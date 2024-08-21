@@ -1,0 +1,6 @@
+[submodule "slow-control_hub"]
+	path = slow-control_hub
+	url = git@github.com:yifeng-ethz/slow-control_hub.git
+[submodule "onewire_temp_sense"]
+	path = onewire_temp_sense
+	url = git@github.com:yifeng-ethz/onewire_temp_sense.git
