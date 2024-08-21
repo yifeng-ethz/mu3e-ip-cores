@@ -4,3 +4,6 @@
 [submodule "onewire_temp_sense"]
 	path = onewire_temp_sense
 	url = git@github.com:yifeng-ethz/onewire_temp_sense.git
+[submodule "mutrig_frame_assembly"]
+	path = mutrig_frame_assembly
+	url = git@github.com:yifeng-ethz/mutrig_frame_assembly.git
