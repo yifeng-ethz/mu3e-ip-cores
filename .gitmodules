@@ -31,3 +31,6 @@
 [submodule "high_performance_counter_array"]
 	path = high_performance_counter_array
 	url = git@github.com:yifeng-ethz/high_performance_counter_array.git
+[submodule "mutrig_channel_counter_fabric"]
+	path = mutrig_channel_counter_fabric
+	url = git@github.com:yifeng-ethz/mutrig_channel_counter_fabric.git
