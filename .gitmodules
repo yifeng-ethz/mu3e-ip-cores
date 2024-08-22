@@ -7,3 +7,6 @@
 [submodule "mutrig_frame_assembly"]
 	path = mutrig_frame_assembly
 	url = git@github.com:yifeng-ethz/mutrig_frame_assembly.git
+[submodule "CAM"]
+	path = CAM
+	url = git@github.com:yifeng-ethz/CAM.git
