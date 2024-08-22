@@ -28,3 +28,6 @@
 [submodule "alt_temp_sense_controller"]
 	path = alt_temp_sense_controller
 	url = git@github.com:yifeng-ethz/alt_temp_sense_controller.git
+[submodule "high_performance_counter_array"]
+	path = high_performance_counter_array
+	url = git@github.com:yifeng-ethz/high_performance_counter_array.git
