@@ -10,3 +10,9 @@
 [submodule "CAM"]
 	path = CAM
 	url = git@github.com:yifeng-ethz/CAM.git
+[submodule "mutrig_timestamp_processor"]
+	path = mutrig_timestamp_processor
+	url = git@github.com:yifeng-ethz/mutrig_timestamp_processor.git
+[submodule "mutrig_frame_deassembly"]
+	path = mutrig_frame_deassembly
+	url = git@github.com:yifeng-ethz/mutrig_frame_deassembly.git
