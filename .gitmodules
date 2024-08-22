@@ -22,3 +22,6 @@
 [submodule "mutrig_controller"]
 	path = mutrig_controller
 	url = git@github.com:yifeng-ethz/mutrig_controller.git
+[submodule "charge_injection"]
+	path = charge_injection
+	url = git@github.com:yifeng-ethz/charge_injection.git
