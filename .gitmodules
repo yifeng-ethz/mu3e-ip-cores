@@ -19,3 +19,6 @@
 [submodule "histogram_statistics"]
 	path = histogram_statistics
 	url = git@github.com:yifeng-ethz/histogram_statistics.git
+[submodule "mutrig_controller"]
+	path = mutrig_controller
+	url = git@github.com:yifeng-ethz/mutrig_controller.git
