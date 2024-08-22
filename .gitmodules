@@ -25,3 +25,6 @@
 [submodule "charge_injection"]
 	path = charge_injection
 	url = git@github.com:yifeng-ethz/charge_injection.git
+[submodule "alt_temp_sense_controller"]
+	path = alt_temp_sense_controller
+	url = git@github.com:yifeng-ethz/alt_temp_sense_controller.git
