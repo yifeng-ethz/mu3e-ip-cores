@@ -13,4 +13,5 @@
 |MuTRiG Controller|Perform SPI configuration of the attached MuTRiG(s) and automatically scan the T-Threshold values (use their last configs). Scan results for all channels are stored locally.|Release|
 |Charge Injection|Generate digital pulse with **arbitary** frequency and duration. Use in pair with correct hardware (e.g. **DAB2.1** or older for TDC injection or **DAB2.2** or newer for TDC and analog injection). Targeted to functionally verify the MuTRiG given the test pulse.|Release|
 |Altera Temperature Sensor Controller|Interfacing with the official `alt_temp_sense` IP on 28 nm device. Store the last result. Can be halted|Release|
+|High Performace Counter Array|Parallel counters allowing concurrent input. Read out with Avalon Memory-Mapped Interface. Feat. `sync clear` and `sync reset`|Release|
 
