@@ -16,3 +16,6 @@
 [submodule "mutrig_frame_deassembly"]
 	path = mutrig_frame_deassembly
 	url = git@github.com:yifeng-ethz/mutrig_frame_deassembly.git
+[submodule "histogram_statistics"]
+	path = histogram_statistics
+	url = git@github.com:yifeng-ethz/histogram_statistics.git
