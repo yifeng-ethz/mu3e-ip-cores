@@ -43,3 +43,6 @@
 [submodule "lvds_error_counter_fabric"]
 	path = lvds_error_counter_fabric
 	url = git@github.com:yifeng-ethz/lvds_error_counter_fabric.git
+[submodule "mutrig_reset_controller"]
+	path = mutrig_reset_controller
+	url = git@github.com:yifeng-ethz/mutrig_reset_controller.git
