@@ -49,3 +49,6 @@
 [submodule "ring-buffer_cam"]
 	path = ring-buffer_cam
 	url = git@github.com:yifeng-ethz/ring-buffer_cam.git
+[submodule "feb_frame_assembly"]
+	path = feb_frame_assembly
+	url = git@github.com:yifeng-ethz/feb_frame_assembly.git
