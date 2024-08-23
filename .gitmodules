@@ -40,3 +40,6 @@
 [submodule "ip_8b10b_decoder"]
 	path = ip_8b10b_decoder
 	url = git@github.com:yifeng-ethz/ip_8b10b_decoder.git
+[submodule "lvds_error_counter_fabric"]
+	path = lvds_error_counter_fabric
+	url = git@github.com:yifeng-ethz/lvds_error_counter_fabric.git
