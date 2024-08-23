@@ -20,4 +20,5 @@
 |IP 8b10b Decoder|Standard **8b10b decoder** for parallel lvds `rxout` data. Derive parity and decoding error.|Release|
 |MuTRiG Reset Controller|Issue reset for the MuTRiG from **`run state`** signal of the `run control mgmt` interface. Arbitary phase shift of the reset pulse utilizing the `alt_pll_reconfig` module.|Debug|
 |Ring-buffer CAM|The **ring-buffer shaped CAM**. Write is similar to *push to stack*, read is similar to *cache write-through*. Used as an primitive to construct the `hit_stack` subsystem.|Release|
+|Frontend-Board Frame Assembly|Assembly the time-interleaved subframes from `ring-buffer cam` into **Mu3e standard data frame**. Frames are packet-scheduled for best throughput. Can transmit **SC packet** during link idle|Release| 
 
