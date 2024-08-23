@@ -46,3 +46,6 @@
 [submodule "mutrig_reset_controller"]
 	path = mutrig_reset_controller
 	url = git@github.com:yifeng-ethz/mutrig_reset_controller.git
+[submodule "ring-buffer_cam"]
+	path = ring-buffer_cam
+	url = git@github.com:yifeng-ethz/ring-buffer_cam.git
