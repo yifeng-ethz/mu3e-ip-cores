@@ -37,3 +37,6 @@
 [submodule "firefly_xcvr_i2c_master"]
 	path = firefly_xcvr_i2c_master
 	url = git@github.com:yifeng-ethz/firefly_xcvr_i2c_master.git
+[submodule "ip_8b10b_decoder"]
+	path = ip_8b10b_decoder
+	url = git@github.com:yifeng-ethz/ip_8b10b_decoder.git
