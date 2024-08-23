@@ -34,3 +34,6 @@
 [submodule "mutrig_channel_counter_fabric"]
 	path = mutrig_channel_counter_fabric
 	url = git@github.com:yifeng-ethz/mutrig_channel_counter_fabric.git
+[submodule "firefly_xcvr_i2c_master"]
+	path = firefly_xcvr_i2c_master
+	url = git@github.com:yifeng-ethz/firefly_xcvr_i2c_master.git
