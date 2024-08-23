@@ -17,4 +17,6 @@
 |MuTRiG Channel Counter Fabric|Connect **hit type 0** from `MuTRiG Frame Deassembly` IP to the `High Performace Counter Array` IP. Decode binary channel ID into one-hot update signals to the counter array.|Release| 
 |LVDS Error Counter Fabric|Connect to **Streaming Error** sideband for collecting decoding and parity error counts.|Release|
 |Firefly Tranceiver I2C Master|Interfacing with the **Samtec Firefly Optical Tranceiver Module**, including the **I2C** master. Peridically readout the temperature and RX power. Can be Halted.|Release|
+|IP 8b10b Decoder|Standard **8b10b decoder** for parallel lvds `rxout` data. Derive parity and decoding error.|Release|
+|MuTRiG Reset Controller|Issue reset for the MuTRiG from **`run state`** signal of the `run control mgmt` interface. Arbitary phase shift of the reset pulse utilizing the `alt_pll_reconfig` module.|Debug|
 
