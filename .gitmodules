@@ -67,3 +67,6 @@
 [submodule "feb_max10_comm"]
 	path = feb_max10_comm
 	url = git@github.com:yifeng-ethz/feb_max10_comm.git
+[submodule "emulator_mutrig"]
+	path = emulator_mutrig
+	url = git@github.com:yifeng-ethz/emulator_mutrig.git
