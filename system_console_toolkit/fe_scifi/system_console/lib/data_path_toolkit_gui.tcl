@@ -18,7 +18,7 @@ package require frame_deassembly::bsp 24.0
 package require histogram_statistics::bsp 24.0
 package require mutrig_injector::bsp 24.0
 package require mts_processor::bsp 24.0
-package require ring_buffer_cam::bsp 24.0
+package require ring_buffer_cam::bsp 26.1
 package require feb_frame_assembly::bsp 24.0
 package require tdom
 
@@ -268,6 +268,23 @@ proc ::data_path_bts::gui::find_register_offset_in_contract {contract register_n
     return ""
 }
 
+proc ::data_path_bts::gui::find_register_write_before_read_in_contract {contract register_name} {
+    if {[catch {dict get $contract registers} registers]} {
+        return ""
+    }
+
+    foreach register $registers {
+        if {![dict exists $register name]} {
+            continue
+        }
+        if {[string equal -nocase [dict get $register name] $register_name] && [dict exists $register write_before_read]} {
+            return [dict get $register write_before_read]
+        }
+    }
+
+    return ""
+}
+
 proc ::data_path_bts::gui::format_common_csr_header_version {raw_value} {
     set major [expr {($raw_value >> 24) & 0xff}]
     set minor [expr {($raw_value >> 16) & 0xff}]
@@ -382,6 +399,14 @@ proc ::data_path_bts::gui::maybe_alert_runtime_version {bspPkgName typeName mast
         return -code ok
     }
 
+    # writeBeforeRead: write the page selector before reading the version register
+    if {[dict exists $version_spec register_name] && [dict exists $metadata contract]} {
+        set wbr_value [::data_path_bts::gui::find_register_write_before_read_in_contract [dict get $metadata contract] [dict get $version_spec register_name]]
+        if {$wbr_value ne ""} {
+            catch {master_write_32 $master_fd [expr {$ipBase + $register_offset}] $wbr_value}
+        }
+    }
+
     if {[catch {master_read_32 $master_fd [expr {$ipBase + $register_offset}] 1} raw_read]} {
         toolkit_send_message warning "Runtime CSR version check for $typeName failed at [format 0x%X $ipBase]: $raw_read"
         set csr_runtime_version_check_done($check_key) 1
@@ -431,6 +456,9 @@ proc ::data_path_bts::gui::contract_to_xml {contract} {
         lappend xml_lines "        <name>[::data_path_bts::gui::xml_escape $reg_name]</name>"
         lappend xml_lines "        <description>[::data_path_bts::gui::xml_escape $reg_description]</description>"
         lappend xml_lines "        <addressOffset>[::data_path_bts::gui::xml_escape $reg_address_offset]</addressOffset>"
+        if {[dict exists $register write_before_read]} {
+            lappend xml_lines "        <writeBeforeRead>[::data_path_bts::gui::xml_escape [dict get $register write_before_read]]</writeBeforeRead>"
+        }
         lappend xml_lines "        <size>32</size>"
         lappend xml_lines "        <fields>"
 
@@ -474,16 +502,19 @@ proc ::data_path_bts::gui::build_xml_from_bsp {bspPkgName} {
 proc ::data_path_bts::gui::sopcinfo_candidates {} {
     variable project_root
 
+    # Prefer the standalone datapath systems before the full FEB wrapper.
+    # The FEB top-level .sopcinfo does not consistently expose every datapath
+    # slave endpoint with names that this inventory parser recognizes.
     set candidates [list \
-        [file join $project_root feb_system_v2.sopcinfo] \
-        [file join $project_root feb_system.sopcinfo] \
-        [file join $project_root feb_system_v1.sopcinfo] \
         [file join $project_root scifi_datapath_v2_system.sopcinfo] \
         [file join $project_root scifi_datapath_system_v2.sopcinfo] \
         [file join $project_root scifi_datapath_system.sopcinfo] \
         [file join $project_root mutrig_datapath_v2_system.sopcinfo] \
         [file join $project_root mutrig_datapath_system_v2.sopcinfo] \
-        [file join $project_root mutrig_datapath_system.sopcinfo]]
+        [file join $project_root mutrig_datapath_system.sopcinfo] \
+        [file join $project_root feb_system_v2.sopcinfo] \
+        [file join $project_root feb_system.sopcinfo] \
+        [file join $project_root feb_system_v1.sopcinfo]]
 
     set unique_candidates [list]
     foreach candidate $candidates {
@@ -1414,6 +1445,10 @@ proc ::data_path_bts::gui::gui2device {bspPkgName baseGroupName typeName} {
         
         # gui -> regValue
         foreach i [$doc selectNodes "/registers/register"] {
+            # writeBeforeRead registers are read-only page views; skip on write-back
+            if {[$i selectNodes "writeBeforeRead"] ne ""} {
+                continue
+            }
             set regValue ""
             # --------------- parse register ---------------
             set regName [[[$i selectNodes "name"] childNodes] nodeValue]
@@ -1548,6 +1583,12 @@ proc ::data_path_bts::gui::device2gui {bspPkgName baseGroupName typeName} {
             set regName [[[$i selectNodes "name"] childNodes] nodeValue]
             set regDespt [[[$i selectNodes "description"] childNodes] nodeValue]
             set regAddrOfst [[[$i selectNodes "addressOffset"] childNodes] nodeValue]
+            # writeBeforeRead: write the selector value before reading (read-multiplexed registers)
+            set wbrNode [$i selectNodes "writeBeforeRead"]
+            if {$wbrNode ne ""} {
+                set selectorValue [[$wbrNode childNodes] nodeValue]
+                master_write_32 $master_fd [expr ${ipBase}+${regAddrOfst}] $selectorValue
+            }
             # master -> regValue (d2h read)
             set regValue [master_read_32 $master_fd [expr ${ipBase}+${regAddrOfst}] 1]
             #puts [format "read: %x from %x" $regValue [expr ${ipBase}+${regAddrOfst}]]

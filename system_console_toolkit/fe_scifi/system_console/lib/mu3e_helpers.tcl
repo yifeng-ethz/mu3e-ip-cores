@@ -520,6 +520,11 @@ proc ::mu3e::helpers::collect_live_marker_inventory {link_id expected_types} {
 
 proc ::mu3e::helpers::set_link_slave_status {status} {
     switch -- $status {
+        FALLBACK {
+            toolkit_set_property "autoLink_text" text "FALLBACK"
+            toolkit_set_property "autoLink_text" backgroundColor "yellow"
+            toolkit_set_property "autoLink_text" foregroundColor "black"
+        }
         MISMATCH {
             toolkit_set_property "autoLink_text" text "MISMATCH"
             toolkit_set_property "autoLink_text" backgroundColor "yellow"
@@ -567,18 +572,27 @@ proc ::mu3e::helpers::link_slave_from_compiled_inventory {compiled_inventory} {
     toolkit_send_message info "link_slave: validating live marker addresses against compiled project [file tail $source_path]"
 
     if {[dict size $live_inventory] == 0} {
-        toolkit_send_message error "link_slave: no typed datapath slave services were discovered on link ${link_id}. Check the alive debug path, firmware image, and connection before retrying."
         foreach type_name $expected_types {
+            set expected_bases [list]
+            foreach entry [dict get $expected_by_type $type_name] {
+                lappend expected_bases [dict get $entry base]
+            }
+
+            if {[::mu3e::helpers::probe_global_variable $fd_global_variable "${type_name}_copies"]} {
+                ::mu3e::helpers::set_global_variable $fd_global_variable "${type_name}_copies" [llength $expected_bases]
+            }
+
             if {[catch {::mu3e::helpers::append_global_variable $fd_global_variable "${type_name}_hpaths" ""}]} {
                 ::mu3e::helpers::set_global_variable $fd_global_variable "${type_name}_hpaths" [list]
             } else {
                 ::mu3e::helpers::set_global_variable $fd_global_variable "${type_name}_hpaths" [list]
             }
             if {[::mu3e::helpers::probe_global_variable $fd_global_variable "${type_name}_base_address"]} {
-                ::mu3e::helpers::set_global_variable $fd_global_variable "${type_name}_base_address" [list]
+                ::mu3e::helpers::set_global_variable $fd_global_variable "${type_name}_base_address" $expected_bases
             }
         }
-        ::mu3e::helpers::set_link_slave_status ERROR
+        toolkit_send_message warning "link_slave: no typed datapath slave services were discovered on link ${link_id}. Falling back to the compiled address map from [file tail $source_path]; live marker validation is unavailable in this session. Check project auto-link or firmware if register access fails."
+        ::mu3e::helpers::set_link_slave_status FALLBACK
         return -code ok
     }
 

@@ -13,5 +13,5 @@ package ifneeded frame_deassembly::bsp 24.0 [list source [file join $dir frame_d
 package ifneeded histogram_statistics::bsp 24.0 [list source [file join $dir histogram_statistics_bsp.tcl]]
 package ifneeded mutrig_injector::bsp 24.0 [list source [file join $dir mutrig_injector_bsp.tcl]]
 package ifneeded mts_processor::bsp 24.0 [list source [file join $dir mts_processor_bsp.tcl]]
-package ifneeded ring_buffer_cam::bsp 24.0 [list source [file join $dir ring_buffer_cam_bsp.tcl]]
+package ifneeded ring_buffer_cam::bsp 26.1 [list source [file join $dir ring_buffer_cam_bsp.tcl]]
 package ifneeded feb_frame_assembly::bsp 24.0 [list source [file join $dir feb_frame_assembly_bsp.tcl]]

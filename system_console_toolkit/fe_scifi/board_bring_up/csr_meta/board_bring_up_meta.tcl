@@ -10,12 +10,16 @@ proc ::fe_scifi::board_bring_up::csr_meta::field {name description bit_range acc
         access $access]
 }
 
-proc ::fe_scifi::board_bring_up::csr_meta::register {name description address_offset fields} {
-    return [dict create \
+proc ::fe_scifi::board_bring_up::csr_meta::register {name description address_offset fields args} {
+    set reg [dict create \
         name $name \
         description $description \
         address_offset $address_offset \
         fields $fields]
+    foreach {key value} $args {
+        dict set reg $key $value
+    }
+    return $reg
 }
 
 proc ::fe_scifi::board_bring_up::csr_meta::contract {registers} {
