@@ -71,7 +71,7 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="altera_temp_sense_ctrl" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller/altera_temp_sense_ctrl_hw.tcl" displayName="Altera Temperature Sensor Controller (Arria V)" version="1.0" description="" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
+ <component name="altera_temp_sense_ctrl" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller/altera_temp_sense_ctrl_hw.tcl" displayName="Altera Temperature Sensor Controller (Arria V)" version="1.1" description="" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="true" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -282,23 +282,12 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="mutrig_cfg_ctrl" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller/mutrig_controller_hw.tcl" displayName="MuTRiG Controller" version="24.0.816" description="&lt;html&gt; Performs SPI-configuration and threshold-scan of the MuTRiG ASIC. &lt;br&gt; &lt;br&gt; &lt;b&gt;MuTRiG Configuration Controller (MCC)&lt;/b&gt; &lt;ul&gt;  &lt;li&gt; Handles MuTRiG configuration scheme. &lt;/li&gt;  &lt;li&gt; Data must be loaded to the external scratch-pad RAM.&lt;/li&gt;  &lt;li&gt; External master writes to CSR to initiate the configuration routine. &lt;/li&gt;   &lt;li&gt;&lt;b&gt;Work Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;&lt;i&gt;data mover&lt;/i&gt; performs DMA from &lt;b&gt;scratch-pad RAM&lt;/b&gt; to asic dedicated &lt;b&gt;cfg-mem&lt;/b&gt; &lt;/li&gt;   &lt;li&gt;&lt;i&gt;cfg writer&lt;/i&gt; performs SPI write to MuTRiG from &lt;b&gt;cfg-mem&lt;/b&gt;&lt;/li&gt;   &lt;li&gt;&lt;i&gt;cfg writer&lt;/i&gt; checks the SPI MISO as validation &lt;/li&gt;  &lt;/ol&gt; &lt;/ul&gt; &lt;br&gt; &lt;b&gt;MuTRiG Threshold Scan Automation(TSA)&lt;/b&gt; &lt;ul&gt;  &lt;li&gt; Performs T(cmd=0x0140_0000)/E(cmd=0170_0000)-Threshold scan of the selected MuTRiG(s). &lt;/li&gt;  &lt;li&gt; External master writes to CSR to initiate the scan routine. &lt;/li&gt;  &lt;li&gt; &lt;b&gt;Note!!!&lt;/b&gt; The TTH scan uses the last configuration as a template when incrementing the TTH value. &lt;/li&gt;  &lt;li&gt;&lt;b&gt;Work Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;&lt;i&gt;pattern modifier&lt;/i&gt; modifies the content in the cfg-mem &lt;/li&gt;   &lt;li&gt;&lt;i&gt;cfg writer&lt;/i&gt; performs SPI write to MuTRiG from &lt;b&gt;cfg-mem&lt;/b&gt;&lt;/li&gt;   &lt;li&gt;&lt;i&gt;rate monitor&lt;/i&gt; collects the rate from the external counters and stores result into result RAM &lt;/li&gt;  &lt;/ol&gt; &lt;/ul&gt; &lt;/html&gt;" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
+ <component name="mutrig_cfg_ctrl" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller/mutrig_controller_hw.tcl" displayName="MuTRiG Controller" version="24.0.817" description="&lt;html&gt; Performs SPI-configuration and threshold-scan of the MuTRiG ASIC. &lt;br&gt; &lt;br&gt; &lt;b&gt;MuTRiG Configuration Controller (MCC)&lt;/b&gt; &lt;ul&gt;  &lt;li&gt; Handles MuTRiG configuration scheme. &lt;/li&gt;  &lt;li&gt; Data must be loaded to the external scratch-pad RAM.&lt;/li&gt;  &lt;li&gt; External master writes to CSR to initiate the configuration routine. &lt;/li&gt;   &lt;li&gt;&lt;b&gt;Work Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;&lt;i&gt;data mover&lt;/i&gt; performs DMA from &lt;b&gt;scratch-pad RAM&lt;/b&gt; to asic dedicated &lt;b&gt;cfg-mem&lt;/b&gt; &lt;/li&gt;   &lt;li&gt;&lt;i&gt;cfg writer&lt;/i&gt; performs SPI write to MuTRiG from &lt;b&gt;cfg-mem&lt;/b&gt;&lt;/li&gt;   &lt;li&gt;&lt;i&gt;cfg writer&lt;/i&gt; checks the SPI MISO as validation &lt;/li&gt;  &lt;/ol&gt; &lt;/ul&gt; &lt;br&gt; &lt;b&gt;MuTRiG Threshold Scan Automation(TSA)&lt;/b&gt; &lt;ul&gt;  &lt;li&gt; Performs T(cmd=0x0140_0000)/E(cmd=0170_0000)-Threshold scan of the selected MuTRiG(s). &lt;/li&gt;  &lt;li&gt; External master writes to CSR to initiate the scan routine. &lt;/li&gt;  &lt;li&gt; &lt;b&gt;Note!!!&lt;/b&gt; The TTH scan uses the last configuration as a template when incrementing the TTH value. &lt;/li&gt;  &lt;li&gt;&lt;b&gt;Work Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;&lt;i&gt;pattern modifier&lt;/i&gt; modifies the content in the cfg-mem &lt;/li&gt;   &lt;li&gt;&lt;i&gt;cfg writer&lt;/i&gt; performs SPI write to MuTRiG from &lt;b&gt;cfg-mem&lt;/b&gt;&lt;/li&gt;   &lt;li&gt;&lt;i&gt;rate monitor&lt;/i&gt; collects the rate from the external counters and stores result into result RAM &lt;/li&gt;  &lt;/ol&gt; &lt;/ul&gt; &lt;/html&gt;" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
   <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
   <tag2 key="ICON_PATH" value="" />
-  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
-  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
-  <tag2 key="REPORT_HIERARCHY" value="false" />
-  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
-  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
- </component>
- <component name="mutrig_frame_assembly" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_assembly/mutrig_frame_assembly_hw.tcl" displayName="MuTRiG Frame Assembly " version="1.2.1" description="Assemble the MuTRiG frame from lvds receiver bytes. " tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
-  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="true" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ICON_PATH" value="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/drawings/20121123203030!Logo_drawing100.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
@@ -434,7 +423,7 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="runctl_mgmt_host" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/runctl_mgmt_host_hw.tcl" displayName="Run-Control Management Host" version="24.0.1125" description="Converts slow-control packet into system bus (Avalon Memory-Mapped) transactions" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
+ <component name="runctl_mgmt_host" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/runctl_mgmt_host_hw.tcl" displayName="Run-Control Management Host" version="24.0.1126" description="Converts slow-control packet into system bus (Avalon Memory-Mapped) transactions" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -510,7 +499,7 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="sc_hub_v2" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/sc_hub_v2_hw.tcl" displayName="Slow Control Hub v2" version="26.3.0" description="Modular slow-control hub with split-buffer architecture, linked-list  payload RAM, out-of-order dispatch, atomic RMW, release/acquire ordering  semantics, and selectable Avalon-MM / AXI4 master interface.  Configurable via presets or manual parameter tuning." tags="AUTHORSHIP=Yifeng Wang /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
+ <component name="sc_hub_v2" file="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/sc_hub_v2_hw.tcl" displayName="Slow Control Hub v2" version="26.4.0" description="Modular slow-control hub with split-buffer architecture, linked-list  payload RAM, out-of-order dispatch, atomic RMW, release/acquire ordering  semantics, and selectable Avalon-MM / AXI4 master interface.  Configurable via presets or manual parameter tuning." tags="AUTHORSHIP=Yifeng Wang /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
