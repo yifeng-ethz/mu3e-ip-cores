@@ -61,6 +61,7 @@ Each Mu3e IP core resides in its own subdirectory of this repository or in an ex
 | [**Mu3e LVDS Controller**](https://github.com/yifeng-ethz/mu3e_lvds_controller) | Provides high‑speed LVDS links to the MuPix sensors using FPGA vendor IP.  Includes 28 nm LVDS RX and Pro variants. | <img src="https://img.shields.io/badge/version-25.1.0630-blue" alt="version 25.1.0630 badge" width="200" /> |
 | [**MuPix Inbound**](https://github.com/yifeng-ethz/mupix_inbound) | Deserializes data from MuPix chips, decodes and buffers hits. | <img src="https://img.shields.io/badge/status-Prototype-lightgrey" alt="Prototype badge" width="200" /> |
 | [**Packet Scheduler**](https://github.com/yifeng-ethz/packet_scheduler) | Orders packets via an interface adapter and an ordered priority queue to achieve deterministic throughput. | <img src="https://img.shields.io/badge/version-25.0.0723-blue" alt="version 25.0.0723 badge" width="200" /> |
+| [**MuTRiG Emulator**](https://github.com/yifeng-ethz/emulator_mutrig) | FPGA emulator of MuTRiG 3 ASIC digital output. Produces 8b/1k frames bit‑compatible with real ASIC output for FPGA‑internal verification. | <img src="https://img.shields.io/badge/version-1.0.0-blue" alt="version 1.0.0 badge" width="200" /> |
 | [**Run‑Control Management**](https://github.com/yifeng-ethz/run-control_mgmt) | Manages run‑state transitions for Mu3e subsystems and issues control signals. | <img src="https://img.shields.io/badge/version-24.0.1125-blue" alt="version 24.0.1125 badge" width="200" /> |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -100,6 +101,7 @@ mu3e-ip-cores/
 ├── histogram_statistics/
 ├── ip_8b10b_decoder/
 ├── lvds_error_counter_fabric/
+├── emulator_mutrig/            # MuTRiG 3 ASIC emulator (8b/1k frame generator)
 ├── misc/                       # Local debug/helper IPs kept outside submodules
 ├── mu3e_lvds_controller/
 ├── mupix_inbound/
