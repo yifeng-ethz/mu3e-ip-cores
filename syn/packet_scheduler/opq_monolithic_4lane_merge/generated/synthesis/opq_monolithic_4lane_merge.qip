@@ -1,0 +1,56 @@
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_TOOL_NAME "Qsys"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_TOOL_VERSION "18.1"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_TOOL_ENV "Qsys"
+set_global_assignment -library "opq_monolithic_4lane_merge" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../opq_monolithic_4lane_merge.sopcinfo"]
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name SLD_INFO "QSYS_NAME opq_monolithic_4lane_merge HAS_SOPCINFO 1 GENERATION_ID 1776083884"
+set_global_assignment -library "opq_monolithic_4lane_merge" -name MISC_FILE [file join $::quartus(qip_path) "../opq_monolithic_4lane_merge.cmp"]
+set_global_assignment -library "opq_monolithic_4lane_merge" -name SLD_FILE [file join $::quartus(qip_path) "opq_monolithic_4lane_merge.debuginfo"]
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_TARGETED_DEVICE_FAMILY "Arria V"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_GENERATED_DEVICE_FAMILY "{Arria V}"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_QSYS_MODE "SYSTEM"
+set_global_assignment -name SYNTHESIS_ONLY_QIP ON
+set_global_assignment -library "opq_monolithic_4lane_merge" -name MISC_FILE [file join $::quartus(qip_path) "../../opq_monolithic_4lane_merge.qsys"]
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_NAME "b3BxX21vbm9saXRoaWNfNGxhbmVfbWVyZ2U="
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_DISPLAY_NAME "b3BxX21vbm9saXRoaWNfNGxhbmVfbWVyZ2U="
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_REPORT_HIERARCHY "On"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_INTERNAL "Off"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_VERSION "MS4w"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTc3NjA4Mzg4NA==::QXV0byBHRU5FUkFUSU9OX0lE"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfRkFNSUxZ::QXJyaWEgVg==::QXV0byBERVZJQ0VfRkFNSUxZ"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0U=::NUFHWEJBN0Q0RjMxQzU=::QXV0byBERVZJQ0U="
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfU1BFRURHUkFERQ==::NV9INA==::QXV0byBERVZJQ0VfU1BFRURHUkFERQ=="
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "QVVUT19DTEtfQ0xPQ0tfUkFURQ==::LTE=::QXV0byBDTE9DS19SQVRF"
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "QVVUT19DTEtfQ0xPQ0tfRE9NQUlO::LTE=::QXV0byBDTE9DS19ET01BSU4="
+set_global_assignment -entity "opq_monolithic_4lane_merge" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "QVVUT19DTEtfUkVTRVRfRE9NQUlO::LTE=::QXV0byBSRVNFVF9ET01BSU4="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_NAME "b3BxX21vbm9saXRoaWNfNGxhbmVfbWVyZ2Vfb3BxXzA="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_DISPLAY_NAME "T3JkZXJlZCBQcmlvcml0eSBRdWV1ZQ=="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_REPORT_HIERARCHY "Off"
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_INTERNAL "Off"
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_AUTHOR "WWlmZW5nIFdhbmc="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_VERSION "MjUuMC43MjI="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "Tl9MQU5F::NA==::TnVtYmVyIG9mIEluZ3Jlc3MgTGFuZXM="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "TU9ERQ==::TUVSR0lORw==::QWdncmVnYXRpb24gTW9kZQ=="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "VFJBQ0tfSEVBREVS::dHJ1ZQ==::VHJhY2sgSGVhZGVy"
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "SU5HUkVTU19EQVRBX1dJRFRI::MzI=::RGF0YSBQb3J0IFdpZHRoIChkYXRhKQ=="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "SU5HUkVTU19EQVRBS19XSURUSA==::NA==::RGF0YSBQb3J0IFdpZHRoIChkYXRhayk="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "Q0hBTk5FTF9XSURUSA==::Mg==::Q2hhbm5lbCBQb3J0IFdpZHRo"
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "TEFORV9GSUZPX0RFUFRI::MTAyNA==::TGFuZSBGSUZPIERlcHRo"
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "TEFORV9GSUZPX1dJRFRI::NDA=::TGFuZSBGSUZPIFdpZHRo"
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "VElDS0VUX0ZJRk9fREVQVEg=::MjU2::VGlja2V0IEZJRk8gRGVwdGg="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "SEFORExFX0ZJRk9fREVQVEg=::NjQ=::SGFuZGxlIEZJRk8gRGVwdGg="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "UEFHRV9SQU1fREVQVEg=::NjU1MzY=::UGFnZSBSQU0gRGVwdGg="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "UEFHRV9SQU1fUkRfV0lEVEg=::MzY=::UGFnZSBSQU0gUkQgV2lkdGg="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "Tl9TSEQ=::MjU2::TnVtYmVyIG9mIFN1YmhlYWRlciBQYWNrZXRzIEJldHdlZW4gSGVhZGVyIFBhY2tldHM="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "Tl9ISVQ=::MjU1::TWF4aW11bSBOdW1iZXIgb2YgSGl0cyBpbiBTdWJoZWFkZXIgUGFja2V0"
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "REVCVUdfTFY=::MQ==::RGVidWcgTGV2ZWw="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "RlJBTUVfU0VSSUFMX1NJWkU=::MTY=::RnJhbWUgU2VyaWFsIFNpemU="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "RlJBTUVfU1VCSF9DTlRfU0laRQ==::MTY=::RnJhbWUgU3ViaGVhZGVyIENvdW50IFNpemU="
+set_global_assignment -entity "opq_monolithic_4lane_merge_opq_0" -library "opq_monolithic_4lane_merge" -name IP_COMPONENT_PARAMETER "RlJBTUVfSElUX0NOVF9TSVpF::MTY=::RnJhbWUgSGl0IENvdW50IFNpemU="
+
+set_global_assignment -library "opq_monolithic_4lane_merge" -name VHDL_FILE [file join $::quartus(qip_path) "opq_monolithic_4lane_merge.vhd"]
+set_global_assignment -library "opq_monolithic_4lane_merge" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/opq_monolithic_4lane_merge_opq_0.vhd"]
+set_global_assignment -library "opq_monolithic_4lane_merge" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/handle_fifo.vhd"]
+set_global_assignment -library "opq_monolithic_4lane_merge" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/lane_fifo.vhd"]
+set_global_assignment -library "opq_monolithic_4lane_merge" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/ticket_fifo.vhd"]
+set_global_assignment -library "opq_monolithic_4lane_merge" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/page_ram.vhd"]
+set_global_assignment -library "opq_monolithic_4lane_merge" -name VERILOG_FILE [file join $::quartus(qip_path) "submodules/tile_fifo.vhd"]

@@ -1,0 +1,37 @@
+	component opq_monolithic_4lane_merge is
+		port (
+			clk_clk                 : in  std_logic                     := 'X';             -- clk
+			egress_startofpacket    : out std_logic;                                        -- startofpacket
+			egress_endofpacket      : out std_logic;                                        -- endofpacket
+			egress_valid            : out std_logic;                                        -- valid
+			egress_ready            : in  std_logic                     := 'X';             -- ready
+			egress_error            : out std_logic_vector(2 downto 0);                     -- error
+			egress_data             : out std_logic_vector(35 downto 0);                    -- data
+			ingress_0_channel       : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- channel
+			ingress_0_startofpacket : in  std_logic                     := 'X';             -- startofpacket
+			ingress_0_endofpacket   : in  std_logic                     := 'X';             -- endofpacket
+			ingress_0_data          : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			ingress_0_valid         : in  std_logic                     := 'X';             -- valid
+			ingress_0_error         : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			ingress_1_channel       : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- channel
+			ingress_1_startofpacket : in  std_logic                     := 'X';             -- startofpacket
+			ingress_1_endofpacket   : in  std_logic                     := 'X';             -- endofpacket
+			ingress_1_data          : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			ingress_1_valid         : in  std_logic                     := 'X';             -- valid
+			ingress_1_error         : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			ingress_2_channel       : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- channel
+			ingress_2_startofpacket : in  std_logic                     := 'X';             -- startofpacket
+			ingress_2_endofpacket   : in  std_logic                     := 'X';             -- endofpacket
+			ingress_2_data          : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			ingress_2_valid         : in  std_logic                     := 'X';             -- valid
+			ingress_2_error         : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			ingress_3_channel       : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- channel
+			ingress_3_startofpacket : in  std_logic                     := 'X';             -- startofpacket
+			ingress_3_endofpacket   : in  std_logic                     := 'X';             -- endofpacket
+			ingress_3_data          : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			ingress_3_valid         : in  std_logic                     := 'X';             -- valid
+			ingress_3_error         : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			reset_reset             : in  std_logic                     := 'X'              -- reset
+		);
+	end component opq_monolithic_4lane_merge;
+
