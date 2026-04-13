@@ -156,6 +156,37 @@ proc ::mu3e::cmsis::svd::device {name args} {
     return $spec
 }
 
+proc ::mu3e::cmsis::svd::word_window_registers {count args} {
+    set spec [::mu3e::cmsis::svd::parse_kv_args [dict create \
+        prefix "WORD" \
+        startIndex 0 \
+        startOffset 0x0 \
+        stride 4 \
+        descriptionPrefix "Window word" \
+        fieldDescriptionPrefix "Raw window word" \
+        access "read-only"] {*}$args]
+    set regs {}
+    set count_int [expr {int($count)}]
+    set start_index [expr {int([dict get $spec startIndex])}]
+    set start_offset [expr {int([dict get $spec startOffset])}]
+    set stride [expr {int([dict get $spec stride])}]
+
+    for {set idx 0} {$idx < $count_int} {incr idx} {
+        set reg_index [expr {$start_index + $idx}]
+        set name [format "%s%03d" [dict get $spec prefix] $reg_index]
+        set offs [format "0x%X" [expr {$start_offset + ($idx * $stride)}]]
+        lappend regs [::mu3e::cmsis::svd::register $name $offs \
+            -description [format {%s %d.} [dict get $spec descriptionPrefix] $reg_index] \
+            -access [dict get $spec access] \
+            -fields [list \
+                [::mu3e::cmsis::svd::field value 0 32 \
+                    -description [format {%s %d.} [dict get $spec fieldDescriptionPrefix] $reg_index] \
+                    -access [dict get $spec access]]]]
+    }
+
+    return $regs
+}
+
 proc ::mu3e::cmsis::svd::emit_scalar {chan indent tag value} {
     if {$value eq ""} {
         return

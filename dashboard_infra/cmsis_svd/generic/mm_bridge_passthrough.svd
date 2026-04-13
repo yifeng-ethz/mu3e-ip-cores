@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>Mu3e</vendor>
+  <vendorID>MU3E</vendorID>
+  <name>MU3E_MM_BRIDGE_PASSTHROUGH</name>
+  <series>MU3E_FPGA_IP</series>
+  <version>1.0.0</version>
+  <description>CMSIS-SVD metadata wrapper for an Avalon MM bridge slave window. The bridge itself does not implement local CSRs; the downstream datapath map is described by separate SVD and runtime-map entries. BaseAddress is 0 because this file only describes the bridge aperture role.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>MM_BRIDGE_PASSTHROUGH</name>
+      <description>Metadata-only passthrough slave window. No local registers are implemented.</description>
+      <groupName>MU3E_GENERIC</groupName>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x10000</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>
