@@ -94,6 +94,10 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
+ <component name="avst_errcnt_system" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/avst_errcnt_system.qsys" displayName="avst_errcnt_system" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
  <component name="avsthit0ch2cntr_ctrl" file="$MU3E_IP_CORES_ROOT/mutrig_channel_counter_fabric/avsthit0ch2cntr_ctrl_hw.tcl" displayName="Avalon-ST Data to Counter Interconnect (channel_id)" version="1.0.12" description="See top level file" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="true" />
@@ -255,6 +259,10 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="hit_stack_system" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/hit_stack_system.qsys" displayName="hit_stack_system" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
  <component name="intf_adapter" file="$MU3E_IP_CORES_ROOT/packet_scheduler/intf_adapter_hw.tcl" displayName="Interface Adapter" version="25.0.723" description="" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
@@ -565,6 +573,10 @@
   <tag2 key="VALIDATION_CALLBACK" value="sc_hub_v2_validate" />
  </component>
  <component name="scifi_datapath_system_v2" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/scifi_datapath_system_v2.qsys" displayName="scifi_datapath_system_v2" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="scifi_lvds_receiver_system" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/scifi_lvds_receiver_system.qsys" displayName="scifi_lvds_receiver_system" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
