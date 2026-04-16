@@ -137,6 +137,14 @@
          type = "int";
       }
    }
+   element sc_hub_cmd_pipe
+   {
+      datum _sortIndex
+      {
+         value = "17";
+         type = "int";
+      }
+   }
    element scratch_pad_ram
    {
       datum _sortIndex
@@ -286,9 +294,10 @@
  </module>
  <module
    name="max10_prog_avmm_0"
-   kind="feb_max10_comm"
-   version="0.1.0"
+   kind="max10_prog_avmm"
+   version="0.2.0"
    enabled="1">
+  <parameter name="BOOT_HIST_AUTO_REFRESH" value="1" />
   <parameter name="BUILD" value="0" />
   <parameter name="BURSTCOUNT_W" value="1" />
   <parameter name="CDC_FIFO_ADDR_W" value="7" />
@@ -296,7 +305,7 @@
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="IP_ID" value="1295067216" />
   <parameter name="VERSION_MAJOR" value="0" />
-  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_MINOR" value="2" />
   <parameter name="VERSION_PATCH" value="0" />
  </module>
  <module
@@ -318,9 +327,27 @@
   <parameter name="USE_RESPONSE" value="1" />
  </module>
  <module
+   name="sc_hub_cmd_pipe"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="SYMBOLS" />
+  <parameter name="ADDRESS_WIDTH" value="18" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="256" />
+  <parameter name="MAX_PENDING_RESPONSES" value="16" />
+  <parameter name="PIPELINE_COMMAND" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="1" />
+ </module>
+ <module
    name="mutrig_cfg_ctrl_0"
    kind="mutrig_cfg_ctrl"
-   version="24.0.816"
+   version="24.0.817"
    enabled="1">
   <parameter name="CLK_FREQUENCY" value="156250000" />
   <parameter name="CLK_FREQUENCY_SPI" value="40000000" />
@@ -352,7 +379,7 @@
  <module
    name="on_die_temp_sense_ctrl"
    kind="altera_temp_sense_ctrl"
-   version="1.0"
+   version="1.1"
    enabled="1">
   <parameter name="CLK_FREQ" value="40000000" />
   <parameter name="DEBUG" value="0" />
@@ -603,23 +630,27 @@
   <parameter name="gui_switchover_mode">Automatic Switchover</parameter>
   <parameter name="gui_use_locked" value="true" />
  </module>
- <module name="sc_hub" kind="sc_hub_v2" version="26.3.0" enabled="1">
-  <parameter name="ADDR_WIDTH" value="16" />
+ <module name="sc_hub" kind="sc_hub_v2" version="26.6.6.414" enabled="1">
+  <parameter name="ADDR_WIDTH" value="18" />
   <parameter name="ATOMIC_ENABLE" value="true" />
   <parameter name="AXI4_ID_WIDTH" value="4" />
   <parameter name="AXI4_USER_WIDTH" value="16" />
   <parameter name="BACKPRESSURE" value="true" />
   <parameter name="BP_FIFO_DEPTH" value="512" />
+  <parameter name="BUILD" value="411" />
   <parameter name="BUS_TYPE" value="AVALON" />
   <parameter name="DATA_WIDTH" value="32" />
   <parameter name="DEBUG" value="1" />
   <parameter name="EXT_DOWN_PLD_DEPTH" value="512" />
   <parameter name="EXT_UP_PLD_DEPTH" value="512" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="HUB_CAP_ENABLE" value="true" />
+  <parameter name="INSTANCE_ID" value="0" />
   <parameter name="INT_DOWN_PLD_DEPTH" value="64" />
   <parameter name="INT_HDR_DEPTH" value="4" />
   <parameter name="INT_UP_PLD_DEPTH" value="64" />
   <parameter name="INVERT_RD_SIG" value="false" />
+  <parameter name="IP_UID" value="1396918338" />
   <parameter name="MAX_BURST" value="256" />
   <parameter name="OOO_ENABLE" value="false" />
   <parameter name="ORD_ENABLE" value="true" />
@@ -630,6 +661,11 @@
   <parameter name="RD_TIMEOUT_CYCLES" value="1024" />
   <parameter name="SCHEDULER_USE_PKT_TRANSFER" value="true" />
   <parameter name="S_AND_F_ENABLE" value="true" />
+  <parameter name="VERSION_DATE" value="20260411" />
+  <parameter name="VERSION_GIT" value="251041326" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="1" />
   <parameter name="WR_TIMEOUT_CYCLES" value="1024" />
  </module>
  <module
@@ -703,7 +739,7 @@
  <connection
    kind="avalon"
    version="18.1"
-   start="sc_hub.hub"
+   start="sc_hub_cmd_pipe.m0"
    end="mutrig_cfg_ctrl_0.avmm_csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0003f010" />
@@ -712,7 +748,7 @@
  <connection
    kind="avalon"
    version="18.1"
-   start="sc_hub.hub"
+   start="sc_hub_cmd_pipe.m0"
    end="onewire_master_controller_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00011000" />
@@ -721,13 +757,40 @@
  <connection
    kind="avalon"
    version="18.1"
-   start="sc_hub.hub"
+   start="sc_hub_cmd_pipe.m0"
+   end="on_die_temp_sense_ctrl.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00015000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="sc_hub_cmd_pipe.m0"
    end="max10_prog_avmm_0.csr_avmm">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00012000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="avalon" version="18.1" start="sc_hub.hub" end="mm_bridge.s0">
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="sc_hub_cmd_pipe.m0"
+   end="charge_injection_pulser_0.csr_avmm">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00013000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="sc_hub_cmd_pipe.m0"
+   end="firefly_xcvr_ctrl_0.firefly">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00014000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="sc_hub_cmd_pipe.m0" end="mm_bridge.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00020000" />
   <parameter name="defaultConnection" value="false" />
@@ -735,10 +798,19 @@
  <connection
    kind="avalon"
    version="18.1"
-   start="sc_hub.hub"
+   start="sc_hub_cmd_pipe.m0"
    end="scratch_pad_ram.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="sc_hub.hub"
+   end="sc_hub_cmd_pipe.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -844,6 +916,7 @@
    end="data_sc_merger.clk" />
  <connection kind="clock" version="18.1" start="clk156.clk" end="jtag_master.clk" />
  <connection kind="clock" version="18.1" start="clk156.clk" end="mm_bridge.clk" />
+ <connection kind="clock" version="18.1" start="clk156.clk" end="sc_hub_cmd_pipe.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -985,6 +1058,11 @@
    version="18.1"
    start="clk156.clk_reset"
    end="mm_bridge.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="clk156.clk_reset"
+   end="sc_hub_cmd_pipe.reset" />
  <connection
    kind="reset"
    version="18.1"
