@@ -10,11 +10,12 @@ Regenerate the Platform Designer catalogs for this repository.
 
 Defaults:
   --root         repository root (defaults to parent of this script)
-  --relative-var <unset> (emit absolute file paths)
+  --relative-var MU3E_IP_CORES_ROOT (emit portable file paths)
+  --absolute     emit absolute file paths instead
   --output       components.ipx
   --output       mu3e_ip_cores.ipx
 
-If --relative-var is supplied, Quartus must see that variable exported and
+When --relative-var is used, Quartus must see that variable exported and
 pointing at --root when it consumes the generated catalog.
 EOF
 }
@@ -23,7 +24,7 @@ script_dir=$(
     cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd
 )
 root_dir="${script_dir}/.."
-relative_var=""
+relative_var="MU3E_IP_CORES_ROOT"
 declare -a outputs=(
     "components.ipx"
     "mu3e_ip_cores.ipx"
@@ -38,6 +39,10 @@ while (($# > 0)); do
         --relative-var)
             relative_var=$2
             shift 2
+            ;;
+        --absolute)
+            relative_var=""
+            shift
             ;;
         --output)
             if ((${#outputs[@]} == 2)) && [[ ${outputs[0]} == "components.ipx" ]] && [[ ${outputs[1]} == "mu3e_ip_cores.ipx" ]]; then
@@ -82,11 +87,6 @@ declare -a ip_make_args=(
     --thorough-descent
 )
 
-if [[ -n "${relative_var}" ]]; then
-    export "${relative_var}=${root_dir}"
-    ip_make_args+=("--relative-vars=${relative_var}")
-fi
-
 ip-make-ipx "${ip_make_args[@]}"
 
 if [[ ! -s "${tmp_ipx}" ]]; then
@@ -94,9 +94,16 @@ if [[ ! -s "${tmp_ipx}" ]]; then
     exit 1
 fi
 
-python3 "${script_dir}/normalize_ipx_catalog.py" \
-    --input "${tmp_ipx}" \
-    --output "${norm_ipx}"
+declare -a normalize_args=(
+    "--input" "${tmp_ipx}"
+    "--output" "${norm_ipx}"
+    "--root" "${root_dir}"
+)
+if [[ -n "${relative_var}" ]]; then
+    normalize_args+=("--relative-var" "${relative_var}")
+fi
+
+python3 "${script_dir}/normalize_ipx_catalog.py" "${normalize_args[@]}"
 
 component_count=$(grep -c '^[[:space:]]*<component' "${norm_ipx}")
 if ((component_count == 0)); then
