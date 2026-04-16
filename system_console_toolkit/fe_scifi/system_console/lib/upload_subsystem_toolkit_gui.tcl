@@ -51,10 +51,10 @@ proc ::upload_subsystem_bts::gui::setup_all {} {
 	variable fd_global_variable "globalVariableTable"
 	::mu3e::helpers::init_global_variable  $fd_global_variable
     # slaves header
-    ::mu3e::helpers::append_global_variable $fd_global_variable "slaves" [list "runctl_mgmt_host.log"]
+    ::mu3e::helpers::append_global_variable $fd_global_variable "slaves" [list "runctl_mgmt_host.csr"]
     # slave list
-    ::mu3e::helpers::append_global_variable $fd_global_variable "runctl_mgmt_host.log_base_address" 0x0
-    ::mu3e::helpers::append_global_variable $fd_global_variable "runctl_mgmt_host.log_encountered" 0
+    ::mu3e::helpers::append_global_variable $fd_global_variable "runctl_mgmt_host.csr_base_address" 0x0
+    ::mu3e::helpers::append_global_variable $fd_global_variable "runctl_mgmt_host.csr_encountered" 0
     # counters
     ::mu3e::helpers::append_global_variable $fd_global_variable "logTable_current_row" 0
     
@@ -128,10 +128,14 @@ proc ::upload_subsystem_bts::gui::readbackLogFifo {tableName} {
     set currentRow [::mu3e::helpers::get_global_variable $fd_global_variable "logTable_current_row"]
     # request opened master service
     set master_fd [::mu3e::helpers::cget_opened_master_path]
-    # get the base address of log fifo in qsys
-    set baseLog [::mu3e::helpers::get_global_variable $fd_global_variable "runctl_mgmt_host.log_base_address"]
-    # d2h
-    set logTuple [master_read_32 $master_fd $baseLog 4]; # always read 4 words as an event tuple
+    # get the base address of runctl host csr in qsys
+    set baseCsr [::mu3e::helpers::get_global_variable $fd_global_variable "runctl_mgmt_host.csr_base_address"]
+    set logPopAddr [expr {$baseCsr + (0x12 << 2)}]
+    # d2h via CSR_LOG_POP
+    set logTuple {}
+    for {set wordIdx 0} {$wordIdx < 4} {incr wordIdx} {
+        lappend logTuple [master_read_32 $master_fd $logPopAddr 1]
+    }
     #puts $logTuple
      
     # tuple -> info, the tcl list 0 1 2 3 corresponding to word 3 2 1 0. tcl-2 = word-1 (info)
@@ -178,10 +182,12 @@ proc ::upload_subsystem_bts::gui::clearLogFifo {tableName} {
     variable fd_global_variable
     # request opened master service
     set master_fd [::mu3e::helpers::cget_opened_master_path]
-    # get the base address of log fifo in qsys
-    set baseLog [::mu3e::helpers::get_global_variable $fd_global_variable "runctl_mgmt_host.log_base_address"]
-    # h2d
-    master_write_32 $master_fd $baseLog 0x0
+    # get the base address of runctl host csr in qsys
+    set baseCsr [::mu3e::helpers::get_global_variable $fd_global_variable "runctl_mgmt_host.csr_base_address"]
+    set controlAddr [expr {$baseCsr + (0x02 << 2)}]
+    set controlWord [master_read_32 $master_fd $controlAddr 1]
+    # h2d: CSR_CONTROL bit1 is log_flush (W1P)
+    master_write_32 $master_fd $controlAddr [expr {($controlWord + 0) | 0x2}]
     # also clear the logTable 
     # ... todo 
     toolkit_send_message info "readbackLogFifo: LOG FIFO flushed"
@@ -226,6 +232,4 @@ proc ::upload_subsystem_bts::gui::decRunCommand {binaryCommand} {
     return $command
 
 } 
-
-
 
