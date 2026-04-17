@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags=""
+   categories="System" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element control_plane_clock_156
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element data_path_clock_125
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element runctl_mgmt_host_0
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element runctl_mgmt_host_0.csr
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element upload_cdc_fifo
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element upload_pkt_mux
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element upload_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element upload_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element upload_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element upload_system_jtag_master
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="5AGXBA7D4F31C5" />
+ <parameter name="deviceFamily" value="Arria V" />
+ <parameter name="deviceSpeedGrade" value="5_H4" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript></instanceScript>
+ <interface
+   name="control_clock"
+   internal="control_plane_clock_156.clk_in"
+   type="clock"
+   dir="end" />
+ <interface
+   name="control_clock_reset"
+   internal="control_plane_clock_156.clk_in_reset"
+   type="reset"
+   dir="end" />
+ <interface
+   name="control_plane_hard_reset"
+   internal="runctl_mgmt_host_0.ct_hard_reset"
+   type="reset"
+   dir="start" />
+ <interface
+   name="data_path_hard_reset"
+   internal="runctl_mgmt_host_0.dp_hard_reset"
+   type="reset"
+   dir="start" />
+ <interface
+   name="ext_hard_reset"
+   internal="runctl_mgmt_host_0.ext_hard_reset"
+   type="reset"
+   dir="start" />
+ <interface
+   name="lvds_outclock"
+   internal="data_path_clock_125.clk_in"
+   type="clock"
+   dir="end" />
+ <interface
+   name="lvds_outclock_reset"
+   internal="data_path_clock_125.clk_in_reset"
+   type="reset"
+   dir="end" />
+ <interface
+   name="csr"
+   internal="csr_bridge.s0"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="runctl_mgmt_host"
+   internal="runctl_mgmt_host_0.runctl"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="synclink"
+   internal="runctl_mgmt_host_0.synclink"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="upload_data"
+   internal="upload_pkt_mux.in0"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="upload_data0_sc_rc"
+   internal="upload_pkt_mux.out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="upload_sc"
+   internal="upload_pkt_mux.in1"
+   type="avalon_streaming"
+   dir="end" />
+ <module
+   name="control_plane_clock_156"
+   kind="clock_source"
+   version="18.1"
+   enabled="1">
+  <parameter name="clockFrequency" value="156250000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="BOTH" />
+ </module>
+ <module
+   name="data_path_clock_125"
+   kind="clock_source"
+   version="18.1"
+   enabled="1">
+  <parameter name="clockFrequency" value="125000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="BOTH" />
+ </module>
+ <module
+   name="csr_bridge"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="1" />
+ </module>
+ <module
+   name="runctl_mgmt_host_0"
+   kind="runctl_mgmt_host"
+   version="26.2.0.0416"
+   enabled="1">
+  <parameter name="DEBUG" value="1" />
+  <parameter name="RUN_END_ACK_SYMBOL" value="11111101" />
+  <parameter name="RUN_START_ACK_SYMBOL" value="11111110" />
+ </module>
+ <module
+   name="upload_cdc_fifo"
+   kind="altera_avalon_dc_fifo"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="36" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="RD_SYNC_DEPTH" value="2" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_IN_FILL_LEVEL" value="0" />
+  <parameter name="USE_OUT_FILL_LEVEL" value="0" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="WR_SYNC_DEPTH" value="2" />
+ </module>
+ <module name="upload_pkt_mux" kind="multiplexer" version="18.1" enabled="1">
+  <parameter name="bitsPerSymbol" value="36" />
+  <parameter name="errorWidth" value="0" />
+  <parameter name="numInputInterfaces" value="3" />
+  <parameter name="outChannelWidth" value="2" />
+  <parameter name="packetScheduling" value="true" />
+  <parameter name="schedulingSize" value="2" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="true" />
+ </module>
+ <module
+   name="upload_system_jtag_master"
+   kind="altera_jtag_avalon_master"
+   version="18.1"
+   enabled="1">
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="COMPONENT_CLOCK" value="0" />
+  <parameter name="FAST_VER" value="0" />
+  <parameter name="FIFO_DEPTHS" value="2" />
+  <parameter name="PLI_PORT" value="50000" />
+  <parameter name="USE_PLI" value="0" />
+ </module>
+<connection
+  kind="avalon"
+  version="18.1"
+  start="csr_bridge.m0"
+  end="runctl_mgmt_host_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+</connection>
+<connection
+  kind="avalon"
+  version="18.1"
+  start="upload_system_jtag_master.master"
+   end="runctl_mgmt_host_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="upload_cdc_fifo.out"
+   end="upload_pkt_mux.in2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="runctl_mgmt_host_0.upload"
+   end="upload_cdc_fifo.in" />
+<connection
+  kind="clock"
+  version="18.1"
+  start="control_plane_clock_156.clk"
+  end="csr_bridge.clk" />
+ <connection
+  kind="clock"
+  version="18.1"
+  start="control_plane_clock_156.clk"
+  end="upload_pkt_mux.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="control_plane_clock_156.clk"
+   end="upload_system_jtag_master.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="data_path_clock_125.clk"
+   end="upload_cdc_fifo.in_clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="data_path_clock_125.clk"
+   end="runctl_mgmt_host_0.lvdspll_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="control_plane_clock_156.clk"
+   end="runctl_mgmt_host_0.mm_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="control_plane_clock_156.clk"
+   end="upload_cdc_fifo.out_clk" />
+<connection
+  kind="reset"
+  version="18.1"
+  start="control_plane_clock_156.clk_reset"
+  end="csr_bridge.reset" />
+ <connection
+  kind="reset"
+  version="18.1"
+  start="control_plane_clock_156.clk_reset"
+  end="upload_system_jtag_master.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="data_path_clock_125.clk_reset"
+   end="upload_cdc_fifo.in_clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="data_path_clock_125.clk_reset"
+   end="runctl_mgmt_host_0.lvdspll_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="control_plane_clock_156.clk_reset"
+   end="runctl_mgmt_host_0.mm_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="control_plane_clock_156.clk_reset"
+   end="upload_cdc_fifo.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="control_plane_clock_156.clk_reset"
+   end="upload_pkt_mux.reset" />
+ <!-- NOTE 2026-04-16: removed upload_system_jtag_master.master_reset feedback
+      connections into the AVMM fabric. On this bitstream the JTAG master's
+      master_reset output stays asserted after system-console claim_service,
+      which kept runctl_mgmt_host_0.mm_reset / csr_bridge / upload_cdc_fifo /
+      upload_pkt_mux permanently in reset and stalled every master_read_32 at
+      60 s. Diagnosed in T002_RC-REG_20260416/reports/run_20260416_blocker.log.
+      The system clock-domain resets (control_plane_clock_156.clk_reset and
+      data_path_clock_125.clk_reset) are the only reset sources now, which is
+      sufficient for power-up and for feb_system_v2's external reset tree. -->
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

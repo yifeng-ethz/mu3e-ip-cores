@@ -190,6 +190,10 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
+ <component name="debug_sc_system_v3" file="$MU3E_IP_CORES_ROOT/quartus_system/debug_sc_system_v3.qsys" displayName="debug_sc_system_v3" version="1.0" description="v3 control-path subsystem (hard-reset propagation, feb_system_v3 family)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
  <component name="emulator_mutrig" file="$MU3E_IP_CORES_ROOT/emulator_mutrig/emulator_mutrig_hw.tcl" displayName="MuTRiG Emulator Mu3e IP" version="26.0.3.416" description="MuTRiG Emulator Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
@@ -230,6 +234,10 @@
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
  <component name="feb_system_v2_snapshot_20260415" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/feb_system_v2.qsys" displayName="feb_system_v2_snapshot_20260415" version="1.0" description="Frozen snapshot from 2026-04-15 (no hard-reset propagation)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="feb_system_v3" file="$MU3E_IP_CORES_ROOT/quartus_system/feb_system_v3.qsys" displayName="feb_system_v3" version="1.0" description="v3 FEB top (hard-reset propagation + emulator_mutrig + latest IPs)" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
@@ -344,6 +352,10 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
  <component name="mutrig_datapath_system_v2" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/mutrig_datapath_system_v2.qsys" displayName="mutrig_datapath_system_v2" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="mutrig_datapath_system_v3" file="$MU3E_IP_CORES_ROOT/quartus_system/mutrig_datapath_system_v3.qsys" displayName="mutrig_datapath_system_v3" version="1.0" description="v3 per-MuTRiG datapath (feb_system_v3 family)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
@@ -588,6 +600,10 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
+ <component name="scifi_datapath_system_v3" file="$MU3E_IP_CORES_ROOT/quartus_system/scifi_datapath_system_v3.qsys" displayName="scifi_datapath_system_v3" version="1.0" description="v3 SciFi datapath (emulator_mutrig + run_control_mux, feb_system_v3 family)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
  <component name="scifi_lvds_receiver_system" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/scifi_lvds_receiver_system.qsys" displayName="scifi_lvds_receiver_system" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -597,6 +613,10 @@
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
  <component name="upload_system_snapshot_20260415" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/upload_system.qsys" displayName="upload_system_snapshot_20260415" version="1.0" description="Frozen snapshot from 2026-04-15" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="upload_system_v3" file="$MU3E_IP_CORES_ROOT/quartus_system/upload_system_v3.qsys" displayName="upload_system_v3" version="1.0" description="v3 upload subsystem (feb_system_v3 family)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
