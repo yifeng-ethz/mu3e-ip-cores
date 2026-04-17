@@ -182,7 +182,11 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="debug_sc_system_v2" file="$MU3E_IP_CORES_ROOT/quartus_system/debug_sc_system_v2.qsys" displayName="debug_sc_system_v2" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+ <component name="debug_sc_system_v2" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/current/debug_sc_system_v2.qsys" displayName="debug_sc_system_v2" version="1.0" description="Current revision (hard-reset propagation wired from upload_subsystem)" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="debug_sc_system_v2_snapshot_20260415" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/debug_sc_system_v2.qsys" displayName="debug_sc_system_v2_snapshot_20260415" version="1.0" description="Frozen snapshot from 2026-04-15" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
@@ -221,7 +225,11 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="feb_system_v2" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/feb_system_v2.qsys" displayName="feb_system_v2" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+ <component name="feb_system_v2" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/current/feb_system_v2.qsys" displayName="feb_system_v2" version="1.0" description="Current revision (upload_subsystem.ext_hard_reset merged into cclk156 reset tree)" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="feb_system_v2_snapshot_20260415" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/feb_system_v2.qsys" displayName="feb_system_v2_snapshot_20260415" version="1.0" description="Frozen snapshot from 2026-04-15 (no hard-reset propagation)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
@@ -572,7 +580,11 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="sc_hub_v2_validate" />
  </component>
- <component name="scifi_datapath_system_v2" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/scifi_datapath_system_v2.qsys" displayName="scifi_datapath_system_v2" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+ <component name="scifi_datapath_system_v2" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/current/scifi_datapath_system_v2.qsys" displayName="scifi_datapath_system_v2" version="1.0" description="Current revision (MAX_BURST_SIZE=256)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="scifi_datapath_system_v2_snapshot_20260415" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/scifi_datapath_system_v2.qsys" displayName="scifi_datapath_system_v2_snapshot_20260415" version="1.0" description="Frozen snapshot from 2026-04-15 (MAX_BURST_SIZE=1)" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
@@ -580,7 +592,11 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
- <component name="upload_system" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/upload_system.qsys" displayName="upload_system" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+ <component name="upload_system" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/current/upload_system.qsys" displayName="upload_system" version="1.0" description="Current revision" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="upload_system_snapshot_20260415" file="$MU3E_IP_CORES_ROOT/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/upload_system.qsys" displayName="upload_system_snapshot_20260415" version="1.0" description="Frozen snapshot from 2026-04-15" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
