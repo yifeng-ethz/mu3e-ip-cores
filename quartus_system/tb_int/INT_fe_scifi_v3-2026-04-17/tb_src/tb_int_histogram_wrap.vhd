@@ -41,6 +41,7 @@ entity tb_int_histogram_wrap is
         i_stream_eop                : in  std_logic_vector(7 downto 0);
         i_stream_data               : in  std_logic_vector((8 * G_AVST_DATA_WIDTH) - 1 downto 0);
         i_stream_channel            : in  std_logic_vector((8 * G_AVST_CHANNEL_WIDTH) - 1 downto 0);
+        o_stream_ready              : out std_logic_vector(7 downto 0);
 
         avs_hist_bin_readdata       : out std_logic_vector(31 downto 0);
         avs_hist_bin_read           : in  std_logic;
@@ -102,6 +103,16 @@ architecture rtl of tb_int_histogram_wrap is
     signal unused_fill_out_eop   : std_logic;
     signal unused_fill_out_ch    : std_logic_vector(G_AVST_CHANNEL_WIDTH - 1 downto 0);
 begin
+    o_stream_ready <=
+        unused_fill_ready_7 &
+        unused_fill_ready_6 &
+        unused_fill_ready_5 &
+        unused_fill_ready_4 &
+        unused_fill_ready_3 &
+        unused_fill_ready_2 &
+        unused_fill_ready_1 &
+        unused_fill_ready_0;
+
     u_hist : entity work.histogram_statistics_v2
         generic map (
             UPDATE_KEY_BIT_HI         => G_UPDATE_KEY_BIT_HI,

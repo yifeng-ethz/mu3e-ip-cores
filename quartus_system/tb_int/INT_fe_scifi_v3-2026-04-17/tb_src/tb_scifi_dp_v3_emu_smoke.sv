@@ -174,16 +174,18 @@ module tb_scifi_dp_v3_emu_smoke;
     logic [7:0]  pre_rbcam_hist_stream_eop;
     logic [(8*5)-1:0]  pre_rbcam_hist_stream_data;
     logic [(8*1)-1:0]  pre_rbcam_hist_stream_channel;
+    wire  [7:0]  pre_rbcam_hist_stream_ready;
     logic [7:0]  emu_lat_hist_stream_valid;
     logic [7:0]  emu_lat_hist_stream_sop;
     logic [7:0]  emu_lat_hist_stream_eop;
     logic [(8*16)-1:0] emu_lat_hist_stream_data;
     logic [(8*1)-1:0]  emu_lat_hist_stream_channel;
-    logic [7:0]        emu_lat_hist_pending_valid;
-    logic [(8*16)-1:0] emu_lat_hist_pending_data;
+    wire  [7:0]        emu_lat_hist_stream_ready;
     longint unsigned   lvds_cycle;
     longint unsigned   emu_live_cycle_q [8][$];
     longint unsigned   emu_frozen_cycle_q [8][$];
+    logic [4:0]        pre_rbcam_hist_queue [8][$];
+    logic [15:0]       emu_lat_hist_queue [8][$];
     int                emu_lat_underflow_count;
     int                emu_live_depth_max [8];
     int                emu_frozen_depth_max [8];
@@ -914,10 +916,22 @@ module tb_scifi_dp_v3_emu_smoke;
             trace_bank_gts_skew_max = 0;
             trace_gen_mod_offset_first = 0;
             trace_gen_mod_offset_seen = 1'b0;
+            pre_rbcam_hist_stream_valid   = '0;
+            pre_rbcam_hist_stream_sop     = '0;
+            pre_rbcam_hist_stream_eop     = '0;
+            pre_rbcam_hist_stream_data    = '0;
+            pre_rbcam_hist_stream_channel = '0;
+            emu_lat_hist_stream_valid     = '0;
+            emu_lat_hist_stream_sop       = '0;
+            emu_lat_hist_stream_eop       = '0;
+            emu_lat_hist_stream_data      = '0;
+            emu_lat_hist_stream_channel   = '0;
             for (int lane = 0; lane < 8; lane++) begin
                 emu_live_depth_max[lane]      = 0;
                 emu_frozen_depth_max[lane]    = 0;
                 emu_live_overwrite_count[lane] = 0;
+                pre_rbcam_hist_queue[lane].delete();
+                emu_lat_hist_queue[lane].delete();
                 emu_live_trace_q[lane].delete();
                 emu_frozen_trace_q[lane].delete();
                 type0_trace_q[lane].delete();
@@ -1568,6 +1582,37 @@ module tb_scifi_dp_v3_emu_smoke;
         end
     endtask
 
+    task automatic wait_local_hist_quiescent(
+        input bit          rate_sel,
+        input int unsigned max_polls
+    );
+        logic [31:0] bank_status;
+        logic [31:0] port_status;
+        logic [31:0] coal_status;
+        int unsigned polls;
+        begin
+            polls = 0;
+            while (1'b1) begin
+                local_hist_csr_read(rate_sel, HIST_CSR_BANK, bank_status);
+                local_hist_csr_read(rate_sel, HIST_CSR_PORT, port_status);
+                local_hist_csr_read(rate_sel, HIST_CSR_COAL, coal_status);
+                if ((bank_status[1] == 1'b0) && (port_status[7:0] == 8'hff) && (coal_status[7:0] == 8'h00))
+                    break;
+                polls++;
+                if (polls > max_polls) begin
+                    $fatal(
+                        1,
+                        "Local histogram quiescent timeout rate_sel=%0d bank=0x%08h port=0x%08h coal=0x%08h",
+                        rate_sel,
+                        bank_status,
+                        port_status,
+                        coal_status
+                    );
+                end
+            end
+        end
+    endtask
+
     task automatic freeze_local_hist(input bit rate_sel);
         begin
             local_hist_csr_write(rate_sel, HIST_CSR_CONTROL, 32'h0000_0000);
@@ -1679,6 +1724,104 @@ module tb_scifi_dp_v3_emu_smoke;
         end
     endtask
 
+    task automatic flush_pre_rbcam_hist_shadow(input int unsigned max_cycles);
+        int unsigned cycles;
+        int unsigned rr_lane;
+        bit          drained;
+        logic [4:0]  channel_v;
+        begin
+            cycles  = 0;
+            rr_lane = 0;
+            while (1'b1) begin
+                drained = 1'b1;
+                for (int lane = 0; lane < 8; lane++) begin
+                    if (pre_rbcam_hist_queue[lane].size() != 0)
+                        drained = 1'b0;
+                end
+                if (drained)
+                    break;
+
+                @(negedge lvds_outclock);
+                pre_rbcam_hist_stream_valid   = '0;
+                pre_rbcam_hist_stream_sop     = '0;
+                pre_rbcam_hist_stream_eop     = '0;
+                pre_rbcam_hist_stream_data    = '0;
+                pre_rbcam_hist_stream_channel = '0;
+                for (int ofs = 0; ofs < 8; ofs++) begin
+                    int lane;
+                    lane = (rr_lane + ofs) % 8;
+                    if (pre_rbcam_hist_queue[lane].size() != 0) begin
+                        channel_v = pre_rbcam_hist_queue[lane].pop_front();
+                        pre_rbcam_hist_stream_valid[lane] = 1'b1;
+                        pre_rbcam_hist_stream_data[(lane*5) +: 5] = channel_v;
+                        rr_lane = (lane + 1) % 8;
+                        break;
+                    end
+                end
+
+                cycles++;
+                if (cycles > max_cycles)
+                    $fatal(1, "Pre-RBCAM histogram shadow flush timeout after %0d cycles", cycles);
+            end
+
+            @(negedge lvds_outclock);
+            pre_rbcam_hist_stream_valid   = '0;
+            pre_rbcam_hist_stream_sop     = '0;
+            pre_rbcam_hist_stream_eop     = '0;
+            pre_rbcam_hist_stream_data    = '0;
+            pre_rbcam_hist_stream_channel = '0;
+        end
+    endtask
+
+    task automatic flush_latency_hist_shadow(input int unsigned max_cycles);
+        int unsigned cycles;
+        int unsigned rr_lane;
+        bit          drained;
+        logic [15:0] latency_v;
+        begin
+            cycles  = 0;
+            rr_lane = 0;
+            while (1'b1) begin
+                drained = 1'b1;
+                for (int lane = 0; lane < 8; lane++) begin
+                    if (emu_lat_hist_queue[lane].size() != 0)
+                        drained = 1'b0;
+                end
+                if (drained)
+                    break;
+
+                @(negedge clk_125);
+                emu_lat_hist_stream_valid   = '0;
+                emu_lat_hist_stream_sop     = '0;
+                emu_lat_hist_stream_eop     = '0;
+                emu_lat_hist_stream_data    = '0;
+                emu_lat_hist_stream_channel = '0;
+                for (int ofs = 0; ofs < 8; ofs++) begin
+                    int lane;
+                    lane = (rr_lane + ofs) % 8;
+                    if (emu_lat_hist_queue[lane].size() != 0) begin
+                        latency_v = emu_lat_hist_queue[lane].pop_front();
+                        emu_lat_hist_stream_valid[lane] = 1'b1;
+                        emu_lat_hist_stream_data[(lane*16) +: 16] = latency_v;
+                        rr_lane = (lane + 1) % 8;
+                        break;
+                    end
+                end
+
+                cycles++;
+                if (cycles > max_cycles)
+                    $fatal(1, "Latency histogram shadow flush timeout after %0d cycles", cycles);
+            end
+
+            @(negedge clk_125);
+            emu_lat_hist_stream_valid   = '0;
+            emu_lat_hist_stream_sop     = '0;
+            emu_lat_hist_stream_eop     = '0;
+            emu_lat_hist_stream_data    = '0;
+            emu_lat_hist_stream_channel = '0;
+        end
+    endtask
+
     task automatic report_emulator_status(input string tag);
         int i;
         logic [31:0] status_word;
@@ -1776,6 +1919,7 @@ module tb_scifi_dp_v3_emu_smoke;
         .i_stream_eop                (pre_rbcam_hist_stream_eop),
         .i_stream_data               (pre_rbcam_hist_stream_data),
         .i_stream_channel            (pre_rbcam_hist_stream_channel),
+        .o_stream_ready              (pre_rbcam_hist_stream_ready),
         .avs_hist_bin_readdata       (rate_hist_bin_readdata),
         .avs_hist_bin_read           (rate_hist_bin_read),
         .avs_hist_bin_address        (rate_hist_bin_address),
@@ -1824,6 +1968,7 @@ module tb_scifi_dp_v3_emu_smoke;
         .i_stream_eop                (emu_lat_hist_stream_eop),
         .i_stream_data               (emu_lat_hist_stream_data),
         .i_stream_channel            (emu_lat_hist_stream_channel),
+        .o_stream_ready              (emu_lat_hist_stream_ready),
         .avs_hist_bin_readdata       (lat_hist_bin_readdata),
         .avs_hist_bin_read           (lat_hist_bin_read),
         .avs_hist_bin_address        (lat_hist_bin_address),
@@ -1849,27 +1994,19 @@ module tb_scifi_dp_v3_emu_smoke;
             pre_rbcam_hist_stream_eop     <= '0;
             pre_rbcam_hist_stream_data    <= '0;
             pre_rbcam_hist_stream_channel <= '0;
+            for (int lane = 0; lane < 8; lane++)
+                pre_rbcam_hist_queue[lane].delete();
         end else begin
             logic [3:0] asic_v;
             logic [4:0] channel_v;
-
-            pre_rbcam_hist_stream_valid   <= '0;
-            pre_rbcam_hist_stream_sop     <= '0;
-            pre_rbcam_hist_stream_eop     <= '0;
-            pre_rbcam_hist_stream_data    <= '0;
-            pre_rbcam_hist_stream_channel <= '0;
 
             if (dut_wrap.dut.mts_preprocessor_0_hit_type1_out_valid
              && dut_wrap.dut.mts_preprocessor_0_hit_type1_out_ready
              && !dut_wrap.dut.mts_preprocessor_0_hit_type1_out_endofpacket) begin
                 asic_v = dut_wrap.dut.mts_preprocessor_0_hit_type1_out_data[38:35];
                 channel_v = dut_wrap.dut.mts_preprocessor_0_hit_type1_out_data[34:30];
-                if (asic_v < 8) begin
-                    pre_rbcam_hist_stream_valid[asic_v] <= 1'b1;
-                    pre_rbcam_hist_stream_sop[asic_v]   <= dut_wrap.dut.mts_preprocessor_0_hit_type1_out_startofpacket;
-                    pre_rbcam_hist_stream_eop[asic_v]   <= 1'b0;
-                    pre_rbcam_hist_stream_data[(asic_v*5) +: 5] <= channel_v;
-                end
+                if (asic_v < 8)
+                    pre_rbcam_hist_queue[asic_v].push_back(channel_v);
             end
 
             if (dut_wrap.dut.mts_preprocessor_1_hit_type1_out_valid
@@ -1877,13 +2014,10 @@ module tb_scifi_dp_v3_emu_smoke;
              && !dut_wrap.dut.mts_preprocessor_1_hit_type1_out_endofpacket) begin
                 asic_v = dut_wrap.dut.mts_preprocessor_1_hit_type1_out_data[38:35];
                 channel_v = dut_wrap.dut.mts_preprocessor_1_hit_type1_out_data[34:30];
-                if (asic_v < 8) begin
-                    pre_rbcam_hist_stream_valid[asic_v] <= 1'b1;
-                    pre_rbcam_hist_stream_sop[asic_v]   <= dut_wrap.dut.mts_preprocessor_1_hit_type1_out_startofpacket;
-                    pre_rbcam_hist_stream_eop[asic_v]   <= 1'b0;
-                    pre_rbcam_hist_stream_data[(asic_v*5) +: 5] <= channel_v;
-                end
+                if (asic_v < 8)
+                    pre_rbcam_hist_queue[asic_v].push_back(channel_v);
             end
+
         end
     end
 
@@ -2022,9 +2156,9 @@ module tb_scifi_dp_v3_emu_smoke;
 
     always @(posedge clk_125 or posedge avmm_rst or negedge xcvr_rst_n) begin
         if (avmm_rst || !xcvr_rst_n) begin
-            emu_lat_hist_pending_valid  <= '0;
-            emu_lat_hist_pending_data   <= '0;
             emu_lat_underflow_count     <= 0;
+            for (int lane = 0; lane < 8; lane++)
+                emu_lat_hist_queue[lane].delete();
         end else begin
             int unsigned    latency_cycles_v;
             trace_hit_t     expect_hit_v;
@@ -2041,8 +2175,6 @@ module tb_scifi_dp_v3_emu_smoke;
             longint unsigned current_tick_v;
 
             current_tick_v              = measure_tick_8ns();
-            emu_lat_hist_pending_valid  <= '0;
-            emu_lat_hist_pending_data   <= '0;
 
             for (int lane = 0; lane < 8; lane++) begin
                 if (lane_type0_fire(lane)) begin
@@ -2050,9 +2182,8 @@ module tb_scifi_dp_v3_emu_smoke;
                         emu_lat_underflow_count <= emu_lat_underflow_count + 1;
                     end else begin
                         latency_cycles_v = current_tick_v - emu_frozen_cycle_q[lane].pop_front();
-                        emu_lat_hist_pending_valid[lane] <= 1'b1;
-                        emu_lat_hist_pending_data[(lane*16) +: 16] <= latency_cycles_v[15:0];
-                        emu_lat_hist_drive_count <= emu_lat_hist_drive_count + 1;
+                        emu_lat_hist_queue[lane].push_back(latency_cycles_v[15:0]);
+                        emu_lat_hist_drive_count = emu_lat_hist_drive_count + 1;
                     end
                 end
 
@@ -2284,12 +2415,6 @@ module tb_scifi_dp_v3_emu_smoke;
             emu_lat_hist_stream_eop     <= '0;
             emu_lat_hist_stream_data    <= '0;
             emu_lat_hist_stream_channel <= '0;
-        end else begin
-            emu_lat_hist_stream_valid   <= emu_lat_hist_pending_valid;
-            emu_lat_hist_stream_sop     <= '0;
-            emu_lat_hist_stream_eop     <= '0;
-            emu_lat_hist_stream_data    <= emu_lat_hist_pending_data;
-            emu_lat_hist_stream_channel <= '0;
         end
     end
 
@@ -2496,15 +2621,21 @@ module tb_scifi_dp_v3_emu_smoke;
             configure_rate_hist(measure_run_cycles);
             wait_local_hist_cfg_applied(1'b1);
             clear_local_hist(1'b1);
+            wait_local_hist_quiescent(1'b1, 8192);
             configure_latency_hist(measure_run_cycles);
             wait_local_hist_cfg_applied(1'b0);
             clear_local_hist(1'b0);
+            wait_local_hist_quiescent(1'b0, 16384);
             reset_counters();
             enter_running();
             repeat (measure_run_cycles) @(posedge lvds_outclock);
             leave_running_with_drain(measure_short_mode ? 2048 : 4096);
+            flush_pre_rbcam_hist_shadow(1_000_000);
+            flush_latency_hist_shadow(1_000_000);
             freeze_local_hist(1'b1);
             freeze_local_hist(1'b0);
+            wait_local_hist_quiescent(1'b1, 8192);
+            wait_local_hist_quiescent(1'b0, 16384);
             wait_local_hist_drained(1'b1, 8192);
             wait_local_hist_drained(1'b0, 8192);
 
