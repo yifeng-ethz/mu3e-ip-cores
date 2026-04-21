@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import tempfile
@@ -42,7 +43,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--report-title", required=True)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--rtl-variant", default="after")
-    parser.add_argument("--vcover", default="/data1/intelFPGA_pro/23.1/questa_fse/bin/vcover")
+    parser.add_argument(
+        "--vcover",
+        default=os.environ.get("VCOVER", "/data1/questaone_sim/questasim/bin/vcover"),
+    )
     parser.add_argument("--raw-json-name", default="DV_REPORT.json")
     parser.add_argument("--strict-implementation", action="store_true")
     return parser.parse_args()
@@ -173,11 +177,13 @@ def metrics_to_raw(metrics: dict[str, tuple[int | float, int]] | None) -> dict[s
     payload: dict[str, dict[str, int | float | None]] = {}
     for key in METRIC_ROWS.values():
         hits, bins = metrics.get(key, (0, 0))
-        payload[key] = {
+        entry: dict[str, int | float | None] = {
             "hits": hits,
             "bins": bins,
-            "pct": None if bins == 0 else round(float(hits) * 100.0 / bins, 2),
         }
+        if bins != 0:
+            entry["pct"] = round(float(hits) * 100.0 / bins, 2)
+        payload[key] = entry
     return payload
 
 
@@ -943,14 +949,7 @@ def main() -> None:
     evidenced_total = sum(len(case_ids) for case_ids in bucket_evidence.values())
     bucket_lookup = {case_id: str(info["bucket"]) for case_id, info in case_info.items()}
     signoff_runs = collect_signoff_runs(tb_root / "uvm", args.rtl_variant, args.seed, args.vcover)
-    isolated_extensive_cases = sum(
-        1 for info in case_info.values() if info.get("isolated_effort") == "extensive" and info.get("passed")
-    )
-    isolated_extensive_random_cases = sum(
-        1
-        for info in case_info.values()
-        if info.get("isolated_effort") == "extensive" and info.get("passed") and is_random_case(info)
-    )
+    passing_random_cases = sum(1 for info in case_info.values() if info.get("passed") and is_random_case(info))
     raw_payload = build_raw_payload(
         args,
         case_lists,
@@ -1033,7 +1032,7 @@ def main() -> None:
         "",
         "This report is generated from the bucket docs plus the case-keyed isolated UVM evidence under `tb/uvm/logs/` and `tb/uvm/cov_after/`.",
         f"Machine-readable raw data for this markdown is emitted to `tb/{args.raw_json_name}` in JSON format.",
-        f"Isolated extensive refresh evidence currently covers `{isolated_extensive_cases}` cases, including `{isolated_extensive_random_cases}` random/seed-tagged cases.",
+        f"Passing isolated refresh evidence currently covers `{evidenced_total}` cases, including `{passing_random_cases}` random/seed-tagged cases.",
         "",
         "Methodology used here:",
         "- `isolated_case_coverage` is the standalone code coverage from that case's own isolated UCDB run",
