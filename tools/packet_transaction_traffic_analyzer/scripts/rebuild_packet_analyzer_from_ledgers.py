@@ -65,6 +65,23 @@ LEGACY_WAVE_PANEL_TITLES = {
     "egress": "Merged OPQ egress",
     "dma": "PCIe app payload",
 }
+LEGACY_WAVE_PANEL_LEGENDS = {
+    "ingress": [
+        {"label": "Header", "color": "#d7e7ff"},
+        {"label": "Subheader", "color": "#d9f2ff"},
+        {"label": "Hit", "color": "#dcf8e5"},
+        {"label": "Trailer", "color": "#fff0d6"},
+    ],
+    "egress": [
+        {"label": "Header", "color": "#d7e7ff"},
+        {"label": "Subheader", "color": "#d9f2ff"},
+        {"label": "Hit", "color": "#dcf8e5"},
+        {"label": "Trailer", "color": "#fff0d6"},
+    ],
+    "dma": [
+        {"label": "DMA Word", "color": "#d7e7ff"},
+    ],
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -181,21 +198,21 @@ def collect_legacy_wave_panels(out_dir: Path, source_id: str, source_label: str)
             grouped[section] = {
                 "panelId": section,
                 "title": chunk_meta["title"] or LEGACY_WAVE_PANEL_TITLES.get(section, section.title()),
-                "subtitle": chunk_meta["detail"] or "Recovered legacy WaveDrom panel view",
+                "subtitle": chunk_meta["detail"] or "Waveform panel",
                 "renderIndex": 0,
                 "chunkCount": 0,
                 "defaultVisibleSlots": max(1, chunk_meta["slotCount"] or 16),
                 "sourceId": source_id,
                 "sourceLabel": source_label,
                 "legacyMode": True,
-                "decodeEnabled": False,
-                "legend": [],
+                "decodeEnabled": True,
+                "legend": copy.deepcopy(LEGACY_WAVE_PANEL_LEGENDS.get(section, [])),
                 "chunks": [],
             }
         panel = grouped[section]
         if chunk_meta["title"]:
             panel["title"] = chunk_meta["title"]
-        if chunk_meta["detail"] and panel["subtitle"] == "Recovered legacy WaveDrom panel view":
+        if chunk_meta["detail"] and panel["subtitle"] == "Waveform panel":
             panel["subtitle"] = chunk_meta["detail"]
         panel["defaultVisibleSlots"] = max(panel["defaultVisibleSlots"], max(1, chunk_meta["slotCount"] or 16))
         panel["chunks"].append(
@@ -1137,9 +1154,9 @@ def rebuild_case(case_dir: Path) -> Path:
             "familyCounts": count_families(bundle_packets),
             "kindCounts": count_kinds(bundle_packets),
             "notes": [
-                "Recovered packet-analyzer bundle rebuilt from checked-in ingress, egress, and DMA ledgers.",
+                "Packet-analyzer bundle generated from checked-in ingress, egress, and DMA ledgers.",
                 "Frames are top-level rows, subheaders are integral subpacket rows, and hit rows preserve per-word decode.",
-                "Legacy WaveDrom panel chunks are restored as a left-side waveform viewer surface beside the packet trace.",
+                "Waveform panels are available as a left-side viewer surface beside the packet trace.",
             ],
             "globalPackets": global_packets,
             "globalWavePanels": legacy_wave_panels,
