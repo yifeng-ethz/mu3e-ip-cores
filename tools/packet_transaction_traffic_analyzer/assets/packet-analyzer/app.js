@@ -1128,6 +1128,9 @@
     if (!panel || frameId == null) {
       return null;
     }
+    if (panel.legacyMode) {
+      return findLegacyWavePanelFrameLocation(panel, frameId);
+    }
     for (let chunkIndex = 0; chunkIndex < panel.chunks.length; chunkIndex += 1) {
       const chunk = await loadWaveChunk(panel.chunks[chunkIndex].src);
       const beat = (chunk.beatLinks || []).find((item) => rowIdMatchesFrameValue(item.targetRowId || item.rowId || "", frameId));
@@ -1141,6 +1144,24 @@
         const cycleBase = Number(panel.chunks[chunkIndex].cycleStart) || 0;
         const slotStart = Math.max(0, Number(annotation.slotStart) || 0);
         return { chunkIndex: chunkIndex, slotStart: slotStart, cycleStart: cycleBase + slotStart };
+      }
+    }
+    return null;
+  }
+
+  async function findLegacyWavePanelFrameLocation(panel, frameId) {
+    for (let chunkIndex = 0; chunkIndex < panel.chunks.length; chunkIndex += 1) {
+      const chunkMeta = panel.chunks[chunkIndex];
+      const chunk = await loadWaveChunk(chunkMeta.src);
+      const slotCount = chunkSlotCount(chunkMeta) || deriveWaveSlotCount(chunk.signal || []);
+      const beatRows = await buildLegacyBeatRows(panel, chunk, chunkMeta, 0, slotCount);
+      for (const row of beatRows) {
+        const cell = (row.cells || []).find((item) => rowIdMatchesFrameValue(item.targetRowId || item.rowId || "", frameId));
+        if (cell) {
+          const cycleBase = Number(chunkMeta.cycleStart) || 0;
+          const slotStart = Math.max(0, Number(cell.slotStart) || 0);
+          return { chunkIndex: chunkIndex, slotStart: slotStart, cycleStart: cycleBase + slotStart };
+        }
       }
     }
     return null;
@@ -1980,7 +2001,7 @@
             <div class="wave-render-status">Loading chunk...</div>
           </div>
         </div>
-        <div class="wave-legacy-note">Recovered legacy WaveDrom panel view.</div>
+        <div class="wave-legacy-note">Recovered legacy WaveDrom panel view. Left-click a beat to sync the current right-side tab; right-click for navigation actions.</div>
       </section>
     `;
   }
@@ -2553,9 +2574,7 @@
     state.selectedWordId = wordId || "";
     state.selectedFieldId = "";
     ensureSelectedField(packet);
-    if (state.viewTab === "tracker") {
-      state.viewTab = "spec";
-    }
+    queueFieldSync(state.selectedRowId, state.selectedFieldId, state.selectedWordId);
     if (switchToTrace) {
       state.surfaceMode = "trace";
     }
@@ -3258,6 +3277,7 @@
     state.selectedWordId = menuState.wordId || "";
     state.selectedFieldId = "";
     ensureSelectedField(packet);
+    queueFieldSync(state.selectedRowId, state.selectedFieldId, state.selectedWordId);
     if (action === "wave-open-spec") {
       state.viewTab = "spec";
     } else if (action === "wave-open-details") {
@@ -3714,7 +3734,7 @@
     if (window.WaveDrom && typeof window.WaveDrom.RenderWaveForm === "function") {
       window.WaveDrom.RenderWaveForm(panel.renderIndex, view.renderJson, "WaveDrom_Display_", false);
       restyleWaveSvg(display.querySelector("svg"), display);
-      renderWaveHotspots(display, view.beatRows);
+      renderWaveHotspots(display, view.beatRows, panel);
     } else {
       display.innerHTML = '<div class="wave-render-status">WaveDrom runtime is unavailable.</div>';
     }
@@ -3743,6 +3763,7 @@
     if (window.WaveDrom && typeof window.WaveDrom.RenderWaveForm === "function") {
       window.WaveDrom.RenderWaveForm(panel.renderIndex, view.renderJson, "WaveDrom_Display_", false);
       restyleWaveSvg(display.querySelector("svg"), display);
+      renderWaveHotspots(display, view.beatRows, panel);
     } else {
       display.innerHTML = '<div class="wave-render-status">WaveDrom runtime is unavailable.</div>';
     }
@@ -3754,7 +3775,35 @@
       return null;
     }
     const chunk = await loadWaveChunk(chunkMeta.src);
+    if (panel.legacyMode) {
+      return buildLegacyChunkWaveViewModel(chunk, chunkMeta, panel, panelState);
+    }
     return buildWaveViewModel(chunk, chunkMeta, panel, panelState);
+  }
+
+  async function buildLegacyChunkWaveViewModel(chunk, chunkMeta, panel, panelState) {
+    const slotCount = chunkSlotCount(chunkMeta) || deriveWaveSlotCount(chunk.signal || []);
+    const slotStart = Math.max(0, Math.min(Math.max(0, slotCount - 1), panelState.slotOffset));
+    const slotStop = Math.max(slotStart + 1, Math.min(slotCount, slotStart + panelState.visibleSlots));
+    const renderJson = JSON.parse(JSON.stringify(chunk));
+    renderJson.signal = cropWaveSignal(chunk.signal || [], slotStart, slotStop);
+    renderJson.config = Object.assign({}, renderJson.config || {}, { hscale: 1 });
+    const cycleBase = Number(chunkMeta.cycleStart);
+    const cycleStart = Number.isFinite(cycleBase) ? cycleBase + slotStart : null;
+    const cycleEnd = cycleStart != null ? cycleStart + Math.max(0, slotStop - slotStart - 1) : null;
+    if (renderJson.head && cycleStart != null && cycleEnd != null) {
+      renderJson.head = Object.assign({}, renderJson.head, {
+        text: `${panel.title}: cycles ${cycleStart}..${cycleEnd}`,
+      });
+    }
+    return {
+      renderJson: renderJson,
+      annotations: [],
+      beatRows: filterWaveBeatRowsByFrame(await buildLegacyBeatRows(panel, chunk, chunkMeta, slotStart, slotStop)),
+      cycleStart: cycleStart,
+      cycleEnd: cycleEnd,
+      visibleSlots: slotStop - slotStart,
+    };
   }
 
   function deriveWaveSlotCount(signal) {
@@ -3787,6 +3836,301 @@
       prevToken = token;
     });
     return slots;
+  }
+
+  function extractWaveDataCells(row) {
+    const cells = [];
+    const labels = Array.isArray(row.data) ? row.data : [];
+    let prevToken = "x";
+    let dataIndex = 0;
+    let active = null;
+    String(row.wave || "").split("").forEach((char, slotIndex) => {
+      const token = char === "." ? prevToken : char;
+      const isDataToken = !["0", "1", "x", "z"].includes(token);
+      if (char !== ".") {
+        if (active) {
+          cells.push(active);
+          active = null;
+        }
+        if (isDataToken) {
+          active = {
+            slotStart: slotIndex,
+            slotEnd: slotIndex,
+            label: labels[dataIndex] || "",
+            token: token,
+          };
+          dataIndex += 1;
+        }
+      } else if (active && isDataToken) {
+        active.slotEnd = slotIndex;
+      } else if (active) {
+        cells.push(active);
+        active = null;
+      }
+      prevToken = token;
+    });
+    if (active) {
+      cells.push(active);
+    }
+    return cells;
+  }
+
+  function visitLegacySignalRows(entries, groupLabel, visitor) {
+    (entries || []).forEach((entry) => {
+      if (Array.isArray(entry)) {
+        const nextGroup = entry[0] ? String(entry[0]) : groupLabel;
+        visitLegacySignalRows(entry.slice(1), nextGroup, visitor);
+        return;
+      }
+      if (entry && typeof entry === "object") {
+        visitor(entry, groupLabel || "");
+      }
+    });
+  }
+
+  function legacyWaveDataRowDescriptors(panel, chunk) {
+    const rows = [];
+    visitLegacySignalRows(chunk.signal || [], "", (entry, groupLabel) => {
+      const name = String(entry.name || "").trim();
+      if (!name) {
+        return;
+      }
+      if (panel.panelId === "dma") {
+        if (name === "data[255:0]") {
+          rows.push({
+            rowKey: "dma",
+            lane: -1,
+            row: entry,
+          });
+        }
+        return;
+      }
+      if (name !== "data[31:0]") {
+        return;
+      }
+      if (panel.panelId === "ingress") {
+        const laneMatch = /Lane\s+(\d+)/i.exec(groupLabel || "");
+        if (!laneMatch) {
+          return;
+        }
+        rows.push({
+          rowKey: `lane-${laneMatch[1]}`,
+          lane: Number(laneMatch[1]),
+          row: entry,
+        });
+        return;
+      }
+      rows.push({
+        rowKey: panel.panelId || "egress",
+        lane: -1,
+        row: entry,
+      });
+    });
+    return rows.sort((left, right) => left.rowKey.localeCompare(right.rowKey, undefined, { numeric: true }));
+  }
+
+  function packetRowPriority(packet) {
+    if (!packet) {
+      return 0;
+    }
+    if (packet.rowType === "hit") {
+      return 3;
+    }
+    if (packet.rowType === "subpkt" || packet.rowType === "subpacket") {
+      return 2;
+    }
+    if (packet.rowType === "frame") {
+      return 1;
+    }
+    return 0;
+  }
+
+  function legacyWaveLinkTargetKey(section, lane, cycle) {
+    return [section, String(lane), String(cycle)].join("::");
+  }
+
+  function legacyWaveTargetGroup(packet, wordId, label) {
+    const wordText = String(wordId || "").toLowerCase();
+    const labelText = String(label || "");
+    if (wordText === "eop" || /trailer/i.test(labelText)) {
+      return "trailer";
+    }
+    if (wordText.includes("subheader") || /^S[0-9A-F]{2}\//i.test(labelText)) {
+      return "subheader";
+    }
+    if (wordText.includes("hit") || /^[0-9A-F]{8}$/i.test(labelText)) {
+      return "hit";
+    }
+    return "header";
+  }
+
+  function legacyWaveTargetTooltip(label, packet, word) {
+    const parts = [];
+    if (label) {
+      parts.push(label);
+    }
+    if (packet && packet.rowId) {
+      parts.push(packet.rowId);
+    }
+    if (word && word.wordLabel) {
+      parts.push(word.wordLabel);
+    }
+    if (word && word.rawHex) {
+      parts.push(word.rawHex);
+    }
+    if (word && Number.isFinite(Number(word.cycle))) {
+      parts.push(`C${Number(word.cycle)}`);
+    } else if (packet && Number.isFinite(Number(packet.cycle))) {
+      parts.push(`C${Number(packet.cycle)}`);
+    }
+    return parts.filter(Boolean).join(" | ");
+  }
+
+  function buildLegacyWaveLinkTargetIndex(section) {
+    const targets = new Map();
+    rowMap.forEach((packet) => {
+      if (!packet || packet.section !== section) {
+        return;
+      }
+      if (section === "dma") {
+        if (packet.kind !== "dma_word") {
+          return;
+        }
+        const cycle = Number(packet.cycle);
+        if (!Number.isFinite(cycle)) {
+          return;
+        }
+        const key = legacyWaveLinkTargetKey(section, -1, cycle);
+        const candidate = {
+          priority: packetRowPriority(packet) + 1,
+          rowId: packet.rowId,
+          targetRowId: packet.rowId,
+          traceRowId: packet.rowId,
+          wordId: "",
+          group: "header",
+          tooltip: [packet.packetLabel, packet.rowId, `C${cycle}`].filter(Boolean).join(" | "),
+        };
+        const previous = targets.get(key);
+        if (!previous || candidate.priority >= previous.priority) {
+          targets.set(key, candidate);
+        }
+        return;
+      }
+      detailWords(packet).forEach((word) => {
+        const cycle = Number(word.cycle != null ? word.cycle : packet.cycle);
+        if (!Number.isFinite(cycle)) {
+          return;
+        }
+        const key = legacyWaveLinkTargetKey(section, packet.lane, cycle);
+        const candidate = {
+          priority: packetRowPriority(packet),
+          rowId: packet.rowId,
+          targetRowId: packet.rowId,
+          traceRowId: packet.rowId,
+          wordId: word.wordId || "",
+          group: legacyWaveTargetGroup(packet, word.wordId || "", word.rawHex || ""),
+          tooltip: legacyWaveTargetTooltip("", packet, word),
+        };
+        const previous = targets.get(key);
+        if (!previous || candidate.priority >= previous.priority) {
+          targets.set(key, candidate);
+        }
+      });
+    });
+    return targets;
+  }
+
+  async function ensureLegacyWaveLinkData(panel) {
+    if (!panel || !panel.legacyMode) {
+      return;
+    }
+    if (panel.panelId !== "ingress") {
+      return;
+    }
+    const laneLoads = (manifest.lanes || [])
+      .map((laneInfo) => String(laneInfo.lane))
+      .filter((laneKey) => laneKey !== "-1");
+    await Promise.all(laneLoads.map(async (laneKey) => {
+      try {
+        await ensureLaneData(laneKey);
+      } catch (error) {
+        noteError(error);
+      }
+    }));
+  }
+
+  async function buildLegacyBeatRows(panel, chunk, chunkMeta, slotStart, slotStop) {
+    await ensureLegacyWaveLinkData(panel);
+    const cycleBase = Number(chunkMeta.cycleStart);
+    const targetIndex = buildLegacyWaveLinkTargetIndex(panel.panelId);
+    const visibleSlotCount = Math.max(1, slotStop - slotStart);
+    return legacyWaveDataRowDescriptors(panel, chunk)
+      .map((descriptor) => {
+        const cells = extractWaveDataCells(descriptor.row)
+          .map((cell) => {
+            const start = Math.max(slotStart, Number(cell.slotStart) || 0);
+            const end = Math.min(slotStop - 1, Number(cell.slotEnd) || Number(cell.slotStart) || 0);
+            if (end < start) {
+              return null;
+            }
+            const absoluteCycle = Number.isFinite(cycleBase) ? cycleBase + (Number(cell.slotStart) || 0) : (Number(cell.slotStart) || 0);
+            const target = targetIndex.get(legacyWaveLinkTargetKey(panel.panelId, descriptor.lane, absoluteCycle));
+            if (!target) {
+              return null;
+            }
+            const label = String(cell.label || "").trim() || target.wordId || target.targetRowId;
+            return {
+              slotStart: start - slotStart,
+              slotEnd: end - slotStart,
+              label: label,
+              fullLabel: legacyWaveTargetTooltip(label, rowMap.get(target.targetRowId) || null, target.wordId && rowMap.has(target.targetRowId)
+                ? detailWords(rowMap.get(target.targetRowId)).find((word) => word.wordId === target.wordId) || null
+                : null) || target.tooltip || label,
+              linkKey: `${target.targetRowId}::${target.wordId || descriptor.rowKey}::${absoluteCycle}`,
+              rowId: target.rowId,
+              targetRowId: target.targetRowId,
+              traceRowId: target.traceRowId,
+              wordId: target.wordId,
+              group: target.group,
+              kind: target.group,
+            };
+          })
+          .filter(Boolean);
+        if (!cells.length) {
+          return null;
+        }
+        return {
+          rowKey: descriptor.rowKey,
+          slotCount: visibleSlotCount,
+          cells: cells,
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function mergeLegacyBeatRows(rowSets, visibleSlots) {
+    const order = [];
+    const rows = new Map();
+    (rowSets || []).forEach((rowSet) => {
+      (rowSet || []).forEach((row) => {
+        const key = row.rowKey || `row-${order.length}`;
+        if (!rows.has(key)) {
+          rows.set(key, {
+            rowKey: key,
+            slotCount: visibleSlots,
+            cells: [],
+          });
+          order.push(key);
+        }
+        rows.get(key).cells.push(...(row.cells || []));
+      });
+    });
+    return order.map((key) => {
+      const row = rows.get(key);
+      row.cells.sort((left, right) => (left.slotStart || 0) - (right.slotStart || 0));
+      row.slotCount = visibleSlots;
+      return row;
+    });
   }
 
   function cropWaveSignal(signal, slotStart, slotStop) {
@@ -4151,6 +4495,9 @@
   }
 
   async function buildSharedWaveViewModel(panel, sharedState) {
+    if (panel.legacyMode) {
+      return buildLegacySharedWaveViewModel(panel, sharedState);
+    }
     const cycleStart = Number(sharedState.cycleStart) || 0;
     const visibleSlots = Math.max(1, Number(sharedState.visibleSlots) || 16);
     const cycleEnd = cycleStart + visibleSlots - 1;
@@ -4185,6 +4532,56 @@
       },
       annotations: filterWaveAnnotationsByFrame(mergeSharedAnnotations(chunkEntries, cycleStart, visibleSlots)),
       beatRows: filterWaveBeatRowsByFrame(beatRows),
+      cycleStart: cycleStart,
+      cycleEnd: cycleEnd,
+      visibleSlots: visibleSlots,
+    };
+  }
+
+  async function buildLegacySharedWaveViewModel(panel, sharedState) {
+    const cycleStart = Number(sharedState.cycleStart) || 0;
+    const visibleSlots = Math.max(1, Number(sharedState.visibleSlots) || 16);
+    const cycleEnd = cycleStart + visibleSlots - 1;
+    const overlappingMeta = (panel.chunks || []).filter((chunkMeta) => {
+      const chunkStart = Number(chunkMeta.cycleStart);
+      const chunkEnd = Number(chunkMeta.cycleEnd);
+      return Number.isFinite(chunkStart) && Number.isFinite(chunkEnd) && chunkEnd >= cycleStart && chunkStart <= cycleEnd;
+    });
+    const templateChunkMeta = overlappingMeta[0] || panel.chunks[0];
+    if (!templateChunkMeta) {
+      return null;
+    }
+    const templateChunk = await loadWaveChunk(templateChunkMeta.src);
+    const chunkEntries = await Promise.all(
+      overlappingMeta.map(async (chunkMeta) => ({
+        meta: chunkMeta,
+        chunk: await loadWaveChunk(chunkMeta.src),
+      }))
+    );
+    const beatRowSets = await Promise.all(chunkEntries.map(async (chunkEntry) => {
+      const chunkStart = Number(chunkEntry.meta.cycleStart) || 0;
+      const slotCount = chunkSlotCount(chunkEntry.meta) || deriveWaveSlotCount(chunkEntry.chunk.signal || []);
+      const localStart = Math.max(0, cycleStart - chunkStart);
+      const localStop = Math.max(localStart + 1, Math.min(slotCount, cycleEnd - chunkStart + 1));
+      if (localStop <= localStart) {
+        return [];
+      }
+      return buildLegacyBeatRows(panel, chunkEntry.chunk, chunkEntry.meta, localStart, localStop);
+    }));
+    return {
+      chunkMeta: {
+        detail: `cycles ${cycleStart}..${cycleEnd}`,
+      },
+      renderJson: {
+        signal: mergeSharedSignal(templateChunk.signal || [], chunkEntries, cycleStart, visibleSlots),
+        config: Object.assign({}, templateChunk.config || {}, { hscale: 1 }),
+        head: {
+          text: `${panel.title}: cycles ${cycleStart}..${cycleEnd}`,
+          tick: 0,
+        },
+      },
+      annotations: [],
+      beatRows: filterWaveBeatRowsByFrame(mergeLegacyBeatRows(beatRowSets, visibleSlots)),
       cycleStart: cycleStart,
       cycleEnd: cycleEnd,
       visibleSlots: visibleSlots,
@@ -4295,7 +4692,7 @@
     }
   }
 
-  function renderWaveHotspots(display, beatRows) {
+  function renderWaveHotspots(display, beatRows, panel) {
     if (!display) {
       return;
     }
@@ -4310,7 +4707,7 @@
     if (!beatRows.length) {
       return;
     }
-    const useRows = collectWaveBeatUseRows(svg);
+    const useRows = collectWaveBeatUseRows(svg, panel);
     if (!useRows.length) {
       return;
     }
@@ -4336,12 +4733,31 @@
     }
   }
 
-  function collectWaveBeatUseRows(svg) {
+  function collectWaveBeatUseRows(svg, panel) {
     if (!svg) {
       return [];
     }
+    if (panel && panel.legacyMode) {
+      return collectLegacyWaveBeatUseRows(svg, panel);
+    }
     return Array.from(svg.querySelectorAll("text.info"))
       .filter((node) => ["FEB_DATA_FRAME", "DMA256"].includes((node.textContent || "").trim()))
+      .map((node) => {
+        const rowGroup = node.parentNode
+          ? Array.from(node.parentNode.children).find((child) => child.tagName && child.tagName.toLowerCase() === "g")
+          : null;
+        if (!rowGroup) {
+          return [];
+        }
+        return Array.from(rowGroup.children).filter((child) => child.tagName && child.tagName.toLowerCase() === "use");
+      })
+      .filter((items) => items.length);
+  }
+
+  function collectLegacyWaveBeatUseRows(svg, panel) {
+    const rowLabel = panel && panel.panelId === "dma" ? "data[255:0]" : "data[31:0]";
+    return Array.from(svg.querySelectorAll("text.info"))
+      .filter((node) => (node.textContent || "").trim() === rowLabel)
       .map((node) => {
         const rowGroup = node.parentNode
           ? Array.from(node.parentNode.children).find((child) => child.tagName && child.tagName.toLowerCase() === "g")
