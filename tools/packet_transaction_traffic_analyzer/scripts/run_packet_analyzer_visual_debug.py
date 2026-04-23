@@ -20,7 +20,7 @@ from typing import Any, Callable
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from selenium import webdriver
-from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -90,10 +90,14 @@ def save_step(
     out_dir: Path,
     sequence_name: str,
     label: str,
+    capture_screenshot: bool = True,
 ) -> StepResult:
     safe_label = label.replace(" ", "_").replace("/", "_")
     screenshot_name = f"{sequence_name}_{safe_label}.png"
-    driver.save_screenshot(str(out_dir / screenshot_name))
+    if capture_screenshot:
+        driver.save_screenshot(str(out_dir / screenshot_name))
+    else:
+        screenshot_name = ""
     return StepResult(label=label, screenshot=screenshot_name, debug_state=debug_state(driver))
 
 
@@ -106,7 +110,10 @@ def safe_click(driver: webdriver.Chrome, element: Any) -> None:
     try:
         element.click()
     except ElementClickInterceptedException:
-        driver.execute_script("arguments[0].click();", element)
+        driver.execute_script(
+            "arguments[0].dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true, view:window}));",
+            element,
+        )
 
 
 def first_visible_rows(driver: webdriver.Chrome, count: int = 12) -> list[Any]:
@@ -161,7 +168,7 @@ def ensure_surface(driver: webdriver.Chrome, value: str) -> None:
     safe_click(driver, driver.find_element(By.CSS_SELECTOR, f"[data-action='surface-mode'][data-value='{value}']"))
     if value == "wave":
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".wave-panel [data-wave-row-id]"))
+            lambda drv: drv.find_elements(By.CSS_SELECTOR, ".wave-panel [data-wave-target-row-id], .wave-panel [data-wave-row-id], .wave-display svg")
         )
         return
     wait_ready(driver, timeout=10.0)
@@ -286,16 +293,21 @@ def context_action(driver: webdriver.Chrome, rng: random.Random) -> str:
     raise NoSuchElementException("No enabled context menu item found")
 
 
-def first_wave_annotation(driver: webdriver.Chrome) -> Any:
+def first_wave_interactive(driver: webdriver.Chrome) -> Any:
     ensure_surface(driver, "wave")
-    return WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "[data-wave-row-id]"))
-    )
+    def locate(drv: webdriver.Chrome) -> Any:
+        candidates = (
+            drv.find_elements(By.CSS_SELECTOR, "[data-wave-target-row-id]") or
+            drv.find_elements(By.CSS_SELECTOR, "[data-wave-row-id]")
+        )
+        return candidates[0] if candidates else False
+
+    return WebDriverWait(driver, 20).until(locate)
 
 
 def wave_context_action(driver: webdriver.Chrome, rng: random.Random) -> str:
-    annotation = first_wave_annotation(driver)
-    ActionChains(driver).context_click(annotation).perform()
+    target = first_wave_interactive(driver)
+    ActionChains(driver).context_click(target).perform()
     WebDriverWait(driver, 5).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, ".context-menu"))
     )
@@ -308,6 +320,42 @@ def wave_context_action(driver: webdriver.Chrome, rng: random.Random) -> str:
             safe_click(driver, items[0])
             return f"wave-context:{action_name}"
     raise NoSuchElementException("No enabled wave context menu item found")
+
+
+def random_wave_beat(driver: webdriver.Chrome, rng: random.Random) -> str:
+    ensure_surface(driver, "wave")
+    beats = driver.find_elements(By.CSS_SELECTOR, "[data-wave-target-row-id]")
+    if not beats:
+        raise NoSuchElementException("No wave beat with link target found")
+    before = debug_state(driver)
+    before_tab = before.get("viewTab")
+    target = rng.choice(beats[: min(len(beats), 40)])
+    target_row = target.get_attribute("data-wave-target-row-id") or ""
+    target_word = target.get_attribute("data-wave-word-id") or ""
+    safe_click(driver, target)
+    WebDriverWait(driver, 10).until(
+        lambda drv: debug_state(drv).get("selectedRowId") == target_row
+    )
+    after = debug_state(driver)
+    if after.get("surfaceMode") != "wave":
+        raise AssertionError(f"Wave click switched surface unexpectedly: {after}")
+    if after.get("viewTab") != before_tab:
+        raise AssertionError(f"Wave click changed active tab unexpectedly: before={before_tab} after={after.get('viewTab')}")
+    if target_word and after.get("selectedWordId") != target_word:
+        raise AssertionError(f"Wave click selected wrong word: expected {target_word}, got {after.get('selectedWordId')}")
+    return f"wave-click:{target_row}:{target_word or 'row'}"
+
+
+def wave_panel_action(action: str) -> Callable[[webdriver.Chrome, random.Random], str]:
+    def inner(driver: webdriver.Chrome, rng: random.Random) -> str:
+        ensure_surface(driver, "wave")
+        buttons = driver.find_elements(By.CSS_SELECTOR, f".wave-panel [data-action='{action}']")
+        if not buttons:
+            raise NoSuchElementException(f"No wave panel button found for {action}")
+        safe_click(driver, rng.choice(buttons[: min(len(buttons), 6)]))
+        return action
+
+    return inner
 
 
 def wait_after_action(driver: webdriver.Chrome) -> None:
@@ -348,10 +396,15 @@ def write_report(out_dir: Path, url: str, report: dict[str, Any]) -> None:
         step_cards = []
         for step in sequence["steps"]:
             state = step["debug_state"]
+            image_html = (
+                f"<img src='{html.escape(step['screenshot'])}' alt='{html.escape(step['label'])}'>"
+                if step["screenshot"]
+                else "<div class='step-no-image'>screenshot skipped</div>"
+            )
             step_cards.append(
                 "<div class='step'>"
                 f"<h4>{html.escape(step['label'])}</h4>"
-                f"<img src='{html.escape(step['screenshot'])}' alt='{html.escape(step['label'])}'>"
+                f"{image_html}"
                 "<pre>"
                 f"lane={html.escape(str(state.get('lane')))} "
                 f"tab={html.escape(str(state.get('viewTab')))} "
@@ -409,6 +462,14 @@ def write_report(out_dir: Path, url: str, report: dict[str, Any]) -> None:
       display: block;
       background: #fff;
     }}
+    .step-no-image {{
+      padding: 14px;
+      border: 1px dashed #405268;
+      color: #9fb6cf;
+      background: #111722;
+      text-align: center;
+      font-style: italic;
+    }}
   </style>
 </head>
 <body>
@@ -438,6 +499,11 @@ def main() -> int:
         action="store_true",
         help="Append force_scrollbars=1 so the Safari/custom scrollbar path can be visually validated",
     )
+    parser.add_argument(
+        "--skip-screenshots",
+        action="store_true",
+        help="Run the interaction/assertion sweep without writing per-step screenshots.",
+    )
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir)
@@ -451,6 +517,9 @@ def main() -> int:
         ("context_flow", [click_row_index(0), expand_selected, context_action]),
         ("lane_decode_flow", [change_lane, change_decode, click_tab("Details View")]),
         ("wave_flow", [click_button("surface-mode", "wave"), wave_context_action, wave_context_action]),
+        ("wave_spec_sync", [click_button("surface-mode", "wave"), click_tab("Spec View"), random_wave_beat]),
+        ("wave_details_sync", [click_button("surface-mode", "wave"), click_tab("Details View"), random_wave_beat]),
+        ("wave_tracker_sync", [click_button("surface-mode", "wave"), click_tab("Link Tracker"), random_wave_beat]),
         ("scrollbar_flow", [assert_scrollbars(["trace", "side"]), scroll_trace, click_button("surface-mode", "wave"), assert_scrollbars(["wave", "side"])]),
     ]
     random_actions: list[Callable[[webdriver.Chrome, random.Random], str]] = [
@@ -472,7 +541,13 @@ def main() -> int:
         expand_selected,
         hold_expand,
         context_action,
+        random_wave_beat,
         wave_context_action,
+        wave_panel_action("wave-prev"),
+        wave_panel_action("wave-next"),
+        wave_panel_action("wave-zoom-in"),
+        wave_panel_action("wave-zoom-out"),
+        wave_panel_action("wave-zoom-reset"),
     ]
 
     report: dict[str, Any] = {
@@ -489,15 +564,20 @@ def main() -> int:
             (f"random_{index:02d}", [rng.choice(random_actions) for _ in range(args.depth)])
             for index in range(args.random_sequences)
         ]:
+            print(f"running {name}", flush=True)
             driver.get(url)
             wait_ready(driver)
-            steps = [save_step(driver, out_dir, name, "base")]
+            steps = [save_step(driver, out_dir, name, "base", capture_screenshot=not args.skip_screenshots)]
             action_names: list[str] = []
             for depth_index, action in enumerate(actions, start=1):
-                action_name = action(driver, rng)
+                try:
+                    action_name = action(driver, rng)
+                except StaleElementReferenceException:
+                    time.sleep(0.2)
+                    action_name = action(driver, rng)
                 action_names.append(action_name)
                 wait_after_action(driver)
-                steps.append(save_step(driver, out_dir, name, f"step{depth_index}_{action_name}"))
+                steps.append(save_step(driver, out_dir, name, f"step{depth_index}_{action_name}", capture_screenshot=not args.skip_screenshots))
 
             report["sequences"].append(
                 {
