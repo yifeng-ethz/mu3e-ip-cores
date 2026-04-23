@@ -1,0 +1,254 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading quartus_system/debug_sc_system_v3_lvdsctrl.qsys
+Progress: Reading input file
+Progress: Adding charge_injection_pulser_0 [charge_injection_pulser 4.0.5]
+Progress: Parameterizing module charge_injection_pulser_0
+Progress: Adding clk125 [altera_clock_bridge 18.1]
+Progress: Parameterizing module clk125
+Progress: Adding clk156 [clock_source 18.1]
+Progress: Parameterizing module clk156
+Progress: Adding data_sc_merger [multiplexer 18.1]
+Progress: Parameterizing module data_sc_merger
+Progress: Adding firefly_xcvr_ctrl_0 [firefly_xcvr_ctrl 26.1.423]
+Progress: Parameterizing module firefly_xcvr_ctrl_0
+Progress: Adding jtag_master [altera_jtag_avalon_master 18.1]
+Progress: Parameterizing module jtag_master
+Progress: Adding legacy_firefly_bridge [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module legacy_firefly_bridge
+Progress: Adding max10_link_clk_bridge [altera_clock_bridge 18.1]
+Progress: Parameterizing module max10_link_clk_bridge
+Progress: Adding max10_prog_avmm_0 [max10_prog_avmm 0.2.0]
+Progress: Parameterizing module max10_prog_avmm_0
+Progress: Adding nios_reset_bridge [altera_reset_bridge 18.1]
+Progress: Parameterizing module nios_reset_bridge
+Progress: Adding nios_subsystem [feb_bringup_system 1.0]
+Progress: Parameterizing module nios_subsystem
+Progress: Adding mm_bridge [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module mm_bridge
+Progress: Adding upload_mm_bridge [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module upload_mm_bridge
+Progress: Adding sc_hub_cmd_pipe [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module sc_hub_cmd_pipe
+Progress: Adding mutrig_cfg_ctrl_0 [mutrig_cfg_ctrl 24.1.423]
+Progress: Parameterizing module mutrig_cfg_ctrl_0
+Progress: Adding on_die_temp_sense [altera_temp_sense 18.1]
+Progress: Parameterizing module on_die_temp_sense
+Progress: Adding on_die_temp_sense_ctrl [altera_temp_sense_ctrl 1.1]
+Progress: Parameterizing module on_die_temp_sense_ctrl
+Progress: Adding onewire_master_0 [onewire_master 24.0.911.1]
+Progress: Parameterizing module onewire_master_0
+Progress: Adding onewire_master_controller_0 [onewire_master_controller 24.0.918]
+Progress: Parameterizing module onewire_master_controller_0
+Progress: Adding pll_156t40 [altera_pll 18.1]
+Progress: Parameterizing module pll_156t40
+Progress: Adding sc_hub [sc_hub_v2 26.6.9.414]
+Progress: Parameterizing module sc_hub
+Progress: Adding scratch_pad_ram [altera_avalon_onchip_memory2 18.1]
+Progress: Parameterizing module scratch_pad_ram
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: debug_sc_system_v3_lvdsctrl.nios_subsystem.jtag_uart: JTAG UART IP input clock need to be at least double (2x) the operating frequency of JTAG TCK on board
+Info: debug_sc_system_v3_lvdsctrl.nios_subsystem.si_in: PIO inputs are not hardwired in test bench. Undefined values will be read from PIO inputs during simulation.
+Info: debug_sc_system_v3_lvdsctrl.nios_subsystem.sysid: System ID is not assigned automatically. Edit the System ID parameter to provide a unique ID
+Info: debug_sc_system_v3_lvdsctrl.nios_subsystem.sysid: Time stamp will be automatically updated when this component is generated.
+Warning: debug_sc_system_v3_lvdsctrl.nios_subsystem.dbg0: dbg0.external_connection must be exported, or connected to a matching conduit.
+Warning: debug_sc_system_v3_lvdsctrl.nios_subsystem.dbg1: dbg1.external_connection must be exported, or connected to a matching conduit.
+Warning: debug_sc_system_v3_lvdsctrl.nios_subsystem.pio: pio.external_connection must be exported, or connected to a matching conduit.
+Warning: debug_sc_system_v3_lvdsctrl.nios_subsystem.timer_ts: Interrupt sender timer_ts.irq is not connected to an interrupt receiver
+Warning: debug_sc_system_v3_lvdsctrl.mutrig_cfg_ctrl_0.avmm_schpad: Master needs a minimum address width of 11 bits (has 10)
+Warning: debug_sc_system_v3_lvdsctrl.mutrig_cfg_ctrl_0.sclr_counter_req: Associated reset sinks not declared
+Warning: debug_sc_system_v3_lvdsctrl.on_die_temp_sense_ctrl.clr: Associated reset sinks not declared
+Info: debug_sc_system_v3_lvdsctrl.pll_156t40: The legal reference clock frequency is 5.0 MHz..750.0 MHz
+Info: debug_sc_system_v3_lvdsctrl.pll_156t40: Able to implement PLL with user settings
+Info: debug_sc_system_v3_lvdsctrl.sc_hub: EXT_UP_PLD_DEPTH (512) < EFFECTIVE_EXT_OUTSTANDING x MAX_BURST  (6 x 256 = 1536). Credit manager will limit effective  read outstanding to ~2 for max-burst reads. This is  normal and validated by TLM CRED-03.
+Warning: debug_sc_system_v3_lvdsctrl.data_sc_merger.in1: data_sc_merger.in1 must be connected to an Avalon-ST source
+Warning: debug_sc_system_v3_lvdsctrl.pll_156t40: pll_156t40.locked must be exported, or connected to a matching conduit.
+Info: debug_sc_system_v3_lvdsctrl: Generating debug_sc_system_v3_lvdsctrl "debug_sc_system_v3_lvdsctrl" for QUARTUS_SYNTH
+Info: Inserting clock-crossing logic between cmd_demux_001.src4 and cmd_mux_004.sink0
+Info: Inserting clock-crossing logic between cmd_demux_001.src6 and cmd_mux_006.sink0
+Info: Inserting clock-crossing logic between cmd_demux_002.src3 and cmd_mux_004.sink1
+Info: Inserting clock-crossing logic between cmd_demux_002.src5 and cmd_mux_006.sink1
+Info: Inserting clock-crossing logic between rsp_demux_004.src0 and rsp_mux_001.sink4
+Info: Inserting clock-crossing logic between rsp_demux_004.src1 and rsp_mux_002.sink3
+Info: Inserting clock-crossing logic between rsp_demux_006.src0 and rsp_mux_001.sink6
+Info: Inserting clock-crossing logic between rsp_demux_006.src1 and rsp_mux_002.sink5
+Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has writeresponsevalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has burstcount signal 9 bit wide, but the slave is 1 bit wide.
+Warning: debug_sc_system_v3_lvdsctrl: "No matching role found for mutrig_cfg_ctrl_0:avmm_cnt:avm_cnt_flush (flush)"
+Info: charge_injection_pulser_0: "debug_sc_system_v3_lvdsctrl" instantiated charge_injection_pulser "charge_injection_pulser_0"
+Info: data_sc_merger: "debug_sc_system_v3_lvdsctrl" instantiated multiplexer "data_sc_merger"
+Info: firefly_xcvr_ctrl_0: "debug_sc_system_v3_lvdsctrl" instantiated firefly_xcvr_ctrl "firefly_xcvr_ctrl_0"
+Info: jtag_master: "debug_sc_system_v3_lvdsctrl" instantiated altera_jtag_avalon_master "jtag_master"
+Info: legacy_firefly_bridge: "debug_sc_system_v3_lvdsctrl" instantiated altera_avalon_mm_bridge "legacy_firefly_bridge"
+Info: max10_prog_avmm_0: "debug_sc_system_v3_lvdsctrl" instantiated max10_prog_avmm "max10_prog_avmm_0"
+Info: nios_subsystem: "debug_sc_system_v3_lvdsctrl" instantiated feb_bringup_system "nios_subsystem"
+Info: mutrig_cfg_ctrl_0: "debug_sc_system_v3_lvdsctrl" instantiated mutrig_cfg_ctrl "mutrig_cfg_ctrl_0"
+Info: on_die_temp_sense: Generating top-level entity debug_sc_system_v3_lvdsctrl_on_die_temp_sense.
+Info: on_die_temp_sense: "debug_sc_system_v3_lvdsctrl" instantiated altera_temp_sense "on_die_temp_sense"
+Info: on_die_temp_sense_ctrl: "debug_sc_system_v3_lvdsctrl" instantiated altera_temp_sense_ctrl "on_die_temp_sense_ctrl"
+Info: onewire_master_0: "debug_sc_system_v3_lvdsctrl" instantiated onewire_master "onewire_master_0"
+Info: onewire_master_controller_0: "debug_sc_system_v3_lvdsctrl" instantiated onewire_master_controller "onewire_master_controller_0"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/pseudo_clock_down_convertor.vhd
+Info: pll_156t40: "debug_sc_system_v3_lvdsctrl" instantiated altera_pll "pll_156t40"
+Info: sc_hub: "debug_sc_system_v3_lvdsctrl" instantiated sc_hub_v2 "sc_hub"
+Info: scratch_pad_ram: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_scratch_pad_ram'
+Info: scratch_pad_ram:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_scratch_pad_ram --dir=/tmp/alt0566_159415786854566032.dir/0014_scratch_pad_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0014_scratch_pad_ram_gen//debug_sc_system_v3_lvdsctrl_scratch_pad_ram_component_configuration.pl  --do_build_sim=0  ]
+Info: scratch_pad_ram: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_scratch_pad_ram'
+Info: scratch_pad_ram: "debug_sc_system_v3_lvdsctrl" instantiated altera_avalon_onchip_memory2 "scratch_pad_ram"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_0: "debug_sc_system_v3_lvdsctrl" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_2: "debug_sc_system_v3_lvdsctrl" instantiated altera_mm_interconnect "mm_interconnect_2"
+Info: irq_mapper: "debug_sc_system_v3_lvdsctrl" instantiated altera_irq_mapper "irq_mapper"
+Info: rst_controller: "debug_sc_system_v3_lvdsctrl" instantiated altera_reset_controller "rst_controller"
+Info: jtag_phy_embedded_in_jtag_master: "jtag_master" instantiated altera_jtag_dc_streaming "jtag_phy_embedded_in_jtag_master"
+Info: timing_adt: "jtag_master" instantiated timing_adapter "timing_adt"
+Info: fifo: "jtag_master" instantiated altera_avalon_sc_fifo "fifo"
+Info: b2p: "jtag_master" instantiated altera_avalon_st_bytes_to_packets "b2p"
+Info: p2b: "jtag_master" instantiated altera_avalon_st_packets_to_bytes "p2b"
+Info: transacto: "jtag_master" instantiated altera_avalon_packets_to_master "transacto"
+Info: b2p_adapter: "jtag_master" instantiated channel_adapter "b2p_adapter"
+Info: p2b_adapter: "jtag_master" instantiated channel_adapter "p2b_adapter"
+Info: cpu: "nios_subsystem" instantiated altera_nios2_gen2 "cpu"
+Info: dbg0: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_dbg0'
+Info: dbg0:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_dbg0 --dir=/tmp/alt0566_159415786854566032.dir/0025_dbg0_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0025_dbg0_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_dbg0_component_configuration.pl  --do_build_sim=0  ]
+Info: dbg0: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_dbg0'
+Info: dbg0: "nios_subsystem" instantiated altera_avalon_pio "dbg0"
+Info: jtag_uart: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_jtag_uart'
+Info: jtag_uart:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_jtag_uart --dir=/tmp/alt0566_159415786854566032.dir/0026_jtag_uart_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0026_jtag_uart_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
+Info: jtag_uart: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_jtag_uart'
+Info: jtag_uart: "nios_subsystem" instantiated altera_avalon_jtag_uart "jtag_uart"
+Info: ram: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_ram'
+Info: ram:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_ram --dir=/tmp/alt0566_159415786854566032.dir/0027_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0027_ram_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_ram_component_configuration.pl  --do_build_sim=0  ]
+Info: ram: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_ram'
+Info: ram: "nios_subsystem" instantiated altera_avalon_onchip_memory2 "ram"
+Info: si_in: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_si_in'
+Info: si_in:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_si_in --dir=/tmp/alt0566_159415786854566032.dir/0028_si_in_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0028_si_in_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_si_in_component_configuration.pl  --do_build_sim=0  ]
+Info: si_in: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_si_in'
+Info: si_in: "nios_subsystem" instantiated altera_avalon_pio "si_in"
+Info: si_out: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_si_out'
+Info: si_out:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_si_out --dir=/tmp/alt0566_159415786854566032.dir/0029_si_out_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0029_si_out_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_si_out_component_configuration.pl  --do_build_sim=0  ]
+Info: si_out: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_si_out'
+Info: si_out: "nios_subsystem" instantiated altera_avalon_pio "si_out"
+Info: sysid: "nios_subsystem" instantiated altera_avalon_sysid_qsys "sysid"
+Info: timer: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_timer'
+Info: timer:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_timer --dir=/tmp/alt0566_159415786854566032.dir/0031_timer_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0031_timer_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_timer_component_configuration.pl  --do_build_sim=0  ]
+Info: timer: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_timer'
+Info: timer: "nios_subsystem" instantiated altera_avalon_timer "timer"
+Info: timer_ts: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_timer_ts'
+Info: timer_ts:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_timer_ts --dir=/tmp/alt0566_159415786854566032.dir/0032_timer_ts_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_159415786854566032.dir/0032_timer_ts_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_timer_ts_component_configuration.pl  --do_build_sim=0  ]
+Info: timer_ts: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_timer_ts'
+Info: timer_ts: "nios_subsystem" instantiated altera_avalon_timer "timer_ts"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_0: "nios_subsystem" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: irq_mapper: "nios_subsystem" instantiated altera_irq_mapper "irq_mapper"
+Info: mutrig_cfg_ctrl_0_avmm_cnt_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "mutrig_cfg_ctrl_0_avmm_cnt_translator"
+Info: mm_bridge_s0_translator: "mm_interconnect_0" instantiated altera_merlin_slave_translator "mm_bridge_s0_translator"
+Info: mutrig_cfg_ctrl_0_avmm_cnt_agent: "mm_interconnect_0" instantiated altera_merlin_master_agent "mutrig_cfg_ctrl_0_avmm_cnt_agent"
+Info: mm_bridge_s0_agent: "mm_interconnect_0" instantiated altera_merlin_slave_agent "mm_bridge_s0_agent"
+Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_0" instantiated altera_merlin_router "router_001"
+Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
+Info: router_003: "mm_interconnect_0" instantiated altera_merlin_router "router_003"
+Info: router_004: "mm_interconnect_0" instantiated altera_merlin_router "router_004"
+Info: router_005: "mm_interconnect_0" instantiated altera_merlin_router "router_005"
+Info: router_006: "mm_interconnect_0" instantiated altera_merlin_router "router_006"
+Info: router_014: "mm_interconnect_0" instantiated altera_merlin_router "router_014"
+Info: mutrig_cfg_ctrl_0_avmm_cnt_limiter: "mm_interconnect_0" instantiated altera_merlin_traffic_limiter "mutrig_cfg_ctrl_0_avmm_cnt_limiter"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: scratch_pad_ram_s1_burst_adapter: "mm_interconnect_0" instantiated altera_merlin_burst_adapter "scratch_pad_ram_s1_burst_adapter"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_001"
+Info: cmd_demux_002: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_002"
+Info: cmd_demux_003: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_003"
+Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: cmd_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_001"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: cmd_mux_010: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_010"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_001"
+Info: rsp_demux_004: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_004"
+Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_001"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_002"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_003: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_003"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: crosser: "mm_interconnect_0" instantiated altera_avalon_st_handshake_clock_crosser "crosser"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_st_clock_crosser.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: limiter_pipeline: "mm_interconnect_0" instantiated altera_avalon_st_pipeline_stage "limiter_pipeline"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: router: "mm_interconnect_2" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_2" instantiated altera_merlin_router "router_001"
+Info: cmd_demux: "mm_interconnect_2" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_mux: "mm_interconnect_2" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux: "mm_interconnect_2" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: cpu: Starting RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_cpu_cpu'
+Info: cpu:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=debug_sc_system_v3_lvdsctrl_nios_subsystem_cpu_cpu --dir=/tmp/alt0566_159415786854566032.dir/0068_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/tmp/alt0566_159415786854566032.dir/0068_cpu_gen//debug_sc_system_v3_lvdsctrl_nios_subsystem_cpu_cpu_processor_configuration.pl  --do_build_sim=0  ]
+Info: cpu: # 2026.04.23 10:20:30 (*) Starting Nios II generation
+Info: cpu: # 2026.04.23 10:20:30 (*)   Checking for plaintext license.
+Info: cpu: # 2026.04.23 10:20:31 (*)   Couldn't query license setup in Quartus directory /data1/intelFPGA/18.1/quartus/linux64/
+Info: cpu: # 2026.04.23 10:20:31 (*)   Defaulting to contents of LM_LICENSE_FILE environment variable
+Info: cpu: # 2026.04.23 10:20:31 (*)   Plaintext license not found.
+Info: cpu: # 2026.04.23 10:20:31 (*)   No license required to generate encrypted Nios II/e.
+Info: cpu: # 2026.04.23 10:20:31 (*)   Elaborating CPU configuration settings
+Info: cpu: # 2026.04.23 10:20:31 (*)   Creating all objects for CPU
+Info: cpu: # 2026.04.23 10:20:31 (*)   Generating RTL from CPU objects
+Info: cpu: # 2026.04.23 10:20:31 (*)   Creating plain-text RTL
+Info: cpu: # 2026.04.23 10:20:32 (*) Done Nios II generation
+Info: cpu: Done RTL generation for module 'debug_sc_system_v3_lvdsctrl_nios_subsystem_cpu_cpu'
+Info: cpu: "cpu" instantiated altera_nios2_gen2_unit "cpu"
+Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_0" instantiated altera_merlin_router "router_001"
+Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
+Info: router_004: "mm_interconnect_0" instantiated altera_merlin_router "router_004"
+Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_001"
+Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: cmd_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_002"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux"
+Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_001"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_system/debug_sc_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
+Info: debug_sc_system_v3_lvdsctrl: Done "debug_sc_system_v3_lvdsctrl" with 87 modules, 151 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

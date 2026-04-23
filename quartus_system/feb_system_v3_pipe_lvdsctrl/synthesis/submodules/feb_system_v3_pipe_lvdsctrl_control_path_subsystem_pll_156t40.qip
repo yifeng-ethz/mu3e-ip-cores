@@ -1,0 +1,4 @@
+set_instance_assignment -name PLL_COMPENSATION_MODE DIRECT -to "*feb_system_v3_pipe_lvdsctrl_control_path_subsystem_pll_156t40*|altera_pll:altera_pll_i*|*"
+ 
+set_instance_assignment -name PLL_AUTO_RESET OFF -to "*feb_system_v3_pipe_lvdsctrl_control_path_subsystem_pll_156t40*|altera_pll:altera_pll_i*|*"
+set_instance_assignment -name PLL_BANDWIDTH_PRESET AUTO -to "*feb_system_v3_pipe_lvdsctrl_control_path_subsystem_pll_156t40*|altera_pll:altera_pll_i*|*"
