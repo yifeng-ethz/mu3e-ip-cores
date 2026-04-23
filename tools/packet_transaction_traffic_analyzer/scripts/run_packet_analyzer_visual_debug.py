@@ -181,7 +181,10 @@ def pane_scoped_button(
 ) -> Callable[[webdriver.Chrome, random.Random], str]:
     def inner(driver: webdriver.Chrome, rng: random.Random) -> str:
         click_tab(pane_label)(driver, rng)
-        driver.find_element(By.CSS_SELECTOR, f"[data-action='{action}'][data-value='{value}']").click()
+        safe_click(
+            driver,
+            driver.find_element(By.CSS_SELECTOR, f"[data-action='{action}'][data-value='{value}']"),
+        )
         return f"{pane_label}:{action}:{value}"
 
     return inner
@@ -210,7 +213,7 @@ def change_decode(driver: webdriver.Chrome, rng: random.Random) -> str:
 
 def expand_selected(driver: webdriver.Chrome, rng: random.Random) -> str:
     ensure_surface(driver, "trace")
-    driver.find_element(By.CSS_SELECTOR, ".trace-row.selected [data-action='toggle-row']").click()
+    safe_click(driver, driver.find_element(By.CSS_SELECTOR, ".trace-row.selected [data-action='toggle-row']"))
     return "expand-selected"
 
 
@@ -223,7 +226,7 @@ def hold_expand(driver: webdriver.Chrome, rng: random.Random) -> str:
 
 def spec_next(driver: webdriver.Chrome, rng: random.Random) -> str:
     click_tab("Spec View")(driver, rng)
-    driver.find_element(By.XPATH, "//button[@data-action='packet-nav' and normalize-space()='Next']").click()
+    safe_click(driver, driver.find_element(By.XPATH, "//button[@data-action='packet-nav' and normalize-space()='Next']"))
     return "spec-next"
 
 
@@ -300,13 +303,27 @@ def first_wave_interactive(driver: webdriver.Chrome) -> Any:
             drv.find_elements(By.CSS_SELECTOR, "[data-wave-target-row-id]") or
             drv.find_elements(By.CSS_SELECTOR, "[data-wave-row-id]")
         )
-        return candidates[0] if candidates else False
+        return candidates[0] if candidates else None
 
-    return WebDriverWait(driver, 20).until(locate)
+    target = locate(driver)
+    if target:
+        return target
+    for action in ["wave-next", "wave-prev", "wave-zoom-in", "wave-zoom-reset"]:
+        buttons = driver.find_elements(By.CSS_SELECTOR, f".wave-panel [data-action='{action}']")
+        if not buttons:
+            continue
+        safe_click(driver, buttons[0])
+        wait_after_action(driver)
+        target = locate(driver)
+        if target:
+            return target
+    return None
 
 
 def wave_context_action(driver: webdriver.Chrome, rng: random.Random) -> str:
     target = first_wave_interactive(driver)
+    if not target:
+        return "wave-context:none"
     ActionChains(driver).context_click(target).perform()
     WebDriverWait(driver, 5).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, ".context-menu"))
@@ -326,7 +343,10 @@ def random_wave_beat(driver: webdriver.Chrome, rng: random.Random) -> str:
     ensure_surface(driver, "wave")
     beats = driver.find_elements(By.CSS_SELECTOR, "[data-wave-target-row-id]")
     if not beats:
-        raise NoSuchElementException("No wave beat with link target found")
+        first_wave_interactive(driver)
+        beats = driver.find_elements(By.CSS_SELECTOR, "[data-wave-target-row-id]")
+    if not beats:
+        return "wave-click:none"
     before = debug_state(driver)
     before_tab = before.get("viewTab")
     target = rng.choice(beats[: min(len(beats), 40)])

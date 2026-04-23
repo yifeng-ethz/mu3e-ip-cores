@@ -92,6 +92,7 @@
     wavePanelState: {},
     sharedWaveState: {},
     pendingFieldSync: null,
+    pendingWaveSync: null,
     flashFieldKey: "",
     flashRowId: "",
   };
@@ -106,10 +107,12 @@
   let fieldSyncSettleTimer = 0;
   let traceCenterTimer = 0;
   let sideCenterTimer = 0;
+  let waveSelectionHighlightTimer = 0;
   let scrollbarSyncRaf = 0;
   let activeWaveLinkKey = "";
   let scrollDragState = null;
   let uiTransitionToken = 0;
+  let waveSelectionRequestToken = 0;
 
   bindEvents();
   bindGlobalErrorCapture();
@@ -955,7 +958,7 @@
     if (hasCorrelatedWavePanels()) {
       return "WaveDrom view of actual VCD-derived FEB_DATA_FRAME content. Left-click a beat decode to focus spec/details on the right; right-click for video-style navigation actions. Frame selection filters the decode overlays across the active source.";
     }
-    return "Recovered WaveDrom panels from the promoted bundle. Use Prev/Next and zoom to inspect ingress, egress, and DMA on the shared time axis beside the packet trace.";
+    return "Use Prev/Next and zoom to inspect ingress, egress, and DMA on the shared time axis beside the packet trace. Hover a decode blob for the full label when the current zoom hides text.";
   }
 
   function ensureSurfaceSelection() {
@@ -1150,6 +1153,13 @@
   }
 
   async function findLegacyWavePanelFrameLocation(panel, frameId) {
+    const framePacket = Array.from(rowMap.values()).find((packet) => packet && packet.section === panel.panelId && packet.rowType === "frame" && String(packet.frameId) === String(frameId));
+    if (framePacket) {
+      const direct = findLegacyWavePanelSelectionLocation(panel, framePacket.rowId, "");
+      if (direct) {
+        return direct;
+      }
+    }
     for (let chunkIndex = 0; chunkIndex < panel.chunks.length; chunkIndex += 1) {
       const chunkMeta = panel.chunks[chunkIndex];
       const chunk = await loadWaveChunk(chunkMeta.src);
@@ -1160,6 +1170,104 @@
         if (cell) {
           const cycleBase = Number(chunkMeta.cycleStart) || 0;
           const slotStart = Math.max(0, Number(cell.slotStart) || 0);
+          return { chunkIndex: chunkIndex, slotStart: slotStart, cycleStart: cycleBase + slotStart };
+        }
+      }
+    }
+    return null;
+  }
+
+  function findWaveSelectionMatch(cells, rowId, wordId) {
+    const list = cells || [];
+    if (wordId) {
+      const exact = list.find((item) => (item.targetRowId || item.rowId || "") === rowId && (item.wordId || "") === wordId);
+      if (exact) {
+        return exact;
+      }
+    }
+    const rowMatch = list.find((item) => (item.targetRowId || item.rowId || "") === rowId);
+    if (rowMatch) {
+      return rowMatch;
+    }
+    if (wordId) {
+      return list.find((item) => (item.wordId || "") === wordId) || null;
+    }
+    return null;
+  }
+
+  function legacyWaveCycleForSelection(packet, wordId) {
+    if (!packet) {
+      return null;
+    }
+    const words = detailWords(packet);
+    if (wordId) {
+      const exact = words.find((word) => word.wordId === wordId);
+      if (exact && Number.isFinite(Number(exact.cycle))) {
+        return Number(exact.cycle);
+      }
+    }
+    if (words.length) {
+      const first = words.find((word) => Number.isFinite(Number(word.cycle))) || words[0];
+      if (first && Number.isFinite(Number(first.cycle))) {
+        return Number(first.cycle);
+      }
+    }
+    if (Number.isFinite(Number(packet.cycle))) {
+      return Number(packet.cycle);
+    }
+    if (Number.isFinite(Number(packet.startCycle))) {
+      return Number(packet.startCycle);
+    }
+    return null;
+  }
+
+  function findLegacyWavePanelSelectionLocation(panel, rowId, wordId) {
+    const packet = rowMap.get(rowId) || null;
+    if (!packet || packet.section !== panel.panelId) {
+      return null;
+    }
+    const cycle = legacyWaveCycleForSelection(packet, wordId);
+    if (!Number.isFinite(cycle)) {
+      return null;
+    }
+    const chunkIndex = (panel.chunks || []).findIndex((chunkMeta) => {
+      const start = Number(chunkMeta.cycleStart);
+      const end = Number(chunkMeta.cycleEnd);
+      return Number.isFinite(start) && Number.isFinite(end) && cycle >= start && cycle <= end;
+    });
+    if (chunkIndex === -1) {
+      return null;
+    }
+    const chunkMeta = panel.chunks[chunkIndex];
+    const cycleBase = Number(chunkMeta.cycleStart) || 0;
+    return {
+      chunkIndex: chunkIndex,
+      slotStart: Math.max(0, cycle - cycleBase),
+      cycleStart: cycle,
+    };
+  }
+
+  async function findWavePanelSelectionLocation(panel, rowId, wordId) {
+    if (!panel || !rowId) {
+      return null;
+    }
+    if (panel.legacyMode) {
+      return findLegacyWavePanelSelectionLocation(panel, rowId, wordId);
+    }
+    for (let chunkIndex = 0; chunkIndex < panel.chunks.length; chunkIndex += 1) {
+      const chunkMeta = panel.chunks[chunkIndex];
+      const chunk = await loadWaveChunk(chunkMeta.src);
+      const beat = findWaveSelectionMatch(chunk.beatLinks || [], rowId, wordId);
+      if (beat) {
+        const cycleBase = Number(chunkMeta.cycleStart) || 0;
+        const slotStart = Math.max(0, Number(beat.slotStart) || 0);
+        return { chunkIndex: chunkIndex, slotStart: slotStart, cycleStart: cycleBase + slotStart };
+      }
+      if (!wordId) {
+        const annotation = (chunk.annotations || []).find((item) => (item.rowId || "") === rowId);
+        if (annotation) {
+          const cycleBase = Number(chunkMeta.cycleStart) || 0;
+          const slotStart = Math.max(0, Number(annotation.slotStart) || 0);
           return { chunkIndex: chunkIndex, slotStart: slotStart, cycleStart: cycleBase + slotStart };
         }
       }
@@ -1202,6 +1310,135 @@
     if (changed) {
       scheduleWaveRender();
     }
+  }
+
+  function queueWaveSync(rowId, wordId) {
+    state.pendingWaveSync = {
+      rowId: rowId || state.selectedRowId || "",
+      wordId: wordId || state.selectedWordId || "",
+    };
+  }
+
+  function findRenderedWaveTarget(rowId, wordId) {
+    if (!rowId) {
+      return null;
+    }
+    if (wordId) {
+      const exact = root.querySelector(`[data-wave-target-row-id="${CSS.escape(rowId)}"][data-wave-word-id="${CSS.escape(wordId)}"]`);
+      if (exact) {
+        return exact;
+      }
+    }
+    return root.querySelector(`[data-wave-target-row-id="${CSS.escape(rowId)}"]`);
+  }
+
+  function scheduleWaveSelectionHighlight(rowId, wordId, attempt) {
+    if (!rowId || state.surfaceMode !== "wave") {
+      return;
+    }
+    const target = findRenderedWaveTarget(rowId, wordId);
+    if (target) {
+      const linkKey = target.getAttribute("data-wave-link-key") || "";
+      if (linkKey) {
+        setWaveLinkHover(linkKey);
+      }
+      return;
+    }
+    if ((attempt || 0) >= 8) {
+      return;
+    }
+    if (waveSelectionHighlightTimer) {
+      window.clearTimeout(waveSelectionHighlightTimer);
+    }
+    waveSelectionHighlightTimer = window.setTimeout(() => {
+      waveSelectionHighlightTimer = 0;
+      scheduleWaveSelectionHighlight(rowId, wordId, (attempt || 0) + 1);
+    }, 60);
+  }
+
+  function applyPendingWaveSync() {
+    if (!state.pendingWaveSync) {
+      return;
+    }
+    const pending = state.pendingWaveSync;
+    const target = findRenderedWaveTarget(pending.rowId, pending.wordId);
+    if (!target) {
+      scheduleWaveSelectionHighlight(pending.rowId, pending.wordId, 1);
+      return;
+    }
+    state.pendingWaveSync = null;
+    const waveStack = root.querySelector(".wave-panel-stack");
+    if (waveStack) {
+      centerElementInScroller(waveStack, target.closest(".wave-panel") || target, { vertical: true, horizontal: false });
+      state.lastWaveScrollTopByKey[currentWaveScrollKey()] = waveStack.scrollTop;
+      syncPersistentScrollbar("wave");
+    }
+    const linkKey = target.getAttribute("data-wave-link-key") || "";
+    if (linkKey) {
+      setWaveLinkHover(linkKey);
+    }
+    scheduleWaveSelectionHighlight(pending.rowId, pending.wordId, 1);
+  }
+
+  async function focusWavePanelsForSelection(rowId, wordId) {
+    if (!rowId || !hasWaveSurface()) {
+      return;
+    }
+    const packet = rowMap.get(rowId) || null;
+    const panels = visibleWavePanels();
+    const locations = (await Promise.all(panels.map((panel) => findWavePanelSelectionLocation(panel, rowId, wordId)))).map((location, index) => ({
+      panel: panels[index],
+      location: location,
+    })).filter((entry) => !!entry.location);
+    if (!locations.length) {
+      if (packet && packet.frameId != null) {
+        await focusWavePanelsForFrame(packet.frameId);
+      }
+      queueWaveSync(rowId, wordId);
+      return;
+    }
+    if (usesSharedWaveViewport()) {
+      const shared = normalizeSharedWaveState(panels, currentSharedWaveState());
+      const targetCycle = Math.min(...locations.map((entry) => Number(entry.location.cycleStart) || 0));
+      shared.cycleStart = targetCycle - Math.floor(shared.visibleSlots / 2);
+      state.sharedWaveState[sharedWaveStateKey()] = normalizeSharedWaveState(panels, shared);
+      queueWaveSync(rowId, wordId);
+      scheduleWaveRender();
+      return;
+    }
+    let changed = false;
+    locations.forEach((entry) => {
+      const panel = entry.panel;
+      const location = entry.location;
+      const current = normalizeWavePanelState(panel, state.wavePanelState[panel.panelId]);
+      const chunkMeta = panel.chunks[location.chunkIndex];
+      const slotCount = chunkSlotCount(chunkMeta);
+      const centeredOffset = location.slotStart - Math.floor(current.visibleSlots / 2);
+      state.wavePanelState[panel.panelId] = normalizeWavePanelState(panel, Object.assign({}, current, {
+        chunkIndex: location.chunkIndex,
+        slotOffset: Math.max(0, Math.min(Math.max(0, slotCount - current.visibleSlots), centeredOffset)),
+      }));
+      changed = true;
+    });
+    queueWaveSync(rowId, wordId);
+    if (changed) {
+      scheduleWaveRender();
+    }
+  }
+
+  function requestWaveSelectionFocus(rowId, wordId) {
+    if (state.surfaceMode !== "wave" || !hasWaveSurface() || !rowId) {
+      return;
+    }
+    const token = ++waveSelectionRequestToken;
+    queueWaveSync(rowId, wordId);
+    scheduleWaveSelectionHighlight(rowId, wordId, 1);
+    Promise.resolve(focusWavePanelsForSelection(rowId, wordId)).catch(noteError).finally(() => {
+      if (token !== waveSelectionRequestToken) {
+        return;
+      }
+      scheduleWaveRender();
+    });
   }
 
   function ensureWaveSourceSelection() {
@@ -1939,6 +2176,40 @@
     `;
   }
 
+  function defaultWaveLegend(panel) {
+    if (panel && panel.panelId === "dma") {
+      return [
+        { label: "DMA Word", color: waveBeatTone("header").fill },
+      ];
+    }
+    return [
+      { label: "Header", color: waveBeatTone("header").fill },
+      { label: "Subheader", color: waveBeatTone("subheader").fill },
+      { label: "Hit", color: waveBeatTone("hit").fill },
+      { label: "Trailer", color: waveBeatTone("trailer").fill },
+    ];
+  }
+
+  function renderWaveLegend(panel) {
+    const items = (panel.legend && panel.legend.length ? panel.legend : defaultWaveLegend(panel)) || [];
+    if (!items.length) {
+      return "";
+    }
+    return `
+      <div class="wave-legend">
+        ${items.map((item) => `<span><i style="background:${escapeHtml(item.color)}"></i>${escapeHtml(item.label)}</span>`).join("")}
+      </div>
+    `;
+  }
+
+  function wavePanelSubtitle(panel) {
+    const subtitle = String((panel && panel.subtitle) || "").trim();
+    if (!subtitle || subtitle === "Recovered legacy WaveDrom panel view") {
+      return "Waveform panel";
+    }
+    return subtitle;
+  }
+
   function renderWavePanelShell(panel) {
     if (panel.legacyMode) {
       return renderLegacyWavePanelShell(panel);
@@ -1951,7 +2222,7 @@
         <div class="wave-panel-head">
           <div>
             <h3>${escapeHtml(panel.title)}</h3>
-            <p>${escapeHtml(panel.subtitle)}${panel.sourceLabel ? ` | ${escapeHtml(panel.sourceLabel)}` : ""}</p>
+            <p>${escapeHtml(wavePanelSubtitle(panel))}${panel.sourceLabel ? ` | ${escapeHtml(panel.sourceLabel)}` : ""}</p>
           </div>
           <div class="wave-toolbar">
             <button class="tool-button subtle" type="button" data-action="wave-prev" data-panel-id="${escapeHtml(panel.panelId)}">Prev</button>
@@ -1962,9 +2233,7 @@
             <button class="tool-button subtle" type="button" data-action="wave-zoom-in" data-panel-id="${escapeHtml(panel.panelId)}">+</button>
           </div>
         </div>
-        <div class="wave-legend">
-          ${(panel.legend || []).map((item) => `<span><i style="background:${escapeHtml(item.color)}"></i>${escapeHtml(item.label)}</span>`).join("")}
-        </div>
+        ${renderWaveLegend(panel)}
         <div class="wave-display-wrap">
           <div class="wave-display" id="WaveDrom_Display_${escapeHtml(String(panel.renderIndex))}" data-wave-panel-display="${escapeHtml(panel.panelId)}">
             <div class="wave-render-status">Loading chunk...</div>
@@ -1985,7 +2254,7 @@
         <div class="wave-panel-head">
           <div>
             <h3>${escapeHtml(panel.title)}</h3>
-            <p>${escapeHtml(panel.subtitle || "Recovered legacy WaveDrom panel")}${panel.sourceLabel ? ` | ${escapeHtml(panel.sourceLabel)}` : ""}</p>
+            <p>${escapeHtml(wavePanelSubtitle(panel))}${panel.sourceLabel ? ` | ${escapeHtml(panel.sourceLabel)}` : ""}</p>
           </div>
           <div class="wave-toolbar">
             <button class="tool-button subtle" type="button" data-action="wave-prev" data-panel-id="${escapeHtml(panel.panelId)}">Prev</button>
@@ -1996,12 +2265,13 @@
             <button class="tool-button subtle" type="button" data-action="wave-zoom-in" data-panel-id="${escapeHtml(panel.panelId)}">+</button>
           </div>
         </div>
+        ${renderWaveLegend(panel)}
         <div class="wave-display-wrap">
           <div class="wave-display" id="WaveDrom_Display_${escapeHtml(String(panel.renderIndex))}" data-wave-panel-display="${escapeHtml(panel.panelId)}">
             <div class="wave-render-status">Loading chunk...</div>
           </div>
         </div>
-        <div class="wave-legacy-note">Recovered legacy WaveDrom panel view. Left-click a beat to sync the current right-side tab; right-click for navigation actions.</div>
+        <div class="wave-decode-shell" data-wave-decode="${escapeHtml(panel.panelId)}"></div>
       </section>
     `;
   }
@@ -2140,7 +2410,7 @@
       <p class="pane-subtitle">${escapeHtml(packet.kindLabel)} | ${escapeHtml(packetLaneLabel(packet))} | ${escapeHtml(packetFrameLabel(packet))} | relative ${escapeHtml(relativeTimeLabel(packet))}</p>
       <div class="spec-scroll-track">
         <div class="spec-stack">
-          ${words.map((word) => renderSpecWordBlock(word, selectedField)).join("")}
+          ${words.map((word) => renderSpecWordBlock(word, selectedField, packet.rowId)).join("")}
         </div>
         <div class="spec-scroll-runway" aria-hidden="true"></div>
       </div>
@@ -2148,7 +2418,7 @@
     `;
   }
 
-  function renderSpecWordBlock(word, selectedField) {
+  function renderSpecWordBlock(word, selectedField, rowId) {
     const fields = (word.fieldsByMode && word.fieldsByMode[state.decodeMode]) || [];
     const activeWordId = selectedField && selectedField.word ? selectedField.word.wordId : "";
     const activeField = activeWordId === word.wordId ? selectedField.field : null;
@@ -2180,11 +2450,11 @@
             <tr><td>${state.specMode === "hex" ? "Reference Bin" : "Reference Hex"}</td>${secondaryRow}</tr>
             <tr class="field-name-row">
               <td>Field Names</td>
-              ${fields.map((field) => renderSpecFieldNameCell(word, field, activeField)).join("")}
+              ${fields.map((field) => renderSpecFieldNameCell(word, field, activeField, rowId)).join("")}
             </tr>
             <tr class="field-value-row">
               <td>Field Values</td>
-              ${fields.map((field) => renderSpecFieldValueCell(word, field, activeField)).join("")}
+              ${fields.map((field) => renderSpecFieldValueCell(word, field, activeField, rowId)).join("")}
             </tr>
           </tbody>
         </table>
@@ -2211,19 +2481,19 @@
     return cells.join("");
   }
 
-  function renderSpecFieldNameCell(word, field, activeField) {
+  function renderSpecFieldNameCell(word, field, activeField, rowId) {
     const active = activeField && activeField.id === field.id;
     const fieldKey = makeWordFieldKey(word.wordId, field.id);
-    const pulseClass = shouldPulseField(fieldKey) ? "sync-pulse" : "";
-    return `<td colspan="${field.width}" class="${active ? "spec-field-selected" : ""}" style="background:${field.tone.label}; color:${field.tone.text}; text-align:center;"><button class="spec-band-button ${pulseClass}" type="button" data-action="select-word-field" data-value="${escapeHtml(fieldKey)}" data-word-field-key="${escapeHtml(fieldKey)}">${escapeHtml(field.label)}</button></td>`;
+    const pulseClass = shouldPulseField(fieldKey, rowId) ? "sync-pulse" : "";
+    return `<td colspan="${field.width}" class="${active ? "spec-field-selected" : ""}" style="background:${field.tone.label}; color:${field.tone.text}; text-align:center;"><button class="spec-band-button ${pulseClass}" type="button" data-action="select-word-field" data-value="${escapeHtml(fieldKey)}" data-word-field-key="${escapeHtml(fieldKey)}" data-row-id="${escapeHtml(rowId || "")}">${escapeHtml(field.label)}</button></td>`;
   }
 
-  function renderSpecFieldValueCell(word, field, activeField) {
+  function renderSpecFieldValueCell(word, field, activeField, rowId) {
     const active = activeField && activeField.id === field.id;
     const value = state.specMode === "hex" ? field.valueHex : field.valueBin;
     const fieldKey = makeWordFieldKey(word.wordId, field.id);
-    const pulseClass = shouldPulseField(fieldKey) ? "sync-pulse" : "";
-    return `<td colspan="${field.width}" class="${active ? "spec-field-selected" : ""}" style="background:${field.tone.value}; color:${field.tone.text}; text-align:center;"><button class="spec-band-button spec-value-button ${pulseClass}" type="button" data-action="select-word-field" data-value="${escapeHtml(fieldKey)}" data-word-field-key="${escapeHtml(fieldKey)}">${escapeHtml(value)}</button></td>`;
+    const pulseClass = shouldPulseField(fieldKey, rowId) ? "sync-pulse" : "";
+    return `<td colspan="${field.width}" class="${active ? "spec-field-selected" : ""}" style="background:${field.tone.value}; color:${field.tone.text}; text-align:center;"><button class="spec-band-button spec-value-button ${pulseClass}" type="button" data-action="select-word-field" data-value="${escapeHtml(fieldKey)}" data-word-field-key="${escapeHtml(fieldKey)}" data-row-id="${escapeHtml(rowId || "")}">${escapeHtml(value)}</button></td>`;
   }
 
   function renderSpecSelectedField(word, field) {
@@ -2256,7 +2526,7 @@
         </tbody>
       </table>
       <div class="detail-word-stack">
-        ${words.map((word) => renderDetailWordSection(word, selectedField)).join("")}
+        ${words.map((word) => renderDetailWordSection(word, selectedField, packet.rowId)).join("")}
       </div>
       ${packet.subpacketTable && packet.subpacketTable.length ? renderSubpacketTable(packet.subpacketTable) : ""}
     `;
@@ -2277,12 +2547,12 @@
     return `<tr><td>${escapeHtml(field.label)}</td><td class="mono">${escapeHtml(field.bits || "meta")}</td><td class="mono">${escapeHtml(primary)}</td><td class="mono">${escapeHtml(secondary)}</td><td>${escapeHtml(field.description || "")}</td></tr>`;
   }
 
-  function renderDetailWordSection(word, selectedField) {
+  function renderDetailWordSection(word, selectedField, rowId) {
     const activeWordId = selectedField && selectedField.word ? selectedField.word.wordId : "";
     const fields = (word.fieldsByMode && word.fieldsByMode[state.decodeMode]) || [];
     const pulseClass = shouldPulseWord(word.wordId) ? "sync-pulse" : "";
     return `
-      <section class="detail-word ${activeWordId === word.wordId ? "active" : ""} ${pulseClass}" data-word-id="${escapeHtml(word.wordId)}">
+      <section class="detail-word ${activeWordId === word.wordId ? "active" : ""} ${pulseClass}" data-word-id="${escapeHtml(word.wordId)}" data-row-id="${escapeHtml(rowId || "")}">
         <div class="detail-word-head">
           <strong>${escapeHtml(word.wordLabel)}</strong>
           <span>${escapeHtml(word.rawHex)} | ${escapeHtml(word.decodeSummaryByMode[state.decodeMode])}</span>
@@ -2297,8 +2567,8 @@
               const primary = state.detailsRadix === "hex" ? field.valueHex : field.valueDec;
               const secondary = state.detailsRadix === "hex" ? field.valueDec : field.valueHex;
               const fieldKey = makeWordFieldKey(word.wordId, field.id);
-              const pulseClass = shouldPulseField(fieldKey) ? "sync-pulse" : "";
-              return `<tr class="${active ? "selected-field" : ""}" data-word-field-row-key="${escapeHtml(fieldKey)}"><td><button class="detail-field-button ${pulseClass}" type="button" data-action="select-word-field" data-value="${escapeHtml(fieldKey)}" data-word-field-key="${escapeHtml(fieldKey)}">${escapeHtml(field.label)}</button></td><td class="mono">${escapeHtml(field.bits)}</td><td class="mono">${escapeHtml(primary)}</td><td class="mono">${escapeHtml(secondary)}</td><td>${escapeHtml(field.description)}</td></tr>`;
+              const pulseClass = shouldPulseField(fieldKey, rowId) ? "sync-pulse" : "";
+              return `<tr class="${active ? "selected-field" : ""}" data-word-field-row-key="${escapeHtml(fieldKey)}" data-row-id="${escapeHtml(rowId || "")}"><td><button class="detail-field-button ${pulseClass}" type="button" data-action="select-word-field" data-value="${escapeHtml(fieldKey)}" data-word-field-key="${escapeHtml(fieldKey)}" data-row-id="${escapeHtml(rowId || "")}">${escapeHtml(field.label)}</button></td><td class="mono">${escapeHtml(field.bits)}</td><td class="mono">${escapeHtml(primary)}</td><td class="mono">${escapeHtml(secondary)}</td><td>${escapeHtml(field.description)}</td></tr>`;
             }).join("")}
           </tbody>
         </table>
@@ -2366,7 +2636,7 @@
   function renderTrackerRow(row, selected) {
     const selectedClass = row.rowId === selected.rowId ? "selected-packet" : "";
     return `
-      <tr class="${selectedClass}">
+      <tr class="${selectedClass}" data-row-id="${escapeHtml(row.rowId)}">
         <td class="mono"><button class="detail-field-button" type="button" data-action="select-row" data-value="${escapeHtml(row.rowId)}">${escapeHtml(row.packetLabel || row.rowId)}</button></td>
         <td>${escapeHtml(row.kindLabel)}</td>
         <td class="mono">${escapeHtml(String(row.lane))}</td>
@@ -2442,6 +2712,7 @@
       label: field.label,
       style: `background:${field.tone.value}; color:${field.tone.text}; border-color:${field.tone.border};`,
       wordFieldKey: fieldLinkKey(field),
+      rowId: packet.rowId,
     }));
   }
 
@@ -2451,9 +2722,9 @@
 
   function renderTrackerToken(token) {
     if (token.wordFieldKey) {
-      const active = token.wordFieldKey === state.selectedFieldId ? "tracker-token-selected" : "";
-      const pulse = shouldPulseField(token.wordFieldKey) ? "sync-pulse" : "";
-      return `<button class="tracker-token tracker-token-button ${active} ${pulse}" type="button" title="${escapeHtml(token.label)}" style="${token.style}" data-action="select-word-field" data-value="${escapeHtml(token.wordFieldKey)}" data-word-field-key="${escapeHtml(token.wordFieldKey)}">${escapeHtml(token.text)}</button>`;
+      const active = token.rowId === state.selectedRowId && token.wordFieldKey === state.selectedFieldId ? "tracker-token-selected" : "";
+      const pulse = shouldPulseField(token.wordFieldKey, token.rowId) ? "sync-pulse" : "";
+      return `<button class="tracker-token tracker-token-button ${active} ${pulse}" type="button" title="${escapeHtml(token.label)}" style="${token.style}" data-action="select-word-field" data-value="${escapeHtml(token.wordFieldKey)}" data-word-field-key="${escapeHtml(token.wordFieldKey)}" data-row-id="${escapeHtml(token.rowId || "")}">${escapeHtml(token.text)}</button>`;
     }
     return `<span class="tracker-token" title="${escapeHtml(token.label)}" style="${token.style}">${escapeHtml(token.text)}</span>`;
   }
@@ -2524,6 +2795,7 @@
       }
       recordAction("field-click", rowId + ":" + (fieldEl.getAttribute("data-field-id") || ""));
       render("selection");
+      requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
       return;
     }
 
@@ -2554,6 +2826,7 @@
     if (rerender) {
       render("selection");
     }
+    requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
   }
 
   function expandRowAncestors(packet) {
@@ -2593,13 +2866,18 @@
     if (action === "tab") {
       state.viewTab = value;
       render("tab-switch");
+      requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
       return;
     }
     if (action === "surface-mode") {
       state.surfaceMode = value === "wave" && !hasWaveSurface() ? "trace" : value;
       render("surface-switch");
-      if (state.surfaceMode === "wave" && state.frameFilter) {
-        void focusWavePanelsForFrame(state.frameFilter);
+      if (state.surfaceMode === "wave") {
+        if (state.selectedRowId) {
+          requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
+        } else if (state.frameFilter) {
+          void focusWavePanelsForFrame(state.frameFilter);
+        }
       }
       return;
     }
@@ -2654,12 +2932,23 @@
       return;
     }
     if (action === "select-word-field") {
-      const packet = selectedPacket();
+      const targetRowId = actionEl.getAttribute("data-row-id") || state.selectedRowId;
+      const packet = targetRowId && rowMap.has(targetRowId) ? rowMap.get(targetRowId) : selectedPacket();
+      if (!packet) {
+        return;
+      }
+      expandRowAncestors(packet);
       const words = detailWords(packet);
       const matchingWord = words.find((word) => value.startsWith(word.wordId + "::"));
-      selectPacketWord(state.selectedRowId, matchingWord ? matchingWord.wordId : state.selectedWordId, value);
-      queueFieldSync(state.selectedRowId, value, matchingWord ? matchingWord.wordId : state.selectedWordId);
+      const nextWordId = matchingWord ? matchingWord.wordId : state.selectedWordId;
+      selectPacketWord(packet.rowId, nextWordId, value);
+      ensureSelectedField(packet);
+      queueFieldSync(packet.rowId, value, nextWordId);
       render("selection");
+      if (state.surfaceMode === "trace" && packet.lane !== -1) {
+        scrollRowIntoView(packet.rowId);
+      }
+      requestWaveSelectionFocus(packet.rowId, nextWordId);
       return;
     }
     if (action === "select-row") {
@@ -2672,6 +2961,7 @@
           ensureSelectedField(target);
           render("selection");
           scrollRowIntoView(value);
+          requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
         }
       }
       return;
@@ -3037,16 +3327,19 @@
     const fieldLinkEl = event.target.closest("[data-word-field-key]");
     if (fieldLinkEl) {
       event.preventDefault();
-      const packet = selectedPacket();
+      const rowId = fieldLinkEl.getAttribute("data-row-id") || state.selectedRowId;
+      const packet = rowId && rowMap.has(rowId) ? rowMap.get(rowId) : selectedPacket();
       const fieldKey = fieldLinkEl.getAttribute("data-word-field-key") || "";
       if (!packet || !fieldKey) {
         return;
       }
       const selection = parseFieldSelectionKey(fieldKey);
+      expandRowAncestors(packet);
       if (selection) {
         selectPacketWord(packet.rowId, selection.wordId, fieldKey);
         queueFieldSync(packet.rowId, fieldKey, selection.wordId);
       }
+      ensureSelectedField(packet);
       openFieldLinkContextMenu(event.clientX, event.clientY, packet, fieldKey, (fieldLinkEl.textContent || "").trim());
       render("selection");
       return;
@@ -3239,6 +3532,7 @@
     }
     saveFieldPrefs();
     render(action.startsWith("open-") ? "tab-switch" : "layout-change");
+    requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
   }
 
   function handleWaveContextAction(action) {
@@ -3319,6 +3613,7 @@
       state.zeroTimePsByLane[String(packet.lane)] = packet.timePs;
     }
     render(action.startsWith("field-link-open-") ? "tab-switch" : "selection");
+    requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
   }
 
   function handleRowContextAction(action) {
@@ -3346,6 +3641,7 @@
     if (state.surfaceMode === "trace" && packet.lane !== -1) {
       scrollRowIntoView(rowId);
     }
+    requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
   }
 
   function moveField(order, fieldId, delta) {
@@ -3524,7 +3820,7 @@
     state.pendingFieldSync = null;
     recordAction("field-sync-apply", pending.fieldKey || pending.wordId || pending.rowId || "");
     scrollTraceFieldIntoView(pending.rowId, pending.fieldKey);
-    scrollSideFieldIntoView(pending.fieldKey, pending.wordId);
+    scrollSideFieldIntoView(pending.rowId, pending.fieldKey, pending.wordId);
     if (fieldSyncSettleTimer) {
       window.clearTimeout(fieldSyncSettleTimer);
     }
@@ -3532,7 +3828,7 @@
       fieldSyncSettleTimer = 0;
       recordAction("field-sync-settle", pending.fieldKey || pending.wordId || pending.rowId || "");
       scrollTraceFieldIntoView(pending.rowId, pending.fieldKey);
-      scrollSideFieldIntoView(pending.fieldKey, pending.wordId);
+      scrollSideFieldIntoView(pending.rowId, pending.fieldKey, pending.wordId);
     }, 80);
   }
 
@@ -3577,7 +3873,7 @@
     }
   }
 
-  function scrollSideFieldIntoView(fieldKey, wordId) {
+  function scrollSideFieldIntoView(rowId, fieldKey, wordId) {
     if (!fieldKey && !wordId) {
       return;
     }
@@ -3586,12 +3882,28 @@
       return;
     }
     const resolveTarget = () => {
+      if (rowId && fieldKey) {
+        const scopedFieldTarget = root.querySelector(`.side-body [data-row-id="${CSS.escape(rowId)}"] [data-word-field-key="${CSS.escape(fieldKey)}"]`);
+        if (scopedFieldTarget) {
+          return scopedFieldTarget;
+        }
+        const scopedRowTarget = root.querySelector(`.side-body [data-row-id="${CSS.escape(rowId)}"][data-word-field-row-key="${CSS.escape(fieldKey)}"]`);
+        if (scopedRowTarget) {
+          return scopedRowTarget;
+        }
+      }
       if (fieldKey) {
         const fieldTarget = root.querySelector(`.side-body [data-word-field-key="${CSS.escape(fieldKey)}"]`);
         if (fieldTarget) {
           return fieldTarget;
         }
         const rowTarget = root.querySelector(`.side-body [data-word-field-row-key="${CSS.escape(fieldKey)}"]`);
+        if (rowTarget) {
+          return rowTarget;
+        }
+      }
+      if (rowId) {
+        const rowTarget = root.querySelector(`.side-body [data-row-id="${CSS.escape(rowId)}"]`);
         if (rowTarget) {
           return rowTarget;
         }
@@ -3648,13 +3960,17 @@
   }
 
   function setWaveLinkHover(linkKey) {
-    if (!linkKey || activeWaveLinkKey === linkKey) {
+    if (!linkKey) {
+      return;
+    }
+    const selector = `[data-wave-link-key="${CSS.escape(linkKey)}"]`;
+    if (activeWaveLinkKey === linkKey && root.querySelector(`${selector}.wave-link-hover`)) {
       return;
     }
     clearWaveLinkHover();
     activeWaveLinkKey = linkKey;
     root
-      .querySelectorAll(`[data-wave-link-key="${CSS.escape(linkKey)}"]`)
+      .querySelectorAll(selector)
       .forEach((node) => node.classList.add("wave-link-hover"));
   }
 
@@ -3696,6 +4012,7 @@
     if (waveStack) {
       waveStack.scrollTop = state.lastWaveScrollTopByKey[currentWaveScrollKey()] || 0;
     }
+    applyPendingWaveSync();
     scheduleScrollbarSync();
   }
 
@@ -3743,6 +4060,7 @@
   }
 
   async function renderLegacyWavePanel(panel, renderToken, display, status) {
+    const decodeHost = root.querySelector(`[data-wave-decode="${CSS.escape(panel.panelId)}"]`);
     const sharedWave = usesSharedWaveViewport() ? currentSharedWaveState() : null;
     const panelState = sharedWave || normalizeWavePanelState(panel, state.wavePanelState[panel.panelId]);
     if (!sharedWave) {
@@ -3767,6 +4085,7 @@
     } else {
       display.innerHTML = '<div class="wave-render-status">WaveDrom runtime is unavailable.</div>';
     }
+    renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots);
   }
 
   async function buildChunkWaveViewModel(panel, panelState) {
@@ -4295,11 +4614,17 @@
 
   function displayWaveBeatLabel(cell, slotPixelWidth, visibleSlots) {
     const level = waveAbbreviationLevel(visibleSlots);
-    const minimum = cell.group === "hit" ? 44 : 16;
-    if (slotPixelWidth < minimum) {
-      return level >= 3 ? "" : cell.group === "hit" ? "" : cell.group === "subheader" ? "SH" : cell.group === "trailer" ? "TR" : "HD";
+    const width = Number(slotPixelWidth) || 0;
+    if (width < 26) {
+      return "";
     }
     if (cell.group === "header") {
+      if (width < 42) {
+        return "";
+      }
+      if (width < 68 && level >= 2) {
+        return "";
+      }
       const map = {
         preamble: level >= 2 ? "HDR" : "Preamble",
         ts_high: "TSH",
@@ -4310,16 +4635,42 @@
       return map[cell.wordId] || (level >= 2 ? "HDR" : cell.label);
     }
     if (cell.group === "subheader") {
-      if (level >= 3) {
+      if (width < 44) {
+        return "";
+      }
+      if (level >= 3 || width < 72) {
         return "SH";
       }
       const token = /^S\d+/.exec(cell.label);
       return token ? token[0] : "SubHdr";
     }
     if (cell.group === "trailer") {
-      return level >= 3 ? "TR" : "TRL";
+      if (width < 44) {
+        return "";
+      }
+      return level >= 3 || width < 72 ? "TR" : "TRL";
+    }
+    if (width < 72 || level >= 4) {
+      return "";
+    }
+    if (level >= 3 && width < 110) {
+      return "";
     }
     return abbreviateHitWaveLabel(cell.label, level);
+  }
+
+  function isWaveCellSelected(cell) {
+    if (!cell || !state.selectedRowId) {
+      return false;
+    }
+    const rowId = cell.targetRowId || cell.rowId || "";
+    if (rowId !== state.selectedRowId) {
+      return false;
+    }
+    if (state.selectedWordId) {
+      return (cell.wordId || "") === state.selectedWordId;
+    }
+    return true;
   }
 
   function buildWaveViewModel(chunk, chunkMeta, panel, panelState) {
@@ -4650,7 +5001,7 @@
     if (!host) {
       return;
     }
-    if (panel.decodeEnabled === false) {
+    if (panel.decodeEnabled === false && !panel.legacyMode) {
       host.innerHTML = '<div class="wave-decode-empty">Mu3e packet decode is not available for DMA payload words.</div>';
       return;
     }
@@ -4669,7 +5020,7 @@
         const text = displayWaveBeatLabel(cell, slotPixelWidth * span, visibleSlots);
         return `
           <button
-            class="wave-decode-tag"
+            class="wave-decode-tag ${isWaveCellSelected(cell) ? "wave-link-hover" : ""}"
             type="button"
             data-wave-link-key="${escapeHtml(cell.linkKey)}"
             data-wave-row-id="${escapeHtml(cell.targetRowId)}"
@@ -4790,7 +5141,7 @@
         hotspot.setAttribute(attr, value);
       }
     });
-    hotspot.setAttribute("class", `wave-beat-hotspot wave-beat-${cell.group}`);
+    hotspot.setAttribute("class", `wave-beat-hotspot wave-beat-${cell.group}${isWaveCellSelected(cell) ? " wave-link-hover" : ""}`);
     hotspot.setAttribute("data-wave-link-key", cell.linkKey);
     hotspot.setAttribute("data-wave-row-id", cell.targetRowId);
     hotspot.setAttribute("data-wave-target-row-id", cell.targetRowId);
