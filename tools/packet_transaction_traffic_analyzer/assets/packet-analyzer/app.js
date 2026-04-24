@@ -17,7 +17,7 @@
   const loadedScripts = new Set();
   const rowMap = new Map();
   const waveChunkCache = new Map();
-  const WAVE_VISIBLE_SLOT_STEPS = [8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 12288, 16384];
+  const WAVE_VISIBLE_SLOT_STEPS = [8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024];
   const STRUCTURAL_RENDER_INTENTS = new Set([
     "row-toggle",
     "surface-switch",
@@ -1537,7 +1537,9 @@
   function autoWaveVisibleSlots(panel, targetSpan, slotCount) {
     const defaultVisible = Number(panel && panel.defaultVisibleSlots) || 16;
     const padded = Math.ceil(Math.max(1, Number(targetSpan) || defaultVisible) * 1.12) + 8;
-    return clampWaveVisibleSlots(panel || { defaultVisibleSlots: defaultVisible }, Math.max(defaultVisible, padded), slotCount);
+    const cappedDefault = Math.min(defaultVisible, 512);
+    const cappedTarget = Math.min(padded, 512);
+    return clampWaveVisibleSlots(panel || { defaultVisibleSlots: cappedDefault }, Math.max(cappedDefault, cappedTarget), slotCount);
   }
 
   function sharedWaveStateKey() {
