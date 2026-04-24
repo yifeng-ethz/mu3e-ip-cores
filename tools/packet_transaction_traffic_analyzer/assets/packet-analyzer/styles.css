@@ -173,7 +173,8 @@ body.scrollbar-dragging {
 }
 
 .tool-button,
-.tool-select {
+.tool-select,
+.tool-input {
   min-height: 28px;
   padding: 4px 8px;
   border: 1px solid var(--border-dark);
@@ -209,6 +210,7 @@ body.scrollbar-dragging {
 
 .tool-button:hover,
 .tool-select:hover,
+.tool-input:hover,
 .side-tab:hover,
 .detail-field-button:hover,
 .spec-band-button:hover {
@@ -224,6 +226,10 @@ body.scrollbar-dragging {
 .tool-button.subtle {
   min-width: 34px;
   padding: 3px 7px;
+}
+
+.tool-input {
+  cursor: text;
 }
 
 .content {
@@ -260,7 +266,7 @@ body.scrollbar-dragging {
 }
 
 .wave-surface {
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   padding: 10px;
 }
 
@@ -288,7 +294,16 @@ body.scrollbar-dragging {
 }
 
 .wave-source-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   padding: 0 10px 10px;
+}
+
+.wave-source-bar-empty {
+  min-height: 0;
+  padding: 0;
 }
 
 .panel-title,
@@ -862,6 +877,32 @@ body.scrollbar-dragging {
   gap: 6px;
 }
 
+.wave-range-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px 0;
+}
+
+.wave-source-bar .wave-range-controls {
+  padding: 0;
+}
+
+.wave-cycle-input {
+  width: 92px;
+  font-family: var(--mono);
+}
+
+.wave-zoom-select {
+  min-width: 94px;
+}
+
+.wave-range-separator {
+  color: var(--muted);
+  font: 12px var(--mono);
+}
+
 .wave-status {
   min-width: 220px;
   font-family: var(--mono);
@@ -906,6 +947,20 @@ body.scrollbar-dragging {
   border: 1px solid rgba(86, 108, 144, 0.14);
   padding: 8px;
   overflow: hidden;
+}
+
+.wave-display.wave-drag-armed {
+  cursor: crosshair;
+}
+
+.wave-range-drag {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  z-index: 5;
+  border: 1px solid rgba(54, 103, 174, 0.78);
+  background: rgba(76, 132, 204, 0.18);
+  pointer-events: none;
 }
 
 .wave-display svg {
@@ -1253,6 +1308,7 @@ body.scrollbar-dragging {
   .toolbar-group,
   .tool-button,
   .tool-select,
+  .tool-input,
   .trace-panel,
   .side-panel,
   .wave-surface,
