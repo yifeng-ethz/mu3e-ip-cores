@@ -951,6 +951,18 @@ def selected_frames_from_bundle(bundle_meta: dict, fallback_frame_ids: list[int]
     return list(range(frame_start, frame_start + frame_count))
 
 
+def default_lane_from_bundle(bundle_meta: dict) -> int:
+    frame_window = bundle_meta.get("frame_window") or {}
+    try:
+        total_frames = int(bundle_meta["frames"])
+        frame_count = int(frame_window["frame_count"])
+    except (KeyError, TypeError, ValueError):
+        return -1
+    if total_frames > frame_count:
+        return 0
+    return -1
+
+
 def parse_out_dir_case_key(out_dir: Path) -> tuple[str, str]:
     case_dir = out_dir.parent
     return (case_dir.parent.name, case_dir.name)
@@ -1160,7 +1172,7 @@ def rebuild_case(case_dir: Path) -> Path:
             "frameStart": selected_frame_ids[0] if selected_frame_ids else 0,
             "frameCount": len(selected_frame_ids),
             "selectedFrames": selected_frame_ids,
-            "defaultLane": -1,
+            "defaultLane": default_lane_from_bundle(bundle_meta),
             "defaultDecodeMode": "mu3e-spec",
             "referenceVideoTitle": "Teledyne LeCroy Voyager USB 3.0 Analyzer packet display workflow",
             "specReference": "Mu3eSpecBook-4.pdf pages 147-148 (32-bit frontend packet and hit layouts)",
