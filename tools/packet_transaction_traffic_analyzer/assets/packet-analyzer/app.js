@@ -1069,15 +1069,43 @@
         caseId: pathMatch[2],
       };
     }
+    const bundlePathMatch = window.location.pathname.match(/\/([^/]+)\/([^/]+)(?:\/([^/]+))?\/packet_analyzer\/?$/i);
+    if (bundlePathMatch) {
+      return {
+        bucket: bundlePathMatch[1],
+        caseId: bundlePathMatch[3] ? `${bundlePathMatch[2]}/${bundlePathMatch[3]}` : bundlePathMatch[2],
+      };
+    }
     const sourceVcd = String((manifest.meta && manifest.meta.sourceVcd) || "");
-    const vcdMatch = sourceVcd.match(/\/wave_reports\/([^/]+)\/([^/]+)\//i);
+    const vcdMatch = sourceVcd.match(/\/wave_reports\/([^/]+)\/([^/]+)(?:\/([^/]+))?\//i);
     if (vcdMatch) {
       return {
         bucket: vcdMatch[1],
-        caseId: vcdMatch[2],
+        caseId: vcdMatch[3] ? `${vcdMatch[2]}/${vcdMatch[3]}` : vcdMatch[2],
+      };
+    }
+    if (manifest.bucket && manifest.caseId) {
+      return {
+        bucket: String(manifest.bucket),
+        caseId: String(manifest.caseId),
       };
     }
     return null;
+  }
+
+  function syntheticCaseEntry(key) {
+    if (!key || !key.bucket || !key.caseId) {
+      return null;
+    }
+    return {
+      bucket: key.bucket,
+      caseId: key.caseId,
+      label: `${key.bucket} / ${key.caseId}`,
+      description: currentSourceDescription(),
+      url: window.location.pathname,
+      current: true,
+      synthetic: true,
+    };
   }
 
   function currentCaseEntry() {
@@ -1087,6 +1115,7 @@
       if (matched) {
         return matched;
       }
+      return syntheticCaseEntry(currentKey);
     }
     return caseCatalogEntries().find((entry) => entry.current) || caseCatalogEntries()[0] || null;
   }
@@ -1101,15 +1130,31 @@
     return current ? (current.description || current.profileName || current.label || "") : "";
   }
 
+  function currentSourceDescription() {
+    const meta = manifest.meta || {};
+    const parts = [];
+    if (meta.sourceVcd) {
+      parts.push(String(meta.sourceVcd).split("/").slice(-3).join("/"));
+    }
+    if (Array.isArray(meta.selectedFrames) && meta.selectedFrames.length) {
+      parts.push(`frames ${meta.selectedFrames.map((frame) => "F" + frame).join(", ")}`);
+    }
+    return parts.join(" | ");
+  }
+
   function renderCaseOptions() {
     const groups = new Map();
-    caseCatalogEntries().forEach((entry) => {
+    const current = currentCaseEntry();
+    const entries = caseCatalogEntries().slice();
+    if (current && current.synthetic) {
+      entries.push(current);
+    }
+    entries.forEach((entry) => {
       if (!groups.has(entry.bucket)) {
         groups.set(entry.bucket, []);
       }
       groups.get(entry.bucket).push(entry);
     });
-    const current = currentCaseEntry();
     return Array.from(groups.entries()).map(([bucket, entries]) => `
       <optgroup label="${escapeHtml(bucket)}">
         ${entries.map((entry) => `<option value="${escapeHtml(entry.url || "")}" ${current && current.bucket === entry.bucket && current.caseId === entry.caseId ? "selected" : ""}>${escapeHtml(entry.caseId || entry.label || "")}</option>`).join("")}
