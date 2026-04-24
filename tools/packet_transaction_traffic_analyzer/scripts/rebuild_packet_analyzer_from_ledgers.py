@@ -939,6 +939,18 @@ def count_kinds(all_packets: Iterable[dict]) -> dict[str, int]:
     return counts
 
 
+def selected_frames_from_bundle(bundle_meta: dict, fallback_frame_ids: list[int]) -> list[int]:
+    frame_window = bundle_meta.get("frame_window") or {}
+    try:
+        frame_start = int(frame_window["frame_start"])
+        frame_count = int(frame_window["frame_count"])
+    except (KeyError, TypeError, ValueError):
+        return fallback_frame_ids
+    if frame_count <= 0:
+        return fallback_frame_ids
+    return list(range(frame_start, frame_start + frame_count))
+
+
 def parse_out_dir_case_key(out_dir: Path) -> tuple[str, str]:
     case_dir = out_dir.parent
     return (case_dir.parent.name, case_dir.name)
@@ -1105,6 +1117,7 @@ def rebuild_case(case_dir: Path) -> Path:
 
     bundle_packets = all_lane_packets + global_packets
     frame_ids = sorted({packet["frameId"] for packet in bundle_packets if packet["rowType"] == "frame" and packet["frameId"] is not None})
+    selected_frame_ids = selected_frames_from_bundle(bundle_meta, frame_ids)
     case_key = parse_out_dir_case_key(out_dir)
     source_vcd = (case_dir / ((bundle_meta.get("artifacts") or {}).get("vcd") or "")).resolve()
     source_id = f"{case_key[0]}/{case_key[1]}"
@@ -1144,9 +1157,9 @@ def rebuild_case(case_dir: Path) -> Path:
             "subtitle": "Packet Transaction Traffic Analyzer",
             "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
             "sourceVcd": str(source_vcd),
-            "frameStart": min(frame_ids) if frame_ids else 0,
-            "frameCount": len(frame_ids),
-            "selectedFrames": frame_ids,
+            "frameStart": selected_frame_ids[0] if selected_frame_ids else 0,
+            "frameCount": len(selected_frame_ids),
+            "selectedFrames": selected_frame_ids,
             "defaultLane": -1,
             "defaultDecodeMode": "mu3e-spec",
             "referenceVideoTitle": "Teledyne LeCroy Voyager USB 3.0 Analyzer packet display workflow",
