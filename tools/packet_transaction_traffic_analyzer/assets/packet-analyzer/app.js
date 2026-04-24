@@ -17,7 +17,7 @@
   const loadedScripts = new Set();
   const rowMap = new Map();
   const waveChunkCache = new Map();
-  const WAVE_VISIBLE_SLOT_STEPS = [8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512];
+  const WAVE_VISIBLE_SLOT_STEPS = [8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 12288, 16384];
   const STRUCTURAL_RENDER_INTENTS = new Set([
     "row-toggle",
     "surface-switch",
@@ -111,6 +111,8 @@
   let scrollbarSyncRaf = 0;
   let activeWaveLinkKey = "";
   let scrollDragState = null;
+  let waveRangeDragState = null;
+  let suppressNextWaveClick = false;
   let uiTransitionToken = 0;
   let waveSelectionRequestToken = 0;
 
@@ -460,6 +462,7 @@
           sectionFilter: state.sectionFilter,
           availableSections: availableSections().map((section) => section.id),
           waveSourceId: state.waveSourceId,
+          waveViewport: currentWaveViewportDebugState(),
           viewTab: state.viewTab,
           specMode: state.specMode,
           detailsRadix: state.detailsRadix,
@@ -1479,6 +1482,64 @@
     };
   }
 
+  function packetCycleBounds(packet) {
+    if (!packet) {
+      return null;
+    }
+    const startCandidates = [packet.startCycle, packet.cycle]
+      .map((value) => Number(value))
+      .filter(Number.isFinite);
+    const endCandidates = [packet.endCycle, packet.startCycle, packet.cycle]
+      .map((value) => Number(value))
+      .filter(Number.isFinite);
+    if (!startCandidates.length || !endCandidates.length) {
+      return null;
+    }
+    return {
+      cycleStart: Math.min(...startCandidates),
+      cycleEnd: Math.max(...endCandidates),
+    };
+  }
+
+  function selectedWaveCycleBounds() {
+    const selectedFrames = new Set(((manifest.meta && manifest.meta.selectedFrames) || [])
+      .map((value) => String(value)));
+    if (!selectedFrames.size) {
+      return null;
+    }
+    const matches = ((manifest.meta && manifest.meta.globalPackets) || [])
+      .filter((packet) => selectedFrames.has(String(packet.frameId)) && (packet.rowType === "frame" || packet.kindFamily === "frame"))
+      .map(packetCycleBounds)
+      .filter(Boolean);
+    if (!matches.length) {
+      return null;
+    }
+    return {
+      cycleStart: Math.min(...matches.map((item) => item.cycleStart)),
+      cycleEnd: Math.max(...matches.map((item) => item.cycleEnd)),
+    };
+  }
+
+  function intersectCycleBounds(left, right) {
+    if (!left || !right) {
+      return null;
+    }
+    const cycleStart = Math.max(left.cycleStart, right.cycleStart);
+    const cycleEnd = Math.min(left.cycleEnd, right.cycleEnd);
+    return cycleEnd >= cycleStart ? { cycleStart: cycleStart, cycleEnd: cycleEnd } : null;
+  }
+
+  function focusedWaveCycleBounds(bounds) {
+    const selected = selectedWaveCycleBounds();
+    return intersectCycleBounds(selected, bounds) || bounds;
+  }
+
+  function autoWaveVisibleSlots(panel, targetSpan, slotCount) {
+    const defaultVisible = Number(panel && panel.defaultVisibleSlots) || 16;
+    const padded = Math.ceil(Math.max(1, Number(targetSpan) || defaultVisible) * 1.12) + 8;
+    return clampWaveVisibleSlots(panel || { defaultVisibleSlots: defaultVisible }, Math.max(defaultVisible, padded), slotCount);
+  }
+
   function sharedWaveStateKey() {
     const source = waveSources()[0];
     return source ? String(source.id) : "default";
@@ -1497,10 +1558,14 @@
     }
     const span = Math.max(1, bounds.cycleEnd - bounds.cycleStart + 1);
     const requestedVisible = Math.max(...panels.map((panel) => Number(panel.defaultVisibleSlots) || 16), 16);
+    const focusBounds = focusedWaveCycleBounds(bounds);
+    const focusSpan = Math.max(1, focusBounds.cycleEnd - focusBounds.cycleStart + 1);
+    const visibleSlots = autoWaveVisibleSlots({ defaultVisibleSlots: requestedVisible }, focusSpan, span);
+    const focusCenter = focusBounds.cycleStart + Math.floor(focusSpan / 2);
     return {
       sourceId: sharedWaveStateKey(),
-      cycleStart: bounds.cycleStart,
-      visibleSlots: clampWaveVisibleSlots({ defaultVisibleSlots: requestedVisible }, requestedVisible, span),
+      cycleStart: focusCenter - Math.floor(visibleSlots / 2),
+      visibleSlots: visibleSlots,
       minCycle: bounds.cycleStart,
       maxCycle: bounds.cycleEnd,
     };
@@ -1541,10 +1606,41 @@
   }
 
   function defaultWavePanelState(panel) {
-    return {
+    const fallback = {
       chunkIndex: 0,
       slotOffset: 0,
       visibleSlots: panel.defaultVisibleSlots || 16,
+    };
+    const bounds = wavePanelsCycleBounds([panel]);
+    if (!bounds || !panel || !Array.isArray(panel.chunks) || !panel.chunks.length) {
+      return fallback;
+    }
+    const focusBounds = focusedWaveCycleBounds(bounds);
+    const focusSpan = Math.max(1, focusBounds.cycleEnd - focusBounds.cycleStart + 1);
+    const focusCenter = focusBounds.cycleStart + Math.floor(focusSpan / 2);
+    let chunkIndex = panel.chunks.findIndex((chunk) => {
+      const chunkStart = Number(chunk.cycleStart);
+      const chunkEnd = Number(chunk.cycleEnd);
+      return Number.isFinite(chunkStart) && Number.isFinite(chunkEnd) && focusCenter >= chunkStart && focusCenter <= chunkEnd;
+    });
+    if (chunkIndex === -1) {
+      chunkIndex = panel.chunks.findIndex((chunk) => !!intersectCycleBounds(focusBounds, {
+        cycleStart: Number(chunk.cycleStart),
+        cycleEnd: Number(chunk.cycleEnd),
+      }));
+    }
+    if (chunkIndex === -1) {
+      chunkIndex = 0;
+    }
+    const chunkMeta = panel.chunks[chunkIndex];
+    const slotCount = chunkSlotCount(chunkMeta);
+    const visibleSlots = autoWaveVisibleSlots(panel, focusSpan, slotCount);
+    const chunkStart = Number(chunkMeta.cycleStart);
+    const focusSlot = Number.isFinite(chunkStart) ? focusCenter - chunkStart : 0;
+    return {
+      chunkIndex: chunkIndex,
+      slotOffset: focusSlot - Math.floor(visibleSlots / 2),
+      visibleSlots: visibleSlots,
     };
   }
 
@@ -1576,6 +1672,16 @@
     return Array.from(new Set(capped)).sort((left, right) => left - right);
   }
 
+  function nearestWaveChoiceIndex(choices, visibleSlots) {
+    if (!choices || !choices.length) {
+      return 0;
+    }
+    const target = Number(visibleSlots) || choices[0];
+    return choices.reduce((bestIndex, value, index) => {
+      return Math.abs(value - target) < Math.abs(choices[bestIndex] - target) ? index : bestIndex;
+    }, 0);
+  }
+
   function clampWaveVisibleSlots(panel, requested, slotCount) {
     const choices = waveSlotChoices(slotCount);
     const target = Math.max(1, Math.min(slotCount, Number(requested) || panel.defaultVisibleSlots || slotCount));
@@ -1595,6 +1701,225 @@
     next.visibleSlots = clampWaveVisibleSlots(panel, next.visibleSlots, slotCount);
     next.slotOffset = Math.max(0, Math.min(Math.max(0, slotCount - next.visibleSlots), Number(next.slotOffset) || 0));
     return next;
+  }
+
+  function waveRangeControlKey(panelId) {
+    return panelId ? String(panelId) : "shared";
+  }
+
+  function sharedWaveViewportDescriptor(sharedWave) {
+    if (!usesSharedWaveViewport()) {
+      return null;
+    }
+    const panels = visibleWavePanels();
+    const normalized = normalizeSharedWaveState(panels, sharedWave || currentSharedWaveState());
+    const span = Math.max(1, normalized.maxCycle - normalized.minCycle + 1);
+    return {
+      mode: "shared",
+      panelId: "",
+      controlKey: waveRangeControlKey(""),
+      minCycle: normalized.minCycle,
+      maxCycle: normalized.maxCycle,
+      cycleStart: normalized.cycleStart,
+      cycleEnd: Math.min(normalized.maxCycle, normalized.cycleStart + normalized.visibleSlots - 1),
+      visibleSlots: normalized.visibleSlots,
+      choices: waveSlotChoices(span),
+    };
+  }
+
+  function panelWaveViewportDescriptor(panel, panelState) {
+    if (!panel) {
+      return null;
+    }
+    const waveState = normalizeWavePanelState(panel, panelState || state.wavePanelState[panel.panelId]);
+    const chunkMeta = panel.chunks[waveState.chunkIndex];
+    const slotCount = chunkSlotCount(chunkMeta);
+    const panelBounds = wavePanelsCycleBounds([panel]) || { cycleStart: 0, cycleEnd: Math.max(0, slotCount - 1) };
+    const chunkStart = Number(chunkMeta && chunkMeta.cycleStart);
+    const viewStart = Number.isFinite(chunkStart) ? chunkStart + waveState.slotOffset : waveState.slotOffset;
+    return {
+      mode: "panel",
+      panelId: panel.panelId,
+      controlKey: waveRangeControlKey(panel.panelId),
+      minCycle: panelBounds.cycleStart,
+      maxCycle: panelBounds.cycleEnd,
+      cycleStart: viewStart,
+      cycleEnd: Math.min(panelBounds.cycleEnd, viewStart + waveState.visibleSlots - 1),
+      visibleSlots: waveState.visibleSlots,
+      choices: waveSlotChoices(slotCount),
+      chunkIndex: waveState.chunkIndex,
+    };
+  }
+
+  function waveViewportDescriptorForPanelId(panelId) {
+    if (usesSharedWaveViewport()) {
+      return sharedWaveViewportDescriptor(currentSharedWaveState());
+    }
+    const panel = findWavePanel(panelId);
+    return panel ? panelWaveViewportDescriptor(panel, state.wavePanelState[panel.panelId]) : null;
+  }
+
+  function currentWaveViewportDebugState() {
+    if (!hasWaveSurface()) {
+      return null;
+    }
+    if (usesSharedWaveViewport()) {
+      return sharedWaveViewportDescriptor(currentSharedWaveState());
+    }
+    return visibleWavePanels().map((panel) => panelWaveViewportDescriptor(panel, state.wavePanelState[panel.panelId]));
+  }
+
+  function normalizeRequestedCycleRange(cycleStart, cycleEnd) {
+    let start = Math.round(Number(cycleStart));
+    let end = Math.round(Number(cycleEnd));
+    if (!Number.isFinite(start) || !Number.isFinite(end)) {
+      return null;
+    }
+    if (end < start) {
+      const tmp = start;
+      start = end;
+      end = tmp;
+    }
+    return { cycleStart: start, cycleEnd: end };
+  }
+
+  function clampCycleRangeToBounds(range, bounds) {
+    if (!range || !bounds) {
+      return null;
+    }
+    const cycleStart = Math.max(bounds.cycleStart, Math.min(bounds.cycleEnd, range.cycleStart));
+    const cycleEnd = Math.max(bounds.cycleStart, Math.min(bounds.cycleEnd, range.cycleEnd));
+    return normalizeRequestedCycleRange(cycleStart, cycleEnd);
+  }
+
+  function findWaveChunkIndexForCycle(panel, cycleStart, cycleEnd) {
+    const range = normalizeRequestedCycleRange(cycleStart, cycleEnd);
+    if (!panel || !range || !Array.isArray(panel.chunks) || !panel.chunks.length) {
+      return 0;
+    }
+    const center = range.cycleStart + Math.floor((range.cycleEnd - range.cycleStart) / 2);
+    let index = panel.chunks.findIndex((chunk) => {
+      const chunkStart = Number(chunk.cycleStart);
+      const chunkEnd = Number(chunk.cycleEnd);
+      return Number.isFinite(chunkStart) && Number.isFinite(chunkEnd) && center >= chunkStart && center <= chunkEnd;
+    });
+    if (index !== -1) {
+      return index;
+    }
+    index = panel.chunks.findIndex((chunk) => intersectCycleBounds(range, {
+      cycleStart: Number(chunk.cycleStart),
+      cycleEnd: Number(chunk.cycleEnd),
+    }));
+    if (index !== -1) {
+      return index;
+    }
+    const firstStart = Number(panel.chunks[0].cycleStart);
+    const lastEnd = Number(panel.chunks[panel.chunks.length - 1].cycleEnd);
+    if (Number.isFinite(firstStart) && center < firstStart) {
+      return 0;
+    }
+    if (Number.isFinite(lastEnd) && center > lastEnd) {
+      return panel.chunks.length - 1;
+    }
+    return 0;
+  }
+
+  function applyWaveRange(panelId, cycleStart, cycleEnd) {
+    const requested = normalizeRequestedCycleRange(cycleStart, cycleEnd);
+    if (!requested) {
+      return false;
+    }
+    if (usesSharedWaveViewport()) {
+      const panels = visibleWavePanels();
+      const sharedWave = normalizeSharedWaveState(panels, currentSharedWaveState());
+      const bounds = { cycleStart: sharedWave.minCycle, cycleEnd: sharedWave.maxCycle };
+      const range = clampCycleRangeToBounds(requested, bounds);
+      if (!range) {
+        return false;
+      }
+      const span = Math.max(1, sharedWave.maxCycle - sharedWave.minCycle + 1);
+      const requestedVisible = Math.max(1, range.cycleEnd - range.cycleStart + 1);
+      const visibleSlots = clampWaveVisibleSlots({ defaultVisibleSlots: requestedVisible }, requestedVisible, span);
+      const center = range.cycleStart + Math.floor(requestedVisible / 2);
+      sharedWave.visibleSlots = visibleSlots;
+      sharedWave.cycleStart = center - Math.floor(visibleSlots / 2);
+      state.sharedWaveState[sharedWaveStateKey()] = normalizeSharedWaveState(panels, sharedWave);
+      scheduleWaveRender();
+      return true;
+    }
+    const panel = findWavePanel(panelId);
+    if (!panel) {
+      return false;
+    }
+    const panelBounds = wavePanelsCycleBounds([panel]);
+    const range = clampCycleRangeToBounds(requested, panelBounds);
+    if (!range) {
+      return false;
+    }
+    const chunkIndex = findWaveChunkIndexForCycle(panel, range.cycleStart, range.cycleEnd);
+    const chunkMeta = panel.chunks[chunkIndex];
+    const slotCount = chunkSlotCount(chunkMeta);
+    const requestedVisible = Math.max(1, range.cycleEnd - range.cycleStart + 1);
+    const visibleSlots = clampWaveVisibleSlots(panel, requestedVisible, slotCount);
+    const chunkStart = Number(chunkMeta.cycleStart);
+    const center = range.cycleStart + Math.floor(requestedVisible / 2);
+    const slotOffset = Number.isFinite(chunkStart) ? center - chunkStart - Math.floor(visibleSlots / 2) : 0;
+    state.wavePanelState[panel.panelId] = normalizeWavePanelState(panel, {
+      chunkIndex: chunkIndex,
+      slotOffset: slotOffset,
+      visibleSlots: visibleSlots,
+    });
+    scheduleWaveRender();
+    return true;
+  }
+
+  function applyWaveVisibleSlots(panelId, requestedVisibleSlots, centerCycle) {
+    const slots = Math.max(1, Math.round(Number(requestedVisibleSlots) || 1));
+    const descriptor = waveViewportDescriptorForPanelId(panelId);
+    if (!descriptor) {
+      return false;
+    }
+    const center = Number.isFinite(Number(centerCycle))
+      ? Number(centerCycle)
+      : descriptor.cycleStart + Math.floor(descriptor.visibleSlots / 2);
+    return applyWaveRange(panelId, center - Math.floor(slots / 2), center + Math.max(0, slots - Math.floor(slots / 2) - 1));
+  }
+
+  function resetWaveViewport(panelId) {
+    if (usesSharedWaveViewport()) {
+      const panels = visibleWavePanels();
+      state.sharedWaveState[sharedWaveStateKey()] = normalizeSharedWaveState(panels, defaultSharedWaveState(panels));
+      scheduleWaveRender();
+      return true;
+    }
+    const panel = findWavePanel(panelId);
+    if (!panel) {
+      return false;
+    }
+    state.wavePanelState[panel.panelId] = normalizeWavePanelState(panel, defaultWavePanelState(panel));
+    scheduleWaveRender();
+    return true;
+  }
+
+  function waveRangeControlsForPanel(panelId) {
+    return root.querySelector(`[data-wave-controls="${CSS.escape(waveRangeControlKey(panelId))}"]`);
+  }
+
+  function applyWaveRangeFromControls(panelId) {
+    const controls = waveRangeControlsForPanel(panelId);
+    if (!controls) {
+      return false;
+    }
+    const startInput = controls.querySelector("[data-wave-range-start]");
+    const endInput = controls.querySelector("[data-wave-range-end]");
+    if (!startInput || !endInput) {
+      return false;
+    }
+    return applyWaveRange(panelId, startInput.value, endInput.value);
+  }
+
+  function applyWaveZoomLevel(panelId, value) {
+    return applyWaveVisibleSlots(panelId, Number(value));
   }
 
   function ensureWaveState() {
@@ -2060,7 +2385,7 @@
       </div>
       ${waveSources().length > 1 ? `
       <div class="toolbar-group">
-        <span class="toolbar-label">VCD</span>
+        <span class="toolbar-label">Interface</span>
         <select class="tool-select" data-action="source-change">${sourceOptions}</select>
       </div>` : ""}
       ${availableFrameIds().length > 1 ? `
@@ -2146,12 +2471,15 @@
     if (!panels.length) {
       return "";
     }
+    const sources = waveSources();
+    const sharedWave = usesSharedWaveViewport() ? currentSharedWaveState() : null;
     return `
       <section class="wave-surface" data-anim-key="primary-surface" data-anim-role="surface">
         <div class="panel-title wave-title">
           <span>${escapeHtml(waveSurfaceLabel())}</span>
           <span class="hint">${escapeHtml(waveSurfaceHint())}</span>
         </div>
+        ${renderWaveSurfaceControls(sources, sharedWave)}
         <div class="scroll-shell wave-panel-stack-shell">
           <div class="wave-panel-stack" data-scroll-sync="wave">
             ${panels.map((panel) => renderWavePanelShell(panel)).join("")}
@@ -2162,16 +2490,49 @@
     `;
   }
 
+  function renderWaveSurfaceControls(sources, sharedWave) {
+    if ((!sources || sources.length <= 1) && !sharedWave) {
+      return '<div class="wave-source-bar wave-source-bar-empty" aria-hidden="true"></div>';
+    }
+    return `
+      <div class="wave-source-bar">
+        ${sources && sources.length > 1 ? renderWaveSourceSelector(sources) : ""}
+        ${sharedWave ? renderWaveViewportControls("", sharedWaveViewportDescriptor(sharedWave)) : ""}
+      </div>
+    `;
+  }
+
   function renderWaveSourceSelector(sources) {
     const options = sources
       .map((source) => `<option value="${escapeHtml(source.id)}" ${source.id === state.waveSourceId ? "selected" : ""}>${escapeHtml(source.label)}</option>`)
       .join("");
     return `
-      <div class="wave-source-bar">
-        <div class="toolbar-group">
-          <span class="toolbar-label">VCD</span>
-          <select class="tool-select" data-action="wave-source-change">${options}</select>
-        </div>
+      <div class="toolbar-group">
+        <span class="toolbar-label">Interface</span>
+        <select class="tool-select" data-action="wave-source-change">${options}</select>
+      </div>
+    `;
+  }
+
+  function renderWaveViewportControls(panelId, descriptor) {
+    if (!descriptor) {
+      return "";
+    }
+    const choices = descriptor.choices && descriptor.choices.length ? descriptor.choices : [descriptor.visibleSlots || 16];
+    const zoomOptions = choices
+      .map((choice) => `<option value="${escapeHtml(String(choice))}" ${choice === descriptor.visibleSlots ? "selected" : ""}>${escapeHtml(String(choice))} cyc</option>`)
+      .join("");
+    const panelAttr = escapeHtml(panelId || "");
+    return `
+      <div class="wave-range-controls" data-wave-controls="${escapeHtml(descriptor.controlKey)}">
+        <span class="toolbar-label">Cycles</span>
+        <input class="tool-input wave-cycle-input" type="number" inputmode="numeric" data-wave-range-start data-panel-id="${panelAttr}" min="${escapeHtml(String(descriptor.minCycle))}" max="${escapeHtml(String(descriptor.maxCycle))}" value="${escapeHtml(String(descriptor.cycleStart))}" aria-label="Wave cycle start">
+        <span class="wave-range-separator">..</span>
+        <input class="tool-input wave-cycle-input" type="number" inputmode="numeric" data-wave-range-end data-panel-id="${panelAttr}" min="${escapeHtml(String(descriptor.minCycle))}" max="${escapeHtml(String(descriptor.maxCycle))}" value="${escapeHtml(String(descriptor.cycleEnd))}" aria-label="Wave cycle end">
+        <button class="tool-button subtle" type="button" data-action="wave-range-apply" data-panel-id="${panelAttr}">Apply</button>
+        <button class="tool-button subtle" type="button" data-action="wave-range-auto" data-panel-id="${panelAttr}">Auto</button>
+        <span class="toolbar-label">Zoom</span>
+        <select class="tool-select wave-zoom-select" data-action="wave-zoom-level" data-panel-id="${panelAttr}">${zoomOptions}</select>
       </div>
     `;
   }
@@ -2233,6 +2594,7 @@
             <button class="tool-button subtle" type="button" data-action="wave-zoom-in" data-panel-id="${escapeHtml(panel.panelId)}">+</button>
           </div>
         </div>
+        ${sharedWave ? "" : renderWaveViewportControls(panel.panelId, panelWaveViewportDescriptor(panel, waveState))}
         ${renderWaveLegend(panel)}
         <div class="wave-display-wrap">
           <div class="wave-display" id="WaveDrom_Display_${escapeHtml(String(panel.renderIndex))}" data-wave-panel-display="${escapeHtml(panel.panelId)}">
@@ -2265,6 +2627,7 @@
             <button class="tool-button subtle" type="button" data-action="wave-zoom-in" data-panel-id="${escapeHtml(panel.panelId)}">+</button>
           </div>
         </div>
+        ${sharedWave ? "" : renderWaveViewportControls(panel.panelId, panelWaveViewportDescriptor(panel, waveState))}
         ${renderWaveLegend(panel)}
         <div class="wave-display-wrap">
           <div class="wave-display" id="WaveDrom_Display_${escapeHtml(String(panel.renderIndex))}" data-wave-panel-display="${escapeHtml(panel.panelId)}">
@@ -2767,6 +3130,10 @@
   }
 
   function onClick(event) {
+    if (suppressNextWaveClick && event.target.closest("[data-wave-panel-display]")) {
+      suppressNextWaveClick = false;
+      return;
+    }
     const waveLinkEl = event.target.closest("[data-wave-link-key][data-wave-target-row-id]");
     if (waveLinkEl) {
       const targetRowId = waveLinkEl.getAttribute("data-wave-target-row-id") || "";
@@ -2951,6 +3318,18 @@
       requestWaveSelectionFocus(packet.rowId, nextWordId);
       return;
     }
+    if (action === "wave-range-apply") {
+      if (applyWaveRangeFromControls(panelId)) {
+        recordAction("wave-range-applied", panelId || "shared");
+      }
+      return;
+    }
+    if (action === "wave-range-auto") {
+      if (resetWaveViewport(panelId)) {
+        recordAction("wave-range-auto", panelId || "shared");
+      }
+      return;
+    }
     if (action === "select-row") {
       if (value) {
         if (rowMap.has(value)) {
@@ -2988,9 +3367,9 @@
           sharedWave.visibleSlots = nextVisible;
           sharedWave.cycleStart = center - Math.floor(nextVisible / 2);
         } else {
-          const requestedVisible = Math.max(...panels.map((panel) => Number(panel.defaultVisibleSlots) || 16), 16);
-          sharedWave.visibleSlots = clampWaveVisibleSlots({ defaultVisibleSlots: requestedVisible }, requestedVisible, span);
-          sharedWave.cycleStart = sharedWave.minCycle;
+          state.sharedWaveState[sharedWaveStateKey()] = normalizeSharedWaveState(panels, defaultSharedWaveState(panels));
+          scheduleWaveRender();
+          return;
         }
         state.sharedWaveState[sharedWaveStateKey()] = normalizeSharedWaveState(panels, sharedWave);
         scheduleWaveRender();
@@ -3032,8 +3411,9 @@
         waveState.visibleSlots = choices[Math.max(0, idx - 1)];
         waveState.slotOffset = Math.min(waveState.slotOffset, Math.max(0, slotCount - waveState.visibleSlots));
       } else {
-        waveState.visibleSlots = clampWaveVisibleSlots(panel, panel.defaultVisibleSlots || slotCount, slotCount);
-        waveState.slotOffset = 0;
+        state.wavePanelState[panelId] = normalizeWavePanelState(panel, defaultWavePanelState(panel));
+        scheduleWaveRender();
+        return;
       }
       state.wavePanelState[panelId] = normalizeWavePanelState(panel, waveState);
       scheduleWaveRender();
@@ -3068,6 +3448,12 @@
       render("source-change");
       if (state.surfaceMode === "wave" && state.frameFilter) {
         void focusWavePanelsForFrame(state.frameFilter);
+      }
+      return;
+    }
+    if (action === "wave-zoom-level") {
+      if (applyWaveZoomLevel(selectEl.getAttribute("data-panel-id") || "", selectEl.value)) {
+        recordAction("wave-zoom-level", selectEl.value);
       }
       return;
     }
@@ -3201,6 +3587,10 @@
       }
       return;
     }
+    const waveDisplay = event.target.closest("[data-wave-panel-display]");
+    if (event.button === 0 && waveDisplay && !event.target.closest(".context-menu, input, select, button")) {
+      startWaveRangeDrag(event, waveDisplay);
+    }
     const waveTarget = event.target.closest("[data-wave-target-row-id], [data-wave-row-id]");
     if (waveTarget) {
       rememberWaveScrollForInteraction();
@@ -3236,6 +3626,10 @@
   }
 
   function onWindowPointerMove(event) {
+    if (waveRangeDragState) {
+      updateWaveRangeDrag(event);
+      return;
+    }
     if (!scrollDragState) {
       return;
     }
@@ -3250,7 +3644,11 @@
     scrollFromRailPosition(scrollDragState.scrollId, scrollDragState.axis || "y", pointerOffset);
   }
 
-  function onWindowPointerUp() {
+  function onWindowPointerUp(event) {
+    if (waveRangeDragState) {
+      finishWaveRangeDrag(event);
+      return;
+    }
     if (!scrollDragState) {
       return;
     }
@@ -3295,18 +3693,148 @@
     }
   }
 
+  function wavePanelIdFromElement(element) {
+    const panel = element && element.closest ? element.closest(".wave-panel[data-panel-id]") : null;
+    return panel ? (panel.getAttribute("data-panel-id") || "") : "";
+  }
+
+  function waveCycleFromDisplayPoint(display, clientX) {
+    if (!display) {
+      return null;
+    }
+    const panelId = display.getAttribute("data-wave-panel-display") || wavePanelIdFromElement(display);
+    const descriptor = waveViewportDescriptorForPanelId(panelId);
+    if (!descriptor) {
+      return null;
+    }
+    const rect = display.getBoundingClientRect();
+    if (!rect.width) {
+      return null;
+    }
+    const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+    const ratio = x / rect.width;
+    const offset = Math.min(Math.max(0, descriptor.visibleSlots - 1), Math.floor(ratio * descriptor.visibleSlots));
+    return {
+      panelId: panelId,
+      cycle: descriptor.cycleStart + offset,
+      x: x,
+      rect: rect,
+      descriptor: descriptor,
+    };
+  }
+
+  function startWaveRangeDrag(event, display) {
+    const point = waveCycleFromDisplayPoint(display, event.clientX);
+    if (!point) {
+      return false;
+    }
+    waveRangeDragState = {
+      display: display,
+      panelId: point.panelId,
+      startX: point.x,
+      currentX: point.x,
+      pointerId: event.pointerId,
+      moved: false,
+    };
+    display.classList.add("wave-drag-armed");
+    document.body.classList.add("wave-range-dragging");
+    return true;
+  }
+
+  function updateWaveRangeDrag(event) {
+    if (!waveRangeDragState) {
+      return false;
+    }
+    const display = waveRangeDragState.display;
+    if (!display || !display.isConnected) {
+      clearWaveRangeDrag();
+      return false;
+    }
+    const point = waveCycleFromDisplayPoint(display, event.clientX);
+    if (!point) {
+      clearWaveRangeDrag();
+      return false;
+    }
+    waveRangeDragState.currentX = point.x;
+    if (Math.abs(waveRangeDragState.currentX - waveRangeDragState.startX) >= 4) {
+      waveRangeDragState.moved = true;
+      event.preventDefault();
+      renderWaveRangeDragOverlay(display, waveRangeDragState.startX, waveRangeDragState.currentX);
+    }
+    return true;
+  }
+
+  function finishWaveRangeDrag(event) {
+    if (!waveRangeDragState) {
+      return false;
+    }
+    const display = waveRangeDragState.display;
+    const moved = waveRangeDragState.moved;
+    const startPoint = display ? waveCycleFromDisplayPoint(display, display.getBoundingClientRect().left + waveRangeDragState.startX) : null;
+    const endPoint = display ? waveCycleFromDisplayPoint(display, event.clientX) : null;
+    const panelId = waveRangeDragState.panelId;
+    clearWaveRangeDrag();
+    if (!moved || !startPoint || !endPoint || Math.abs(startPoint.x - endPoint.x) < 8) {
+      return false;
+    }
+    suppressNextWaveClick = true;
+    const applied = applyWaveRange(panelId, startPoint.cycle, endPoint.cycle);
+    if (applied) {
+      recordAction("wave-drag-zoom", `${Math.min(startPoint.cycle, endPoint.cycle)}..${Math.max(startPoint.cycle, endPoint.cycle)}`);
+    }
+    return applied;
+  }
+
+  function renderWaveRangeDragOverlay(display, startX, currentX) {
+    let overlay = display.querySelector(".wave-range-drag");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "wave-range-drag";
+      display.appendChild(overlay);
+    }
+    const left = Math.min(startX, currentX);
+    const width = Math.max(1, Math.abs(currentX - startX));
+    overlay.style.left = `${left}px`;
+    overlay.style.width = `${width}px`;
+  }
+
+  function clearWaveRangeDrag() {
+    if (waveRangeDragState && waveRangeDragState.display) {
+      waveRangeDragState.display.classList.remove("wave-drag-armed");
+      const overlay = waveRangeDragState.display.querySelector(".wave-range-drag");
+      if (overlay) {
+        overlay.remove();
+      }
+    }
+    document.body.classList.remove("wave-range-dragging");
+    waveRangeDragState = null;
+  }
+
   function onContextMenu(event) {
     const waveBeatEl = event.target.closest("[data-wave-target-row-id]");
     if (waveBeatEl) {
       event.preventDefault();
+      const panelId = waveBeatEl.getAttribute("data-wave-panel-id") || wavePanelIdFromElement(waveBeatEl);
+      const cycle = Number(waveBeatEl.getAttribute("data-wave-cycle"));
       openWaveContextMenu(
         event.clientX,
         event.clientY,
         waveBeatEl.getAttribute("data-wave-target-row-id") || "",
         waveBeatEl.getAttribute("data-wave-tooltip") || "",
         waveBeatEl.getAttribute("data-wave-word-id") || "",
-        waveBeatEl.getAttribute("data-wave-trace-row-id") || ""
+        waveBeatEl.getAttribute("data-wave-trace-row-id") || "",
+        panelId,
+        cycle
       );
+      return;
+    }
+    const waveDisplay = event.target.closest("[data-wave-panel-display]");
+    if (waveDisplay) {
+      event.preventDefault();
+      const point = waveCycleFromDisplayPoint(waveDisplay, event.clientX);
+      if (point) {
+        openWaveViewportContextMenu(event.clientX, event.clientY, point.panelId, point.cycle);
+      }
       return;
     }
     const fieldEl = event.target.closest("[data-field-card]");
@@ -3369,7 +3897,9 @@
       event.preventDefault();
       const rowId = annotationEl.getAttribute("data-wave-row-id") || "";
       const tooltip = annotationEl.getAttribute("data-wave-tooltip") || "";
-      openWaveContextMenu(event.clientX, event.clientY, rowId, tooltip, "", rowId);
+      const panelId = annotationEl.getAttribute("data-wave-panel-id") || wavePanelIdFromElement(annotationEl);
+      const cycle = Number(annotationEl.getAttribute("data-wave-cycle"));
+      openWaveContextMenu(event.clientX, event.clientY, rowId, tooltip, "", rowId, panelId, cycle);
       return;
     }
   }
@@ -3398,12 +3928,22 @@
     showContextMenu(x, y);
   }
 
-  function openWaveContextMenu(x, y, rowId, tooltip, wordId, traceRowId) {
-    menuState = { type: "wave", rowId: rowId, tooltip: tooltip, wordId: wordId || "", traceRowId: traceRowId || "" };
+  function openWaveContextMenu(x, y, rowId, tooltip, wordId, traceRowId, panelId, cycle) {
+    const cycleValue = Number(cycle);
+    menuState = {
+      type: "wave",
+      rowId: rowId,
+      tooltip: tooltip,
+      wordId: wordId || "",
+      traceRowId: traceRowId || "",
+      panelId: panelId || "",
+      cycle: Number.isFinite(cycleValue) ? cycleValue : null,
+    };
     const rowExists = !!rowId && rowMap.has(rowId);
     const rowPacket = rowExists ? rowMap.get(rowId) : null;
     const tracePacket = traceRowId && rowMap.has(traceRowId) ? rowMap.get(traceRowId) : null;
     const traceLinkable = !!tracePacket || (!!rowPacket && rowPacket.lane !== -1);
+    const canZoomHere = Number.isFinite(menuState.cycle);
     menuEl.innerHTML = [
       menuTitle("Waveform Link"),
       menuItem("link-row", "Link To Packet Trace", !traceLinkable),
@@ -3411,8 +3951,28 @@
       menuItem("wave-open-details", "Open Decode In Details View", !rowExists),
       menuItem("wave-open-tracker", "Open Decode In Link Tracker", !rowExists),
       menuSeparator(),
+      menuItem("wave-zoom-in-here", "Zoom In Around Cycle", !canZoomHere),
+      menuItem("wave-zoom-out-here", "Zoom Out Around Cycle", !canZoomHere),
+      menuItem("wave-auto-range", "Reset To Auto Range"),
+      menuSeparator(),
       menuItem("wave-show-tooltip", "Show Decode Tooltip"),
       menuItem("wave-zero-time", "Zero Timestamp At Linked Row", !rowExists),
+    ].join("");
+    showContextMenu(x, y);
+  }
+
+  function openWaveViewportContextMenu(x, y, panelId, cycle) {
+    const cycleValue = Number(cycle);
+    menuState = {
+      type: "wave-viewport",
+      panelId: panelId || "",
+      cycle: Number.isFinite(cycleValue) ? cycleValue : null,
+    };
+    menuEl.innerHTML = [
+      menuTitle(Number.isFinite(menuState.cycle) ? `Cycle ${menuState.cycle}` : "Waveform Range"),
+      menuItem("wave-viewport-zoom-in", "Zoom In Around Cycle", !Number.isFinite(menuState.cycle)),
+      menuItem("wave-viewport-zoom-out", "Zoom Out Around Cycle", !Number.isFinite(menuState.cycle)),
+      menuItem("wave-viewport-auto", "Reset To Auto Range"),
     ].join("");
     showContextMenu(x, y);
   }
@@ -3487,6 +4047,8 @@
       handleRowContextAction(action);
     } else if (menuState.type === "wave") {
       handleWaveContextAction(action);
+    } else if (menuState.type === "wave-viewport") {
+      handleWaveViewportContextAction(action);
     }
     closeContextMenu();
   }
@@ -3538,6 +4100,22 @@
   function handleWaveContextAction(action) {
     const rowId = menuState.rowId || "";
     const traceRowId = menuState.traceRowId || "";
+    if (action === "wave-zoom-in-here" || action === "wave-zoom-out-here") {
+      const descriptor = waveViewportDescriptorForPanelId(menuState.panelId || "");
+      if (!descriptor || !Number.isFinite(menuState.cycle)) {
+        return;
+      }
+      const idx = nearestWaveChoiceIndex(descriptor.choices, descriptor.visibleSlots);
+      const nextIdx = action === "wave-zoom-in-here"
+        ? Math.max(0, idx - 1)
+        : Math.min(descriptor.choices.length - 1, idx + 1);
+      applyWaveVisibleSlots(menuState.panelId || "", descriptor.choices[nextIdx], menuState.cycle);
+      return;
+    }
+    if (action === "wave-auto-range") {
+      resetWaveViewport(menuState.panelId || "");
+      return;
+    }
     if (action === "wave-show-tooltip") {
       if (menuState.tooltip) {
         showTooltip(menuState.tooltip, window.innerWidth / 2, 120);
@@ -3585,6 +4163,25 @@
     if (state.surfaceMode === "trace" && packet.lane !== -1) {
       scrollRowIntoView(rowId);
     }
+  }
+
+  function handleWaveViewportContextAction(action) {
+    if (action === "wave-viewport-auto") {
+      resetWaveViewport(menuState.panelId || "");
+      return;
+    }
+    if (action !== "wave-viewport-zoom-in" && action !== "wave-viewport-zoom-out") {
+      return;
+    }
+    const descriptor = waveViewportDescriptorForPanelId(menuState.panelId || "");
+    if (!descriptor || !Number.isFinite(menuState.cycle)) {
+      return;
+    }
+    const idx = nearestWaveChoiceIndex(descriptor.choices, descriptor.visibleSlots);
+    const nextIdx = action === "wave-viewport-zoom-in"
+      ? Math.max(0, idx - 1)
+      : Math.min(descriptor.choices.length - 1, idx + 1);
+    applyWaveVisibleSlots(menuState.panelId || "", descriptor.choices[nextIdx], menuState.cycle);
   }
 
   function handleFieldLinkContextAction(action) {
@@ -4051,12 +4648,12 @@
     if (window.WaveDrom && typeof window.WaveDrom.RenderWaveForm === "function") {
       window.WaveDrom.RenderWaveForm(panel.renderIndex, view.renderJson, "WaveDrom_Display_", false);
       restyleWaveSvg(display.querySelector("svg"), display);
-      renderWaveHotspots(display, view.beatRows, panel);
+      renderWaveHotspots(display, view.beatRows, panel, view.cycleStart);
     } else {
       display.innerHTML = '<div class="wave-render-status">WaveDrom runtime is unavailable.</div>';
     }
-    renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots);
-    renderWaveAnnotations(annotationHost, view.annotations, view.chunkMeta || null, panel, view.visibleSlots);
+    renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart);
+    renderWaveAnnotations(annotationHost, view.annotations, view.chunkMeta || null, panel, view.visibleSlots, view.cycleStart);
   }
 
   async function renderLegacyWavePanel(panel, renderToken, display, status) {
@@ -4081,11 +4678,11 @@
     if (window.WaveDrom && typeof window.WaveDrom.RenderWaveForm === "function") {
       window.WaveDrom.RenderWaveForm(panel.renderIndex, view.renderJson, "WaveDrom_Display_", false);
       restyleWaveSvg(display.querySelector("svg"), display);
-      renderWaveHotspots(display, view.beatRows, panel);
+      renderWaveHotspots(display, view.beatRows, panel, view.cycleStart);
     } else {
       display.innerHTML = '<div class="wave-render-status">WaveDrom runtime is unavailable.</div>';
     }
-    renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots);
+    renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart);
   }
 
   async function buildChunkWaveViewModel(panel, panelState) {
@@ -4997,7 +5594,7 @@
     return tones[group] || tones.header;
   }
 
-  function renderWaveDecodeAxis(host, beatRows, panel, visibleSlots) {
+  function renderWaveDecodeAxis(host, beatRows, panel, visibleSlots, cycleStart) {
     if (!host) {
       return;
     }
@@ -5018,11 +5615,14 @@
         const width = Math.max(2.8, (span / row.slotCount) * 100);
         const tone = waveBeatTone(cell.group);
         const text = displayWaveBeatLabel(cell, slotPixelWidth * span, visibleSlots);
+        const absoluteCycle = Number.isFinite(Number(cycleStart)) ? Number(cycleStart) + (Number(cell.slotStart) || 0) : "";
         return `
           <button
             class="wave-decode-tag ${isWaveCellSelected(cell) ? "wave-link-hover" : ""}"
             type="button"
             data-wave-link-key="${escapeHtml(cell.linkKey)}"
+            data-wave-panel-id="${escapeHtml(panel.panelId || "")}"
+            data-wave-cycle="${escapeHtml(String(absoluteCycle))}"
             data-wave-row-id="${escapeHtml(cell.targetRowId)}"
             data-wave-target-row-id="${escapeHtml(cell.targetRowId)}"
             data-wave-trace-row-id="${escapeHtml(cell.traceRowId || cell.targetRowId)}"
@@ -5043,7 +5643,7 @@
     }
   }
 
-  function renderWaveHotspots(display, beatRows, panel) {
+  function renderWaveHotspots(display, beatRows, panel, cycleStart) {
     if (!display) {
       return;
     }
@@ -5071,7 +5671,7 @@
       }
       row.cells.forEach((cell) => {
         for (let slot = cell.slotStart; slot <= cell.slotEnd; slot += 1) {
-          const hotspot = cloneWaveBeatUse(sourceUses[slot], cell);
+          const hotspot = cloneWaveBeatUse(sourceUses[slot], cell, panel, cycleStart);
           if (hotspot) {
             layer.appendChild(hotspot);
           }
@@ -5121,7 +5721,7 @@
       .filter((items) => items.length);
   }
 
-  function cloneWaveBeatUse(sourceUse, cell) {
+  function cloneWaveBeatUse(sourceUse, cell, panel, cycleStart) {
     if (!sourceUse) {
       return null;
     }
@@ -5143,6 +5743,10 @@
     });
     hotspot.setAttribute("class", `wave-beat-hotspot wave-beat-${cell.group}${isWaveCellSelected(cell) ? " wave-link-hover" : ""}`);
     hotspot.setAttribute("data-wave-link-key", cell.linkKey);
+    hotspot.setAttribute("data-wave-panel-id", panel && panel.panelId ? panel.panelId : "");
+    if (Number.isFinite(Number(cycleStart))) {
+      hotspot.setAttribute("data-wave-cycle", String(Number(cycleStart) + (Number(cell.slotStart) || 0)));
+    }
     hotspot.setAttribute("data-wave-row-id", cell.targetRowId);
     hotspot.setAttribute("data-wave-target-row-id", cell.targetRowId);
     hotspot.setAttribute("data-wave-trace-row-id", cell.traceRowId || cell.targetRowId);
@@ -5151,7 +5755,7 @@
     return hotspot;
   }
 
-  function renderWaveAnnotations(host, annotations, chunkMeta, panel, visibleSlots) {
+  function renderWaveAnnotations(host, annotations, chunkMeta, panel, visibleSlots, cycleStart) {
     if (!annotations.length) {
       host.innerHTML = '<div class="wave-annotation-empty">No row-linked annotations in this window.</div>';
       return;
@@ -5171,10 +5775,13 @@
           const left = ((annotation.slotStart || 0) / maxSlot) * 100;
           const span = Math.max(1, (annotation.slotEnd || 0) - (annotation.slotStart || 0) + 1);
           const width = Math.max(1.5, (span / maxSlot) * 100);
+          const absoluteCycle = Number.isFinite(Number(cycleStart)) ? Number(cycleStart) + (Number(annotation.slotStart) || 0) : "";
           return `
             <button
               class="wave-annotation-tag"
               type="button"
+              data-wave-panel-id="${escapeHtml(panel.panelId || "")}"
+              data-wave-cycle="${escapeHtml(String(absoluteCycle))}"
               data-wave-row-id="${escapeHtml(annotation.rowId || "")}"
               data-wave-tooltip="${escapeHtml(annotation.tooltip || annotation.label || "")}"
               style="left:${left}%; width:${width}%;"
