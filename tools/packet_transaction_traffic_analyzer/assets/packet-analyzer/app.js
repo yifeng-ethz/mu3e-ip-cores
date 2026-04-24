@@ -109,6 +109,7 @@
   let sideCenterTimer = 0;
   let waveSelectionHighlightTimer = 0;
   let scrollbarSyncRaf = 0;
+  let waveRenderToken = 0;
   let activeWaveLinkKey = "";
   let scrollDragState = null;
   let waveRangeDragState = null;
@@ -1967,6 +1968,48 @@
 
   function applyWaveZoomLevel(panelId, value) {
     return applyWaveVisibleSlots(panelId, Number(value));
+  }
+
+  function syncWaveViewportControlDescriptor(descriptor) {
+    if (!descriptor) {
+      return;
+    }
+    const controls = waveRangeControlsForPanel(descriptor.panelId || "");
+    if (!controls) {
+      return;
+    }
+    const startInput = controls.querySelector("[data-wave-range-start]");
+    const endInput = controls.querySelector("[data-wave-range-end]");
+    const zoomSelect = controls.querySelector('[data-action="wave-zoom-level"]');
+    if (startInput) {
+      startInput.min = String(descriptor.minCycle);
+      startInput.max = String(descriptor.maxCycle);
+      startInput.value = String(descriptor.cycleStart);
+    }
+    if (endInput) {
+      endInput.min = String(descriptor.minCycle);
+      endInput.max = String(descriptor.maxCycle);
+      endInput.value = String(descriptor.cycleEnd);
+    }
+    if (zoomSelect) {
+      const value = String(descriptor.visibleSlots);
+      if (Array.from(zoomSelect.options).some((option) => option.value === value)) {
+        zoomSelect.value = value;
+      }
+    }
+  }
+
+  function syncWaveViewportControls() {
+    if (state.surfaceMode !== "wave" || !hasWaveSurface()) {
+      return;
+    }
+    if (usesSharedWaveViewport()) {
+      syncWaveViewportControlDescriptor(sharedWaveViewportDescriptor(currentSharedWaveState()));
+      return;
+    }
+    visibleWavePanels().forEach((panel) => {
+      syncWaveViewportControlDescriptor(panelWaveViewportDescriptor(panel, state.wavePanelState[panel.panelId]));
+    });
   }
 
   function ensureWaveState() {
@@ -4633,24 +4676,32 @@
   }
 
   function scheduleWaveRender() {
+    syncWaveViewportControls();
+    const waveToken = ++waveRenderToken;
     if (waveRenderRaf) {
       window.clearTimeout(waveRenderRaf);
     }
     waveRenderRaf = window.setTimeout(() => {
       waveRenderRaf = 0;
-      renderWavePanels();
+      renderWavePanels(waveToken);
     }, 0);
   }
 
-  async function renderWavePanels() {
+  async function renderWavePanels(waveToken) {
     const renderToken = debugState.renderCount;
     clearWaveLinkHover();
     for (const panel of visibleWavePanels()) {
+      if (waveToken !== waveRenderToken || renderToken !== debugState.renderCount) {
+        return;
+      }
       try {
-        await renderWavePanel(panel, renderToken);
+        await renderWavePanel(panel, renderToken, waveToken);
       } catch (error) {
         noteError(error);
       }
+    }
+    if (waveToken !== waveRenderToken || renderToken !== debugState.renderCount) {
+      return;
     }
     const waveStack = root.querySelector(".wave-panel-stack");
     if (waveStack) {
@@ -4660,14 +4711,14 @@
     scheduleScrollbarSync();
   }
 
-  async function renderWavePanel(panel, renderToken) {
+  async function renderWavePanel(panel, renderToken, waveToken) {
     const display = document.getElementById("WaveDrom_Display_" + panel.renderIndex);
     const status = root.querySelector(`[data-wave-status="${CSS.escape(panel.panelId)}"]`);
     if (!display) {
       return;
     }
     if (panel.legacyMode) {
-      await renderLegacyWavePanel(panel, renderToken, display, status);
+      await renderLegacyWavePanel(panel, renderToken, waveToken, display, status);
       return;
     }
     const annotationHost = root.querySelector(`[data-wave-annotations="${CSS.escape(panel.panelId)}"]`);
@@ -4684,7 +4735,7 @@
     const view = sharedWave
       ? await buildSharedWaveViewModel(panel, sharedWave)
       : await buildChunkWaveViewModel(panel, panelState);
-    if (renderToken !== debugState.renderCount || !view) {
+    if (waveToken !== waveRenderToken || renderToken !== debugState.renderCount || !view) {
       return;
     }
     if (status) {
@@ -4703,7 +4754,7 @@
     renderWaveAnnotations(annotationHost, view.annotations, view.chunkMeta || null, panel, view.visibleSlots, view.cycleStart);
   }
 
-  async function renderLegacyWavePanel(panel, renderToken, display, status) {
+  async function renderLegacyWavePanel(panel, renderToken, waveToken, display, status) {
     const decodeHost = root.querySelector(`[data-wave-decode="${CSS.escape(panel.panelId)}"]`);
     const sharedWave = usesSharedWaveViewport() ? currentSharedWaveState() : null;
     const panelState = sharedWave || normalizeWavePanelState(panel, state.wavePanelState[panel.panelId]);
@@ -4714,7 +4765,7 @@
     const view = sharedWave
       ? await buildSharedWaveViewModel(panel, sharedWave)
       : await buildChunkWaveViewModel(panel, panelState);
-    if (renderToken !== debugState.renderCount || !view) {
+    if (waveToken !== waveRenderToken || renderToken !== debugState.renderCount || !view) {
       return;
     }
     if (status) {
