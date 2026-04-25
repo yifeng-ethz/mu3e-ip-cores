@@ -10,6 +10,8 @@ DISLIN_DIR="${DISLIN_DIR:-${REPO_ROOT}/packet_scheduler/.vendor/dislin}"
 
 mkdir -p "${ARTIFACT_DIR}" "${BUILD_DIR}"
 
+python3 "${SCRIPT_DIR}/phase4_queue_tlm.py"
+
 python3 "${SCRIPT_DIR}/collect_phase4_artifacts.py" \
   --repo-root "${REPO_ROOT}" \
   --artifact-dir "${ARTIFACT_DIR}"
@@ -26,17 +28,27 @@ gcc -O2 -Wall -Wextra -std=c11 \
   "${ARTIFACT_DIR}/phase4_tlm_latency_hist.csv" \
   "${ARTIFACT_DIR}/phase4_rtl_latency_hist.csv" \
   "${ARTIFACT_DIR}/phase4_rate_sweep.csv" \
+  "${ARTIFACT_DIR}/phase4_queue_depth_regions.csv" \
+  "${ARTIFACT_DIR}/phase4_mutrig_latency_model.csv" \
   "${ARTIFACT_DIR}/phase4_latency_tlm_vs_rtl.png" \
   "${ARTIFACT_DIR}/phase4_rate_sweep.png" \
+  "${ARTIFACT_DIR}/phase4_queue_depth_regions.png" \
+  "${ARTIFACT_DIR}/phase4_mutrig_latency_model.png" \
   | tee "${ARTIFACT_DIR}/phase4_dislin_png.log"
 
 "${BUILD_DIR}/phase4_dislin_plots" \
   "${ARTIFACT_DIR}/phase4_tlm_latency_hist.csv" \
   "${ARTIFACT_DIR}/phase4_rtl_latency_hist.csv" \
   "${ARTIFACT_DIR}/phase4_rate_sweep.csv" \
+  "${ARTIFACT_DIR}/phase4_queue_depth_regions.csv" \
+  "${ARTIFACT_DIR}/phase4_mutrig_latency_model.csv" \
   "${ARTIFACT_DIR}/phase4_latency_tlm_vs_rtl.svg" \
   "${ARTIFACT_DIR}/phase4_rate_sweep.svg" \
+  "${ARTIFACT_DIR}/phase4_queue_depth_regions.svg" \
+  "${ARTIFACT_DIR}/phase4_mutrig_latency_model.svg" \
   | tee "${ARTIFACT_DIR}/phase4_dislin_svg.log"
 
 printf 'Wrote %s\n' "${ARTIFACT_DIR}/phase4_latency_tlm_vs_rtl.png"
 printf 'Wrote %s\n' "${ARTIFACT_DIR}/phase4_rate_sweep.png"
+printf 'Wrote %s\n' "${ARTIFACT_DIR}/phase4_queue_depth_regions.png"
+printf 'Wrote %s\n' "${ARTIFACT_DIR}/phase4_mutrig_latency_model.png"

@@ -1,0 +1,6 @@
+quantity,value,definition
+mutrig_wire_limit,25.0,25 Mhit/s per MuTRiG physical wire-speed cap
+datapath_4_mutrig_limit,100.0,25 Mhit/s * 4 MuTRiG per datapath
+histogram_8_mutrig_limit,200.0,25 Mhit/s * 8 MuTRiG feeding histogram
+hist_queue_element_service,78.125,156.25 MHz / 2 cycles per bin update
+coalesce_factor_at_hist_cap,2.56,hit rate / queue-element service at 200 Mhit/s

@@ -2,8 +2,9 @@
 
 Date: 2026-04-25
 
-This report summarizes the on-board Phase 4 emulator/histogram evidence and
-links it to the TLM and RTL simulation artifacts.
+This report summarizes the available on-board Phase 4 emulator/histogram
+evidence and compares it against the updated 25 Mhit/s per-MuTRiG physical
+limit.
 
 ## Board Evidence
 
@@ -21,7 +22,7 @@ Board setup from the report:
 | SC link | 2 |
 | FEB target | 7 |
 | device | `/dev/mudaq0` |
-| result | PASS |
+| reported result | PASS |
 
 ## Primary 8-Lane Run
 
@@ -59,8 +60,10 @@ The plotted board rate sweep is generated from
 | `r4000` | `0x4000` | 130.794350 Mhit/s | 0 | CLIPPED |
 | `r8000` | `0x8000` | 124.972800 Mhit/s | 0 | CLIPPED |
 
-The saturation knee is `0x1000` at 135.360020 Mhit/s. No point in the sweep
-reported a `DROPPED_HITS` delta.
+The observed board knee is 135.360020 Mhit/s. Under the updated physical model,
+the histogram should not clip until about 200 Mhit/s, so this board image does
+not close the Phase 4 rate target. It remains useful functional evidence:
+there were no dropped histogram hits and the post-end flush was clean.
 
 ## Stage Counter Probe
 
@@ -84,26 +87,38 @@ Key cross-checks:
 | Check | Result |
 |---|---|
 | HDL/TLM Questa run | 0 errors, 0 warnings |
-| RTL integration run | 4 passed, 0 failed |
-| TLM cap | 136.718750 Mhit/s |
+| DISLIN render | 0 warnings |
+| Physical cap | 25 Mhit/s per MuTRiG, 200 Mhit/s for 8 MuTRiG |
+| TLM accepted rate at `0x0800` | 195.286719 Mhit/s |
+| TLM cap from `0x1000` up | 200.000000 Mhit/s |
 | Board knee | 135.360020 Mhit/s |
-| Board knee vs TLM cap | 0.994 percent low |
-| RTL latency max | 1589 cycles |
-| TLM latency max | 1567 cycles |
+| RTL latency evidence | stale for short-frame injection signoff |
 
-## Open Items
+## Required Board Follow-Up
 
-SignalTap Phase 4.3 was not compiled into the nostp image used by the existing
-board report, so no SignalTap no-fire window is claimed here.
+The next board run should use the updated target:
 
-The current emulator RTL uses `INJECT_MASK` for the masked-trigger conduit, not
-for background Poisson traffic. The literal Phase 4.5 channel-mask sweep still
-needs a masked-pulse source or equivalent driver before it can be closed from
-host software.
+```bash
+python3 quartus_system/board_test/script/run_phase4_emulator.py \
+  --measure-after-end \
+  --output quartus_system/board_test/reports/phase4_emulator_<date>_target200.md
+```
+
+Acceptance for the refreshed board run:
+
+- no histogram drop/underflow/overflow status;
+- clean post-end flush;
+- monotonic rate growth through the `0x0800` point;
+- clipping at the 200 Mhit/s physical histogram target, not near 135 Mhit/s.
+
+The injection-mode latency board/RTL setup should enable one channel, sweep
+the injection pulse offset across a full short frame, and then repeat at higher
+background rate to show the envelope growing from 0 to 1 frame toward 0 to 2
+frames.
 
 ## Verdict
 
-Phase 4 emulator/histogram functional testing is PASS for the current scope:
-8-lane emulator activity, histogram accumulation, zero dropped histogram hits,
-flush-aware post-end residue checking, stage-counter activity, and a documented
-throughput knee near the TLM acceptance cap.
+Functional board evidence is PASS for 8-lane activity, histogram accumulation,
+zero dropped histogram hits, and clean flush. Rate signoff is OPEN: the tested
+board image clips near 135 Mhit/s, while the updated physical requirement is
+200 Mhit/s for the 8-MuTRiG histogram input.

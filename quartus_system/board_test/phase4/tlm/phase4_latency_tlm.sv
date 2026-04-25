@@ -2,11 +2,11 @@ module phase4_latency_tlm;
   localparam int N_LANE = 8;
   localparam int RATE_POINTS = 8;
   localparam int LATENCY_BINS = 4096;
-  localparam int FRAME_INTERVAL_CYCLES = 1550;
+  localparam int FRAME_INTERVAL_CYCLES = 910;
   localparam int RUN_CYCLES = 200000;
   localparam int CLK_HZ = 156250000;
-  localparam int HIST_ACCEPT_NUM = 7;
-  localparam int HIST_ACCEPT_DEN = 8;
+  localparam int MUTRIG_PHYSICAL_CAP_HZ = 25000000;
+  localparam int HIST_PHYSICAL_CAP_HZ = MUTRIG_PHYSICAL_CAP_HZ * N_LANE;
   localparam int HIST_BACKLOG_LIMIT = 1 << 28;
 
   string artifact_dir;
@@ -100,7 +100,7 @@ module phase4_latency_tlm;
     int threshold;
     int unsigned rng [0:N_LANE-1];
     int generated_this_cycle;
-    int accept_accum;
+    longint accept_accum;
     int accept_slots;
     int unsigned backlog;
     begin
@@ -130,9 +130,9 @@ module phase4_latency_tlm;
           backlog += generated_this_cycle;
         end
 
-        accept_accum += HIST_ACCEPT_NUM;
-        accept_slots = accept_accum / HIST_ACCEPT_DEN;
-        accept_accum = accept_accum % HIST_ACCEPT_DEN;
+        accept_accum += HIST_PHYSICAL_CAP_HZ;
+        accept_slots = accept_accum / CLK_HZ;
+        accept_accum = accept_accum % CLK_HZ;
         if (accept_slots > backlog) begin
           accept_slots = backlog;
         end
@@ -200,7 +200,8 @@ module phase4_latency_tlm;
       $fdisplay(fd, "frame_interval_cycles=%0d", FRAME_INTERVAL_CYCLES);
       $fdisplay(fd, "latency_case_rate_word=0x0800");
       $fdisplay(fd, "latency_total_hits=%0d", latency_total);
-      $fdisplay(fd, "hist_accept_ratio=%0d/%0d", HIST_ACCEPT_NUM, HIST_ACCEPT_DEN);
+      $fdisplay(fd, "mutrig_physical_cap_hz=%0d", MUTRIG_PHYSICAL_CAP_HZ);
+      $fdisplay(fd, "hist_physical_cap_hz=%0d", HIST_PHYSICAL_CAP_HZ);
       $fclose(fd);
     end
   endtask
