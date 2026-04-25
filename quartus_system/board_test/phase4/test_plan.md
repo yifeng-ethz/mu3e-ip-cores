@@ -7,6 +7,42 @@ This plan extends the canonical Phase 4 board plan in
 TLM, RTL-simulation, DISLIN plotting, and on-board evidence chain for the
 FE SciFi emulator/histogram datapath.
 
+## Closure contract
+
+Phase 4 is closed only when every item below is signed. No partial closure.
+
+| Gate | Artifact | Evidence required |
+|---|---|---|
+| Histogram-overflow pre-gate | [`TEST_PLAN_BASIC.md`](TEST_PLAN_BASIC.md) TPBH001..TPBH030 | `OVERFLOW_COUNT delta=0` across iid Poisson, local 8-channel cluster, roaming cluster-8, 50/50 mixed, and all-channel injection burst on TLM, standalone tb (`../../histogram_statistics/tb/`), RTL integration sim, and on-board; signoff report `../reports/phase4_overflow_pregate_<date>.md` |
+| Wiring preflight | TPB000 | emulator + injector + histogram chain reachable through `mm_bridge`; `histogram_statistics_0.UID = 0x48495354`; `INJ_ARM` SignalTap trigger never fires outside RUNNING |
+| Channel-mask catalog | TPB004..TPB031 | every (lane, channel) and every channel-mask pattern produces the predicted bin geometry; TLM <-> RTL SIM <-> BOARD overlay agrees |
+| Injection mode 1 (frame-synchronous, slide 24 truth) | TPB032..TPB055 | latency PDF is a delta pulse at `(FRAME_INTERVAL_SHORT - header_delay)` for every header_delay across the full frame interval; TLM <-> SIM <-> BOARD overlay agrees with the slide 24 small-multiples panel |
+| Injection mode 2 (free-running, slides 23 / 25 / 38 truth) | TPB056..TPB079 | latency PDF widens monotonically with rate; capped at `pipe + 2*FRAME_INTERVAL_SHORT` at the 25 Mhit/s per-MuTRiG limit; TLM <-> SIM <-> BOARD overlay agrees with slide 25 small-multiples and slide 38 ingress/egress panels |
+| Rate signoff at the 200 Mhit/s aggregate target | TPB080..TPB096 | board sweep grows monotonically through 0x0800 and clips at the 200 Mhit/s physical target (NOT at the legacy 135 Mhit/s knee documented in [`TEST_REPORT.md`](TEST_REPORT.md)); `DROPPED_HITS=0`, `OVERFLOW_COUNT=0`, `UNDERFLOW_COUNT=0`; ping-pong alternation regular |
+| In-situ cross-layer comparison | TPB003, TPB018, TPB031, TPB035, TPB045, TPB055, TPB066, TPB075, TPB079, TPB082, TPB096, TPB099 (all `live CMP`) | DISLIN `Warnings: 0`; every comparison plot overlays `Model/TLM`, `RTL SIM`, and `BOARD` with a three-entry legend and shows agreement within the configured tolerance; 1D loss-vs-rate and 2D loss-vs-rate/burstiness contour views use the same variable space; any disagreement is recorded with the discrepancy ratio and routed per the disagreement protocol below |
+| Closure attestation | TPB100 | TPBH030 + TPB000..TPB099 all PASS; `phase4_emulator_<date>_target200.md` and `phase4_overflow_pregate_<date>.md` checked into `../reports/` |
+
+The basic-bucket case catalog is the single source of truth for what runs and
+in what order: see [`TEST_PLAN_BASIC.md`](TEST_PLAN_BASIC.md).
+
+### Disagreement protocol (TLM is truth)
+
+When the in-situ DISLIN overlay shows the three layers disagree:
+
+1. The TLM model is treated as architectural truth and is calibrated to the
+   upstream slide deck at [`../../../doc/Archive/ethhw_reordering.pdf`](../../../doc/Archive/ethhw_reordering.pdf)
+   (extract `doc/Archive/` from `doc/Archive.zip` once). Do not modify the TLM
+   to chase a SIM or board observation.
+2. If RTL SIM disagrees with TLM, debug the RTL: `emulator_mutrig.sv`,
+   `histogram_statistics.vhd`, `coalescing_queue.vhd`, integration tb stimulus,
+   in that order.
+3. If on-board disagrees with RTL SIM, debug the integration: flash state,
+   SC bridge address, `histogram_ingress_bridge_0` mode, ping-pong interval,
+   link L2 jitter, in that order.
+4. Re-run the disagreeing case end-to-end. Append the discrepancy and the
+   resolution to the relevant IP's `BUG_HISTORY.md` per the rtl-doc-style
+   convention.
+
 ## Scope
 
 The Phase 4 question is whether the 8-lane `emulator_mutrig` traffic source,
@@ -87,6 +123,8 @@ Not closed by the current evidence:
 | Math report | [`MATH_REPORT.md`](MATH_REPORT.md) |
 | TLM/RTL report | [`TLM_REPORT.md`](TLM_REPORT.md) |
 | Board report | [`TEST_REPORT.md`](TEST_REPORT.md) |
+| BASIC closure catalog | [`TEST_PLAN_BASIC.md`](TEST_PLAN_BASIC.md) |
+| Three-tier model index | [`../../model/`](../../model/) |
 | HDL/TLM model | [`tlm/phase4_latency_tlm.sv`](tlm/phase4_latency_tlm.sv) |
 | Queue/MuTRiG TLM | [`scripts/phase4_queue_tlm.py`](scripts/phase4_queue_tlm.py) |
 | Plot renderer | [`scripts/phase4_dislin_plots.c`](scripts/phase4_dislin_plots.c) |
@@ -113,7 +151,22 @@ Not closed by the current evidence:
    - `artifacts/phase4_tlm_summary.txt`
    - `artifacts/phase4_tlm_run.log`
 
-2. Generate the queue-depth and MuTRiG injection-latency model artifacts.
+2. Use the BASIC closure catalog as the directed case source.
+
+   [`TEST_PLAN_BASIC.md`](TEST_PLAN_BASIC.md) is the canonical Phase 4 BASIC
+   bucket. It defines the wiring preflight, single-channel mask cases,
+   injection-mode-1 and injection-mode-2 latency sweeps, physical-rate sweep,
+   histogram-overflow pre-gate, execution modes, and cross-layer disagreement
+   protocol. Every case is mapped onto the evidence ladder:
+
+   ```text
+   T = TLM, S = RTL simulation, B = on-board, C = DISLIN comparison
+   ```
+
+   Do not call Phase 4 closed from this file alone. Closure requires the
+   matching T/S/B/C evidence rows in the BASIC catalog to pass.
+
+3. Generate the queue-depth and MuTRiG injection-latency model artifacts.
 
    ```bash
    python3 quartus_system/board_test/phase4/scripts/phase4_queue_tlm.py
@@ -126,7 +179,7 @@ Not closed by the current evidence:
    - `artifacts/phase4_queue_depth_regions.csv`
    - `artifacts/phase4_mutrig_latency_model.csv`
 
-3. Re-run the RTL datapath measurement if the existing evidence needs to be
+4. Re-run the RTL datapath measurement if the existing evidence needs to be
    refreshed.
 
    ```bash
@@ -140,7 +193,7 @@ Not closed by the current evidence:
    `ts_soak_exact5k_stable` run copied under
    `quartus_system/board_test/phase4/inputs/`.
 
-4. Run the calibrated periodic-injector RTL sweep for injection mode 2.
+5. Run the calibrated periodic-injector RTL sweep for injection mode 2.
 
    ```bash
    bash quartus_system/tb_int/INT_fe_scifi_v3-2026-04-17/scripts/run_dp_hist_rate_sweep.sh
@@ -157,7 +210,7 @@ Not closed by the current evidence:
      queueing delay;
    - a full injection offset sweep across `FRAME_INTERVAL_SHORT=910`.
 
-5. Collect RTL and board evidence and render DISLIN figures.
+6. Collect RTL and board evidence and render DISLIN figures.
 
    ```bash
    bash quartus_system/board_test/phase4/scripts/render_phase4_plots.sh
@@ -174,7 +227,7 @@ Not closed by the current evidence:
    - `artifacts/phase4_mutrig_latency_model.png`
    - matching SVG files for all plots.
 
-6. Confirm plotting quality before accepting the report.
+7. Confirm plotting quality before accepting the report.
 
    Acceptance criteria:
 
@@ -188,7 +241,7 @@ Not closed by the current evidence:
    - injection plot uses normalized frame axes and labels the 25 Mhit/s physical
      clip.
 
-7. Board test commands for a new run, using the established Phase 4 scripts:
+8. Board test commands for a new run, using the established Phase 4 scripts:
 
    ```bash
    python3 quartus_system/board_test/script/run_phase4_emulator.py \
@@ -215,6 +268,9 @@ The Phase 4 math/TLM/RTL/board reporting package passes when:
   clusters, roaming clusters, mixed traffic, and all-channel injection;
 - RTL injection-mode evidence covers one-channel offset sweep and saturation
   queueing;
+- the BASIC catalog in `TEST_PLAN_BASIC.md` has passing TLM, RTL simulation,
+  on-board, and DISLIN comparison evidence for all required Phase 4 closure
+  cases;
 - RTL integration simulation has no failing checks and reports no
   histogram-underflow, histogram-overflow, or dropped-hit status in the measured
   path;
