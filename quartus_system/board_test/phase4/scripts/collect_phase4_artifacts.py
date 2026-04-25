@@ -141,7 +141,7 @@ def write_rate_csv(path: Path, rows: list[dict[str, object]]) -> None:
         "backlog_end",
     ]
     with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+        writer = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             out = {field: row.get(field, "") for field in fields}
@@ -173,6 +173,13 @@ def parse_stage_summary(path: Path) -> list[dict[str, object]]:
             }
         )
     return rows
+
+
+def read_csv_rows(path: Path) -> list[dict[str, object]]:
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as f:
+        return list(csv.DictReader(f))
 
 
 def main() -> int:
@@ -216,6 +223,12 @@ def main() -> int:
         "board_primary": primary,
         "board_rate_rows": board_rows,
         "stage_rows": parse_stage_summary(stage_report),
+        "physical_rate_limits": read_csv_rows(out_dir / "phase4_physical_rate_limits.csv"),
+        "queue_depth_1ppm_at_200mhit": [
+            row
+            for row in read_csv_rows(out_dir / "phase4_queue_depth_regions.csv")
+            if row.get("rate_mhit") == "200.000" and row.get("threshold") == "1e-06"
+        ],
     }
     (out_dir / "phase4_summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"Wrote {out_dir / 'phase4_summary.json'}")
