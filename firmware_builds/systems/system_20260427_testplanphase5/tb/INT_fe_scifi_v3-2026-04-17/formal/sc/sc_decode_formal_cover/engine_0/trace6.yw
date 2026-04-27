@@ -1,0 +1,17 @@
+{
+  "format": "Yosys Witness Trace",
+  "generator": "smtbmc",
+  "clocks": [],
+  "signals": [
+    {"path": ["\\cmd_accept"], "width": 1, "offset": 0, "init_only": false},
+    {"path": ["\\cmd_addr"], "width": 18, "offset": 0, "init_only": false},
+    {"path": ["\\cmd_burstcount"], "width": 9, "offset": 0, "init_only": false},
+    {"path": ["\\gclk"], "width": 1, "offset": 0, "init_only": false}
+  ],
+  "steps": [
+    {"bits": "00000000000000000000000000001"},
+    {"bits": "01010110000000000011110000000"},
+    {"bits": "00000000101111110000000100011"},
+    {"bits": "00000000010000000000000000001"}
+  ]
+}

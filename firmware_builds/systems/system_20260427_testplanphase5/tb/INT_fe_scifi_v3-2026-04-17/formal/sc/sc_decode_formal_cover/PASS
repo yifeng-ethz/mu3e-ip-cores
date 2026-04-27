@@ -1,0 +1,36 @@
+Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+engine_0 (smtbmc z3) returned pass
+cover trace: engine_0/trace0.vcd
+cover trace: engine_0/trace0.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_217_383 at props_sc_decode.sv:217.13-217.102 step 3
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_226_422 at props_sc_decode.sv:226.13-226.53 step 3
+cover trace: engine_0/trace1.vcd
+cover trace: engine_0/trace1.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_225_420 at props_sc_decode.sv:225.13-225.45 step 3
+cover trace: engine_0/trace2.vcd
+cover trace: engine_0/trace2.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_228_431 at props_sc_decode.sv:228.13-228.94 step 3
+cover trace: engine_0/trace3.vcd
+cover trace: engine_0/trace3.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_219_393 at props_sc_decode.sv:219.13-219.110 step 3
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_227_424 at props_sc_decode.sv:227.13-227.75 step 3
+cover trace: engine_0/trace4.vcd
+cover trace: engine_0/trace4.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_220_398 at props_sc_decode.sv:220.13-220.118 step 3
+cover trace: engine_0/trace5.vcd
+cover trace: engine_0/trace5.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_218_388 at props_sc_decode.sv:218.13-218.115 step 3
+cover trace: engine_0/trace6.vcd
+cover trace: engine_0/trace6.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_224_418 at props_sc_decode.sv:224.13-224.110 step 3
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_229_436 at props_sc_decode.sv:229.13-229.110 step 3
+cover trace: engine_0/trace7.vcd
+cover trace: engine_0/trace7.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_223_413 at props_sc_decode.sv:223.13-223.96 step 3
+cover trace: engine_0/trace8.vcd
+cover trace: engine_0/trace8.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_221_403 at props_sc_decode.sv:221.13-221.111 step 3
+cover trace: engine_0/trace9.vcd
+cover trace: engine_0/trace9.yw
+  reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_222_408 at props_sc_decode.sv:222.13-222.110 step 3

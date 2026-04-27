@@ -1,0 +1,75 @@
+	component feb_system_v3_pipe is
+		port (
+			cclk156_clk                           : in    std_logic                     := 'X';             -- clk
+			control_path_clk125_clk               : out   std_logic;                                        -- clk
+			download_sc_data                      : in    std_logic_vector(31 downto 0) := (others => 'X'); -- data
+			download_sc_datak                     : in    std_logic_vector(3 downto 0)  := (others => 'X'); -- datak
+			download_sc_ready                     : out   std_logic;                                        -- ready
+			inject_pulse                          : out   std_logic;                                        -- pulse
+			inject_masked_pulse                   : out   std_logic;                                        -- masked_pulse
+			legacy_firefly_mon_waitrequest        : in    std_logic                     := 'X';             -- waitrequest
+			legacy_firefly_mon_readdata           : in    std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			legacy_firefly_mon_readdatavalid      : in    std_logic                     := 'X';             -- readdatavalid
+			legacy_firefly_mon_response           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- response
+			legacy_firefly_mon_burstcount         : out   std_logic_vector(0 downto 0);                     -- burstcount
+			legacy_firefly_mon_writedata          : out   std_logic_vector(31 downto 0);                    -- writedata
+			legacy_firefly_mon_address            : out   std_logic_vector(7 downto 0);                     -- address
+			legacy_firefly_mon_write              : out   std_logic;                                        -- write
+			legacy_firefly_mon_read               : out   std_logic;                                        -- read
+			legacy_firefly_mon_byteenable         : out   std_logic_vector(3 downto 0);                     -- byteenable
+			legacy_firefly_mon_debugaccess        : out   std_logic;                                        -- debugaccess
+			lvds_pll_inclock_clk                  : in    std_logic                     := 'X';             -- clk
+			max10_link_csn                        : out   std_logic;                                        -- csn
+			max10_link_clk                        : out   std_logic;                                        -- clk
+			max10_link_mosi_in                    : in    std_logic                     := 'X';             -- mosi_in
+			max10_link_mosi_out                   : out   std_logic;                                        -- mosi_out
+			max10_link_mosi_oe                    : out   std_logic;                                        -- mosi_oe
+			max10_link_miso_in                    : in    std_logic                     := 'X';             -- miso_in
+			max10_link_miso_out                   : out   std_logic;                                        -- miso_out
+			max10_link_miso_oe                    : out   std_logic;                                        -- miso_oe
+			max10_link_d1_in                      : in    std_logic                     := 'X';             -- d1_in
+			max10_link_d1_out                     : out   std_logic;                                        -- d1_out
+			max10_link_d1_oe                      : out   std_logic;                                        -- d1_oe
+			max10_link_d2_in                      : in    std_logic                     := 'X';             -- d2_in
+			max10_link_d2_out                     : out   std_logic;                                        -- d2_out
+			max10_link_d2_oe                      : out   std_logic;                                        -- d2_oe
+			max10_link_d3_in                      : in    std_logic                     := 'X';             -- d3_in
+			max10_link_d3_out                     : out   std_logic;                                        -- d3_out
+			max10_link_d3_oe                      : out   std_logic;                                        -- d3_oe
+			max10_link_clock_clk                  : in    std_logic                     := 'X';             -- clk
+			mclk125_clk                           : in    std_logic                     := 'X';             -- clk
+			mutrig_cfg_ctrl_0_spi_export2top_miso : in    std_logic                     := 'X';             -- miso
+			mutrig_cfg_ctrl_0_spi_export2top_mosi : out   std_logic;                                        -- mosi
+			mutrig_cfg_ctrl_0_spi_export2top_sclk : out   std_logic;                                        -- sclk
+			mutrig_cfg_ctrl_0_spi_export2top_ssn  : out   std_logic_vector(7 downto 0);                     -- ssn
+			mutrig_reset_reset                    : out   std_logic_vector(1 downto 0);                     -- reset
+			osc_clock_50_in_clk                   : in    std_logic                     := 'X';             -- clk
+			pulse_out_conduit_pulse               : out   std_logic;                                        -- pulse
+			redriver_losn                         : in    std_logic_vector(8 downto 0)  := (others => 'X'); -- losn
+			reset_3_reset_n                       : in    std_logic                     := 'X';             -- reset_n
+			sense_dq_in                           : in    std_logic_vector(5 downto 0)  := (others => 'X'); -- in
+			sense_dq_out                          : out   std_logic_vector(5 downto 0);                     -- out
+			sense_dq_oe                           : out   std_logic_vector(5 downto 0);                     -- oe
+			serial_data                           : in    std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			si_gpio_out_export                    : out   std_logic_vector(15 downto 0);                    -- export
+			si_status_in_export                   : in    std_logic_vector(7 downto 0)  := (others => 'X'); -- export
+			to_firefly_ucc8_scl                   : inout std_logic                     := 'X';             -- scl
+			to_firefly_ucc8_present_n             : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- present_n
+			to_firefly_ucc8_sda                   : inout std_logic                     := 'X';             -- sda
+			to_firefly_ucc8_reset_n               : out   std_logic_vector(1 downto 0);                     -- reset_n
+			to_firefly_ucc8_select_n              : out   std_logic_vector(1 downto 0);                     -- select_n
+			to_firefly_ucc8_int_n                 : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- int_n
+			upload_data0_sc_rc_data               : out   std_logic_vector(35 downto 0);                    -- data
+			upload_data0_sc_rc_valid              : out   std_logic;                                        -- valid
+			upload_data0_sc_rc_ready              : in    std_logic                     := 'X';             -- ready
+			upload_data0_sc_rc_startofpacket      : out   std_logic;                                        -- startofpacket
+			upload_data0_sc_rc_endofpacket        : out   std_logic;                                        -- endofpacket
+			upload_data0_sc_rc_channel            : out   std_logic_vector(1 downto 0);                     -- channel
+			upload_data1_data                     : out   std_logic_vector(35 downto 0);                    -- data
+			upload_data1_valid                    : out   std_logic;                                        -- valid
+			upload_data1_ready                    : in    std_logic                     := 'X';             -- ready
+			upload_data1_startofpacket            : out   std_logic;                                        -- startofpacket
+			upload_data1_endofpacket              : out   std_logic                                         -- endofpacket
+		);
+	end component feb_system_v3_pipe;
+

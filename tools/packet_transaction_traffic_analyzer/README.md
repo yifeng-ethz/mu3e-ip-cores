@@ -28,8 +28,8 @@ Generate:
 
 ```bash
 python3 tools/packet_transaction_traffic_analyzer/scripts/generate_musip_packet_analyzer.py \
-  --vcd tb_int/wave_reports/opq_twoframe_260422/sim/opq_twoframe_replay.vcd \
-  --out-dir tb_int/wave_reports/opq_twoframe_260422/packet_analyzer \
+  --vcd tb_int/report/wave/opq_twoframe_260422/sim/opq_twoframe_replay.vcd \
+  --out-dir tb_int/report/wave/opq_twoframe_260422/packet_analyzer \
   --frame-start 1 \
   --frame-count 2
 ```
@@ -38,8 +38,8 @@ Optional raw export:
 
 ```bash
 python3 tools/packet_transaction_traffic_analyzer/scripts/feb_data_frame.py \
-  --vcd tb_int/wave_reports/opq_twoframe_260422/sim/opq_twoframe_replay.vcd \
-  --out-json tb_int/wave_reports/opq_twoframe_260422/packet_analyzer/feb-data-frame.json \
+  --vcd tb_int/report/wave/opq_twoframe_260422/sim/opq_twoframe_replay.vcd \
+  --out-json tb_int/report/wave/opq_twoframe_260422/packet_analyzer/feb-data-frame.json \
   --frame-start 1 \
   --frame-count 2
 ```
@@ -48,7 +48,7 @@ Serve:
 
 ```bash
 python3 tools/packet_transaction_traffic_analyzer/scripts/serve_packet_analyzer.py \
-  --dir tb_int/wave_reports/opq_twoframe_260422/packet_analyzer \
+  --dir tb_int/report/wave/opq_twoframe_260422/packet_analyzer \
   --port 8765
 ```
 
@@ -57,7 +57,7 @@ Visual debug:
 ```bash
 python3 tools/packet_transaction_traffic_analyzer/scripts/run_packet_analyzer_visual_debug.py \
   --url http://127.0.0.1:8765/ \
-  --out-dir tb_int/wave_reports/opq_twoframe_260422/packet_analyzer/visual_debug
+  --out-dir tb_int/report/wave/opq_twoframe_260422/packet_analyzer/visual_debug
 ```
 
 ## Current Correlation Surface

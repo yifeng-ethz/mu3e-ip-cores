@@ -1,0 +1,10 @@
+# running in upload_pkt_mux_formal_cover/src/
+read_verilog -formal -sv formal_defs.svh
+read_verilog -formal -sv /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv
+read_verilog -formal -sv upload_pkt_mux_formal_tb.sv
+prep -top upload_pkt_mux_formal_tb
+
+hierarchy -smtcheck
+rename -witness
+write_jny -no-connections ../model/design.json
+write_rtlil ../model/design.il

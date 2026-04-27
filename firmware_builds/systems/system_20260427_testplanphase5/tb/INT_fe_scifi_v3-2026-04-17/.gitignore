@@ -1,0 +1,6 @@
+work/
+generated/*
+!generated/README.md
+REPORT/**
+!REPORT/
+!REPORT/README.md

@@ -328,7 +328,17 @@ def wave_context_action(driver: webdriver.Chrome, rng: random.Random) -> str:
     WebDriverWait(driver, 5).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, ".context-menu"))
     )
-    for action_name in ["link-row", "wave-open-details", "wave-open-spec", "wave-open-tracker", "wave-zero-time", "wave-show-tooltip"]:
+    for action_name in [
+        "link-row",
+        "wave-open-details",
+        "wave-open-spec",
+        "wave-open-tracker",
+        "wave-zero-time",
+        "wave-show-tooltip",
+        "wave-viewport-zoom-out",
+        "wave-viewport-zoom-in",
+        "wave-viewport-auto",
+    ]:
         items = driver.find_elements(
             By.CSS_SELECTOR,
             f".context-menu [data-menu-action='{action_name}'][data-disabled='0']",

@@ -1,0 +1,77 @@
+SBY 15:33:58 [upload_pkt_mux_formal_cover] Removing directory '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_cover'.
+SBY 15:33:58 [upload_pkt_mux_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/../common/formal_defs.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_cover/src/formal_defs.svh'.
+SBY 15:33:58 [upload_pkt_mux_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_cover/src/upload_system_v3_upload_pkt_mux.sv'.
+SBY 15:33:58 [upload_pkt_mux_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_tb.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_cover/src/upload_pkt_mux_formal_tb.sv'.
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: smtbmc z3
+SBY 15:33:58 [upload_pkt_mux_formal_cover] base: starting process "cd upload_pkt_mux_formal_cover/src; yosys -ql ../model/design.log ../model/design.ys"
+SBY 15:33:58 [upload_pkt_mux_formal_cover] base: Warning: Wire upload_pkt_mux_formal_tb.\gclk is used but has no driver.
+SBY 15:33:58 [upload_pkt_mux_formal_cover] base: finished (returncode=0)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] prep: starting process "cd upload_pkt_mux_formal_cover/model; yosys -ql design_prep.log design_prep.ys"
+SBY 15:33:58 [upload_pkt_mux_formal_cover] prep: Warning: Wire upload_pkt_mux_formal_tb.\gclk is used but has no driver.
+SBY 15:33:58 [upload_pkt_mux_formal_cover] prep: finished (returncode=0)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] smt2: starting process "cd upload_pkt_mux_formal_cover/model; yosys -ql design_smt2.log design_smt2.ys"
+SBY 15:33:58 [upload_pkt_mux_formal_cover] smt2: finished (returncode=0)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: starting process "cd upload_pkt_mux_formal_cover; yosys-smtbmc -s z3 --presat -c --noprogress -t 32  --append 0 --dump-vcd engine_0/trace%.vcd --dump-yw engine_0/trace%.yw --dump-vlogtb engine_0/trace%_tb.v --dump-smtc engine_0/trace%.smtc model/design_smt2.smt2"
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Solver: z3
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 0..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 1..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 2..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at upload_pkt_mux_formal_tb: upload_pkt_mux_formal_tb.sv:348.13-348.61 (_witness_.check_cover_upload_pkt_mux_formal_tb_sv_348_245)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace0.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace0_tb.v
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace0.smtc
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace0.yw
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 4..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 4 at upload_pkt_mux_formal_tb: upload_pkt_mux_formal_tb.sv:345.13-345.53 (_witness_.check_cover_upload_pkt_mux_formal_tb_sv_345_236)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace1.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace1_tb.v
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace1.smtc
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace1.yw
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 4..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 5 at upload_pkt_mux_formal_tb: upload_pkt_mux_formal_tb.sv:347.13-347.53 (_witness_.check_cover_upload_pkt_mux_formal_tb_sv_347_242)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace2.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace2_tb.v
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace2.smtc
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace2.yw
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 5 at upload_pkt_mux_formal_tb: upload_pkt_mux_formal_tb.sv:349.13-349.64 (_witness_.check_cover_upload_pkt_mux_formal_tb_sv_349_248)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace3.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace3_tb.v
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace3.smtc
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace3.yw
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 5 at upload_pkt_mux_formal_tb: upload_pkt_mux_formal_tb.sv:346.13-346.53 (_witness_.check_cover_upload_pkt_mux_formal_tb_sv_346_239)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace4.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace4_tb.v
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace4.smtc
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace4.yw
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 6..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 7..
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 7 at upload_pkt_mux_formal_tb: upload_pkt_mux_formal_tb.sv:350.13-350.112 (_witness_.check_cover_upload_pkt_mux_formal_tb_sv_350_252)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace5.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace5_tb.v
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace5.smtc
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace5.yw
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: ##   0:00:00  Status: passed
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: finished (returncode=0)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] engine_0: Status returned by engine: pass
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: engine_0 (smtbmc z3) returned pass
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: cover trace: upload_pkt_mux_formal_cover/engine_0/trace0.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary:   reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_348_245 at upload_pkt_mux_formal_tb.sv:348.13-348.61 step 3
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: cover trace: upload_pkt_mux_formal_cover/engine_0/trace1.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary:   reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_345_236 at upload_pkt_mux_formal_tb.sv:345.13-345.53 step 4
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: cover trace: upload_pkt_mux_formal_cover/engine_0/trace2.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary:   reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_347_242 at upload_pkt_mux_formal_tb.sv:347.13-347.53 step 5
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: cover trace: upload_pkt_mux_formal_cover/engine_0/trace3.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary:   reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_349_248 at upload_pkt_mux_formal_tb.sv:349.13-349.64 step 5
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: cover trace: upload_pkt_mux_formal_cover/engine_0/trace4.vcd
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary:   reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_346_239 at upload_pkt_mux_formal_tb.sv:346.13-346.53 step 5
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: and 1 further trace
+SBY 15:33:58 [upload_pkt_mux_formal_cover] summary: see upload_pkt_mux_formal_cover/PASS for a complete summary
+SBY 15:33:58 [upload_pkt_mux_formal_cover] DONE (PASS, rc=0)

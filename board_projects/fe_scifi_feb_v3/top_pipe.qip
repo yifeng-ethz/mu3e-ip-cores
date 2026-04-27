@@ -1,0 +1,38 @@
+#
+# Self-contained SciFi FEB board build for the local v3 system.
+#
+
+set repo_root [file normalize [file join $::quartus(qip_path) .. ..]]
+
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/top.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/scifi_path.vhd"]
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "src/top.sdc"]
+
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "generated/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "src/common/util/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "src/common/registers/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "src/common/a5/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "src/FEB_common/include_FEB_v2.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "firmware/FEB_mutrig/include.qip"]
+
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/fe/sc_rx.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/fe/sc_ram.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/fe/sc_node.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/fe/fe_block_v2.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/adapters/board_reset_adapter.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/adapters/max10_link_adapter.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/adapters/onewire_adapter.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/FEB_common/firefly/firefly_reg_mapping.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/wrappers/feb_system_v3/sc_downlink_cdc_bridge.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/wrappers/feb_system_v3/legacy_firefly_mon_cdc_bridge.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/wrappers/feb_system_v3/firefly_xcvr_subsystem.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/wrappers/feb_system_v3/feb_system_pipe_top.vhd"]
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "src/fe/top_FEB_v2.sdc"]
+
+set_global_assignment -name QIP_FILE [file join $repo_root "firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe/synthesis/feb_system_v3_pipe.qip"]
+
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_ds/alt_issp_ds/synthesis/alt_issp_ds.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_srst/alt_issp_srst/synthesis/alt_issp_srst.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/alt_clkctrl/unnamed/synthesis/unnamed.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/ram_sub_det/ram_sub_det.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/altera_io_bidir/alt_iobuf_onewire.qip"]

@@ -65,6 +65,8 @@
     surfaceMode: "trace",
     waveSourceId: "",
     frameFilter: "",
+    frameTrimStart: "",
+    frameTrimEnd: "",
     sectionFilter: "all",
     viewTab: "spec",
     specMode: "hex",
@@ -460,6 +462,9 @@
           selectedFieldId: state.selectedFieldId,
           surfaceMode: state.surfaceMode,
           frameFilter: state.frameFilter,
+          frameTrimStart: state.frameTrimStart,
+          frameTrimEnd: state.frameTrimEnd,
+          activeFrameFilter: frameFilterLabel(),
           sectionFilter: state.sectionFilter,
           availableSections: availableSections().map((section) => section.id),
           waveSourceId: state.waveSourceId,
@@ -977,29 +982,149 @@
     return Array.from(new Set((current.length ? current : fallback).map((value) => String(value)))).sort((left, right) => Number(left) - Number(right));
   }
 
+  function parseFrameNumber(value) {
+    if (value == null || String(value).trim() === "") {
+      return null;
+    }
+    const parsed = Number(String(value).trim());
+    return Number.isFinite(parsed) ? Math.trunc(parsed) : null;
+  }
+
+  function normalizeFrameTrimValues(startValue, endValue) {
+    let start = parseFrameNumber(startValue);
+    let end = parseFrameNumber(endValue);
+    if (start == null && end == null) {
+      return { start: "", end: "" };
+    }
+    if (start != null && end != null && end < start) {
+      const tmp = start;
+      start = end;
+      end = tmp;
+    }
+    return {
+      start: start == null ? "" : String(start),
+      end: end == null ? "" : String(end),
+    };
+  }
+
+  function activeFrameTrimRange() {
+    const normalized = normalizeFrameTrimValues(state.frameTrimStart, state.frameTrimEnd);
+    if (!normalized.start && !normalized.end) {
+      return null;
+    }
+    return {
+      start: parseFrameNumber(normalized.start),
+      end: parseFrameNumber(normalized.end),
+    };
+  }
+
+  function hasActiveFrameFilter() {
+    return !!state.frameFilter || !!activeFrameTrimRange();
+  }
+
+  function frameIdWithinTrimRange(frameId, range) {
+    if (!range) {
+      return true;
+    }
+    const frameNumber = parseFrameNumber(frameId);
+    if (frameNumber == null) {
+      return false;
+    }
+    if (range.start != null && frameNumber < range.start) {
+      return false;
+    }
+    if (range.end != null && frameNumber > range.end) {
+      return false;
+    }
+    return true;
+  }
+
+  function filteredFrameIds() {
+    const frames = availableFrameIds();
+    if (state.frameFilter) {
+      return frames.includes(String(state.frameFilter)) ? [String(state.frameFilter)] : [];
+    }
+    const range = activeFrameTrimRange();
+    if (!range) {
+      return frames;
+    }
+    return frames.filter((frameId) => frameIdWithinTrimRange(frameId, range));
+  }
+
+  function compactFrameListLabel(frames) {
+    const list = (frames || []).map((value) => String(value));
+    if (!list.length) {
+      return "n/a";
+    }
+    if (list.length <= 8) {
+      return "F" + list.join(", F");
+    }
+    const numeric = list.map((value) => Number(value));
+    const consecutive = numeric.every((value, index) => Number.isFinite(value) && (index === 0 || value === numeric[index - 1] + 1));
+    if (consecutive) {
+      return `F${list[0]}..F${list[list.length - 1]} (${list.length})`;
+    }
+    return `F${list[0]}..F${list[list.length - 1]} (${list.length} shown)`;
+  }
+
+  function frameTrimRangeLabel() {
+    const range = activeFrameTrimRange();
+    if (!range) {
+      return "";
+    }
+    if (range.start != null && range.end != null) {
+      return `F${range.start}..F${range.end}`;
+    }
+    if (range.start != null) {
+      return `F${range.start}..`;
+    }
+    return `..F${range.end}`;
+  }
+
+  function frameFilterLabel() {
+    if (state.frameFilter) {
+      return "F" + String(state.frameFilter);
+    }
+    const rangeLabel = frameTrimRangeLabel();
+    if (rangeLabel) {
+      const frames = filteredFrameIds();
+      return frames.length ? compactFrameListLabel(frames) : `${rangeLabel} (0)`;
+    }
+    return compactFrameListLabel(availableFrameIds());
+  }
+
+  function clearFrameFilters() {
+    state.frameFilter = "";
+    state.frameTrimStart = "";
+    state.frameTrimEnd = "";
+  }
+
   function ensureFrameSelection() {
     const frames = availableFrameIds();
     if (!frames.length) {
-      state.frameFilter = "";
+      clearFrameFilters();
       return;
     }
-    if (!state.frameFilter) {
-      return;
-    }
-    if (!frames.includes(String(state.frameFilter))) {
+    if (state.frameFilter && !frames.includes(String(state.frameFilter))) {
       state.frameFilter = "";
     }
+    const normalized = normalizeFrameTrimValues(state.frameTrimStart, state.frameTrimEnd);
+    state.frameTrimStart = normalized.start;
+    state.frameTrimEnd = normalized.end;
   }
 
   function packetMatchesFrameFilter(packet) {
-    if (!packet || !state.frameFilter) {
+    if (!packet || !hasActiveFrameFilter()) {
       return true;
     }
-    return String(packet.frameId) === String(state.frameFilter);
+    if (state.frameFilter) {
+      return String(packet.frameId) === String(state.frameFilter);
+    }
+    return frameIdWithinTrimRange(packet.frameId, activeFrameTrimRange());
   }
 
   function rowIdMatchesFrameFilter(rowId) {
-    if (!state.frameFilter || !rowId || !rowMap.has(rowId)) {
+    if (!hasActiveFrameFilter() || !rowId || !rowMap.has(rowId)) {
       return true;
     }
     return packetMatchesFrameFilter(rowMap.get(rowId));
@@ -1078,7 +1203,7 @@
       };
     }
     const sourceVcd = String((manifest.meta && manifest.meta.sourceVcd) || "");
-    const vcdMatch = sourceVcd.match(/\/wave_reports\/([^/]+)\/([^/]+)(?:\/([^/]+))?\//i);
+    const vcdMatch = sourceVcd.match(/\/(?:wave_reports|report\/wave)\/([^/]+)\/([^/]+)(?:\/([^/]+))?\//i);
     if (vcdMatch) {
       return {
         bucket: vcdMatch[1],
@@ -1361,6 +1486,71 @@
     }
   }
 
+  function frameFocusSample(frameIds) {
+    const frames = (frameIds || []).map((value) => String(value));
+    if (frames.length <= 32) {
+      return frames;
+    }
+    return Array.from(new Set([
+      frames[0],
+      frames[Math.floor(frames.length / 2)],
+      frames[frames.length - 1],
+    ]));
+  }
+
+  async function findWavePanelFrameLocationsForRange(panels, frameIds) {
+    const frames = frameFocusSample(frameIds);
+    const pending = [];
+    panels.forEach((panel) => {
+      frames.forEach((frameId) => {
+        pending.push(findWavePanelFrameLocation(panel, frameId).then((location) => ({
+          panel: panel,
+          frameId: frameId,
+          location: location,
+        })));
+      });
+    });
+    return (await Promise.all(pending)).filter((entry) => !!entry.location);
+  }
+
+  async function focusWavePanelsForActiveFrameFilter() {
+    if (!hasActiveFrameFilter()) {
+      return;
+    }
+    const frames = filteredFrameIds();
+    if (!frames.length) {
+      return;
+    }
+    if (frames.length === 1 || state.frameFilter) {
+      await focusWavePanelsForFrame(frames[0]);
+      return;
+    }
+    const panels = visibleWavePanels();
+    const locations = await findWavePanelFrameLocationsForRange(panels, frames);
+    const locationBounds = locations.length ? {
+      cycleStart: Math.min(...locations.map((entry) => Number(entry.location.cycleStart) || 0)),
+      cycleEnd: Math.max(...locations.map((entry) => Number(entry.location.cycleStart) || 0)),
+    } : null;
+    const bounds = locationBounds || frameCycleBoundsForFrameIds(frames);
+    if (bounds) {
+      if (usesSharedWaveViewport()) {
+        if (applyWaveRange("", bounds.cycleStart, bounds.cycleEnd)) {
+          return;
+        }
+      } else {
+        let applied = false;
+        panels.forEach((panel) => {
+          applied = applyWaveRange(panel.panelId, bounds.cycleStart, bounds.cycleEnd) || applied;
+        });
+        if (applied) {
+          return;
+        }
+      }
+    }
+    const middle = frames[Math.floor(frames.length / 2)];
+    await focusWavePanelsForFrame(middle);
+  }
+
   function queueWaveSync(rowId, wordId) {
     state.pendingWaveSync = {
       rowId: rowId || state.selectedRowId || "",
@@ -1547,9 +1737,8 @@
     };
   }
 
-  function selectedWaveCycleBounds() {
-    const selectedFrames = new Set(((manifest.meta && manifest.meta.selectedFrames) || [])
-      .map((value) => String(value)));
+  function frameCycleBoundsForFrameIds(frameIds) {
+    const selectedFrames = new Set((frameIds || []).map((value) => String(value)));
     if (!selectedFrames.size) {
       return null;
     }
@@ -1564,6 +1753,16 @@
       cycleStart: Math.min(...matches.map((item) => item.cycleStart)),
       cycleEnd: Math.max(...matches.map((item) => item.cycleEnd)),
     };
+  }
+
+  function selectedWaveCycleBounds() {
+    if (hasActiveFrameFilter()) {
+      const activeBounds = frameCycleBoundsForFrameIds(filteredFrameIds());
+      if (activeBounds) {
+        return activeBounds;
+      }
+    }
+    return frameCycleBoundsForFrameIds((manifest.meta && manifest.meta.selectedFrames) || []);
   }
 
   function intersectCycleBounds(left, right) {
@@ -1949,8 +2148,56 @@
     return true;
   }
 
+  function resetVisibleWaveViewports() {
+    if (usesSharedWaveViewport()) {
+      return resetWaveViewport("");
+    }
+    const panels = visibleWavePanels();
+    if (!panels.length) {
+      return false;
+    }
+    panels.forEach((panel) => {
+      state.wavePanelState[panel.panelId] = normalizeWavePanelState(panel, defaultWavePanelState(panel));
+    });
+    scheduleWaveRender();
+    return true;
+  }
+
+  function refreshWaveViewportForFrameFilter() {
+    if (state.surfaceMode !== "wave") {
+      return;
+    }
+    if (hasActiveFrameFilter()) {
+      void focusWavePanelsForActiveFrameFilter();
+      return;
+    }
+    resetVisibleWaveViewports();
+  }
+
   function waveRangeControlsForPanel(panelId) {
     return root.querySelector(`[data-wave-controls="${CSS.escape(waveRangeControlKey(panelId))}"]`);
+  }
+
+  function frameTrimControls() {
+    return root.querySelector("[data-frame-trim-controls]");
+  }
+
+  function applyFrameTrimFromControls() {
+    const controls = frameTrimControls();
+    if (!controls) {
+      return false;
+    }
+    const startInput = controls.querySelector("[data-frame-trim-start]");
+    const endInput = controls.querySelector("[data-frame-trim-end]");
+    const normalized = normalizeFrameTrimValues(startInput ? startInput.value : "", endInput ? endInput.value : "");
+    state.frameFilter = "";
+    state.frameTrimStart = normalized.start;
+    state.frameTrimEnd = normalized.end;
+    ensureSelection();
+    ensureSelectedField(selectedPacket());
+    render("filter-change");
+    refreshWaveViewportForFrameFilter();
+    return true;
   }
 
   function applyWaveRangeFromControls(panelId) {
@@ -2047,8 +2294,8 @@
     debugState.renderCount += 1;
     ensureSectionSelection();
     ensureSurfaceSelection();
-    ensureWaveState();
     ensureFrameSelection();
+    ensureWaveState();
     captureCurrentScrollPositions();
 
     if (state.fatalError) {
@@ -2083,7 +2330,7 @@
           </div>
           <div class="summary-bar">
             ${summaryCard("Source", currentCaseLabel(), currentCaseDescription())}
-            ${summaryCard("Frames", state.frameFilter ? ("F" + String(state.frameFilter)) : ("F" + (((lane.frameIds || []).join(", F")) || "n/a")))}
+            ${summaryCard("Frames", frameFilterLabel())}
             ${summaryCard("Section", currentSectionLabel())}
             ${summaryCard("Visible Rows", visibleCountLabel)}
             ${summaryCard("Spec", (manifest.meta && manifest.meta.specReference) || "n/a")}
@@ -2456,6 +2703,9 @@
     const frameOptions = availableFrameIds()
       .map((frameId) => `<option value="${escapeHtml(frameId)}" ${String(state.frameFilter) === String(frameId) ? "selected" : ""}>F${escapeHtml(frameId)}</option>`)
       .join("");
+    const frameIds = availableFrameIds();
+    const frameTrimMin = frameIds.length ? frameIds[0] : "";
+    const frameTrimMax = frameIds.length ? frameIds[frameIds.length - 1] : "";
     const laneOptions = (manifest.lanes || [])
       .map((lane) => `<option value="${escapeHtml(String(lane.lane))}" ${String(lane.lane) === state.lane ? "selected" : ""}>${escapeHtml(lane.label || ("Lane " + lane.lane))}</option>`)
       .join("");
@@ -2478,13 +2728,22 @@
         <span class="toolbar-label">Interface</span>
         <select class="tool-select" data-action="source-change">${sourceOptions}</select>
       </div>` : ""}
-      ${availableFrameIds().length > 1 ? `
+      ${frameIds.length > 1 ? `
       <div class="toolbar-group">
         <span class="toolbar-label">Frame</span>
         <select class="tool-select" data-action="frame-change">
           <option value="" ${!state.frameFilter ? "selected" : ""}>All Frames</option>
           ${frameOptions}
         </select>
+      </div>` : ""}
+      ${frameIds.length > 1 ? `
+      <div class="toolbar-group frame-trim-group" data-frame-trim-controls>
+        <span class="toolbar-label">Trim</span>
+        <input class="tool-input frame-trim-input" type="number" inputmode="numeric" data-frame-trim-start min="${escapeHtml(String(frameTrimMin))}" max="${escapeHtml(String(frameTrimMax))}" placeholder="${escapeHtml(String(frameTrimMin))}" value="${escapeHtml(state.frameTrimStart)}" aria-label="First frame">
+        <span class="frame-trim-separator">..</span>
+        <input class="tool-input frame-trim-input" type="number" inputmode="numeric" data-frame-trim-end min="${escapeHtml(String(frameTrimMin))}" max="${escapeHtml(String(frameTrimMax))}" placeholder="${escapeHtml(String(frameTrimMax))}" value="${escapeHtml(state.frameTrimEnd)}" aria-label="Last frame">
+        <button class="tool-button subtle" type="button" data-action="frame-trim-apply">Apply</button>
+        <button class="tool-button subtle" type="button" data-action="frame-trim-clear">All</button>
       </div>` : ""}
       ${availableSections().length > 1 ? `
       <div class="toolbar-group">
@@ -3330,10 +3589,12 @@
       state.surfaceMode = value === "wave" && !hasWaveSurface() ? "trace" : value;
       render("surface-switch");
       if (state.surfaceMode === "wave") {
-        if (state.selectedRowId) {
+        if (activeFrameTrimRange()) {
+          void focusWavePanelsForActiveFrameFilter();
+        } else if (state.selectedRowId) {
           requestWaveSelectionFocus(state.selectedRowId, state.selectedWordId);
-        } else if (state.frameFilter) {
-          void focusWavePanelsForFrame(state.frameFilter);
+        } else if (hasActiveFrameFilter()) {
+          void focusWavePanelsForActiveFrameFilter();
         }
       }
       return;
@@ -3353,6 +3614,20 @@
     if (action === "update-mode") {
       state.updateMode = value;
       render("selection");
+      return;
+    }
+    if (action === "frame-trim-apply") {
+      if (applyFrameTrimFromControls()) {
+        recordAction("frame-trim", frameFilterLabel());
+      }
+      return;
+    }
+    if (action === "frame-trim-clear") {
+      clearFrameFilters();
+      ensureSelection();
+      ensureSelectedField(selectedPacket());
+      render("filter-change");
+      refreshWaveViewportForFrameFilter();
       return;
     }
     if (action === "spec-mode") {
@@ -3536,9 +3811,7 @@
     if (action === "source-change" || action === "wave-source-change") {
       state.waveSourceId = selectEl.value;
       render("source-change");
-      if (state.surfaceMode === "wave" && state.frameFilter) {
-        void focusWavePanelsForFrame(state.frameFilter);
-      }
+      refreshWaveViewportForFrameFilter();
       return;
     }
     if (action === "wave-zoom-level") {
@@ -3549,12 +3822,12 @@
     }
     if (action === "frame-change") {
       state.frameFilter = selectEl.value || "";
+      state.frameTrimStart = "";
+      state.frameTrimEnd = "";
       ensureSelection();
       ensureSelectedField(selectedPacket());
       render("filter-change");
-      if (state.surfaceMode === "wave" && state.frameFilter) {
-        void focusWavePanelsForFrame(state.frameFilter);
-      }
+      refreshWaveViewportForFrameFilter();
       return;
     }
     if (action === "section-change") {
@@ -3566,9 +3839,7 @@
       ensureSelection();
       ensureSelectedField(selectedPacket());
       render("filter-change");
-      if (state.surfaceMode === "wave" && state.frameFilter) {
-        void focusWavePanelsForFrame(state.frameFilter);
-      }
+      refreshWaveViewportForFrameFilter();
       return;
     }
     if (action === "row-visibility-change") {
@@ -3598,9 +3869,7 @@
       ensureSelection();
       ensureSelectedField(selectedPacket());
       render("lane-change");
-      if (state.surfaceMode === "wave" && state.frameFilter) {
-        void focusWavePanelsForFrame(state.frameFilter);
-      }
+      refreshWaveViewportForFrameFilter();
     }
   }
 
@@ -4746,12 +5015,17 @@
     if (window.WaveDrom && typeof window.WaveDrom.RenderWaveForm === "function") {
       window.WaveDrom.RenderWaveForm(panel.renderIndex, view.renderJson, "WaveDrom_Display_", false);
       restyleWaveSvg(display.querySelector("svg"), display);
+      const decodeLayout = measureWaveAxisLayout(display, decodeHost, panel, view.visibleSlots);
+      const annotationLayout = measureWaveAxisLayout(display, annotationHost, panel, view.visibleSlots);
       renderWaveHotspots(display, view.beatRows, panel, view.cycleStart);
+      renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart, decodeLayout);
+      renderWaveAnnotations(annotationHost, view.annotations, view.chunkMeta || null, panel, view.visibleSlots, view.cycleStart, annotationLayout);
+      scheduleWaveAxisRealignment(display, decodeHost, annotationHost, view, panel, renderToken, waveToken);
     } else {
       display.innerHTML = '<div class="wave-render-status">WaveDrom runtime is unavailable.</div>';
+      renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart, null);
+      renderWaveAnnotations(annotationHost, view.annotations, view.chunkMeta || null, panel, view.visibleSlots, view.cycleStart, null);
     }
-    renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart);
-    renderWaveAnnotations(annotationHost, view.annotations, view.chunkMeta || null, panel, view.visibleSlots, view.cycleStart);
   }
 
   async function renderLegacyWavePanel(panel, renderToken, waveToken, display, status) {
@@ -4776,11 +5050,14 @@
     if (window.WaveDrom && typeof window.WaveDrom.RenderWaveForm === "function") {
       window.WaveDrom.RenderWaveForm(panel.renderIndex, view.renderJson, "WaveDrom_Display_", false);
       restyleWaveSvg(display.querySelector("svg"), display);
+      const decodeLayout = measureWaveAxisLayout(display, decodeHost, panel, view.visibleSlots);
       renderWaveHotspots(display, view.beatRows, panel, view.cycleStart);
+      renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart, decodeLayout);
+      scheduleWaveAxisRealignment(display, decodeHost, null, view, panel, renderToken, waveToken);
     } else {
       display.innerHTML = '<div class="wave-render-status">WaveDrom runtime is unavailable.</div>';
+      renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart, null);
     }
-    renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart);
   }
 
   async function buildChunkWaveViewModel(panel, panelState) {
@@ -4793,6 +5070,22 @@
       return buildLegacyChunkWaveViewModel(chunk, chunkMeta, panel, panelState);
     }
     return buildWaveViewModel(chunk, chunkMeta, panel, panelState);
+  }
+
+  function scheduleWaveAxisRealignment(display, decodeHost, annotationHost, view, panel, renderToken, waveToken) {
+    const schedule = window.requestAnimationFrame || ((callback) => window.setTimeout(callback, 0));
+    schedule(() => {
+      if (waveToken !== waveRenderToken || renderToken !== debugState.renderCount) {
+        return;
+      }
+      const decodeLayout = measureWaveAxisLayout(display, decodeHost, panel, view.visibleSlots);
+      renderWaveHotspots(display, view.beatRows, panel, view.cycleStart);
+      renderWaveDecodeAxis(decodeHost, view.beatRows, panel, view.visibleSlots, view.cycleStart, decodeLayout);
+      if (annotationHost) {
+        const annotationLayout = measureWaveAxisLayout(display, annotationHost, panel, view.visibleSlots);
+        renderWaveAnnotations(annotationHost, view.annotations, view.chunkMeta || null, panel, view.visibleSlots, view.cycleStart, annotationLayout);
+      }
+    });
   }
 
   async function buildLegacyChunkWaveViewModel(chunk, chunkMeta, panel, panelState) {
@@ -5232,14 +5525,14 @@
   }
 
   function filterWaveAnnotationsByFrame(annotations) {
-    if (!state.frameFilter) {
+    if (!hasActiveFrameFilter()) {
       return annotations;
     }
     return (annotations || []).filter((annotation) => rowIdMatchesFrameFilter(annotation.rowId || ""));
   }
 
   function filterWaveBeatRowsByFrame(beatRows) {
-    if (!state.frameFilter) {
+    if (!hasActiveFrameFilter()) {
       return beatRows;
     }
     return (beatRows || [])
@@ -5692,7 +5985,92 @@
     return tones[group] || tones.header;
   }
 
-  function renderWaveDecodeAxis(host, beatRows, panel, visibleSlots, cycleStart) {
+  function svgElementClientRect(element, svg) {
+    if (!element || typeof element.getBoundingClientRect !== "function") {
+      return null;
+    }
+    const rect = element.getBoundingClientRect();
+    if (rect && Number.isFinite(rect.left) && Number.isFinite(rect.right) && rect.right > rect.left) {
+      return rect;
+    }
+    if (!svg || typeof element.getBBox !== "function") {
+      return null;
+    }
+    try {
+      const box = element.getBBox();
+      const svgRect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox && svg.viewBox.baseVal;
+      const viewWidth = viewBox && viewBox.width ? viewBox.width : Number(svg.getAttribute("width")) || svgRect.width;
+      const viewX = viewBox && Number.isFinite(viewBox.x) ? viewBox.x : 0;
+      if (!box || !Number.isFinite(box.x) || !Number.isFinite(box.width) || !viewWidth || !svgRect.width) {
+        return null;
+      }
+      const scaleX = svgRect.width / viewWidth;
+      const left = svgRect.left + (box.x - viewX) * scaleX;
+      const right = left + box.width * scaleX;
+      return { left: left, right: right, width: Math.max(0, right - left) };
+    } catch (error) {
+      noteError(error);
+      return null;
+    }
+  }
+
+  function measureWaveAxisLayout(display, host, panel, visibleSlots) {
+    const svg = display ? display.querySelector("svg") : null;
+    if (!svg || !host) {
+      return null;
+    }
+    const slotCount = Math.max(1, Number(visibleSlots) || 1);
+    const sourceRows = collectWaveBeatUseRows(svg, panel);
+    const sourceUses = sourceRows.find((row) => row.length >= slotCount) || sourceRows[0];
+    if (!sourceUses || !sourceUses.length) {
+      return null;
+    }
+    const lastIndex = Math.max(0, Math.min(sourceUses.length - 1, slotCount - 1));
+    const firstRect = svgElementClientRect(sourceUses[0], svg);
+    const lastRect = svgElementClientRect(sourceUses[lastIndex], svg);
+    const hostRect = host.getBoundingClientRect();
+    const hostStyle = window.getComputedStyle ? window.getComputedStyle(host) : null;
+    const paddingLeft = hostStyle ? parseFloat(hostStyle.paddingLeft) || 0 : 0;
+    const paddingRight = hostStyle ? parseFloat(hostStyle.paddingRight) || 0 : 0;
+    const contentLeft = hostRect ? hostRect.left + paddingLeft : 0;
+    const contentWidth = hostRect ? Math.max(1, hostRect.width - paddingLeft - paddingRight) : 0;
+    if (!firstRect || !lastRect || !hostRect || !Number.isFinite(contentLeft) || !contentWidth) {
+      return null;
+    }
+    const rawLeft = firstRect.left - contentLeft;
+    const rawRight = lastRect.right - contentLeft;
+    const leftPx = Math.max(0, Math.min(contentWidth - 1, rawLeft));
+    const widthPx = Math.max(1, Math.min(contentWidth - leftPx, rawRight - leftPx));
+    if (!Number.isFinite(leftPx) || !Number.isFinite(widthPx) || widthPx <= 0) {
+      return null;
+    }
+    return {
+      leftPx: leftPx,
+      widthPx: widthPx,
+      slotPixelWidth: widthPx / slotCount,
+    };
+  }
+
+  function pixelStyleValue(value) {
+    return String(Math.round((Number(value) || 0) * 100) / 100);
+  }
+
+  function waveAlignedTrackStyle(layout) {
+    if (!layout) {
+      return "";
+    }
+    return ` style="margin-left:${pixelStyleValue(layout.leftPx)}px; width:${pixelStyleValue(layout.widthPx)}px;"`;
+  }
+
+  function waveAlignedAnnotationBandStyle(layout) {
+    if (!layout) {
+      return "";
+    }
+    return ` style="grid-template-columns:${pixelStyleValue(layout.leftPx)}px ${pixelStyleValue(layout.widthPx)}px; column-gap:0;"`;
+  }
+
+  function renderWaveDecodeAxis(host, beatRows, panel, visibleSlots, cycleStart, axisLayout) {
     if (!host) {
       return;
     }
@@ -5704,13 +6082,14 @@
       host.innerHTML = '<div class="wave-decode-empty">No decoded FEB_DATA_FRAME labels in this window.</div>';
       return;
     }
-    const trackWidth = Math.max(240, host.clientWidth || root.clientWidth || 960);
+    const trackWidth = axisLayout ? axisLayout.widthPx : Math.max(240, host.clientWidth || root.clientWidth || 960);
+    const trackStyle = waveAlignedTrackStyle(axisLayout);
     host.innerHTML = beatRows.map((row) => {
-      const slotPixelWidth = trackWidth / Math.max(1, row.slotCount);
+      const slotPixelWidth = axisLayout ? axisLayout.slotPixelWidth : trackWidth / Math.max(1, row.slotCount);
       const buttons = row.cells.map((cell) => {
         const left = (cell.slotStart / row.slotCount) * 100;
         const span = Math.max(1, cell.slotEnd - cell.slotStart + 1);
-        const width = Math.max(2.8, (span / row.slotCount) * 100);
+        const width = (span / row.slotCount) * 100;
         const tone = waveBeatTone(cell.group);
         const text = displayWaveBeatLabel(cell, slotPixelWidth * span, visibleSlots);
         const absoluteCycle = Number.isFinite(Number(cycleStart)) ? Number(cycleStart) + (Number(cell.slotStart) || 0) : "";
@@ -5726,13 +6105,13 @@
             data-wave-trace-row-id="${escapeHtml(cell.traceRowId || cell.targetRowId)}"
             data-wave-word-id="${escapeHtml(cell.wordId)}"
             data-wave-tooltip="${escapeHtml(cell.fullLabel)}"
-            style="left:${left}%; width:${width}%; background:${escapeHtml(tone.fill)}; color:${escapeHtml(tone.text)}; border-color:${escapeHtml(tone.stroke)};"
+            style="left:${left}%; width:${width}%; background:${escapeHtml(tone.fill)}; color:${escapeHtml(tone.text)}; --wave-tone-stroke:${escapeHtml(tone.stroke)};"
           >${escapeHtml(text)}</button>
         `;
       }).join("");
       return `
         <div class="wave-decode-band">
-          <div class="wave-decode-track">${buttons}</div>
+          <div class="wave-decode-track"${trackStyle}>${buttons}</div>
         </div>
       `;
     }).join("");
@@ -5760,23 +6139,38 @@
     if (!useRows.length) {
       return;
     }
-    const layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    layer.setAttribute("class", "wave-hotspot-layer");
+    const layers = new Map();
+    const getLayer = (sourceUses) => {
+      const rowGroup = sourceUses && sourceUses[0] ? sourceUses[0].parentNode : null;
+      if (!rowGroup) {
+        return null;
+      }
+      if (!layers.has(rowGroup)) {
+        const rowLayer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        rowLayer.setAttribute("class", "wave-hotspot-layer");
+        rowGroup.appendChild(rowLayer);
+        layers.set(rowGroup, rowLayer);
+      }
+      return layers.get(rowGroup);
+    };
     beatRows.forEach((row, rowIndex) => {
       const sourceUses = useRows[Math.min(rowIndex, Math.max(0, useRows.length - 1))];
       if (!sourceUses || !sourceUses.length) {
         return;
       }
+      const layer = getLayer(sourceUses);
+      if (!layer) {
+        return;
+      }
       row.cells.forEach((cell) => {
         for (let slot = cell.slotStart; slot <= cell.slotEnd; slot += 1) {
-          const hotspot = cloneWaveBeatUse(sourceUses[slot], cell, panel, cycleStart);
+          const hotspot = cloneWaveBeatUse(sourceUses[slot], cell, panel, cycleStart, slot);
           if (hotspot) {
             layer.appendChild(hotspot);
           }
         }
       });
     });
-    svg.appendChild(layer);
     if (activeWaveLinkKey) {
       setWaveLinkHover(activeWaveLinkKey);
     }
@@ -5819,7 +6213,7 @@
       .filter((items) => items.length);
   }
 
-  function cloneWaveBeatUse(sourceUse, cell, panel, cycleStart) {
+  function cloneWaveBeatUse(sourceUse, cell, panel, cycleStart, slot) {
     if (!sourceUse) {
       return null;
     }
@@ -5843,7 +6237,7 @@
     hotspot.setAttribute("data-wave-link-key", cell.linkKey);
     hotspot.setAttribute("data-wave-panel-id", panel && panel.panelId ? panel.panelId : "");
     if (Number.isFinite(Number(cycleStart))) {
-      hotspot.setAttribute("data-wave-cycle", String(Number(cycleStart) + (Number(cell.slotStart) || 0)));
+      hotspot.setAttribute("data-wave-cycle", String(Number(cycleStart) + (Number(slot) || 0)));
     }
     hotspot.setAttribute("data-wave-row-id", cell.targetRowId);
     hotspot.setAttribute("data-wave-target-row-id", cell.targetRowId);
@@ -5853,7 +6247,7 @@
     return hotspot;
   }
 
-  function renderWaveAnnotations(host, annotations, chunkMeta, panel, visibleSlots, cycleStart) {
+  function renderWaveAnnotations(host, annotations, chunkMeta, panel, visibleSlots, cycleStart, axisLayout) {
     if (!annotations.length) {
       host.innerHTML = '<div class="wave-annotation-empty">No row-linked annotations in this window.</div>';
       return;
@@ -5865,14 +6259,15 @@
       }
       groups.get(annotation.band).push(annotation);
     });
-    const maxSlot = Math.max(1, ...annotations.map((annotation) => (annotation.slotEnd || 0) + 1));
+    const maxSlot = Math.max(1, Number(visibleSlots) || 1);
+    const bandStyle = waveAlignedAnnotationBandStyle(axisLayout);
     host.innerHTML = Array.from(groups.entries()).map(([band, items]) => {
       const rows = packWaveAnnotationRows(items);
       const tracks = rows.map((row) => {
         const buttons = row.map((annotation) => {
           const left = ((annotation.slotStart || 0) / maxSlot) * 100;
           const span = Math.max(1, (annotation.slotEnd || 0) - (annotation.slotStart || 0) + 1);
-          const width = Math.max(1.5, (span / maxSlot) * 100);
+          const width = (span / maxSlot) * 100;
           const absoluteCycle = Number.isFinite(Number(cycleStart)) ? Number(cycleStart) + (Number(annotation.slotStart) || 0) : "";
           return `
             <button
@@ -5889,7 +6284,7 @@
         return `<div class="wave-annotation-track">${buttons}</div>`;
       }).join("");
       return `
-        <div class="wave-annotation-band">
+        <div class="wave-annotation-band"${bandStyle}>
           <div class="wave-annotation-label">${escapeHtml(band)}</div>
           <div class="wave-annotation-rows">${tracks}</div>
         </div>

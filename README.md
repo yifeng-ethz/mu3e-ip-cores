@@ -16,7 +16,7 @@
 
 <p align="middle">
   <a href="https://github.com/yifeng-ethz/mu3e-ip-cores">
-    <img src="./quartus_system/logo/Logo_drawing300.png" alt="Mu3e Logo" width="150" />
+    <img src="./firmware_builds/misc/logo/Logo_drawing300.png" alt="Mu3e Logo" width="150" />
   </a>
 </p>
 
@@ -55,14 +55,14 @@ Each Mu3e IP core resides in its own subdirectory of this repository or in an ex
 | [**Firefly Transceiver I2C Master**](https://github.com/yifeng-ethz/firefly_xcvr_i2c_master) | Interfaces with the Samtec Firefly optical transceiver module via I2C.  Periodically reads temperature and RX power and can be halted. | <img src="https://img.shields.io/badge/version-26.0.0330-blue" alt="version 26.0.0330 badge" width="200" /> | — |
 | [**IP 8b/10b Decoder**](https://github.com/yifeng-ethz/ip_8b10b_decoder) | Standard 8b/10b decoder for parallel LVDS `rxout` data.  Derives parity and decoding errors. | <img src="https://img.shields.io/badge/version-1.3.1-blue" alt="version 1.3.1 badge" width="200" /> | — |
 | [**MuTRiG Reset Controller**](https://github.com/yifeng-ethz/mutrig_reset_controller) | Issues reset pulses for the MuTRiG based on run‑state changes.  Provides programmable phase shift via `alt_pll_reconfig`. | <img src="https://img.shields.io/badge/version-1.0.8-blue" alt="version 1.0.8 badge" width="200" /> | — |
-| [**Ring‑buffer CAM**](https://github.com/yifeng-ethz/ring-buffer_cam) | Circular buffer variant of CAM with push‑to‑stack write semantics and cache‑like read‑through.  Used to build the hit stack. | <img src="https://img.shields.io/badge/version-26.1.4.0402-blue" alt="version 26.1.4.0402 badge" width="200" /> | [Standalone](ring-buffer_cam/SIGNOFF.md) |
+| [**Ring‑buffer CAM**](https://github.com/yifeng-ethz/ring-buffer_cam) | Circular buffer variant of CAM with push‑to‑stack write semantics and cache‑like read‑through.  Used to build the hit stack. | <img src="https://img.shields.io/badge/version-26.1.4.0402-blue" alt="version 26.1.4.0402 badge" width="200" /> | [Standalone](ring-buffer_cam/doc/SIGNOFF.md) |
 | [**Frontend‑Board Frame Assembly**](https://github.com/yifeng-ethz/feb_frame_assembly) | Assembles time‑interleaved subframes from the ring‑buffer CAM into Mu3e‑standard data frames and schedules packet transmission. | <img src="https://img.shields.io/badge/version-26.0.0328-blue" alt="version 26.0.0328 badge" width="200" /> | — |
 | [**FEB MAX10 Communication Bridge**](https://github.com/yifeng-ethz/feb_max10_comm) | FEB-side Arria V bridge that stages one flash page, crosses it into the MAX10 link domain, and preserves the downstream FEBSPI programming contract. | <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="version 0.1.0 badge" width="200" /> | — |
 | [**Mu3e LVDS Controller**](https://github.com/yifeng-ethz/mu3e_lvds_controller) | Provides high‑speed LVDS links to the MuPix sensors using FPGA vendor IP.  Includes 28 nm LVDS RX and Pro variants. | <img src="https://img.shields.io/badge/version-25.1.0630-blue" alt="version 25.1.0630 badge" width="200" /> | — |
 | [**MuPix Inbound**](https://github.com/yifeng-ethz/mupix_inbound) | Deserializes data from MuPix chips, decodes and buffers hits. | <img src="https://img.shields.io/badge/status-Prototype-lightgrey" alt="Prototype badge" width="200" /> | — |
 | [**Packet Scheduler**](https://github.com/yifeng-ethz/packet_scheduler) | Orders packets via an interface adapter and ordered-priority queues to achieve deterministic DAQ multiplexing. | <img src="https://img.shields.io/badge/version-26.3.10.0414-blue" alt="version 26.3.10.0414 badge" width="200" /> | [DV](packet_scheduler/doc/VERIFICATION_SIGNOFF.md) |
 | [**MuTRiG Emulator**](https://github.com/yifeng-ethz/emulator_mutrig) | FPGA emulator of MuTRiG 3 ASIC digital output. Produces 8b/1k frames bit‑compatible with real ASIC output for FPGA‑internal verification. | <img src="https://img.shields.io/badge/version-26.0.3.0416-blue" alt="version 26.0.3.0416 badge" width="200" /> | [Standalone](emulator_mutrig/SIGNOFF.md) |
-| [**MuTRiG Lane Source Mux**](./mutrig_lane_source_mux/) | Static per-lane selector that switches FEB datapath inputs between real MuTRiG decode streams and emulator streams during DAQ bring-up. | <img src="https://img.shields.io/badge/version-1.0-blue" alt="version 1.0 badge" width="200" /> | — |
+| [**MuTRiG Lane Source Mux**](./misc/mutrig_lane_source_mux/) | Static per-lane selector that switches FEB datapath inputs between real MuTRiG decode streams and emulator streams during DAQ bring-up. | <img src="https://img.shields.io/badge/version-1.0-blue" alt="version 1.0 badge" width="200" /> | — |
 | [**Run‑Control Management**](https://github.com/yifeng-ethz/run-control_mgmt) | Manages run‑state transitions for Mu3e subsystems and issues control signals. | <img src="https://img.shields.io/badge/version-26.1.0.0413-blue" alt="version 26.1.0.0413 badge" width="200" /> | — |
 
 `Signoff` links point to checked-in DV reports, standalone signoff bundles, or synthesis signoff notes. `—` means no signoff document is currently indexed from this top-level catalog.
@@ -90,13 +90,33 @@ The firmware stack orchestrated by this repository spans the complete readout ch
 
 ---
 
+## Active FEB SciFi Bring-Up
+
+The active real-MuTRiG firmware build is
+[`firmware_builds/systems/system_20260427_testplanphase5/`](firmware_builds/systems/system_20260427_testplanphase5/).
+Before live hardware work, read the centralized references:
+
+- [`firmware_builds/doc/SETUP.md`](firmware_builds/doc/SETUP.md) for SWB/FEB programming, SMB3/SMB5 mapping, and board-test tool flow.
+- [`firmware_builds/doc/CONTRACT.md`](firmware_builds/doc/CONTRACT.md) for AVST payload, packet, and error-sideband policy across the Phase-5 datapath.
+- [`firmware_builds/doc/MUTRIG.md`](firmware_builds/doc/MUTRIG.md) for MuTRiG configuration files, TDC injection, analog mode, and PLL-lock interpretation.
+- [`firmware_builds/doc/MATH.md`](firmware_builds/doc/MATH.md) for the Phase-5 latency/rate model sketch and histogram queue-depth gate.
+- [`firmware_builds/doc/TEST_PLAN_PHASE5.md`](firmware_builds/doc/TEST_PLAN_PHASE5.md) for the Phase-5 case catalog.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
 ## Directory Structure
 
 ```text
 mu3e-ip-cores/
 ├── CAM/                        # Content addressable memory core
 ├── alt_temp_sense_controller/  # On‑chip temperature diode wrapper
+├── board_projects/             # Full board-level Quartus projects and generated build areas
+├── board_test_system/          # Legacy and live board-test inputs that predate the system folder split
 ├── charge_injection/           # Analog pulser and MuTRiG injector variants
+├── docs/                       # Repository-level reference material, archives, and slides
+├── emulator_mutrig/            # MuTRiG 3 ASIC emulator (8b/1k frame generator)
 ├── feb_frame_assembly/         # Frontend-board frame assembly
 ├── feb_max10_comm/             # FEB-side MAX10 flash programming bridge
 ├── firefly_xcvr_i2c_master/    # I2C master for Samtec Firefly transceiver
@@ -104,25 +124,29 @@ mu3e-ip-cores/
 ├── histogram_statistics/
 ├── ip_8b10b_decoder/
 ├── lvds_error_counter_fabric/
-├── emulator_mutrig/            # MuTRiG 3 ASIC emulator (8b/1k frame generator)
 ├── misc/                       # Local debug/helper IPs kept outside submodules
+│   ├── altera_lvds/            # Vendor LVDS wrapper experiments and compatibility helpers
+│   └── mutrig_lane_source_mux/ # Static selector between real and emulated MuTRiG lanes
 ├── mu3e_lvds_controller/
 ├── mupix_inbound/
 ├── mutrig_channel_counter_fabric/
 ├── mutrig_controller/
-├── mutrig_lane_source_mux/     # Static selector between real and emulated MuTRiG lanes
-├── mutrig_frame_assembly/
 ├── mutrig_frame_deassembly/
 ├── mutrig_reset_controller/
 ├── mutrig_timestamp_processor/
 ├── onewire_temp_sense/         # 1-Wire controllers plus FEB v1 bridge helper
 ├── packet_scheduler/
-├── quartus_system/             # Qsys wrapper, portable IP catalogs, and catalog scripts
+├── firmware_builds/            # Qsys wrapper, portable IP catalogs, and catalog scripts
 ├── ring-buffer_cam/
 ├── run-control_mgmt/
 ├── scripts/                    # Shared DV/report automation used across IPs
 ├── slow-control_hub/
-└── system_console_toolkit/     # Shared System Console toolkits and board bring-up flows
+├── toolkits/                   # Shared System Console toolkits plus infra helpers
+│   ├── fe_scifi/               # FE SciFi System Console runtime and board bring-up toolkits
+│   └── infra/                  # CMSIS-SVD and shared board bring-up metadata helpers
+├── templates/                  # Shared document and code templates
+├── tools/                      # Analysis, visualization, and local developer tools
+└── trash_bin/                  # Deprecated plans, debug dumps, and unclassified old work
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -151,12 +175,12 @@ mu3e-ip-cores/
    ```
 3. (optional) Regenerate the normalized Platform Designer catalogs used by Quartus and downstream tooling.
    ```bash
-   ./quartus_system/regenerate_ipx_catalog.sh
+   ./firmware_builds/systems/system_20260427_testplanphase5/script/regenerate_ipx_catalog.sh
    ```
-   This refreshes the canonical `quartus_system/components.ipx` catalog and the identical compatibility alias `quartus_system/mu3e_ip_cores.ipx`.
+   This refreshes the canonical active-system catalog under `firmware_builds/systems/system_20260427_testplanphase5/syn/`.
 4. Add the catalog directory to Quartus / Platform Designer search paths.
    ```bash
-   export QSYS_IP_FILE_PATH=${QSYS_IP_FILE_PATH:+$QSYS_IP_FILE_PATH:}$MU3E_IP_CORES_ROOT/quartus_system
+   export QSYS_IP_FILE_PATH=${QSYS_IP_FILE_PATH:+$QSYS_IP_FILE_PATH:}$MU3E_IP_CORES_ROOT/firmware_builds/systems/system_20260427_testplanphase5/syn
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -168,7 +192,7 @@ mu3e-ip-cores/
 Detailed integration instructions are provided in each core’s subdirectory.  In general:
 - GUI:
   1. Open Platform Designer (formerly Qsys) in Quartus.
-  2. Add `quartus_system/` as an **IP search path** so Platform Designer picks up the normalized Mu3e catalog.
+  2. Add `firmware_builds/systems/system_20260427_testplanphase5/syn/` as an **IP search path** so Platform Designer picks up the normalized Mu3e catalog.
 - CLI:
   1. Configure parameters (e.g., burst widths, channel counts) as required for your design.
     ```bash
@@ -176,7 +200,7 @@ Detailed integration instructions are provided in each core’s subdirectory.  I
     ```
   2. Export generated system top RTL file and connect the IP into your top‑level design or testbench.
     ```bash
-    qsys-generate <path_to_your_system>.qsys --search-path="$MU3E_IP_CORES_ROOT/quartus_system,$" --synthesis=VHDL --output-directory=./generated
+    qsys-generate <path_to_your_system>.qsys --search-path="$MU3E_IP_CORES_ROOT/firmware_builds/systems/system_20260427_testplanphase5/syn,$" --synthesis=VHDL --output-directory=./generated
     ```
 
     

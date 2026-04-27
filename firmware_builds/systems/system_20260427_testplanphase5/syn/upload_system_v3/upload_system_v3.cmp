@@ -1,0 +1,46 @@
+	component upload_system_v3 is
+		port (
+			control_clock_clk                : in  std_logic                     := 'X';             -- clk
+			control_clock_reset_reset_n      : in  std_logic                     := 'X';             -- reset_n
+			control_plane_hard_reset_reset   : out std_logic;                                        -- reset
+			data_path_hard_reset_reset       : out std_logic;                                        -- reset
+			ext_hard_reset_reset             : out std_logic;                                        -- reset
+			lvds_outclock_clk                : in  std_logic                     := 'X';             -- clk
+			lvds_outclock_reset_reset_n      : in  std_logic                     := 'X';             -- reset_n
+			upload_sc_clock_clk              : in  std_logic                     := 'X';             -- clk
+			upload_sc_clock_reset_reset_n    : in  std_logic                     := 'X';             -- reset_n
+			csr_waitrequest                  : out std_logic;                                        -- waitrequest
+			csr_readdata                     : out std_logic_vector(31 downto 0);                    -- readdata
+			csr_readdatavalid                : out std_logic;                                        -- readdatavalid
+			csr_response                     : out std_logic_vector(1 downto 0);                     -- response
+			csr_burstcount                   : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
+			csr_writedata                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			csr_address                      : in  std_logic_vector(4 downto 0)  := (others => 'X'); -- address
+			csr_write                        : in  std_logic                     := 'X';             -- write
+			csr_read                         : in  std_logic                     := 'X';             -- read
+			csr_byteenable                   : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
+			csr_debugaccess                  : in  std_logic                     := 'X';             -- debugaccess
+			runctl_mgmt_host_data            : out std_logic_vector(8 downto 0);                     -- data
+			runctl_mgmt_host_valid           : out std_logic;                                        -- valid
+			runctl_mgmt_host_ready           : in  std_logic                     := 'X';             -- ready
+			synclink_data                    : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			synclink_error                   : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			upload_data_data                 : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			upload_data_valid                : in  std_logic                     := 'X';             -- valid
+			upload_data_ready                : out std_logic;                                        -- ready
+			upload_data_startofpacket        : in  std_logic                     := 'X';             -- startofpacket
+			upload_data_endofpacket          : in  std_logic                     := 'X';             -- endofpacket
+			upload_data0_sc_rc_data          : out std_logic_vector(35 downto 0);                    -- data
+			upload_data0_sc_rc_valid         : out std_logic;                                        -- valid
+			upload_data0_sc_rc_ready         : in  std_logic                     := 'X';             -- ready
+			upload_data0_sc_rc_startofpacket : out std_logic;                                        -- startofpacket
+			upload_data0_sc_rc_endofpacket   : out std_logic;                                        -- endofpacket
+			upload_data0_sc_rc_channel       : out std_logic_vector(1 downto 0);                     -- channel
+			upload_sc_data                   : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			upload_sc_valid                  : in  std_logic                     := 'X';             -- valid
+			upload_sc_ready                  : out std_logic;                                        -- ready
+			upload_sc_startofpacket          : in  std_logic                     := 'X';             -- startofpacket
+			upload_sc_endofpacket            : in  std_logic                     := 'X'              -- endofpacket
+		);
+	end component upload_system_v3;
+

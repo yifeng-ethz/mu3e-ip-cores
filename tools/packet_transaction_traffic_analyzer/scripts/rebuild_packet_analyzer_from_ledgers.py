@@ -3,7 +3,7 @@
 
 The original VCD-backed packet analyzer generator backend is unavailable in
 this workspace. This script recovers static analyzer bundles from the promoted
-`index.ledger.*.html` artifacts that still exist under `wave_reports/`.
+`index.ledger.*.html` artifacts that still exist under `report/wave/`.
 """
 
 from __future__ import annotations
@@ -89,7 +89,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--wave-reports-root",
         type=Path,
-        default=Path("/home/yifeng/packages/musip_2604/tb_int/wave_reports"),
+        default=Path("/home/yifeng/packages/musip_2604/tb_int/report/wave"),
         help="Root containing bucket/case wave report bundles.",
     )
     parser.add_argument(
@@ -951,7 +951,9 @@ def selected_frames_from_bundle(bundle_meta: dict, fallback_frame_ids: list[int]
     return list(range(frame_start, frame_start + frame_count))
 
 
-def default_lane_from_bundle(bundle_meta: dict) -> int:
+def default_lane_from_bundle(bundle_meta: dict, include_all_lanes: bool) -> int:
+    if not include_all_lanes:
+        return 0
     frame_window = bundle_meta.get("frame_window") or {}
     try:
         total_frames = int(bundle_meta["frames"])
@@ -972,6 +974,8 @@ def find_wave_reports_root(path: Path) -> Path | None:
     resolved = path.resolve()
     for candidate in [resolved, *resolved.parents]:
         if candidate.name == "wave_reports" and (candidate / "README.md").exists():
+            return candidate
+        if candidate.name == "wave" and candidate.parent.name == "report" and (candidate / "README.md").exists():
             return candidate
     return None
 
@@ -1134,9 +1138,11 @@ def rebuild_case(case_dir: Path) -> Path:
     source_vcd = (case_dir / ((bundle_meta.get("artifacts") or {}).get("vcd") or "")).resolve()
     source_id = f"{case_key[0]}/{case_key[1]}"
     legacy_wave_panels = collect_legacy_wave_panels(out_dir, source_id, source_id)
+    include_all_lanes = len(selected_frame_ids) <= 16
 
-    lanes_payload = {
-        -1: {
+    lanes_payload: dict[int, dict] = {}
+    if include_all_lanes:
+        lanes_payload[-1] = {
             "lane": -1,
             "label": "All Lanes",
             "frameIds": sorted({packet["frameId"] for packet in all_lane_packets if packet["rowType"] == "frame"}),
@@ -1145,7 +1151,6 @@ def rebuild_case(case_dir: Path) -> Path:
             "packets": all_lane_packets,
             "wavePanels": {},
         }
-    }
     for lane, packets in ingress_by_lane.items():
         lanes_payload[lane] = {
             "lane": lane,
@@ -1157,10 +1162,10 @@ def rebuild_case(case_dir: Path) -> Path:
             "wavePanels": {},
         }
 
-    lane_infos = [
-        build_lane_info(-1, lanes_payload[-1]["packets"], "packet-lane-all.js"),
-        *(build_lane_info(lane, lanes_payload[lane]["packets"], f"packet-lane{lane}.js") for lane in range(4)),
-    ]
+    lane_infos = []
+    if include_all_lanes:
+        lane_infos.append(build_lane_info(-1, lanes_payload[-1]["packets"], "packet-lane-all.js"))
+    lane_infos.extend(build_lane_info(lane, lanes_payload[lane]["packets"], f"packet-lane{lane}.js") for lane in range(4))
 
     manifest = {
         "meta": {
@@ -1172,7 +1177,8 @@ def rebuild_case(case_dir: Path) -> Path:
             "frameStart": selected_frame_ids[0] if selected_frame_ids else 0,
             "frameCount": len(selected_frame_ids),
             "selectedFrames": selected_frame_ids,
-            "defaultLane": default_lane_from_bundle(bundle_meta),
+            "defaultLane": default_lane_from_bundle(bundle_meta, include_all_lanes),
+            "allLaneAggregate": "present" if include_all_lanes else "omitted_for_long_frame_window",
             "defaultDecodeMode": "mu3e-spec",
             "referenceVideoTitle": "Teledyne LeCroy Voyager USB 3.0 Analyzer packet display workflow",
             "specReference": "Mu3eSpecBook-4.pdf pages 147-148 (32-bit frontend packet and hit layouts)",
@@ -1194,7 +1200,11 @@ def rebuild_case(case_dir: Path) -> Path:
     }
 
     write_js_assignment(out_dir / "packet-manifest.js", "window.__PACKET_ANALYZER_MANIFEST__", manifest)
-    write_js_assignment(out_dir / "packet-lane-all.js", "window.__PACKET_ANALYZER_LANES__", {"-1": lanes_payload[-1]})
+    all_lane_script = out_dir / "packet-lane-all.js"
+    if include_all_lanes:
+        write_js_assignment(all_lane_script, "window.__PACKET_ANALYZER_LANES__", {"-1": lanes_payload[-1]})
+    elif all_lane_script.exists():
+        all_lane_script.unlink()
     for lane in range(4):
         write_js_assignment(out_dir / f"packet-lane{lane}.js", "window.__PACKET_ANALYZER_LANES__", {str(lane): lanes_payload[lane]})
 

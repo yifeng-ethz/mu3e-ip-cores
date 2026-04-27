@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_irq_mapper.sv"
+   type="SYSTEM_VERILOG"
+   library="irq_mapper" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_mm_interconnect_0.v"
+   type="VERILOG"
+   library="mm_interconnect_0" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_timer_ts.vhd"
+   type="VHDL"
+   library="timer_ts" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_timer.vhd"
+   type="VHDL"
+   library="timer" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_sysid.v"
+   type="VERILOG"
+   library="sysid" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_si_out.vhd"
+   type="VHDL"
+   library="si_out" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_si_in.vhd"
+   type="VHDL"
+   library="si_in" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_ram.vhd"
+   type="VHDL"
+   library="ram" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_jtag_uart.vhd"
+   type="VHDL"
+   library="jtag_uart" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_dbg0.vhd"
+   type="VHDL"
+   library="dbg0" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem_cpu.v"
+   type="VERILOG"
+   library="cpu" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_avalon_st_adapter_002.vhd"
+   type="VHDL"
+   library="avalon_st_adapter_002" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_avalon_st_adapter_001.vhd"
+   type="VHDL"
+   library="avalon_st_adapter_001" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_avalon_st_adapter.vhd"
+   type="VHDL"
+   library="avalon_st_adapter" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_mm_interconnect_1.v"
+   type="VERILOG"
+   library="mm_interconnect_1" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_mm_interconnect_0.v"
+   type="VERILOG"
+   library="mm_interconnect_0" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_upload_subsystem.vhd"
+   type="VHDL"
+   library="upload_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_upload_subsystem_upload_cdc_fifo.vhd"
+   type="VHDL"
+   library="upload_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_upload_subsystem_upload_sc_cdc_fifo.vhd"
+   type="VHDL"
+   library="upload_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_rst_controller.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_rst_controller_006.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_mm_pipeline_jtagmaster2rstctrl.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_mm_pipeline_lvds_csr_emu_dbg.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_mm_pipeline_lvds_csr_hitstack_frame.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_mm_pipeline_lvds_csr_hitstack_ring.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_mm_pipeline_lvds_csr_low.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_mm_pipeline_lvds_csr_mts1.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_emulator_ctrl_splitter.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_hist_post_splitter_0.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_data_path_subsystem_run_control_splitter.vhd"
+   type="VHDL"
+   library="data_path_subsystem" />
+ <file
+   path="simulation/submodules/altera_reset_controller.v"
+   type="VERILOG"
+   library="control_reset_sync_125" />
+ <file
+   path="simulation/submodules/altera_reset_synchronizer.v"
+   type="VERILOG"
+   library="control_reset_sync_125" />
+ <file
+   path="simulation/submodules/altera_reset_controller.sdc"
+   type="SDC"
+   library="control_reset_sync_125" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem_rst_controller.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem_rst_controller_001.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem_rst_controller_004.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem_legacy_firefly_bridge.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem_mm_bridge.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem_upload_mm_bridge.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_control_path_subsystem_sc_hub_cmd_pipe.vhd"
+   type="VHDL"
+   library="control_path_subsystem" />
+ <file
+   path="simulation/submodules/feb_system_v3_pipe_bringup_subsystem.vhd"
+   type="VHDL"
+   library="bringup_subsystem" />
+ <file path="simulation/feb_system_v3_pipe.vhd" type="VHDL" />
+ <file
+   path="simulation/feb_system_v3_pipe_control_reset_sync_125.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/feb_system_v3_pipe_ext_reset_merge_cclk156.vhd"
+   type="VHDL" />
+ <topLevel name="feb_system_v3_pipe" />
+ <deviceFamily name="arriav" />
+ <modelMap
+   controllerPath="feb_system_v3_pipe.bringup_subsystem.ram"
+   modelPath="feb_system_v3_pipe.bringup_subsystem.ram" />
+ <modelMap
+   controllerPath="feb_system_v3_pipe.control_path_subsystem.scratch_pad_ram"
+   modelPath="feb_system_v3_pipe.control_path_subsystem.scratch_pad_ram" />
+</simPackage>

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+<testsuite timestamp="2026-04-18T16:10:26" hostname="teferi.ethz.ch" package="sc_decode_formal" id="0" name="prove" tests="55" errors="0" failures="0" time="0" skipped="13">
+<properties>
+<property name="os" value="Linux"/>
+<property name="expect" value="PASS"/>
+<property name="status" value="PASS"/>
+</properties>
+<testcase classname="prove" name="build execution" time="0">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_881">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_884">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_887">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_890">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_893">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_896">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_899">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_902">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_882">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_885">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_888">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_891">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_894">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_897">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_900">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_903">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_905">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_908">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_911">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_914">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_917">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_920">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_923">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_906">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_909">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_912">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_915">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_918">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_921">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_924">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:194.13-194.47" time="0" type="ASSERT" location="props_sc_decode.sv:194.13-194.47" id="_witness_.check_assert_props_sc_decode_sv_194_350">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:195.13-195.45" time="0" type="ASSERT" location="props_sc_decode.sv:195.13-195.45" id="_witness_.check_assert_props_sc_decode_sv_195_352">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:196.13-196.49" time="0" type="ASSERT" location="props_sc_decode.sv:196.13-196.49" id="_witness_.check_assert_props_sc_decode_sv_196_354">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:198.13-198.61" time="0" type="ASSERT" location="props_sc_decode.sv:198.13-198.61" id="_witness_.check_assert_props_sc_decode_sv_198_356">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:199.13-199.63" time="0" type="ASSERT" location="props_sc_decode.sv:199.13-199.63" id="_witness_.check_assert_props_sc_decode_sv_199_359">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:200.13-200.64" time="0" type="ASSERT" location="props_sc_decode.sv:200.13-200.64" id="_witness_.check_assert_props_sc_decode_sv_200_362">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:202.13-202.49" time="0" type="ASSERT" location="props_sc_decode.sv:202.13-202.49" id="_witness_.check_assert_props_sc_decode_sv_202_365">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:203.13-203.65" time="0" type="ASSERT" location="props_sc_decode.sv:203.13-203.65" id="_witness_.check_assert_props_sc_decode_sv_203_368">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:204.13-204.61" time="0" type="ASSERT" location="props_sc_decode.sv:204.13-204.61" id="_witness_.check_assert_props_sc_decode_sv_204_371">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:208.21-208.39" time="0" type="ASSERT" location="props_sc_decode.sv:208.21-208.39" id="_witness_.check_assert_props_sc_decode_sv_208_376">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:209.21-209.55" time="0" type="ASSERT" location="props_sc_decode.sv:209.21-209.55" id="_witness_.check_assert_props_sc_decode_sv_209_377">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:213.21-213.46" time="0" type="ASSERT" location="props_sc_decode.sv:213.21-213.46" id="_witness_.check_assert_props_sc_decode_sv_213_379">
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:217.13-217.102" time="0" type="COVER" location="props_sc_decode.sv:217.13-217.102" id="_witness_.check_cover_props_sc_decode_sv_217_383">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:218.13-218.115" time="0" type="COVER" location="props_sc_decode.sv:218.13-218.115" id="_witness_.check_cover_props_sc_decode_sv_218_388">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:219.13-219.110" time="0" type="COVER" location="props_sc_decode.sv:219.13-219.110" id="_witness_.check_cover_props_sc_decode_sv_219_393">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:220.13-220.118" time="0" type="COVER" location="props_sc_decode.sv:220.13-220.118" id="_witness_.check_cover_props_sc_decode_sv_220_398">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:221.13-221.111" time="0" type="COVER" location="props_sc_decode.sv:221.13-221.111" id="_witness_.check_cover_props_sc_decode_sv_221_403">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:222.13-222.110" time="0" type="COVER" location="props_sc_decode.sv:222.13-222.110" id="_witness_.check_cover_props_sc_decode_sv_222_408">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:223.13-223.96" time="0" type="COVER" location="props_sc_decode.sv:223.13-223.96" id="_witness_.check_cover_props_sc_decode_sv_223_413">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:224.13-224.110" time="0" type="COVER" location="props_sc_decode.sv:224.13-224.110" id="_witness_.check_cover_props_sc_decode_sv_224_418">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:225.13-225.45" time="0" type="COVER" location="props_sc_decode.sv:225.13-225.45" id="_witness_.check_cover_props_sc_decode_sv_225_420">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:226.13-226.53" time="0" type="COVER" location="props_sc_decode.sv:226.13-226.53" id="_witness_.check_cover_props_sc_decode_sv_226_422">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:227.13-227.75" time="0" type="COVER" location="props_sc_decode.sv:227.13-227.75" id="_witness_.check_cover_props_sc_decode_sv_227_424">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:228.13-228.94" time="0" type="COVER" location="props_sc_decode.sv:228.13-228.94" id="_witness_.check_cover_props_sc_decode_sv_228_431">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:229.13-229.110" time="0" type="COVER" location="props_sc_decode.sv:229.13-229.110" id="_witness_.check_cover_props_sc_decode_sv_229_436">
+<skipped />
+</testcase>
+<system-out>SBY 16:10:26 [sc_decode_formal_prove] Removing directory '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_prove'.
+SBY 16:10:26 [sc_decode_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/../common/formal_defs.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_prove/src/formal_defs.svh'.
+SBY 16:10:26 [sc_decode_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/debug_sc_system_v3_map.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_prove/src/debug_sc_system_v3_map.svh'.
+SBY 16:10:26 [sc_decode_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/props_sc_decode.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_prove/src/props_sc_decode.sv'.
+SBY 16:10:26 [sc_decode_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_tb.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_prove/src/sc_decode_formal_tb.sv'.
+SBY 16:10:26 [sc_decode_formal_prove] engine_0: smtbmc z3
+SBY 16:10:26 [sc_decode_formal_prove] base: starting process &quot;cd sc_decode_formal_prove/src; yosys -ql ../model/design.log ../model/design.ys&quot;
+SBY 16:10:26 [sc_decode_formal_prove] base: Warning: Wire sc_decode_formal_tb.\gclk is used but has no driver.
+SBY 16:10:26 [sc_decode_formal_prove] base: finished (returncode=0)
+SBY 16:10:26 [sc_decode_formal_prove] prep: starting process &quot;cd sc_decode_formal_prove/model; yosys -ql design_prep.log design_prep.ys&quot;
+SBY 16:10:26 [sc_decode_formal_prove] prep: Warning: Wire sc_decode_formal_tb.\gclk is used but has no driver.
+SBY 16:10:26 [sc_decode_formal_prove] prep: finished (returncode=0)
+SBY 16:10:26 [sc_decode_formal_prove] smt2: starting process &quot;cd sc_decode_formal_prove/model; yosys -ql design_smt2.log design_smt2.ys&quot;
+SBY 16:10:26 [sc_decode_formal_prove] smt2: finished (returncode=0)
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: starting process &quot;cd sc_decode_formal_prove; yosys-smtbmc -s z3 --presat --noprogress -t 8  --append 0 --dump-vcd engine_0/trace.vcd --dump-yw engine_0/trace.yw --dump-vlogtb engine_0/trace_tb.v --dump-smtc engine_0/trace.smtc model/design_smt2.smt2&quot;
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: starting process &quot;cd sc_decode_formal_prove; yosys-smtbmc -s z3 --presat -i --noprogress -t 8  --append 0 --dump-vcd engine_0/trace_induct.vcd --dump-yw engine_0/trace_induct.yw --dump-vlogtb engine_0/trace_induct_tb.v --dump-smtc engine_0/trace_induct.smtc model/design_smt2.smt2&quot;
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Solver: z3
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: ##   0:00:00  Solver: z3
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 0..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 8..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 0..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 1..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 1..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 2..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 7..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 2..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 3..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 3..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: ##   0:00:00  Temporal induction successful.
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: ##   0:00:00  Status: passed
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 4..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 4..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: finished (returncode=0)
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.induction: Status returned by engine for induction: pass
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 5..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 5..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 6..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 6..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 7..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 7..
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: ##   0:00:00  Status: passed
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: finished (returncode=0)
+SBY 16:10:26 [sc_decode_formal_prove] engine_0.basecase: Status returned by engine for basecase: pass
+SBY 16:10:26 [sc_decode_formal_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 16:10:26 [sc_decode_formal_prove] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 16:10:26 [sc_decode_formal_prove] summary: engine_0 (smtbmc z3) returned pass for basecase
+SBY 16:10:26 [sc_decode_formal_prove] summary: engine_0 (smtbmc z3) returned pass for induction
+SBY 16:10:26 [sc_decode_formal_prove] summary: engine_0 did not produce any traces
+SBY 16:10:26 [sc_decode_formal_prove] summary: successful proof by k-induction.
+SBY 16:10:26 [sc_decode_formal_prove] DONE (PASS, rc=0)
+</system-out>
+<system-err>
+</system-err>
+</testsuite>
+</testsuites>

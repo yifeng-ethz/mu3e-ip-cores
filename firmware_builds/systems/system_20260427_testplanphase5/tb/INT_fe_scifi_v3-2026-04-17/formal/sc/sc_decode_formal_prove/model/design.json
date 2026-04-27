@@ -1,0 +1,4210 @@
+{
+  "$schema": "https://raw.githubusercontent.com/YosysHQ/yosys/main/misc/jny.schema.json",
+  "generator": "Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)",
+  "version": "0.0.1",
+  "invocation": "write_jny -no-connections ../model/design.json ",
+  "features": ["attributes", "properties"],
+  "modules": [
+      {
+        "name": "props_sc_decode",
+        "cell_sorts": [
+          {
+            "type": "$sub",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [19, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [20, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$sub$props_sc_decode.sv:19$287",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:19.34-19.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010011",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000010100"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$logic_or",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$800",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-111.92"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$801",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-112.87"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$802",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-113.95"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$803",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-114.88"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$804",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-115.87"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$857",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-111.92"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$858",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-112.87"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$859",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-113.95"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$860",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-114.88"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:110$861",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:110.17-115.87"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:158$288",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:158.32-158.69"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:158$289",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:158.32-158.92"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:163$290",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:163.30-163.63"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:163$291",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:163.30-163.84"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:169$299",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:169.10-170.50"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_or$props_sc_decode.sv:169$301",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:169.10-171.52"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$logic_not",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$logic_not$props_sc_decode.sv:190$324",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:190.29-190.33"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_not$props_sc_decode.sv:198$358",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:198.20-198.60"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_not$props_sc_decode.sv:199$361",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:199.20-199.62"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_not$props_sc_decode.sv:200$364",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:200.20-200.63"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_not$props_sc_decode.sv:202$366",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:202.35-202.48"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_not$props_sc_decode.sv:207$374",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:207.37-207.55"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_not$props_sc_decode.sv:227$426",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:227.54-227.74"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$check",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "ARGS",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "EN",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "TRG",
+                  "direction": "io",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_881",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_881",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_884",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_884",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_887",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_887",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_890",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_890",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_893",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_893",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_896",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_896",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_899",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_899",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_177_902",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_177_902",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:177.17-177.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_882",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_882",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_885",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_885",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_888",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_888",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_891",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_891",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_894",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_894",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_897",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_897",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_900",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_900",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_178_903",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_178_903",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:178.17-178.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_183_905",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_183_905",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:183.17-183.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_183_908",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_183_908",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:183.17-183.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_183_911",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_183_911",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:183.17-183.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_183_914",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_183_914",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:183.17-183.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_183_917",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_183_917",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:183.17-183.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_183_920",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_183_920",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:183.17-183.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_183_923",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_183_923",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:183.17-183.54"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_184_906",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_184_906",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:184.17-184.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_184_909",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_184_909",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:184.17-184.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_184_912",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_184_912",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:184.17-184.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_184_915",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_184_915",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:184.17-184.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_184_918",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_184_918",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:184.17-184.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_184_921",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_184_921",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:184.17-184.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_184_924",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_184_924",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:184.17-184.57"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_194_350",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_194_350",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:194.13-194.47"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111101",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_195_352",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_195_352",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:195.13-195.45"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111100",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_196_354",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_196_354",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:196.13-196.49"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111011",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_198_356",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_198_356",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:198.13-198.61"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111010",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_199_359",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_199_359",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:199.13-199.63"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111001",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_200_362",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_200_362",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:200.13-200.64"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111000",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_202_365",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_202_365",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:202.13-202.49"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110111",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_203_368",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_203_368",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:203.13-203.65"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110110",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_204_371",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_204_371",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:204.13-204.61"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110101",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_208_376",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_208_376",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:208.21-208.39"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110100",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_209_377",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_209_377",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:209.21-209.55"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110011",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assert_props_sc_decode_sv_213_379",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assert_props_sc_decode_sv_213_379",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:213.21-213.46"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assert",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110010",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assume_props_sc_decode_sv_191_346",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assume_props_sc_decode_sv_191_346",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:191.13-191.43"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assume",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_assume_props_sc_decode_sv_192_348",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assume_props_sc_decode_sv_192_348",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:192.13-192.51"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assume",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111110",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_217_383",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_217_383",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:217.13-217.102"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110001",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_218_388",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_218_388",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:218.13-218.115"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111110000",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_219_393",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_219_393",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:219.13-219.110"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101111",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_220_398",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_220_398",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:220.13-220.118"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101110",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_221_403",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_221_403",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:221.13-221.111"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101101",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_222_408",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_222_408",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:222.13-222.110"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101100",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_223_413",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_223_413",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:223.13-223.96"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101011",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_224_418",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_224_418",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:224.13-224.110"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101010",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_225_420",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_225_420",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:225.13-225.45"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101001",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_226_422",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_226_422",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:226.13-226.53"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111101000",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_227_424",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_227_424",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:227.13-227.75"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111100111",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_228_431",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_228_431",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:228.13-228.94"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111100110",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "_witness_.check_cover_props_sc_decode_sv_229_436",
+                  "attributes": {
+                    "hdlname": "_witness_ check_cover_props_sc_decode_sv_229_436",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:229.13-229.110"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "cover",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111100101",
+                    "TRG_ENABLE": "00000000000000000000000000000001",
+                    "TRG_POLARITY": "1",
+                    "TRG_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$logic_and",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$659",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$665",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$671",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$677",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$683",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$689",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$695",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$728",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$734",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$740",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$746",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$752",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$758",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:100$764",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.21-100.78"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:166$295",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:166.31-166.86"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:168$302",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:168.9-171.53"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:190$325",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:190.13-190.33"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:198$357",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:198.22-198.59"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:199$360",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:199.22-199.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:200$363",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:200.22-200.62"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:207$375",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:207.21-207.55"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:217$384",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:217.19-217.101"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:218$389",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:218.19-218.114"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:219$394",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:219.19-219.109"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:220$399",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:220.19-220.117"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:221$404",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:221.19-221.110"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:222$409",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:222.19-222.109"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:223$414",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:223.19-223.95"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:225$421",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:225.19-225.44"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:226$423",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:226.19-226.52"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:227$425",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:227.19-227.50"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:227$427",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:227.19-227.74"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:228$432",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:228.19-228.93"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:229$437",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:229.19-229.109"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$590",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$595",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$600",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$605",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$625",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$784",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$787",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$790",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$793",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$796",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$799",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$813",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$822",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$841",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$844",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$847",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$850",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$853",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$856",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$870",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$logic_and$props_sc_decode.sv:72$879",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.19-72.68"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$mux",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [6, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [6, 0]
+                },
+                {
+                  "name": "S",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [6, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$procmux$1002",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1005",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1008",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1014",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1017",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1020",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1023",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1026",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1029",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1032",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1035",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1038",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1041",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1044",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1047",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1050",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1053",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1056",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$1059",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1137",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:190.13-190.33|props_sc_decode.sv:190.9-230.12"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1161",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:212.21-212.40|props_sc_decode.sv:212.17-214.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1163",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:206.17-206.27|props_sc_decode.sv:206.13-215.16"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1165",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:190.13-190.33|props_sc_decode.sv:190.9-230.12"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1168",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:207.21-207.55|props_sc_decode.sv:207.17-210.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1170",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:206.17-206.27|props_sc_decode.sv:206.13-215.16"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$1172",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:190.13-190.33|props_sc_decode.sv:190.9-230.12"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$939",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$942",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$945",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$948",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$951",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$954",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$957",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$960",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$963",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$966",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$969",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$972",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$975",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$978",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$981",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$984",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:100.21-100.78|props_sc_decode.sv:100.17-102.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000101"
+                  }
+                },
+                {
+                  "name": "$procmux$987",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$990",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$993",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$996",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$procmux$999",
+                  "attributes": {
+                    "full_case": "00000000000000000000000000000001",
+                    "src": "props_sc_decode.sv:84.21-84.37|props_sc_decode.sv:84.17-86.20"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000110"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$reduce_bool",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [9, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$ne$props_sc_decode.sv:191$347",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:191.20-191.42"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000001001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$le",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [32, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [18, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$le$props_sc_decode.sv:192$349",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:192.20-192.50"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:194$351",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:194.20-194.46"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:195$353",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:195.20-195.44"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:196$355",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:196.20-196.48"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$589",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$594",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$599",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$604",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$624",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$783",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$786",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$789",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$792",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$795",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$798",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$812",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$821",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$840",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$843",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$846",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$849",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$852",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$855",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$869",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$le$props_sc_decode.sv:72$878",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.47-72.67"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$ne",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [5, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [5, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$ne$props_sc_decode.sv:166$294",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:166.59-166.85"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ne$props_sc_decode.sv:169$297",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:169.11-169.48"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ne$props_sc_decode.sv:170$298",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:170.11-170.49"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ne$props_sc_decode.sv:171$300",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:171.11-171.51"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$gt",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [9, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$gt$props_sc_decode.sv:168$296",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:168.10-168.31"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000001001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$ge",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [18, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [11, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$ge$props_sc_decode.sv:72$588",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$593",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$598",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$603",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$623",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010011",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$782",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$785",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$788",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$791",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$794",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$797",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$811",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$820",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$839",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$842",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$845",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$848",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$851",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$854",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$868",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$ge$props_sc_decode.sv:72$877",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:72.20-72.41"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000100000",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000010010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$eq",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [5, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [5, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$eq$props_sc_decode.sv:100$658",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$664",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$670",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$676",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$682",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$688",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$694",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$727",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$733",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$739",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$745",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$751",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$757",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:100$763",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:100.22-100.57"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:203$369",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:203.37-203.63"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:203$370",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:203.20-203.64"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:204$372",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:204.35-204.59"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:204$373",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:204.20-204.60"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000001",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$eq$props_sc_decode.sv:209$378",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:209.28-209.54"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000101",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000101",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$add",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [18, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [9, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [19, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$add$props_sc_decode.sv:19$286",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:19.34-19.59"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000010010",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000001001",
+                    "Y_WIDTH": "00000000000000000000000000010011"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$473",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$478",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$483",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$488",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$493",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$498",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$529",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$534",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$539",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$544",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$549",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$554",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$559",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$592",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$597",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$602",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$607",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$612",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$617",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$622",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                },
+                {
+                  "name": "$add$props_sc_decode.sv:85$627",
+                  "attributes": {
+                    "src": "props_sc_decode.sv:85.39-85.61"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000110",
+                    "B_SIGNED": "00000000000000000000000000000000",
+                    "B_WIDTH": "00000000000000000000000000000001",
+                    "Y_WIDTH": "00000000000000000000000000000110"
+                  }
+                }
+            ]
+          }
+        ],
+        "attributes": {
+            "keep": "00000000000000000000000000000001",
+            "src": "props_sc_decode.sv:3.1-233.10"
+        }
+      },
+      {
+        "name": "sc_decode_formal_tb",
+        "cell_sorts": [
+          {
+            "type": "props_sc_decode",
+            "ports": [
+                {
+                  "name": "clk",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "cmd_accept",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "cmd_addr",
+                  "direction": "io",
+                  "range": [18, 0]
+                },
+                {
+                  "name": "cmd_burstcount",
+                  "direction": "io",
+                  "range": [9, 0]
+                },
+                {
+                  "name": "f_past_valid",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "rst",
+                  "direction": "io",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "dut",
+                  "attributes": {
+                    "module_not_derived": "00000000000000000000000000000001",
+                    "src": "sc_decode_formal_tb.sv:15.21-22.6"
+                  },
+                  "parameters": {
+
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$check",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "ARGS",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "EN",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "TRG",
+                  "direction": "io",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "_witness_.check_assume_sc_decode_formal_tb_sv_28_930",
+                  "attributes": {
+                    "hdlname": "_witness_ check_assume_sc_decode_formal_tb_sv_28_930",
+                    "keep": "00000000000000000000000000000001",
+                    "src": "sc_decode_formal_tb.sv:28.13-28.24"
+                  },
+                  "parameters": {
+                    "ARGS_WIDTH": "00000000000000000000000000000000",
+                    "FLAVOR": "assume",
+                    "FORMAT": true,
+                    "PRIORITY": "11111111111111111111111111111111",
+                    "TRG_ENABLE": "00000000000000000000000000000000",
+                    "TRG_POLARITY": true,
+                    "TRG_WIDTH": "00000000000000000000000000000000"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$ff",
+            "ports": [
+                {
+                  "name": "D",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Q",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$procdff$1214",
+                  "attributes": {
+                    "src": "sc_decode_formal_tb.sv:24.5-34.8"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procdff$1215",
+                  "attributes": {
+                    "src": "sc_decode_formal_tb.sv:24.5-34.8"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000010"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$mux",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "B",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "S",
+                  "direction": "io",
+                  "range": [0, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$procmux$934",
+                  "attributes": {
+                    "src": "sc_decode_formal_tb.sv:27.13-27.26|sc_decode_formal_tb.sv:27.9-29.12"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$procmux$936",
+                  "attributes": {
+                    "src": "sc_decode_formal_tb.sv:31.13-31.32|sc_decode_formal_tb.sv:31.9-33.12"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000010"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$reduce_bool",
+            "ports": [
+                {
+                  "name": "A",
+                  "direction": "io",
+                  "range": [2, 0]
+                },
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$ne$sc_decode_formal_tb.sv:31$931",
+                  "attributes": {
+                    "src": "sc_decode_formal_tb.sv:31.13-31.32"
+                  },
+                  "parameters": {
+                    "A_SIGNED": "00000000000000000000000000000000",
+                    "A_WIDTH": "00000000000000000000000000000010",
+                    "Y_WIDTH": "00000000000000000000000000000001"
+                  }
+                }
+            ]
+          },
+          {
+            "type": "$anyseq",
+            "ports": [
+                {
+                  "name": "Y",
+                  "direction": "",
+                  "range": [0, 0]
+                }
+            ],
+            "cells": [
+                {
+                  "name": "$anyseq$925",
+                  "attributes": {
+                    "reg": "cmd_accept",
+                    "src": "sc_decode_formal_tb.sv:9.29-9.39"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000000001"
+                  }
+                },
+                {
+                  "name": "$anyseq$926",
+                  "attributes": {
+                    "reg": "cmd_addr",
+                    "src": "sc_decode_formal_tb.sv:10.29-10.37"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000010010"
+                  }
+                },
+                {
+                  "name": "$anyseq$927",
+                  "attributes": {
+                    "reg": "cmd_burstcount",
+                    "src": "sc_decode_formal_tb.sv:11.29-11.43"
+                  },
+                  "parameters": {
+                    "WIDTH": "00000000000000000000000000001001"
+                  }
+                }
+            ]
+          }
+        ],
+        "attributes": {
+            "keep": "00000000000000000000000000000001",
+            "top": "00000000000000000000000000000001",
+            "src": "sc_decode_formal_tb.sv:3.1-36.10"
+        }
+      }
+  ]
+}

@@ -1,0 +1,3 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.04.25.05:09:16 Info: Doing: <b>qsys-script --package-version=18.1 --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds,$ --system-file=firmware_builds/feb_system_v3_pipe.qsys --cmd=save_system firmware_builds/feb_system_v3_pipe.qsys</b>
+2026.04.25.05:09:27 Info: save_system firmware_builds/feb_system_v3_pipe.qsys

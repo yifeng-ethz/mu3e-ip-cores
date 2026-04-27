@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+<testsuite timestamp="2026-04-18T15:33:46" hostname="teferi.ethz.ch" package="upload_pkt_mux_formal" id="0" name="prove" tests="31" errors="0" failures="0" time="223" skipped="6">
+<properties>
+<property name="os" value="Linux"/>
+<property name="expect" value="PASS"/>
+<property name="status" value="PASS"/>
+</properties>
+<testcase classname="prove" name="build execution" time="0">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:253.17-253.34" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:253.17-253.34" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_253_131">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:254.17-254.50" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:254.17-254.50" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_254_132">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:255.17-255.56" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:255.17-255.56" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_255_134">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:256.17-256.58" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:256.17-256.58" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_256_136">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:257.17-257.56" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:257.17-257.56" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_257_138">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:261.17-261.45" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:261.17-261.45" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_261_140">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:265.17-265.53" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:265.17-265.53" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_265_143">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:266.17-266.43" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:266.17-266.43" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_266_145">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:272.25-272.55" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:272.25-272.55" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_272_159">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:273.25-273.78" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:273.25-273.78" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_273_163">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:274.25-274.74" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:274.25-274.74" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_274_165">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:275.25-275.84" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:275.25-275.84" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_275_168">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:279.25-279.55" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:279.25-279.55" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_279_174">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:280.25-280.78" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:280.25-280.78" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_280_178">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:281.25-281.74" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:281.25-281.74" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_281_180">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:282.25-282.84" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:282.25-282.84" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_282_183">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:286.25-286.55" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:286.25-286.55" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_286_189">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:287.25-287.78" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:287.25-287.78" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_287_193">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:288.25-288.74" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:288.25-288.74" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_288_195">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:289.25-289.84" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:289.25-289.84" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_289_198">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:292.30-292.42" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:292.30-292.42" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_292_204">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:296.21-296.47" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:296.21-296.47" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_296_205">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:322.21-322.50" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:322.21-322.50" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_322_223">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:331.21-331.50" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:331.21-331.50" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_331_228">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:340.21-340.50" time="0" type="ASSERT" location="upload_pkt_mux_formal_tb.sv:340.21-340.50" id="_witness_.check_assert_upload_pkt_mux_formal_tb_sv_340_233">
+</testcase>
+<testcase classname="prove" name="Property COVER in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:345.13-345.53" time="0" type="COVER" location="upload_pkt_mux_formal_tb.sv:345.13-345.53" id="_witness_.check_cover_upload_pkt_mux_formal_tb_sv_345_236">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:346.13-346.53" time="0" type="COVER" location="upload_pkt_mux_formal_tb.sv:346.13-346.53" id="_witness_.check_cover_upload_pkt_mux_formal_tb_sv_346_239">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:347.13-347.53" time="0" type="COVER" location="upload_pkt_mux_formal_tb.sv:347.13-347.53" id="_witness_.check_cover_upload_pkt_mux_formal_tb_sv_347_242">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:348.13-348.61" time="0" type="COVER" location="upload_pkt_mux_formal_tb.sv:348.13-348.61" id="_witness_.check_cover_upload_pkt_mux_formal_tb_sv_348_245">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:349.13-349.64" time="0" type="COVER" location="upload_pkt_mux_formal_tb.sv:349.13-349.64" id="_witness_.check_cover_upload_pkt_mux_formal_tb_sv_349_248">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in upload_pkt_mux_formal_tb at upload_pkt_mux_formal_tb.sv:350.13-350.112" time="0" type="COVER" location="upload_pkt_mux_formal_tb.sv:350.13-350.112" id="_witness_.check_cover_upload_pkt_mux_formal_tb_sv_350_252">
+<skipped />
+</testcase>
+<system-out>SBY 15:30:03 [upload_pkt_mux_formal_prove] Removing directory '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_prove'.
+SBY 15:30:03 [upload_pkt_mux_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/../common/formal_defs.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_prove/src/formal_defs.svh'.
+SBY 15:30:03 [upload_pkt_mux_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_prove/src/upload_system_v3_upload_pkt_mux.sv'.
+SBY 15:30:03 [upload_pkt_mux_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_tb.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/upload_pkt_mux_formal_prove/src/upload_pkt_mux_formal_tb.sv'.
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: smtbmc z3
+SBY 15:30:03 [upload_pkt_mux_formal_prove] base: starting process &quot;cd upload_pkt_mux_formal_prove/src; yosys -ql ../model/design.log ../model/design.ys&quot;
+SBY 15:30:03 [upload_pkt_mux_formal_prove] base: Warning: Wire upload_pkt_mux_formal_tb.\gclk is used but has no driver.
+SBY 15:30:03 [upload_pkt_mux_formal_prove] base: finished (returncode=0)
+SBY 15:30:03 [upload_pkt_mux_formal_prove] prep: starting process &quot;cd upload_pkt_mux_formal_prove/model; yosys -ql design_prep.log design_prep.ys&quot;
+SBY 15:30:03 [upload_pkt_mux_formal_prove] prep: Warning: Wire upload_pkt_mux_formal_tb.\gclk is used but has no driver.
+SBY 15:30:03 [upload_pkt_mux_formal_prove] prep: finished (returncode=0)
+SBY 15:30:03 [upload_pkt_mux_formal_prove] smt2: starting process &quot;cd upload_pkt_mux_formal_prove/model; yosys -ql design_smt2.log design_smt2.ys&quot;
+SBY 15:30:03 [upload_pkt_mux_formal_prove] smt2: finished (returncode=0)
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: starting process &quot;cd upload_pkt_mux_formal_prove; yosys-smtbmc -s z3 --presat --noprogress -t 32  --append 0 --dump-vcd engine_0/trace.vcd --dump-yw engine_0/trace.yw --dump-vlogtb engine_0/trace_tb.v --dump-smtc engine_0/trace.smtc model/design_smt2.smt2&quot;
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Solver: z3
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 0..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 0..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 1..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 1..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 2..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 2..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 3..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 3..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 4..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 4..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 5..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 5..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 6..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 6..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 7..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 7..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 8..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 8..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 9..
+SBY 15:30:03 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 9..
+SBY 15:30:04 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assumptions in step 10..
+SBY 15:30:04 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:00  Checking assertions in step 10..
+SBY 15:30:05 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:01  Checking assumptions in step 11..
+SBY 15:30:05 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:01  Checking assertions in step 11..
+SBY 15:30:06 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:02  Checking assumptions in step 12..
+SBY 15:30:06 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:02  Checking assertions in step 12..
+SBY 15:30:08 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:04  Checking assumptions in step 13..
+SBY 15:30:08 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:04  Checking assertions in step 13..
+SBY 15:30:10 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:06  Checking assumptions in step 14..
+SBY 15:30:10 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:06  Checking assertions in step 14..
+SBY 15:30:13 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:09  Checking assumptions in step 15..
+SBY 15:30:13 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:09  Checking assertions in step 15..
+SBY 15:30:16 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:13  Checking assumptions in step 16..
+SBY 15:30:16 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:13  Checking assertions in step 16..
+SBY 15:30:20 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:17  Checking assumptions in step 17..
+SBY 15:30:20 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:17  Checking assertions in step 17..
+SBY 15:30:23 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:20  Checking assumptions in step 18..
+SBY 15:30:24 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:20  Checking assertions in step 18..
+SBY 15:30:31 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:27  Checking assumptions in step 19..
+SBY 15:30:31 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:27  Checking assertions in step 19..
+SBY 15:30:40 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:37  Checking assumptions in step 20..
+SBY 15:30:40 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:37  Checking assertions in step 20..
+SBY 15:30:49 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:46  Checking assumptions in step 21..
+SBY 15:30:50 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:46  Checking assertions in step 21..
+SBY 15:31:01 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:58  Checking assumptions in step 22..
+SBY 15:31:01 [upload_pkt_mux_formal_prove] engine_0: ##   0:00:58  Checking assertions in step 22..
+SBY 15:31:16 [upload_pkt_mux_formal_prove] engine_0: ##   0:01:12  Checking assumptions in step 23..
+SBY 15:31:16 [upload_pkt_mux_formal_prove] engine_0: ##   0:01:12  Checking assertions in step 23..
+SBY 15:31:31 [upload_pkt_mux_formal_prove] engine_0: ##   0:01:28  Checking assumptions in step 24..
+SBY 15:31:32 [upload_pkt_mux_formal_prove] engine_0: ##   0:01:28  Checking assertions in step 24..
+SBY 15:31:49 [upload_pkt_mux_formal_prove] engine_0: ##   0:01:46  Checking assumptions in step 25..
+SBY 15:31:49 [upload_pkt_mux_formal_prove] engine_0: ##   0:01:46  Checking assertions in step 25..
+SBY 15:32:04 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:00  Checking assumptions in step 26..
+SBY 15:32:04 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:00  Checking assertions in step 26..
+SBY 15:32:17 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:13  Checking assumptions in step 27..
+SBY 15:32:17 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:13  Checking assertions in step 27..
+SBY 15:32:32 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:28  Checking assumptions in step 28..
+SBY 15:32:32 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:28  Checking assertions in step 28..
+SBY 15:32:47 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:44  Checking assumptions in step 29..
+SBY 15:32:47 [upload_pkt_mux_formal_prove] engine_0: ##   0:02:44  Checking assertions in step 29..
+SBY 15:33:06 [upload_pkt_mux_formal_prove] engine_0: ##   0:03:03  Checking assumptions in step 30..
+SBY 15:33:06 [upload_pkt_mux_formal_prove] engine_0: ##   0:03:03  Checking assertions in step 30..
+SBY 15:33:27 [upload_pkt_mux_formal_prove] engine_0: ##   0:03:24  Checking assumptions in step 31..
+SBY 15:33:27 [upload_pkt_mux_formal_prove] engine_0: ##   0:03:24  Checking assertions in step 31..
+SBY 15:33:46 [upload_pkt_mux_formal_prove] engine_0: ##   0:03:43  Status: passed
+SBY 15:33:46 [upload_pkt_mux_formal_prove] engine_0: finished (returncode=0)
+SBY 15:33:46 [upload_pkt_mux_formal_prove] engine_0: Status returned by engine: pass
+SBY 15:33:46 [upload_pkt_mux_formal_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:03:43 (223)
+SBY 15:33:46 [upload_pkt_mux_formal_prove] summary: Elapsed process time [H:MM:SS (secs)]: 0:03:43 (223)
+SBY 15:33:46 [upload_pkt_mux_formal_prove] summary: engine_0 (smtbmc z3) returned pass
+SBY 15:33:46 [upload_pkt_mux_formal_prove] summary: engine_0 did not produce any traces
+SBY 15:33:46 [upload_pkt_mux_formal_prove] DONE (PASS, rc=0)
+</system-out>
+<system-err>
+</system-err>
+</testsuite>
+</testsuites>

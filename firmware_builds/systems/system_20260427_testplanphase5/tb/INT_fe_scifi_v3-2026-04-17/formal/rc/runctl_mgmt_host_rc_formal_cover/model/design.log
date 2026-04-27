@@ -1,0 +1,1306 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+
+-- Executing script file `../model/design.ys' --
+
+1. Executing Verilog-2005 frontend: formal_defs.svh
+Parsing formal SystemVerilog input from `formal_defs.svh' to AST representation.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: logging_fifo_stub.sv
+Parsing formal SystemVerilog input from `logging_fifo_stub.sv' to AST representation.
+Generating RTLIL representation for module `\logging_fifo'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv
+Parsing formal SystemVerilog input from `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv' to AST representation.
+Generating RTLIL representation for module `\runctl_mgmt_host'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: runctl_mgmt_host_rc_formal_tb.sv
+Parsing formal SystemVerilog input from `runctl_mgmt_host_rc_formal_tb.sv' to AST representation.
+Generating RTLIL representation for module `\runctl_mgmt_host_rc_formal_tb'.
+Successfully finished Verilog frontend.
+
+5. Executing PREP pass.
+
+5.1. Executing HIERARCHY pass (managing design hierarchy).
+
+5.1.1. Analyzing design hierarchy..
+Top module:  \runctl_mgmt_host_rc_formal_tb
+Used module:     \runctl_mgmt_host
+Used module:         \logging_fifo
+
+5.1.2. Analyzing design hierarchy..
+Top module:  \runctl_mgmt_host_rc_formal_tb
+Used module:     \runctl_mgmt_host
+Used module:         \logging_fifo
+Removed 0 unused modules.
+Module runctl_mgmt_host_rc_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+5.2. Executing PROC pass (convert processes to netlists).
+
+5.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+5.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 7 switch rules as full_case in process $proc$runctl_mgmt_host_rc_formal_tb.sv:169$349 in module runctl_mgmt_host_rc_formal_tb.
+Marked 9 switch rules as full_case in process $proc$runctl_mgmt_host_rc_formal_tb.sv:101$322 in module runctl_mgmt_host_rc_formal_tb.
+Marked 7 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227 in module runctl_mgmt_host.
+Removed 1 dead cases from process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:916$226 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:916$226 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:811$217 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:796$207 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204 in module runctl_mgmt_host.
+Marked 2 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:680$197 in module runctl_mgmt_host.
+Marked 3 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190 in module runctl_mgmt_host.
+Marked 4 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174 in module runctl_mgmt_host.
+Marked 21 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:294$79 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:238$74 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:212$71 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:187$21 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:180$18 in module runctl_mgmt_host.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:165$16 in module runctl_mgmt_host.
+Removed a total of 1 dead cases.
+
+5.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 49 redundant assignments.
+Promoted 167 assignments to connections.
+
+5.2.4. Executing PROC_INIT pass (extract init attributes).
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:75$529'.
+  Set init value: \prev_upload_ready = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:74$528'.
+  Set init value: \prev_upload_eop = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:73$527'.
+  Set init value: \prev_upload_sop = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:72$526'.
+  Set init value: \prev_upload_data = 36'000000000000000000000000000000000000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:71$525'.
+  Set init value: \prev_upload_valid = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:70$524'.
+  Set init value: \prev_runctl_ready = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:69$523'.
+  Set init value: \prev_runctl_data = 9'000000000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:68$522'.
+  Set init value: \prev_runctl_valid = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:66$521'.
+  Set init value: \upload_fire_count = 2'00
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:65$520'.
+  Set init value: \runctl_fire_count = 2'00
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:63$519'.
+  Set init value: \reset_deadline = 3'000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:62$518'.
+  Set init value: \expect_reset_clear = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:61$517'.
+  Set init value: \expect_reset_assert = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:60$516'.
+  Set init value: \ack_deadline = 4'0000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:59$515'.
+  Set init value: \expected_ack_data = 36'000000000000000000000000000000000000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:58$514'.
+  Set init value: \expect_ack = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:57$513'.
+  Set init value: \runctl_deadline = 4'0000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:56$512'.
+  Set init value: \expected_runctl_data = 9'000000000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:55$511'.
+  Set init value: \expect_runctl = 1'0
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:53$510'.
+  Set init value: \upload_stall_ctr = 4'0000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:52$509'.
+  Set init value: \runctl_stall_ctr = 4'0000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:8$508'.
+  Set init value: \f_cycle = 6'000000
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:7$507'.
+  Set init value: \f_reset_sr = 2'11
+Found init rule in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:6$506'.
+  Set init value: \f_past_valid = 1'0
+
+5.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+5.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~116 debug messages>
+
+5.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:75$529'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:74$528'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:73$527'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:72$526'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:71$525'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:70$524'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:69$523'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:68$522'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:66$521'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:65$520'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:63$519'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:62$518'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:61$517'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:60$516'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:59$515'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:58$514'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:57$513'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:56$512'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:55$511'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:53$510'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:52$509'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:8$508'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:7$507'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:6$506'.
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+     1/64: $4\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.$result[8:0]$410
+     2/64: $3\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.$result[8:0]$408
+     3/64: $3\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.cmd[7:0]$409
+     4/64: $2\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.cmd[7:0]$407
+     5/64: $2\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.$result[8:0]$406
+     6/64: $0\prev_upload_ready[0:0]
+     7/64: $0\prev_upload_eop[0:0]
+     8/64: $0\prev_upload_sop[0:0]
+     9/64: $0\prev_upload_data[35:0]
+    10/64: $0\prev_upload_valid[0:0]
+    11/64: $0\prev_runctl_ready[0:0]
+    12/64: $0\prev_runctl_data[8:0]
+    13/64: $0\prev_runctl_valid[0:0]
+    14/64: $0\upload_stall_ctr[3:0]
+    15/64: $0\runctl_stall_ctr[3:0]
+    16/64: $1\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.cmd[7:0]$394
+    17/64: $1\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.$result[8:0]$393
+    18/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:367$503_EN
+    19/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:366$500_EN
+    20/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:365$497_EN
+    21/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:364$494_EN
+    22/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:363$489_EN
+    23/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:362$484_EN
+    24/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:361$480_EN
+    25/64: $cover$runctl_mgmt_host_rc_formal_tb.sv:360$476_EN
+    26/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:343$467_EN
+    27/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:342$465_EN
+    28/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:339$460_EN
+    29/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:338$458_EN
+    30/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:335$456_EN
+    31/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:334$454_EN
+    32/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:333$452_EN
+    33/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:332$451_EN
+    34/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:328$446_EN
+    35/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:327$445_EN
+    36/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:321$441_EN
+    37/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:320$440_EN
+    38/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:319$438_EN
+    39/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:318$437_EN
+    40/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:293$426_EN
+    41/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:292$425_EN
+    42/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:286$421_EN
+    43/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:282$417_EN
+    44/64: $assert$runctl_mgmt_host_rc_formal_tb.sv:278$414_EN
+    45/64: $assume$runctl_mgmt_host_rc_formal_tb.sv:252$403_EN
+    46/64: $assume$runctl_mgmt_host_rc_formal_tb.sv:251$401_EN
+    47/64: $assume$runctl_mgmt_host_rc_formal_tb.sv:193$384_EN
+    48/64: $assume$runctl_mgmt_host_rc_formal_tb.sv:184$370_EN
+    49/64: $assume$runctl_mgmt_host_rc_formal_tb.sv:175$356_EN
+    50/64: $assume$runctl_mgmt_host_rc_formal_tb.sv:174$354_EN
+    51/64: $assume$runctl_mgmt_host_rc_formal_tb.sv:173$353_EN
+    52/64: $0\upload_fire_count[1:0]
+    53/64: $0\runctl_fire_count[1:0]
+    54/64: $0\reset_deadline[2:0]
+    55/64: $0\expect_reset_clear[0:0]
+    56/64: $0\expect_reset_assert[0:0]
+    57/64: $0\ack_deadline[3:0]
+    58/64: $0\expected_ack_data[35:0]
+    59/64: $0\expect_ack[0:0]
+    60/64: $0\runctl_deadline[3:0]
+    61/64: $0\expected_runctl_data[8:0]
+    62/64: $0\expect_runctl[0:0]
+    63/64: $0\f_cycle[5:0]
+    64/64: $0\f_reset_sr[1:0]
+Creating decoders for process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+     1/24: $3\asi_synclink_error[2:0]
+     2/24: $8\asi_synclink_data[8:0]
+     3/24: $7\asi_synclink_data[8:0]
+     4/24: $6\asi_synclink_data[8:0]
+     5/24: $5\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.$result[7:0]$345
+     6/24: $5\asi_synclink_data[8:0]
+     7/24: $4\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.$result[7:0]$341
+     8/24: $4\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.idx[2:0]$343
+     9/24: $4\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.word[31:0]$342
+    10/24: $4\asi_synclink_data[8:0]
+    11/24: $3\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.idx[2:0]$337
+    12/24: $3\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.word[31:0]$336
+    13/24: $3\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.$result[7:0]$335
+    14/24: $3\asi_synclink_data[8:0]
+    15/24: $2\asi_synclink_data[8:0]
+    16/24: $2\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.idx[2:0]$332
+    17/24: $2\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.word[31:0]$331
+    18/24: $2\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.$result[7:0]$330
+    19/24: $2\asi_synclink_error[2:0]
+    20/24: $1\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.idx[2:0]$329
+    21/24: $1\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.word[31:0]$328
+    22/24: $1\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.$result[7:0]$327
+    23/24: $1\asi_synclink_error[2:0]
+    24/24: $1\asi_synclink_data[8:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$272'.
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$235'.
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+     1/12: $0\log_fifo_rdreq[0:0]
+     2/12: $0\avs_csr_waitrequest[0:0]
+     3/12: $0\avs_csr_readdata[31:0]
+     4/12: $0\gts_h_shadow[31:0]
+     5/12: $0\meta_page[1:0]
+     6/12: $0\csr_scratch[31:0]
+     7/12: $0\csr_state[1:0]
+     8/12: $0\local_cmd_req_mm[0:0]
+     9/12: $0\local_cmd_word_mm[31:0]
+    10/12: $0\rst_mask_ct_mm[0:0]
+    11/12: $0\rst_mask_dp_mm[0:0]
+    12/12: $0\soft_reset_req_mm[0:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:916$226'.
+     1/1: $1\meta_readdata[31:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+     1/8: $0\host_state_sync_q1[15:0]
+     2/8: $0\host_state_sync_q0[15:0]
+     3/8: $0\recv_state_sync_q1[15:0]
+     4/8: $0\recv_state_sync_q0[15:0]
+     5/8: $0\ct_hreset_sync[1:0]
+     6/8: $0\dp_hreset_sync[1:0]
+     7/8: $0\host_idle_sync[1:0]
+     8/8: $0\recv_idle_sync[1:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+     1/6: $0\log_drop_gray_ff1[31:0]
+     2/6: $0\log_drop_gray_ff0[31:0]
+     3/6: $0\rx_err_gray_ff1[31:0]
+     4/6: $0\rx_err_gray_ff0[31:0]
+     5/6: $0\rx_cmd_gray_ff1[31:0]
+     6/6: $0\rx_cmd_gray_ff0[31:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:811$217'.
+     1/3: $0\log_drop_gray_lvds[31:0]
+     2/3: $0\rx_err_gray_lvds[31:0]
+     3/3: $0\rx_cmd_gray_lvds[31:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:796$207'.
+     1/3: $0\log_drop_count_lvds[31:0]
+     2/3: $0\rx_err_count_lvds[31:0]
+     3/3: $0\rx_cmd_count_lvds[31:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+     1/10: $0\snap_update_mm_sync[1:0]
+     2/10: $0\shadow_exec_ts[47:0]
+     3/10: $0\shadow_recv_ts[47:0]
+     4/10: $0\shadow_fpga_addr_valid[0:0]
+     5/10: $0\shadow_fpga_addr[15:0]
+     6/10: $0\shadow_reset_release[15:0]
+     7/10: $0\shadow_reset_assert[15:0]
+     8/10: $0\shadow_run_number[31:0]
+     9/10: $0\shadow_last_cmd[7:0]
+    10/10: $0\snap_update_mm_seen[0:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+     1/8: $0\snap_exec_ts_lvds[47:0]
+     2/8: $0\snap_recv_ts_lvds[47:0]
+     3/8: $0\snap_fpga_addr_valid_lvds[0:0]
+     4/8: $0\snap_fpga_addr_lvds[15:0]
+     5/8: $0\snap_reset_release_lvds[15:0]
+     6/8: $0\snap_reset_assert_lvds[15:0]
+     7/8: $0\snap_run_number_lvds[31:0]
+     8/8: $0\snap_last_cmd_lvds[7:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:680$197'.
+     1/3: $0\ext_hard_reset_q[0:0]
+     2/3: $0\ct_hard_reset_q[0:0]
+     3/3: $0\dp_hard_reset_q[0:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+     1/7: $0\aso_upload_data[35:0] [31:8]
+     2/7: $0\aso_upload_data[35:0] [7:0]
+     3/7: $0\aso_upload_data[35:0] [35:32]
+     4/7: $0\aso_upload_endofpacket[0:0]
+     5/7: $0\aso_upload_startofpacket[0:0]
+     6/7: $0\aso_upload_valid[0:0]
+     7/7: $0\upload_state[7:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+     1/12: $4\dec_runcmd$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:598$11.$result[8:0]$185
+     2/12: $3\dec_runcmd$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:598$11.$result[8:0]$183
+     3/12: $3\dec_runcmd$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:598$11.cmd[7:0]$184
+     4/12: $2\dec_runcmd$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:598$11.cmd[7:0]$180
+     5/12: $2\dec_runcmd$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:598$11.$result[8:0]$179
+     6/12: $1\dec_runcmd$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:598$11.cmd[7:0]$178
+     7/12: $1\dec_runcmd$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:598$11.$result[8:0]$177
+     8/12: $0\host_state[7:0]
+     9/12: $0\pipe_r2h_done[0:0]
+    10/12: $0\host_exec_ts[47:0]
+    11/12: $0\aso_runctl_data[8:0]
+    12/12: $0\aso_runctl_valid[0:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+     1/80: $7\host_exec_payload32_display$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:538$10.$result[31:0]$172
+     2/80: $6\host_exec_payload32_display$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:538$10.$result[31:0]$171
+     3/80: $5\host_exec_payload32_display$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:538$10.$result[31:0]$169
+     4/80: $4\host_exec_payload32_display$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:538$10.$result[31:0]$167
+     5/80: $3\host_exec_payload32_display$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:538$10.$result[31:0]$162
+     6/80: $8\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$154
+     7/80: $7\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.cmd[7:0]$153
+     8/80: $7\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$152
+     9/80: $7\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.$result[0:0]$150
+    10/80: $7\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.$result[3:0]$147
+    11/80: $6\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.cmd[7:0]$146
+    12/80: $6\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$145
+    13/80: $6\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.$result[0:0]$143
+    14/80: $6\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.cmd[7:0]$144
+    15/80: $6\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.$result[3:0]$141
+    16/80: $6\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.cmd[7:0]$142
+    17/80: $5\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.cmd[7:0]$139
+    18/80: $5\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$138
+    19/80: $5\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.cmd[7:0]$137
+    20/80: $5\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.$result[0:0]$136
+    21/80: $5\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.cmd[7:0]$135
+    22/80: $5\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.$result[3:0]$134
+    23/80: $4\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.cmd[7:0]$132
+    24/80: $4\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$131
+    25/80: $4\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.cmd[7:0]$130
+    26/80: $4\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.$result[0:0]$129
+    27/80: $4\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.cmd[7:0]$128
+    28/80: $4\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.$result[3:0]$127
+    29/80: $4\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:442$6.$result[0:0]$125
+    30/80: $4\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:420$5.$result[3:0]$124
+    31/80: $3\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:442$6.$result[0:0]$116
+    32/80: $3\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:442$6.cmd[7:0]$117
+    33/80: $3\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:420$5.$result[3:0]$114
+    34/80: $3\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:420$5.cmd[7:0]$115
+    35/80: $3\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.cmd[7:0]$123
+    36/80: $3\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$122
+    37/80: $3\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.cmd[7:0]$121
+    38/80: $3\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.$result[0:0]$120
+    39/80: $3\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.cmd[7:0]$119
+    40/80: $3\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.$result[3:0]$118
+    41/80: $2\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.cmd[7:0]$112
+    42/80: $2\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$111
+    43/80: $2\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.cmd[7:0]$110
+    44/80: $2\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.$result[0:0]$109
+    45/80: $2\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.cmd[7:0]$108
+    46/80: $2\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.$result[3:0]$107
+    47/80: $2\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:442$6.cmd[7:0]$106
+    48/80: $2\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:442$6.$result[0:0]$105
+    49/80: $2\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:420$5.cmd[7:0]$104
+    50/80: $2\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:420$5.$result[3:0]$103
+    51/80: $2\host_exec_payload32_display$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:538$10.$result[31:0]$113
+    52/80: $0\ev_log_drop[0:0]
+    53/80: $0\ev_rx_error[0:0]
+    54/80: $0\ev_cmd_accepted[0:0]
+    55/80: $0\log_fifo_data[127:0]
+    56/80: $0\log_fifo_wrreq[0:0]
+    57/80: $0\local_cmd_consume_lvds[0:0]
+    58/80: $1\host_exec_payload32_display$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:538$10.$result[31:0]$102
+    59/80: $1\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.cmd[7:0]$101
+    60/80: $1\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:469$9.$result[3:0]$100
+    61/80: $1\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.cmd[7:0]$99
+    62/80: $1\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:466$8.$result[0:0]$98
+    63/80: $1\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.cmd[7:0]$97
+    64/80: $1\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:455$7.$result[3:0]$96
+    65/80: $1\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:442$6.cmd[7:0]$95
+    66/80: $1\cmd_is_known$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:442$6.$result[0:0]$94
+    67/80: $1\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:420$5.cmd[7:0]$93
+    68/80: $1\payload_len_lut$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:420$5.$result[3:0]$92
+    69/80: $0\snap_update_lvds[0:0]
+    70/80: $0\pipe_r2h_start[0:0]
+    71/80: $0\recv_payload_cnt[3:0]
+    72/80: $0\recv_payload_len[3:0]
+    73/80: $0\recv_payload32[31:0]
+    74/80: $0\recv_fpga_address[15:0]
+    75/80: $0\recv_reset_release_mask[15:0]
+    76/80: $0\recv_reset_assert_mask[15:0]
+    77/80: $0\recv_run_number[31:0]
+    78/80: $0\recv_timestamp[47:0]
+    79/80: $0\recv_run_command[7:0]
+    80/80: $0\recv_state[7:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:294$79'.
+     1/1: $0\local_cmd_ack_mm_sync[1:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+     1/7: $0\local_cmd_word_lvds_sync_q1[31:0]
+     2/7: $0\local_cmd_word_lvds_sync_q0[31:0]
+     3/7: $0\local_cmd_req_lvds_sync[1:0]
+     4/7: $0\local_cmd_word_lvds[31:0]
+     5/7: $0\local_cmd_pending_lvds[0:0]
+     6/7: $0\local_cmd_ack_lvds[0:0]
+     7/7: $0\local_cmd_req_lvds_seen[0:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:238$74'.
+     1/2: $0\rst_mask_ct_lvds_sync[1:0]
+     2/2: $0\rst_mask_dp_lvds_sync[1:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:212$71'.
+     1/3: $0\soft_reset_pulse_lvds[0:0]
+     2/3: $0\soft_reset_req_lvds_sync[1:0]
+     3/3: $0\soft_reset_req_lvds_seen[0:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:198$22'.
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:187$21'.
+     1/2: $0\gts_gray_mm_ff1[47:0]
+     2/2: $0\gts_gray_mm_ff0[47:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:180$18'.
+     1/1: $0\gts_gray_lvds[47:0]
+Creating decoders for process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:165$16'.
+     1/1: $0\gts_counter[47:0]
+
+5.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\runctl_mgmt_host_rc_formal_tb.\asi_synclink_data' from process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+No latch inferred for signal `\runctl_mgmt_host_rc_formal_tb.\asi_synclink_error' from process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+No latch inferred for signal `\runctl_mgmt_host_rc_formal_tb.\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.$result' from process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+No latch inferred for signal `\runctl_mgmt_host_rc_formal_tb.\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.word' from process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+No latch inferred for signal `\runctl_mgmt_host_rc_formal_tb.\prepare_byte$func$runctl_mgmt_host_rc_formal_tb.sv:116$309.idx' from process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$13.$result' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$272'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$15.$result' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$272'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$15.g' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$272'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$15.b' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$272'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$15.$fordecl_block$3.i' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$272'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$12.$result' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$235'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$14.$result' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$235'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$14.g' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$235'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$14.b' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$235'.
+No latch inferred for signal `\runctl_mgmt_host.\gray_to_bin32$func$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$14.$fordecl_block$3.i' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$235'.
+No latch inferred for signal `\runctl_mgmt_host.\meta_readdata' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:916$226'.
+No latch inferred for signal `\runctl_mgmt_host.\gts_mm_binary' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:198$22'.
+No latch inferred for signal `\runctl_mgmt_host.$fordecl_block$1.i' from process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:198$22'.
+
+5.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\f_past_valid' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3205' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\f_reset_sr' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3206' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\f_cycle' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3207' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\runctl_stall_ctr' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3208' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\upload_stall_ctr' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3209' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expect_runctl' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3210' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expected_runctl_data' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3211' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\runctl_deadline' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3212' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expect_ack' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3213' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expected_ack_data' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3214' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\ack_deadline' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3215' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expect_reset_assert' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3216' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expect_reset_clear' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3217' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\reset_deadline' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3218' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\runctl_fire_count' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3219' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\upload_fire_count' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3220' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_runctl_valid' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3221' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_runctl_data' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3222' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_runctl_ready' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3223' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_upload_valid' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3224' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_upload_data' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3225' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_upload_sop' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3226' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_upload_eop' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3227' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\prev_upload_ready' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3228' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.$result' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3229' with global clock.
+Creating register for signal `\runctl_mgmt_host_rc_formal_tb.\expected_runcode$func$runctl_mgmt_host_rc_formal_tb.sv:258$310.cmd' using process `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+  created $ff cell `$procdff$3230' with global clock.
+Creating register for signal `\runctl_mgmt_host.\avs_csr_readdata' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3231' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\avs_csr_waitrequest' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3232' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\soft_reset_req_mm' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3233' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rst_mask_dp_mm' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3234' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rst_mask_ct_mm' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3235' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_word_mm' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3236' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_req_mm' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3237' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\log_fifo_rdreq' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3238' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\csr_state' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3239' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\csr_scratch' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3240' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\meta_page' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3241' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\gts_h_shadow' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+  created $dff cell `$procdff$3242' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_idle_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3243' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\host_idle_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3244' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\dp_hreset_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3245' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\ct_hreset_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3246' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_state_sync_q0' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3247' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_state_sync_q1' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3248' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\host_state_sync_q0' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3249' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\host_state_sync_q1' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+  created $dff cell `$procdff$3250' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_cmd_gray_ff0' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+  created $dff cell `$procdff$3251' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_cmd_gray_ff1' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+  created $dff cell `$procdff$3252' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_err_gray_ff0' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+  created $dff cell `$procdff$3253' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_err_gray_ff1' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+  created $dff cell `$procdff$3254' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\log_drop_gray_ff0' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+  created $dff cell `$procdff$3255' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\log_drop_gray_ff1' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+  created $dff cell `$procdff$3256' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_cmd_gray_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:811$217'.
+  created $dff cell `$procdff$3257' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_err_gray_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:811$217'.
+  created $dff cell `$procdff$3258' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\log_drop_gray_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:811$217'.
+  created $dff cell `$procdff$3259' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_cmd_count_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:796$207'.
+  created $dff cell `$procdff$3260' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rx_err_count_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:796$207'.
+  created $dff cell `$procdff$3261' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\log_drop_count_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:796$207'.
+  created $dff cell `$procdff$3262' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_update_mm_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3263' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_update_mm_seen' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3264' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_last_cmd' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3265' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_run_number' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3266' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_reset_assert' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3267' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_reset_release' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3268' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_fpga_addr' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3269' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_fpga_addr_valid' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3270' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_recv_ts' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3271' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\shadow_exec_ts' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+  created $dff cell `$procdff$3272' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_last_cmd_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3273' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_run_number_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3274' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_reset_assert_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3275' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_reset_release_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3276' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_fpga_addr_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3277' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_fpga_addr_valid_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3278' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_recv_ts_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3279' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_exec_ts_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+  created $dff cell `$procdff$3280' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\dp_hard_reset_q' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:680$197'.
+  created $dff cell `$procdff$3281' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\ct_hard_reset_q' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:680$197'.
+  created $dff cell `$procdff$3282' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\ext_hard_reset_q' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:680$197'.
+  created $dff cell `$procdff$3283' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\aso_upload_data' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+  created $dff cell `$procdff$3284' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\aso_upload_valid' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+  created $dff cell `$procdff$3285' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\aso_upload_startofpacket' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+  created $dff cell `$procdff$3286' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\aso_upload_endofpacket' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+  created $dff cell `$procdff$3287' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\upload_state' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+  created $dff cell `$procdff$3288' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\aso_runctl_valid' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+  created $dff cell `$procdff$3289' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\aso_runctl_data' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+  created $dff cell `$procdff$3290' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\host_exec_ts' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+  created $dff cell `$procdff$3291' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\pipe_r2h_done' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+  created $dff cell `$procdff$3292' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\host_state' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+  created $dff cell `$procdff$3293' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_consume_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3294' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_state' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3295' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_run_command' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3296' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_timestamp' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3297' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_run_number' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3298' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_reset_assert_mask' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3299' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_reset_release_mask' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3300' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_fpga_address' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3301' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_payload32' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3302' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_payload_len' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3303' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\recv_payload_cnt' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3304' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\pipe_r2h_start' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3305' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\snap_update_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3306' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\ev_cmd_accepted' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3307' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\ev_rx_error' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3308' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\ev_log_drop' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3309' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\log_fifo_wrreq' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3310' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\log_fifo_data' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+  created $dff cell `$procdff$3311' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_ack_mm_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:294$79'.
+  created $dff cell `$procdff$3312' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_req_lvds_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+  created $dff cell `$procdff$3313' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_req_lvds_seen' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+  created $dff cell `$procdff$3314' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_ack_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+  created $dff cell `$procdff$3315' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_word_lvds_sync_q0' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+  created $dff cell `$procdff$3316' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_word_lvds_sync_q1' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+  created $dff cell `$procdff$3317' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_pending_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+  created $dff cell `$procdff$3318' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\local_cmd_word_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+  created $dff cell `$procdff$3319' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rst_mask_dp_lvds_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:238$74'.
+  created $dff cell `$procdff$3320' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\rst_mask_ct_lvds_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:238$74'.
+  created $dff cell `$procdff$3321' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\soft_reset_req_lvds_sync' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:212$71'.
+  created $dff cell `$procdff$3322' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\soft_reset_req_lvds_seen' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:212$71'.
+  created $dff cell `$procdff$3323' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\soft_reset_pulse_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:212$71'.
+  created $dff cell `$procdff$3324' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\gts_gray_mm_ff0' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:187$21'.
+  created $dff cell `$procdff$3325' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\gts_gray_mm_ff1' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:187$21'.
+  created $dff cell `$procdff$3326' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\gts_gray_lvds' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:180$18'.
+  created $dff cell `$procdff$3327' with positive edge clock.
+Creating register for signal `\runctl_mgmt_host.\gts_counter' using process `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:165$16'.
+  created $dff cell `$procdff$3328' with positive edge clock.
+
+5.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+5.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:75$529'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:74$528'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:73$527'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:72$526'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:71$525'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:70$524'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:69$523'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:68$522'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:66$521'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:65$520'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:63$519'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:62$518'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:61$517'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:60$516'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:59$515'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:58$514'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:57$513'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:56$512'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:55$511'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:53$510'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:52$509'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:8$508'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:7$507'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:6$506'.
+Found and cleaned up 26 empty switches in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:169$349'.
+Found and cleaned up 9 empty switches in `\runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+Removing empty process `runctl_mgmt_host_rc_formal_tb.$proc$runctl_mgmt_host_rc_formal_tb.sv:101$322'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:847$272'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:846$235'.
+Found and cleaned up 12 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:926$227'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:916$226'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:916$226'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:852$225'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:823$224'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:811$217'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:811$217'.
+Found and cleaned up 4 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:796$207'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:796$207'.
+Found and cleaned up 2 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:758$205'.
+Found and cleaned up 3 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:723$204'.
+Found and cleaned up 8 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:680$197'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:680$197'.
+Found and cleaned up 5 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:631$190'.
+Found and cleaned up 6 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:585$174'.
+Found and cleaned up 27 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:382$80'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:294$79'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:294$79'.
+Found and cleaned up 3 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:268$76'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:238$74'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:238$74'.
+Found and cleaned up 2 empty switches in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:212$71'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:212$71'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:198$22'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:187$21'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:187$21'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:180$18'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:180$18'.
+Found and cleaned up 1 empty switch in `\runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:165$16'.
+Removing empty process `runctl_mgmt_host.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:165$16'.
+Cleaned up 116 empty switches.
+
+5.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module runctl_mgmt_host_rc_formal_tb.
+<suppressed ~52 debug messages>
+Optimizing module runctl_mgmt_host.
+<suppressed ~182 debug messages>
+Optimizing module logging_fifo.
+
+5.3. Executing FUTURE pass.
+
+5.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module runctl_mgmt_host_rc_formal_tb.
+Optimizing module runctl_mgmt_host.
+Optimizing module logging_fifo.
+
+5.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \runctl_mgmt_host_rc_formal_tb..
+Finding unused cells or wires in module \runctl_mgmt_host..
+Finding unused cells or wires in module \logging_fifo..
+Removed 338 unused cells and 1438 unused wires.
+<suppressed ~353 debug messages>
+
+5.6. Executing CHECK pass (checking for obvious problems).
+Checking module runctl_mgmt_host_rc_formal_tb...
+Warning: Wire runctl_mgmt_host_rc_formal_tb.\gclk is used but has no driver.
+Checking module runctl_mgmt_host...
+Checking module logging_fifo...
+Found and reported 1 problems.
+
+5.7. Executing OPT pass (performing simple optimizations).
+
+5.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module runctl_mgmt_host_rc_formal_tb.
+Optimizing module runctl_mgmt_host.
+Optimizing module logging_fifo.
+
+5.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 378 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 330 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 329 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+<suppressed ~147 debug messages>
+Finding identical cells in module `\runctl_mgmt_host'.
+Computing hashes of 831 cells of `\runctl_mgmt_host'.
+Finding duplicate cells in `\runctl_mgmt_host'.
+Computing hashes of 694 cells of `\runctl_mgmt_host'.
+Finding duplicate cells in `\runctl_mgmt_host'.
+Computing hashes of 693 cells of `\runctl_mgmt_host'.
+Finding duplicate cells in `\runctl_mgmt_host'.
+<suppressed ~414 debug messages>
+Finding identical cells in module `\logging_fifo'.
+Computing hashes of 0 cells of `\logging_fifo'.
+Finding duplicate cells in `\logging_fifo'.
+Removed a total of 187 cells.
+
+5.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \runctl_mgmt_host_rc_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$906.
+    dead port 2/2 on $mux $procmux$904.
+    dead port 2/2 on $mux $procmux$1066.
+    dead port 1/2 on $mux $procmux$897.
+    dead port 2/2 on $mux $procmux$895.
+    dead port 1/2 on $mux $procmux$1111.
+    dead port 1/2 on $mux $procmux$1019.
+    dead port 2/2 on $mux $procmux$1017.
+    dead port 1/2 on $mux $procmux$549.
+    dead port 2/2 on $mux $procmux$546.
+    dead port 2/2 on $mux $procmux$544.
+    dead port 1/2 on $mux $procmux$1078.
+    dead port 1/2 on $mux $procmux$1068.
+    dead port 1/2 on $mux $procmux$962.
+    dead port 2/2 on $mux $procmux$960.
+    dead port 1/2 on $mux $procmux$958.
+    dead port 1/2 on $mux $procmux$947.
+    dead port 2/2 on $mux $procmux$945.
+    dead port 1/2 on $mux $procmux$943.
+    dead port 2/2 on $mux $procmux$940.
+    dead port 1/2 on $mux $procmux$927.
+    dead port 2/2 on $mux $procmux$925.
+    dead port 1/2 on $mux $procmux$916.
+    dead port 2/2 on $mux $procmux$914.
+Running muxtree optimizer on module \runctl_mgmt_host..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 1/2 on $mux $procmux$2012.
+    dead port 2/2 on $mux $procmux$2009.
+    dead port 1/2 on $mux $procmux$2007.
+    dead port 1/2 on $mux $procmux$2004.
+    dead port 1/2 on $mux $procmux$2002.
+    dead port 1/2 on $mux $procmux$1999.
+    dead port 1/2 on $mux $procmux$1818.
+    dead port 2/2 on $mux $procmux$1815.
+    dead port 1/2 on $mux $procmux$1813.
+    dead port 1/2 on $mux $procmux$1810.
+    dead port 2/2 on $mux $procmux$1807.
+    dead port 1/2 on $mux $procmux$1805.
+    dead port 1/5 on $pmux $procmux$1800.
+    dead port 1/2 on $mux $procmux$1689.
+    dead port 2/2 on $mux $procmux$1686.
+    dead port 2/2 on $mux $procmux$1684.
+    dead port 1/2 on $mux $procmux$2388.
+    dead port 2/2 on $mux $procmux$2385.
+    dead port 2/2 on $mux $procmux$2383.
+Running muxtree optimizer on module \logging_fifo..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 43 multiplexer ports.
+<suppressed ~753 debug messages>
+
+5.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \runctl_mgmt_host_rc_formal_tb.
+    New ctrl vector for $pmux cell $procmux$842: $auto$opt_reduce.cc:137:opt_pmux$3330
+    New ctrl vector for $pmux cell $procmux$534: { $procmux$543_CMP $procmux$542_CMP $procmux$541_CMP $procmux$540_CMP $procmux$538_CMP $auto$opt_reduce.cc:137:opt_pmux$3332 $procmux$535_CMP }
+    New ctrl vector for $pmux cell $procmux$870: $auto$opt_reduce.cc:137:opt_pmux$3334
+  Optimizing cells in module \runctl_mgmt_host_rc_formal_tb.
+  Optimizing cells in module \runctl_mgmt_host.
+    New ctrl vector for $pmux cell $procmux$2885: { $procmux$2889_CMP $auto$opt_reduce.cc:137:opt_pmux$3336 }
+    New ctrl vector for $pmux cell $procmux$1377: { $procmux$1381_CMP $procmux$1380_CMP $auto$opt_reduce.cc:137:opt_pmux$3338 }
+  Optimizing cells in module \runctl_mgmt_host.
+  Optimizing cells in module \logging_fifo.
+Performed a total of 5 changes.
+
+5.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 308 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 283 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 274 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+<suppressed ~102 debug messages>
+Finding identical cells in module `\runctl_mgmt_host'.
+Computing hashes of 677 cells of `\runctl_mgmt_host'.
+Finding duplicate cells in `\runctl_mgmt_host'.
+Computing hashes of 669 cells of `\runctl_mgmt_host'.
+Finding duplicate cells in `\runctl_mgmt_host'.
+<suppressed ~24 debug messages>
+Finding identical cells in module `\logging_fifo'.
+Computing hashes of 0 cells of `\logging_fifo'.
+Finding duplicate cells in `\logging_fifo'.
+Removed a total of 42 cells.
+
+5.7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \runctl_mgmt_host_rc_formal_tb..
+Finding unused cells or wires in module \runctl_mgmt_host..
+Finding unused cells or wires in module \logging_fifo..
+Removed 0 unused cells and 246 unused wires.
+<suppressed ~2 debug messages>
+
+5.7.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module runctl_mgmt_host_rc_formal_tb.
+Optimizing module runctl_mgmt_host.
+Optimizing module logging_fifo.
+
+5.7.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.7.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \runctl_mgmt_host_rc_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \runctl_mgmt_host..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \logging_fifo..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Removed 0 multiplexer ports.
+<suppressed ~666 debug messages>
+
+5.7.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \runctl_mgmt_host_rc_formal_tb.
+  Optimizing cells in module \runctl_mgmt_host.
+  Optimizing cells in module \logging_fifo.
+Performed a total of 0 changes.
+
+5.7.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 274 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+Finding identical cells in module `\runctl_mgmt_host'.
+Computing hashes of 669 cells of `\runctl_mgmt_host'.
+Finding duplicate cells in `\runctl_mgmt_host'.
+Finding identical cells in module `\logging_fifo'.
+Computing hashes of 0 cells of `\logging_fifo'.
+Finding duplicate cells in `\logging_fifo'.
+Removed a total of 0 cells.
+
+5.7.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \runctl_mgmt_host_rc_formal_tb..
+Finding unused cells or wires in module \runctl_mgmt_host..
+Finding unused cells or wires in module \logging_fifo..
+
+5.7.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module runctl_mgmt_host_rc_formal_tb.
+Optimizing module runctl_mgmt_host.
+Optimizing module logging_fifo.
+
+5.7.14. Finished fast OPT passes. (There is nothing left to do.)
+
+5.8. Executing WREDUCE pass (reducing word size of cells).
+Removed top 31 bits (of 32) from port B of cell runctl_mgmt_host_rc_formal_tb.$ge$runctl_mgmt_host_rc_formal_tb.sv:115$338 ($ge).
+Removed top 29 bits (of 32) from port B of cell runctl_mgmt_host_rc_formal_tb.$le$runctl_mgmt_host_rc_formal_tb.sv:115$339 ($le).
+Removed top 3 bits (of 6) from port Y of cell runctl_mgmt_host_rc_formal_tb.$sub$runctl_mgmt_host_rc_formal_tb.sv:116$344 ($sub).
+Removed top 3 bits (of 6) from port A of cell runctl_mgmt_host_rc_formal_tb.$sub$runctl_mgmt_host_rc_formal_tb.sv:116$344 ($sub).
+Removed top 29 bits (of 32) from port B of cell runctl_mgmt_host_rc_formal_tb.$le$runctl_mgmt_host_rc_formal_tb.sv:174$355 ($le).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$eq$runctl_mgmt_host_rc_formal_tb.sv:188$376 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$eq$runctl_mgmt_host_rc_formal_tb.sv:189$378 ($eq).
+Removed top 1 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$eq$runctl_mgmt_host_rc_formal_tb.sv:190$380 ($eq).
+Removed top 2 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$eq$runctl_mgmt_host_rc_formal_tb.sv:194$385 ($eq).
+Removed top 1 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$eq$runctl_mgmt_host_rc_formal_tb.sv:195$386 ($eq).
+Removed top 5 bits (of 6) from port B of cell runctl_mgmt_host_rc_formal_tb.$add$runctl_mgmt_host_rc_formal_tb.sv:204$392 ($add).
+Removed top 3 bits (of 4) from port B of cell runctl_mgmt_host_rc_formal_tb.$add$runctl_mgmt_host_rc_formal_tb.sv:240$397 ($add).
+Removed top 3 bits (of 4) from port B of cell runctl_mgmt_host_rc_formal_tb.$add$runctl_mgmt_host_rc_formal_tb.sv:246$400 ($add).
+Removed top 29 bits (of 32) from port B of cell runctl_mgmt_host_rc_formal_tb.$lt$runctl_mgmt_host_rc_formal_tb.sv:251$402 ($lt).
+Removed top 29 bits (of 32) from port B of cell runctl_mgmt_host_rc_formal_tb.$lt$runctl_mgmt_host_rc_formal_tb.sv:252$404 ($lt).
+Removed top 3 bits (of 6) from port B of cell runctl_mgmt_host_rc_formal_tb.$eq$runctl_mgmt_host_rc_formal_tb.sv:271$411 ($eq).
+Removed top 3 bits (of 4) from port B of cell runctl_mgmt_host_rc_formal_tb.$sub$runctl_mgmt_host_rc_formal_tb.sv:279$416 ($sub).
+Removed top 3 bits (of 4) from port B of cell runctl_mgmt_host_rc_formal_tb.$sub$runctl_mgmt_host_rc_formal_tb.sv:283$419 ($sub).
+Removed top 2 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$sub$runctl_mgmt_host_rc_formal_tb.sv:287$423 ($sub).
+Removed top 1 bits (of 2) from port B of cell runctl_mgmt_host_rc_formal_tb.$add$runctl_mgmt_host_rc_formal_tb.sv:291$424 ($add).
+Removed top 1 bits (of 2) from port B of cell runctl_mgmt_host_rc_formal_tb.$add$runctl_mgmt_host_rc_formal_tb.sv:317$436 ($add).
+Removed top 1 bits (of 2) from port B of cell runctl_mgmt_host_rc_formal_tb.$le$runctl_mgmt_host_rc_formal_tb.sv:338$459 ($le).
+Removed top 1 bits (of 2) from port B of cell runctl_mgmt_host_rc_formal_tb.$le$runctl_mgmt_host_rc_formal_tb.sv:339$461 ($le).
+Removed top 5 bits (of 6) from port B of cell runctl_mgmt_host_rc_formal_tb.$eq$runctl_mgmt_host_rc_formal_tb.sv:361$482 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$535_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$536_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$537_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$538_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$539_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$540_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$541_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$542_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$543_CMP0 ($eq).
+Removed top 1 bits (of 9) from mux cell runctl_mgmt_host_rc_formal_tb.$procmux$912 ($mux).
+Removed top 1 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$937_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$938_CMP0 ($eq).
+Removed top 2 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$1018_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$1074_CMP0 ($eq).
+Removed top 1 bits (of 3) from port B of cell runctl_mgmt_host_rc_formal_tb.$procmux$1075_CMP0 ($eq).
+Removed top 1 bits (of 9) from wire runctl_mgmt_host_rc_formal_tb.$7\asi_synclink_data[8:0].
+Removed top 3 bits (of 6) from wire runctl_mgmt_host_rc_formal_tb.$sub$runctl_mgmt_host_rc_formal_tb.sv:116$344_Y.
+Removed top 47 bits (of 48) from port B of cell runctl_mgmt_host.$add$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:169$17 ($add).
+Removed top 1 bits (of 48) from port A of cell runctl_mgmt_host.$xor$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:184$20 ($xor).
+Removed top 3 bits (of 4) from port B of cell runctl_mgmt_host.$add$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:489$159 ($add).
+Removed top 31 bits (of 32) from port B of cell runctl_mgmt_host.$add$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:803$210 ($add).
+Removed top 31 bits (of 32) from port B of cell runctl_mgmt_host.$add$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:805$213 ($add).
+Removed top 1 bits (of 32) from port A of cell runctl_mgmt_host.$xor$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:817$219 ($xor).
+Removed top 1 bits (of 32) from port A of cell runctl_mgmt_host.$xor$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv:818$221 ($xor).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1192_CMP0 ($eq).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1193_CMP0 ($eq).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1195_CMP0 ($eq).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1196_CMP0 ($eq).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1197_CMP0 ($eq).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1198_CMP0 ($eq).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1199_CMP0 ($eq).
+Removed top 2 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1200_CMP0 ($eq).
+Removed top 2 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1201_CMP0 ($eq).
+Removed top 2 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1203_CMP0 ($eq).
+Removed top 3 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1204_CMP0 ($eq).
+Removed top 1 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1230_CMP0 ($eq).
+Removed top 4 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1249_CMP0 ($eq).
+Removed top 2 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1263_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell runctl_mgmt_host.$procmux$1302_CMP0 ($eq).
+Removed top 3 bits (of 5) from port B of cell runctl_mgmt_host.$procmux$1369_CMP0 ($eq).
+Removed top 1 bits (of 2) from port B of cell runctl_mgmt_host.$procmux$1380_CMP0 ($eq).
+Removed top 8 bits (of 16) from mux cell runctl_mgmt_host.$procmux$1386 ($mux).
+Removed top 8 bits (of 16) from mux cell runctl_mgmt_host.$procmux$1392 ($mux).
+Removed top 6 bits (of 8) from mux cell runctl_mgmt_host.$procmux$1610 ($mux).
+Removed top 7 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1665_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1678_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1680_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1681_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1682_CMP0 ($eq).
+Removed top 6 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1754_CMP0 ($eq).
+Removed top 7 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1786_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP1 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP2 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP3 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP4 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP5 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP6 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1996_CMP7 ($eq).
+Removed top 1 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1997_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$1998_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2380_CMP2 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2380_CMP3 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2380_CMP4 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2380_CMP5 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2380_CMP6 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2380_CMP7 ($eq).
+Removed top 7 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2659_CMP0 ($eq).
+Removed top 6 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2706_CMP0 ($eq).
+Removed top 5 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2812_CMP0 ($eq).
+Removed top 1 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2886_CMP0 ($eq).
+Removed top 8 bits (of 32) from mux cell runctl_mgmt_host.$procmux$2885 ($pmux).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2887_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2888_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2889_CMP0 ($eq).
+Removed top 1 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2902_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2932_CMP0 ($eq).
+Removed top 2 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$2975_CMP0 ($eq).
+Removed top 3 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$3020_CMP0 ($eq).
+Removed top 6 bits (of 8) from port B of cell runctl_mgmt_host.$procmux$3093_CMP0 ($eq).
+Removed top 6 bits (of 8) from mux cell runctl_mgmt_host.$procmux$3118 ($mux).
+Removed top 5 bits (of 8) from mux cell runctl_mgmt_host.$procmux$3121 ($mux).
+Removed top 5 bits (of 8) from mux cell runctl_mgmt_host.$procmux$3132 ($mux).
+Removed top 8 bits (of 16) from FF cell runctl_mgmt_host.$procdff$3248 ($dff).
+Removed top 8 bits (of 16) from FF cell runctl_mgmt_host.$procdff$3250 ($dff).
+Removed top 8 bits (of 16) from mux cell runctl_mgmt_host.$procmux$1383 ($mux).
+Removed top 8 bits (of 16) from mux cell runctl_mgmt_host.$procmux$1389 ($mux).
+Removed top 8 bits (of 16) from FF cell runctl_mgmt_host.$procdff$3247 ($dff).
+Removed top 8 bits (of 16) from FF cell runctl_mgmt_host.$procdff$3249 ($dff).
+Removed top 6 bits (of 8) from wire runctl_mgmt_host.$procmux$1610_Y.
+Removed top 8 bits (of 32) from wire runctl_mgmt_host.$procmux$2885_Y.
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.$0\host_state_sync_q1[15:0].
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.$0\host_state_sync_q0[15:0].
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.$0\recv_state_sync_q1[15:0].
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.$0\recv_state_sync_q0[15:0].
+Removed top 6 bits (of 8) from wire runctl_mgmt_host.$procmux$3118_Y.
+Removed top 5 bits (of 8) from wire runctl_mgmt_host.$procmux$3121_Y.
+Removed top 5 bits (of 8) from wire runctl_mgmt_host.$procmux$3132_Y.
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.host_state_sync_q1.
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.host_state_sync_q0.
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.recv_state_sync_q1.
+Removed top 8 bits (of 16) from wire runctl_mgmt_host.recv_state_sync_q0.
+
+5.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \runctl_mgmt_host_rc_formal_tb..
+Finding unused cells or wires in module \runctl_mgmt_host..
+Finding unused cells or wires in module \logging_fifo..
+Removed 0 unused cells and 15 unused wires.
+<suppressed ~2 debug messages>
+
+5.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+5.11. Executing OPT pass (performing simple optimizations).
+
+5.11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module runctl_mgmt_host_rc_formal_tb.
+Optimizing module runctl_mgmt_host.
+Optimizing module logging_fifo.
+
+5.11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\runctl_mgmt_host_rc_formal_tb'.
+Computing hashes of 274 cells of `\runctl_mgmt_host_rc_formal_tb'.
+Finding duplicate cells in `\runctl_mgmt_host_rc_formal_tb'.
+Finding identical cells in module `\runctl_mgmt_host'.
+Computing hashes of 669 cells of `\runctl_mgmt_host'.
+Finding duplicate cells in `\runctl_mgmt_host'.
+Finding identical cells in module `\logging_fifo'.
+Computing hashes of 0 cells of `\logging_fifo'.
+Finding duplicate cells in `\logging_fifo'.
+Removed a total of 0 cells.
+
+5.11.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \runctl_mgmt_host_rc_formal_tb..
+Finding unused cells or wires in module \runctl_mgmt_host..
+Finding unused cells or wires in module \logging_fifo..
+
+5.11.4. Finished fast OPT passes.
+
+5.12. Executing SORT pass.
+
+5.13. Printing statistics.
+
+=== logging_fifo ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       12 wires
+      186 wire bits
+       12 public wires
+      186 public wire bits
+       12 ports
+      186 port bits
+
+=== runctl_mgmt_host ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      581 wires
+     7561 wire bits
+      136 public wires
+     2051 public wire bits
+       23 ports
+      142 port bits
+      668 cells
+        4   $add
+       93   $dff
+       60   $eq
+        1   $ge
+        8   $logic_and
+        9   $logic_not
+        1   $logic_or
+      334   $mux
+        5   $ne
+        4   $not
+        1   $or
+       28   $pmux
+        1   $reduce_bool
+        6   $reduce_or
+      113   $xor
+        1 submodules
+        1   logging_fifo
+
+=== runctl_mgmt_host_rc_formal_tb ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      252 wires
+      891 wire bits
+       48 public wires
+      291 public wire bits
+      273 cells
+        5   $add
+        5   $anyconst
+        2   $anyseq
+       34   $check
+       33   $eq
+       24   $ff
+        1   $ge
+        4   $le
+       25   $logic_and
+       12   $logic_not
+       16   $logic_or
+        2   $lt
+       95   $mux
+        1   $ne
+        4   $pmux
+        4   $reduce_bool
+        2   $reduce_or
+        4   $sub
+        1 submodules
+        1   runctl_mgmt_host
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      941 runctl_mgmt_host_rc_formal_tb
+      668 runctl_mgmt_host
+
+        +----------Count including submodules.
+        | 
+      845 wires
+     8638 wire bits
+      196 public wires
+     2528 public wire bits
+       35 ports
+      328 port bits
+        - memories
+        - memory bits
+        - processes
+      941 cells
+        9   $add
+        5   $anyconst
+        2   $anyseq
+       34   $check
+       93   $dff
+       93   $eq
+       24   $ff
+        2   $ge
+        4   $le
+       33   $logic_and
+       21   $logic_not
+       17   $logic_or
+        2   $lt
+      429   $mux
+        6   $ne
+        4   $not
+        1   $or
+       32   $pmux
+        5   $reduce_bool
+        8   $reduce_or
+        4   $sub
+      113   $xor
+        1 submodules
+        1   runctl_mgmt_host
+
+5.14. Executing CHECK pass (checking for obvious problems).
+Checking module logging_fifo...
+Checking module runctl_mgmt_host...
+Checking module runctl_mgmt_host_rc_formal_tb...
+Warning: Wire runctl_mgmt_host_rc_formal_tb.\gclk is used but has no driver.
+Found and reported 1 problems.
+
+6. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `runctl_mgmt_host_rc_formal_tb'. Setting top module to runctl_mgmt_host_rc_formal_tb.
+
+6.1. Analyzing design hierarchy..
+Top module:  \runctl_mgmt_host_rc_formal_tb
+Used module:     \runctl_mgmt_host
+Used module:         \logging_fifo
+
+6.2. Analyzing design hierarchy..
+Top module:  \runctl_mgmt_host_rc_formal_tb
+Used module:     \runctl_mgmt_host
+Used module:         \logging_fifo
+Removed 0 unused modules.
+Module runctl_mgmt_host_rc_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+7. Executing jny backend.
+
+8. Executing RTLIL backend.
+Output filename: ../model/design.il
+
+Warnings: 1 unique messages, 2 total
+End of script. Logfile hash: f33e1ab459, time: 0.23s, user: 0.23s, system: 0.00s, MEM: 28.57 MB peak
+Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+Time spent: 21% 8x read_verilog (0 sec), 19% 5x opt_clean (0 sec), ...

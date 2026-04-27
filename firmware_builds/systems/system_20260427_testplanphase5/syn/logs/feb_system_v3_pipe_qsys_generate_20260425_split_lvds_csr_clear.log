@@ -1,0 +1,2 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.04.25.05:17:37 Error: You specified too many generation targets; you can only specify one of the following (--export-qsys-script, --upgrade-ip-cores, --upgrade-variation-file, --example-design, (combination of --synthesis, --simulation, --block-symbol-file, and --test-bench).

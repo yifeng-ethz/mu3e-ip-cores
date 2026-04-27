@@ -22,7 +22,7 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/fe/fe
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "src/fe/top_FEB_v2.sdc"]
 
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "src/wrappers/feb_system_v3/feb_system_v3_pipe_lvdsctrl_wrapper.qip"]
-set_global_assignment -name QIP_FILE [file join $repo_root "quartus_system/feb_system_v3_pipe_lvdsctrl/synthesis/feb_system_v3_pipe_lvdsctrl.qip"]
+set_global_assignment -name QIP_FILE [file join $repo_root "firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe_lvdsctrl/synthesis/feb_system_v3_pipe_lvdsctrl.qip"]
 
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_ds/alt_issp_ds/synthesis/alt_issp_ds.qip"]
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_srst/alt_issp_srst/synthesis/alt_issp_srst.qip"]

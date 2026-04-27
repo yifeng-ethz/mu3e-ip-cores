@@ -1,0 +1,8 @@
+-- megafunction wizard: %Altera PLL%
+-- GENERATION: XML
+-- Retrieval info: <instance entity-name="altera_pll" >
+-- Retrieval info: 	<generic name="device_family" value="Arria V" />
+-- Retrieval info: 	<generic name="gui_reference_clock_frequency" value="125.0" />
+-- Retrieval info: 	<generic name="gui_output_clock_frequency0" value="500.0" />
+-- Retrieval info: </instance>
+-- IPFS_FILES : trigPLL.vho
