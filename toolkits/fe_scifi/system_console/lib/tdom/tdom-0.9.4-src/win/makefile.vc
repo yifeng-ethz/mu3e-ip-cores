@@ -1,0 +1,94 @@
+#------------------------------------------------------------- -*- makefile -*-
+#
+# Makefile for tdom
+#
+# For basic build instructions see the README in this directory.
+#
+# For other build options (debug, static etc.),
+# See TIP 477 (https://core.tcl.tk/tips/doc/trunk/tip/477.md) for
+# detailed documentation.
+# 
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+#------------------------------------------------------------------------------
+
+PROJECT = tdom
+PRJ_RCFILE = tdom.rc
+!if [echo VERSIONHASH = \> nmakehlp.out] \
+   || [type ..\manifest.uuid >> nmakehlp.out]
+!error *** Could not retrieve VERSIONHASH.
+!endif
+!include nmakehlp.out
+
+!include "rules-ext.vc"
+
+EXPATDIR = ..\expat
+PRJ_OBJS = \
+	$(TMP_DIR)\xmlrole.obj     \
+	$(TMP_DIR)\xmltok.obj      \
+	$(TMP_DIR)\xmlparse.obj    \
+	$(TMP_DIR)\xmlsimple.obj   \
+	$(TMP_DIR)\dom.obj         \
+	$(TMP_DIR)\domhtml.obj     \
+	$(TMP_DIR)\domhtml5.obj    \
+	$(TMP_DIR)\domxslt.obj     \
+	$(TMP_DIR)\nodecmd.obj     \
+	$(TMP_DIR)\domxpath.obj    \
+	$(TMP_DIR)\domlock.obj     \
+	$(TMP_DIR)\domjson.obj     \
+	$(TMP_DIR)\tclexpat.obj    \
+	$(TMP_DIR)\tcldom.obj      \
+	$(TMP_DIR)\tclpull.obj     \
+	$(TMP_DIR)\datatypes.obj   \
+	$(TMP_DIR)\schema.obj      \
+	$(TMP_DIR)\tdomStubInit.obj\
+	$(TMP_DIR)\tdomStubLib.obj \
+	$(TMP_DIR)\tdominit.obj
+
+PRJ_STUBOBJS = $(TMP_DIR)\tdomStubLib.obj
+
+PRJ_DEFINES = \
+	-D _CRT_SECURE_NO_DEPRECATE -D _CRT_NONSTDC_NO_DEPRECATE \
+	-DHAVE_MEMMOVE -DXML_DTD=1 -DXML_NS=1 -DTDOM_NO_UNKNOWN_CMD=1 \
+	-DXML_GE=1 -DXML_CONTEXT_BYTES=0 -DUSE_NORMAL_ALLOCATOR \
+	-DXMLIMPORT=__declspec(dllexport)
+
+# TBD - some of the code, like expat checks for Windows using the
+# WIN32 macro. This should really be changed to check _WIN32. For now,
+# define WIN32 ourselves
+PRJ_DEFINES = $(PRJ_DEFINES) -DWIN32
+
+PRJ_INCLUDES	= -I"$(EXPATDIR)" -I"$(TMP_DIR)"
+
+!if "$(GUMBODIR)" != ""
+
+PRJ_DEFINES     = $(PRJ_DEFINES) -DTDOM_HAVE_GUMBO=1
+PRJ_INCLUDES = $(PRJ_INCLUDES) -I"$(GUMBODIR)\src"
+
+!if "$(MACHINE)" == "AMD64"
+baselibs = $(baselibs) "$(GUMBODIR)\visualc\x64\Release\gumbo.lib"
+!else
+baselibs = $(baselibs) "$(GUMBODIR)\visualc\Win32\Release\gumbo.lib"
+!endif
+
+!endif # GUMBODIR
+
+!include "$(_RULESDIR)\targets.vc"
+
+$(TMP_DIR)\tcldom.obj: $(TMP_DIR)\versionhash.h
+$(TMP_DIR)\versionhash.h: $(ROOT)\manifest.uuid
+	echo #define FOSSIL_HASH "$(VERSIONHASH)" > $(TMP_DIR)\versionhash.h
+
+install:    default-install-docs-html default-install-stubs
+
+{$(EXPATDIR)}.c{$(TMP_DIR)}.obj::
+    $(CCPKGCMD) @<<
+$<
+<<
+
+pkgindex:
+        @type << >"$(OUT_DIR)\pkgIndex.tcl"
+    package ifneeded $(PROJECT) $(DOTVERSION) "[list load [file join $$dir $(PRJLIBNAME)] Tdom]; [list source [file join $$dir tdom.tcl]]"
+<<
+

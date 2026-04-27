@@ -1,0 +1,40 @@
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x00000
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00000000
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 68 us
+  timing total        : 68 us
+  secondary before    : 0x0000
+  secondary after     : 0x0005
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0005
+  type                : RD
+  link                : 2
+  addr                : 0x00000
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00000000
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000

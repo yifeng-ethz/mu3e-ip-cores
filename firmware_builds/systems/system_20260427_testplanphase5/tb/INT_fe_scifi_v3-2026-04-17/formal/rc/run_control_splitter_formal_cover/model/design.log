@@ -1,0 +1,1082 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+
+-- Executing script file `../model/design.ys' --
+
+1. Executing Verilog-2005 frontend: formal_defs.svh
+Parsing formal SystemVerilog input from `formal_defs.svh' to AST representation.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv
+Parsing formal SystemVerilog input from `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv' to AST representation.
+Generating RTLIL representation for module `\altera_avalon_st_splitter'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: run_control_splitter_formal_tb.sv
+Parsing formal SystemVerilog input from `run_control_splitter_formal_tb.sv' to AST representation.
+Generating RTLIL representation for module `\run_control_splitter_formal_tb'.
+Successfully finished Verilog frontend.
+
+4. Executing PREP pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     \altera_avalon_st_splitter
+Parameter \NUMBER_OF_OUTPUTS = 16
+Parameter \QUALIFY_VALID_OUT = 0
+Parameter \DATA_WIDTH = 9
+Parameter \BITS_PER_SYMBOL = 9
+Parameter \USE_PACKETS = 0
+Parameter \CHANNEL_WIDTH = 1
+Parameter \ERROR_WIDTH = 1
+Parameter \EMPTY_WIDTH = 1
+
+4.1.2. Executing AST frontend in derive mode using pre-parsed AST for module `\altera_avalon_st_splitter'.
+Parameter \NUMBER_OF_OUTPUTS = 16
+Parameter \QUALIFY_VALID_OUT = 0
+Parameter \DATA_WIDTH = 9
+Parameter \BITS_PER_SYMBOL = 9
+Parameter \USE_PACKETS = 0
+Parameter \CHANNEL_WIDTH = 1
+Parameter \ERROR_WIDTH = 1
+Parameter \EMPTY_WIDTH = 1
+Generating RTLIL representation for module `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Reprocessing module run_control_splitter_formal_tb because instantiated module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter has become available.
+Generating RTLIL representation for module `\run_control_splitter_formal_tb'.
+
+4.1.3. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     \altera_avalon_st_splitter
+Parameter \NUMBER_OF_OUTPUTS = 16
+Parameter \QUALIFY_VALID_OUT = 0
+Parameter \DATA_WIDTH = 9
+Parameter \BITS_PER_SYMBOL = 9
+Parameter \USE_PACKETS = 0
+Parameter \CHANNEL_WIDTH = 1
+Parameter \ERROR_WIDTH = 1
+Parameter \EMPTY_WIDTH = 1
+Found cached RTLIL representation for module `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+
+4.1.4. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+4.1.5. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+Removing unused module `\altera_avalon_st_splitter'.
+Removed 1 unused modules.
+Module run_control_splitter_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 2 switch rules as full_case in process $proc$run_control_splitter_formal_tb.sv:178$657 in module run_control_splitter_formal_tb.
+Removed a total of 0 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 0 redundant assignments.
+Promoted 167 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+Found init rule in `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:24$1121'.
+  Set init value: \prev_accept_data = 9'000000000
+Found init rule in `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:23$1120'.
+  Set init value: \prev_accept = 1'0
+Found init rule in `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:7$1119'.
+  Set init value: \f_reset_sr = 2'11
+Found init rule in `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:6$1118'.
+  Set init value: \f_past_valid = 1'0
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~6 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$520'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$519'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$518'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$517'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$516'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$515'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$514'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$513'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$512'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$511'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$510'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$509'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$508'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$507'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$506'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$505'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$504'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$503'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$502'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$501'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$500'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$499'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$498'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$497'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$496'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$495'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$494'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$493'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$492'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$491'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$490'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$489'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$488'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$487'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$486'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$485'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$484'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$483'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$482'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$481'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$480'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$479'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$478'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$477'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$476'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$475'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$474'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$473'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$472'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$471'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$470'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$469'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$468'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$467'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$466'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$465'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$464'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$463'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$462'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$461'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$460'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$459'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$458'.
+Creating decoders for process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$457'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:24$1121'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:23$1120'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:7$1119'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:6$1118'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:172$1117'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:171$1116'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:170$1115'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:169$1114'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:168$1113'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:167$1112'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:164$1111'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:163$1110'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:162$1109'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:161$1108'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:160$1107'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:159$1106'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:156$1105'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:155$1104'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:154$1103'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:153$1102'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:152$1101'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:151$1100'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:148$1099'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:147$1098'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:146$1097'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:145$1096'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:144$1095'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:143$1094'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:140$1093'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:139$1092'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:138$1091'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:137$1090'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:136$1089'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:135$1088'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:132$1087'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:131$1086'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:130$1085'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:129$1084'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:128$1083'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:127$1082'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:124$1081'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:123$1080'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:122$1079'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:121$1078'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:120$1077'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:119$1076'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:116$1075'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:115$1074'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:114$1073'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:113$1072'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:112$1071'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:111$1070'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:108$1069'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:107$1068'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:106$1067'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:105$1066'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:104$1065'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:103$1064'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:100$1063'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:99$1062'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:98$1061'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:97$1060'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:96$1059'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:95$1058'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:92$1057'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:91$1056'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:90$1055'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:89$1054'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:88$1053'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:87$1052'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:84$1051'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:83$1050'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:82$1049'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:81$1048'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:80$1047'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:79$1046'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:76$1045'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:75$1044'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:74$1043'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:73$1042'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:72$1041'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:71$1040'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:68$1039'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:67$1038'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:66$1037'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:65$1036'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:64$1035'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:63$1034'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:60$1033'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:59$1032'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:58$1031'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:57$1030'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:56$1029'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:55$1028'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:52$1027'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:51$1026'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:50$1025'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:49$1024'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:48$1023'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:47$1022'.
+Creating decoders for process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+     1/156: $2\i[31:0]
+     2/156: $1\i[31:0]
+     3/156: $cover$run_control_splitter_formal_tb.sv:218$1011_EN
+     4/156: $cover$run_control_splitter_formal_tb.sv:217$1006_EN
+     5/156: $cover$run_control_splitter_formal_tb.sv:216$1001_EN
+     6/156: $cover$run_control_splitter_formal_tb.sv:215$999_EN
+     7/156: $assert$run_control_splitter_formal_tb.sv:211$997_EN
+     8/156: $assert$run_control_splitter_formal_tb.sv:210$995_EN
+     9/156: $assert$run_control_splitter_formal_tb.sv:211$993_EN
+    10/156: $assert$run_control_splitter_formal_tb.sv:210$991_EN
+    11/156: $assert$run_control_splitter_formal_tb.sv:211$989_EN
+    12/156: $assert$run_control_splitter_formal_tb.sv:210$987_EN
+    13/156: $assert$run_control_splitter_formal_tb.sv:211$985_EN
+    14/156: $assert$run_control_splitter_formal_tb.sv:210$983_EN
+    15/156: $assert$run_control_splitter_formal_tb.sv:211$981_EN
+    16/156: $assert$run_control_splitter_formal_tb.sv:210$979_EN
+    17/156: $assert$run_control_splitter_formal_tb.sv:211$977_EN
+    18/156: $assert$run_control_splitter_formal_tb.sv:210$975_EN
+    19/156: $assert$run_control_splitter_formal_tb.sv:211$973_EN
+    20/156: $assert$run_control_splitter_formal_tb.sv:210$971_EN
+    21/156: $assert$run_control_splitter_formal_tb.sv:211$969_EN
+    22/156: $assert$run_control_splitter_formal_tb.sv:210$967_EN
+    23/156: $assert$run_control_splitter_formal_tb.sv:211$965_EN
+    24/156: $assert$run_control_splitter_formal_tb.sv:210$963_EN
+    25/156: $assert$run_control_splitter_formal_tb.sv:211$961_EN
+    26/156: $assert$run_control_splitter_formal_tb.sv:210$959_EN
+    27/156: $assert$run_control_splitter_formal_tb.sv:211$957_EN
+    28/156: $assert$run_control_splitter_formal_tb.sv:210$955_EN
+    29/156: $assert$run_control_splitter_formal_tb.sv:211$953_EN
+    30/156: $assert$run_control_splitter_formal_tb.sv:210$951_EN
+    31/156: $assert$run_control_splitter_formal_tb.sv:211$949_EN
+    32/156: $assert$run_control_splitter_formal_tb.sv:210$947_EN
+    33/156: $assert$run_control_splitter_formal_tb.sv:211$945_EN
+    34/156: $assert$run_control_splitter_formal_tb.sv:210$943_EN
+    35/156: $assert$run_control_splitter_formal_tb.sv:211$941_EN
+    36/156: $assert$run_control_splitter_formal_tb.sv:210$939_EN
+    37/156: $assert$run_control_splitter_formal_tb.sv:211$937_EN
+    38/156: $assert$run_control_splitter_formal_tb.sv:210$935_EN
+    39/156: $assert$run_control_splitter_formal_tb.sv:205$932_EN
+    40/156: $assert$run_control_splitter_formal_tb.sv:201$927_EN
+    41/156: $assert$run_control_splitter_formal_tb.sv:200$925_EN
+    42/156: $assert$run_control_splitter_formal_tb.sv:199$923_EN
+    43/156: $assert$run_control_splitter_formal_tb.sv:198$921_EN
+    44/156: $assert$run_control_splitter_formal_tb.sv:197$919_EN
+    45/156: $assert$run_control_splitter_formal_tb.sv:196$917_EN
+    46/156: $assert$run_control_splitter_formal_tb.sv:195$915_EN
+    47/156: $assert$run_control_splitter_formal_tb.sv:201$913_EN
+    48/156: $assert$run_control_splitter_formal_tb.sv:200$911_EN
+    49/156: $assert$run_control_splitter_formal_tb.sv:199$909_EN
+    50/156: $assert$run_control_splitter_formal_tb.sv:198$907_EN
+    51/156: $assert$run_control_splitter_formal_tb.sv:197$905_EN
+    52/156: $assert$run_control_splitter_formal_tb.sv:196$903_EN
+    53/156: $assert$run_control_splitter_formal_tb.sv:195$901_EN
+    54/156: $assert$run_control_splitter_formal_tb.sv:201$899_EN
+    55/156: $assert$run_control_splitter_formal_tb.sv:200$897_EN
+    56/156: $assert$run_control_splitter_formal_tb.sv:199$895_EN
+    57/156: $assert$run_control_splitter_formal_tb.sv:198$893_EN
+    58/156: $assert$run_control_splitter_formal_tb.sv:197$891_EN
+    59/156: $assert$run_control_splitter_formal_tb.sv:196$889_EN
+    60/156: $assert$run_control_splitter_formal_tb.sv:195$887_EN
+    61/156: $assert$run_control_splitter_formal_tb.sv:201$885_EN
+    62/156: $assert$run_control_splitter_formal_tb.sv:200$883_EN
+    63/156: $assert$run_control_splitter_formal_tb.sv:199$881_EN
+    64/156: $assert$run_control_splitter_formal_tb.sv:198$879_EN
+    65/156: $assert$run_control_splitter_formal_tb.sv:197$877_EN
+    66/156: $assert$run_control_splitter_formal_tb.sv:196$875_EN
+    67/156: $assert$run_control_splitter_formal_tb.sv:195$873_EN
+    68/156: $assert$run_control_splitter_formal_tb.sv:201$871_EN
+    69/156: $assert$run_control_splitter_formal_tb.sv:200$869_EN
+    70/156: $assert$run_control_splitter_formal_tb.sv:199$867_EN
+    71/156: $assert$run_control_splitter_formal_tb.sv:198$865_EN
+    72/156: $assert$run_control_splitter_formal_tb.sv:197$863_EN
+    73/156: $assert$run_control_splitter_formal_tb.sv:196$861_EN
+    74/156: $assert$run_control_splitter_formal_tb.sv:195$859_EN
+    75/156: $assert$run_control_splitter_formal_tb.sv:201$857_EN
+    76/156: $assert$run_control_splitter_formal_tb.sv:200$855_EN
+    77/156: $assert$run_control_splitter_formal_tb.sv:199$853_EN
+    78/156: $assert$run_control_splitter_formal_tb.sv:198$851_EN
+    79/156: $assert$run_control_splitter_formal_tb.sv:197$849_EN
+    80/156: $assert$run_control_splitter_formal_tb.sv:196$847_EN
+    81/156: $assert$run_control_splitter_formal_tb.sv:195$845_EN
+    82/156: $assert$run_control_splitter_formal_tb.sv:201$843_EN
+    83/156: $assert$run_control_splitter_formal_tb.sv:200$841_EN
+    84/156: $assert$run_control_splitter_formal_tb.sv:199$839_EN
+    85/156: $assert$run_control_splitter_formal_tb.sv:198$837_EN
+    86/156: $assert$run_control_splitter_formal_tb.sv:197$835_EN
+    87/156: $assert$run_control_splitter_formal_tb.sv:196$833_EN
+    88/156: $assert$run_control_splitter_formal_tb.sv:195$831_EN
+    89/156: $assert$run_control_splitter_formal_tb.sv:201$829_EN
+    90/156: $assert$run_control_splitter_formal_tb.sv:200$827_EN
+    91/156: $assert$run_control_splitter_formal_tb.sv:199$825_EN
+    92/156: $assert$run_control_splitter_formal_tb.sv:198$823_EN
+    93/156: $assert$run_control_splitter_formal_tb.sv:197$821_EN
+    94/156: $assert$run_control_splitter_formal_tb.sv:196$819_EN
+    95/156: $assert$run_control_splitter_formal_tb.sv:195$817_EN
+    96/156: $assert$run_control_splitter_formal_tb.sv:201$815_EN
+    97/156: $assert$run_control_splitter_formal_tb.sv:200$813_EN
+    98/156: $assert$run_control_splitter_formal_tb.sv:199$811_EN
+    99/156: $assert$run_control_splitter_formal_tb.sv:198$809_EN
+   100/156: $assert$run_control_splitter_formal_tb.sv:197$807_EN
+   101/156: $assert$run_control_splitter_formal_tb.sv:196$805_EN
+   102/156: $assert$run_control_splitter_formal_tb.sv:195$803_EN
+   103/156: $assert$run_control_splitter_formal_tb.sv:201$801_EN
+   104/156: $assert$run_control_splitter_formal_tb.sv:200$799_EN
+   105/156: $assert$run_control_splitter_formal_tb.sv:199$797_EN
+   106/156: $assert$run_control_splitter_formal_tb.sv:198$795_EN
+   107/156: $assert$run_control_splitter_formal_tb.sv:197$793_EN
+   108/156: $assert$run_control_splitter_formal_tb.sv:196$791_EN
+   109/156: $assert$run_control_splitter_formal_tb.sv:195$789_EN
+   110/156: $assert$run_control_splitter_formal_tb.sv:201$787_EN
+   111/156: $assert$run_control_splitter_formal_tb.sv:200$785_EN
+   112/156: $assert$run_control_splitter_formal_tb.sv:199$783_EN
+   113/156: $assert$run_control_splitter_formal_tb.sv:198$781_EN
+   114/156: $assert$run_control_splitter_formal_tb.sv:197$779_EN
+   115/156: $assert$run_control_splitter_formal_tb.sv:196$777_EN
+   116/156: $assert$run_control_splitter_formal_tb.sv:195$775_EN
+   117/156: $assert$run_control_splitter_formal_tb.sv:201$773_EN
+   118/156: $assert$run_control_splitter_formal_tb.sv:200$771_EN
+   119/156: $assert$run_control_splitter_formal_tb.sv:199$769_EN
+   120/156: $assert$run_control_splitter_formal_tb.sv:198$767_EN
+   121/156: $assert$run_control_splitter_formal_tb.sv:197$765_EN
+   122/156: $assert$run_control_splitter_formal_tb.sv:196$763_EN
+   123/156: $assert$run_control_splitter_formal_tb.sv:195$761_EN
+   124/156: $assert$run_control_splitter_formal_tb.sv:201$759_EN
+   125/156: $assert$run_control_splitter_formal_tb.sv:200$757_EN
+   126/156: $assert$run_control_splitter_formal_tb.sv:199$755_EN
+   127/156: $assert$run_control_splitter_formal_tb.sv:198$753_EN
+   128/156: $assert$run_control_splitter_formal_tb.sv:197$751_EN
+   129/156: $assert$run_control_splitter_formal_tb.sv:196$749_EN
+   130/156: $assert$run_control_splitter_formal_tb.sv:195$747_EN
+   131/156: $assert$run_control_splitter_formal_tb.sv:201$745_EN
+   132/156: $assert$run_control_splitter_formal_tb.sv:200$743_EN
+   133/156: $assert$run_control_splitter_formal_tb.sv:199$741_EN
+   134/156: $assert$run_control_splitter_formal_tb.sv:198$739_EN
+   135/156: $assert$run_control_splitter_formal_tb.sv:197$737_EN
+   136/156: $assert$run_control_splitter_formal_tb.sv:196$735_EN
+   137/156: $assert$run_control_splitter_formal_tb.sv:195$733_EN
+   138/156: $assert$run_control_splitter_formal_tb.sv:201$731_EN
+   139/156: $assert$run_control_splitter_formal_tb.sv:200$729_EN
+   140/156: $assert$run_control_splitter_formal_tb.sv:199$727_EN
+   141/156: $assert$run_control_splitter_formal_tb.sv:198$725_EN
+   142/156: $assert$run_control_splitter_formal_tb.sv:197$723_EN
+   143/156: $assert$run_control_splitter_formal_tb.sv:196$721_EN
+   144/156: $assert$run_control_splitter_formal_tb.sv:195$719_EN
+   145/156: $assert$run_control_splitter_formal_tb.sv:201$717_EN
+   146/156: $assert$run_control_splitter_formal_tb.sv:200$715_EN
+   147/156: $assert$run_control_splitter_formal_tb.sv:199$713_EN
+   148/156: $assert$run_control_splitter_formal_tb.sv:198$711_EN
+   149/156: $assert$run_control_splitter_formal_tb.sv:197$709_EN
+   150/156: $assert$run_control_splitter_formal_tb.sv:196$707_EN
+   151/156: $assert$run_control_splitter_formal_tb.sv:195$705_EN
+   152/156: $assert$run_control_splitter_formal_tb.sv:192$702_EN
+   153/156: $assume$run_control_splitter_formal_tb.sv:190$662_EN
+   154/156: $assume$run_control_splitter_formal_tb.sv:182$659_EN
+   155/156: $0\prev_accept_data[8:0]
+   156/156: $0\f_reset_sr[1:0]
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[15]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$520'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[15]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$519'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[15]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$518'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[15]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$517'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[14]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$516'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[14]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$515'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[14]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$514'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[14]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$513'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[13]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$512'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[13]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$511'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[13]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$510'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[13]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$509'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[12]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$508'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[12]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$507'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[12]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$506'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[12]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$505'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[11]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$504'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[11]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$503'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[11]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$502'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[11]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$501'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[10]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$500'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[10]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$499'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[10]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$498'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[10]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$497'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[9]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$496'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[9]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$495'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[9]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$494'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[9]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$493'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[8]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$492'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[8]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$491'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[8]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$490'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[8]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$489'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[7]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$488'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[7]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$487'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[7]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$486'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[7]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$485'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[6]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$484'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[6]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$483'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[6]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$482'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[6]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$481'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[5]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$480'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[5]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$479'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[5]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$478'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[5]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$477'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[4]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$476'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[4]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$475'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[4]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$474'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[4]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$473'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[3]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$472'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[3]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$471'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[3]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$470'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[3]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$469'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[2]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$468'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[2]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$467'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[2]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$466'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[2]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$465'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[1]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$464'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[1]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$463'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[1]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$462'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[1]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$461'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutEmpty[0]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$460'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutError[0]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$459'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutChannel[0]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$458'.
+No latch inferred for signal `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.\OutData[0]' from process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$457'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[15]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:172$1117'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[15]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:171$1116'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[15]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:170$1115'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[15]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:169$1114'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[15]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:168$1113'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[15]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:167$1112'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[14]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:164$1111'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[14]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:163$1110'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[14]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:162$1109'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[14]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:161$1108'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[14]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:160$1107'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[14]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:159$1106'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[13]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:156$1105'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[13]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:155$1104'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[13]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:154$1103'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[13]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:153$1102'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[13]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:152$1101'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[13]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:151$1100'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[12]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:148$1099'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[12]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:147$1098'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[12]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:146$1097'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[12]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:145$1096'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[12]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:144$1095'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[12]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:143$1094'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[11]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:140$1093'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[11]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:139$1092'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[11]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:138$1091'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[11]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:137$1090'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[11]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:136$1089'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[11]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:135$1088'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[10]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:132$1087'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[10]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:131$1086'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[10]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:130$1085'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[10]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:129$1084'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[10]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:128$1083'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[10]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:127$1082'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[9]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:124$1081'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[9]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:123$1080'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[9]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:122$1079'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[9]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:121$1078'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[9]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:120$1077'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[9]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:119$1076'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[8]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:116$1075'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[8]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:115$1074'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[8]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:114$1073'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[8]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:113$1072'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[8]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:112$1071'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[8]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:111$1070'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[7]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:108$1069'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[7]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:107$1068'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[7]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:106$1067'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[7]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:105$1066'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[7]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:104$1065'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[7]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:103$1064'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[6]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:100$1063'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[6]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:99$1062'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[6]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:98$1061'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[6]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:97$1060'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[6]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:96$1059'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[6]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:95$1058'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[5]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:92$1057'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[5]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:91$1056'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[5]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:90$1055'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[5]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:89$1054'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[5]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:88$1053'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[5]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:87$1052'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[4]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:84$1051'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[4]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:83$1050'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[4]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:82$1049'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[4]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:81$1048'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[4]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:80$1047'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[4]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:79$1046'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[3]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:76$1045'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[3]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:75$1044'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[3]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:74$1043'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[3]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:73$1042'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[3]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:72$1041'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[3]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:71$1040'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[2]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:68$1039'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[2]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:67$1038'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[2]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:66$1037'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[2]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:65$1036'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[2]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:64$1035'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[2]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:63$1034'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[1]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:60$1033'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[1]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:59$1032'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[1]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:58$1031'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[1]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:57$1030'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[1]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:56$1029'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[1]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:55$1028'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_empty[0]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:52$1027'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_eop[0]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:51$1026'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_sop[0]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:50$1025'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_error[0]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:49$1024'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_channel[0]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:48$1023'.
+No latch inferred for signal `\run_control_splitter_formal_tb.\out_data[0]' from process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:47$1022'.
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\run_control_splitter_formal_tb.\i' using process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+  created $ff cell `$procdff$1687' with global clock.
+Creating register for signal `\run_control_splitter_formal_tb.\f_past_valid' using process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+  created $ff cell `$procdff$1688' with global clock.
+Creating register for signal `\run_control_splitter_formal_tb.\f_reset_sr' using process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+  created $ff cell `$procdff$1689' with global clock.
+Creating register for signal `\run_control_splitter_formal_tb.\prev_accept' using process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+  created $ff cell `$procdff$1690' with global clock.
+Creating register for signal `\run_control_splitter_formal_tb.\prev_accept_data' using process `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+  created $ff cell `$procdff$1691' with global clock.
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$520'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$519'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$518'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$517'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$516'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$515'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$514'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$513'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$512'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$511'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$510'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$509'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$508'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$507'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$506'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$505'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$504'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$503'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$502'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$501'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$500'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$499'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$498'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$497'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$496'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$495'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$494'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$493'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$492'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$491'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$490'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$489'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$488'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$487'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$486'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$485'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$484'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$483'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$482'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$481'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$480'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$479'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$478'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$477'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$476'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$475'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$474'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$473'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$472'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$471'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$470'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$469'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$468'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$467'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$466'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$465'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$464'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$463'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$462'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$461'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:220$460'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:217$459'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:216$458'.
+Removing empty process `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv:215$457'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:24$1121'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:23$1120'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:7$1119'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:6$1118'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:172$1117'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:171$1116'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:170$1115'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:169$1114'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:168$1113'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:167$1112'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:164$1111'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:163$1110'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:162$1109'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:161$1108'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:160$1107'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:159$1106'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:156$1105'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:155$1104'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:154$1103'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:153$1102'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:152$1101'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:151$1100'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:148$1099'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:147$1098'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:146$1097'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:145$1096'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:144$1095'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:143$1094'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:140$1093'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:139$1092'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:138$1091'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:137$1090'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:136$1089'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:135$1088'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:132$1087'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:131$1086'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:130$1085'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:129$1084'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:128$1083'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:127$1082'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:124$1081'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:123$1080'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:122$1079'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:121$1078'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:120$1077'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:119$1076'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:116$1075'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:115$1074'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:114$1073'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:113$1072'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:112$1071'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:111$1070'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:108$1069'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:107$1068'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:106$1067'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:105$1066'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:104$1065'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:103$1064'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:100$1063'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:99$1062'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:98$1061'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:97$1060'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:96$1059'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:95$1058'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:92$1057'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:91$1056'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:90$1055'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:89$1054'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:88$1053'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:87$1052'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:84$1051'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:83$1050'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:82$1049'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:81$1048'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:80$1047'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:79$1046'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:76$1045'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:75$1044'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:74$1043'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:73$1042'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:72$1041'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:71$1040'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:68$1039'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:67$1038'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:66$1037'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:65$1036'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:64$1035'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:63$1034'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:60$1033'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:59$1032'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:58$1031'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:57$1030'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:56$1029'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:55$1028'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:52$1027'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:51$1026'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:50$1025'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:49$1024'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:48$1023'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:47$1022'.
+Found and cleaned up 6 empty switches in `\run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+Removing empty process `run_control_splitter_formal_tb.$proc$run_control_splitter_formal_tb.sv:178$657'.
+Cleaned up 6 empty switches.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+Optimizing module run_control_splitter_formal_tb.
+<suppressed ~253 debug messages>
+
+4.3. Executing FUTURE pass.
+
+4.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+Optimizing module run_control_splitter_formal_tb.
+
+4.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter..
+Finding unused cells or wires in module \run_control_splitter_formal_tb..
+Removed 5 unused cells and 672 unused wires.
+<suppressed ~8 debug messages>
+
+4.6. Executing CHECK pass (checking for obvious problems).
+Checking module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter...
+Checking module run_control_splitter_formal_tb...
+Warning: Wire run_control_splitter_formal_tb.\gclk is used but has no driver.
+Found and reported 1 problems.
+
+4.7. Executing OPT pass (performing simple optimizations).
+
+4.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+Optimizing module run_control_splitter_formal_tb.
+
+4.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Computing hashes of 1 cells of `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding duplicate cells in `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding identical cells in module `\run_control_splitter_formal_tb'.
+Computing hashes of 539 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+Computing hashes of 518 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+Computing hashes of 516 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+Computing hashes of 515 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+<suppressed ~72 debug messages>
+Removed a total of 24 cells.
+
+4.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \run_control_splitter_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~341 debug messages>
+
+4.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+  Optimizing cells in module \run_control_splitter_formal_tb.
+Performed a total of 0 changes.
+
+4.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Computing hashes of 1 cells of `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding duplicate cells in `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding identical cells in module `\run_control_splitter_formal_tb'.
+Computing hashes of 515 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+Computing hashes of 367 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+Computing hashes of 336 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+<suppressed ~537 debug messages>
+Removed a total of 179 cells.
+
+4.7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter..
+Finding unused cells or wires in module \run_control_splitter_formal_tb..
+Removed 0 unused cells and 203 unused wires.
+<suppressed ~1 debug messages>
+
+4.7.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+Optimizing module run_control_splitter_formal_tb.
+
+4.7.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.7.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter..
+  Creating internal representation of mux trees.
+  No muxes found in this module.
+Running muxtree optimizer on module \run_control_splitter_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~14 debug messages>
+
+4.7.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+  Optimizing cells in module \run_control_splitter_formal_tb.
+Performed a total of 0 changes.
+
+4.7.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Computing hashes of 1 cells of `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding duplicate cells in `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding identical cells in module `\run_control_splitter_formal_tb'.
+Computing hashes of 336 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+Removed a total of 0 cells.
+
+4.7.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter..
+Finding unused cells or wires in module \run_control_splitter_formal_tb..
+
+4.7.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+Optimizing module run_control_splitter_formal_tb.
+
+4.7.14. Finished fast OPT passes. (There is nothing left to do.)
+
+4.8. Executing WREDUCE pass (reducing word size of cells).
+Removed top 31 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$667 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$667 ($add).
+Removed top 30 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$667 ($add).
+Removed top 30 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$671 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$671 ($add).
+Removed top 29 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$671 ($add).
+Removed top 29 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$675 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$675 ($add).
+Removed top 28 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$675 ($add).
+Removed top 28 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$679 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$679 ($add).
+Removed top 27 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$679 ($add).
+Removed top 27 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$683 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$683 ($add).
+Removed top 26 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$683 ($add).
+Removed top 26 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$687 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$687 ($add).
+Removed top 25 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$687 ($add).
+Removed top 25 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$691 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$691 ($add).
+Removed top 24 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$691 ($add).
+Removed top 24 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$695 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$695 ($add).
+Removed top 23 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$695 ($add).
+Removed top 23 bits (of 32) from port A of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$699 ($add).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$699 ($add).
+Removed top 22 bits (of 32) from port Y of cell run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$699 ($add).
+Removed top 22 bits (of 32) from port A of cell run_control_splitter_formal_tb.$eq$run_control_splitter_formal_tb.sv:190$700 ($eq).
+Removed top 31 bits (of 32) from port B of cell run_control_splitter_formal_tb.$eq$run_control_splitter_formal_tb.sv:190$700 ($eq).
+Removed top 1 bits (of 16) from port B of cell run_control_splitter_formal_tb.$eq$run_control_splitter_formal_tb.sv:217$1009 ($eq).
+Removed top 24 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$691_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$690_Y.
+Removed top 25 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$687_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$686_Y.
+Removed top 26 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$683_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$682_Y.
+Removed top 27 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$679_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$678_Y.
+Removed top 28 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$675_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$674_Y.
+Removed top 29 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$671_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$670_Y.
+Removed top 30 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$667_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$666_Y.
+Removed top 22 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$699_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$698_Y.
+Removed top 23 bits (of 32) from wire run_control_splitter_formal_tb.$add$run_control_splitter_formal_tb.sv:190$695_Y.
+Removed top 31 bits (of 32) from wire run_control_splitter_formal_tb.$eqx$run_control_splitter_formal_tb.sv:190$694_Y.
+
+4.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter..
+Finding unused cells or wires in module \run_control_splitter_formal_tb..
+Removed 0 unused cells and 18 unused wires.
+<suppressed ~1 debug messages>
+
+4.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.11. Executing OPT pass (performing simple optimizations).
+
+4.11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+Optimizing module run_control_splitter_formal_tb.
+
+4.11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Computing hashes of 1 cells of `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding duplicate cells in `$paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter'.
+Finding identical cells in module `\run_control_splitter_formal_tb'.
+Computing hashes of 336 cells of `\run_control_splitter_formal_tb'.
+Finding duplicate cells in `\run_control_splitter_formal_tb'.
+Removed a total of 0 cells.
+
+4.11.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter..
+Finding unused cells or wires in module \run_control_splitter_formal_tb..
+
+4.11.4. Finished fast OPT passes.
+
+4.12. Executing SORT pass.
+
+4.13. Printing statistics.
+
+=== $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      206 wires
+      530 wire bits
+      206 public wires
+      530 public wire bits
+      138 ports
+      274 port bits
+        1 cells
+        1   $reduce_and
+
+=== run_control_splitter_formal_tb ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      283 wires
+      791 wire bits
+      107 public wires
+      282 public wire bits
+      335 cells
+        9   $add
+        3   $anyseq
+      152   $check
+       36   $eq
+        9   $eqx
+        4   $ff
+       26   $logic_and
+        4   $logic_not
+        1   $logic_or
+        8   $mux
+        1   $ne
+       80   $not
+        1   $reduce_and
+        1   $reduce_bool
+        1 submodules
+        1   $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      336 run_control_splitter_formal_tb
+        1 $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+        +----------Count including submodules.
+        | 
+      489 wires
+     1321 wire bits
+      313 public wires
+      812 public wire bits
+      138 ports
+      274 port bits
+        - memories
+        - memory bits
+        - processes
+      336 cells
+        9   $add
+        3   $anyseq
+      152   $check
+       36   $eq
+        9   $eqx
+        4   $ff
+       26   $logic_and
+        4   $logic_not
+        1   $logic_or
+        8   $mux
+        1   $ne
+       80   $not
+        2   $reduce_and
+        1   $reduce_bool
+        1 submodules
+        1   $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+4.14. Executing CHECK pass (checking for obvious problems).
+Checking module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter...
+Checking module run_control_splitter_formal_tb...
+Warning: Wire run_control_splitter_formal_tb.\gclk is used but has no driver.
+Found and reported 1 problems.
+
+5. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `run_control_splitter_formal_tb'. Setting top module to run_control_splitter_formal_tb.
+
+5.1. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+5.2. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+Removed 0 unused modules.
+Module run_control_splitter_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+6. Executing jny backend.
+
+7. Executing RTLIL backend.
+Output filename: ../model/design.il
+
+Warnings: 1 unique messages, 2 total
+End of script. Logfile hash: 8414a2882e, time: 0.09s, user: 0.09s, system: 0.01s, MEM: 20.16 MB peak
+Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+Time spent: 26% 2x hierarchy (0 sec), 24% 6x read_verilog (0 sec), ...

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolkit
+        name="temp_sensor_toolkit"
+        displayName="Temperature Sensor Monitor Toolkit (Beta)"
+        addMenuItem="true"
+        >
+		<file>temp_sensor_toolkit.tcl</file>
+        
+		<description>The toolkit allows the monitoring of  temperature sensors on FEB.</description>
+</toolkit>

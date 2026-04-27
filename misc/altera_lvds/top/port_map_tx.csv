@@ -1,0 +1,3 @@
+INTERFACE,OLD_PORT_NAME,NEW_PORT_NAME
+inclock,inclock,tx_inclock
+pll_locked,pll_locked,tx_locked

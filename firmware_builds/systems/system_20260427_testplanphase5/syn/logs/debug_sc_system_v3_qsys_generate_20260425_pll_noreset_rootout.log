@@ -1,0 +1,168 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.04.25.03:23:47 Info: Saving generation log to /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/debug_sc_system_v3_generation.rpt
+2026.04.25.03:23:47 Info: Starting: <b>Create HDL design files for synthesis</b>
+2026.04.25.03:23:47 Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+2026.04.25.03:23:47 Info: Loading firmware_builds/debug_sc_system_v3.qsys
+2026.04.25.03:23:47 Info: Reading input file
+2026.04.25.03:23:47 Info: Adding charge_injection_pulser_0 [charge_injection_pulser 4.0.5]
+2026.04.25.03:23:47 Info: Parameterizing module charge_injection_pulser_0
+2026.04.25.03:23:47 Info: Adding clk125 [altera_clock_bridge 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module clk125
+2026.04.25.03:23:47 Info: Adding clk156 [clock_source 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module clk156
+2026.04.25.03:23:47 Info: Adding firefly_xcvr_ctrl_0 [firefly_xcvr_ctrl 26.0.330]
+2026.04.25.03:23:47 Warning: firefly_xcvr_ctrl_0: Used firefly_xcvr_ctrl <b>26.2.423</b> (instead of 26.0.330)
+2026.04.25.03:23:47 Info: Parameterizing module firefly_xcvr_ctrl_0
+2026.04.25.03:23:47 Info: Adding jtag_master [altera_jtag_avalon_master 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module jtag_master
+2026.04.25.03:23:47 Info: Adding legacy_firefly_bridge [altera_avalon_mm_bridge 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module legacy_firefly_bridge
+2026.04.25.03:23:47 Info: Adding max10_link_clk_bridge [altera_clock_bridge 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module max10_link_clk_bridge
+2026.04.25.03:23:47 Info: Adding max10_prog_avmm_0 [max10_prog_avmm 0.2.0]
+2026.04.25.03:23:47 Info: Parameterizing module max10_prog_avmm_0
+2026.04.25.03:23:47 Info: Adding mm_bridge [altera_avalon_mm_bridge 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module mm_bridge
+2026.04.25.03:23:47 Info: Adding upload_mm_bridge [altera_avalon_mm_bridge 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module upload_mm_bridge
+2026.04.25.03:23:47 Info: Adding sc_hub_cmd_pipe [altera_avalon_mm_bridge 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module sc_hub_cmd_pipe
+2026.04.25.03:23:47 Info: Adding mutrig_cfg_ctrl_0 [mutrig_cfg_ctrl 24.0.817]
+2026.04.25.03:23:47 Warning: mutrig_cfg_ctrl_0: Used mutrig_cfg_ctrl <b>24.1.423</b> (instead of 24.0.817)
+2026.04.25.03:23:47 Info: Parameterizing module mutrig_cfg_ctrl_0
+2026.04.25.03:23:47 Info: Adding on_die_temp_sense [altera_temp_sense 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module on_die_temp_sense
+2026.04.25.03:23:47 Info: Adding on_die_temp_sense_ctrl [altera_temp_sense_ctrl 1.1]
+2026.04.25.03:23:47 Info: Parameterizing module on_die_temp_sense_ctrl
+2026.04.25.03:23:47 Info: Adding onewire_master_0 [onewire_master 24.0.911.1]
+2026.04.25.03:23:47 Warning: onewire_master_0: Used onewire_master <b>24.1.423</b> (instead of 24.0.911.1)
+2026.04.25.03:23:47 Info: Parameterizing module onewire_master_0
+2026.04.25.03:23:47 Info: Adding onewire_master_controller_0 [onewire_master_controller 24.0.918]
+2026.04.25.03:23:47 Warning: onewire_master_controller_0: Used onewire_master_controller <b>24.1.423</b> (instead of 24.0.918)
+2026.04.25.03:23:47 Info: Parameterizing module onewire_master_controller_0
+2026.04.25.03:23:47 Info: Adding pll_156t40 [altera_pll 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module pll_156t40
+2026.04.25.03:23:47 Info: Adding sc_hub [sc_hub_v2 26.6.9.414]
+2026.04.25.03:23:47 Warning: sc_hub: Used sc_hub_v2 <b>26.6.10.423</b> (instead of 26.6.9.414)
+2026.04.25.03:23:47 Info: Parameterizing module sc_hub
+2026.04.25.03:23:47 Info: Adding scratch_pad_ram [altera_avalon_onchip_memory2 18.1]
+2026.04.25.03:23:47 Info: Parameterizing module scratch_pad_ram
+2026.04.25.03:23:47 Info: Building connections
+2026.04.25.03:23:47 Info: Parameterizing connections
+2026.04.25.03:23:47 Info: Validating
+2026.04.25.03:23:47 Info: Done reading input file
+2026.04.25.03:23:47 Warning: debug_sc_system_v3.mutrig_cfg_ctrl_0.sclr_counter_req: Associated reset sinks not declared
+2026.04.25.03:23:47 Warning: debug_sc_system_v3.on_die_temp_sense_ctrl.clr: Associated reset sinks not declared
+2026.04.25.03:23:47 Info: debug_sc_system_v3.pll_156t40: The legal reference clock frequency is 5.0 MHz..750.0 MHz
+2026.04.25.03:23:47 Info: debug_sc_system_v3.pll_156t40: Able to implement PLL with user settings
+2026.04.25.03:23:47 Info: debug_sc_system_v3.sc_hub: EXT_UP_PLD_DEPTH (512) < EFFECTIVE_EXT_OUTSTANDING x MAX_BURST  (6 x 256 = 1536). Credit manager will limit effective  read outstanding to ~2 for max-burst reads. This is  normal and validated by TLM CRED-03.
+2026.04.25.03:23:47 Warning: debug_sc_system_v3.pll_156t40: <b>pll_156t40.locked</b> must be exported, or connected to a matching conduit.
+2026.04.25.03:23:47 Error: debug_sc_system_v3.pll_156t40: <b>pll_156t40.reset</b> must be connected to a reset source
+2026.04.25.03:23:48 Info: debug_sc_system_v3: Generating <b>debug_sc_system_v3</b> "<b>debug_sc_system_v3</b>" for QUARTUS_SYNTH
+2026.04.25.03:23:49 Info: Inserting clock-crossing logic between cmd_demux_001.src4 and cmd_mux_004.sink0
+2026.04.25.03:23:49 Info: Inserting clock-crossing logic between cmd_demux_002.src3 and cmd_mux_004.sink1
+2026.04.25.03:23:49 Info: Inserting clock-crossing logic between rsp_demux_004.src0 and rsp_mux_001.sink4
+2026.04.25.03:23:49 Info: Inserting clock-crossing logic between rsp_demux_004.src1 and rsp_mux_002.sink3
+2026.04.25.03:23:49 Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has address signal 18 bit wide, but the slave is 16 bit wide.
+2026.04.25.03:23:49 Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has writeresponsevalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.04.25.03:23:49 Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has burstcount signal 9 bit wide, but the slave is 1 bit wide.
+2026.04.25.03:23:50 Warning: debug_sc_system_v3: "No matching role found for mutrig_cfg_ctrl_0:avmm_cnt:avm_cnt_flush (flush)"
+2026.04.25.03:23:51 Info: charge_injection_pulser_0: "<b>debug_sc_system_v3</b>" instantiated <b>charge_injection_pulser</b> "<b>charge_injection_pulser_0</b>"
+2026.04.25.03:23:51 Info: firefly_xcvr_ctrl_0: "<b>debug_sc_system_v3</b>" instantiated <b>firefly_xcvr_ctrl</b> "<b>firefly_xcvr_ctrl_0</b>"
+2026.04.25.03:23:51 Info: jtag_master: "<b>debug_sc_system_v3</b>" instantiated <b>altera_jtag_avalon_master</b> "<b>jtag_master</b>"
+2026.04.25.03:23:51 Info: legacy_firefly_bridge: "<b>debug_sc_system_v3</b>" instantiated <b>altera_avalon_mm_bridge</b> "<b>legacy_firefly_bridge</b>"
+2026.04.25.03:23:51 Info: max10_prog_avmm_0: "<b>debug_sc_system_v3</b>" instantiated <b>max10_prog_avmm</b> "<b>max10_prog_avmm_0</b>"
+2026.04.25.03:23:51 Info: mutrig_cfg_ctrl_0: "<b>debug_sc_system_v3</b>" instantiated <b>mutrig_cfg_ctrl</b> "<b>mutrig_cfg_ctrl_0</b>"
+2026.04.25.03:23:51 Info: on_die_temp_sense: Generating top-level entity debug_sc_system_v3_on_die_temp_sense.
+2026.04.25.03:23:52 Info: on_die_temp_sense: "<b>debug_sc_system_v3</b>" instantiated <b>altera_temp_sense</b> "<b>on_die_temp_sense</b>"
+2026.04.25.03:23:52 Info: on_die_temp_sense_ctrl: "<b>debug_sc_system_v3</b>" instantiated <b>altera_temp_sense_ctrl</b> "<b>on_die_temp_sense_ctrl</b>"
+2026.04.25.03:23:52 Info: onewire_master_0: "<b>debug_sc_system_v3</b>" instantiated <b>onewire_master</b> "<b>onewire_master_0</b>"
+2026.04.25.03:23:52 Info: onewire_master_controller_0: "<b>debug_sc_system_v3</b>" instantiated <b>onewire_master_controller</b> "<b>onewire_master_controller_0</b>"
+2026.04.25.03:23:52 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/pseudo_clock_down_convertor.vhd</b>
+2026.04.25.03:23:52 Info: pll_156t40: "<b>debug_sc_system_v3</b>" instantiated <b>altera_pll</b> "<b>pll_156t40</b>"
+2026.04.25.03:23:52 Info: sc_hub: "<b>debug_sc_system_v3</b>" instantiated <b>sc_hub_v2</b> "<b>sc_hub</b>"
+2026.04.25.03:23:52 Info: scratch_pad_ram: Starting RTL generation for module 'debug_sc_system_v3_scratch_pad_ram'
+2026.04.25.03:23:52 Info: scratch_pad_ram:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=debug_sc_system_v3_scratch_pad_ram --dir=/tmp/alt0568_3960189499831778093.dir/0013_scratch_pad_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_3960189499831778093.dir/0013_scratch_pad_ram_gen//debug_sc_system_v3_scratch_pad_ram_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.03:23:52 Info: scratch_pad_ram: Done RTL generation for module 'debug_sc_system_v3_scratch_pad_ram'
+2026.04.25.03:23:52 Info: scratch_pad_ram: "<b>debug_sc_system_v3</b>" instantiated <b>altera_avalon_onchip_memory2</b> "<b>scratch_pad_ram</b>"
+2026.04.25.03:23:52 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:52 Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:52 Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:52 Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:52 Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:52 Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:52 Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:52 Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:53 Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:53 Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:53 Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:53 Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:53 Info: mm_interconnect_0: "<b>debug_sc_system_v3</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.04.25.03:23:53 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.03:23:53 Info: mm_interconnect_2: "<b>debug_sc_system_v3</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_2</b>"
+2026.04.25.03:23:53 Info: irq_mapper: "<b>debug_sc_system_v3</b>" instantiated <b>altera_irq_mapper</b> "<b>irq_mapper</b>"
+2026.04.25.03:23:53 Info: rst_controller: "<b>debug_sc_system_v3</b>" instantiated <b>altera_reset_controller</b> "<b>rst_controller</b>"
+2026.04.25.03:23:53 Info: jtag_phy_embedded_in_jtag_master: "<b>jtag_master</b>" instantiated <b>altera_jtag_dc_streaming</b> "<b>jtag_phy_embedded_in_jtag_master</b>"
+2026.04.25.03:23:53 Info: timing_adt: "<b>jtag_master</b>" instantiated <b>timing_adapter</b> "<b>timing_adt</b>"
+2026.04.25.03:23:53 Info: fifo: "<b>jtag_master</b>" instantiated <b>altera_avalon_sc_fifo</b> "<b>fifo</b>"
+2026.04.25.03:23:53 Info: b2p: "<b>jtag_master</b>" instantiated <b>altera_avalon_st_bytes_to_packets</b> "<b>b2p</b>"
+2026.04.25.03:23:53 Info: p2b: "<b>jtag_master</b>" instantiated <b>altera_avalon_st_packets_to_bytes</b> "<b>p2b</b>"
+2026.04.25.03:23:53 Info: transacto: "<b>jtag_master</b>" instantiated <b>altera_avalon_packets_to_master</b> "<b>transacto</b>"
+2026.04.25.03:23:53 Info: b2p_adapter: "<b>jtag_master</b>" instantiated <b>channel_adapter</b> "<b>b2p_adapter</b>"
+2026.04.25.03:23:53 Info: p2b_adapter: "<b>jtag_master</b>" instantiated <b>channel_adapter</b> "<b>p2b_adapter</b>"
+2026.04.25.03:23:53 Info: mutrig_cfg_ctrl_0_avmm_cnt_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_translator</b> "<b>mutrig_cfg_ctrl_0_avmm_cnt_translator</b>"
+2026.04.25.03:23:53 Info: mm_bridge_s0_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_translator</b> "<b>mm_bridge_s0_translator</b>"
+2026.04.25.03:23:53 Info: mutrig_cfg_ctrl_0_avmm_cnt_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_agent</b> "<b>mutrig_cfg_ctrl_0_avmm_cnt_agent</b>"
+2026.04.25.03:23:53 Info: mm_bridge_s0_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_agent</b> "<b>mm_bridge_s0_agent</b>"
+2026.04.25.03:23:53 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.03:23:53 Info: router_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.03:23:53 Info: router_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_002</b>"
+2026.04.25.03:23:53 Info: router_003: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_003</b>"
+2026.04.25.03:23:53 Info: router_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_004</b>"
+2026.04.25.03:23:53 Info: router_005: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_005</b>"
+2026.04.25.03:23:53 Info: router_006: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_006</b>"
+2026.04.25.03:23:53 Info: router_014: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_014</b>"
+2026.04.25.03:23:53 Info: mutrig_cfg_ctrl_0_avmm_cnt_limiter: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_traffic_limiter</b> "<b>mutrig_cfg_ctrl_0_avmm_cnt_limiter</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_sc_fifo.v</b>
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.03:23:53 Info: mm_bridge_s0_burst_adapter: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_burst_adapter</b> "<b>mm_bridge_s0_burst_adapter</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_st_pipeline_stage.sv</b>
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.03:23:53 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.03:23:53 Info: cmd_demux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_001</b>"
+2026.04.25.03:23:53 Info: cmd_demux_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_002</b>"
+2026.04.25.03:23:53 Info: cmd_demux_003: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_003</b>"
+2026.04.25.03:23:53 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.03:23:53 Info: cmd_mux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux_001</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: cmd_mux_010: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux_010</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: rsp_demux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux_001</b>"
+2026.04.25.03:23:53 Info: rsp_demux_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux_004</b>"
+2026.04.25.03:23:53 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: rsp_mux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_001</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: rsp_mux_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_002</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: rsp_mux_003: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_003</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: crosser: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_handshake_clock_crosser</b> "<b>crosser</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_st_clock_crosser.v</b>
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.04.25.03:23:53 Info: limiter_pipeline: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_pipeline_stage</b> "<b>limiter_pipeline</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_st_pipeline_stage.sv</b>
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.03:23:53 Info: avalon_st_adapter: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.04.25.03:23:53 Info: router: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.03:23:53 Info: router_001: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.03:23:53 Info: cmd_demux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.03:23:53 Info: cmd_mux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: rsp_mux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.03:23:53 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.03:23:53 Info: error_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>error_adapter</b> "<b>error_adapter_0</b>"
+2026.04.25.03:23:53 Info: debug_sc_system_v3: Done "<b>debug_sc_system_v3</b>" with 62 modules, 117 files
+2026.04.25.03:23:54 Error: qsys-generate failed with exit code 1: 1 Error, 9 Warnings
+2026.04.25.03:23:54 Info: Finished: <b>Create HDL design files for synthesis</b>

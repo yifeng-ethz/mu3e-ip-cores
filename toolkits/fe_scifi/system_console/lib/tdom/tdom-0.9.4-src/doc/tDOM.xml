@@ -1,0 +1,34 @@
+<!DOCTYPE manual PUBLIC "-//jenglish//DTD TMML 0.5//EN" "tmml.dtd" [
+<!ENTITY dom SYSTEM "dom.xml">
+<!ENTITY domDoc SYSTEM "domDoc.xml">
+<!ENTITY domNode SYSTEM "domNode.xml">
+<!ENTITY expat SYSTEM "expat.xml">
+<!ENTITY expatapi SYSTEM "expatapi.xml">
+<!ENTITY pullparser SYSTEM "pullparser.xml">
+<!ENTITY schema SYSTEM "schema.xml">
+<!ENTITY tdomcmd SYSTEM "tdomcmd.xml">
+<!ENTITY tnc SYSTEM "tnc.xml">
+]>
+<manual package="tDOM">
+<title>tDOM manual</title>
+
+&dom;
+
+&domDoc;
+
+&domNode;
+
+&expat;
+
+&expatapi;
+
+&pullparser;
+
+&schema;
+
+&tdomcmd;
+
+&tnc;
+
+</manual>
+

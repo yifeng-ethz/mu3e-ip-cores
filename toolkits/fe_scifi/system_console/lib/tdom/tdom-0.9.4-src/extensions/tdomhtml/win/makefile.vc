@@ -1,0 +1,38 @@
+# Simple makefile for pure Tcl package
+
+PROJECT    = tdomhtml
+DOTVERSION = 0.1.0
+VERSION    = $(DOTVERSION:.=)
+
+CPY	= echo y | xcopy /i >NUL
+
+!ifndef INSTALLDIR
+### Assume the normal default.
+_INSTALLDIR	= C:\Program Files\Tcl\lib
+!else
+### Fix the path separators.
+_INSTALLDIR	= $(INSTALLDIR:/=\)\lib
+!endif
+
+
+PRJ_INSTALL_DIR         = $(_INSTALLDIR)\$(PROJECT)$(DOTVERSION)
+DOC_INSTALL_DIR		= $(PRJ_INSTALL_DIR)
+SCRIPT_INSTALL_DIR	= $(PRJ_INSTALL_DIR)
+
+all:
+	@echo This is a pure Tcl package. Just run 'make /f makefile.vc install INSTALLDIR=path\to\tcl\root'
+
+install: install-libraries
+
+install-libraries:
+	@if not exist $(SCRIPT_INSTALL_DIR)\nul mkdir $(SCRIPT_INSTALL_DIR)
+	@echo Installing libraries to '$(SCRIPT_INSTALL_DIR)'
+        $(CPY) ..\tdomhtml.tcl "$(SCRIPT_INSTALL_DIR)" >NUL
+        @echo Installing package index in '$(SCRIPT_INSTALL_DIR)'
+        @type << >"$(SCRIPT_INSTALL_DIR)\pkgIndex.tcl"
+    package ifneeded tdomhtml $(DOTVERSION) "set _V_ $(DOTVERSION); source [list [file join $$dir tdomhtml.tcl]]"
+<<
+
+install-docs:
+#	@echo Installing documentation files to '$(DOC_INSTALL_DIR)'
+#	@if exist $(DOCDIR) $(CPY) $(DOCDIR)\*.n "$(DOC_INSTALL_DIR)"

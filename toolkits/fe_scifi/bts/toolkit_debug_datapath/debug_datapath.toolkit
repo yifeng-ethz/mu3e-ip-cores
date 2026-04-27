@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolkit
+        name="debug_datapath_toolkit"
+        displayName="Debug Datapath of SciFi (Beta)"
+        addMenuItem="true"
+        >
+		<file>debug_datapath_toolkit.tcl</file>
+        
+		<description>The toolkit allows the connection to avmm-to-jtag and other sld modules inside the datapath.</description>
+</toolkit>

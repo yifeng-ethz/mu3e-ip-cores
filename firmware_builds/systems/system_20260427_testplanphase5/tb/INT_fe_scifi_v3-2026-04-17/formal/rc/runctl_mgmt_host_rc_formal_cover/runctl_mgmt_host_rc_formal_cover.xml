@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+<testsuite timestamp="2026-04-18T15:18:07" hostname="teferi.ethz.ch" package="runctl_mgmt_host_rc_formal" id="0" name="cover" tests="27" errors="0" failures="0" time="1" skipped="19">
+<properties>
+<property name="os" value="Linux"/>
+<property name="expect" value="PASS"/>
+<property name="status" value="PASS"/>
+</properties>
+<testcase classname="cover" name="build execution" time="0">
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:278.17-278.48" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:278.17-278.48" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_278_414">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:282.17-282.45" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:282.17-282.45" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_282_417">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:286.17-286.47" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:286.17-286.47" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_286_421">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:292.17-292.38" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:292.17-292.38" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_292_425">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:293.17-293.64" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:293.17-293.64" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_293_426">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:318.17-318.35" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:318.17-318.35" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_318_437">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:319.17-319.61" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:319.17-319.61" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_319_438">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:320.17-320.49" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:320.17-320.49" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_320_440">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:321.17-321.47" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:321.17-321.47" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_321_441">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:327.17-327.41" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:327.17-327.41" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_327_445">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:328.17-328.60" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:328.17-328.60" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_328_446">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:332.17-332.41" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:332.17-332.41" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_332_451">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:333.17-333.60" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:333.17-333.60" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_333_452">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:334.17-334.68" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:334.17-334.68" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_334_454">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:335.17-335.66" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:335.17-335.66" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_335_456">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:338.13-338.46" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:338.13-338.46" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_338_458">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:339.13-339.46" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:339.13-339.46" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_339_460">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:342.17-342.37" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:342.17-342.37" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_342_465">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:343.17-343.37" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:343.17-343.37" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_343_467">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:360.13-360.59" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:360.13-360.59" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_360_476" tracefile="engine_0/trace1.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:361.13-361.59" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:361.13-361.59" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_361_480" tracefile="engine_0/trace0.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:362.13-362.88" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:362.13-362.88" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_362_484" tracefile="engine_0/trace3.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:363.13-363.84" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:363.13-363.84" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_363_489" tracefile="engine_0/trace2.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:364.13-364.60" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:364.13-364.60" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_364_494" tracefile="engine_0/trace6.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:365.13-365.60" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:365.13-365.60" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_365_497" tracefile="engine_0/trace7.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:366.13-366.56" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:366.13-366.56" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_366_500" tracefile="engine_0/trace4.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:367.13-367.56" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:367.13-367.56" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_367_503" tracefile="engine_0/trace5.vcd">
+</testcase>
+<system-out>SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] Removing directory '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_cover'.
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/../common/formal_defs.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_cover/src/formal_defs.svh'.
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/logging_fifo_stub.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_cover/src/logging_fifo_stub.sv'.
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_cover/src/runctl_mgmt_host.sv'.
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_tb.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_cover/src/runctl_mgmt_host_rc_formal_tb.sv'.
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: smtbmc z3
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] base: starting process &quot;cd runctl_mgmt_host_rc_formal_cover/src; yosys -ql ../model/design.log ../model/design.ys&quot;
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] base: Warning: Wire runctl_mgmt_host_rc_formal_tb.\gclk is used but has no driver.
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] base: finished (returncode=0)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] prep: starting process &quot;cd runctl_mgmt_host_rc_formal_cover/model; yosys -ql design_prep.log design_prep.ys&quot;
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] prep: Warning: Wire runctl_mgmt_host_rc_formal_tb.\gclk is used but has no driver.
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] prep: finished (returncode=0)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] smt2: starting process &quot;cd runctl_mgmt_host_rc_formal_cover/model; yosys -ql design_smt2.log design_smt2.ys&quot;
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] smt2: finished (returncode=0)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: starting process &quot;cd runctl_mgmt_host_rc_formal_cover; yosys-smtbmc -s z3 --presat -c --noprogress -t 32  --append 0 --dump-vcd engine_0/trace%.vcd --dump-yw engine_0/trace%.yw --dump-vlogtb engine_0/trace%_tb.v --dump-smtc engine_0/trace%.smtc model/design_smt2.smt2&quot;
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Solver: z3
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 0..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 1..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 2..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:361.13-361.59 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_361_480)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace0.vcd
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace0_tb.v
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace0.smtc
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace0.yw
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:360.13-360.59 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_360_476)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace1.vcd
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace1_tb.v
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace1.smtc
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace1.yw
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 4..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 5 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:363.13-363.84 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_363_489)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace2.vcd
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace2_tb.v
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace2.smtc
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace2.yw
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 5 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:362.13-362.88 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_362_484)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace3.vcd
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace3_tb.v
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace3.smtc
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace3.yw
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 5 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:366.13-366.56 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_366_500)
+SBY 15:18:06 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace4.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace4_tb.v
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace4.smtc
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace4.yw
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 5..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 6..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 7..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 7 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:367.13-367.56 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_367_503)
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace5.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace5_tb.v
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace5.smtc
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace5.yw
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 7..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 8..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 9..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 9 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:364.13-364.60 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_364_494)
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace6.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace6_tb.v
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace6.smtc
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace6.yw
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 9..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 10..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 11..
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 11 at runctl_mgmt_host_rc_formal_tb: runctl_mgmt_host_rc_formal_tb.sv:365.13-365.60 (_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_365_497)
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace7.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace7_tb.v
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace7.smtc
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace7.yw
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: ##   0:00:00  Status: passed
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: finished (returncode=0)
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] engine_0: Status returned by engine: pass
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: engine_0 (smtbmc z3) returned pass
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: cover trace: runctl_mgmt_host_rc_formal_cover/engine_0/trace0.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary:   reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_361_480 at runctl_mgmt_host_rc_formal_tb.sv:361.13-361.59 step 3
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: cover trace: runctl_mgmt_host_rc_formal_cover/engine_0/trace1.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary:   reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_360_476 at runctl_mgmt_host_rc_formal_tb.sv:360.13-360.59 step 3
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: cover trace: runctl_mgmt_host_rc_formal_cover/engine_0/trace2.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary:   reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_363_489 at runctl_mgmt_host_rc_formal_tb.sv:363.13-363.84 step 5
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: cover trace: runctl_mgmt_host_rc_formal_cover/engine_0/trace3.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary:   reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_362_484 at runctl_mgmt_host_rc_formal_tb.sv:362.13-362.88 step 5
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: cover trace: runctl_mgmt_host_rc_formal_cover/engine_0/trace4.vcd
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary:   reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_366_500 at runctl_mgmt_host_rc_formal_tb.sv:366.13-366.56 step 5
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: and 3 further traces
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] summary: see runctl_mgmt_host_rc_formal_cover/PASS for a complete summary
+SBY 15:18:07 [runctl_mgmt_host_rc_formal_cover] DONE (PASS, rc=0)
+</system-out>
+<system-err>
+</system-err>
+</testsuite>
+</testsuites>

@@ -1,0 +1,29 @@
+##   0:00:00  Solver: z3
+##   0:00:00  Checking cover reachability in step 0..
+##   0:00:00  Checking cover reachability in step 1..
+##   0:00:00  Checking cover reachability in step 2..
+##   0:00:00  Reached cover statement in step 2 at run_control_splitter_formal_tb: run_control_splitter_formal_tb.sv:216.13-216.68 (_witness_.check_cover_run_control_splitter_formal_tb_sv_216_1001)
+##   0:00:00  Writing trace to VCD file: engine_0/trace0.vcd
+##   0:00:00  Writing trace to Verilog testbench: engine_0/trace0_tb.v
+##   0:00:00  Writing trace to constraints file: engine_0/trace0.smtc
+##   0:00:00  Writing trace to Yosys witness file: engine_0/trace0.yw
+##   0:00:00  Checking cover reachability in step 2..
+##   0:00:00  Reached cover statement in step 2 at run_control_splitter_formal_tb: run_control_splitter_formal_tb.sv:215.13-215.42 (_witness_.check_cover_run_control_splitter_formal_tb_sv_215_999)
+##   0:00:00  Writing trace to VCD file: engine_0/trace1.vcd
+##   0:00:00  Writing trace to Verilog testbench: engine_0/trace1_tb.v
+##   0:00:00  Writing trace to constraints file: engine_0/trace1.smtc
+##   0:00:00  Writing trace to Yosys witness file: engine_0/trace1.yw
+##   0:00:00  Checking cover reachability in step 2..
+##   0:00:00  Reached cover statement in step 2 at run_control_splitter_formal_tb: run_control_splitter_formal_tb.sv:217.13-217.68 (_witness_.check_cover_run_control_splitter_formal_tb_sv_217_1006)
+##   0:00:00  Writing trace to VCD file: engine_0/trace2.vcd
+##   0:00:00  Writing trace to Verilog testbench: engine_0/trace2_tb.v
+##   0:00:00  Writing trace to constraints file: engine_0/trace2.smtc
+##   0:00:00  Writing trace to Yosys witness file: engine_0/trace2.yw
+##   0:00:00  Checking cover reachability in step 2..
+##   0:00:00  Checking cover reachability in step 3..
+##   0:00:00  Reached cover statement in step 3 at run_control_splitter_formal_tb: run_control_splitter_formal_tb.sv:218.13-218.89 (_witness_.check_cover_run_control_splitter_formal_tb_sv_218_1011)
+##   0:00:00  Writing trace to VCD file: engine_0/trace3.vcd
+##   0:00:00  Writing trace to Verilog testbench: engine_0/trace3_tb.v
+##   0:00:00  Writing trace to constraints file: engine_0/trace3.smtc
+##   0:00:00  Writing trace to Yosys witness file: engine_0/trace3.yw
+##   0:00:00  Status: passed

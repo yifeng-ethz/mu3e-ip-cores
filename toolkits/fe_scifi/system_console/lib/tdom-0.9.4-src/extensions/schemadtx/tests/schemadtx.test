@@ -1,0 +1,39 @@
+# Features covered: extended schema text constraint commands.
+#
+# This file contains a collection of tests for the collection of
+# additional schema text constraint commands of schemadtx, provided as
+# an "extension extension" to tdom. 
+#
+# Copyright (c) 2020 Rolf Ade.
+
+
+set testDir [file dir [info script]]
+source [file join $testDir loadschemadtx.tcl]
+
+test schemadtx-1.1 {gtin} {
+    tdom::schema s
+    s defelement e {
+        text {
+            gtin
+        }
+    }
+    set result ""
+    foreach xml {
+        <e/>
+        <e></e>
+        <e>1</e>
+        <e>4012345123456</e>
+        <e>4012345a23456</e>
+    } {
+        lappend result [s validate $xml]
+    }
+    s delete
+    set result
+} {0 0 0 1 0}
+         
+     
+# Local Variables:
+# mode: tcl
+# End:
+
+

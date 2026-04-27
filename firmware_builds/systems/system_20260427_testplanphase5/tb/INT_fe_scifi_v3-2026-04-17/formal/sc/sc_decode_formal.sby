@@ -1,0 +1,28 @@
+[tasks]
+prove
+cover
+
+[options]
+prove: mode prove
+prove: depth 8
+prove: wait on
+cover: mode cover
+cover: depth 8
+cover: wait on
+
+[engines]
+prove: smtbmc z3
+cover: smtbmc z3
+
+[script]
+read_verilog -formal -sv formal_defs.svh
+read_verilog -formal -sv debug_sc_system_v3_map.svh
+read_verilog -formal -sv props_sc_decode.sv
+read_verilog -formal -sv sc_decode_formal_tb.sv
+prep -top sc_decode_formal_tb
+
+[files]
+../common/formal_defs.svh
+debug_sc_system_v3_map.svh
+props_sc_decode.sv
+sc_decode_formal_tb.sv

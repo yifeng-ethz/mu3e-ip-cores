@@ -1,0 +1,6 @@
+#
+# Tcl package index file
+#
+package ifneeded @PACKAGE_NAME@ @PACKAGE_VERSION@ \
+    "package require tdom 0.9.2-;
+     load [file join $dir @PKG_LIB_FILE@]"

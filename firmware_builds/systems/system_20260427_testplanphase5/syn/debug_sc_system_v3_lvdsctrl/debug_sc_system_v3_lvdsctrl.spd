@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file path="simulation/debug_sc_system_v3_lvdsctrl.v" type="VERILOG" />
+ <topLevel name="debug_sc_system_v3_lvdsctrl" />
+ <deviceFamily name="arriav" />
+ <modelMap
+   controllerPath="debug_sc_system_v3_lvdsctrl.nios_subsystem.ram"
+   modelPath="debug_sc_system_v3_lvdsctrl.nios_subsystem.ram" />
+ <modelMap
+   controllerPath="debug_sc_system_v3_lvdsctrl.scratch_pad_ram"
+   modelPath="debug_sc_system_v3_lvdsctrl.scratch_pad_ram" />
+</simPackage>

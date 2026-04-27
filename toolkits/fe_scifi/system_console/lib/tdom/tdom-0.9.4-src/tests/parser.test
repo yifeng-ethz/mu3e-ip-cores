@@ -1,0 +1,968 @@
+# Features covered:  Parser functions
+#
+# This file tests the parser's basic functions.
+#
+#    parser-1.*: parser creation
+#    parser-2.*: return code 'break' from callback
+#    parser-3.*: return code 'continue' from callback
+#    parser-4.*: return code 'error' from callback
+#    parser-5.*: parse input from channel
+#    parser-6.*: reuse parser 
+#    parser-7.*: parser reset
+#    parser-8.*: parser free
+#    parser-9.*: parser parse
+#    parser-10.*: return code 'return' from callback
+#    parser-11.*: parser input from filename
+#    parser-12.*: parser currentmarkup
+#
+# Copyright (c) 1999-2000 Zveno Pty Ltd.
+# Copyright (c) 2002-2015 Rolf Ade
+#
+# $Id$
+
+source [file join [file dir [info script]] loadtdom.tcl]
+
+proc parray arrayName {
+    upvar #0 $arrayName arr
+    foreach key [lsort [array names $arrayName]] {
+	lappend result $key $arr($key)
+    }
+    return $result
+}
+
+catch {unset count} 
+proc Count {args} {
+    if {![info exists ::count]} {
+        set ::count 1
+    } else {
+        incr ::count
+    }
+}
+
+catch {unset started}
+proc Start {name atList args} {
+    array set opts $args
+    array set atts $atList
+
+    if {![info exists ::started($name)]} {
+	set ::started($name) 1
+    } else {
+	incr ::started($name)
+    }
+    if {[info exists atts(class)]} {
+	switch $atts(class) {
+	    continue {
+		return -code continue
+	    }
+	    break {
+		return -code break
+	    }
+	    error {
+		return -code error "error condition in callback"
+	    }
+            return {
+                return -code return
+            }
+	    default {
+		return -code $atts(class) 
+	    }
+	}
+    }
+}
+catch {unset ended}
+proc End {name args} {
+    array set opts $args
+    if {![info exists ::ended($name)]} {
+	set ::ended($name) 1
+    } else {
+	incr ::ended($name)
+    }
+}
+proc PI {name args} {
+    return -code $name
+}
+
+catch {unset elList}
+proc ElStart {name atList args} {
+    array set opts {-empty 0}
+    array set opts $args
+    lappend ::elList start $name $opts(-empty)
+}
+proc ElEnd {name args} {
+    array set opts {-empty 0}
+    array set opts $args
+    lappend ::elList end $name $opts(-empty)
+}
+
+test parser-1.1 {parser creation} {
+    set p [::xml::parser]
+    regexp {^xmlparser[0-9]+$} $p
+} 1
+
+test parser-1.2 {parser creation, only options} {
+    set p [::xml::parser -elementstartcommand Start]
+    regexp {^xmlparser[0-9]+$} $p
+} 1
+
+test parser-1.3 {parser creation, named} {
+    catch {rename parser-1.3 {}}
+    ::xml::parser parser-1.3
+} parser-1.3
+
+test parser-1.4 {parser creation, named with options} {
+    catch {rename parser-1.4 {}}
+    ::xml::parser parser-1.4 -elementstartcommand Start
+} parser-1.4
+
+test parser-1.5 {parser freeing, wrong nr of args} {
+    set p [expat]
+    if {[set result [catch {$p free wrongarg}]]} {
+        $p free
+    }
+    set result
+} 1
+
+test parser-1.6 {parser create syntax check} {
+    set result [catch {set parser [expat -paramentityparsing wrong]} errMsg]
+    lappend result $errMsg
+} {1 {bad value "wrong": must be always, never, or notstandalone}}
+
+test parser-1.7 {parser cget syntax} {
+    catch {rename parser-1.7 {}}
+    set parser [expat parser-1.7]
+    set result [catch {$parser cget} errMsg]
+    lappend result $errMsg
+} {1 {wrong # args: should be "parser-1.7 cget ?-handlerset handlersetname? switch"}}
+
+test parser-1.8 {parser cget syntax} {
+    catch {rename parser-1.8 {}}
+    set parser [expat parser-1.8]
+    set result [catch {$parser cget -handlerset -final} errMsg]
+    lappend result $errMsg
+} {1 {wrong # args: should be "?-handlerset handlersetname? switch"}}
+
+test parser-1.9 {parser cget syntax} {
+    catch {rename parser-1.9 {}}
+    set parser [expat parser-1.9]
+    set result [catch {$parser cget -handlerset dontexist -baseurl} errMsg]
+    lappend result $errMsg
+} {1 {invalid handlerset name: dontexist}}
+
+test parser-1.10 {parser cget syntax} {
+    catch {rename parser-1.10 {}}
+    set parser [expat parser-1.10]
+    set result [$parser cget -handlerset default -baseurl]
+} {}
+
+test parser-1.11 {parser cget syntax} {
+    catch {rename parser-1.11 {}}
+    set parser [expat parser-1.11 -baseurl http://foo.org/]
+    set result [$parser cget -handlerset default -baseurl]
+} {http://foo.org/}
+
+test parser-1.12 {parser cget} {
+    catch {rename parser-1.12 {}}
+    set parser [expat parser-1.12]
+    set result [$parser cget -baseurl]
+} {}
+
+proc esh_1_13_1 {args} {
+    incr ::esh_1_13_1
+}
+proc esh_1_13_2 {args} {
+    incr ::esh_1_13_2
+}
+test parser-1.13 {parser configure} {
+    set ::esh_1_13_1 0
+    set ::esh_1_13_2 0
+    catch {rename parser-1.13 {}}
+    set p [expat parser-1.13 -elementstartcommand esh_1_13_1]
+    $p configure -elementstartcommand esh_1_13_2
+    $p parse {<root><a/><b/></root>}
+    list $::esh_1_13_1 $::esh_1_13_2
+} {0 3}
+
+test parser-1.14 {parser get} {
+    catch {rename parser-1.14 {}}
+    set parser [expat parser-1.14]
+    set result [catch {$parser get}]
+    $parser free
+    set result
+} {1}
+test parser-1.15 {parser get} {
+    catch {rename parser-1.15 {}}
+    set parser [expat parser-1.15]
+    set result [catch {$parser get foo bar}]
+    $parser free
+    set result
+} {1}
+test parser-1.16 {parser get} {
+    catch {rename parser-1.16 {}}
+    set parser [expat parser-1.16]
+    set result [$parser get -currentbytecount]
+    $parser free
+    set result
+} {0}
+
+test parser-1.17 {parser delete} {
+    expat parser-1.17
+    parser-1.17 delete
+} {}
+
+proc cdh-1.18 {data} {
+    if {[string trim $data] ne ""} {
+        append ::result "cdh:$data"
+    }
+}
+proc dh-1.18 {data} {
+    if {[string trim $data] ne ""} {
+        append ::result "dh:$data"
+    }
+}
+
+test parser-1.18 {parser option -noexpand} {
+    catch {rename parser-1.18 {}}
+    set parser [expat parser-1.18]
+    $parser configure \
+        -noexpand 1 \
+        -defaultcommand dh-1.18 \
+        -characterdatacommand cdh-1.18
+    set result ""
+    $parser parse {<!DOCTYPE xml [
+      <!ELEMENT xml (#PCDATA) >                                  
+      <!ENTITY xxx "this was the xxx entity">
+     ]>
+     <xml>foo&xxx;bar</xml>}
+    set result
+} {cdh:foodh:&xxx;cdh:bar}
+
+test parser-1.19 {parser option -noexpand} {
+    catch {rename parser-1.19 {}}
+    set parser [expat parser-1.19]
+    $parser configure \
+        -noexpand 0 \
+        -defaultcommand dh-1.18 \
+        -characterdatacommand cdh-1.18
+    set result ""
+    $parser parse {<!DOCTYPE xml [
+      <!ELEMENT xml (#PCDATA) >                                  
+      <!ENTITY xxx "this was the xxx entity">
+     ]>
+     <xml>foo&xxx;bar</xml>}
+    set result
+} {cdh:foothis was the xxx entitybar}
+
+test parser-1.20 {parser option -noexpand} {
+    catch {rename parser-1.20 {}}
+    set parser [expat parser-1.20]
+    $parser configure \
+        -noexpand 1 \
+        -characterdatacommand cdh-1.18
+    set result ""
+    $parser parse {<!DOCTYPE xml [
+      <!ELEMENT xml (#PCDATA) >                                  
+      <!ENTITY xxx "this was the xxx entity">
+     ]>
+     <xml>foo&xxx;bar</xml>}
+    set result
+} {cdh:foocdh:bar}
+
+test parser-1.21 {parser option -noexpand} {
+    catch {rename parser-1.21 {}}
+    set parser [expat parser-1.21]
+    $parser configure \
+        -noexpand 1 \
+        -defaultcommand dh-1.18
+    set result ""
+    $parser parse {<!DOCTYPE xml [
+      <!ELEMENT xml (#PCDATA) >                                  
+      <!ENTITY xxx "this was the xxx entity">
+     ]>
+     <xml>foo&xxx;bar</xml>}
+    set result
+} {dh:&xxx;}
+
+test parser-1.22 {parser option -noexpand} {
+    catch {rename parser-1.22 {}}
+    set parser [expat parser-1.18]
+    $parser configure \
+        -noexpand 1 \
+        -defaultcommand dh-1.18
+    set result ""
+    $parser parse {<!DOCTYPE xml [
+      <!ELEMENT xml (#PCDATA) >                                  
+      <!ENTITY xxx "this was the xxx entity">
+     ]>
+     <xml>foo&xxx;bar</xml>}
+    set result
+} {dh:&xxx;}
+
+test parser-1.23 {Unknown option flag} {
+    catch {rename xml::parser-1.23 {}}
+    catch {
+        set parser [xml::parser parser-1.23 \
+                        -elementstartcommand EStart \
+                        -boo]
+    }
+} 1
+
+test parser-1.24 {Missing option argument} {
+    catch {rename xml::parser-1.24 {}}
+    catch {
+        set parser [xml::parser parser-1.24 \
+                        -elementstartcommand]
+                        
+    }
+} 1
+
+test parser-1.25 {billion laughs attact proctection options} {
+    catch {xml::parser-1.25 delete}
+    xml::parser xml::parser-1.25
+    set result ""
+    foreach {option value} {
+        -billionLaughsAttackProtectionMaximumAmplification foo
+        -billionLaughsAttackProtectionMaximumAmplification 0
+        -billionLaughsAttackProtectionMaximumAmplification -2.0
+        -billionLaughsAttackProtectionMaximumAmplification 23
+        -billionLaughsAttackProtectionActivationThreshold bar
+        -billionLaughsAttackProtectionActivationThreshold 0
+        -billionLaughsAttackProtectionActivationThreshold -7
+        -billionLaughsAttackProtectionActivationThreshold 2000000000
+    } {
+        lappend result [catch {
+            xml::parser-1.25 configure $option $value
+        }]
+    }
+    xml::parser-1.25 delete
+    set result
+} {1 1 1 0 1 1 1 0}
+
+proc estart-1.26 {name attrs} {
+    lappend ::result "estart-1.26 $name"
+}
+proc eend-1.26 {name} {
+    lappend ::result "eend-1.26 $name"
+}
+proc cdata-1.26 {cdata} {
+    lappend ::result "cdata-1.26 $cdata"
+}
+trace add execution estart-1.26 enter cmdtracer
+trace add execution eend-1.26 enter cmdtracer
+trace add execution cdata-1.26 enter cmdtracer
+proc cmdtracer {args} {
+    lappend ::result "cmdtracer $args"
+}
+test parser-1.26 {-fastcall} {
+    catch {xml::parser-1.26}
+    set result ""
+    xml::parser xml::parser-1.26 -final 0 -fastcall 1
+    xml::parser-1.26 configure -elementstartcommand estart-1.26 \
+        -elementendcommand eend-1.26 \
+        -characterdatacommand cdata-1.26
+    xml::parser-1.26 parse <doc><a>foo</a>
+    xml::parser-1.26 configure -fastcall 0 \
+        -elementstartcommand estart-1.26 \
+        -elementendcommand eend-1.26 \
+        -characterdatacommand cdata-1.26
+    xml::parser-1.26 parse <a>foo</a></doc>
+    xml::parser-1.26 delete
+    set result
+} {{estart-1.26 doc} {estart-1.26 a} {cdata-1.26 foo} {eend-1.26 a} {cmdtracer {estart-1.26 a {}} enter} {estart-1.26 a} {cmdtracer {cdata-1.26 foo} enter} {cdata-1.26 foo} {cmdtracer {eend-1.26 a} enter} {eend-1.26 a} {cmdtracer {eend-1.26 doc} enter} {eend-1.26 doc}}
+
+# Test break return code from callback
+
+test parser-2.1 {break in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-2.1 {}}
+    set p [::xml::parser parser-2.1 -elementstartcommand Start]
+    $p parse {<?xml version="1.0"?>
+<Test>
+<Element id="el1">Should see this data</Element>
+<Element class="break" id="el2">Should not see this data<Element id="el3"/></Element>
+<Element id='el4'>Should not see this data</Element>
+</Test>
+}
+    set ::started(Element)
+} 2
+
+test parser-2.2 {break in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-2.2 {}}
+    set p [::xml::parser parser-2.2 -elementstartcommand Start]
+    $p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element>Should see this data<Element class="break"/></Element>
+<Element>Should not see this data</Element>
+</Test>
+}
+    set ::started(Element)
+} 3
+
+test parser-2.3 {break in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-2.3 {}}
+    set p [::xml::parser parser-2.3 -elementstartcommand Start]
+    $p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element>Should see this data
+  <?break?>
+</Element>
+<Element>Should not see this data</Element>
+</Test>
+}
+    set ::started(Element)
+} 3
+
+test parser-3.1 {continue in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-3.1 {}}
+    set p [::xml::parser parser-3.1 -elementstartcommand Start]
+    $p parse {<?xml version="1.0"?>
+<Test>
+<Element id='el1'>Should see this data</Element>
+<Element class="continue" id='el2'>Should not see this data
+  <Element id='el3'/>
+</Element>
+<Element id='el4'>Should see this data</Element>
+</Test>
+}
+    set ::started(Element)
+} 3
+
+test parser-3.2 {continue in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-3.2 {}}
+    set p [::xml::parser parser-3.2 -elementstartcommand Start]
+    $p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element>Should see this data
+  <Element class="continue">
+    Should not see this data
+    <Element/>
+  </Element>
+  Should see this data
+  <Element/>
+</Element>
+<Element>Should see this data</Element>
+</Test>
+}
+    set ::started(Element)
+} 5
+
+test parser-3.3 {continue in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-3.3 {}}
+    set p [::xml::parser parser-3.3 -elementstartcommand Start]
+    $p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element>Should see this data
+  <Element class="continue">
+    Should not see this data
+    <Element class="break"/>
+    break will have no effect
+  </Element>
+  Should see this data
+  <Element/>
+</Element>
+<Element>Should see this data</Element>
+</Test>
+}
+    set ::started(Element)
+} 5
+
+proc esh-3.4 {name attList} {
+    incr ::eshcounter
+    return -code continue
+}
+
+proc eeh-3.4 {name} {
+    incr ::eehcounter
+}
+
+proc cdh-3.4 {data} {
+    incr ::cdhcounter
+}
+
+test parser-3.4 {continue} {
+    set ::eshcounter 0
+    set ::eehcounter 0
+    set ::cdhcounter 0
+    set p [expat -elementstartcommand esh-3.4 -elementendcommand eeh-3.4 \
+              -characterdatacommand chd-3.4]
+    $p parse {<root><a/>foo<a>foo<b><c/>foo</b></a></root>}
+    $p free
+    list $::eshcounter $::eehcounter $::cdhcounter
+} {1 1 0}
+
+proc esh-3.5 {name attList} {
+    incr ::eshcounter2
+}
+
+proc eeh-3.5 {name} {
+    incr ::eehcounter2
+}
+
+proc cdh-3.5 {data} {
+    incr ::cdhcounter2
+}
+
+test parser-3.5 {continue with more than one handlerset} {
+    set ::eshcounter 0
+    set ::eehcounter 0
+    set ::cdhcounter 0
+    set ::eshcounter2 0
+    set ::eehcounter2 0
+    set ::cdhcounter2 0
+    set p [expat -elementstartcommand esh-3.4 -elementendcommand eeh-3.4 \
+              -characterdatacommand chd-3.4 -handlerset second \
+              -elementstartcommand esh-3.5 -elementendcommand eeh-3.5 \
+              -characterdatacommand cdh-3.5]
+    $p parse {<root><a/>foo<a>foo<b><c/>foo</b></a></root>}
+    $p free
+    list $::eshcounter $::eehcounter $::cdhcounter \
+        $::eshcounter2 $::eehcounter2 $::cdhcounter2
+} {1 1 0 5 5 3}
+
+test parser-4.1 {error in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-4.1 {}}
+    set p [::xml::parser parser-4.1 -elementstartcommand Start]
+    set errcode [catch {$p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element class="error"/>
+<Element>Should not see this data</Element>
+</Test>
+    }} result]
+    list $errcode $::started(Element)
+} {1 2}
+
+test parser-4.2 {error in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-4.2 {}}
+    set p [::xml::parser parser-4.2 -elementstartcommand Start]
+    set errcode [catch {$p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element class="13"/>
+<Element>Should not see this data</Element>
+</Test>
+}} result]
+    list $::errcode $::started(Element)
+} {13 2}
+
+test parser-5.1 {parse channel input} {
+    catch {unset ::count}
+
+    catch {rename parser-5.1 {}}
+    set parser [::xml::parser parser-5.1 -elementstartcommand Count]
+    set fd [open [file join [pwd] [file dir [info script]] data/books.xml]]
+    $parser parsechannel $fd
+    close $fd
+    list $::count
+} {42}
+
+proc elementstart {args} {
+    global parser
+
+    if {![info exists ::count]} {
+        set ::count 1
+    } else {
+        incr ::count
+    }
+    set fd [open [file join [pwd] [file dir [info script]] data/books.xml]]
+    catch {$parser parsechannel $fd}
+    close $fd
+}
+
+test parser-5.2 {parse channel input with catched try to recursive parsing} {
+    catch {unset ::count}
+
+    catch {rename parser-5.2 {}}
+    set parser [::xml::parser parser-5.2 -elementstartcommand elementstart]
+    set fd [open [file join [pwd] [file dir [info script]] data/books.xml]]
+    $parser parsechannel $fd
+    close $fd
+    list $::count
+} {42}
+
+test parser-5.3 {parse channel - xml wrong} -setup {
+    set xmlFile [makeFile {<root><a></root>} parser.xml]
+} -body {
+    set fd [open $xmlFile]
+    catch {rename parser-5.3 {}}
+    set parser [::xml::parser parser-5.3 -elementstartcommand elementstart]
+    set result [catch {$parser parsechannel $fd}]
+    close $fd
+    set result
+} -cleanup {
+    removeFile parser.xml
+} -result 1
+
+proc elementstart-5.4 {args} {
+    error "Error raised by elementstart-5.4"
+}
+
+test parser-5.4 {parse channel - error raised in handler} {
+    catch {parser-5.4 free}
+    ::xml::parser parser-5.4 -elementstartcommand elementstart-5.4
+    set file [file join [pwd] [file dir [info script]] data/books.xml]
+    catch {parser-5.4 parsefile $file} errMsg
+    parser-5.4 free
+    set errMsg
+} "Error raised by elementstart-5.4"
+
+test parser-6.1 {reuse parser} {
+    catch {rename parser-6.1 {}}
+    set parser [expat parser-6.1 -baseurl file:///foo/bar]
+    set result [$parser cget -baseurl]
+    $parser parse <data/>
+    lappend result [$parser cget -baseurl]
+    $parser configure -baseurl file:///bar/foo
+    lappend result [$parser cget -baseurl]
+    $parser parse <otherdata/>
+    lappend result [$parser cget -baseurl]
+    set result
+} {file:///foo/bar {} file:///bar/foo {}}
+
+
+proc elementstart {args} {
+    global parser
+    
+    $parser reset
+}
+
+test parser-7.1 {parser reset called from within callback proc} {
+    set parser [expat -elementstartcommand elementstart]
+    set result [catch {$parser parse <root>foo</root>} errMsg]
+    lappend result $errMsg
+    $parser free
+    set result
+} {1 {parser reset not allowed from within callback}}
+
+test parser-7.2 {parser reset} {
+    set parser [expat -final 0]
+    $parser parse "<ro"
+    $parser reset
+    set result [list]
+    foreach option {-final -baseurl -ignorewhitecdata -useForeignDTD} {
+        lappend result [$parser cget $option]
+    }
+    $parser parse "<doc/>"
+    $parser free
+    set result
+} {1 {} 0 0}
+
+proc elementstart {args} {
+    global parser
+    
+    $parser free
+}
+
+test parser-8.1 {parser free called from within callback proc} {
+    set parser [expat -elementstartcommand elementstart]
+    set result [catch {$parser parse <root>foo</root>} errMsg]
+    lappend result $errMsg
+    $parser free
+    set result
+} {1 {parser delete not allowed from within callback}}
+
+proc elementstart {args} {
+    global parser
+
+    $parser parse {<root>foo bar</root>}
+}
+
+test parser-9.1 {try to use the parser from within one of its callbacks} {
+    set parser [expat -elementstartcommand elementstart]
+    set result [catch {$parser parse <root>foo</root>} errMsg]
+    lappend result $errMsg
+    $parser free
+    set result
+} {1 {Parser already in use.}}
+
+proc calledFromElementstart {args} {
+    global parser
+
+    $parser parse {<root>foo bar</root>}
+}
+
+proc elementstart {args} {
+    calledFromElementstart
+}
+
+test parser-9.2 {try to use the parser from within one of its callbacks} {
+    set parser [expat -elementstartcommand elementstart]
+    set result [catch {$parser parse <root>foo</root>} errMsg]
+    lappend result $errMsg
+    $parser free
+    set result
+} {1 {Parser already in use.}}
+
+
+test parser-10.1 {return -code return in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-10.1 {}}
+    set p [::xml::parser parser-10.1 -elementstartcommand Start]
+    set errcode [catch {$p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element class="return"/>
+<Element>Should not see this data</Element>
+</Test>
+}} result]
+    list $errcode $::started(Element)
+} {0 2}
+
+test parser-10.2 {return -code return in callback} {
+    catch {unset ::started}
+
+    catch {rename parser-10.2 {}}
+    set p [::xml::parser parser-10.2 -elementstartcommand Start]
+    set errcode [catch {$p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element class="return"/>
+<Element>Should not see this data</Element>
+</Test>}} errMsg]
+    set result [list $errcode $::started(Element)]
+    $p reset
+    catch {unset ::started}
+    set errcode [catch {$p parse {<?xml version="1.0"?>
+<Test>
+<Element>Should see this data</Element>
+<Element class="ok"/>
+<Element>Should see this data</Element>
+</Test>}} errMsg]
+    lappend result $errcode $::started(Element)
+} {0 2 0 3}
+
+test parser-11.1 {parse parsefile} {
+    catch {unset ::count}
+
+    catch {rename parser-11.1 {}}
+    set parser [::xml::parser parser-11.1 -elementstartcommand Count]
+    set file [file join [pwd] [file dir [info script]] data/books.xml]
+    $parser parsefile $file
+    set ::count
+} {42}
+
+proc elementstart-11.2 {args} {
+    error "Error raised by elementstart-11.2"
+}
+
+test parser-11.2 {parse parsefile - error raised in handler} {
+    catch {parser-11.2 free}
+    ::xml::parser parser-11.2 -elementstartcommand elementstart-11.2
+    set file [file join [pwd] [file dir [info script]] data/books.xml]
+    catch {parser-11.2 parsefile $file} errMsg
+    parser-11.2 free
+    set errMsg
+} "Error raised by elementstart-11.2"
+
+proc elementstart-12.1 {parser args} {
+    global result
+    append result [$parser currentmarkup]
+}
+
+proc elementend-12.1 {parser args} {
+    global result
+    append result [$parser currentmarkup]
+}
+
+test parser-12.1 {currentmarkup method} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.1]
+    $p configure \
+        -elementstartcommand [list elementstart-12.1 $p] \
+        -elementendcommand [list elementend-12.1 $p]
+    $p parse {<root rootatt="rootatt">text<a
+        a_att1="a_att1"
+        a_att2 = "a_att2"/><b>more text</b></root>}
+    $p free
+    set result
+} {<root rootatt="rootatt"><a
+        a_att1="a_att1"
+        a_att2 = "a_att2"/><b></b></root>}
+
+proc characterdata-12.2 {parser data} {
+    global result
+    append result [$parser currentmarkup]
+}
+test parser-12.2 {currentmarkup method} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.2]
+    $p configure \
+        -characterdatacommand [list characterdata-12.2 $p] 
+    $p parse {<root rootatt="rootatt">text<a
+        a_att1="a_att1"
+        a_att2 = "a_att2"/><b>more text</b></root>}
+    $p free
+    set result
+} {}
+
+test parser-12.3 {currentmarkup method} {
+    set p [expat parser-12.3]
+    set result [$p currentmarkup]
+    $p free
+    set result
+} {}
+
+proc elementstart-12.4 {parser handlerset args} {
+    global result
+    append result "$handlerset: [$parser currentmarkup]\n"
+}
+proc elementend-12.4 {parser handlerset args} {
+    global result
+    append result "$handlerset: [$parser currentmarkup]\n"
+}
+test parser-12.4 {currentmarkup method - multiple handler set} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.4]
+    $p configure \
+        -elementstartcommand [list elementstart-12.4 $p default] \
+        -elementendcommand [list elementend-12.4 $p default] \
+        -handlerset "additional" \
+        -elementstartcommand [list elementstart-12.4 $p "additional"] \
+        -elementendcommand [list elementend-12.4 $p "additional"]
+    $p parse {<root rootatt="rootatt">text<a
+        a_att1="a_att1"
+        a_att2 = "a_att2"/><b>more text</b></root>}
+    $p free
+    set result
+} {default: <root rootatt="rootatt">
+additional: <root rootatt="rootatt">
+default: <a
+        a_att1="a_att1"
+        a_att2 = "a_att2"/>
+additional: <a
+        a_att1="a_att1"
+        a_att2 = "a_att2"/>
+default: 
+additional: 
+default: <b>
+additional: <b>
+default: </b>
+additional: </b>
+default: </root>
+additional: </root>
+}
+
+proc elementstart-12.5 {parser args} {
+    global result
+    append result "[$parser currentmarkup]"
+}
+test parser-12.5 {currentmarkup method - empty element shortcut -elementstartcommand} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.5]
+    $p configure \
+        -elementstartcommand [list elementstart-12.5 $p] 
+    $p parse {<root><elem/></root>}
+    $p free
+    set result
+} {<root><elem/>}
+
+proc elementend-12.6 {parser args} {
+    global result
+    if {[$parser currentmarkup] eq ""} {
+        append result "<elementend called, but currentmarkup return empty string>"
+    }
+    append result "[$parser currentmarkup]"
+}
+test parser-12.6 {currentmarkup method - empty element shortcut -elementendcommand} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.6]
+    $p configure \
+        -elementendcommand [list elementend-12.6 $p] 
+    $p parse {<root><elem/></root>}
+    $p free
+    set result
+} {<elementend called, but currentmarkup return empty string></root>}
+    
+foreach parser [info commands xmlparser*] {
+    $parser free
+}
+foreach parser [info commands parser-*] {
+    $parser free
+}
+
+proc elementdeclcommand-12.7 {parser args} {
+    global result
+    append result "elementdeclcommand: [$parser currentmarkup]"
+}
+
+proc entitydeclcommand-12.7 {parser args} {
+    global result
+    append result "entitydeclcommand: [$parser currentmarkup]"
+}
+
+test parser-12.7 {currentmarkup method - not for doctype markup handler} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.7]
+    $p configure \
+        -elementdeclcommand [list elementdeclcommand-12.7 $p] \
+        -entitydeclcommand [list entitydeclcommand-12.7 $p]
+    $p parse {<!DOCTYPE test [
+<!ELEMENT test (#PCDATA) >
+<!ENTITY % xx '&#37;zz;'>
+<!ENTITY % zz '&#60;!ENTITY tricky "error-prone" >' >
+%xx;
+]>
+<test>This sample shows a &tricky; method.</test>}
+    $p free
+    set result
+} {elementdeclcommand: entitydeclcommand: entitydeclcommand: }
+
+proc pi-12.8 {parser args} {
+    global result
+    append result "pi: [$parser currentmarkup]"
+}
+test parser-12.8 {currentmarkup method - processing instruction} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.8]
+    $p configure \
+        -processinginstructioncommand [list pi-12.8 $p]
+    $p parse {<doc><?xml-stylesheet type="text/xsl" href="style.xsl"?></doc>}
+    $p free
+    set result
+} {pi: <?xml-stylesheet type="text/xsl" href="style.xsl"?>}
+
+proc comment-12.9 {parser args} {
+    global result
+    append result "comment: [$parser currentmarkup]"
+}
+test parser-12.9 {currentmarkup method - comment} {
+    catch {unset result}
+    set result ""
+    set p [expat parser-12.9]
+    $p configure \
+        -commentcommand [list comment-12.9 $p]
+    $p parse {<doc><!-- A comment --></doc>}
+    $p free
+    set result
+} {comment: <!-- A comment -->}
+
+
+# cleanup
+::tcltest::cleanupTests
+return

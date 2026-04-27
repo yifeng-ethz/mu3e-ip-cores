@@ -1,0 +1,816 @@
+start manpage
+defelement manpage {
+    attribute version ?
+    attribute title 
+    attribute id 
+    attribute cat 
+    attribute package ?
+    element head ?
+    element namesection 
+    element synopsis ?
+    element section *
+    element seealso ?
+    element keywords ?
+}
+defelement DEF {
+    attribute cat ?
+    attribute name 
+    attribute package ?
+    attribute subpart ?
+    attribute manpage ?
+}
+defelement INDEX {
+    attribute package ?
+    attribute standalone ?
+    attribute title 
+    element head ?
+    choice * {
+        element MAN 
+        element DEF 
+        element KWD 
+    }
+}
+defelement KWD {
+    attribute manpage ?
+    attribute name 
+}
+defelement MAN {
+    attribute id 
+    attribute title 
+}
+defelement argdef {
+    attribute version ?
+    element argtype 
+    element name 
+    element argmode ?
+    element desc 
+}
+defelement arglist {
+    element argdef +
+}
+defelement argmode {
+    text
+}
+defelement argtype {
+    text
+}
+defelement b {
+    attribute cat ?
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement br {
+}
+defelement categories {
+    element category +
+}
+defelement category {
+    attribute title ?
+    attribute id 
+}
+defelement class {
+    text
+}
+defelement cmd {
+    text
+}
+defelement command {
+    mixed {
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement commanddef {
+    attribute version ?
+    element command 
+    element desc 
+}
+defelement commandlist {
+    element commanddef +
+}
+defelement dbclass {
+    text
+}
+defelement dbname {
+    text
+}
+defelement dd {
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+        element p 
+        element ul 
+        element ol 
+        element dl 
+        element sl 
+        element xl 
+        element example 
+        element syntax 
+        element commandlist 
+        element optlist 
+    }
+}
+defelement desc {
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+        element p 
+        element ul 
+        element ol 
+        element dl 
+        element sl 
+        element xl 
+        element example 
+        element syntax 
+        element commandlist 
+        element optlist 
+    }
+}
+defelement division {
+    element title 
+    choice  {
+        element division *
+        choice * {
+            element manpage 
+            element subdoc 
+            element extref 
+        }
+    }
+}
+defelement dl {
+    attribute cat ?
+    attribute scope ? {enumeration {local global}}
+    choice + {
+        element dle 
+        group  {
+            element dt 
+            element dd 
+        }
+    }
+}
+defelement dle {
+    attribute version ?
+    element dt +
+    element dd 
+}
+defelement dt {
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement emph {
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement example {
+    mixed {
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement extension {
+    attribute gi 
+    attribute tmml 
+}
+defelement extensions {
+    choice * {
+        element extension 
+        element xlh 
+    }
+}
+defelement extref {
+    attribute title 
+    attribute href 
+    attribute type 
+}
+defelement file {
+    text
+}
+defelement fun {
+    text
+}
+defelement head {
+    choice * {
+        element extensions 
+        element info 
+        element link 
+        element category 
+    }
+}
+defelement i {
+    attribute cat ?
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement info {
+    attribute key 
+    attribute value 
+}
+defelement keyword {
+    text
+}
+defelement keywords {
+    element keyword +
+}
+defelement l {
+    text
+}
+defelement li {
+    attribute version ?
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+        element p 
+        element ul 
+        element ol 
+        element dl 
+        element sl 
+        element xl 
+        element example 
+        element syntax 
+        element commandlist 
+        element optlist 
+    }
+}
+defelement link {
+    attribute href 
+    attribute rel 
+}
+defelement m {
+    text
+}
+defelement manual {
+    attribute version ?
+    attribute package 
+    element title 
+    element head ?
+    choice  {
+        element division *
+        choice * {
+            element manpage 
+            element subdoc 
+            element extref 
+        }
+    }
+}
+defelement method {
+    text
+}
+defelement name {
+    attribute cat ?
+    attribute name ?
+    text
+}
+defelement namesection {
+    choice  {
+        element name +
+        group  {
+            element title 
+            element name *
+        }
+    }
+    element desc 
+}
+defelement new {
+    attribute version 
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement o {
+    mixed {
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement ol {
+    element li +
+}
+defelement optarg {
+    text
+}
+defelement optdef {
+    element optname 
+    element optarg ?
+    element desc 
+}
+defelement option {
+    text
+}
+defelement optiondef {
+    attribute version ?
+    element name 
+    element dbname 
+    element dbclass 
+    element desc 
+}
+defelement optionlist {
+    attribute cat ?
+    attribute scope ? {enumeration {local global}}
+    element optiondef +
+}
+defelement optlist {
+    element optdef +
+}
+defelement optname {
+    text
+}
+defelement p {
+    attribute version ?
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement package {
+    text
+}
+defelement ref {
+    attribute cat ?
+    attribute href ?
+    attribute refid ?
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement samp {
+    mixed {
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement section {
+    attribute id ?
+    attribute version ?
+    element title 
+    choice * {
+        element p 
+        element ul 
+        element ol 
+        element dl 
+        element sl 
+        element xl 
+        element example 
+        element syntax 
+        element commandlist 
+        element optlist 
+        element arglist 
+        element optionlist 
+    }
+    element subsection *
+}
+defelement seealso {
+    choice + {
+        element ref 
+        element url 
+    }
+}
+defelement sl {
+    attribute cols ?
+    attribute cat ?
+    element li +
+}
+defelement subdoc {
+    attribute href 
+}
+defelement subsection {
+    attribute id ?
+    attribute version ?
+    element title 
+    choice * {
+        element p 
+        element ul 
+        element ol 
+        element dl 
+        element sl 
+        element xl 
+        element example 
+        element syntax 
+        element commandlist 
+        element optlist 
+        element arglist 
+        element optionlist 
+    }
+}
+defelement synopsis {
+    choice + {
+        element syntax 
+        element example 
+    }
+}
+defelement syntax {
+    attribute name ?
+    attribute scope ? {enumeration {local global}}
+    attribute cat ?
+    mixed {
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement syscmd {
+    text
+}
+defelement term {
+    attribute cat ?
+    text
+}
+defelement title {
+    text
+}
+defelement type {
+    text
+}
+defelement ul {
+    element li +
+}
+defelement url {
+    text
+}
+defelement variable {
+    text
+}
+defelement widget {
+    text
+}
+defelement xh {
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}
+defelement xl {
+    element xlh ?
+    element xle +
+}
+defelement xle {
+    element xt +
+    element desc ?
+}
+defelement xlh {
+    attribute gi ?
+    element xh +
+}
+defelement xt {
+    mixed {
+        element emph 
+        element ref 
+        element url 
+        element samp 
+        element command 
+        element new 
+        element m 
+        element l 
+        element o 
+        element i 
+        element b 
+        element br 
+        element term 
+        element cmd 
+        element variable 
+        element method 
+        element option 
+        element file 
+        element syscmd 
+        element fun 
+        element widget 
+        element package 
+        element type 
+        element class 
+    }
+}

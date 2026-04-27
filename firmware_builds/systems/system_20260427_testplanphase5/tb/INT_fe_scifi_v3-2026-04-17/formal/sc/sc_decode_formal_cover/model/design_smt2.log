@@ -1,0 +1,129 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+
+-- Executing script file `design_smt2.ys' --
+
+1. Executing RTLIL frontend.
+Input filename: design_prep.il
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `sc_decode_formal_tb'. Setting top module to sc_decode_formal_tb.
+
+2.1. Analyzing design hierarchy..
+Top module:  \sc_decode_formal_tb
+Used module:     \props_sc_decode
+
+2.2. Analyzing design hierarchy..
+Top module:  \sc_decode_formal_tb
+Used module:     \props_sc_decode
+Removed 0 unused modules.
+Module props_sc_decode directly or indirectly contains formal properties -> setting "keep" attribute.
+Module sc_decode_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+3. Executing FORMALFF pass.
+
+4. Executing DFFUNMAP pass (unmap clock enable and synchronous reset from FFs).
+
+5. Printing statistics.
+
+=== props_sc_decode ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      160 wires
+      360 wire bits
+       21 public wires
+      147 public wire bits
+        6 ports
+       31 port bits
+      168 cells
+        1   $add
+        3   $assume
+       13   $cover
+       14   $eq
+       13   $ff
+       17   $ge
+        1   $gt
+       18   $le
+       47   $logic_and
+        3   $logic_not
+       14   $logic_or
+       17   $mux
+        4   $ne
+        1   $not
+        1   $reduce_bool
+        1   $sub
+
+=== sc_decode_formal_tb ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       11 wires
+       38 wire bits
+        7 public wires
+       33 public wire bits
+       12 cells
+        4   $anyseq
+        2   $assume
+        2   $ff
+        2   $mux
+        1   $not
+        1   $reduce_bool
+        1 submodules
+        1   props_sc_decode
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      180 sc_decode_formal_tb
+      168 props_sc_decode
+
+        +----------Count including submodules.
+        | 
+      171 wires
+      398 wire bits
+       28 public wires
+      180 public wire bits
+        6 ports
+       31 port bits
+        - memories
+        - memory bits
+        - processes
+      180 cells
+        1   $add
+        4   $anyseq
+        5   $assume
+       13   $cover
+       14   $eq
+       15   $ff
+       17   $ge
+        1   $gt
+       18   $le
+       47   $logic_and
+        3   $logic_not
+       14   $logic_or
+       19   $mux
+        4   $ne
+        2   $not
+        2   $reduce_bool
+        1   $sub
+        1 submodules
+        1   props_sc_decode
+
+6. Executing SMT2 backend.
+
+6.1. Executing BMUXMAP pass.
+
+6.2. Executing DEMUXMAP pass.
+Creating SMT-LIBv2 representation of module props_sc_decode.
+Creating SMT-LIBv2 representation of module sc_decode_formal_tb.
+
+End of script. Logfile hash: 86897acc3f, time: 0.01s, user: 0.01s, system: 0.01s, MEM: 14.36 MB peak
+Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+Time spent: 55% 2x write_smt2 (0 sec), 24% 2x read_rtlil (0 sec), ...

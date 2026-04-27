@@ -1,0 +1,154 @@
+# Phase 1 Bring-Up Report
+
+- Timestamp: `2026-04-25T08:25:50`
+- SC link: `2`
+- SC tool: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool`
+- System Console: `/data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console`
+- JDI: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi`
+- Project dir: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3`
+- Debug Qsys: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3.qsys`
+- FEB Qsys/SOPC: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.qsys`, `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.sopcinfo`
+- JTAG cable: `USB-BlasterII [7-2]`
+- JTAG master pattern: `*#7-2*/phy_0/master`
+- JTAG fallback pattern: `*phy_0/master,*#7-2*/control_path_subsystem_jtag_master.master,*control_path_subsystem_jtag_master.master`
+- SC enable mask: `n/a`
+- Expected JDI hash: `DCDFE8408FFD77041828`
+- Live design hash: `DCDFE8408FFD77041828`
+- Result: `PASS`
+
+## Pre-Flight
+
+### `jtagconfig -n`
+
+- Return code: `0`
+```
+1) DE5 [3-6.2]
+  02E660DD   10AX115H1(.|E2|ES)/10AX115H2/..
+    Node 19104600  Nios II #0
+    Node 0C206E00  JTAG PHY #0
+    Node 0C006E00  JTAG UART #0
+    Node 30006E00  Signal Tap #0
+    Design hash    3B5F2C87A2CED31867F6
+
+2) USB-BlasterII [7-2]
+  02A020DD   5AGT(FC7H3|MC7G3)/5AGXBA7D4/..
+    Node 19104600  Nios II #0
+    Node 0C006E00  JTAG UART #0
+    Node 0C206E00  JTAG PHY #0
+    Node 10186E00  ROM/RAM/Constant #0
+    Node 0C206E01  JTAG PHY #1
+    Node 0C206E02  JTAG PHY #2
+    Design hash    DCDFE8408FFD77041828
+```
+
+### `ls -l /dev/mudaq0`
+
+- Return code: `0`
+```
+crw-rw-rw- 1 root users 10, 124 Apr 25 08:18 /dev/mudaq0
+```
+
+## Image Check
+
+- Status: `PASS`
+- Detail: live DCDFE8408FFD77041828 matches JDI DCDFE8408FFD77041828
+
+## Metadata Gate
+
+- Command: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/script/check_ip_metadata.py --link 2 --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool --system-console /data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console --jdi /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi --project-dir /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3 --inventory-out /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/generated/debug_sc_system_v3_inventory_pipe_live.json --jtag-master-pattern *#7-2*/phy_0/master --jtag-fallback-pattern *phy_0/master,*#7-2*/control_path_subsystem_jtag_master.master,*control_path_subsystem_jtag_master.master`
+- Return code: `0`
+```
+PASS max10_prog_avmm_0 svd=feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd exp_ver=0x00020000 qsys_ver=0x00020000 sc_ver=0x00020000 jtag_ver=0x00020000 exp_git=n/a sc_git=n/a jtag_git=n/a
+PASS sc_hub svd=slow-control_hub/sc_hub.svd exp_ver=0x1A06919E qsys_ver=0x1A06919E sc_ver=0x1A06919E jtag_ver=0x1A06919E exp_git=0x05E3EABD sc_git=0x05E3EABD jtag_git=0x05E3EABD
+```
+
+## Bridge Gate
+
+- Command: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/script/check_sc_bridges.py --link 2 --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool --system-console /data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console --jdi /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi --project-dir /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3 --debug-qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3.qsys --feb-qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.qsys --sopcinfo /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.sopcinfo --jtag-master-pattern *#7-2*/phy_0/master --jtag-fallback-pattern *phy_0/master,*#7-2*/control_path_subsystem_jtag_master.master,*control_path_subsystem_jtag_master.master`
+- Return code: `0`
+```
+PASS mm_bridge.histogram_statistics_0.uid
+  sc_addr: 0x0A900
+  uid: 0x48495354
+PASS mm_bridge.histogram_statistics_1.uid
+  note: not present in current downstream map
+  topology: single histogram_statistics_0 instance fed by histogram_ingress_bridge_0
+PASS mm_bridge.histogram_ingress_bridge_0.uid_status
+  uid_addr: 0x0AB00
+  status_addr: 0x0AB03
+  uid: 0x48495342
+  status: 0x00000E03
+PASS mm_bridge.emulator_mutrig_0.reachability
+  sc_addr: 0x08800
+  uid_raw: 0x00000001
+  version_raw: 0x01000800
+PASS mm_bridge.dbg_mm2runctrl_0.reachability
+  sc_addr: 0x08880
+  word0: 0x4D325243
+PASS upload_mm_bridge.runctl.sc
+  uid_addr: 0x0C000
+  meta_addr: 0x0C001
+  status_addr: 0x0C003
+  last_cmd_addr: 0x0C004
+  rx_cmd_count_addr: 0x0C00F
+  local_cmd_addr: 0x0C013
+  uid: 0x52434D48
+  version: 0x1A0251A8
+  status: 0x00000003
+  last_cmd: 0x00000031
+  rx_cmd_count: 0x00000017
+  local_cmd: 0x00000031
+PASS upload_mm_bridge.runctl.jtag
+  uid_addr: 0x00030000
+  meta_addr: 0x00030004
+  status_addr: 0x0003000C
+  last_cmd_addr: 0x00030010
+  local_cmd_addr: 0x0003004C
+  uid: 0x52434D48
+  version: 0x1A0251A8
+  status: 0x00000003
+  last_cmd: 0x00000031
+  local_cmd: 0x00000031
+SUMMARY pass=7 fail=0
+```
+
+## Read-Only Slave Audit
+
+| Status | Probe | Word addr | Count | RSP | First payload | Detail |
+|---|---:|---:|---:|---:|---:|---|
+| PASS | `scratch_pad_ram[0..15]` | `0x00000` | 16 | `OK` | `0x00000000` | read-only baseline |
+| PASS | `onewire_master_controller_0.CAPABILITY` | `0x04400` | 1 | `OK` | `0x00000006` | SVD has CAPABILITY at offset 0, no UID register |
+| PASS | `onewire_master_controller_0.out_of_range` | `0x04408` | 1 | `OK` | `0x00000000` | one word past 0x20-byte SVD aperture |
+| PASS | `max10_prog_avmm_0.ID` | `0x04800` | 1 | `OK` | `0x4D312850` | expected match; expected from Qsys IP_ID parameter |
+| PASS | `max10_prog_avmm_0.VERSION` | `0x04801` | 1 | `OK` | `0x00020000` | expected match |
+| PASS | `max10_prog_avmm_0.STATUS` | `0x04803` | 1 | `OK` | `0x00000001` | ready/busy/fault status |
+| PASS | `charge_injection_pulser_0.read_probe` | `0x04C00` | 1 | `OK` | `0x00000000` | write-only SVD; OK/SLVERR/DECERR acceptable |
+| PASS | `firefly_xcvr_ctrl_0[0..13]` | `0x05000` | 14 | `OK` | `0x0000003A` | read-only audit; no I2C start write issued |
+| PASS | `on_die_temp_sense_ctrl.CSR` | `0x05400` | 1 | `OK` | `0x00000031` | temperature status |
+| PASS | `legacy_firefly_bridge.word0` | `0x05800` | 1 | `OK` | `0xCCCCCCCC` | bridge reachability |
+| PASS | `mutrig_cfg_ctrl_0.OPCODE_STATUS` | `0x0FC04` | 1 | `OK` | `0x00000000` | cfg CSR reachability |
+
+## Scratchpad Baseline
+
+- `0x00000` = `0x00000000`
+- `0x00001` = `0x00000000`
+- `0x00002` = `0x00000000`
+- `0x00003` = `0x00000000`
+- `0x00004` = `0x00000000`
+- `0x00005` = `0x00000000`
+- `0x00006` = `0x00000000`
+- `0x00007` = `0x00000000`
+- `0x00008` = `0x00000000`
+- `0x00009` = `0x00000000`
+- `0x0000A` = `0x00000000`
+- `0x0000B` = `0x00000000`
+- `0x0000C` = `0x00000000`
+- `0x0000D` = `0x00000000`
+- `0x0000E` = `0x00000000`
+- `0x0000F` = `0x00000000`
+
+## Notes
+
+- This phase is read-only except for metadata page-select writes performed by the existing metadata/bridge gate scripts.
+- The bridge gate uses `debug_sc_system_v3.qsys` for the SC primary map and the pipe Qsys/SOPC pair for downstream datapath addresses.
+- Phase 2 remains destructive and was not run by this script.

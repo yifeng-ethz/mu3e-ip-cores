@@ -16,7 +16,7 @@
 
 <p align="middle">
   <a href="https://github.com/yifeng-ethz/mu3e-ip-cores">
-    <img src="./quartus_system/logo/Logo_drawing300.png" alt="Mu3e Logo" width="150" />
+    <img src="./firmware_builds/misc/logo/Logo_drawing300.png" alt="Mu3e Logo" width="150" />
   </a>
 </p>
 
@@ -37,173 +37,35 @@ Achieving the design sensitivity requires an ultra-light detector composed of HV
 
 Each Mu3e IP core resides in its own subdirectory of this repository or in an external submodule. Cores marked as **Prototype** have no `VERSION` property and are still under development.
 
-<table>
-  <thead>
-    <tr>
-      <th rowspan="2">IP Name</th>
-      <th rowspan="2">Description</th>
-      <th colspan="2">Signoff</th>
-    </tr>
-    <tr>
-      <th>DV</th>
-      <th>SYN</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/slow-control_hub"><strong>Slow-Control Hub</strong></a></td>
-      <td>Converts Mu3e slow-control packets into Avalon Memory-Mapped transactions and handles burst count, address and response timing. <img src="https://img.shields.io/badge/version-26.6.9.0414-blue" alt="version 26.6.9.0414 badge" /></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/slow-control_hub/blob/1fe83feac36337492bbc69728c66c958cafd36ae/doc/VERIFICATION_SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="DV signoff available" /></a></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/slow-control_hub/blob/1fe83feac36337492bbc69728c66c958cafd36ae/doc/SYNTHESIS_SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="SYN signoff available" /></a></td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/onewire_temp_sense"><strong>Onewire Temperature Sensor Controller</strong></a></td>
-      <td>Periodically polls 1-Wire temperature sensors; implements reset, presence detect and bit-level timing. <img src="https://img.shields.io/badge/version-24.0.918-blue" alt="version 24.0.918 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/mutrig_frame_deassembly"><strong>MuTRiG Frame Deassembly</strong></a></td>
-      <td>Parses MuTRiG frames into header and hit payloads and flags individual hit errors and frame CRC errors. <img src="https://img.shields.io/badge/version-26.0.1.0415-blue" alt="version 26.0.1.0415 badge" /></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/mutrig_frame_deassembly/blob/8af676e18d86f87c34ba98de33f120e04e44bfa3/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="DV signoff available" /></a></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/mutrig_frame_deassembly/blob/8af676e18d86f87c34ba98de33f120e04e44bfa3/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="SYN signoff available" /></a></td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/CAM"><strong>CAM (Content Addressable Memory)</strong></a></td>
-      <td>Primitive content-addressable memory core. Use as a building block for caches, correlators and address decoders. <img src="https://img.shields.io/badge/version-17.0.2-blue" alt="version 17.0.2 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/mutrig_timestamp_processor"><strong>MuTRiG Timestamp Processor</strong></a></td>
-      <td>Tracks MuTRiG timestamp overflow and maps MuTRiG-local timestamps to global timestamps. <img src="https://img.shields.io/badge/version-26.0.1.0415-blue" alt="version 26.0.1.0415 badge" /></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/mutrig_timestamp_processor/blob/98691c1d1b43420c8fcd0a063271c39ff26d2af2/tb/DV_REPORT.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="DV signoff available" /></a></td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/histogram_statistics"><strong>Histogram Statistics</strong></a></td>
-      <td>Builds histograms from a selected data stream using SAR bin calculation and DP-RAM counters. <img src="https://img.shields.io/badge/version-26.1.1.0416-blue" alt="version 26.1.1.0416 badge" /></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/histogram_statistics/blob/5a39f5159c4b1fcb506c1bcd4bf28e497b0b9600/VERIFICATION_SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="DV signoff available" /></a></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/histogram_statistics/blob/5a39f5159c4b1fcb506c1bcd4bf28e497b0b9600/SYNTHESIS_SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="SYN signoff available" /></a></td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/mutrig_controller"><strong>MuTRiG Controller</strong></a></td>
-      <td>SPI master for configuring MuTRiG ASICs. Automatically scans T- and E-thresholds and stores results locally. <img src="https://img.shields.io/badge/version-24.0.817-blue" alt="version 24.0.817 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/charge_injection"><strong>Charge Injection (Analog Pulser)</strong></a></td>
-      <td>Generates calibration pulses with arbitrary frequency and duration for TDC injection tests. <img src="https://img.shields.io/badge/version-4.0.5-blue" alt="version 4.0.5 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/charge_injection"><strong>Charge Injection (MuTRiG Injector)</strong></a></td>
-      <td>Produces digital and analog pulses to verify MuTRiG operation when used with DAB boards. <img src="https://img.shields.io/badge/version-26.0.0326-blue" alt="version 26.0.0326 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/alt_temp_sense_controller"><strong>Altera Temperature Sensor Controller</strong></a></td>
-      <td>Wraps the on-chip <code>alt_temp_sense</code> IP on 28 nm devices and stores the last temperature result. <img src="https://img.shields.io/badge/version-1.1-blue" alt="version 1.1 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/high_performance_counter_array"><strong>High Performance Counter Array</strong></a></td>
-      <td>Parallel counters supporting concurrent inputs with Avalon-MM readout. Features synchronous clear and reset. <img src="https://img.shields.io/badge/version-1.4.1-blue" alt="version 1.4.1 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/mutrig_channel_counter_fabric"><strong>MuTRiG Channel Counter Fabric</strong></a></td>
-      <td>Connects hit type 0 from the frame deassembly IP to the counter array and decodes channel IDs into one-hot update signals. <img src="https://img.shields.io/badge/version-1.0.12-blue" alt="version 1.0.12 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/lvds_error_counter_fabric"><strong>LVDS Error Counter Fabric</strong></a></td>
-      <td>Accumulates parity and decode error counts from the LVDS receiver sideband. <img src="https://img.shields.io/badge/version-1.0.5-blue" alt="version 1.0.5 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/firefly_xcvr_i2c_master"><strong>Firefly Transceiver I2C Master</strong></a></td>
-      <td>Interfaces with the Samtec Firefly optical transceiver module via I2C and periodically reads temperature and RX power. <img src="https://img.shields.io/badge/version-26.0.0330-blue" alt="version 26.0.0330 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/ip_8b10b_decoder"><strong>IP 8b/10b Decoder</strong></a></td>
-      <td>Standard 8b/10b decoder for parallel LVDS <code>rxout</code> data and decoding/parity error derivation. <img src="https://img.shields.io/badge/version-1.3.1-blue" alt="version 1.3.1 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/mutrig_reset_controller"><strong>MuTRiG Reset Controller</strong></a></td>
-      <td>Issues reset pulses for the MuTRiG based on run-state changes and provides programmable phase shift via <code>alt_pll_reconfig</code>. <img src="https://img.shields.io/badge/version-1.0.8-blue" alt="version 1.0.8 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/ring-buffer_cam"><strong>Ring-buffer CAM</strong></a></td>
-      <td>Circular buffer variant of CAM with push-to-stack write semantics and cache-like read-through. Used to build the hit stack. <img src="https://img.shields.io/badge/version-26.1.4.0402-blue" alt="version 26.1.4.0402 badge" /></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/ring-buffer_cam/blob/3c512dd6fd8c2e287dd77fecef9e07f30165d0a3/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="DV signoff available" /></a></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/ring-buffer_cam/blob/3c512dd6fd8c2e287dd77fecef9e07f30165d0a3/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="SYN signoff available" /></a></td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/feb_frame_assembly"><strong>Frontend-Board Frame Assembly</strong></a></td>
-      <td>Assembles time-interleaved subframes from the ring-buffer CAM into Mu3e-standard data frames and schedules packet transmission. <img src="https://img.shields.io/badge/version-26.0.0328-blue" alt="version 26.0.0328 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/feb_max10_comm"><strong>FEB MAX10 Communication Bridge</strong></a></td>
-      <td>FEB-side Arria V bridge that stages one flash page, crosses it into the MAX10 link domain, and preserves the downstream FEBSPI programming contract. <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="version 0.1.0 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/mu3e_lvds_controller"><strong>Mu3e LVDS Controller</strong></a></td>
-      <td>Provides high-speed LVDS links to the MuPix sensors using FPGA vendor IP, including 28 nm LVDS RX and Pro variants. <img src="https://img.shields.io/badge/version-25.1.0630-blue" alt="version 25.1.0630 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/mupix_inbound"><strong>MuPix Inbound</strong></a></td>
-      <td>Deserializes data from MuPix chips, decodes and buffers hits. <img src="https://img.shields.io/badge/status-Prototype-lightgrey" alt="Prototype badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/packet_scheduler"><strong>Packet Scheduler</strong></a></td>
-      <td>Orders packets via an interface adapter and ordered-priority queues to achieve deterministic DAQ multiplexing. <img src="https://img.shields.io/badge/version-26.3.10.0414-blue" alt="version 26.3.10.0414 badge" /></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/packet_scheduler/blob/bf59a0dc13b90c8d66e0beacf07a4698d332c471/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="DV signoff available" /></a></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/packet_scheduler/blob/bf59a0dc13b90c8d66e0beacf07a4698d332c471/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="SYN signoff available" /></a></td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/emulator_mutrig"><strong>MuTRiG Emulator</strong></a></td>
-      <td>FPGA emulator of MuTRiG 3 ASIC digital output. Produces 8b/1k frames bit-compatible with real ASIC output for FPGA-internal verification. <img src="https://img.shields.io/badge/version-26.0.3.0416-blue" alt="version 26.0.3.0416 badge" /></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/emulator_mutrig/blob/e763a56020202d942338aca538fb752a8994b4e8/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="DV signoff available" /></a></td>
-      <td align="center"><a href="https://github.com/yifeng-ethz/emulator_mutrig/blob/e763a56020202d942338aca538fb752a8994b4e8/doc/SIGNOFF.md"><img src="https://img.shields.io/badge/-%E2%9C%85-brightgreen?style=flat-square" alt="SYN signoff available" /></a></td>
-    </tr>
-    <tr>
-      <td><a href="./mutrig_lane_source_mux/"><strong>MuTRiG Lane Source Mux</strong></a></td>
-      <td>Static per-lane selector that switches FEB datapath inputs between real MuTRiG decode streams and emulator streams during DAQ bring-up. <img src="https://img.shields.io/badge/version-1.0-blue" alt="version 1.0 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-    <tr>
-      <td><a href="https://github.com/yifeng-ethz/run-control_mgmt"><strong>Run-Control Management</strong></a></td>
-      <td>Manages run-state transitions for Mu3e subsystems and issues control signals. <img src="https://img.shields.io/badge/version-26.1.0.0413-blue" alt="version 26.1.0.0413 badge" /></td>
-      <td align="center">—</td>
-      <td align="center">—</td>
-    </tr>
-  </tbody>
-</table>
+| IP Name | Description | Version / Status | Signoff |
+|---|---|---|---|
+| [**Slow‑Control Hub**](https://github.com/yifeng-ethz/slow-control_hub) | Converts Mu3e slow‑control packets into Avalon Memory‑Mapped transactions and handles burst count, address and response timing. | <img src="https://img.shields.io/badge/version-26.6.9.0414-blue" alt="version 26.6.9.0414 badge" width="200" /> | [DV](slow-control_hub/doc/VERIFICATION_SIGNOFF.md) / [Syn](slow-control_hub/doc/SYNTHESIS_SIGNOFF.md) |
+| [**Onewire Temperature Sensor Controller**](https://github.com/yifeng-ethz/onewire_temp_sense) | Periodically polls 1‑Wire temperature sensors; implements reset, presence detect and bit‑level timing. | <img src="https://img.shields.io/badge/version-24.0.918-blue" alt="version 24.0.918 badge" width="200" /> | — |
+| [**MuTRiG Frame Deassembly**](https://github.com/yifeng-ethz/mutrig_frame_deassembly) | Parses MuTRiG frames into header and hit payloads and flags individual hit errors and frame CRC errors. | <img src="https://img.shields.io/badge/version-26.0.1.0415-blue" alt="version 26.0.1.0415 badge" width="200" /> | [DV](mutrig_frame_deassembly/tb/DV_REPORT.md) |
+| [**CAM (Content Addressable Memory)**](https://github.com/yifeng-ethz/CAM) | Primitive content‑addressable memory core.  Use as a building block for caches, correlators and address decoders. | <img src="https://img.shields.io/badge/version-17.0.2-blue" alt="version 17.0.2 badge" width="200" /> | — |
+| [**MuTRiG Timestamp Processor**](https://github.com/yifeng-ethz/mutrig_timestamp_processor) | Tracks MuTRiG timestamp overflow and maps MuTRiG‑local timestamps to global timestamps. | <img src="https://img.shields.io/badge/version-26.0.1.0415-blue" alt="version 26.0.1.0415 badge" width="200" /> | [DV](mutrig_timestamp_processor/tb/DV_REPORT.md) |
+| [**Histogram Statistics**](https://github.com/yifeng-ethz/histogram_statistics) | Builds histograms from a selected data stream using SAR bin calculation and DP‑RAM counters. | <img src="https://img.shields.io/badge/version-26.1.1.0416-blue" alt="version 26.1.1.0416 badge" width="200" /> | [DV](histogram_statistics/VERIFICATION_SIGNOFF.md) / [Syn](histogram_statistics/SYNTHESIS_SIGNOFF.md) |
+| [**MuTRiG Controller**](https://github.com/yifeng-ethz/mutrig_controller) | SPI master for configuring MuTRiG ASICs.  Automatically scans T‑ and E‑thresholds and stores results locally. | <img src="https://img.shields.io/badge/version-24.0.817-blue" alt="version 24.0.817 badge" width="200" /> | — |
+| [**Charge Injection (Analog Pulser)**](https://github.com/yifeng-ethz/charge_injection) | Generates calibration pulses with arbitrary frequency and duration for TDC injection tests. | <img src="https://img.shields.io/badge/version-4.0.5-blue" alt="version 4.0.5 badge" width="200" /> | — |
+| [**Charge Injection (MuTRiG Injector)**](https://github.com/yifeng-ethz/charge_injection) | Produces digital and analog pulses to verify MuTRiG operation when used with DAB boards. | <img src="https://img.shields.io/badge/version-26.0.0326-blue" alt="version 26.0.0326 badge" width="200" /> | — |
+| [**Altera Temperature Sensor Controller**](https://github.com/yifeng-ethz/alt_temp_sense_controller) | Wraps the on‑chip `alt_temp_sense` IP on 28 nm devices and stores the last temperature result. | <img src="https://img.shields.io/badge/version-1.1-blue" alt="version 1.1 badge" width="200" /> | — |
+| [**High Performance Counter Array**](https://github.com/yifeng-ethz/high_performance_counter_array) | Parallel counters supporting concurrent inputs with Avalon‑MM readout.  Features synchronous clear and reset. | <img src="https://img.shields.io/badge/version-1.4.1-blue" alt="version 1.4.1 badge" width="200" /> | — |
+| [**MuTRiG Channel Counter Fabric**](https://github.com/yifeng-ethz/mutrig_channel_counter_fabric) | Connects *hit type 0* from the frame deassembly IP to the counter array.  Decodes channel IDs into one‑hot update signals. | <img src="https://img.shields.io/badge/version-1.0.12-blue" alt="version 1.0.12 badge" width="200" /> | — |
+| [**LVDS Error Counter Fabric**](https://github.com/yifeng-ethz/lvds_error_counter_fabric) | Accumulates parity and decode error counts from the LVDS receiver sideband. | <img src="https://img.shields.io/badge/version-1.0.5-blue" alt="version 1.0.5 badge" width="200" /> | — |
+| [**Firefly Transceiver I2C Master**](https://github.com/yifeng-ethz/firefly_xcvr_i2c_master) | Interfaces with the Samtec Firefly optical transceiver module via I2C.  Periodically reads temperature and RX power and can be halted. | <img src="https://img.shields.io/badge/version-26.0.0330-blue" alt="version 26.0.0330 badge" width="200" /> | — |
+| [**IP 8b/10b Decoder**](https://github.com/yifeng-ethz/ip_8b10b_decoder) | Standard 8b/10b decoder for parallel LVDS `rxout` data.  Derives parity and decoding errors. | <img src="https://img.shields.io/badge/version-1.3.1-blue" alt="version 1.3.1 badge" width="200" /> | — |
+| [**MuTRiG Reset Controller**](https://github.com/yifeng-ethz/mutrig_reset_controller) | Issues reset pulses for the MuTRiG based on run‑state changes.  Provides programmable phase shift via `alt_pll_reconfig`. | <img src="https://img.shields.io/badge/version-1.0.8-blue" alt="version 1.0.8 badge" width="200" /> | — |
+| [**Ring‑buffer CAM**](https://github.com/yifeng-ethz/ring-buffer_cam) | Circular buffer variant of CAM with push‑to‑stack write semantics and cache‑like read‑through.  Used to build the hit stack. | <img src="https://img.shields.io/badge/version-26.1.4.0402-blue" alt="version 26.1.4.0402 badge" width="200" /> | [Standalone](ring-buffer_cam/doc/SIGNOFF.md) |
+| [**Frontend‑Board Frame Assembly**](https://github.com/yifeng-ethz/feb_frame_assembly) | Assembles time‑interleaved subframes from the ring‑buffer CAM into Mu3e‑standard data frames and schedules packet transmission. | <img src="https://img.shields.io/badge/version-26.0.0328-blue" alt="version 26.0.0328 badge" width="200" /> | — |
+| [**FEB MAX10 Communication Bridge**](https://github.com/yifeng-ethz/feb_max10_comm) | FEB-side Arria V bridge that stages one flash page, crosses it into the MAX10 link domain, and preserves the downstream FEBSPI programming contract. | <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="version 0.1.0 badge" width="200" /> | — |
+| [**Mu3e LVDS Controller**](https://github.com/yifeng-ethz/mu3e_lvds_controller) | Provides high‑speed LVDS links to the MuPix sensors using FPGA vendor IP.  Includes 28 nm LVDS RX and Pro variants. | <img src="https://img.shields.io/badge/version-25.1.0630-blue" alt="version 25.1.0630 badge" width="200" /> | — |
+| [**MuPix Inbound**](https://github.com/yifeng-ethz/mupix_inbound) | Deserializes data from MuPix chips, decodes and buffers hits. | <img src="https://img.shields.io/badge/status-Prototype-lightgrey" alt="Prototype badge" width="200" /> | — |
+| [**Packet Scheduler**](https://github.com/yifeng-ethz/packet_scheduler) | Orders packets via an interface adapter and ordered-priority queues to achieve deterministic DAQ multiplexing. | <img src="https://img.shields.io/badge/version-26.3.10.0414-blue" alt="version 26.3.10.0414 badge" width="200" /> | [DV](packet_scheduler/doc/VERIFICATION_SIGNOFF.md) |
+| [**MuTRiG Emulator**](https://github.com/yifeng-ethz/emulator_mutrig) | FPGA emulator of MuTRiG 3 ASIC digital output. Produces 8b/1k frames bit‑compatible with real ASIC output for FPGA‑internal verification. | <img src="https://img.shields.io/badge/version-26.0.3.0416-blue" alt="version 26.0.3.0416 badge" width="200" /> | [Standalone](emulator_mutrig/SIGNOFF.md) |
+| [**MuTRiG Lane Source Mux**](./misc/mutrig_lane_source_mux/) | Static per-lane selector that switches FEB datapath inputs between real MuTRiG decode streams and emulator streams during DAQ bring-up. | <img src="https://img.shields.io/badge/version-1.0-blue" alt="version 1.0 badge" width="200" /> | — |
+| [**Run‑Control Management**](https://github.com/yifeng-ethz/run-control_mgmt) | Manages run‑state transitions for Mu3e subsystems and issues control signals. | <img src="https://img.shields.io/badge/version-26.1.0.0413-blue" alt="version 26.1.0.0413 badge" width="200" /> | — |
 
-`Signoff` links are checked one by one against the current checked-in file in each IP. Because many entries in this catalog are git submodules, the landing page uses absolute GitHub blob URLs pinned to the current submodule commit so the rendered web page resolves correctly. When an IP publishes a master `SIGNOFF.md`, both `DV` and `SYN` intentionally point to that master dashboard. `—` means no synthesis or verification signoff document is currently indexed from this top-level catalog.
+`Signoff` links point to checked-in DV reports, standalone signoff bundles, or synthesis signoff notes. `—` means no signoff document is currently indexed from this top-level catalog.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -228,13 +90,33 @@ The firmware stack orchestrated by this repository spans the complete readout ch
 
 ---
 
+## Active FEB SciFi Bring-Up
+
+The active real-MuTRiG firmware build is
+[`firmware_builds/systems/system_20260427_testplanphase5/`](firmware_builds/systems/system_20260427_testplanphase5/).
+Before live hardware work, read the centralized references:
+
+- [`firmware_builds/doc/SETUP.md`](firmware_builds/doc/SETUP.md) for SWB/FEB programming, SMB3/SMB5 mapping, and board-test tool flow.
+- [`firmware_builds/doc/CONTRACT.md`](firmware_builds/doc/CONTRACT.md) for AVST payload, packet, and error-sideband policy across the Phase-5 datapath.
+- [`firmware_builds/doc/MUTRIG.md`](firmware_builds/doc/MUTRIG.md) for MuTRiG configuration files, TDC injection, analog mode, and PLL-lock interpretation.
+- [`firmware_builds/doc/MATH.md`](firmware_builds/doc/MATH.md) for the Phase-5 latency/rate model sketch and histogram queue-depth gate.
+- [`firmware_builds/doc/TEST_PLAN_PHASE5.md`](firmware_builds/doc/TEST_PLAN_PHASE5.md) for the Phase-5 case catalog.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+
 ## Directory Structure
 
 ```text
 mu3e-ip-cores/
 ├── CAM/                        # Content addressable memory core
 ├── alt_temp_sense_controller/  # On‑chip temperature diode wrapper
+├── board_projects/             # Full board-level Quartus projects and generated build areas
+├── board_test_system/          # Legacy and live board-test inputs that predate the system folder split
 ├── charge_injection/           # Analog pulser and MuTRiG injector variants
+├── docs/                       # Repository-level reference material, archives, and slides
+├── emulator_mutrig/            # MuTRiG 3 ASIC emulator (8b/1k frame generator)
 ├── feb_frame_assembly/         # Frontend-board frame assembly
 ├── feb_max10_comm/             # FEB-side MAX10 flash programming bridge
 ├── firefly_xcvr_i2c_master/    # I2C master for Samtec Firefly transceiver
@@ -242,25 +124,29 @@ mu3e-ip-cores/
 ├── histogram_statistics/
 ├── ip_8b10b_decoder/
 ├── lvds_error_counter_fabric/
-├── emulator_mutrig/            # MuTRiG 3 ASIC emulator (8b/1k frame generator)
 ├── misc/                       # Local debug/helper IPs kept outside submodules
+│   ├── altera_lvds/            # Vendor LVDS wrapper experiments and compatibility helpers
+│   └── mutrig_lane_source_mux/ # Static selector between real and emulated MuTRiG lanes
 ├── mu3e_lvds_controller/
 ├── mupix_inbound/
 ├── mutrig_channel_counter_fabric/
 ├── mutrig_controller/
-├── mutrig_lane_source_mux/     # Static selector between real and emulated MuTRiG lanes
-├── mutrig_frame_assembly/
 ├── mutrig_frame_deassembly/
 ├── mutrig_reset_controller/
 ├── mutrig_timestamp_processor/
 ├── onewire_temp_sense/         # 1-Wire controllers plus FEB v1 bridge helper
 ├── packet_scheduler/
-├── quartus_system/             # Qsys wrapper, portable IP catalogs, and catalog scripts
+├── firmware_builds/            # Qsys wrapper, portable IP catalogs, and catalog scripts
 ├── ring-buffer_cam/
 ├── run-control_mgmt/
 ├── scripts/                    # Shared DV/report automation used across IPs
 ├── slow-control_hub/
-└── system_console_toolkit/     # Shared System Console toolkits and board bring-up flows
+├── toolkits/                   # Shared System Console toolkits plus infra helpers
+│   ├── fe_scifi/               # FE SciFi System Console runtime and board bring-up toolkits
+│   └── infra/                  # CMSIS-SVD and shared board bring-up metadata helpers
+├── templates/                  # Shared document and code templates
+├── tools/                      # Analysis, visualization, and local developer tools
+└── trash_bin/                  # Deprecated plans, debug dumps, and unclassified old work
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -289,12 +175,12 @@ mu3e-ip-cores/
    ```
 3. (optional) Regenerate the normalized Platform Designer catalogs used by Quartus and downstream tooling.
    ```bash
-   ./quartus_system/regenerate_ipx_catalog.sh
+   ./firmware_builds/systems/system_20260427_testplanphase5/script/regenerate_ipx_catalog.sh
    ```
-   This refreshes the canonical `quartus_system/components.ipx` catalog and the identical compatibility alias `quartus_system/mu3e_ip_cores.ipx`.
+   This refreshes the canonical active-system catalog under `firmware_builds/systems/system_20260427_testplanphase5/syn/`.
 4. Add the catalog directory to Quartus / Platform Designer search paths.
    ```bash
-   export QSYS_IP_FILE_PATH=${QSYS_IP_FILE_PATH:+$QSYS_IP_FILE_PATH:}$MU3E_IP_CORES_ROOT/quartus_system
+   export QSYS_IP_FILE_PATH=${QSYS_IP_FILE_PATH:+$QSYS_IP_FILE_PATH:}$MU3E_IP_CORES_ROOT/firmware_builds/systems/system_20260427_testplanphase5/syn
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -306,7 +192,7 @@ mu3e-ip-cores/
 Detailed integration instructions are provided in each core’s subdirectory.  In general:
 - GUI:
   1. Open Platform Designer (formerly Qsys) in Quartus.
-  2. Add `quartus_system/` as an **IP search path** so Platform Designer picks up the normalized Mu3e catalog.
+  2. Add `firmware_builds/systems/system_20260427_testplanphase5/syn/` as an **IP search path** so Platform Designer picks up the normalized Mu3e catalog.
 - CLI:
   1. Configure parameters (e.g., burst widths, channel counts) as required for your design.
     ```bash
@@ -314,7 +200,7 @@ Detailed integration instructions are provided in each core’s subdirectory.  I
     ```
   2. Export generated system top RTL file and connect the IP into your top‑level design or testbench.
     ```bash
-    qsys-generate <path_to_your_system>.qsys --search-path="$MU3E_IP_CORES_ROOT/quartus_system,$" --synthesis=VHDL --output-directory=./generated
+    qsys-generate <path_to_your_system>.qsys --search-path="$MU3E_IP_CORES_ROOT/firmware_builds/systems/system_20260427_testplanphase5/syn,$" --synthesis=VHDL --output-directory=./generated
     ```
 
     

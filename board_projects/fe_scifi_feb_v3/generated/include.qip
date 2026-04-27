@@ -1,0 +1,13 @@
+#
+# Local generated helper-IP bundle for fe_block_v2 and the bring-up image.
+#
+
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "components_pkg.vhd"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "legacy_fe/ip/clk_ctrl_single/synthesis/clk_ctrl_single.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "legacy_fe/a5/trigPLL.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "legacy_fe/a5/native_reset_tx.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "legacy_fe/a5/ip_altera_xcvr_reset_control.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "legacy_fe/a5/ip_altera_xcvr_native_av.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "legacy_fe/a5/ip_alt_xcvr_reconfig.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "legacy_fe/a5/fastlink_small.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "software/app/mem_init/meminit.qip"]

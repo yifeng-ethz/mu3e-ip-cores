@@ -1,0 +1,621 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy
+ date="2026.04.17.18:49:34"
+ outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/">
+ <perimeter>
+  <parameter
+     name="AUTO_GENERATION_ID"
+     type="Integer"
+     defaultValue="0"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_UNIQUE_ID"
+     type="String"
+     defaultValue=""
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_FAMILY"
+     type="String"
+     defaultValue="Arria V"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE"
+     type="String"
+     defaultValue="5AGXBA7D4F31C5"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_SPEEDGRADE"
+     type="String"
+     defaultValue="5_H4"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_CLOCK_RATE"
+     type="Long"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_CLOCK_DOMAIN"
+     type="Integer"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_RESET_DOMAIN"
+     type="Integer"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <interface name="backpressure_fifo_csr" kind="avalon" start="0">
+   <property name="addressAlignment" value="DYNAMIC" />
+   <property name="addressGroup" value="0" />
+   <property name="addressSpan" value="16" />
+   <property name="addressUnits" value="WORDS" />
+   <property name="alwaysBurstMaxBurst" value="false" />
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="bitsPerSymbol" value="8" />
+   <property name="bridgedAddressOffset" value="0" />
+   <property name="bridgesToMaster" value="" />
+   <property name="burstOnBurstBoundariesOnly" value="false" />
+   <property name="burstcountUnits" value="WORDS" />
+   <property name="constantBurstBehavior" value="false" />
+   <property name="explicitAddressSpan" value="0" />
+   <property name="holdTime" value="0" />
+   <property name="interleaveBursts" value="false" />
+   <property name="isBigEndian" value="false" />
+   <property name="isFlash" value="false" />
+   <property name="isMemoryDevice" value="false" />
+   <property name="isNonVolatileStorage" value="false" />
+   <property name="linewrapBursts" value="false" />
+   <property name="maximumPendingReadTransactions" value="0" />
+   <property name="maximumPendingWriteTransactions" value="0" />
+   <property name="minimumUninterruptedRunLength" value="1" />
+   <property name="printableDevice" value="false" />
+   <property name="readLatency" value="1" />
+   <property name="readWaitStates" value="0" />
+   <property name="readWaitTime" value="0" />
+   <property name="registerIncomingSignals" value="false" />
+   <property name="registerOutgoingSignals" value="false" />
+   <property name="setupTime" value="0" />
+   <property name="timingUnits" value="Cycles" />
+   <property name="transparentBridge" value="false" />
+   <property name="wellBehavedWaitrequest" value="false" />
+   <property name="writeLatency" value="0" />
+   <property name="writeWaitStates" value="0" />
+   <property name="writeWaitTime" value="0" />
+   <port
+       name="backpressure_fifo_csr_address"
+       direction="input"
+       role="address"
+       width="2" />
+   <port
+       name="backpressure_fifo_csr_read"
+       direction="input"
+       role="read"
+       width="1" />
+   <port
+       name="backpressure_fifo_csr_write"
+       direction="input"
+       role="write"
+       width="1" />
+   <port
+       name="backpressure_fifo_csr_readdata"
+       direction="output"
+       role="readdata"
+       width="32" />
+   <port
+       name="backpressure_fifo_csr_writedata"
+       direction="input"
+       role="writedata"
+       width="32" />
+  </interface>
+  <interface name="clk" kind="clock" start="0">
+   <property name="clockRate" value="125000000" />
+   <property name="externallyDriven" value="false" />
+   <property name="ptfSchematicName" value="" />
+   <port name="clk_clk" direction="input" role="clk" width="1" />
+  </interface>
+  <interface name="csr" kind="avalon" start="0">
+   <property name="addressAlignment" value="DYNAMIC" />
+   <property name="addressGroup" value="0" />
+   <property name="addressSpan" value="16" />
+   <property name="addressUnits" value="WORDS" />
+   <property name="alwaysBurstMaxBurst" value="false" />
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="bitsPerSymbol" value="8" />
+   <property name="bridgedAddressOffset" value="0" />
+   <property name="bridgesToMaster" value="" />
+   <property name="burstOnBurstBoundariesOnly" value="false" />
+   <property name="burstcountUnits" value="WORDS" />
+   <property name="constantBurstBehavior" value="false" />
+   <property name="explicitAddressSpan" value="0" />
+   <property name="holdTime" value="0" />
+   <property name="interleaveBursts" value="false" />
+   <property name="isBigEndian" value="false" />
+   <property name="isFlash" value="false" />
+   <property name="isMemoryDevice" value="false" />
+   <property name="isNonVolatileStorage" value="false" />
+   <property name="linewrapBursts" value="false" />
+   <property name="maximumPendingReadTransactions" value="0" />
+   <property name="maximumPendingWriteTransactions" value="0" />
+   <property name="minimumUninterruptedRunLength" value="1" />
+   <property name="printableDevice" value="false" />
+   <property name="readLatency" value="1" />
+   <property name="readWaitStates" value="1" />
+   <property name="readWaitTime" value="1" />
+   <property name="registerIncomingSignals" value="false" />
+   <property name="registerOutgoingSignals" value="false" />
+   <property name="setupTime" value="0" />
+   <property name="timingUnits" value="Cycles" />
+   <property name="transparentBridge" value="false" />
+   <property name="wellBehavedWaitrequest" value="false" />
+   <property name="writeLatency" value="0" />
+   <property name="writeWaitStates" value="0" />
+   <property name="writeWaitTime" value="0" />
+   <port name="csr_read" direction="input" role="read" width="1" />
+   <port name="csr_readdata" direction="output" role="readdata" width="32" />
+   <port
+       name="csr_waitrequest"
+       direction="output"
+       role="waitrequest"
+       width="1" />
+   <port name="csr_write" direction="input" role="write" width="1" />
+   <port name="csr_writedata" direction="input" role="writedata" width="32" />
+   <port name="csr_address" direction="input" role="address" width="2" />
+  </interface>
+  <interface name="decoded_din" kind="avalon_streaming" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="9" />
+   <property name="emptyWithinPacket" value="false" />
+   <property
+       name="errorDescriptor"
+       value="loss_sync_pattern,parity_error,decode_error" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="15" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="decoded_din_data" direction="input" role="data" width="9" />
+   <port name="decoded_din_valid" direction="input" role="valid" width="1" />
+   <port name="decoded_din_error" direction="input" role="error" width="3" />
+   <port name="decoded_din_channel" direction="input" role="channel" width="4" />
+  </interface>
+  <interface name="headerinfo" kind="avalon_streaming" start="1">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="42" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="15" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="headerinfo_data" direction="output" role="data" width="42" />
+   <port name="headerinfo_valid" direction="output" role="valid" width="1" />
+   <port name="headerinfo_channel" direction="output" role="channel" width="4" />
+  </interface>
+  <interface name="hit_type0_out" kind="avalon_streaming" start="1">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="45" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="15" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="hit_type0_out_data" direction="output" role="data" width="45" />
+   <port name="hit_type0_out_valid" direction="output" role="valid" width="1" />
+   <port name="hit_type0_out_ready" direction="input" role="ready" width="1" />
+   <port
+       name="hit_type0_out_startofpacket"
+       direction="output"
+       role="startofpacket"
+       width="1" />
+   <port
+       name="hit_type0_out_endofpacket"
+       direction="output"
+       role="endofpacket"
+       width="1" />
+   <port name="hit_type0_out_error" direction="output" role="error" width="3" />
+   <port
+       name="hit_type0_out_channel"
+       direction="output"
+       role="channel"
+       width="4" />
+  </interface>
+  <interface name="reset" kind="reset" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="synchronousEdges" value="DEASSERT" />
+   <port name="reset_reset_n" direction="input" role="reset_n" width="1" />
+  </interface>
+  <interface name="run_ctrl" kind="avalon_streaming" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="9" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="0" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="run_ctrl_data" direction="input" role="data" width="9" />
+   <port name="run_ctrl_valid" direction="input" role="valid" width="1" />
+   <port name="run_ctrl_ready" direction="output" role="ready" width="1" />
+  </interface>
+ </perimeter>
+ <entity
+   path=""
+   parameterizationKey="mutrig_datapath_system_v3:1.0:AUTO_CLK_CLOCK_DOMAIN=-1,AUTO_CLK_CLOCK_RATE=-1,AUTO_CLK_RESET_DOMAIN=-1,AUTO_DEVICE=5AGXBA7D4F31C5,AUTO_DEVICE_FAMILY=Arria V,AUTO_DEVICE_SPEEDGRADE=5_H4,AUTO_GENERATION_ID=1776444573,AUTO_UNIQUE_ID=(altera_avalon_sc_fifo:18.1:BITS_PER_SYMBOL=45,CHANNEL_WIDTH=4,EMPTY_LATENCY=3,ENABLE_EXPLICIT_MAXCHANNEL=true,ERROR_WIDTH=3,EXPLICIT_MAXCHANNEL=15,FIFO_DEPTH=128,SYMBOLS_PER_BEAT=1,USE_ALMOST_EMPTY_IF=1,USE_ALMOST_FULL_IF=0,USE_FILL_LEVEL=1,USE_MEMORY_BLOCKS=1,USE_PACKETS=1,USE_STORE_FORWARD=0)(mutrig_frame_deassembly:26.0.6.417:BUILD=417,CHANNEL_WIDTH=4,CSR_ADDR_WIDTH=2,DEBUG_LV=0,GIT_STAMP_OVERRIDE=false,INSTANCE_ID=0,IP_UID=1179804502,MODE_HALT=0,VERSION_DATE=20260417,VERSION_GIT=59543297,VERSION_MAJOR=26,VERSION_MINOR=0,VERSION_PATCH=6)(clock_source:18.1:clockFrequency=125000000,clockFrequencyKnown=true,inputClockFrequency=0,resetSynchronousEdges=DEASSERT)(clock:18.1:)(clock:18.1:)(reset:18.1:)(reset:18.1:)(avalon_streaming:18.1:)"
+   instancePathKey="mutrig_datapath_system_v3"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   name="mutrig_datapath_system_v3">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_GENERATION_ID" value="1776444573" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_UNIQUE_ID" value="" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/mutrig_datapath_system_v3.vhd"
+       type="VHDL" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_avalon_sc_fifo.v"
+       type="VERILOG"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/frame_rcv_ip.vhd"
+       type="VHDL"
+       attributes="TOP_LEVEL_FILE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/crc16_calc.vhd"
+       type="VHDL"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter.v"
+       type="VERILOG" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
+       type="SYSTEM_VERILOG"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.v"
+       type="VERILOG"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_synchronizer.v"
+       type="VERILOG"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.sdc"
+       type="SDC"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3.qsys" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/mutrig_frame_deassembly_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_adapter/altera_avalon_st_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+  </childSourceFiles>
+  <messages>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 0 starting:mutrig_datapath_system_v3 "mutrig_datapath_system_v3"</message>
+   <message level="Progress" culprit="min"></message>
+   <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Debug">Transform: CustomInstructionTransform</message>
+   <message level="Debug">No custom instruction connections, skipping transform </message>
+   <message level="Debug" culprit="merlin_custom_instruction_transform"><![CDATA[After transform: <b>3</b> modules, <b>5</b> connections]]></message>
+   <message level="Debug">Transform: MMTransform</message>
+   <message level="Debug">Transform: InterruptMapperTransform</message>
+   <message level="Debug">Transform: InterruptSyncTransform</message>
+   <message level="Debug">Transform: InterruptFanoutTransform</message>
+   <message level="Debug">Transform: AvalonStreamingTransform</message>
+   <message level="Progress" culprit="min"></message>
+   <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Info" culprit="avalon_st_adapter">Inserting timing_adapter: timing_adapter_0</message>
+   <message level="Debug" culprit="avalon_st_adapter.clk_bridge_0">Timing: ELA:1/0.000s</message>
+   <message level="Debug" culprit="avalon_st_adapter.rst_bridge_0">Timing: ELA:2/0.000s/0.000s</message>
+   <message level="Debug" culprit="avalon_st_adapter.timing_adapter_0">Timing: ELA:1/0.004s</message>
+   <message level="Debug" culprit="avalon_st_adapter">Timing: COM:3/0.023s/0.035s</message>
+   <message
+       level="Debug"
+       culprit="com_altera_sopcmodel_transforms_avalonst_AvalonStreamingTransform"><![CDATA[After transform: <b>4</b> modules, <b>8</b> connections]]></message>
+   <message level="Debug">Transform: ResetAdaptation</message>
+   <message level="Progress" culprit="min"></message>
+   <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Debug" culprit="reset_adaptation_transform"><![CDATA[After transform: <b>5</b> modules, <b>10</b> connections]]></message>
+   <message level="Warning" culprit="mutrig_datapath_system_v3">"No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"</message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3"><![CDATA["<b>mutrig_datapath_system_v3</b>" reuses <b>altera_avalon_sc_fifo</b> "<b>submodules/altera_avalon_sc_fifo</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3"><![CDATA["<b>mutrig_datapath_system_v3</b>" reuses <b>mutrig_frame_deassembly</b> "<b>submodules/frame_rcv_ip</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3"><![CDATA["<b>mutrig_datapath_system_v3</b>" reuses <b>altera_avalon_st_adapter</b> "<b>submodules/mutrig_datapath_system_v3_avalon_st_adapter</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3"><![CDATA["<b>mutrig_datapath_system_v3</b>" reuses <b>altera_reset_controller</b> "<b>submodules/altera_reset_controller</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 3 starting:altera_avalon_sc_fifo "submodules/altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="backpressure_fifo"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>altera_avalon_sc_fifo</b> "<b>backpressure_fifo</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 2 starting:mutrig_frame_deassembly "submodules/frame_rcv_ip"</message>
+   <message level="Info" culprit="mutrig_frame_deassembly_0"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>mutrig_frame_deassembly</b> "<b>mutrig_frame_deassembly_0</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 1 starting:altera_avalon_st_adapter "submodules/mutrig_datapath_system_v3_avalon_st_adapter"</message>
+   <message level="Progress" culprit="min"></message>
+   <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Debug">Transform: CustomInstructionTransform</message>
+   <message level="Debug">No custom instruction connections, skipping transform </message>
+   <message level="Debug" culprit="merlin_custom_instruction_transform"><![CDATA[After transform: <b>3</b> modules, <b>3</b> connections]]></message>
+   <message level="Debug">Transform: MMTransform</message>
+   <message level="Debug">Transform: InterruptMapperTransform</message>
+   <message level="Debug">Transform: InterruptSyncTransform</message>
+   <message level="Debug">Transform: InterruptFanoutTransform</message>
+   <message level="Debug">Transform: AvalonStreamingTransform</message>
+   <message level="Debug">Transform: ResetAdaptation</message>
+   <message level="Debug" culprit="avalon_st_adapter"><![CDATA["<b>avalon_st_adapter</b>" reuses <b>timing_adapter</b> "<b>submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0</b>"]]></message>
+   <message level="Info" culprit="avalon_st_adapter"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 0 starting:timing_adapter "submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0"</message>
+   <message level="Info" culprit="timing_adapter_0"><![CDATA["<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 1 starting:altera_reset_controller "submodules/altera_reset_controller"</message>
+   <message level="Info" culprit="rst_controller"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>altera_reset_controller</b> "<b>rst_controller</b>"]]></message>
+  </messages>
+ </entity>
+ <entity
+   path="submodules/"
+   parameterizationKey="altera_avalon_sc_fifo:18.1:BITS_PER_SYMBOL=45,CHANNEL_WIDTH=4,EMPTY_LATENCY=3,ENABLE_EXPLICIT_MAXCHANNEL=true,ERROR_WIDTH=3,EXPLICIT_MAXCHANNEL=15,FIFO_DEPTH=128,SYMBOLS_PER_BEAT=1,USE_ALMOST_EMPTY_IF=1,USE_ALMOST_FULL_IF=0,USE_FILL_LEVEL=1,USE_MEMORY_BLOCKS=1,USE_PACKETS=1,USE_STORE_FORWARD=0"
+   instancePathKey="mutrig_datapath_system_v3:.:backpressure_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="18.1"
+   name="altera_avalon_sc_fifo">
+  <parameter name="EXPLICIT_MAXCHANNEL" value="15" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="true" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_avalon_sc_fifo.v"
+       type="VERILOG"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles/>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator instantiator="mutrig_datapath_system_v3" as="backpressure_fifo" />
+  <messages>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 3 starting:altera_avalon_sc_fifo "submodules/altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="backpressure_fifo"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>altera_avalon_sc_fifo</b> "<b>backpressure_fifo</b>"]]></message>
+  </messages>
+ </entity>
+ <entity
+   path="submodules/"
+   parameterizationKey="mutrig_frame_deassembly:26.0.6.417:BUILD=417,CHANNEL_WIDTH=4,CSR_ADDR_WIDTH=2,DEBUG_LV=0,GIT_STAMP_OVERRIDE=false,INSTANCE_ID=0,IP_UID=1179804502,MODE_HALT=0,VERSION_DATE=20260417,VERSION_GIT=59543297,VERSION_MAJOR=26,VERSION_MINOR=0,VERSION_PATCH=6"
+   instancePathKey="mutrig_datapath_system_v3:.:mutrig_frame_deassembly_0"
+   kind="mutrig_frame_deassembly"
+   version="26.0.6.417"
+   name="frame_rcv_ip">
+  <parameter name="CSR_ADDR_WIDTH" value="2" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="BUILD" value="417" />
+  <parameter name="MODE_HALT" value="0" />
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="VERSION_DATE" value="20260417" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="VERSION_GIT" value="59543297" />
+  <parameter name="VERSION_MINOR" value="0" />
+  <parameter name="DEBUG_LV" value="0" />
+  <parameter name="IP_UID" value="1179804502" />
+  <parameter name="VERSION_PATCH" value="6" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/frame_rcv_ip.vhd"
+       type="VHDL"
+       attributes="TOP_LEVEL_FILE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/crc16_calc.vhd"
+       type="VHDL"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles/>
+  <sourceFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/mutrig_frame_deassembly_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="mutrig_datapath_system_v3"
+     as="mutrig_frame_deassembly_0" />
+  <messages>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 2 starting:mutrig_frame_deassembly "submodules/frame_rcv_ip"</message>
+   <message level="Info" culprit="mutrig_frame_deassembly_0"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>mutrig_frame_deassembly</b> "<b>mutrig_frame_deassembly_0</b>"]]></message>
+  </messages>
+ </entity>
+ <entity
+   path="submodules/"
+   parameterizationKey="altera_avalon_st_adapter:18.1:AUTO_DEVICE=5AGXBA7D4F31C5,AUTO_DEVICE_FAMILY=Arria V,AUTO_DEVICE_SPEEDGRADE=,inBitsPerSymbol=45,inChannelWidth=4,inDataWidth=45,inEmptyWidth=1,inErrorDescriptor=,inErrorWidth=3,inMaxChannel=15,inReadyLatency=0,inUseEmptyPort=0,inUsePackets=1,inUseReady=0,inUseValid=1,outChannelWidth=4,outDataWidth=45,outEmptyWidth=1,outErrorDescriptor=,outErrorWidth=3,outMaxChannel=15,outReadyLatency=0,outUseEmptyPort=0,outUseReady=1,outUseValid=1(altera_clock_bridge:18.1:DERIVED_CLOCK_RATE=0,EXPLICIT_CLOCK_RATE=0,NUM_CLOCK_OUTPUTS=1)(altera_reset_bridge:18.1:ACTIVE_LOW_RESET=0,AUTO_CLK_CLOCK_RATE=0,NUM_RESET_OUTPUTS=1,SYNCHRONOUS_EDGES=deassert,USE_RESET_REQUEST=0)(timing_adapter:18.1:inBitsPerSymbol=45,inChannelWidth=4,inErrorDescriptor=,inErrorWidth=3,inMaxChannel=15,inReadyLatency=0,inSymbolsPerBeat=1,inUseEmpty=false,inUseEmptyPort=NO,inUsePackets=true,inUseReady=false,inUseValid=true,outReadyLatency=0,outUseReady=true,outUseValid=true)(clock:18.1:)(clock:18.1:)(reset:18.1:)"
+   instancePathKey="mutrig_datapath_system_v3:.:avalon_st_adapter"
+   kind="altera_avalon_st_adapter"
+   version="18.1"
+   name="mutrig_datapath_system_v3_avalon_st_adapter">
+  <parameter name="inUseValid" value="1" />
+  <parameter name="inBitsPerSymbol" value="45" />
+  <parameter name="outUseEmptyPort" value="0" />
+  <parameter name="inChannelWidth" value="4" />
+  <parameter name="outErrorWidth" value="3" />
+  <parameter name="outUseValid" value="1" />
+  <parameter name="outMaxChannel" value="15" />
+  <parameter name="inErrorDescriptor" value="" />
+  <parameter name="inUsePackets" value="1" />
+  <parameter name="inErrorWidth" value="3" />
+  <parameter name="inEmptyWidth" value="1" />
+  <parameter name="inUseReady" value="0" />
+  <parameter name="outReadyLatency" value="0" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="outDataWidth" value="45" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="" />
+  <parameter name="inUseEmptyPort" value="0" />
+  <parameter name="outChannelWidth" value="4" />
+  <parameter name="inMaxChannel" value="15" />
+  <parameter name="outUseReady" value="1" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="inDataWidth" value="45" />
+  <parameter name="outErrorDescriptor" value="" />
+  <parameter name="outEmptyWidth" value="1" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter.v"
+       type="VERILOG" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
+       type="SYSTEM_VERILOG"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_adapter/altera_avalon_st_adapter_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+  </childSourceFiles>
+  <instantiator instantiator="mutrig_datapath_system_v3" as="avalon_st_adapter" />
+  <messages>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 1 starting:altera_avalon_st_adapter "submodules/mutrig_datapath_system_v3_avalon_st_adapter"</message>
+   <message level="Progress" culprit="min"></message>
+   <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Debug">Transform: CustomInstructionTransform</message>
+   <message level="Debug">No custom instruction connections, skipping transform </message>
+   <message level="Debug" culprit="merlin_custom_instruction_transform"><![CDATA[After transform: <b>3</b> modules, <b>3</b> connections]]></message>
+   <message level="Debug">Transform: MMTransform</message>
+   <message level="Debug">Transform: InterruptMapperTransform</message>
+   <message level="Debug">Transform: InterruptSyncTransform</message>
+   <message level="Debug">Transform: InterruptFanoutTransform</message>
+   <message level="Debug">Transform: AvalonStreamingTransform</message>
+   <message level="Debug">Transform: ResetAdaptation</message>
+   <message level="Debug" culprit="avalon_st_adapter"><![CDATA["<b>avalon_st_adapter</b>" reuses <b>timing_adapter</b> "<b>submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0</b>"]]></message>
+   <message level="Info" culprit="avalon_st_adapter"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"]]></message>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 0 starting:timing_adapter "submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0"</message>
+   <message level="Info" culprit="timing_adapter_0"><![CDATA["<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"]]></message>
+  </messages>
+ </entity>
+ <entity
+   path="submodules/"
+   parameterizationKey="altera_reset_controller:18.1:ADAPT_RESET_REQUEST=0,MIN_RST_ASSERTION_TIME=3,NUM_RESET_INPUTS=1,OUTPUT_RESET_SYNC_EDGES=both,RESET_REQUEST_PRESENT=0,RESET_REQ_EARLY_DSRT_TIME=1,RESET_REQ_WAIT_TIME=1,SYNC_DEPTH=2,USE_RESET_REQUEST_IN0=0,USE_RESET_REQUEST_IN1=0,USE_RESET_REQUEST_IN10=0,USE_RESET_REQUEST_IN11=0,USE_RESET_REQUEST_IN12=0,USE_RESET_REQUEST_IN13=0,USE_RESET_REQUEST_IN14=0,USE_RESET_REQUEST_IN15=0,USE_RESET_REQUEST_IN2=0,USE_RESET_REQUEST_IN3=0,USE_RESET_REQUEST_IN4=0,USE_RESET_REQUEST_IN5=0,USE_RESET_REQUEST_IN6=0,USE_RESET_REQUEST_IN7=0,USE_RESET_REQUEST_IN8=0,USE_RESET_REQUEST_IN9=0,USE_RESET_REQUEST_INPUT=0"
+   instancePathKey="mutrig_datapath_system_v3:.:rst_controller"
+   kind="altera_reset_controller"
+   version="18.1"
+   name="altera_reset_controller">
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.v"
+       type="VERILOG"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_synchronizer.v"
+       type="VERILOG"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.sdc"
+       type="SDC"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles/>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator instantiator="mutrig_datapath_system_v3" as="rst_controller" />
+  <messages>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 1 starting:altera_reset_controller "submodules/altera_reset_controller"</message>
+   <message level="Info" culprit="rst_controller"><![CDATA["<b>mutrig_datapath_system_v3</b>" instantiated <b>altera_reset_controller</b> "<b>rst_controller</b>"]]></message>
+  </messages>
+ </entity>
+ <entity
+   path="submodules/"
+   parameterizationKey="timing_adapter:18.1:inBitsPerSymbol=45,inChannelWidth=4,inErrorDescriptor=,inErrorWidth=3,inMaxChannel=15,inReadyLatency=0,inSymbolsPerBeat=1,inUseEmpty=false,inUseEmptyPort=NO,inUsePackets=true,inUseReady=false,inUseValid=true,outReadyLatency=0,outUseReady=true,outUseValid=true"
+   instancePathKey="mutrig_datapath_system_v3:.:avalon_st_adapter:.:timing_adapter_0"
+   kind="timing_adapter"
+   version="18.1"
+   name="mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0">
+  <parameter name="inErrorWidth" value="3" />
+  <parameter name="inUseValid" value="true" />
+  <parameter name="inUseReady" value="false" />
+  <parameter name="inBitsPerSymbol" value="45" />
+  <parameter name="outReadyLatency" value="0" />
+  <parameter name="inChannelWidth" value="4" />
+  <parameter name="inSymbolsPerBeat" value="1" />
+  <parameter name="inUseEmptyPort" value="NO" />
+  <parameter name="inMaxChannel" value="15" />
+  <parameter name="outUseReady" value="true" />
+  <parameter name="outUseValid" value="true" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="inUseEmpty" value="false" />
+  <parameter name="inErrorDescriptor" value="" />
+  <parameter name="inUsePackets" value="true" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
+       type="SYSTEM_VERILOG"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles/>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="mutrig_datapath_system_v3_avalon_st_adapter"
+     as="timing_adapter_0" />
+  <messages>
+   <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 0 starting:timing_adapter "submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0"</message>
+   <message level="Info" culprit="timing_adapter_0"><![CDATA["<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"]]></message>
+  </messages>
+ </entity>
+</deploy>

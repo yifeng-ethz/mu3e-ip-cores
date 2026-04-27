@@ -1,0 +1,18 @@
+[options]
+mode prove
+depth 8
+wait on
+
+[engines]
+smtbmc z3
+
+[script]
+read_verilog -formal -sv formal_defs.svh
+read_verilog -formal -sv /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv
+read_verilog -formal -sv run_control_splitter_formal_tb.sv
+prep -top run_control_splitter_formal_tb
+
+[files]
+../common/formal_defs.svh
+/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/submodules/altera_avalon_st_splitter.sv
+run_control_splitter_formal_tb.sv

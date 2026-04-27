@@ -1,0 +1,22 @@
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0FE80
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000FE80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 0 us
+  timing total        : 1000797 us
+  secondary before    : 0x0000
+  secondary after     : 0x0000
+  secondary delta     : 0 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+err: timed out waiting for matching secondary reply
