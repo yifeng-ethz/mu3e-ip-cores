@@ -12742,7 +12742,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="initializationFileName">
    <type>java.lang.String</type>
-   <value>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex</value>
+   <value>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>true</visible>
@@ -12953,7 +12953,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="derived_init_file_name">
    <type>java.lang.String</type>
-   <value>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex</value>
+   <value>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex</value>
    <derived>true</derived>
    <enabled>true</enabled>
    <visible>false</visible>

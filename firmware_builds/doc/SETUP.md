@@ -19,7 +19,7 @@ Load this file before running live-board Phase-5 work.
 | Board | Image source | Notes |
 |---|---|---|
 | SWB A10 | `online_sc/online/switching_pc/a10_board/output_files/top.sof` | Source of truth for `/dev/mudaq0`, reset link, and SC bridge behavior. Do not use the `online_dpv2` SWB SOF for this bring-up. |
-| FEB SciFi | `board_projects/fe_scifi_feb_v3/output_files/top.sof` or the active `top_nostp_pipe` SOF | Built from this repo and the active system under `firmware_builds/systems/system_20260427_testplanphase5/`. |
+| FEB SciFi | `firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof` or the active `top_nostp_pipe` SOF | Built from this repo and the active system under `firmware_builds/systems/system_20260427_testplanphase5/`. |
 
 Cold-start sequence:
 

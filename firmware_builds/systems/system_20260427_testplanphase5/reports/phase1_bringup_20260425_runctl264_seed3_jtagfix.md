@@ -4,8 +4,8 @@
 - SC link: `2`
 - SC tool: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool`
 - System Console: `/data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console`
-- JDI: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi`
-- Project dir: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3`
+- JDI: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi`
+- Project dir: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3`
 - Debug Qsys: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3.qsys`
 - FEB Qsys/SOPC: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.qsys`, `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.sopcinfo`
 - JTAG cable: `USB-BlasterII [7-2]`
@@ -55,7 +55,7 @@ crw-rw-rw- 1 root users 10, 124 Apr 25 01:05 /dev/mudaq0
 
 ## Metadata Gate
 
-- Command: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/script/check_ip_metadata.py --link 2 --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool --system-console /data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console --jdi /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi --project-dir /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3 --inventory-out /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/generated/debug_sc_system_v3_inventory_pipe_live.json --jtag-master-pattern *#7-2*/phy_0/master --jtag-fallback-pattern *phy_0/master,*#7-2*/control_path_subsystem_jtag_master.master,*control_path_subsystem_jtag_master.master`
+- Command: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/script/check_ip_metadata.py --link 2 --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool --system-console /data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console --jdi /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi --project-dir /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3 --inventory-out /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/generated/debug_sc_system_v3_inventory_pipe_live.json --jtag-master-pattern *#7-2*/phy_0/master --jtag-fallback-pattern *phy_0/master,*#7-2*/control_path_subsystem_jtag_master.master,*control_path_subsystem_jtag_master.master`
 - Return code: `0`
 ```
 PASS max10_prog_avmm_0 svd=feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd exp_ver=0x00020000 qsys_ver=0x00020000 sc_ver=0x00020000 jtag_ver=0x00020000 exp_git=n/a sc_git=n/a jtag_git=n/a
@@ -64,7 +64,7 @@ PASS sc_hub svd=slow-control_hub/sc_hub.svd exp_ver=0x1A06919E qsys_ver=0x1A0691
 
 ## Bridge Gate
 
-- Command: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/script/check_sc_bridges.py --link 2 --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool --system-console /data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console --jdi /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi --project-dir /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3 --debug-qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3.qsys --feb-qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.qsys --sopcinfo /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.sopcinfo --jtag-master-pattern *#7-2*/phy_0/master --jtag-fallback-pattern *phy_0/master,*#7-2*/control_path_subsystem_jtag_master.master,*control_path_subsystem_jtag_master.master`
+- Command: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/script/check_sc_bridges.py --link 2 --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/bin/sc_tool --system-console /data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console --jdi /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi --project-dir /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3 --debug-qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3.qsys --feb-qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.qsys --sopcinfo /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.sopcinfo --jtag-master-pattern *#7-2*/phy_0/master --jtag-fallback-pattern *phy_0/master,*#7-2*/control_path_subsystem_jtag_master.master,*control_path_subsystem_jtag_master.master`
 - Return code: `0`
 ```
 PASS mm_bridge.histogram_statistics_0.uid

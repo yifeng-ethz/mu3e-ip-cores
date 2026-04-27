@@ -2,7 +2,7 @@
 
 - Timestamp: `2026-04-24T08:35:45`
 - SC link: `2`
-- Image under test: `board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof`
+- Image under test: `firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof`
 - Runner: `firmware_builds/board_test/script/run_atpg_v2_reference.sh`
 - Raw log: `firmware_builds/board_test/reports/feb_scifi_sc_dv_20260424_083545.log`
 - Result: `PASS` for the executed reference ATPG suite

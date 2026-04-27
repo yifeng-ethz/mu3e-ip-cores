@@ -28,7 +28,7 @@ use ieee.std_logic_unsigned.all;
 
 entity feb_system_v3_pipe_bringup_subsystem_ram is 
         generic (
-                 INIT_FILE : STRING := "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex"
+                 INIT_FILE : STRING := "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex"
                  );
         port (
               -- inputs:

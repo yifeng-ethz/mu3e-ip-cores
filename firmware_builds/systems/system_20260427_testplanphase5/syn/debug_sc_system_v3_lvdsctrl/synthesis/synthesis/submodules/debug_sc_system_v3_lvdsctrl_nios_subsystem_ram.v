@@ -36,7 +36,7 @@ module debug_sc_system_v3_lvdsctrl_nios_subsystem_ram (
                                                       )
 ;
 
-  parameter INIT_FILE = "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex";
+  parameter INIT_FILE = "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/generated/software/app/mem_init/nios_ram.hex";
 
 
   output  [ 31: 0] readdata;

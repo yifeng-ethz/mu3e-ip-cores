@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<toolkit
-        name="board_bring_up"
-        displayName="Board Bring Up (Datapath)"
-        addMenuItem="true"
-        >
-        <file>board_bring_up.tcl</file>
-        <description>Board bring-up dashboard for the FE SciFi datapath.</description>
-</toolkit>

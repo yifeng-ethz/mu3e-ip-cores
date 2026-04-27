@@ -1432,7 +1432,7 @@
    <file
        path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/mutrig_injector_multiheader_hw.tcl" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl" />
    <file
        path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_reset_controller/mutrig_reset_controller_hw.tcl" />
    <file
@@ -10633,7 +10633,7 @@
   <childGeneratedFiles/>
   <sourceFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl" />
   </sourceFiles>
   <childSourceFiles/>
   <instantiator
