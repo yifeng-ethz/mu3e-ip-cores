@@ -15,11 +15,11 @@
  <plugin name="scifi_onewire_master.qprs" file="../../../../onewire_temp_sense/scifi_onewire_master.qprs" displayName="scifi_onewire_master.qprs" version="0.0" description="" tags="" categories="" type="com.altera.sopcmodel.util.IElementPresetList" subtype="" factory="PresetFactory">
   <tag2 key="PRESET_TYPE" value="onewire_master" />
  </plugin>
- <component name="alt_issp_ds" file="../../../../board_projects/fe_scifi_feb_v3/bts/alt_issp_ds/alt_issp_ds.qsys" displayName="alt_issp_ds" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+ <component name="alt_issp_ds" file="board_projects/fe_scifi_feb_v3/bts/alt_issp_ds/alt_issp_ds.qsys" displayName="alt_issp_ds" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
- <component name="alt_issp_srst" file="../../../../board_projects/fe_scifi_feb_v3/bts/alt_issp_srst/alt_issp_srst.qsys" displayName="alt_issp_srst" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+ <component name="alt_issp_srst" file="board_projects/fe_scifi_feb_v3/bts/alt_issp_srst/alt_issp_srst.qsys" displayName="alt_issp_srst" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
@@ -92,7 +92,7 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="avalon_proxy" file="../../../../board_projects/fe_scifi_feb_v3/src/common/util/avalon_proxy_hw.tcl" displayName="avalon_proxy" version="1.1" description="" tags="AUTHORSHIP=Alexandr Kozlinskiy" categories="mu3e" factory="TclModuleFactory">
+ <component name="avalon_proxy" file="board_projects/fe_scifi_feb_v3/src/common/util/avalon_proxy_hw.tcl" displayName="avalon_proxy" version="1.1" description="" tags="AUTHORSHIP=Alexandr Kozlinskiy" categories="mu3e" factory="TclModuleFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
   <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
@@ -100,7 +100,7 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="avalon_spi_master" file="../../../../board_projects/fe_scifi_feb_v3/src/common/util/avalon_spi_master_hw.tcl" displayName="avalon_spi_master" version="1.1" description="" tags="AUTHORSHIP=Alexandr Kozlinskiy" categories="vhdutil" factory="TclModuleFactory">
+ <component name="avalon_spi_master" file="board_projects/fe_scifi_feb_v3/src/common/util/avalon_spi_master_hw.tcl" displayName="avalon_spi_master" version="1.1" description="" tags="AUTHORSHIP=Alexandr Kozlinskiy" categories="vhdutil" factory="TclModuleFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
   <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
@@ -292,7 +292,7 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <documentUrl displayName="FireFly ECUO 14Gbps x 4" type="OTHER" url="https://www.physi.uni-heidelberg.de/Forschung/he/mu3e/restricted/notes/Mu3e-Note-0040-FireflyTransceiver_B04.pdf" />
  </component>
- <component name="flash1616" file="../../../../board_projects/fe_scifi_feb_v3/src/common/util/flash1616_hw.tcl" displayName="flash1616" version="1.0" description="" tags="AUTHORSHIP=akozlins" categories="mu3e" factory="TclModuleFactory">
+ <component name="flash1616" file="board_projects/fe_scifi_feb_v3/src/common/util/flash1616_hw.tcl" displayName="flash1616" version="1.0" description="" tags="AUTHORSHIP=akozlins" categories="mu3e" factory="TclModuleFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
   <tag2 key="COMPOSITION_CALLBACK" value="compose" />
@@ -690,7 +690,7 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
- <component name="unnamed" file="../../../../board_projects/fe_scifi_feb_v3/ip/alt_clkctrl/unnamed.qsys" displayName="unnamed" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+ <component name="unnamed" file="board_projects/fe_scifi_feb_v3/ip/alt_clkctrl/unnamed.qsys" displayName="unnamed" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>

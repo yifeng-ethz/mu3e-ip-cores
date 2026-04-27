@@ -70,6 +70,9 @@ bt_setup_env() {
     local bin_dir
     local generated_dir
     local report_dir
+    local board_project_dir
+    local default_jdi
+    local default_sof
 
     repo_root="$(bt_repo_root)"
     board_test_dir="$(bt_board_test_dir)"
@@ -77,6 +80,15 @@ bt_setup_env() {
     bin_dir="${board_test_dir}/bin"
     generated_dir="${board_test_dir}/generated"
     report_dir="${board_test_dir}/reports"
+    board_project_dir="${board_test_dir}/syn/board_projects/fe_scifi_feb_v3"
+    default_jdi="${board_project_dir}/output_files_pipe/top_nostp_pipe.jdi"
+    default_sof="${board_project_dir}/output_files_pipe/top_nostp_pipe.sof"
+    if [[ ! -f "${default_jdi}" ]]; then
+        default_jdi="${board_project_dir}/output_files/top.jdi"
+    fi
+    if [[ ! -f "${default_sof}" ]]; then
+        default_sof="${board_project_dir}/output_files/top.sof"
+    fi
 
     export BT_REPO_ROOT="${repo_root}"
     export BOARD_TEST_DIR="${board_test_dir}"
@@ -88,8 +100,9 @@ bt_setup_env() {
     export BOARD_TEST_LINK="${BOARD_TEST_LINK:-2}"
     export BOARD_TEST_DISPLAY="${BOARD_TEST_DISPLAY:-${DISPLAY:-:2}}"
     export DISPLAY="${BOARD_TEST_DISPLAY}"
-    export BOARD_TEST_JDI="${BOARD_TEST_JDI:-${repo_root}/board_projects/fe_scifi_feb_v3/output_files/top.jdi}"
-    export BOARD_TEST_PROJECT_DIR="${BOARD_TEST_PROJECT_DIR:-${repo_root}/board_projects/fe_scifi_feb_v3}"
+    export BOARD_TEST_JDI="${BOARD_TEST_JDI:-${default_jdi}}"
+    export BOARD_TEST_SOF="${BOARD_TEST_SOF:-${default_sof}}"
+    export BOARD_TEST_PROJECT_DIR="${BOARD_TEST_PROJECT_DIR:-${board_project_dir}}"
     export BOARD_TEST_SYSCON="${BOARD_TEST_SYSCON:-$(bt_find_first_exec \
         /data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console \
         "$(command -v system-console 2>/dev/null || true)")}"
@@ -107,7 +120,7 @@ bt_setup_env() {
 
     bt_require_device "${BOARD_TEST_DEVICE}"
     bt_require_file "${BOARD_TEST_JDI}"
-    bt_require_file "${BOARD_TEST_PROJECT_DIR}/output_files/top.sof"
+    bt_require_file "${BOARD_TEST_SOF}"
     bt_require_exec "${BOARD_TEST_SYSCON}"
     bt_require_exec "${BOARD_TEST_SC_TOOL}"
     bt_require_exec "${BOARD_TEST_RC_TOOL}"

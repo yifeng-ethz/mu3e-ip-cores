@@ -190,11 +190,20 @@ module tb_scifi_dp_v3_emu_smoke;
     logic [(8*16)-1:0] emu_lat_hist_stream_data;
     logic [(8*1)-1:0]  emu_lat_hist_stream_channel;
     wire  [7:0]        emu_lat_hist_stream_ready;
+    logic [3:0]        emu_csr_force_address [8];
+    logic              emu_csr_force_read [8];
+    logic              emu_csr_force_write [8];
+    logic [31:0]       emu_csr_force_writedata [8];
     longint unsigned   lvds_cycle;
     longint unsigned   emu_live_cycle_q [8][$];
     longint unsigned   emu_frozen_cycle_q [8][$];
     logic [4:0]        pre_rbcam_hist_queue [8][$];
     logic [15:0]       emu_lat_hist_queue [8][$];
+    int                pre_rbcam_mts_asic_count [8];
+    int                pre_rbcam_mts_ch16_count [8];
+    int                pre_rbcam_mts_bad_asic_count;
+    int                pre_rbcam_flush_lane_count [8];
+    int                pre_rbcam_flush_ch16_count [8];
     int                emu_lat_underflow_count;
     int                emu_live_depth_max [8];
     int                emu_frozen_depth_max [8];
@@ -736,7 +745,44 @@ module tb_scifi_dp_v3_emu_smoke;
         end
     endtask
 
-    task force_emulator_local_csr_lane(
+    task automatic bind_emulator_local_csr_forces;
+        begin
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_address   = emu_csr_force_address[0];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_read      = emu_csr_force_read[0];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_write     = emu_csr_force_write[0];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_writedata = emu_csr_force_writedata[0];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_address   = emu_csr_force_address[1];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_read      = emu_csr_force_read[1];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_write     = emu_csr_force_write[1];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_writedata = emu_csr_force_writedata[1];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_address   = emu_csr_force_address[2];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_read      = emu_csr_force_read[2];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_write     = emu_csr_force_write[2];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_writedata = emu_csr_force_writedata[2];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_address   = emu_csr_force_address[3];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_read      = emu_csr_force_read[3];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_write     = emu_csr_force_write[3];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_writedata = emu_csr_force_writedata[3];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_address   = emu_csr_force_address[4];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_read      = emu_csr_force_read[4];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_write     = emu_csr_force_write[4];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_writedata = emu_csr_force_writedata[4];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_address   = emu_csr_force_address[5];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_read      = emu_csr_force_read[5];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_write     = emu_csr_force_write[5];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_writedata = emu_csr_force_writedata[5];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_address   = emu_csr_force_address[6];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_read      = emu_csr_force_read[6];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_write     = emu_csr_force_write[6];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_writedata = emu_csr_force_writedata[6];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_address   = emu_csr_force_address[7];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_read      = emu_csr_force_read[7];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_write     = emu_csr_force_write[7];
+            force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_writedata = emu_csr_force_writedata[7];
+        end
+    endtask
+
+    task automatic force_emulator_local_csr_lane(
         input int unsigned lane,
         input logic [3:0]  addr,
         input logic        read_en,
@@ -744,61 +790,16 @@ module tb_scifi_dp_v3_emu_smoke;
         input logic [31:0] write_data
     );
         begin
-            case (lane)
-                0: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_0_csr_writedata = write_data;
-                end
-                1: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_1_csr_writedata = write_data;
-                end
-                2: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_2_csr_writedata = write_data;
-                end
-                3: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_3_csr_writedata = write_data;
-                end
-                4: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_4_csr_writedata = write_data;
-                end
-                5: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_5_csr_writedata = write_data;
-                end
-                6: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_6_csr_writedata = write_data;
-                end
-                7: begin
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_address   = addr;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_read      = read_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_write     = write_en;
-                    force dut_wrap.dut.mm_interconnect_0_emulator_mutrig_7_csr_writedata = write_data;
-                end
-                default: $fatal(1, "Invalid emulator lane %0d", lane);
-            endcase
+            if (lane >= 8)
+                $fatal(1, "Invalid emulator lane %0d", lane);
+            emu_csr_force_address[lane]   = addr;
+            emu_csr_force_read[lane]      = read_en;
+            emu_csr_force_write[lane]     = write_en;
+            emu_csr_force_writedata[lane] = write_data;
         end
     endtask
 
-    task force_emulator_local_csr_idle;
+    task automatic force_emulator_local_csr_idle;
         begin
             for (int lane = 0; lane < 8; lane++)
                 force_emulator_local_csr_lane(lane, 4'h0, 1'b0, 1'b0, 32'h0000_0000);
@@ -851,14 +852,10 @@ module tb_scifi_dp_v3_emu_smoke;
 
     task automatic force_datapath_hit0_ready_paths;
         begin
-            force dut_wrap.dut.mutrig_datapath_subsystem_0_hit_type0_out_ready = 1'b1;
-            force dut_wrap.dut.mutrig_datapath_subsystem_1_hit_type0_out_ready = 1'b1;
-            force dut_wrap.dut.mutrig_datapath_subsystem_2_hit_type0_out_ready = 1'b1;
-            force dut_wrap.dut.mutrig_datapath_subsystem_3_hit_type0_out_ready = 1'b1;
-            force dut_wrap.dut.mutrig_datapath_subsystem_4_hit_type0_out_ready = 1'b1;
-            force dut_wrap.dut.mutrig_datapath_subsystem_5_hit_type0_out_ready = 1'b1;
-            force dut_wrap.dut.mutrig_datapath_subsystem_6_hit_type0_out_ready = 1'b1;
-            force dut_wrap.dut.mutrig_datapath_subsystem_7_hit_type0_out_ready = 1'b1;
+            // Do not force the per-lane ready nets here. They are outputs of
+            // the generated muxes and must only acknowledge the selected lane;
+            // forcing all eight high makes simultaneous shared-injector hits
+            // disappear before the MTS preprocessors can arbitrate them.
         end
     endtask
 
@@ -987,6 +984,10 @@ module tb_scifi_dp_v3_emu_smoke;
                 emu_live_depth_max[lane]      = 0;
                 emu_frozen_depth_max[lane]    = 0;
                 emu_live_overwrite_count[lane] = 0;
+                pre_rbcam_mts_asic_count[lane] = 0;
+                pre_rbcam_mts_ch16_count[lane] = 0;
+                pre_rbcam_flush_lane_count[lane] = 0;
+                pre_rbcam_flush_ch16_count[lane] = 0;
                 pre_rbcam_hist_queue[lane].delete();
                 emu_lat_hist_queue[lane].delete();
                 emu_live_trace_q[lane].delete();
@@ -994,6 +995,7 @@ module tb_scifi_dp_v3_emu_smoke;
                 type0_trace_q[lane].delete();
                 mts_trace_q[lane].delete();
             end
+            pre_rbcam_mts_bad_asic_count = 0;
         end
     endtask
 
@@ -2175,6 +2177,9 @@ module tb_scifi_dp_v3_emu_smoke;
                     lane = (rr_lane + ofs) % 8;
                     if (pre_rbcam_hist_queue[lane].size() != 0) begin
                         channel_v = pre_rbcam_hist_queue[lane].pop_front();
+                        pre_rbcam_flush_lane_count[lane]++;
+                        if (channel_v == 5'd16)
+                            pre_rbcam_flush_ch16_count[lane]++;
                         pre_rbcam_hist_stream_valid[lane] = 1'b1;
                         pre_rbcam_hist_stream_data[(lane*5) +: 5] = channel_v;
                         rr_lane = (lane + 1) % 8;
@@ -2248,16 +2253,25 @@ module tb_scifi_dp_v3_emu_smoke;
     task automatic report_emulator_status(input string tag);
         int i;
         logic [31:0] status_word;
+        logic [31:0] cfg_word;
         logic [15:0] frame_count_word;
         logic [9:0]  event_count_word;
         begin
             for (i = 0; i < 8; i++) begin
+                emu_read32_local(i, 4'd4, cfg_word);
                 emu_read32_local(i, 4'd5, status_word);
                 frame_count_word = status_word[15:0];
                 event_count_word = status_word[25:16];
                 $display(
-                    "TB_EMU_STATUS %s lane=%0d frame_count=%0d event_count=%0d status=0x%08h",
-                    tag, i, frame_count_word, event_count_word, status_word
+                    "TB_EMU_STATUS %s lane=%0d asic_id=%0d tx_mode=%0d cfg=0x%08h frame_count=%0d event_count=%0d status=0x%08h",
+                    tag,
+                    i,
+                    lane_asic_id(i),
+                    lane_tx_mode(i),
+                    cfg_word,
+                    frame_count_word,
+                    event_count_word,
+                    status_word
                 );
             end
         end
@@ -2428,8 +2442,14 @@ module tb_scifi_dp_v3_emu_smoke;
              && !dut_wrap.dut.mts_preprocessor_0_hit_type1_out_endofpacket) begin
                 asic_v = dut_wrap.dut.mts_preprocessor_0_hit_type1_out_data[38:35];
                 channel_v = dut_wrap.dut.mts_preprocessor_0_hit_type1_out_data[34:30];
-                if (asic_v < 8)
+                if (asic_v < 8) begin
+                    pre_rbcam_mts_asic_count[asic_v]++;
+                    if (channel_v == 5'd16)
+                        pre_rbcam_mts_ch16_count[asic_v]++;
                     pre_rbcam_hist_queue[asic_v].push_back(channel_v);
+                end else begin
+                    pre_rbcam_mts_bad_asic_count++;
+                end
             end
 
             if (dut_wrap.dut.mts_preprocessor_1_hit_type1_out_valid
@@ -2437,8 +2457,14 @@ module tb_scifi_dp_v3_emu_smoke;
              && !dut_wrap.dut.mts_preprocessor_1_hit_type1_out_endofpacket) begin
                 asic_v = dut_wrap.dut.mts_preprocessor_1_hit_type1_out_data[38:35];
                 channel_v = dut_wrap.dut.mts_preprocessor_1_hit_type1_out_data[34:30];
-                if (asic_v < 8)
+                if (asic_v < 8) begin
+                    pre_rbcam_mts_asic_count[asic_v]++;
+                    if (channel_v == 5'd16)
+                        pre_rbcam_mts_ch16_count[asic_v]++;
                     pre_rbcam_hist_queue[asic_v].push_back(channel_v);
+                end else begin
+                    pre_rbcam_mts_bad_asic_count++;
+                end
             end
 
         end
@@ -3076,6 +3102,7 @@ module tb_scifi_dp_v3_emu_smoke;
             $display("TB_DECODED_DIN using generated lane_source_mux direct path");
         force_histogram_ready_paths();
         force_avmm_idle_seams();
+        bind_emulator_local_csr_forces();
         force_emulator_local_csr_idle();
         force_datapath_local_csr_idle();
         force_datapath_hit0_ready_paths();
@@ -3196,6 +3223,17 @@ module tb_scifi_dp_v3_emu_smoke;
             $display("TB_MEAS hit_stack_ingress_word_count=%0d", hit_stack_ingress_word_count);
             $display("TB_MEAS hit_stack_ingress_payload_word_count=%0d", hit_stack_ingress_payload_word_count);
             $display("TB_MEAS emu_lat_hist_drive_count=%0d", emu_lat_hist_drive_count);
+            for (int lane = 0; lane < 8; lane++) begin
+                $display(
+                    "TB_MEAS_PRE_RBCAM lane=%0d mts_asic=%0d mts_ch16=%0d hist_flush=%0d hist_flush_ch16=%0d",
+                    lane,
+                    pre_rbcam_mts_asic_count[lane],
+                    pre_rbcam_mts_ch16_count[lane],
+                    pre_rbcam_flush_lane_count[lane],
+                    pre_rbcam_flush_ch16_count[lane]
+                );
+            end
+            $display("TB_MEAS_PRE_RBCAM bad_asic=%0d", pre_rbcam_mts_bad_asic_count);
             $display(
                 "TB_MEAS_DROP payload_clean=%0d payload_error=%0d",
                 hit_stack_ingress_payload_clean_word_count,

@@ -42,14 +42,15 @@ class Probe:
 
 
 def default_jdi() -> Path:
-    pipe = REPO_ROOT / "board_projects" / "fe_scifi_feb_v3" / "output_files_pipe" / "top_nostp_pipe.jdi"
+    board_project = SYN_DIR / "board_projects" / "fe_scifi_feb_v3"
+    pipe = board_project / "output_files_pipe" / "top_nostp_pipe.jdi"
     if pipe.is_file():
         return pipe
-    return REPO_ROOT / "board_projects" / "fe_scifi_feb_v3" / "output_files" / "top.jdi"
+    return board_project / "output_files" / "top.jdi"
 
 
 def default_project_dir() -> Path:
-    return REPO_ROOT / "board_projects" / "fe_scifi_feb_v3"
+    return SYN_DIR / "board_projects" / "fe_scifi_feb_v3"
 
 
 def default_output() -> Path:

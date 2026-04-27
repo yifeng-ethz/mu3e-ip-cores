@@ -5,6 +5,7 @@ INT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 SYSTEM_DIR="$(cd -- "${INT_DIR}/../.." && pwd)"
 FIRMWARE_BUILDS_DIR="$(cd -- "${SYSTEM_DIR}/../.." && pwd)"
 REPO_ROOT="$(cd -- "${FIRMWARE_BUILDS_DIR}/.." && pwd)"
+BOARD_PROJECT_DIR="${SYSTEM_DIR}/syn/board_projects/fe_scifi_feb_v3"
 STATIC_TB_DIR="${INT_DIR}/tb_src"
 DOC_ROOT="${INT_DIR}/docs"
 CASE_ROOT="${INT_DIR}/cases"
@@ -78,7 +79,7 @@ compile_feb_sim_overrides() {
   local work_dir="$1"
 
   run_vcom -work "${work_dir}" -2008 "${STATIC_TB_DIR}/alt_dpram.vhd"
-  run_vcom -work "${work_dir}" -2008 "${REPO_ROOT}/board_projects/fe_scifi_feb_v3/src/wrappers/feb_system_v3/sc_downlink_cdc_bridge.vhd"
+  run_vcom -work "${work_dir}" -2008 "${BOARD_PROJECT_DIR}/src/wrappers/feb_system_v3/sc_downlink_cdc_bridge.vhd"
 }
 
 create_work_lib() {
