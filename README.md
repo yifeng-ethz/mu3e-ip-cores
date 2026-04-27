@@ -112,7 +112,6 @@ Before live hardware work, read the centralized references:
 mu3e-ip-cores/
 ├── CAM/                        # Content addressable memory core
 ├── alt_temp_sense_controller/  # On‑chip temperature diode wrapper
-├── board_projects/             # Full board-level Quartus projects and generated build areas
 ├── board_test_system/          # Legacy and live board-test inputs that predate the system folder split
 ├── charge_injection/           # Analog pulser and MuTRiG injector variants
 ├── docs/                       # Repository-level reference material, archives, and slides
@@ -136,7 +135,11 @@ mu3e-ip-cores/
 ├── mutrig_timestamp_processor/
 ├── onewire_temp_sense/         # 1-Wire controllers plus FEB v1 bridge helper
 ├── packet_scheduler/
-├── firmware_builds/            # Qsys wrapper, portable IP catalogs, and catalog scripts
+├── firmware_builds/            # Firmware build roots, system folders, Qsys catalogs, and board projects
+│   └── systems/
+│       └── system_20260427_testplanphase5/
+│           └── syn/
+│               └── board_projects/
 ├── ring-buffer_cam/
 ├── run-control_mgmt/
 ├── scripts/                    # Shared DV/report automation used across IPs

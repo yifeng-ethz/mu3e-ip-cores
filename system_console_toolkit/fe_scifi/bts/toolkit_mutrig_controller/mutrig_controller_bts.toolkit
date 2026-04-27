@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<toolkit
-        name="mutrig_controller_bts"
-        displayName="MuTRiG Controller BTS"
-        addMenuItem="true"
-        >
-		<file>mutrig_controller_bts.tcl</file>
-		<description>Application layer to interfacing with the MuTRiG Controller hard IP core. Using the board support package (bsp) of MuTRiG Controller to gain CSR access of the MCC and TSA sub-routines. Generates the configure pattern for MuTRiG.</description>
-</toolkit>

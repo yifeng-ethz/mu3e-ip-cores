@@ -1,7 +1,7 @@
 # FEB SciFi v3 Pipe Test Blockers
 
 - Timestamp: `2026-04-24T09:18:00+02:00`
-- Target SOF/JDI: `board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof`, `top_nostp_pipe.jdi`
+- Target SOF/JDI: `firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof`, `top_nostp_pipe.jdi`
 - Live FEB JTAG hash: `768B16B404A0AA5F62D5`
 - Expected pipe JDI hash: `768B16B404A0AA5F62D5`
 - SWB reset-link state left released: `RESET_LINK_STATUS_REGISTER_R = 0x31000000`

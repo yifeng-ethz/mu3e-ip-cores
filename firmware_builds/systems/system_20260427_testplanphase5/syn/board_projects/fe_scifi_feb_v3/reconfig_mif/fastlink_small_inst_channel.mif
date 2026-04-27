@@ -1,0 +1,31 @@
+
+-- File Name = /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/reconfig_mif/fastlink_small_inst_channel.mif.mif
+WIDTH=16;
+DEPTH=21;
+
+ADDRESS_RADIX=UNS;
+DATA_RADIX=BIN;
+
+CONTENT BEGIN
+	0   :   0000000000100001; -- Start of MIF opcode - FAMILY - Arria V
+	1   :   0000000001100010; -- Type of MIF opcode
+	2   :   0000000000000100; -- CGB PLL switch opcode
+	3   :   0011100000000000; -- PMA - TX
+	4   :   0000110100100100;
+	5   :   0000001011110000;
+	6   :   0000001110101100;
+	7   :   0011100000000001;
+	8   :   0000001010001100;
+	9   :   0000000000000000;
+	10  :   0000110000000000;
+	11  :   0000100011111010; -- PCS PLD IF - TX
+	12  :   0000000000000000;
+	13  :   0010000010010110; -- PCS8G - TX
+	14  :   0000110000110000;
+	15  :   1110000000000000;
+	16  :   0000000000000000;
+	17  :   0000111001001000;
+	18  :   0000100001100100; -- PCS PMA IF - TX
+	19  :   0000000000000000;
+	20  :   0000000000011111; -- End of MIF opcode
+END;

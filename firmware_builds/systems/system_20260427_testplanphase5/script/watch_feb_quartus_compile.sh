@@ -13,7 +13,7 @@ Purpose:
 EOF
 }
 
-proj_dir="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3"
+proj_dir="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3"
 project="top"
 rev="top"
 interval_sec="${WATCH_INTERVAL_SEC:-1800}"

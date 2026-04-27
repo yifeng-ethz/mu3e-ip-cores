@@ -109,7 +109,7 @@ Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
 2026.04.25.01:25:33 Info: Loading util/avalon_spi_master_hw.tcl
 2026.04.25.01:25:33 Info: Loading util/flash1616_hw.tcl
 2026.04.25.01:25:33 Info: Loading ip/clk_ctrl_single.qsys
-2026.04.25.01:25:33 Info: Loading mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl
+2026.04.25.01:25:33 Info: Loading misc/mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl
 2026.04.25.01:25:33 Info: Loading util/avalon_proxy_hw.tcl
 2026.04.25.01:25:33 Info: Loading util/avalon_spi_master_hw.tcl
 2026.04.25.01:25:33 Info: Loading util/flash1616_hw.tcl
