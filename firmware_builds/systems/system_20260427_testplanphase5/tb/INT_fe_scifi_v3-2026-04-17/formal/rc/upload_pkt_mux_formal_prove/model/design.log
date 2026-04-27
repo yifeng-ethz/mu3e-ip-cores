@@ -1,0 +1,969 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+
+-- Executing script file `../model/design.ys' --
+
+1. Executing Verilog-2005 frontend: formal_defs.svh
+Parsing formal SystemVerilog input from `formal_defs.svh' to AST representation.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv
+Parsing formal SystemVerilog input from `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv' to AST representation.
+Generating RTLIL representation for module `\upload_system_v3_upload_pkt_mux'.
+Generating RTLIL representation for module `\upload_system_v3_upload_pkt_mux_1stage_pipeline'.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: upload_pkt_mux_formal_tb.sv
+Parsing formal SystemVerilog input from `upload_pkt_mux_formal_tb.sv' to AST representation.
+Generating RTLIL representation for module `\upload_pkt_mux_formal_tb'.
+Successfully finished Verilog frontend.
+
+4. Executing PREP pass.
+
+4.1. Executing HIERARCHY pass (managing design hierarchy).
+
+4.1.1. Analyzing design hierarchy..
+Top module:  \upload_pkt_mux_formal_tb
+Used module:     \upload_system_v3_upload_pkt_mux
+Used module:         \upload_system_v3_upload_pkt_mux_1stage_pipeline
+Parameter \PAYLOAD_WIDTH = 40
+
+4.1.2. Executing AST frontend in derive mode using pre-parsed AST for module `\upload_system_v3_upload_pkt_mux_1stage_pipeline'.
+Parameter \PAYLOAD_WIDTH = 40
+Generating RTLIL representation for module `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+
+4.1.3. Analyzing design hierarchy..
+Top module:  \upload_pkt_mux_formal_tb
+Used module:     \upload_system_v3_upload_pkt_mux
+Used module:         $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000
+
+4.1.4. Analyzing design hierarchy..
+Top module:  \upload_pkt_mux_formal_tb
+Used module:     \upload_system_v3_upload_pkt_mux
+Used module:         $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000
+Removing unused module `\upload_system_v3_upload_pkt_mux_1stage_pipeline'.
+Removed 1 unused modules.
+Module upload_pkt_mux_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+4.2. Executing PROC pass (convert processes to netlists).
+
+4.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+4.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 12 switch rules as full_case in process $proc$upload_pkt_mux_formal_tb.sv:149$81 in module upload_pkt_mux_formal_tb.
+Marked 2 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330 in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:212$11 in module upload_system_v3_upload_pkt_mux.
+Marked 1 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10 in module upload_system_v3_upload_pkt_mux.
+Marked 2 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:161$3 in module upload_system_v3_upload_pkt_mux.
+Marked 13 switch rules as full_case in process $proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:131$2 in module upload_system_v3_upload_pkt_mux.
+Removed a total of 0 dead cases.
+
+4.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 8 redundant assignments.
+Promoted 72 assignments to connections.
+
+4.2.4. Executing PROC_INIT pass (extract init attributes).
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:97$326'.
+  Set init value: \frame_channel = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:96$325'.
+  Set init value: \frame_in_progress = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:94$324'.
+  Set init value: \prev_out_eop = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:93$323'.
+  Set init value: \prev_out_sop = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:92$322'.
+  Set init value: \prev_out_channel = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:91$321'.
+  Set init value: \prev_out_data = 36'000000000000000000000000000000000000
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:90$320'.
+  Set init value: \prev_out_ready = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:89$319'.
+  Set init value: \prev_out_valid = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:87$318'.
+  Set init value: \out_stall_ctr = 4'0000
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:85$317'.
+  Set init value: \req_deadline2 = 6'000000
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:84$316'.
+  Set init value: \req_pending2 = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:83$315'.
+  Set init value: \req_deadline1 = 6'000000
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:82$314'.
+  Set init value: \req_pending1 = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:81$313'.
+  Set init value: \req_deadline0 = 6'000000
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:80$312'.
+  Set init value: \req_pending0 = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:78$311'.
+  Set init value: \out_count2 = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:77$310'.
+  Set init value: \out_count1 = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:76$309'.
+  Set init value: \out_count0 = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:75$308'.
+  Set init value: \in_count2 = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:74$307'.
+  Set init value: \in_count1 = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:73$306'.
+  Set init value: \in_count0 = 2'00
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:34$305'.
+  Set init value: \src2_beat = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:33$304'.
+  Set init value: \src2_done = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:32$303'.
+  Set init value: \src2_started = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:31$302'.
+  Set init value: \src2_active = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:29$301'.
+  Set init value: \src1_beat = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:28$300'.
+  Set init value: \src1_done = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:27$299'.
+  Set init value: \src1_started = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:26$298'.
+  Set init value: \src1_active = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:24$297'.
+  Set init value: \src0_beat = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:23$296'.
+  Set init value: \src0_done = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:22$295'.
+  Set init value: \src0_started = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:21$294'.
+  Set init value: \src0_active = 1'0
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:8$293'.
+  Set init value: \f_cycle = 6'000000
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:7$292'.
+  Set init value: \f_reset_sr = 2'11
+Found init rule in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:6$291'.
+  Set init value: \f_past_valid = 1'0
+Found init rule in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:110$18'.
+  Set init value: \selected_endofpacket = 1'0
+Found init rule in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:109$17'.
+  Set init value: \select = 2'00
+Found init rule in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:108$16'.
+  Set init value: \decision = 2'00
+
+4.2.5. Executing PROC_ARST pass (detect async resets in processes).
+Found async reset \reset_n in `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330'.
+Found async reset \reset_n in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:161$3'.
+
+4.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~50 debug messages>
+
+4.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:97$326'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:96$325'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:94$324'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:93$323'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:92$322'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:91$321'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:90$320'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:89$319'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:87$318'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:85$317'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:84$316'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:83$315'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:82$314'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:81$313'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:80$312'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:78$311'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:77$310'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:76$309'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:75$308'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:74$307'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:73$306'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:34$305'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:33$304'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:32$303'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:31$302'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:29$301'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:28$300'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:27$299'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:26$298'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:24$297'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:23$296'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:22$295'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:21$294'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:8$293'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:7$292'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:6$291'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:71$286'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:70$281'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:69$276'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:49$270'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:43$264'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:37$258'.
+Creating decoders for process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+     1/89: $3\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.$result[35:0]$153
+     2/89: $3\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.beat_idx[0:0]$154
+     3/89: $3\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.beat_idx[0:0]$158
+     4/89: $3\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.$result[35:0]$157
+     5/89: $3\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.beat_idx[0:0]$156
+     6/89: $3\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.$result[35:0]$155
+     7/89: $2\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.beat_idx[0:0]$152
+     8/89: $2\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.$result[35:0]$151
+     9/89: $2\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.beat_idx[0:0]$150
+    10/89: $2\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.$result[35:0]$149
+    11/89: $2\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.beat_idx[0:0]$148
+    12/89: $2\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.$result[35:0]$147
+    13/89: $0\prev_out_eop[0:0]
+    14/89: $0\prev_out_sop[0:0]
+    15/89: $0\prev_out_channel[1:0]
+    16/89: $0\prev_out_data[35:0]
+    17/89: $0\prev_out_ready[0:0]
+    18/89: $0\prev_out_valid[0:0]
+    19/89: $0\out_stall_ctr[3:0]
+    20/89: $1\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.beat_idx[0:0]$104
+    21/89: $1\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.$result[35:0]$103
+    22/89: $1\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.beat_idx[0:0]$102
+    23/89: $1\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.$result[35:0]$101
+    24/89: $1\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.beat_idx[0:0]$100
+    25/89: $1\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.$result[35:0]$99
+    26/89: $cover$upload_pkt_mux_formal_tb.sv:350$252_EN
+    27/89: $cover$upload_pkt_mux_formal_tb.sv:349$248_EN
+    28/89: $cover$upload_pkt_mux_formal_tb.sv:348$245_EN
+    29/89: $cover$upload_pkt_mux_formal_tb.sv:347$242_EN
+    30/89: $cover$upload_pkt_mux_formal_tb.sv:346$239_EN
+    31/89: $cover$upload_pkt_mux_formal_tb.sv:345$236_EN
+    32/89: $assert$upload_pkt_mux_formal_tb.sv:340$233_EN
+    33/89: $assert$upload_pkt_mux_formal_tb.sv:331$228_EN
+    34/89: $assert$upload_pkt_mux_formal_tb.sv:322$223_EN
+    35/89: $assert$upload_pkt_mux_formal_tb.sv:296$205_EN
+    36/89: $assert$upload_pkt_mux_formal_tb.sv:292$204_EN
+    37/89: $assert$upload_pkt_mux_formal_tb.sv:289$198_EN
+    38/89: $assert$upload_pkt_mux_formal_tb.sv:288$195_EN
+    39/89: $assert$upload_pkt_mux_formal_tb.sv:287$193_EN
+    40/89: $assert$upload_pkt_mux_formal_tb.sv:286$189_EN
+    41/89: $assert$upload_pkt_mux_formal_tb.sv:282$183_EN
+    42/89: $assert$upload_pkt_mux_formal_tb.sv:281$180_EN
+    43/89: $assert$upload_pkt_mux_formal_tb.sv:280$178_EN
+    44/89: $assert$upload_pkt_mux_formal_tb.sv:279$174_EN
+    45/89: $assert$upload_pkt_mux_formal_tb.sv:275$168_EN
+    46/89: $assert$upload_pkt_mux_formal_tb.sv:274$165_EN
+    47/89: $assert$upload_pkt_mux_formal_tb.sv:273$163_EN
+    48/89: $assert$upload_pkt_mux_formal_tb.sv:272$159_EN
+    49/89: $assert$upload_pkt_mux_formal_tb.sv:266$145_EN
+    50/89: $assert$upload_pkt_mux_formal_tb.sv:265$143_EN
+    51/89: $assert$upload_pkt_mux_formal_tb.sv:261$140_EN
+    52/89: $assert$upload_pkt_mux_formal_tb.sv:257$138_EN
+    53/89: $assert$upload_pkt_mux_formal_tb.sv:256$136_EN
+    54/89: $assert$upload_pkt_mux_formal_tb.sv:255$134_EN
+    55/89: $assert$upload_pkt_mux_formal_tb.sv:254$132_EN
+    56/89: $assert$upload_pkt_mux_formal_tb.sv:253$131_EN
+    57/89: $assume$upload_pkt_mux_formal_tb.sv:250$126_EN
+    58/89: $assume$upload_pkt_mux_formal_tb.sv:156$94_EN
+    59/89: $assume$upload_pkt_mux_formal_tb.sv:155$92_EN
+    60/89: $assume$upload_pkt_mux_formal_tb.sv:154$90_EN
+    61/89: $assume$upload_pkt_mux_formal_tb.sv:153$89_EN
+    62/89: $0\frame_channel[1:0]
+    63/89: $0\frame_in_progress[0:0]
+    64/89: $0\req_deadline2[5:0]
+    65/89: $0\req_pending2[0:0]
+    66/89: $0\req_deadline1[5:0]
+    67/89: $0\req_pending1[0:0]
+    68/89: $0\req_deadline0[5:0]
+    69/89: $0\req_pending0[0:0]
+    70/89: $0\out_count2[1:0]
+    71/89: $0\out_count1[1:0]
+    72/89: $0\out_count0[1:0]
+    73/89: $0\in_count2[1:0]
+    74/89: $0\in_count1[1:0]
+    75/89: $0\in_count0[1:0]
+    76/89: $0\src2_beat[0:0]
+    77/89: $0\src2_done[0:0]
+    78/89: $0\src2_started[0:0]
+    79/89: $0\src2_active[0:0]
+    80/89: $0\src1_beat[0:0]
+    81/89: $0\src1_done[0:0]
+    82/89: $0\src1_started[0:0]
+    83/89: $0\src1_active[0:0]
+    84/89: $0\src0_beat[0:0]
+    85/89: $0\src0_done[0:0]
+    86/89: $0\src0_started[0:0]
+    87/89: $0\src0_active[0:0]
+    88/89: $0\f_cycle[5:0]
+    89/89: $0\f_reset_sr[1:0]
+Creating decoders for process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330'.
+     1/3: $0\in_ready1[0:0]
+     2/3: $0\out_payload[39:0]
+     3/3: $0\out_valid[0:0]
+Creating decoders for process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:266$327'.
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:110$18'.
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:109$17'.
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:108$16'.
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:242$15'.
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:212$11'.
+     1/3: $0\in2_ready[0:0]
+     2/3: $0\in1_ready[0:0]
+     3/3: $0\in0_ready[0:0]
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10'.
+     1/3: $1\selected_endofpacket[0:0]
+     2/3: $1\selected_valid[0:0]
+     3/3: $1\selected_payload[37:0]
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:161$3'.
+     1/2: $0\packet_in_progress[0:0]
+     2/2: $0\select[1:0]
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:131$2'.
+     1/13: $13\decision[1:0]
+     2/13: $12\decision[1:0]
+     3/13: $11\decision[1:0]
+     4/13: $10\decision[1:0]
+     5/13: $9\decision[1:0]
+     6/13: $8\decision[1:0]
+     7/13: $7\decision[1:0]
+     8/13: $6\decision[1:0]
+     9/13: $5\decision[1:0]
+    10/13: $4\decision[1:0]
+    11/13: $3\decision[1:0]
+    12/13: $2\decision[1:0]
+    13/13: $1\decision[1:0]
+Creating decoders for process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:122$1'.
+
+4.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\src2_beat_for_out$func$upload_pkt_mux_formal_tb.sv:71$32.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:71$286'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\src2_beat_for_out$func$upload_pkt_mux_formal_tb.sv:71$41.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:71$286'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\src1_beat_for_out$func$upload_pkt_mux_formal_tb.sv:70$31.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:70$281'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\src1_beat_for_out$func$upload_pkt_mux_formal_tb.sv:70$40.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:70$281'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\src0_beat_for_out$func$upload_pkt_mux_formal_tb.sv:69$30.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:69$276'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\src0_beat_for_out$func$upload_pkt_mux_formal_tb.sv:69$39.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:69$276'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:49$29.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:49$270'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:49$38.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:49$270'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:49$38.beat_idx' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:49$270'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:43$28.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:43$264'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:43$37.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:43$264'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:43$37.beat_idx' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:43$264'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:37$27.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:37$258'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:37$36.$result' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:37$258'.
+No latch inferred for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:37$36.beat_idx' from process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:37$258'.
+No latch inferred for signal `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.\in_ready' from process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:266$327'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\out_channel' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:242$15'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\out_valid' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:242$15'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\out_data' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:242$15'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\out_startofpacket' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:242$15'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\out_endofpacket' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:242$15'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\in0_ready' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:212$11'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\in1_ready' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:212$11'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\in2_ready' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:212$11'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\selected_endofpacket' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10'.
+Removing init bit 1'0 for non-memory siginal `\upload_system_v3_upload_pkt_mux.\selected_endofpacket` in process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10`.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\selected_valid' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\selected_payload' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\decision' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:131$2'.
+Removing init bit 1'0 for non-memory siginal `\upload_system_v3_upload_pkt_mux.\decision [0]` in process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:131$2`.
+Removing init bit 1'0 for non-memory siginal `\upload_system_v3_upload_pkt_mux.\decision [1]` in process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:131$2`.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\in0_payload' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:122$1'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\in1_payload' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:122$1'.
+No latch inferred for signal `\upload_system_v3_upload_pkt_mux.\in2_payload' from process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:122$1'.
+
+4.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\upload_pkt_mux_formal_tb.\f_past_valid' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1068' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\f_reset_sr' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1069' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\f_cycle' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1070' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src0_active' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1071' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src0_started' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1072' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src0_done' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1073' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src0_beat' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1074' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src1_active' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1075' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src1_started' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1076' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src1_done' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1077' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src1_beat' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1078' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src2_active' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1079' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src2_started' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1080' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src2_done' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1081' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\src2_beat' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1082' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\in_count0' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1083' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\in_count1' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1084' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\in_count2' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1085' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\out_count0' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1086' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\out_count1' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1087' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\out_count2' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1088' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\req_pending0' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1089' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\req_deadline0' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1090' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\req_pending1' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1091' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\req_deadline1' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1092' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\req_pending2' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1093' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\req_deadline2' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1094' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\out_stall_ctr' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1095' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\prev_out_valid' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1096' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\prev_out_ready' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1097' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\prev_out_data' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1098' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\prev_out_channel' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1099' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\prev_out_sop' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1100' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\prev_out_eop' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1101' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\frame_in_progress' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1102' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\frame_channel' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1103' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.$result' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1104' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:273$33.beat_idx' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1105' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.$result' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1106' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:280$34.beat_idx' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1107' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.$result' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1108' with global clock.
+Creating register for signal `\upload_pkt_mux_formal_tb.\beat_payload$func$upload_pkt_mux_formal_tb.sv:287$35.beat_idx' using process `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+  created $ff cell `$procdff$1109' with global clock.
+Creating register for signal `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.\out_valid' using process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330'.
+  created $adff cell `$procdff$1114' with positive edge clock and positive level reset.
+Creating register for signal `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.\out_payload' using process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330'.
+  created $adff cell `$procdff$1119' with positive edge clock and positive level reset.
+Creating register for signal `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.\in_ready1' using process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330'.
+  created $adff cell `$procdff$1124' with positive edge clock and positive level reset.
+Creating register for signal `\upload_system_v3_upload_pkt_mux.\select' using process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:161$3'.
+  created $adff cell `$procdff$1129' with positive edge clock and positive level reset.
+Creating register for signal `\upload_system_v3_upload_pkt_mux.\packet_in_progress' using process `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:161$3'.
+  created $adff cell `$procdff$1134' with positive edge clock and positive level reset.
+
+4.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+4.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:97$326'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:96$325'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:94$324'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:93$323'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:92$322'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:91$321'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:90$320'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:89$319'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:87$318'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:85$317'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:84$316'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:83$315'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:82$314'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:81$313'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:80$312'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:78$311'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:77$310'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:76$309'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:75$308'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:74$307'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:73$306'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:34$305'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:33$304'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:32$303'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:31$302'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:29$301'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:28$300'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:27$299'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:26$298'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:24$297'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:23$296'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:22$295'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:21$294'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:8$293'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:7$292'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:6$291'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:71$286'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:70$281'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:69$276'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:49$270'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:43$264'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:37$258'.
+Found and cleaned up 30 empty switches in `\upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+Removing empty process `upload_pkt_mux_formal_tb.$proc$upload_pkt_mux_formal_tb.sv:149$81'.
+Found and cleaned up 3 empty switches in `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330'.
+Removing empty process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:272$330'.
+Removing empty process `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:266$327'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:110$18'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:109$17'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:108$16'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:242$15'.
+Found and cleaned up 1 empty switch in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:212$11'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:212$11'.
+Found and cleaned up 1 empty switch in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:183$10'.
+Found and cleaned up 2 empty switches in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:161$3'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:161$3'.
+Found and cleaned up 13 empty switches in `\upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:131$2'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:131$2'.
+Removing empty process `upload_system_v3_upload_pkt_mux.$proc$/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv:122$1'.
+Cleaned up 50 empty switches.
+
+4.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upload_pkt_mux_formal_tb.
+<suppressed ~36 debug messages>
+Optimizing module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+<suppressed ~6 debug messages>
+Optimizing module upload_system_v3_upload_pkt_mux.
+<suppressed ~11 debug messages>
+
+4.3. Executing FUTURE pass.
+
+4.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upload_pkt_mux_formal_tb.
+Optimizing module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+Optimizing module upload_system_v3_upload_pkt_mux.
+
+4.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upload_pkt_mux_formal_tb..
+Finding unused cells or wires in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+Finding unused cells or wires in module \upload_system_v3_upload_pkt_mux..
+Removed 71 unused cells and 530 unused wires.
+<suppressed ~81 debug messages>
+
+4.6. Executing CHECK pass (checking for obvious problems).
+Checking module upload_pkt_mux_formal_tb...
+Warning: Wire upload_pkt_mux_formal_tb.\gclk is used but has no driver.
+Checking module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000...
+Checking module upload_system_v3_upload_pkt_mux...
+Found and reported 1 problems.
+
+4.7. Executing OPT pass (performing simple optimizations).
+
+4.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upload_pkt_mux_formal_tb.
+Optimizing module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+Optimizing module upload_system_v3_upload_pkt_mux.
+
+4.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upload_pkt_mux_formal_tb'.
+Computing hashes of 410 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Computing hashes of 372 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Computing hashes of 363 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+<suppressed ~141 debug messages>
+Finding identical cells in module `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Computing hashes of 8 cells of `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding duplicate cells in `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding identical cells in module `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 75 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 47 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+<suppressed ~84 debug messages>
+Removed a total of 75 cells.
+
+4.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upload_pkt_mux_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \upload_system_v3_upload_pkt_mux..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+    dead port 2/2 on $mux $procmux$1005.
+    dead port 2/2 on $mux $procmux$1046.
+    dead port 1/4 on $pmux $procmux$997.
+    dead port 2/4 on $pmux $procmux$997.
+    dead port 3/4 on $pmux $procmux$997.
+    dead port 2/2 on $mux $procmux$1038.
+    dead port 1/4 on $pmux $procmux$990.
+    dead port 2/4 on $pmux $procmux$990.
+    dead port 3/4 on $pmux $procmux$990.
+    dead port 2/2 on $mux $procmux$1031.
+    dead port 1/4 on $pmux $procmux$982.
+    dead port 2/4 on $pmux $procmux$982.
+    dead port 3/4 on $pmux $procmux$982.
+    dead port 2/2 on $mux $procmux$1024.
+    dead port 2/2 on $mux $procmux$1061.
+    dead port 2/2 on $mux $procmux$1017.
+    dead port 2/2 on $mux $procmux$1011.
+    dead port 2/2 on $mux $procmux$1054.
+Removed 18 multiplexer ports.
+<suppressed ~359 debug messages>
+
+4.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upload_pkt_mux_formal_tb.
+    New ctrl vector for $pmux cell $procmux$526: $auto$opt_reduce.cc:137:opt_pmux$1148
+  Optimizing cells in module \upload_pkt_mux_formal_tb.
+  Optimizing cells in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+  Optimizing cells in module \upload_system_v3_upload_pkt_mux.
+    New ctrl vector for $pmux cell $procmux$953: $auto$opt_reduce.cc:137:opt_pmux$1150
+  Optimizing cells in module \upload_system_v3_upload_pkt_mux.
+Performed a total of 2 changes.
+
+4.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upload_pkt_mux_formal_tb'.
+Computing hashes of 364 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Computing hashes of 341 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Computing hashes of 327 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Computing hashes of 318 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+<suppressed ~138 debug messages>
+Finding identical cells in module `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Computing hashes of 8 cells of `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding duplicate cells in `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding identical cells in module `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 36 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 34 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 32 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+<suppressed ~12 debug messages>
+Removed a total of 50 cells.
+
+4.7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upload_pkt_mux_formal_tb..
+Finding unused cells or wires in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+Finding unused cells or wires in module \upload_system_v3_upload_pkt_mux..
+Removed 0 unused cells and 137 unused wires.
+<suppressed ~2 debug messages>
+
+4.7.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upload_pkt_mux_formal_tb.
+Optimizing module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+Optimizing module upload_system_v3_upload_pkt_mux.
+
+4.7.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.7.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upload_pkt_mux_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \upload_system_v3_upload_pkt_mux..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~257 debug messages>
+
+4.7.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upload_pkt_mux_formal_tb.
+  Optimizing cells in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+  Optimizing cells in module \upload_system_v3_upload_pkt_mux.
+    New ctrl vector for $pmux cell $procmux$1064: { $procmux$1025_CMP $procmux$1006_CMP }
+  Optimizing cells in module \upload_system_v3_upload_pkt_mux.
+Performed a total of 1 changes.
+
+4.7.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upload_pkt_mux_formal_tb'.
+Computing hashes of 318 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Finding identical cells in module `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Computing hashes of 8 cells of `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding duplicate cells in `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding identical cells in module `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 32 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+Removed a total of 0 cells.
+
+4.7.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upload_pkt_mux_formal_tb..
+Finding unused cells or wires in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+Finding unused cells or wires in module \upload_system_v3_upload_pkt_mux..
+Removed 1 unused cells and 1 unused wires.
+<suppressed ~2 debug messages>
+
+4.7.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upload_pkt_mux_formal_tb.
+Optimizing module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+Optimizing module upload_system_v3_upload_pkt_mux.
+
+4.7.14. Rerunning OPT passes. (Maybe there is more to do..)
+
+4.7.15. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \upload_pkt_mux_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \upload_system_v3_upload_pkt_mux..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~251 debug messages>
+
+4.7.16. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \upload_pkt_mux_formal_tb.
+  Optimizing cells in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+  Optimizing cells in module \upload_system_v3_upload_pkt_mux.
+Performed a total of 0 changes.
+
+4.7.17. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upload_pkt_mux_formal_tb'.
+Computing hashes of 318 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Finding identical cells in module `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Computing hashes of 8 cells of `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding duplicate cells in `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding identical cells in module `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 31 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+Removed a total of 0 cells.
+
+4.7.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upload_pkt_mux_formal_tb..
+Finding unused cells or wires in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+Finding unused cells or wires in module \upload_system_v3_upload_pkt_mux..
+
+4.7.19. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upload_pkt_mux_formal_tb.
+Optimizing module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+Optimizing module upload_system_v3_upload_pkt_mux.
+
+4.7.20. Finished fast OPT passes. (There is nothing left to do.)
+
+4.8. Executing WREDUCE pass (reducing word size of cells).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$le$upload_pkt_mux_formal_tb.sv:154$91 ($le).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$le$upload_pkt_mux_formal_tb.sv:155$93 ($le).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$le$upload_pkt_mux_formal_tb.sv:156$95 ($le).
+Removed top 5 bits (of 6) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:163$98 ($add).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:218$114 ($add).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:227$117 ($add).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:236$120 ($add).
+Removed top 3 bits (of 4) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:246$125 ($add).
+Removed top 29 bits (of 32) from port B of cell upload_pkt_mux_formal_tb.$lt$upload_pkt_mux_formal_tb.sv:250$127 ($lt).
+Removed top 2 bits (of 36) from port B of cell upload_pkt_mux_formal_tb.$eq$upload_pkt_mux_formal_tb.sv:273$164 ($eq).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:276$173 ($add).
+Removed top 1 bits (of 36) from port B of cell upload_pkt_mux_formal_tb.$eq$upload_pkt_mux_formal_tb.sv:280$179 ($eq).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:283$188 ($add).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$add$upload_pkt_mux_formal_tb.sv:290$203 ($add).
+Removed top 5 bits (of 6) from port B of cell upload_pkt_mux_formal_tb.$sub$upload_pkt_mux_formal_tb.sv:323$225 ($sub).
+Removed top 5 bits (of 6) from port B of cell upload_pkt_mux_formal_tb.$sub$upload_pkt_mux_formal_tb.sv:332$230 ($sub).
+Removed top 5 bits (of 6) from port B of cell upload_pkt_mux_formal_tb.$sub$upload_pkt_mux_formal_tb.sv:341$235 ($sub).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$eq$upload_pkt_mux_formal_tb.sv:107$279 ($eq).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$eq$upload_pkt_mux_formal_tb.sv:113$284 ($eq).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$eq$upload_pkt_mux_formal_tb.sv:119$289 ($eq).
+Removed top 1 bits (of 2) from port B of cell upload_pkt_mux_formal_tb.$procmux$799_CMP0 ($eq).
+Removed top 2 bits (of 36) from wire upload_pkt_mux_formal_tb.in2_data.
+Removed top 2 bits (of 36) from wire upload_pkt_mux_formal_tb.in1_data.
+Removed top 2 bits (of 36) from wire upload_pkt_mux_formal_tb.in0_data.
+Removed top 1 bits (of 2) from mux cell upload_system_v3_upload_pkt_mux.$procmux$1036 ($mux).
+Removed top 1 bits (of 2) from port B of cell upload_system_v3_upload_pkt_mux.$procmux$1066_CMP0 ($eq).
+Removed top 1 bits (of 2) from wire upload_system_v3_upload_pkt_mux.$5\decision[1:0].
+
+4.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upload_pkt_mux_formal_tb..
+Finding unused cells or wires in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+Finding unused cells or wires in module \upload_system_v3_upload_pkt_mux..
+Removed 0 unused cells and 4 unused wires.
+<suppressed ~2 debug messages>
+
+4.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+4.11. Executing OPT pass (performing simple optimizations).
+
+4.11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module upload_pkt_mux_formal_tb.
+Optimizing module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000.
+Optimizing module upload_system_v3_upload_pkt_mux.
+
+4.11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\upload_pkt_mux_formal_tb'.
+Computing hashes of 318 cells of `\upload_pkt_mux_formal_tb'.
+Finding duplicate cells in `\upload_pkt_mux_formal_tb'.
+Finding identical cells in module `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Computing hashes of 8 cells of `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding duplicate cells in `$paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000'.
+Finding identical cells in module `\upload_system_v3_upload_pkt_mux'.
+Computing hashes of 31 cells of `\upload_system_v3_upload_pkt_mux'.
+Finding duplicate cells in `\upload_system_v3_upload_pkt_mux'.
+Removed a total of 0 cells.
+
+4.11.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \upload_pkt_mux_formal_tb..
+Finding unused cells or wires in module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000..
+Finding unused cells or wires in module \upload_system_v3_upload_pkt_mux..
+
+4.11.4. Finished fast OPT passes.
+
+4.12. Executing SORT pass.
+
+4.13. Printing statistics.
+
+=== $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000 ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       13 wires
+      130 wire bits
+        8 public wires
+       86 public wire bits
+        8 ports
+       86 port bits
+        8 cells
+        2   $adff
+        1   $logic_and
+        1   $logic_or
+        3   $mux
+        1   $not
+
+=== upload_pkt_mux_formal_tb ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      297 wires
+      665 wire bits
+       79 public wires
+      287 public wire bits
+      317 cells
+        8   $add
+        6   $anyconst
+        1   $anyseq
+       36   $check
+       22   $eq
+       33   $ff
+        3   $ge
+        3   $le
+       29   $logic_and
+       22   $logic_not
+        9   $logic_or
+        4   $lt
+      122   $mux
+        5   $ne
+        6   $not
+        4   $reduce_bool
+        1   $reduce_or
+        3   $sub
+        1 submodules
+        1   upload_system_v3_upload_pkt_mux
+
+=== upload_system_v3_upload_pkt_mux ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       57 wires
+      393 wire bits
+       36 public wires
+      365 public wire bits
+       23 ports
+      164 port bits
+       30 cells
+        2   $adff
+        2   $eq
+        3   $logic_and
+        2   $logic_not
+       13   $mux
+        3   $not
+        4   $pmux
+        1   $reduce_or
+        1 submodules
+        1   $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      355 upload_pkt_mux_formal_tb
+       30 upload_system_v3_upload_pkt_mux
+        8   $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000
+
+        +----------Count including submodules.
+        | 
+      367 wires
+     1188 wire bits
+      123 public wires
+      738 public wire bits
+       31 ports
+      250 port bits
+        - memories
+        - memory bits
+        - processes
+      355 cells
+        8   $add
+        4   $adff
+        6   $anyconst
+        1   $anyseq
+       36   $check
+       24   $eq
+       33   $ff
+        3   $ge
+        3   $le
+       33   $logic_and
+       24   $logic_not
+       10   $logic_or
+        4   $lt
+      138   $mux
+        5   $ne
+       10   $not
+        4   $pmux
+        4   $reduce_bool
+        2   $reduce_or
+        3   $sub
+        1 submodules
+        1   upload_system_v3_upload_pkt_mux
+
+4.14. Executing CHECK pass (checking for obvious problems).
+Checking module $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000...
+Checking module upload_pkt_mux_formal_tb...
+Warning: Wire upload_pkt_mux_formal_tb.\gclk is used but has no driver.
+Checking module upload_system_v3_upload_pkt_mux...
+Found and reported 1 problems.
+
+5. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `upload_pkt_mux_formal_tb'. Setting top module to upload_pkt_mux_formal_tb.
+
+5.1. Analyzing design hierarchy..
+Top module:  \upload_pkt_mux_formal_tb
+Used module:     \upload_system_v3_upload_pkt_mux
+Used module:         $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000
+
+5.2. Analyzing design hierarchy..
+Top module:  \upload_pkt_mux_formal_tb
+Used module:     \upload_system_v3_upload_pkt_mux
+Used module:         $paramod\upload_system_v3_upload_pkt_mux_1stage_pipeline\PAYLOAD_WIDTH=s32'00000000000000000000000000101000
+Removed 0 unused modules.
+Module upload_pkt_mux_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+6. Executing jny backend.
+
+7. Executing RTLIL backend.
+Output filename: ../model/design.il
+
+Warnings: 1 unique messages, 2 total
+End of script. Logfile hash: 5078667238, time: 0.06s, user: 0.07s, system: 0.00s, MEM: 18.20 MB peak
+Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+Time spent: 23% 6x read_verilog (0 sec), 17% 6x opt_clean (0 sec), ...

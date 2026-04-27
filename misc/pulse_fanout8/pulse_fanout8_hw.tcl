@@ -36,47 +36,61 @@ set_interface_property inject_in associatedClock clk
 set_interface_property inject_in associatedReset reset
 add_interface_port inject_in coe_inject_pulse pulse Input 1
 
+add_interface inject_aux_in conduit end
+set_interface_property inject_aux_in associatedClock ""
+set_interface_property inject_aux_in associatedReset ""
+add_interface_port inject_aux_in coe_aux_inject_pulse pulse Input 1
+
 add_interface out0 conduit start
 set_interface_property out0 associatedClock clk
 set_interface_property out0 associatedReset reset
 add_interface_port out0 coe_out0_pulse pulse Output 1
+add_interface_port out0 coe_out0_masked_pulse masked_pulse Output 1
 
 add_interface out1 conduit start
 set_interface_property out1 associatedClock clk
 set_interface_property out1 associatedReset reset
 add_interface_port out1 coe_out1_pulse pulse Output 1
+add_interface_port out1 coe_out1_masked_pulse masked_pulse Output 1
 
 add_interface out2 conduit start
 set_interface_property out2 associatedClock clk
 set_interface_property out2 associatedReset reset
 add_interface_port out2 coe_out2_pulse pulse Output 1
+add_interface_port out2 coe_out2_masked_pulse masked_pulse Output 1
 
 add_interface out3 conduit start
 set_interface_property out3 associatedClock clk
 set_interface_property out3 associatedReset reset
 add_interface_port out3 coe_out3_pulse pulse Output 1
+add_interface_port out3 coe_out3_masked_pulse masked_pulse Output 1
 
 add_interface out4 conduit start
 set_interface_property out4 associatedClock clk
 set_interface_property out4 associatedReset reset
 add_interface_port out4 coe_out4_pulse pulse Output 1
+add_interface_port out4 coe_out4_masked_pulse masked_pulse Output 1
 
 add_interface out5 conduit start
 set_interface_property out5 associatedClock clk
 set_interface_property out5 associatedReset reset
 add_interface_port out5 coe_out5_pulse pulse Output 1
+add_interface_port out5 coe_out5_masked_pulse masked_pulse Output 1
 
 add_interface out6 conduit start
 set_interface_property out6 associatedClock clk
 set_interface_property out6 associatedReset reset
 add_interface_port out6 coe_out6_pulse pulse Output 1
+add_interface_port out6 coe_out6_masked_pulse masked_pulse Output 1
 
 add_interface out7 conduit start
 set_interface_property out7 associatedClock clk
 set_interface_property out7 associatedReset reset
 add_interface_port out7 coe_out7_pulse pulse Output 1
+add_interface_port out7 coe_out7_masked_pulse masked_pulse Output 1
 
 add_interface out8 conduit start
 set_interface_property out8 associatedClock clk
 set_interface_property out8 associatedReset reset
 add_interface_port out8 coe_out8_pulse pulse Output 1
+add_interface_port out8 coe_out8_masked_pulse masked_pulse Output 1

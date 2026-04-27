@@ -1,0 +1,37 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading firmware_builds/mutrig_datapath_system_v3.qsys
+Progress: Reading input file
+Progress: Adding backpressure_fifo [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module backpressure_fifo
+Progress: Adding dbg_counter_fab_sclr [dbg_counter_fab 1.0.1]
+Progress: Parameterizing module dbg_counter_fab_sclr
+Progress: Adding debug_clock [altera_clock_bridge 18.1]
+Progress: Parameterizing module debug_clock
+Progress: Adding issp_cnt_sclr [altera_in_system_sources_probes 18.1]
+Progress: Parameterizing module issp_cnt_sclr
+Progress: Adding lvdserr_count_subsystem [avst_errcnt_system 1.0]
+Progress: Parameterizing module lvdserr_count_subsystem
+Progress: Adding mutrig_frame_deassembly_0 [mutrig_frame_deassembly 26.0.5.416]
+Warning: mutrig_frame_deassembly_0: Used mutrig_frame_deassembly 26.0.6.417 (instead of 26.0.5.416)
+Progress: Parameterizing module mutrig_frame_deassembly_0
+Progress: Adding system_clock_reset_interface [clock_source 18.1]
+Progress: Parameterizing module system_clock_reset_interface
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: mutrig_datapath_system_v3.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: mutrig_datapath_system_v3.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: mutrig_datapath_system_v3.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Info: mutrig_datapath_system_v3: Generating mutrig_datapath_system_v3 "mutrig_datapath_system_v3" for QUARTUS_SYNTH
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_system_v3: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: backpressure_fifo: "mutrig_datapath_system_v3" instantiated altera_avalon_sc_fifo "backpressure_fifo"
+Info: mutrig_frame_deassembly_0: "mutrig_datapath_system_v3" instantiated mutrig_frame_deassembly "mutrig_frame_deassembly_0"
+Info: avalon_st_adapter: "mutrig_datapath_system_v3" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: rst_controller: "mutrig_datapath_system_v3" instantiated altera_reset_controller "rst_controller"
+Info: timing_adapter_0: "avalon_st_adapter" instantiated timing_adapter "timing_adapter_0"
+Info: mutrig_datapath_system_v3: Done "mutrig_datapath_system_v3" with 6 modules, 9 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

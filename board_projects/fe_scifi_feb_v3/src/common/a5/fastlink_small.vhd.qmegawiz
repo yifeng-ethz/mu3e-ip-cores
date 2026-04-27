@@ -1,0 +1,27 @@
+-- megafunction wizard: %Arria V Transceiver Native PHY Intel FPGA IP v18.0%
+-- GENERATION: XML
+-- Retrieval info: <?xml version="1.0"?>
+-- Retrieval info: <instance entity-name="altera_xcvr_native_av" version="18.0" >
+-- Retrieval info: 	<generic name="device_family" value="Arria V" />
+-- Retrieval info: 	<generic name="device_speedgrade" value="5_H4" />
+-- Retrieval info: 	<generic name="rx_enable" value="0" />
+-- Retrieval info: 	<generic name="enable_std" value="1" />
+-- Retrieval info: 	<generic name="channels" value="4" />
+-- Retrieval info: 	<generic name="enable_simple_interface" value="1" />
+-- Retrieval info: 	<generic name="set_data_rate" value="6250" />
+-- Retrieval info: 	<generic name="enable_port_rx_pma_clkout" value="0" />
+-- Retrieval info: 	<generic name="enable_ports_rx_manual_cdr_mode" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_seriallpbken" value="1" />
+-- Retrieval info: 	<generic name="std_pcs_pma_width" value="20" />
+-- Retrieval info: 	<generic name="std_tx_byte_ser_enable" value="1" />
+-- Retrieval info: 	<generic name="std_rx_byte_deser_enable" value="1" />
+-- Retrieval info: 	<generic name="std_tx_8b10b_enable" value="1" />
+-- Retrieval info: 	<generic name="std_rx_8b10b_enable" value="1" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_mode" value="manual" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_pattern_len" value="10" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_pattern" value="17C" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_wa_patternalign" value="1" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll0_refclk_freq" value="156.25 MHz" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll0_clk_network" value="xN" />
+-- Retrieval info: </instance>
+-- IPFS_FILES : fastlink_small.vho

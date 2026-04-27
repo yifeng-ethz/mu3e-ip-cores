@@ -1,0 +1,181 @@
+<session sof_file="">
+  <display_tree gui_logging_enabled="0">
+    <display_branch instance="pipe_sc_156_lite" signal_set="pipe_sc_156_lite" trigger="sc_156_fifo_wrreq" />
+  </display_tree>
+  <global_info>
+    <single attribute="active instance" value="0" />
+    <single attribute="lock mode" value="0" />
+    <multi attribute="frame size" size="2" value="1680,981" />
+    <single attribute="jtag widget visible" value="1" />
+    <multi attribute="jtag widget size" size="2" value="398,160" />
+    <single attribute="instance widget visible" value="1" />
+    <single attribute="config widget visible" value="1" />
+    <single attribute="hierarchy widget visible" value="1" />
+    <single attribute="data log widget visible" value="1" />
+  </global_info>
+  <instance enabled="true" entity_name="sld_signaltap" is_auto_node="yes" name="pipe_sc_156_lite" source_file="sld_signaltap.vhd">
+    <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6" />
+    <position_info>
+      <single attribute="active tab" value="1" />
+      <single attribute="setup vertical scroll position" value="0" />
+      <single attribute="setup horizontal scroll position" value="0" />
+    </position_info>
+    <signal_set name="pipe_sc_156_lite">
+      <!--Generated 2026/04/24 09:42:51 UTC-->
+      <clock name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_clk" polarity="posedge" tap_mode="classic" />
+      <config pipeline_level="0" ram_type="AUTO" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="512" trigger_in_enable="no" trigger_out_enable="no" />
+      <top_entity />
+      <signal_vec>
+        <trigger_input_vec>
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" tap_mode="classic" />
+        </trigger_input_vec>
+        <data_input_vec>
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" tap_mode="classic" />
+        </data_input_vec>
+        <storage_qualifier_input_vec>
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" tap_mode="classic" />
+          <wire name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" tap_mode="classic" />
+        </storage_qualifier_input_vec>
+      </signal_vec>
+      <presentation>
+        <unified_setup_data_view>
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" tap_mode="classic" type="unknown" />
+          <node duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" tap_mode="classic" type="unknown" />
+        </unified_setup_data_view>
+        <data_view>
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" tap_mode="classic" type="unknown" data_index="0" storage_index="0" trigger_index="0" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" tap_mode="classic" type="unknown" data_index="1" storage_index="1" trigger_index="1" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" tap_mode="classic" type="unknown" data_index="2" storage_index="2" trigger_index="2" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" tap_mode="classic" type="unknown" data_index="3" storage_index="3" trigger_index="3" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" tap_mode="classic" type="unknown" data_index="4" storage_index="4" trigger_index="4" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" tap_mode="classic" type="unknown" data_index="5" storage_index="5" trigger_index="5" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" tap_mode="classic" type="unknown" data_index="6" storage_index="6" trigger_index="6" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" tap_mode="classic" type="unknown" data_index="7" storage_index="7" trigger_index="7" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" tap_mode="classic" type="unknown" data_index="8" storage_index="8" trigger_index="8" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" tap_mode="classic" type="unknown" data_index="9" storage_index="9" trigger_index="9" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" tap_mode="classic" type="unknown" data_index="10" storage_index="10" trigger_index="10" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" tap_mode="classic" type="unknown" data_index="11" storage_index="11" trigger_index="11" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" tap_mode="classic" type="unknown" data_index="12" storage_index="12" trigger_index="12" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" tap_mode="classic" type="unknown" data_index="13" storage_index="13" trigger_index="13" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" tap_mode="classic" type="unknown" data_index="14" storage_index="14" trigger_index="14" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" tap_mode="classic" type="unknown" data_index="15" storage_index="15" trigger_index="15" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" tap_mode="classic" type="unknown" data_index="16" storage_index="16" trigger_index="16" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" tap_mode="classic" type="unknown" data_index="17" storage_index="17" trigger_index="17" />
+        </data_view>
+        <setup_view>
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" tap_mode="classic" type="unknown" data_index="0" storage_index="0" trigger_index="0" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" tap_mode="classic" type="unknown" data_index="1" storage_index="1" trigger_index="1" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" tap_mode="classic" type="unknown" data_index="2" storage_index="2" trigger_index="2" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" tap_mode="classic" type="unknown" data_index="3" storage_index="3" trigger_index="3" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" tap_mode="classic" type="unknown" data_index="4" storage_index="4" trigger_index="4" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" tap_mode="classic" type="unknown" data_index="5" storage_index="5" trigger_index="5" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" tap_mode="classic" type="unknown" data_index="6" storage_index="6" trigger_index="6" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" tap_mode="classic" type="unknown" data_index="7" storage_index="7" trigger_index="7" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" tap_mode="classic" type="unknown" data_index="8" storage_index="8" trigger_index="8" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" tap_mode="classic" type="unknown" data_index="9" storage_index="9" trigger_index="9" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" tap_mode="classic" type="unknown" data_index="10" storage_index="10" trigger_index="10" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" tap_mode="classic" type="unknown" data_index="11" storage_index="11" trigger_index="11" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" tap_mode="classic" type="unknown" data_index="12" storage_index="12" trigger_index="12" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" tap_mode="classic" type="unknown" data_index="13" storage_index="13" trigger_index="13" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" tap_mode="classic" type="unknown" data_index="14" storage_index="14" trigger_index="14" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" tap_mode="classic" type="unknown" data_index="15" storage_index="15" trigger_index="15" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" tap_mode="classic" type="unknown" data_index="16" storage_index="16" trigger_index="16" />
+          <net duplicate_name_allowed="false" is_data_input="true" is_node_valid="true" is_storage_input="true" is_trigger_input="true" name="feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" tap_mode="classic" type="unknown" data_index="17" storage_index="17" trigger_index="17" />
+        </setup_view>
+        <trigger_in_editor />
+        <trigger_out_editor />
+      </presentation>
+      <trigger attribute_mem_mode="false" gap_record="true" name="sc_156_fifo_wrreq" position="pre" power_up_trigger_mode="false" record_data_gap="true" segment_size="1" storage_mode="off" storage_qualifier_disabled="no" storage_qualifier_port_is_pin="true" storage_qualifier_port_name="auto_stp_external_storage_qualifier" storage_qualifier_port_tap_mode="classic" trigger_type="circular">
+        <power_up_trigger position="pre" storage_qualifier_disabled="no" />
+        <events use_custom_flow_control="no">
+          <level enabled="yes" name="condition1" type="basic">'feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq' == high<power_up enabled="yes" />
+            <op_node />
+          </level>
+        </events>
+        <storage_qualifier_events>
+          <transitional>111111111111111111<pwr_up_transitional>111111111111111111</pwr_up_transitional>
+          </transitional>
+          <storage_qualifier_level type="basic">
+            <power_up />
+            <op_node />
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up />
+            <op_node />
+          </storage_qualifier_level>
+          <storage_qualifier_level type="basic">
+            <power_up />
+            <op_node />
+          </storage_qualifier_level>
+        </storage_qualifier_events>
+      </trigger>
+    </signal_set>
+  </instance>
+  <mnemonics />
+</session>

@@ -1,0 +1,699 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.04.25.05:10:49 Info: Saving generation log to /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/feb_system_v3_pipe_generation.rpt
+2026.04.25.05:10:49 Info: Starting: <b>Create HDL design files for synthesis</b>
+2026.04.25.05:10:49 Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+2026.04.25.05:10:49 Info: Loading firmware_builds/feb_system_v3_pipe.qsys
+2026.04.25.05:10:49 Info: Reading input file
+2026.04.25.05:10:49 Info: Adding cclk156_bridge [altera_clock_bridge 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module cclk156_bridge
+2026.04.25.05:10:49 Info: Adding cclk156_source [clock_source 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module cclk156_source
+2026.04.25.05:10:49 Info: Adding control_path_subsystem [debug_sc_system_v3 1.0]
+2026.04.25.05:10:49 Info: Parameterizing module control_path_subsystem
+2026.04.25.05:10:49 Info: Adding bringup_subsystem [feb_bringup_system 1.0]
+2026.04.25.05:10:49 Info: Parameterizing module bringup_subsystem
+2026.04.25.05:10:49 Info: Adding data_path_subsystem [scifi_datapath_system_v3_pipe 1.0]
+2026.04.25.05:10:49 Info: Parameterizing module data_path_subsystem
+2026.04.25.05:10:49 Info: Adding ext_reset_merge_cclk156 [altera_reset_controller 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module ext_reset_merge_cclk156
+2026.04.25.05:10:49 Info: Adding control_reset_sync_125 [altera_reset_controller 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module control_reset_sync_125
+2026.04.25.05:10:49 Info: Adding ext_reset_pipe1_cclk156 [altera_reset_bridge 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module ext_reset_pipe1_cclk156
+2026.04.25.05:10:49 Info: Adding ext_reset_pipe2_cclk156 [altera_reset_bridge 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module ext_reset_pipe2_cclk156
+2026.04.25.05:10:49 Info: Adding mclk125_souce [clock_source 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module mclk125_souce
+2026.04.25.05:10:49 Info: Adding osc50_source [altera_clock_bridge 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module osc50_source
+2026.04.25.05:10:49 Info: Adding osc50_reset_bridge [altera_reset_bridge 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module osc50_reset_bridge
+2026.04.25.05:10:49 Info: Adding upload_lvds_reset_bridge [altera_reset_bridge 18.1]
+2026.04.25.05:10:49 Info: Parameterizing module upload_lvds_reset_bridge
+2026.04.25.05:10:49 Info: Adding upload_subsystem [upload_system_v3 1.0]
+2026.04.25.05:10:49 Info: Parameterizing module upload_subsystem
+2026.04.25.05:10:49 Info: Building connections
+2026.04.25.05:10:49 Info: Parameterizing connections
+2026.04.25.05:10:49 Info: Validating
+2026.04.25.05:10:50 Info: Done reading input file
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.control_path_subsystem.mutrig_cfg_ctrl_0.sclr_counter_req: Associated reset sinks not declared
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.control_path_subsystem.on_die_temp_sense_ctrl.clr: Associated reset sinks not declared
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.control_path_subsystem.pll_156t40: The legal reference clock frequency is 5.0 MHz..750.0 MHz
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.control_path_subsystem.pll_156t40: Able to implement PLL with user settings
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.control_path_subsystem.sc_hub: EXT_UP_PLD_DEPTH (512) < EFFECTIVE_EXT_OUTSTANDING x MAX_BURST  (6 x 256 = 1536). Credit manager will limit effective  read outstanding to ~2 for max-burst reads. This is  normal and validated by TLM CRED-03.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.control_path_subsystem.pll_156t40: <b>pll_156t40.locked</b> must be exported, or connected to a matching conduit.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.bringup_subsystem.jtag_uart: JTAG UART IP input clock need to be at least double (2x) the operating frequency of JTAG TCK on board
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.bringup_subsystem.si_in: PIO inputs are not hardwired in test bench. Undefined values will be read from PIO inputs during simulation.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.bringup_subsystem.sysid: System ID is not assigned automatically. Edit the System ID parameter to provide a unique ID
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.bringup_subsystem.sysid: Time stamp will be automatically updated when this component is generated.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.bringup_subsystem.dbg0: <b>dbg0.external_connection</b> must be exported, or connected to a matching conduit.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.bringup_subsystem.dbg1: <b>dbg1.external_connection</b> must be exported, or connected to a matching conduit.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.bringup_subsystem.pio: <b>pio.external_connection</b> must be exported, or connected to a matching conduit.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.bringup_subsystem.timer_ts: Interrupt sender <b>timer_ts.irq</b> is not connected to an interrupt receiver
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0: lvds_rx_controller_pro: file generation successful!
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_0.hit_type0_in: Signal <b>asi_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1.hit_type0_in: Signal <b>asi_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_0.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_1.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_2.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_3.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_4.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_5.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_6.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_7.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.hit_type3/hist_post_splitter_0.in: The sink has a empty signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out0/histogram_statistics_0.ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.hist_post_splitter_0.out1/hist_post_cdc_0.in: The source has a empty signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out1/mts_preprocessor_0.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out10/mutrig_datapath_subsystem_6.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out11/mutrig_datapath_subsystem_7.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out12/mts_preprocessor_1.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out13/mutrig_injector_0.runctl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out14/hit_stack_subsystem_1.run_control_signal: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out15/emulator_ctrl_splitter.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out2/mutrig_datapath_subsystem_0.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out3/mutrig_datapath_subsystem_1.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out4/mutrig_datapath_subsystem_2.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out5/mutrig_datapath_subsystem_3.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out6/hit_stack_subsystem_0.run_control_signal: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out7/mutrig_reset_controller_0.runcontrol: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out8/mutrig_datapath_subsystem_4.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out9/mutrig_datapath_subsystem_5.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_0.tx8b1k/decoded_lane_mux_0.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_1.tx8b1k/decoded_lane_mux_1.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_2.tx8b1k/decoded_lane_mux_2.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_3.tx8b1k/decoded_lane_mux_3.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_4.tx8b1k/decoded_lane_mux_4.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_5.tx8b1k/decoded_lane_mux_5.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_6.tx8b1k/decoded_lane_mux_6.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_7.tx8b1k/decoded_lane_mux_7.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.dbg_mm2runctrl_0.ctrl: <b>dbg_mm2runctrl_0.ctrl</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.histogram_ingress_bridge_0.post_out: <b>histogram_ingress_bridge_0.post_out</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.histogram_statistics_0.fill_out: <b>histogram_statistics_0.fill_out</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_burst: <b>hit_stack_subsystem_0.frame_debug_burst</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_delay8loss: <b>hit_stack_subsystem_0.frame_debug_delay8loss</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_filllevel: <b>hit_stack_subsystem_0.frame_debug_filllevel</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_loss8fill: <b>hit_stack_subsystem_0.frame_debug_loss8fill</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_ts: <b>hit_stack_subsystem_0.frame_debug_ts</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_ts_delta: <b>hit_stack_subsystem_0.frame_ts_delta</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_burst: <b>hit_stack_subsystem_1.frame_debug_burst</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_delay8loss: <b>hit_stack_subsystem_1.frame_debug_delay8loss</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_filllevel: <b>hit_stack_subsystem_1.frame_debug_filllevel</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_loss8fill: <b>hit_stack_subsystem_1.frame_debug_loss8fill</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_ts: <b>hit_stack_subsystem_1.frame_debug_ts</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_ts_delta: <b>hit_stack_subsystem_1.frame_ts_delta</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_0_filllevel</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_1_filllevel</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_2_filllevel</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_3_filllevel</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_0.debug_ts: <b>mts_preprocessor_0.debug_ts</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1.debug_ts: <b>mts_preprocessor_1.debug_ts</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1.debug_burst: <b>mts_preprocessor_1.debug_burst</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1.ts_delta: <b>mts_preprocessor_1.ts_delta</b> must be connected to an Avalon-ST sink
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.: You have exported the interface run_control_splitter.in but not its associated reset interface.  Export the driver(s) of run_control_splitter.reset
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.runctl_mgmt_host: Interface must have an associated reset
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.upload_subsystem.runctl_mgmt_host_0.dp_hard_reset: No synchronous edges, but has associated clock
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.upload_subsystem.runctl_mgmt_host_0.ct_hard_reset: No synchronous edges, but has associated clock
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.upload_subsystem.runctl_mgmt_host_0.ext_hard_reset: No synchronous edges, but has associated clock
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.upload_subsystem.control_plane_hard_reset: No synchronous edges, but has associated clock
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.upload_subsystem.data_path_hard_reset: No synchronous edges, but has associated clock
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.upload_subsystem.ext_hard_reset: No synchronous edges, but has associated clock
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.hit_type3_upper/upload_subsystem.upload_data: The source has a empty signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.rstlink/upload_subsystem.synclink: Max channel is 9 for source and 0 for sink. Avalon-ST Adapter will be inserted..
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.data_path_subsystem.rstlink/upload_subsystem.synclink: The source has a channel signal of 4 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Info: feb_system_v3_pipe.upload_subsystem.runctl_mgmt_host/data_path_subsystem.runctl_mgmt_host: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.mclk125_souce: <b>mclk125_souce.clk</b> cannot be both connected and exported
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem: <b>data_path_subsystem.inject_aux</b> must be exported, or connected to a matching conduit.
+2026.04.25.05:10:51 Warning: feb_system_v3_pipe.data_path_subsystem.runctl_mgmt_host: <b>data_path_subsystem.runctl_mgmt_host</b> does not have an associated reset
+2026.04.25.05:10:52 Info: feb_system_v3_pipe: Generating <b>feb_system_v3_pipe</b> "<b>feb_system_v3_pipe</b>" for QUARTUS_SYNTH
+2026.04.25.05:10:53 Info: Interconnect is inserted between master control_path_subsystem.avmm_port and slave data_path_subsystem.avmm_port because the master has response signal 2 bit wide, but the slave is 0 bit wide.
+2026.04.25.05:10:53 Info: Interconnect is inserted between master control_path_subsystem.avmm_port and slave data_path_subsystem.avmm_port because the master has burstcount signal 1 bit wide, but the slave is 9 bit wide.
+2026.04.25.05:10:53 Info: Interconnect is inserted between master control_path_subsystem.upload_avmm_port and slave upload_subsystem.csr because they have different clock source.
+2026.04.25.05:10:53 Info: Inserting clock-crossing logic between cmd_demux.src0 and cmd_mux.sink0
+2026.04.25.05:10:53 Info: Inserting clock-crossing logic between rsp_demux.src0 and rsp_mux.sink0
+2026.04.25.05:10:53 Info: avalon_st_adapter: Inserting data_format_adapter: data_format_adapter_0
+2026.04.25.05:10:53 Info: avalon_st_adapter_001: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:10:53 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:10:53 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:10:53 Info: avalon_st_adapter_002: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:10:55 Info: Inserting clock-crossing logic between cmd_demux_001.src4 and cmd_mux_004.sink0
+2026.04.25.05:10:55 Info: Inserting clock-crossing logic between cmd_demux_002.src3 and cmd_mux_004.sink1
+2026.04.25.05:10:55 Info: Inserting clock-crossing logic between rsp_demux_004.src0 and rsp_mux_001.sink4
+2026.04.25.05:10:55 Info: Inserting clock-crossing logic between rsp_demux_004.src1 and rsp_mux_002.sink3
+2026.04.25.05:10:56 Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has address signal 18 bit wide, but the slave is 16 bit wide.
+2026.04.25.05:10:56 Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has writeresponsevalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.04.25.05:10:56 Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has burstcount signal 9 bit wide, but the slave is 1 bit wide.
+2026.04.25.05:10:57 Warning: control_path_subsystem: "No matching role found for mutrig_cfg_ctrl_0:avmm_cnt:avm_cnt_flush (flush)"
+2026.04.25.05:10:57 Info: control_path_subsystem: "<b>feb_system_v3_pipe</b>" instantiated <b>debug_sc_system_v3</b> "<b>control_path_subsystem</b>"
+2026.04.25.05:10:58 Info: bringup_subsystem: "<b>feb_system_v3_pipe</b>" instantiated <b>feb_bringup_system</b> "<b>bringup_subsystem</b>"
+2026.04.25.05:10:59 Info: Inserting clock-crossing logic between cmd_demux.src19 and cmd_mux_019.sink0
+2026.04.25.05:10:59 Info: Inserting clock-crossing logic between cmd_demux.src42 and cmd_mux_042.sink0
+2026.04.25.05:10:59 Info: Inserting clock-crossing logic between cmd_demux_001.src0 and cmd_mux.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src1 and cmd_mux_001.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src2 and cmd_mux_002.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src3 and cmd_mux_003.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src4 and cmd_mux_004.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src5 and cmd_mux_005.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src6 and cmd_mux_006.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src7 and cmd_mux_007.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src8 and cmd_mux_008.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src9 and cmd_mux_009.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src10 and cmd_mux_010.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src11 and cmd_mux_011.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src12 and cmd_mux_012.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src13 and cmd_mux_013.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src14 and cmd_mux_014.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src15 and cmd_mux_015.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src16 and cmd_mux_016.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src17 and cmd_mux_017.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src18 and cmd_mux_018.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src20 and cmd_mux_020.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src21 and cmd_mux_021.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src22 and cmd_mux_022.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src23 and cmd_mux_023.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src24 and cmd_mux_024.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src25 and cmd_mux_025.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src26 and cmd_mux_026.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src27 and cmd_mux_027.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src28 and cmd_mux_028.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src29 and cmd_mux_029.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src30 and cmd_mux_030.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src31 and cmd_mux_031.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src32 and cmd_mux_032.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src33 and cmd_mux_033.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src34 and cmd_mux_034.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src35 and cmd_mux_035.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src36 and cmd_mux_036.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src37 and cmd_mux_037.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src38 and cmd_mux_038.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src39 and cmd_mux_039.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src40 and cmd_mux_040.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between cmd_demux_001.src41 and cmd_mux_041.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux.src1 and rsp_mux_001.sink0
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_001.src1 and rsp_mux_001.sink1
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_002.src1 and rsp_mux_001.sink2
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_003.src1 and rsp_mux_001.sink3
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_004.src1 and rsp_mux_001.sink4
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_005.src1 and rsp_mux_001.sink5
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_006.src1 and rsp_mux_001.sink6
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_007.src1 and rsp_mux_001.sink7
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_008.src1 and rsp_mux_001.sink8
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_009.src1 and rsp_mux_001.sink9
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_010.src1 and rsp_mux_001.sink10
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_011.src1 and rsp_mux_001.sink11
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_012.src1 and rsp_mux_001.sink12
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_013.src1 and rsp_mux_001.sink13
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_014.src1 and rsp_mux_001.sink14
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_015.src1 and rsp_mux_001.sink15
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_016.src1 and rsp_mux_001.sink16
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_017.src1 and rsp_mux_001.sink17
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_018.src1 and rsp_mux_001.sink18
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_019.src0 and rsp_mux.sink19
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_020.src1 and rsp_mux_001.sink20
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_021.src1 and rsp_mux_001.sink21
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_022.src1 and rsp_mux_001.sink22
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_023.src1 and rsp_mux_001.sink23
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_024.src1 and rsp_mux_001.sink24
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_025.src1 and rsp_mux_001.sink25
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_026.src1 and rsp_mux_001.sink26
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_027.src1 and rsp_mux_001.sink27
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_028.src1 and rsp_mux_001.sink28
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_029.src1 and rsp_mux_001.sink29
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_030.src1 and rsp_mux_001.sink30
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_031.src1 and rsp_mux_001.sink31
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_032.src1 and rsp_mux_001.sink32
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_033.src1 and rsp_mux_001.sink33
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_034.src1 and rsp_mux_001.sink34
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_035.src1 and rsp_mux_001.sink35
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_036.src1 and rsp_mux_001.sink36
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_037.src1 and rsp_mux_001.sink37
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_038.src1 and rsp_mux_001.sink38
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_039.src1 and rsp_mux_001.sink39
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_040.src1 and rsp_mux_001.sink40
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_041.src1 and rsp_mux_001.sink41
+2026.04.25.05:11:00 Info: Inserting clock-crossing logic between rsp_demux_042.src0 and rsp_mux.sink42
+2026.04.25.05:11:02 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.04.25.05:11:02 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.04.25.05:11:02 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.04.25.05:11:02 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.04.25.05:11:02 Info: avalon_st_adapter: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_001: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_002: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_002: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_002: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_003: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_003: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_003: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_004: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_004: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_004: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_005: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_005: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_005: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_006: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_006: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_006: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_007: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_007: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_007: Inserting timing_adapter: timing_adapter_1
+2026.04.25.05:11:02 Info: avalon_st_adapter_008: Inserting data_format_adapter: data_format_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_009: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_009: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_010: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_010: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_011: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_011: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_012: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_012: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_013: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_013: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_014: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_014: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_015: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_015: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_016: Inserting channel_adapter: channel_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_016: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_017: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:02 Info: avalon_st_adapter_018: Inserting data_format_adapter: data_format_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_019: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_020: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_021: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_022: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_023: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_024: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_025: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_026: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_027: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_028: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_029: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_030: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_031: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_032: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_033: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_034: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_035: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_036: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_037: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_038: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_039: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_040: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:03 Info: avalon_st_adapter_041: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:05 Warning: data_path_subsystem: "No matching role found for mts_preprocessor_0:hit_type0_in:asi_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:05 Warning: data_path_subsystem: "No matching role found for mts_preprocessor_1:hit_type0_in:asi_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:08 Info: data_path_subsystem: "<b>feb_system_v3_pipe</b>" instantiated <b>scifi_datapath_system_v3_pipe</b> "<b>data_path_subsystem</b>"
+2026.04.25.05:11:08 Info: ext_reset_merge_cclk156: "<b>feb_system_v3_pipe</b>" instantiated <b>altera_reset_controller</b> "<b>ext_reset_merge_cclk156</b>"
+2026.04.25.05:11:08 Info: upload_subsystem: "<b>feb_system_v3_pipe</b>" instantiated <b>upload_system_v3</b> "<b>upload_subsystem</b>"
+2026.04.25.05:11:08 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:08 Info: mm_interconnect_0: "<b>feb_system_v3_pipe</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.04.25.05:11:08 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:09 Info: mm_interconnect_1: "<b>feb_system_v3_pipe</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_1</b>"
+2026.04.25.05:11:09 Info: avalon_st_adapter: "<b>feb_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.04.25.05:11:09 Info: avalon_st_adapter_001: "<b>feb_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_001</b>"
+2026.04.25.05:11:09 Info: avalon_st_adapter_002: "<b>feb_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_002</b>"
+2026.04.25.05:11:09 Info: charge_injection_pulser_0: "<b>control_path_subsystem</b>" instantiated <b>charge_injection_pulser</b> "<b>charge_injection_pulser_0</b>"
+2026.04.25.05:11:09 Info: pll_reset_inactive: "<b>control_path_subsystem</b>" instantiated <b>inactive_reset_source</b> "<b>pll_reset_inactive</b>"
+2026.04.25.05:11:09 Info: firefly_xcvr_ctrl_0: "<b>control_path_subsystem</b>" instantiated <b>firefly_xcvr_ctrl</b> "<b>firefly_xcvr_ctrl_0</b>"
+2026.04.25.05:11:09 Info: jtag_master: "<b>control_path_subsystem</b>" instantiated <b>altera_jtag_avalon_master</b> "<b>jtag_master</b>"
+2026.04.25.05:11:09 Info: legacy_firefly_bridge: "<b>control_path_subsystem</b>" instantiated <b>altera_avalon_mm_bridge</b> "<b>legacy_firefly_bridge</b>"
+2026.04.25.05:11:09 Info: max10_prog_avmm_0: "<b>control_path_subsystem</b>" instantiated <b>max10_prog_avmm</b> "<b>max10_prog_avmm_0</b>"
+2026.04.25.05:11:09 Info: mutrig_cfg_ctrl_0: "<b>control_path_subsystem</b>" instantiated <b>mutrig_cfg_ctrl</b> "<b>mutrig_cfg_ctrl_0</b>"
+2026.04.25.05:11:09 Info: on_die_temp_sense: Generating top-level entity feb_system_v3_pipe_control_path_subsystem_on_die_temp_sense.
+2026.04.25.05:11:09 Info: on_die_temp_sense: "<b>control_path_subsystem</b>" instantiated <b>altera_temp_sense</b> "<b>on_die_temp_sense</b>"
+2026.04.25.05:11:09 Info: on_die_temp_sense_ctrl: "<b>control_path_subsystem</b>" instantiated <b>altera_temp_sense_ctrl</b> "<b>on_die_temp_sense_ctrl</b>"
+2026.04.25.05:11:09 Info: onewire_master_0: "<b>control_path_subsystem</b>" instantiated <b>onewire_master</b> "<b>onewire_master_0</b>"
+2026.04.25.05:11:09 Info: onewire_master_controller_0: "<b>control_path_subsystem</b>" instantiated <b>onewire_master_controller</b> "<b>onewire_master_controller_0</b>"
+2026.04.25.05:11:09 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/pseudo_clock_down_convertor.vhd</b>
+2026.04.25.05:11:09 Info: pll_156t40: "<b>control_path_subsystem</b>" instantiated <b>altera_pll</b> "<b>pll_156t40</b>"
+2026.04.25.05:11:09 Info: sc_hub: "<b>control_path_subsystem</b>" instantiated <b>sc_hub_v2</b> "<b>sc_hub</b>"
+2026.04.25.05:11:09 Info: scratch_pad_ram: Starting RTL generation for module 'feb_system_v3_pipe_control_path_subsystem_scratch_pad_ram'
+2026.04.25.05:11:09 Info: scratch_pad_ram:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=feb_system_v3_pipe_control_path_subsystem_scratch_pad_ram --dir=/tmp/alt0568_5328384710406018213.dir/0015_scratch_pad_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0015_scratch_pad_ram_gen//feb_system_v3_pipe_control_path_subsystem_scratch_pad_ram_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:09 Info: scratch_pad_ram: Done RTL generation for module 'feb_system_v3_pipe_control_path_subsystem_scratch_pad_ram'
+2026.04.25.05:11:09 Info: scratch_pad_ram: "<b>control_path_subsystem</b>" instantiated <b>altera_avalon_onchip_memory2</b> "<b>scratch_pad_ram</b>"
+2026.04.25.05:11:09 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: mm_interconnect_0: "<b>control_path_subsystem</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.04.25.05:11:10 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:10 Info: mm_interconnect_2: "<b>control_path_subsystem</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_2</b>"
+2026.04.25.05:11:10 Info: irq_mapper: "<b>control_path_subsystem</b>" instantiated <b>altera_irq_mapper</b> "<b>irq_mapper</b>"
+2026.04.25.05:11:10 Info: cpu: "<b>bringup_subsystem</b>" instantiated <b>altera_nios2_gen2</b> "<b>cpu</b>"
+2026.04.25.05:11:10 Info: dbg0: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_dbg0'
+2026.04.25.05:11:10 Info: dbg0:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=feb_system_v3_pipe_bringup_subsystem_dbg0 --dir=/tmp/alt0568_5328384710406018213.dir/0017_dbg0_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0017_dbg0_gen//feb_system_v3_pipe_bringup_subsystem_dbg0_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:10 Info: dbg0: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_dbg0'
+2026.04.25.05:11:10 Info: dbg0: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_pio</b> "<b>dbg0</b>"
+2026.04.25.05:11:10 Info: jtag_uart: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_jtag_uart'
+2026.04.25.05:11:10 Info: jtag_uart:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=feb_system_v3_pipe_bringup_subsystem_jtag_uart --dir=/tmp/alt0568_5328384710406018213.dir/0018_jtag_uart_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0018_jtag_uart_gen//feb_system_v3_pipe_bringup_subsystem_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:10 Info: jtag_uart: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_jtag_uart'
+2026.04.25.05:11:10 Info: jtag_uart: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_jtag_uart</b> "<b>jtag_uart</b>"
+2026.04.25.05:11:10 Info: ram: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_ram'
+2026.04.25.05:11:10 Info: ram:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=feb_system_v3_pipe_bringup_subsystem_ram --dir=/tmp/alt0568_5328384710406018213.dir/0019_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0019_ram_gen//feb_system_v3_pipe_bringup_subsystem_ram_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:11 Info: ram: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_ram'
+2026.04.25.05:11:11 Info: ram: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_onchip_memory2</b> "<b>ram</b>"
+2026.04.25.05:11:11 Info: si_in: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_si_in'
+2026.04.25.05:11:11 Info: si_in:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=feb_system_v3_pipe_bringup_subsystem_si_in --dir=/tmp/alt0568_5328384710406018213.dir/0020_si_in_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0020_si_in_gen//feb_system_v3_pipe_bringup_subsystem_si_in_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:11 Info: si_in: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_si_in'
+2026.04.25.05:11:11 Info: si_in: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_pio</b> "<b>si_in</b>"
+2026.04.25.05:11:11 Info: si_out: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_si_out'
+2026.04.25.05:11:11 Info: si_out:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=feb_system_v3_pipe_bringup_subsystem_si_out --dir=/tmp/alt0568_5328384710406018213.dir/0021_si_out_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0021_si_out_gen//feb_system_v3_pipe_bringup_subsystem_si_out_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:11 Info: si_out: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_si_out'
+2026.04.25.05:11:11 Info: si_out: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_pio</b> "<b>si_out</b>"
+2026.04.25.05:11:11 Info: sysid: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_sysid_qsys</b> "<b>sysid</b>"
+2026.04.25.05:11:11 Info: timer: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_timer'
+2026.04.25.05:11:11 Info: timer:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=feb_system_v3_pipe_bringup_subsystem_timer --dir=/tmp/alt0568_5328384710406018213.dir/0023_timer_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0023_timer_gen//feb_system_v3_pipe_bringup_subsystem_timer_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:11 Info: timer: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_timer'
+2026.04.25.05:11:11 Info: timer: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_timer</b> "<b>timer</b>"
+2026.04.25.05:11:11 Info: timer_ts: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_timer_ts'
+2026.04.25.05:11:11 Info: timer_ts:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=feb_system_v3_pipe_bringup_subsystem_timer_ts --dir=/tmp/alt0568_5328384710406018213.dir/0024_timer_ts_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0568_5328384710406018213.dir/0024_timer_ts_gen//feb_system_v3_pipe_bringup_subsystem_timer_ts_component_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:11 Info: timer_ts: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_timer_ts'
+2026.04.25.05:11:11 Info: timer_ts: "<b>bringup_subsystem</b>" instantiated <b>altera_avalon_timer</b> "<b>timer_ts</b>"
+2026.04.25.05:11:11 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:11 Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:12 Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:12 Info: mm_interconnect_0: "<b>bringup_subsystem</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.04.25.05:11:12 Info: irq_mapper: "<b>bringup_subsystem</b>" instantiated <b>altera_irq_mapper</b> "<b>irq_mapper</b>"
+2026.04.25.05:11:12 Info: dbg_mm2runctrl_0: "<b>data_path_subsystem</b>" instantiated <b>dbg_mm2runctrl</b> "<b>dbg_mm2runctrl_0</b>"
+2026.04.25.05:11:12 Info: decoded_lane_fifo_0: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_sc_fifo</b> "<b>decoded_lane_fifo_0</b>"
+2026.04.25.05:11:12 Info: decoded_lane_mux_0: "<b>data_path_subsystem</b>" instantiated <b>multiplexer</b> "<b>decoded_lane_mux_0</b>"
+2026.04.25.05:11:12 Info: emulator_ctrl_splitter: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_st_splitter</b> "<b>emulator_ctrl_splitter</b>"
+2026.04.25.05:11:12 Info: emulator_inject_fanout: "<b>data_path_subsystem</b>" instantiated <b>pulse_fanout8</b> "<b>emulator_inject_fanout</b>"
+2026.04.25.05:11:12 Info: emulator_mutrig_0: "<b>data_path_subsystem</b>" instantiated <b>emulator_mutrig</b> "<b>emulator_mutrig_0</b>"
+2026.04.25.05:11:12 Info: hist_post_cdc_0: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_dc_fifo</b> "<b>hist_post_cdc_0</b>"
+2026.04.25.05:11:12 Info: histogram_ingress_bridge_0: "<b>data_path_subsystem</b>" instantiated <b>histogram_ingress_bridge</b> "<b>histogram_ingress_bridge_0</b>"
+2026.04.25.05:11:12 Info: histogram_statistics_0: "<b>data_path_subsystem</b>" instantiated <b>histogram_statistics_v2</b> "<b>histogram_statistics_0</b>"
+2026.04.25.05:11:12 Info: hit_stack_subsystem_0: "<b>data_path_subsystem</b>" instantiated <b>hit_stack_system</b> "<b>hit_stack_subsystem_0</b>"
+2026.04.25.05:11:12 Info: hit_stack_subsystem_1: "<b>data_path_subsystem</b>" instantiated <b>hit_stack_system</b> "<b>hit_stack_subsystem_1</b>"
+2026.04.25.05:11:12 Info: lvds_rx_28nm_0: "<b>data_path_subsystem</b>" instantiated <b>altera_lvds_rx_28nm</b> "<b>lvds_rx_28nm_0</b>"
+2026.04.25.05:11:12 Info: lvds_rx_controller_pro_0: "<b>data_path_subsystem</b>" instantiated <b>lvds_rx_controller_pro</b> "<b>lvds_rx_controller_pro_0</b>"
+2026.04.25.05:11:12 Info: master_datapath: "<b>data_path_subsystem</b>" instantiated <b>altera_jtag_avalon_master</b> "<b>master_datapath</b>"
+2026.04.25.05:11:12 Info: mm_clock_crossing_bridge: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_mm_clock_crossing_bridge</b> "<b>mm_clock_crossing_bridge</b>"
+2026.04.25.05:11:12 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_dc_fifo.v</b>
+2026.04.25.05:11:12 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_dcfifo_synchronizer_bundle.v</b>
+2026.04.25.05:11:12 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.04.25.05:11:12 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_dc_fifo.sdc</b>
+2026.04.25.05:11:12 Info: mts_preprocessor_0: "<b>data_path_subsystem</b>" instantiated <b>mts_preprocessor</b> "<b>mts_preprocessor_0</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_0: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_0: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_0</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_1: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_1: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_1</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_2: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_2: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_2</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_3: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_3: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_3</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_4: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_4: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_4</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_5: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_5: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_5</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_6: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_6: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_6</b>"
+2026.04.25.05:11:12 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.04.25.05:11:12 Warning: mutrig_datapath_subsystem_7: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.04.25.05:11:12 Info: mutrig_datapath_subsystem_7: "<b>data_path_subsystem</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_7</b>"
+2026.04.25.05:11:12 Info: mutrig_injector_0: "<b>data_path_subsystem</b>" instantiated <b>mutrig_injector_multiheader</b> "<b>mutrig_injector_0</b>"
+2026.04.25.05:11:12 Info: mutrig_reset_controller_0: "<b>data_path_subsystem</b>" instantiated <b>mutrig_reset_controller</b> "<b>mutrig_reset_controller_0</b>"
+2026.04.25.05:11:12 Info: mux_mutrig2processor: "<b>data_path_subsystem</b>" instantiated <b>multiplexer</b> "<b>mux_mutrig2processor</b>"
+2026.04.25.05:11:14 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:14 Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_012: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_013: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_014: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_015: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_016: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_017: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_018: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_019: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_020: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_021: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_022: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_023: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_024: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_025: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_026: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_027: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_028: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_029: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_030: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_031: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_032: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_033: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_034: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_035: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_036: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_037: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_038: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_039: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_040: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_041: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:15 Info: avalon_st_adapter_042: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:16 Info: mm_interconnect_0: "<b>data_path_subsystem</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.04.25.05:11:17 Info: mm_interconnect_1: "<b>data_path_subsystem</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_1</b>"
+2026.04.25.05:11:17 Info: avalon_st_adapter: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.04.25.05:11:17 Info: avalon_st_adapter_008: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_008</b>"
+2026.04.25.05:11:17 Info: avalon_st_adapter_009: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_009</b>"
+2026.04.25.05:11:17 Info: avalon_st_adapter_017: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_017</b>"
+2026.04.25.05:11:17 Info: avalon_st_adapter_034: "<b>data_path_subsystem</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_034</b>"
+2026.04.25.05:11:17 Info: runctl_mgmt_host_0: "<b>upload_subsystem</b>" instantiated <b>runctl_mgmt_host</b> "<b>runctl_mgmt_host_0</b>"
+2026.04.25.05:11:17 Info: upload_pkt_mux: "<b>upload_subsystem</b>" instantiated <b>multiplexer</b> "<b>upload_pkt_mux</b>"
+2026.04.25.05:11:17 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.25.05:11:17 Info: mm_interconnect_0: "<b>upload_subsystem</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.04.25.05:11:17 Info: control_path_subsystem_avmm_port_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_translator</b> "<b>control_path_subsystem_avmm_port_translator</b>"
+2026.04.25.05:11:17 Info: data_path_subsystem_avmm_port_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_translator</b> "<b>data_path_subsystem_avmm_port_translator</b>"
+2026.04.25.05:11:17 Info: control_path_subsystem_avmm_port_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_agent</b> "<b>control_path_subsystem_avmm_port_agent</b>"
+2026.04.25.05:11:17 Info: data_path_subsystem_avmm_port_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_agent</b> "<b>data_path_subsystem_avmm_port_agent</b>"
+2026.04.25.05:11:17 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.05:11:17 Info: router_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.05:11:17 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.05:11:17 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.05:11:17 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: avalon_st_adapter: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.04.25.05:11:17 Info: router: "<b>mm_interconnect_1</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.05:11:17 Info: router_001: "<b>mm_interconnect_1</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.05:11:17 Info: cmd_demux: "<b>mm_interconnect_1</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.05:11:17 Info: cmd_mux: "<b>mm_interconnect_1</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: rsp_demux: "<b>mm_interconnect_1</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux</b>"
+2026.04.25.05:11:17 Info: rsp_mux: "<b>mm_interconnect_1</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: crosser: "<b>mm_interconnect_1</b>" instantiated <b>altera_avalon_st_handshake_clock_crosser</b> "<b>crosser</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.04.25.05:11:17 Info: data_format_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>data_format_adapter</b> "<b>data_format_adapter_0</b>"
+2026.04.25.05:11:17 Info: channel_adapter_0: "<b>avalon_st_adapter_001</b>" instantiated <b>channel_adapter</b> "<b>channel_adapter_0</b>"
+2026.04.25.05:11:17 Info: timing_adapter_0: "<b>avalon_st_adapter_001</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.04.25.05:11:17 Info: timing_adapter_1: "<b>avalon_st_adapter_001</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_1</b>"
+2026.04.25.05:11:17 Info: timing_adapter_0: "<b>avalon_st_adapter_002</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.04.25.05:11:17 Info: jtag_phy_embedded_in_jtag_master: "<b>jtag_master</b>" instantiated <b>altera_jtag_dc_streaming</b> "<b>jtag_phy_embedded_in_jtag_master</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_st_clock_crosser.v</b>
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.05:11:17 Info: timing_adt: "<b>jtag_master</b>" instantiated <b>timing_adapter</b> "<b>timing_adt</b>"
+2026.04.25.05:11:17 Info: b2p: "<b>jtag_master</b>" instantiated <b>altera_avalon_st_bytes_to_packets</b> "<b>b2p</b>"
+2026.04.25.05:11:17 Info: p2b: "<b>jtag_master</b>" instantiated <b>altera_avalon_st_packets_to_bytes</b> "<b>p2b</b>"
+2026.04.25.05:11:17 Info: transacto: "<b>jtag_master</b>" instantiated <b>altera_avalon_packets_to_master</b> "<b>transacto</b>"
+2026.04.25.05:11:17 Info: b2p_adapter: "<b>jtag_master</b>" instantiated <b>channel_adapter</b> "<b>b2p_adapter</b>"
+2026.04.25.05:11:17 Info: p2b_adapter: "<b>jtag_master</b>" instantiated <b>channel_adapter</b> "<b>p2b_adapter</b>"
+2026.04.25.05:11:17 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.05:11:17 Info: router_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.05:11:17 Info: router_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_002</b>"
+2026.04.25.05:11:17 Info: router_003: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_003</b>"
+2026.04.25.05:11:17 Info: router_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_004</b>"
+2026.04.25.05:11:17 Info: router_005: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_005</b>"
+2026.04.25.05:11:17 Info: router_006: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_006</b>"
+2026.04.25.05:11:17 Info: router_014: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_014</b>"
+2026.04.25.05:11:17 Info: mutrig_cfg_ctrl_0_avmm_cnt_limiter: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_traffic_limiter</b> "<b>mutrig_cfg_ctrl_0_avmm_cnt_limiter</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_sc_fifo.v</b>
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.05:11:17 Info: mm_bridge_s0_burst_adapter: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_burst_adapter</b> "<b>mm_bridge_s0_burst_adapter</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_stage.sv</b>
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.05:11:17 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.05:11:17 Info: cmd_demux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_001</b>"
+2026.04.25.05:11:17 Info: cmd_demux_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_002</b>"
+2026.04.25.05:11:17 Info: cmd_demux_003: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_003</b>"
+2026.04.25.05:11:17 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: cmd_mux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux_001</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: cmd_mux_010: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux_010</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: rsp_demux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux_001</b>"
+2026.04.25.05:11:17 Info: rsp_demux_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux_004</b>"
+2026.04.25.05:11:17 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: rsp_mux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_001</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: rsp_mux_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_002</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: rsp_mux_003: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_003</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: limiter_pipeline: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_pipeline_stage</b> "<b>limiter_pipeline</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_stage.sv</b>
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.04.25.05:11:17 Info: router: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.05:11:17 Info: router_001: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.05:11:17 Info: cmd_demux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.05:11:17 Info: cmd_mux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: rsp_mux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.05:11:17 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:17 Info: cpu: Starting RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_cpu_cpu'
+2026.04.25.05:11:17 Info: cpu:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=feb_system_v3_pipe_bringup_subsystem_cpu_cpu --dir=/tmp/alt0568_5328384710406018213.dir/0101_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/tmp/alt0568_5328384710406018213.dir/0101_cpu_gen//feb_system_v3_pipe_bringup_subsystem_cpu_cpu_processor_configuration.pl  --do_build_sim=0  ]
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:17 (*) Starting Nios II generation
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:17 (*)   Checking for plaintext license.
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:18 (*)   Plaintext license not found.
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:18 (*)   No license required to generate encrypted Nios II/e.
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:18 (*)   Elaborating CPU configuration settings
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:18 (*)   Creating all objects for CPU
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:18 (*)   Generating RTL from CPU objects
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:18 (*)   Creating plain-text RTL
+2026.04.25.05:11:19 Info: cpu: # 2026.04.25 05:11:19 (*) Done Nios II generation
+2026.04.25.05:11:19 Info: cpu: Done RTL generation for module 'feb_system_v3_pipe_bringup_subsystem_cpu_cpu'
+2026.04.25.05:11:19 Info: cpu: "<b>cpu</b>" instantiated <b>altera_nios2_gen2_unit</b> "<b>cpu</b>"
+2026.04.25.05:11:19 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.05:11:19 Info: router_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.05:11:19 Info: router_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_002</b>"
+2026.04.25.05:11:19 Info: router_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_004</b>"
+2026.04.25.05:11:19 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.05:11:19 Info: cmd_demux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_001</b>"
+2026.04.25.05:11:19 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: cmd_mux_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux_002</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: rsp_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux</b>"
+2026.04.25.05:11:19 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: rsp_mux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_001</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: feb_frame_assembly_0: "<b>hit_stack_subsystem_0</b>" instantiated <b>feb_frame_assembly</b> "<b>feb_frame_assembly_0</b>"
+2026.04.25.05:11:19 Info: ring_buffer_cam_0: "<b>hit_stack_subsystem_0</b>" instantiated <b>ring_buffer_cam</b> "<b>ring_buffer_cam_0</b>"
+2026.04.25.05:11:19 Info: mutrig_frame_deassembly_0: "<b>mutrig_datapath_subsystem_0</b>" instantiated <b>mutrig_frame_deassembly</b> "<b>mutrig_frame_deassembly_0</b>"
+2026.04.25.05:11:19 Info: avalon_st_adapter: "<b>mutrig_datapath_subsystem_0</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.04.25.05:11:19 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.05:11:19 Info: router_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.04.25.05:11:19 Info: router_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_002</b>"
+2026.04.25.05:11:19 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.05:11:19 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: rsp_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux</b>"
+2026.04.25.05:11:19 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: channel_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>channel_adapter</b> "<b>channel_adapter_0</b>"
+2026.04.25.05:11:19 Info: timing_adapter_1: "<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_1</b>"
+2026.04.25.05:11:19 Info: data_format_adapter_0: "<b>avalon_st_adapter_008</b>" instantiated <b>data_format_adapter</b> "<b>data_format_adapter_0</b>"
+2026.04.25.05:11:19 Info: channel_adapter_0: "<b>avalon_st_adapter_009</b>" instantiated <b>channel_adapter</b> "<b>channel_adapter_0</b>"
+2026.04.25.05:11:19 Info: timing_adapter_0: "<b>avalon_st_adapter_009</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.04.25.05:11:19 Info: timing_adapter_0: "<b>avalon_st_adapter_017</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.04.25.05:11:19 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.25.05:11:19 Info: router_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_002</b>"
+2026.04.25.05:11:19 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.25.05:11:19 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: rsp_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux</b>"
+2026.04.25.05:11:19 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.25.05:11:19 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.25.05:11:19 Info: error_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>error_adapter</b> "<b>error_adapter_0</b>"
+2026.04.25.05:11:19 Info: timing_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.04.25.05:11:19 Info: feb_system_v3_pipe: Done "<b>feb_system_v3_pipe</b>" with 171 modules, 296 files
+2026.04.25.05:11:20 Info: qsys-generate succeeded.
+2026.04.25.05:11:20 Info: Finished: <b>Create HDL design files for synthesis</b>

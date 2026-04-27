@@ -55,6 +55,8 @@ def find_wave_reports_root(path: Path) -> Path | None:
     for candidate in [resolved, *resolved.parents]:
         if candidate.name == "wave_reports" and (candidate / "README.md").exists():
             return candidate
+        if candidate.name == "wave" and candidate.parent.name == "report" and (candidate / "README.md").exists():
+            return candidate
     return None
 
 

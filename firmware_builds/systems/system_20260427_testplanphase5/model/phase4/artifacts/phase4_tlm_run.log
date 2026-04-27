@@ -1,0 +1,31 @@
+Reading pref.tcl
+
+# 2026.1_1
+
+# ** Note: (vsim-220) '/data1/questaone_sim/questasim/modelsim.ini' is used as the ini file.
+# vsim -c phase4_latency_tlm -do "run -all; quit -f" "+ARTIFACT_DIR=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/artifacts" 
+# Start time: 22:38:32 on Apr 25,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Note: (vopt-220) '/data1/questaone_sim/questasim/modelsim.ini' is used as the ini file.
+# //  Questa Sim-64
+# //  Version 2026.1_1 linux_x86_64 Mar  2 2026
+# //
+# // Unpublished work. Copyright 2026 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# Loading sv_std.std
+# Loading work.phase4_latency_tlm(fast)
+# run -all
+# PHASE4_TLM_DONE artifact_dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/artifacts latency_total=249211
+# ** Note: $finish    : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/tlm/phase4_latency_tlm.sv(230)
+#    Time: 0 ns  Iteration: 0  Instance: /phase4_latency_tlm
+# End time: 22:38:33 on Apr 25,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0

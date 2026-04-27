@@ -1,0 +1,11 @@
+# running in runctl_mgmt_host_rc_formal_prove/src/
+read_verilog -formal -sv formal_defs.svh
+read_verilog -formal -sv logging_fifo_stub.sv
+read_verilog -formal -sv /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv
+read_verilog -formal -sv runctl_mgmt_host_rc_formal_tb.sv
+prep -top runctl_mgmt_host_rc_formal_tb
+
+hierarchy -smtcheck
+rename -witness
+write_jny -no-connections ../model/design.json
+write_rtlil ../model/design.il

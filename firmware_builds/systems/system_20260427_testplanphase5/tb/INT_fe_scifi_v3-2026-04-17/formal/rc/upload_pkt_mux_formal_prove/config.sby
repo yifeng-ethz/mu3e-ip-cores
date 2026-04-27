@@ -1,0 +1,18 @@
+[options]
+mode bmc
+depth 32
+wait on
+
+[engines]
+smtbmc z3
+
+[script]
+read_verilog -formal -sv formal_defs.svh
+read_verilog -formal -sv /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv
+read_verilog -formal -sv upload_pkt_mux_formal_tb.sv
+prep -top upload_pkt_mux_formal_tb
+
+[files]
+../common/formal_defs.svh
+/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/upload_system_v3_upload_pkt_mux.sv
+upload_pkt_mux_formal_tb.sv

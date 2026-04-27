@@ -8,8 +8,10 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 from collections import OrderedDict
+from datetime import date
 from pathlib import Path
 
 
@@ -34,6 +36,9 @@ METRIC_ROWS = OrderedDict(
     ]
 )
 ENGINE_MARKER = "DOC_CASE_ENGINE_V2"
+RTL_DOC_STYLE_LINTER = (
+    Path.home() / ".codex" / "skills" / "rtl-doc-style" / "scripts" / "rtl_doc_style_check.py"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -279,19 +284,24 @@ def log_contains_engine_marker(log_path: Path) -> bool:
 
 def parse_log_summary(log_path: Path) -> dict[str, int]:
     if not log_path.exists():
-        return {"headers": 0, "hits": 0, "real_eops": 0, "synth_eops": 0}
+        return {"headers": 0, "hits": 0, "real_eops": 0, "synth_eops": 0, "endofruns": 0}
 
-    summary_re = re.compile(r"headers=(\d+)\s+hits=(\d+)\s+real_eops=(\d+)\s+synth_eops=(\d+)")
+    summary_re = re.compile(
+        r"headers=(\d+)\s+hits=(\d+)\s+real_eops=(\d+)(?:\s+(synth_eops|endofruns)=(\d+))?"
+    )
     for line in reversed(log_path.read_text().splitlines()):
         match = summary_re.search(line)
         if match:
+            extra_key = match.group(4) or ""
+            extra_value = int(match.group(5)) if match.group(5) is not None else 0
             return {
                 "headers": int(match.group(1)),
                 "hits": int(match.group(2)),
                 "real_eops": int(match.group(3)),
-                "synth_eops": int(match.group(4)),
+                "synth_eops": extra_value if extra_key == "synth_eops" else 0,
+                "endofruns": extra_value if extra_key == "endofruns" else 0,
             }
-    return {"headers": 0, "hits": 0, "real_eops": 0, "synth_eops": 0}
+    return {"headers": 0, "hits": 0, "real_eops": 0, "synth_eops": 0, "endofruns": 0}
 
 
 def parse_cross_summary(log_path: Path) -> dict[str, object] | None:
@@ -687,6 +697,7 @@ def write_random_case_summary(
 
 def build_raw_payload(
     args: argparse.Namespace,
+    report_date: str,
     case_lists: dict[str, list[str]],
     case_info: dict[str, dict[str, object]],
     failed_cases: list[str],
@@ -824,7 +835,7 @@ def build_raw_payload(
     return {
         "report_title": args.report_title,
         "dut_name": args.dut_name,
-        "date": "2026-04-16",
+        "date": report_date,
         "rtl_variant": args.rtl_variant,
         "seed": args.seed,
         "failed_cases": failed_cases,
@@ -914,9 +925,15 @@ def main() -> None:
     args = parse_args()
     ip_root = args.ip_root.resolve()
     tb_root = ip_root / "tb"
+    report_date = date.today().isoformat()
 
     case_lists, case_info, failed_cases = build_case_index(ip_root, args.seed, args.rtl_variant)
     unimplemented_cases = [case_id for case_id, info in case_info.items() if not bool(info["implemented"])]
+    stale_artifact_cases = [
+        case_id
+        for case_id, info in case_info.items()
+        if not bool(info["implemented"]) and (info["log"].exists() or info["ucdb"].exists())
+    ]
 
     if args.strict_implementation and unimplemented_cases:
         raise SystemExit(
@@ -949,9 +966,16 @@ def main() -> None:
     evidenced_total = sum(len(case_ids) for case_ids in bucket_evidence.values())
     bucket_lookup = {case_id: str(info["bucket"]) for case_id, info in case_info.items()}
     signoff_runs = collect_signoff_runs(tb_root / "uvm", args.rtl_variant, args.seed, args.vcover)
+    signoff_runs_with_failures = sum(
+        1
+        for run in signoff_runs
+        if ((run.get("cross_summary") or {}).get("counter_checks_failed", 0) or 0) > 0
+        or ((run.get("cross_summary") or {}).get("unexpected_outputs", 0) or 0) > 0
+    )
     passing_random_cases = sum(1 for info in case_info.values() if info.get("passed") and is_random_case(info))
     raw_payload = build_raw_payload(
         args,
+        report_date,
         case_lists,
         case_info,
         failed_cases,
@@ -964,6 +988,7 @@ def main() -> None:
         evidenced_total,
         signoff_runs,
     )
+    report_status = "❌" if failed_cases or stale_artifact_cases else "⚠️" if unimplemented_cases else "✅"
 
     report_summary_rows: list[str] = []
     cov_summary_rows: list[str] = []
@@ -1022,11 +1047,23 @@ def main() -> None:
     )
 
     report_lines = [
-        f"# DV Report: {args.report_title}",
+        f"# {report_status} DV Report — {args.report_title}",
         "",
-        f"**DUT:** `{args.dut_name}`  ",
-        "**Date:** 2026-04-16  ",
-        f"**Execution baseline used in this report:** `{args.rtl_variant}` RTL, seed `{args.seed}`, with isolated refresh evidence plus continuous-frame signoff runs when present",
+        f"**DUT:** `{args.dut_name}` &nbsp; **Date:** `{report_date}`",
+        f"**RTL variant:** `{args.rtl_variant}` &nbsp; **Seed:** `{args.seed}`",
+        "",
+        "## Legend",
+        "",
+        "✅ pass / closed &middot; ⚠️ partial / below target &middot; ❌ failed / blocked &middot; ❓ pending &middot; ℹ️ informational",
+        "",
+        "## Health",
+        "",
+        "| status | field | value |",
+        "|:---:|---|---|",
+        f"| {'❌' if failed_cases else '✅'} | failed_cases | `{len(failed_cases)}` |",
+        f"| {'❌' if signoff_runs_with_failures else '✅'} | signoff_runs_with_failures | `{signoff_runs_with_failures}` |",
+        f"| {'⚠️' if unimplemented_cases else '✅'} | unimplemented_cases | `{len(unimplemented_cases)}` |",
+        f"| {'❌' if stale_artifact_cases else '✅'} | stale_artifacts | `{len(stale_artifact_cases)}` |",
         "",
         "## Scope",
         "",
@@ -1108,15 +1145,24 @@ def main() -> None:
             f"- `all_buckets_frame` status: {all_buckets_status}",
             f"- `cross` status: {cross_status}",
             "",
+            (
+                f"_Regenerate with `python3 scripts/dv_case_report.py --ip-root {ip_root.name} "
+                f"--dut-name {args.dut_name} --report-title {args.report_title} --seed {args.seed} "
+                f"--rtl-variant {args.rtl_variant} --vcover {args.vcover}`._"
+            ),
         ]
     )
 
     cov_lines = [
-        f"# DV Coverage Tracking — {args.report_title}",
+        f"# DV Coverage Summary — {args.report_title}",
         "",
         f"**DUT:** `{args.dut_name}`  ",
-        "**Date:** 2026-04-16  ",
+        f"**Date:** `{report_date}`  ",
         f"**Execution baseline tracked here:** `{args.rtl_variant}` RTL, seed `{args.seed}`, isolated refresh plus continuous-frame signoff runs when present",
+        "",
+        "## Legend",
+        "",
+        "✅ pass / closed &middot; ⚠️ partial / below target &middot; ❌ failed / blocked &middot; ❓ pending &middot; ℹ️ informational",
         "",
         "Execution-mode status:",
         "- `isolated`: tracked in this file as ordered incremental gains from passing case-keyed UCDBs merged in bucket order, then documented case order",
@@ -1159,12 +1205,18 @@ def main() -> None:
             f"- `all_buckets_frame` status: {all_buckets_status}",
             f"- `cross` status: {cross_status}",
             "",
+            (
+                f"_Regenerate with `python3 scripts/dv_case_report.py --ip-root {ip_root.name} "
+                f"--dut-name {args.dut_name} --report-title {args.report_title} --seed {args.seed} "
+                f"--rtl-variant {args.rtl_variant} --vcover {args.vcover}`._"
+            ),
         ]
     )
 
     (tb_root / args.raw_json_name).write_text(json.dumps(raw_payload, indent=2) + "\n")
     (tb_root / "DV_REPORT.md").write_text("\n".join(report_lines) + "\n")
     (tb_root / "DV_COV.md").write_text("\n".join(cov_lines) + "\n")
+    subprocess.run([sys.executable, str(RTL_DOC_STYLE_LINTER), "--strict", str(tb_root)], check=True)
 
 
 if __name__ == "__main__":

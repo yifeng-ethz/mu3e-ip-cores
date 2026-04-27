@@ -1,0 +1,1090 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.04.25.06:16:52 Info: Doing: <b>qsys-script --script=firmware_builds/scifi_datapath_system_v3_pipe.tcl --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds,$</b>
+2026.04.25.06:16:57 Info: load_system /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3.qsys
+2026.04.25.06:17:00 Info: set_instance_parameter_value run_control_splitter USE_READY 0
+2026.04.25.06:17:00 Info: set_instance_parameter_value mm_clock_crossing_bridge USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0
+2026.04.25.06:17:00 Info: remove_connection emulator_mutrig_0.tx8b1k/decoded_lane_mux_0.in1
+2026.04.25.06:17:00 Info: remove_connection decoded_lane_mux_0.out/decoded_lane_fifo_0.in
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_0.clk
+2026.04.25.06:17:00 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_0.reset
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: remove_instance decoded_lane_mux_0
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: add_instance mutrig_lane_source_mux_0 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:00 Info: set_instance_parameter_value mutrig_lane_source_mux_0 SELECT_EMULATOR 1
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_0 ASIC_ID_DEFAULT 0
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_0 CLUSTER_LANE_INDEX_DEFAULT 0
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_0 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:00 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_0.clk 
+2026.04.25.06:17:00 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_0.rst 
+2026.04.25.06:17:00 Info: add_connection lvds_rx_controller_pro_0.decoded0/mutrig_lane_source_mux_0.real_in 
+2026.04.25.06:17:00 Info: add_connection emulator_mutrig_0.tx8b1k/mutrig_lane_source_mux_0.emu_in 
+2026.04.25.06:17:00 Info: add_connection mutrig_lane_source_mux_0.selected_out/decoded_lane_fifo_0.in 
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0
+2026.04.25.06:17:00 Info: remove_connection emulator_mutrig_1.tx8b1k/decoded_lane_mux_1.in1
+2026.04.25.06:17:00 Info: remove_connection decoded_lane_mux_1.out/decoded_lane_fifo_1.in
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_1.clk
+2026.04.25.06:17:00 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_1.reset
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: remove_instance decoded_lane_mux_1
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: add_instance mutrig_lane_source_mux_1 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:00 Info: set_instance_parameter_value mutrig_lane_source_mux_1 SELECT_EMULATOR 1
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_1 ASIC_ID_DEFAULT 1
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_1 CLUSTER_LANE_INDEX_DEFAULT 1
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_1 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:00 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_1.clk 
+2026.04.25.06:17:00 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_1.rst 
+2026.04.25.06:17:00 Info: add_connection lvds_rx_controller_pro_0.decoded1/mutrig_lane_source_mux_1.real_in 
+2026.04.25.06:17:00 Info: add_connection emulator_mutrig_1.tx8b1k/mutrig_lane_source_mux_1.emu_in 
+2026.04.25.06:17:00 Info: add_connection mutrig_lane_source_mux_1.selected_out/decoded_lane_fifo_1.in 
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0
+2026.04.25.06:17:00 Info: remove_connection emulator_mutrig_2.tx8b1k/decoded_lane_mux_2.in1
+2026.04.25.06:17:00 Info: remove_connection decoded_lane_mux_2.out/decoded_lane_fifo_2.in
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_2.clk
+2026.04.25.06:17:00 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_2.reset
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: remove_instance decoded_lane_mux_2
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: add_instance mutrig_lane_source_mux_2 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:00 Info: set_instance_parameter_value mutrig_lane_source_mux_2 SELECT_EMULATOR 1
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_2 ASIC_ID_DEFAULT 2
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_2 CLUSTER_LANE_INDEX_DEFAULT 2
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_2 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:00 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_2.clk 
+2026.04.25.06:17:00 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_2.rst 
+2026.04.25.06:17:00 Info: add_connection lvds_rx_controller_pro_0.decoded2/mutrig_lane_source_mux_2.real_in 
+2026.04.25.06:17:00 Info: add_connection emulator_mutrig_2.tx8b1k/mutrig_lane_source_mux_2.emu_in 
+2026.04.25.06:17:00 Info: add_connection mutrig_lane_source_mux_2.selected_out/decoded_lane_fifo_2.in 
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0
+2026.04.25.06:17:00 Info: remove_connection emulator_mutrig_3.tx8b1k/decoded_lane_mux_3.in1
+2026.04.25.06:17:00 Info: remove_connection decoded_lane_mux_3.out/decoded_lane_fifo_3.in
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_3.clk
+2026.04.25.06:17:00 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_3.reset
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: remove_instance decoded_lane_mux_3
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: add_instance mutrig_lane_source_mux_3 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:00 Info: set_instance_parameter_value mutrig_lane_source_mux_3 SELECT_EMULATOR 1
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_3 ASIC_ID_DEFAULT 3
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_3 CLUSTER_LANE_INDEX_DEFAULT 3
+2026.04.25.06:17:00 Info: set_instance_parameter_value emulator_mutrig_3 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:00 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_3.clk 
+2026.04.25.06:17:00 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_3.rst 
+2026.04.25.06:17:00 Info: add_connection lvds_rx_controller_pro_0.decoded3/mutrig_lane_source_mux_3.real_in 
+2026.04.25.06:17:00 Info: add_connection emulator_mutrig_3.tx8b1k/mutrig_lane_source_mux_3.emu_in 
+2026.04.25.06:17:00 Info: add_connection mutrig_lane_source_mux_3.selected_out/decoded_lane_fifo_3.in 
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0
+2026.04.25.06:17:00 Info: remove_connection emulator_mutrig_4.tx8b1k/decoded_lane_mux_4.in1
+2026.04.25.06:17:00 Info: remove_connection decoded_lane_mux_4.out/decoded_lane_fifo_4.in
+2026.04.25.06:17:00 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_4.clk
+2026.04.25.06:17:00 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_4.reset
+2026.04.25.06:17:00 Info: get_instances 
+2026.04.25.06:17:00 Info: remove_instance decoded_lane_mux_4
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: add_instance mutrig_lane_source_mux_4 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mutrig_lane_source_mux_4 SELECT_EMULATOR 1
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_4 ASIC_ID_DEFAULT 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_4 CLUSTER_LANE_INDEX_DEFAULT 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_4 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_4.clk 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_4.rst 
+2026.04.25.06:17:01 Info: add_connection lvds_rx_controller_pro_0.decoded4/mutrig_lane_source_mux_4.real_in 
+2026.04.25.06:17:01 Info: add_connection emulator_mutrig_4.tx8b1k/mutrig_lane_source_mux_4.emu_in 
+2026.04.25.06:17:01 Info: add_connection mutrig_lane_source_mux_4.selected_out/decoded_lane_fifo_4.in 
+2026.04.25.06:17:01 Info: remove_connection lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0
+2026.04.25.06:17:01 Info: remove_connection emulator_mutrig_5.tx8b1k/decoded_lane_mux_5.in1
+2026.04.25.06:17:01 Info: remove_connection decoded_lane_mux_5.out/decoded_lane_fifo_5.in
+2026.04.25.06:17:01 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_5.clk
+2026.04.25.06:17:01 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_5.reset
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: remove_instance decoded_lane_mux_5
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: add_instance mutrig_lane_source_mux_5 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mutrig_lane_source_mux_5 SELECT_EMULATOR 1
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_5 ASIC_ID_DEFAULT 5
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_5 CLUSTER_LANE_INDEX_DEFAULT 5
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_5 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_5.clk 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_5.rst 
+2026.04.25.06:17:01 Info: add_connection lvds_rx_controller_pro_0.decoded5/mutrig_lane_source_mux_5.real_in 
+2026.04.25.06:17:01 Info: add_connection emulator_mutrig_5.tx8b1k/mutrig_lane_source_mux_5.emu_in 
+2026.04.25.06:17:01 Info: add_connection mutrig_lane_source_mux_5.selected_out/decoded_lane_fifo_5.in 
+2026.04.25.06:17:01 Info: remove_connection lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0
+2026.04.25.06:17:01 Info: remove_connection emulator_mutrig_6.tx8b1k/decoded_lane_mux_6.in1
+2026.04.25.06:17:01 Info: remove_connection decoded_lane_mux_6.out/decoded_lane_fifo_6.in
+2026.04.25.06:17:01 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_6.clk
+2026.04.25.06:17:01 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_6.reset
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: remove_instance decoded_lane_mux_6
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: add_instance mutrig_lane_source_mux_6 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mutrig_lane_source_mux_6 SELECT_EMULATOR 1
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_6 ASIC_ID_DEFAULT 6
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_6 CLUSTER_LANE_INDEX_DEFAULT 6
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_6 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_6.clk 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_6.rst 
+2026.04.25.06:17:01 Info: add_connection lvds_rx_controller_pro_0.decoded6/mutrig_lane_source_mux_6.real_in 
+2026.04.25.06:17:01 Info: add_connection emulator_mutrig_6.tx8b1k/mutrig_lane_source_mux_6.emu_in 
+2026.04.25.06:17:01 Info: add_connection mutrig_lane_source_mux_6.selected_out/decoded_lane_fifo_6.in 
+2026.04.25.06:17:01 Info: remove_connection lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0
+2026.04.25.06:17:01 Info: remove_connection emulator_mutrig_7.tx8b1k/decoded_lane_mux_7.in1
+2026.04.25.06:17:01 Info: remove_connection decoded_lane_mux_7.out/decoded_lane_fifo_7.in
+2026.04.25.06:17:01 Info: remove_connection lvds_rx_28nm_0.outclock/decoded_lane_mux_7.clk
+2026.04.25.06:17:01 Info: remove_connection master_datapath.master_reset/decoded_lane_mux_7.reset
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: remove_instance decoded_lane_mux_7
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: add_instance mutrig_lane_source_mux_7 mutrig_lane_source_mux 1.0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mutrig_lane_source_mux_7 SELECT_EMULATOR 1
+2026.04.25.06:17:01 Info: get_instances 
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_7 ASIC_ID_DEFAULT 7
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_7 CLUSTER_LANE_INDEX_DEFAULT 7
+2026.04.25.06:17:01 Info: set_instance_parameter_value emulator_mutrig_7 CLUSTER_LANE_COUNT_DEFAULT 8
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_7.clk 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mutrig_lane_source_mux_7.rst 
+2026.04.25.06:17:01 Info: add_connection lvds_rx_controller_pro_0.decoded7/mutrig_lane_source_mux_7.real_in 
+2026.04.25.06:17:01 Info: add_connection emulator_mutrig_7.tx8b1k/mutrig_lane_source_mux_7.emu_in 
+2026.04.25.06:17:01 Info: add_connection mutrig_lane_source_mux_7.selected_out/decoded_lane_fifo_7.in 
+2026.04.25.06:17:01 Info: add_instance mm_pipeline_lvds_csr_low altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low ADDRESS_UNITS WORDS
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low ADDRESS_WIDTH 13
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low DATA_WIDTH 32
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low LINEWRAPBURSTS 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low MAX_BURST_SIZE 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low PIPELINE_COMMAND 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low PIPELINE_RESPONSE 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low SYMBOL_WIDTH 8
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_low USE_RESPONSE 0
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_low.clk 
+2026.04.25.06:17:01 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_low.reset 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_low.reset 
+2026.04.25.06:17:01 Info: add_instance mm_pipeline_lvds_csr_emu_dbg altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg ADDRESS_UNITS WORDS
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg ADDRESS_WIDTH 12
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg DATA_WIDTH 32
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg LINEWRAPBURSTS 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg MAX_BURST_SIZE 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg PIPELINE_COMMAND 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg PIPELINE_RESPONSE 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg SYMBOL_WIDTH 8
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_emu_dbg USE_RESPONSE 0
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_emu_dbg.clk 
+2026.04.25.06:17:01 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_emu_dbg.reset 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_emu_dbg.reset 
+2026.04.25.06:17:01 Info: add_instance mm_pipeline_lvds_csr_mutrig3 altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 ADDRESS_UNITS WORDS
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 ADDRESS_WIDTH 12
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 DATA_WIDTH 32
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 LINEWRAPBURSTS 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 MAX_BURST_SIZE 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 PIPELINE_COMMAND 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 PIPELINE_RESPONSE 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 SYMBOL_WIDTH 8
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig3 USE_RESPONSE 0
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig3.clk 
+2026.04.25.06:17:01 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig3.reset 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig3.reset 
+2026.04.25.06:17:01 Info: add_instance mm_pipeline_lvds_csr_mutrig4_mts0 altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 ADDRESS_UNITS WORDS
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 ADDRESS_WIDTH 12
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 DATA_WIDTH 32
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 LINEWRAPBURSTS 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 MAX_BURST_SIZE 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 PIPELINE_COMMAND 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 PIPELINE_RESPONSE 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 SYMBOL_WIDTH 8
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0 USE_RESPONSE 0
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig4_mts0.clk 
+2026.04.25.06:17:01 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig4_mts0.reset 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig4_mts0.reset 
+2026.04.25.06:17:01 Info: add_instance mm_pipeline_lvds_csr_mutrig5 altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 ADDRESS_UNITS WORDS
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 ADDRESS_WIDTH 12
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 DATA_WIDTH 32
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 LINEWRAPBURSTS 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 MAX_BURST_SIZE 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 PIPELINE_COMMAND 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 PIPELINE_RESPONSE 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 SYMBOL_WIDTH 8
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig5 USE_RESPONSE 0
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig5.clk 
+2026.04.25.06:17:01 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig5.reset 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig5.reset 
+2026.04.25.06:17:01 Info: add_instance mm_pipeline_lvds_csr_mutrig6 altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 ADDRESS_UNITS WORDS
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 ADDRESS_WIDTH 12
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 DATA_WIDTH 32
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 LINEWRAPBURSTS 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 MAX_BURST_SIZE 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 PIPELINE_COMMAND 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 PIPELINE_RESPONSE 0
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 SYMBOL_WIDTH 8
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig6 USE_RESPONSE 0
+2026.04.25.06:17:01 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig6.clk 
+2026.04.25.06:17:01 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig6.reset 
+2026.04.25.06:17:01 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig6.reset 
+2026.04.25.06:17:01 Info: add_instance mm_pipeline_lvds_csr_mutrig7 altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 ADDRESS_UNITS WORDS
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 ADDRESS_WIDTH 12
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 DATA_WIDTH 32
+2026.04.25.06:17:01 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 LINEWRAPBURSTS 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 MAX_BURST_SIZE 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 PIPELINE_COMMAND 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 PIPELINE_RESPONSE 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 SYMBOL_WIDTH 8
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mutrig7 USE_RESPONSE 0
+2026.04.25.06:17:02 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig7.clk 
+2026.04.25.06:17:02 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig7.reset 
+2026.04.25.06:17:02 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig7.reset 
+2026.04.25.06:17:02 Info: add_instance mm_pipeline_lvds_csr_mts1 altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 ADDRESS_UNITS WORDS
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 ADDRESS_WIDTH 12
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 DATA_WIDTH 32
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 LINEWRAPBURSTS 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 MAX_BURST_SIZE 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 PIPELINE_COMMAND 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 PIPELINE_RESPONSE 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 SYMBOL_WIDTH 8
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_mts1 USE_RESPONSE 0
+2026.04.25.06:17:02 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mts1.clk 
+2026.04.25.06:17:02 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mts1.reset 
+2026.04.25.06:17:02 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_mts1.reset 
+2026.04.25.06:17:02 Info: add_instance mm_pipeline_lvds_csr_hist altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist ADDRESS_UNITS WORDS
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist ADDRESS_WIDTH 12
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist DATA_WIDTH 32
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist LINEWRAPBURSTS 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist MAX_BURST_SIZE 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist PIPELINE_COMMAND 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist PIPELINE_RESPONSE 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist SYMBOL_WIDTH 8
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hist USE_RESPONSE 0
+2026.04.25.06:17:02 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_hist.clk 
+2026.04.25.06:17:02 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_hist.reset 
+2026.04.25.06:17:02 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_hist.reset 
+2026.04.25.06:17:02 Info: add_instance mm_pipeline_lvds_csr_hitstack_ring altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring ADDRESS_UNITS WORDS
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring ADDRESS_WIDTH 12
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring DATA_WIDTH 32
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring LINEWRAPBURSTS 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring MAX_BURST_SIZE 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring PIPELINE_COMMAND 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring PIPELINE_RESPONSE 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring SYMBOL_WIDTH 8
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_ring USE_RESPONSE 0
+2026.04.25.06:17:02 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_hitstack_ring.clk 
+2026.04.25.06:17:02 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_hitstack_ring.reset 
+2026.04.25.06:17:02 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_hitstack_ring.reset 
+2026.04.25.06:17:02 Info: add_instance mm_pipeline_lvds_csr_hitstack_frame altera_avalon_mm_bridge 18.1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame ADDRESS_UNITS WORDS
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame ADDRESS_WIDTH 12
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame DATA_WIDTH 32
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame LINEWRAPBURSTS 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame MAX_BURST_SIZE 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame MAX_PENDING_RESPONSES 4
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame PIPELINE_COMMAND 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame PIPELINE_RESPONSE 0
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame SYMBOL_WIDTH 8
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame USE_AUTO_ADDRESS_WIDTH 1
+2026.04.25.06:17:02 Info: set_instance_parameter_value mm_pipeline_lvds_csr_hitstack_frame USE_RESPONSE 0
+2026.04.25.06:17:02 Info: add_connection lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_hitstack_frame.clk 
+2026.04.25.06:17:02 Info: add_connection monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_hitstack_frame.reset 
+2026.04.25.06:17:02 Info: add_connection master_datapath.master_reset/mm_pipeline_lvds_csr_hitstack_frame.reset 
+2026.04.25.06:17:02 Info: get_connections 
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out0/emulator_mutrig_0.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out1/emulator_mutrig_1.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out2/emulator_mutrig_2.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out3/emulator_mutrig_3.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out4/emulator_mutrig_4.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out5/emulator_mutrig_5.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out6/emulator_mutrig_6.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_ctrl_splitter.out7/emulator_mutrig_7.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out0/emulator_mutrig_0.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out1/emulator_mutrig_1.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out2/emulator_mutrig_2.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out3/emulator_mutrig_3.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out4/emulator_mutrig_4.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out5/emulator_mutrig_5.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out6/emulator_mutrig_6.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_inject_fanout.out7/emulator_mutrig_7.inject START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_0.tx8b1k/mutrig_lane_source_mux_0.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_1.tx8b1k/mutrig_lane_source_mux_1.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_2.tx8b1k/mutrig_lane_source_mux_2.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_3.tx8b1k/mutrig_lane_source_mux_3.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_4.tx8b1k/mutrig_lane_source_mux_4.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_5.tx8b1k/mutrig_lane_source_mux_5.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_6.tx8b1k/mutrig_lane_source_mux_6.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property emulator_mutrig_7.tx8b1k/mutrig_lane_source_mux_7.emu_in START
+2026.04.25.06:17:02 Info: get_connection_property hist_post_cdc_0.out/histogram_ingress_bridge_0.post_in START
+2026.04.25.06:17:02 Info: get_connection_property hist_post_splitter_0.out1/hist_post_cdc_0.in START
+2026.04.25.06:17:02 Info: get_connection_property histogram_ingress_bridge_0.hist_out/histogram_statistics_0.hist_fill_in START
+2026.04.25.06:17:02 Info: get_connection_property histogram_ingress_bridge_0.pre_out/hit_stack_subsystem_0.hit_type_1 START
+2026.04.25.06:17:02 Info: get_connection_property hit_stack_subsystem_0.hit_type3/hist_post_splitter_0.in START
+2026.04.25.06:17:02 Info: get_connection_property hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_2 START
+2026.04.25.06:17:02 Info: get_connection_property hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_3 START
+2026.04.25.06:17:02 Info: get_connection_property hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_4 START
+2026.04.25.06:17:02 Info: get_connection_property hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_5 START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/dbg_mm2runctrl_0.clock_interface START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_0.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_1.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_2.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_3.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_4.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_5.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_6.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/decoded_lane_fifo_7.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_ctrl_splitter.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_inject_fanout.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_0.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_1.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_2.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_3.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_4.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_5.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_6.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/emulator_mutrig_7.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/hist_post_cdc_0.out_clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/histogram_ingress_bridge_0.clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/histogram_statistics_0.clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/hit_stack_subsystem_0.datapath_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/hit_stack_subsystem_1.datapath_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/lvds_rx_controller_pro_0.data_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_clock_crossing_bridge.m0_clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_emu_dbg.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_hist.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_hitstack_frame.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_hitstack_ring.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_low.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mts1.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig3.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig4_mts0.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig5.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig6.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mm_pipeline_lvds_csr_mutrig7.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mts_preprocessor_0.clock_interface START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mts_preprocessor_1.clock_interface START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_0.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_1.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_2.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_3.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_4.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_5.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_6.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_datapath_subsystem_7.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_injector_0.clock_interface START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_0.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_1.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_2.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_3.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_4.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_5.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_6.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_lane_source_mux_7.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mutrig_reset_controller_0.dpa_clock START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mux_mutrig2processor.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/mux_mutrig2processor_0.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/receiver_clock_125.in_clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.outclock/run_control_splitter.clk START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_28nm_0.parallel/lvds_rx_controller_pro_0.parallel START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.ctrl/lvds_rx_28nm_0.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded0/mutrig_lane_source_mux_0.real_in START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded1/mutrig_lane_source_mux_1.real_in START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded2/mutrig_lane_source_mux_2.real_in START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded3/mutrig_lane_source_mux_3.real_in START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded4/mutrig_lane_source_mux_4.real_in START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded5/mutrig_lane_source_mux_5.real_in START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded6/mutrig_lane_source_mux_6.real_in START
+2026.04.25.06:17:02 Info: get_connection_property lvds_rx_controller_pro_0.decoded7/mutrig_lane_source_mux_7.real_in START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/dbg_mm2runctrl_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_1.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_2.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_3.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_4.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_5.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_6.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/emulator_mutrig_7.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/histogram_ingress_bridge_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/histogram_statistics_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/histogram_statistics_0.hist_bin START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_0.feb_frame_assembly_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_0.ring_buffer_cam_0_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_0.ring_buffer_cam_1_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_0.ring_buffer_cam_2_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_0.ring_buffer_cam_3_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_1.feb_frame_assembly_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_1.ring_buffer_cam_0_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_1.ring_buffer_cam_1_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_1.ring_buffer_cam_2_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/hit_stack_subsystem_1.ring_buffer_cam_3_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/lvds_rx_controller_pro_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mm_pipeline_jtagmaster2rstctrl.s0 START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mts_preprocessor_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mts_preprocessor_1.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_0.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_1.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_1.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_2.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_2.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_3.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_3.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_4.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_4.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_5.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_5.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_6.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_6.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_7.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_datapath_subsystem_7.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master/mutrig_injector_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/dbg_mm2runctrl_0.reset_interface START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_0.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_1.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_2.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_3.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_4.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_5.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_6.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/decoded_lane_fifo_7.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_ctrl_splitter.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_inject_fanout.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_0.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_1.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_2.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_3.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_4.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_5.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_6.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/emulator_mutrig_7.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/hist_post_cdc_0.out_clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/histogram_ingress_bridge_0.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/histogram_statistics_0.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/hit_stack_subsystem_0.datapath_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/hit_stack_subsystem_1.datapath_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_clock_crossing_bridge.m0_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_emu_dbg.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_hist.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_hitstack_frame.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_hitstack_ring.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_low.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_mts1.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig3.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig4_mts0.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig5.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig6.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mm_pipeline_lvds_csr_mutrig7.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mts_preprocessor_0.reset_interface START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mts_preprocessor_1.reset_interface START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_0.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_1.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_2.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_3.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_4.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_5.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_6.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_datapath_subsystem_7.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_injector_0.reset_interface START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_0.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_1.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_2.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_3.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_4.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_5.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_6.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_lane_source_mux_7.rst START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mutrig_reset_controller_0.dpa_reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mux_mutrig2processor.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/mux_mutrig2processor_0.reset START
+2026.04.25.06:17:02 Info: get_connection_property master_datapath.master_reset/run_control_splitter.reset START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/dbg_mm2runctrl_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_1.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_2.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_3.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_4.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_5.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_6.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_7.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/histogram_ingress_bridge_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/histogram_statistics_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/histogram_statistics_0.hist_bin START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.feb_frame_assembly_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.feb_frame_assembly_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/lvds_rx_controller_pro_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mm_pipeline_jtagmaster2rstctrl.s0 START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mts_preprocessor_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mts_preprocessor_1.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_injector_0.csr START
+2026.04.25.06:17:02 Info: get_connection_property mm_pipeline_jtagmaster2rstctrl.m0/mutrig_reset_controller_0.reconfig_mgmt START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk/lvds_rx_controller_pro_0.control_clock START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk/master_datapath.clk START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk/mm_pipeline_jtagmaster2rstctrl.clk START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk/mutrig_reset_controller_0.si_direct_clock START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/lvds_rx_controller_pro_0.control_reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/lvds_rx_controller_pro_0.data_reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/master_datapath.clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_clock_crossing_bridge.m0_reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_jtagmaster2rstctrl.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_emu_dbg.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_hist.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_hitstack_frame.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_hitstack_ring.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_low.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mts1.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig3.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig4_mts0.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig5.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig6.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mm_pipeline_lvds_csr_mutrig7.reset START
+2026.04.25.06:17:02 Info: get_connection_property monitor_clock_125.clk_reset/mutrig_reset_controller_0.dpa_reset START
+2026.04.25.06:17:02 Info: get_connection_property mts_preprocessor_0.debug_burst/histogram_statistics_0.debug_6 START
+2026.04.25.06:17:02 Info: get_connection_property mts_preprocessor_0.hit_type1_out/histogram_ingress_bridge_0.pre_in START
+2026.04.25.06:17:02 Info: get_connection_property mts_preprocessor_0.ts_delta/histogram_statistics_0.debug_1 START
+2026.04.25.06:17:02 Info: get_connection_property mts_preprocessor_1.hit_type1_out/hit_stack_subsystem_1.hit_type_1 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_0.headerinfo/mutrig_injector_0.headerinfo0 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_0.hit_type0_out/mux_mutrig2processor.in0 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_1.headerinfo/mutrig_injector_0.headerinfo1 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_1.hit_type0_out/mux_mutrig2processor.in1 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_2.headerinfo/mutrig_injector_0.headerinfo2 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_2.hit_type0_out/mux_mutrig2processor.in2 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_3.headerinfo/mutrig_injector_0.headerinfo3 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_3.hit_type0_out/mux_mutrig2processor.in3 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_4.headerinfo/mutrig_injector_0.headerinfo4 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_4.hit_type0_out/mux_mutrig2processor_0.in0 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_5.headerinfo/mutrig_injector_0.headerinfo5 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_5.hit_type0_out/mux_mutrig2processor_0.in1 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_6.headerinfo/mutrig_injector_0.headerinfo6 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_6.hit_type0_out/mux_mutrig2processor_0.in2 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_7.headerinfo/mutrig_injector_0.headerinfo7 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_datapath_subsystem_7.hit_type0_out/mux_mutrig2processor_0.in3 START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_injector_0.inject/emulator_inject_fanout.inject_in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_0.selected_out/decoded_lane_fifo_0.in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_1.selected_out/decoded_lane_fifo_1.in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_2.selected_out/decoded_lane_fifo_2.in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_3.selected_out/decoded_lane_fifo_3.in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_4.selected_out/decoded_lane_fifo_4.in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_5.selected_out/decoded_lane_fifo_5.in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_6.selected_out/decoded_lane_fifo_6.in START
+2026.04.25.06:17:02 Info: get_connection_property mutrig_lane_source_mux_7.selected_out/decoded_lane_fifo_7.in START
+2026.04.25.06:17:02 Info: get_connection_property mux_mutrig2processor.out/mts_preprocessor_0.hit_type0_in START
+2026.04.25.06:17:02 Info: get_connection_property mux_mutrig2processor_0.out/mts_preprocessor_1.hit_type0_in START
+2026.04.25.06:17:02 Info: get_connection_property reset_bridge_export.out_reset/histogram_statistics_0.interval_reset START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out0/histogram_statistics_0.ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out1/mts_preprocessor_0.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out10/mutrig_datapath_subsystem_6.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out11/mutrig_datapath_subsystem_7.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out12/mts_preprocessor_1.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out13/mutrig_injector_0.runctl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out14/hit_stack_subsystem_1.run_control_signal START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out15/emulator_ctrl_splitter.in START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out2/mutrig_datapath_subsystem_0.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out3/mutrig_datapath_subsystem_1.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out4/mutrig_datapath_subsystem_2.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out5/mutrig_datapath_subsystem_3.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out6/hit_stack_subsystem_0.run_control_signal START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out7/mutrig_reset_controller_0.runcontrol START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out8/mutrig_datapath_subsystem_4.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property run_control_splitter.out9/mutrig_datapath_subsystem_5.run_ctrl START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk/hist_post_cdc_0.in_clk START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk/hist_post_splitter_0.clk START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk/hit_stack_subsystem_0.xcvr_clock START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk/hit_stack_subsystem_1.xcvr_clock START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk_reset/hist_post_cdc_0.in_clk_reset START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk_reset/hist_post_splitter_0.reset START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk_reset/hit_stack_subsystem_0.xcvr_reset START
+2026.04.25.06:17:02 Info: get_connection_property xcvr156_clock.clk_reset/hit_stack_subsystem_1.xcvr_reset START
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/dbg_mm2runctrl_0.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/dbg_mm2runctrl_0.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/dbg_mm2runctrl_0.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/dbg_mm2runctrl_0.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/dbg_mm2runctrl_0.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/dbg_mm2runctrl_0.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/dbg_mm2runctrl_0.csr baseAddress 0x0200
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/dbg_mm2runctrl_0.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/dbg_mm2runctrl_0.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_0.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_0.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_0.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_0.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_0.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_0.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_0.csr baseAddress 0x0000
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_0.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_0.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_1.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_1.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_1.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_1.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_1.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_1.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_1.csr baseAddress 0x0040
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_1.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_1.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_2.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_2.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_2.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_2.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_2.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_2.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_2.csr baseAddress 0x0080
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_2.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_2.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_3.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_3.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_3.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_3.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_3.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_3.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_3.csr baseAddress 0x00c0
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_3.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_3.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_4.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_4.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_4.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_4.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_4.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_4.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_4.csr baseAddress 0x0100
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_4.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_4.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_5.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_5.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_5.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_5.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_5.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_5.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_5.csr baseAddress 0x0140
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_5.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_5.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_6.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_6.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_6.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_6.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_6.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_6.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_6.csr baseAddress 0x0180
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_6.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_6.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/emulator_mutrig_7.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_7.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_7.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_7.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/emulator_mutrig_7.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_7.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_7.csr baseAddress 0x01c0
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_7.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_7.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/histogram_ingress_bridge_0.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_ingress_bridge_0.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_ingress_bridge_0.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_ingress_bridge_0.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/histogram_ingress_bridge_0.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_hist.m0/histogram_ingress_bridge_0.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_ingress_bridge_0.csr baseAddress 0x0c00
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_ingress_bridge_0.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_ingress_bridge_0.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/histogram_statistics_0.csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_statistics_0.csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_statistics_0.csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_statistics_0.csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/histogram_statistics_0.csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.csr baseAddress 0x0400
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/histogram_statistics_0.hist_bin END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_statistics_0.hist_bin baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_statistics_0.hist_bin arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_statistics_0.hist_bin defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/histogram_statistics_0.hist_bin
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.hist_bin 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.hist_bin baseAddress 0x0000
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.hist_bin arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_statistics_0.hist_bin defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.feb_frame_assembly_csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.feb_frame_assembly_csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.feb_frame_assembly_csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.feb_frame_assembly_csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.feb_frame_assembly_csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_0.feb_frame_assembly_csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_0.feb_frame_assembly_csr baseAddress 0x0000
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_0.feb_frame_assembly_csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_0.feb_frame_assembly_csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr baseAddress 0x0000
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_0_csr defaultConnection 0
+2026.04.25.06:17:02 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr END
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr baseAddress
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr arbitrationPriority
+2026.04.25.06:17:02 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr defaultConnection
+2026.04.25.06:17:02 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr
+2026.04.25.06:17:02 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr 
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr baseAddress 0x0080
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr arbitrationPriority 1
+2026.04.25.06:17:02 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_1_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr baseAddress 0x0100
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_2_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr baseAddress 0x0180
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_0.ring_buffer_cam_3_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.feb_frame_assembly_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.feb_frame_assembly_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.feb_frame_assembly_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.feb_frame_assembly_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.feb_frame_assembly_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_1.feb_frame_assembly_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_1.feb_frame_assembly_csr baseAddress 0x0040
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_1.feb_frame_assembly_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_frame.m0/hit_stack_subsystem_1.feb_frame_assembly_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr baseAddress 0x0400
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_0_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr baseAddress 0x0480
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_1_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr baseAddress 0x0500
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_2_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr baseAddress 0x0580
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/hit_stack_subsystem_1.ring_buffer_cam_3_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/lvds_rx_controller_pro_0.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/lvds_rx_controller_pro_0.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/lvds_rx_controller_pro_0.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/lvds_rx_controller_pro_0.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/lvds_rx_controller_pro_0.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_low.m0/lvds_rx_controller_pro_0.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/lvds_rx_controller_pro_0.csr baseAddress 0x0000
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/lvds_rx_controller_pro_0.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/lvds_rx_controller_pro_0.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mm_pipeline_jtagmaster2rstctrl.s0 END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_jtagmaster2rstctrl.s0 baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_jtagmaster2rstctrl.s0 arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_jtagmaster2rstctrl.s0 defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mm_pipeline_jtagmaster2rstctrl.s0
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_low.m0/mm_pipeline_jtagmaster2rstctrl.s0 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mm_pipeline_jtagmaster2rstctrl.s0 baseAddress 0x0200
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mm_pipeline_jtagmaster2rstctrl.s0 arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mm_pipeline_jtagmaster2rstctrl.s0 defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mts_preprocessor_0.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mts_preprocessor_0.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mts_preprocessor_0.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mts_preprocessor_0.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mts_preprocessor_0.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig4_mts0.m0/mts_preprocessor_0.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mts_preprocessor_0.csr baseAddress 0x0000
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mts_preprocessor_0.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mts_preprocessor_0.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mts_preprocessor_1.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mts_preprocessor_1.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mts_preprocessor_1.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mts_preprocessor_1.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mts_preprocessor_1.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mts1.m0/mts_preprocessor_1.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mts1.m0/mts_preprocessor_1.csr baseAddress 0x0000
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mts1.m0/mts_preprocessor_1.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mts1.m0/mts_preprocessor_1.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr baseAddress 0x0860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.csr baseAddress 0x0900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_0.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr baseAddress 0x1860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_1.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.csr baseAddress 0x1900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_low.m0/mutrig_datapath_subsystem_1.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr baseAddress 0x0860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_2.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.csr baseAddress 0x0900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/mutrig_datapath_subsystem_2.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr baseAddress 0x0860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_3.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.csr baseAddress 0x0900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig3.m0/mutrig_datapath_subsystem_3.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr baseAddress 0x0860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_4.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.csr baseAddress 0x0900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig4_mts0.m0/mutrig_datapath_subsystem_4.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr baseAddress 0x0860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_5.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.csr baseAddress 0x0900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig5.m0/mutrig_datapath_subsystem_5.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr baseAddress 0x0860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_6.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.csr baseAddress 0x0900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig6.m0/mutrig_datapath_subsystem_6.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr baseAddress 0x0860
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.backpressure_fifo_csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_7.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.csr baseAddress 0x0900
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_mutrig7.m0/mutrig_datapath_subsystem_7.csr defaultConnection 0
+2026.04.25.06:17:03 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_injector_0.csr END
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_injector_0.csr baseAddress
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_injector_0.csr arbitrationPriority
+2026.04.25.06:17:03 Info: get_connection_parameter_value mm_clock_crossing_bridge.m0/mutrig_injector_0.csr defaultConnection
+2026.04.25.06:17:03 Info: remove_connection mm_clock_crossing_bridge.m0/mutrig_injector_0.csr
+2026.04.25.06:17:03 Info: add_connection mm_pipeline_lvds_csr_hitstack_ring.m0/mutrig_injector_0.csr 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/mutrig_injector_0.csr baseAddress 0x0200
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/mutrig_injector_0.csr arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hitstack_ring.m0/mutrig_injector_0.csr defaultConnection 0
+2026.04.25.06:17:03 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_low.s0 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_low.s0 baseAddress 0x0000
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_low.s0 arbitrationPriority 1
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_low.s0 defaultConnection false
+2026.04.25.06:17:03 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_emu_dbg.s0 
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_emu_dbg.s0 baseAddress 0x2000
+2026.04.25.06:17:03 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_emu_dbg.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_emu_dbg.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig3.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig3.s0 baseAddress 0x3000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig3.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig3.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig4_mts0.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig4_mts0.s0 baseAddress 0x4000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig4_mts0.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig4_mts0.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig5.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig5.s0 baseAddress 0x5000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig5.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig5.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig6.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig6.s0 baseAddress 0x6000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig6.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig6.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig7.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig7.s0 baseAddress 0x7000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig7.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mutrig7.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mts1.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mts1.s0 baseAddress 0x8000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mts1.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_mts1.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hist.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hist.s0 baseAddress 0xa000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hist.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hist.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_ring.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_ring.s0 baseAddress 0xb000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_ring.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_ring.s0 defaultConnection false
+2026.04.25.06:17:04 Info: add_connection mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_frame.s0 
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_frame.s0 baseAddress 0xd000
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_frame.s0 arbitrationPriority 1
+2026.04.25.06:17:04 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/mm_pipeline_lvds_csr_hitstack_frame.s0 defaultConnection false
+2026.04.25.06:17:04 Info: save_system /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3_pipe.qsys

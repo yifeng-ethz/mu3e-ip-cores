@@ -1,0 +1,28 @@
+[tasks]
+prove
+cover
+
+[options]
+prove: mode prove
+prove: depth 32
+prove: wait on
+cover: mode cover
+cover: depth 32
+cover: wait on
+
+[engines]
+prove: smtbmc z3
+cover: smtbmc z3
+
+[script]
+read_verilog -formal -sv formal_defs.svh
+read_verilog -formal -sv logging_fifo_stub.sv
+read_verilog -formal -sv /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv
+read_verilog -formal -sv runctl_mgmt_host_rc_formal_tb.sv
+prep -top runctl_mgmt_host_rc_formal_tb
+
+[files]
+../common/formal_defs.svh
+logging_fifo_stub.sv
+/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv
+runctl_mgmt_host_rc_formal_tb.sv

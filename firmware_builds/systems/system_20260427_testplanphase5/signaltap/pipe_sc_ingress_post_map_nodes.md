@@ -1,0 +1,107 @@
+# SignalTap Node Finder Report
+
+- Generated: 2026-04-24 07:57:18 UTC
+- Project dir: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3`
+- STP file: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/signaltap/pipe_sc_ingress.stp`
+- Observable type: `post_synthesis`
+- Probes: `134`
+- Found: `38`
+- Missing: `96`
+
+## Missing Probes
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|rx_locked`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|rx_ready`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|rx_is_lockedtodata`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|syncstatus`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|errdetect`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|disperr`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|rx_data_sys`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|rx_datak_sys`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|o_download_sc_data`
+- `feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|o_download_sc_datak`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[0]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[1]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[2]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[3]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[4]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[5]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[6]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[7]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[8]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[9]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[10]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[11]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[12]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[13]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[14]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[15]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[16]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[17]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[18]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[19]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[20]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[21]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[22]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[23]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[24]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[25]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[26]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[27]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[28]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[29]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[30]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_data[31]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_out_ready`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_rdreq`
+- `feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|load_out_word`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[4]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[5]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[6]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[7]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[8]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[9]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[10]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[11]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[12]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[13]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[14]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[15]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[16]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[17]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[18]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[19]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[20]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[21]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[22]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[23]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[24]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[25]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[26]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[27]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[28]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[29]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[30]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[31]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|o_download_ready`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|sc_hub_pkt_rx:pkt_rx_inst|o_download_ready`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_read`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_write`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_readdatavalid`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_waitrequest`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_writeresponsevalid`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_response[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_response[1]`

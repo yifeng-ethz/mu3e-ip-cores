@@ -1,0 +1,33 @@
+[*]
+@200
+-tb
+@28
+top.ram_1r1w_wreg_tb.clk
+top.ram_1r1w_wreg_tb.reset_n
+@420
+top.ram_1r1w_wreg_tb.cycle
+@28
+top.ram_1r1w_wreg_tb.err
+@200
+-dut
+@22
+#{top.ram_1r1w_wreg_tb.e_dut.i_waddr[1:0]} top.ram_1r1w_wreg_tb.e_dut.i_waddr[1] top.ram_1r1w_wreg_tb.e_dut.i_waddr[0]
+#{top.ram_1r1w_wreg_tb.e_dut.i_wdata[3:0]} top.ram_1r1w_wreg_tb.e_dut.i_wdata[3] top.ram_1r1w_wreg_tb.e_dut.i_wdata[2] top.ram_1r1w_wreg_tb.e_dut.i_wdata[1] top.ram_1r1w_wreg_tb.e_dut.i_wdata[0]
+top.ram_1r1w_wreg_tb.e_dut.i_we
+#{top.ram_1r1w_wreg_tb.e_dut.i_raddr[1:0]} top.ram_1r1w_wreg_tb.e_dut.i_raddr[1] top.ram_1r1w_wreg_tb.e_dut.i_raddr[0]
+@200
+-dut_ram
+@22
+#{top.ram_1r1w_wreg_tb.dut_rdata[3:0]} top.ram_1r1w_wreg_tb.dut_rdata[3] top.ram_1r1w_wreg_tb.dut_rdata[2] top.ram_1r1w_wreg_tb.dut_rdata[1] top.ram_1r1w_wreg_tb.dut_rdata[0]
+#{top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[0][3:0]} top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[0][3] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[0][2] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[0][1] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[0][0]
+#{top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[1][3:0]} top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[1][3] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[1][2] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[1][1] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[1][0]
+#{top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[2][3:0]} top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[2][3] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[2][2] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[2][1] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[2][0]
+#{top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[3][3:0]} top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[3][3] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[3][2] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[3][1] top.ram_1r1w_wreg_tb.e_dut.e_ram.ram[3][0]
+@200
+-tb_ram
+@22
+#{top.ram_1r1w_wreg_tb.ram_rdata[3:0]} top.ram_1r1w_wreg_tb.ram_rdata[3] top.ram_1r1w_wreg_tb.ram_rdata[2] top.ram_1r1w_wreg_tb.ram_rdata[1] top.ram_1r1w_wreg_tb.ram_rdata[0]
+#{top.ram_1r1w_wreg_tb.ram[0][3:0]} top.ram_1r1w_wreg_tb.ram[0][3] top.ram_1r1w_wreg_tb.ram[0][2] top.ram_1r1w_wreg_tb.ram[0][1] top.ram_1r1w_wreg_tb.ram[0][0]
+#{top.ram_1r1w_wreg_tb.ram[1][3:0]} top.ram_1r1w_wreg_tb.ram[1][3] top.ram_1r1w_wreg_tb.ram[1][2] top.ram_1r1w_wreg_tb.ram[1][1] top.ram_1r1w_wreg_tb.ram[1][0]
+#{top.ram_1r1w_wreg_tb.ram[2][3:0]} top.ram_1r1w_wreg_tb.ram[2][3] top.ram_1r1w_wreg_tb.ram[2][2] top.ram_1r1w_wreg_tb.ram[2][1] top.ram_1r1w_wreg_tb.ram[2][0]
+#{top.ram_1r1w_wreg_tb.ram[3][3:0]} top.ram_1r1w_wreg_tb.ram[3][3] top.ram_1r1w_wreg_tb.ram[3][2] top.ram_1r1w_wreg_tb.ram[3][1] top.ram_1r1w_wreg_tb.ram[3][0]

@@ -1,0 +1,6 @@
+__design_bin_path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/work/tlm
+__design_bin_name_path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/work/tlm/design.bin
+incr_run_version=16384
+incr_partial_run_stats=0:0
+incr_no_change_stats=0:0
+opt_data_elab=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/work/tlm/work/@_opt

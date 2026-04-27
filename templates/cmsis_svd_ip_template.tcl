@@ -1,7 +1,7 @@
 package require Tcl 8.5
 
 set script_dir [file dirname [info script]]
-set helper_file [file normalize [file join $script_dir .. dashboard_infra cmsis_svd lib mu3e_cmsis_svd.tcl]]
+set helper_file [file normalize [file join $script_dir .. toolkits infra cmsis_svd lib mu3e_cmsis_svd.tcl]]
 source $helper_file
 
 namespace eval ::mu3e::cmsis::spec {}

@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simPackage>
+ <file
+   path="simulation/submodules/rtl/histogram_ingress_bridge.vhd"
+   type="VHDL"
+   library="histogram_ingress_bridge_0" />
+ <file
+   path="simulation/submodules/altera_avalon_dc_fifo.v"
+   type="VERILOG"
+   library="hist_post_cdc_0" />
+ <file
+   path="simulation/submodules/altera_dcfifo_synchronizer_bundle.v"
+   type="VERILOG"
+   library="hist_post_cdc_0" />
+ <file
+   path="simulation/submodules/altera_std_synchronizer_nocut.v"
+   type="VERILOG"
+   library="hist_post_cdc_0" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_7" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_7" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_7" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_7" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_7" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_7" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_6" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_6" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_6" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_6" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_6" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_6" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_5" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_5" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_5" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_5" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_5" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_5" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_4" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_4" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_4" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_4" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_4" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_4" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_3" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_3" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_3" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_3" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_3" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_3" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_2" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_2" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_2" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_2" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_2" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_2" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_1" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_1" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_1" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_1" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_1" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_1" />
+ <file
+   path="simulation/submodules/emulator_mutrig_pkg.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_0" />
+ <file
+   path="simulation/submodules/prbs15_lfsr.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_0" />
+ <file
+   path="simulation/submodules/crc16_8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_0" />
+ <file
+   path="simulation/submodules/hit_generator.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_0" />
+ <file
+   path="simulation/submodules/frame_assembler.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_0" />
+ <file
+   path="simulation/submodules/emulator_mutrig.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_mutrig_0" />
+ <file
+   path="simulation/submodules/pulse_fanout8.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_inject_fanout" />
+ <file
+   path="simulation/submodules/altera_avalon_st_splitter.sv"
+   type="SYSTEM_VERILOG"
+   library="emulator_ctrl_splitter" />
+ <file
+   path="simulation/submodules/dbg_mm2runctrl.sv"
+   type="SYSTEM_VERILOG"
+   library="dbg_mm2runctrl_0" />
+ <file path="simulation/scifi_datapath_system_v3_pipe.vhd" type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_rst_controller.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_rst_controller_006.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_mm_pipeline_jtagmaster2rstctrl.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_mm_pipeline_lvds_csr_emu_dbg.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_mm_pipeline_lvds_csr_hitstack_frame.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_mm_pipeline_lvds_csr_hitstack_ring.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_mm_pipeline_lvds_csr_low.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_mm_pipeline_lvds_csr_mts1.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_emulator_ctrl_splitter.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_hist_post_splitter_0.vhd"
+   type="VHDL" />
+ <file
+   path="simulation/scifi_datapath_system_v3_pipe_run_control_splitter.vhd"
+   type="VHDL" />
+ <topLevel name="scifi_datapath_system_v3_pipe" />
+ <deviceFamily name="arriav" />
+</simPackage>

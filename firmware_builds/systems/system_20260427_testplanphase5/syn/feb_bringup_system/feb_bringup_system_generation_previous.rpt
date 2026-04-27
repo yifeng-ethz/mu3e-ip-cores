@@ -1,0 +1,122 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_bringup_system.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_bringup_system/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading firmware_builds/feb_bringup_system.qsys
+Progress: Reading input file
+Progress: Adding clk [clock_source 18.1]
+Progress: Parameterizing module clk
+Progress: Adding cpu [altera_nios2_gen2 18.1]
+Progress: Parameterizing module cpu
+Progress: Adding dbg0 [altera_avalon_pio 18.1]
+Progress: Parameterizing module dbg0
+Progress: Adding dbg1 [altera_avalon_pio 18.1]
+Progress: Parameterizing module dbg1
+Progress: Adding jtag_uart [altera_avalon_jtag_uart 18.1]
+Progress: Parameterizing module jtag_uart
+Progress: Adding pio [altera_avalon_pio 18.1]
+Progress: Parameterizing module pio
+Progress: Adding ram [altera_avalon_onchip_memory2 18.1]
+Progress: Parameterizing module ram
+Progress: Adding si_in [altera_avalon_pio 18.1]
+Progress: Parameterizing module si_in
+Progress: Adding si_out [altera_avalon_pio 18.1]
+Progress: Parameterizing module si_out
+Progress: Adding sysid [altera_avalon_sysid_qsys 18.1]
+Progress: Parameterizing module sysid
+Progress: Adding timer [altera_avalon_timer 18.1]
+Progress: Parameterizing module timer
+Progress: Adding timer_ts [altera_avalon_timer 18.1]
+Progress: Parameterizing module timer_ts
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: feb_bringup_system.jtag_uart: JTAG UART IP input clock need to be at least double (2x) the operating frequency of JTAG TCK on board
+Info: feb_bringup_system.si_in: PIO inputs are not hardwired in test bench. Undefined values will be read from PIO inputs during simulation.
+Info: feb_bringup_system.sysid: System ID is not assigned automatically. Edit the System ID parameter to provide a unique ID
+Info: feb_bringup_system.sysid: Time stamp will be automatically updated when this component is generated.
+Warning: feb_bringup_system.dbg0: dbg0.external_connection must be exported, or connected to a matching conduit.
+Warning: feb_bringup_system.dbg1: dbg1.external_connection must be exported, or connected to a matching conduit.
+Warning: feb_bringup_system.pio: pio.external_connection must be exported, or connected to a matching conduit.
+Warning: feb_bringup_system.timer_ts: Interrupt sender timer_ts.irq is not connected to an interrupt receiver
+Info: feb_bringup_system: Generating feb_bringup_system "feb_bringup_system" for QUARTUS_SYNTH
+Info: cpu: "feb_bringup_system" instantiated altera_nios2_gen2 "cpu"
+Info: dbg0: Starting RTL generation for module 'feb_bringup_system_dbg0'
+Info: dbg0:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=feb_bringup_system_dbg0 --dir=/tmp/alt0563_1923970665135210924.dir/0002_dbg0_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0563_1923970665135210924.dir/0002_dbg0_gen//feb_bringup_system_dbg0_component_configuration.pl  --do_build_sim=0  ]
+Info: dbg0: Done RTL generation for module 'feb_bringup_system_dbg0'
+Info: dbg0: "feb_bringup_system" instantiated altera_avalon_pio "dbg0"
+Info: jtag_uart: Starting RTL generation for module 'feb_bringup_system_jtag_uart'
+Info: jtag_uart:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=feb_bringup_system_jtag_uart --dir=/tmp/alt0563_1923970665135210924.dir/0003_jtag_uart_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0563_1923970665135210924.dir/0003_jtag_uart_gen//feb_bringup_system_jtag_uart_component_configuration.pl  --do_build_sim=0  ]
+Info: jtag_uart: Done RTL generation for module 'feb_bringup_system_jtag_uart'
+Info: jtag_uart: "feb_bringup_system" instantiated altera_avalon_jtag_uart "jtag_uart"
+Info: ram: Starting RTL generation for module 'feb_bringup_system_ram'
+Info: ram:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=feb_bringup_system_ram --dir=/tmp/alt0563_1923970665135210924.dir/0004_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0563_1923970665135210924.dir/0004_ram_gen//feb_bringup_system_ram_component_configuration.pl  --do_build_sim=0  ]
+Info: ram: Done RTL generation for module 'feb_bringup_system_ram'
+Info: ram: "feb_bringup_system" instantiated altera_avalon_onchip_memory2 "ram"
+Info: si_in: Starting RTL generation for module 'feb_bringup_system_si_in'
+Info: si_in:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=feb_bringup_system_si_in --dir=/tmp/alt0563_1923970665135210924.dir/0005_si_in_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0563_1923970665135210924.dir/0005_si_in_gen//feb_bringup_system_si_in_component_configuration.pl  --do_build_sim=0  ]
+Info: si_in: Done RTL generation for module 'feb_bringup_system_si_in'
+Info: si_in: "feb_bringup_system" instantiated altera_avalon_pio "si_in"
+Info: si_out: Starting RTL generation for module 'feb_bringup_system_si_out'
+Info: si_out:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=feb_bringup_system_si_out --dir=/tmp/alt0563_1923970665135210924.dir/0006_si_out_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0563_1923970665135210924.dir/0006_si_out_gen//feb_bringup_system_si_out_component_configuration.pl  --do_build_sim=0  ]
+Info: si_out: Done RTL generation for module 'feb_bringup_system_si_out'
+Info: si_out: "feb_bringup_system" instantiated altera_avalon_pio "si_out"
+Info: sysid: "feb_bringup_system" instantiated altera_avalon_sysid_qsys "sysid"
+Info: timer: Starting RTL generation for module 'feb_bringup_system_timer'
+Info: timer:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=feb_bringup_system_timer --dir=/tmp/alt0563_1923970665135210924.dir/0008_timer_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0563_1923970665135210924.dir/0008_timer_gen//feb_bringup_system_timer_component_configuration.pl  --do_build_sim=0  ]
+Info: timer: Done RTL generation for module 'feb_bringup_system_timer'
+Info: timer: "feb_bringup_system" instantiated altera_avalon_timer "timer"
+Info: timer_ts: Starting RTL generation for module 'feb_bringup_system_timer_ts'
+Info: timer_ts:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=feb_bringup_system_timer_ts --dir=/tmp/alt0563_1923970665135210924.dir/0009_timer_ts_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0563_1923970665135210924.dir/0009_timer_ts_gen//feb_bringup_system_timer_ts_component_configuration.pl  --do_build_sim=0  ]
+Info: timer_ts: Done RTL generation for module 'feb_bringup_system_timer_ts'
+Info: timer_ts: "feb_bringup_system" instantiated altera_avalon_timer "timer_ts"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_0: "feb_bringup_system" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: irq_mapper: "feb_bringup_system" instantiated altera_irq_mapper "irq_mapper"
+Info: rst_controller: "feb_bringup_system" instantiated altera_reset_controller "rst_controller"
+Info: cpu: Starting RTL generation for module 'feb_bringup_system_cpu_cpu'
+Info: cpu:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=feb_bringup_system_cpu_cpu --dir=/tmp/alt0563_1923970665135210924.dir/0012_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/tmp/alt0563_1923970665135210924.dir/0012_cpu_gen//feb_bringup_system_cpu_cpu_processor_configuration.pl  --do_build_sim=0  ]
+Info: cpu: # 2026.04.20 11:37:24 (*) Starting Nios II generation
+Info: cpu: # 2026.04.20 11:37:24 (*)   Checking for plaintext license.
+Info: cpu: # 2026.04.20 11:37:24 (*)   Plaintext license not found.
+Info: cpu: # 2026.04.20 11:37:24 (*)   No license required to generate encrypted Nios II/e.
+Info: cpu: # 2026.04.20 11:37:24 (*)   Elaborating CPU configuration settings
+Info: cpu: # 2026.04.20 11:37:24 (*)   Creating all objects for CPU
+Info: cpu: # 2026.04.20 11:37:25 (*)   Generating RTL from CPU objects
+Info: cpu: # 2026.04.20 11:37:25 (*)   Creating plain-text RTL
+Info: cpu: # 2026.04.20 11:37:25 (*) Done Nios II generation
+Info: cpu: Done RTL generation for module 'feb_bringup_system_cpu_cpu'
+Info: cpu: "cpu" instantiated altera_nios2_gen2_unit "cpu"
+Info: cpu_data_master_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "cpu_data_master_translator"
+Info: jtag_uart_avalon_jtag_slave_translator: "mm_interconnect_0" instantiated altera_merlin_slave_translator "jtag_uart_avalon_jtag_slave_translator"
+Info: cpu_data_master_agent: "mm_interconnect_0" instantiated altera_merlin_master_agent "cpu_data_master_agent"
+Info: jtag_uart_avalon_jtag_slave_agent: "mm_interconnect_0" instantiated altera_merlin_slave_agent "jtag_uart_avalon_jtag_slave_agent"
+Info: jtag_uart_avalon_jtag_slave_agent_rsp_fifo: "mm_interconnect_0" instantiated altera_avalon_sc_fifo "jtag_uart_avalon_jtag_slave_agent_rsp_fifo"
+Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_0" instantiated altera_merlin_router "router_001"
+Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
+Info: router_004: "mm_interconnect_0" instantiated altera_merlin_router "router_004"
+Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_001"
+Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: cmd_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_002"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_bringup_system/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux"
+Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_bringup_system/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_001"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/feb_bringup_system/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
+Info: feb_bringup_system: Done "feb_bringup_system" with 32 modules, 44 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

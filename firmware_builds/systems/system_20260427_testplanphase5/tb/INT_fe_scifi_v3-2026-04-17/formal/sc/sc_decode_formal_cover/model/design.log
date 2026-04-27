@@ -1,0 +1,813 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+
+-- Executing script file `../model/design.ys' --
+
+1. Executing Verilog-2005 frontend: formal_defs.svh
+Parsing formal SystemVerilog input from `formal_defs.svh' to AST representation.
+Successfully finished Verilog frontend.
+
+2. Executing Verilog-2005 frontend: debug_sc_system_v3_map.svh
+Parsing formal SystemVerilog input from `debug_sc_system_v3_map.svh' to AST representation.
+Successfully finished Verilog frontend.
+
+3. Executing Verilog-2005 frontend: props_sc_decode.sv
+Parsing formal SystemVerilog input from `props_sc_decode.sv' to AST representation.
+Generating RTLIL representation for module `\props_sc_decode'.
+Successfully finished Verilog frontend.
+
+4. Executing Verilog-2005 frontend: sc_decode_formal_tb.sv
+Parsing formal SystemVerilog input from `sc_decode_formal_tb.sv' to AST representation.
+Generating RTLIL representation for module `\sc_decode_formal_tb'.
+Successfully finished Verilog frontend.
+
+5. Executing PREP pass.
+
+5.1. Executing HIERARCHY pass (managing design hierarchy).
+
+5.1.1. Analyzing design hierarchy..
+Top module:  \sc_decode_formal_tb
+Used module:     \props_sc_decode
+
+5.1.2. Analyzing design hierarchy..
+Top module:  \sc_decode_formal_tb
+Used module:     \props_sc_decode
+Removed 0 unused modules.
+Module sc_decode_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+Module props_sc_decode directly or indirectly contains formal properties -> setting "keep" attribute.
+
+5.2. Executing PROC pass (convert processes to netlists).
+
+5.2.1. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Cleaned up 0 empty switches.
+
+5.2.2. Executing PROC_RMDEAD pass (remove dead branches from decision trees).
+Marked 8 switch rules as full_case in process $proc$props_sc_decode.sv:153$697 in module props_sc_decode.
+Marked 8 switch rules as full_case in process $proc$props_sc_decode.sv:152$628 in module props_sc_decode.
+Marked 9 switch rules as full_case in process $proc$props_sc_decode.sv:150$560 in module props_sc_decode.
+Marked 8 switch rules as full_case in process $proc$props_sc_decode.sv:149$499 in module props_sc_decode.
+Marked 8 switch rules as full_case in process $proc$props_sc_decode.sv:148$438 in module props_sc_decode.
+Marked 1 switch rules as full_case in process $proc$props_sc_decode.sv:189$303 in module props_sc_decode.
+Removed a total of 0 dead cases.
+
+5.2.3. Executing PROC_PRUNE pass (remove redundant assignments in processes).
+Removed 30 redundant assignments.
+Promoted 205 assignments to connections.
+
+5.2.4. Executing PROC_INIT pass (extract init attributes).
+Found init rule in `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:7$933'.
+  Set init value: \f_reset_sr = 2'11
+Found init rule in `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:6$932'.
+  Set init value: \f_past_valid = 1'0
+
+5.2.5. Executing PROC_ARST pass (detect async resets in processes).
+
+5.2.6. Executing PROC_ROM pass (convert switches to ROMs).
+Converted 0 switches.
+<suppressed ~47 debug messages>
+
+5.2.7. Executing PROC_MUX pass (convert decision trees to multiplexers).
+Creating decoders for process `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:7$933'.
+Creating decoders for process `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:6$932'.
+Creating decoders for process `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:24$928'.
+     1/2: $assume$sc_decode_formal_tb.sv:28$930_EN
+     2/2: $0\f_reset_sr[1:0]
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:182$922'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:182$919'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:182$916'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:182$913'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:182$910'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:182$907'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:182$904'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$901'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$898'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$895'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$892'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$889'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$886'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$883'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:176$880'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:162$871'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:161$862'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:157$814'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:156$805'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+     1/8: $8\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$765
+     2/8: $7\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$759
+     3/8: $6\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$753
+     4/8: $5\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$747
+     5/8: $4\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$741
+     6/8: $3\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$735
+     7/8: $2\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$729
+     8/8: $1\first_hit_index$func$props_sc_decode.sv:153$207.$result[4:0]$723
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+     1/8: $8\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$696
+     2/8: $7\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$690
+     3/8: $6\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$684
+     4/8: $5\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$678
+     5/8: $4\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$672
+     6/8: $3\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$666
+     7/8: $2\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$660
+     8/8: $1\first_hit_index$func$props_sc_decode.sv:152$182.$result[4:0]$654
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+     1/9: $9\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$626
+     2/9: $8\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$621
+     3/9: $7\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$616
+     4/9: $6\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$611
+     5/9: $5\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$606
+     6/9: $4\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$601
+     7/9: $3\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$596
+     8/9: $2\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$591
+     9/9: $1\hit_count_range$func$props_sc_decode.sv:150$154.$result[5:0]$586
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+     1/8: $8\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$558
+     2/8: $7\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$553
+     3/8: $6\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$548
+     4/8: $5\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$543
+     5/8: $4\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$538
+     6/8: $3\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$533
+     7/8: $2\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$528
+     8/8: $1\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$523
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+     1/8: $8\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$497
+     2/8: $7\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$492
+     3/8: $6\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$487
+     4/8: $5\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$482
+     5/8: $4\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$477
+     6/8: $3\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$472
+     7/8: $2\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$467
+     8/8: $1\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$462
+Creating decoders for process `\props_sc_decode.$proc$props_sc_decode.sv:189$303'.
+     1/47: $1\map_hit$func$props_sc_decode.sv:229$101.$result[0:0]$344
+     2/47: $1\map_hit$func$props_sc_decode.sv:229$101.addr[31:0]$345
+     3/47: $1\map_hit$func$props_sc_decode.sv:228$98.$result[0:0]$342
+     4/47: $1\map_hit$func$props_sc_decode.sv:228$98.addr[31:0]$343
+     5/47: $1\map_hit$func$props_sc_decode.sv:224$95.$result[0:0]$340
+     6/47: $1\map_hit$func$props_sc_decode.sv:224$95.addr[31:0]$341
+     7/47: $1\map_hit$func$props_sc_decode.sv:223$92.$result[0:0]$338
+     8/47: $1\map_hit$func$props_sc_decode.sv:223$92.addr[31:0]$339
+     9/47: $1\map_hit$func$props_sc_decode.sv:222$89.$result[0:0]$336
+    10/47: $1\map_hit$func$props_sc_decode.sv:222$89.addr[31:0]$337
+    11/47: $1\map_hit$func$props_sc_decode.sv:221$86.$result[0:0]$334
+    12/47: $1\map_hit$func$props_sc_decode.sv:221$86.addr[31:0]$335
+    13/47: $1\map_hit$func$props_sc_decode.sv:220$83.$result[0:0]$332
+    14/47: $1\map_hit$func$props_sc_decode.sv:220$83.addr[31:0]$333
+    15/47: $1\map_hit$func$props_sc_decode.sv:219$80.$result[0:0]$330
+    16/47: $1\map_hit$func$props_sc_decode.sv:219$80.addr[31:0]$331
+    17/47: $1\map_hit$func$props_sc_decode.sv:218$77.$result[0:0]$328
+    18/47: $1\map_hit$func$props_sc_decode.sv:218$77.addr[31:0]$329
+    19/47: $1\map_hit$func$props_sc_decode.sv:217$74.$result[0:0]$326
+    20/47: $1\map_hit$func$props_sc_decode.sv:217$74.addr[31:0]$327
+    21/47: $cover$props_sc_decode.sv:229$436_EN
+    22/47: $cover$props_sc_decode.sv:228$431_EN
+    23/47: $cover$props_sc_decode.sv:227$424_EN
+    24/47: $cover$props_sc_decode.sv:226$422_EN
+    25/47: $cover$props_sc_decode.sv:225$420_EN
+    26/47: $cover$props_sc_decode.sv:224$418_EN
+    27/47: $cover$props_sc_decode.sv:223$413_EN
+    28/47: $cover$props_sc_decode.sv:222$408_EN
+    29/47: $cover$props_sc_decode.sv:221$403_EN
+    30/47: $cover$props_sc_decode.sv:220$398_EN
+    31/47: $cover$props_sc_decode.sv:219$393_EN
+    32/47: $cover$props_sc_decode.sv:218$388_EN
+    33/47: $cover$props_sc_decode.sv:217$383_EN
+    34/47: $assert$props_sc_decode.sv:213$379_EN
+    35/47: $assert$props_sc_decode.sv:209$377_EN
+    36/47: $assert$props_sc_decode.sv:208$376_EN
+    37/47: $assert$props_sc_decode.sv:204$371_EN
+    38/47: $assert$props_sc_decode.sv:203$368_EN
+    39/47: $assert$props_sc_decode.sv:202$365_EN
+    40/47: $assert$props_sc_decode.sv:200$362_EN
+    41/47: $assert$props_sc_decode.sv:199$359_EN
+    42/47: $assert$props_sc_decode.sv:198$356_EN
+    43/47: $assert$props_sc_decode.sv:196$354_EN
+    44/47: $assert$props_sc_decode.sv:195$352_EN
+    45/47: $assert$props_sc_decode.sv:194$350_EN
+    46/47: $assume$props_sc_decode.sv:192$348_EN
+    47/47: $assume$props_sc_decode.sv:191$346_EN
+
+5.2.8. Executing PROC_DLATCH pass (convert process syncs to latches).
+No latch inferred for signal `\props_sc_decode.\sc_hits_mutrig_cfg$func$props_sc_decode.sv:162$13.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:162$871'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_mutrig_cfg$func$props_sc_decode.sv:162$282.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:162$871'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_mutrig_cfg$func$props_sc_decode.sv:162$282.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:162$871'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:124$283.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:162$871'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:124$283.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:162$871'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_datapath$func$props_sc_decode.sv:161$12.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:161$862'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_datapath$func$props_sc_decode.sv:161$278.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:161$862'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_datapath$func$props_sc_decode.sv:161$278.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:161$862'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:120$279.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:161$862'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:120$279.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:161$862'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_control$func$props_sc_decode.sv:160$11.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_control$func$props_sc_decode.sv:160$259.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_control$func$props_sc_decode.sv:160$259.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:110$260.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:110$260.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:111$261.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:111$261.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:112$262.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:112$262.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:113$263.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:113$263.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:114$264.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:114$264.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:115$265.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:115$265.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_mutrig_cfg$func$props_sc_decode.sv:157$10.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:157$814'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_mutrig_cfg$func$props_sc_decode.sv:157$255.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:157$814'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_mutrig_cfg$func$props_sc_decode.sv:157$255.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:157$814'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:124$256.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:157$814'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:124$256.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:157$814'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_datapath$func$props_sc_decode.sv:156$9.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:156$805'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_datapath$func$props_sc_decode.sv:156$251.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:156$805'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_datapath$func$props_sc_decode.sv:156$251.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:156$805'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:120$252.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:156$805'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:120$252.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:156$805'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_control$func$props_sc_decode.sv:155$8.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_control$func$props_sc_decode.sv:155$232.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\sc_hits_control$func$props_sc_decode.sv:155$232.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:110$233.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:110$233.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:111$234.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:111$234.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:112$235.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:112$235.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:113$236.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:113$236.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:114$237.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:114$237.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:115$238.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:115$238.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:153$7.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:153$207.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:153$207.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:153$207.i' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$208.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$208.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$211.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$211.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$214.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$214.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$217.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$217.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$220.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$220.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$223.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$223.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$226.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$226.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$229.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$229.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:152$6.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:152$182.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:152$182.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\first_hit_index$func$props_sc_decode.sv:152$182.i' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$183.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$183.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$186.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$186.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$189.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$189.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$192.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$192.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$195.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$195.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$198.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$198.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$201.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$201.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$204.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:100$204.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:150$5.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:150$154.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:150$154.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:150$154.i' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$155.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$155.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$158.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$158.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$161.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$161.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$164.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$164.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$167.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$167.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$170.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$170.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$173.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$173.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$176.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$176.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$179.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$179.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:149$4.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:149$129.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:149$129.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:149$129.i' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$130.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$130.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$133.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$133.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$136.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$136.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$139.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$139.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$142.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$142.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$145.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$145.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$148.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$148.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$151.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$151.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:148$3.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:148$104.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:148$104.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\hit_count_range$func$props_sc_decode.sv:148$104.i' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$105.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$105.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$108.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$108.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$111.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$111.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$114.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$114.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$117.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$117.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$120.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$120.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$123.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$123.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$126.$result' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+No latch inferred for signal `\props_sc_decode.\map_hit$func$props_sc_decode.sv:84$126.addr' from process `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+
+5.2.9. Executing PROC_DFF pass (convert process syncs to FFs).
+Creating register for signal `\sc_decode_formal_tb.\f_past_valid' using process `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:24$928'.
+  created $ff cell `$procdff$1214' with global clock.
+Creating register for signal `\sc_decode_formal_tb.\f_reset_sr' using process `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:24$928'.
+  created $ff cell `$procdff$1215' with global clock.
+
+5.2.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+
+5.2.11. Executing PROC_CLEAN pass (remove empty switches from decision trees).
+Removing empty process `sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:7$933'.
+Removing empty process `sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:6$932'.
+Found and cleaned up 2 empty switches in `\sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:24$928'.
+Removing empty process `sc_decode_formal_tb.$proc$sc_decode_formal_tb.sv:24$928'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:182$922'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:182$919'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:182$916'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:182$913'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:182$910'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:182$907'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:182$904'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$901'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$898'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$895'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$892'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$889'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$886'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$883'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:176$880'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:162$871'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:161$862'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:160$823'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:157$814'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:156$805'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:155$766'.
+Found and cleaned up 8 empty switches in `\props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:153$697'.
+Found and cleaned up 8 empty switches in `\props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:152$628'.
+Found and cleaned up 9 empty switches in `\props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:150$560'.
+Found and cleaned up 8 empty switches in `\props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:149$499'.
+Found and cleaned up 8 empty switches in `\props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:148$438'.
+Found and cleaned up 4 empty switches in `\props_sc_decode.$proc$props_sc_decode.sv:189$303'.
+Removing empty process `props_sc_decode.$proc$props_sc_decode.sv:189$303'.
+Cleaned up 47 empty switches.
+
+5.2.12. Executing OPT_EXPR pass (perform const folding).
+Optimizing module sc_decode_formal_tb.
+<suppressed ~2 debug messages>
+Optimizing module props_sc_decode.
+<suppressed ~8 debug messages>
+
+5.3. Executing FUTURE pass.
+
+5.4. Executing OPT_EXPR pass (perform const folding).
+Optimizing module sc_decode_formal_tb.
+Optimizing module props_sc_decode.
+
+5.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \sc_decode_formal_tb..
+Finding unused cells or wires in module \props_sc_decode..
+Removed 21 unused cells and 538 unused wires.
+<suppressed ~33 debug messages>
+
+5.6. Executing CHECK pass (checking for obvious problems).
+Checking module sc_decode_formal_tb...
+Warning: Wire sc_decode_formal_tb.\gclk is used but has no driver.
+Checking module props_sc_decode...
+Found and reported 1 problems.
+
+5.7. Executing OPT pass (performing simple optimizations).
+
+5.7.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module sc_decode_formal_tb.
+Optimizing module props_sc_decode.
+
+5.7.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\sc_decode_formal_tb'.
+Computing hashes of 10 cells of `\sc_decode_formal_tb'.
+Finding duplicate cells in `\sc_decode_formal_tb'.
+Finding identical cells in module `\props_sc_decode'.
+Computing hashes of 446 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Computing hashes of 352 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Computing hashes of 306 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Computing hashes of 305 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+<suppressed ~423 debug messages>
+Removed a total of 141 cells.
+
+5.7.3. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \sc_decode_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \props_sc_decode..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~146 debug messages>
+
+5.7.4. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \sc_decode_formal_tb.
+  Optimizing cells in module \props_sc_decode.
+Performed a total of 0 changes.
+
+5.7.5. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\sc_decode_formal_tb'.
+Computing hashes of 10 cells of `\sc_decode_formal_tb'.
+Finding duplicate cells in `\sc_decode_formal_tb'.
+Finding identical cells in module `\props_sc_decode'.
+Computing hashes of 305 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Computing hashes of 280 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Computing hashes of 278 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Computing hashes of 277 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+<suppressed ~84 debug messages>
+Removed a total of 28 cells.
+
+5.7.6. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \sc_decode_formal_tb..
+Finding unused cells or wires in module \props_sc_decode..
+Removed 0 unused cells and 169 unused wires.
+<suppressed ~1 debug messages>
+
+5.7.7. Executing OPT_EXPR pass (perform const folding).
+Optimizing module sc_decode_formal_tb.
+Optimizing module props_sc_decode.
+<suppressed ~1 debug messages>
+
+5.7.8. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.7.9. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \sc_decode_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \props_sc_decode..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~94 debug messages>
+
+5.7.10. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \sc_decode_formal_tb.
+  Optimizing cells in module \props_sc_decode.
+Performed a total of 0 changes.
+
+5.7.11. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\sc_decode_formal_tb'.
+Computing hashes of 10 cells of `\sc_decode_formal_tb'.
+Finding duplicate cells in `\sc_decode_formal_tb'.
+Finding identical cells in module `\props_sc_decode'.
+Computing hashes of 276 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Removed a total of 0 cells.
+
+5.7.12. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \sc_decode_formal_tb..
+Finding unused cells or wires in module \props_sc_decode..
+Removed 0 unused cells and 1 unused wires.
+<suppressed ~1 debug messages>
+
+5.7.13. Executing OPT_EXPR pass (perform const folding).
+Optimizing module sc_decode_formal_tb.
+Optimizing module props_sc_decode.
+
+5.7.14. Rerunning OPT passes. (Maybe there is more to do..)
+
+5.7.15. Executing OPT_MUXTREE pass (detect dead branches in mux trees).
+Running muxtree optimizer on module \sc_decode_formal_tb..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Running muxtree optimizer on module \props_sc_decode..
+  Creating internal representation of mux trees.
+  Evaluating internal representation of mux trees.
+  Analyzing evaluation results.
+Removed 0 multiplexer ports.
+<suppressed ~94 debug messages>
+
+5.7.16. Executing OPT_REDUCE pass (consolidate $*mux and $reduce_* inputs).
+  Optimizing cells in module \sc_decode_formal_tb.
+  Optimizing cells in module \props_sc_decode.
+Performed a total of 0 changes.
+
+5.7.17. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\sc_decode_formal_tb'.
+Computing hashes of 10 cells of `\sc_decode_formal_tb'.
+Finding duplicate cells in `\sc_decode_formal_tb'.
+Finding identical cells in module `\props_sc_decode'.
+Computing hashes of 276 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Removed a total of 0 cells.
+
+5.7.18. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \sc_decode_formal_tb..
+Finding unused cells or wires in module \props_sc_decode..
+
+5.7.19. Executing OPT_EXPR pass (perform const folding).
+Optimizing module sc_decode_formal_tb.
+Optimizing module props_sc_decode.
+
+5.7.20. Finished fast OPT passes. (There is nothing left to do.)
+
+5.8. Executing WREDUCE pass (reducing word size of cells).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$add$props_sc_decode.sv:19$286 ($add).
+Removed top 23 bits (of 32) from port B of cell props_sc_decode.$add$props_sc_decode.sv:19$286 ($add).
+Removed top 13 bits (of 32) from port Y of cell props_sc_decode.$add$props_sc_decode.sv:19$286 ($add).
+Removed top 13 bits (of 32) from port A of cell props_sc_decode.$sub$props_sc_decode.sv:19$287 ($sub).
+Removed top 31 bits (of 32) from port B of cell props_sc_decode.$sub$props_sc_decode.sv:19$287 ($sub).
+Removed top 12 bits (of 32) from port Y of cell props_sc_decode.$sub$props_sc_decode.sv:19$287 ($sub).
+Removed top 8 bits (of 9) from port B of cell props_sc_decode.$gt$props_sc_decode.sv:168$296 ($gt).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:192$349 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$le$props_sc_decode.sv:194$351 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$le$props_sc_decode.sv:195$353 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$le$props_sc_decode.sv:196$355 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$eq$props_sc_decode.sv:203$369 ($eq).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$eq$props_sc_decode.sv:204$372 ($eq).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$473 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$478 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$483 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$488 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$493 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$498 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$529 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$534 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$539 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$544 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$549 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$554 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$559 ($add).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$588 ($ge).
+Removed top 21 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$588 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$589 ($le).
+Removed top 21 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$589 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$592 ($add).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$593 ($ge).
+Removed top 21 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$593 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$594 ($le).
+Removed top 21 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$594 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$597 ($add).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$598 ($ge).
+Removed top 21 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$598 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$599 ($le).
+Removed top 21 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$599 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$602 ($add).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$603 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$603 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$604 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$604 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$607 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$612 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$617 ($add).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$622 ($add).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$623 ($ge).
+Removed top 13 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$623 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$624 ($le).
+Removed top 13 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$624 ($le).
+Removed top 5 bits (of 6) from port B of cell props_sc_decode.$add$props_sc_decode.sv:85$627 ($add).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$782 ($ge).
+Removed top 31 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$782 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$783 ($le).
+Removed top 22 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$783 ($le).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$785 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$785 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$786 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$786 ($le).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$788 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$788 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$789 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$789 ($le).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$791 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$791 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$792 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$792 ($le).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$794 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$794 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$795 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$795 ($le).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$797 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$797 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$798 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$798 ($le).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$811 ($ge).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$811 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$812 ($le).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$812 ($le).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$ge$props_sc_decode.sv:72$820 ($ge).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$820 ($ge).
+Removed top 14 bits (of 32) from port A of cell props_sc_decode.$le$props_sc_decode.sv:72$821 ($le).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$821 ($le).
+Removed top 31 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$839 ($ge).
+Removed top 22 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$840 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$842 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$843 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$845 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$846 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$848 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$849 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$851 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$852 ($le).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$854 ($ge).
+Removed top 15 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$855 ($le).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$868 ($ge).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$869 ($le).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$ge$props_sc_decode.sv:72$877 ($ge).
+Removed top 14 bits (of 32) from port B of cell props_sc_decode.$le$props_sc_decode.sv:72$878 ($le).
+Removed top 5 bits (of 6) from mux cell props_sc_decode.$procmux$1035 ($mux).
+Removed top 5 bits (of 6) from mux cell props_sc_decode.$procmux$1059 ($mux).
+Removed top 5 bits (of 6) from wire props_sc_decode.$1\hit_count_range$func$props_sc_decode.sv:148$104.$result[5:0]$462.
+Removed top 13 bits (of 32) from wire props_sc_decode.$add$props_sc_decode.sv:19$286_Y.
+Removed top 5 bits (of 6) from wire props_sc_decode.$1\hit_count_range$func$props_sc_decode.sv:149$129.$result[5:0]$523.
+
+5.9. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \sc_decode_formal_tb..
+Finding unused cells or wires in module \props_sc_decode..
+Removed 0 unused cells and 3 unused wires.
+<suppressed ~1 debug messages>
+
+5.10. Executing MEMORY_COLLECT pass (generating $mem cells).
+
+5.11. Executing OPT pass (performing simple optimizations).
+
+5.11.1. Executing OPT_EXPR pass (perform const folding).
+Optimizing module sc_decode_formal_tb.
+Optimizing module props_sc_decode.
+
+5.11.2. Executing OPT_MERGE pass (detect identical cells).
+Finding identical cells in module `\sc_decode_formal_tb'.
+Computing hashes of 10 cells of `\sc_decode_formal_tb'.
+Finding duplicate cells in `\sc_decode_formal_tb'.
+Finding identical cells in module `\props_sc_decode'.
+Computing hashes of 276 cells of `\props_sc_decode'.
+Finding duplicate cells in `\props_sc_decode'.
+Removed a total of 0 cells.
+
+5.11.3. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \sc_decode_formal_tb..
+Finding unused cells or wires in module \props_sc_decode..
+
+5.11.4. Finished fast OPT passes.
+
+5.12. Executing SORT pass.
+
+5.13. Printing statistics.
+
+=== props_sc_decode ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      300 wires
+     2978 wire bits
+       98 public wires
+     2502 public wire bits
+        6 ports
+       31 port bits
+      276 cells
+       22   $add
+       57   $check
+       19   $eq
+       21   $ge
+        1   $gt
+       25   $le
+       55   $logic_and
+        7   $logic_not
+       16   $logic_or
+       47   $mux
+        4   $ne
+        1   $reduce_bool
+        1   $sub
+
+=== sc_decode_formal_tb ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       10 wires
+       37 wire bits
+        7 public wires
+       33 public wire bits
+        9 cells
+        3   $anyseq
+        1   $check
+        2   $ff
+        2   $mux
+        1   $reduce_bool
+        1 submodules
+        1   props_sc_decode
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      285 sc_decode_formal_tb
+      276 props_sc_decode
+
+        +----------Count including submodules.
+        | 
+      310 wires
+     3015 wire bits
+      105 public wires
+     2535 public wire bits
+        6 ports
+       31 port bits
+        - memories
+        - memory bits
+        - processes
+      285 cells
+       22   $add
+        3   $anyseq
+       58   $check
+       19   $eq
+        2   $ff
+       21   $ge
+        1   $gt
+       25   $le
+       55   $logic_and
+        7   $logic_not
+       16   $logic_or
+       49   $mux
+        4   $ne
+        2   $reduce_bool
+        1   $sub
+        1 submodules
+        1   props_sc_decode
+
+5.14. Executing CHECK pass (checking for obvious problems).
+Checking module props_sc_decode...
+Checking module sc_decode_formal_tb...
+Warning: Wire sc_decode_formal_tb.\gclk is used but has no driver.
+Found and reported 1 problems.
+
+6. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `sc_decode_formal_tb'. Setting top module to sc_decode_formal_tb.
+
+6.1. Analyzing design hierarchy..
+Top module:  \sc_decode_formal_tb
+Used module:     \props_sc_decode
+
+6.2. Analyzing design hierarchy..
+Top module:  \sc_decode_formal_tb
+Used module:     \props_sc_decode
+Removed 0 unused modules.
+Module props_sc_decode directly or indirectly contains formal properties -> setting "keep" attribute.
+Module sc_decode_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+7. Executing jny backend.
+
+8. Executing RTLIL backend.
+Output filename: ../model/design.il
+
+Warnings: 1 unique messages, 2 total
+End of script. Logfile hash: c4e33d3632, time: 0.11s, user: 0.12s, system: 0.00s, MEM: 19.78 MB peak
+Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+Time spent: 56% 8x read_verilog (0 sec), 11% 6x opt_clean (0 sec), ...
