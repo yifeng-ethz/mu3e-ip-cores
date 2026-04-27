@@ -1,0 +1,9 @@
+phase4_latency_tlm
+n_lane=8
+run_cycles=200000
+clk_hz=156250000
+frame_interval_cycles=910
+latency_case_rate_word=0x0800
+latency_total_hits=249211
+mutrig_physical_cap_hz=25000000
+hist_physical_cap_hz=200000000

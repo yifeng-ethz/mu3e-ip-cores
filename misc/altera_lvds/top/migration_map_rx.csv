@@ -1,0 +1,86 @@
+CONDITION,DO
+"[get_old_param ENABLE_DPA_MODE] == ""OFF""","set_new_param MODE ""RX_Non-DPA"""
+"[get_old_param ENABLE_DPA_MODE] == ""ON"" && [get_old_param ENABLE_SOFT_CDR_MODE] == ""OFF""","set_new_param MODE ""RX_DPA-FIFO"""
+"[get_old_param ENABLE_DPA_MODE] == ""ON"" && [get_old_param ENABLE_SOFT_CDR_MODE] == ""ON""","set_new_param MODE ""RX_Soft-CDR"""
+"[get_old_param USE_EXTERNAL_PLL] == ""OFF""","set_new_param USE_EXTERNAL_PLL ""false"""
+"[get_old_param USE_EXTERNAL_PLL] == ""ON""","set_new_param USE_EXTERNAL_PLL ""true"""
+"[get_old_param USE_EXTERNAL_PLL] == ""ON""","croak ""IPs with an external PLL must be migrated manually. Please consult the documentation for the Altera LVDS Serdes IP for more information."""
+,set_new_param NUM_CHANNELS [get_old_param Num_Channel]
+[get_old_param Deser_Factor] <= 2,"croak ""Deserialization factor must be greater than 2 in order to migrate"""
+,set_new_param J_FACTOR [get_old_param Deser_Factor]
+,set_new_param DATA_RATE [get_old_param Data_rate]
+,set_new_param INCLOCK_FREQUENCY [get_old_param PLL_Freq]
+[get_old_param Use_Data_Align] == 1,"set_new_param RX_USE_BITSLIP ""True"""
+[get_old_param Use_Data_Align] == 0,"set_new_param RX_USE_BITSLIP ""False"""
+,set_new_param RX_INCLOCK_PHASE_SHIFT [get_old_param pINCLOCK_PHASE_SHIFT]
+[get_old_param Use_Cda_Reset] == 1,"set_new_param RX_BITSLIP_USE_RESET ""True"""
+[get_old_param Use_Cda_Reset] == 0,"set_new_param RX_BITSLIP_USE_RESET ""False"""
+,set_new_param RX_BITSLIP_ASSERT_MAX [get_old_param RX_CDA_MAX_MODE]
+"[get_old_param ENABLE_DPA_ALIGN_TO_RISING_EDGE_ONLY] == ""OFF""","set_new_param RX_DPA_ALIGN_TO_RISING_EDGE_ONLY ""False"""
+"[get_old_param ENABLE_DPA_ALIGN_TO_RISING_EDGE_ONLY] == ""ON""","set_new_param RX_DPA_ALIGN_TO_RISING_EDGE_ONLY ""True"""
+,set_new_param RX_DPA_USE_RESET [get_old_param rx_reset]
+,"set_new_param RX_DPA_LOSE_LOCK_ON_ONE_CHANGE ""True"""
+,set_new_param RX_DPA_LOCKED_USED [get_old_param m_use_dpa_locked]
+,set_new_param RX_DPA_USE_HOLD [get_old_param rx_dpll_hold]
+,set_new_param RX_FIFO_USE_RESET [get_old_param m_use_fifo_reset]
+,set_new_param RX_CDR_SIMULATION_PPM_DRIFT 0
+,set_new_param PLL_SPEED_GRADE 4
+,set_new_param PLL_EXPORT_LOCK [get_old_param USE_RX_LOCKED_MODE]
+"[get_old_param USE_PLL_RESET_MODE] == ""false""","croak ""PLL reset must be enabled in order to migrate"""
+"[get_old_param m_use_dpa_lock_reset] == ""true""","croak ""DPA Lock reset is no longer supported"""
+,set_new_param PLL_USE_RESET [get_old_param USE_PLL_RESET_MODE]
+,set_new_param SYS_INFO_DEVICE_FAMILY [get_old_param INTENDED_DEVICE_FAMILY]
+,ignore_new_param PLL_CORECLOCK_RESOURCE
+,ignore_new_param SYS_INFO_DEVICE
+,ignore_new_param SYS_INFO_DEVICE_SPEEDGRADE
+,ignore_new_param USE_CLOCK_PIN
+,ignore_new_param RX_BITSLIP_ROLLOVER
+,ignore_new_param TX_USE_OUTCLOCK
+,ignore_new_param TX_OUTCLOCK_DIVISION
+,ignore_new_param TX_OUTCLOCK_PHASE_SHIFT
+,ignore_new_param TX_EXPORT_CORECLOCK
+,ignore_new_param TX_REGISTER_CLOCK
+,ignore_new_param GENERATE_SDC_FILE
+,ignore_new_param AUTO_DEVICE
+,ignore_new_param AUTO_BASE_DEVICE
+,"set_new_param ENABLE_MIGRATABLE_PORT_MAPPINGS ""true"""
+,"set_new_param PORT_MAP_FILE_NAME ""port_map_rx.csv"""
+,"set_new_param gui_enable_advanced_mode "0""
+,ignore_new_param gui_actual_outclk_duty_cycle_5
+,ignore_new_param gui_actual_outclk_duty_cycle_6
+,ignore_new_param gui_actual_outclk_duty_cycle_7
+,ignore_new_param gui_actual_outclk_duty_cycle_8
+,ignore_new_param gui_actual_outclk_frequency_5
+,ignore_new_param gui_actual_outclk_frequency_6
+,ignore_new_param gui_actual_outclk_frequency_7
+,ignore_new_param gui_actual_outclk_frequency_8
+,ignore_new_param gui_desired_outclk_duty_cycle_5
+,ignore_new_param gui_desired_outclk_duty_cycle_6
+,ignore_new_param gui_desired_outclk_duty_cycle_7
+,ignore_new_param gui_desired_outclk_duty_cycle_8
+,ignore_new_param gui_desired_outclk_frequency_5
+,ignore_new_param gui_desired_outclk_frequency_6
+,ignore_new_param gui_desired_outclk_frequency_7
+,ignore_new_param gui_desired_outclk_frequency_8
+,ignore_new_param gui_number_of_pll_output_clocks
+,ignore_new_param gui_outclk_actual_phase_shift_deg_5
+,ignore_new_param gui_outclk_actual_phase_shift_deg_6
+,ignore_new_param gui_outclk_actual_phase_shift_deg_7
+,ignore_new_param gui_outclk_actual_phase_shift_deg_8
+,ignore_new_param gui_outclk_actual_phase_shift_ps_5
+,ignore_new_param gui_outclk_actual_phase_shift_ps_6
+,ignore_new_param gui_outclk_actual_phase_shift_ps_7
+,ignore_new_param gui_outclk_actual_phase_shift_ps_8
+,ignore_new_param gui_outclk_desired_phase_shift_5
+,ignore_new_param gui_outclk_desired_phase_shift_6
+,ignore_new_param gui_outclk_desired_phase_shift_7
+,ignore_new_param gui_outclk_desired_phase_shift_8
+,ignore_new_param gui_outclk_phase_shift_unit_0
+,ignore_new_param gui_outclk_phase_shift_unit_1
+,ignore_new_param gui_outclk_phase_shift_unit_2
+,ignore_new_param gui_outclk_phase_shift_unit_3
+,ignore_new_param gui_outclk_phase_shift_unit_4
+,ignore_new_param gui_outclk_phase_shift_unit_5
+,ignore_new_param gui_outclk_phase_shift_unit_6
+,ignore_new_param gui_outclk_phase_shift_unit_7
+,ignore_new_param gui_outclk_phase_shift_unit_8

@@ -1,0 +1,6 @@
+	component alt_issp_srst is
+		port (
+			source : out std_logic_vector(1 downto 0)   -- source
+		);
+	end component alt_issp_srst;
+

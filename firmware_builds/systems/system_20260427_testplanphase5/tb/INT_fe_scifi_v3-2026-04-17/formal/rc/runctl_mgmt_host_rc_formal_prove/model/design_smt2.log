@@ -1,0 +1,165 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+
+-- Executing script file `design_smt2.ys' --
+
+1. Executing RTLIL frontend.
+Input filename: design_prep.il
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `runctl_mgmt_host_rc_formal_tb'. Setting top module to runctl_mgmt_host_rc_formal_tb.
+
+2.1. Analyzing design hierarchy..
+Top module:  \runctl_mgmt_host_rc_formal_tb
+Used module:     \runctl_mgmt_host
+Used module:         \logging_fifo
+
+2.2. Analyzing design hierarchy..
+Top module:  \runctl_mgmt_host_rc_formal_tb
+Used module:     \runctl_mgmt_host
+Used module:         \logging_fifo
+Removed 0 unused modules.
+Module runctl_mgmt_host_rc_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+3. Executing FORMALFF pass.
+
+4. Executing DFFUNMAP pass (unmap clock enable and synchronous reset from FFs).
+
+5. Printing statistics.
+
+=== logging_fifo ===
+
+        +----------Local Count, excluding submodules.
+        | 
+       12 wires
+      186 wire bits
+       12 public wires
+      186 public wire bits
+       12 ports
+      186 port bits
+
+=== runctl_mgmt_host ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      596 wires
+     7504 wire bits
+      149 public wires
+     1992 public wire bits
+       23 ports
+      142 port bits
+      689 cells
+        4   $add
+       93   $anyinit
+       17   $anyseq
+        2   $assume
+       60   $eq
+        1   $ge
+        8   $logic_and
+        9   $logic_not
+        1   $logic_or
+      334   $mux
+        5   $ne
+        6   $not
+        1   $or
+       28   $pmux
+        1   $reduce_bool
+        6   $reduce_or
+      113   $xor
+        1 submodules
+        1   logging_fifo
+
+=== runctl_mgmt_host_rc_formal_tb ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      241 wires
+      847 wire bits
+       46 public wires
+      256 public wire bits
+      258 cells
+        5   $add
+        5   $anyconst
+        3   $anyseq
+       19   $assert
+        8   $assume
+       32   $eq
+       24   $ff
+        1   $ge
+        4   $le
+       16   $logic_and
+       12   $logic_not
+       16   $logic_or
+        2   $lt
+       95   $mux
+        1   $ne
+        1   $not
+        4   $pmux
+        4   $reduce_bool
+        2   $reduce_or
+        4   $sub
+        1 submodules
+        1   runctl_mgmt_host
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+      947 runctl_mgmt_host_rc_formal_tb
+      689 runctl_mgmt_host
+
+        +----------Count including submodules.
+        | 
+      849 wires
+     8537 wire bits
+      207 public wires
+     2434 public wire bits
+       35 ports
+      328 port bits
+        - memories
+        - memory bits
+        - processes
+      947 cells
+        9   $add
+        5   $anyconst
+       93   $anyinit
+       20   $anyseq
+       19   $assert
+       10   $assume
+       92   $eq
+       24   $ff
+        2   $ge
+        4   $le
+       24   $logic_and
+       21   $logic_not
+       17   $logic_or
+        2   $lt
+      429   $mux
+        6   $ne
+        7   $not
+        1   $or
+       32   $pmux
+        5   $reduce_bool
+        8   $reduce_or
+        4   $sub
+      113   $xor
+        1 submodules
+        1   runctl_mgmt_host
+
+6. Executing SMT2 backend.
+
+6.1. Executing BMUXMAP pass.
+
+6.2. Executing DEMUXMAP pass.
+Creating SMT-LIBv2 representation of module logging_fifo.
+Creating SMT-LIBv2 representation of module runctl_mgmt_host.
+Creating SMT-LIBv2 representation of module runctl_mgmt_host_rc_formal_tb.
+
+End of script. Logfile hash: 703ee591b7, time: 0.03s, user: 0.03s, system: 0.00s, MEM: 18.03 MB peak
+Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+Time spent: 63% 2x write_smt2 (0 sec), 27% 2x read_rtlil (0 sec), ...

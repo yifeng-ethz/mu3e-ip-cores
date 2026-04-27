@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+<testsuite timestamp="2026-04-18T15:17:56" hostname="teferi.ethz.ch" package="runctl_mgmt_host_rc_formal" id="0" name="prove" tests="27" errors="0" failures="0" time="63" skipped="8">
+<properties>
+<property name="os" value="Linux"/>
+<property name="expect" value="PASS"/>
+<property name="status" value="PASS"/>
+</properties>
+<testcase classname="prove" name="build execution" time="0">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:278.17-278.48" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:278.17-278.48" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_278_414">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:282.17-282.45" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:282.17-282.45" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_282_417">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:286.17-286.47" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:286.17-286.47" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_286_421">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:292.17-292.38" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:292.17-292.38" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_292_425">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:293.17-293.64" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:293.17-293.64" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_293_426">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:318.17-318.35" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:318.17-318.35" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_318_437">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:319.17-319.61" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:319.17-319.61" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_319_438">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:320.17-320.49" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:320.17-320.49" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_320_440">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:321.17-321.47" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:321.17-321.47" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_321_441">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:327.17-327.41" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:327.17-327.41" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_327_445">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:328.17-328.60" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:328.17-328.60" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_328_446">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:332.17-332.41" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:332.17-332.41" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_332_451">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:333.17-333.60" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:333.17-333.60" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_333_452">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:334.17-334.68" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:334.17-334.68" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_334_454">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:335.17-335.66" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:335.17-335.66" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_335_456">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:338.13-338.46" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:338.13-338.46" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_338_458">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:339.13-339.46" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:339.13-339.46" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_339_460">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:342.17-342.37" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:342.17-342.37" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_342_465">
+</testcase>
+<testcase classname="prove" name="Property ASSERT in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:343.17-343.37" time="0" type="ASSERT" location="runctl_mgmt_host_rc_formal_tb.sv:343.17-343.37" id="_witness_.check_assert_runctl_mgmt_host_rc_formal_tb_sv_343_467">
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:360.13-360.59" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:360.13-360.59" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_360_476">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:361.13-361.59" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:361.13-361.59" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_361_480">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:362.13-362.88" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:362.13-362.88" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_362_484">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:363.13-363.84" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:363.13-363.84" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_363_489">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:364.13-364.60" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:364.13-364.60" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_364_494">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:365.13-365.60" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:365.13-365.60" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_365_497">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:366.13-366.56" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:366.13-366.56" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_366_500">
+<skipped />
+</testcase>
+<testcase classname="prove" name="Property COVER in runctl_mgmt_host_rc_formal_tb at runctl_mgmt_host_rc_formal_tb.sv:367.13-367.56" time="0" type="COVER" location="runctl_mgmt_host_rc_formal_tb.sv:367.13-367.56" id="_witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_367_503">
+<skipped />
+</testcase>
+<system-out>SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] Removing directory '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_prove'.
+SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/../common/formal_defs.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_prove/src/formal_defs.svh'.
+SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/logging_fifo_stub.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_prove/src/logging_fifo_stub.sv'.
+SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/rtl/runctl_mgmt_host.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_prove/src/runctl_mgmt_host.sv'.
+SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_tb.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/rc/runctl_mgmt_host_rc_formal_prove/src/runctl_mgmt_host_rc_formal_tb.sv'.
+SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] engine_0: smtbmc z3
+SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] base: starting process &quot;cd runctl_mgmt_host_rc_formal_prove/src; yosys -ql ../model/design.log ../model/design.ys&quot;
+SBY 15:17:12 [runctl_mgmt_host_rc_formal_prove] base: Warning: Wire runctl_mgmt_host_rc_formal_tb.\gclk is used but has no driver.
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] base: finished (returncode=0)
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] prep: starting process &quot;cd runctl_mgmt_host_rc_formal_prove/model; yosys -ql design_prep.log design_prep.ys&quot;
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] prep: Warning: Wire runctl_mgmt_host_rc_formal_tb.\gclk is used but has no driver.
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] prep: finished (returncode=0)
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] smt2: starting process &quot;cd runctl_mgmt_host_rc_formal_prove/model; yosys -ql design_smt2.log design_smt2.ys&quot;
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] smt2: finished (returncode=0)
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: starting process &quot;cd runctl_mgmt_host_rc_formal_prove; yosys-smtbmc -s z3 --presat --noprogress -t 32  --append 0 --dump-vcd engine_0/trace.vcd --dump-yw engine_0/trace.yw --dump-vlogtb engine_0/trace_tb.v --dump-smtc engine_0/trace.smtc model/design_smt2.smt2&quot;
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: starting process &quot;cd runctl_mgmt_host_rc_formal_prove; yosys-smtbmc -s z3 --presat -i --noprogress -t 32  --append 0 --dump-vcd engine_0/trace_induct.vcd --dump-yw engine_0/trace_induct.yw --dump-vlogtb engine_0/trace_induct_tb.v --dump-smtc engine_0/trace_induct.smtc model/design_smt2.smt2&quot;
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Solver: z3
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Solver: z3
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 32..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 0..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 31..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 0..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 1..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 1..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 2..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 30..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 2..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 3..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 3..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 4..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 4..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 5..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 5..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 6..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 29..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 6..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 7..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 7..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 28..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 8..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 8..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 27..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 9..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 9..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 26..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 10..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 10..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 25..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 11..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 11..
+SBY 15:17:13 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assumptions in step 12..
+SBY 15:17:14 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:00  Checking assertions in step 12..
+SBY 15:17:14 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:00  Trying induction in step 24..
+SBY 15:17:14 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:01  Trying induction in step 23..
+SBY 15:17:14 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:01  Checking assumptions in step 13..
+SBY 15:17:14 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:01  Checking assertions in step 13..
+SBY 15:17:14 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:01  Trying induction in step 22..
+SBY 15:17:14 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:01  Trying induction in step 21..
+SBY 15:17:15 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:01  Checking assumptions in step 14..
+SBY 15:17:15 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:01  Checking assertions in step 14..
+SBY 15:17:15 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:02  Trying induction in step 20..
+SBY 15:17:16 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:02  Checking assumptions in step 15..
+SBY 15:17:16 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:02  Checking assertions in step 15..
+SBY 15:17:16 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:03  Trying induction in step 19..
+SBY 15:17:16 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:03  Trying induction in step 18..
+SBY 15:17:17 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:03  Trying induction in step 17..
+SBY 15:17:17 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:04  Checking assumptions in step 16..
+SBY 15:17:17 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:04  Checking assertions in step 16..
+SBY 15:17:18 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:05  Checking assumptions in step 17..
+SBY 15:17:18 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:05  Checking assertions in step 17..
+SBY 15:17:19 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:06  Checking assumptions in step 18..
+SBY 15:17:19 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:06  Checking assertions in step 18..
+SBY 15:17:20 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:06  Trying induction in step 16..
+SBY 15:17:20 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:07  Checking assumptions in step 19..
+SBY 15:17:20 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:07  Checking assertions in step 19..
+SBY 15:17:21 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:07  Checking assumptions in step 20..
+SBY 15:17:21 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:08  Checking assertions in step 20..
+SBY 15:17:21 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:08  Trying induction in step 15..
+SBY 15:17:22 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:08  Checking assumptions in step 21..
+SBY 15:17:22 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:09  Checking assertions in step 21..
+SBY 15:17:23 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:09  Checking assumptions in step 22..
+SBY 15:17:23 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:09  Checking assertions in step 22..
+SBY 15:17:23 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:10  Trying induction in step 14..
+SBY 15:17:23 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:10  Checking assumptions in step 23..
+SBY 15:17:24 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:11  Checking assertions in step 23..
+SBY 15:17:24 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:11  Checking assumptions in step 24..
+SBY 15:17:24 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:11  Checking assertions in step 24..
+SBY 15:17:25 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:11  Trying induction in step 13..
+SBY 15:17:25 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:12  Checking assumptions in step 25..
+SBY 15:17:25 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:12  Checking assertions in step 25..
+SBY 15:17:26 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:13  Checking assumptions in step 26..
+SBY 15:17:26 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:13  Checking assertions in step 26..
+SBY 15:17:27 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:14  Checking assumptions in step 27..
+SBY 15:17:27 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:14  Checking assertions in step 27..
+SBY 15:17:28 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:15  Checking assumptions in step 28..
+SBY 15:17:28 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:15  Checking assertions in step 28..
+SBY 15:17:29 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:16  Checking assumptions in step 29..
+SBY 15:17:29 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:16  Checking assertions in step 29..
+SBY 15:17:30 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:17  Trying induction in step 12..
+SBY 15:17:30 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:17  Checking assumptions in step 30..
+SBY 15:17:30 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:17  Checking assertions in step 30..
+SBY 15:17:31 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:18  Trying induction in step 11..
+SBY 15:17:31 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:18  Checking assumptions in step 31..
+SBY 15:17:31 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:18  Checking assertions in step 31..
+SBY 15:17:32 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: ##   0:00:19  Status: passed
+SBY 15:17:32 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: finished (returncode=0)
+SBY 15:17:32 [runctl_mgmt_host_rc_formal_prove] engine_0.basecase: Status returned by engine for basecase: pass
+SBY 15:17:36 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:22  Trying induction in step 10..
+SBY 15:17:40 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:27  Trying induction in step 9..
+SBY 15:17:42 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:28  Trying induction in step 8..
+SBY 15:17:45 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:31  Trying induction in step 7..
+SBY 15:17:45 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:32  Trying induction in step 6..
+SBY 15:17:48 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:35  Trying induction in step 5..
+SBY 15:17:51 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:38  Trying induction in step 4..
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:43  Temporal induction successful.
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: ##   0:00:43  Status: passed
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: finished (returncode=0)
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] engine_0.induction: Status returned by engine for induction: pass
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:43 (43)
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] summary: Elapsed process time [H:MM:SS (secs)]: 0:01:03 (63)
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] summary: engine_0 (smtbmc z3) returned pass for basecase
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] summary: engine_0 (smtbmc z3) returned pass for induction
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] summary: engine_0 did not produce any traces
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] summary: successful proof by k-induction.
+SBY 15:17:56 [runctl_mgmt_host_rc_formal_prove] DONE (PASS, rc=0)
+</system-out>
+<system-err>
+</system-err>
+</testsuite>
+</testsuites>

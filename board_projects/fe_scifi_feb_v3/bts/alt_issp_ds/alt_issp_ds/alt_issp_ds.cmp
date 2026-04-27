@@ -1,0 +1,7 @@
+	component alt_issp_ds is
+		port (
+			probe  : in  std_logic_vector(13 downto 0) := (others => 'X'); -- probe
+			source : out std_logic_vector(11 downto 0)                     -- source
+		);
+	end component alt_issp_ds;
+

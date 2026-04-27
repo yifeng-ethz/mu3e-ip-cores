@@ -1,0 +1,117 @@
+
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2026  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+
+-- Executing script file `design_smt2.ys' --
+
+1. Executing RTLIL frontend.
+Input filename: design_prep.il
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+Attribute `top' found on module `run_control_splitter_formal_tb'. Setting top module to run_control_splitter_formal_tb.
+
+2.1. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+2.2. Analyzing design hierarchy..
+Top module:  \run_control_splitter_formal_tb
+Used module:     $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+Removed 0 unused modules.
+Module run_control_splitter_formal_tb directly or indirectly contains formal properties -> setting "keep" attribute.
+
+3. Executing FORMALFF pass.
+
+4. Executing DFFUNMAP pass (unmap clock enable and synchronous reset from FFs).
+
+5. Printing statistics.
+
+=== $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      206 wires
+      530 wire bits
+      206 public wires
+      530 public wire bits
+      138 ports
+      274 port bits
+        1 cells
+        1   $reduce_and
+
+=== run_control_splitter_formal_tb ===
+
+        +----------Local Count, excluding submodules.
+        | 
+      146 wires
+      623 wire bits
+      107 public wires
+      282 public wire bits
+       53 cells
+        8   $add
+        4   $anyseq
+        2   $assume
+        4   $cover
+        3   $eq
+        9   $eqx
+        4   $ff
+        9   $logic_and
+        3   $logic_not
+        1   $logic_or
+        4   $mux
+        1   $ne
+        1   $reduce_bool
+        1 submodules
+        1   $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+=== design hierarchy ===
+
+        +----------Count including submodules.
+        | 
+       54 run_control_splitter_formal_tb
+        1 $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+        +----------Count including submodules.
+        | 
+      352 wires
+     1153 wire bits
+      313 public wires
+      812 public wire bits
+      138 ports
+      274 port bits
+        - memories
+        - memory bits
+        - processes
+       54 cells
+        8   $add
+        4   $anyseq
+        2   $assume
+        4   $cover
+        3   $eq
+        9   $eqx
+        4   $ff
+        9   $logic_and
+        3   $logic_not
+        1   $logic_or
+        4   $mux
+        1   $ne
+        1   $reduce_and
+        1   $reduce_bool
+        1 submodules
+        1   $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter
+
+6. Executing SMT2 backend.
+
+6.1. Executing BMUXMAP pass.
+
+6.2. Executing DEMUXMAP pass.
+Creating SMT-LIBv2 representation of module $paramod$a9eef6e764c79700598d9bb27099aa7d860a714e\altera_avalon_st_splitter.
+Creating SMT-LIBv2 representation of module run_control_splitter_formal_tb.
+
+End of script. Logfile hash: 017fba2332, time: 0.01s, user: 0.01s, system: 0.01s, MEM: 15.01 MB peak
+Yosys 0.64+68 (git sha1 413169663, clang++ 18.1.8 -fPIC -O3)
+Time spent: 64% 2x write_smt2 (0 sec), 21% 2x read_rtlil (0 sec), ...

@@ -1,0 +1,35 @@
+	component mutrig_datapath_system_v3 is
+		port (
+			backpressure_fifo_csr_address   : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- address
+			backpressure_fifo_csr_read      : in  std_logic                     := 'X';             -- read
+			backpressure_fifo_csr_write     : in  std_logic                     := 'X';             -- write
+			backpressure_fifo_csr_readdata  : out std_logic_vector(31 downto 0);                    -- readdata
+			backpressure_fifo_csr_writedata : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			clk_clk                         : in  std_logic                     := 'X';             -- clk
+			csr_read                        : in  std_logic                     := 'X';             -- read
+			csr_readdata                    : out std_logic_vector(31 downto 0);                    -- readdata
+			csr_waitrequest                 : out std_logic;                                        -- waitrequest
+			csr_write                       : in  std_logic                     := 'X';             -- write
+			csr_writedata                   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			csr_address                     : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- address
+			decoded_din_data                : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			decoded_din_valid               : in  std_logic                     := 'X';             -- valid
+			decoded_din_error               : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			decoded_din_channel             : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			headerinfo_data                 : out std_logic_vector(41 downto 0);                    -- data
+			headerinfo_valid                : out std_logic;                                        -- valid
+			headerinfo_channel              : out std_logic_vector(3 downto 0);                     -- channel
+			hit_type0_out_data              : out std_logic_vector(44 downto 0);                    -- data
+			hit_type0_out_valid             : out std_logic;                                        -- valid
+			hit_type0_out_ready             : in  std_logic                     := 'X';             -- ready
+			hit_type0_out_startofpacket     : out std_logic;                                        -- startofpacket
+			hit_type0_out_endofpacket       : out std_logic;                                        -- endofpacket
+			hit_type0_out_error             : out std_logic_vector(2 downto 0);                     -- error
+			hit_type0_out_channel           : out std_logic_vector(3 downto 0);                     -- channel
+			reset_reset_n                   : in  std_logic                     := 'X';             -- reset_n
+			run_ctrl_data                   : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			run_ctrl_valid                  : in  std_logic                     := 'X';             -- valid
+			run_ctrl_ready                  : out std_logic                                         -- ready
+		);
+	end component mutrig_datapath_system_v3;
+

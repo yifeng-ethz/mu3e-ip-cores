@@ -1,0 +1,114 @@
+set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files_pipe_sc156_lite_stp
+set_global_assignment -name QIP_FILE top_pipe.qip
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
+set_global_assignment -name PROJECT_IP_REGENERATION_POLICY ALWAYS_REGENERATE_IP
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE util/quartus/settings.tcl
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_a5_base.tcl
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_v2_scifi_pins.tcl
+
+set_global_assignment -name USE_SIGNALTAP_FILE "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/pipe_sc_ingress156_lite.stp"
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name ENABLE_LOGIC_ANALYZER_INTERFACE ON
+
+set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_clk" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_locked[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|firefly_reg_mapping:u_firefly_monitor|i_rx_ready[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|ip_altera_xcvr_native_av:u_xcvr_native|rx_is_lockedtodata[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[0]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[1]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[2]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_in_datak[3]" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_wrreq" -section_id pipe_sc_156_lite
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_reset_n" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=AUTO" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=18" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=18" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_BITS=18" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=77" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=512" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INCREMENTAL_ROUTING=1" -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[0] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[1] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[2] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[3] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[4] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[5] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[6] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[7] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[8] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[9] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[10] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[11] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[12] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[13] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[14] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[15] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[16] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[17] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[18] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[19] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[20] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[21] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[22] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[23] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[24] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[25] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[26] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[27] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[28] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[29] -to pipe_sc_156_lite|gnd -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[30] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[31] -to pipe_sc_156_lite|vcc -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=512" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_PIPELINE=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_PIPELINE=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_COUNTER_PIPELINE=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id pipe_sc_156_lite
+set_global_assignment -name SLD_FILE db/pipe_sc_ingress156_lite_auto_stripped.stp

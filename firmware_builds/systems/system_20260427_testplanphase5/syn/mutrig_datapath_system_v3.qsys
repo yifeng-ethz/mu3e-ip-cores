@@ -1,0 +1,282 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<system name="$${FILENAME}">
+ <component name="$${FILENAME}" displayName="$${FILENAME}" version="1.0" description="" tags="" categories="System" />
+ <parameter name="bonusData">bonusData 
+{
+   element backpressure_fifo
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element dbg_counter_fab_sclr
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element debug_clock
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element issp_cnt_sclr
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element lvdserr_count_subsystem
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element mch_count_subsystem
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element mutrig_frame_deassembly_0
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element system_clock_reset_interface
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+}
+</parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="5AGXBA7D4F31C5" />
+ <parameter name="deviceFamily" value="Arria V" />
+ <parameter name="deviceSpeedGrade" value="5_H4" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="top.qpf" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript># request a specific version of the scripting API
+package require -exact qsys 16.1
+
+# Set the name of the procedure to manipulate parameters
+set_module_property COMPOSITION_CALLBACK compose
+
+proc compose {} {
+    # manipulate parameters in here
+    # Example: set_instance_parameter_value child0 param0 [ get_parameter_value new_parameter_0 ]
+   
+    
+}</instanceScript>
+ <interface name="backpressure_fifo_csr" internal="backpressure_fifo.csr" type="avalon" dir="end" />
+ <interface name="clk" internal="system_clock_reset_interface.clk_in" type="clock" dir="end" />
+ <interface name="csr" internal="mutrig_frame_deassembly_0.csr" type="avalon" dir="end" />
+ <interface name="debug_clock_in_clk" internal="debug_clock.in_clk" />
+ <interface name="decoded_din" internal="mutrig_frame_deassembly_0.rx8b1k" type="avalon_streaming" dir="end" />
+ <interface name="headerinfo" internal="mutrig_frame_deassembly_0.headerinfo" type="avalon_streaming" dir="start" />
+ <interface name="hit_type0_out" internal="backpressure_fifo.out" type="avalon_streaming" dir="start" />
+ <interface name="reset" internal="system_clock_reset_interface.clk_in_reset" type="reset" dir="end" />
+ <interface name="run_ctrl" internal="mutrig_frame_deassembly_0.ctrl" type="avalon_streaming" dir="end" />
+ <module name="backpressure_fifo" kind="altera_avalon_sc_fifo" version="18.1" enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="45" />
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="true" />
+  <parameter name="ERROR_WIDTH" value="3" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="15" />
+  <parameter name="FIFO_DEPTH" value="128" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="1" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="1" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module name="dbg_counter_fab_sclr" kind="dbg_counter_fab" version="1.0.1" enabled="0" />
+ <module name="debug_clock" kind="altera_clock_bridge" version="18.1" enabled="0">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="125000000" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module name="issp_cnt_sclr" kind="altera_in_system_sources_probes" version="18.1" enabled="0">
+  <parameter name="create_source_clock" value="true" />
+  <parameter name="create_source_clock_enable" value="false" />
+  <parameter name="device_family" value="Arria V" />
+  <parameter name="gui_use_auto_index" value="true" />
+  <parameter name="instance_id" value="NONE" />
+  <parameter name="probe_width" value="0" />
+  <parameter name="sld_instance_index" value="10" />
+  <parameter name="source_initial_value" value="0" />
+  <parameter name="source_width" value="2" />
+ </module>
+ <module name="lvdserr_count_subsystem" kind="avst_errcnt_system" version="1.0" enabled="0">
+  <parameter name="AUTO_COUNTER_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_COUNTER_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_COUNTER_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">mutrig_datapath_system_lvdserr_count_subsystem</parameter>
+ </module>
+ <module name="mutrig_frame_deassembly_0" kind="mutrig_frame_deassembly" version="26.0.6.0418" enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="CSR_ADDR_WIDTH" value="2" />
+  <parameter name="DEBUG_LV" value="0" />
+  <parameter name="MODE_HALT" value="0" />
+ </module>
+ <module name="system_clock_reset_interface" kind="clock_source" version="18.1" enabled="1">
+  <parameter name="clockFrequency" value="125000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="DEASSERT" />
+ </module>
+ <connection kind="clock" version="18.1" start="system_clock_reset_interface.clk" end="backpressure_fifo.clk" />
+ <connection kind="clock" version="18.1" start="system_clock_reset_interface.clk" end="mutrig_frame_deassembly_0.clock_sink" />
+ <connection kind="clock" version="18.1" start="system_clock_reset_interface.clk" end="lvdserr_count_subsystem.counter_clk" />
+ <connection kind="clock" version="18.1" start="debug_clock.out_clk" end="dbg_counter_fab_sclr.clock_sink" />
+ <connection kind="clock" version="18.1" start="debug_clock.out_clk" end="issp_cnt_sclr.source_clk" />
+ <connection kind="conduit" version="18.1" start="issp_cnt_sclr.sources" end="dbg_counter_fab_sclr.to_source">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection kind="reset" version="18.1" start="system_clock_reset_interface.clk_reset" end="backpressure_fifo.clk_reset" />
+ <connection kind="reset" version="18.1" start="system_clock_reset_interface.clk_reset" end="lvdserr_count_subsystem.counter_rst" />
+ <connection kind="reset" version="18.1" start="system_clock_reset_interface.clk_reset" end="mutrig_frame_deassembly_0.reset_sink" />
+ <connection kind="avalon_streaming" version="18.1" start="mutrig_frame_deassembly_0.hit_type0" end="backpressure_fifo.in" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

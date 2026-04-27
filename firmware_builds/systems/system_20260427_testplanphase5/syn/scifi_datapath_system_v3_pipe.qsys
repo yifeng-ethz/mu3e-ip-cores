@@ -1,0 +1,3929 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags=""
+   categories="System" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element dbg_mm2runctrl_0
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element dbg_mm2runctrl_0.csr
+   {
+      datum baseAddress
+      {
+         value = "8704";
+         type = "String";
+      }
+   }
+   element emulator_ctrl_splitter
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+   }
+   element emulator_inject_fanout
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_0
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_1
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_2
+   {
+      datum _sortIndex
+      {
+         value = "16";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_3
+   {
+      datum _sortIndex
+      {
+         value = "17";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_4
+   {
+      datum _sortIndex
+      {
+         value = "18";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_5
+   {
+      datum _sortIndex
+      {
+         value = "19";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_6
+   {
+      datum _sortIndex
+      {
+         value = "20";
+         type = "int";
+      }
+   }
+   element emulator_mutrig_7
+   {
+      datum _sortIndex
+      {
+         value = "21";
+         type = "int";
+      }
+   }
+   element hist_post_cdc_0
+   {
+      datum _sortIndex
+      {
+         value = "56";
+         type = "int";
+      }
+   }
+   element hist_post_splitter_0
+   {
+      datum _sortIndex
+      {
+         value = "55";
+         type = "int";
+      }
+   }
+   element histogram_ingress_bridge_0
+   {
+      datum _sortIndex
+      {
+         value = "54";
+         type = "int";
+      }
+   }
+   element histogram_statistics_0
+   {
+      datum _sortIndex
+      {
+         value = "47";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element histogram_statistics_0.csr
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "132096";
+         type = "String";
+      }
+   }
+   element histogram_statistics_0.hist_bin
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "131072";
+         type = "String";
+      }
+   }
+   element hit_stack_subsystem_0
+   {
+      datum _sortIndex
+      {
+         value = "50";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element hit_stack_subsystem_0.ring_buffer_cam_0_csr
+   {
+      datum baseAddress
+      {
+         value = "135168";
+         type = "String";
+      }
+   }
+   element hit_stack_subsystem_0.ring_buffer_cam_1_csr
+   {
+      datum baseAddress
+      {
+         value = "135296";
+         type = "String";
+      }
+   }
+   element hit_stack_subsystem_0.ring_buffer_cam_2_csr
+   {
+      datum baseAddress
+      {
+         value = "135424";
+         type = "String";
+      }
+   }
+   element hit_stack_subsystem_0.ring_buffer_cam_3_csr
+   {
+      datum baseAddress
+      {
+         value = "135552";
+         type = "String";
+      }
+   }
+   element hit_stack_subsystem_1
+   {
+      datum _sortIndex
+      {
+         value = "53";
+         type = "int";
+      }
+   }
+   element lvds_rx_28nm_0
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element lvds_rx_controller_pro_0
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element master_datapath
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element mm_clock_crossing_bridge
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element mm_pipeline_jtagmaster2rstctrl
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element mm_pipeline_jtagmaster2rstctrl.s0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "69632";
+         type = "String";
+      }
+   }
+   element mm_pipeline_lvds_csr_emu_dbg
+   {
+      datum _sortIndex
+      {
+         value = "66";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_hist
+   {
+      datum _sortIndex
+      {
+         value = "73";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_hitstack_frame
+   {
+      datum _sortIndex
+      {
+         value = "75";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_hitstack_ring
+   {
+      datum _sortIndex
+      {
+         value = "74";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_low
+   {
+      datum _sortIndex
+      {
+         value = "65";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_mts1
+   {
+      datum _sortIndex
+      {
+         value = "72";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_mutrig3
+   {
+      datum _sortIndex
+      {
+         value = "67";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_mutrig4_mts0
+   {
+      datum _sortIndex
+      {
+         value = "68";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_mutrig5
+   {
+      datum _sortIndex
+      {
+         value = "69";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_mutrig6
+   {
+      datum _sortIndex
+      {
+         value = "70";
+         type = "int";
+      }
+   }
+   element mm_pipeline_lvds_csr_mutrig7
+   {
+      datum _sortIndex
+      {
+         value = "71";
+         type = "int";
+      }
+   }
+   element monitor_clock_125
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element mts_preprocessor_0
+   {
+      datum _sortIndex
+      {
+         value = "49";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element mts_preprocessor_0.csr
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "16384";
+         type = "String";
+      }
+   }
+   element mts_preprocessor_1
+   {
+      datum _sortIndex
+      {
+         value = "52";
+         type = "int";
+      }
+   }
+   element mts_preprocessor_1.csr
+   {
+      datum baseAddress
+      {
+         value = "32768";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_0
+   {
+      datum _sortIndex
+      {
+         value = "24";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_0.backpressure_fifo_csr
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "2144";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_0.csr
+   {
+      datum baseAddress
+      {
+         value = "67840";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_1
+   {
+      datum _sortIndex
+      {
+         value = "27";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_1.backpressure_fifo_csr
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "6240";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_1.csr
+   {
+      datum baseAddress
+      {
+         value = "71936";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_2
+   {
+      datum _sortIndex
+      {
+         value = "30";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_2.backpressure_fifo_csr
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "10336";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_2.csr
+   {
+      datum baseAddress
+      {
+         value = "76032";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_3
+   {
+      datum _sortIndex
+      {
+         value = "33";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_3.backpressure_fifo_csr
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "14432";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_3.csr
+   {
+      datum baseAddress
+      {
+         value = "80128";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_4
+   {
+      datum _sortIndex
+      {
+         value = "36";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_4.backpressure_fifo_csr
+   {
+      datum baseAddress
+      {
+         value = "296448";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_4.csr
+   {
+      datum baseAddress
+      {
+         value = "84224";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_5
+   {
+      datum _sortIndex
+      {
+         value = "39";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_5.backpressure_fifo_csr
+   {
+      datum baseAddress
+      {
+         value = "361984";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_5.csr
+   {
+      datum baseAddress
+      {
+         value = "88320";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_6
+   {
+      datum _sortIndex
+      {
+         value = "42";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_6.backpressure_fifo_csr
+   {
+      datum baseAddress
+      {
+         value = "427520";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_6.csr
+   {
+      datum baseAddress
+      {
+         value = "92416";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_7
+   {
+      datum _sortIndex
+      {
+         value = "45";
+         type = "int";
+      }
+   }
+   element mutrig_datapath_subsystem_7.backpressure_fifo_csr
+   {
+      datum baseAddress
+      {
+         value = "493056";
+         type = "String";
+      }
+   }
+   element mutrig_datapath_subsystem_7.csr
+   {
+      datum baseAddress
+      {
+         value = "96512";
+         type = "String";
+      }
+   }
+   element mutrig_injector_0
+   {
+      datum _sortIndex
+      {
+         value = "46";
+         type = "int";
+      }
+   }
+   element mutrig_injector_0.csr
+   {
+      datum baseAddress
+      {
+         value = "139264";
+         type = "String";
+      }
+   }
+   element mutrig_lane_source_mux_0
+   {
+      datum _sortIndex
+      {
+         value = "57";
+         type = "int";
+      }
+   }
+   element mutrig_lane_source_mux_1
+   {
+      datum _sortIndex
+      {
+         value = "58";
+         type = "int";
+      }
+   }
+   element mutrig_lane_source_mux_2
+   {
+      datum _sortIndex
+      {
+         value = "59";
+         type = "int";
+      }
+   }
+   element mutrig_lane_source_mux_3
+   {
+      datum _sortIndex
+      {
+         value = "60";
+         type = "int";
+      }
+   }
+   element mutrig_lane_source_mux_4
+   {
+      datum _sortIndex
+      {
+         value = "61";
+         type = "int";
+      }
+   }
+   element mutrig_lane_source_mux_5
+   {
+      datum _sortIndex
+      {
+         value = "62";
+         type = "int";
+      }
+   }
+   element mutrig_lane_source_mux_6
+   {
+      datum _sortIndex
+      {
+         value = "63";
+         type = "int";
+      }
+   }
+   element mutrig_lane_source_mux_7
+   {
+      datum _sortIndex
+      {
+         value = "64";
+         type = "int";
+      }
+   }
+   element mutrig_reset_controller_0
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element mutrig_reset_controller_0.reconfig_mgmt
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element mux_mutrig2processor
+   {
+      datum _sortIndex
+      {
+         value = "48";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element mux_mutrig2processor_0
+   {
+      datum _sortIndex
+      {
+         value = "51";
+         type = "int";
+      }
+   }
+   element receiver_clock_125
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element reset_bridge_export
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element run_control_splitter
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element xcvr156_clock
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="AUTO" />
+ <parameter name="device" value="5AGXBA7D4F31C5" />
+ <parameter name="deviceFamily" value="Arria V" />
+ <parameter name="deviceSpeedGrade" value="5_H4" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="top.qpf" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript></instanceScript>
+ <interface
+   name="avmm_clk"
+   internal="mm_clock_crossing_bridge.s0_clk"
+   type="clock"
+   dir="end" />
+ <interface
+   name="avmm_port"
+   internal="mm_clock_crossing_bridge.s0"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="avmm_rst"
+   internal="mm_clock_crossing_bridge.s0_reset"
+   type="reset"
+   dir="end" />
+ <interface
+   name="counter_sclr"
+   internal="reset_bridge_export.in_reset"
+   type="reset"
+   dir="end" />
+ <interface
+   name="hit_type3_lower"
+   internal="hit_stack_subsystem_1.hit_type3"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="hit_type3_upper"
+   internal="hist_post_splitter_0.out0"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="inject"
+   internal="emulator_inject_fanout.out8"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="inject_aux"
+   internal="emulator_inject_fanout.inject_aux_in"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="lvds_outclock"
+   internal="receiver_clock_125.out_clk"
+   type="clock"
+   dir="start" />
+ <interface
+   name="lvds_pll_inclock"
+   internal="lvds_rx_28nm_0.inclock"
+   type="clock"
+   dir="end" />
+ <interface
+   name="monitor_clock_125_in"
+   internal="monitor_clock_125.clk_in"
+   type="clock"
+   dir="end" />
+ <interface
+   name="monitor_reset_in_reset"
+   internal="monitor_clock_125.clk_in_reset"
+   type="reset"
+   dir="end" />
+ <interface
+   name="mutrig_reset"
+   internal="mutrig_reset_controller_0.mutrig_reset"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="osc_clock_50_in"
+   internal="mutrig_injector_0.osc_clock_interface"
+   type="clock"
+   dir="end" />
+ <interface
+   name="redriver"
+   internal="lvds_rx_controller_pro_0.redriver"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="rstlink"
+   internal="lvds_rx_controller_pro_0.decoded8"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="runctl_mgmt_host"
+   internal="run_control_splitter.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="serial"
+   internal="lvds_rx_28nm_0.serial"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="xcvr_clock"
+   internal="xcvr156_clock.clk_in"
+   type="clock"
+   dir="end" />
+ <interface
+   name="xcvr_reset"
+   internal="xcvr156_clock.clk_in_reset"
+   type="reset"
+   dir="end" />
+ <module
+   name="dbg_mm2runctrl_0"
+   kind="dbg_mm2runctrl"
+   version="1.0.0"
+   enabled="1" />
+ <module
+   name="emulator_ctrl_splitter"
+   kind="altera_avalon_st_splitter"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="9" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="8" />
+  <parameter name="QUALIFY_VALID_OUT" value="0" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
+   name="emulator_inject_fanout"
+   kind="pulse_fanout8"
+   version="1.0"
+   enabled="1" />
+ <module
+   name="emulator_mutrig_0"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="emulator_mutrig_1"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="1" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="1" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="emulator_mutrig_2"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="2" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="2" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="emulator_mutrig_3"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="3" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="3" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="emulator_mutrig_4"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="4" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="4" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="emulator_mutrig_5"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="5" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="5" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="emulator_mutrig_6"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="6" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="6" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="emulator_mutrig_7"
+   kind="emulator_mutrig"
+   version="26.1.10.425"
+   enabled="1">
+  <parameter name="ASIC_ID_DEFAULT" value="7" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
+  <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="7" />
+  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="FIFO_DEPTH" value="64" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1162696020" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="10" />
+ </module>
+ <module
+   name="hist_post_cdc_0"
+   kind="altera_avalon_dc_fifo"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="36" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="256" />
+  <parameter name="RD_SYNC_DEPTH" value="3" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_IN_FILL_LEVEL" value="0" />
+  <parameter name="USE_OUT_FILL_LEVEL" value="0" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="WR_SYNC_DEPTH" value="3" />
+ </module>
+ <module
+   name="hist_post_splitter_0"
+   kind="altera_avalon_st_splitter"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="36" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="36" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="2" />
+  <parameter name="QUALIFY_VALID_OUT" value="0" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
+   name="histogram_ingress_bridge_0"
+   kind="histogram_ingress_bridge"
+   version="26.0.2.425"
+   enabled="1">
+  <parameter name="BUILD" value="425" />
+  <parameter name="DEFAULT_SELECT_POST" value="1" />
+  <parameter name="ENABLE_POST_FORWARD" value="0" />
+  <parameter name="FILTER_POST_HIT_WORDS" value="1" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1212764994" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="481097348" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="0" />
+  <parameter name="VERSION_PATCH" value="2" />
+ </module>
+ <module
+   name="histogram_statistics_0"
+   kind="histogram_statistics_v2"
+   version="26.1.2.425"
+   enabled="1">
+  <parameter name="AVST_CHANNEL_WIDTH" value="4" />
+  <parameter name="AVST_DATA_WIDTH" value="39" />
+  <parameter name="AVS_ADDR_WIDTH" value="8" />
+  <parameter name="BUILD" value="425" />
+  <parameter name="CHANNELS_PER_PORT" value="32" />
+  <parameter name="COAL_QUEUE_DEPTH" value="256" />
+  <parameter name="DEBUG" value="0" />
+  <parameter name="DEF_BIN_WIDTH" value="1" />
+  <parameter name="DEF_INTERVAL_CLOCKS" value="125000000" />
+  <parameter name="DEF_LEFT_BOUND" value="0" />
+  <parameter name="ENABLE_PACKET" value="false" />
+  <parameter name="ENABLE_PINGPONG" value="true" />
+  <parameter name="FILTER_KEY_BIT_HI" value="38" />
+  <parameter name="FILTER_KEY_BIT_LO" value="35" />
+  <parameter name="FIFO_ADDR_WIDTH" value="8" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1212765012" />
+  <parameter name="MAX_COUNT_BITS" value="32" />
+  <parameter name="N_BINS" value="256" />
+  <parameter name="N_DEBUG_INTERFACE" value="6" />
+  <parameter name="N_PORTS" value="1" />
+  <parameter name="SAR_KEY_WIDTH" value="8" />
+  <parameter name="SAR_TICK_WIDTH" value="16" />
+  <parameter name="SNOOP_EN" value="false" />
+  <parameter name="UPDATE_KEY_BIT_HI" value="21" />
+  <parameter name="UPDATE_KEY_BIT_LO" value="17" />
+  <parameter name="UPDATE_KEY_REPRESENTATION" value="SIGNED" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="1929539473" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="2" />
+ </module>
+ <module
+   name="hit_stack_subsystem_0"
+   kind="hit_stack_system"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_DATAPATH_CLOCK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_hit_stack_subsystem_0</parameter>
+  <parameter name="AUTO_XCVR_CLOCK_CLOCK_DOMAIN" value="11" />
+  <parameter name="AUTO_XCVR_CLOCK_CLOCK_RATE" value="156250000" />
+  <parameter name="AUTO_XCVR_CLOCK_RESET_DOMAIN" value="11" />
+ </module>
+ <module
+   name="hit_stack_subsystem_1"
+   kind="hit_stack_system"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_DATAPATH_CLOCK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_hit_stack_subsystem_1</parameter>
+  <parameter name="AUTO_XCVR_CLOCK_CLOCK_DOMAIN" value="11" />
+  <parameter name="AUTO_XCVR_CLOCK_CLOCK_RATE" value="156250000" />
+  <parameter name="AUTO_XCVR_CLOCK_RESET_DOMAIN" value="11" />
+ </module>
+ <module
+   name="lvds_rx_28nm_0"
+   kind="altera_lvds_rx_28nm"
+   version="24.0.1110"
+   enabled="1">
+  <parameter name="N_LANE" value="9" />
+ </module>
+ <module
+   name="lvds_rx_controller_pro_0"
+   kind="lvds_rx_controller_pro"
+   version="25.1.631"
+   enabled="1">
+  <parameter name="AVMM_ADDR_W" value="4" />
+  <parameter name="DECODED_USE_CHANNEL" value="1" />
+  <parameter name="N_LANE" value="9" />
+  <parameter name="SYNC_PATTERN_SEL" value="0xFA" />
+ </module>
+ <module
+   name="master_datapath"
+   kind="altera_jtag_avalon_master"
+   version="18.1"
+   enabled="1">
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="COMPONENT_CLOCK" value="0" />
+  <parameter name="FAST_VER" value="0" />
+  <parameter name="FIFO_DEPTHS" value="2" />
+  <parameter name="PLI_PORT" value="50000" />
+  <parameter name="USE_PLI" value="0" />
+ </module>
+ <module
+   name="mm_clock_crossing_bridge"
+   kind="altera_avalon_mm_clock_crossing_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="14" />
+  <parameter name="COMMAND_FIFO_DEPTH" value="8" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="MASTER_SYNC_DEPTH" value="2" />
+  <parameter name="MAX_BURST_SIZE" value="256" />
+  <parameter name="RESPONSE_FIFO_DEPTH" value="512" />
+  <parameter name="SLAVE_SYNC_DEPTH" value="2" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="16" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+ </module>
+ <module
+   name="mm_pipeline_jtagmaster2rstctrl"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="6" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="8" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_emu_dbg"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_hist"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_hitstack_frame"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_hitstack_ring"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="11" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_low"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="13" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="13" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_mts1"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="5" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_mutrig3"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_mutrig4_mts0"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_mutrig5"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_mutrig6"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="mm_pipeline_lvds_csr_mutrig7"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="12" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="monitor_clock_125"
+   kind="clock_source"
+   version="18.1"
+   enabled="1">
+  <parameter name="clockFrequency" value="125000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="DEASSERT" />
+ </module>
+ <module
+   name="mts_preprocessor_0"
+   kind="mts_preprocessor"
+   version="26.0.8.0427"
+   enabled="1">
+  <parameter name="BANK" value="UP" />
+  <parameter name="BUILD" value="427" />
+  <parameter name="CRCERR_BIT_LOC" value="1" />
+  <parameter name="DEBUG" value="1" />
+  <parameter name="ENABLED_CHANNEL_HI" value="3" />
+  <parameter name="ENABLED_CHANNEL_LO" value="0" />
+  <parameter name="FRAME_CORRPT_BIT_LOC" value="2" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="HITERR_BIT_LOC" value="0" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1297376080" />
+  <parameter name="LPM_DIV_PIPELINE" value="4" />
+  <parameter name="MUTRIG_BUFFER_EXPECTED_LATENCY_8N" value="4096" />
+  <parameter name="MUTRIG_OVERFLOW_LOOKBACK_8N" value="2000" />
+  <parameter name="PADDING_EOP_WAIT_CYCLE" value="512" />
+  <parameter name="VERSION_DATE" value="20260427" />
+  <parameter name="VERSION_GIT" value="30068584" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="0" />
+  <parameter name="VERSION_PATCH" value="8" />
+ </module>
+ <module
+   name="mts_preprocessor_1"
+   kind="mts_preprocessor"
+   version="26.0.8.0427"
+   enabled="1">
+  <parameter name="BANK" value="DW" />
+  <parameter name="BUILD" value="427" />
+  <parameter name="CRCERR_BIT_LOC" value="1" />
+  <parameter name="DEBUG" value="1" />
+  <parameter name="ENABLED_CHANNEL_HI" value="3" />
+  <parameter name="ENABLED_CHANNEL_LO" value="0" />
+  <parameter name="FRAME_CORRPT_BIT_LOC" value="2" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="false" />
+  <parameter name="HITERR_BIT_LOC" value="0" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1297376080" />
+  <parameter name="LPM_DIV_PIPELINE" value="4" />
+  <parameter name="MUTRIG_BUFFER_EXPECTED_LATENCY_8N" value="4096" />
+  <parameter name="MUTRIG_OVERFLOW_LOOKBACK_8N" value="2000" />
+  <parameter name="PADDING_EOP_WAIT_CYCLE" value="512" />
+  <parameter name="VERSION_DATE" value="20260427" />
+  <parameter name="VERSION_GIT" value="30068584" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="0" />
+  <parameter name="VERSION_PATCH" value="8" />
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_0"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_0</parameter>
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_1"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_1</parameter>
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_2"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_2</parameter>
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_3"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_3</parameter>
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_4"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_4</parameter>
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_5"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_5</parameter>
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_6"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_6</parameter>
+ </module>
+ <module
+   name="mutrig_datapath_subsystem_7"
+   kind="mutrig_datapath_system_v3"
+   version="1.0"
+   enabled="1">
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID">scifi_datapath_system_v3_mutrig_datapath_subsystem_7</parameter>
+ </module>
+ <module
+   name="mutrig_injector_0"
+   kind="mutrig_injector_multiheader"
+   version="26.0.326"
+   enabled="1">
+  <parameter name="HEADERINFO_CHANNEL_W" value="4" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_0"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_1"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_2"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_3"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_4"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_5"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_6"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_lane_source_mux_7"
+   kind="mutrig_lane_source_mux"
+   version="1.0"
+   enabled="1">
+  <parameter name="SELECT_EMULATOR" value="1" />
+ </module>
+ <module
+   name="mutrig_reset_controller_0"
+   kind="mutrig_reset_controller"
+   version="1.0.8"
+   enabled="1">
+  <parameter name="DEBUG" value="1" />
+  <parameter name="RESET_LANE" value="2" />
+ </module>
+ <module
+   name="mux_mutrig2processor"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="45" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="4" />
+  <parameter name="outChannelWidth" value="6" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="true" />
+ </module>
+ <module
+   name="mux_mutrig2processor_0"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="45" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="4" />
+  <parameter name="outChannelWidth" value="6" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="true" />
+ </module>
+ <module
+   name="receiver_clock_125"
+   kind="altera_clock_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="125000000" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="125000000" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="reset_bridge_export"
+   kind="altera_reset_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ACTIVE_LOW_RESET" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="NUM_RESET_OUTPUTS" value="1" />
+  <parameter name="SYNCHRONOUS_EDGES" value="none" />
+  <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <module
+   name="run_control_splitter"
+   kind="altera_avalon_st_splitter"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="9" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="16" />
+  <parameter name="QUALIFY_VALID_OUT" value="0" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_READY" value="0" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module name="xcvr156_clock" kind="clock_source" version="18.1" enabled="1">
+  <parameter name="clockFrequency" value="156250000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="BOTH" />
+ </module>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="mutrig_datapath_subsystem_0.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="mutrig_datapath_subsystem_1.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="mutrig_datapath_subsystem_2.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig3.m0"
+   end="mutrig_datapath_subsystem_3.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig4_mts0.m0"
+   end="mutrig_datapath_subsystem_4.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig5.m0"
+   end="mutrig_datapath_subsystem_5.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig6.m0"
+   end="mutrig_datapath_subsystem_6.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig7.m0"
+   end="mutrig_datapath_subsystem_7.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="dbg_mm2runctrl_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0200" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0040" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0080" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00c0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0140" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0180" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="emulator_mutrig_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x01c0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hist.m0"
+   end="histogram_ingress_bridge_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0c00" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hist.m0"
+   end="histogram_statistics_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0400" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="lvds_rx_controller_pro_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig4_mts0.m0"
+   end="mts_preprocessor_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mts1.m0"
+   end="mts_preprocessor_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="mutrig_datapath_subsystem_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="mutrig_datapath_subsystem_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="mutrig_datapath_subsystem_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig3.m0"
+   end="mutrig_datapath_subsystem_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig4_mts0.m0"
+   end="mutrig_datapath_subsystem_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig5.m0"
+   end="mutrig_datapath_subsystem_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig6.m0"
+   end="mutrig_datapath_subsystem_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig7.m0"
+   end="mutrig_datapath_subsystem_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="mutrig_injector_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0200" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_frame.m0"
+   end="hit_stack_subsystem_0.feb_frame_assembly_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_frame.m0"
+   end="hit_stack_subsystem_1.feb_frame_assembly_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0040" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hist.m0"
+   end="histogram_statistics_0.hist_bin">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_jtagmaster2rstctrl.m0"
+   end="mutrig_reset_controller_0.reconfig_mgmt">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_0.ring_buffer_cam_0_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_1.ring_buffer_cam_0_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0400" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_0.ring_buffer_cam_1_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0080" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_1.ring_buffer_cam_1_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0480" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_0.ring_buffer_cam_2_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_1.ring_buffer_cam_2_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0500" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_0.ring_buffer_cam_3_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0180" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
+   end="hit_stack_subsystem_1.ring_buffer_cam_3_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0580" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="mm_pipeline_jtagmaster2rstctrl.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0200" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_low.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_emu_dbg.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_mutrig3.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x3000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_mutrig4_mts0.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x4000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_mutrig5.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x5000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_mutrig6.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x6000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_mutrig7.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x7000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_mts1.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x8000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_hist.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0xa000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_hitstack_ring.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0xb000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_clock_crossing_bridge.m0"
+   end="mm_pipeline_lvds_csr_hitstack_frame.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0xd000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_7.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x7860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_6.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x6860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_5.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x5860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_4.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x4860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_3.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x3860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_2.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_1.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_0.backpressure_fifo_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_injector_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00022000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mts_preprocessor_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x8000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00017900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00016900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00015900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00014900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00013900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00012900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00011900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00010900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="lvds_rx_controller_pro_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="histogram_statistics_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00020400" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mts_preprocessor_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x4000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="dbg_mm2runctrl_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2200" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2040" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2080" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x20c0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2140" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x2180" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="emulator_mutrig_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x21c0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="histogram_ingress_bridge_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00020c00" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_0.feb_frame_assembly_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00025000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_1.feb_frame_assembly_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00025040" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="histogram_statistics_0.hist_bin">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00020000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_1.ring_buffer_cam_0_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00023000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_0.ring_buffer_cam_0_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00021000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_1.ring_buffer_cam_1_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00023080" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_0.ring_buffer_cam_1_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00021080" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_1.ring_buffer_cam_2_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00023100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_0.ring_buffer_cam_2_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00021100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_1.ring_buffer_cam_3_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00023180" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="hit_stack_subsystem_0.ring_buffer_cam_3_csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00021180" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mm_pipeline_jtagmaster2rstctrl.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00011000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mts_preprocessor_0.debug_burst"
+   end="histogram_statistics_0.debug_6" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded0"
+   end="mutrig_lane_source_mux_0.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded1"
+   end="mutrig_lane_source_mux_1.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded2"
+   end="mutrig_lane_source_mux_2.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded3"
+   end="mutrig_lane_source_mux_3.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded4"
+   end="mutrig_lane_source_mux_4.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded5"
+   end="mutrig_lane_source_mux_5.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded6"
+   end="mutrig_lane_source_mux_6.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.decoded7"
+   end="mutrig_lane_source_mux_7.real_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_0.headerinfo"
+   end="mutrig_injector_0.headerinfo0" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_1.headerinfo"
+   end="mutrig_injector_0.headerinfo1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_2.headerinfo"
+   end="mutrig_injector_0.headerinfo2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_3.headerinfo"
+   end="mutrig_injector_0.headerinfo3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_4.headerinfo"
+   end="mutrig_injector_0.headerinfo4" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_5.headerinfo"
+   end="mutrig_injector_0.headerinfo5" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_6.headerinfo"
+   end="mutrig_injector_0.headerinfo6" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_7.headerinfo"
+   end="mutrig_injector_0.headerinfo7" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="histogram_ingress_bridge_0.hist_out"
+   end="histogram_statistics_0.hist_fill_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_0.hit_type0_out"
+   end="mux_mutrig2processor.in0" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_4.hit_type0_out"
+   end="mux_mutrig2processor_0.in0" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_1.hit_type0_out"
+   end="mux_mutrig2processor.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_5.hit_type0_out"
+   end="mux_mutrig2processor_0.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_2.hit_type0_out"
+   end="mux_mutrig2processor.in2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_6.hit_type0_out"
+   end="mux_mutrig2processor_0.in2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_3.hit_type0_out"
+   end="mux_mutrig2processor.in3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_7.hit_type0_out"
+   end="mux_mutrig2processor_0.in3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mts_preprocessor_1.hit_type1_out"
+   end="hit_stack_subsystem_1.hit_type_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mts_preprocessor_0.hit_type1_out"
+   end="histogram_ingress_bridge_0.pre_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_0.hit_type3"
+   end="hist_post_splitter_0.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mux_mutrig2processor.out"
+   end="mts_preprocessor_0.hit_type0_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mux_mutrig2processor_0.out"
+   end="mts_preprocessor_1.hit_type0_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_post_cdc_0.out"
+   end="histogram_ingress_bridge_0.post_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out0"
+   end="histogram_statistics_0.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out0"
+   end="emulator_mutrig_0.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out1"
+   end="emulator_mutrig_1.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_post_splitter_0.out1"
+   end="hist_post_cdc_0.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out1"
+   end="mts_preprocessor_0.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out10"
+   end="mutrig_datapath_subsystem_6.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out11"
+   end="mutrig_datapath_subsystem_7.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out12"
+   end="mts_preprocessor_1.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out13"
+   end="mutrig_injector_0.runctl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out14"
+   end="hit_stack_subsystem_1.run_control_signal" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out15"
+   end="emulator_ctrl_splitter.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out2"
+   end="emulator_mutrig_2.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out2"
+   end="mutrig_datapath_subsystem_0.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out3"
+   end="emulator_mutrig_3.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out3"
+   end="mutrig_datapath_subsystem_1.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out4"
+   end="emulator_mutrig_4.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out4"
+   end="mutrig_datapath_subsystem_2.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out5"
+   end="emulator_mutrig_5.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out5"
+   end="mutrig_datapath_subsystem_3.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out6"
+   end="emulator_mutrig_6.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out6"
+   end="hit_stack_subsystem_0.run_control_signal" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_ctrl_splitter.out7"
+   end="emulator_mutrig_7.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out7"
+   end="mutrig_reset_controller_0.runcontrol" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out8"
+   end="mutrig_datapath_subsystem_4.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out9"
+   end="mutrig_datapath_subsystem_5.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="histogram_ingress_bridge_0.pre_out"
+   end="hit_stack_subsystem_0.hit_type_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_0.ring_buffer_cam_0_filllevel"
+   end="histogram_statistics_0.debug_2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_0.ring_buffer_cam_1_filllevel"
+   end="histogram_statistics_0.debug_3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_0.ring_buffer_cam_2_filllevel"
+   end="histogram_statistics_0.debug_4" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_0.ring_buffer_cam_3_filllevel"
+   end="histogram_statistics_0.debug_5" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_0.selected_out"
+   end="mutrig_datapath_subsystem_0.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_1.selected_out"
+   end="mutrig_datapath_subsystem_1.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_2.selected_out"
+   end="mutrig_datapath_subsystem_2.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_3.selected_out"
+   end="mutrig_datapath_subsystem_3.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_4.selected_out"
+   end="mutrig_datapath_subsystem_4.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_5.selected_out"
+   end="mutrig_datapath_subsystem_5.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_6.selected_out"
+   end="mutrig_datapath_subsystem_6.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_lane_source_mux_7.selected_out"
+   end="mutrig_datapath_subsystem_7.decoded_din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mts_preprocessor_0.ts_delta"
+   end="histogram_statistics_0.debug_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_0.tx8b1k"
+   end="mutrig_lane_source_mux_0.emu_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_1.tx8b1k"
+   end="mutrig_lane_source_mux_1.emu_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_2.tx8b1k"
+   end="mutrig_lane_source_mux_2.emu_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_3.tx8b1k"
+   end="mutrig_lane_source_mux_3.emu_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_4.tx8b1k"
+   end="mutrig_lane_source_mux_4.emu_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_5.tx8b1k"
+   end="mutrig_lane_source_mux_5.emu_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_6.tx8b1k"
+   end="mutrig_lane_source_mux_6.emu_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="emulator_mutrig_7.tx8b1k"
+   end="mutrig_lane_source_mux_7.emu_in" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="monitor_clock_125.clk"
+   end="master_datapath.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="monitor_clock_125.clk"
+   end="mm_pipeline_jtagmaster2rstctrl.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="xcvr156_clock.clk"
+   end="hist_post_splitter_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="monitor_clock_125.clk"
+   end="lvds_rx_controller_pro_0.control_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="xcvr156_clock.clk"
+   end="hist_post_cdc_0.in_clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="monitor_clock_125.clk"
+   end="mutrig_reset_controller_0.si_direct_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="xcvr156_clock.clk"
+   end="hit_stack_subsystem_1.xcvr_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="xcvr156_clock.clk"
+   end="hit_stack_subsystem_0.xcvr_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mux_mutrig2processor_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_7.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_6.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_5.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_4.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="run_control_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mux_mutrig2processor.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_3.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_2.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_1.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_datapath_subsystem_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_ctrl_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_inject_fanout.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_1.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_2.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_3.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_4.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_5.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_6.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_lane_source_mux_7.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_low.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_emu_dbg.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_mutrig3.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_mutrig4_mts0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_mutrig5.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_mutrig6.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_mutrig7.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_mts1.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_hist.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_hitstack_ring.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_pipeline_lvds_csr_hitstack_frame.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="histogram_statistics_0.clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="histogram_ingress_bridge_0.clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="dbg_mm2runctrl_0.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_injector_0.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mts_preprocessor_1.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mts_preprocessor_0.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="lvds_rx_controller_pro_0.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_0.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_1.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_2.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_3.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_4.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_5.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_6.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="emulator_mutrig_7.data_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hit_stack_subsystem_1.datapath_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hit_stack_subsystem_0.datapath_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_reset_controller_0.dpa_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="receiver_clock_125.in_clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mm_clock_crossing_bridge.m0_clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_post_cdc_0.out_clk" />
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="lvds_rx_controller_pro_0.ctrl"
+   end="lvds_rx_28nm_0.ctrl">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="mutrig_injector_0.inject"
+   end="emulator_inject_fanout.inject_in">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out0"
+   end="emulator_mutrig_0.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out1"
+   end="emulator_mutrig_1.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out2"
+   end="emulator_mutrig_2.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out3"
+   end="emulator_mutrig_3.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out4"
+   end="emulator_mutrig_4.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out5"
+   end="emulator_mutrig_5.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out6"
+   end="emulator_mutrig_6.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="emulator_inject_fanout.out7"
+   end="emulator_mutrig_7.inject">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="lvds_rx_28nm_0.parallel"
+   end="lvds_rx_controller_pro_0.parallel">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="master_datapath.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="lvds_rx_controller_pro_0.control_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="lvds_rx_controller_pro_0.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mutrig_reset_controller_0.dpa_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="xcvr156_clock.clk_reset"
+   end="hist_post_cdc_0.in_clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_clock_crossing_bridge.m0_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_jtagmaster2rstctrl.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="xcvr156_clock.clk_reset"
+   end="hist_post_splitter_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_low.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_emu_dbg.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_mutrig3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_mutrig4_mts0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_mutrig5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_mutrig6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_mutrig7.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_mts1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_hist.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_hitstack_ring.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="mm_pipeline_lvds_csr_hitstack_frame.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="xcvr156_clock.clk_reset"
+   end="hit_stack_subsystem_1.xcvr_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="xcvr156_clock.clk_reset"
+   end="hit_stack_subsystem_0.xcvr_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_0.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_1.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_2.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_3.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_4.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_5.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_6.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_mutrig_7.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="hit_stack_subsystem_1.datapath_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="hit_stack_subsystem_0.datapath_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_reset_controller_0.dpa_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_clock_crossing_bridge.m0_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="hist_post_cdc_0.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mux_mutrig2processor_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_7.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_4.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="run_control_splitter.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mux_mutrig2processor.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_2.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_datapath_subsystem_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="histogram_statistics_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_ctrl_splitter.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="emulator_inject_fanout.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="histogram_ingress_bridge_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_low.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_emu_dbg.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_mutrig3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_mutrig4_mts0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_mutrig5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_mutrig6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_mutrig7.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_mts1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_hist.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_hitstack_ring.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mm_pipeline_lvds_csr_hitstack_frame.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="dbg_mm2runctrl_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_injector_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mts_preprocessor_1.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mts_preprocessor_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_0.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_1.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_2.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_3.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_4.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_5.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_6.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_lane_source_mux_7.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge_export.out_reset"
+   end="histogram_statistics_0.interval_reset" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="AUTO" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

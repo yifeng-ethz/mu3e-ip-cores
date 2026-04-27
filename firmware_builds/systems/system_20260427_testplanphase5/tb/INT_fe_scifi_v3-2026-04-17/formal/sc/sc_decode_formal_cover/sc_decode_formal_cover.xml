@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+<testsuite timestamp="2026-04-18T16:10:30" hostname="teferi.ethz.ch" package="sc_decode_formal" id="0" name="cover" tests="55" errors="0" failures="0" time="0" skipped="42">
+<properties>
+<property name="os" value="Linux"/>
+<property name="expect" value="PASS"/>
+<property name="status" value="PASS"/>
+</properties>
+<testcase classname="cover" name="build execution" time="0">
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_881">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_884">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_887">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_890">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_893">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_896">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_899">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:177.17-177.54" time="0" type="ASSERT" location="props_sc_decode.sv:177.17-177.54" id="_witness_.check_assert_props_sc_decode_sv_177_902">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_882">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_885">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_888">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_891">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_894">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_897">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_900">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:178.17-178.57" time="0" type="ASSERT" location="props_sc_decode.sv:178.17-178.57" id="_witness_.check_assert_props_sc_decode_sv_178_903">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_905">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_908">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_911">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_914">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_917">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_920">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:183.17-183.54" time="0" type="ASSERT" location="props_sc_decode.sv:183.17-183.54" id="_witness_.check_assert_props_sc_decode_sv_183_923">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_906">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_909">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_912">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_915">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_918">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_921">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:184.17-184.57" time="0" type="ASSERT" location="props_sc_decode.sv:184.17-184.57" id="_witness_.check_assert_props_sc_decode_sv_184_924">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:194.13-194.47" time="0" type="ASSERT" location="props_sc_decode.sv:194.13-194.47" id="_witness_.check_assert_props_sc_decode_sv_194_350">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:195.13-195.45" time="0" type="ASSERT" location="props_sc_decode.sv:195.13-195.45" id="_witness_.check_assert_props_sc_decode_sv_195_352">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:196.13-196.49" time="0" type="ASSERT" location="props_sc_decode.sv:196.13-196.49" id="_witness_.check_assert_props_sc_decode_sv_196_354">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:198.13-198.61" time="0" type="ASSERT" location="props_sc_decode.sv:198.13-198.61" id="_witness_.check_assert_props_sc_decode_sv_198_356">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:199.13-199.63" time="0" type="ASSERT" location="props_sc_decode.sv:199.13-199.63" id="_witness_.check_assert_props_sc_decode_sv_199_359">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:200.13-200.64" time="0" type="ASSERT" location="props_sc_decode.sv:200.13-200.64" id="_witness_.check_assert_props_sc_decode_sv_200_362">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:202.13-202.49" time="0" type="ASSERT" location="props_sc_decode.sv:202.13-202.49" id="_witness_.check_assert_props_sc_decode_sv_202_365">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:203.13-203.65" time="0" type="ASSERT" location="props_sc_decode.sv:203.13-203.65" id="_witness_.check_assert_props_sc_decode_sv_203_368">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:204.13-204.61" time="0" type="ASSERT" location="props_sc_decode.sv:204.13-204.61" id="_witness_.check_assert_props_sc_decode_sv_204_371">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:208.21-208.39" time="0" type="ASSERT" location="props_sc_decode.sv:208.21-208.39" id="_witness_.check_assert_props_sc_decode_sv_208_376">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:209.21-209.55" time="0" type="ASSERT" location="props_sc_decode.sv:209.21-209.55" id="_witness_.check_assert_props_sc_decode_sv_209_377">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property ASSERT in sc_decode_formal_tb/dut at props_sc_decode.sv:213.21-213.46" time="0" type="ASSERT" location="props_sc_decode.sv:213.21-213.46" id="_witness_.check_assert_props_sc_decode_sv_213_379">
+<skipped />
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:217.13-217.102" time="0" type="COVER" location="props_sc_decode.sv:217.13-217.102" id="_witness_.check_cover_props_sc_decode_sv_217_383" tracefile="engine_0/trace0.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:218.13-218.115" time="0" type="COVER" location="props_sc_decode.sv:218.13-218.115" id="_witness_.check_cover_props_sc_decode_sv_218_388" tracefile="engine_0/trace5.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:219.13-219.110" time="0" type="COVER" location="props_sc_decode.sv:219.13-219.110" id="_witness_.check_cover_props_sc_decode_sv_219_393" tracefile="engine_0/trace3.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:220.13-220.118" time="0" type="COVER" location="props_sc_decode.sv:220.13-220.118" id="_witness_.check_cover_props_sc_decode_sv_220_398" tracefile="engine_0/trace4.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:221.13-221.111" time="0" type="COVER" location="props_sc_decode.sv:221.13-221.111" id="_witness_.check_cover_props_sc_decode_sv_221_403" tracefile="engine_0/trace8.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:222.13-222.110" time="0" type="COVER" location="props_sc_decode.sv:222.13-222.110" id="_witness_.check_cover_props_sc_decode_sv_222_408" tracefile="engine_0/trace9.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:223.13-223.96" time="0" type="COVER" location="props_sc_decode.sv:223.13-223.96" id="_witness_.check_cover_props_sc_decode_sv_223_413" tracefile="engine_0/trace7.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:224.13-224.110" time="0" type="COVER" location="props_sc_decode.sv:224.13-224.110" id="_witness_.check_cover_props_sc_decode_sv_224_418" tracefile="engine_0/trace6.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:225.13-225.45" time="0" type="COVER" location="props_sc_decode.sv:225.13-225.45" id="_witness_.check_cover_props_sc_decode_sv_225_420" tracefile="engine_0/trace1.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:226.13-226.53" time="0" type="COVER" location="props_sc_decode.sv:226.13-226.53" id="_witness_.check_cover_props_sc_decode_sv_226_422" tracefile="engine_0/trace0.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:227.13-227.75" time="0" type="COVER" location="props_sc_decode.sv:227.13-227.75" id="_witness_.check_cover_props_sc_decode_sv_227_424" tracefile="engine_0/trace3.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:228.13-228.94" time="0" type="COVER" location="props_sc_decode.sv:228.13-228.94" id="_witness_.check_cover_props_sc_decode_sv_228_431" tracefile="engine_0/trace2.vcd">
+</testcase>
+<testcase classname="cover" name="Property COVER in sc_decode_formal_tb/dut at props_sc_decode.sv:229.13-229.110" time="0" type="COVER" location="props_sc_decode.sv:229.13-229.110" id="_witness_.check_cover_props_sc_decode_sv_229_436" tracefile="engine_0/trace6.vcd">
+</testcase>
+<system-out>SBY 16:10:29 [sc_decode_formal_cover] Removing directory '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_cover'.
+SBY 16:10:29 [sc_decode_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/../common/formal_defs.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_cover/src/formal_defs.svh'.
+SBY 16:10:29 [sc_decode_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/debug_sc_system_v3_map.svh' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_cover/src/debug_sc_system_v3_map.svh'.
+SBY 16:10:29 [sc_decode_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/props_sc_decode.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_cover/src/props_sc_decode.sv'.
+SBY 16:10:29 [sc_decode_formal_cover] Copy '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_tb.sv' to '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/tb_int/INT_fe_scifi_v3-2026-04-17/formal/sc/sc_decode_formal_cover/src/sc_decode_formal_tb.sv'.
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: smtbmc z3
+SBY 16:10:29 [sc_decode_formal_cover] base: starting process &quot;cd sc_decode_formal_cover/src; yosys -ql ../model/design.log ../model/design.ys&quot;
+SBY 16:10:29 [sc_decode_formal_cover] base: Warning: Wire sc_decode_formal_tb.\gclk is used but has no driver.
+SBY 16:10:29 [sc_decode_formal_cover] base: finished (returncode=0)
+SBY 16:10:29 [sc_decode_formal_cover] prep: starting process &quot;cd sc_decode_formal_cover/model; yosys -ql design_prep.log design_prep.ys&quot;
+SBY 16:10:29 [sc_decode_formal_cover] prep: Warning: Wire sc_decode_formal_tb.\gclk is used but has no driver.
+SBY 16:10:29 [sc_decode_formal_cover] prep: finished (returncode=0)
+SBY 16:10:29 [sc_decode_formal_cover] smt2: starting process &quot;cd sc_decode_formal_cover/model; yosys -ql design_smt2.log design_smt2.ys&quot;
+SBY 16:10:29 [sc_decode_formal_cover] smt2: finished (returncode=0)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: starting process &quot;cd sc_decode_formal_cover; yosys-smtbmc -s z3 --presat -c --noprogress -t 8  --append 0 --dump-vcd engine_0/trace%.vcd --dump-yw engine_0/trace%.yw --dump-vlogtb engine_0/trace%_tb.v --dump-smtc engine_0/trace%.smtc model/design_smt2.smt2&quot;
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Solver: z3
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 0..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 1..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 2..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:217.13-217.102 (_witness_.check_cover_props_sc_decode_sv_217_383)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:226.13-226.53 (_witness_.check_cover_props_sc_decode_sv_226_422)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace0.vcd
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace0_tb.v
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace0.smtc
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace0.yw
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:225.13-225.45 (_witness_.check_cover_props_sc_decode_sv_225_420)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace1.vcd
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace1_tb.v
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace1.smtc
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace1.yw
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:228.13-228.94 (_witness_.check_cover_props_sc_decode_sv_228_431)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace2.vcd
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace2_tb.v
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace2.smtc
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace2.yw
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:219.13-219.110 (_witness_.check_cover_props_sc_decode_sv_219_393)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:227.13-227.75 (_witness_.check_cover_props_sc_decode_sv_227_424)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace3.vcd
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace3_tb.v
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace3.smtc
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace3.yw
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:220.13-220.118 (_witness_.check_cover_props_sc_decode_sv_220_398)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace4.vcd
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace4_tb.v
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace4.smtc
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace4.yw
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:218.13-218.115 (_witness_.check_cover_props_sc_decode_sv_218_388)
+SBY 16:10:29 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace5.vcd
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace5_tb.v
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace5.smtc
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace5.yw
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:224.13-224.110 (_witness_.check_cover_props_sc_decode_sv_224_418)
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:229.13-229.110 (_witness_.check_cover_props_sc_decode_sv_229_436)
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace6.vcd
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace6_tb.v
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace6.smtc
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace6.yw
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:223.13-223.96 (_witness_.check_cover_props_sc_decode_sv_223_413)
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace7.vcd
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace7_tb.v
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace7.smtc
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace7.yw
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:221.13-221.111 (_witness_.check_cover_props_sc_decode_sv_221_403)
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace8.vcd
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace8_tb.v
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace8.smtc
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace8.yw
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Checking cover reachability in step 3..
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Reached cover statement in step 3 at sc_decode_formal_tb.dut: props_sc_decode.sv:222.13-222.110 (_witness_.check_cover_props_sc_decode_sv_222_408)
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to VCD file: engine_0/trace9.vcd
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Verilog testbench: engine_0/trace9_tb.v
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to constraints file: engine_0/trace9.smtc
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Writing trace to Yosys witness file: engine_0/trace9.yw
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: ##   0:00:00  Status: passed
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: finished (returncode=0)
+SBY 16:10:30 [sc_decode_formal_cover] engine_0: Status returned by engine: pass
+SBY 16:10:30 [sc_decode_formal_cover] summary: Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 16:10:30 [sc_decode_formal_cover] summary: Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+SBY 16:10:30 [sc_decode_formal_cover] summary: engine_0 (smtbmc z3) returned pass
+SBY 16:10:30 [sc_decode_formal_cover] summary: cover trace: sc_decode_formal_cover/engine_0/trace0.vcd
+SBY 16:10:30 [sc_decode_formal_cover] summary:   reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_217_383 at props_sc_decode.sv:217.13-217.102 step 3
+SBY 16:10:30 [sc_decode_formal_cover] summary:   reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_226_422 at props_sc_decode.sv:226.13-226.53 step 3
+SBY 16:10:30 [sc_decode_formal_cover] summary: cover trace: sc_decode_formal_cover/engine_0/trace1.vcd
+SBY 16:10:30 [sc_decode_formal_cover] summary:   reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_225_420 at props_sc_decode.sv:225.13-225.45 step 3
+SBY 16:10:30 [sc_decode_formal_cover] summary: cover trace: sc_decode_formal_cover/engine_0/trace2.vcd
+SBY 16:10:30 [sc_decode_formal_cover] summary:   reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_228_431 at props_sc_decode.sv:228.13-228.94 step 3
+SBY 16:10:30 [sc_decode_formal_cover] summary: cover trace: sc_decode_formal_cover/engine_0/trace3.vcd
+SBY 16:10:30 [sc_decode_formal_cover] summary:   reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_219_393 at props_sc_decode.sv:219.13-219.110 step 3
+SBY 16:10:30 [sc_decode_formal_cover] summary:   reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_227_424 at props_sc_decode.sv:227.13-227.75 step 3
+SBY 16:10:30 [sc_decode_formal_cover] summary: cover trace: sc_decode_formal_cover/engine_0/trace4.vcd
+SBY 16:10:30 [sc_decode_formal_cover] summary:   reached cover statement sc_decode_formal_tb.dut._witness_.check_cover_props_sc_decode_sv_220_398 at props_sc_decode.sv:220.13-220.118 step 3
+SBY 16:10:30 [sc_decode_formal_cover] summary: and 5 further traces
+SBY 16:10:30 [sc_decode_formal_cover] summary: see sc_decode_formal_cover/PASS for a complete summary
+SBY 16:10:30 [sc_decode_formal_cover] DONE (PASS, rc=0)
+</system-out>
+<system-err>
+</system-err>
+</testsuite>
+</testsuites>

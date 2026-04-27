@@ -1,0 +1,145 @@
+This file contains instructions for building tdom on Windows platforms.
+
+Windows builds may be done with either the MingW-W64 tool chain
+comprising of gcc and friends, or with the Microsoft Visual C++ and
+nmake tools. Each is described below.
+
+IMPORTANT NOTE:
+Building with either tool chain requires that the Tcl libraries that
+are linked have also been built with the same tool chain. The resulting
+binaries however can be loaded into a Tcl shell compiled with any
+tool chain provided the requisite C runtimes are present on the system.
+
+Building With The Mingw-W64 Tool Chain
+======================================
+
+Building with the MingW follows a similar process to the autoconf/TEA
+based Unix builds.
+
+1. Start a shell using mingw32.exe or mingw64.exe for 32- and 64-bit
+fields respectively. Do NOT use msys2.exe directly.
+
+2. Assuming you want to include HTML5 support using the Gumbo libraries,
+build the Gumbo libraries by running these commands in the top level
+directory where you extracted the Gumbo distribution. Note these
+shell commands must be run in the mingw32.exe or mingw64.exe shells
+as appropriate.
+
+    ./autogen.sh
+    ./configure
+    make
+    make install
+
+This will install the Gumbo libraries in the mingw32/mingw64 system
+directories as appropriate.
+
+3. Change to a build directory and run the configure at the top level
+tdom directory. For example, if doing a 64-bit build in the win/build64
+directory within a mingw64.exe shell,
+
+    mkdir win/build
+    cd win/build
+    ../../configure --enable-threads --enable-html5 --enable-64bit --prefix=/c/tcl/mingw/85/x64 --with-tcl=/c/tcl/mingw/85/x64/lib
+    make
+    make install
+
+In the above sequence, we are building against Tcl 8.5 installed under
+c:\tcl\mingw\85\x64 on the system. The Gumbo libraries built in the
+previous step are automatically picked up from the mingw64.exe directories.
+Note that tdom on Windows binds against the static Gumbo library so
+there is no additional DLL to distribute.
+
+The 32-bit build is similar except omitting the --enable-64bit option
+(and of course pointing configure to a 32-bit installation of Tcl.
+
+4. Build the tnc and tdomhtml extensions in similar fashion to the above
+except that the --enable-html5 option should be left out in both cases,
+and an additional option --with-tdom=path/to/tdom/build needs to be
+specified for the tnc configure step.
+
+IMPORTANT NOTE:
+Because the MinGW-built binaries link to the msvcrt 6.0 runtimes that
+is present on all Windows systems, the built tdom is usable on all
+Windows systems with a Tcl built with any tool chain without needing
+additional runtime libraries to be installed.
+
+
+
+
+Building with Visual Studio 2017 Community Edition (free)
+=========================================================
+
+1. Build the Gumbo libraries if HTML5 support is desired.
+
+1a. Check out the git repository from
+https://github.com/apnadkarni/gumbo-parser.  Do NOT use the original
+Gumbo repository as that does not contain a complete Visual Studio
+project file required for tdom.
+
+1b. Switch to the tdom-libs branch.
+Open the visualc/gumbo.sln solution file in Visual Studio. Click the
+Batch Build... item under the Build menu. In the dialog box, select
+the Win32|Release|x86 and x64|Release|x64 project configurations and
+then click the Build or Rebuild button. This will build the 32-bit
+and 64-bit gumbo.lib libraries under visualc/Win32/Release and
+visualc/x64/Release respectively.
+
+2. Next start a Visual Studio build command shell for 64-bit builds,
+usually from
+    Windows Start menu->Visual Studio 2017 Folder->x64 Native Command shell
+
+3. Change to the tdom\win directory and type the command
+
+     nmake /s /nologo /f makefile.vc INSTALLDIR=c:\tcl\85-vs2017\x64 GUMBODIR=C:\src\gumbo
+    nmake /s /nologo /f makefile.vc INSTALLDIR=c:\tcl\85-vs2017\x64 GUMBODIR=C:\src\gumbo install
+
+Here INSTALLDIR is the path to your Tcl installation and GUMBODIR is
+the path to the top level of the Gumbo sources. If GUMBODIR is not
+specified, tdom will build without HTML5 support.
+
+The 32-bit builds are similar except that
+
+- the commands need to be run from the Visual Studio x86 Native Tools
+command shell, and
+- the INSTALLDIR needs to point to a 32-bit Tcl installation
+- (Note GUMBODIR need not change)
+
+4a. To build the tnc and tdomhtml extensions,
+
+    cd extensions/tnc/win
+    nmake /s /nologo /f makefile.vc INSTALLDIR=c:\tcl\85-vs2017\x64
+    nmake /s /nologo /f makefile.vc INSTALLDIR=c:\tcl\85-vs2017\x64 install
+
+    cd extensions/tdomhtml/win
+    nmake /s /nologo /f makefile.vc INSTALLDIR=c:\tcl\85-vs2017\x64 install
+
+Note no build step necessary for tdomhtml as it is pure Tcl.
+
+Similar steps for 32-bit builds with appropriate changes.
+
+IMPORTANT NOTE:
+The Visual Studio 2017 runtimes are not guaranteed to be installed on
+all Windows systems. Thus the built tdom package should only be used
+with a Tcl that is also built with Visual Studio 2017.
+
+
+
+# Building with Visual C++ 6 (32-bit) or Windows 2003 SDK (for 64-bit)
+======================================================================
+
+Building with Visual C++ 6 with the included expat isn't any more
+possible, because expat dropped support for this. If you still want to
+build with this toolset use an expat version prior to 2.2.8.
+
+Steps similar to above except that HTML5 support is not available due
+to Gumbo needing C99 support. The GUMBODIR option should be left out
+on the nmake build commands.
+
+IMPORTANT NOTE:
+Because the VC++ 6 and 2003 SDK link to the msvcrt 6.0 runtimes that
+is present on all Windows systems, the built tdom is usable on all
+Windows systems with a Tcl built with any tool chain without needing
+additional runtime libraries to be installed.
+
+
+

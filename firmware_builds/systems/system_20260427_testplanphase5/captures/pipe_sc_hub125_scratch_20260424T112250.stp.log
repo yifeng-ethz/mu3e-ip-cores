@@ -1,0 +1,37 @@
+Info: *******************************************************************
+Info: Running Quartus Prime Signal Tap
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Fri Apr 24 11:22:51 2026
+Info: Command: quartus_stp -t firmware_builds/board_test/script/capture_signaltap_vcd.tcl firmware_builds/board_test/signaltap/pipe_sc_hub125.stp firmware_builds/board_test/captures/pipe_sc_hub125_scratch_20260424T112250.vcd pipe_sc_125 pipe_sc_125 sc_125_hub_kchar sc_hub125_scratch_20260424T112250 30
+Info: Quartus(args): firmware_builds/board_test/signaltap/pipe_sc_hub125.stp firmware_builds/board_test/captures/pipe_sc_hub125_scratch_20260424T112250.vcd pipe_sc_125 pipe_sc_125 sc_125_hub_kchar sc_hub125_scratch_20260424T112250 30
+Using hardware : USB-BlasterII [7-2]
+Using device   : @1: 5AGT(FC7H3|MC7G3)/5AGXBA7D4/.. (0x02A020DD)
+Opening STP    : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/signaltap/pipe_sc_hub125.stp
+Signal set     : pipe_sc_125
+Trigger        : sc_125_hub_kchar
+Data log       : sc_hub125_scratch_20260424T112250
+Output VCD     : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/captures/pipe_sc_hub125_scratch_20260424T112250.vcd
+Timeout (s)    : 30
+Info (16704): Signal Tap data acquisition is in IDLE state: 
+Info (16704): Signal Tap data acquisition is in PRE state:  (0 triggers seen)
+Info (16704): Signal Tap data acquisition is in DONE state: 
+Wrote /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/captures/pipe_sc_hub125_scratch_20260424T112250.vcd
+Info (23030): Evaluation of Tcl script firmware_builds/board_test/script/capture_signaltap_vcd.tcl was successful
+Info: Quartus Prime Signal Tap was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 788 megabytes
+    Info: Processing ended: Fri Apr 24 11:22:56 2026
+    Info: Elapsed time: 00:00:05
+    Info: Total CPU time (on all processors): 00:00:00

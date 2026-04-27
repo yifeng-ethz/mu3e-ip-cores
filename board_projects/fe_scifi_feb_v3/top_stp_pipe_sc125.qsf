@@ -1,0 +1,248 @@
+set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files_pipe_sc125_stp
+set_global_assignment -name QIP_FILE top_pipe.qip
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
+set_global_assignment -name PROJECT_IP_REGENERATION_POLICY ALWAYS_REGENERATE_IP
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE util/quartus/settings.tcl
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_a5_base.tcl
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_v2_scifi_pins.tcl
+
+set_global_assignment -name USE_SIGNALTAP_FILE "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/pipe_sc_hub125.stp"
+set_global_assignment -name ENABLE_SIGNALTAP ON
+set_global_assignment -name ENABLE_LOGIC_ANALYZER_INTERFACE OFF
+
+set_global_assignment -name SLD_NODE_CREATOR_ID 110 -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_ENTITY_NAME sld_signaltap -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_clk -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_out_clk" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[0] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_out_ready" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[1] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_rdreq" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[2] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_valid" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[3] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[4] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[5] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[6] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[7] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[4]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[8] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[5]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[9] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[6]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[10] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[7]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[11] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[8]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[12] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[9]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[13] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[10]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[14] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[11]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[15] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[12]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[16] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[13]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[17] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[14]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[18] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[15]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[19] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[16]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[20] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[17]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[21] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[18]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[22] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[19]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[23] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[20]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[24] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[21]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[25] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[22]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[26] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[23]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[27] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[24]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[28] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[25]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[29] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[26]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[30] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[27]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[31] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[28]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[32] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[29]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[33] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[30]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[34] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[31]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[35] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[36] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[37] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[38] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[39] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[40] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[41] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[42] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[43] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[4]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[44] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[5]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[45] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[6]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[46] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[7]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[47] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[8]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[48] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[9]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[49] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[10]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[50] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[11]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[51] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[12]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[52] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[13]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[53] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[14]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[54] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[15]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[55] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[16]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[56] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[17]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[57] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[18]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[58] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[19]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[59] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[20]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[60] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[21]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[61] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[22]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[62] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[23]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[63] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[24]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[64] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[25]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[65] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[26]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[66] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[27]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[67] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[28]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[68] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[29]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[69] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[30]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[70] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[31]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[71] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[72] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[73] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[74] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[75] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|o_download_ready" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[76] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|sc_hub_pkt_rx:pkt_rx_inst|o_download_ready" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[77] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|sc_hub_pkt_rx:pkt_rx_inst|pkt_has_download_words_reg" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[78] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_read" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[79] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_write" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[80] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_readdatavalid" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[81] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_waitrequest" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[82] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_writeresponsevalid" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[83] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_response[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_trigger_in[84] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_response[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[0] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|i_out_ready" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[1] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|fifo_rdreq" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[2] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_valid" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[3] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[4] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[5] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[6] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[7] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[4]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[8] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[5]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[9] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[6]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[10] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[7]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[11] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[8]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[12] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[9]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[13] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[10]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[14] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[11]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[15] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[12]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[16] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[13]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[17] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[14]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[18] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[15]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[19] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[16]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[20] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[17]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[21] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[18]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[22] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[19]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[23] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[20]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[24] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[21]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[25] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[22]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[26] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[23]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[27] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[24]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[28] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[25]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[29] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[26]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[30] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[27]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[31] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[28]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[32] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[29]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[33] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[30]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[34] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_data[31]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[35] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[36] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[37] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[38] -to "feb_system:u_feb_system|sc_downlink_cdc_bridge:u_sc_downlink_cdc|out_datak[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[39] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[40] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[41] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[42] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[43] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[4]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[44] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[5]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[45] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[6]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[46] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[7]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[47] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[8]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[48] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[9]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[49] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[10]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[50] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[11]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[51] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[12]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[52] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[13]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[53] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[14]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[54] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[15]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[55] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[16]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[56] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[17]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[57] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[18]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[58] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[19]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[59] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[20]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[60] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[21]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[61] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[22]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[62] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[23]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[63] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[24]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[64] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[25]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[65] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[26]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[66] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[27]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[67] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[28]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[68] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[29]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[69] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[30]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[70] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_data[31]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[71] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[72] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[1]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[73] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[2]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[74] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|i_download_datak[3]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[75] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|o_download_ready" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[76] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|sc_hub_pkt_rx:pkt_rx_inst|o_download_ready" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[77] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|sc_hub_top:sc_hub|sc_hub_pkt_rx:pkt_rx_inst|pkt_has_download_words_reg" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[78] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_read" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[79] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_write" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[80] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_readdatavalid" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[81] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_waitrequest" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[82] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_writeresponsevalid" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[83] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_response[0]" -section_id pipe_sc_125
+set_instance_assignment -name CONNECT_TO_SLD_NODE_ENTITY_PORT acq_data_in[84] -to "feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_control_path_subsystem:control_path_subsystem|feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2:mm_interconnect_2|sc_hub_hub_response[1]" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_BLOCK_TYPE=AUTO" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_DATA_BITS=85" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_BITS=85" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_BITS=85" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_NODE_INFO=805334528" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_POWER_UP_TRIGGER=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK=00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INVERSION_MASK_LENGTH=278" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STORAGE_QUALIFIER_INVERSION_MASK_LENGTH=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SEGMENT_SIZE=512" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ATTRIBUTE_MEM_MODE=OFF" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_FLOW_USE_GENERATED=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_STATE_BITS=11" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_BUFFER_FULL_STOP=1" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_CURRENT_RESOURCE_WIDTH=1" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_INCREMENTAL_ROUTING=1" -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[0] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[1] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[2] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[3] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[4] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[5] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[6] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[7] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[8] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[9] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[10] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[11] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[12] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[13] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[14] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[15] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[16] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[17] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[18] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[19] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[20] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[21] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[22] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[23] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[24] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[25] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[26] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[27] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[28] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[29] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[30] -to pipe_sc_125|vcc -section_id pipe_sc_125
+set_instance_assignment -name POST_FIT_CONNECT_TO_SLD_NODE_ENTITY_PORT crc[31] -to pipe_sc_125|gnd -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL=1" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_SAMPLE_DEPTH=512" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_IN_ENABLED=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_PIPELINE=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_RAM_PIPELINE=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_COUNTER_PIPELINE=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ADVANCED_TRIGGER_ENTITY=basic,1," -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_TRIGGER_LEVEL_PIPELINE=1" -section_id pipe_sc_125
+set_global_assignment -name SLD_NODE_PARAMETER_ASSIGNMENT "SLD_ENABLE_ADVANCED_TRIGGER=0" -section_id pipe_sc_125
+set_global_assignment -name SLD_FILE db/pipe_sc_hub125_auto_stripped.stp

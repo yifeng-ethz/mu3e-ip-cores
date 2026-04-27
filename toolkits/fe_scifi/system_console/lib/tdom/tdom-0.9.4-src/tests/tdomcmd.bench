@@ -1,0 +1,131 @@
+# -*- tcl -*-
+#
+# This file contains benchmarks for DOM doc creation with dom and tdom
+#
+# (c) 2018 Rolf Ade <rolf@pointsman.de>
+#
+
+
+# ### ### ### ######### ######### ######### ###########################
+## Setting up the environment ...
+
+package require tdom 
+
+# ### ### ### ######### ######### ######### ###########################
+## Benchmarks.
+
+
+bench -desc "dom mondial-europe.xml" -iters 20 -ipre {
+    set fd [open ../tests/data/mondial-europe.xml]
+} -body {
+    set doc [dom parse -channel $fd]
+} -ipost {
+    close $fd
+    $doc delete
+}
+
+bench -desc "tdom mondial-europe.xml" -iters 20 -ipre {
+    set p [expat]
+    tdom $p enable
+} -body {
+    $p parsefile ../tests/data/mondial-europe.xml
+    set doc [tdom $p getdoc]
+} -ipost {
+    $doc delete
+    $p free
+}
+
+bench -desc "tdom mondial-europe.xml / reuse parser" -iters 20 -pre {
+    set p [expat]
+    tdom $p enable
+} -body {
+    $p parsefile ../tests/data/mondial-europe.xml
+    set doc [tdom $p getdoc]
+} -ipost {
+    $doc delete
+    $p reset
+} -post {
+    $p free
+}
+
+bench -desc "dom REC-xslt-19991116.xml" -iters 20 -ipre {
+    set fd [open ../tests/data/REC-xslt-19991116.xml]
+} -body {
+    set doc [dom parse -channel $fd]
+} -ipost {
+    close $fd
+    $doc delete
+}
+
+bench -desc "tdom REC-xslt-19991116.xml" -iters 20 -ipre {
+    set p [expat]
+    tdom $p enable
+} -body {
+    $p parsefile ../tests/data/REC-xslt-19991116.xml
+    set doc [tdom $p getdoc]
+} -ipost {
+    $doc delete
+    $p free
+}
+
+bench -desc "tdom REC-xslt-19991116.xml / reuse parser" -iters 20 -pre {
+    set p [expat]
+    tdom $p enable
+} -body {
+    $p parsefile ../tests/data/REC-xslt-19991116.xml
+    set doc [tdom $p getdoc]
+} -ipost {
+    $doc delete
+    $p reset
+} -post {
+    $p free
+}
+
+if {![catch {package require tnc}]} {
+
+    proc extresolver {base systemId publicId} {
+        switch $publicId {
+            "-//W3C//DTD Specification V2.0//EN" {
+                set fd [open [file join [file dir [info script]] \
+                                  data/xmlspec-v20.dtd]]
+                set xmlspec [read $fd]
+                close $fd
+                return [list "string" "" $xmlspec]
+            }
+            default {
+                puts stderr "Unexpected systemId '$systemId'"
+                return ""
+            }
+        }
+    }
+    
+    bench -desc "tdom REC-xslt-19991116.xml / tnc " -iters 20 -ipre {
+        set p [expat -externalentitycommand extresolver \
+                   -paramentityparsing always]
+        tdom $p enable
+        tnc $p enable
+    } -body {
+        $p parsefile ../tests/data/REC-xslt-19991116.xml
+        set doc [tdom $p getdoc]
+    } -ipost {
+        $doc delete
+        $p free
+    }
+
+
+    bench -desc "tdom REC-xslt-19991116.xml / tnc / reuse parse" -iters 20 -pre {
+        set p [expat -externalentitycommand extresolver \
+                   -paramentityparsing always]
+        tdom $p enable
+        tnc $p enable
+    } -body {
+        $p parsefile ../tests/data/REC-xslt-19991116.xml
+        set doc [tdom $p getdoc]
+    } -ipost {
+        $doc delete
+        $p reset
+        $p configure -paramentityparsing always
+    } -post {
+        $p free
+    }
+}

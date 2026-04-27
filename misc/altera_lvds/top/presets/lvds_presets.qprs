@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ip><presets version="18.1">
+	<preset name="LVDS Default" kind="top" version="18.1" description="LVDS Default">
+		<parameter name="MODE" value="TX" />
+		<parameter name="NUM_CHANNELS" value="1" />
+		<parameter name="DATA_RATE" value="1000" />
+		<parameter name="J_FACTOR" value="10" />
+		<parameter name="ENABLE_MIGRATABLE_PORT_MAPPINGS" value="FALSE" />
+		<parameter name="USE_EXTERNAL_PLL" value="FALSE" />
+		<parameter name="INCLOCK_FREQUENCY" value="100" />
+		<parameter name="PLL_CORECLOCK_RESOURCE" value="Periphery" />
+		<parameter name="gui_enable_advanced_mode" value="0" />
+		<parameter name="TX_REGISTER_CLOCK" value="tx_coreclock" />
+		<parameter name="TX_EXPORT_CORECLOCK" value="FALSE" />
+		<parameter name="TX_USE_OUTCLOCK" value="TRUE" />
+		<parameter name="TX_OUTCLOCK_PHASE_SHIFT" value="0" />
+		<parameter name="TX_OUTCLOCK_DIVISION" value="2" />
+	</preset>
+</presets></ip>

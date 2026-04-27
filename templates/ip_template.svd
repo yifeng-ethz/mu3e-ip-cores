@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>Mu3e</vendor>
+  <vendorID>MU3E</vendorID>
+  <name>MU3E_IP_TEMPLATE</name>
+  <series>MU3E_FPGA_IP</series>
+  <version>0.0.0</version>
+  <description>Author-owned CMSIS-SVD template for a Mu3e FPGA IP CSR window. Keep this Tcl file as the editable source and regenerate the .svd XML after every register-map change.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>IP_TEMPLATE</name>
+      <description>Relative CSR window. The system integrator supplies the actual slave base address.</description>
+      <groupName>MU3E_IP_TEMPLATE</groupName>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x8</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>UID</name>
+          <description>Software-visible IP identifier. Replace this template text with the author-owned CSR contract.</description>
+          <addressOffset>0x0</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Replace with the real UID field description.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>META</name>
+          <description>Standard Mu3e metadata mux word. Replace page semantics and reset values with the real contract.</description>
+          <addressOffset>0x4</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>page_sel</name>
+              <description>0=VERSION, 1=DATE, 2=GIT, 3=INSTANCE_ID by convention.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>2</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, read as zero unless the IP defines otherwise.</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>30</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

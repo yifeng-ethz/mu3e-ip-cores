@@ -1,0 +1,115 @@
+# -*- tcl -*-
+#
+# This file contains a number of benchmarks for push (expat) and pull
+# (tdom::pullparser) parser.
+#
+# (c) 2018 Rolf Ade <rolf@pointsman.de>
+#
+
+
+# ### ### ### ######### ######### ######### ###########################
+## Setting up the environment ...
+
+package require tdom 
+
+# ### ### ### ######### ######### ######### ###########################
+## Benchmarks.
+
+
+proc loopPullE {} {
+    while {[set state [pullparser next]] ne "END_DOCUMENT"} {
+        switch $state {
+            "START_TAG" {
+                append pullstr [pullparser tag]
+                foreach {attname attvalue} [pullparser attributes] {
+                    append pullstr $attname $attvalue
+                }
+            }
+            "TEXT" {
+                append pullstr [pullparser text]
+            }
+            "END_TAG" {
+                append pullstr /[pullparser tag]
+            }
+        }
+    }
+    return $pullstr
+}
+
+expat pushparserCanonical \
+    -elementstartcommand elementstart \
+    -elementendcommand elementend \
+    -characterdatacommand cdata
+
+
+proc elementstart {name atts} {
+    global expatstr
+
+    append expatstr $name
+    foreach {attname attvalue} $atts {
+        append expatstr $attname $attvalue
+    }
+}
+
+proc elementend {name} {
+    global expatstr
+
+    append expatstr /$name
+}
+
+proc cdata {cdata} {
+    global expatstr
+
+    append expatstr $cdata
+}
+
+expat pushparserTricky \
+    -elementstartcommand elementstart \
+    -elementendcommand elementend \
+    -characterdatacommand cdata
+
+
+proc dopull {} {
+    while {[set state [pullparser next]] ne "END_DOCUMENT"} {
+        switch $state {
+            "START_TAG" {
+                append pullstr [pullparser tag]
+                foreach {attname attvalue} [pullparser attributes] {
+                    append pullstr $attname $attvalue
+                }
+            }
+            "TEXT" {
+                append pullstr [pullparser text]
+            }
+            "END_TAG" {
+                append pullstr /[pullparser tag]
+            }
+        }
+    }
+    return $pullstr
+}
+bench -desc "push/canonical mondial-europe.xml" -iters 5 -body {
+    set expatstr ""
+    pushparserCanonical parsefile ../tests/data/mondial-europe.xml
+    pushparserCanonical reset
+} -post {
+    pushparserCanonical free
+}
+
+bench -desc "push/tricky mondial-europe.xml" -iters 5 -body {
+    set expatstr ""
+    pushparserTricky parsefile ../tests/data/mondial-europe.xml
+    pushparserTricky reset
+} -post {
+    pushparserTricky free
+}
+
+tdom::pullparser pullparser
+
+bench -desc "pull mondial-europe.xml" -iters 5 -body {
+    pullparser inputfile ../tests/data/mondial-europe.xml
+    dopull
+    pullparser reset
+} -post {
+    pullparser delete
+}

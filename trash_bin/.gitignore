@@ -1,2 +1,6 @@
 *
 !.gitignore
+!README.md
+!top_level_20260427/
+top_level_20260427/*
+!top_level_20260427/RUN_SEQ_UPGRADE_PLAN.md

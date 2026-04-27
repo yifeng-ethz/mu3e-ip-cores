@@ -1,0 +1,34 @@
+initial
+assume (= [dut.$auto$async2sync.cc:253:execute$1159] #b00)
+assume (= [dut._witness_.anyinit_procdff_1134] false)
+assume (= [dut.outpipe._witness_.anyinit_procdff_1114] false)
+assume (= [dut.outpipe._witness_.anyinit_procdff_1119] #x0000000001)
+assume (= [f_cycle] #b000000)
+assume (= [f_past_valid] false)
+assume (= [f_reset_sr] #b11)
+assume (= [frame_in_progress] false)
+assume (= [out_count0] #b00)
+assume (= [out_count1] #b00)
+assume (= [out_count2] #b00)
+assume (= [out_stall_ctr] #x0)
+assume (= [src0_active] false)
+assume (= [src0_beat] false)
+assume (= [src0_started] false)
+assume (= [src1_active] false)
+assume (= [src1_beat] false)
+assume (= [src1_started] false)
+assume (= [src2_active] false)
+assume (= [src2_beat] false)
+assume (= [src2_started] false)
+
+state 0
+
+state 1
+
+state 2
+
+state 3
+
+state 4
+
+state 5

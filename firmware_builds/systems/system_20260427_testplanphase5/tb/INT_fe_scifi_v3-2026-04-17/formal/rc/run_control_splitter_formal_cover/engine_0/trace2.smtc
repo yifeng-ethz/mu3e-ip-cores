@@ -1,0 +1,11 @@
+initial
+assume (= [f_past_valid] false)
+assume (= [f_reset_sr] #b11)
+assume (= [prev_accept] false)
+assume (= [prev_accept_data] #b000000000)
+
+state 0
+
+state 1
+
+state 2

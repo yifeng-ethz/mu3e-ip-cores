@@ -1,0 +1,54 @@
+m255
+K4
+z2
+!s12c _opt
+Z0 !s99 nomlopt
+!s11f vlog 2026.1_1 2026.03, Mar  2 2026
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z1 d/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/work/tlm
+T_opt
+!i145 1
+!i144 0
+!s110 1777149513
+V4LFZHT;nn^45d1FUQj_l93
+04 18 4 work phase4_latency_tlm fast 0
+=1-ba5bb5d9daf9-69ed2648-e414e-a1c
+R0
+!s12f OEM100
+!s12b OEM100
+!s124 OEM100
+!s135 nogc
+o-quiet -auto_acc_if_foreign -work work
+Z2 tCvgOpt 0
+n@_opt
+OL;O;2026.1_1;84
+vphase4_latency_tlm
+2/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/tlm/phase4_latency_tlm.sv
+DXx6 sv_std 3 std 0 22 @5XbY]_OacJl=`ToSm<M^0
+!s110 1777149512
+!i10b 1
+!s100 NAgH0D8kUBPU05Z]8h0e92
+IB1A3l?YAgY7zLFJahH;cj3
+S1
+R1
+w1777149207
+8/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/tlm/phase4_latency_tlm.sv
+F/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/tlm/phase4_latency_tlm.sv
+!i122 0
+L0 1 232
+VDg1SIo80bB@j0V0VzS_@n1
+OL;L;2026.1_1;84
+r1
+!s85 0
+31
+!s108 1777149512.000000
+!s107 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/tlm/phase4_latency_tlm.sv|
+!s90 -sv|/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/phase4/tlm/phase4_latency_tlm.sv|
+!i113 0
+o-sv -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+R2

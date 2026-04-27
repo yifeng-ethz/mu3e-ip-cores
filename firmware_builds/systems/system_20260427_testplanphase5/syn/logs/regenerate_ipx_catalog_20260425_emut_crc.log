@@ -1,0 +1,7 @@
+Normalized /tmp/tmp.Amca4DORBh/components.ipx: kept 79 unique components, filtered 25 excluded catalog entries, removed 9 duplicate name/version entries, version-tagged 1 multi-version component families.
+Wrote /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx
+Wrote /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/components.ipx (wrapper -> mu3e_ip_cores.ipx)
+Catalog root : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores
+Catalog dir  : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds
+Component cnt: 79
+Path mode    : relative

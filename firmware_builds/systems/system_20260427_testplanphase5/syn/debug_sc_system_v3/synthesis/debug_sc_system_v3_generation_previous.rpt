@@ -1,0 +1,174 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading firmware_builds/debug_sc_system_v3.qsys
+Progress: Reading input file
+Progress: Adding charge_injection_pulser_0 [charge_injection_pulser 4.0.5]
+Progress: Parameterizing module charge_injection_pulser_0
+Progress: Adding clk125 [altera_clock_bridge 18.1]
+Progress: Parameterizing module clk125
+Progress: Adding clk156 [clock_source 18.1]
+Progress: Parameterizing module clk156
+Progress: Adding data_sc_merger [multiplexer 18.1]
+Progress: Parameterizing module data_sc_merger
+Progress: Adding firefly_xcvr_ctrl_0 [firefly_xcvr_ctrl 26.0.330]
+Warning: firefly_xcvr_ctrl_0: Used firefly_xcvr_ctrl 26.2.423 (instead of 26.0.330)
+Progress: Parameterizing module firefly_xcvr_ctrl_0
+Progress: Adding jtag_master [altera_jtag_avalon_master 18.1]
+Progress: Parameterizing module jtag_master
+Progress: Adding legacy_firefly_bridge [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module legacy_firefly_bridge
+Progress: Adding max10_link_clk_bridge [altera_clock_bridge 18.1]
+Progress: Parameterizing module max10_link_clk_bridge
+Progress: Adding max10_prog_avmm_0 [max10_prog_avmm 0.2.0]
+Progress: Parameterizing module max10_prog_avmm_0
+Progress: Adding mm_bridge [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module mm_bridge
+Progress: Adding upload_mm_bridge [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module upload_mm_bridge
+Progress: Adding sc_hub_cmd_pipe [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module sc_hub_cmd_pipe
+Progress: Adding mutrig_cfg_ctrl_0 [mutrig_cfg_ctrl 24.0.817]
+Warning: mutrig_cfg_ctrl_0: Used mutrig_cfg_ctrl 24.1.423 (instead of 24.0.817)
+Progress: Parameterizing module mutrig_cfg_ctrl_0
+Progress: Adding on_die_temp_sense [altera_temp_sense 18.1]
+Progress: Parameterizing module on_die_temp_sense
+Progress: Adding on_die_temp_sense_ctrl [altera_temp_sense_ctrl 1.1]
+Progress: Parameterizing module on_die_temp_sense_ctrl
+Progress: Adding onewire_master_0 [onewire_master 24.0.911.1]
+Warning: onewire_master_0: Used onewire_master 24.1.423 (instead of 24.0.911.1)
+Progress: Parameterizing module onewire_master_0
+Progress: Adding onewire_master_controller_0 [onewire_master_controller 24.0.918]
+Warning: onewire_master_controller_0: Used onewire_master_controller 24.1.423 (instead of 24.0.918)
+Progress: Parameterizing module onewire_master_controller_0
+Progress: Adding pll_156t40 [altera_pll 18.1]
+Progress: Parameterizing module pll_156t40
+Progress: Adding sc_hub [sc_hub_v2 26.6.9.414]
+Warning: sc_hub: Used sc_hub_v2 26.6.10.423 (instead of 26.6.9.414)
+Progress: Parameterizing module sc_hub
+Progress: Adding scratch_pad_ram [altera_avalon_onchip_memory2 18.1]
+Progress: Parameterizing module scratch_pad_ram
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: debug_sc_system_v3.mutrig_cfg_ctrl_0.sclr_counter_req: Associated reset sinks not declared
+Warning: debug_sc_system_v3.on_die_temp_sense_ctrl.clr: Associated reset sinks not declared
+Info: debug_sc_system_v3.pll_156t40: The legal reference clock frequency is 5.0 MHz..750.0 MHz
+Info: debug_sc_system_v3.pll_156t40: Able to implement PLL with user settings
+Info: debug_sc_system_v3.sc_hub: EXT_UP_PLD_DEPTH (512) < EFFECTIVE_EXT_OUTSTANDING x MAX_BURST  (6 x 256 = 1536). Credit manager will limit effective  read outstanding to ~2 for max-burst reads. This is  normal and validated by TLM CRED-03.
+Warning: debug_sc_system_v3.data_sc_merger.in1: data_sc_merger.in1 must be connected to an Avalon-ST source
+Warning: debug_sc_system_v3.pll_156t40: pll_156t40.locked must be exported, or connected to a matching conduit.
+Info: debug_sc_system_v3: Generating debug_sc_system_v3 "debug_sc_system_v3" for QUARTUS_SYNTH
+Info: Inserting clock-crossing logic between cmd_demux_001.src4 and cmd_mux_004.sink0
+Info: Inserting clock-crossing logic between cmd_demux_001.src6 and cmd_mux_006.sink0
+Info: Inserting clock-crossing logic between cmd_demux_002.src3 and cmd_mux_004.sink1
+Info: Inserting clock-crossing logic between cmd_demux_002.src5 and cmd_mux_006.sink1
+Info: Inserting clock-crossing logic between rsp_demux_004.src0 and rsp_mux_001.sink4
+Info: Inserting clock-crossing logic between rsp_demux_004.src1 and rsp_mux_002.sink3
+Info: Inserting clock-crossing logic between rsp_demux_006.src0 and rsp_mux_001.sink6
+Info: Inserting clock-crossing logic between rsp_demux_006.src1 and rsp_mux_002.sink5
+Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has address signal 18 bit wide, but the slave is 16 bit wide.
+Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has writeresponsevalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master sc_hub.hub and slave sc_hub_cmd_pipe.s0 because the master has burstcount signal 9 bit wide, but the slave is 1 bit wide.
+Warning: debug_sc_system_v3: "No matching role found for mutrig_cfg_ctrl_0:avmm_cnt:avm_cnt_flush (flush)"
+Info: charge_injection_pulser_0: "debug_sc_system_v3" instantiated charge_injection_pulser "charge_injection_pulser_0"
+Info: data_sc_merger: "debug_sc_system_v3" instantiated multiplexer "data_sc_merger"
+Info: firefly_xcvr_ctrl_0: "debug_sc_system_v3" instantiated firefly_xcvr_ctrl "firefly_xcvr_ctrl_0"
+Info: jtag_master: "debug_sc_system_v3" instantiated altera_jtag_avalon_master "jtag_master"
+Info: legacy_firefly_bridge: "debug_sc_system_v3" instantiated altera_avalon_mm_bridge "legacy_firefly_bridge"
+Info: max10_prog_avmm_0: "debug_sc_system_v3" instantiated max10_prog_avmm "max10_prog_avmm_0"
+Info: mutrig_cfg_ctrl_0: "debug_sc_system_v3" instantiated mutrig_cfg_ctrl "mutrig_cfg_ctrl_0"
+Info: on_die_temp_sense: Generating top-level entity debug_sc_system_v3_on_die_temp_sense.
+Info: on_die_temp_sense: "debug_sc_system_v3" instantiated altera_temp_sense "on_die_temp_sense"
+Info: on_die_temp_sense_ctrl: "debug_sc_system_v3" instantiated altera_temp_sense_ctrl "on_die_temp_sense_ctrl"
+Info: onewire_master_0: "debug_sc_system_v3" instantiated onewire_master "onewire_master_0"
+Info: onewire_master_controller_0: "debug_sc_system_v3" instantiated onewire_master_controller "onewire_master_controller_0"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/pseudo_clock_down_convertor.vhd
+Info: pll_156t40: "debug_sc_system_v3" instantiated altera_pll "pll_156t40"
+Info: sc_hub: "debug_sc_system_v3" instantiated sc_hub_v2 "sc_hub"
+Info: scratch_pad_ram: Starting RTL generation for module 'debug_sc_system_v3_scratch_pad_ram'
+Info: scratch_pad_ram:   Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=debug_sc_system_v3_scratch_pad_ram --dir=/tmp/alt0566_6789723771690581431.dir/0014_scratch_pad_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/tmp/alt0566_6789723771690581431.dir/0014_scratch_pad_ram_gen//debug_sc_system_v3_scratch_pad_ram_component_configuration.pl  --do_build_sim=0  ]
+Info: scratch_pad_ram: Done RTL generation for module 'debug_sc_system_v3_scratch_pad_ram'
+Info: scratch_pad_ram: "debug_sc_system_v3" instantiated altera_avalon_onchip_memory2 "scratch_pad_ram"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_0: "debug_sc_system_v3" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_2: "debug_sc_system_v3" instantiated altera_mm_interconnect "mm_interconnect_2"
+Info: irq_mapper: "debug_sc_system_v3" instantiated altera_irq_mapper "irq_mapper"
+Info: rst_controller: "debug_sc_system_v3" instantiated altera_reset_controller "rst_controller"
+Info: jtag_phy_embedded_in_jtag_master: "jtag_master" instantiated altera_jtag_dc_streaming "jtag_phy_embedded_in_jtag_master"
+Info: timing_adt: "jtag_master" instantiated timing_adapter "timing_adt"
+Info: fifo: "jtag_master" instantiated altera_avalon_sc_fifo "fifo"
+Info: b2p: "jtag_master" instantiated altera_avalon_st_bytes_to_packets "b2p"
+Info: p2b: "jtag_master" instantiated altera_avalon_st_packets_to_bytes "p2b"
+Info: transacto: "jtag_master" instantiated altera_avalon_packets_to_master "transacto"
+Info: b2p_adapter: "jtag_master" instantiated channel_adapter "b2p_adapter"
+Info: p2b_adapter: "jtag_master" instantiated channel_adapter "p2b_adapter"
+Info: mutrig_cfg_ctrl_0_avmm_cnt_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "mutrig_cfg_ctrl_0_avmm_cnt_translator"
+Info: mm_bridge_s0_translator: "mm_interconnect_0" instantiated altera_merlin_slave_translator "mm_bridge_s0_translator"
+Info: mutrig_cfg_ctrl_0_avmm_cnt_agent: "mm_interconnect_0" instantiated altera_merlin_master_agent "mutrig_cfg_ctrl_0_avmm_cnt_agent"
+Info: mm_bridge_s0_agent: "mm_interconnect_0" instantiated altera_merlin_slave_agent "mm_bridge_s0_agent"
+Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_0" instantiated altera_merlin_router "router_001"
+Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
+Info: router_003: "mm_interconnect_0" instantiated altera_merlin_router "router_003"
+Info: router_004: "mm_interconnect_0" instantiated altera_merlin_router "router_004"
+Info: router_005: "mm_interconnect_0" instantiated altera_merlin_router "router_005"
+Info: router_006: "mm_interconnect_0" instantiated altera_merlin_router "router_006"
+Info: router_014: "mm_interconnect_0" instantiated altera_merlin_router "router_014"
+Info: mutrig_cfg_ctrl_0_avmm_cnt_limiter: "mm_interconnect_0" instantiated altera_merlin_traffic_limiter "mutrig_cfg_ctrl_0_avmm_cnt_limiter"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: mm_bridge_s0_burst_adapter: "mm_interconnect_0" instantiated altera_merlin_burst_adapter "mm_bridge_s0_burst_adapter"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_001"
+Info: cmd_demux_002: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_002"
+Info: cmd_demux_003: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_003"
+Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: cmd_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_001"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: cmd_mux_010: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_010"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_001"
+Info: rsp_demux_004: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_004"
+Info: rsp_demux_006: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_006"
+Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_001"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_002"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux_003: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_003"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: crosser: "mm_interconnect_0" instantiated altera_avalon_st_handshake_clock_crosser "crosser"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_st_clock_crosser.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: limiter_pipeline: "mm_interconnect_0" instantiated altera_avalon_st_pipeline_stage "limiter_pipeline"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: router: "mm_interconnect_2" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_2" instantiated altera_merlin_router "router_001"
+Info: cmd_demux: "mm_interconnect_2" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_mux: "mm_interconnect_2" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: rsp_mux: "mm_interconnect_2" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/debug_sc_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
+Info: debug_sc_system_v3: Done "debug_sc_system_v3" with 64 modules, 119 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

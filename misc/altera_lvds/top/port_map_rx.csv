@@ -1,0 +1,9 @@
+INTERFACE,OLD_PORT_NAME,NEW_PORT_NAME
+rx_coreclock,rx_coreclock,rx_outclock
+inclock,inclock,rx_inclock
+rx_bitslip_ctrl,rx_bitslip_ctrl,rx_channel_data_align
+rx_bitslip_max,rx_bitslip_max,rx_cda_max
+rx_bitslip_reset,rx_bitslip_reset,rx_cda_reset
+rx_dpa_reset,rx_dpa_reset,rx_reset
+rx_dpa_hold,rx_dpa_hold,rx_dpll_hold
+pll_locked,pll_locked,rx_locked

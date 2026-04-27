@@ -1,0 +1,47 @@
+# SignalTap Node Finder Report
+
+- Generated: 2026-04-24 15:23:10 UTC
+- Project dir: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_projects/fe_scifi_feb_v3`
+- STP file: `/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/board_test/signaltap/phase3_runctl_ingress_lvds.stp`
+- Observable type: `post_synthesis`
+- Probes: `49`
+- Found: `13`
+- Missing: `36`
+
+## Missing Probes
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|lvdspll_reset`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[4]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[5]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[6]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[7]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_data[8]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_error[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_error[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|synclink_error[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[4]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[5]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[6]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[7]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_data[8]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_error[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_error[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host:runctl_mgmt_host_0|asi_synclink_error[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_valid`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_ready`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[4]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[5]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[6]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[7]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_upload_subsystem:upload_subsystem|runctl_mgmt_host_data[8]`

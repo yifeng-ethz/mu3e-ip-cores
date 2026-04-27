@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolkit
+        name="debug_sc_toolkit"
+        displayName="Debug Slow Control Plane of SciFi (Beta)"
+        addMenuItem="true"
+        >
+		<file>debug_sc_toolkit.tcl</file>
+		<description>The toolkit allows the connection to avmm-to-jtag and other sld modules inside the debug_sc_system.</description>
+</toolkit>

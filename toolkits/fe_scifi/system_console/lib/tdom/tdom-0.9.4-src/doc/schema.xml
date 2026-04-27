@@ -1,0 +1,1630 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manpage id="schema" cat="schema" title="schema">
+  <namesection>
+    <name>tdom::schema</name>
+    <desc>Creates a schema validation command</desc>
+  </namesection>
+
+  <synopsis>
+    <syntax>package require tdom
+
+<cmd>tdom::schema</cmd> <m>?create?</m> <m>cmdName</m>
+    </syntax>
+  </synopsis>
+
+  <section>
+    <title>DESCRIPTION </title>    
+    
+    <p>Every call of this command creates a new validation command. A
+    validation command has methods to define a schema and is able
+    to validate XML data or to post-validate a tDOM DOM tree (and to
+    some degree other kind of hierarchical data) against this
+    schema.</p>
+
+    <p>Also, a validation command may be used as argument to the
+    <m>-validateCmd</m> option of the <m>dom parse</m> and the
+    <m>expat</m> commands to enable validation additionally to what
+    they do otherwise.</p>
+
+    <p>The methods of created commands are:</p>
+
+    <commandlist>
+      <commanddef>
+          <command><method>prefixns</method> <m>?prefixUriList?</m></command>
+          <desc>This method controls prefix (or abbreviation) to
+          namespace URI mapping. Wherever a namespace argument is
+          expected in the schema command methods the
+          &quot;prefix&quot; could be used instead of the namespace
+          URI. If the list maps the same prefix to different namespace
+          URIs, the first one wins. If there is no such prefix, the
+          namespace argument is used literally as namespace URI. If
+          the method is called without argument, it returns the
+          current prefixUriList. If the method is called with the
+          empty string, any namespace URI arguments are used
+          literally. This is the default.
+          </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>defelement</method> <m>name</m> <m>?namespace?</m> <m>&lt;definition script></m></command>
+        <desc>This method defines the element <m>name</m> (optional in
+        the namespace <m>namespace</m>) in the schema. The
+        <m>definition script</m> is evaluated and defines the content
+        model of the element. If the <m>namespace</m> argument is
+        given, any <m>element</m> or <m>ref</m> references in the
+        definition script not wrapped inside a <m>namespace</m>
+        command are resolved in that namespace. If there is already a
+        element definition for the name/namespace combination, the
+        command raises error.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>defelementtype</method> <m>typename</m> <m>?namespace?</m> <m>&lt;definition script></m></command>
+        <desc>This method defines the element type <m>typename</m>
+        (optional in the namespace <m>namespace</m>) in the schema. If
+        the element type is used in a definition script with the
+        schema command element, the validation engine expects an
+        element content according to content model <m>definition
+        script</m>. Defining (and using) element types seems only
+        sensible if you really have elements with the same name and
+        namespace but different content models. The <m>definition
+        script</m> is evaluated and defines the content model of the
+        element it is assgned to. If the <m>namespace</m> argument is
+        given, any <m>element</m> or <m>ref</m> references in the
+        definition script not wrapped inside a <m>namespace</m>
+        command are resolved in that namespace. If there is already an
+        elementtype definition for the typename/namespace combination,
+        the command raises error. The document element of any XML to
+        validate cannot be a <m>defelementtype</m> defined
+        element.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>defpattern</method> <m>name</m> <m>?namespace?</m> <m>&lt;definition script></m></command>
+        <desc>This method defines a (maybe complex) content particle
+        with the <m>name</m> (optional in the namespace
+        <m>namespace</m>) in the schema, to be used in other
+        definition scripts with the definition command <m>ref</m>. The
+        <m>definition script</m> is evaluated and defines the content
+        model of the content particle. If the <m>namespace</m>
+        argument is given, any <m>element</m> or <m>ref</m> references
+        in the definition script not wrapped inside a <m>namespace</m>
+        command are resolved in that namespace. If there is already a
+        pattern definition for the name/namespace combination, the
+        command raises error.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>deftexttype</method> <m>name</m> <m>&lt;constraint script></m></command>
+        <desc>This method defines a bundle of text constraints that
+        can be referred to by <m>name</m> while defining constraints
+        on text element or attribute values. If there is already a
+        text type definition with this name, the command raises error.
+        A text type may be referred before it is defined in the
+        schema. If a referred text type isn't defined anywhere in the
+        schema then any text will match this type during
+        validation.</desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>start</method> <m>documentElement</m> <m>?namespace?</m></command>
+        <desc>This method defines the name and namespace of the root
+        element of a tree to validate. If this method is used, the
+        root element must match for validity. If <m>start</m> is not
+        used, any element defined by <m>defelement</m> may be the root
+        of a valid document. The <m>start</m> method may be used
+        several times with varying arguments during the lifetime of a
+        validation command. If the command is called with just the
+        empty string (and no namespace argument), the validation
+        constraint for the root element is removed and any defined
+        element will be valid as root of a tree to validate.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>define</method> <m>&lt;definition script></m></command>
+        <desc>This method defines several elements or patterns or a
+        whole schema with one call, by evaluating the <m>definition
+        script></m>. All schema command methods so far
+        (<m>prefixns</m>, <m>defelement</m>, <m>defelementtype</m>,
+        <m>defpattern</m>, <m>deftexttype</m> and <m>start</m>) are
+        allowed top level in the <m>definition script</m>. The
+        <m>define</m> method itself isn't allowed recursively.</desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>event</method> <m>(start|end|text)</m> <m>?event specific data?</m></command>
+        <desc>This method enables validation of hierarchical data against
+        the content constraints of the validation command. 
+
+        <optlist>
+          <optdef>
+            <optname>start</optname>
+            <optarg>name ?attributes? ?namespace? </optarg>
+            <desc>Checks if the current validation state allows the
+            element <m>name</m> in the <m>namespace</m> to start here.
+            It raises error if not.</desc>
+          </optdef>
+
+          <optdef>
+            <optname>end</optname>
+            <desc>Checks if the current innermost open element may end
+            there in the current state without violation of validation
+            constraints. It raises error if not.</desc>
+          </optdef>
+          
+          <optdef>
+            <optname>text</optname>
+            <optarg>text</optarg>
+            <desc>Checks if the current validation state allows the
+            given text content. It raises error if not.</desc>
+          </optdef>
+        </optlist>
+        </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>validate</method> ?<m>options</m>? <m>&lt;XML string></m> <m>?objVar?</m></command>
+        <desc><p>Returns true if the <m>&lt;XML string></m> is valid, or
+        false, otherwise. If validation has failed and the optional
+        <m>objVar</m> argument is given, the variable with that
+        name is set to a validation error message. If the XML string
+        is valid and the optional <m>objVar</m> argument is given,
+        the variable will be untouched.</p>
+
+        <p>The valid options are:</p>
+        <optlist>
+            <optdef>
+                <optname>-baseurl</optname>
+                <optarg>&lt;baseURI&gt;</optarg>
+                <desc>If <m>-baseurl &lt;baseURI&gt;</m> is specified,
+                the baseURI is used as the base URI of the document.
+                External entities references in the document are
+                resolved relative to this base URI. This base URI is
+                also stored within the DOM tree.</desc>
+            </optdef>
+            <optdef>
+                <optname>-externalentitycommand</optname>
+                <optarg>&lt;script&gt;</optarg>
+                <desc>If <m>-externalentitycommand &lt;script&gt;</m>
+                is specified, the specified Tcl script is called to
+                resolve any external entities of the document. The
+                default is "::tdom::extRefHandler", which is a simple
+                file URL resolver defined by the script part of the
+                package. Setting the option value to the empty string
+                disables resolving of external entities. The actual
+                evaluated command consists of this option followed by
+                three arguments: the base uri, the system identifier
+                of the entity and the public identifier of the entity.
+                The base uri and the public identifier may be the
+                empty list. The script has to return a Tcl list
+                consisting of three elements. The first element of
+                this list signals how the external entity is returned
+                to the processor. Currently the two allowed types are
+                "string" and "channel". The second element of the list
+                has to be the (absolute) base URI of the external
+                entity to be parsed. The third element of the list are
+                data, either the already read data out of the external
+                entity as string in the case of type "string", or the
+                name of a Tcl channel, in the case of type "channel".
+                Note that if the script returns a Tcl channel, it will
+                not be closed by the processor. It must be closed
+                separately if it is no longer needed.</desc>
+            </optdef>
+
+            <optdef>
+                <optname>-paramentityparsing</optname>
+                <optarg>&lt;always|never|notstandalone&gt;</optarg>
+                <desc>The <m>-paramentityparsing</m> option controls,
+                if the parser tries to resolve the external entities
+                (including the external DTD subset) of the document
+                while building the DOM tree.
+                <m>-paramentityparsing</m> requires an argument, which
+                must be either "always", "never", or "notstandalone".
+                The value "always" means that the parser tries to
+                resolves (recursively) all external entities of the
+                XML source. This is the default in case
+                <m>-paramentityparsing</m> is omitted. The value
+                "never" means that only the given XML source is
+                parsed and no external entity (including the external
+                subset) will be resolved and parsed. The value
+                "notstandalone" means, that all external entities will
+                be resolved and parsed, with the exception of
+                documents, which explicitly states standalone="yes" in
+                their XML declaration.</desc>
+            </optdef>
+
+            <optdef>
+                <optname>-useForeignDTD</optname>
+                <optarg>&lt;boolean&gt;</optarg>
+                <desc>If &lt;boolean&gt; is true and the document does
+                not have an external subset, the parser will call the
+                -externalentitycommand script with empty values for
+                the systemId and publicID arguments. Please note that
+                if the document also doesn't have an internal subset,
+                the -startdoctypedeclcommand and
+                -enddoctypedeclcommand scripts, if set, are not
+                called.</desc>
+            </optdef>
+            
+        </optlist>
+        </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>validatefile</method> ?<m>options</m>? <m>filename</m> <m>?objVar?</m></command>
+        <desc>Returns true if the content of <m>filename</m> is valid,
+        or false, otherwise. The given file is fed as binary stream to
+        expat, therefore, only US-ASCII, ISO-8859-1, UTF-8 or UTF-16
+        encoded data will work with this method. If validation has
+        failed and the optional <m>objVar</m> argument is given, the
+        variable with that name is set to a validation error message.
+        If the XML data is valid and the optional <m>objVar</m>
+        argument is given, the variable will be untouched. The allowed
+        options and their meaning are the same as for the
+        <m>validate</m> method; see there for a description.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>validatechannel</method> ?<m>options</m>? <m>channel</m> <m>?objVar?</m></command>
+        <desc>Returns true if the content read from the Tcl channel
+        <m>channel</m> is valid, or false, otherwise. Since data read
+        out of a Tcl channel is UTF-8 encoded, any misleading encoding
+        declaration at the beginning of the data will lead to errors.
+        If the validation fails and the optional <m>objVar</m>
+        argument is given, the variable with that name is set to a
+        validation error message. If the XML data is valid and the
+        optional <m>objVar</m> argument is given, the variable will be
+        untouched. The allowed options and their meaning are the same
+        as for the <m>validate</m> method; see there for a
+        description.</desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>domvalidate</method> <m>domNode</m> <m>?objVar?</m></command>
+        <desc>Returns true if the first argument is a valid tree, or
+        false, otherwise. If validation has failed and the optional
+        <m>objVar</m> argument is given, the variable with that name
+        is set to a validation error message. If the dom tree is valid
+        and the optional <m>objVar</m> argument is given, the variable
+        with that name is set to the empty string. </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>reportcmd</method> <m>?cmd?</m></command>
+        <desc>This method expects the name of a Tcl command to be
+        called in case of validation error. The command will be
+        called with two arguments appended: the schema command which
+        raises the validation error, and a validation error code.
+
+        <p>The possible error codes are:</p>
+        <dl>
+            <dt>MISSING_ELEMENT</dt><dd></dd>
+            <dt>MISSING_TEXT</dt><dd></dd>
+            <dt>UNEXPECTED_ELEMENT</dt><dd></dd>
+            <dt>UNEXPECTED_ROOT_ELEMENT</dt><dd></dd>
+            <dt>UNEXPECTED_TEXT</dt><dd></dd>
+            <dt>UNKNOWN_ROOT_ELEMENT</dt><dd></dd>
+            <dt>UNKNOWN_ATTRIBUTE</dt><dd></dd>
+            <dt>MISSING_ATTRIBUTE</dt><dd></dd>
+            <dt>INVALID_ATTRIBUTE_VALUE</dt><dd></dd>
+            <dt>DOM_KEYCONSTRAINT</dt><dd></dd>
+            <dt>DOM_XPATH_BOOLEAN</dt><dd></dd>
+            <dt>INVALID_KEYREF</dt><dd></dd>
+            <dt>INVALID_VALUE</dt><dd></dd>
+            <dt>UNKNOWN_GLOBAL_ID</dt><dd></dd>
+            <dt>UNKNOWN_ID</dt><dd></dd>
+        </dl>
+        <p> For more detailed information see section <ref
+        refid="recovering">Recovering</ref>.</p>
+        </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>delete</method></command>
+        <desc>This method deletes the validation command.</desc>
+      </commanddef>
+
+      <commanddef>
+          <command><method>info</method> <m>?args?</m></command>
+          <desc>This method bundles methods to query the state of and
+          details about the schema command.
+          <optlist>
+              <optdef>
+                  <optname>validationstate</optname>
+                  <desc>This method returns the state of the validation command
+                  with respect to validation state. The possible return values
+                  and their meanings are:
+                  <dl>
+                      <dt>READY</dt><dd>The validation command is ready to start
+                      validation</dd>
+                      <dt>VALIDATING</dt><dd>The validation command is in the
+                      process of validating input.</dd>
+                      <dt>FINISHED</dt><dd>The validation has finished, no further
+                      events are expected.</dd>
+                  </dl>
+                  </desc>
+              </optdef>
+              <optdef>
+                  <optname>vstate</optname>
+                  <desc>This method is a shorter alias for validationstate; see there.</desc>
+              </optdef>
+              <optdef>
+                  <optname>line</optname>
+                  <desc>If the schema command is currently validating,
+                  this method returns the line part of the parsing
+                  position information, and the empty string in all
+                  other cases. If the schema command is currently
+                  post-validating a DOM tree, there may be no position
+                  information stored at some or all nodes. The
+                  empty string is returned in these cases.</desc>
+              </optdef>
+              <optdef>
+                  <optname>column</optname>
+                  <desc>If the schema command is currently validating
+                  this method returns the column part of the parsing
+                  position information, and the empty string in all
+                  other cases. If the schema command is currently
+                  post-validating a DOM tree, there may be no position
+                  information stored at some or all nodes. The
+                  empty string is returned in these cases.</desc>
+              </optdef>
+              <optdef>
+                  <optname>byteIndex</optname>
+                  <desc>If the schema command is currently validating
+                  this method returns the byte position of the parsing
+                  position information, and the empty string in all
+                  other cases. If the schema command is currently
+                  post-validating a DOM tree, there may be no position
+                  information stored at some or all nodes. The
+                  empty string is returned in these cases.</desc>
+              </optdef>
+              <optdef>
+                  <optname>domNode</optname>
+                  <desc>If the schema command isn't currently
+                  post-validating a DOM tree this method returns the
+                  empty string. Otherwise, if the schema command waits
+                  for the reportcmd script to finish while recovering
+                  from a validation error it returns the node on which
+                  the validation engine is currently looking at in
+                  case the node is an ELEMENT_NODE or, if not, its
+                  parent node. It is recommended that you do not use
+                  this method. Or at least leave the DOM tree alone,
+                  use it read-only.</desc>
+              </optdef>
+              <optdef>
+                  <optname>nrForwardDefinitions</optname>
+                  <desc>Returns how many elements, element types and
+                  ref patterns are referenced that aren't defined so
+                  far (summed together).</desc>
+              </optdef>
+              <optdef>
+                  <optname>definedElements</optname>
+                  <desc>Returns in no particular order the defined
+                  elements in the grammar as list. If an element is
+                  namespaced, its list entry will be itself a list with
+                  two elements, with the name as first and the
+                  namespace as second element.</desc>
+              </optdef>
+              <optdef>
+                  <optname>definedElementtypes</optname>
+                  <desc>Returns in no particular order the defined
+                  element types in the grammar as list. If an element
+                  type is namespaced, its list entry will be itself a
+                  list with two elements, with the name as first and
+                  the namespace as second element.</desc>
+              </optdef>
+              <optdef>
+                  <optname>definedPatterns</optname>
+                  <desc>Returns in no particular order the defined
+                  named pattern in the grammar as list. If a named
+                  pattern is namespaced, its list entry will be itself
+                  a list with two elements, with the name as first and
+                  the namespace as second element.</desc>
+              </optdef>
+              <optdef>
+                  <optname>expected</optname>
+                  <desc>Returns in no particular order all possible
+                  next events (since the last successful event match,
+                  if there was one) as a list. If an element is
+                  namespaced its list entry will be itself a list with
+                  two elements, with the name as first and the
+                  namespace as second element. If text is a possible
+                  next event, the list entry will be a two elements
+                  list, with #text as first element and the empty
+                  string as second. If an any element constraint is
+                  possible. the list entry will be a two elements list,
+                  with &lt;any> as first element and the empty string
+                  as second. If an any element in a certain namespace
+                  constraint is possible, the list entry will be a two
+                  elements list, with &lt;any> as first element and
+                  the namespace as second. If element end is a
+                  possible event, the list entry will be a two elements
+                  list with &lt;elementend> as first element and the
+                  empty string as second element.</desc>
+              </optdef>
+              <optdef>
+                  <optname>definition name ?namespace?</optname>
+                  <desc>Returns the code that defines the given
+                  element. The command raises error if there is no
+                  definition of that element.
+                  </desc>
+              </optdef>
+              <optdef>
+                  <optname>typedefinition name ?namespace?</optname>
+                  <desc>Returns the code that defines the given
+                  element type definition. The command raises error if
+                  there is no definition of that element.
+                  </desc>
+              </optdef>
+              <optdef>
+                  <optname>patterndefinition name ?namespace?</optname>
+                  <desc>Returns the code that defines the given
+                  pattern definition. The command raises error if
+                  there is no definition of a pattern with that name
+                  and, if given, namespace.
+                  </desc>
+              </optdef>
+              <optdef>
+                  <optname>vaction ?name|namespace|text?</optname>
+                  <desc><p>This method returns useful information only if
+                  the schema command waits for the reportcmd script to
+                  finish while recovering from a validation error.
+                  Otherwise it returns NONE.</p>
+                  <p>If the command is called without the optional
+                  argument the possible return values and their
+                  meanings are:</p>
+                  <dl>
+                      <dt>NONE</dt><dd>The schema command currently
+                      does not recover from a validation event.</dd>
+                      <dt>MATCH_ELEMENT_START</dt><dd>Element start event, which includes looking for missing or unknown attributes.</dd>
+                      <dt>MATCH_ELEMENT_END</dt><dd>Element end event.</dd>
+                      <dt>MATCH_TEXT</dt><dd>Validating text between tags.</dd>
+                      <dt>MATCH_ATTRIBUTE_TEXT</dt><dd>Attribute text value constraint check</dd>
+                      <dt>MATCH_GLOBAL</dt><dd>Checking global IDs</dd>
+                      <dt>MATCH_DOM_KEYCONSTRAINT</dt><dd>Checking domunique constraint</dd>
+                      <dt>MATCH_DOM_XPATH_BOOLEAN</dt><dd>Checking domxpathboolean constant</dd>
+                  </dl>
+                  <p>If called with one of the possible optional
+                  arguments, the command returns detail information
+                  depending on current action.</p>
+                  <dl>
+                      <dt>name</dt><dd>Returns the name of the element
+                      that has to match in case of
+                      MATCH_ELEMENT_START. Returns the name of the
+                      closed element in case of MATCH_ELEMENT_END.
+                      Returns the name of the attribute in case of
+                      MATCH_ATTRIBUTE_TEXT. Returns the name of the
+                      parent element in case of MATCH_TEXT.</dd>
+                      
+                      <dt>namespace</dt><dd>Returns the namespace of
+                      the element that has to match in case of
+                      MATCH_ELEMENT_START. Returns the namespace of the
+                      closed element in case of MATCH_ELEMENT_END.
+                      Returns the namespace of the attribute in case
+                      of MATCH_ATTRIBUTE_TEXT. Returns the namespace of
+                      the parent element in case of MATCH_TEXT.</dd>
+                      
+                      <dt>text</dt><dd>Returns the text to match in
+                      case of MATCH_TEXT. Returns the value of the
+                      attribute in case of MATCH_ATTRIBUTE_TEXT.</dd>
+                  </dl>
+                  </desc>
+              </optdef>
+              <optdef>
+                  <optname>stack top|inside|associated</optname>
+                  <desc>In Tcl scripts evaluated by validation this method
+                  provides information about the current validation stack.
+                  Called outside this context the method returns the empty
+                  string.
+                  <optlist>
+                      <optdef>
+                          <optname>top</optname>
+                          <desc>Returns the element whose content is currently
+                          checked (the open element tag at this moment).
+                          </desc>
+                      </optdef>
+                      
+                      <optdef>
+                          <optname>inside</optname>
+                          <desc>Returns all currently open elements as a list.</desc>
+                      </optdef>
+                      
+                      <optdef>
+                          <optname>associated</optname>
+                          <desc>Returns the data associated with the
+                          current top most stack content particle or
+                          the empty string if there isn't any.
+                          </desc>
+                      </optdef>
+                  </optlist>
+                  </desc>
+              </optdef>
+          </optlist>
+          </desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>reset</method></command>
+        <desc>This method resets the validation command into state
+        READY (while preserving the defined grammar).</desc>
+      </commanddef>
+
+    </commandlist>
+  </section>
+
+  <section>
+    <title>Schema definition scripts</title>
+
+    <p>Schema definition scripts are ordinary Tcl scripts evaluated in
+    the namespace tdom::schema. The schema definition commands listed
+    below in this Tcl namespace allow the definition of a wide variety
+    of document structures. Every schema definition command
+    establishes a validation constraint on the content which has to
+    match or must be optional to qualify the content as valid. It is a
+    validation error if there is additional (not matched) content.
+    White-space-only text (in the XML sense of white space) between
+    any different tags is ignored, with the exception of text only
+    elements (for which even white-space-only text will be considered
+    as significant content).</p>
+
+    <p>The schema definition commands are:</p>
+
+    <commandlist>
+      <commanddef>
+        <command><method>element</method> <m>name</m> <m>?quant?</m> <m>(?&lt;definition script>|"type" typename)?</m></command>
+        <desc><p>If neither the optional argument <m>definition
+        script</m> nor the string "type" and a <m>typename</m> is given this
+        command refers to the element defined with <m>defelement</m>
+        with the name <m>name</m> in the current context namespace.</p>
+        <p>If the string "type" and a <m>typename</m> is given then
+        the content of the element is described by the content model
+        defined with <m>defelementtype</m> with the name
+        <m>typename</m> in the current context namespace.</p>
+        <p>If the <m>defelement script</m> argument is given, the
+        validation constraint expects an element with the name
+        <m>name</m> in the current namespace with content "locally"
+        defined by the <m>definition script</m>. Forward references to
+        so far not defined elements or patterns or other local
+        definitions of the same name inside the <m>definition
+        script</m> are allowed. If a forward referenced element is not
+        defined until validation, only an empty element with name
+        <m>name</m> and namespace <m>namespace</m> and no attributes
+        matches.</p></desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>ref</method> <m>name</m> <m>?quant?</m></command>
+        <desc>This command refers to the content particle defined with
+        <m>defpattern</m> with the name <m>name</m> in the current
+        context namespace. Forward references to a so far not defined
+        pattern and recursive references are allowed. If a forward
+        referenced pattern is not defined until validation no content
+        whatsoever is expected ("empty match").</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>group</method> <m>?quant?</m> <m>&lt;definition script></m></command>
+        <desc>This method group a sequence of content particles
+        defined by the <m>definition script></m>, which have to match
+        in this sequence order.</desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>choice</method> <m>?quant?</m> <m>&lt;definition script></m></command>
+        <desc>This schema constraint matches if one of the top level
+        content particles defined by the <m>definition script></m>
+        matches. If one of this top level content particle is optional
+        this constraint matches the "empty match".
+        </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>interleave</method> <m>?quant?</m> <m>&lt;definition script></m></command>
+        <desc>This schema constraint matches after every of the required
+        top level content particles defined by the <m>definition
+        script></m> have matched (and, optional, some or all other) in
+        any arbitrary order.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>mixed</method> <m>?quant?</m> <m>&lt;definition script></m></command>
+        <desc>This schema constraint matches for any text (including the
+        empty one) and every top level content particle defined by the
+        <m>definition script></m> with default quantifier *.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>text</method> <m>?&lt;constraint script>|"type" typename?</m></command>
+        <desc>Without the optional constraint script this validation
+        constraint matches every string (including the empty one).
+        With <m>constraint script</m> or with a given text type
+        argument a text matching this script or the text type is
+        expected. </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>any</method> ?<m>options</m>? <m>?&lt;namespace list>?</m> <m>?quant?</m></command>
+        <desc>Without arguments the any command matches every element.
+        If the <m>&lt;namespace list></m> argument is given, this
+        matches any element in a namespace out of that list. The empty
+        string means elements with no namespace. If additionally the
+        option <m>-not</m> is given then this maches every element
+        with a namespace not in the list. The only other recognized
+        option is <m>--</m> which signals the end of any options.
+        Please note that in case of no <m>namespace</m> argument is
+        given that means that the quantifier * and + will eat up any
+        elements until the enclosing element ends. If you really have
+        a namespace that looks like a valid tDOM schema quantifier you
+        will have to spell out always both arguments.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>attribute</method> <m>name</m> <m>?quant?</m> <m>(?&lt;constraint script>|"type" typename?)</m></command>
+        <desc>The attribute command defines an attribute (in no
+        namespace) to the enclosing element. The first definition of
+        <m>name</m> inside an element definition wins; later
+        definitions of the same name are silently ignored. After the
+        <m>name</m> argument there may be one of the quantifiers ? or
+        !. If there is, it will be used. Otherwise the attribute will
+        be required (must be present in the XML source). If there is
+        one argument more this argument is evaluated as constraint
+        script, defining the value constraints of the attribute.
+        Otherwise, if there are two more arguments and the first of
+        them is the bare-word "type" the following argument is used as
+        a text type name. This command is only allowed at top level in
+        the definition script of a defelement/element script.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>nsattribute</method> <m>name</m> <m>namespace</m> <m>?quant?</m> <m>(?&lt;constraint script>|"type" typename?)</m></command>
+        <desc>This command does the same as the command
+        <m>attribute</m>, for the attribute <m>name</m> in the
+        namespace <m>namespace</m>.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>namespace</method> <m>URI</m> <m>&lt;definition script></m></command>
+        <desc>Evaluates the <m>definition script</m> with context
+        namespace <m>URI</m>. Every element, element type or ref
+        command name will be looked up in the namespace <m>URI</m>,
+        and local defined elements will be in that namespace. An
+        empty string as <m>URI</m> means no namespace.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>tcl</method> <m>tclcmd</m> <m>?arg arg ...?</m></command>
+        <desc>Evaluates the Tcl script <m>tclcmd arg arg ... </m>.
+        This validation command is only allowed in strict sequential
+        context (not in choice, mixed and interleave). If the return
+        code is something else than TCL_OK, this is an error (which
+        is not caught and reported by reportcmd).</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>self</method></command>
+        <desc>Returns the schema command.</desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>associate</method> <m>data</m></command>
+        <desc>This command is only allowed top-level inside definition
+        scripts of the element, elementtype, pattern or interleave
+        content particles. Associates the <m>data</m> given as argument
+        with the currently defined content particle and may be
+        requested in scripts evaluated while validating the content of
+        that particle with the schema command method call <m>info
+        stack associated</m>.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>domunique</method> <m>selector</m> <m>fieldlist</m> <m>?name?</m> <m>?"IGNORE_EMPTY_FIELD_SET"|("EMPTY_FIELD_SET_VALUE" emptyFieldSetValue)?</m></command>
+        <desc>If not postvalidating a DOM tree with <m>domvalidate</m>
+        this constraint always matches. If postvalidating this
+        constraint resembles the xsd key/keyref mechanism. The
+        <m>selector</m> argument may be any valid XPath expression
+        (without the xsd limits). Several <m>domunique</m> commands
+        within one element definition are allowed. They are checked in
+        definition order. The argument name is available in the
+        recovering script per <m>info vaction name</m>. If the
+        <m>fieldlist</m> does not select something for a node of the
+        result set of the <m>selector</m> the key value will be the
+        empty string by default. If the arguments
+        <m>EMPTY_FIELD_SET_VALUE &lt;value></m> are given an empty
+        node set will have the key value <m>value</m>. If instead the
+        flag <m>IGNORE_EMPTY_FIELD_SET</m> flag is given an empty
+        node set result will not have any key value.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>domxpathboolean</method> <m>XPath_expr</m> <m>?name?</m></command>
+        <desc><p>If not postvalidating a DOM tree with
+        <m>domvalidate</m> this constraint always matches. If
+        postvalidating the <m>XPath_expr</m> argument is evaluated
+        (with the node matching the schema parent of the
+        <m>domxpathboolean</m> command as context node). The
+        constraint maches if the result of this XPath expression,
+        converted to boolean by XPath rules, is true. Several
+        <m>domxpathboolean</m> commands within one element definition
+        are allowed. They are checked in definition order.</p>
+
+        <p>This enables checks depending on more than one element. Consider</p>
+
+        <example>
+tdom::schema s
+s define {
+    defelement doc {
+        element a ! text
+        element b ! text
+        element c ! text
+        domxpathboolean "a * b * c &gt;= 20000" volume
+        domxpathboolean "a &gt; b and b &gt; c" sequence
+    }
+}
+        </example>
+        </desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>jsontype</method> <m>JSON structure type</m></command>
+        <desc><p>If not postvalidating a DOM tree with
+        <m>domvalidate</m> this constraint always matches. If
+        postvalidating the constraint matches if the enclosing element
+        has the JSON type given as argument to the structure
+        constraint. The possible JSON structure types are <m>NONE</m>,
+        <m>OBJECT</m> and <m>ARRAY</m>. This constraint is only
+        allowed as direct child of a defelement, defelementtype or
+        local element definition.</p>
+        </desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>prefixns</method>
+        <m>?prefixUriList?</m></command>
+        <desc>This defines a prefix to namespace URI mapping exactly
+        as a <i>schemacmd prefixns</i> would. It is meant as top-level
+        command of a <i>schemacmd define</i> script. This command is
+        not allowed nested in another definition script command and
+        will raise error, if you call it there.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>defelement</method> <m>name</m> <m>?namespace?</m> <m>&lt;definition script></m></command>
+        <desc>This defines an element exactly as a <i>schemacmd
+        defelement</i> call would. It is meant as top-level command of a
+        <i>schemacmd define</i> script. This command is not allowed
+        nested in another definition script command and will raise
+        error, if you call it there.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>defelementtype</method> <m>typename</m> <m>?namespace?</m> <m>&lt;definition script></m></command>
+        <desc>This defines an elementtype exactly as a <i>schemacmd
+        defelementtype</i> call would. It is meant as top-level
+        command of a <i>schemacmd define</i> script. This command is
+        not allowed nested in another definition script command and
+        will raise error, if you call it there.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>defpattern</method> <m>name</m> <m>?namespace?</m> <m>&lt;definition script></m></command>
+        <desc>This defines a named pattern exactly as a <i>schemacmd
+        defpattern</i> call would. It is meant as top-level command of a
+        <i>schemacmd define</i> script. This command is not allowed
+        nested in another definition script command and will raise
+        error, if you call it there.</desc>
+      </commanddef>
+
+      <commanddef>
+        <command><method>deftexttype</method> <m>name</m> <m>&lt;constraint script></m></command>
+        <desc>This defines a named bundle of text constraints exactly
+        as a <i>schemacmd deftexttype</i> call would. It is meant as
+        top-level command of a <i>schemacmd define</i> script. This
+        command is not allowed nested in another definition script
+        command and will raise error, if you call it there.</desc>
+      </commanddef>
+      
+      <commanddef>
+        <command><method>start</method> <m>name</m> <m>?namespace?</m></command>
+        <desc>This command works exactly as a <i>schemacmd start</i>
+        call would. It is meant as top-level command of a <i>schemacmd
+        define</i> script. This command is not allowed nested in
+        another definition script command and will raise error, if you
+        call it there.</desc>
+      </commanddef>
+    </commandlist>
+    
+  </section>
+
+  <section>
+    <title>Quantity specifier</title>
+
+    <p>Several schema definition commands expect a quantifier as
+    one of their arguments which determines how often the content
+    particle specified by the command is expected. The valid values
+    for a <m>quant</m> argument are:</p>
+
+    <optlist>
+      <optdef>
+        <optname>!</optname>
+        <desc>The content particle has to occur exactly once in valid
+        documents.</desc>
+      </optdef>
+    
+      <optdef>
+        <optname>?</optname>
+        <desc>The content particle may not occur more than once in
+        valid documents - the particle is optional.</desc>
+      </optdef>
+    
+      <optdef>
+        <optname>*</optname>
+        <desc>The content particle may occur zero or more times in a
+        row in valid documents.</desc>
+      </optdef>
+    
+      <optdef>
+        <optname>+</optname>
+        <desc>The content particle may occur one or more times in a
+        row in valid documents.</desc>
+      </optdef>
+    
+      <optdef>
+        <optname>n</optname>
+        <desc>The content particle must occur n times in a row in
+        valid documents. The quantifier must be an integer greater
+        zero.</desc>
+      </optdef>
+    
+      <optdef>
+        <optname>{n m}</optname> <desc>The content particle must occur
+        at least n and at most m times in a row in valid documents.
+        The quantifier must be a Tcl list with two elements. The first
+        element of this list must be an integer with n >= 0. If the
+        second list element is the character *, then there is no upper
+        limit. Otherwise the second list element must be an integer
+        with n &lt; m.</desc>
+      </optdef>
+    </optlist>
+
+    <p>If an optional quantifier is not given, it defaults to * in
+    case of the <m>mixed</m> command and to ! for all other commands.</p>
+  </section>
+
+  <section>
+    <title>Text constraint scripts</title>
+
+    <p>Text (parsed character data, as XML calls it) sometimes has to
+    be of a certain kind or comply with certain rules to be valid. The
+    text constraint script arguments to text, attribute, nsattribute
+    and deftexttype commands are evaluated in the Tcl namespace
+    <m>tdom::schema::text</m> namespace and allow the ensuing text
+    constraint commands to check text for certain properties. The
+    commands are defined in the Tcl namespace
+    <m>tdom::schema::text</m>. They raise error in case they are
+    called outside of a text constraint script.</p>
+
+    <p>A few of the ensuing text type commands are exposed as general
+    Tcl commands. They are defined in the namespace tdom::type and are
+    called as documented below with the text to check appended to the
+    argument list. They return a logical value. Please note that the
+    commands may not accept starting or ending white space. If a
+    command is available in the tdom::type namespace is recorded in
+    its documentation.
+    </p>
+
+    <subsection>
+        <title>The tcl text constraint command</title>
+        <p>The <m>tcl</m> text constraint command dispatches the check
+        to an arbitrary Tcl command, thus enable any programmable
+        decision rules.</p>
+        <commandlist>
+            <commanddef>
+                <command><cmd>tcl</cmd> <m>tclcmd</m> <m>?arg arg ...?</m></command>
+                <desc>Evaluates the Tcl script <m>tclcmd arg arg ... </m> and
+                the text to validate appended to the argument list. The return
+                value of the Tcl command is interpreted as a boolean.</desc>
+            </commanddef>
+        </commandlist>
+    </subsection>
+
+    <subsection>
+        <title>Basic XML types</title>
+        <commandlist>
+            <commanddef>
+                <command><cmd>name</cmd></command>
+                <desc>This text constraint matches if the text value
+                matches the XML name production
+                <url>https://www.w3.org/TR/xml/#NT-Name</url>. This
+                means that the text value must start with a letter,
+                underscore (_), or colon (:), and may contain only
+                letters, digits, underscores (_), colons (:), hyphens
+                (-), and periods (.).</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>ncname</cmd></command>
+                <desc>This text constraint matches if the text value
+                matches the XML ncname production
+                <url>https://www.w3.org/TR/xml-names/#NT-NCName</url>.
+                This means that the text value must start with a
+                letter or underscore (_), and may contain only
+                letters, digits, underscores (_), hyphens (-), and
+                periods (.) (The only difference to the name
+                constraint is that colons are not permitted.)</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>qname</cmd></command>
+                <desc>This text constraint matches if the text value
+                matches the XML qname production
+                <url>https://www.w3.org/TR/xml-names/#NT-QName</url>.
+                This means that the text value is either a ncname or
+                two ncnames joined by a colon (:).</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>nmtoken</cmd></command>
+                <desc>This text constraint matches if the text value
+                matches the XML nmtoken production
+                <url>https://www.w3.org/TR/xml/#NT-Nmtoken</url></desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>nmtokens</cmd></command>
+                <desc>This text constraint matches if the text value
+                matches the XML nmtokens production
+                <url>https://www.w3.org/TR/xml/#NT-Nmtokens</url></desc>
+            </commanddef>
+        </commandlist>
+    </subsection>
+
+    <subsection>
+        <title>Basic type tests</title>
+        <p>
+        </p>
+        <commandlist>
+            <commanddef>
+                <command><cmd>integer</cmd> <m>?(xsd|tcl)?</m></command>
+                <desc>This text constraint matches if the text value could be
+                parsed as an integer. If the optional argument to the command
+                is <m>tcl</m>, everything that returns TCL_OK if fed into
+                Tcl_GetInt() matches. If the optional argument to the command
+                is <m>xsd</m>, the constraint matches if the value is a
+                valid xsd:integer. Without argument <m>xsd</m> is the
+                default.</desc>
+            </commanddef>
+
+            <commanddef>
+                <command><cmd>negativeInteger</cmd> <m>?(xsd|tcl)?</m></command>
+                <desc>This text constraint matches the same text values as the
+                <m>integer</m> text constraint (see there), with the additional
+                constraint, that the value must be &lt; zero.</desc>
+            </commanddef>
+            
+            <commanddef>
+                <command><cmd>nonNegativeInteger</cmd> <m>?(xsd|tcl)?</m></command>
+                <desc>This text constraint matches the same text values as the
+                <m>integer</m> text constraint (see there), with the additional
+                constraint, that the value must be &gt;= zero.</desc>
+            </commanddef>
+
+            <commanddef>
+                <command><cmd>nonPositiveInteger</cmd> <m>?(xsd|tcl)?</m></command>
+                <desc>This text constraint matches the same text values as the
+                <m>integer</m> text constraint (see there), with the additional
+                constraint, that the value must be &lt;= zero.</desc>
+            </commanddef>
+
+            <commanddef>
+                <command><cmd>positiveInteger</cmd> <m>?(xsd|tcl)?</m></command>
+                <desc>This text constraint matches the same text values as the
+                <m>integer</m> text constraint (see there), with the additional
+                constraint, that the value must be &gt; zero.</desc>
+            </commanddef>
+
+            <commanddef>
+                <command><cmd>number</cmd> <m>?(xsd|tcl)?</m></command>
+                <desc>This text constraint matches if the text value could be
+                parsed as a number. If the optional argument to the command is
+                <m>tcl</m>, everything that returns TCL_OK if fed into
+                Tcl_GetDouble() matches. If the optional argument to the command
+                is <m>xsd</m>, the constraint matches if the value is a
+                valid xsd:decimal. Without argument <m>xsd</m> is the
+                default.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>boolean</cmd> <m>?(xsd|tcl)?</m></command>
+                <desc>This text constraint matches if the text value could be
+                parsed as a boolean. If the optional argument to the command is
+                <m>tcl</m>, everything that returns TCL_OK if fed into
+                Tcl_GetBoolean() matches. If the optional argument to the command
+                is <m>xsd</m>, the constraint matches if the value is a
+                valid xsd:boolean. Without argument <m>xsd</m> is the
+                default.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>date</cmd></command>
+                <desc>This text constraint matches if the text value is
+                a xsd:date, which is basically like an ISO 8601 date of
+                the form YYYY-MM-DD, with optional time zone part
+                (either the letter Z or plus (+) or minus (-) followed
+                by hh:mm and with maximum allowed positive or negative
+                time zone 14:00). It follows the date rules of the
+                Gregorian calendar for all dates. A preceding minus
+                sign for bce dates is allowed. There is no year 0. The
+                year may have more than 4 digits, but only if needed
+                (no extra leading zeros). This is available as common
+                Tcl command tdom::type::date.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>time</cmd></command>
+                <desc>This text constraint matches if the text value is
+                a xsd:time, which is basically like an ISO 8601 time of
+                the form hh:mm:ss with optional time zone part. The
+                time zone part follow the rules of the <m>date</m>
+                command; see there. All three parts of the time value
+                (hours, minutes, seconds) must be spelled out with 2
+                digits. Additional fractional seconds (with a point
+                ('.') as separator) are allowed, but not just a
+                dangling point. The time value 24:00:00 (without
+                fractional part) is allowed. This is available as
+                common Tcl command tdom::type::time.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>dateTime</cmd></command>
+                <desc>This text constraint matches if the text value
+                is a xsd:dateTime, which is basically like an ISO 8601
+                date time of the form YYYY-MM-DDThh:mm:ss with
+                optional time zone part. The date and time zone parts
+                follows the rules of the <m>date</m> and <m>time</m>
+                command; see there. The time part (including the
+                signaling 'T' character) is mandatory. This is
+                available as common Tcl command
+                tdom::type::dateTime.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>duration</cmd></command>
+                <desc>This text constraint matches if the text value is
+                a xsd:duration, which is basically like an ISO 8601
+                duration of the form PnYnMnDTnHnMnS. All parts other
+                than the starting P and - if one of H, M or S is given
+                - T are optional. In case the following sign letter is
+                S, n may be a decimal (with at least one digit before
+                and after the dot), otherwise it must be a (positive)
+                integer. This is available as common Tcl command
+                tdom::type::duration.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>base64</cmd></command>
+                <desc>This text constraint matches if text is valid according to
+                RFC 4648.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>hexBinary</cmd></command>
+                <desc>This text constraint matches if text is a sequence of
+                binary octets in hexadecimal encoding, where each binary octet
+                is a two-character hexadecimal number. Lowercase and uppercase
+                letters A through F are permitted.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>unsignedByte</cmd></command>
+                <desc>This text constraint matches if the text value is a
+                xsd:unsignedByte. This is an integer between 0 and 255, both
+                included, optionally preceded by a + sign and leading
+                zeros.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>unsignedShort</cmd></command>
+                <desc>This text constraint matches if the text value is a
+                xsd:unsignedShort. This is an integer between 0 and 65535,
+                both included, optionally preceded by a + sign and leading
+                zeros.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>unsignedInt</cmd></command>
+                <desc>This text constraint matches if the text value is a
+                xsd:unsignedInt. This is an integer between 0 and 4294967295,
+                both included, optionally preceded by a + sign and leading
+                zeros.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>unsignedLong</cmd></command>
+                <desc>This text constraint matches if the text value is a
+                xsd:unsignedLong. This is an integer between 0 and
+                18446744073709551615, both included, optionally preceded by a
+                + sign and leading zeros.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>byte</cmd></command>
+                <desc>This text constraint matches if the text value
+                is a xsd:byte. This is an integer between -128 and
+                127, both included, optionally preceded by a + or a -
+                sign and leading zeros.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>short</cmd></command>
+                <desc>This text constraint matches if the text value is a
+                xsd:short. This is an integer between -32768 and 32767,
+                both included, optionally preceded by a + or a - sign and leading
+                zeros.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>int</cmd></command>
+                <desc>This text constraint matches if the text value
+                is a xsd:int. This is an integer between -2147483648
+                and 2147483647, both included, optionally preceded by
+                a + or a - sign and leading zeros.</desc>
+            </commanddef>
+            <commanddef>
+                <command><cmd>long</cmd></command>
+                <desc>This text constraint matches if the text value
+                is a xsd:long. This is an integer between
+                -9223372036854775808 and 9223372036854775807, both
+                included, optionally preceded by a + or a - sign and
+                leading zeros.</desc>
+            </commanddef>
+        </commandlist>
+    </subsection>
+
+    <subsection>
+        <title>Logical constructs</title>
+        <commandlist>
+        <commanddef>
+            <command><cmd>oneOf</cmd> <m>&lt;constraint script></m></command>
+            <desc>This text constraint matches if one of the text
+            constraints defined in the argument <m>constraint script</m>
+            matches the text. It stops after the first matches and probes the
+            text constraints in the order of definition.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>allOf</cmd> <m>&lt;constraint script></m></command>
+            <desc>This text constraint matches if all of the text
+            constraints defined in the argument <m>constraint script</m>
+            matches the text. It stops after the first match failure and
+            probes the text constraints in the order of definition. Since
+            the schema definition command <m>text</m> also expects all
+            text constraints to match the text constraint, <m>allOf</m> is
+            useful mostly in connection with the <m>oneOf</m> text constraint
+            command.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>not</cmd> <m>&lt;constraint script></m></command>
+            <desc>This text constraint matches if none of the text
+            constraints defined in the argument <m>constraint
+            script</m> matches the text. It stops after the first
+            matching constraint in the <m>constraint script</m> and
+            reports validation error. The text constraints in the
+            <m>constraint script</m> are probed in the order of
+            definition.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>type</cmd> <m>text type name</m></command>
+            <desc>This text constraint matches if the text type given
+            as argument matches.</desc>
+        </commanddef>
+        </commandlist>
+    </subsection>
+
+    <subsection>
+        <title>Constraints on processed text value</title>
+        <commandlist>
+            <commanddef>
+            <command><cmd>whitespace</cmd> <m>(preserve|replace|collapse)</m> <m>&lt;constraint script></m></command>
+            <desc>This text constraint command does white-space (#x20
+            (space, ' '), #x9 (tab, \t), #xA (linefeed, \n), and #xD
+            (carriage return, \r) normalization to the text value and
+            checks the resulting text with the text constraints of the
+            constraint script argument. The normalization method
+            <m>preserve</m> keeps everything as it is; this is another way
+            to say <m>allOf</m>. The <m>replace</m> normalization method
+            replaces any single white-space character (as above) to a
+            space. The <m>collapse</m> normalization method removes all
+            leading and trailing white-space, and all the other sequences of
+            contiguous white-space are replaced by a single space.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>split</cmd> <m>?type ?args??</m><m>&lt;constraint script></m></command>
+            <desc><p>This text constraint command splits the text to test
+            into a list of values and tests all elements of that list for
+            the text constraints in the evaluated <m>constraint
+            script></m>.</p>
+            <p>The available types are:</p>
+            <dl>
+                <dt>whitespace</dt><dd>The text to split is stripped
+                of all white space at start and end and split into a
+                list at any successive white space.</dd>
+                <dt>tcl tclcmd ?arg ...?</dt><dd>The text to split is
+                handed to the <m>tclcmd</m>, which is evaluated on
+                global level, appended with every given arg and the
+                text to split as last argument. This call must return
+                a valid Tcl list whose elements are tested.</dd>
+            </dl>
+            <p>The default in case no split type argument is given is
+            <m>whitespace</m>.</p></desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>strip</cmd> <m>&lt;constraint script></m></command>
+            <desc>This text constraint command tests all text constraints
+            in the evaluated <m>constraint script></m> with the text to
+            test stripped of all white space at start and end.</desc>
+        </commanddef>
+        </commandlist>
+    </subsection>
+
+    <subsection>
+        <title>Various other string properties</title>
+        <commandlist>
+        <commanddef>
+            <command><cmd>fixed</cmd> <m>value</m></command>
+            <desc>The text constraint only matches if the text value is
+            string equal to the given value.</desc>
+        </commanddef>
+        
+        <commanddef>
+            <command><cmd>enumeration</cmd> <m>list</m></command>
+            <desc>This text constraint matches if the text value is equal to
+            one element (respecting case and any white-space) of the
+            argument <m>list</m>, which has to be a valid Tcl list.
+            </desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>match</cmd> <m>?-nocase?</m> <m>glob_style_match_pattern></m></command>
+            <desc>This text constraint matches if the text value matches the
+            glob style pattern given as argument. It follows the rules of
+            the Tcl [string match] command, see
+            <url>https://www.tcl.tk/man/tcl8.6/TclCmd/string.htm#M35</url>.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>regexp</cmd> <m>expression</m></command>
+            <desc>This text constraint matches if the text value matches the
+            regular expression given as argument. <url>https://www.tcl.tk/man/tcl8.6/TclCmd/re_syntax.htm</url> describes the regular expression syntax</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>length</cmd> <m>length</m></command>
+            <desc>This text constraint matches if the length of the text
+            value (in characters, not bytes) is <m>length</m>. The
+            length argument must be a positive integer or zero.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>maxLength</cmd> <m>length</m></command>
+            <desc>This text constraint matches if the length of the text
+            value (in characters, not bytes) is at most <m>length</m>. The
+            length argument must be an integer greater zero.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>minLength</cmd> <m>length</m></command>
+            <desc>This text constraint matches if the length of the text
+            value (in characters, not bytes) is at least <m>length</m>.
+            The length argument must be an integer greater zero.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>id</cmd> <m>?keySpace?</m></command>
+            <desc>This text constraint command marks the text as a
+            document wide ID (to be referenced by an idref). Every ID
+            value within a document must be unique. It isn't an error if
+            the ID isn't actually referenced within the document. The
+            optional argument <m>keySpace</m> does all this for a named
+            key space. The key space "" (the empty sting) is another key
+            space then the <m>id</m> command without keySpace
+            argument.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>idref</cmd> <m>?keySpace?</m></command>
+            <desc>This text constraint command expects the text to be a
+            reference to an ID within the document. The referenced ID may
+            appear later in the document, that the reference. Several
+            references within the document to one ID are possible.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>jsontype</cmd> <m>&lt;JSON text type></m></command>
+            <desc>If not postvalidating a DOM tree with
+            <m>domvalidate</m> this constraint always matches. If
+            postvalidating the current TEXT_NODE to check must have
+            the JSON text type given as argument to the text
+            constraint command. The possible types are <m>NULL</m>,
+            <m>TRUE</m>, <m>FALSE</m>, <m>STRING</m> and
+            <m>NUMBER</m>.</desc>
+        </commanddef>
+        </commandlist>
+    </subsection>
+  </section>
+
+  <section>
+    <title>Local key constraints</title>
+
+    <p>Document wide uniqueness and foreign key constraints are
+    available with the text constraint commands id and idref.
+    Keyspaces allow for sub-tree local uniqueness and foreign key
+    constraints.</p>
+
+    <commandlist>
+        <commanddef>
+            <command><cmd>keyspace</cmd> <m>&lt;names list></m> <m>&lt;constraint script></m></command>
+            <desc>Any number of keyspaces are possible. A keyspace is
+            either active or not. An inside a <m>constraint
+            script</m> called keyspace with the same name does
+            nothing.</desc>
+        </commanddef>
+    </commandlist>
+
+    <p>This text constraint commands work with keyspaces:</p>
+
+    <commandlist>
+        <commanddef>
+            <command><cmd>key</cmd> <m>&lt;name></m></command>
+            <desc>If the keyspace with the name <m>&lt;name></m> is
+            not active the constraint always matches. If the keyspace
+            is active, reports error if there is already a key with
+            the value. Otherwise it stores the value as key in this
+            keyspace and matches.</desc>
+        </commanddef>
+        <commanddef>
+            <command><cmd>keyref</cmd> <m>&lt;name></m></command>
+            <desc>If the keyspace with the name <m>&lt;name></m> is not
+            active always matches. If the keyspace is active then
+            reports error if there is still no key as the value at the
+            end of the keyspace <m>&lt;name></m>. Otherwise, it
+            matches.</desc>
+        </commanddef>
+    </commandlist>
+    
+  </section>
+
+  <section id="recovering">
+      <title>Recovering</title>
+
+      <p>By default the validation engine stops at the first detected
+      validation violation and reports that finding. It does so by
+      return false (and sets, if given, the result variable with an
+      error message) in case the schema command itself is used to
+      validate input. If the schema command is used by a SAX parser or
+      the DOM parser, it does so by throwing error.</p>
+
+      <p>If a <m>reportcmd</m> is set this command is called on global
+      level appended with the schema command and an error type as
+      arguments in case a validation violation is detected. Then the
+      validation recovers from the error and continues. For some
+      validation errors the recover strategy can be determined with
+      the script result of the reportcmd.</p>
+
+      <p>With a <m>reportcmd</m> (as long as the <m>reportcmd</m> does
+      not throw error while called) the validation engine will never
+      report validation failure to its caller. The validation engine
+      recovers, continues, and reports the next error (if occurring)
+      and so on until the end of the input. The schema command will
+      return true and the SAX parser and DOM builder will process
+      normally until the end of the input, as if there had not been a
+      validation error.</p>
+
+      <p>Please note that this happens only for validation errors. It
+      is not possible to recover from well-formedness errors. If the
+      input is not well-formed, the schema command returns false and
+      sets (if given) the result variable with an error message about
+      the well-formedness error.</p>
+
+      <p>If the <m>reportcmd</m> throws error while called by the
+      validation engine then validation stops and the schema command
+      throws error with the error message of the script.</p>
+
+      <p>While validating basically three events can happen: an
+      element start tag has to match, a piece of text has to match or
+      an element end tag has to match. The method <m>info vaction</m>
+      called in the recovering script or any script code called from
+      there returns, which event has triggered the error report
+      (MATCH_ELEMENT_START, MATCH_TEXT, MATCH_ELEMENT_END,
+      respectively). While the command walks throu the schema looking
+      whether the event matches other, data driven events (as, for example
+      checking, if any keyref within a keyspace exists) may happen.</p>
+
+      <p>Several of the validation error codes, appended as second
+      argument to the <m>reportcmd</m> calls, may happen at more than
+      one kind of validation event. The <m>info vaction</m> method and
+      its subcommands provide information about the current validation
+      event, if called from the report command.</p>
+
+      <p>If a structural validation error happens, the default
+      recovering strategy is to ignore any following (or missing)
+      content within the current subtree and to continue with the
+      element end event of the subtree.</p>
+
+      <p>Returning "ignore" from the recovering script in case of
+      error type MISSING_ELEMENT recovers by ignoring the failed
+      constraint and continues to match the event further against the
+      schema.</p>
+
+      <p>Returning "vanish" from the recover script in case of the
+      error types MISSING_ELEMENT and UNEXPECTED_ELEMENT recovers by
+      ignoring the event.</p>
+      
+  </section>
+
+  <section>
+    <title>Examples</title>
+
+    <p>The XML Schema Part 0: Primer Second Edition
+    (<url>https://www.w3.org/TR/xmlschema-0/</url>) starts with this
+    example schema:</p>
+
+    <example>
+&lt;xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  &lt;xsd:annotation>
+    &lt;xsd:documentation xml:lang="en">
+     Purchase order schema for Example.com.
+     Copyright 2000 Example.com. All rights reserved.
+    &lt;/xsd:documentation>
+  &lt;/xsd:annotation>
+
+  &lt;xsd:element name="purchaseOrder" type="PurchaseOrderType"/>
+
+  &lt;xsd:element name="comment" type="xsd:string"/>
+
+  &lt;xsd:complexType name="PurchaseOrderType">
+    &lt;xsd:sequence>
+      &lt;xsd:element name="shipTo" type="USAddress"/>
+      &lt;xsd:element name="billTo" type="USAddress"/>
+      &lt;xsd:element ref="comment" minOccurs="0"/>
+      &lt;xsd:element name="items"  type="Items"/>
+    &lt;/xsd:sequence>
+    &lt;xsd:attribute name="orderDate" type="xsd:date"/>
+  &lt;/xsd:complexType>
+
+  &lt;xsd:complexType name="USAddress">
+    &lt;xsd:sequence>
+      &lt;xsd:element name="name"   type="xsd:string"/>
+      &lt;xsd:element name="street" type="xsd:string"/>
+      &lt;xsd:element name="city"   type="xsd:string"/>
+      &lt;xsd:element name="state"  type="xsd:string"/>
+      &lt;xsd:element name="zip"    type="xsd:decimal"/>
+    &lt;/xsd:sequence>
+    &lt;xsd:attribute name="country" type="xsd:NMTOKEN"
+                   fixed="US"/>
+  &lt;/xsd:complexType>
+
+  &lt;xsd:complexType name="Items">
+    &lt;xsd:sequence>
+      &lt;xsd:element name="item" minOccurs="0" maxOccurs="unbounded">
+        &lt;xsd:complexType>
+          &lt;xsd:sequence>
+            &lt;xsd:element name="productName" type="xsd:string"/>
+            &lt;xsd:element name="quantity">
+              &lt;xsd:simpleType>
+                &lt;xsd:restriction base="xsd:positiveInteger">
+                  &lt;xsd:maxExclusive value="100"/>
+                &lt;/xsd:restriction>
+              &lt;/xsd:simpleType>
+            &lt;/xsd:element>
+            &lt;xsd:element name="USPrice"  type="xsd:decimal"/>
+            &lt;xsd:element ref="comment"   minOccurs="0"/>
+            &lt;xsd:element name="shipDate" type="xsd:date" minOccurs="0"/>
+          &lt;/xsd:sequence>
+          &lt;xsd:attribute name="partNum" type="SKU" use="required"/>
+        &lt;/xsd:complexType>
+      &lt;/xsd:element>
+    &lt;/xsd:sequence>
+  &lt;/xsd:complexType>
+
+  &lt;!-- Stock Keeping Unit, a code for identifying products -->
+  &lt;xsd:simpleType name="SKU">
+    &lt;xsd:restriction base="xsd:string">
+      &lt;xsd:pattern value="\d{3}-[A-Z]{2}"/>
+    &lt;/xsd:restriction>
+  &lt;/xsd:simpleType>
+
+&lt;/xsd:schema>
+    </example>
+
+    <p>A simple one-to-one translation of that into a tDOM schema
+    definition script would be:</p>
+
+    <example>
+tdom::schema schema      
+schema define {
+
+    # Purchase order schema for Example.com.
+    # Copyright 2000 Example.com. All rights reserved.
+
+    defelement purchaseOrder {ref PurchaseOrderType}
+
+    foreach elm {comment name street city state product} {
+        defelement $elm text
+    }
+
+    defpattern PurchaseOrderType {
+        element shipTo ! {ref USAddress}
+        element billTo ! {ref USAddress}
+        element comment ?
+        element items
+        attribute orderDate date
+    }
+
+    defpattern USAddress {
+        element name
+        element street
+        element city
+        element state
+        element zip ! {text number}
+        attribute country {fixed "US"}
+    }
+
+    defelement items {
+        element item * {
+            element product
+            element quantity ! {text positiveInteger}
+            element USPrice ! {text number}
+            element comment
+            element shipDate ? {text date}
+            attribute partNum {regexp "^\d{3}-[A-Z]{2}$"}
+        }
+    }
+}
+      
+    </example>
+
+    <p>The RELAX NG Tutorial
+    (<url>http://relaxng.org/tutorial-20011203.html</url>) starts with
+    this example:</p>
+
+    <example>
+Consider a simple XML representation of an email address book:
+
+&lt;addressBook>
+  &lt;card>
+    &lt;name>John Smith&lt;/name>
+    &lt;email>js@example.com&lt;/email>
+  &lt;/card>
+  &lt;card>
+    &lt;name>Fred Bloggs&lt;/name>
+    &lt;email>fb@example.net&lt;/email>
+  &lt;/card>
+&lt;/addressBook>
+
+The DTD would be as follows:
+
+&lt;!DOCTYPE addressBook [
+&lt;!ELEMENT addressBook (card*)>
+&lt;!ELEMENT card (name, email)>
+&lt;!ELEMENT name (#PCDATA)>
+&lt;!ELEMENT email (#PCDATA)>
+]>
+
+A RELAX NG pattern for this could be written as follows:
+
+&lt;element name="addressBook" xmlns="http://relaxng.org/ns/structure/1.0">
+  &lt;zeroOrMore>
+    &lt;element name="card">
+      &lt;element name="name">
+        &lt;text/>
+      &lt;/element>
+      &lt;element name="email">
+        &lt;text/>
+      &lt;/element>
+    &lt;/element>
+  &lt;/zeroOrMore>
+&lt;/element>
+      
+    </example>
+
+    <p>This schema definition script will do the same:</p>
+
+    <example>
+tdom::schema schema      
+schema define {
+    defelement addressBook {
+        element card *
+    }
+    defelement card {
+        element name
+        element email
+    }
+    foreach e {name email} {
+        defelement $e text
+    }
+}
+      
+    </example>
+</section>
+
+<keywords>
+    <keyword>Validation</keyword>
+    <keyword>Postvalidation</keyword>
+    <keyword>DOM</keyword>
+    <keyword>SAX</keyword>
+</keywords>
+</manpage>

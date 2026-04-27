@@ -1,0 +1,61 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3_lvdsctrl.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3_lvdsctrl/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading firmware_builds/upload_system_v3_lvdsctrl.qsys
+Progress: Reading input file
+Progress: Adding control_plane_clock_156 [clock_source 18.1]
+Progress: Parameterizing module control_plane_clock_156
+Progress: Adding data_path_clock_125 [clock_source 18.1]
+Progress: Parameterizing module data_path_clock_125
+Progress: Adding csr_bridge [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_bridge
+Progress: Adding runctl_mgmt_host_0 [runctl_mgmt_host 26.2.0.416]
+Progress: Parameterizing module runctl_mgmt_host_0
+Progress: Adding upload_cdc_fifo [altera_avalon_dc_fifo 18.1]
+Progress: Parameterizing module upload_cdc_fifo
+Progress: Adding upload_sc_cdc_fifo [altera_avalon_dc_fifo 18.1]
+Progress: Parameterizing module upload_sc_cdc_fifo
+Progress: Adding upload_pkt_mux [multiplexer 18.1]
+Progress: Parameterizing module upload_pkt_mux
+Progress: Adding upload_system_jtag_master [altera_jtag_avalon_master 18.1]
+Progress: Parameterizing module upload_system_jtag_master
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: upload_system_v3_lvdsctrl.runctl_mgmt_host_0.dp_hard_reset: No synchronous edges, but has associated clock
+Warning: upload_system_v3_lvdsctrl.runctl_mgmt_host_0.ct_hard_reset: No synchronous edges, but has associated clock
+Warning: upload_system_v3_lvdsctrl.runctl_mgmt_host_0.ext_hard_reset: No synchronous edges, but has associated clock
+Info: upload_system_v3_lvdsctrl: Generating upload_system_v3_lvdsctrl "upload_system_v3_lvdsctrl" for QUARTUS_SYNTH
+Info: csr_bridge: "upload_system_v3_lvdsctrl" instantiated altera_avalon_mm_bridge "csr_bridge"
+Info: runctl_mgmt_host_0: "upload_system_v3_lvdsctrl" instantiated runctl_mgmt_host "runctl_mgmt_host_0"
+Info: upload_cdc_fifo: "upload_system_v3_lvdsctrl" instantiated altera_avalon_dc_fifo "upload_cdc_fifo"
+Info: upload_pkt_mux: "upload_system_v3_lvdsctrl" instantiated multiplexer "upload_pkt_mux"
+Info: upload_system_jtag_master: "upload_system_v3_lvdsctrl" instantiated altera_jtag_avalon_master "upload_system_jtag_master"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_0: "upload_system_v3_lvdsctrl" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: rst_controller: "upload_system_v3_lvdsctrl" instantiated altera_reset_controller "rst_controller"
+Info: jtag_phy_embedded_in_jtag_master: "upload_system_jtag_master" instantiated altera_jtag_dc_streaming "jtag_phy_embedded_in_jtag_master"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3_lvdsctrl/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: timing_adt: "upload_system_jtag_master" instantiated timing_adapter "timing_adt"
+Info: fifo: "upload_system_jtag_master" instantiated altera_avalon_sc_fifo "fifo"
+Info: b2p: "upload_system_jtag_master" instantiated altera_avalon_st_bytes_to_packets "b2p"
+Info: p2b: "upload_system_jtag_master" instantiated altera_avalon_st_packets_to_bytes "p2b"
+Info: transacto: "upload_system_jtag_master" instantiated altera_avalon_packets_to_master "transacto"
+Info: b2p_adapter: "upload_system_jtag_master" instantiated channel_adapter "b2p_adapter"
+Info: p2b_adapter: "upload_system_jtag_master" instantiated channel_adapter "p2b_adapter"
+Info: csr_bridge_m0_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "csr_bridge_m0_translator"
+Info: runctl_mgmt_host_0_csr_translator: "mm_interconnect_0" instantiated altera_merlin_slave_translator "runctl_mgmt_host_0_csr_translator"
+Info: csr_bridge_m0_agent: "mm_interconnect_0" instantiated altera_merlin_master_agent "csr_bridge_m0_agent"
+Info: runctl_mgmt_host_0_csr_agent: "mm_interconnect_0" instantiated altera_merlin_slave_agent "runctl_mgmt_host_0_csr_agent"
+Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
+Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
+Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: rsp_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux"
+Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3_lvdsctrl/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
+Info: upload_system_v3_lvdsctrl: Done "upload_system_v3_lvdsctrl" with 28 modules, 48 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

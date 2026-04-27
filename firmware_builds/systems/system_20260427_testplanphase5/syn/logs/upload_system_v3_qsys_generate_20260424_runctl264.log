@@ -1,0 +1,66 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.04.24.23:51:57 Info: Saving generation log to /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/upload_system_v3_generation.rpt
+2026.04.24.23:51:57 Info: Starting: <b>Create HDL design files for synthesis</b>
+2026.04.24.23:51:57 Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+2026.04.24.23:51:57 Info: Loading firmware_builds/upload_system_v3.qsys
+2026.04.24.23:51:57 Info: Reading input file
+2026.04.24.23:51:57 Info: Adding control_plane_clock_156 [clock_source 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module control_plane_clock_156
+2026.04.24.23:51:57 Info: Adding data_path_clock_125 [clock_source 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module data_path_clock_125
+2026.04.24.23:51:57 Info: Adding upload_sc_clock_125 [clock_source 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module upload_sc_clock_125
+2026.04.24.23:51:57 Info: Adding csr_bridge [altera_avalon_mm_bridge 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module csr_bridge
+2026.04.24.23:51:57 Info: Adding runctl_mgmt_host_0 [runctl_mgmt_host 26.2.2.423]
+2026.04.24.23:51:57 Warning: runctl_mgmt_host_0: Used runctl_mgmt_host <b>26.2.4.424</b> (instead of 26.2.2.423)
+2026.04.24.23:51:57 Info: Parameterizing module runctl_mgmt_host_0
+2026.04.24.23:51:57 Info: Adding upload_cdc_fifo [altera_avalon_dc_fifo 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module upload_cdc_fifo
+2026.04.24.23:51:57 Info: Adding upload_sc_cdc_fifo [altera_avalon_dc_fifo 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module upload_sc_cdc_fifo
+2026.04.24.23:51:57 Info: Adding upload_pkt_mux [multiplexer 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module upload_pkt_mux
+2026.04.24.23:51:57 Info: Adding upload_system_jtag_master [altera_jtag_avalon_master 18.1]
+2026.04.24.23:51:57 Info: Parameterizing module upload_system_jtag_master
+2026.04.24.23:51:57 Info: Building connections
+2026.04.24.23:51:57 Info: Parameterizing connections
+2026.04.24.23:51:57 Info: Validating
+2026.04.24.23:51:57 Info: Done reading input file
+2026.04.24.23:51:57 Warning: upload_system_v3.runctl_mgmt_host_0.dp_hard_reset: No synchronous edges, but has associated clock
+2026.04.24.23:51:57 Warning: upload_system_v3.runctl_mgmt_host_0.ct_hard_reset: No synchronous edges, but has associated clock
+2026.04.24.23:51:57 Warning: upload_system_v3.runctl_mgmt_host_0.ext_hard_reset: No synchronous edges, but has associated clock
+2026.04.24.23:51:57 Info: upload_system_v3: Generating <b>upload_system_v3</b> "<b>upload_system_v3</b>" for QUARTUS_SYNTH
+2026.04.24.23:51:58 Info: csr_bridge: "<b>upload_system_v3</b>" instantiated <b>altera_avalon_mm_bridge</b> "<b>csr_bridge</b>"
+2026.04.24.23:51:58 Info: runctl_mgmt_host_0: "<b>upload_system_v3</b>" instantiated <b>runctl_mgmt_host</b> "<b>runctl_mgmt_host_0</b>"
+2026.04.24.23:51:58 Info: upload_cdc_fifo: "<b>upload_system_v3</b>" instantiated <b>altera_avalon_dc_fifo</b> "<b>upload_cdc_fifo</b>"
+2026.04.24.23:51:58 Info: upload_pkt_mux: "<b>upload_system_v3</b>" instantiated <b>multiplexer</b> "<b>upload_pkt_mux</b>"
+2026.04.24.23:51:58 Info: upload_system_jtag_master: "<b>upload_system_v3</b>" instantiated <b>altera_jtag_avalon_master</b> "<b>upload_system_jtag_master</b>"
+2026.04.24.23:51:58 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.04.24.23:51:58 Info: mm_interconnect_0: "<b>upload_system_v3</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.04.24.23:51:58 Info: rst_controller: "<b>upload_system_v3</b>" instantiated <b>altera_reset_controller</b> "<b>rst_controller</b>"
+2026.04.24.23:51:58 Info: jtag_phy_embedded_in_jtag_master: "<b>upload_system_jtag_master</b>" instantiated <b>altera_jtag_dc_streaming</b> "<b>jtag_phy_embedded_in_jtag_master</b>"
+2026.04.24.23:51:58 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.04.24.23:51:58 Info: timing_adt: "<b>upload_system_jtag_master</b>" instantiated <b>timing_adapter</b> "<b>timing_adt</b>"
+2026.04.24.23:51:58 Info: fifo: "<b>upload_system_jtag_master</b>" instantiated <b>altera_avalon_sc_fifo</b> "<b>fifo</b>"
+2026.04.24.23:51:58 Info: b2p: "<b>upload_system_jtag_master</b>" instantiated <b>altera_avalon_st_bytes_to_packets</b> "<b>b2p</b>"
+2026.04.24.23:51:58 Info: p2b: "<b>upload_system_jtag_master</b>" instantiated <b>altera_avalon_st_packets_to_bytes</b> "<b>p2b</b>"
+2026.04.24.23:51:58 Info: transacto: "<b>upload_system_jtag_master</b>" instantiated <b>altera_avalon_packets_to_master</b> "<b>transacto</b>"
+2026.04.24.23:51:58 Info: b2p_adapter: "<b>upload_system_jtag_master</b>" instantiated <b>channel_adapter</b> "<b>b2p_adapter</b>"
+2026.04.24.23:51:58 Info: p2b_adapter: "<b>upload_system_jtag_master</b>" instantiated <b>channel_adapter</b> "<b>p2b_adapter</b>"
+2026.04.24.23:51:58 Info: csr_bridge_m0_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_translator</b> "<b>csr_bridge_m0_translator</b>"
+2026.04.24.23:51:58 Info: runctl_mgmt_host_0_csr_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_translator</b> "<b>runctl_mgmt_host_0_csr_translator</b>"
+2026.04.24.23:51:58 Info: csr_bridge_m0_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_agent</b> "<b>csr_bridge_m0_agent</b>"
+2026.04.24.23:51:58 Info: runctl_mgmt_host_0_csr_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_agent</b> "<b>runctl_mgmt_host_0_csr_agent</b>"
+2026.04.24.23:51:58 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.04.24.23:51:58 Info: router_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_002</b>"
+2026.04.24.23:51:58 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.04.24.23:51:58 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.04.24.23:51:58 Info: rsp_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux</b>"
+2026.04.24.23:51:58 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.04.24.23:51:58 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/upload_system_v3/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.04.24.23:51:58 Info: avalon_st_adapter: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.04.24.23:51:58 Info: error_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>error_adapter</b> "<b>error_adapter_0</b>"
+2026.04.24.23:51:58 Info: upload_system_v3: Done "<b>upload_system_v3</b>" with 28 modules, 48 files
+2026.04.24.23:51:58 Info: qsys-generate succeeded.
+2026.04.24.23:51:58 Info: Finished: <b>Create HDL design files for synthesis</b>

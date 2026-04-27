@@ -1,0 +1,136 @@
+/*
+WARNING: Do NOT edit the input and output ports in this file in a text
+editor if you plan to continue editing the block that represents it in
+the Block Editor! File corruption is VERY likely to occur.
+*/
+/*
+Copyright (C) 2018  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details.
+*/
+(header "symbol" (version "1.1"))
+(symbol
+	(rect 0 0 352 264)
+	(text "native_reset_tx" (rect 131 -1 193 11)(font "Arial" (font_size 10)))
+	(text "inst" (rect 8 248 20 260)(font "Arial" ))
+	(port
+		(pt 0 72)
+		(input)
+		(text "clock" (rect 0 0 20 12)(font "Arial" (font_size 8)))
+		(text "clock" (rect 4 61 34 72)(font "Arial" (font_size 8)))
+		(line (pt 0 72)(pt 96 72)(line_width 1))
+	)
+	(port
+		(pt 0 112)
+		(input)
+		(text "reset" (rect 0 0 20 12)(font "Arial" (font_size 8)))
+		(text "reset" (rect 4 101 34 112)(font "Arial" (font_size 8)))
+		(line (pt 0 112)(pt 96 112)(line_width 1))
+	)
+	(port
+		(pt 0 152)
+		(input)
+		(text "pll_locked[3..0]" (rect 0 0 57 12)(font "Arial" (font_size 8)))
+		(text "pll_locked[3..0]" (rect 4 141 100 152)(font "Arial" (font_size 8)))
+		(line (pt 0 152)(pt 96 152)(line_width 3))
+	)
+	(port
+		(pt 0 192)
+		(input)
+		(text "pll_select[7..0]" (rect 0 0 55 12)(font "Arial" (font_size 8)))
+		(text "pll_select[7..0]" (rect 4 181 100 192)(font "Arial" (font_size 8)))
+		(line (pt 0 192)(pt 96 192)(line_width 3))
+	)
+	(port
+		(pt 0 232)
+		(input)
+		(text "tx_cal_busy[3..0]" (rect 0 0 69 12)(font "Arial" (font_size 8)))
+		(text "tx_cal_busy[3..0]" (rect 4 221 106 232)(font "Arial" (font_size 8)))
+		(line (pt 0 232)(pt 96 232)(line_width 3))
+	)
+	(port
+		(pt 352 72)
+		(output)
+		(text "pll_powerdown[3..0]" (rect 0 0 76 12)(font "Arial" (font_size 8)))
+		(text "pll_powerdown[3..0]" (rect 249 61 363 72)(font "Arial" (font_size 8)))
+		(line (pt 352 72)(pt 240 72)(line_width 3))
+	)
+	(port
+		(pt 352 112)
+		(output)
+		(text "tx_analogreset[3..0]" (rect 0 0 77 12)(font "Arial" (font_size 8)))
+		(text "tx_analogreset[3..0]" (rect 253 101 373 112)(font "Arial" (font_size 8)))
+		(line (pt 352 112)(pt 240 112)(line_width 3))
+	)
+	(port
+		(pt 352 152)
+		(output)
+		(text "tx_digitalreset[3..0]" (rect 0 0 73 12)(font "Arial" (font_size 8)))
+		(text "tx_digitalreset[3..0]" (rect 258 141 384 152)(font "Arial" (font_size 8)))
+		(line (pt 352 152)(pt 240 152)(line_width 3))
+	)
+	(port
+		(pt 352 192)
+		(output)
+		(text "tx_ready[3..0]" (rect 0 0 56 12)(font "Arial" (font_size 8)))
+		(text "tx_ready[3..0]" (rect 282 181 366 192)(font "Arial" (font_size 8)))
+		(line (pt 352 192)(pt 240 192)(line_width 3))
+	)
+	(drawing
+		(text "clock" (rect 68 43 166 99)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "clk" (rect 101 67 220 144)(font "Arial" (color 0 0 0)))
+		(text "reset" (rect 67 83 164 179)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "reset" (rect 101 107 232 224)(font "Arial" (color 0 0 0)))
+		(text "pll_powerdown" (rect 241 43 560 99)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "pll_powerdown" (rect 176 67 430 144)(font "Arial" (color 0 0 0)))
+		(text "tx_analogreset" (rect 241 83 566 179)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "tx_analogreset" (rect 174 107 432 224)(font "Arial" (color 0 0 0)))
+		(text "tx_digitalreset" (rect 241 123 572 259)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "tx_digitalreset" (rect 177 147 444 304)(font "Arial" (color 0 0 0)))
+		(text "tx_ready" (rect 241 163 530 339)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "tx_ready" (rect 198 187 444 384)(font "Arial" (color 0 0 0)))
+		(text "pll_locked" (rect 39 123 138 259)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "pll_locked" (rect 101 147 262 304)(font "Arial" (color 0 0 0)))
+		(text "pll_select" (rect 42 163 144 339)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "pll_select" (rect 101 187 262 384)(font "Arial" (color 0 0 0)))
+		(text "tx_cal_busy" (rect 28 203 122 419)(font "Arial" (color 128 0 0)(font_size 9)))
+		(text "tx_cal_busy" (rect 101 227 268 464)(font "Arial" (color 0 0 0)))
+		(text " altera_xcvr_reset_control " (rect 236 248 634 506)(font "Arial" ))
+		(line (pt 96 32)(pt 240 32)(line_width 1))
+		(line (pt 240 32)(pt 240 248)(line_width 1))
+		(line (pt 96 248)(pt 240 248)(line_width 1))
+		(line (pt 96 32)(pt 96 248)(line_width 1))
+		(line (pt 97 52)(pt 97 76)(line_width 1))
+		(line (pt 98 52)(pt 98 76)(line_width 1))
+		(line (pt 97 92)(pt 97 116)(line_width 1))
+		(line (pt 98 92)(pt 98 116)(line_width 1))
+		(line (pt 239 52)(pt 239 76)(line_width 1))
+		(line (pt 238 52)(pt 238 76)(line_width 1))
+		(line (pt 239 92)(pt 239 116)(line_width 1))
+		(line (pt 238 92)(pt 238 116)(line_width 1))
+		(line (pt 239 132)(pt 239 156)(line_width 1))
+		(line (pt 238 132)(pt 238 156)(line_width 1))
+		(line (pt 239 172)(pt 239 196)(line_width 1))
+		(line (pt 238 172)(pt 238 196)(line_width 1))
+		(line (pt 97 132)(pt 97 156)(line_width 1))
+		(line (pt 98 132)(pt 98 156)(line_width 1))
+		(line (pt 97 172)(pt 97 196)(line_width 1))
+		(line (pt 98 172)(pt 98 196)(line_width 1))
+		(line (pt 97 212)(pt 97 236)(line_width 1))
+		(line (pt 98 212)(pt 98 236)(line_width 1))
+		(line (pt 0 0)(pt 352 0)(line_width 1))
+		(line (pt 352 0)(pt 352 264)(line_width 1))
+		(line (pt 0 264)(pt 352 264)(line_width 1))
+		(line (pt 0 0)(pt 0 264)(line_width 1))
+	)
+)

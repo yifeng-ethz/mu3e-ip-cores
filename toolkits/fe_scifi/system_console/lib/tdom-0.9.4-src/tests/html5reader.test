@@ -1,0 +1,380 @@
+# Features covered: HTML parser
+#
+# This file contains a collection of tests for the HTML parser.
+# Tested functionalities:
+#    html5-1.*: Character encoding
+#    html5-2.*: Parsing tests
+#    html5-3.*: Bad data
+#    html5-4.*: DOM building
+#    html5-5.*: Namespaces
+#
+# Copyright (c) 2017 Rolf Ade.
+
+source [file join [file dir [info script]] loadtdom.tcl]
+
+testConstraint html5 [dom featureinfo html5]
+
+test html5-1.1 {HTML character entities} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html><body>&nbsp;&iexcl;&Auml;&uuml;</body></html>}]
+    set root [$doc documentElement]
+    set body [$root selectNodes body]
+    set result [$body text]
+    $doc delete
+    set result
+} "\u00A0\u00A1\u00c4\u00fc"
+
+test html5-1.2 {character entities} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html><body>&#214;&#xC4;&#xc4;</body></html>}]
+    set root [$doc documentElement]
+    set body [$root selectNodes body]
+    set result [$body text]
+    $doc delete
+    set result
+} "\u00d6\u00c4\u00c4"
+
+test html5-1.3 {character entities} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html>&euro;&ni;</html>}]
+    set root [$doc documentElement]
+    set body [$root selectNodes body]
+    set result [$body text]
+    $doc delete
+    set result
+} "\u20ac\u220b"
+
+test html5-1.4 {invalid characters} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html>&#1;&#2;&#3;&#4;foo;</html>}]
+    set root [$doc documentElement]
+    set body [$root selectNodes body]
+    set result [$body text]
+    $doc delete
+    set result
+} "\u0001\u0002\u0003\u0004foo;"
+
+test html5-2.1 {not closed p tags} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {
+        <html><body><p>Para 1<p>Para 2<p>Para 3</body></html>
+    }]
+    set result [$doc asXML -indent none]
+    $doc delete
+    set result
+} {<html><head/><body><p>Para 1</p><p>Para 2</p><p>Para 3
+    </p></body></html>}
+
+test html5-2.2 {HTML parsing} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {
+        <HTML><HEAD></HEAD>
+        <BODY>
+        <H1>HTML</H1>
+        </BODY>
+        </HTML>
+    }]
+    set result [$doc asXML -indent none]
+    $doc delete
+    set result
+} {<html><head/><body><h1>HTML</h1></body></html>}
+
+test html5-2.3 {HTML parsing} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {
+        <!-- comment -->
+        <HTML><HEAD></HEAD>
+        <BODY>
+        <H1>HTML</H1>
+        </BODY>
+        </HTML>
+    }]
+    set result [$doc asXML -indent none]
+    $doc delete
+    set result
+} {<!-- comment --><html><head/><body><h1>HTML</h1></body></html>}
+
+test html5-2.4 {HTML parsing} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {
+        <!-- comment -->
+        <HTML><HEAD></HEAD>
+        <BODY>
+        <H1>HTML</H1>
+        </BODY>
+        </HTML>
+        <!-- comment -->
+    }]
+    $doc documentElement root
+    set result [$root nodeName]
+    $doc delete
+    set result
+} {html}
+
+test html5-2.5 {HTML parsing} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html> <head><title></title></head><body>
+        <form>
+        <select id="L" name="nls_language">
+        <option value="">--</option>
+        <option value="en_US" selected="on">en_US</option>
+        <option value="es_ES">es_ES</option>
+        <option value="de_DE">de_DE</option>
+        </select>
+        </form>
+        </body></html>
+    }]
+    $doc asHTML
+} {<html>
+<head><title></title></head><body><form><select id="L" name="nls_language">
+<option value="">--</option><option value="en_US" selected="on">en_US</option><option value="es_ES">es_ES</option><option value="de_DE">de_DE</option>
+</select></form></body>
+</html>}
+
+test html5-2.6 {HTML parsing} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html> <head><title></title></head><body>
+        <form>
+        <select id="L" name="nls_language">
+        <option value="">--
+        <option value="en_US" selected="on">en_US
+        <option value="es_ES">es_ES
+        <option value="de_DE">de_DE
+        </select>
+        </form>
+        </body></html>
+    }]
+    $doc asHTML
+} {<html>
+<head><title></title></head><body><form><select id="L" name="nls_language">
+<option value="">--
+        </option><option value="en_US" selected="on">en_US
+        </option><option value="es_ES">es_ES
+        </option><option value="de_DE">de_DE
+        </option>
+</select></form></body>
+</html>}
+
+test html5-2.7 {HTML parsing} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html> <head><title></title></head><body>
+        <form>
+        <select id="L" name="nls_language">
+        <option value="">--
+        <option value="en_US" selected>en_US
+        <option value="de_DE">de_DE
+        </select>
+        </form>
+        </body></html>
+    }]
+    $doc asHTML
+} {<html>
+<head><title></title></head><body><form><select id="L" name="nls_language">
+<option value="">--
+        </option><option value="en_US" selected="selected">en_US
+        </option><option value="de_DE">de_DE
+        </option>
+</select></form></body>
+</html>}
+
+test html5-2.8 {HTML parsing} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<html> <head><title></title></head><body>
+        <form>
+        <select id="L" name="nls_language">
+        <option value="">--
+        <option selected value="en_US">en_US
+        <option value="de_DE">de_DE
+        </select>
+        </form>
+        </body></html>
+    }]
+    $doc asHTML
+} {<html>
+<head><title></title></head><body><form><select id="L" name="nls_language">
+<option value="">--
+        </option><option selected="selected" value="en_US">en_US
+        </option><option value="de_DE">de_DE
+        </option>
+</select></form></body>
+</html>}
+
+test html5-2.9 {HTML parsing} {64bit Tcl9 html5 longRunning} {
+    set result [catch {
+        dom parse -html5 "<doc>[string repeat [string repeat [string repeat abcde 1000] 1000] 1000]</doc>"
+    } errMsg]
+    lappend result $errMsg
+} {1 {The Gumbo library doesn't support strings longer than 4 gigabytes.}}
+
+# Gumbo has more limitations than just max 4 GByte input string length.
+# test html5-2.10 {HTML parsing} {64bit Tcl9 html5 knownBug} {
+#     set xml [string repeat [string repeat [string repeat a 1000] 1000] 1000]
+#     set doc [dom parse -html5 $xml]
+#     $doc delete
+# }  {}
+
+test html5-3.1 {Bad data} {html5} {
+    set data {line 6 column 17 - Warning: <script> lacks "type" attribute
+line 10 column 17 - Warning: <script> lacks "type" attribute
+        line 11 column 17 - Warning: <table> lacks "summary" attribute}
+    set doc [dom parse -html5 -ignorexmlns $data]
+    set result [$doc asXML -indent none]
+    $doc delete
+    set result
+} {<html><head/><body>line 6 column 17 - Warning: <script> lacks "type" attribute
+line 10 column 17 - Warning: &lt;script&gt; lacks "type" attribute
+        line 11 column 17 - Warning: &lt;table&gt; lacks "summary" attribute</script></body></html>}
+
+test html5-3.2 {Bad data} {html5} {
+     set doc [dom parse -html5 -ignorexmlns {<a>}]
+     set result [$doc asXML -indent none]
+     $doc delete
+     set result
+} {<html><head/><body><a/></body></html>}
+        
+test html5-4.1 {Tag name case normalization} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<HtmL><boDY></BODy></HTml>}]
+    set result [$doc asXML -indent none]
+    $doc delete
+    set result
+} {<html><head/><body/></html>}
+
+test html5-4.2 {Tag name case normalization} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<HtmL><NotaHTML_Tag/></HTml>}]
+    set result [$doc asXML -indent none]
+    $doc delete
+    set result
+} {<html><head/><body><notahtml_tag/></body></html>}
+
+test html5-4.3 {Attribute normalization} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<HtmL><Body Id='3' FOO="Bar" note=this GriLL></body></html>}]
+    set result [$doc asXML -indent none]
+    $doc delete
+    set result
+} {<html><head/><body id="3" foo="Bar" note="note" grill="grill"/></html>}
+
+test html5-4.4 {ID Attribute handling} {html5} {
+    set doc [dom parse -html5 -ignorexmlns {<HtmL><p ID="1"/><p id="2"/><p/></html>}]
+    set result [[$doc getElementById 1] getAttribute id]
+    $doc delete
+    set result
+} {1}
+
+
+set xhtml {h "http://www.w3.org/1999/xhtml"}
+set svg {svg "http://www.w3.org/2000/svg"}
+set mathml {mml "http://www.w3.org/1998/Math/MathML"}
+set xlink  {xlink "http://www.w3.org/1999/xlink"}
+
+set html5 {<!doctype html>
+<html>
+  <body>
+    <p>
+      <svg xmlns="http://www.w3.org/2000/svg">
+      <circle cx="30" cy="30" r="30" fill="green"></circle>
+      </svg>
+    <p>text</p>
+    </body>
+</html>}
+test html5-5.1 {svg subtrees} {html5} {
+    set doc [dom parse -html5 $html5]
+    set result [$doc selectNodes -namespaces $xhtml {string(/h:html/h:body/h:p[2])}]
+    $doc delete
+    set result
+} {text}
+
+set html5 {<!DOCTYPE html>
+<html>
+  <head>
+    <title>HTML5 SVG demo</title>
+  </head>
+
+  <body>
+    <h1>HTML5 SVG Demo</h1>
+
+A nice green circle:
+    <svg id="circle" height="200" xmlns="http://www.w3.org/2000/svg">
+      <circle id="greencircle" cx="30" cy="30" r="30" fill="green" />
+    </svg>
+
+    <hr>
+    <address>Created by DKS. This is free code</address>
+  </body>
+</html>}
+test html5-5.2 {svg subtrees} {html5} {
+    set doc [dom parse -html5 $html5]
+    set svg [$doc selectNodes -namespaces $svg //svg:circle]
+    set result [$svg @fill]
+    $doc delete
+    set result
+} {green}
+
+set html5 {<html xmlns="http://www.w3.org/1999/xhtml" xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+        <title>Binomial Theorem</title>
+    </head>
+    <body>
+        <p>Binomial Theorem:</p>
+        <math XMLNS="http://www.w3.org/1998/Math/MathML" FOO="bar">
+            <mrow>
+                <MSUp>
+                    <mfenced BAR="grill">
+                        <mrow>
+                            <mi>a</mi>
+                            <mo>+</mo>
+                            <mi>b</mi>
+                        </mrow>
+                    </mfenced>
+                    <mn>2</mn>
+                </msup>
+                <mo>=</mo>
+                <msup>
+                    <mrow>
+                        <mi>a</mi>
+                    </mrow>
+                    <mn>2</mn>
+                </msup>
+                <mo>+</mo>
+                <msup>
+                    <mrow>
+                        <mi>b</mi>
+                    </mrow>
+                    <mn>2</mn>
+                </msup>
+                <mo>+</mo>
+                <mrow>
+                    <mn>2</mn>
+                    <mi>a</mi>
+                    <mi>b</mi>
+                </mrow>
+            </mrow>
+        </math>
+    </body>
+</html>}
+test html5-5.3 {mathml subtrees} {html5} {
+    set doc [dom parse -html5 $html5]
+    set mis [$doc selectNodes -namespaces $mathml //mml:mi]
+    set result ""
+    foreach mi $mis {
+        append result [$mi text]
+    }
+    $doc delete
+    set result
+} {ababab}
+
+set html5 {<html>
+  <body>
+    <svg id="circle" height="60" width="60" 
+     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
+      <image id="image" x="0" y="0" height="60" width="60"  xlink:href="huge-red-circle.svg" />
+    </svg>
+</body>}
+test html5-5.4 {xlink attribute} {html5} {
+    set doc [dom parse -html5 $html5]
+    set node [$doc selectNodes -namespaces $xlink {//*[@xlink:href]}]
+    set result [$node getAttributeNS [lindex $xlink 1] href]
+    $doc delete
+    set result
+} {huge-red-circle.svg}
+
+test html5-5.5 {xlink attribute} {html5} {
+    set doc [dom parse -html5 -ignorexmlns $html5]
+    set node [$doc getElementById "image"]
+    set result [$node getAttribute "xlink:href"]
+    $doc delete
+    set result
+} {huge-red-circle.svg}
+
+
+# cleanup
+::tcltest::cleanupTests
+return
+

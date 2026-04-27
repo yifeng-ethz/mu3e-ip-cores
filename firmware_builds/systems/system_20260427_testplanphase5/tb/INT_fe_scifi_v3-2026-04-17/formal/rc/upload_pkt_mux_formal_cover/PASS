@@ -1,0 +1,21 @@
+Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+engine_0 (smtbmc z3) returned pass
+cover trace: engine_0/trace0.vcd
+cover trace: engine_0/trace0.yw
+  reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_348_245 at upload_pkt_mux_formal_tb.sv:348.13-348.61 step 3
+cover trace: engine_0/trace1.vcd
+cover trace: engine_0/trace1.yw
+  reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_345_236 at upload_pkt_mux_formal_tb.sv:345.13-345.53 step 4
+cover trace: engine_0/trace2.vcd
+cover trace: engine_0/trace2.yw
+  reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_347_242 at upload_pkt_mux_formal_tb.sv:347.13-347.53 step 5
+cover trace: engine_0/trace3.vcd
+cover trace: engine_0/trace3.yw
+  reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_349_248 at upload_pkt_mux_formal_tb.sv:349.13-349.64 step 5
+cover trace: engine_0/trace4.vcd
+cover trace: engine_0/trace4.yw
+  reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_346_239 at upload_pkt_mux_formal_tb.sv:346.13-346.53 step 5
+cover trace: engine_0/trace5.vcd
+cover trace: engine_0/trace5.yw
+  reached cover statement upload_pkt_mux_formal_tb._witness_.check_cover_upload_pkt_mux_formal_tb_sv_350_252 at upload_pkt_mux_formal_tb.sv:350.13-350.112 step 7

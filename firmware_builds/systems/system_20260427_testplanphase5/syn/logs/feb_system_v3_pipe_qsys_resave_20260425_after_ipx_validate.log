@@ -1,0 +1,50 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.04.25.05:10:05 Info: Doing: <b>qsys-script --package-version=18.1 --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds,$ --system-file=firmware_builds/feb_system_v3_pipe.qsys --cmd=reload_ip_catalog; validate_system; save_system firmware_builds/feb_system_v3_pipe.qsys</b>
+2026.04.25.05:10:15 Info: reload_ip_catalog 
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: Reading index <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/root_components.ipx</b>
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/root_components.ipx</b>: Loading now from components.ipx
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: Reading index <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/ip_component_categories.ipx</b>
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/ip_component_categories.ipx</b> described 0 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/ip_component_categories.ipx</b> matched 1 files in 0.00 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/ip/**/*</b> matched 0 files in 0.00 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: Reading index <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/components.ipx</b>
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: Reading index <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b>
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b> described 84 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/components.ipx</b> described 0 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: Reading index <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b>
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b> described 84 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/*</b> matched 89 files in 0.02 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/*/*</b> matched 96 files in 0.04 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: Reading index <b>/home/yifeng/.altera.quartus/ip/18.1/ip_search_path/user_components.ipx</b>
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/libraries/megafunctions/IO/**/*</b> matched 29 files in 0.00 seconds
+2026.04.25.05:10:15 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/online_dpv2/online/fe_board/ip_mu3e/**/*</b> matched 0 files in 0.00 seconds
+2026.04.25.05:10:16 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/ip/altera/megafunctions/**/*</b> matched 154 files in 0.49 seconds
+2026.04.25.05:10:17 Info: <html><div WIDTH=500>Info: Reading index <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/components.ipx</b>
+2026.04.25.05:10:17 Info: <html><div WIDTH=500>Info: Reading index <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b>
+2026.04.25.05:10:17 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b> described 84 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:17 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/components.ipx</b> described 0 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:17 Info: <html><div WIDTH=500>Info: Reading index <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b>
+2026.04.25.05:10:17 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mu3e_ip_cores.ipx</b> described 84 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/**/*</b> matched 60508 files in 1.87 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/.altera.quartus/ip/18.1/ip_search_path/user_components.ipx</b> described 0 plugins, 4 paths, in 2.36 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/.altera.quartus/ip/18.1/**/*</b> matched 2 files in 2.36 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/$$QUARTUS_IP_PROJECTDIR/*</b> matched 0 files in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/$$QUARTUS_IP_USERDIR/*</b> matched 0 files in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/$$QUARTUS_IP_GLOBALDIR/*</b> matched 0 files in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: Reading index <b>/data1/intelFPGA/18.1/ip/altera/altera_components.ipx</b>
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/ip/altera/altera_components.ipx</b> described 2035 plugins, 0 paths, in 0.05 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/ip/**/*</b> matched 139 files in 0.05 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/ip/**/*</b> matched 0 files in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: Reading index <b>/data1/intelFPGA/18.1/quartus/sopc_builder/builtin.ipx</b>
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/builtin.ipx</b> described 83 plugins, 0 paths, in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/**/*</b> matched 9 files in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: Reading index <b>/data1/intelFPGA/18.1/quartus/common/librarian/factories/index.ipx</b>
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/common/librarian/factories/index.ipx</b> described 151 plugins, 0 paths, in 0.01 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/common/librarian/factories/**/*</b> matched 4 files in 0.01 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/$IP_IPX_PATH</b> matched 1 files in 0.00 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/root_components.ipx</b> described 0 plugins, 13 paths, in 2.48 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/data1/intelFPGA/18.1/quartus/sopc_builder/bin/root_components.ipx</b> matched 1 files in 2.48 seconds
+2026.04.25.05:10:18 Info: <html><div WIDTH=500>Info: <b>/home/yifeng/packages/online_dpv2/online/fe_board/ip_mu3e</b> matched 1 files in 0.00 seconds
+2026.04.25.05:10:19 Warning: <html><div WIDTH=500>Warning: <b>lvds_rx_controller_pro_0</b>: Used lvds_rx_controller_pro <b>25.1.631</b> (instead of 25.1.630)
+2026.04.25.05:10:20 Info: validate_system 
+2026.04.25.05:10:20 Info: save_system firmware_builds/feb_system_v3_pipe.qsys

@@ -1,0 +1,51 @@
+#------------------------------------------------------------- -*- makefile -*-
+#
+# Makefile for schemadtx
+#
+# Basic build, test and install
+#   nmake /f makefile.vc INSTALLDIR=c:\tcl
+#   nmake /f makefile.vc INSTALLDIR=c:\tcl test
+#   nmake /f makefile.vc INSTALLDIR=c:\tcl install
+#
+# For other build options (debug, static etc.),
+# See TIP 477 (https://core.tcl.tk/tips/doc/trunk/tip/477.md) for
+# detailed documentation.
+# 
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+#------------------------------------------------------------------------------
+
+
+PROJECT = schemadtx
+!include "rules-ext.vc"
+
+PRJ_OBJS = $(TMP_DIR)\schemadtx.obj
+
+!if [echo TDOM_DOTVERSION = \> versions.vc] \
+   || [nmakehlp -V ..\..\..\configure.ac ^[tdom^] >> versions.vc]
+!error *** Could not figure out tdom version.
+!endif
+!include versions.vc
+TDOMVER             = $(TDOM_DOTVERSION:.=)
+
+# tdom root
+TDOMROOT            = ..\..\..
+
+PRJ_DEFINES = -D _CRT_SECURE_NO_DEPRECATE -D _CRT_NONSTDC_NO_DEPRECATE \
+	-DHAVE_MEMMOVE=1 -DXML_DTD=1 -DXML_NS=1 -DTDOM_NO_UNKNOWN_CMD=1 \
+!if !$(STATIC_BUILD)
+	-DUSE_TDOM_STUBS
+!endif
+
+TDOMLIBPATH    = "$(TDOMROOT)\win\$(BUILDDIRTOP)"
+
+PRJ_INCLUDES = -I$(TDOMROOT)\generic -I$(TDOMROOT)\expat
+
+!if !$(STATIC_BUILD)
+PRJ_LIBS  = $(TDOMLIBPATH)\tdomstub$(TDOMVER).lib
+!endif
+
+!include "$(_RULESDIR)\targets.vc"
+pkgindex: default-pkgindex
+

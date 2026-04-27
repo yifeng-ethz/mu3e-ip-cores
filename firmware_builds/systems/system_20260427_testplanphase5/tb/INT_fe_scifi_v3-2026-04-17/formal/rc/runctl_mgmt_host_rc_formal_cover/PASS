@@ -1,0 +1,27 @@
+Elapsed clock time [H:MM:SS (secs)]: 0:00:01 (1)
+Elapsed process time [H:MM:SS (secs)]: 0:00:01 (1)
+engine_0 (smtbmc z3) returned pass
+cover trace: engine_0/trace0.vcd
+cover trace: engine_0/trace0.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_361_480 at runctl_mgmt_host_rc_formal_tb.sv:361.13-361.59 step 3
+cover trace: engine_0/trace1.vcd
+cover trace: engine_0/trace1.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_360_476 at runctl_mgmt_host_rc_formal_tb.sv:360.13-360.59 step 3
+cover trace: engine_0/trace2.vcd
+cover trace: engine_0/trace2.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_363_489 at runctl_mgmt_host_rc_formal_tb.sv:363.13-363.84 step 5
+cover trace: engine_0/trace3.vcd
+cover trace: engine_0/trace3.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_362_484 at runctl_mgmt_host_rc_formal_tb.sv:362.13-362.88 step 5
+cover trace: engine_0/trace4.vcd
+cover trace: engine_0/trace4.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_366_500 at runctl_mgmt_host_rc_formal_tb.sv:366.13-366.56 step 5
+cover trace: engine_0/trace5.vcd
+cover trace: engine_0/trace5.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_367_503 at runctl_mgmt_host_rc_formal_tb.sv:367.13-367.56 step 7
+cover trace: engine_0/trace6.vcd
+cover trace: engine_0/trace6.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_364_494 at runctl_mgmt_host_rc_formal_tb.sv:364.13-364.60 step 9
+cover trace: engine_0/trace7.vcd
+cover trace: engine_0/trace7.yw
+  reached cover statement runctl_mgmt_host_rc_formal_tb._witness_.check_cover_runctl_mgmt_host_rc_formal_tb_sv_365_497 at runctl_mgmt_host_rc_formal_tb.sv:365.13-365.60 step 11

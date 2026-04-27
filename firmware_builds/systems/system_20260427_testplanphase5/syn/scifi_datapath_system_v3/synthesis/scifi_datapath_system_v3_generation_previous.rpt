@@ -1,0 +1,523 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading firmware_builds/scifi_datapath_system_v3.qsys
+Progress: Reading input file
+Progress: Adding dbg_mm2runctrl_0 [dbg_mm2runctrl 1.0.0]
+Progress: Parameterizing module dbg_mm2runctrl_0
+Progress: Adding decoded_lane_fifo_0 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_0
+Progress: Adding decoded_lane_fifo_1 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_1
+Progress: Adding decoded_lane_fifo_2 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_2
+Progress: Adding decoded_lane_fifo_3 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_3
+Progress: Adding decoded_lane_fifo_4 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_4
+Progress: Adding decoded_lane_fifo_5 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_5
+Progress: Adding decoded_lane_fifo_6 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_6
+Progress: Adding decoded_lane_fifo_7 [altera_avalon_sc_fifo 18.1]
+Progress: Parameterizing module decoded_lane_fifo_7
+Progress: Adding decoded_lane_mux_0 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_0
+Progress: Adding decoded_lane_mux_1 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_1
+Progress: Adding decoded_lane_mux_2 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_2
+Progress: Adding decoded_lane_mux_3 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_3
+Progress: Adding decoded_lane_mux_4 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_4
+Progress: Adding decoded_lane_mux_5 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_5
+Progress: Adding decoded_lane_mux_6 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_6
+Progress: Adding decoded_lane_mux_7 [multiplexer 18.1]
+Progress: Parameterizing module decoded_lane_mux_7
+Progress: Adding emulator_ctrl_splitter [altera_avalon_st_splitter 18.1]
+Progress: Parameterizing module emulator_ctrl_splitter
+Progress: Adding emulator_inject_fanout [pulse_fanout8 1.0]
+Progress: Parameterizing module emulator_inject_fanout
+Progress: Adding emulator_mutrig_0 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_0
+Progress: Adding emulator_mutrig_1 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_1
+Progress: Adding emulator_mutrig_2 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_2
+Progress: Adding emulator_mutrig_3 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_3
+Progress: Adding emulator_mutrig_4 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_4
+Progress: Adding emulator_mutrig_5 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_5
+Progress: Adding emulator_mutrig_6 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_6
+Progress: Adding emulator_mutrig_7 [emulator_mutrig 26.1.9.418]
+Progress: Parameterizing module emulator_mutrig_7
+Progress: Adding hist_post_cdc_0 [altera_avalon_dc_fifo 18.1]
+Progress: Parameterizing module hist_post_cdc_0
+Progress: Adding hist_post_splitter_0 [altera_avalon_st_splitter 18.1]
+Progress: Parameterizing module hist_post_splitter_0
+Progress: Adding histogram_ingress_bridge_0 [histogram_ingress_bridge 26.0.1.421]
+Progress: Parameterizing module histogram_ingress_bridge_0
+Progress: Adding histogram_statistics_0 [histogram_statistics_v2 26.1.1.416]
+Progress: Parameterizing module histogram_statistics_0
+Progress: Adding hit_stack_subsystem_0 [hit_stack_system 1.0]
+Progress: Parameterizing module hit_stack_subsystem_0
+Progress: Adding hit_stack_subsystem_1 [hit_stack_system 1.0]
+Progress: Parameterizing module hit_stack_subsystem_1
+Progress: Adding lvds_rx_28nm_0 [altera_lvds_rx_28nm 24.0.1110]
+Progress: Parameterizing module lvds_rx_28nm_0
+Progress: Adding lvds_rx_controller_pro_0 [lvds_rx_controller_pro 25.1.630]
+Progress: Parameterizing module lvds_rx_controller_pro_0
+Progress: Adding master_datapath [altera_jtag_avalon_master 18.1]
+Progress: Parameterizing module master_datapath
+Progress: Adding mm_clock_crossing_bridge [altera_avalon_mm_clock_crossing_bridge 18.1]
+Progress: Parameterizing module mm_clock_crossing_bridge
+Progress: Adding mm_pipeline_avmm_lvds [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module mm_pipeline_avmm_lvds
+Progress: Adding mm_pipeline_jtagmaster2rstctrl [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module mm_pipeline_jtagmaster2rstctrl
+Progress: Adding monitor_clock_125 [clock_source 18.1]
+Progress: Parameterizing module monitor_clock_125
+Progress: Adding mts_preprocessor_0 [mts_preprocessor 26.0.2.416]
+Progress: Parameterizing module mts_preprocessor_0
+Progress: Adding mts_preprocessor_1 [mts_preprocessor 26.0.2.416]
+Progress: Parameterizing module mts_preprocessor_1
+Progress: Adding mutrig_datapath_subsystem_0 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_0
+Progress: Adding mutrig_datapath_subsystem_1 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_1
+Progress: Adding mutrig_datapath_subsystem_2 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_2
+Progress: Adding mutrig_datapath_subsystem_3 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_3
+Progress: Adding mutrig_datapath_subsystem_4 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_4
+Progress: Adding mutrig_datapath_subsystem_5 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_5
+Progress: Adding mutrig_datapath_subsystem_6 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_6
+Progress: Adding mutrig_datapath_subsystem_7 [mutrig_datapath_system_v3 1.0]
+Progress: Parameterizing module mutrig_datapath_subsystem_7
+Progress: Adding mutrig_injector_0 [mutrig_injector_multiheader 26.0.326]
+Progress: Parameterizing module mutrig_injector_0
+Progress: Adding mutrig_reset_controller_0 [mutrig_reset_controller 1.0.8]
+Progress: Parameterizing module mutrig_reset_controller_0
+Progress: Adding mux_mutrig2processor [multiplexer 18.1]
+Progress: Parameterizing module mux_mutrig2processor
+Progress: Adding mux_mutrig2processor_0 [multiplexer 18.1]
+Progress: Parameterizing module mux_mutrig2processor_0
+Progress: Adding receiver_clock_125 [altera_clock_bridge 18.1]
+Progress: Parameterizing module receiver_clock_125
+Progress: Adding reset_bridge_export [altera_reset_bridge 18.1]
+Progress: Parameterizing module reset_bridge_export
+Progress: Adding run_control_splitter [altera_avalon_st_splitter 18.1]
+Progress: Parameterizing module run_control_splitter
+Progress: Adding xcvr156_clock [clock_source 18.1]
+Progress: Parameterizing module xcvr156_clock
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0: lvds_rx_controller_pro: file generation successful!
+Warning: scifi_datapath_system_v3.mts_preprocessor_0.hit_type0_in: Signal asi_hit_type0_endofrun has unknown type endofrun
+Warning: scifi_datapath_system_v3.mts_preprocessor_1.hit_type0_in: Signal asi_hit_type0_endofrun has unknown type endofrun
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_0.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_1.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_2.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_3.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_4.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_5.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_6.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0: Signal aso_hit_type0_endofrun has unknown type endofrun
+Info: scifi_datapath_system_v3.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.mutrig_datapath_subsystem_7.backpressure_fifo.almost_empty: backpressure_fifo.almost_empty must be connected to an Avalon-ST sink
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.hit_stack_subsystem_0.hit_type3/hist_post_splitter_0.in: The sink has a empty signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.hist_post_splitter_0.out1/hist_post_cdc_0.in: The source has a empty signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_0.tx8b1k/decoded_lane_mux_0.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_1.tx8b1k/decoded_lane_mux_1.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_2.tx8b1k/decoded_lane_mux_2.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_3.tx8b1k/decoded_lane_mux_3.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_4.tx8b1k/decoded_lane_mux_4.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_5.tx8b1k/decoded_lane_mux_5.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_6.tx8b1k/decoded_lane_mux_6.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3.emulator_mutrig_7.tx8b1k/decoded_lane_mux_7.in1: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Warning: scifi_datapath_system_v3.dbg_mm2runctrl_0.ctrl: dbg_mm2runctrl_0.ctrl must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.emulator_ctrl_splitter.out0: emulator_ctrl_splitter.out0 must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.histogram_ingress_bridge_0.post_out: histogram_ingress_bridge_0.post_out must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.histogram_statistics_0.fill_out: histogram_statistics_0.fill_out must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_0.frame_debug_burst: hit_stack_subsystem_0.frame_debug_burst must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_0.frame_debug_delay8loss: hit_stack_subsystem_0.frame_debug_delay8loss must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_0.frame_debug_filllevel: hit_stack_subsystem_0.frame_debug_filllevel must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_0.frame_debug_loss8fill: hit_stack_subsystem_0.frame_debug_loss8fill must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_0.frame_debug_ts: hit_stack_subsystem_0.frame_debug_ts must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_0.frame_ts_delta: hit_stack_subsystem_0.frame_ts_delta must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.frame_debug_burst: hit_stack_subsystem_1.frame_debug_burst must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.frame_debug_delay8loss: hit_stack_subsystem_1.frame_debug_delay8loss must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.frame_debug_filllevel: hit_stack_subsystem_1.frame_debug_filllevel must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.frame_debug_loss8fill: hit_stack_subsystem_1.frame_debug_loss8fill must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.frame_debug_ts: hit_stack_subsystem_1.frame_debug_ts must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.frame_ts_delta: hit_stack_subsystem_1.frame_ts_delta must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.ring_buffer_cam_0_filllevel: hit_stack_subsystem_1.ring_buffer_cam_0_filllevel must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.ring_buffer_cam_1_filllevel: hit_stack_subsystem_1.ring_buffer_cam_1_filllevel must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.ring_buffer_cam_2_filllevel: hit_stack_subsystem_1.ring_buffer_cam_2_filllevel must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.hit_stack_subsystem_1.ring_buffer_cam_3_filllevel: hit_stack_subsystem_1.ring_buffer_cam_3_filllevel must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mts_preprocessor_0.debug_ts: mts_preprocessor_0.debug_ts must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mts_preprocessor_1.debug_ts: mts_preprocessor_1.debug_ts must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mts_preprocessor_1.debug_burst: mts_preprocessor_1.debug_burst must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.mts_preprocessor_1.ts_delta: mts_preprocessor_1.ts_delta must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3.: You have exported the interface run_control_splitter.in but not its associated reset interface.  Export the driver(s) of run_control_splitter.reset
+Info: scifi_datapath_system_v3: Generating scifi_datapath_system_v3 "scifi_datapath_system_v3" for QUARTUS_SYNTH
+Info: Inserting clock-crossing logic between cmd_demux.src8 and cmd_mux_008.sink0
+Info: Inserting clock-crossing logic between cmd_demux.src42 and cmd_mux_042.sink0
+Info: Inserting clock-crossing logic between cmd_demux_001.src0 and cmd_mux.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src1 and cmd_mux_001.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src2 and cmd_mux_002.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src3 and cmd_mux_003.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src4 and cmd_mux_004.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src5 and cmd_mux_005.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src6 and cmd_mux_006.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src7 and cmd_mux_007.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src9 and cmd_mux_009.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src10 and cmd_mux_010.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src11 and cmd_mux_011.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src12 and cmd_mux_012.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src13 and cmd_mux_013.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src14 and cmd_mux_014.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src15 and cmd_mux_015.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src16 and cmd_mux_016.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src17 and cmd_mux_017.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src18 and cmd_mux_018.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src19 and cmd_mux_019.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src20 and cmd_mux_020.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src21 and cmd_mux_021.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src22 and cmd_mux_022.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src23 and cmd_mux_023.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src24 and cmd_mux_024.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src25 and cmd_mux_025.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src26 and cmd_mux_026.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src27 and cmd_mux_027.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src28 and cmd_mux_028.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src29 and cmd_mux_029.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src30 and cmd_mux_030.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src31 and cmd_mux_031.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src32 and cmd_mux_032.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src33 and cmd_mux_033.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src34 and cmd_mux_034.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src35 and cmd_mux_035.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src36 and cmd_mux_036.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src37 and cmd_mux_037.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src38 and cmd_mux_038.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src39 and cmd_mux_039.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src40 and cmd_mux_040.sink1
+Info: Inserting clock-crossing logic between cmd_demux_001.src41 and cmd_mux_041.sink1
+Info: Inserting clock-crossing logic between rsp_demux.src1 and rsp_mux_001.sink0
+Info: Inserting clock-crossing logic between rsp_demux_001.src1 and rsp_mux_001.sink1
+Info: Inserting clock-crossing logic between rsp_demux_002.src1 and rsp_mux_001.sink2
+Info: Inserting clock-crossing logic between rsp_demux_003.src1 and rsp_mux_001.sink3
+Info: Inserting clock-crossing logic between rsp_demux_004.src1 and rsp_mux_001.sink4
+Info: Inserting clock-crossing logic between rsp_demux_005.src1 and rsp_mux_001.sink5
+Info: Inserting clock-crossing logic between rsp_demux_006.src1 and rsp_mux_001.sink6
+Info: Inserting clock-crossing logic between rsp_demux_007.src1 and rsp_mux_001.sink7
+Info: Inserting clock-crossing logic between rsp_demux_008.src0 and rsp_mux.sink8
+Info: Inserting clock-crossing logic between rsp_demux_009.src1 and rsp_mux_001.sink9
+Info: Inserting clock-crossing logic between rsp_demux_010.src1 and rsp_mux_001.sink10
+Info: Inserting clock-crossing logic between rsp_demux_011.src1 and rsp_mux_001.sink11
+Info: Inserting clock-crossing logic between rsp_demux_012.src1 and rsp_mux_001.sink12
+Info: Inserting clock-crossing logic between rsp_demux_013.src1 and rsp_mux_001.sink13
+Info: Inserting clock-crossing logic between rsp_demux_014.src1 and rsp_mux_001.sink14
+Info: Inserting clock-crossing logic between rsp_demux_015.src1 and rsp_mux_001.sink15
+Info: Inserting clock-crossing logic between rsp_demux_016.src1 and rsp_mux_001.sink16
+Info: Inserting clock-crossing logic between rsp_demux_017.src1 and rsp_mux_001.sink17
+Info: Inserting clock-crossing logic between rsp_demux_018.src1 and rsp_mux_001.sink18
+Info: Inserting clock-crossing logic between rsp_demux_019.src1 and rsp_mux_001.sink19
+Info: Inserting clock-crossing logic between rsp_demux_020.src1 and rsp_mux_001.sink20
+Info: Inserting clock-crossing logic between rsp_demux_021.src1 and rsp_mux_001.sink21
+Info: Inserting clock-crossing logic between rsp_demux_022.src1 and rsp_mux_001.sink22
+Info: Inserting clock-crossing logic between rsp_demux_023.src1 and rsp_mux_001.sink23
+Info: Inserting clock-crossing logic between rsp_demux_024.src1 and rsp_mux_001.sink24
+Info: Inserting clock-crossing logic between rsp_demux_025.src1 and rsp_mux_001.sink25
+Info: Inserting clock-crossing logic between rsp_demux_026.src1 and rsp_mux_001.sink26
+Info: Inserting clock-crossing logic between rsp_demux_027.src1 and rsp_mux_001.sink27
+Info: Inserting clock-crossing logic between rsp_demux_028.src1 and rsp_mux_001.sink28
+Info: Inserting clock-crossing logic between rsp_demux_029.src1 and rsp_mux_001.sink29
+Info: Inserting clock-crossing logic between rsp_demux_030.src1 and rsp_mux_001.sink30
+Info: Inserting clock-crossing logic between rsp_demux_031.src1 and rsp_mux_001.sink31
+Info: Inserting clock-crossing logic between rsp_demux_032.src1 and rsp_mux_001.sink32
+Info: Inserting clock-crossing logic between rsp_demux_033.src1 and rsp_mux_001.sink33
+Info: Inserting clock-crossing logic between rsp_demux_034.src1 and rsp_mux_001.sink34
+Info: Inserting clock-crossing logic between rsp_demux_035.src1 and rsp_mux_001.sink35
+Info: Inserting clock-crossing logic between rsp_demux_036.src1 and rsp_mux_001.sink36
+Info: Inserting clock-crossing logic between rsp_demux_037.src1 and rsp_mux_001.sink37
+Info: Inserting clock-crossing logic between rsp_demux_038.src1 and rsp_mux_001.sink38
+Info: Inserting clock-crossing logic between rsp_demux_039.src1 and rsp_mux_001.sink39
+Info: Inserting clock-crossing logic between rsp_demux_040.src1 and rsp_mux_001.sink40
+Info: Inserting clock-crossing logic between rsp_demux_041.src1 and rsp_mux_001.sink41
+Info: Inserting clock-crossing logic between rsp_demux_042.src0 and rsp_mux.sink42
+Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: avalon_st_adapter: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_001: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_002: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_002: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_002: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_003: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_003: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_003: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_004: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_004: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_004: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_005: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_005: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_005: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_006: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_006: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_006: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_007: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_007: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_007: Inserting timing_adapter: timing_adapter_1
+Info: avalon_st_adapter_008: Inserting data_format_adapter: data_format_adapter_0
+Info: avalon_st_adapter_009: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_009: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_010: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_010: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_011: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_011: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_012: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_012: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_013: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_013: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_014: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_014: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_015: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_015: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_016: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_016: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_017: Inserting data_format_adapter: data_format_adapter_0
+Info: avalon_st_adapter_018: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_019: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_020: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_021: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_022: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_023: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_024: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_025: Inserting timing_adapter: timing_adapter_0
+Warning: scifi_datapath_system_v3: "No matching role found for mts_preprocessor_0:hit_type0_in:asi_hit_type0_endofrun (endofrun)"
+Warning: scifi_datapath_system_v3: "No matching role found for mts_preprocessor_1:hit_type0_in:asi_hit_type0_endofrun (endofrun)"
+Info: dbg_mm2runctrl_0: "scifi_datapath_system_v3" instantiated dbg_mm2runctrl "dbg_mm2runctrl_0"
+Info: decoded_lane_fifo_0: "scifi_datapath_system_v3" instantiated altera_avalon_sc_fifo "decoded_lane_fifo_0"
+Info: decoded_lane_mux_0: "scifi_datapath_system_v3" instantiated multiplexer "decoded_lane_mux_0"
+Info: emulator_ctrl_splitter: "scifi_datapath_system_v3" instantiated altera_avalon_st_splitter "emulator_ctrl_splitter"
+Info: emulator_inject_fanout: "scifi_datapath_system_v3" instantiated pulse_fanout8 "emulator_inject_fanout"
+Info: emulator_mutrig_0: "scifi_datapath_system_v3" instantiated emulator_mutrig "emulator_mutrig_0"
+Info: hist_post_cdc_0: "scifi_datapath_system_v3" instantiated altera_avalon_dc_fifo "hist_post_cdc_0"
+Info: histogram_ingress_bridge_0: "scifi_datapath_system_v3" instantiated histogram_ingress_bridge "histogram_ingress_bridge_0"
+Info: histogram_statistics_0: "scifi_datapath_system_v3" instantiated histogram_statistics_v2 "histogram_statistics_0"
+Info: hit_stack_subsystem_0: "scifi_datapath_system_v3" instantiated hit_stack_system "hit_stack_subsystem_0"
+Info: hit_stack_subsystem_1: "scifi_datapath_system_v3" instantiated hit_stack_system "hit_stack_subsystem_1"
+Info: lvds_rx_28nm_0: "scifi_datapath_system_v3" instantiated altera_lvds_rx_28nm "lvds_rx_28nm_0"
+Info: lvds_rx_controller_pro_0: "scifi_datapath_system_v3" instantiated lvds_rx_controller_pro "lvds_rx_controller_pro_0"
+Info: master_datapath: "scifi_datapath_system_v3" instantiated altera_jtag_avalon_master "master_datapath"
+Info: mm_clock_crossing_bridge: "scifi_datapath_system_v3" instantiated altera_avalon_mm_clock_crossing_bridge "mm_clock_crossing_bridge"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_dc_fifo.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_dcfifo_synchronizer_bundle.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_dc_fifo.sdc
+Info: mm_pipeline_avmm_lvds: "scifi_datapath_system_v3" instantiated altera_avalon_mm_bridge "mm_pipeline_avmm_lvds"
+Info: mts_preprocessor_0: "scifi_datapath_system_v3" instantiated mts_preprocessor "mts_preprocessor_0"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_0: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_0: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_0"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_1: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_1: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_1"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_2: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_2: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_2"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_3: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_3: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_3"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_4: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_4: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_4"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_5: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_5: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_5"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_6: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_6: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_6"
+Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+Warning: mutrig_datapath_subsystem_7: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+Info: mutrig_datapath_subsystem_7: "scifi_datapath_system_v3" instantiated mutrig_datapath_system_v3 "mutrig_datapath_subsystem_7"
+Info: mutrig_injector_0: "scifi_datapath_system_v3" instantiated mutrig_injector_multiheader "mutrig_injector_0"
+Info: mutrig_reset_controller_0: "scifi_datapath_system_v3" instantiated mutrig_reset_controller "mutrig_reset_controller_0"
+Info: mux_mutrig2processor: "scifi_datapath_system_v3" instantiated multiplexer "mux_mutrig2processor"
+Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_012: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_013: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_014: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_015: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_016: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_017: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_018: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_019: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_020: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_021: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_022: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_023: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_024: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_025: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_026: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_027: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_028: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_029: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_030: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_031: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_032: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_033: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_034: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_035: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_036: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_037: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_038: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_039: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_040: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_041: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_042: Inserting error_adapter: error_adapter_0
+Info: mm_interconnect_0: "scifi_datapath_system_v3" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: mm_interconnect_1: "scifi_datapath_system_v3" instantiated altera_mm_interconnect "mm_interconnect_1"
+Info: avalon_st_adapter: "scifi_datapath_system_v3" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: avalon_st_adapter_008: "scifi_datapath_system_v3" instantiated altera_avalon_st_adapter "avalon_st_adapter_008"
+Info: avalon_st_adapter_009: "scifi_datapath_system_v3" instantiated altera_avalon_st_adapter "avalon_st_adapter_009"
+Info: avalon_st_adapter_017: "scifi_datapath_system_v3" instantiated altera_avalon_st_adapter "avalon_st_adapter_017"
+Info: avalon_st_adapter_018: "scifi_datapath_system_v3" instantiated altera_avalon_st_adapter "avalon_st_adapter_018"
+Info: rst_controller: "scifi_datapath_system_v3" instantiated altera_reset_controller "rst_controller"
+Info: feb_frame_assembly_0: "hit_stack_subsystem_0" instantiated feb_frame_assembly "feb_frame_assembly_0"
+Info: ring_buffer_cam_0: "hit_stack_subsystem_0" instantiated ring_buffer_cam "ring_buffer_cam_0"
+Info: jtag_phy_embedded_in_jtag_master: "master_datapath" instantiated altera_jtag_dc_streaming "jtag_phy_embedded_in_jtag_master"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: timing_adt: "master_datapath" instantiated timing_adapter "timing_adt"
+Info: b2p: "master_datapath" instantiated altera_avalon_st_bytes_to_packets "b2p"
+Info: p2b: "master_datapath" instantiated altera_avalon_st_packets_to_bytes "p2b"
+Info: transacto: "master_datapath" instantiated altera_avalon_packets_to_master "transacto"
+Info: b2p_adapter: "master_datapath" instantiated channel_adapter "b2p_adapter"
+Info: p2b_adapter: "master_datapath" instantiated channel_adapter "p2b_adapter"
+Info: mutrig_frame_deassembly_0: "mutrig_datapath_subsystem_0" instantiated mutrig_frame_deassembly "mutrig_frame_deassembly_0"
+Info: avalon_st_adapter: "mutrig_datapath_subsystem_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: mm_pipeline_avmm_lvds_m0_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "mm_pipeline_avmm_lvds_m0_translator"
+Info: mutrig_datapath_subsystem_0_backpressure_fifo_csr_translator: "mm_interconnect_0" instantiated altera_merlin_slave_translator "mutrig_datapath_subsystem_0_backpressure_fifo_csr_translator"
+Info: mm_pipeline_avmm_lvds_m0_agent: "mm_interconnect_0" instantiated altera_merlin_master_agent "mm_pipeline_avmm_lvds_m0_agent"
+Info: mutrig_datapath_subsystem_0_backpressure_fifo_csr_agent: "mm_interconnect_0" instantiated altera_merlin_slave_agent "mutrig_datapath_subsystem_0_backpressure_fifo_csr_agent"
+Info: router: "mm_interconnect_0" instantiated altera_merlin_router "router"
+Info: router_001: "mm_interconnect_0" instantiated altera_merlin_router "router_001"
+Info: router_002: "mm_interconnect_0" instantiated altera_merlin_router "router_002"
+Info: mm_pipeline_avmm_lvds_m0_limiter: "mm_interconnect_0" instantiated altera_merlin_traffic_limiter "mm_pipeline_avmm_lvds_m0_limiter"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: mutrig_datapath_subsystem_0_backpressure_fifo_csr_burst_adapter: "mm_interconnect_0" instantiated altera_merlin_burst_adapter "mutrig_datapath_subsystem_0_backpressure_fifo_csr_burst_adapter"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
+Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
+Info: rsp_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux"
+Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: crosser: "mm_interconnect_0" instantiated altera_avalon_st_handshake_clock_crosser "crosser"
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_st_clock_crosser.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/scifi_datapath_system_v3/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
+Info: channel_adapter_0: "avalon_st_adapter" instantiated channel_adapter "channel_adapter_0"
+Info: timing_adapter_0: "avalon_st_adapter" instantiated timing_adapter "timing_adapter_0"
+Info: timing_adapter_1: "avalon_st_adapter" instantiated timing_adapter "timing_adapter_1"
+Info: data_format_adapter_0: "avalon_st_adapter_008" instantiated data_format_adapter "data_format_adapter_0"
+Info: channel_adapter_0: "avalon_st_adapter_009" instantiated channel_adapter "channel_adapter_0"
+Info: timing_adapter_0: "avalon_st_adapter_009" instantiated timing_adapter "timing_adapter_0"
+Info: data_format_adapter_0: "avalon_st_adapter_017" instantiated data_format_adapter "data_format_adapter_0"
+Info: timing_adapter_0: "avalon_st_adapter" instantiated timing_adapter "timing_adapter_0"
+Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
+Info: scifi_datapath_system_v3: Done "scifi_datapath_system_v3" with 72 modules, 150 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

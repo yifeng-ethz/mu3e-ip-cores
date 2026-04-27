@@ -1,0 +1,15 @@
+Elapsed clock time [H:MM:SS (secs)]: 0:00:00 (0)
+Elapsed process time [H:MM:SS (secs)]: 0:00:00 (0)
+engine_0 (smtbmc z3) returned pass
+cover trace: engine_0/trace0.vcd
+cover trace: engine_0/trace0.yw
+  reached cover statement run_control_splitter_formal_tb._witness_.check_cover_run_control_splitter_formal_tb_sv_216_1001 at run_control_splitter_formal_tb.sv:216.13-216.68 step 2
+cover trace: engine_0/trace1.vcd
+cover trace: engine_0/trace1.yw
+  reached cover statement run_control_splitter_formal_tb._witness_.check_cover_run_control_splitter_formal_tb_sv_215_999 at run_control_splitter_formal_tb.sv:215.13-215.42 step 2
+cover trace: engine_0/trace2.vcd
+cover trace: engine_0/trace2.yw
+  reached cover statement run_control_splitter_formal_tb._witness_.check_cover_run_control_splitter_formal_tb_sv_217_1006 at run_control_splitter_formal_tb.sv:217.13-217.68 step 2
+cover trace: engine_0/trace3.vcd
+cover trace: engine_0/trace3.yw
+  reached cover statement run_control_splitter_formal_tb._witness_.check_cover_run_control_splitter_formal_tb_sv_218_1011 at run_control_splitter_formal_tb.sv:218.13-218.89 step 3
