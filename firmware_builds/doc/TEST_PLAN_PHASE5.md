@@ -17,7 +17,7 @@ The plan is structured as four sequential closures:
 1. **Real-MuTRiG bring-up** — load each ASIC's known-good configuration via `mutrig_cfg_ctrl_0` (the MuTRiG Controller IP), sweep the per-channel TTH via the on-IP TTH-Scan-Automation (TSA) routine, and confirm every ASIC reports a stable, decoded MuTRiG frame.
 2. **Frame-format signoff with SignalTap (4k × 4 segments)** — capture the FEB egress side and the SWB ingress side over multiple complete packets and prove the deassembled frame is structurally identical at both ends.
 3. **Emulator vs real-MuTRiG packet equivalence** — re-run the same emulator stimulus the Phase 4 closure already passed against, capture the egress, and confirm the bit-for-bit framing is identical between emulator and real ASIC at the FEB egress and the SWB ingress (modulo the agreed-upon hit-payload differences listed in §4.4).
-4. **Injector + histogram closure** — sweep `mutrig_injector_0` across **every implemented mode** at multiple rates against eight live MuTRiG ASICs and compare the delay PDF and the channel/ASIC rate distribution against `histogram_statistics_0`. The case catalog is **5 buckets × 64 cases = 320 cases**.
+4. **Injector + histogram closure** — sweep `mutrig_injector_0` across **every implemented mode** at multiple rates against eight live MuTRiG ASICs and compare the delay PDF and the channel/ASIC rate distribution against `histogram_statistics_0`. The live stimulus catalog has five 64-case groups; closure coverage is reported against the four required BASIC/EDGE/PROF/ERROR buckets in §1.6.
 
 Phase 5 does **not** redo Phase 4 closure on the emulator; Phase 4 is the prerequisite, not part of the Phase 5 evidence.
 
@@ -89,6 +89,36 @@ This plan adopts the BASIC catalog conventions from [`phase4/TEST_PLAN_BASIC.md`
 - **stage** — `B` = on-board, `S` = SignalTap segmented capture, `C` = cross-source DISLIN compare against the Phase 4 emulator reference
 
 Phase 5 is on-board-first by construction; the TLM/RTL-SIM rows of Phase 4 are the **reference** that real-MuTRiG cases compare against.
+
+### 1.6 Functional coverage accounting
+
+Phase 5 uses four functional-coverage buckets for board and SignalTap closure:
+
+| Coverage bucket | Required points | Scope |
+|---|---:|---|
+| BASIC | 64 | Nominal bring-up, consecutive-frame framing, run-control, and one-rate histogram checks. |
+| EDGE | 64 | Boundary settings: short/long frames, first/last ASIC, first/last channel, TTH extremes, delay endpoints, and wire-cap edge rates. |
+| PROF | 64 | Rate, latency, queue, and sustained-run profiling checkpoints. |
+| ERROR | 64 | Negative triggers and fault checkpoints: torn frame, code/disp error, bad timestamp, overflow/drop/underflow, and misconfiguration detection. |
+
+The sign-off target is at least **50% functional coverage** over the 256 required points, with no open failure in any implemented checkpoint. Until the full catalog is implemented, every report must publish both views:
+
+- implemented coverage by bucket: `implemented_pass / 64`
+- aggregate coverage: `sum(implemented_pass) / 256`
+
+The existing §5 A..E case catalog remains the live-MuTRiG stimulus catalog. Each case maps to one or more BASIC/EDGE/PROF/ERROR coverage points in the report. SignalTap trigger-condition cases also count as coverage points, but each segmented acquisition is one trigger condition with four consecutive trigger events, per §3.
+
+Current implemented trigger/checkpoint coverage in this revision:
+
+| Bucket | Implemented | Required | Current ratio |
+|---|---:|---:|---:|
+| BASIC | 6 | 64 | 9.4% |
+| EDGE | 1 | 64 | 1.6% |
+| PROF | 0 | 64 | 0.0% |
+| ERROR | 2 | 64 | 3.1% |
+| **Aggregate** | **9** | **256** | **3.5%** |
+
+These counts cover only concrete trigger/checkpoint cases that are enumerated in this document today: the five FEB trigger cases in §3.1 and the four SWB trigger cases in §3.2. Planned §5 stimulus rows do not count toward implemented coverage until the runner, report row, and pass/fail evidence exist.
 
 ---
 
@@ -174,7 +204,11 @@ Phase 5 §2 FAILS hard if any of the eight ASICs cannot lock its decoded frame w
 
 ## 3. Frame-format SignalTap signoff (4096 samples × 4 segments)
 
-Capture two SignalTap images, one for FEB egress and one for SWB ingress, both configured **4096 sample depth × 4 segments** (segmented capture on Quartus Stp). The 4×4096 layout (16384 cumulative samples) lets a single arming pass capture **multiple complete short-frame and long-frame packets**, which is the requirement of this stage: the proof is not just "one packet is shaped correctly" but "the framing repeats correctly across every packet boundary".
+Capture two SignalTap image families, one for FEB egress and one for SWB ingress, both configured **4096 sample depth × 4 segments** (segmented capture on Quartus Stp).
+
+**SignalTap segmentation constraint**: one segmented `.stp` acquisition has exactly one trigger condition. The four segments are four consecutive occurrences of that same trigger condition. Do not specify a different trigger for each segment. When several trigger conditions are needed, create several `.stp` trigger-case images or several runs of the same image with the trigger edited between runs.
+
+The goal of the 4×4096 layout is to capture four adjacent frames or four adjacent hit/framing events. The proof is not just "one packet is shaped correctly"; it is that adjacent frame counters, SOP cadence, EOP cadence, and payload/hit counts advance correctly across consecutive frames, which catches common missed-frame, double-SOP, and off-by-one bugs.
 
 ### 3.1 SignalTap image #1 — FEB egress
 
@@ -194,18 +228,19 @@ Capture two SignalTap images, one for FEB egress and one for SWB ingress, both c
 | `runctl_mgmt_host_0.run_state[8:0]` | 9 | one-hot run-state echo |
 | `histogram_ingress_bridge_0.live_select_post` + `.post_packet_active` | 2 | confirms ingress is in the expected mode for this capture |
 
-**Trigger matrix** (one trigger per segment, 4 segments per arming):
+**Trigger-case matrix** (one trigger condition per image/run; each image stores four consecutive trigger events):
 
-| Segment | Trigger condition (1-cycle combinational) | Captures |
-|---|---|---|
-| 0 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` (K28.0 SOP, lane 0) | one short-frame packet boundary (lane 0) |
-| 1 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h19C` (K28.4 trailer, lane 0) | the matching trailer |
-| 2 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` (lane 4 — different bank) | confirms framing on the other 4-MuTRiG datapath |
-| 3 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C && in_frame_q` (SOP inside an in-progress packet) | this **must not fire** under nominal traffic; it would fire only if a torn frame is observed (matches Phase 4 §4.3 `SOP_NO_EOP`). The fact that segment 3 does *not* arm during nominal traffic is itself the proof; segment 3 is left armed deliberately. |
+| case_id | Trigger condition (1-cycle combinational) | Captures | Coverage bucket |
+|---|---|---|---|
+| STP5-FEB-BASIC-SOP-L0 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` on lane 0 | four consecutive SOP-centered frame windows on lower bank | BASIC |
+| STP5-FEB-BASIC-EOP-L0 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h19C` on lane 0 | four consecutive EOP-centered frame windows on lower bank | BASIC |
+| STP5-FEB-BASIC-SOP-L4 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` on lane 4 | four consecutive SOP-centered frame windows on upper bank | BASIC |
+| STP5-FEB-EDGE-LONG-SOP | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` with `csr_short_mode=0` | four consecutive long-frame SOP windows | EDGE |
+| STP5-FEB-ERROR-SOP-IN-FRAME | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C && in_frame_q` | should not trigger during a 60 s nominal window; if it does, stores the first four torn-frame events | ERROR |
 
-**Capture position**: 20% post-trigger so each segment retains 3276 cycles of pre-trigger context — enough to capture the K28.5 idle stream that precedes a SOP and the partial payload that follows. Across four segments, the image stores ~3.2k cycles of pre + ~820 cycles of post per segment, for a total observation budget that spans at least four short-frames (910 cycles each) and confirms the alternation of K28.5 idle / K28.0 SOP / payload / K28.4 EOP across multiple packets.
+**Capture position**: 20% post-trigger so each segment retains 3276 cycles of pre-trigger context and ~820 cycles of post-trigger context. For SOP-triggered short-frame captures, this is enough to see the K28.5 idle stream before the SOP, the payload that follows, the EOP, and the next frame boundary context. Across four segments, verify four consecutive trigger events and the adjacent-frame relationships between them.
 
-**Trigger-disabled arming** (segment 3 case, see §3.4): if Phase 5 traffic cannot reasonably be expected to provoke a torn frame, segment 3's trigger is replaced with a free-running condition that arms at the start of the test window so it captures whatever happens to land in the budget during the §5 stimulus.
+For ERROR trigger cases, pass is normally "no trigger during the observation window." If a negative trigger fires, all four segments capture consecutive occurrences of that same error condition and the case fails with those captures as debug evidence.
 
 ### 3.2 SignalTap image #2 — SWB ingress
 
@@ -222,14 +257,14 @@ Capture two SignalTap images, one for FEB egress and one for SWB ingress, both c
 | Per-link `LINK_LOCKED` bit | 1 | confirms link 2 is locked (the bit in the low link-lock register, not the upper register that contains other boards) |
 | SWB-side per-link hit counter shadow | 32 | the same counter `TEST_PLAN.md` §4.4 already references |
 
-**Trigger matrix** (one per segment):
+**Trigger-case matrix** (one trigger condition per image/run; each image stores four consecutive trigger events):
 
-| Segment | Trigger | Captures |
-|---|---|---|
-| 0 | `is_k && data == 8'h1C` (K28.0 ingressing) | first SOP |
-| 1 | `is_k && data == 8'h9C` (K28.4 ingressing) | matching EOP |
-| 2 | `is_k && data == 8'hBC && rising_edge(prev_payload_valid)` (K28.5 idle right after a payload-bearing cycle) | inter-frame transition |
-| 3 | `code_err \|\| disp_err` | **must not fire**; same gate as §3.1 segment 3 |
+| case_id | Trigger | Captures | Coverage bucket |
+|---|---|---|---|
+| STP5-SWB-BASIC-SOP | `is_k && data == 8'h1C` | four consecutive ingress SOP windows | BASIC |
+| STP5-SWB-BASIC-EOP | `is_k && data == 8'h9C` | four consecutive ingress EOP windows | BASIC |
+| STP5-SWB-BASIC-IDLE-AFTER-PAYLOAD | `is_k && data == 8'hBC && rising_edge(prev_payload_valid)` | four consecutive inter-frame transitions | BASIC |
+| STP5-SWB-ERROR-CODE-DISP | `code_err || disp_err` | should not trigger during a 60 s nominal window; if it does, stores the first four decoder-error events | ERROR |
 
 **Same depth and position as §3.1**: 4096 × 4 segments, 20% post-trigger.
 
@@ -237,26 +272,29 @@ Capture two SignalTap images, one for FEB egress and one for SWB ingress, both c
 
 The pair of images proves the canonical 8b/10b framing contract end-to-end:
 
-- **K28.5 fill** — the inter-frame stream is K28.5 idles only; both FEB egress segment 0 pre-window and SWB ingress segment 2 must show solid K28.5 between two K28.0 SOPs.
-- **K28.0 SOP at frame boundary** — both images segment 0 captures match.
-- **K28.4 EOP closes the frame** — both images segment 1 captures match.
-- **No torn frames** — segment 3 of both images stays disarmed for the full test window.
-- **Frame interval** — measured cycle distance between consecutive SOPs in segment 0's capture window equals `FRAME_INTERVAL_SHORT` (910) for `csr_short_mode=1` and `FRAME_INTERVAL_LONG` (1550) for `csr_short_mode=0`, within the expected 1-cycle FIFO jitter.
-- **Multi-packet repetition** — across four segments, both images cumulatively span at least four complete packets so an off-by-one timing error in any single packet would not pass the four-segment alignment cross-check.
+- **K28.5 fill** — the inter-frame stream is K28.5 idles only; SOP and idle-after-payload trigger cases must show solid K28.5 between two K28.0 SOPs.
+- **K28.0 SOP at frame boundary** — the four SOP segments capture four adjacent frame starts on the same trigger case.
+- **K28.4 EOP closes the frame** — the four EOP segments capture four adjacent frame closes on the same trigger case.
+- **No torn frames** — the dedicated torn-frame/error trigger cases do not trigger during the 60 s nominal window.
+- **Adjacent frame counter increment** — for consecutive SOP and EOP trigger cases, `mutrig_frame_deassembly_k.frame_counter` and FEB frame ID shadows increment by exactly one between adjacent segments, modulo the documented counter width.
+- **Frame interval** — measured cycle distance between consecutive SOP events equals `FRAME_INTERVAL_SHORT` (910) for `csr_short_mode=1` and `FRAME_INTERVAL_LONG` (1550) for `csr_short_mode=0`, within the expected 1-cycle FIFO jitter.
+- **Multi-packet repetition** — the four segments are four consecutive events, so an off-by-one timing error, dropped frame, repeated frame counter, or missed EOP in any adjacent pair fails the alignment cross-check.
 
 ### 3.4 Pass / fail
 
 Phase 5 §3 PASSES when:
 
 - Both images arm and capture in the same FEB run; the SWB image was armed before the FEB-side stimulus started.
-- Segment 0..2 of both images present clean, decoded packet boundaries with K28.0 → payload → K28.4 → K28.5 idle ordering.
-- Segment 3 of both images **does not fire** during the 60 s observation window.
-- The cycle distance between consecutive SOPs in segment 0's pre-trigger window matches `FRAME_INTERVAL_{SHORT,LONG}` ± 1 cycle.
+- Every BASIC/EDGE trigger case produces four consecutive segments with clean decoded packet boundaries and K28.0 → payload → K28.4 → K28.5 idle ordering.
+- Adjacent segments in each SOP/EOP trigger case show frame counters and frame IDs incrementing by exactly one.
+- Dedicated ERROR trigger cases do not fire during the 60 s nominal observation window.
+- The cycle distance between consecutive SOP trigger events matches `FRAME_INTERVAL_{SHORT,LONG}` ± 1 cycle.
 
 Phase 5 §3 FAILS if any of:
 
-- A K28.0 lands inside an already-open packet (segment 3 of FEB image fires).
-- A code-err or disp-err lands at SWB ingress (segment 3 of SWB image fires).
+- A K28.0 lands inside an already-open packet (the FEB torn-frame trigger case fires).
+- A code-err or disp-err lands at SWB ingress (the SWB decoder-error trigger case fires).
+- Adjacent captured frame counters skip, repeat, or advance by more than one.
 - The frame interval drifts beyond ± 4 cycles, indicating a clock-domain or FIFO-overflow hazard on the egress path.
 
 A failure here is treated as a **datapath regression** and routes back to the integration debug ladder in `phase4/TEST_PLAN_BASIC.md` "Disagreement protocol" — debug RTL (`emulator_mutrig.sv` / `mutrig_frame_deassembly`) before debugging the board fabric.
@@ -276,7 +314,7 @@ up to a defined set of allowed payload differences (real MuTRiG hits carry real 
 
 ### 4.2 Capture pairs
 
-Two stimulus configurations are run back-to-back with the same SC/RC sequence, the same histogram CSR settings, the same SignalTap images from §3, and the **same** segment depth × count:
+Two stimulus configurations are run back-to-back with the same SC/RC sequence, the same histogram CSR settings, the same SignalTap trigger-case images from §3, and the **same** segment depth × count:
 
 1. **Emulator stimulus** (Phase 4 reference): write `data_path_subsystem.source_select` (or its functional equivalent in the integration build's mux) to "emulator", program `emulator_mutrig_0..7.csr` for `enable=1, hit_mode=POISSON_IID, short_mode=1, hit_rate=0x0800`. Arm run-control `RUNNING`. Capture `phase5_emut_baseline_egress.stp` and `phase5_emut_baseline_swb.stp`.
 2. **Real-MuTRiG stimulus**: write the source select to "real" (the live ASIC path), with §2 baseline cfg already loaded. Same `short_mode`, same per-MuTRiG average rate (achieved on real ASICs by the dark-rate floor at the §2.5 known-good threshold). Capture `phase5_real_egress.stp` and `phase5_real_swb.stp`.
@@ -310,7 +348,7 @@ Phase 5 §4 PASSES when every "bit-exact / shape-exact" line in §4.3 passes for
 
 ---
 
-## 5. Injector + histogram closure (5 buckets × 64 cases)
+## 5. Injector + histogram closure (5 stimulus groups × 64 cases)
 
 ### 5.1 Common configuration
 
@@ -355,7 +393,7 @@ Phase 5 §5 buckets exercise all live modes: 0+onclick, 1, 2, 3, 4, and 5.
 | D | TPB5D01..TPB5D64 | 64 | mode-2 `pulse_interval` sweep covering 25 Mhit/s wire-floor down to wire-cap | delay PDF + per-MuTRiG accepted rate | does the delay PDF widen monotonically and the per-MuTRiG accepted rate clip exactly at the 25 Mhit/s wire-cap, matching slides 23/25/38? |
 | E | TPB5E01..TPB5E64 | 64 | mode-3 async periodic, mode-5 PRNG, mode-4 onClick burst stimulus, ASIC×channel-rate stress | channel/ASIC rate distribution **and** delay PDF | does the histogram correctly observe async, random, one-shot, and skewed-rate injection at the expected rate without overflow or dropped hits? |
 
-The catalog covers **delay** and **channel/ASIC rate** distributions explicitly per the Phase-5 closure ask, with at least 5 buckets and 64 cases per bucket. Each bucket below lists every case as a row.
+The stimulus catalog covers **delay** and **channel/ASIC rate** distributions explicitly per the Phase-5 closure ask, with five 64-case stimulus groups. Each row maps into the BASIC/EDGE/PROF/ERROR functional coverage buckets from §1.6 when reported; the coverage denominator is therefore 256 required functional points, not the 320 stimulus rows.
 
 ### 5.4 Bucket A — real-MuTRiG threshold / dark-rate distribution (TPB5A01..TPB5A64)
 
@@ -489,8 +527,8 @@ Phase 5 reuses the disagreement protocol from `phase4/TEST_PLAN_BASIC.md` §"Dis
 | Symptom | First-pass debug entry point |
 |---|---|
 | §2 some ASICs do not lock decoded frames | `mutrig_cfg_ctrl_0` cfglen / scratchpad word stream — confirm the 84-word block is bit-for-bit the production bitstream from `Mutrig_FEB.cpp`, then check the SPI clock domain (`i_clk_spi`) reset and the SS-N fan-out |
-| §3 segment 3 fires at FEB egress (torn frame) | `mutrig_frame_deassembly` decoder error, then `feb_frame_assembly` framing logic, then the `aso_tx8b1k` clock-domain crossing |
-| §3 segment 3 fires at SWB ingress (code-err / disp-err) | SWB-side 8b/10b decoder, link-2 RX equalization, or the LVDS RX outclock |
+| §3 FEB ERROR trigger case fires (torn frame) | `mutrig_frame_deassembly` decoder error, then `feb_frame_assembly` framing logic, then the `aso_tx8b1k` clock-domain crossing |
+| §3 SWB ERROR trigger case fires (code-err / disp-err) | SWB-side 8b/10b decoder, link-2 RX equalization, or the LVDS RX outclock |
 | §4 bit-exact compare fails | `aso_tx8b1k` width / K-flag wiring on the lane that diverges; cross-check against the Phase-4-emulator bits at the same byte position |
 | §5 Bucket A rate-vs-TTH non-monotone | TSA result-RAM vs cfg-bitstream TTH field offset (`CFG_HEADER_LENGTH + CFG_SINGLE_CH_TTH_OFFSET + CFG_SINGLE_CH_LENGTH*i`); then the per-channel TTH bit-width (`CFG_TTH_SETTING_LENGTH = 6`) |
 | §5 Bucket B mask not exact | cfg-bitstream channel-TTH-to-quiet-channel mapping; then the histogram_ingress_bridge `select_post` setting — pre-tap vs post-tap |
@@ -508,20 +546,21 @@ Each Phase-5 stage produces a structured Markdown report under `../reports/`:
 | Report | Contents |
 |---|---|
 | `phase5_mutrig_baseline_<date>.md` | per-(ASIC, channel) known-good TTH from §2.5; the cfg-bitstream baseline word stream pointer; the `mutrig_frame_deassembly_*` lock evidence |
-| `phase5_frame_format_egress_<date>.md` | §3.1 SignalTap capture summary, exported segment 0..3 PNG/CSV, frame-interval cycle distance histogram |
-| `phase5_frame_format_swb_<date>.md` | §3.2 SignalTap capture summary on the SWB side, code-err/disp-err clean record |
+| `phase5_frame_format_egress_<date>.md` | §3.1 SignalTap trigger-case summary, exported segment 0..3 PNG/CSV per trigger condition, adjacent-frame counter increments, frame-interval cycle distance histogram |
+| `phase5_frame_format_swb_<date>.md` | §3.2 SignalTap trigger-case summary on the SWB side, adjacent-frame counter increments, code-err/disp-err clean record |
 | `phase5_emulator_vs_real_<date>.md` | §4 four-way comparison (FEB egress emulator vs real, SWB ingress emulator vs real) with the §4.3 per-row pass/fail |
 | `phase5_injector_bucketA_<date>.md` | TPB5A01..TPB5A64 per-cell results |
 | `phase5_injector_bucketB_<date>.md` | TPB5B01..TPB5B64 per-cell results |
 | `phase5_injector_bucketC_<date>.md` | TPB5C01..TPB5C64 per-cell results |
 | `phase5_injector_bucketD_<date>.md` | TPB5D01..TPB5D64 per-cell results |
 | `phase5_injector_bucketE_<date>.md` | TPB5E01..TPB5E64 per-cell results |
-| `phase5_closure_<date>.md` | aggregated PASS/FAIL across §2..§5, list of any cross-source discrepancies with their numeric ratios, pointer to the TLM/RTL-SIM Phase-4 reference each Phase-5 case overlays against |
+| `phase5_closure_<date>.md` | aggregated PASS/FAIL across §2..§5, BASIC/EDGE/PROF/ERROR coverage table as `implemented_pass / 64` per bucket and aggregate `sum(implemented_pass) / 256`, list of any cross-source discrepancies with their numeric ratios, pointer to the TLM/RTL-SIM Phase-4 reference each Phase-5 case overlays against |
 
 The reports are the sign-off artifact; Phase 5 is closed when:
 
 - §2..§5 all PASS per their stage aggregator,
 - the closure report is checked into `../reports/`,
+- BASIC/EDGE/PROF/ERROR functional coverage is at least 50% aggregate, reported as implemented passing checkpoints over the 256-point requirement,
 - every Phase-5 cross-source overlay is within the tolerance documented in the bucket's pass aggregator,
 - no Phase-4 Closure invariant (`OVERFLOW_COUNT`, `DROPPED_HITS`, `UNDERFLOW_COUNT` deltas all zero) is violated.
 

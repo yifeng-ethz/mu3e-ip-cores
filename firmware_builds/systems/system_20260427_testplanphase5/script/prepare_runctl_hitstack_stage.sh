@@ -72,7 +72,7 @@ fi
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 system_dir="$(cd -- "${script_dir}/.." && pwd)"
 repo_root="$(cd -- "${script_dir}/../../../.." && pwd)"
-project_dir="${repo_root}/board_projects/fe_scifi_feb_v3"
+project_dir="${system_dir}/syn/board_projects/fe_scifi_feb_v3"
 generator="${system_dir}/script/generate_runctl_hitstack_stage_stp.py"
 validator="${HOME}/.codex/skills/signaltap-creation-co-debug/scripts/check_stp_nodes.py"
 stp_file="${system_dir}/signaltap/phase4d_runctl_hitstack${target}_stage.stp"

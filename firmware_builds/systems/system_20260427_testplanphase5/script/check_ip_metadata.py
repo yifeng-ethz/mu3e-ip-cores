@@ -45,17 +45,18 @@ def _default_jdi() -> Path:
     path = os.environ.get("BOARD_TEST_JDI")
     if path:
         return Path(path)
-    pipe = REPO_ROOT / "board_projects" / "fe_scifi_feb_v3" / "output_files_pipe" / "top_nostp_pipe.jdi"
+    board_project = SYN_DIR / "board_projects" / "fe_scifi_feb_v3"
+    pipe = board_project / "output_files_pipe" / "top_nostp_pipe.jdi"
     if pipe.is_file():
         return pipe
-    return REPO_ROOT / "board_projects" / "fe_scifi_feb_v3" / "output_files" / "top.jdi"
+    return board_project / "output_files" / "top.jdi"
 
 
 def _default_project_dir() -> Path:
     path = os.environ.get("BOARD_TEST_PROJECT_DIR")
     if path:
         return Path(path)
-    return REPO_ROOT / "board_projects" / "fe_scifi_feb_v3"
+    return SYN_DIR / "board_projects" / "fe_scifi_feb_v3"
 
 
 def run_checked(cmd: list[str], env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
