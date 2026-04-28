@@ -41,6 +41,11 @@ proc ::lvds_rx::bsp::configure {option value} {
 proc ::lvds_rx::bsp::get_address_map {} {
     variable n_lane
     array set csr_map {}
+    set decoded_channel_width [expr {int(ceil(log($n_lane) / log(2)))}]
+    if {$decoded_channel_width < 1} {
+        set decoded_channel_width 1
+    }
+    set decoded_channel_msb [expr {$decoded_channel_width - 1}]
    ################################################ capa. ################################################
     set csr_map(0)  \
     "
@@ -62,7 +67,7 @@ proc ::lvds_rx::bsp::get_address_map {} {
               <name>sync_pattern</name>
               <description>sync pattern of the bit sliper</description>
               <bitRange>\[25:16\]</bitRange>
-              <access>read-only</access>
+              <access>read-write</access>
             </field>
         </fields>
     </register>
@@ -78,7 +83,7 @@ proc ::lvds_rx::bsp::get_address_map {} {
                 <name>mode_masks_lane${i}</name>
                 <description>select alignment mode of lane ${i}</description>
                 <bitRange>\[${i}:${i}\]</bitRange>
-                <access>read-only</access>
+                <access>read-write</access>
                 <enumeratedValues>
                     <enumeratedValue>
                         <name>bit_slip</name>
@@ -243,6 +248,75 @@ proc ::lvds_rx::bsp::get_address_map {} {
                     <name>error counts</name>
                     <dataType>uint32_t</dataType>
                     <bitRange>\[31:0\]</bitRange>
+                    <access>read-only</access>
+                </field>
+            </fields>
+        </register>
+        "
+    }
+
+    ############################################# debug lane selection #############################################
+    set addressOfst [format 0x%x [expr 0x14 + ${n_lane}*4]]
+    set csr_map([expr 5+$n_lane]) \
+    "
+    <register>
+        <name>lane_selection</name>
+        <description>lane selector for the port-mapped LVDS debug registers</description>
+        <addressOffset>${addressOfst}</addressOffset>
+
+        <size>32</size>
+        <fields>
+            <field>
+                <name>lane_selection</name>
+                <description>selected lane index for lane_dpa_unlocks and, when addressable, lane_word_aligner_chosen</description>
+                <bitRange>\[${decoded_channel_msb}:0\]</bitRange>
+                <access>read-write</access>
+            </field>
+        </fields>
+    </register>
+    "
+
+    ############################################# selected-lane dpa unlock counter #############################################
+    set addressOfst [format 0x%x [expr 0x18 + ${n_lane}*4]]
+    set csr_map([expr 6+$n_lane]) \
+    "
+    <register>
+        <name>lane_dpa_unlocks</name>
+        <description>DPA unlock counter of the lane selected by lane_selection</description>
+        <addressOffset>${addressOfst}</addressOffset>
+
+        <size>32</size>
+        <fields>
+            <field>
+                <name>dpa_unlocks</name>
+                <dataType>uint32_t</dataType>
+                <description>DPA unlock counter of the selected lane</description>
+                <bitRange>\[31:0\]</bitRange>
+                <access>read-only</access>
+            </field>
+        </fields>
+    </register>
+    "
+
+    # The RTL also decodes word N_LANE+7 as lane_word_aligner_chosen. The
+    # current 9-lane package uses AVMM_ADDR_W=4, so offset 0x40 is not
+    # addressable in the live FE SciFi systems. Keep it out of this BSP unless
+    # the package/system address width is widened.
+    if {[expr {$n_lane + 7}] < 16} {
+        set addressOfst [format 0x%x [expr 0x1c + ${n_lane}*4]]
+        set csr_map([expr 7+$n_lane]) \
+        "
+        <register>
+            <name>lane_word_aligner_chosen</name>
+            <description>word-aligner choice mask of the lane selected by lane_selection</description>
+            <addressOffset>${addressOfst}</addressOffset>
+
+            <size>32</size>
+            <fields>
+                <field>
+                    <name>chosen_mask</name>
+                    <description>10-bit one-hot word-aligner choice mask for the selected lane</description>
+                    <bitRange>\[9:0\]</bitRange>
                     <access>read-only</access>
                 </field>
             </fields>
