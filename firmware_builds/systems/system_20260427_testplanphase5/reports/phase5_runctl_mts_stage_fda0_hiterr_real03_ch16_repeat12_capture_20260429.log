@@ -1,0 +1,76 @@
+timestamp=2026-04-29T10:12:53
+stp=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage_fda0_hiterr_runtime_20260429.stp
+out_vcd=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_runctl_mts_stage_fda0_hiterr_real03_ch16_repeat12_250ms_20260429.vcd
+capture_cmd=quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage_fda0_hiterr_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_runctl_mts_stage_fda0_hiterr_real03_ch16_repeat12_250ms_20260429.vcd runctl_mts_stage runctl_mts_stage runctl_host_valid_rise phase5_runctl_mts_stage_fda0_hiterr_repeat12 320.0
+runner_cmd=/opt/anaconda3/bin/python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/run_phase5_injector_datapath_sanity.py --source mixed --emulator-source-mask 0xF6 --lvds-lane-mask 0x009 --active-lanes-mask 0x00 --inject-mode periodic --pulse-intervals 12500,12500,12500,12500,12500,12500,12500,12500,12500,12500,12500,12500 --pulse-high-cycles 5 --duration-ms 250 --run-number-base 47100 --continue-on-error --output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat12_250ms_fda0_hiterr_stp_20260429.md --json-output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat12_250ms_fda0_hiterr_stp_20260429.json
+## runner stdout
+case=0 interval=12500 class=PASS hist=31475 drops=0 mts=23875 real=4464421659 emu=4464421659
+case=1 interval=12500 class=PASS hist=31559 drops=0 mts=24243 real=3375762581 emu=3375762581
+case=2 interval=12500 class=PASS hist=29939 drops=0 mts=24703 real=3277972429 emu=3277972429
+case=3 interval=12500 class=PASS hist=30818 drops=0 mts=24002 real=3167600796 emu=3167600796
+case=4 interval=12500 class=PASS hist=32764 drops=0 mts=25291 real=3315492584 emu=3315492584
+case=5 interval=12500 class=PASS hist=29251 drops=0 mts=24108 real=3204994470 emu=3204994470
+case=6 interval=12500 class=PASS hist=33295 drops=0 mts=25884 real=3346941233 emu=3346941233
+case=7 interval=12500 class=PASS hist=32062 drops=0 mts=24894 real=3322445885 emu=3322445885
+case=8 interval=12500 class=PASS hist=31649 drops=0 mts=25310 real=3303719029 emu=3303719029
+case=9 interval=12500 class=PASS hist=30447 drops=0 mts=25721 real=3219483874 emu=3219483874
+case=10 interval=12500 class=PASS hist=31626 drops=0 mts=24492 real=3341159537 emu=3341159537
+case=11 interval=12500 class=PASS hist=29716 drops=0 mts=24567 real=3257538786 emu=3257538786
+report=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat12_250ms_fda0_hiterr_stp_20260429.md
+json=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat12_250ms_fda0_hiterr_stp_20260429.json
+SUMMARY pass=12 fail=0
+
+## runner stderr
+
+## quartus_stp stdout
+Info: *******************************************************************
+Info: Running Quartus Prime Signal Tap
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions
+    Info: and other software and tools, and its AMPP partner logic
+    Info: functions, and any output files from any of the foregoing
+    Info: (including device programming or simulation files), and any
+    Info: associated documentation or information are expressly subject
+    Info: to the terms and conditions of the Intel Program License
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Wed Apr 29 10:12:54 2026
+Info: Command: quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage_fda0_hiterr_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_runctl_mts_stage_fda0_hiterr_real03_ch16_repeat12_250ms_20260429.vcd runctl_mts_stage runctl_mts_stage runctl_host_valid_rise phase5_runctl_mts_stage_fda0_hiterr_repeat12 320.0
+Info: Quartus(args): /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage_fda0_hiterr_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_runctl_mts_stage_fda0_hiterr_real03_ch16_repeat12_250ms_20260429.vcd runctl_mts_stage runctl_mts_stage runctl_host_valid_rise phase5_runctl_mts_stage_fda0_hiterr_repeat12 320.0
+Using hardware : USB-BlasterII [7-2]
+Using device   : @1: 5AGT(FC7H3|MC7G3)/5AGXBA7D4/.. (0x02A020DD)
+Opening STP    : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage_fda0_hiterr_runtime_20260429.stp
+Signal set     : runctl_mts_stage
+Trigger        : runctl_host_valid_rise
+Data log       : phase5_runctl_mts_stage_fda0_hiterr_repeat12
+Output VCD     : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_runctl_mts_stage_fda0_hiterr_real03_ch16_repeat12_250ms_20260429.vcd
+Timeout (s)    : 320.0
+Info (16704): Signal Tap data acquisition is in IDLE state:
+Info (16704): Signal Tap data acquisition is in PRE state:  (0 triggers seen)
+Info (16704): Signal Tap data acquisition is in TIMEOUT state:
+------------------------------------------------
+ERROR: Trigger did not occur in timeout period. Make sure trigger conditions are valid and/or increase timeout period.
+
+    while executing
+"run \
+    -hardware_name $hw_name \
+    -device_name $dev_name \
+    -instance $instance_name \
+    -signal_set $signal_set_name \
+    -trigger $trigg..."
+    (file "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl" line 53)
+------------------------------------------------
+Error (23031): Evaluation of Tcl script /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl unsuccessful
+Error: Quartus Prime Signal Tap was unsuccessful. 1 error, 0 warnings
+    Error: Peak virtual memory: 792 megabytes
+    Error: Processing ended: Wed Apr 29 10:18:15 2026
+    Error: Elapsed time: 00:05:21
+    Error: Total CPU time (on all processors): 00:00:01
+
+runner_rc=0
+capture_rc=3
