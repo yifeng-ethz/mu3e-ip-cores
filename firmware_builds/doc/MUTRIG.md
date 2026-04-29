@@ -279,6 +279,13 @@ Observed Phase-5 update on 2026-04-30:
   pair; reducing the injector rate to 10 kHz/channel also still fails. Those
   are negative tuning results and should not be retried without a new
   hypothesis.
+- The lower full-channel pair has a sharp integer pulse-width edge. Pulse high
+  `3` can be clean at the MTS/ring gate, but it is far below the required
+  32-channel multiplicity; pulse high `4` produces enough hits but brings back
+  MTS delay errors. Scanning ASIC5/6 `vnhitlogic=0`, `5`, and `10` at pulse high
+  `3` kept the run clean but underfilled, and `vnhitlogic=5` at pulse high `4`
+  still failed. The wiki `cml_sc=1` setting at pulse high `3` reduced accepted
+  counts further. Do not treat pulse high `3` PASS as rate closure.
 - The ring error is forwarded MTS `tserr`, meaning the hit reaches the ring
   outside the accepted timestamp-delay rule before the ring-buffer CAM decides
   whether to filter it. The Phase-5 sanity runner now has a diagnostic
