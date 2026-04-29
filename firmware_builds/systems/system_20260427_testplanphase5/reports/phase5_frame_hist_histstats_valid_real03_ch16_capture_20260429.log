@@ -1,0 +1,55 @@
+timestamp=2026-04-29T08:40:47
+stp=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_histstats_valid_runtime_20260429.stp
+out_vcd=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_histstats_valid_real03_ch16_20260429.vcd
+capture_cmd=quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_histstats_valid_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_histstats_valid_real03_ch16_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_histstats_valid 120.0
+runner_cmd=/opt/anaconda3/bin/python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/run_phase5_injector_datapath_sanity.py --source mixed --emulator-source-mask 0xF6 --lvds-lane-mask 0x009 --active-lanes-mask 0x00 --inject-mode periodic --pulse-intervals 12500 --pulse-high-cycles 5 --duration-ms 100 --run-number-base 47030 --output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_histstats_valid_stp_20260429.md --json-output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_histstats_valid_stp_20260429.json
+## runner stdout
+case=0 interval=12500 class=mts_discard_with_histogram_hits hist=30613 drops=0 mts=23617 real=3094064402 emu=3094064402
+report=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_histstats_valid_stp_20260429.md
+json=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_histstats_valid_stp_20260429.json
+SUMMARY pass=0 fail=1
+
+## runner stderr
+
+## quartus_stp stdout
+Info: *******************************************************************
+Info: Running Quartus Prime Signal Tap
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Wed Apr 29 08:40:47 2026
+Info: Command: quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_histstats_valid_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_histstats_valid_real03_ch16_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_histstats_valid 120.0
+Info: Quartus(args): /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_histstats_valid_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_histstats_valid_real03_ch16_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_histstats_valid 120.0
+Using hardware : USB-BlasterII [7-2]
+Using device   : @1: 5AGT(FC7H3|MC7G3)/5AGXBA7D4/.. (0x02A020DD)
+Opening STP    : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_histstats_valid_runtime_20260429.stp
+Signal set     : phase5_frame_hist_path
+Trigger        : hist_valid_high
+Data log       : phase5_frame_hist_histstats_valid
+Output VCD     : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_histstats_valid_real03_ch16_20260429.vcd
+Timeout (s)    : 120.0
+Info (16704): Signal Tap data acquisition is in IDLE state: 
+Info (16704): Signal Tap data acquisition is in FILL state: 
+Info (16704): Signal Tap data acquisition is in PRE state:  (0 triggers seen)
+Info (16704): Signal Tap data acquisition is in DONE state: 
+Wrote /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_histstats_valid_real03_ch16_20260429.vcd
+Info (23030): Evaluation of Tcl script /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl was successful
+Info: Quartus Prime Signal Tap was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 800 megabytes
+    Info: Processing ended: Wed Apr 29 08:41:02 2026
+    Info: Elapsed time: 00:00:15
+    Info: Total CPU time (on all processors): 00:00:02
+
+runner_rc=1
+capture_rc=0

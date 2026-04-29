@@ -1,0 +1,177 @@
+timestamp=2026-04-29T08:31:01
+stp=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path.stp
+out_vcd=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_tserr_real03_ch16_20260429.vcd
+capture_cmd=quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_tserr_real03_ch16_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_mts0_tserr 120.0
+runner_cmd=/opt/anaconda3/bin/python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/run_phase5_injector_datapath_sanity.py --source mixed --emulator-source-mask 0xF6 --lvds-lane-mask 0x009 --active-lanes-mask 0x00 --inject-mode periodic --pulse-intervals 12500 --pulse-high-cycles 5 --duration-ms 100 --run-number-base 47000 --output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_mts_tserr_stp_20260429.md --json-output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_mts_tserr_stp_20260429.json
+## runner stdout
+report=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_mts_tserr_stp_20260429.md
+json=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_mts_tserr_stp_20260429.json
+SUMMARY pass=0 fail=1
+
+## runner stderr
+case=0 interval=12500 class=exception error=SC transaction failed after quiet/verbose attempts
+quiet rc=4: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/bin/sc_tool 2 write 0x0AC80 0x00000000 --quiet --no-reset --reply-timeout-ms 1000
+info: request summary:
+  type               : WR
+  link               : 2
+  addr               : 0x0AC80
+  request length     : 1 word(s)
+  main length reg    : 3
+  expected reply words (actual)   : 4
+  expected reply words (declared) : 4
+info: request words written to SC main:
+  wmem[0] = 0x1D0002BC
+  wmem[1] = 0x0000AC80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x00000000
+  wmem[4] = 0x0000009C
+  timing main ready   : 67 us
+  timing matched      : 0 us
+  timing total        : 1000904 us
+  secondary before    : 0xDDC1
+  secondary after     : 0xDDC1
+  secondary delta     : 0 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x90000001
+err: timed out waiting for matching secondary reply
+
+verbose rc=4: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/bin/sc_tool 2 write 0x0AC80 0x00000000 --no-reset --reply-timeout-ms 1000
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_LOW_REGISTER_R = 0x31000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000F00
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : WR
+  link               : 2
+  addr               : 0x0AC80
+  request length     : 1 word(s)
+  main length reg    : 3
+  expected reply words (actual)   : 4
+  expected reply words (declared) : 4
+info: request words written to SC main:
+  wmem[0] = 0x1D0002BC
+  wmem[1] = 0x0000AC80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x00000000
+  wmem[4] = 0x0000009C
+  timing main ready   : 63 us
+  timing matched      : 0 us
+  timing total        : 1000499 us
+  secondary before    : 0xDDC1
+  secondary after     : 0xDDC1
+  secondary delta     : 0 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x90000001
+err: timed out waiting for matching secondary reply
+
+WARN failed to force injector off in cleanup: SC transaction failed after quiet/verbose attempts
+quiet rc=4: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/bin/sc_tool 2 write 0x0AC80 0x00000000 --quiet --no-reset --reply-timeout-ms 1000
+info: request summary:
+  type               : WR
+  link               : 2
+  addr               : 0x0AC80
+  request length     : 1 word(s)
+  main length reg    : 3
+  expected reply words (actual)   : 4
+  expected reply words (declared) : 4
+info: request words written to SC main:
+  wmem[0] = 0x1D0002BC
+  wmem[1] = 0x0000AC80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x00000000
+  wmem[4] = 0x0000009C
+  timing main ready   : 62 us
+  timing matched      : 0 us
+  timing total        : 1000767 us
+  secondary before    : 0xDDC1
+  secondary after     : 0xDDC1
+  secondary delta     : 0 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x90000001
+err: timed out waiting for matching secondary reply
+
+verbose rc=4: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/bin/sc_tool 2 write 0x0AC80 0x00000000 --no-reset --reply-timeout-ms 1000
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_LOW_REGISTER_R = 0x31000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000F00
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : WR
+  link               : 2
+  addr               : 0x0AC80
+  request length     : 1 word(s)
+  main length reg    : 3
+  expected reply words (actual)   : 4
+  expected reply words (declared) : 4
+info: request words written to SC main:
+  wmem[0] = 0x1D0002BC
+  wmem[1] = 0x0000AC80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x00000000
+  wmem[4] = 0x0000009C
+  timing main ready   : 62 us
+  timing matched      : 0 us
+  timing total        : 1000874 us
+  secondary before    : 0xDDC1
+  secondary after     : 0xDDC1
+  secondary delta     : 0 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x90000001
+err: timed out waiting for matching secondary reply
+
+
+## quartus_stp stdout
+Info: *******************************************************************
+Info: Running Quartus Prime Signal Tap
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Wed Apr 29 08:31:01 2026
+Info: Command: quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_tserr_real03_ch16_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_mts0_tserr 120.0
+Info: Quartus(args): /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_tserr_real03_ch16_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_mts0_tserr 120.0
+Using hardware : USB-BlasterII [7-2]
+Using device   : @1: 5AGT(FC7H3|MC7G3)/5AGXBA7D4/.. (0x02A020DD)
+Opening STP    : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path.stp
+Signal set     : phase5_frame_hist_path
+Trigger        : hist_valid_high
+Data log       : phase5_frame_hist_mts0_tserr
+Output VCD     : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_tserr_real03_ch16_20260429.vcd
+Timeout (s)    : 120.0
+Info (16704): Signal Tap data acquisition is in IDLE state: 
+Info (16704): Signal Tap data acquisition is in FILL state: 
+Info (16704): Signal Tap data acquisition is in PRE state:  (0 triggers seen)
+Info (16704): Signal Tap data acquisition is in TIMEOUT state: 
+------------------------------------------------
+ERROR: Trigger did not occur in timeout period. Make sure trigger conditions are valid and/or increase timeout period.
+
+    while executing
+"run \
+    -hardware_name $hw_name \
+    -device_name $dev_name \
+    -instance $instance_name \
+    -signal_set $signal_set_name \
+    -trigger $trigg..."
+    (file "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl" line 53)
+------------------------------------------------
+Error (23031): Evaluation of Tcl script /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl unsuccessful
+Error: Quartus Prime Signal Tap was unsuccessful. 1 error, 0 warnings
+    Error: Peak virtual memory: 803 megabytes
+    Error: Processing ended: Wed Apr 29 08:33:02 2026
+    Error: Elapsed time: 00:02:01
+    Error: Total CPU time (on all processors): 00:00:01
+
+runner_rc=1
+capture_rc=3

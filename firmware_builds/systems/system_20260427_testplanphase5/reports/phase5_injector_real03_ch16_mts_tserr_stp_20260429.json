@@ -1,0 +1,52 @@
+{
+  "args": {
+    "active_lanes_mask": 0,
+    "cluster_center": 16,
+    "cluster_size": 1,
+    "device": "/dev/mudaq0",
+    "duration_ms": 100,
+    "feb": 7,
+    "inject_channel_mask": 4294967295,
+    "inject_mode": "periodic",
+    "link": 2,
+    "lvds_lane_mask": 9,
+    "mts_delay_ts_field": "keep",
+    "mts_drop_delay_error": "keep",
+    "mts_expected_latency": null,
+    "pulse_intervals": [
+      12500
+    ],
+    "ring_filter_inerr": "keep",
+    "selected_source_mask": 246,
+    "source": "mixed"
+  },
+  "cases": [
+    {
+      "active_lanes_mask": 0,
+      "duration_ms": 100,
+      "error": "SC transaction failed after quiet/verbose attempts\nquiet rc=4: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/bin/sc_tool 2 write 0x0AC80 0x00000000 --quiet --no-reset --reply-timeout-ms 1000\ninfo: request summary:\n  type               : WR\n  link               : 2\n  addr               : 0x0AC80\n  request length     : 1 word(s)\n  main length reg    : 3\n  expected reply words (actual)   : 4\n  expected reply words (declared) : 4\ninfo: request words written to SC main:\n  wmem[0] = 0x1D0002BC\n  wmem[1] = 0x0000AC80\n  wmem[2] = 0x00000001\n  wmem[3] = 0x00000000\n  wmem[4] = 0x0000009C\n  timing main ready   : 67 us\n  timing matched      : 0 us\n  timing total        : 1000904 us\n  secondary before    : 0xDDC1\n  secondary after     : 0xDDC1\n  secondary delta     : 0 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x90000001\nerr: timed out waiting for matching secondary reply\n\nverbose rc=4: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/bin/sc_tool 2 write 0x0AC80 0x00000000 --no-reset --reply-timeout-ms 1000\nboard:\n  PLL_LOCKED_REGISTER_R      = 0x00000000\n  LINK_LOCKED_LOW_REGISTER_R = 0x31000000\n  LINK_LOCKED_HIGH_REGISTER_R= 0x00000F00\n  RESET_LINK_STATUS_REGISTER_R = 0x00000000\ninfo: request summary:\n  type               : WR\n  link               : 2\n  addr               : 0x0AC80\n  request length     : 1 word(s)\n  main length reg    : 3\n  expected reply words (actual)   : 4\n  expected reply words (declared) : 4\ninfo: request words written to SC main:\n  wmem[0] = 0x1D0002BC\n  wmem[1] = 0x0000AC80\n  wmem[2] = 0x00000001\n  wmem[3] = 0x00000000\n  wmem[4] = 0x0000009C\n  timing main ready   : 63 us\n  timing matched      : 0 us\n  timing total        : 1000499 us\n  secondary before    : 0xDDC1\n  secondary after     : 0xDDC1\n  secondary delta     : 0 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x90000001\nerr: timed out waiting for matching secondary reply\n",
+      "index": 0,
+      "inject_mode": "periodic",
+      "pulse_interval": 12500,
+      "run_number": 47000,
+      "selected_source_mask": 246,
+      "source": "mixed",
+      "summary": {
+        "emu_frame_delta": 0,
+        "frame_actual_delta": 0,
+        "frame_crc_delta": 0,
+        "hist_drop_delta": 0,
+        "hist_total_delta": 0,
+        "mts_total_delta": 0,
+        "pass": false,
+        "phase5_classification": "exception",
+        "post_end_clean": false,
+        "ring_inerr_delta": 0,
+        "source_mux_emu_delta": 0,
+        "source_mux_real_delta": 0,
+        "source_mux_selected_delta": 0
+      }
+    }
+  ],
+  "timestamp": "2026-04-29T08:31:03"
+}
