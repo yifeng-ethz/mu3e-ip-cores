@@ -261,12 +261,35 @@ Observed Phase-5 update on 2026-04-30:
   and the parked emulators are quiet, but the full 32-channel pair still
   produces ring-buffer CAM input errors. Treat that as a multiplicity/rate
   problem, not as proof of an ASIC1/2 phase offset.
-- Lower pair `lanes5+6` still produces ring-buffer CAM input errors even with
-  one TDC-test channel per ASIC while lanes `5` and `6` pass alone. Header
-  `ext_trig_offset`, `sync_ch_rst`, the wiki `cml_sc=1` setting, and known
-  older SMB5 local-2 PLL points did not clear it. The ring error is forwarded
-  MTS `tserr`, meaning the hit reaches the ring outside the allowed
-  `0..2000` cycle timestamp-delay window.
+- Lower pair `lanes5+6` now passes at one TDC-test channel per ASIC after a
+  clean good-ribbon restore of ASIC5/6. The earlier one-channel failure should
+  be treated as a stale/reset-sensitive observation, not the current blocker.
+- Lower pair `lanes5+6` still fails with all 32 TDC-test channels enabled on
+  ASIC5 and ASIC6. Opening the MTS expected-latency window to `65535` does not
+  remove the ring input errors, so the failure is not just a small positive
+  latency tail above `2000` cycles.
+- ASIC5/lane5 and ASIC6/lane6 each pass full 32-channel injection alone with
+  `vnhitlogic=60`, but the two-ASIC pair fails. Channel-mask scans show some
+  four/eight-channel groups pass alone while the union of individually clean
+  groups still fails. Treat the lower full-channel blocker as a cross-ASIC
+  timestamp ordering/epoch issue until a SignalTap or focused MTS simulation
+  proves otherwise.
+- Header `ext_trig_offset=1` on either ASIC5 or ASIC6 worsens the full-channel
+  lower pair. Raising `vnhitlogic` to `40`, `50`, or `60` does not clear the
+  pair; reducing the injector rate to 10 kHz/channel also still fails. Those
+  are negative tuning results and should not be retried without a new
+  hypothesis.
+- The ring error is forwarded MTS `tserr`, meaning the hit reaches the ring
+  outside the accepted timestamp-delay rule before the ring-buffer CAM decides
+  whether to filter it. The Phase-5 sanity runner now has a diagnostic
+  `--mts-bypass-lapse` switch for isolating the MTS GTS/lapse transform; that
+  diagnostic did not clear the lower full-channel pair. Using the E timestamp
+  field also made the full-channel pair worse, which matches the short-mode
+  TDC-injection expectation that `recv_all=1` should use T.
+- Enabling MTS `drop_delay_error` makes the lower pair a clean downstream
+  diagnostic by removing the offending hits before the ring, but that is not
+  latency closure. It only confirms the ring-buffer CAM is reacting to upstream
+  MTS delay errors rather than creating the errors locally.
 - The quick `rate` profile's `LAST_INTERVAL_TOTAL_HITS` is not closure evidence
   in the current live runs; it stayed near `66560` for one-channel lane5 while
   live/MTS counters changed with run duration. Use raw DMA/hit decode or a fixed

@@ -22,6 +22,7 @@ from check_ip_metadata import _default_sc_tool  # noqa: E402
 from check_run_control import default_rc_tool  # noqa: E402
 from probe_phase4_stage_counters import (  # noqa: E402
     MTS_BASE_WORDS,
+    MTS_CTRL_BYPASS_LAPSE,
     MTS_CTRL_DELAY_TS_FIELD_USE_T,
     MTS_CTRL_DISCARD_HITERR,
     MTS_CTRL_DROP_DELAY_ERROR,
@@ -405,6 +406,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
 def apply_debug_overrides(args: argparse.Namespace) -> dict[str, Any]:
     overrides: dict[str, Any] = {
         "mts_expected_latency": args.mts_expected_latency,
+        "mts_bypass_lapse": args.mts_bypass_lapse,
         "mts_delay_ts_field": args.mts_delay_ts_field,
         "mts_drop_delay_error": args.mts_drop_delay_error,
         "ring_filter_inerr": args.ring_filter_inerr,
@@ -412,9 +414,12 @@ def apply_debug_overrides(args: argparse.Namespace) -> dict[str, Any]:
 
     if (
         args.mts_delay_ts_field != "keep"
+        or args.mts_bypass_lapse != "keep"
         or args.mts_drop_delay_error != "keep"
     ):
         ctrl = MTS_CTRL_GO | MTS_CTRL_DISCARD_HITERR
+        if args.mts_bypass_lapse == "on":
+            ctrl |= MTS_CTRL_BYPASS_LAPSE
         if args.mts_delay_ts_field in ("keep", "t"):
             ctrl |= MTS_CTRL_DELAY_TS_FIELD_USE_T
         if args.mts_drop_delay_error == "on":
@@ -659,6 +664,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- Histogram filter key loc override: `{getattr(args, 'hist_filter_key_loc', None)}`",
         f"- Histogram filter key value: `{fmt_hex(getattr(args, 'hist_filter_key_value', 0) or 0)}`",
         f"- MTS expected latency override: `{args.mts_expected_latency if args.mts_expected_latency is not None else 'keep'}`",
+        f"- MTS bypass-lapse override: `{args.mts_bypass_lapse}`",
         f"- MTS delay-ts field override: `{args.mts_delay_ts_field}`",
         f"- MTS drop-delay-error override: `{args.mts_drop_delay_error}`",
         f"- Ring filter-inerr override: `{args.ring_filter_inerr}`",
@@ -772,6 +778,7 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "cluster_center": args.cluster_center,
             "inject_channel_mask": args.inject_channel_mask,
             "mts_expected_latency": args.mts_expected_latency,
+            "mts_bypass_lapse": args.mts_bypass_lapse,
             "mts_delay_ts_field": args.mts_delay_ts_field,
             "mts_drop_delay_error": args.mts_drop_delay_error,
             "ring_filter_inerr": args.ring_filter_inerr,
@@ -848,6 +855,7 @@ def main() -> int:
     parser.add_argument("--inject-channel-mask", type=parse_u32, default=0xFFFFFFFF)
     parser.add_argument("--short-mode", action="store_true")
     parser.add_argument("--mts-expected-latency", type=parse_u32, default=None)
+    parser.add_argument("--mts-bypass-lapse", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--mts-delay-ts-field", choices=("keep", "t", "e"), default="keep")
     parser.add_argument("--mts-drop-delay-error", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--ring-filter-inerr", choices=("keep", "on", "off"), default="keep")

@@ -22,7 +22,7 @@ EVIDENCE = [
     (
         "Restore full tuned baseline",
         "Config",
-        "phase5_mutrig_restore_full32_tuned_baseline_20260430.json",
+        "phase5_mutrig_restore_full32_tuned_baseline_20260430d.json",
         "All eight ASICs reloaded full-channel with the single-lane-clean PLL overrides.",
     ),
     (
@@ -64,62 +64,92 @@ EVIDENCE = [
     (
         "Lower lanes 5+6, one channel",
         "Delay",
-        "phase5_real_lower_lanes56_ch1_quietemu_pulse4_delay_2000cyc_20260430.json",
-        "Pair fails with MTS tserr forwarded into the ring.",
+        "phase5_real_lower_lanes56_ch1_goodribbon_latency2000_retry_pulse4_20260430.json",
+        "After restoring ASIC5/6 from the good-ribbon config, the one-channel pair passes at the 2000-cycle gate.",
     ),
     (
-        "ASIC6 ext offset",
+        "Lower lanes 5+6, full channels",
+        "Delay",
+        "phase5_real_lower_lanes56_full32_postrestore_latency2000_pulse4_20260430.json",
+        "Fresh post-restore full 32-channel ASIC5+6 run fails the required 0..2000-cycle MTS/ring gate.",
+    ),
+    (
+        "Lower full channels, loose latency",
+        "Delay",
+        "phase5_real_lower_lanes56_full32_latency65535_pulse4_20260430.json",
+        "Still fails even with expected latency opened to 65535, so this is not a small positive-latency tail.",
+    ),
+    (
+        "Lower pair bypass-lapse",
+        "Diagnostic",
+        "phase5_real_lower_lanes56_full32_bypasslapse_latency2000_pulse4_20260430.json",
+        "Disabling the MTS GTS/lapse transform does not clear the lower-pair timestamp errors.",
+    ),
+    (
+        "Lower pair E-field delay",
+        "Diagnostic",
+        "phase5_real_lower_lanes56_full32_delayfieldE_latency2000_pulse4_20260430.json",
+        "Using E instead of T for delay calculation is worse, matching the short-mode TDC-injection expectation.",
+    ),
+    (
+        "Lower pair drop-delay",
+        "Diagnostic",
+        "phase5_real_lower_lanes56_full32_dropdelay_latency2000_pulse4_20260430.json",
+        "Dropping MTS delay-error hits keeps the downstream ring clean, but this is diagnostic-only and not closure.",
+    ),
+    (
+        "Lower channels 0..3",
+        "Mask scan",
+        "phase5_real_lower_lanes56_chmask_00_03_latency2000_pulse4_20260430.json",
+        "A four-channel mask can pass, proving full-channel failure is not a universal lane lock loss.",
+    ),
+    (
+        "Lower channels 4..7",
+        "Mask scan",
+        "phase5_real_lower_lanes56_chmask_04_07_latency2000_pulse4_20260430.json",
+        "This adjacent four-channel mask fails, showing channel grouping still matters.",
+    ),
+    (
+        "Lower pass-union mask",
+        "Mask scan",
+        "phase5_real_lower_lanes56_chmask_pass_union_latency2000_pulse4_20260430.json",
+        "The union of individually clean channel groups still fails when aggregated across ASIC5+6.",
+    ),
+    (
+        "Lane 5 full channels",
+        "Delay",
+        "phase5_real_lane5_full32_hl60_latency2000_pulse4_20260430.json",
+        "ASIC5/lane5 passes full 32 channels by itself with vnhitlogic=60.",
+    ),
+    (
+        "Lane 6 full channels",
+        "Delay",
+        "phase5_real_lane6_full32_hl60_latency2000_pulse4_20260430.json",
+        "ASIC6/lane6 passes full 32 channels by itself with vnhitlogic=60.",
+    ),
+    (
+        "Lower pair hitlogic 60",
         "Tune",
-        "phase5_real_lower_lanes56_ch1_asic6_extoffset1_pulse4_delay_2000cyc_20260430.json",
-        "Header ext_trig_offset=1 on ASIC6 did not improve the lower pair.",
+        "phase5_real_lower_lanes56_full32_hl60_latency2000_pulse4_20260430.json",
+        "Raising vnhitlogic on both ASICs does not clear the pair-level full-channel failure.",
+    ),
+    (
+        "Lower pair at 10 kHz/channel",
+        "Tune",
+        "phase5_real_lower_lanes56_full32_hl60_latency2000_pulse4_interval12500_20260430.json",
+        "Even 10 kHz/channel still fails, so the blocker is not only 100 kHz steady-state throughput.",
     ),
     (
         "ASIC5 ext offset",
         "Tune",
-        "phase5_real_lower_lanes56_ch1_asic5_extoffset1_pulse4_delay_2000cyc_20260430.json",
-        "Header ext_trig_offset=1 on ASIC5 made accepted delay counts worse.",
+        "phase5_real_lower_lanes56_full32_asic5_extoffset1_latency2000_pulse4_20260430.json",
+        "Header ext_trig_offset=1 on ASIC5 makes the full-channel pair worse, not better.",
     ),
     (
-        "ASIC6 sync_ch_rst=0",
+        "ASIC6 ext offset",
         "Tune",
-        "phase5_real_lower_lanes56_ch1_asic6_synchrst0_pulse4_delay_2000cyc_20260430.json",
-        "Reset-sync flip on ASIC6 did not improve the lower pair.",
-    ),
-    (
-        "ASIC5 sync_ch_rst=0",
-        "Tune",
-        "phase5_real_lower_lanes56_ch1_asic5_synchrst0_pulse4_delay_2000cyc_20260430.json",
-        "Reset-sync flip on ASIC5 did not improve the lower pair.",
-    ),
-    (
-        "Lower pair cml_sc=1",
-        "Tune",
-        "phase5_real_lower_lanes56_ch1_cmlsc1_pulse4_delay_2000cyc_20260430.json",
-        "Wiki CML-scale setting kills accepted delay counts while ring errors remain.",
-    ),
-    (
-        "ASIC6 40/30/30",
-        "Tune",
-        "phase5_real_lower_lanes56_ch1_asic6_cnt40_vcd30_hl30_pulse4_delay_2000cyc_20260430.json",
-        "Known SMB5 local-2 PLL point did not clear the lower-pair error.",
-    ),
-    (
-        "ASIC6 PLL-half",
-        "Tune",
-        "phase5_real_lower_lanes56_ch1_asic6_cnt25off1_vcd20_hl40_pulse4_delay_2000cyc_20260430.json",
-        "Older pll-half local-2 point did not clear the lower-pair error.",
-    ),
-    (
-        "SMB5 241204 pair config",
-        "Tune",
-        "phase5_real_lower_lanes56_ch1_smb005_241204_pulse4_delay_2000cyc_20260430.json",
-        "Full older ASIC5/6 local config is worse than good_ribbon_0.",
-    ),
-    (
-        "Lane5 one-channel rate",
-        "Rate",
-        "phase5_real_lane5_ch1_rate100k_goodribbon_pulse4_2500ms_20260430.json",
-        "Quick rate profile is out of tolerance and not stable enough for closure.",
+        "phase5_real_lower_lanes56_full32_asic6_extoffset1_latency2000_pulse4_20260430.json",
+        "Header ext_trig_offset=1 on ASIC6 also worsens the full-channel pair.",
     ),
 ]
 
@@ -352,10 +382,11 @@ def write_html() -> None:
   <main>
     <div class="callout">
       <strong>Closure status: FAIL.</strong>
-      Single-lane delay can be made clean, but the lower pair <code>lanes5+6</code>
-      still forwards MTS timestamp errors into the lower ring-buffer CAM even at
-      one TDC-test channel per ASIC. No FEB/SWB host-disk 256-hit, 100 kHz
-      end-to-end claim is valid yet.
+      Single-lane delay can be made clean and the lower <code>lanes5+6</code>
+      one-channel pair now passes after a clean good-ribbon restore. The blocker
+      is the full-channel pair: ASIC5 and ASIC6 each pass alone, but together
+      they still forward MTS timestamp errors into the lower ring-buffer CAM.
+      No FEB/SWB host-disk 256-hit, 100 kHz end-to-end claim is valid yet.
     </div>
 
     <h2>Current Read</h2>
@@ -363,16 +394,20 @@ def write_html() -> None:
       The strongest blocker is not the deprecated injector path or XML mapping.
       The active injector is the Phase-5 <code>mutrig_injector_0</code> path and
       the XML split is SMB3 for ASICs 0..3 and SMB5 for ASICs 4..7. The lower
-      side fails because MTS asserts <code>tserr</code> before the ring stage;
-      the ring <code>inerr_count</code> is therefore a real timestamp-delay
-      failure, not a ring-local decode bug.
+      side fails at full multiplicity because MTS asserts
+      <code>tserr</code> before the ring stage; the ring
+      <code>inerr_count</code> is therefore a real timestamp-delay failure,
+      not a ring-local decode bug.
     </p>
     <p>
-      Tuning attempts that did not clear the lower pair include
-      <code>ext_trig_offset</code>, <code>sync_ch_rst</code>,
-      <code>cml_sc=1</code>, ASIC6 <code>40/30/30</code>, ASIC6 pll-half, and
-      the older SMB5 241204 local config. The upper pair behaves differently:
-      <code>lanes1+2</code> passes at one channel and fails at full multiplicity.
+      The lower full-channel pair also fails with the MTS expected-latency
+      window opened to 65535 and at 10 kHz/channel. Channel-mask scans prove
+      some groups are clean alone, but their union still fails. That points at
+      a cross-ASIC ordering/epoch interaction in the lower MTS path, not a
+      single dead lane. Bypassing the MTS lapse transform did not clear it, and
+      using the E timestamp field made it worse. The upper pair behaves differently:
+      <code>lanes1+2</code> passes at one channel and fails at full
+      multiplicity.
     </p>
     <p>
       MuTRiG tuning reference: <a href="{esc(rel(mutrig_doc))}">MUTRIG.md</a>.
