@@ -1,0 +1,1213 @@
+{
+  "args": {
+    "channel_enable_mask": null,
+    "configure_asics": null,
+    "device": "/dev/mudaq0",
+    "feb": 7,
+    "lane_mask": 511,
+    "link": 2,
+    "lvds_reset": false,
+    "mode_mask": 511,
+    "scratch_offset": 0,
+    "skip_pre_config_stop_reset": false,
+    "tdctest_channel_mask": null,
+    "window_ms": 500
+  },
+  "classification": "aligned_idle_no_frames",
+  "config_rows": [],
+  "pre_config_run_control": [],
+  "reset_actions": [],
+  "snapshots": [
+    {
+      "label": "initial",
+      "snapshot": {
+        "frame_rcv": [
+          {
+            "crc_err": 0,
+            "lane": 0,
+            "open_frame_count": 0,
+            "status_control": 822083585
+          },
+          {
+            "crc_err": 0,
+            "lane": 1,
+            "open_frame_count": 0,
+            "status_control": 1
+          },
+          {
+            "crc_err": 0,
+            "lane": 2,
+            "open_frame_count": 0,
+            "status_control": 335544321
+          },
+          {
+            "crc_err": 0,
+            "lane": 3,
+            "open_frame_count": 0,
+            "status_control": 822083585
+          },
+          {
+            "crc_err": 0,
+            "lane": 4,
+            "open_frame_count": 0,
+            "status_control": 469762049
+          },
+          {
+            "crc_err": 0,
+            "lane": 5,
+            "open_frame_count": 0,
+            "status_control": 67108865
+          },
+          {
+            "crc_err": 0,
+            "lane": 6,
+            "open_frame_count": 0,
+            "status_control": 16777217
+          },
+          {
+            "crc_err": 0,
+            "lane": 7,
+            "open_frame_count": 0,
+            "status_control": 16777217
+          }
+        ],
+        "lvds": {
+          "base": 32768,
+          "capability": 16384009,
+          "dpa_hold": 0,
+          "lane_go": 1,
+          "lane_selection": 0,
+          "lanes": [
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 16,
+              "lane": 0,
+              "lane_go": 1,
+              "link_state": "aligned_idle",
+              "mode_adaptive": 1,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 0,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 0,
+                "real_data": 444,
+                "real_error": 0,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 0,
+                "selected_error": 0,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 4294967295,
+              "lane": 1,
+              "lane_go": 0,
+              "link_state": "fatal_training",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 1,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 1,
+                "real_data": 351,
+                "real_error": 4,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 1,
+                "selected_error": 4,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 3990279991,
+              "lane": 2,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 2,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 2,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 2,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 18,
+              "lane": 3,
+              "lane_go": 0,
+              "link_state": "aligned_idle",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 3,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 3,
+                "real_data": 444,
+                "real_error": 0,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 3,
+                "selected_error": 0,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 4017620011,
+              "lane": 4,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 4,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 4,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 4,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 2583228897,
+              "lane": 5,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 5,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 5,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 5,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 4031942915,
+              "lane": 6,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 6,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 6,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 6,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 4038883622,
+              "lane": 7,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 7,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 7,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 7,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 0,
+              "lane": 8,
+              "lane_go": 0,
+              "link_state": "quiet_or_clean",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": null
+            }
+          ],
+          "mode_mask": 1,
+          "n_lane": 9,
+          "raw_words": [
+            16384009,
+            1,
+            0,
+            0,
+            1,
+            16,
+            4294967295,
+            3990279991,
+            18,
+            4017620011,
+            2583228897,
+            4031942915,
+            4038883622,
+            0,
+            0,
+            0
+          ],
+          "selected_dpa_unlocks": 0,
+          "soft_reset_req": 0,
+          "sync_pattern": 250
+        },
+        "source_mux": [
+          {
+            "base": 34960,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 0,
+            "last_selected": {
+              "channel": 0,
+              "data": 444,
+              "error": 0,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 0,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 0,
+              "real_data": 444,
+              "real_error": 0,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 0,
+              "selected_error": 0,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 34976,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 1,
+            "last_selected": {
+              "channel": 1,
+              "data": 351,
+              "error": 4,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 1,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 1,
+              "real_data": 351,
+              "real_error": 4,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 1,
+              "selected_error": 4,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 34992,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 2,
+            "last_selected": {
+              "channel": 2,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 2,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 2,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 2,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35008,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 3,
+            "last_selected": {
+              "channel": 3,
+              "data": 444,
+              "error": 0,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 3,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 3,
+              "real_data": 444,
+              "real_error": 0,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 3,
+              "selected_error": 0,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35024,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 4,
+            "last_selected": {
+              "channel": 4,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 4,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 4,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 4,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35040,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 5,
+            "last_selected": {
+              "channel": 5,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 5,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 5,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 5,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35056,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 6,
+            "last_selected": {
+              "channel": 6,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 6,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 6,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 6,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35072,
+            "control": 0,
+            "emu_beats": 4294967295,
+            "idx": 7,
+            "last_selected": {
+              "channel": 7,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 4294967295,
+            "selected_beats": 4294967295,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 7,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 7,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 7,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          }
+        ]
+      }
+    },
+    {
+      "label": "after_window",
+      "snapshot": {
+        "frame_rcv": [
+          {
+            "crc_err": 0,
+            "lane": 0,
+            "open_frame_count": 0,
+            "status_control": 822083585
+          },
+          {
+            "crc_err": 0,
+            "lane": 1,
+            "open_frame_count": 0,
+            "status_control": 1
+          },
+          {
+            "crc_err": 0,
+            "lane": 2,
+            "open_frame_count": 0,
+            "status_control": 335544321
+          },
+          {
+            "crc_err": 0,
+            "lane": 3,
+            "open_frame_count": 0,
+            "status_control": 822083585
+          },
+          {
+            "crc_err": 0,
+            "lane": 4,
+            "open_frame_count": 0,
+            "status_control": 469762049
+          },
+          {
+            "crc_err": 0,
+            "lane": 5,
+            "open_frame_count": 0,
+            "status_control": 67108865
+          },
+          {
+            "crc_err": 0,
+            "lane": 6,
+            "open_frame_count": 0,
+            "status_control": 16777217
+          },
+          {
+            "crc_err": 0,
+            "lane": 7,
+            "open_frame_count": 0,
+            "status_control": 16777217
+          }
+        ],
+        "lvds": {
+          "base": 32768,
+          "capability": 16384009,
+          "dpa_hold": 0,
+          "lane_go": 1,
+          "lane_selection": 8,
+          "lanes": [
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 16,
+              "lane": 0,
+              "lane_go": 1,
+              "link_state": "aligned_idle",
+              "mode_adaptive": 1,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 0,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 0,
+                "real_data": 444,
+                "real_error": 0,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 0,
+                "selected_error": 0,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 4294967295,
+              "lane": 1,
+              "lane_go": 0,
+              "link_state": "fatal_training",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 1,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 1,
+                "real_data": 351,
+                "real_error": 4,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 1,
+                "selected_error": 4,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 1936374926,
+              "lane": 2,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 2,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 2,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 2,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 18,
+              "lane": 3,
+              "lane_go": 0,
+              "link_state": "aligned_idle",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 3,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 3,
+                "real_data": 444,
+                "real_error": 0,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 3,
+                "selected_error": 0,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 1963336845,
+              "lane": 4,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 4,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 4,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 4,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 520367849,
+              "lane": 5,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 5,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 5,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 5,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 1979668577,
+              "lane": 6,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 6,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 6,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 6,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 1986558152,
+              "lane": 7,
+              "lane_go": 0,
+              "link_state": "parity_error",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": {
+                "both_valid": 1,
+                "emu_channel": 7,
+                "emu_error": 0,
+                "emu_valid": 1,
+                "real_channel": 7,
+                "real_data": 351,
+                "real_error": 3,
+                "real_valid": 1,
+                "select_emulator": 0,
+                "selected_channel": 7,
+                "selected_error": 3,
+                "selected_valid": 1
+              }
+            },
+            {
+              "dpa_hold": 0,
+              "dpa_unlocks": 0,
+              "error_counter": 0,
+              "lane": 8,
+              "lane_go": 0,
+              "link_state": "quiet_or_clean",
+              "mode_adaptive": 0,
+              "soft_reset_req": 0,
+              "source_mux_status": null
+            }
+          ],
+          "mode_mask": 1,
+          "n_lane": 9,
+          "raw_words": [
+            16384009,
+            1,
+            0,
+            0,
+            1,
+            16,
+            4294967295,
+            1936374926,
+            18,
+            1963336845,
+            520367849,
+            1979668577,
+            1986558152,
+            0,
+            8,
+            0
+          ],
+          "selected_dpa_unlocks": 0,
+          "soft_reset_req": 0,
+          "sync_pattern": 250
+        },
+        "source_mux": [
+          {
+            "base": 34960,
+            "control": 0,
+            "emu_beats": 1627244547,
+            "idx": 0,
+            "last_selected": {
+              "channel": 0,
+              "data": 444,
+              "error": 0,
+              "source_emulator": 0
+            },
+            "real_beats": 1620091016,
+            "selected_beats": 1636692532,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 0,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 0,
+              "real_data": 444,
+              "real_error": 0,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 0,
+              "selected_error": 0,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 34976,
+            "control": 0,
+            "emu_beats": 1667277303,
+            "idx": 1,
+            "last_selected": {
+              "channel": 1,
+              "data": 351,
+              "error": 4,
+              "source_emulator": 0
+            },
+            "real_beats": 1659513564,
+            "selected_beats": 1674517297,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 1,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 1,
+              "real_data": 351,
+              "real_error": 4,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 1,
+              "selected_error": 4,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 34992,
+            "control": 0,
+            "emu_beats": 1707247412,
+            "idx": 2,
+            "last_selected": {
+              "channel": 2,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 1699981772,
+            "selected_beats": 1715374212,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 2,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 2,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 2,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35008,
+            "control": 0,
+            "emu_beats": 1745474791,
+            "idx": 3,
+            "last_selected": {
+              "channel": 3,
+              "data": 444,
+              "error": 0,
+              "source_emulator": 0
+            },
+            "real_beats": 1738335262,
+            "selected_beats": 1753701759,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 3,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 3,
+              "real_data": 444,
+              "real_error": 0,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 3,
+              "selected_error": 0,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35024,
+            "control": 0,
+            "emu_beats": 1783499198,
+            "idx": 4,
+            "last_selected": {
+              "channel": 4,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 1776853517,
+            "selected_beats": 1790416466,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 4,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 4,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 4,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35040,
+            "control": 0,
+            "emu_beats": 1818677011,
+            "idx": 5,
+            "last_selected": {
+              "channel": 5,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 1811298991,
+            "selected_beats": 1825886903,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 5,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 5,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 5,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35056,
+            "control": 0,
+            "emu_beats": 1855663048,
+            "idx": 6,
+            "last_selected": {
+              "channel": 6,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 1848198730,
+            "selected_beats": 1863543921,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 6,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 6,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 6,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          },
+          {
+            "base": 35072,
+            "control": 0,
+            "emu_beats": 1889909529,
+            "idx": 7,
+            "last_selected": {
+              "channel": 7,
+              "data": 351,
+              "error": 3,
+              "source_emulator": 0
+            },
+            "real_beats": 1882378586,
+            "selected_beats": 1897916596,
+            "status": {
+              "both_valid": 1,
+              "emu_channel": 7,
+              "emu_error": 0,
+              "emu_valid": 1,
+              "real_channel": 7,
+              "real_data": 351,
+              "real_error": 3,
+              "real_valid": 1,
+              "select_emulator": 0,
+              "selected_channel": 7,
+              "selected_error": 3,
+              "selected_valid": 1
+            },
+            "switch_count": 0,
+            "uid": 1296847693
+          }
+        ]
+      }
+    }
+  ],
+  "timestamp": "2026-04-29T20:31:27",
+  "window_delta": {
+    "frame_rcv": [
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 0,
+        "status_control": 822083585
+      },
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 1,
+        "status_control": 1
+      },
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 2,
+        "status_control": 335544321
+      },
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 3,
+        "status_control": 822083585
+      },
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 4,
+        "status_control": 469762049
+      },
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 5,
+        "status_control": 67108865
+      },
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 6,
+        "status_control": 16777217
+      },
+      {
+        "crc_delta": 0,
+        "frame_delta": 0,
+        "lane": 7,
+        "status_control": 16777217
+      }
+    ],
+    "source_mux": [
+      {
+        "emu_delta": 1165209766,
+        "lane": 0,
+        "last_data": 444,
+        "link_state": "aligned_idle",
+        "real_delta": 1164766717,
+        "real_error": 0,
+        "selected_delta": 1166354376
+      },
+      {
+        "emu_delta": 1160326940,
+        "lane": 1,
+        "last_data": 351,
+        "link_state": "fatal_training",
+        "real_delta": 1159950391,
+        "real_error": 4,
+        "selected_delta": 1160501331
+      },
+      {
+        "emu_delta": 1156238940,
+        "lane": 2,
+        "last_data": 351,
+        "link_state": "parity_error",
+        "real_delta": 1156429795,
+        "real_error": 3,
+        "selected_delta": 1157409892
+      },
+      {
+        "emu_delta": 1154699616,
+        "lane": 3,
+        "last_data": 444,
+        "link_state": "aligned_idle",
+        "real_delta": 1154493582,
+        "real_error": 0,
+        "selected_delta": 1155786658
+      },
+      {
+        "emu_delta": 1154017214,
+        "lane": 4,
+        "last_data": 351,
+        "link_state": "parity_error",
+        "real_delta": 1154058266,
+        "real_error": 3,
+        "selected_delta": 1153533213
+      },
+      {
+        "emu_delta": 1149671909,
+        "lane": 5,
+        "last_data": 351,
+        "link_state": "parity_error",
+        "real_delta": 1149234330,
+        "real_error": 3,
+        "selected_delta": 1146436873
+      },
+      {
+        "emu_delta": 1148519968,
+        "lane": 6,
+        "last_data": 351,
+        "link_state": "parity_error",
+        "real_delta": 1148335978,
+        "real_error": 3,
+        "selected_delta": 1149326037
+      },
+      {
+        "emu_delta": 1006124736,
+        "lane": 7,
+        "last_data": 351,
+        "link_state": "parity_error",
+        "real_delta": 1008051754,
+        "real_error": 3,
+        "selected_delta": 1007543830
+      }
+    ]
+  }
+}

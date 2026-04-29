@@ -21,6 +21,17 @@
 --		        debug_1 and debug_2 into independent ingress FIFOs so upper
 --		        and lower hit-stack timestamp-delta streams can share one
 --		        histogram without changing the normal rate path.
+-- Revision: 1.8
+--		Date: Apr 29, 2026
+--		Change: Apply the runtime CSR filter in debug modes using a
+--		        synthetic debug word: bits [15:0] are the sample,
+--		        bits [23:16] are the zero-based debug source index,
+--		        and bits [31:24] are the absolute debug mode.
+-- Revision: 1.9
+--		Date: Apr 29, 2026
+--		Change: Latch last-interval accepted and dropped hit counters
+--		        before the rate-window reset so a host can read a stable
+--		        one-second rate without racing TOTAL_HITS reset.
 -- Revision: 1.3
 --		Date: Apr 25, 2026
 --		Change: Parameterize the ingress FIFO depth for bursty post-stack
@@ -93,7 +104,7 @@ entity histogram_statistics_v2 is
         N_DEBUG_INTERFACE        : natural := 6;
         VERSION_MAJOR            : natural := 26;
         VERSION_MINOR            : natural := 1;
-        VERSION_PATCH            : natural := 4;
+        VERSION_PATCH            : natural := 6;
         BUILD                    : natural := 429;
         IP_UID                   : natural := 1212765012;  -- ASCII "HIST" = 0x48495354
         VERSION_DATE             : natural := 20260429;
@@ -253,6 +264,8 @@ architecture rtl of histogram_statistics_v2 is
     signal divider_stat_underflow_d1 : std_logic := '0';
     signal divider_stat_overflow_d1  : std_logic := '0';
     signal stats_reset_pulse_d1      : std_logic := '0';
+    signal stats_clear_pulse_d1      : std_logic := '0';
+    signal stats_interval_pulse_d1   : std_logic := '0';
 
     signal arb_valid      : std_logic;
     signal arb_port       : port_index_t;
@@ -313,6 +326,8 @@ architecture rtl of histogram_statistics_v2 is
     signal csr_overflow_count   : unsigned(31 downto 0) := (others => '0');
     signal csr_total_hits       : unsigned(31 downto 0) := (others => '0');
     signal csr_dropped_hits     : unsigned(31 downto 0) := (others => '0');
+    signal csr_last_interval_total_hits   : unsigned(31 downto 0) := (others => '0');
+    signal csr_last_interval_dropped_hits : unsigned(31 downto 0) := (others => '0');
     signal csr_interval_cfg     : unsigned(31 downto 0) := to_unsigned(DEF_INTERVAL_CLOCKS, 32);
     signal csr_scratch          : std_logic_vector(31 downto 0) := (others => '0');
     signal csr_meta_sel         : std_logic_vector(1 downto 0)  := (others => '0');
@@ -429,6 +444,37 @@ architecture rtl of histogram_statistics_v2 is
         return std_logic_vector(result_v);
     end function build_debug_key;
 
+    function build_debug_filter_word(
+        debug_source : natural;
+        debug_mode   : integer;
+        data_word    : std_logic_vector(15 downto 0)
+    ) return std_logic_vector is
+        variable result_v : std_logic_vector(AVST_DATA_WIDTH - 1 downto 0) := (others => '0');
+        variable source_v : unsigned(7 downto 0) := to_unsigned(debug_source, 8);
+        variable mode_v   : unsigned(7 downto 0) := (others => '0');
+    begin
+        if debug_mode < 0 then
+            mode_v := to_unsigned(-debug_mode, 8);
+        end if;
+
+        for bit_idx_v in 0 to 15 loop
+            if bit_idx_v <= result_v'high then
+                result_v(bit_idx_v) := data_word(bit_idx_v);
+            end if;
+        end loop;
+
+        for bit_idx_v in 0 to 7 loop
+            if bit_idx_v + 16 <= result_v'high then
+                result_v(bit_idx_v + 16) := source_v(bit_idx_v);
+            end if;
+            if bit_idx_v + 24 <= result_v'high then
+                result_v(bit_idx_v + 24) := mode_v(bit_idx_v);
+            end if;
+        end loop;
+
+        return result_v;
+    end function build_debug_filter_word;
+
     function clip_status_byte_f(
         value_in : unsigned
     ) return status_byte_t is
@@ -531,6 +577,8 @@ begin
         variable debug_active_v    : boolean;
         variable debug_valid_v     : std_logic;
         variable debug_data_v      : std_logic_vector(15 downto 0);
+        variable debug_source_v    : natural;
+        variable debug_filter_v    : std_logic_vector(AVST_DATA_WIDTH - 1 downto 0);
     begin
         fifo_write        <= (others => '0');
         fifo_wr_data      <= (others => (others => '0'));
@@ -544,6 +592,8 @@ begin
         debug_dual_mts_v := debug_mode_v = -7;
         debug_valid_v    := '0';
         debug_data_v     := (others => '0');
+        debug_source_v   := 0;
+        debug_filter_v   := (others => '0');
 
         case debug_mode_v is
             when -1 =>
@@ -598,20 +648,25 @@ begin
 
                 sampled_v := stream_sampled_v;
                 if debug_mode_v < 0 then
+                    debug_source_v := 0;
                     if debug_dual_mts_v then
                         case idx is
                             when 0 =>
                                 debug_valid_v := asi_debug_1_valid;
                                 debug_data_v  := asi_debug_1_data;
+                                debug_source_v := 0;
                             when 1 =>
                                 debug_valid_v := asi_debug_2_valid;
                                 debug_data_v  := asi_debug_2_data;
+                                debug_source_v := 1;
                             when others =>
                                 debug_valid_v := '0';
                                 debug_data_v  := (others => '0');
+                                debug_source_v := 0;
                         end case;
                         sampled_v := debug_valid_v and not cfg_apply_pending;
                     elsif idx = 0 then
+                        debug_source_v := natural((-debug_mode_v) - 1);
                         sampled_v := debug_valid_v and not cfg_apply_pending;
                     else
                         sampled_v := '0';
@@ -623,11 +678,27 @@ begin
 
                 if sampled_v = '1' then
                     if debug_mode_v < 0 then
-                        ingress_write_req(idx) <= '1';
                         ingress_key_next(idx) <= build_debug_key(
                             debug_mode => debug_mode_v,
                             data_word  => debug_data_v
                         );
+                        debug_filter_v := build_debug_filter_word(
+                            debug_source => debug_source_v,
+                            debug_mode   => debug_mode_v,
+                            data_word    => debug_data_v
+                        );
+
+                        filter_pass_v := match_filter(
+                            data_word      => debug_filter_v,
+                            filter_enable  => cfg_filter_enable_port(idx),
+                            filter_reject  => cfg_filter_reject_port(idx),
+                            filter_hi      => cfg_filter_key_high_port(idx),
+                            filter_lo      => cfg_filter_key_low_port(idx),
+                            filter_key     => cfg_filter_key_port(idx)
+                        );
+                        if filter_pass_v then
+                            ingress_write_req(idx) <= '1';
+                        end if;
                     else
                         -- Compute key unconditionally (don't gate by filter_pass)
                         -- to break timing from cfg_filter_key_low → ingress_stage_key.
@@ -868,6 +939,8 @@ begin
                 divider_stat_underflow_d1 <= '0';
                 divider_stat_overflow_d1  <= '0';
                 stats_reset_pulse_d1    <= '0';
+                stats_clear_pulse_d1    <= '0';
+                stats_interval_pulse_d1 <= '0';
             else
                 accept_stat_pulse_d1    <= accept_pulse;
                 drop_stat_pulse_d1      <= drop_pulse;
@@ -875,6 +948,8 @@ begin
                 divider_stat_underflow_d1 <= divider_underflow;
                 divider_stat_overflow_d1  <= divider_overflow;
                 stats_reset_pulse_d1    <= measure_clear_pulse or interval_pulse;
+                stats_clear_pulse_d1    <= measure_clear_pulse;
+                stats_interval_pulse_d1 <= interval_pulse;
             end if;
         end if;
     end process stats_pipe;
@@ -893,6 +968,8 @@ begin
                 csr_overflow_count  <= (others => '0');
                 csr_total_hits      <= (others => '0');
                 csr_dropped_hits    <= (others => '0');
+                csr_last_interval_total_hits   <= (others => '0');
+                csr_last_interval_dropped_hits <= (others => '0');
             else
                 total_hits_v    := csr_total_hits;
                 dropped_hits_v  := csr_dropped_hits;
@@ -902,6 +979,13 @@ begin
                 drop_count_v    := (others => '0');
 
                 if stats_reset_pulse_d1 = '1' then
+                    if stats_interval_pulse_d1 = '1' then
+                        csr_last_interval_total_hits   <= total_hits_v;
+                        csr_last_interval_dropped_hits <= dropped_hits_v;
+                    elsif stats_clear_pulse_d1 = '1' then
+                        csr_last_interval_total_hits   <= (others => '0');
+                        csr_last_interval_dropped_hits <= (others => '0');
+                    end if;
                     underflow_cnt_v := (others => '0');
                     overflow_cnt_v  := (others => '0');
                     total_hits_v    := (others => '0');
@@ -1251,6 +1335,10 @@ begin
                 csr_readdata_mux <= csr_coal_status;
             when 16 =>  -- SCRATCH
                 csr_readdata_mux <= csr_scratch;
+            when 17 =>  -- LAST_INTERVAL_TOTAL_HITS
+                csr_readdata_mux <= std_logic_vector(csr_last_interval_total_hits);
+            when 18 =>  -- LAST_INTERVAL_DROPPED_HITS
+                csr_readdata_mux <= std_logic_vector(csr_last_interval_dropped_hits);
             when others =>
                 csr_readdata_mux <= (others => '0');
         end case;

@@ -284,7 +284,7 @@ def select_lane_sources(
 
 
 def hist_snapshot(sc_tool: Path, link: int) -> dict[str, int]:
-    regs = sc_read(sc_tool, link, HIST_CSR_BASE_WORD + 8, 8)
+    regs = sc_read(sc_tool, link, HIST_CSR_BASE_WORD + 8, 11)
     return {
         "UNDERFLOW_COUNT": regs[0],
         "OVERFLOW_COUNT": regs[1],
@@ -294,6 +294,8 @@ def hist_snapshot(sc_tool: Path, link: int) -> dict[str, int]:
         "TOTAL_HITS": regs[5],
         "DROPPED_HITS": regs[6],
         "COAL_STATUS": regs[7],
+        "LAST_INTERVAL_TOTAL_HITS": regs[9],
+        "LAST_INTERVAL_DROPPED_HITS": regs[10],
     }
 
 

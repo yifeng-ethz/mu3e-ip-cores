@@ -27,6 +27,11 @@
 --		        synthetic debug word: bits [15:0] are the sample,
 --		        bits [23:16] are the zero-based debug source index,
 --		        and bits [31:24] are the absolute debug mode.
+-- Revision: 1.9
+--		Date: Apr 29, 2026
+--		Change: Latch last-interval accepted and dropped hit counters
+--		        before the rate-window reset so a host can read a stable
+--		        one-second rate without racing TOTAL_HITS reset.
 -- Revision: 1.3
 --		Date: Apr 25, 2026
 --		Change: Parameterize the ingress FIFO depth for bursty post-stack
@@ -99,7 +104,7 @@ entity histogram_statistics_v2 is
         N_DEBUG_INTERFACE        : natural := 6;
         VERSION_MAJOR            : natural := 26;
         VERSION_MINOR            : natural := 1;
-        VERSION_PATCH            : natural := 5;
+        VERSION_PATCH            : natural := 6;
         BUILD                    : natural := 429;
         IP_UID                   : natural := 1212765012;  -- ASCII "HIST" = 0x48495354
         VERSION_DATE             : natural := 20260429;
@@ -259,6 +264,8 @@ architecture rtl of histogram_statistics_v2 is
     signal divider_stat_underflow_d1 : std_logic := '0';
     signal divider_stat_overflow_d1  : std_logic := '0';
     signal stats_reset_pulse_d1      : std_logic := '0';
+    signal stats_clear_pulse_d1      : std_logic := '0';
+    signal stats_interval_pulse_d1   : std_logic := '0';
 
     signal arb_valid      : std_logic;
     signal arb_port       : port_index_t;
@@ -319,6 +326,8 @@ architecture rtl of histogram_statistics_v2 is
     signal csr_overflow_count   : unsigned(31 downto 0) := (others => '0');
     signal csr_total_hits       : unsigned(31 downto 0) := (others => '0');
     signal csr_dropped_hits     : unsigned(31 downto 0) := (others => '0');
+    signal csr_last_interval_total_hits   : unsigned(31 downto 0) := (others => '0');
+    signal csr_last_interval_dropped_hits : unsigned(31 downto 0) := (others => '0');
     signal csr_interval_cfg     : unsigned(31 downto 0) := to_unsigned(DEF_INTERVAL_CLOCKS, 32);
     signal csr_scratch          : std_logic_vector(31 downto 0) := (others => '0');
     signal csr_meta_sel         : std_logic_vector(1 downto 0)  := (others => '0');
@@ -930,6 +939,8 @@ begin
                 divider_stat_underflow_d1 <= '0';
                 divider_stat_overflow_d1  <= '0';
                 stats_reset_pulse_d1    <= '0';
+                stats_clear_pulse_d1    <= '0';
+                stats_interval_pulse_d1 <= '0';
             else
                 accept_stat_pulse_d1    <= accept_pulse;
                 drop_stat_pulse_d1      <= drop_pulse;
@@ -937,6 +948,8 @@ begin
                 divider_stat_underflow_d1 <= divider_underflow;
                 divider_stat_overflow_d1  <= divider_overflow;
                 stats_reset_pulse_d1    <= measure_clear_pulse or interval_pulse;
+                stats_clear_pulse_d1    <= measure_clear_pulse;
+                stats_interval_pulse_d1 <= interval_pulse;
             end if;
         end if;
     end process stats_pipe;
@@ -955,6 +968,8 @@ begin
                 csr_overflow_count  <= (others => '0');
                 csr_total_hits      <= (others => '0');
                 csr_dropped_hits    <= (others => '0');
+                csr_last_interval_total_hits   <= (others => '0');
+                csr_last_interval_dropped_hits <= (others => '0');
             else
                 total_hits_v    := csr_total_hits;
                 dropped_hits_v  := csr_dropped_hits;
@@ -964,6 +979,13 @@ begin
                 drop_count_v    := (others => '0');
 
                 if stats_reset_pulse_d1 = '1' then
+                    if stats_interval_pulse_d1 = '1' then
+                        csr_last_interval_total_hits   <= total_hits_v;
+                        csr_last_interval_dropped_hits <= dropped_hits_v;
+                    elsif stats_clear_pulse_d1 = '1' then
+                        csr_last_interval_total_hits   <= (others => '0');
+                        csr_last_interval_dropped_hits <= (others => '0');
+                    end if;
                     underflow_cnt_v := (others => '0');
                     overflow_cnt_v  := (others => '0');
                     total_hits_v    := (others => '0');
@@ -1313,6 +1335,10 @@ begin
                 csr_readdata_mux <= csr_coal_status;
             when 16 =>  -- SCRATCH
                 csr_readdata_mux <= csr_scratch;
+            when 17 =>  -- LAST_INTERVAL_TOTAL_HITS
+                csr_readdata_mux <= std_logic_vector(csr_last_interval_total_hits);
+            when 18 =>  -- LAST_INTERVAL_DROPPED_HITS
+                csr_readdata_mux <= std_logic_vector(csr_last_interval_dropped_hits);
             when others =>
                 csr_readdata_mux <= (others => '0');
         end case;

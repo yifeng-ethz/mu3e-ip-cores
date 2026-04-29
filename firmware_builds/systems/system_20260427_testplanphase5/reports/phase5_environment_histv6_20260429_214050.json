@@ -1,0 +1,737 @@
+{
+  "checks": [
+    {
+      "detail": "common CSR header UID should identify the upgraded OneWire controller",
+      "name": "onewire.uid",
+      "status": "PASS",
+      "value": "0x4F574D43"
+    },
+    {
+      "detail": "expected at least one synthesized 1-Wire DQ line",
+      "name": "onewire.capability.n_dq_lines",
+      "status": "PASS",
+      "value": 6
+    },
+    {
+      "detail": "sticky CRC error flag should normally be clear",
+      "name": "onewire.status.crc_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "sticky init error flag should normally be clear",
+      "name": "onewire.status.init_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "selected 1-Wire line should have captured at least one full scratchpad",
+      "name": "onewire.status.sample_valid",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "expected finite board temperature in [-40, 125] C, normally within [5, 85] C on a populated bench board; 1.0 C is treated as the old default/stale-loop signature",
+      "name": "onewire.sensor0.temp_c",
+      "status": "PASS",
+      "value": 30.25
+    },
+    {
+      "detail": "expected finite board temperature in [-40, 125] C, normally within [5, 85] C on a populated bench board; 1.0 C is treated as the old default/stale-loop signature",
+      "name": "onewire.sensor1.temp_c",
+      "status": "PASS",
+      "value": 31.438
+    },
+    {
+      "detail": "expected finite board temperature in [-40, 125] C, normally within [5, 85] C on a populated bench board; 1.0 C is treated as the old default/stale-loop signature",
+      "name": "onewire.sensor2.temp_c",
+      "status": "PASS",
+      "value": 21.5
+    },
+    {
+      "detail": "expected finite board temperature in [-40, 125] C, normally within [5, 85] C on a populated bench board; 1.0 C is treated as the old default/stale-loop signature",
+      "name": "onewire.sensor3.temp_c",
+      "status": "PASS",
+      "value": 21.812
+    },
+    {
+      "detail": "expected finite board temperature in [-40, 125] C, normally within [5, 85] C on a populated bench board; 1.0 C is treated as the old default/stale-loop signature",
+      "name": "onewire.sensor4.temp_c",
+      "status": "PASS",
+      "value": 40.25
+    },
+    {
+      "detail": "expected finite board temperature in [-40, 125] C, normally within [5, 85] C on a populated bench board; 1.0 C is treated as the old default/stale-loop signature",
+      "name": "onewire.sensor5.temp_c",
+      "status": "PASS",
+      "value": 40.312
+    },
+    {
+      "detail": "at least one 1-Wire temperature should decode as a non-default-looking board temperature",
+      "name": "onewire.sensor.valid_count",
+      "status": "PASS",
+      "value": 6
+    },
+    {
+      "detail": "expected 0x4D312850",
+      "name": "max10.id",
+      "status": "PASS",
+      "value": "0x4D312850"
+    },
+    {
+      "detail": "expected legacy interface version 0x00020000",
+      "name": "max10.version",
+      "status": "PASS",
+      "value": "0x00020000"
+    },
+    {
+      "detail": "programmer should be idle during environmental audit",
+      "name": "max10.status.busy",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "programmer fault bit must be clear",
+      "name": "max10.status.fault",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "expected non-sentinel optical module temperature",
+      "name": "firefly.ff1.temp_c",
+      "status": "PASS",
+      "value": 58
+    },
+    {
+      "detail": "expected low-16 VCC monitor code to be non-sentinel and near a 3.3 V module rail",
+      "name": "firefly.ff1.vcc_raw",
+      "status": "WARN",
+      "value": 58
+    },
+    {
+      "detail": "expected optical-power monitor code to avoid 0xFFFF; zero means unplugged/dark channel or stale poll",
+      "name": "firefly.ff1.rx_power1_raw",
+      "status": "PASS",
+      "value": 3900
+    },
+    {
+      "detail": "expected optical-power monitor code to avoid 0xFFFF; zero means unplugged/dark channel or stale poll",
+      "name": "firefly.ff1.rx_power2_raw",
+      "status": "PASS",
+      "value": 3900
+    },
+    {
+      "detail": "expected optical-power monitor code to avoid 0xFFFF; zero means unplugged/dark channel or stale poll",
+      "name": "firefly.ff1.rx_power3_raw",
+      "status": "PASS",
+      "value": 2820
+    },
+    {
+      "detail": "expected optical-power monitor code to avoid 0xFFFF; zero means unplugged/dark channel or stale poll",
+      "name": "firefly.ff1.rx_power4_raw",
+      "status": "PASS",
+      "value": 2820
+    },
+    {
+      "detail": "Firefly 2 is expected to be dangling on this Phase-5 setup; non-sentinel values should be explained",
+      "name": "firefly.ff2.expected_absent",
+      "status": "PASS",
+      "value": {
+        "rx_power_raw": [
+          65535,
+          65535,
+          65535,
+          65535
+        ],
+        "temp_c": 0,
+        "vcc_raw": 65535
+      }
+    },
+    {
+      "detail": "at least one optical power channel should be nonzero on a cabled board",
+      "name": "firefly.rx_power.nonzero_count",
+      "status": "PASS",
+      "value": 4
+    },
+    {
+      "detail": "expected non-sentinel Arria-V die temperature",
+      "name": "on_die.temp_c",
+      "status": "PASS",
+      "value": 50
+    },
+    {
+      "detail": "legacy bridge read is informational; primary Firefly monitor is firefly_xcvr_ctrl_0",
+      "name": "legacy_firefly_bridge.reachability",
+      "status": "PASS",
+      "value": "OK"
+    },
+    {
+      "detail": "STATUS.sel_line should echo the requested DQ line",
+      "name": "onewire.line0.selected",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "processor_go must remain asserted to run the background temperature loop",
+      "name": "onewire.line0.processor_go",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "CRC error should stay clear for a healthy 1-Wire sensor read",
+      "name": "onewire.line0.crc_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "initialization error should stay clear for a detected/powered 1-Wire sensor",
+      "name": "onewire.line0.init_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "sample_valid should assert after a full DS18B20 scratchpad read",
+      "name": "onewire.line0.sample_valid",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "STATUS.sel_line should echo the requested DQ line",
+      "name": "onewire.line1.selected",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "processor_go must remain asserted to run the background temperature loop",
+      "name": "onewire.line1.processor_go",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "CRC error should stay clear for a healthy 1-Wire sensor read",
+      "name": "onewire.line1.crc_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "initialization error should stay clear for a detected/powered 1-Wire sensor",
+      "name": "onewire.line1.init_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "sample_valid should assert after a full DS18B20 scratchpad read",
+      "name": "onewire.line1.sample_valid",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "STATUS.sel_line should echo the requested DQ line",
+      "name": "onewire.line2.selected",
+      "status": "PASS",
+      "value": 2
+    },
+    {
+      "detail": "processor_go must remain asserted to run the background temperature loop",
+      "name": "onewire.line2.processor_go",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "CRC error should stay clear for a healthy 1-Wire sensor read",
+      "name": "onewire.line2.crc_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "initialization error should stay clear for a detected/powered 1-Wire sensor",
+      "name": "onewire.line2.init_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "sample_valid should assert after a full DS18B20 scratchpad read",
+      "name": "onewire.line2.sample_valid",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "STATUS.sel_line should echo the requested DQ line",
+      "name": "onewire.line3.selected",
+      "status": "PASS",
+      "value": 3
+    },
+    {
+      "detail": "processor_go must remain asserted to run the background temperature loop",
+      "name": "onewire.line3.processor_go",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "CRC error should stay clear for a healthy 1-Wire sensor read",
+      "name": "onewire.line3.crc_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "initialization error should stay clear for a detected/powered 1-Wire sensor",
+      "name": "onewire.line3.init_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "sample_valid should assert after a full DS18B20 scratchpad read",
+      "name": "onewire.line3.sample_valid",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "STATUS.sel_line should echo the requested DQ line",
+      "name": "onewire.line4.selected",
+      "status": "PASS",
+      "value": 4
+    },
+    {
+      "detail": "processor_go must remain asserted to run the background temperature loop",
+      "name": "onewire.line4.processor_go",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "CRC error should stay clear for a healthy 1-Wire sensor read",
+      "name": "onewire.line4.crc_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "initialization error should stay clear for a detected/powered 1-Wire sensor",
+      "name": "onewire.line4.init_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "sample_valid should assert after a full DS18B20 scratchpad read",
+      "name": "onewire.line4.sample_valid",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "STATUS.sel_line should echo the requested DQ line",
+      "name": "onewire.line5.selected",
+      "status": "PASS",
+      "value": 5
+    },
+    {
+      "detail": "processor_go must remain asserted to run the background temperature loop",
+      "name": "onewire.line5.processor_go",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "CRC error should stay clear for a healthy 1-Wire sensor read",
+      "name": "onewire.line5.crc_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "initialization error should stay clear for a detected/powered 1-Wire sensor",
+      "name": "onewire.line5.init_err",
+      "status": "PASS",
+      "value": 0
+    },
+    {
+      "detail": "sample_valid should assert after a full DS18B20 scratchpad read",
+      "name": "onewire.line5.sample_valid",
+      "status": "PASS",
+      "value": 1
+    },
+    {
+      "detail": "detected OneWire CSR map or wrote STATUS.sel_line with processor_go=1 to enable the 1-Wire background monitor loop",
+      "name": "onewire_start_line5",
+      "status": "PASS",
+      "value": "0x00010005"
+    },
+    {
+      "detail": "detected OneWire CSR map or wrote STATUS.sel_line with processor_go=1 to enable the 1-Wire background monitor loop",
+      "name": "onewire_start_line4",
+      "status": "PASS",
+      "value": "0x00010004"
+    },
+    {
+      "detail": "detected OneWire CSR map or wrote STATUS.sel_line with processor_go=1 to enable the 1-Wire background monitor loop",
+      "name": "onewire_start_line3",
+      "status": "PASS",
+      "value": "0x00010003"
+    },
+    {
+      "detail": "detected OneWire CSR map or wrote STATUS.sel_line with processor_go=1 to enable the 1-Wire background monitor loop",
+      "name": "onewire_start_line2",
+      "status": "PASS",
+      "value": "0x00010002"
+    },
+    {
+      "detail": "detected OneWire CSR map or wrote STATUS.sel_line with processor_go=1 to enable the 1-Wire background monitor loop",
+      "name": "onewire_start_line1",
+      "status": "PASS",
+      "value": "0x00010001"
+    },
+    {
+      "detail": "detected OneWire CSR map or wrote STATUS.sel_line with processor_go=1 to enable the 1-Wire background monitor loop",
+      "name": "onewire_start_line0",
+      "status": "PASS",
+      "value": "0x00010000"
+    },
+    {
+      "detail": "detected OneWire CSR map or wrote STATUS.sel_line with processor_go=1 to enable the 1-Wire background monitor loop",
+      "name": "onewire_detect_common_header",
+      "status": "PASS",
+      "value": "UID=0x4F574D43, cap_addr=0x04403, status_addr=0x04404"
+    }
+  ],
+  "onewire_line_statuses": [
+    {
+      "line": 0,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          67174400
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "select_parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "select_returncode": 0,
+      "status_addr": "0x04404"
+    },
+    {
+      "line": 1,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          67174401
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "select_parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "select_returncode": 0,
+      "status_addr": "0x04404"
+    },
+    {
+      "line": 2,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          67174402
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "select_parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "select_returncode": 0,
+      "status_addr": "0x04404"
+    },
+    {
+      "line": 3,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          67174403
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "select_parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "select_returncode": 0,
+      "status_addr": "0x04404"
+    },
+    {
+      "line": 4,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          67174404
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "select_parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "select_returncode": 0,
+      "status_addr": "0x04404"
+    },
+    {
+      "line": 5,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          67174405
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "select_parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "select_returncode": 0,
+      "status_addr": "0x04404"
+    }
+  ],
+  "pre_actions": [
+    {
+      "addr": "0x04400",
+      "name": "onewire_detect_common_header",
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          6
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "status": "PASS",
+      "value": "UID=0x4F574D43, cap_addr=0x04403, status_addr=0x04404"
+    },
+    {
+      "addr": "0x04404",
+      "name": "onewire_start_line0",
+      "parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "status": "PASS",
+      "value": "0x00010000"
+    },
+    {
+      "addr": "0x04404",
+      "name": "onewire_start_line1",
+      "parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "status": "PASS",
+      "value": "0x00010001"
+    },
+    {
+      "addr": "0x04404",
+      "name": "onewire_start_line2",
+      "parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "status": "PASS",
+      "value": "0x00010002"
+    },
+    {
+      "addr": "0x04404",
+      "name": "onewire_start_line3",
+      "parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "status": "PASS",
+      "value": "0x00010003"
+    },
+    {
+      "addr": "0x04404",
+      "name": "onewire_start_line4",
+      "parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "status": "PASS",
+      "value": "0x00010004"
+    },
+    {
+      "addr": "0x04404",
+      "name": "onewire_start_line5",
+      "parsed": {
+        "ack": 1,
+        "payload": [],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0,
+      "status": "PASS",
+      "value": "0x00010005"
+    }
+  ],
+  "raw_reads": {
+    "firefly_xcvr_ctrl_0": {
+      "addr": "0x05000",
+      "count": 14,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          58,
+          58,
+          3900,
+          3900,
+          2820,
+          2820,
+          1342177280,
+          1342177280,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535,
+          65535
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0
+    },
+    "legacy_firefly_bridge": {
+      "addr": "0x05800",
+      "count": 1,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          3435973836
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0
+    },
+    "max10_prog_avmm_0": {
+      "addr": "0x04800",
+      "count": 4,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          1295067216,
+          131072,
+          0,
+          1
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0
+    },
+    "on_die_temp_sense_ctrl": {
+      "addr": "0x05400",
+      "count": 1,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          50
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0
+    },
+    "onewire_master_controller_0": {
+      "addr": "0x04400",
+      "count": 11,
+      "parsed": {
+        "ack": 1,
+        "payload": [
+          1331121475,
+          436343212,
+          0,
+          6,
+          67174405,
+          1106378752,
+          1107001344,
+          1101791232,
+          1101955072,
+          1109458944,
+          1109475328
+        ],
+        "rsp_code": 0,
+        "rsp_name": "OK",
+        "sc_transport": "quiet"
+      },
+      "returncode": 0
+    }
+  },
+  "read_status": {
+    "firefly_xcvr_ctrl_0": "OK",
+    "legacy_firefly_bridge": "OK",
+    "max10_prog_avmm_0": "OK",
+    "on_die_temp_sense_ctrl": "OK",
+    "onewire_master_controller_0": "OK"
+  },
+  "summary": {
+    "FAIL": 0,
+    "PASS": 62,
+    "WARN": 1
+  }
+}

@@ -182,9 +182,11 @@ def make_case_args(
         source=source,
         emulator_source_mask=selected_emu_mask if source == "mixed" else None,
         lvds_lane_mask=lvds_mask,
+        skip_lvds_config=False,
         active_lanes_mask=active_emu_mask,
         inject_mode=scenario["inject_mode"],
         hist_profile=scenario["hist_profile"],
+        rate_tolerance_pct=args.rate_tolerance_pct,
         pulse_intervals=[scenario["pulse_interval"]],
         pulse_high_cycles=args.pulse_high_cycles,
         onclick_count=16,
@@ -276,23 +278,25 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, records: 
         "",
         "## Summary",
         "",
-        "| # | Scenario | Source | Scope | Requested | Effective emu | Effective real/LVDS | Hist profile | Hits | Drops | MTS | Discard | CRC | Ring InErr | Status |",
-        "|---:|---|---|---|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---|",
+        "| # | Scenario | Source | Scope | Requested | Mux emu select | Effective emu | Effective real/LVDS | Hist profile | Hits | Rate Exp | Rate Err | Drops | MTS | Discard | CRC | Ring InErr | Status |",
+        "|---:|---|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for rec in records:
         summary = rec.get("summary", {})
         lines.append(
             f"| {rec['matrix_index']} | `{rec['scenario']}` | `{rec['source']}` | `{rec['scope']}` | "
-            f"`{fmt_hex(rec.get('requested_lanes_mask', 0))}` | `{fmt_hex(rec.get('effective_emulator_mask', 0))}` | "
+            f"`{fmt_hex(rec.get('requested_lanes_mask', 0))}` | `{fmt_hex(rec.get('selected_source_mask', 0))}` | "
+            f"`{fmt_hex(rec.get('effective_emulator_mask', 0))}` | "
             f"`{fmt_hex(rec.get('effective_lvds_mask', 0))}` | `{rec.get('hist_profile', '-')}` | "
-            f"{summary.get('hist_total_delta', 0)} | {summary.get('hist_drop_delta', 0)} | "
+            f"{summary.get('hist_total_delta', 0)} | {summary.get('rate_expected_hits', 0)} | "
+            f"{summary.get('rate_error_hits', 0)} | {summary.get('hist_drop_delta', 0)} | "
             f"{summary.get('mts_total_delta', 0)} | {summary.get('mts_discard_delta', 0)} | "
             f"{summary.get('frame_crc_delta', 0)} | {summary.get('ring_inerr_delta', 0)} | `{rec.get('status', 'UNKNOWN')}` |"
         )
 
     lines.extend(["", "## Notes", ""])
     lines.append("- `PASS_PARTIAL` means the requested `all` real-MuTRiG scope was reduced to the currently configured real lanes, mask `0x09` by default. It is evidence, but not full eight-MuTRiG closure.")
-    lines.append("- Rate scenarios use the Phase-5 histogram preset: `INTERVAL_CFG = 125000000` (1 s at 125 MHz) and update key `data[38:30] = {ASIC[3:0], channel[4:0]}` for 256-channel global-rate bins.")
+    lines.append("- Rate scenarios use the Phase-5 histogram preset: `INTERVAL_CFG = 125000000` (1 s at 125 MHz) and update key `data[38:30] = {ASIC[3:0], channel[4:0]}` for 256-channel global-rate bins. Rate-mode PASS requires the v26.1.6 `LAST_INTERVAL_TOTAL_HITS` CSR and aggregate hits within +/-1% of the pulse-interval expectation.")
     lines.append("- Delay scenarios use histogram profile `delay-mts-both`, i.e. `histogram_statistics_0.CONTROL.mode = -7`, which samples `mts_preprocessor_0.ts_delta` on debug_1 and `mts_preprocessor_1.ts_delta` on debug_2 into one delay PDF. Current mode -7 does not carry a lane tag through the histogram CSR filter; eight-lane overlays require eight isolated lane-source runs unless the RTL is extended with lane-tagged debug filtering.")
     lines.append("- Final closure must use raw histogram-bin readout and DISLIN plots; this matrix remains quick CSR triage and does not replace the histogram plot evidence.")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -344,6 +348,7 @@ def main() -> int:
     parser.add_argument("--header-channel", type=int, default=0)
     parser.add_argument("--cluster-center", type=int, default=16)
     parser.add_argument("--emulator-seed", type=int, default=0xDEADBEEF)
+    parser.add_argument("--rate-tolerance-pct", type=float, default=1.0)
     parser.add_argument("--max-runs", type=int, default=0, help="limit executed non-blocked runs; 0 means no limit")
     parser.add_argument("--no-prime", action="store_true")
     parser.add_argument("--firmware-note", default="top_stp_pipe_phase5_injector.sof checksum 0x13F0D32A")
@@ -426,6 +431,7 @@ def main() -> int:
                 case.update(
                     {
                         "matrix_index": matrix_index,
+                        "source": source,
                         "scenario": scenario_name,
                         "scenario_title": scenario["title"],
                         "scope": scope_name,

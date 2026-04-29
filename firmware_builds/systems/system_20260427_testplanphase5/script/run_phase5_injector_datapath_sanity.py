@@ -144,10 +144,60 @@ def source_mask(args: argparse.Namespace) -> int:
     if args.source == "emulator":
         return 0xFF
     if args.source == "real":
-        return 0x00
+        # Park non-requested lanes on disabled emulator sources so a scoped
+        # real-lane run cannot accidentally count every live MuTRiG lane.
+        return (~args.lvds_lane_mask) & 0xFF
     if args.emulator_source_mask is None:
         raise ValueError("--source mixed requires --emulator-source-mask")
     return args.emulator_source_mask
+
+
+def popcount(value: int) -> int:
+    return int(value & 0xFFFFFFFF).bit_count()
+
+
+def expected_periodic_rate_hits(args: argparse.Namespace, pulse_interval: int) -> int:
+    """Expected aggregate 1 s histogram count for rate-profile periodic mode."""
+    if args.hist_profile != "rate" or args.inject_mode != "periodic" or pulse_interval <= 0:
+        return 0
+
+    source_select = source_mask(args) & 0xFF
+    if args.source == "emulator":
+        emulator_lanes = popcount(args.active_lanes_mask & 0xFF)
+        real_lanes = 0
+    elif args.source == "real":
+        emulator_lanes = 0
+        real_lanes = popcount(args.lvds_lane_mask & 0xFF)
+    else:
+        emulator_lanes = popcount(args.active_lanes_mask & source_select)
+        real_lanes = popcount((args.lvds_lane_mask & 0xFF) & (~source_select & 0xFF))
+
+    # The emulator can fan one injector pulse into a configured cluster.  The
+    # real MuTRiG TDC-test configuration used by this runner is one channel per
+    # enabled ASIC unless a separate ASIC configuration flow changes it.
+    hits_per_pulse = (emulator_lanes * max(1, args.cluster_size)) + real_lanes
+    return int(round((HIST_INTERVAL_CLOCKS_1S / pulse_interval) * hits_per_pulse))
+
+
+def add_rate_acceptance(args: argparse.Namespace, summary: dict[str, Any], pulse_interval: int) -> None:
+    expected = expected_periodic_rate_hits(args, pulse_interval)
+    summary["rate_expected_hits"] = expected
+    summary["rate_tolerance_pct"] = args.rate_tolerance_pct
+    summary["rate_tolerance_hits"] = 0
+    summary["rate_error_hits"] = 0
+    summary["rate_error_pct"] = None
+    summary["rate_last_interval_available"] = summary.get("hist_rate_counter_source") == "last_interval"
+    summary["rate_within_tolerance"] = True
+    if expected <= 0:
+        return
+
+    observed = summary.get("hist_total_delta", 0)
+    tolerance_hits = max(1, int(round(expected * (args.rate_tolerance_pct / 100.0))))
+    error_hits = observed - expected
+    summary["rate_tolerance_hits"] = tolerance_hits
+    summary["rate_error_hits"] = error_hits
+    summary["rate_error_pct"] = (100.0 * error_hits / expected) if expected else None
+    summary["rate_within_tolerance"] = abs(error_hits) <= tolerance_hits
 
 
 def emu_base(idx: int) -> int:
@@ -421,6 +471,9 @@ def classify(args: argparse.Namespace, summary: dict[str, Any]) -> str:
         args.ring_filter_inerr == "off"
         or args.mts_drop_delay_error == "on"
     )
+    rate_profile = args.hist_profile == "rate" and summary.get("rate_expected_hits", 0) > 0
+    if rate_profile and not summary.get("rate_last_interval_available", False):
+        return "rate_last_interval_unavailable"
     if (
         summary["hist_total_delta"] > 0
         and summary["hist_drop_delta"] == 0
@@ -429,6 +482,8 @@ def classify(args: argparse.Namespace, summary: dict[str, Any]) -> str:
         and summary["ring_inerr_delta"] == 0
         and summary["post_end_clean"]
     ):
+        if rate_profile and not summary.get("rate_within_tolerance", False):
+            return "rate_out_of_tolerance"
         if diagnostic_bypass:
             return "diagnostic_bypass_clean_not_closure"
         return "PASS"
@@ -492,6 +547,19 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
     injector_after = read_injector_regs(args.sc_tool, args.link)
 
     summary = summarize_cycle(before, sample, after)
+    summary["hist_live_total_delta"] = summary.get("hist_total_delta", 0)
+    summary["hist_live_drop_delta"] = summary.get("hist_drop_delta", 0)
+    summary["hist_last_interval_total"] = sample["histogram"].get("LAST_INTERVAL_TOTAL_HITS", 0)
+    summary["hist_last_interval_dropped"] = sample["histogram"].get("LAST_INTERVAL_DROPPED_HITS", 0)
+    summary["hist_rate_counter_source"] = "live_delta"
+    if args.hist_profile == "rate":
+        if summary["hist_last_interval_total"] or summary["hist_last_interval_dropped"]:
+            summary["hist_total_delta"] = summary["hist_last_interval_total"]
+            summary["hist_drop_delta"] = summary["hist_last_interval_dropped"]
+            summary["hist_rate_counter_source"] = "last_interval"
+        else:
+            summary["hist_rate_counter_source"] = "live_delta_no_last_interval"
+    add_rate_acceptance(args, summary, pulse_interval)
     summary["phase5_classification"] = classify(args, summary)
     summary["pass"] = summary["phase5_classification"] == "PASS"
 
@@ -539,6 +607,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- Active emulator lanes: `{fmt_hex(args.active_lanes_mask)}`",
         f"- Inject mode: `{args.inject_mode}`",
         f"- Histogram profile: `{args.hist_profile}`",
+        f"- Rate tolerance: `{args.rate_tolerance_pct:.3f}%`",
         f"- Histogram filter enable: `{getattr(args, 'hist_filter_enable', False)}`",
         f"- Histogram filter key loc override: `{getattr(args, 'hist_filter_key_loc', None)}`",
         f"- Histogram filter key value: `{fmt_hex(getattr(args, 'hist_filter_key_value', 0) or 0)}`",
@@ -570,6 +639,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
             "",
             "- The active `mutrig_injector_0` exposes one `coe_inject_pulse` output. The emulator `inject_channel_mask` CSR is still written for visibility, but that mask only affects the separate masked-trigger conduit and is not driven by this injector instance.",
             "- Channel sanity in this report is therefore represented by emulator cluster center/size; ASIC sanity is represented by `active_lanes_mask` and the per-lane source mux selection.",
+            "- Scoped real-source runs select disabled emulator sources on non-requested lanes; otherwise an aligned idle/live MuTRiG lane can continue into MTS/histogram even when the LVDS lane-go mask requests a single lane.",
             "- The runner writes injector mode `0` before setup and immediately after the injection window because the current injector RTL accepts run-control but does not gate the pulse arbiter by RUNNING.",
             "",
             "## Per-Case Details",
@@ -596,6 +666,10 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
                 f"- Emulator frame delta: `{summary.get('emu_frame_delta', 0)}`",
                 f"- Frame CRC delta: `{summary.get('frame_crc_delta', 0)}`",
                 f"- Frame actual-hit delta: `{summary.get('frame_actual_delta', 0)}`",
+                f"- Histogram rate counter source: `{summary.get('hist_rate_counter_source', 'live_delta')}`",
+                f"- Histogram live delta: `{summary.get('hist_live_total_delta', 0)}` / dropped `{summary.get('hist_live_drop_delta', 0)}`",
+                f"- Histogram last interval: `{summary.get('hist_last_interval_total', 0)}` / dropped `{summary.get('hist_last_interval_dropped', 0)}`",
+                f"- Rate expected/tolerance/error: `{summary.get('rate_expected_hits', 0)}` / `±{summary.get('rate_tolerance_hits', 0)}` / `{summary.get('rate_error_hits', 0)}` hits",
                 f"- Post-end clean: `{'yes' if summary.get('post_end_clean', False) else 'no'}`",
                 "",
             ]
@@ -641,6 +715,7 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "duration_ms": args.duration_ms,
             "pulse_intervals": args.pulse_intervals,
             "hist_profile": args.hist_profile,
+            "rate_tolerance_pct": args.rate_tolerance_pct,
             "hist_filter_enable": getattr(args, "hist_filter_enable", False),
             "hist_filter_key_loc": getattr(args, "hist_filter_key_loc", None),
             "hist_filter_key_value": getattr(args, "hist_filter_key_value", 0),
@@ -680,6 +755,7 @@ def main() -> int:
     parser.add_argument("--active-lanes-mask", type=parse_mask, default=0xFF)
     parser.add_argument("--inject-mode", choices=tuple(INJECT_MODE), default="periodic")
     parser.add_argument("--hist-profile", choices=tuple(HIST_PROFILE), default="rate")
+    parser.add_argument("--rate-tolerance-pct", type=float, default=1.0)
     parser.add_argument("--hist-filter-enable", action="store_true")
     parser.add_argument("--hist-filter-key-loc", type=parse_u32, default=None)
     parser.add_argument("--hist-filter-key-value", type=parse_u32, default=0)

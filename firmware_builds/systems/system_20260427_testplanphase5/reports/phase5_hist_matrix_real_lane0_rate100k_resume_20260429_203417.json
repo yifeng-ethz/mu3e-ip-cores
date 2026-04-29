@@ -1,0 +1,56 @@
+{
+  "args": {
+    "duration_ms": 1100,
+    "feb": 7,
+    "link": 2,
+    "mixed_emulator_mask": 246,
+    "real_lane_mask": 255,
+    "scenarios": [
+      "rate_100k"
+    ],
+    "scopes": "lane0",
+    "sources": [
+      "real"
+    ]
+  },
+  "firmware_note": "top_nostp_pipe dual-MTS checksum 0x13DB4566, resume real lane0 ch16 cfg",
+  "prime_logs": [
+    "info: cmd=0x30 (reset) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000030\ninfo: before: CTL=0x00000000 STATUS=0x31000000\ninfo: after : CTL=0x00000000 STATUS=0x30000000\ninfo: ok: o_state_out echoes 0x30\n",
+    "info: cmd=0x40 (address) feb=2 -> RESET_LINK_CTL_REGISTER_W=0x40000040\ninfo: before: CTL=0x00000000 STATUS=0x30000000\ninfo: after : CTL=0x00000000 STATUS=0x40000000\ninfo: ok: o_state_out echoes 0x40\n",
+    "info: cmd=0x31 (stop-reset) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000031\ninfo: before: CTL=0x00000000 STATUS=0x40000000\ninfo: after : CTL=0x00000000 STATUS=0x31000000\ninfo: ok: o_state_out echoes 0x31\n",
+    "info: cmd=0x30 (reset) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000030\ninfo: before: CTL=0x00000000 STATUS=0x31000000\ninfo: after : CTL=0x00000000 STATUS=0x30000000\ninfo: ok: o_state_out echoes 0x30\n",
+    "info: cmd=0x40 (address) feb=2 -> RESET_LINK_CTL_REGISTER_W=0x40000040\ninfo: before: CTL=0x00000000 STATUS=0x30000000\ninfo: after : CTL=0x00000000 STATUS=0x40000000\ninfo: ok: o_state_out echoes 0x40\n",
+    "info: cmd=0x31 (stop-reset) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000031\ninfo: before: CTL=0x00000000 STATUS=0x40000000\ninfo: after : CTL=0x00000000 STATUS=0x31000000\ninfo: ok: o_state_out echoes 0x31\n"
+  ],
+  "records": [
+    {
+      "effective_emulator_mask": 0,
+      "effective_lvds_mask": 1,
+      "error": "'types.SimpleNamespace' object has no attribute 'skip_lvds_config'",
+      "first_error": "'types.SimpleNamespace' object has no attribute 'skip_lvds_config'",
+      "hist_profile": "rate",
+      "matrix_index": 0,
+      "partial_reason": null,
+      "requested_lanes_mask": 1,
+      "scenario": "rate_100k",
+      "scenario_title": "Rate 100 kHz periodic",
+      "scope": "lane0",
+      "source": "real",
+      "status": "FAIL",
+      "summary": {
+        "emu_frame_delta": 0,
+        "frame_actual_delta": 0,
+        "frame_crc_delta": 0,
+        "hist_drop_delta": 0,
+        "hist_total_delta": 0,
+        "mts_discard_delta": 0,
+        "mts_total_delta": 0,
+        "pass": false,
+        "phase5_classification": "exception",
+        "post_end_clean": false,
+        "ring_inerr_delta": 0
+      }
+    }
+  ],
+  "timestamp": "2026-04-29T20:34:17"
+}
