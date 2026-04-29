@@ -134,9 +134,9 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         id "mutrig_injector" \
                         title "MuTRiG Injector" \
                         type_name "mutrig_injector.csr" \
-                        meta_file [file join $repo_root charge_injection mutrig_injector_csr_meta.tcl] \
+                        meta_file [file join $repo_root charge_injection script mutrig_injector_csr_meta.tcl] \
                         meta_namespace "::board_bring_up::meta::mutrig_injector" \
-                        hw_file [file join $repo_root charge_injection mutrig_injector_hw.tcl] \
+                        hw_file [file join $repo_root charge_injection script mutrig_injector_multiheader_hw.tcl] \
                         config_options [list -HEADERINFO_CHANNEL_W 4]]]
 
         return [dict create \

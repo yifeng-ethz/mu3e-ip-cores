@@ -143,11 +143,11 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="charge_injection_pulser" file="../../../../charge_injection/analog_pulser_hw.tcl" displayName="Charge Injection Pulser" version="4.0.5" description="Generate arbitary pulse for a set width and frequency" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
+ <component name="charge_injection_pulser" file="../../../../charge_injection/legacy/analog_pulser_hw.tcl" displayName="Charge Injection Pulser" version="4.0.5" description="Generate arbitary pulse for a set width and frequency" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="true" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ICON_PATH" value="../../../../drawings/20121123203030!Logo_drawing100.png" />
+  <tag2 key="ICON_PATH" value="../../../../firmware_builds/misc/logo/mu3e_logo.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
@@ -440,19 +440,19 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="mutrig_injector" file="../../../../charge_injection/mutrig_injector_hw.tcl" displayName="MuTRiG Timestamp Precision Injector" version="25.0.710" description="Inject pulse into MuTRiG for on-board verification" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="mutrig_injector" file="../../../../charge_injection/legacy/mutrig_injector_hw.tcl" displayName="MuTRiG Timestamp Precision Injector" version="25.0.710" description="Inject pulse into MuTRiG for on-board verification" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
   <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
-  <tag2 key="ICON_PATH" value="../../../misc/logo/mu3e_logo.png" />
+  <tag2 key="ICON_PATH" value="../../../../firmware_builds/misc/logo/mu3e_logo.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="mutrig_injector_multiheader" file="../../../../charge_injection/mutrig_injector_multiheader_hw.tcl" displayName="MuTRiG Timestamp Precision Injector (8-header)" version="26.0.1.428" description="MuTRiG Timestamp Precision Injector Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="mutrig_injector_multiheader" file="../../../../charge_injection/script/mutrig_injector_multiheader_hw.tcl" displayName="MuTRiG Timestamp Precision Injector (8-header)" version="26.0.3.0429" description="MuTRiG Timestamp Precision Injector Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />

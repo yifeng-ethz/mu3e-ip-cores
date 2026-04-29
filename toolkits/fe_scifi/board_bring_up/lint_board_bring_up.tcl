@@ -179,7 +179,7 @@ set files_to_scan [list \
         [file join $repo_root mutrig_frame_deassembly mutrig_frame_deassembly_csr_meta.tcl] \
         [file join $repo_root mutrig_timestamp_processor mts_processor_csr_meta.tcl] \
         [file join $repo_root feb_frame_assembly feb_frame_assembly_csr_meta.tcl] \
-        [file join $repo_root charge_injection mutrig_injector_csr_meta.tcl] \
+        [file join $repo_root charge_injection script mutrig_injector_csr_meta.tcl] \
         [file join $repo_root ring-buffer_cam script ring_buffer_cam_csr_meta.tcl] \
         [file join $repo_root histogram_statistics histogram_statistics_v2_csr_meta.tcl] \
         [file join $script_dir fe_scifi_board_bring_up_project.tcl] \
@@ -190,12 +190,48 @@ foreach file_path $files_to_scan {
         check_no_tabs $file_path
 }
 
-source [file join $script_dir board_bring_up.tcl]
+set shared_gui_files [list \
+        [file join $repo_root toolkits infra board_bring_up lib board_bring_up_contract.tcl] \
+        [file join $repo_root toolkits infra board_bring_up lib board_bring_up_gui.tcl]]
+set shared_gui_available 1
+foreach shared_file $shared_gui_files {
+        if {![file exists $shared_file]} {
+                set shared_gui_available 0
+        }
+}
 
-assert_true [::lint_gui::widget_exists board_bring_up_tabs] "missing top-level tab widget"
-assert_true [::lint_gui::widget_exists histogram_ingress_write_button] "missing histogram ingress write button"
-assert_true [::lint_gui::widget_exists ring_buffer_cam_subtabs] "missing ring-buffer tab group"
-assert_equals [toolkit_get_property histogram_ingress_write_button enabled] false "histogram ingress write button must stay disabled before read"
-assert_equals [toolkit_get_property self title] "Board Bring Up (Datapath)" "unexpected toolkit title"
+if {$shared_gui_available} {
+        source [file join $script_dir board_bring_up.tcl]
 
-puts "PASS: board_bring_up smoke lint"
+        assert_true [::lint_gui::widget_exists board_bring_up_tabs] "missing top-level tab widget"
+        assert_true [::lint_gui::widget_exists histogram_ingress_write_button] "missing histogram ingress write button"
+        assert_true [::lint_gui::widget_exists ring_buffer_cam_subtabs] "missing ring-buffer tab group"
+        assert_equals [toolkit_get_property histogram_ingress_write_button enabled] false "histogram ingress write button must stay disabled before read"
+        assert_equals [toolkit_get_property self title] "Board Bring Up (Datapath)" "unexpected toolkit title"
+
+        puts "PASS: board_bring_up smoke lint"
+} else {
+        source [file join $script_dir fe_scifi_board_bring_up_project.tcl]
+        set spec [::fe_scifi::board_bring_up::project::get_spec]
+        assert_equals [dict get $spec title] "Board Bring Up (Datapath)" "unexpected toolkit title"
+
+        set injector_spec ""
+        foreach ip_spec [dict get $spec ip_sequence] {
+                if {[dict get $ip_spec id] eq "mutrig_injector"} {
+                        set injector_spec $ip_spec
+                }
+        }
+        assert_true [expr {$injector_spec ne ""}] "missing mutrig_injector project spec"
+        assert_true [file exists [dict get $injector_spec meta_file]] "missing mutrig injector CSR metadata file"
+        assert_true [file exists [dict get $injector_spec hw_file]] "missing mutrig injector hw.tcl file"
+
+        source [dict get $injector_spec meta_file]
+        set injector_contract [::board_bring_up::meta::mutrig_injector::get_contract]
+        set injector_registers [dict get $injector_contract registers]
+        assert_equals [llength $injector_registers] 13 "unexpected mutrig injector register count"
+        assert_equals [dict get [lindex $injector_registers 0] address_offset] "0x0" "mutrig injector UID offset mismatch"
+        assert_equals [dict get [lindex $injector_registers 1] address_offset] "0x4" "mutrig injector META offset mismatch"
+        assert_equals [dict get [lindex $injector_registers 2] address_offset] "0x8" "mutrig injector MODE offset mismatch"
+
+        puts "PASS: board_bring_up contract lint (shared GUI files unavailable)"
+}
