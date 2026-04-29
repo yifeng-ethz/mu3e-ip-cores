@@ -22,6 +22,9 @@ module tb_scifi_dp_v3_emu_smoke;
     localparam logic [13:0] HIST0_CSR_BANK      = HIST0_CSR_BASE + 14'd11;
     localparam logic [13:0] HIST0_CSR_TOTAL     = HIST0_CSR_BASE + 14'd13;
     localparam logic [13:0] HIST0_CSR_DROPPED   = HIST0_CSR_BASE + 14'd14;
+    localparam logic [13:0] SOURCE_MUX_CSR_BASE = 14'h0890;
+    localparam logic [13:0] SOURCE_MUX_CSR_STRIDE = 14'h0010;
+    localparam logic [13:0] SOURCE_MUX_CSR_CONTROL_OFFSET = 14'd2;
     localparam logic [13:0] INJECTOR_CSR_BASE   = 14'h2C80;
     localparam time         STARTUP_SETTLE      = 20us;
     localparam int unsigned RATE_HIST_ADDR_W    = 8;
@@ -152,6 +155,18 @@ module tb_scifi_dp_v3_emu_smoke;
     int hist_active_bins;
     int hist_min_nonzero;
     int hist_max_nonzero;
+    int injector_top_pulse_count;
+    int injector_qsys_pulse_count;
+    int injector_fanout_pulse_count [8];
+    int emulator_inject_pin_count [8];
+    int emulator_inject_edge_count [8];
+    int emulator_hit_wr_count [8];
+    int emulator_frame_start_count [8];
+    int emulator_enabled_sample_count [8];
+    logic [31:0] injector_mode_readback;
+    logic [31:0] injector_period_readback;
+    logic [31:0] injector_high_readback;
+    logic [31:0] source_mux_control_readback [8];
     logic [31:0] hist_ctrl_word;
     logic [31:0] hist_bank_status;
     logic [31:0] hist_total_status;
@@ -296,6 +311,57 @@ module tb_scifi_dp_v3_emu_smoke;
         dut_wrap.dut.emulator_mutrig_1.u_hit_gen.hit_wr_en,
         dut_wrap.dut.emulator_mutrig_0.u_hit_gen.hit_wr_en
     };
+    wire injector_qsys_pulse = dut_wrap.dut.mutrig_injector_0_inject_pulse;
+    wire [7:0] injector_fanout_pulse = {
+        dut_wrap.dut.emulator_inject_fanout_out7_pulse,
+        dut_wrap.dut.emulator_inject_fanout_out6_pulse,
+        dut_wrap.dut.emulator_inject_fanout_out5_pulse,
+        dut_wrap.dut.emulator_inject_fanout_out4_pulse,
+        dut_wrap.dut.emulator_inject_fanout_out3_pulse,
+        dut_wrap.dut.emulator_inject_fanout_out2_pulse,
+        dut_wrap.dut.emulator_inject_fanout_out1_pulse,
+        dut_wrap.dut.emulator_inject_fanout_out0_pulse
+    };
+    wire [7:0] emulator_inject_pin = {
+        dut_wrap.dut.emulator_mutrig_7.coe_inject_pulse,
+        dut_wrap.dut.emulator_mutrig_6.coe_inject_pulse,
+        dut_wrap.dut.emulator_mutrig_5.coe_inject_pulse,
+        dut_wrap.dut.emulator_mutrig_4.coe_inject_pulse,
+        dut_wrap.dut.emulator_mutrig_3.coe_inject_pulse,
+        dut_wrap.dut.emulator_mutrig_2.coe_inject_pulse,
+        dut_wrap.dut.emulator_mutrig_1.coe_inject_pulse,
+        dut_wrap.dut.emulator_mutrig_0.coe_inject_pulse
+    };
+    wire [7:0] emulator_inject_edge = {
+        dut_wrap.dut.emulator_mutrig_7.inject_pulse_clk,
+        dut_wrap.dut.emulator_mutrig_6.inject_pulse_clk,
+        dut_wrap.dut.emulator_mutrig_5.inject_pulse_clk,
+        dut_wrap.dut.emulator_mutrig_4.inject_pulse_clk,
+        dut_wrap.dut.emulator_mutrig_3.inject_pulse_clk,
+        dut_wrap.dut.emulator_mutrig_2.inject_pulse_clk,
+        dut_wrap.dut.emulator_mutrig_1.inject_pulse_clk,
+        dut_wrap.dut.emulator_mutrig_0.inject_pulse_clk
+    };
+    wire [7:0] emulator_csr_enable = {
+        dut_wrap.dut.emulator_mutrig_7.csr_enable,
+        dut_wrap.dut.emulator_mutrig_6.csr_enable,
+        dut_wrap.dut.emulator_mutrig_5.csr_enable,
+        dut_wrap.dut.emulator_mutrig_4.csr_enable,
+        dut_wrap.dut.emulator_mutrig_3.csr_enable,
+        dut_wrap.dut.emulator_mutrig_2.csr_enable,
+        dut_wrap.dut.emulator_mutrig_1.csr_enable,
+        dut_wrap.dut.emulator_mutrig_0.csr_enable
+    };
+    wire [7:0] emulator_run_generating = {
+        dut_wrap.dut.emulator_mutrig_7.run_generating,
+        dut_wrap.dut.emulator_mutrig_6.run_generating,
+        dut_wrap.dut.emulator_mutrig_5.run_generating,
+        dut_wrap.dut.emulator_mutrig_4.run_generating,
+        dut_wrap.dut.emulator_mutrig_3.run_generating,
+        dut_wrap.dut.emulator_mutrig_2.run_generating,
+        dut_wrap.dut.emulator_mutrig_1.run_generating,
+        dut_wrap.dut.emulator_mutrig_0.run_generating
+    };
     wire [7:0] emu_frame_start = {
         dut_wrap.dut.emulator_mutrig_7.frame_start,
         dut_wrap.dut.emulator_mutrig_6.frame_start,
@@ -428,29 +494,21 @@ module tb_scifi_dp_v3_emu_smoke;
     function automatic bit lane_type0_fire(input int unsigned lane);
         case (lane)
             0: return dut_wrap.dut.mutrig_datapath_subsystem_0_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_0_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_0_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_0_hit_type0_out_ready;
             1: return dut_wrap.dut.mutrig_datapath_subsystem_1_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_1_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_1_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_1_hit_type0_out_ready;
             2: return dut_wrap.dut.mutrig_datapath_subsystem_2_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_2_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_2_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_2_hit_type0_out_ready;
             3: return dut_wrap.dut.mutrig_datapath_subsystem_3_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_3_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_3_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_3_hit_type0_out_ready;
             4: return dut_wrap.dut.mutrig_datapath_subsystem_4_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_4_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_4_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_4_hit_type0_out_ready;
             5: return dut_wrap.dut.mutrig_datapath_subsystem_5_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_5_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_5_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_5_hit_type0_out_ready;
             6: return dut_wrap.dut.mutrig_datapath_subsystem_6_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_6_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_6_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_6_hit_type0_out_ready;
             7: return dut_wrap.dut.mutrig_datapath_subsystem_7_hit_type0_out_valid
-                    && dut_wrap.dut.mutrig_datapath_subsystem_7_hit_type0_out_ready
-                    && !dut_wrap.dut.mutrig_datapath_subsystem_7_hit_type0_out_endofpacket;
+                    && dut_wrap.dut.mutrig_datapath_subsystem_7_hit_type0_out_ready;
             default: return 1'b0;
         endcase
     endfunction
@@ -472,11 +530,9 @@ module tb_scifi_dp_v3_emu_smoke;
     function automatic bit mts_input_fire(input int unsigned bank);
         case (bank)
             0: return dut_wrap.dut.mux_mutrig2processor_out_valid
-                    && dut_wrap.dut.mux_mutrig2processor_out_ready
-                    && !dut_wrap.dut.mux_mutrig2processor_out_endofpacket;
+                    && dut_wrap.dut.mux_mutrig2processor_out_ready;
             1: return dut_wrap.dut.mux_mutrig2processor_0_out_valid
-                    && dut_wrap.dut.mux_mutrig2processor_0_out_ready
-                    && !dut_wrap.dut.mux_mutrig2processor_0_out_endofpacket;
+                    && dut_wrap.dut.mux_mutrig2processor_0_out_ready;
             default: return 1'b0;
         endcase
     endfunction
@@ -944,6 +1000,8 @@ module tb_scifi_dp_v3_emu_smoke;
             hist_active_bins         = 0;
             hist_min_nonzero         = 0;
             hist_max_nonzero         = 0;
+            injector_top_pulse_count = 0;
+            injector_qsys_pulse_count = 0;
             rate_hist_total_hits     = 0;
             rate_hist_active_bins    = 0;
             rate_hist_min_nonzero    = 0;
@@ -988,6 +1046,12 @@ module tb_scifi_dp_v3_emu_smoke;
                 pre_rbcam_mts_ch16_count[lane] = 0;
                 pre_rbcam_flush_lane_count[lane] = 0;
                 pre_rbcam_flush_ch16_count[lane] = 0;
+                injector_fanout_pulse_count[lane] = 0;
+                emulator_inject_pin_count[lane] = 0;
+                emulator_inject_edge_count[lane] = 0;
+                emulator_hit_wr_count[lane] = 0;
+                emulator_frame_start_count[lane] = 0;
+                emulator_enabled_sample_count[lane] = 0;
                 pre_rbcam_hist_queue[lane].delete();
                 emu_lat_hist_queue[lane].delete();
                 emu_live_trace_q[lane].delete();
@@ -996,6 +1060,36 @@ module tb_scifi_dp_v3_emu_smoke;
                 mts_trace_q[lane].delete();
             end
             pre_rbcam_mts_bad_asic_count = 0;
+        end
+    endtask
+
+    function automatic logic [13:0] source_mux_csr_addr(
+        input int unsigned lane,
+        input logic [13:0] offset
+    );
+        return SOURCE_MUX_CSR_BASE + (SOURCE_MUX_CSR_STRIDE * lane[13:0]) + offset;
+    endfunction
+
+    task automatic configure_lane_source_muxes(input bit select_emulator);
+        logic [31:0] control_word;
+        begin
+            control_word = select_emulator ? 32'h0000_0001 : 32'h0000_0000;
+            for (int lane = 0; lane < 8; lane++) begin
+                avmm_write32(
+                    source_mux_csr_addr(lane, SOURCE_MUX_CSR_CONTROL_OFFSET),
+                    control_word
+                );
+                avmm_read32(
+                    source_mux_csr_addr(lane, SOURCE_MUX_CSR_CONTROL_OFFSET),
+                    source_mux_control_readback[lane]
+                );
+                $display(
+                    "TB_SOURCE_MUX_CFG lane=%0d select_emulator=%0d control_readback=0x%08h",
+                    lane,
+                    select_emulator,
+                    source_mux_control_readback[lane]
+                );
+            end
         end
     endtask
 
@@ -1091,7 +1185,7 @@ module tb_scifi_dp_v3_emu_smoke;
                 cycles++;
                 if (cycles > AVMM_ACCEPT_TIMEOUT) begin
                     $display(
-                        "TB_AVMM_CSR_TIMEOUT addr=0x%04h s0_wait=%0b s0_rdv=%0b s0_rdata=0x%08h m0_read=%0b m0_addr=0x%04h m0_wait=%0b hist_read=%0b hist_addr=0x%0h hist_wait=%0b hist_rdata=0x%08h mts2_read=%0b mts2_addr=0x%0h rst006=%0b rst001=%0b",
+                        "TB_AVMM_CSR_TIMEOUT addr=0x%04h s0_wait=%0b s0_rdv=%0b s0_rdata=0x%08h m0_read=%0b m0_addr=0x%04h m0_wait=%0b mts2_read=%0b mts2_addr=0x%0h rst006=%0b rst001=%0b",
                         addr,
                         avmm_waitrequest,
                         avmm_readdatavalid,
@@ -1099,10 +1193,6 @@ module tb_scifi_dp_v3_emu_smoke;
                         dut_wrap.dut.mm_clock_crossing_bridge_m0_read,
                         dut_wrap.dut.mm_clock_crossing_bridge_m0_address,
                         dut_wrap.dut.mm_clock_crossing_bridge_m0_waitrequest,
-                        dut_wrap.dut.mm_interconnect_0_histogram_statistics_0_csr_read,
-                        dut_wrap.dut.mm_interconnect_0_histogram_statistics_0_csr_address,
-                        dut_wrap.dut.mm_interconnect_0_histogram_statistics_0_csr_waitrequest,
-                        dut_wrap.dut.mm_interconnect_0_histogram_statistics_0_csr_readdata,
                         dut_wrap.dut.mm_interconnect_0_mutrig_datapath_subsystem_2_csr_read,
                         dut_wrap.dut.mm_interconnect_0_mutrig_datapath_subsystem_2_csr_address,
                         dut_wrap.dut.rst_controller_006_reset_out_reset,
@@ -1408,6 +1498,15 @@ module tb_scifi_dp_v3_emu_smoke;
             avmm_write32(INJECTOR_CSR_PULSE_PERIOD, pulse_interval_cycles);
             avmm_write32(INJECTOR_CSR_PULSE_HIGH,   pulse_high_cycles);
             avmm_write32(INJECTOR_CSR_MODE,         mode_word);
+            avmm_read32(INJECTOR_CSR_PULSE_PERIOD, injector_period_readback);
+            avmm_read32(INJECTOR_CSR_PULSE_HIGH,   injector_high_readback);
+            avmm_read32(INJECTOR_CSR_MODE,         injector_mode_readback);
+            $display(
+                "TB_INJECTOR_CSR_READBACK mode=0x%08h period=0x%08h high=0x%08h",
+                injector_mode_readback,
+                injector_period_readback,
+                injector_high_readback
+            );
         end
     endtask
 
@@ -2307,7 +2406,6 @@ module tb_scifi_dp_v3_emu_smoke;
         .hit_type3_upper_endofpacket    (hit_upper_eop),
 
         .inject_pulse                   (inject_pulse),
-        .inject_aux_pulse               (1'b0),
         .lvds_outclock_clk              (lvds_outclock),
         .mutrig_reset_reset             (mutrig_reset),
         .rstlink_data                   (rstlink_data),
@@ -2988,6 +3086,25 @@ module tb_scifi_dp_v3_emu_smoke;
                                                      && dut_wrap.dut.mts_preprocessor_1_hit_type1_out_error) ? 1 : 0);
     end
 
+    always_ff @(posedge lvds_outclock) begin
+        injector_top_pulse_count  <= injector_top_pulse_count + (inject_pulse ? 1 : 0);
+        injector_qsys_pulse_count <= injector_qsys_pulse_count + (injector_qsys_pulse ? 1 : 0);
+        for (int lane = 0; lane < 8; lane++) begin
+            injector_fanout_pulse_count[lane] <= injector_fanout_pulse_count[lane]
+                                               + (injector_fanout_pulse[lane] ? 1 : 0);
+            emulator_inject_pin_count[lane] <= emulator_inject_pin_count[lane]
+                                             + (emulator_inject_pin[lane] ? 1 : 0);
+            emulator_inject_edge_count[lane] <= emulator_inject_edge_count[lane]
+                                              + (emulator_inject_edge[lane] ? 1 : 0);
+            emulator_hit_wr_count[lane] <= emulator_hit_wr_count[lane]
+                                         + (emu_hit_wr_en[lane] ? 1 : 0);
+            emulator_frame_start_count[lane] <= emulator_frame_start_count[lane]
+                                              + (emu_frame_start[lane] ? 1 : 0);
+            emulator_enabled_sample_count[lane] <= emulator_enabled_sample_count[lane]
+                                                + ((emulator_run_generating[lane] && emulator_csr_enable[lane]) ? 1 : 0);
+        end
+    end
+
     initial begin
         #(TB_WATCHDOG);
         $fatal(1, "DP E2E smoke watchdog expired");
@@ -3121,6 +3238,8 @@ module tb_scifi_dp_v3_emu_smoke;
             run_terminal_tail_check();
         end else if (pre_rbcam_measure_en) begin
             configure_all_emulators_profile();
+            if (!force_decoded_din_from_emu)
+                configure_lane_source_muxes(1'b1);
             if (measure_use_periodic_injector) begin
                 configure_injector(
                     measure_inject_mode[31:0],
@@ -3189,11 +3308,30 @@ module tb_scifi_dp_v3_emu_smoke;
             report_emulator_status("PRE_RBCAM_MEAS");
             if (measure_use_periodic_injector) begin
                 $display(
-                    "TB_MEAS_INJECTOR mode=%0d pulse_interval=%0d pulse_high=%0d",
+                    "TB_MEAS_INJECTOR mode=%0d pulse_interval=%0d pulse_high=%0d readback_mode=0x%08h readback_period=0x%08h readback_high=0x%08h top_pulse=%0d qsys_pulse=%0d",
                     measure_inject_mode,
                     measure_inject_period_cycles,
-                    measure_inject_high_cycles
+                    measure_inject_high_cycles,
+                    injector_mode_readback,
+                    injector_period_readback,
+                    injector_high_readback,
+                    injector_top_pulse_count,
+                    injector_qsys_pulse_count
                 );
+                for (int lane = 0; lane < 8; lane++) begin
+                    $display(
+                        "TB_MEAS_INJECT_PATH lane=%0d fanout=%0d emu_pin=%0d emu_edge=%0d hit_wr=%0d frame_start=%0d enabled_samples=%0d csr_enable=%0d run_generating=%0d",
+                        lane,
+                        injector_fanout_pulse_count[lane],
+                        emulator_inject_pin_count[lane],
+                        emulator_inject_edge_count[lane],
+                        emulator_hit_wr_count[lane],
+                        emulator_frame_start_count[lane],
+                        emulator_enabled_sample_count[lane],
+                        emulator_csr_enable[lane],
+                        emulator_run_generating[lane]
+                    );
+                end
             end
             $display(
                 "TB_MEAS run_cycles=%0d hit_rate=0x%04h noise_rate=0x%04h short_mode=%0d frame_cycles=%0d sync_hold_cycles=%0d mts_error_window=%0d",
@@ -3318,6 +3456,8 @@ module tb_scifi_dp_v3_emu_smoke;
                 $display("TB_MEAS_NOTE latency_underflow_events=%0d", emu_lat_underflow_count);
         end else begin
             configure_all_emulators_rate(smoke_hit_rate, smoke_noise_rate, smoke_short_mode);
+            if (!force_decoded_din_from_emu)
+                configure_lane_source_muxes(1'b1);
             configure_hist0_local(smoke_hist_interval_clocks[31:0]);
             wait_local_hist_cfg_applied(1'b1);
             clear_local_hist(1'b1);

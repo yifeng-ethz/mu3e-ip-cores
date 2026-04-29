@@ -71,6 +71,8 @@ proc first_existing_path {paths} {
   quit -code 1 -f
 }
 set datapath_translator_reset_path [first_existing_path [list \
+  /tb_scifi_dp_v3_emu_smoke/dut_wrap/dut/mm_interconnect_0/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
+  /tb_scifi_dp_v3_emu_smoke/dut_wrap/dut/mm_interconnect_4/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
   /tb_scifi_dp_v3_emu_smoke/dut_wrap/dut/mm_interconnect_1/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
   /tb_scifi_dp_v3_emu_smoke/dut_wrap/dut/mm_interconnect_1/master_datapath_master_translator_reset_reset_bridge_in_reset_reset]]
 set datapath_master_reset_path [first_existing_path [list \

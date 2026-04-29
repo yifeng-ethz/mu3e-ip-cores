@@ -19,3 +19,17 @@ transcript
 firmware_builds/board_test/phase4/work/
 docs/Archive.zip
 docs/Archive/
+
+# Generated RTL/model simulation run logs. Keep reports and curated evidence
+# tracked explicitly, but do not checkpoint raw multi-hundred-MB run logs.
+model/rtl_sim/runs/**/logs/*.log
+model/rtl_sim/runs/**/stdout/*.log
+model/rtl_sim/runs/**/*.stdout.log
+firmware_builds/systems/system_20260427_testplanphase5/syn/**/*.log
+firmware_builds/systems/system_20260427_testplanphase5/syn/*.log
+firmware_builds/systems/system_20260427_testplanphase5/syn/firmware_builds/
+firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/**/db
+firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/**/incremental_db
+firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/**/*.map.guard
+firmware_builds/systems/system_20260427_testplanphase5/signaltap/*.log
+firmware_builds/systems/system_20260427_testplanphase5/captures/*.vcd

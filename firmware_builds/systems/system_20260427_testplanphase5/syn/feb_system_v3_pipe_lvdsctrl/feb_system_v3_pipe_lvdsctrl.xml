@@ -1845,9 +1845,9 @@
    <file
        path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller/altera_temp_sense_ctrl_hw.tcl" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/onewire_master_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/systems/system_20260428_onewire_controller_master/syn/ip/onewire_master/onewire_master_hw.tcl" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/onewire_master_controller_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/systems/system_20260428_onewire_controller_master/syn/ip/onewire_master_controller/onewire_master_controller_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/altera_pll/source/top/pll_hw.tcl" />
    <file
@@ -12906,9 +12906,9 @@
    <file
        path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller/altera_temp_sense_ctrl_hw.tcl" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/onewire_master_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/systems/system_20260428_onewire_controller_master/syn/ip/onewire_master/onewire_master_hw.tcl" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/onewire_master_controller_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/systems/system_20260428_onewire_controller_master/syn/ip/onewire_master_controller/onewire_master_controller_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/altera_pll/source/top/pll_hw.tcl" />
    <file
@@ -26107,7 +26107,7 @@
   <childGeneratedFiles/>
   <sourceFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/onewire_master_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/systems/system_20260428_onewire_controller_master/syn/ip/onewire_master/onewire_master_hw.tcl" />
   </sourceFiles>
   <childSourceFiles/>
   <instantiator
@@ -26146,7 +26146,7 @@
   <childGeneratedFiles/>
   <sourceFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/onewire_master_controller_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/systems/system_20260428_onewire_controller_master/syn/ip/onewire_master_controller/onewire_master_controller_hw.tcl" />
   </sourceFiles>
   <childSourceFiles/>
   <instantiator

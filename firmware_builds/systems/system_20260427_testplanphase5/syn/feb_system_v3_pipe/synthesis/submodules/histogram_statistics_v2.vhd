@@ -1,6 +1,26 @@
 -- File name: histogram_statistics_v2.vhd
 -- Author: Yifeng Wang (yifenwan@phys.ethz.ch)
 -- =======================================
+-- Revision: 1.4
+--		Date: Apr 27, 2026
+--		Change: Replicate configurable filter fields per ingress port
+--		        so the hot-path match logic is not driven by one
+--		        high-fanout shared CSR/config source.
+-- Revision: 1.5
+--		Date: Apr 27, 2026
+--		Change: Package metadata bump for the one-hit-per-clock arbiter
+--		        drain fix in rr_arbiter.vhd.
+-- Revision: 1.6
+--		Date: Apr 29, 2026
+--		Change: Wire FIFO level into rr_arbiter so its registered
+--		        grant-to-pop pipeline can avoid re-selecting a FIFO that
+--		        will become empty after the pending pop.
+-- Revision: 1.7
+--		Date: Apr 29, 2026
+--		Change: Add combined signed MTS-delay debug mode -7, sampling
+--		        debug_1 and debug_2 into independent ingress FIFOs so upper
+--		        and lower hit-stack timestamp-delta streams can share one
+--		        histogram without changing the normal rate path.
 -- Revision: 1.3
 --		Date: Apr 25, 2026
 --		Change: Parameterize the ingress FIFO depth for bursty post-stack
@@ -63,7 +83,7 @@ entity histogram_statistics_v2 is
         DEF_BIN_WIDTH            : natural := 16;
         AVS_ADDR_WIDTH           : natural := 8;
         N_PORTS                  : natural := 8;
-        FIFO_ADDR_WIDTH          : natural := 10;
+        FIFO_ADDR_WIDTH          : natural := 8;
         CHANNELS_PER_PORT        : natural := 32;
         COAL_QUEUE_DEPTH         : natural := 256;
         ENABLE_PINGPONG          : boolean := true;
@@ -73,11 +93,11 @@ entity histogram_statistics_v2 is
         N_DEBUG_INTERFACE        : natural := 6;
         VERSION_MAJOR            : natural := 26;
         VERSION_MINOR            : natural := 1;
-        VERSION_PATCH            : natural := 2;
-        BUILD                    : natural := 425;
+        VERSION_PATCH            : natural := 4;
+        BUILD                    : natural := 429;
         IP_UID                   : natural := 1212765012;  -- ASCII "HIST" = 0x48495354
-        VERSION_DATE             : natural := 20260425;
-        VERSION_GIT              : natural := 1929539473;
+        VERSION_DATE             : natural := 20260429;
+        VERSION_GIT              : natural := 375124078;
         INSTANCE_ID              : natural := 0;
         SNOOP_EN                 : boolean := true;
         ENABLE_PACKET            : boolean := true;
@@ -317,6 +337,11 @@ architecture rtl of histogram_statistics_v2 is
     signal cfg_update_key       : unsigned(SAR_KEY_WIDTH - 1 downto 0) := (others => '0');
     signal cfg_filter_key       : unsigned(SAR_KEY_WIDTH - 1 downto 0) := (others => '0');
     signal cfg_interval_cfg     : unsigned(31 downto 0) := to_unsigned(DEF_INTERVAL_CLOCKS, 32);
+    signal cfg_filter_enable_port  : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal cfg_filter_reject_port  : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal cfg_filter_key_low_port : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(7 downto 0) := (others => to_unsigned(FILTER_KEY_BIT_LO, 8));
+    signal cfg_filter_key_high_port: hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(7 downto 0) := (others => to_unsigned(FILTER_KEY_BIT_HI, 8));
+    signal cfg_filter_key_port     : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(SAR_KEY_WIDTH - 1 downto 0) := (others => (others => '0'));
 
     signal status_active_bank_shadow        : std_logic := '0';
     signal status_flushing_shadow           : std_logic := '0';
@@ -396,7 +421,7 @@ architecture rtl of histogram_statistics_v2 is
         variable result_v : tick_t := (others => '0');
     begin
         case debug_mode is
-            when -1 =>
+            when -1 | -7 =>
                 result_v := resize(signed(data_word), SAR_TICK_WIDTH);
             when others =>
                 result_v := signed(resize(unsigned(data_word), SAR_TICK_WIDTH));
@@ -502,6 +527,8 @@ begin
         variable stream_sampled_v  : std_logic;
         variable filter_pass_v     : boolean;
         variable debug_mode_v      : integer;
+        variable debug_dual_mts_v  : boolean;
+        variable debug_active_v    : boolean;
         variable debug_valid_v     : std_logic;
         variable debug_data_v      : std_logic_vector(15 downto 0);
     begin
@@ -513,9 +540,10 @@ begin
         ingress_accept    <= (others => '0');
         ingress_write_req <= (others => '0');
         ingress_key_next  <= (others => (others => '0'));
-        debug_mode_v := to_integer(signed(cfg_mode));
-        debug_valid_v := '0';
-        debug_data_v  := (others => '0');
+        debug_mode_v     := to_integer(signed(cfg_mode));
+        debug_dual_mts_v := debug_mode_v = -7;
+        debug_valid_v    := '0';
+        debug_data_v     := (others => '0');
 
         case debug_mode_v is
             when -1 =>
@@ -541,10 +569,17 @@ begin
         end case;
 
         for idx in 0 to MAX_PORTS_CONST - 1 loop
-            if idx < N_PORTS then
+            debug_active_v := false;
+            if debug_dual_mts_v and idx < 2 then
+                debug_active_v := true;
+            elsif debug_mode_v < 0 and idx = 0 then
+                debug_active_v := true;
+            end if;
+
+            if (idx < N_PORTS) or debug_active_v then
                 stream_ready_v   := '0';
                 stream_sampled_v := '0';
-                if cfg_apply_pending = '0' then
+                if (idx < N_PORTS) and (cfg_apply_pending = '0') then
                     if idx = 0 then
                         if SNOOP_EN then
                             stream_ready_v   := aso_hist_fill_out_ready;
@@ -563,7 +598,20 @@ begin
 
                 sampled_v := stream_sampled_v;
                 if debug_mode_v < 0 then
-                    if idx = 0 then
+                    if debug_dual_mts_v then
+                        case idx is
+                            when 0 =>
+                                debug_valid_v := asi_debug_1_valid;
+                                debug_data_v  := asi_debug_1_data;
+                            when 1 =>
+                                debug_valid_v := asi_debug_2_valid;
+                                debug_data_v  := asi_debug_2_data;
+                            when others =>
+                                debug_valid_v := '0';
+                                debug_data_v  := (others => '0');
+                        end case;
+                        sampled_v := debug_valid_v and not cfg_apply_pending;
+                    elsif idx = 0 then
                         sampled_v := debug_valid_v and not cfg_apply_pending;
                     else
                         sampled_v := '0';
@@ -593,11 +641,11 @@ begin
 
                         filter_pass_v := match_filter(
                             data_word      => port_data(idx),
-                            filter_enable  => cfg_filter_enable,
-                            filter_reject  => cfg_filter_reject,
-                            filter_hi      => cfg_filter_key_high,
-                            filter_lo      => cfg_filter_key_low,
-                            filter_key     => cfg_filter_key
+                            filter_enable  => cfg_filter_enable_port(idx),
+                            filter_reject  => cfg_filter_reject_port(idx),
+                            filter_hi      => cfg_filter_key_high_port(idx),
+                            filter_lo      => cfg_filter_key_low_port(idx),
+                            filter_key     => cfg_filter_key_port(idx)
                         );
                         if filter_pass_v then
                             ingress_write_req(idx) <= '1';
@@ -667,8 +715,9 @@ begin
 
     arb_inst : entity work.rr_arbiter
         generic map (
-            N_PORTS    => MAX_PORTS_CONST,
-            DATA_WIDTH => SAR_TICK_WIDTH
+            N_PORTS     => MAX_PORTS_CONST,
+            DATA_WIDTH  => SAR_TICK_WIDTH,
+            LEVEL_WIDTH => FIFO_ADDR_WIDTH_CONST + 1
         )
         port map (
             i_clk        => i_clk,
@@ -676,6 +725,7 @@ begin
             i_clear      => measure_clear_pulse,
             i_sink_ready => '1',
             i_fifo_valid => not fifo_empty,
+            i_fifo_level => fifo_level,
             i_fifo_data  => fifo_rd_data,
             o_fifo_pop   => fifo_read,
             o_out_valid  => arb_valid,
@@ -707,7 +757,11 @@ begin
                 key_pipe       <= (others => '0');
 
                 if arb_pipe_valid = '1' then
-                    port_offset_v := to_signed(to_integer(arb_pipe_port) * CHANNELS_PER_PORT, SAR_TICK_WIDTH);
+                    if to_integer(signed(cfg_mode)) < 0 then
+                        port_offset_v := (others => '0');
+                    else
+                        port_offset_v := to_signed(to_integer(arb_pipe_port) * CHANNELS_PER_PORT, SAR_TICK_WIDTH);
+                    end if;
                     key_pipe      <= signed(arb_pipe_key) + port_offset_v;
                     key_pipe_count <= to_unsigned(1, KICK_WIDTH_CONST);
                 end if;
@@ -1003,6 +1057,13 @@ begin
                 cfg_update_key      <= (others => '0');
                 cfg_filter_key      <= (others => '0');
                 cfg_interval_cfg    <= to_unsigned(DEF_INTERVAL_CLOCKS, 32);
+                for idx in 0 to MAX_PORTS_CONST - 1 loop
+                    cfg_filter_enable_port(idx)  <= '0';
+                    cfg_filter_reject_port(idx)  <= '0';
+                    cfg_filter_key_low_port(idx) <= to_unsigned(FILTER_KEY_BIT_LO, 8);
+                    cfg_filter_key_high_port(idx) <= to_unsigned(FILTER_KEY_BIT_HI, 8);
+                    cfg_filter_key_port(idx)     <= (others => '0');
+                end loop;
             else
                 ingress_empty_v := true;
                 for idx in 0 to MAX_PORTS_CONST - 1 loop
@@ -1027,6 +1088,13 @@ begin
                     cfg_update_key      <= csr_update_key;
                     cfg_filter_key      <= csr_filter_key;
                     cfg_interval_cfg    <= csr_interval_cfg;
+                    for idx in 0 to MAX_PORTS_CONST - 1 loop
+                        cfg_filter_enable_port(idx)  <= csr_filter_enable;
+                        cfg_filter_reject_port(idx)  <= csr_filter_reject;
+                        cfg_filter_key_low_port(idx) <= csr_filter_key_low;
+                        cfg_filter_key_high_port(idx) <= csr_filter_key_high;
+                        cfg_filter_key_port(idx)     <= csr_filter_key;
+                    end loop;
                 elsif cfg_apply_request = '1' then
                     cfg_apply_pending <= '1';
                 end if;

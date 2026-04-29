@@ -1,8 +1,9 @@
 -- ------------------------------------------------------------------------------------------------------------
 -- IP Name:             onewire_master_controller
 -- Author:              Yifeng Wang (yifenwan@phys.ethz.ch)
--- Revision:            1.0
--- Date:                Sept 16, 2024 (file created)
+-- Revision:            26.2.1
+-- Date:                20260428
+-- Change:              Add common UID/META CSR header, sample-valid guard, and 125 MHz odd-divider repair.
 -- Description:         Host transaction layer issues by process data from/into the onewire master IP.
 --						It wraps around the link layer by automatically perform functional commands on a specific 1-Wire device.
 -- Usage:               
@@ -51,7 +52,15 @@ generic (
 	AVST_CHANNEL_WIDTH		: natural	:= 3;
 	N_DQ_LINES				: natural   := 6;
 	SENSOR_TYPE				: string := "DS18B20";
-	DEBUG_LV				: natural := 0
+	DEBUG_LV				: natural := 0;
+	IP_UID					: natural := 16#4F574D43#; -- ASCII "OWMC"
+	VERSION_MAJOR			: natural := 26;
+	VERSION_MINOR			: natural := 2;
+	VERSION_PATCH			: natural := 1;
+	BUILD					: natural := 428;
+	VERSION_DATE			: natural := 20260428;
+	VERSION_GIT				: natural := 0;
+	INSTANCE_ID				: natural := 0
 );
 port (
 	-- avmm (ctrl)
@@ -101,6 +110,31 @@ architecture rtl of onewire_master_controller is
 	constant CMD_ROM_SKIP			: integer := 16#CC#;
 	constant CMD_CONVT				: integer := 16#44#;
 	constant CMD_READM				: integer := 16#BE#;
+	constant CSR_WORD_UID_CONST			: natural := 0;
+	constant CSR_WORD_META_CONST		: natural := 1;
+	constant CSR_WORD_SCRATCH_CONST		: natural := 2;
+	constant CSR_WORD_CAPABILITY_CONST	: natural := 3;
+	constant CSR_WORD_STATUS_CONST		: natural := 4;
+	constant CSR_WORD_TEMP_BASE_CONST	: natural := 5;
+	constant META_SEL_VERSION_CONST		: std_logic_vector(1 downto 0) := "00";
+	constant META_SEL_DATE_CONST		: std_logic_vector(1 downto 0) := "01";
+	constant META_SEL_GIT_CONST			: std_logic_vector(1 downto 0) := "10";
+	constant META_SEL_INSTANCE_CONST	: std_logic_vector(1 downto 0) := "11";
+
+	function pack_version_func(
+		constant major		: natural;
+		constant minor		: natural;
+		constant patch		: natural;
+		constant build		: natural
+	) return std_logic_vector is
+		variable version_word	: std_logic_vector(31 downto 0);
+	begin
+		version_word(31 downto 24)	:= std_logic_vector(to_unsigned(major, 8));
+		version_word(23 downto 16)	:= std_logic_vector(to_unsigned(minor, 8));
+		version_word(15 downto 12)	:= std_logic_vector(to_unsigned(patch, 4));
+		version_word(11 downto 0)	:= std_logic_vector(to_unsigned(build, 12));
+		return version_word;
+	end function;
 
 	-- ------------------------------------
 	-- slow_timer
@@ -120,6 +154,7 @@ architecture rtl of onewire_master_controller is
 	type sensor_data_t is array (0 to 8) of std_logic_vector(7 downto 0);
 	type sensor_data_array_t is array (0 to N_DQ_LINES-1) of sensor_data_t;
 	signal sensor_data				: sensor_data_array_t;
+	signal sensor_sample_valid		: std_logic_vector(N_DQ_LINES-1 downto 0);
 	
 	-- error report
 	-- E: error sympton                                                    
@@ -189,6 +224,8 @@ architecture rtl of onewire_master_controller is
 	-- --------------------------------
 	type temp_f32_t is array (0 to N_DQ_LINES-1) of std_logic_vector(31 downto 0);
 	type csr_t is record
+		meta_sel			: std_logic_vector(1 downto 0);
+		scratch				: std_logic_vector(31 downto 0);
 		processor_go		: std_logic_vector(N_DQ_LINES-1 downto 0);
 		crc_err				: std_logic_vector(N_DQ_LINES-1 downto 0);
 		init_err			: std_logic_vector(N_DQ_LINES-1 downto 0);
@@ -271,12 +308,12 @@ begin
 		)
 		port map ( 
 			-- input fast clock and reset interface
-			i_clk 			=> csi_clock_clk, -- input clock
-			i_reset_n 		=> not rsi_reset_reset,	-- input reset
+			clk 			=> csi_clock_clk, -- input clock
+			reset_n 		=> not rsi_reset_reset,	-- input reset
 			-- pseudo slow clock
-			o_clk		 	=> open, -- so far not used, can be slow down the overall state machine to release more timing slack
+			pseudo_clk	 	=> open, -- so far not used, can be slow down the overall state machine to release more timing slack
 			-- slow tick (active for one fast cycle at the rising edge of the slow clock)
-			o_tick			=> slow_tick(i)
+			tick			=> slow_tick(i)
 		);
 	
 		proc_slow_timer : process(rsi_reset_reset,csi_clock_clk)
@@ -611,6 +648,7 @@ begin
 					case rx_flow(i) is 
 						when MM_CONFIG =>
 							-- drive the command ticket
+							sensor_sample_valid(i)	<= '0';
 							mm_write.rx(i)			<= '1';
 							mm_address.rx(i)		<= std_logic_vector(to_unsigned(1,mm_address.rx(i)'length));
 							mm_data.rx(i)(23 downto 16)	<= std_logic_vector(to_unsigned(i,8)); -- wire_id
@@ -654,6 +692,7 @@ begin
 									st_ready(i)				<= '0'; -- stop receiving data
 									rx_flow(i)				<= IDLE; -- exit
 									rx_flow_byte_cnt(i)		<= (others => '0');	-- reset byte counter
+									sensor_sample_valid(i)	<= '1';
 									pipe.rx2flow(i).done	<= '1';	-- ack the master through pipe
 								end if;
 							end if;
@@ -675,6 +714,7 @@ begin
 							st_ready(i)			<= '0';
 							-- reset local signals
 							sensor_data(i)		<= (others => (others => '0'));
+							sensor_sample_valid(i)	<= '0';
 							rx_flow_byte_cnt(i)	<= (others => '0');
 							-- reset pipe
 							pipe.rx2flow(i).done	<= '0';
@@ -756,14 +796,14 @@ begin
 							ticket_lock.gnt			<= (others => '0'); -- clear the current grant
 							ticket_lock_state		<= IDLE; -- jump to idle state
 						end if;
-					when IDLE => -- no request is present (normal state)
-						if (or_reduce(ticket_lock.req) = '1') then -- there is request in the queue
-							ticket_lock_state		<= DECIDING; -- jump to deciding state to calculate the next grant
-						end if;
-					when RESET => -- reset the current selection
-						ticket_lock.priority		<= (0 => '1', others => '0'); -- reset priority
-						ticket_lock.gnt				<= (others => '0'); -- reset the current grant
-						ticket_lock_state			<= IDLE; -- wait in idle state 
+						when IDLE => -- no request is present (normal state)
+							if (or_reduce(ticket_lock.req) = '1') then -- there is request in the queue
+								ticket_lock_state		<= DECIDING; -- jump to deciding state to calculate the next grant
+							end if;
+						when RESET => -- reset the current selection
+							ticket_lock.priority		<= std_logic_vector(to_unsigned(1,ticket_lock.priority'length)); -- reset priority
+							ticket_lock.gnt				<= (others => '0'); -- reset the current grant
+							ticket_lock_state			<= IDLE; -- wait in idle state 
 					when others =>
 						null;
 				end case;
@@ -886,21 +926,33 @@ begin
 	-- +-------------------------------------------------------------------------------------------------+
 	-- |address              register name          access             function                          |
 	-- +-------------------------------------------------------------------------------------------------+
-	-- word 0				capability								
-	-- ├── byte 1-0			├──	n_dq_lines				ro				the hardset number of dq lines
-	-- └── byte 3-2 		└──	n_sensors				ro				(not implemented yet)
-	-- 
-	-- word 1				control and status
-	-- ├── byte 1-0			├── sel_line				rw				select the line to access control code
-	-- ├── byte 2			├── line_ctrl			
-	-- │   └── bit 0		│   └── processor_go		rw 				enable or disable the processor 
-	-- └── byte 3			└── line_status	
+-- word 0				UID
+-- └── byte 3-0			└──	IP_UID					ro				common Mu3e IP identifier
+-- 
+-- word 1				META
+-- ├── write 0			├──	VERSION					rw/ro			major/minor/patch/build
+-- ├── write 1			├──	VERSION_DATE			rw/ro			YYYYMMDD
+-- ├── write 2			├──	VERSION_GIT				rw/ro			truncated git stamp
+-- └── write 3			└──	INSTANCE_ID				rw/ro			integrator instance id
+--
+-- word 2				SCRATCH					rw				host scratchpad/readback word
+--
+-- word 3				capability
+-- ├── byte 1-0			├──	n_dq_lines				ro				the hardset number of dq lines
+-- └── byte 3-2 		└──	n_sensors				ro				(not implemented yet)
+-- 
+-- word 4				control and status
+-- ├── byte 1-0			├── sel_line				rw				select the line to access control code
+-- ├── byte 2			├── line_ctrl			
+-- │   └── bit 0		│   └── processor_go		rw 				enable or disable the processor 
+-- └── byte 3			└── line_status	
 	--     ├── bit 0			├── crc_err				ro				crc error from the reading 
-	--	   └── bit 1			└── init_err			ro				initilization error (sensor not detected/powered)		
+	--	   ├── bit 1			├── init_err			ro				initilization error (sensor not detected/powered)
+	--	   └── bit 2			└── sample_valid		ro				full scratchpad has been captured after reset/latest read
 	-- 
-	-- word 2 				sense_temp (sensor 0)		ro				floating-point temperature read from the sensor
-	--
-	-- word 3+				sense_temp (sensor 1+)		ro				reading from 2nd sensors and onward...
+-- word 5 				sense_temp (sensor 0)		ro				floating-point temperature read from the sensor
+--
+-- word 6+				sense_temp (sensor 1+)		ro				reading from 2nd sensors and onward...
 	-- 													
 	proc_csr_hub : process (rsi_reset_reset,csi_clock_clk) 
 	begin
@@ -909,7 +961,11 @@ begin
 				-- reset
 				avs_csr_waitrequest		<= '0'; -- release the qsys bus
 				avs_csr_readdata		<= (others => '0');
+				csr.meta_sel			<= META_SEL_VERSION_CONST;
+				csr.scratch				<= (others => '0');
 				csr.sel_line			<= (others => '0');
+				csr.processor_go		<= (others => '0');
+				csr.crc_err				<= (others => '0');
 			else -- sync reset begin
 				-- -------------------
 				-- default
@@ -923,32 +979,60 @@ begin
 				if (avs_csr_read = '1') then 
 					avs_csr_waitrequest	<= '0'; -- ack the qsys bus
 					case to_integer(unsigned(avs_csr_address)) is -- address map
-						when 0 => -- capability register
+						when CSR_WORD_UID_CONST =>
+							avs_csr_readdata		<= std_logic_vector(to_unsigned(IP_UID, AVMM_DATA_WIDTH));
+						when CSR_WORD_META_CONST =>
+							case csr.meta_sel is
+								when META_SEL_VERSION_CONST =>
+									avs_csr_readdata	<= pack_version_func(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, BUILD);
+								when META_SEL_DATE_CONST =>
+									avs_csr_readdata	<= std_logic_vector(to_unsigned(VERSION_DATE, AVMM_DATA_WIDTH));
+								when META_SEL_GIT_CONST =>
+									avs_csr_readdata	<= std_logic_vector(to_unsigned(VERSION_GIT, AVMM_DATA_WIDTH));
+								when META_SEL_INSTANCE_CONST =>
+									avs_csr_readdata	<= std_logic_vector(to_unsigned(INSTANCE_ID, AVMM_DATA_WIDTH));
+								when others =>
+									avs_csr_readdata	<= (others => '0');
+							end case;
+						when CSR_WORD_SCRATCH_CONST =>
+							avs_csr_readdata		<= csr.scratch;
+						when CSR_WORD_CAPABILITY_CONST =>
 							avs_csr_readdata(15 downto 0)	<= std_logic_vector(to_unsigned(N_DQ_LINES,16));
 							avs_csr_readdata(31 downto 16)	<= (others => '0');
-						when 1 => -- status register
+						when CSR_WORD_STATUS_CONST =>
 							avs_csr_readdata(15 downto 0)	<= csr.sel_line;
 							for i in 0 to N_DQ_LINES-1 loop
 								if (to_integer(unsigned(csr.sel_line)) = i) then 
 									avs_csr_readdata(16)			<= csr.processor_go(i);
 									avs_csr_readdata(24)			<= csr.crc_err(i);
 									avs_csr_readdata(25)			<= csr.init_err(i);
+									avs_csr_readdata(26)			<= sensor_sample_valid(i);
 								end if;
 							end loop;
 						when others => -- temperature 
 							-- WARNING: no range check here
 							for i in 0 to N_DQ_LINES-1 loop
-								if (to_integer(unsigned(avs_csr_address))-2 = i) then -- addr 2 -> sensor 0
-									avs_csr_readdata			<= csr.sense_temp(i);
+								if (to_integer(unsigned(avs_csr_address))-CSR_WORD_TEMP_BASE_CONST = i) then
+									if (sensor_sample_valid(i) = '1') then
+										avs_csr_readdata		<= csr.sense_temp(i);
+									else
+										avs_csr_readdata		<= (others => '0');
+									end if;
 								end if;
 							end loop;
 						end case;
 				elsif (avs_csr_write = '1') then 
 					avs_csr_waitrequest	<= '0'; -- ack the qsys bus
 					case to_integer(unsigned(avs_csr_address)) is -- address map
-						when 0 => -- capability register
-							null; -- NOTE: read-only 
-						when 1 => -- status register
+						when CSR_WORD_UID_CONST =>
+							null; -- NOTE: read-only
+						when CSR_WORD_META_CONST =>
+							csr.meta_sel		<= avs_csr_writedata(1 downto 0);
+						when CSR_WORD_SCRATCH_CONST =>
+							csr.scratch			<= avs_csr_writedata;
+						when CSR_WORD_CAPABILITY_CONST =>
+							null; -- NOTE: read-only
+						when CSR_WORD_STATUS_CONST =>
 							csr.sel_line		<= avs_csr_writedata(15 downto 0);
 							for i in 0 to N_DQ_LINES-1 loop -- NOTE: the processor_go will set the CURRENT sel_line 
 								if (to_integer(unsigned(avs_csr_writedata(15 downto 0))) = i) then 
@@ -1009,19 +1093,25 @@ begin
 			temp_frac		:= sensor_data(i)(1)(2 downto 0) & sensor_data(i)(0);
 			
 			-- default
+			f32_sign		:= and_reduce(temp_sign); -- NOTE: more likely to be positive, in case of error, so more prune to report overheat 
 			f32_expo		:= std_logic_vector(to_unsigned(127,f32_expo'length));
 			f32_frac		:= (others => '0');
 			-- convert
-			f32_sign		:= and_reduce(temp_sign); -- NOTE: more likely to be positive, in case of error, so more prune to report overheat 
-			for j in 0 to 10 loop 
-				if (temp_frac(j) = '1') then -- detect the position of leading '1' 
-					f32_expo				:= std_logic_vector(to_unsigned(j-4+127,f32_expo'length));
-					f32_frac(22 downto 12)	:= std_logic_vector(shift_left(unsigned(temp_frac),11-j)); -- shift the remaining bit as fraction
-					-- for example for raw of +4=2^2, bit 6 is '1', others are '0'. 
-					-- exponent part is 2^2, where 2 is from 6-4. 
-					-- fraction part is just the remaining bit, shifted to fill the fraction from msb
-				end if;
-			end loop;
+			if (unsigned(temp_frac) = 0) then
+				f32_sign		:= '0';
+				f32_expo		:= (others => '0');
+				f32_frac		:= (others => '0');
+			else
+				for j in 0 to 10 loop 
+					if (temp_frac(j) = '1') then -- detect the position of leading '1' 
+						f32_expo				:= std_logic_vector(to_unsigned(j-4+127,f32_expo'length));
+						f32_frac(22 downto 12)	:= std_logic_vector(shift_left(unsigned(temp_frac),11-j)); -- shift the remaining bit as fraction
+						-- for example for raw of +4=2^2, bit 6 is '1', others are '0'. 
+						-- exponent part is 2^2, where 2 is from 6-4. 
+						-- fraction part is just the remaining bit, shifted to fill the fraction from msb
+					end if;
+				end loop;
+			end if;
 			
 			-- output 
 			sense_temp_comb(i)	<= f32_sign & f32_expo & f32_frac;
@@ -1030,8 +1120,3 @@ begin
 
 
 end architecture rtl;
-
-
-
-
-

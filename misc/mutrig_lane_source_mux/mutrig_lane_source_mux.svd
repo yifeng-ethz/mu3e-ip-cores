@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>Mu3e</vendor>
+  <vendorID>MU3E</vendorID>
+  <name>MU3E_MUTRIG_LANE_SOURCE_MUX</name>
+  <series>MU3E_FPGA_IP</series>
+  <version>26.1.0.0427</version>
+  <description>Runtime-selectable lane mux between real decoded MuTRiG traffic and the local emulator stream.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>MUTRIG_LANE_SOURCE_MUX_CSR</name>
+      <description>Relative 16-word CSR aperture for one lane-source mux instance.</description>
+      <groupName>MU3E_DATA_PATH</groupName>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x40</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register><name>UID</name><description>IP identifier, ASCII MLSM.</description><addressOffset>0x00</addressOffset><access>read-only</access><resetValue>0x4D4C534D</resetValue><fields><field><name>uid</name><description>ASCII MLSM identifier.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field></fields></register>
+        <register>
+          <name>META</name>
+          <description>Selectable metadata readback. Write 0=VERSION, 1=DATE, 2=GIT, 3=INSTANCE_ID.</description>
+          <addressOffset>0x04</addressOffset>
+          <access>read-write</access>
+          <fields><field><name>meta_select</name><description>Metadata page selector on writes; selected metadata on reads.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-write</access></field></fields>
+        </register>
+        <register>
+          <name>CONTROL</name>
+          <description>Lane source select and diagnostic counter clear.</description>
+          <addressOffset>0x08</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field><name>select_emulator</name><description>0 selects real decoded MuTRiG stream, 1 selects emulator stream.</description><bitOffset>0</bitOffset><bitWidth>1</bitWidth><access>read-write</access></field>
+            <field><name>clear_counters</name><description>Write one to clear counters and last-selected image.</description><bitOffset>1</bitOffset><bitWidth>1</bitWidth><access>write-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>STATUS</name>
+          <description>Current source selection and live stream sidebands.</description>
+          <addressOffset>0x0C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>select_emulator</name><description>Live selected source.</description><bitOffset>0</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>real_valid</name><description>Real input valid.</description><bitOffset>1</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>emu_valid</name><description>Emulator input valid.</description><bitOffset>2</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>selected_valid</name><description>Selected output valid.</description><bitOffset>3</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>selected_channel</name><description>Selected output channel.</description><bitOffset>4</bitOffset><bitWidth>4</bitWidth><access>read-only</access></field>
+            <field><name>selected_error</name><description>Selected output error sideband.</description><bitOffset>8</bitOffset><bitWidth>3</bitWidth><access>read-only</access></field>
+            <field><name>real_channel</name><description>Real input channel sideband.</description><bitOffset>11</bitOffset><bitWidth>4</bitWidth><access>read-only</access></field>
+            <field><name>real_error</name><description>Real input error sideband.</description><bitOffset>15</bitOffset><bitWidth>3</bitWidth><access>read-only</access></field>
+            <field><name>emu_channel</name><description>Emulator input channel sideband.</description><bitOffset>18</bitOffset><bitWidth>4</bitWidth><access>read-only</access></field>
+            <field><name>emu_error</name><description>Emulator input error sideband.</description><bitOffset>22</bitOffset><bitWidth>3</bitWidth><access>read-only</access></field>
+            <field><name>both_valid</name><description>Both real and emulator inputs valid on this cycle.</description><bitOffset>25</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register><name>REAL_BEATS</name><description>Saturating real input valid-beat counter.</description><addressOffset>0x10</addressOffset><access>read-only</access><fields><field><name>value</name><description>Real input beat count.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field></fields></register>
+        <register><name>EMU_BEATS</name><description>Saturating emulator input valid-beat counter.</description><addressOffset>0x14</addressOffset><access>read-only</access><fields><field><name>value</name><description>Emulator input beat count.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field></fields></register>
+        <register><name>SELECTED_BEATS</name><description>Saturating selected output valid-beat counter.</description><addressOffset>0x18</addressOffset><access>read-only</access><fields><field><name>value</name><description>Selected output beat count.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field></fields></register>
+        <register><name>SWITCH_COUNT</name><description>Saturating count of source-select changes through CONTROL.</description><addressOffset>0x1C</addressOffset><access>read-only</access><fields><field><name>value</name><description>Source switch count.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field></fields></register>
+        <register>
+          <name>LAST_SELECTED</name>
+          <description>Last selected output source, error, channel, and data.</description>
+          <addressOffset>0x20</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>data</name><description>Last selected 9-bit data word.</description><bitOffset>0</bitOffset><bitWidth>9</bitWidth><access>read-only</access></field>
+            <field><name>channel</name><description>Last selected channel sideband.</description><bitOffset>9</bitOffset><bitWidth>4</bitWidth><access>read-only</access></field>
+            <field><name>error</name><description>Last selected error sideband.</description><bitOffset>13</bitOffset><bitWidth>3</bitWidth><access>read-only</access></field>
+            <field><name>source</name><description>0=real, 1=emulator for the last selected beat.</description><bitOffset>16</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

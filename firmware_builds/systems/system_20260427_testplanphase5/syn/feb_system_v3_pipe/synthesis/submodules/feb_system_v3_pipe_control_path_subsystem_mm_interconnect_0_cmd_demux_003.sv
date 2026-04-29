@@ -29,7 +29,7 @@
 // Generation parameters:
 //   output_name:         feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_cmd_demux_003
 //   ST_DATA_W:           116
-//   ST_CHANNEL_W:        12
+//   ST_CHANNEL_W:        11
 //   NUM_OUTPUTS:         1
 //   VALID_WIDTH:         1
 // ------------------------------------------
@@ -47,7 +47,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_cmd_demux_003
     // -------------------
     input  [1-1      : 0]   sink_valid,
     input  [116-1    : 0]   sink_data, // ST_DATA_W=116
-    input  [12-1 : 0]   sink_channel, // ST_CHANNEL_W=12
+    input  [11-1 : 0]   sink_channel, // ST_CHANNEL_W=11
     input                         sink_startofpacket,
     input                         sink_endofpacket,
     output                        sink_ready,
@@ -57,7 +57,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_cmd_demux_003
     // -------------------
     output reg                      src0_valid,
     output reg [116-1    : 0] src0_data, // ST_DATA_W=116
-    output reg [12-1 : 0] src0_channel, // ST_CHANNEL_W=12
+    output reg [11-1 : 0] src0_channel, // ST_CHANNEL_W=11
     output reg                      src0_startofpacket,
     output reg                      src0_endofpacket,
     input                           src0_ready,
@@ -94,7 +94,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_cmd_demux_003
     // -------------------
     assign ready_vector[0] = src0_ready;
 
-    assign sink_ready = |(sink_channel & {{11{1'b0}},{ready_vector[NUM_OUTPUTS - 1 : 0]}});
+    assign sink_ready = |(sink_channel & {{10{1'b0}},{ready_vector[NUM_OUTPUTS - 1 : 0]}});
 
 endmodule
 

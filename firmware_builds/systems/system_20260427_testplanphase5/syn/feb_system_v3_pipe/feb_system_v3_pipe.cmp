@@ -44,7 +44,6 @@
 			mutrig_cfg_ctrl_0_spi_export2top_ssn  : out   std_logic_vector(7 downto 0);                     -- ssn
 			mutrig_reset_reset                    : out   std_logic_vector(1 downto 0);                     -- reset
 			osc_clock_50_in_clk                   : in    std_logic                     := 'X';             -- clk
-			pulse_out_conduit_pulse               : out   std_logic;                                        -- pulse
 			redriver_losn                         : in    std_logic_vector(8 downto 0)  := (others => 'X'); -- losn
 			reset_3_reset_n                       : in    std_logic                     := 'X';             -- reset_n
 			sense_dq_in                           : in    std_logic_vector(5 downto 0)  := (others => 'X'); -- in
@@ -65,11 +64,12 @@
 			upload_data0_sc_rc_startofpacket      : out   std_logic;                                        -- startofpacket
 			upload_data0_sc_rc_endofpacket        : out   std_logic;                                        -- endofpacket
 			upload_data0_sc_rc_channel            : out   std_logic_vector(1 downto 0);                     -- channel
-			upload_data1_data                     : out   std_logic_vector(35 downto 0);                    -- data
-			upload_data1_valid                    : out   std_logic;                                        -- valid
 			upload_data1_ready                    : in    std_logic                     := 'X';             -- ready
+			upload_data1_valid                    : out   std_logic;                                        -- valid
 			upload_data1_startofpacket            : out   std_logic;                                        -- startofpacket
-			upload_data1_endofpacket              : out   std_logic                                         -- endofpacket
+			upload_data1_endofpacket              : out   std_logic;                                        -- endofpacket
+			upload_data1_empty                    : out   std_logic_vector(0 downto 0);                     -- empty
+			upload_data1_data                     : out   std_logic_vector(35 downto 0)                     -- data
 		);
 	end component feb_system_v3_pipe;
 

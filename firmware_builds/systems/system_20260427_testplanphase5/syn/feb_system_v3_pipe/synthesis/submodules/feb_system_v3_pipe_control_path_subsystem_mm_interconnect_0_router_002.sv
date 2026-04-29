@@ -44,15 +44,15 @@
 
 module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002_default_decode
   #(
-     parameter DEFAULT_CHANNEL = 9,
+     parameter DEFAULT_CHANNEL = 8,
                DEFAULT_WR_CHANNEL = -1,
                DEFAULT_RD_CHANNEL = -1,
-               DEFAULT_DESTID = 6 
+               DEFAULT_DESTID = 5 
    )
   (output [102 - 99 : 0] default_destination_id,
-   output [12-1 : 0] default_wr_channel,
-   output [12-1 : 0] default_rd_channel,
-   output [12-1 : 0] default_src_channel
+   output [11-1 : 0] default_wr_channel,
+   output [11-1 : 0] default_rd_channel,
+   output [11-1 : 0] default_src_channel
   );
 
   assign default_destination_id = 
@@ -63,7 +63,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002_de
       assign default_src_channel = '0;
     end
     else begin : default_channel_assignment
-      assign default_src_channel = 12'b1 << DEFAULT_CHANNEL;
+      assign default_src_channel = 11'b1 << DEFAULT_CHANNEL;
     end
   endgenerate
 
@@ -73,8 +73,8 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002_de
       assign default_rd_channel = '0;
     end
     else begin : default_rw_channel_assignment
-      assign default_wr_channel = 12'b1 << DEFAULT_WR_CHANNEL;
-      assign default_rd_channel = 12'b1 << DEFAULT_RD_CHANNEL;
+      assign default_wr_channel = 11'b1 << DEFAULT_WR_CHANNEL;
+      assign default_rd_channel = 11'b1 << DEFAULT_RD_CHANNEL;
     end
   endgenerate
 
@@ -103,7 +103,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002
     // -------------------
     output                          src_valid,
     output reg [116-1    : 0] src_data,
-    output reg [12-1 : 0] src_channel,
+    output reg [11-1 : 0] src_channel,
     output                          src_startofpacket,
     output                          src_endofpacket,
     input                           src_ready
@@ -119,7 +119,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002
     localparam PKT_PROTECTION_H = 106;
     localparam PKT_PROTECTION_L = 104;
     localparam ST_DATA_W = 116;
-    localparam ST_CHANNEL_W = 12;
+    localparam ST_CHANNEL_W = 11;
     localparam DECODER_TYPE = 0;
 
     localparam PKT_TRANS_WRITE = 70;
@@ -136,15 +136,14 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002
     // -------------------------------------------------------
     localparam PAD0 = log2ceil(64'h400 - 64'h0); 
     localparam PAD1 = log2ceil(64'h480 - 64'h400); 
-    localparam PAD2 = log2ceil(64'h4c8 - 64'h4c4); 
-    localparam PAD3 = log2ceil(64'h580 - 64'h500); 
-    localparam PAD4 = log2ceil(64'hc00 - 64'h800); 
-    localparam PAD5 = log2ceil(64'h1081c - 64'h10818); 
-    localparam PAD6 = log2ceil(64'h11040 - 64'h11000); 
-    localparam PAD7 = log2ceil(64'h13000 - 64'h12000); 
-    localparam PAD8 = log2ceil(64'h30080 - 64'h30000); 
-    localparam PAD9 = log2ceil(64'h3f020 - 64'h3f010); 
-    localparam PAD10 = log2ceil(64'h50000 - 64'h40000); 
+    localparam PAD2 = log2ceil(64'h580 - 64'h500); 
+    localparam PAD3 = log2ceil(64'hc00 - 64'h800); 
+    localparam PAD4 = log2ceil(64'h1081c - 64'h10818); 
+    localparam PAD5 = log2ceil(64'h11040 - 64'h11000); 
+    localparam PAD6 = log2ceil(64'h13000 - 64'h12000); 
+    localparam PAD7 = log2ceil(64'h30080 - 64'h30000); 
+    localparam PAD8 = log2ceil(64'h3f020 - 64'h3f010); 
+    localparam PAD9 = log2ceil(64'h50000 - 64'h40000); 
     // -------------------------------------------------------
     // Work out which address bits are significant based on the
     // address range of the slaves. If the required width is too
@@ -174,7 +173,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002
     assign src_startofpacket = sink_startofpacket;
     assign src_endofpacket   = sink_endofpacket;
     wire [PKT_DEST_ID_W-1:0] default_destid;
-    wire [12-1 : 0] default_src_channel;
+    wire [11-1 : 0] default_src_channel;
 
 
 
@@ -205,68 +204,62 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_002
 
     // ( 0x0 .. 0x400 )
     if ( {address[RG:PAD0],{PAD0{1'b0}}} == 19'h0   ) begin
-            src_channel = 12'b00000000001;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 10;
+            src_channel = 11'b0000000001;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 9;
     end
 
     // ( 0x400 .. 0x480 )
     if ( {address[RG:PAD1],{PAD1{1'b0}}} == 19'h400   ) begin
-            src_channel = 12'b10000000000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 9;
-    end
-
-    // ( 0x4c4 .. 0x4c8 )
-    if ( {address[RG:PAD2],{PAD2{1'b0}}} == 19'h4c4   ) begin
-            src_channel = 12'b00000100000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 0;
-    end
-
-    // ( 0x500 .. 0x580 )
-    if ( {address[RG:PAD3],{PAD3{1'b0}}} == 19'h500   ) begin
-            src_channel = 12'b00001000000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 1;
-    end
-
-    // ( 0x800 .. 0xc00 )
-    if ( {address[RG:PAD4],{PAD4{1'b0}}} == 19'h800   ) begin
-            src_channel = 12'b00010000000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 2;
-    end
-
-    // ( 0x10818 .. 0x1081c )
-    if ( {address[RG:PAD5],{PAD5{1'b0}}} == 19'h10818   ) begin
-            src_channel = 12'b00000001000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 7;
-    end
-
-    // ( 0x11000 .. 0x11040 )
-    if ( {address[RG:PAD6],{PAD6{1'b0}}} == 19'h11000   ) begin
-            src_channel = 12'b00000000100;
+            src_channel = 11'b1000000000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 8;
     end
 
+    // ( 0x500 .. 0x580 )
+    if ( {address[RG:PAD2],{PAD2{1'b0}}} == 19'h500   ) begin
+            src_channel = 11'b0000100000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 0;
+    end
+
+    // ( 0x800 .. 0xc00 )
+    if ( {address[RG:PAD3],{PAD3{1'b0}}} == 19'h800   ) begin
+            src_channel = 11'b0001000000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 1;
+    end
+
+    // ( 0x10818 .. 0x1081c )
+    if ( {address[RG:PAD4],{PAD4{1'b0}}} == 19'h10818   ) begin
+            src_channel = 11'b0000001000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 6;
+    end
+
+    // ( 0x11000 .. 0x11040 )
+    if ( {address[RG:PAD5],{PAD5{1'b0}}} == 19'h11000   ) begin
+            src_channel = 11'b0000000100;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 7;
+    end
+
     // ( 0x12000 .. 0x13000 )
-    if ( {address[RG:PAD7],{PAD7{1'b0}}} == 19'h12000   ) begin
-            src_channel = 12'b00000010000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 3;
+    if ( {address[RG:PAD6],{PAD6{1'b0}}} == 19'h12000   ) begin
+            src_channel = 11'b0000010000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 2;
     end
 
     // ( 0x30000 .. 0x30080 )
-    if ( {address[RG:PAD8],{PAD8{1'b0}}} == 19'h30000   ) begin
-            src_channel = 12'b00100000000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 11;
+    if ( {address[RG:PAD7],{PAD7{1'b0}}} == 19'h30000   ) begin
+            src_channel = 11'b0010000000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 10;
     end
 
     // ( 0x3f010 .. 0x3f020 )
-    if ( {address[RG:PAD9],{PAD9{1'b0}}} == 19'h3f010   ) begin
-            src_channel = 12'b00000000010;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 5;
+    if ( {address[RG:PAD8],{PAD8{1'b0}}} == 19'h3f010   ) begin
+            src_channel = 11'b0000000010;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 4;
     end
 
     // ( 0x40000 .. 0x50000 )
-    if ( {address[RG:PAD10],{PAD10{1'b0}}} == 19'h40000  && read_transaction  ) begin
-            src_channel = 12'b01000000000;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 6;
+    if ( {address[RG:PAD9],{PAD9{1'b0}}} == 19'h40000  && read_transaction  ) begin
+            src_channel = 11'b0100000000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 5;
     end
 
 end

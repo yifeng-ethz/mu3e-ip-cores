@@ -836,11 +836,6 @@
    type="conduit"
    dir="end" />
  <interface
-   name="inject_aux"
-   internal="emulator_inject_fanout.inject_aux_in"
-   type="conduit"
-   dir="end" />
- <interface
    name="lvds_outclock"
    internal="receiver_clock_125.out_clk"
    type="clock"
@@ -1209,7 +1204,7 @@
  <module
    name="emulator_inject_fanout"
    kind="pulse_fanout8"
-   version="1.0"
+   version="26.2.0.0429"
    enabled="1" />
  <module
    name="emulator_mutrig_0"
@@ -1763,7 +1758,7 @@
  <module
    name="mutrig_injector_0"
    kind="mutrig_injector_multiheader"
-   version="26.0.326"
+   version="26.0.2.0429"
    enabled="1">
   <parameter name="HEADERINFO_CHANNEL_W" value="4" />
  </module>

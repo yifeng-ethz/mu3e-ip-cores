@@ -1,18 +1,15 @@
 // pulse_fanout8.sv
 // Simple conduit pulse fanout for emulator injection distribution.
 //
-// Version : 1.1.0
-// Date    : 20260418
-// Change  : Merge the local injector pulse with one auxiliary external pulse
-//           source and fan out the combined edge to the datapath monitor seam
-//           plus the 8 emulator conduits. The masked-trigger legs stay tied low
-//           until the external masked path is integrated explicitly.
+// Version : 26.2.0
+// Date    : 20260429
+// Change  : Remove the deprecated auxiliary injection input from the packaged
+//           fanout. The active source is the local mutrig_injector pulse only.
 
 module pulse_fanout8 (
     input  logic csi_clk,
     input  logic rsi_reset,
     input  logic coe_inject_pulse,
-    input  logic coe_aux_inject_pulse,
     output logic coe_out0_pulse,
     output logic coe_out0_masked_pulse,
     output logic coe_out1_pulse,
@@ -34,7 +31,7 @@ module pulse_fanout8 (
 );
     logic merged_inject_pulse;
 
-    assign merged_inject_pulse = coe_inject_pulse | coe_aux_inject_pulse;
+    assign merged_inject_pulse = coe_inject_pulse;
 
     always_comb begin
         coe_out0_pulse        = merged_inject_pulse;

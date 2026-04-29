@@ -18,7 +18,7 @@ Every case below assumes the following datapath is verified live before the case
 | Block | Source | Sink | Confirmation |
 |---|---|---|---|
 | 8 × `emulator_mutrig_N` (N=0..7) | `lvds_rx_28nm_0.outclock`, `master_datapath.master_reset` | per-lane `aso_tx8b1k` into hit_stack subsystem | `emulator_mutrig_N.csr[0x05]` `frame_count` increments (per `TEST_PLAN.md` §4.2) |
-| `mutrig_injector` / `charge_injection_pulser` | SC writes via `mm_bridge` aperture | `coe_inject_pulse` / `coe_inject_masked_pulse` per emulator (see `emulator_mutrig.sv:55..57`) | injector arm bit observable, `INJ_ARM` SignalTap trigger never fires outside `RUNNING` |
+| `mutrig_injector` | SC writes via `mm_bridge` aperture | active injector pulse path per emulator (see `emulator_mutrig.sv:55..57`) | injector arm bit observable, `INJ_ARM` SignalTap trigger never fires outside `RUNNING` |
 | 7 × `hist_rate_splitter_N.out1 → histogram_statistics_0.fill_in_N` and `histogram_ingress_bridge_0.hist_out → histogram_statistics_0.hist_fill_in` | `scifi_datapath_system_v3.qsys` lines 2353, 2365–2395 | `histogram_statistics_0.csr[0x34]` `TOTAL_HITS` advances together with the SWB per-link counter | `TEST_PLAN.md` §4.4 |
 | `coalescing_queue` inside `histogram_statistics_0` | `bin_divider` per-bin update stream | `pingpong_sram` updates | `histogram_statistics/rtl/coalescing_queue.vhd` `o_overflow_count` stays at 0 in the basic bucket; any tick is logged and gates Phase 4 closure |
 

@@ -1,7 +1,23 @@
 package require -exact qsys 18.1
 
-set script_dir [file dirname [file normalize [info script]]]
-set system_root [file normalize [file join $script_dir ..]]
+proc abs_path {path} {
+    if {[string match "/*" $path]} {
+        return $path
+    }
+    if {[info exists ::env(PWD)] && [string match "/*" $::env(PWD)]} {
+        return [file join $::env(PWD) $path]
+    }
+    return [file join [pwd] $path]
+}
+
+if {[info exists ::phase5_system_dir] && [string match "/*" $::phase5_system_dir]} {
+    set system_root $::phase5_system_dir
+} elseif {[info exists ::env(PHASE5_SYSTEM_DIR)] && [string match "/*" $::env(PHASE5_SYSTEM_DIR)]} {
+    set system_root $::env(PHASE5_SYSTEM_DIR)
+} else {
+    set script_dir [file dirname [abs_path [info script]]]
+    set system_root [file dirname $script_dir]
+}
 set syn_dir [file join $system_root syn]
 load_system [file join $syn_dir scifi_datapath_system_v3.qsys]
 
@@ -25,6 +41,17 @@ set_instance_parameter_value histogram_ingress_bridge_0 VERSION_DATE 20260425
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_GIT 481097348
 set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_HI 21
 set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_LO 17
+set_instance_parameter_value histogram_statistics_0 COAL_QUEUE_DEPTH 256
+set_instance_parameter_value histogram_statistics_0 VERSION_MAJOR 26
+set_instance_parameter_value histogram_statistics_0 VERSION_MINOR 1
+set_instance_parameter_value histogram_statistics_0 VERSION_PATCH 6
+set_instance_parameter_value histogram_statistics_0 BUILD 429
+set_instance_parameter_value histogram_statistics_0 VERSION_DATE 20260429
+set_instance_parameter_value histogram_statistics_0 VERSION_GIT 375124078
+# Keep the per-port FIFO at the signed-off Phase-5 depth. The histogram arbiter
+# drains a single active FIFO at one hit per clock; extra depth should cover
+# burst skew, not compensate for a throughput bubble.
+set_instance_parameter_value histogram_statistics_0 FIFO_ADDR_WIDTH 8
 
 # The emulator source was fixed to remove the obsolete pre-CRC delay byte.
 # Keep the pipe integration metadata explicit so Qsys does not preserve stale
@@ -75,8 +102,12 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
         remove_instance $new_mux
     }
 
-    add_instance $new_mux mutrig_lane_source_mux 1.0
-    set_instance_parameter_value $new_mux SELECT_EMULATOR 1
+    add_instance $new_mux mutrig_lane_source_mux 26.1.0.0427
+    # Phase 5 is the real-MuTRiG board bring-up build. Keep the emulator
+    # connected for simulation/debug, but reset to the live LVDS/deassembly
+    # path. Software can select real/emulator per lane through this CSR.
+    set_instance_parameter_value $new_mux SELECT_EMULATOR 0
+    set_instance_parameter_value $new_mux INSTANCE_ID $lane
 
     if {[has_instance $emu]} {
         set_emulator_mutrig_crcfix_version $emu
@@ -90,11 +121,87 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
     add_connection lvds_rx_controller_pro_0.decoded${lane}/$new_mux.real_in
     add_connection $emu.tx8b1k/$new_mux.emu_in
     add_connection $new_mux.selected_out/$lane_dp.decoded_din
+
+    set mux_csr_base [expr {0x2240 + (0x40 * $lane)}]
+    add_connection mm_clock_crossing_bridge.m0/$new_mux.csr
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/$new_mux.csr baseAddress [format "0x%04x" $mux_csr_base]
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/$new_mux.csr arbitrationPriority 1
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/$new_mux.csr defaultConnection false
+
+    add_connection master_datapath.master/$new_mux.csr
+    set_connection_parameter_value master_datapath.master/$new_mux.csr baseAddress [format "0x%04x" $mux_csr_base]
+    set_connection_parameter_value master_datapath.master/$new_mux.csr arbitrationPriority 1
+    set_connection_parameter_value master_datapath.master/$new_mux.csr defaultConnection false
 }
 
 for {set lane 0} {$lane < 8} {incr lane} {
     replace_decoded_lane_mux_with_source_mux $lane
 }
+
+# Phase-5 delay histograms must observe both hit-stack halves. Rewire the
+# optional histogram debug inputs so mode -7 samples the signed timestamp-delta
+# streams from both MTS preprocessors. Keep the ring-CAM fill-level streams on
+# debug_3..6; the older MTS debug_burst stream is sacrificed in this build
+# because the histogram IP exposes six debug sinks total.
+foreach path {
+    mts_preprocessor_0.debug_burst/histogram_statistics_0.debug_6
+    mts_preprocessor_0.ts_delta/histogram_statistics_0.debug_1
+    hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_2
+    hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_3
+    hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_4
+    hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_5
+} {
+    remove_connection_if_present $path
+}
+add_connection mts_preprocessor_0.ts_delta/histogram_statistics_0.debug_1
+add_connection mts_preprocessor_1.ts_delta/histogram_statistics_0.debug_2
+add_connection hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_3
+add_connection hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_4
+add_connection hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5
+add_connection hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_6
+
+# The Phase-5 histogram tap is a collective observation point. The base
+# topology only forwarded the upper hit stack into histogram_statistics_0,
+# which made lanes 4..7 visible at MTS/frame counters but invisible at the
+# histogram. Preserve the two top-level upload exports, but merge the upper and
+# lower post-hit-stack packet streams into the histogram post input.
+proc configure_hit_type3_splitter {name} {
+    add_instance $name altera_avalon_st_splitter 18.1
+    set_instance_parameter_value $name BITS_PER_SYMBOL 36
+    set_instance_parameter_value $name CHANNEL_WIDTH 1
+    set_instance_parameter_value $name DATA_WIDTH 36
+    set_instance_parameter_value $name ERROR_DESCRIPTOR ""
+    set_instance_parameter_value $name ERROR_WIDTH 1
+    set_instance_parameter_value $name MAX_CHANNELS 1
+    set_instance_parameter_value $name NUMBER_OF_OUTPUTS 2
+    set_instance_parameter_value $name QUALIFY_VALID_OUT 0
+    set_instance_parameter_value $name READY_LATENCY 0
+    set_instance_parameter_value $name USE_CHANNEL 0
+    set_instance_parameter_value $name USE_DATA 1
+    set_instance_parameter_value $name USE_ERROR 0
+    set_instance_parameter_value $name USE_PACKETS 1
+    set_instance_parameter_value $name USE_READY 1
+    set_instance_parameter_value $name USE_VALID 1
+
+    add_connection xcvr156_clock.clk/$name.clk
+    add_connection xcvr156_clock.clk_reset/$name.reset
+}
+
+remove_connection_if_present hist_post_splitter_0.out1/hist_post_cdc_0.in
+
+configure_hit_type3_splitter hist_post_lower_splitter_0
+add_instance hist_post_merge_0 hit_type3_stream_merge 26.0.0.0429
+
+add_connection xcvr156_clock.clk/hist_post_merge_0.clk
+add_connection xcvr156_clock.clk_reset/hist_post_merge_0.reset
+add_connection hit_stack_subsystem_1.hit_type3/hist_post_lower_splitter_0.in
+add_connection hist_post_splitter_0.out1/hist_post_merge_0.in0
+add_connection hist_post_lower_splitter_0.out1/hist_post_merge_0.in1
+add_connection hist_post_merge_0.out/hist_post_cdc_0.in
+
+catch {remove_interface hit_type3_lower}
+add_interface hit_type3_lower avalon_streaming start
+set_interface_property hit_type3_lower EXPORT_OF hist_post_lower_splitter_0.out0
 
 # Split the LVDS-side CSR fanout into smaller Avalon-MM bridge islands.
 # This keeps the external SC map unchanged while reducing the generated
@@ -194,42 +301,142 @@ foreach group $lvds_csr_groups {
         $lvds_csr_group_width($group)
 }
 
-set reroute_connections [list]
-foreach connection [get_connections] {
-    if {[string equal [get_connection_property $connection START] "mm_clock_crossing_bridge.m0"]} {
-        lappend reroute_connections $connection
+proc remember_lvds_csr_upstream_base {master_start group upstream_base} {
+    global lvds_csr_master_upstream_base
+
+    set key ${master_start}|${group}
+    if {[info exists lvds_csr_master_upstream_base($key)] &&
+        $lvds_csr_master_upstream_base($key) != $upstream_base} {
+        error [format \
+            "Inconsistent upstream base for %s/%s: 0x%04x vs 0x%04x" \
+            $master_start \
+            $group \
+            $lvds_csr_master_upstream_base($key) \
+            $upstream_base]
+    }
+
+    set lvds_csr_master_upstream_base($key) $upstream_base
+}
+
+proc reroute_clock_crossed_lvds_csr_master {} {
+    global lvds_csr_endpoint_group
+    global lvds_csr_endpoint_local_base
+    global lvds_csr_group_base
+
+    set master_start mm_clock_crossing_bridge.m0
+    set reroute_connections [list]
+    foreach connection [get_connections] {
+        if {[string equal [get_connection_property $connection START] $master_start]} {
+            lappend reroute_connections $connection
+        }
+    }
+
+    foreach connection $reroute_connections {
+        set end_point [get_connection_property $connection END]
+        set base_addr [expr {[get_connection_parameter_value $connection baseAddress]}]
+        set arb_prio [get_connection_parameter_value $connection arbitrationPriority]
+        set default_conn [get_connection_parameter_value $connection defaultConnection]
+        set group [lvds_csr_group_for_base $base_addr]
+        set bridge_name mm_pipeline_lvds_csr_$group
+        set local_base_addr [expr {$base_addr - $lvds_csr_group_base($group)}]
+
+        remove_connection $connection
+        add_connection $bridge_name.m0/$end_point
+        set_connection_parameter_value $bridge_name.m0/$end_point baseAddress [format "0x%04x" $local_base_addr]
+        set_connection_parameter_value $bridge_name.m0/$end_point arbitrationPriority $arb_prio
+        set_connection_parameter_value $bridge_name.m0/$end_point defaultConnection $default_conn
+
+        set lvds_csr_endpoint_group($end_point) $group
+        set lvds_csr_endpoint_local_base($end_point) $local_base_addr
+        remember_lvds_csr_upstream_base $master_start $group $lvds_csr_group_base($group)
     }
 }
 
-foreach connection $reroute_connections {
-    set end_point [get_connection_property $connection END]
-    set base_addr [expr {[get_connection_parameter_value $connection baseAddress]}]
-    set arb_prio [get_connection_parameter_value $connection arbitrationPriority]
-    set default_conn [get_connection_parameter_value $connection defaultConnection]
-    set group [lvds_csr_group_for_base $base_addr]
-    set bridge_name mm_pipeline_lvds_csr_$group
-    set local_base_addr [expr {$base_addr - $lvds_csr_group_base($group)}]
+proc reroute_local_lvds_csr_master {} {
+    global lvds_csr_endpoint_group
+    global lvds_csr_endpoint_local_base
 
-    remove_connection $connection
-    add_connection $bridge_name.m0/$end_point
-    set_connection_parameter_value $bridge_name.m0/$end_point baseAddress [format "0x%04x" $local_base_addr]
-    set_connection_parameter_value $bridge_name.m0/$end_point arbitrationPriority $arb_prio
-    set_connection_parameter_value $bridge_name.m0/$end_point defaultConnection $default_conn
-    set lvds_csr_group_used($group) 1
-}
+    set master_start master_datapath.master
+    set candidate_connections [list]
+    foreach connection [get_connections] {
+        if {![string equal [get_connection_property $connection START] $master_start]} {
+            continue
+        }
 
-foreach group $lvds_csr_groups {
-    if {![info exists lvds_csr_group_used($group)]} {
-        continue
+        set end_point [get_connection_property $connection END]
+        if {![info exists lvds_csr_endpoint_group($end_point)]} {
+            continue
+        }
+
+        # These legacy CSR windows have a different local-master address map
+        # than the System Console map. Leave them direct unless they are split
+        # into finer bridge islands in a later timing-cleanup pass.
+        if {[string match "mm_pipeline_*.s0" $end_point] ||
+            [regexp {^mutrig_datapath_subsystem_[0-7]\.csr$} $end_point] ||
+            [regexp {^hit_stack_subsystem_[01]\.ring_buffer_cam_[0-3]_csr$} $end_point] ||
+            [string equal $end_point "mutrig_injector_0.csr"]} {
+            continue
+        }
+
+        lappend candidate_connections $connection
     }
 
-    set bridge_name mm_pipeline_lvds_csr_$group
-    set upstream_path mm_clock_crossing_bridge.m0/$bridge_name.s0
+    foreach connection $candidate_connections {
+        set end_point [get_connection_property $connection END]
+        set base_addr [expr {[get_connection_parameter_value $connection baseAddress]}]
+        set group $lvds_csr_endpoint_group($end_point)
+        set local_base_addr $lvds_csr_endpoint_local_base($end_point)
+        set upstream_base [expr {$base_addr - $local_base_addr}]
 
-    add_connection $upstream_path
-    set_connection_parameter_value $upstream_path baseAddress [format "0x%04x" $lvds_csr_group_base($group)]
-    set_connection_parameter_value $upstream_path arbitrationPriority 1
-    set_connection_parameter_value $upstream_path defaultConnection false
+        set key ${master_start}|${group}
+        if {[info exists local_master_upstream_base($key)] &&
+            $local_master_upstream_base($key) != $upstream_base} {
+            set local_master_conflict($group) 1
+        } else {
+            set local_master_upstream_base($key) $upstream_base
+        }
+
+        lappend local_master_group_connections($group) $connection
+    }
+
+    foreach group [array names local_master_group_connections] {
+        if {[info exists local_master_conflict($group)]} {
+            puts [format \
+                "Skipping master_datapath bridge reroute for %s; local address windows are not contiguous" \
+                $group]
+            continue
+        }
+
+        foreach connection $local_master_group_connections($group) {
+            remove_connection $connection
+        }
+
+        set key ${master_start}|${group}
+        remember_lvds_csr_upstream_base \
+            $master_start \
+            $group \
+            $local_master_upstream_base($key)
+    }
+}
+
+reroute_clock_crossed_lvds_csr_master
+reroute_local_lvds_csr_master
+
+foreach master_start [list mm_clock_crossing_bridge.m0 master_datapath.master] {
+    foreach group $lvds_csr_groups {
+        set key ${master_start}|${group}
+        if {![info exists lvds_csr_master_upstream_base($key)]} {
+            continue
+        }
+
+        set bridge_name mm_pipeline_lvds_csr_$group
+        set upstream_path $master_start/$bridge_name.s0
+
+        add_connection $upstream_path
+        set_connection_parameter_value $upstream_path baseAddress [format "0x%04x" $lvds_csr_master_upstream_base($key)]
+        set_connection_parameter_value $upstream_path arbitrationPriority 1
+        set_connection_parameter_value $upstream_path defaultConnection false
+    }
 }
 
 save_system [file join $syn_dir scifi_datapath_system_v3_pipe.qsys]

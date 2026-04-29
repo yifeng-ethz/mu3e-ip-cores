@@ -31,13 +31,35 @@
 -- Revision: 5.9 (Treat external RESET / OUT_OF_DAQ control words as local IDLE aborts so the
 --      run-control handshake cannot wedge on unimplemented datapath-specific behavior)
 --      Date: Apr 22, 2026
--- Version : 26.0.3
--- Date    : 20260422
+-- Revision: 5.10 (Re-derive latency padding state on run-control SYNC)
+--      Date: Apr 25, 2026
+-- Revision: 5.11 (Replace the pipelined overflow multiplier with a synchronous overflow base)
+--      Date: Apr 25, 2026
+-- Revision: 5.12 (Split timestamp-error latency from overflow disambiguation lookback)
+--      Date: Apr 25, 2026
+-- Revision: 5.13 (Count debug hits only on accepted hit_type0 transfers)
+--      Date: Apr 25, 2026
+-- Revision: 5.14 (Add timestamp-delay error forward/drop policy for MuTRiG bring-up)
+--      Date: Apr 27, 2026
+-- Version : 26.0.8
+-- Date    : 20260427
 -- Change  : Register the corrected divider numerators in hit_prediv, then split divider launch and
 --           ToT subtraction into separate cycles. A one-cycle delayed copy of the divider outputs keeps
 --           the quotient/remainder aligned with the metadata shift pipeline. External RESET / OUT_OF_DAQ
 --           words now collapse to IDLE in the local control agent because this IP has no dedicated
---           datapath action for them and must acknowledge the broadcast command stream cleanly.
+--           datapath action for them and must acknowledge the broadcast command stream cleanly. The
+--           latency-derived overflow padding state is now initialized at power-up and re-derived on
+--           run-control SYNC, matching the visible expected_latency CSR without requiring a host rewrite.
+--           The overflow epoch used for timestamp padding now advances synchronously with the local MTS
+--           wrap counter so post-overflow hits cannot use a stale pipelined multiplier product. The
+--           overflow-adjust window now starts from the wrap edge to match the registered epoch update.
+--           The overflow disambiguation lookback is now a separate packaged generic so increasing the
+--           timestamp-error latency window does not falsely subtract one MuTRiG epoch from mid-range hits.
+--           Debug hit counters now advance only on accepted hit_type0 ready/valid transfers so a buffered
+--           upstream beat cannot be counted repeatedly while this processor is idle.
+--           CONTROL_STATUS bit 5 now optionally drops hits whose timestamp-delay error sideband is
+--           asserted. The default behavior still forwards those hits with error asserted so downstream
+--           consumers can decide whether to trim or observe them.
 -- =========
 -- Description:	[MuTRiG Timestamp Processor] 
     -- Processes the Timestamp TCC (15 bit)(1.6 ns) into TCC_8n (13 bit) and TCC_1n6 (3 bit).:
@@ -117,6 +139,7 @@ generic (
     PADDING_EOP_WAIT_CYCLE	: natural := 512; -- set the wait grace period to generating eop of each link at end of run. note: backpressure fifo depth (128) x enabled_channel (4)
     LPM_DIV_PIPELINE		: natural := 4;
     MUTRIG_BUFFER_EXPECTED_LATENCY_8N		: natural := 2000; -- affects the error signal on <hit_type1>
+    MUTRIG_OVERFLOW_LOOKBACK_8N               : natural := 2000; -- controls post-wrap epoch disambiguation only
     DEBUG					: natural := 1
 );
 port (
@@ -333,6 +356,8 @@ architecture rtl of mts_processor is
     signal hit_in_ok						: std_logic;
     signal processor_allow_input			: std_logic;
     signal upstream_endofrun_seen        : std_logic;
+    signal asi_hit_type0_ready_i         : std_logic;
+    signal asi_hit_type0_accept          : std_logic;
     
     -- data and control path signals 
     type csr_t is record 
@@ -342,10 +367,21 @@ architecture rtl of mts_processor is
         derive_tot              : std_logic;
         delay_ts_field_use_t    : std_logic;
         bypass_lapse            : std_logic;
+        drop_delay_error        : std_logic;
         discard_hiterr          : std_logic;
         expected_latency        : std_logic_vector(31 downto 0);
     end record;
-    signal csr                  : csr_t;
+    signal csr                  : csr_t := (
+        go                   => '1',
+        force_stop           => '0',
+        soft_reset           => '0',
+        derive_tot           => '0',
+        delay_ts_field_use_t => '1',
+        bypass_lapse         => '0',
+        drop_delay_error     => '0',
+        discard_hiterr       => '1',
+        expected_latency     => std_logic_vector(to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N, 32))
+    );
     
     type debug_msg_t is record
         discard_hit_cnt		: unsigned(31 downto 0);
@@ -401,41 +437,17 @@ architecture rtl of mts_processor is
         Q 		: out std_logic_vector(LPM_WIDTH-1 downto 0);
         EQ 		: out std_logic_vector(15 downto 0));
     end component;
-    
-    -- multiplier
-    component LPM_MULT
-    generic ( 	
-        LPM_WIDTHA 		: natural; 
-        LPM_WIDTHB 		: natural;
-        LPM_WIDTHS 		: natural := 1;
-        LPM_WIDTHP 		: natural;
-        LPM_REPRESENTATION 	: string := "UNSIGNED";
-        LPM_PIPELINE 	: natural := 0;
-        LPM_TYPE		: string := L_MULT;
-        LPM_HINT 		: string := "UNUSED"
-    );
-    port (
-        DATAA 	: in std_logic_vector(LPM_WIDTHA-1 downto 0);
-        DATAB 	: in std_logic_vector(LPM_WIDTHB-1 downto 0);
-        ACLR 	: in std_logic := '0';
-        CLOCK 	: in std_logic := '0';
-        CLKEN 	: in std_logic := '1';
-        SUM 	: in std_logic_vector(LPM_WIDTHS-1 downto 0) := (OTHERS => '0');
-        RESULT 	: out std_logic_vector(LPM_WIDTHP-1 downto 0)
-    );
-    end component;
-    
-    -- multiplier	
-    constant LPM_MULT_PIPELINE			: natural := 10;
     -- padding_logic_comb (tcc (15bit) -> cc_gts_1n6_slv50 (50bit))
     constant OVERFLOW_1N6				: integer := 32766;
     constant OVERFLOW_TIME_1N6			: integer := OVERFLOW_1N6 + 1; 
     -- NOTE: mutrig overflow at 2^15-2=32766 (counting from 0), but takes 2^15-1=32767 * 1.6ns. So we plus 1 here.
     --		 when calculating the time, we use OVERFLOW_TIME_1N6.
     --		 when count up, we use OVERFLOW_1N6.
-    constant UPPER						: integer := OVERFLOW_1N6 - MUTRIG_BUFFER_EXPECTED_LATENCY_8N*5; -- 2000 (deprecated)
-    signal expected_latency_1n6         : unsigned(31 downto 0);
-    signal padding_upper                : unsigned(14 downto 0); -- adjustable by csr, in 1.6 ns ticks
+    constant OVERFLOW_LOOKBACK_1N6_CONST      : natural := MUTRIG_OVERFLOW_LOOKBACK_8N * 5;
+    constant OVERFLOW_PADDING_UPPER_CONST     : natural := OVERFLOW_1N6 - OVERFLOW_LOOKBACK_1N6_CONST;
+    signal expected_latency_1n6         : unsigned(31 downto 0) := to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N * 5, 32);
+    signal overflow_lookback_1n6        : unsigned(31 downto 0);
+    signal padding_upper                : unsigned(14 downto 0);
     signal padding_logic_gray_ts		: unsigned(14 downto 0);
     signal padding_logic_gray_ts_e		: unsigned(14 downto 0);
     signal padding_logic_white_ts		: unsigned(49 downto 0);
@@ -476,6 +488,7 @@ architecture rtl of mts_processor is
     signal ecc_div_quotient_d : std_logic_vector(LPM_DIV_WIDTHN-1 downto 0);
     signal tcc_div_remain_d   : std_logic_vector(2 downto 0);
     signal ecc_div_remain_d   : std_logic_vector(2 downto 0);
+    signal hit_out_delay_error : std_logic := '0';
 
     type prediv_stage_t is record
         asic            : std_logic_vector(3 downto 0);
@@ -495,10 +508,9 @@ architecture rtl of mts_processor is
     -- counter mts
     signal counter_mts_1n6			: unsigned(14 downto 0);
     signal counter_ov_cnt			: unsigned(31 downto 0); -- can be tuned
-    signal counter_ov_cnt_reg		: unsigned(31 downto 0);
-    signal fpga_overflow_happened			: std_logic;
+    signal counter_ov_base_1n6      : unsigned(49 downto 0);
+    signal fpga_overflow_will_happen       : std_logic;
     signal fpga_overflow_lookback_cnt		: unsigned(31 downto 0);
-    signal lpm_multi_valid_cnt              : unsigned(15 downto 0);
     signal overflow_adjust_active           : std_logic;
     -- counter gts 
     signal counter_gts_8n					: unsigned(47 downto 0); -- can be tuned
@@ -574,18 +586,26 @@ architecture rtl of mts_processor is
 
 begin
 
+    overflow_lookback_1n6 <= to_unsigned(OVERFLOW_LOOKBACK_1N6_CONST, overflow_lookback_1n6'length);
+    padding_upper         <= to_unsigned(OVERFLOW_PADDING_UPPER_CONST, padding_upper'length);
+
     -- Carry the overflow-correction window alongside the hit so late ToT
     -- arithmetic no longer depends directly on the live overflow counter.
-    -- The multiplier output becomes valid on the cycle where the countdown
-    -- reaches 1, while a hit captured on that same edge still sees the
-    -- pre-update register value. Accept the final countdown cycle here so the
-    -- first post-product hit also latches the overflow adjustment.
+    fpga_overflow_will_happen <= '1' when (
+        counter_mts_1n6 = to_unsigned(32766, counter_mts_1n6'length)
+        or counter_mts_1n6 = to_unsigned(32765, counter_mts_1n6'length)
+        or counter_mts_1n6 = to_unsigned(32764, counter_mts_1n6'length)
+        or counter_mts_1n6 = to_unsigned(32763, counter_mts_1n6'length)
+        or counter_mts_1n6 = to_unsigned(32762, counter_mts_1n6'length)
+    ) else '0';
     overflow_adjust_active <= '1' when (
         fpga_overflow_lookback_cnt /= to_unsigned(0, fpga_overflow_lookback_cnt'length)
-        and lpm_multi_valid_cnt <= to_unsigned(1, lpm_multi_valid_cnt'length)
+        or fpga_overflow_will_happen = '1'
     ) else '0';
 
     asi_ctrl_ready <= ctrl_ready_comb;
+    asi_hit_type0_ready <= asi_hit_type0_ready_i;
+    asi_hit_type0_accept <= asi_hit_type0_valid and asi_hit_type0_ready_i;
     ctrl_ready_comb <= '0' when i_rst = '1' else
                       '1' when (run_state_cmd = IDLE and processor_state = IDLE) else
                       '1' when (run_state_cmd = RUN_PREPARE and processor_state = RESET and reset_flow = SCLR) else
@@ -708,24 +728,7 @@ begin
         REMAIN				=> ecc_div_remain
     );
     
-    of2gts_mult : LPM_MULT
-    generic map ( 	
-        LPM_WIDTHA 		=> 32, -- counter_ov_cnt
-        LPM_WIDTHB 		=> 15, -- OVERFLOW_TIME_1N6
-        LPM_WIDTHS 		=> 15, -- hit_padding.cc_out
-        LPM_WIDTHP 		=> 50, -- cc_gts_1n6_slv50
-        LPM_REPRESENTATION 	=> "UNSIGNED",
-        LPM_PIPELINE 	=> LPM_MULT_PIPELINE
-    )
-    port map (
-        DATAA 		=> std_logic_vector(counter_ov_cnt),
-        DATAB 		=> std_logic_vector(to_unsigned(OVERFLOW_TIME_1N6,15)), 
-        ACLR 		=> i_rst,
-        CLOCK 		=> i_clk,
-        CLKEN 		=> '1',
-        SUM 		=> (14 downto 0 => '0'),
-        RESULT 		=> padding_logic_gts_product
-    );
+    padding_logic_gts_product <= std_logic_vector(counter_ov_base_1n6);
     
     proc_run_control_mgmt_agent : process (i_rst, i_clk)
         variable decoded_run_state_v : run_state_t;
@@ -784,9 +787,9 @@ begin
             csr.derive_tot              <= '0';
             csr.delay_ts_field_use_t    <= '1';
             csr.bypass_lapse            <= '0';
+            csr.drop_delay_error        <= '0';
             csr.expected_latency        <= std_logic_vector(to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N, csr.expected_latency'length));
             expected_latency_1n6        <= to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N * 5, expected_latency_1n6'length);
-            padding_upper               <= to_unsigned(OVERFLOW_1N6 - (MUTRIG_BUFFER_EXPECTED_LATENCY_8N * 5), padding_upper'length);
             csr.discard_hiterr          <= '1'; -- NOTE: default is discard hiterr
         elsif (rising_edge(i_clk)) then
             -- default
@@ -802,6 +805,7 @@ begin
                         csr.soft_reset          <=	avs_csr_writedata(2);
                         csr.bypass_lapse        <=  avs_csr_writedata(3);
                         csr.discard_hiterr      <= 	avs_csr_writedata(4);
+                        csr.drop_delay_error    <=  avs_csr_writedata(5);
                         -- 3-bit of op mode 
                         -- [2] derive tot : 1=long, 0=short (def). Decode E branch and validate E-BadHit. Output format go to type1b.
                         csr.derive_tot        <= avs_csr_writedata(OP_MODE_LO + 2);
@@ -824,7 +828,6 @@ begin
                         csr_v_expected_latency_1n6 := csr_v_expected_latency_1n6 + shift_left(csr_v_expected_latency_1n6, 2);
                         csr.expected_latency       <= avs_csr_writedata;
                         expected_latency_1n6       <= csr_v_expected_latency_1n6;
-                        padding_upper              <= to_unsigned(OVERFLOW_1N6, padding_upper'length) - resize(csr_v_expected_latency_1n6, padding_upper'length);
                     when others =>
                         null;
                 end case;
@@ -842,6 +845,7 @@ begin
                         avs_csr_readdata(2)     <= csr.soft_reset;
                         avs_csr_readdata(3)     <= csr.bypass_lapse;
                         avs_csr_readdata(4)     <= csr.discard_hiterr;
+                        avs_csr_readdata(5)     <= csr.drop_delay_error;
                         avs_csr_readdata(OP_MODE_LO + 2)                <= csr.derive_tot;
                         avs_csr_readdata(OP_MODE_LO + 1)                <= csr.delay_ts_field_use_t;
                     when 1 => 
@@ -856,7 +860,13 @@ begin
                         null;
                 end case;
             -- contention with other state machines
-            else 
+            else
+                if (reset_flow = SYNC or csr.soft_reset = '1') then
+                    csr_v_expected_latency_1n6 := resize(unsigned(csr.expected_latency), expected_latency_1n6'length);
+                    csr_v_expected_latency_1n6 := csr_v_expected_latency_1n6 + shift_left(csr_v_expected_latency_1n6, 2);
+                    expected_latency_1n6       <= csr_v_expected_latency_1n6;
+                end if;
+
                 -- release reset by csr
                 if (csr.soft_reset = '1') then 
                     csr.soft_reset          <= '0';
@@ -957,30 +967,31 @@ begin
     proc_in_ready : process (i_rst, i_clk)
     begin
         if (i_rst = '1') then 
+            asi_hit_type0_ready_i       <= '0';
         
         elsif (rising_edge(i_clk)) then 
             -- default 
-            asi_hit_type0_ready			<= '0';	
+            asi_hit_type0_ready_i			<= '0';	
             case processor_state is 
                 when IDLE => 
-                    asi_hit_type0_ready			<= '0';
+                    asi_hit_type0_ready_i			<= '0';
                 when RESET =>
                     case reset_flow is 
                         when SCLR => 
-                            asi_hit_type0_ready			<= '1'; -- flushing fifo
+                            asi_hit_type0_ready_i			<= '1'; -- flushing fifo
                         when SYNC =>
-                            asi_hit_type0_ready			<= '0';
+                            asi_hit_type0_ready_i			<= '0';
                         when DONE =>
-                            asi_hit_type0_ready			<= '0';
+                            asi_hit_type0_ready_i			<= '0';
                         when others =>
                     end case;
                 when RUNNING =>
-                    asi_hit_type0_ready			<= '1'; -- accepting input hits
+                    asi_hit_type0_ready_i			<= '1'; -- accepting input hits
                 when FLUSHING =>
                     if (upstream_endofrun_seen = '0') then
-                        asi_hit_type0_ready         <= '1'; -- flushing until upstream reports end-of-run
+                        asi_hit_type0_ready_i       <= '1'; -- flushing until upstream reports end-of-run
                     else
-                        asi_hit_type0_ready         <= '0';
+                        asi_hit_type0_ready_i       <= '0';
                     end if;
                 when others =>
             end case;
@@ -994,55 +1005,50 @@ begin
         if (i_rst = '1') then
             counter_mts_1n6              <= (others => '0');
             counter_ov_cnt               <= (others => '0');
-            counter_ov_cnt_reg           <= (others => '0');
+            counter_ov_base_1n6          <= (others => '0');
             fpga_overflow_lookback_cnt   <= (others => '0');
-            lpm_multi_valid_cnt          <= (others => '0');
         elsif rising_edge(i_clk) then
             if (processor_state = RESET and reset_flow = SYNC) then 
                  -- reset counter
                 counter_mts_1n6		<= (others => '0');
                 counter_ov_cnt		<= (others => '0');
-                counter_ov_cnt_reg  <= (others => '0');
+                counter_ov_base_1n6  <= (others => '0');
                 fpga_overflow_lookback_cnt		<= (others => '0');
-                lpm_multi_valid_cnt     <= (others => '0');
             else
                 -- begin counter
                 case counter_mts_1n6 is -- overflow at (32766 - 0 - 1 - 2 - 3 - 4)
                     when to_unsigned(32766,15) =>
                         counter_mts_1n6		<= to_unsigned(4,15);
                         counter_ov_cnt		<= counter_ov_cnt + to_unsigned(1,counter_ov_cnt'length);
+                        counter_ov_base_1n6 <= counter_ov_base_1n6 + to_unsigned(OVERFLOW_TIME_1N6, counter_ov_base_1n6'length);
                     when to_unsigned(32765,15) =>
                         counter_mts_1n6		<= to_unsigned(3,15);
                         counter_ov_cnt		<= counter_ov_cnt + to_unsigned(1,counter_ov_cnt'length);
+                        counter_ov_base_1n6 <= counter_ov_base_1n6 + to_unsigned(OVERFLOW_TIME_1N6, counter_ov_base_1n6'length);
                     when to_unsigned(32764,15) =>
                         counter_mts_1n6		<= to_unsigned(2,15);
                         counter_ov_cnt		<= counter_ov_cnt + to_unsigned(1,counter_ov_cnt'length);
+                        counter_ov_base_1n6 <= counter_ov_base_1n6 + to_unsigned(OVERFLOW_TIME_1N6, counter_ov_base_1n6'length);
                     when to_unsigned(32763,15) =>
                         counter_mts_1n6		<= to_unsigned(1,15);
                         counter_ov_cnt		<= counter_ov_cnt + to_unsigned(1,counter_ov_cnt'length);
+                        counter_ov_base_1n6 <= counter_ov_base_1n6 + to_unsigned(OVERFLOW_TIME_1N6, counter_ov_base_1n6'length);
                     when to_unsigned(32762,15) =>
                         counter_mts_1n6		<= to_unsigned(0,15);
                         counter_ov_cnt		<= counter_ov_cnt + to_unsigned(1,counter_ov_cnt'length);
+                        counter_ov_base_1n6 <= counter_ov_base_1n6 + to_unsigned(OVERFLOW_TIME_1N6, counter_ov_base_1n6'length);
                     when others => -- bullshit
                         counter_mts_1n6		<= counter_mts_1n6 + to_unsigned(5,15);
                         counter_ov_cnt		<= counter_ov_cnt;
                 end case;
                 
-                counter_ov_cnt_reg	<= counter_ov_cnt;
-                if (fpga_overflow_happened = '1') then -- set counter
-                    fpga_overflow_lookback_cnt      <= expected_latency_1n6;
-                elsif (fpga_overflow_lookback_cnt <= expected_latency_1n6 and fpga_overflow_lookback_cnt /= to_unsigned(0, fpga_overflow_lookback_cnt'length)) then
+                if (fpga_overflow_will_happen = '1') then -- set counter
+                    fpga_overflow_lookback_cnt      <= overflow_lookback_1n6;
+                elsif (fpga_overflow_lookback_cnt <= overflow_lookback_1n6 and fpga_overflow_lookback_cnt /= to_unsigned(0, fpga_overflow_lookback_cnt'length)) then
                     fpga_overflow_lookback_cnt      <= fpga_overflow_lookback_cnt - 5; -- with underflow protection
                 else
                     fpga_overflow_lookback_cnt		<= (others => '0');
                 end if;
-                
-                if (fpga_overflow_happened = '1') then 
-                    lpm_multi_valid_cnt             <= to_unsigned(LPM_MULT_PIPELINE-1,lpm_multi_valid_cnt'length);
-                elsif (lpm_multi_valid_cnt /= to_unsigned(0,lpm_multi_valid_cnt'length)) then 
-                    lpm_multi_valid_cnt             <= lpm_multi_valid_cnt - 1;
-                end if;
-                
             end if;
         end if;
     end process;
@@ -1077,12 +1083,6 @@ begin
         variable padding_logic_white_ts_e_v: unsigned(49 downto 0);
         variable padding_logic_gts_product_v : unsigned(49 downto 0);
     begin
-        if (counter_ov_cnt_reg /= counter_ov_cnt) then -- generate a pulse when overflow happened on fpga
-            fpga_overflow_happened 	<= '1'; -- after reset it should be ok 
-        else
-            fpga_overflow_happened 	<= '0';
-        end if;
-
         padding_logic_gray_ts_v      := unsigned(hit_padding.cc_out);
         padding_logic_gray_ts_e_v    := unsigned(hit_padding.ecc_out);
         padding_logic_gts_product_v  := unsigned(padding_logic_gts_product);
@@ -1149,16 +1149,14 @@ begin
             debug_msg.total_hit_cnt			<= (others => '0');
         elsif (rising_edge(i_clk)) then 
             
-            if (asi_hit_type0_valid = '1' and hit_in_ok = '0') then -- capture invalid error
-                debug_msg.discard_hit_cnt		<= debug_msg.discard_hit_cnt + 1;
-            elsif (reset_flow = SYNC or csr.soft_reset = '1') then -- soft reset by csr
+            if (reset_flow = SYNC or csr.soft_reset = '1') then -- soft reset by csr
                 debug_msg.discard_hit_cnt		<= (others => '0'); -- sclr the counter
-            end if;
-            
-            if (asi_hit_type0_valid = '1') then -- including errors
-                debug_msg.total_hit_cnt			<= debug_msg.total_hit_cnt + 1;
-            elsif (reset_flow = SYNC or csr.soft_reset = '1') then -- soft reset by csr
                 debug_msg.total_hit_cnt			<= (others => '0');
+            elsif (asi_hit_type0_accept = '1') then -- count only accepted ready/valid beats
+                debug_msg.total_hit_cnt			<= debug_msg.total_hit_cnt + 1;
+                if (hit_in_ok = '0') then -- capture invalid error
+                    debug_msg.discard_hit_cnt		<= debug_msg.discard_hit_cnt + 1;
+                end if;
             end if;
             
 
@@ -1475,6 +1473,7 @@ begin
             aso_hit_type1_startofpacket   <= '0';
             aso_hit_type1_endofpacket     <= '0';
             aso_hit_type1_empty           <= '0';
+            aso_hit_type1_error           <= '0';
         
         elsif (rising_edge(i_clk)) then
             aso_hit_type1_data            <= (others => '0');
@@ -1483,6 +1482,7 @@ begin
             aso_hit_type1_startofpacket   <= '0';
             aso_hit_type1_endofpacket     <= '0';
             aso_hit_type1_empty           <= '0';
+            aso_hit_type1_error           <= '0';
 
             if (processor_state = RESET or processor_state = IDLE) then
                 route_startofrun_sent     <= (others => '0');
@@ -1502,7 +1502,7 @@ begin
             end if;
 
             if (processor_state = RUNNING or processor_state = FLUSHING) then 
-                if (hit_out.valid = '1') then
+                if (hit_out.valid = '1' and (csr.drop_delay_error = '0' or hit_out_delay_error = '0')) then
                     route_lane_v := to_integer(unsigned(hit_out.tcc_8n(5 downto 4)));
                     aso_hit_type1_data(O_ASIC_HI downto O_ASIC_LO)               <= hit_out.asic;
                     aso_hit_type1_data(O_CHANNEL_HI downto O_CHANNEL_LO)         <= hit_out.channel;
@@ -1512,6 +1512,7 @@ begin
                     aso_hit_type1_data(O_ET1N6_HI downto O_ET1N6_LO)             <= hit_out.et_1n6;
                     aso_hit_type1_valid                                          <= '1';
                     aso_hit_type1_channel                                        <= "00" & hit_out.tcc_8n(5 downto 4);
+                    aso_hit_type1_error                                          <= hit_out_delay_error;
                     if (route_startofrun_sent(route_lane_v) = '0') then
                         route_startofrun_sent(route_lane_v)                      <= '1';
                         aso_hit_type1_startofpacket                             <= '1';
@@ -1546,7 +1547,7 @@ begin
         end if;
     end process;
 
-    proc_debug_ts_comb : process (all) -- need to delay 1 cycle to match with normal hit data
+    proc_debug_ts_comb : process (i_clk) -- need to delay 1 cycle to match with normal hit data
     begin
         if (rising_edge(i_clk)) then
             aso_debug_ts_data           <= int_aso_debug_ts_data;
@@ -1572,14 +1573,14 @@ begin
             -- derive the error signals of the datapath
             -- --------------------------------------------
             -- default 
-            aso_hit_type1_error              <= '0'; -- timing aligned with <hit_type1> valid
+            hit_out_delay_error              <= '0'; -- timing aligned with <hit_type1> output stage
             if (int_aso_debug_ts_valid = '1') then 
                 -- ok: ts within range of (0,2000)
                 if (signed(int_aso_debug_ts_data) > to_signed(0, int_aso_debug_ts_data'length) and unsigned(int_aso_debug_ts_data) < unsigned(csr.expected_latency)) then -- refactor : use csr and better lint 
-                    aso_hit_type1_error         <= '0';
+                    hit_out_delay_error         <= '0';
                 -- error: ts out of range of (0,2000). possible pll unlocked or cml logic recv side is too low (generate a bit of side noise)
                 else 
-                    aso_hit_type1_error         <= '1';
+                    hit_out_delay_error         <= '1';
                 end if;
             end if;
         end if;

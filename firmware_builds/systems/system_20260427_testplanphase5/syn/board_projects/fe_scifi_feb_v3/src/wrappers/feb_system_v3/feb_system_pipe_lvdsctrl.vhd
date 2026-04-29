@@ -194,7 +194,6 @@ begin
             legacy_firefly_mon_byteenable         => legacy_firefly_mon_byteenable,
             legacy_firefly_mon_debugaccess        => legacy_firefly_mon_debugaccess,
             osc_clock_50_in_clk                   => osc_clock_50_in_clk,
-            pulse_out_conduit_pulse               => open,
             redriver_losn                         => redriver_losn,
             reset_3_reset_n                       => reset_3_reset_n,
             sense_dq_in                           => sense_dq_in,

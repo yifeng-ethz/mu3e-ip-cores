@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>Mu3e</vendor>
+  <vendorID>MU3E</vendorID>
+  <name>MU3E_DBG_MM2RUNCTRL</name>
+  <series>MU3E_FPGA_IP</series>
+  <version>1.0.0</version>
+  <description>CSR-driven local run-control source used by FEB datapath bring-up.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>DBG_MM2RUNCTRL_CSR</name>
+      <description>Relative 16-word Avalon-MM CSR aperture for local run-control command injection.</description>
+      <groupName>MU3E_DEBUG</groupName>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x40</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>ID</name>
+          <description>IP identifier, ASCII M2RC.</description>
+          <addressOffset>0x00</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x4D325243</resetValue>
+          <fields><field><name>id</name><description>ASCII M2RC identifier.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field></fields>
+        </register>
+        <register>
+          <name>STATUS</name>
+          <description>Current local source state and sticky error flags.</description>
+          <addressOffset>0x04</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x00040001</resetValue>
+          <fields>
+            <field><name>local_enable</name><description>Local CSR command source is enabled.</description><bitOffset>0</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>pending</name><description>A run-control word is pending on the Avalon-ST output.</description><bitOffset>1</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>script_busy</name><description>A built-in command script is active.</description><bitOffset>2</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>overrun</name><description>Sticky flag set when software wrote a command while the source could not accept it.</description><bitOffset>3</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>bad_cmd</name><description>Sticky flag set when software wrote an unsupported command encoding.</description><bitOffset>4</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>last_from_host</name><description>Last accepted command was written through HOST_CMD rather than STATE_CMD.</description><bitOffset>5</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>gap_cycles</name><description>Configured script inter-command gap in clock cycles.</description><bitOffset>16</bitOffset><bitWidth>16</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>CONTROL</name>
+          <description>Local source enable plus write-one pulses for flush and sticky-flag clear.</description>
+          <addressOffset>0x08</addressOffset>
+          <access>read-write</access>
+          <resetValue>0x00000001</resetValue>
+          <fields>
+            <field><name>local_enable</name><description>When set, CSR writes can enqueue local run-control words.</description><bitOffset>0</bitOffset><bitWidth>1</bitWidth><access>read-write</access></field>
+            <field><name>flush</name><description>Write one to clear pending/script state.</description><bitOffset>1</bitOffset><bitWidth>1</bitWidth><access>write-only</access></field>
+            <field><name>clear_sticky</name><description>Write one to clear overrun and bad_cmd sticky flags.</description><bitOffset>2</bitOffset><bitWidth>1</bitWidth><access>write-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>HOST_CMD</name>
+          <description>Write a raw host command byte. Accepted values include 0x10..0x14 and 0x30..0x33.</description>
+          <addressOffset>0x0C</addressOffset>
+          <access>write-only</access>
+          <fields><field><name>host_cmd</name><description>Host command byte decoded to a one-hot run-control state.</description><bitOffset>0</bitOffset><bitWidth>8</bitWidth><access>write-only</access></field></fields>
+        </register>
+        <register>
+          <name>STATE_CMD</name>
+          <description>Write a direct one-hot run-control state word.</description>
+          <addressOffset>0x10</addressOffset>
+          <access>write-only</access>
+          <fields><field><name>state_word</name><description>One-hot run-control state bits [8:0].</description><bitOffset>0</bitOffset><bitWidth>9</bitWidth><access>write-only</access></field></fields>
+        </register>
+        <register>
+          <name>SCRIPT</name>
+          <description>Launch a built-in local run-control script.</description>
+          <addressOffset>0x14</addressOffset>
+          <access>write-only</access>
+          <fields><field><name>script_kind</name><description>1=self-run, 2=end-run, 3=abort-to-idle.</description><bitOffset>0</bitOffset><bitWidth>3</bitWidth><access>write-only</access></field></fields>
+        </register>
+        <register>
+          <name>GAP_CYCLES</name>
+          <description>Script inter-command gap. RTL writes and reads this value in bits [31:16].</description>
+          <addressOffset>0x18</addressOffset>
+          <access>read-write</access>
+          <resetValue>0x00040000</resetValue>
+          <fields><field><name>gap_cycles</name><description>Inter-command gap for SCRIPT sequencing.</description><bitOffset>16</bitOffset><bitWidth>16</bitWidth><access>read-write</access></field></fields>
+        </register>
+        <register>
+          <name>SENT_COUNT</name>
+          <description>Accepted Avalon-ST command count.</description>
+          <addressOffset>0x1C</addressOffset>
+          <access>read-only</access>
+          <fields><field><name>value</name><description>Saturating-free 32-bit accepted-command counter.</description><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field></fields>
+        </register>
+        <register>
+          <name>LAST_SENT</name>
+          <description>Last accepted output command image.</description>
+          <addressOffset>0x20</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>state_word</name><description>One-hot run-control state bits.</description><bitOffset>0</bitOffset><bitWidth>9</bitWidth><access>read-only</access></field>
+            <field><name>from_host</name><description>Last command originated from HOST_CMD decode.</description><bitOffset>9</bitOffset><bitWidth>1</bitWidth><access>read-only</access></field>
+            <field><name>host_cmd</name><description>Raw host command byte for the last command.</description><bitOffset>10</bitOffset><bitWidth>8</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

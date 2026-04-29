@@ -35,6 +35,32 @@ MTS policy:
 - This is an ingress-quality filter for malformed raw hits, not the
   timestamp-delay policy.
 
+## `mutrig_lane_source_mux_N`
+
+Stream in:
+
+- `asi_real`: decoded 9-bit MuTRiG frame stream from the LVDS controller and
+  frame receiver.
+- `asi_emu`: decoded 9-bit MuTRiG-compatible frame stream from
+  `emulator_mutrig_N`.
+
+Stream out:
+
+- `selected_out`: the chosen 9-bit stream into `mutrig_datapath_subsystem_N`.
+
+CSR policy:
+
+- `UID = 0x4D4C534D` (`MLSM`).
+- `CONTROL[0] select_emulator`: `0` selects real LVDS/MuTRiG, `1` selects the
+  emulator.
+- `CONTROL[1] clear_counters`: write-one pulse clearing real, emulator,
+  selected, and switch counters.
+- `STATUS` reports live source, current valid/error/channel sidebands, and
+  whether both inputs are valid in the same cycle.
+- The mux does not rewrite `data`, `channel`, or `error`; it forwards the
+  selected source verbatim. Diagnostic counters may observe both inputs, but
+  only the selected stream is part of the downstream data contract.
+
 ## `mts_preprocessor_{0,1}` to Hit Stack
 
 Stream: `hit_type1_out`, 39-bit payload.

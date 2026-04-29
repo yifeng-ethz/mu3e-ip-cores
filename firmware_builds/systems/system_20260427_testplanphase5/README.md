@@ -5,7 +5,7 @@ Phase 5 firmware build and verification workspace for FEB SciFi real-MuTRiG brin
 Read these before live hardware work:
 
 - `../../doc/SETUP.md` — board programming, SMB mapping, and configuration files.
-- `../../doc/CONTRACT.md` — AVST payload/framing/error policy across MTS, histogram tap, and ring-buffer CAM.
+- `../../doc/CONTRACT.md` — AVST payload/framing/error policy across the runtime MuTRiG source mux, MTS, histogram tap, and ring-buffer CAM.
 - `../../doc/MUTRIG.md` — MuTRiG mode/configuration notes.
 - `../../doc/MATH.md` — latency/rate model sketch and histogram queue-depth assumptions.
 - `../../doc/TEST_PLAN_PHASE5.md` — Phase-5 case catalog.

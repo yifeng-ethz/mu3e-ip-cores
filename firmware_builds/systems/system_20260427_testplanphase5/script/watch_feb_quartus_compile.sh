@@ -69,10 +69,13 @@ if ! command -v quartus_sh >/dev/null 2>&1; then
     exit 2
 fi
 
-qsf_file="${project}.qsf"
+qsf_file="${rev}.qsf"
+if [ ! -f "${qsf_file}" ]; then
+    qsf_file="${project}.qsf"
+fi
 output_dir="output_files"
 if [ -f "${qsf_file}" ]; then
-    output_dir_parsed="$(awk -F '\"' '/PROJECT_OUTPUT_DIRECTORY/ {print $2; exit}' "${qsf_file}" || true)"
+    output_dir_parsed="$(awk '/PROJECT_OUTPUT_DIRECTORY/ {gsub(/"/, "", $NF); print $NF; exit}' "${qsf_file}" || true)"
     if [ -n "${output_dir_parsed}" ]; then
         output_dir="${output_dir_parsed}"
     fi

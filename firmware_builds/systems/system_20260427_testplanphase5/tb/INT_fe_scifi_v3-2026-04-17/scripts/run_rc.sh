@@ -238,20 +238,16 @@ set rc_lvds_reset_path [first_existing_path [list \
 set rc_mutrig_reset_path [first_existing_path [list \
   /tb_feb_to_swb_links/dut/data_path_subsystem/mm_interconnect_1/mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset \
   /tb_feb_to_swb_links/dut/data_path_subsystem/mm_interconnect_0/mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset]]
-set rc_charge_injection_reset_path [first_existing_path [list \
-  /tb_feb_to_swb_links/dut/control_path_subsystem/mm_interconnect_0/charge_injection_pulser_0_reset_interface_reset_bridge_in_reset_reset]]
 force -freeze $rc_master_reset_path 0 0
 force -freeze $rc_master_clk_reset_path 1 0
 force -freeze $rc_translator_reset_path 1 0
 force -freeze $rc_lvds_reset_path 1 0
 force -freeze $rc_mutrig_reset_path 1 0
-force -freeze $rc_charge_injection_reset_path 1 0
 run 340ns
 noforce $rc_master_clk_reset_path
 noforce $rc_translator_reset_path
 noforce $rc_lvds_reset_path
 noforce $rc_mutrig_reset_path
-noforce $rc_charge_injection_reset_path
 if {![wait_cycles_for_value /tb_feb_to_swb_links/external_injection_window 1 50000 8ns "external injection window"]} {
   quit -code 1 -f
 }

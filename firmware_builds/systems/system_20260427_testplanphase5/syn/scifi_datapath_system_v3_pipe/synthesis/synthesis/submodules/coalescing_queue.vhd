@@ -3,6 +3,12 @@
 -- =======================================
 -- Revision: 1.0 (file created)
 --		Date: Mar 20, 2026
+-- Revision: 1.1
+--      Date: Apr 27, 2026
+--      Change: Register the peak occupancy update from the previous
+--              cycle's queue level. This keeps the max statistic exact
+--              while removing the hit-bin decode from the timing path
+--              into queue_level_max.
 -- =========
 -- Description:	[Queued post-divider coalescer for histogram bin updates]
 --
@@ -263,8 +269,8 @@ begin
                 queue_head_valid_q <= next_head_valid_v;
                 overflow_count_q <= overflow_v;
 
-                if level_v > queue_level_max then
-                    queue_level_max <= level_v;
+                if queue_level > queue_level_max then
+                    queue_level_max <= queue_level;
                 end if;
             end if;
         end if;

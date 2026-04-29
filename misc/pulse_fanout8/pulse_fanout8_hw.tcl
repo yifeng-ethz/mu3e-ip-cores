@@ -2,8 +2,8 @@ package require -exact qsys 16.1
 
 set_module_property NAME pulse_fanout8
 set_module_property DISPLAY_NAME "Pulse Fanout x8"
-set_module_property VERSION 1.0
-set_module_property DESCRIPTION "Simple 1-to-8 conduit pulse fanout helper."
+set_module_property VERSION 26.2.0.0429
+set_module_property DESCRIPTION "Mutrig injector conduit pulse fanout helper."
 set_module_property GROUP "Mu3e Utility/Modules"
 set_module_property AUTHOR "OpenAI Codex"
 set_module_property INTERNAL false
@@ -35,11 +35,6 @@ add_interface inject_in conduit end
 set_interface_property inject_in associatedClock clk
 set_interface_property inject_in associatedReset reset
 add_interface_port inject_in coe_inject_pulse pulse Input 1
-
-add_interface inject_aux_in conduit end
-set_interface_property inject_aux_in associatedClock ""
-set_interface_property inject_aux_in associatedReset ""
-add_interface_port inject_aux_in coe_aux_inject_pulse pulse Input 1
 
 add_interface out0 conduit start
 set_interface_property out0 associatedClock clk

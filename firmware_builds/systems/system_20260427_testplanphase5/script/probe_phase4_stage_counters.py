@@ -31,9 +31,11 @@ from run_phase4_emulator import (  # noqa: E402
     hist_snapshot,
     rc_send,
     read_emulator_statuses,
+    read_lane_source_muxes,
     sc_read,
     sc_write,
     select_histogram_ingress_post,
+    select_lane_sources,
 )
 
 
@@ -159,6 +161,7 @@ def read_stage_snapshot(sc_tool: Path, link: int) -> dict[str, Any]:
     ingress_raw = sc_read(sc_tool, link, HIST_INGRESS_BASE_WORD + 3)[0]
     return {
         "sc_hub": read_sc_hub_snapshot(sc_tool, link),
+        "source_mux": read_lane_source_muxes(sc_tool, link),
         "emulators": read_emulator_statuses(sc_tool, link),
         "frame_rcv": read_frame_rcv_snapshot(sc_tool, link),
         "mts": read_mts_snapshot(sc_tool, link),
@@ -207,6 +210,18 @@ def summarize_cycle(before: dict[str, Any], sample: dict[str, Any], post_end: di
     frame_crc_delta = sum(
         counter_delta(a["crc_err"], b["crc_err"])
         for a, b in zip(before["frame_rcv"], sample["frame_rcv"])
+    )
+    source_mux_real_delta = sum(
+        counter_delta(a["real_beats"], b["real_beats"])
+        for a, b in zip(before["source_mux"], sample["source_mux"])
+    )
+    source_mux_emu_delta = sum(
+        counter_delta(a["emu_beats"], b["emu_beats"])
+        for a, b in zip(before["source_mux"], sample["source_mux"])
+    )
+    source_mux_selected_delta = sum(
+        counter_delta(a["selected_beats"], b["selected_beats"])
+        for a, b in zip(before["source_mux"], sample["source_mux"])
     )
     mts_total_delta = sum(
         counter_delta(a["total_hits"], b["total_hits"], bits=48)
@@ -273,6 +288,9 @@ def summarize_cycle(before: dict[str, Any], sample: dict[str, Any], post_end: di
 
     return {
         "classification": classification,
+        "source_mux_real_delta": source_mux_real_delta,
+        "source_mux_emu_delta": source_mux_emu_delta,
+        "source_mux_selected_delta": source_mux_selected_delta,
         "emu_frame_delta": emu_frame_delta,
         "frame_crc_delta": frame_crc_delta,
         "mts_total_delta": mts_total_delta,
@@ -305,6 +323,7 @@ def run_cycle(args: argparse.Namespace, index: int) -> dict[str, Any]:
         time.sleep(args.post_stop_reset_ms / 1000.0)
 
     lane_go = configure_lvds_lanes(args.sc_tool, args.link)
+    source_mux_after_select = select_lane_sources(args.sc_tool, args.link, 0xFF, clear_counters=True)
     configure_histogram(args.sc_tool, args.link)
     clear_histogram(args.sc_tool, args.link)
     ingress_status = select_histogram_ingress_post(args.sc_tool, args.link)
@@ -332,6 +351,7 @@ def run_cycle(args: argparse.Namespace, index: int) -> dict[str, Any]:
         "hit_rate": args.hit_rate,
         "duration_ms": args.duration_ms,
         "lane_go": lane_go,
+        "source_mux_after_select": source_mux_after_select,
         "debug_overrides": overrides,
         "ingress_status_after_select": ingress_status,
         "before": before,
@@ -363,13 +383,13 @@ def write_markdown(path: Path, args: argparse.Namespace, records: list[dict[str,
         "",
         "## Summary",
         "",
-        "| Iter | Class | Emu Frames | MTS Hits | MTS Discard | Ring InErr | Ring Push | Ring Pop | Frame Actual | Hist Total | Hist Drop | CRC Err | Flush | Ingress | SC Flags | SC Drops |",
-        "|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|",
+        "| Iter | Class | Mux Selected | Emu Frames | MTS Hits | MTS Discard | Ring InErr | Ring Push | Ring Pop | Frame Actual | Hist Total | Hist Drop | CRC Err | Flush | Ingress | SC Flags | SC Drops |",
+        "|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|",
     ]
     for record in records:
         s = record["summary"]
         lines.append(
-            f"| {record['index']} | `{s['classification']}` | {s['emu_frame_delta']} | "
+            f"| {record['index']} | `{s['classification']}` | {s['source_mux_selected_delta']} | {s['emu_frame_delta']} | "
             f"{s['mts_total_delta']} | {s['mts_discard_delta']} | {s['ring_inerr_delta']} | {s['ring_push_delta']} | {s['ring_pop_delta']} | "
             f"{s['frame_actual_delta']} | {s['hist_total_delta']} | {s['hist_drop_delta']} | "
             f"{s['frame_crc_delta']} | `{'clean' if s['post_end_clean'] else 'residue'}` | `{fmt_hex(s['hist_ingress_after'])}` | "
@@ -391,6 +411,8 @@ def write_markdown(path: Path, args: argparse.Namespace, records: list[dict[str,
                 "",
                 f"- Classification: `{s['classification']}`",
                 f"- Lane-go: `{fmt_hex(record['lane_go'])}`",
+                f"- Source mux selected: `emulator` lanes 0..7; deltas real/emu/selected = "
+                f"`{s['source_mux_real_delta']}/{s['source_mux_emu_delta']}/{s['source_mux_selected_delta']}`",
                 f"- Debug overrides: `{record['debug_overrides']}`",
                 f"- Ingress select status: `{fmt_hex(record['ingress_status_after_select']['raw'])}`",
                 f"- Post-end flush: `{'clean' if s['post_end_clean'] else 'residue'}` "
@@ -496,6 +518,7 @@ def main() -> int:
             f"frame_actual={s['frame_actual_delta']} "
             f"hist_total={s['hist_total_delta']} "
             f"hist_drop={s['hist_drop_delta']} "
+            f"mux_selected={s['source_mux_selected_delta']} "
             f"flush={'clean' if s['post_end_clean'] else 'residue'}"
         )
         if args.stop_on_zero and s["hist_total_delta"] == 0:

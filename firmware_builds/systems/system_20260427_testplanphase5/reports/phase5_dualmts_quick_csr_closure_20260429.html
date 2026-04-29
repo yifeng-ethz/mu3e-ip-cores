@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Phase 5 dual-MTS quick CSR closure evidence</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17202a;
+      --muted: #5d6d7e;
+      --line: #d5d8dc;
+      --panel: #f7f9fb;
+      --head: #26323f;
+      --pass-bg: #dff5e6;
+      --pass-fg: #146c2e;
+      --partial-bg: #fff1cc;
+      --partial-fg: #8a5a00;
+      --fail-bg: #ffd9d9;
+      --fail-fg: #9b1c1c;
+    }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: #ffffff;
+      line-height: 1.42;
+    }
+    main {
+      width: min(1480px, calc(100vw - 48px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+    h1, h2, h3 { margin: 0; }
+    h1 { font-size: 30px; }
+    h2 { margin-top: 34px; font-size: 22px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+    h3 { margin-top: 20px; font-size: 17px; }
+    p { max-width: 1100px; }
+    code { background: #eef1f4; padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+    a { color: #1f618d; overflow-wrap: anywhere; }
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .meta div {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+    .note {
+      background: #fff8e6;
+      border: 1px solid #f5c967;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-top: 18px;
+      max-width: 1120px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    th {
+      background: var(--head);
+      color: #ffffff;
+      text-align: left;
+      padding: 8px 9px;
+      border: 1px solid var(--head);
+      white-space: nowrap;
+    }
+    td {
+      padding: 7px 9px;
+      border: 1px solid var(--line);
+      vertical-align: top;
+    }
+    tr:nth-child(even) td { background: #fbfcfd; }
+    .badge {
+      display: inline-block;
+      min-width: 42px;
+      text-align: center;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    .pass { background: var(--pass-bg); color: var(--pass-fg); }
+    .partial { background: var(--partial-bg); color: var(--partial-fg); }
+    .fail { background: var(--fail-bg); color: var(--fail-fg); }
+    .blocked { background: #e8e8e8; color: #4d4d4d; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+      gap: 18px;
+      margin-top: 16px;
+    }
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+      gap: 18px;
+      margin-top: 16px;
+    }
+    figure {
+      margin: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      overflow: hidden;
+    }
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: #ffffff;
+    }
+    figcaption {
+      padding: 8px 10px;
+      color: var(--muted);
+      font-size: 13px;
+      border-top: 1px solid var(--line);
+    }
+    .nowrap { white-space: nowrap; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Phase 5 dual-MTS quick CSR closure evidence</h1>
+  <p>Generated 2026-04-29 17:27:26. This page consolidates the Phase 5 quick CSR evidence captured after the dual-MTS histogram debug firmware was programmed.</p>
+  <div class="meta">
+    <div><strong>Evidence level</strong><br>quick CSR over SWB System Console slow-control path</div>
+    <div><strong>Firmware</strong><br><code>top_nostp_pipe dual-MTS histogram 26.1.4 Quartus checksum 0x13DB4566 cksum 0xB4F49A95</code></div>
+    <div><strong>SOF SHA-256</strong><br><code>136c2d5df538a12713b7138cf775128d633993c3411f9040f4f300d9aae0c8cc</code></div>
+    <div><strong>Timing gate</strong><br>Quartus compile PASS, slow 85 C setup WNS <code>+0.318 ns</code>, TNS <code>0.000</code></div>
+    <div><strong>Compile log</strong><br><a href="../syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_nostp_pipe_dualmts_debug_20260429.console.log">quartus_compile_top_nostp_pipe_dualmts_debug_20260429.console.log</a></div>
+    <div><strong>Program log</strong><br><a href="../syn/board_projects/fe_scifi_feb_v3/program_top_nostp_pipe_dualmts_debug_20260429.log">program_top_nostp_pipe_dualmts_debug_20260429.log</a></div>
+  </div>
+  <div class="note">
+    These screenshots are generated from captured CSR JSON with the System-Console-style matrix viewer under Xvfb. They are not a fresh live Intel System Console toolkit screen capture. The raw JSON and Markdown evidence are linked below and remain authoritative for this quick gate.
+  </div>
+
+  <h2>Evidence Index</h2>
+  <table>
+    <thead><tr><th>Artifact</th><th>Result</th><th>Scenario</th><th>Rows</th><th>PASS / PARTIAL / FAIL / BLOCKED</th></tr></thead>
+    <tbody>
+<tr><td><a href="phase5_hist_matrix_dualmts_lane4_delay100k_quick_20260429.md">phase5_hist_matrix_dualmts_lane4_delay100k_quick_20260429.md</a><br><a href="phase5_hist_matrix_dualmts_lane4_delay100k_quick_20260429.json">raw JSON</a></td><td><span class="badge pass">PASS</span></td><td>delay_100k</td><td>1</td><td>1 / 0 / 0 / 0</td></tr>
+<tr><td><a href="phase5_hist_matrix_dualmts_lane0_delay100k_quick_20260429.md">phase5_hist_matrix_dualmts_lane0_delay100k_quick_20260429.md</a><br><a href="phase5_hist_matrix_dualmts_lane0_delay100k_quick_20260429.json">raw JSON</a></td><td><span class="badge pass">PASS</span></td><td>delay_100k</td><td>1</td><td>1 / 0 / 0 / 0</td></tr>
+<tr><td><a href="phase5_hist_matrix_dualmts_lane4_rate100k_10k_quick_20260429.md">phase5_hist_matrix_dualmts_lane4_rate100k_10k_quick_20260429.md</a><br><a href="phase5_hist_matrix_dualmts_lane4_rate100k_10k_quick_20260429.json">raw JSON</a></td><td><span class="badge pass">PASS</span></td><td>rate_100k, rate_10k</td><td>2</td><td>2 / 0 / 0 / 0</td></tr>
+<tr><td><a href="phase5_hist_matrix_dualmts_emulator_all_delay100k_quick_20260429.md">phase5_hist_matrix_dualmts_emulator_all_delay100k_quick_20260429.md</a><br><a href="phase5_hist_matrix_dualmts_emulator_all_delay100k_quick_20260429.json">raw JSON</a></td><td><span class="badge pass">PASS</span></td><td>delay_100k</td><td>9</td><td>9 / 0 / 0 / 0</td></tr>
+<tr><td><a href="phase5_hist_matrix_dualmts_emulator_all_rate100k_10k_quick_20260429.md">phase5_hist_matrix_dualmts_emulator_all_rate100k_10k_quick_20260429.md</a><br><a href="phase5_hist_matrix_dualmts_emulator_all_rate100k_10k_quick_20260429.json">raw JSON</a></td><td><span class="badge pass">PASS</span></td><td>rate_100k, rate_10k</td><td>18</td><td>18 / 0 / 0 / 0</td></tr>
+<tr><td><a href="phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429.md">phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429.md</a><br><a href="phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429.json">raw JSON</a></td><td><span class="badge pass">PASS</span></td><td>header_1, header_2, header_4</td><td>27</td><td>27 / 0 / 0 / 0</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Sanity Plots</h2>
+  <div class="grid">
+    <figure><a href="assets/phase5_dualmts_20260429/phase5_dualmts_rate_scaling.png"><img src="assets/phase5_dualmts_20260429/phase5_dualmts_rate_scaling.png" alt="Rate-mode 100k/10k histogram and MTS scaling. Expected ratio is 10x." loading="lazy"></a><figcaption>Rate-mode 100k/10k histogram and MTS scaling. Expected ratio is 10x.</figcaption></figure>
+    <figure><a href="assets/phase5_dualmts_20260429/phase5_dualmts_delay_counts.png"><img src="assets/phase5_dualmts_20260429/phase5_dualmts_delay_counts.png" alt="Delay-mode 100k histogram and MTS deltas across all and individual emulator lanes." loading="lazy"></a><figcaption>Delay-mode 100k histogram and MTS deltas across all and individual emulator lanes.</figcaption></figure>
+    <figure><a href="assets/phase5_dualmts_20260429/phase5_dualmts_header_scaling.png"><img src="assets/phase5_dualmts_20260429/phase5_dualmts_header_scaling.png" alt="Header-mode scaling for 2/header and 4/header relative to 1/header." loading="lazy"></a><figcaption>Header-mode scaling for 2/header and 4/header relative to 1/header.</figcaption></figure>
+  </div>
+
+  <h2>Rate Matrix</h2>
+  <p>All rows use emulator source, separate 100 ms sampling windows, and zero histogram drops, CRC deltas, MTS discards, and ring input errors in the source artifact.</p>
+  <table>
+    <thead><tr><th>Scope</th><th>Hist 100k</th><th>Hist 10k</th><th>Hist ratio</th><th>MTS 100k</th><th>MTS 10k</th><th>MTS ratio</th><th>Status</th></tr></thead>
+    <tbody>
+<tr><td>all</td><td>2,148,816</td><td>210,232</td><td>10.22x</td><td>1,796,444</td><td>175,996</td><td>10.21x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane0</td><td>255,955</td><td>26,348</td><td>9.71x</td><td>218,825</td><td>22,164</td><td>9.87x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane1</td><td>251,760</td><td>25,813</td><td>9.75x</td><td>217,065</td><td>22,031</td><td>9.85x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane2</td><td>253,245</td><td>26,096</td><td>9.70x</td><td>217,721</td><td>21,909</td><td>9.94x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane3</td><td>257,047</td><td>24,694</td><td>10.41x</td><td>216,650</td><td>21,872</td><td>9.91x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane4</td><td>252,719</td><td>24,931</td><td>10.14x</td><td>222,869</td><td>22,465</td><td>9.92x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane5</td><td>246,151</td><td>25,574</td><td>9.63x</td><td>223,430</td><td>22,202</td><td>10.06x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane6</td><td>260,989</td><td>25,101</td><td>10.40x</td><td>228,134</td><td>22,153</td><td>10.30x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane7</td><td>267,791</td><td>25,738</td><td>10.40x</td><td>230,428</td><td>22,399</td><td>10.29x</td><td><span class="badge pass">PASS</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Delay Matrix</h2>
+  <table>
+    <thead><tr><th>Scope</th><th>Hist total</th><th>MTS total</th><th>Hist drop</th><th>Frame CRC</th><th>Ring InErr</th><th>Status</th></tr></thead>
+    <tbody>
+<tr><td>all</td><td>2,213,464</td><td>1,832,216</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane0</td><td>293,736</td><td>221,313</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane1</td><td>285,351</td><td>225,324</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane2</td><td>278,873</td><td>218,782</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane3</td><td>260,405</td><td>220,626</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane4</td><td>253,919</td><td>221,974</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane5</td><td>257,019</td><td>222,445</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane6</td><td>267,010</td><td>226,016</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane7</td><td>260,392</td><td>222,950</td><td>0</td><td>0</td><td>0</td><td><span class="badge pass">PASS</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Header Matrix</h2>
+  <table>
+    <thead><tr><th>Scope</th><th>1/header hist</th><th>2/header hist</th><th>2/header ratio</th><th>4/header hist</th><th>4/header ratio</th><th>Status</th></tr></thead>
+    <tbody>
+<tr><td>all</td><td>1,714,160</td><td>3,522,448</td><td>2.05x</td><td>7,069,568</td><td>4.12x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane0</td><td>213,061</td><td>430,052</td><td>2.02x</td><td>846,300</td><td>3.97x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane1</td><td>204,192</td><td>438,366</td><td>2.15x</td><td>857,572</td><td>4.20x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane2</td><td>219,118</td><td>413,297</td><td>1.89x</td><td>823,240</td><td>3.76x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane3</td><td>219,359</td><td>441,582</td><td>2.01x</td><td>825,980</td><td>3.77x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane4</td><td>215,004</td><td>431,920</td><td>2.01x</td><td>834,736</td><td>3.88x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane5</td><td>214,786</td><td>423,558</td><td>1.97x</td><td>807,224</td><td>3.76x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane6</td><td>215,880</td><td>429,644</td><td>1.99x</td><td>843,304</td><td>3.91x</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>lane7</td><td>220,785</td><td>437,736</td><td>1.98x</td><td>829,516</td><td>3.76x</td><td><span class="badge pass">PASS</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>System-Console-Style Screenshots</h2>
+  <div class="screens">
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_delay100k_quick_20260429_delay_100k.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_delay100k_quick_20260429_delay_100k.png" alt="emulator all delay100k delay 100k" loading="lazy"></a><figcaption>emulator all delay100k delay 100k</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429_header_1.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429_header_1.png" alt="emulator all header1 2 4 header 1" loading="lazy"></a><figcaption>emulator all header1 2 4 header 1</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429_header_2.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429_header_2.png" alt="emulator all header1 2 4 header 2" loading="lazy"></a><figcaption>emulator all header1 2 4 header 2</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429_header_4.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_header1_2_4_quick_20260429_header_4.png" alt="emulator all header1 2 4 header 4" loading="lazy"></a><figcaption>emulator all header1 2 4 header 4</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_rate100k_10k_quick_20260429_rate_100k.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_rate100k_10k_quick_20260429_rate_100k.png" alt="emulator all rate100k 10k rate 100k" loading="lazy"></a><figcaption>emulator all rate100k 10k rate 100k</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_rate100k_10k_quick_20260429_rate_10k.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_emulator_all_rate100k_10k_quick_20260429_rate_10k.png" alt="emulator all rate100k 10k rate 10k" loading="lazy"></a><figcaption>emulator all rate100k 10k rate 10k</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane0_delay100k_quick_20260429_delay_100k.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane0_delay100k_quick_20260429_delay_100k.png" alt="lane0 delay100k delay 100k" loading="lazy"></a><figcaption>lane0 delay100k delay 100k</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane4_delay100k_quick_20260429_delay_100k.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane4_delay100k_quick_20260429_delay_100k.png" alt="lane4 delay100k delay 100k" loading="lazy"></a><figcaption>lane4 delay100k delay 100k</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane4_rate100k_10k_quick_20260429_rate_100k.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane4_rate100k_10k_quick_20260429_rate_100k.png" alt="lane4 rate100k 10k rate 100k" loading="lazy"></a><figcaption>lane4 rate100k 10k rate 100k</figcaption></figure>
+<figure><a href="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane4_rate100k_10k_quick_20260429_rate_10k.png"><img src="screenshots/dualmts_20260429/phase5_hist_matrix_dualmts_lane4_rate100k_10k_quick_20260429_rate_10k.png" alt="lane4 rate100k 10k rate 10k" loading="lazy"></a><figcaption>lane4 rate100k 10k rate 10k</figcaption></figure>
+  </div>
+
+  <h2>Open Closure Items</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Status</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td>Live System Console screenshot</td><td><span class="badge partial">PASS_PARTIAL</span></td><td>This report uses a generated System-Console-style CSR screenshot from raw JSON. A final live toolkit screenshot still belongs in the final closure packet.</td></tr>
+      <tr><td>Authentic generated-system <code>tb_int</code> match</td><td><span class="badge partial">PASS_PARTIAL</span></td><td>Quick board CSR evidence passes; matching simulation evidence for the exact scenario tuple and firmware checksum remains required.</td></tr>
+      <tr><td>Real MuTRiG and mixed source matrix</td><td><span class="badge partial">PASS_PARTIAL</span></td><td>The current full matrix is emulator-source evidence. Real and mixed source closure remain open per <code>TEST_PLAN_PHASE5.md</code>.</td></tr>
+      <tr><td>Histogram bin SRAM dump</td><td><span class="badge partial">PASS_PARTIAL</span></td><td>The quick path excludes <code>hist_bin</code> because this firmware/SC aperture currently returns RSP3.</td></tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

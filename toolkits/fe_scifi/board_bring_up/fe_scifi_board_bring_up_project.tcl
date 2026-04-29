@@ -45,10 +45,10 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         "csr.filter" "0x0" \
                         "left_bound.left_bound" "0x0" \
                         "bin_width.bin_width" "0x1" \
-                        "keys_location.update_key_low" "0x24" \
-                        "keys_location.update_key_high" "0x28" \
-                        "keys_location.filter_key_low" "0x24" \
-                        "keys_location.filter_key_high" "0x28" \
+                        "keys_location.update_key_low" "0x1e" \
+                        "keys_location.update_key_high" "0x26" \
+                        "keys_location.filter_key_low" "0x23" \
+                        "keys_location.filter_key_high" "0x26" \
                         "keys_value.filter_key_value" "0x0" \
                         "keys_value.update_key_value" "0x0" \
                         "interval_cfg.interval_clocks" "0x07735940" \
@@ -87,7 +87,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         type_name "histogram_statistics.csr" \
                         hist_type_name "histogram_statistics.hist_bin" \
                         instance_indices [list 0] \
-                        expected_version [dict create major 26 minor 0 patch 0 build 321] \
+                        expected_version [dict create major 26 minor 1 patch 6 build 429] \
                         meta_file [file join $repo_root histogram_statistics histogram_statistics_v2_csr_meta.tcl] \
                         meta_namespace "::board_bring_up::meta::histogram_statistics_v2" \
                         hw_file [file join $repo_root histogram_statistics histogram_statistics_v2_hw.tcl] \
@@ -116,7 +116,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         type_name "histogram_statistics.csr" \
                         hist_type_name "histogram_statistics.hist_bin" \
                         instance_indices [list 1] \
-                        expected_version [dict create major 26 minor 0 patch 0 build 321] \
+                        expected_version [dict create major 26 minor 1 patch 6 build 429] \
                         meta_file [file join $repo_root histogram_statistics histogram_statistics_v2_csr_meta.tcl] \
                         meta_namespace "::board_bring_up::meta::histogram_statistics_v2" \
                         hw_file [file join $repo_root histogram_statistics histogram_statistics_v2_hw.tcl] \

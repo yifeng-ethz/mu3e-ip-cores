@@ -21,11 +21,12 @@ entity feb_system_v3_pipe_data_path_subsystem is
 		avmm_port_debugaccess          : in  std_logic                     := '0';             --                       .debugaccess
 		avmm_rst_reset                 : in  std_logic                     := '0';             --               avmm_rst.reset
 		counter_sclr_reset             : in  std_logic                     := '0';             --           counter_sclr.reset
-		hit_type3_lower_data           : out std_logic_vector(35 downto 0);                    --        hit_type3_lower.data
+		hit_type3_lower_ready          : in  std_logic                     := '0';             --        hit_type3_lower.ready
 		hit_type3_lower_valid          : out std_logic;                                        --                       .valid
-		hit_type3_lower_ready          : in  std_logic                     := '0';             --                       .ready
 		hit_type3_lower_startofpacket  : out std_logic;                                        --                       .startofpacket
 		hit_type3_lower_endofpacket    : out std_logic;                                        --                       .endofpacket
+		hit_type3_lower_empty          : out std_logic_vector(0 downto 0);                     --                       .empty
+		hit_type3_lower_data           : out std_logic_vector(35 downto 0);                    --                       .data
 		hit_type3_upper_ready          : in  std_logic                     := '0';             --        hit_type3_upper.ready
 		hit_type3_upper_valid          : out std_logic;                                        --                       .valid
 		hit_type3_upper_startofpacket  : out std_logic;                                        --                       .startofpacket
@@ -34,7 +35,6 @@ entity feb_system_v3_pipe_data_path_subsystem is
 		hit_type3_upper_data           : out std_logic_vector(35 downto 0);                    --                       .data
 		inject_pulse                   : out std_logic;                                        --                 inject.pulse
 		inject_masked_pulse            : out std_logic;                                        --                       .masked_pulse
-		inject_aux_pulse               : in  std_logic                     := '0';             --             inject_aux.pulse
 		lvds_outclock_clk              : out std_logic;                                        --          lvds_outclock.clk
 		lvds_pll_inclock_clk           : in  std_logic                     := '0';             --       lvds_pll_inclock.clk
 		monitor_clock_125_in_clk       : in  std_logic                     := '0';             --   monitor_clock_125_in.clk
@@ -75,7 +75,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			csi_clk               : in  std_logic := 'X'; -- clk
 			rsi_reset             : in  std_logic := 'X'; -- reset
 			coe_inject_pulse      : in  std_logic := 'X'; -- pulse
-			coe_aux_inject_pulse  : in  std_logic := 'X'; -- pulse
 			coe_out0_pulse        : out std_logic;        -- pulse
 			coe_out0_masked_pulse : out std_logic;        -- masked_pulse
 			coe_out1_pulse        : out std_logic;        -- pulse
@@ -176,6 +175,28 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 		);
 	end component altera_avalon_dc_fifo;
 
+	component hit_type3_stream_merge is
+		port (
+			clk                   : in  std_logic                     := 'X';             -- clk
+			reset                 : in  std_logic                     := 'X';             -- reset
+			asi_in0_data          : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			asi_in0_valid         : in  std_logic                     := 'X';             -- valid
+			asi_in0_ready         : out std_logic;                                        -- ready
+			asi_in0_startofpacket : in  std_logic                     := 'X';             -- startofpacket
+			asi_in0_endofpacket   : in  std_logic                     := 'X';             -- endofpacket
+			asi_in1_data          : in  std_logic_vector(35 downto 0) := (others => 'X'); -- data
+			asi_in1_valid         : in  std_logic                     := 'X';             -- valid
+			asi_in1_ready         : out std_logic;                                        -- ready
+			asi_in1_startofpacket : in  std_logic                     := 'X';             -- startofpacket
+			asi_in1_endofpacket   : in  std_logic                     := 'X';             -- endofpacket
+			aso_out_data          : out std_logic_vector(35 downto 0);                    -- data
+			aso_out_valid         : out std_logic;                                        -- valid
+			aso_out_ready         : in  std_logic                     := 'X';             -- ready
+			aso_out_startofpacket : out std_logic;                                        -- startofpacket
+			aso_out_endofpacket   : out std_logic                                         -- endofpacket
+		);
+	end component hit_type3_stream_merge;
+
 	component histogram_ingress_bridge is
 		generic (
 			DEFAULT_SELECT_POST   : natural := 0;
@@ -248,7 +269,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			SAR_TICK_WIDTH            : natural := 32;
 			SAR_KEY_WIDTH             : natural := 16;
 			N_PORTS                   : natural := 8;
-			FIFO_ADDR_WIDTH           : natural := 10;
+			FIFO_ADDR_WIDTH           : natural := 8;
 			CHANNELS_PER_PORT         : natural := 32;
 			COAL_QUEUE_DEPTH          : natural := 256;
 			AVST_DATA_WIDTH           : natural := 39;
@@ -262,11 +283,11 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			DEBUG                     : natural := 0;
 			VERSION_MAJOR             : natural := 26;
 			VERSION_MINOR             : natural := 1;
-			VERSION_PATCH             : natural := 2;
-			BUILD                     : natural := 425;
+			VERSION_PATCH             : natural := 4;
+			BUILD                     : natural := 429;
 			IP_UID                    : natural := 1212765012;
-			VERSION_DATE              : natural := 20260425;
-			VERSION_GIT               : natural := 1929539473;
+			VERSION_DATE              : natural := 20260429;
+			VERSION_GIT               : natural := 375124078;
 			INSTANCE_ID               : natural := 0
 		);
 		port (
@@ -1030,23 +1051,37 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 
 	component mutrig_lane_source_mux is
 		generic (
-			SELECT_EMULATOR : integer := 0
+			SELECT_EMULATOR : natural                       := 0;
+			IP_UID          : std_logic_vector(31 downto 0) := "01001101010011000101001101001101";
+			VERSION_MAJOR   : natural                       := 26;
+			VERSION_MINOR   : natural                       := 1;
+			VERSION_PATCH   : natural                       := 0;
+			BUILD           : natural                       := 427;
+			VERSION_DATE    : natural                       := 20260427;
+			VERSION_GIT     : std_logic_vector(31 downto 0) := "00000101001010001101101110101101";
+			INSTANCE_ID     : natural                       := 0
 		);
 		port (
-			clk              : in  std_logic                    := 'X';             -- clk
-			rst              : in  std_logic                    := 'X';             -- reset
-			asi_real_data    : in  std_logic_vector(8 downto 0) := (others => 'X'); -- data
-			asi_real_valid   : in  std_logic                    := 'X';             -- valid
-			asi_real_error   : in  std_logic_vector(2 downto 0) := (others => 'X'); -- error
-			asi_real_channel : in  std_logic_vector(3 downto 0) := (others => 'X'); -- channel
-			asi_emu_data     : in  std_logic_vector(8 downto 0) := (others => 'X'); -- data
-			asi_emu_valid    : in  std_logic                    := 'X';             -- valid
-			asi_emu_error    : in  std_logic_vector(2 downto 0) := (others => 'X'); -- error
-			asi_emu_channel  : in  std_logic_vector(3 downto 0) := (others => 'X'); -- channel
-			aso_data         : out std_logic_vector(8 downto 0);                    -- data
-			aso_valid        : out std_logic;                                       -- valid
-			aso_error        : out std_logic_vector(2 downto 0);                    -- error
-			aso_channel      : out std_logic_vector(3 downto 0)                     -- channel
+			clk                 : in  std_logic                     := 'X';             -- clk
+			rst                 : in  std_logic                     := 'X';             -- reset
+			avs_csr_address     : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- address
+			avs_csr_write       : in  std_logic                     := 'X';             -- write
+			avs_csr_read        : in  std_logic                     := 'X';             -- read
+			avs_csr_writedata   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			avs_csr_readdata    : out std_logic_vector(31 downto 0);                    -- readdata
+			avs_csr_waitrequest : out std_logic;                                        -- waitrequest
+			asi_real_data       : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_real_valid      : in  std_logic                     := 'X';             -- valid
+			asi_real_error      : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			asi_real_channel    : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			asi_emu_data        : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_emu_valid       : in  std_logic                     := 'X';             -- valid
+			asi_emu_error       : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			asi_emu_channel     : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			aso_data            : out std_logic_vector(8 downto 0);                     -- data
+			aso_valid           : out std_logic;                                        -- valid
+			aso_error           : out std_logic_vector(2 downto 0);                     -- error
+			aso_channel         : out std_logic_vector(3 downto 0)                      -- channel
 		);
 	end component mutrig_lane_source_mux;
 
@@ -1133,6 +1168,16 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			master_datapath_master_readdatavalid                               : out std_logic;                                        -- readdatavalid
 			master_datapath_master_write                                       : in  std_logic                     := 'X';             -- write
 			master_datapath_master_writedata                                   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			mm_clock_crossing_bridge_m0_address                                : in  std_logic_vector(13 downto 0) := (others => 'X'); -- address
+			mm_clock_crossing_bridge_m0_waitrequest                            : out std_logic;                                        -- waitrequest
+			mm_clock_crossing_bridge_m0_burstcount                             : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- burstcount
+			mm_clock_crossing_bridge_m0_byteenable                             : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
+			mm_clock_crossing_bridge_m0_read                                   : in  std_logic                     := 'X';             -- read
+			mm_clock_crossing_bridge_m0_readdata                               : out std_logic_vector(31 downto 0);                    -- readdata
+			mm_clock_crossing_bridge_m0_readdatavalid                          : out std_logic;                                        -- readdatavalid
+			mm_clock_crossing_bridge_m0_write                                  : in  std_logic                     := 'X';             -- write
+			mm_clock_crossing_bridge_m0_writedata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			mm_clock_crossing_bridge_m0_debugaccess                            : in  std_logic                     := 'X';             -- debugaccess
 			mm_pipeline_lvds_csr_emu_dbg_m0_address                            : in  std_logic_vector(9 downto 0)  := (others => 'X'); -- address
 			mm_pipeline_lvds_csr_emu_dbg_m0_waitrequest                        : out std_logic;                                        -- waitrequest
 			mm_pipeline_lvds_csr_emu_dbg_m0_burstcount                         : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
@@ -1143,26 +1188,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			mm_pipeline_lvds_csr_emu_dbg_m0_write                              : in  std_logic                     := 'X';             -- write
 			mm_pipeline_lvds_csr_emu_dbg_m0_writedata                          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
 			mm_pipeline_lvds_csr_emu_dbg_m0_debugaccess                        : in  std_logic                     := 'X';             -- debugaccess
-			mm_pipeline_lvds_csr_hist_m0_address                               : in  std_logic_vector(9 downto 0)  := (others => 'X'); -- address
-			mm_pipeline_lvds_csr_hist_m0_waitrequest                           : out std_logic;                                        -- waitrequest
-			mm_pipeline_lvds_csr_hist_m0_burstcount                            : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
-			mm_pipeline_lvds_csr_hist_m0_byteenable                            : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
-			mm_pipeline_lvds_csr_hist_m0_read                                  : in  std_logic                     := 'X';             -- read
-			mm_pipeline_lvds_csr_hist_m0_readdata                              : out std_logic_vector(31 downto 0);                    -- readdata
-			mm_pipeline_lvds_csr_hist_m0_readdatavalid                         : out std_logic;                                        -- readdatavalid
-			mm_pipeline_lvds_csr_hist_m0_write                                 : in  std_logic                     := 'X';             -- write
-			mm_pipeline_lvds_csr_hist_m0_writedata                             : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			mm_pipeline_lvds_csr_hist_m0_debugaccess                           : in  std_logic                     := 'X';             -- debugaccess
-			mm_pipeline_lvds_csr_hitstack_frame_m0_address                     : in  std_logic_vector(4 downto 0)  := (others => 'X'); -- address
-			mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest                 : out std_logic;                                        -- waitrequest
-			mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount                  : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
-			mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable                  : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
-			mm_pipeline_lvds_csr_hitstack_frame_m0_read                        : in  std_logic                     := 'X';             -- read
-			mm_pipeline_lvds_csr_hitstack_frame_m0_readdata                    : out std_logic_vector(31 downto 0);                    -- readdata
-			mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid               : out std_logic;                                        -- readdatavalid
-			mm_pipeline_lvds_csr_hitstack_frame_m0_write                       : in  std_logic                     := 'X';             -- write
-			mm_pipeline_lvds_csr_hitstack_frame_m0_writedata                   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess                 : in  std_logic                     := 'X';             -- debugaccess
 			mm_pipeline_lvds_csr_hitstack_ring_m0_address                      : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- address
 			mm_pipeline_lvds_csr_hitstack_ring_m0_waitrequest                  : out std_logic;                                        -- waitrequest
 			mm_pipeline_lvds_csr_hitstack_ring_m0_burstcount                   : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
@@ -1183,16 +1208,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			mm_pipeline_lvds_csr_low_m0_write                                  : in  std_logic                     := 'X';             -- write
 			mm_pipeline_lvds_csr_low_m0_writedata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
 			mm_pipeline_lvds_csr_low_m0_debugaccess                            : in  std_logic                     := 'X';             -- debugaccess
-			mm_pipeline_lvds_csr_mts1_m0_address                               : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- address
-			mm_pipeline_lvds_csr_mts1_m0_waitrequest                           : out std_logic;                                        -- waitrequest
-			mm_pipeline_lvds_csr_mts1_m0_burstcount                            : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
-			mm_pipeline_lvds_csr_mts1_m0_byteenable                            : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
-			mm_pipeline_lvds_csr_mts1_m0_read                                  : in  std_logic                     := 'X';             -- read
-			mm_pipeline_lvds_csr_mts1_m0_readdata                              : out std_logic_vector(31 downto 0);                    -- readdata
-			mm_pipeline_lvds_csr_mts1_m0_readdatavalid                         : out std_logic;                                        -- readdatavalid
-			mm_pipeline_lvds_csr_mts1_m0_write                                 : in  std_logic                     := 'X';             -- write
-			mm_pipeline_lvds_csr_mts1_m0_writedata                             : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			mm_pipeline_lvds_csr_mts1_m0_debugaccess                           : in  std_logic                     := 'X';             -- debugaccess
 			mm_pipeline_lvds_csr_mutrig3_m0_address                            : in  std_logic_vector(9 downto 0)  := (others => 'X'); -- address
 			mm_pipeline_lvds_csr_mutrig3_m0_waitrequest                        : out std_logic;                                        -- waitrequest
 			mm_pipeline_lvds_csr_mutrig3_m0_burstcount                         : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
@@ -1297,34 +1312,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			emulator_mutrig_7_csr_readdata                                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
 			emulator_mutrig_7_csr_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
 			emulator_mutrig_7_csr_waitrequest                                  : in  std_logic                     := 'X';             -- waitrequest
-			histogram_ingress_bridge_0_csr_address                             : out std_logic_vector(1 downto 0);                     -- address
-			histogram_ingress_bridge_0_csr_write                               : out std_logic;                                        -- write
-			histogram_ingress_bridge_0_csr_read                                : out std_logic;                                        -- read
-			histogram_ingress_bridge_0_csr_readdata                            : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			histogram_ingress_bridge_0_csr_writedata                           : out std_logic_vector(31 downto 0);                    -- writedata
-			histogram_ingress_bridge_0_csr_waitrequest                         : in  std_logic                     := 'X';             -- waitrequest
-			histogram_statistics_0_csr_address                                 : out std_logic_vector(4 downto 0);                     -- address
-			histogram_statistics_0_csr_write                                   : out std_logic;                                        -- write
-			histogram_statistics_0_csr_read                                    : out std_logic;                                        -- read
-			histogram_statistics_0_csr_readdata                                : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			histogram_statistics_0_csr_writedata                               : out std_logic_vector(31 downto 0);                    -- writedata
-			histogram_statistics_0_csr_waitrequest                             : in  std_logic                     := 'X';             -- waitrequest
-			histogram_statistics_0_hist_bin_address                            : out std_logic_vector(7 downto 0);                     -- address
-			histogram_statistics_0_hist_bin_write                              : out std_logic;                                        -- write
-			histogram_statistics_0_hist_bin_read                               : out std_logic;                                        -- read
-			histogram_statistics_0_hist_bin_readdata                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			histogram_statistics_0_hist_bin_writedata                          : out std_logic_vector(31 downto 0);                    -- writedata
-			histogram_statistics_0_hist_bin_burstcount                         : out std_logic_vector(8 downto 0);                     -- burstcount
-			histogram_statistics_0_hist_bin_readdatavalid                      : in  std_logic                     := 'X';             -- readdatavalid
-			histogram_statistics_0_hist_bin_waitrequest                        : in  std_logic                     := 'X';             -- waitrequest
-			histogram_statistics_0_hist_bin_response                           : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
-			histogram_statistics_0_hist_bin_writeresponsevalid                 : in  std_logic                     := 'X';             -- writeresponsevalid
-			hit_stack_subsystem_0_feb_frame_assembly_csr_address               : out std_logic_vector(3 downto 0);                     -- address
-			hit_stack_subsystem_0_feb_frame_assembly_csr_write                 : out std_logic;                                        -- write
-			hit_stack_subsystem_0_feb_frame_assembly_csr_read                  : out std_logic;                                        -- read
-			hit_stack_subsystem_0_feb_frame_assembly_csr_readdata              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			hit_stack_subsystem_0_feb_frame_assembly_csr_writedata             : out std_logic_vector(31 downto 0);                    -- writedata
-			hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest           : in  std_logic                     := 'X';             -- waitrequest
 			hit_stack_subsystem_0_ring_buffer_cam_0_csr_address                : out std_logic_vector(4 downto 0);                     -- address
 			hit_stack_subsystem_0_ring_buffer_cam_0_csr_write                  : out std_logic;                                        -- write
 			hit_stack_subsystem_0_ring_buffer_cam_0_csr_read                   : out std_logic;                                        -- read
@@ -1349,12 +1336,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata               : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
 			hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata              : out std_logic_vector(31 downto 0);                    -- writedata
 			hit_stack_subsystem_0_ring_buffer_cam_3_csr_waitrequest            : in  std_logic                     := 'X';             -- waitrequest
-			hit_stack_subsystem_1_feb_frame_assembly_csr_address               : out std_logic_vector(3 downto 0);                     -- address
-			hit_stack_subsystem_1_feb_frame_assembly_csr_write                 : out std_logic;                                        -- write
-			hit_stack_subsystem_1_feb_frame_assembly_csr_read                  : out std_logic;                                        -- read
-			hit_stack_subsystem_1_feb_frame_assembly_csr_readdata              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			hit_stack_subsystem_1_feb_frame_assembly_csr_writedata             : out std_logic_vector(31 downto 0);                    -- writedata
-			hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest           : in  std_logic                     := 'X';             -- waitrequest
 			hit_stack_subsystem_1_ring_buffer_cam_0_csr_address                : out std_logic_vector(4 downto 0);                     -- address
 			hit_stack_subsystem_1_ring_buffer_cam_0_csr_write                  : out std_logic;                                        -- write
 			hit_stack_subsystem_1_ring_buffer_cam_0_csr_read                   : out std_logic;                                        -- read
@@ -1395,18 +1376,122 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			mm_pipeline_jtagmaster2rstctrl_s0_readdatavalid                    : in  std_logic                     := 'X';             -- readdatavalid
 			mm_pipeline_jtagmaster2rstctrl_s0_waitrequest                      : in  std_logic                     := 'X';             -- waitrequest
 			mm_pipeline_jtagmaster2rstctrl_s0_debugaccess                      : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_emu_dbg_s0_address                            : out std_logic_vector(9 downto 0);                     -- address
+			mm_pipeline_lvds_csr_emu_dbg_s0_write                              : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_emu_dbg_s0_read                               : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_emu_dbg_s0_readdata                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_emu_dbg_s0_writedata                          : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_emu_dbg_s0_burstcount                         : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_emu_dbg_s0_byteenable                         : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid                      : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest                        : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess                        : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_hist_s0_address                               : out std_logic_vector(9 downto 0);                     -- address
+			mm_pipeline_lvds_csr_hist_s0_write                                 : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_hist_s0_read                                  : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_hist_s0_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_hist_s0_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_hist_s0_burstcount                            : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_hist_s0_byteenable                            : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_hist_s0_readdatavalid                         : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_hist_s0_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_hist_s0_debugaccess                           : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_hitstack_frame_s0_address                     : out std_logic_vector(4 downto 0);                     -- address
+			mm_pipeline_lvds_csr_hitstack_frame_s0_write                       : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_hitstack_frame_s0_read                        : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_hitstack_frame_s0_readdata                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_hitstack_frame_s0_writedata                   : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount                  : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable                  : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid               : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest                 : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess                 : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_hitstack_ring_s0_address                      : out std_logic_vector(8 downto 0);                     -- address
+			mm_pipeline_lvds_csr_hitstack_ring_s0_write                        : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_hitstack_ring_s0_read                         : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_hitstack_ring_s0_readdata                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_hitstack_ring_s0_writedata                    : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount                   : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable                   : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid                : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest                  : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess                  : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_low_s0_address                                : out std_logic_vector(10 downto 0);                    -- address
+			mm_pipeline_lvds_csr_low_s0_write                                  : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_low_s0_read                                   : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_low_s0_readdata                               : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_low_s0_writedata                              : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_low_s0_burstcount                             : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_low_s0_byteenable                             : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_low_s0_readdatavalid                          : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_low_s0_waitrequest                            : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_low_s0_debugaccess                            : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_mts1_s0_address                               : out std_logic_vector(2 downto 0);                     -- address
+			mm_pipeline_lvds_csr_mts1_s0_write                                 : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_mts1_s0_read                                  : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_mts1_s0_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_mts1_s0_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_mts1_s0_burstcount                            : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_mts1_s0_byteenable                            : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_mts1_s0_readdatavalid                         : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_mts1_s0_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_mts1_s0_debugaccess                           : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_mutrig3_s0_address                            : out std_logic_vector(9 downto 0);                     -- address
+			mm_pipeline_lvds_csr_mutrig3_s0_write                              : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_mutrig3_s0_read                               : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_mutrig3_s0_readdata                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_mutrig3_s0_writedata                          : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_mutrig3_s0_burstcount                         : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_mutrig3_s0_byteenable                         : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid                      : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_mutrig3_s0_waitrequest                        : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_mutrig3_s0_debugaccess                        : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_address                       : out std_logic_vector(9 downto 0);                     -- address
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_write                         : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_read                          : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount                    : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable                    : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid                 : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess                   : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_mutrig5_s0_address                            : out std_logic_vector(9 downto 0);                     -- address
+			mm_pipeline_lvds_csr_mutrig5_s0_write                              : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_mutrig5_s0_read                               : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_mutrig5_s0_readdata                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_mutrig5_s0_writedata                          : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_mutrig5_s0_burstcount                         : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_mutrig5_s0_byteenable                         : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid                      : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_mutrig5_s0_waitrequest                        : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_mutrig5_s0_debugaccess                        : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_mutrig6_s0_address                            : out std_logic_vector(9 downto 0);                     -- address
+			mm_pipeline_lvds_csr_mutrig6_s0_write                              : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_mutrig6_s0_read                               : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_mutrig6_s0_readdata                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_mutrig6_s0_writedata                          : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_mutrig6_s0_burstcount                         : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_mutrig6_s0_byteenable                         : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid                      : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_mutrig6_s0_waitrequest                        : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_mutrig6_s0_debugaccess                        : out std_logic;                                        -- debugaccess
+			mm_pipeline_lvds_csr_mutrig7_s0_address                            : out std_logic_vector(9 downto 0);                     -- address
+			mm_pipeline_lvds_csr_mutrig7_s0_write                              : out std_logic;                                        -- write
+			mm_pipeline_lvds_csr_mutrig7_s0_read                               : out std_logic;                                        -- read
+			mm_pipeline_lvds_csr_mutrig7_s0_readdata                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_pipeline_lvds_csr_mutrig7_s0_writedata                          : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_pipeline_lvds_csr_mutrig7_s0_burstcount                         : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_pipeline_lvds_csr_mutrig7_s0_byteenable                         : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid                      : in  std_logic                     := 'X';             -- readdatavalid
+			mm_pipeline_lvds_csr_mutrig7_s0_waitrequest                        : in  std_logic                     := 'X';             -- waitrequest
+			mm_pipeline_lvds_csr_mutrig7_s0_debugaccess                        : out std_logic;                                        -- debugaccess
 			mts_preprocessor_0_csr_address                                     : out std_logic_vector(2 downto 0);                     -- address
 			mts_preprocessor_0_csr_write                                       : out std_logic;                                        -- write
 			mts_preprocessor_0_csr_read                                        : out std_logic;                                        -- read
 			mts_preprocessor_0_csr_readdata                                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
 			mts_preprocessor_0_csr_writedata                                   : out std_logic_vector(31 downto 0);                    -- writedata
 			mts_preprocessor_0_csr_waitrequest                                 : in  std_logic                     := 'X';             -- waitrequest
-			mts_preprocessor_1_csr_address                                     : out std_logic_vector(2 downto 0);                     -- address
-			mts_preprocessor_1_csr_write                                       : out std_logic;                                        -- write
-			mts_preprocessor_1_csr_read                                        : out std_logic;                                        -- read
-			mts_preprocessor_1_csr_readdata                                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mts_preprocessor_1_csr_writedata                                   : out std_logic_vector(31 downto 0);                    -- writedata
-			mts_preprocessor_1_csr_waitrequest                                 : in  std_logic                     := 'X';             -- waitrequest
 			mutrig_datapath_subsystem_0_backpressure_fifo_csr_address          : out std_logic_vector(1 downto 0);                     -- address
 			mutrig_datapath_subsystem_0_backpressure_fifo_csr_write            : out std_logic;                                        -- write
 			mutrig_datapath_subsystem_0_backpressure_fifo_csr_read             : out std_logic;                                        -- read
@@ -1500,11 +1585,154 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			mutrig_injector_0_csr_read                                         : out std_logic;                                        -- read
 			mutrig_injector_0_csr_readdata                                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
 			mutrig_injector_0_csr_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
-			mutrig_injector_0_csr_waitrequest                                  : in  std_logic                     := 'X'              -- waitrequest
+			mutrig_injector_0_csr_waitrequest                                  : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_0_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_0_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_0_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_0_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_0_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_0_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_1_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_1_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_1_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_1_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_1_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_1_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_2_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_2_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_2_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_2_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_2_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_2_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_3_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_3_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_3_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_3_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_3_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_3_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_4_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_4_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_4_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_4_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_4_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_4_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_5_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_5_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_5_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_5_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_5_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_5_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_6_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_6_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_6_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_6_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_6_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_6_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_7_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_7_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_7_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_7_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_7_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_7_csr_waitrequest                           : in  std_logic                     := 'X'              -- waitrequest
 		);
 	end component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_0;
 
 	component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_1 is
+		port (
+			lvds_rx_28nm_0_outclock_clk                                  : in  std_logic                     := 'X';             -- clk
+			histogram_ingress_bridge_0_reset_reset_bridge_in_reset_reset : in  std_logic                     := 'X';             -- reset
+			mm_pipeline_lvds_csr_hist_reset_reset_bridge_in_reset_reset  : in  std_logic                     := 'X';             -- reset
+			mm_pipeline_lvds_csr_hist_m0_address                         : in  std_logic_vector(9 downto 0)  := (others => 'X'); -- address
+			mm_pipeline_lvds_csr_hist_m0_waitrequest                     : out std_logic;                                        -- waitrequest
+			mm_pipeline_lvds_csr_hist_m0_burstcount                      : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
+			mm_pipeline_lvds_csr_hist_m0_byteenable                      : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
+			mm_pipeline_lvds_csr_hist_m0_read                            : in  std_logic                     := 'X';             -- read
+			mm_pipeline_lvds_csr_hist_m0_readdata                        : out std_logic_vector(31 downto 0);                    -- readdata
+			mm_pipeline_lvds_csr_hist_m0_readdatavalid                   : out std_logic;                                        -- readdatavalid
+			mm_pipeline_lvds_csr_hist_m0_write                           : in  std_logic                     := 'X';             -- write
+			mm_pipeline_lvds_csr_hist_m0_writedata                       : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			mm_pipeline_lvds_csr_hist_m0_debugaccess                     : in  std_logic                     := 'X';             -- debugaccess
+			histogram_ingress_bridge_0_csr_address                       : out std_logic_vector(1 downto 0);                     -- address
+			histogram_ingress_bridge_0_csr_write                         : out std_logic;                                        -- write
+			histogram_ingress_bridge_0_csr_read                          : out std_logic;                                        -- read
+			histogram_ingress_bridge_0_csr_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			histogram_ingress_bridge_0_csr_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
+			histogram_ingress_bridge_0_csr_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
+			histogram_statistics_0_csr_address                           : out std_logic_vector(4 downto 0);                     -- address
+			histogram_statistics_0_csr_write                             : out std_logic;                                        -- write
+			histogram_statistics_0_csr_read                              : out std_logic;                                        -- read
+			histogram_statistics_0_csr_readdata                          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			histogram_statistics_0_csr_writedata                         : out std_logic_vector(31 downto 0);                    -- writedata
+			histogram_statistics_0_csr_waitrequest                       : in  std_logic                     := 'X';             -- waitrequest
+			histogram_statistics_0_hist_bin_address                      : out std_logic_vector(7 downto 0);                     -- address
+			histogram_statistics_0_hist_bin_write                        : out std_logic;                                        -- write
+			histogram_statistics_0_hist_bin_read                         : out std_logic;                                        -- read
+			histogram_statistics_0_hist_bin_readdata                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			histogram_statistics_0_hist_bin_writedata                    : out std_logic_vector(31 downto 0);                    -- writedata
+			histogram_statistics_0_hist_bin_burstcount                   : out std_logic_vector(8 downto 0);                     -- burstcount
+			histogram_statistics_0_hist_bin_readdatavalid                : in  std_logic                     := 'X';             -- readdatavalid
+			histogram_statistics_0_hist_bin_waitrequest                  : in  std_logic                     := 'X';             -- waitrequest
+			histogram_statistics_0_hist_bin_response                     : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
+			histogram_statistics_0_hist_bin_writeresponsevalid           : in  std_logic                     := 'X'              -- writeresponsevalid
+		);
+	end component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_1;
+
+	component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_2 is
+		port (
+			lvds_rx_28nm_0_outclock_clk                                    : in  std_logic                     := 'X';             -- clk
+			mm_pipeline_lvds_csr_mts1_reset_reset_bridge_in_reset_reset    : in  std_logic                     := 'X';             -- reset
+			mts_preprocessor_1_reset_interface_reset_bridge_in_reset_reset : in  std_logic                     := 'X';             -- reset
+			mm_pipeline_lvds_csr_mts1_m0_address                           : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- address
+			mm_pipeline_lvds_csr_mts1_m0_waitrequest                       : out std_logic;                                        -- waitrequest
+			mm_pipeline_lvds_csr_mts1_m0_burstcount                        : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
+			mm_pipeline_lvds_csr_mts1_m0_byteenable                        : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
+			mm_pipeline_lvds_csr_mts1_m0_read                              : in  std_logic                     := 'X';             -- read
+			mm_pipeline_lvds_csr_mts1_m0_readdata                          : out std_logic_vector(31 downto 0);                    -- readdata
+			mm_pipeline_lvds_csr_mts1_m0_readdatavalid                     : out std_logic;                                        -- readdatavalid
+			mm_pipeline_lvds_csr_mts1_m0_write                             : in  std_logic                     := 'X';             -- write
+			mm_pipeline_lvds_csr_mts1_m0_writedata                         : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			mm_pipeline_lvds_csr_mts1_m0_debugaccess                       : in  std_logic                     := 'X';             -- debugaccess
+			mts_preprocessor_1_csr_address                                 : out std_logic_vector(2 downto 0);                     -- address
+			mts_preprocessor_1_csr_write                                   : out std_logic;                                        -- write
+			mts_preprocessor_1_csr_read                                    : out std_logic;                                        -- read
+			mts_preprocessor_1_csr_readdata                                : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mts_preprocessor_1_csr_writedata                               : out std_logic_vector(31 downto 0);                    -- writedata
+			mts_preprocessor_1_csr_waitrequest                             : in  std_logic                     := 'X'              -- waitrequest
+		);
+	end component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_2;
+
+	component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_3 is
+		port (
+			lvds_rx_28nm_0_outclock_clk                                                               : in  std_logic                     := 'X';             -- clk
+			hit_stack_subsystem_0_datapath_reset_reset_bridge_in_reset_reset                          : in  std_logic                     := 'X';             -- reset
+			hit_stack_subsystem_0_feb_frame_assembly_csr_translator_reset_reset_bridge_in_reset_reset : in  std_logic                     := 'X';             -- reset
+			mm_pipeline_lvds_csr_hitstack_frame_reset_reset_bridge_in_reset_reset                     : in  std_logic                     := 'X';             -- reset
+			mm_pipeline_lvds_csr_hitstack_frame_m0_address                                            : in  std_logic_vector(4 downto 0)  := (others => 'X'); -- address
+			mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest                                        : out std_logic;                                        -- waitrequest
+			mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount                                         : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
+			mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable                                         : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
+			mm_pipeline_lvds_csr_hitstack_frame_m0_read                                               : in  std_logic                     := 'X';             -- read
+			mm_pipeline_lvds_csr_hitstack_frame_m0_readdata                                           : out std_logic_vector(31 downto 0);                    -- readdata
+			mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid                                      : out std_logic;                                        -- readdatavalid
+			mm_pipeline_lvds_csr_hitstack_frame_m0_write                                              : in  std_logic                     := 'X';             -- write
+			mm_pipeline_lvds_csr_hitstack_frame_m0_writedata                                          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess                                        : in  std_logic                     := 'X';             -- debugaccess
+			hit_stack_subsystem_0_feb_frame_assembly_csr_address                                      : out std_logic_vector(3 downto 0);                     -- address
+			hit_stack_subsystem_0_feb_frame_assembly_csr_write                                        : out std_logic;                                        -- write
+			hit_stack_subsystem_0_feb_frame_assembly_csr_read                                         : out std_logic;                                        -- read
+			hit_stack_subsystem_0_feb_frame_assembly_csr_readdata                                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			hit_stack_subsystem_0_feb_frame_assembly_csr_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
+			hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest                                  : in  std_logic                     := 'X';             -- waitrequest
+			hit_stack_subsystem_1_feb_frame_assembly_csr_address                                      : out std_logic_vector(3 downto 0);                     -- address
+			hit_stack_subsystem_1_feb_frame_assembly_csr_write                                        : out std_logic;                                        -- write
+			hit_stack_subsystem_1_feb_frame_assembly_csr_read                                         : out std_logic;                                        -- read
+			hit_stack_subsystem_1_feb_frame_assembly_csr_readdata                                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			hit_stack_subsystem_1_feb_frame_assembly_csr_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
+			hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest                                  : in  std_logic                     := 'X'              -- waitrequest
+		);
+	end component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_3;
+
+	component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_4 is
 		port (
 			monitor_clock_125_clk_clk                                                            : in  std_logic                     := 'X';             -- clk
 			mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset                     : in  std_logic                     := 'X';             -- reset
@@ -1527,134 +1755,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			mutrig_reset_controller_0_reconfig_mgmt_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
 			mutrig_reset_controller_0_reconfig_mgmt_waitrequest                                  : in  std_logic                     := 'X'              -- waitrequest
 		);
-	end component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_1;
-
-	component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_2 is
-		port (
-			lvds_rx_28nm_0_outclock_clk                                   : in  std_logic                     := 'X';             -- clk
-			mm_clock_crossing_bridge_m0_reset_reset_bridge_in_reset_reset : in  std_logic                     := 'X';             -- reset
-			mm_clock_crossing_bridge_m0_address                           : in  std_logic_vector(13 downto 0) := (others => 'X'); -- address
-			mm_clock_crossing_bridge_m0_waitrequest                       : out std_logic;                                        -- waitrequest
-			mm_clock_crossing_bridge_m0_burstcount                        : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- burstcount
-			mm_clock_crossing_bridge_m0_byteenable                        : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
-			mm_clock_crossing_bridge_m0_read                              : in  std_logic                     := 'X';             -- read
-			mm_clock_crossing_bridge_m0_readdata                          : out std_logic_vector(31 downto 0);                    -- readdata
-			mm_clock_crossing_bridge_m0_readdatavalid                     : out std_logic;                                        -- readdatavalid
-			mm_clock_crossing_bridge_m0_write                             : in  std_logic                     := 'X';             -- write
-			mm_clock_crossing_bridge_m0_writedata                         : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			mm_clock_crossing_bridge_m0_debugaccess                       : in  std_logic                     := 'X';             -- debugaccess
-			mm_pipeline_lvds_csr_emu_dbg_s0_address                       : out std_logic_vector(9 downto 0);                     -- address
-			mm_pipeline_lvds_csr_emu_dbg_s0_write                         : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_emu_dbg_s0_read                          : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_emu_dbg_s0_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_emu_dbg_s0_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_emu_dbg_s0_burstcount                    : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_emu_dbg_s0_byteenable                    : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid                 : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess                   : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_hist_s0_address                          : out std_logic_vector(9 downto 0);                     -- address
-			mm_pipeline_lvds_csr_hist_s0_write                            : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_hist_s0_read                             : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_hist_s0_readdata                         : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_hist_s0_writedata                        : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_hist_s0_burstcount                       : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_hist_s0_byteenable                       : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_hist_s0_readdatavalid                    : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_hist_s0_waitrequest                      : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_hist_s0_debugaccess                      : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_hitstack_frame_s0_address                : out std_logic_vector(4 downto 0);                     -- address
-			mm_pipeline_lvds_csr_hitstack_frame_s0_write                  : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_hitstack_frame_s0_read                   : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_hitstack_frame_s0_readdata               : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_hitstack_frame_s0_writedata              : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount             : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable             : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid          : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest            : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess            : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_hitstack_ring_s0_address                 : out std_logic_vector(8 downto 0);                     -- address
-			mm_pipeline_lvds_csr_hitstack_ring_s0_write                   : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_hitstack_ring_s0_read                    : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_hitstack_ring_s0_readdata                : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_hitstack_ring_s0_writedata               : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount              : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable              : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid           : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest             : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess             : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_low_s0_address                           : out std_logic_vector(10 downto 0);                    -- address
-			mm_pipeline_lvds_csr_low_s0_write                             : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_low_s0_read                              : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_low_s0_readdata                          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_low_s0_writedata                         : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_low_s0_burstcount                        : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_low_s0_byteenable                        : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_low_s0_readdatavalid                     : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_low_s0_waitrequest                       : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_low_s0_debugaccess                       : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_mts1_s0_address                          : out std_logic_vector(2 downto 0);                     -- address
-			mm_pipeline_lvds_csr_mts1_s0_write                            : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_mts1_s0_read                             : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_mts1_s0_readdata                         : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_mts1_s0_writedata                        : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_mts1_s0_burstcount                       : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_mts1_s0_byteenable                       : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_mts1_s0_readdatavalid                    : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_mts1_s0_waitrequest                      : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_mts1_s0_debugaccess                      : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_mutrig3_s0_address                       : out std_logic_vector(9 downto 0);                     -- address
-			mm_pipeline_lvds_csr_mutrig3_s0_write                         : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_mutrig3_s0_read                          : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_mutrig3_s0_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_mutrig3_s0_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_mutrig3_s0_burstcount                    : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_mutrig3_s0_byteenable                    : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid                 : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_mutrig3_s0_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_mutrig3_s0_debugaccess                   : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_address                  : out std_logic_vector(9 downto 0);                     -- address
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_write                    : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_read                     : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata                 : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata                : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount               : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable               : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid            : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest              : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess              : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_mutrig5_s0_address                       : out std_logic_vector(9 downto 0);                     -- address
-			mm_pipeline_lvds_csr_mutrig5_s0_write                         : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_mutrig5_s0_read                          : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_mutrig5_s0_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_mutrig5_s0_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_mutrig5_s0_burstcount                    : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_mutrig5_s0_byteenable                    : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid                 : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_mutrig5_s0_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_mutrig5_s0_debugaccess                   : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_mutrig6_s0_address                       : out std_logic_vector(9 downto 0);                     -- address
-			mm_pipeline_lvds_csr_mutrig6_s0_write                         : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_mutrig6_s0_read                          : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_mutrig6_s0_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_mutrig6_s0_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_mutrig6_s0_burstcount                    : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_mutrig6_s0_byteenable                    : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid                 : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_mutrig6_s0_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_mutrig6_s0_debugaccess                   : out std_logic;                                        -- debugaccess
-			mm_pipeline_lvds_csr_mutrig7_s0_address                       : out std_logic_vector(9 downto 0);                     -- address
-			mm_pipeline_lvds_csr_mutrig7_s0_write                         : out std_logic;                                        -- write
-			mm_pipeline_lvds_csr_mutrig7_s0_read                          : out std_logic;                                        -- read
-			mm_pipeline_lvds_csr_mutrig7_s0_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_pipeline_lvds_csr_mutrig7_s0_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_pipeline_lvds_csr_mutrig7_s0_burstcount                    : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_pipeline_lvds_csr_mutrig7_s0_byteenable                    : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid                 : in  std_logic                     := 'X';             -- readdatavalid
-			mm_pipeline_lvds_csr_mutrig7_s0_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
-			mm_pipeline_lvds_csr_mutrig7_s0_debugaccess                   : out std_logic                                         -- debugaccess
-		);
-	end component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_2;
+	end component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_4;
 
 	component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter is
 		generic (
@@ -1724,7 +1825,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 		);
 	end component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_008;
 
-	component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009 is
+	component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010 is
 		generic (
 			inBitsPerSymbol : integer := 8;
 			inUsePackets    : integer := 0;
@@ -1752,7 +1853,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			out_0_valid    : out std_logic;                                       -- valid
 			out_0_ready    : in  std_logic                    := 'X'              -- ready
 		);
-	end component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009;
+	end component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010;
 
 	component feb_system_v3_pipe_avalon_st_adapter is
 		generic (
@@ -2297,7 +2398,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 		);
 	end component feb_system_v3_pipe_data_path_subsystem_emulator_ctrl_splitter;
 
-	component feb_system_v3_pipe_data_path_subsystem_hist_post_splitter_0 is
+	component feb_system_v3_pipe_data_path_subsystem_hist_post_lower_splitter_0 is
 		generic (
 			NUMBER_OF_OUTPUTS : integer := 2;
 			QUALIFY_VALID_OUT : integer := 1;
@@ -2448,7 +2549,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			out9_startofpacket  : out std_logic;
 			out9_valid          : out std_logic
 		);
-	end component feb_system_v3_pipe_data_path_subsystem_hist_post_splitter_0;
+	end component feb_system_v3_pipe_data_path_subsystem_hist_post_lower_splitter_0;
 
 	component feb_system_v3_pipe_data_path_subsystem_run_control_splitter is
 		generic (
@@ -2603,8 +2704,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 		);
 	end component feb_system_v3_pipe_data_path_subsystem_run_control_splitter;
 
-	signal mts_preprocessor_0_debug_burst_valid                                          : std_logic;                     -- mts_preprocessor_0:aso_debug_burst_valid -> histogram_statistics_0:asi_debug_6_valid
-	signal mts_preprocessor_0_debug_burst_data                                           : std_logic_vector(15 downto 0); -- mts_preprocessor_0:aso_debug_burst_data -> histogram_statistics_0:asi_debug_6_data
 	signal mutrig_datapath_subsystem_0_headerinfo_valid                                  : std_logic;                     -- mutrig_datapath_subsystem_0:headerinfo_valid -> mutrig_injector_0:asi_headerinfo0_valid
 	signal mutrig_datapath_subsystem_0_headerinfo_data                                   : std_logic_vector(41 downto 0); -- mutrig_datapath_subsystem_0:headerinfo_data -> mutrig_injector_0:asi_headerinfo0_data
 	signal mutrig_datapath_subsystem_0_headerinfo_channel                                : std_logic_vector(3 downto 0);  -- mutrig_datapath_subsystem_0:headerinfo_channel -> mutrig_injector_0:asi_headerinfo0_channel
@@ -2721,6 +2820,11 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mux_mutrig2processor_0_out_startofpacket                                      : std_logic;                     -- mux_mutrig2processor_0:out_startofpacket -> mts_preprocessor_1:asi_hit_type0_startofpacket
 	signal mux_mutrig2processor_0_out_endofpacket                                        : std_logic;                     -- mux_mutrig2processor_0:out_endofpacket -> mts_preprocessor_1:asi_hit_type0_endofpacket
 	signal mux_mutrig2processor_0_out_error                                              : std_logic_vector(2 downto 0);  -- mux_mutrig2processor_0:out_error -> mts_preprocessor_1:asi_hit_type0_error
+	signal hist_post_merge_0_out_valid                                                   : std_logic;                     -- hist_post_merge_0:aso_out_valid -> hist_post_cdc_0:in_valid
+	signal hist_post_merge_0_out_data                                                    : std_logic_vector(35 downto 0); -- hist_post_merge_0:aso_out_data -> hist_post_cdc_0:in_data
+	signal hist_post_merge_0_out_ready                                                   : std_logic;                     -- hist_post_cdc_0:in_ready -> hist_post_merge_0:aso_out_ready
+	signal hist_post_merge_0_out_startofpacket                                           : std_logic;                     -- hist_post_merge_0:aso_out_startofpacket -> hist_post_cdc_0:in_startofpacket
+	signal hist_post_merge_0_out_endofpacket                                             : std_logic;                     -- hist_post_merge_0:aso_out_endofpacket -> hist_post_cdc_0:in_endofpacket
 	signal hist_post_cdc_0_out_valid                                                     : std_logic;                     -- hist_post_cdc_0:out_valid -> histogram_ingress_bridge_0:asi_post_valid
 	signal hist_post_cdc_0_out_data                                                      : std_logic_vector(35 downto 0); -- hist_post_cdc_0:out_data -> histogram_ingress_bridge_0:asi_post_data
 	signal hist_post_cdc_0_out_ready                                                     : std_logic;                     -- histogram_ingress_bridge_0:asi_post_ready -> hist_post_cdc_0:out_ready
@@ -2758,14 +2862,14 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal histogram_ingress_bridge_0_pre_out_endofpacket                                : std_logic;                     -- histogram_ingress_bridge_0:aso_pre_endofpacket -> hit_stack_subsystem_0:hit_type_1_endofpacket
 	signal histogram_ingress_bridge_0_pre_out_error                                      : std_logic;                     -- histogram_ingress_bridge_0:aso_pre_error -> hit_stack_subsystem_0:hit_type_1_error
 	signal histogram_ingress_bridge_0_pre_out_empty                                      : std_logic;                     -- histogram_ingress_bridge_0:aso_pre_empty -> hit_stack_subsystem_0:hit_type_1_empty
-	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_valid -> histogram_statistics_0:asi_debug_2_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_data -> histogram_statistics_0:asi_debug_2_data
-	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_valid -> histogram_statistics_0:asi_debug_3_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_data -> histogram_statistics_0:asi_debug_3_data
-	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_valid -> histogram_statistics_0:asi_debug_4_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_data -> histogram_statistics_0:asi_debug_4_data
-	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_valid -> histogram_statistics_0:asi_debug_5_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_data -> histogram_statistics_0:asi_debug_5_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_valid -> histogram_statistics_0:asi_debug_3_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_data -> histogram_statistics_0:asi_debug_3_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_valid -> histogram_statistics_0:asi_debug_4_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_data -> histogram_statistics_0:asi_debug_4_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_valid -> histogram_statistics_0:asi_debug_5_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_data -> histogram_statistics_0:asi_debug_5_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_valid -> histogram_statistics_0:asi_debug_6_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_data -> histogram_statistics_0:asi_debug_6_data
 	signal mutrig_lane_source_mux_0_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_0:aso_valid -> mutrig_datapath_subsystem_0:decoded_din_valid
 	signal mutrig_lane_source_mux_0_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_0:aso_data -> mutrig_datapath_subsystem_0:decoded_din_data
 	signal mutrig_lane_source_mux_0_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_0:aso_channel -> mutrig_datapath_subsystem_0:decoded_din_channel
@@ -2800,6 +2904,8 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mutrig_lane_source_mux_7_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_7:aso_error -> mutrig_datapath_subsystem_7:decoded_din_error
 	signal mts_preprocessor_0_ts_delta_valid                                             : std_logic;                     -- mts_preprocessor_0:aso_ts_delta_valid -> histogram_statistics_0:asi_debug_1_valid
 	signal mts_preprocessor_0_ts_delta_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_0:aso_ts_delta_data -> histogram_statistics_0:asi_debug_1_data
+	signal mts_preprocessor_1_ts_delta_valid                                             : std_logic;                     -- mts_preprocessor_1:aso_ts_delta_valid -> histogram_statistics_0:asi_debug_2_valid
+	signal mts_preprocessor_1_ts_delta_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_1:aso_ts_delta_data -> histogram_statistics_0:asi_debug_2_data
 	signal emulator_mutrig_0_tx8b1k_valid                                                : std_logic;                     -- emulator_mutrig_0:aso_tx8b1k_valid -> mutrig_lane_source_mux_0:asi_emu_valid
 	signal emulator_mutrig_0_tx8b1k_data                                                 : std_logic_vector(8 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_data -> mutrig_lane_source_mux_0:asi_emu_data
 	signal emulator_mutrig_0_tx8b1k_channel                                              : std_logic_vector(3 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_channel -> mutrig_lane_source_mux_0:asi_emu_channel
@@ -2832,7 +2938,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal emulator_mutrig_7_tx8b1k_data                                                 : std_logic_vector(8 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_data -> mutrig_lane_source_mux_7:asi_emu_data
 	signal emulator_mutrig_7_tx8b1k_channel                                              : std_logic_vector(3 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_channel -> mutrig_lane_source_mux_7:asi_emu_channel
 	signal emulator_mutrig_7_tx8b1k_error                                                : std_logic_vector(2 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_error -> mutrig_lane_source_mux_7:asi_emu_error
-	signal lvds_rx_28nm_0_outclock_clk                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_outclock -> [lvds_outclock_clk, avalon_st_adapter:in_clk_0_clk, avalon_st_adapter_001:in_clk_0_clk, avalon_st_adapter_002:in_clk_0_clk, avalon_st_adapter_003:in_clk_0_clk, avalon_st_adapter_004:in_clk_0_clk, avalon_st_adapter_005:in_clk_0_clk, avalon_st_adapter_006:in_clk_0_clk, avalon_st_adapter_007:in_clk_0_clk, avalon_st_adapter_009:in_clk_0_clk, avalon_st_adapter_011:in_clk_0_clk, avalon_st_adapter_012:in_clk_0_clk, avalon_st_adapter_013:in_clk_0_clk, avalon_st_adapter_014:in_clk_0_clk, avalon_st_adapter_015:in_clk_0_clk, avalon_st_adapter_016:in_clk_0_clk, avalon_st_adapter_017:in_clk_0_clk, avalon_st_adapter_018:in_clk_0_clk, avalon_st_adapter_019:in_clk_0_clk, avalon_st_adapter_020:in_clk_0_clk, avalon_st_adapter_021:in_clk_0_clk, avalon_st_adapter_022:in_clk_0_clk, avalon_st_adapter_023:in_clk_0_clk, avalon_st_adapter_024:in_clk_0_clk, avalon_st_adapter_025:in_clk_0_clk, dbg_mm2runctrl_0:i_clk, emulator_ctrl_splitter:clk, emulator_inject_fanout:csi_clk, emulator_mutrig_0:i_clk, emulator_mutrig_1:i_clk, emulator_mutrig_2:i_clk, emulator_mutrig_3:i_clk, emulator_mutrig_4:i_clk, emulator_mutrig_5:i_clk, emulator_mutrig_6:i_clk, emulator_mutrig_7:i_clk, hist_post_cdc_0:out_clk, histogram_ingress_bridge_0:csi_clock_clk, histogram_statistics_0:i_clk, hit_stack_subsystem_0:datapath_clock_clk, hit_stack_subsystem_1:datapath_clock_clk, lvds_rx_controller_pro_0:csi_data_clk, mm_clock_crossing_bridge:m0_clk, mm_interconnect_0:lvds_rx_28nm_0_outclock_clk, mm_interconnect_2:lvds_rx_28nm_0_outclock_clk, mm_pipeline_lvds_csr_emu_dbg:clk, mm_pipeline_lvds_csr_hist:clk, mm_pipeline_lvds_csr_hitstack_frame:clk, mm_pipeline_lvds_csr_hitstack_ring:clk, mm_pipeline_lvds_csr_low:clk, mm_pipeline_lvds_csr_mts1:clk, mm_pipeline_lvds_csr_mutrig3:clk, mm_pipeline_lvds_csr_mutrig4_mts0:clk, mm_pipeline_lvds_csr_mutrig5:clk, mm_pipeline_lvds_csr_mutrig6:clk, mm_pipeline_lvds_csr_mutrig7:clk, mts_preprocessor_0:i_clk, mts_preprocessor_1:i_clk, mutrig_datapath_subsystem_0:clk_clk, mutrig_datapath_subsystem_1:clk_clk, mutrig_datapath_subsystem_2:clk_clk, mutrig_datapath_subsystem_3:clk_clk, mutrig_datapath_subsystem_4:clk_clk, mutrig_datapath_subsystem_5:clk_clk, mutrig_datapath_subsystem_6:clk_clk, mutrig_datapath_subsystem_7:clk_clk, mutrig_injector_0:i_clk, mutrig_lane_source_mux_0:clk, mutrig_lane_source_mux_1:clk, mutrig_lane_source_mux_2:clk, mutrig_lane_source_mux_3:clk, mutrig_lane_source_mux_4:clk, mutrig_lane_source_mux_5:clk, mutrig_lane_source_mux_6:clk, mutrig_lane_source_mux_7:clk, mutrig_reset_controller_0:i_lvds_dpa_clk, mux_mutrig2processor:clk, mux_mutrig2processor_0:clk, rst_controller:clk, rst_controller_001:clk, rst_controller_003:clk, rst_controller_004:clk, rst_controller_006:clk, rst_controller_009:clk, run_control_splitter:clk]
+	signal lvds_rx_28nm_0_outclock_clk                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_outclock -> [lvds_outclock_clk, avalon_st_adapter:in_clk_0_clk, avalon_st_adapter_001:in_clk_0_clk, avalon_st_adapter_002:in_clk_0_clk, avalon_st_adapter_003:in_clk_0_clk, avalon_st_adapter_004:in_clk_0_clk, avalon_st_adapter_005:in_clk_0_clk, avalon_st_adapter_006:in_clk_0_clk, avalon_st_adapter_007:in_clk_0_clk, avalon_st_adapter_010:in_clk_0_clk, avalon_st_adapter_013:in_clk_0_clk, avalon_st_adapter_014:in_clk_0_clk, avalon_st_adapter_015:in_clk_0_clk, avalon_st_adapter_016:in_clk_0_clk, avalon_st_adapter_017:in_clk_0_clk, avalon_st_adapter_018:in_clk_0_clk, avalon_st_adapter_019:in_clk_0_clk, avalon_st_adapter_020:in_clk_0_clk, avalon_st_adapter_021:in_clk_0_clk, avalon_st_adapter_022:in_clk_0_clk, avalon_st_adapter_023:in_clk_0_clk, avalon_st_adapter_024:in_clk_0_clk, avalon_st_adapter_025:in_clk_0_clk, avalon_st_adapter_026:in_clk_0_clk, avalon_st_adapter_027:in_clk_0_clk, dbg_mm2runctrl_0:i_clk, emulator_ctrl_splitter:clk, emulator_inject_fanout:csi_clk, emulator_mutrig_0:i_clk, emulator_mutrig_1:i_clk, emulator_mutrig_2:i_clk, emulator_mutrig_3:i_clk, emulator_mutrig_4:i_clk, emulator_mutrig_5:i_clk, emulator_mutrig_6:i_clk, emulator_mutrig_7:i_clk, hist_post_cdc_0:out_clk, histogram_ingress_bridge_0:csi_clock_clk, histogram_statistics_0:i_clk, hit_stack_subsystem_0:datapath_clock_clk, hit_stack_subsystem_1:datapath_clock_clk, lvds_rx_controller_pro_0:csi_data_clk, mm_clock_crossing_bridge:m0_clk, mm_interconnect_0:lvds_rx_28nm_0_outclock_clk, mm_interconnect_1:lvds_rx_28nm_0_outclock_clk, mm_interconnect_2:lvds_rx_28nm_0_outclock_clk, mm_interconnect_3:lvds_rx_28nm_0_outclock_clk, mm_pipeline_lvds_csr_emu_dbg:clk, mm_pipeline_lvds_csr_hist:clk, mm_pipeline_lvds_csr_hitstack_frame:clk, mm_pipeline_lvds_csr_hitstack_ring:clk, mm_pipeline_lvds_csr_low:clk, mm_pipeline_lvds_csr_mts1:clk, mm_pipeline_lvds_csr_mutrig3:clk, mm_pipeline_lvds_csr_mutrig4_mts0:clk, mm_pipeline_lvds_csr_mutrig5:clk, mm_pipeline_lvds_csr_mutrig6:clk, mm_pipeline_lvds_csr_mutrig7:clk, mts_preprocessor_0:i_clk, mts_preprocessor_1:i_clk, mutrig_datapath_subsystem_0:clk_clk, mutrig_datapath_subsystem_1:clk_clk, mutrig_datapath_subsystem_2:clk_clk, mutrig_datapath_subsystem_3:clk_clk, mutrig_datapath_subsystem_4:clk_clk, mutrig_datapath_subsystem_5:clk_clk, mutrig_datapath_subsystem_6:clk_clk, mutrig_datapath_subsystem_7:clk_clk, mutrig_injector_0:i_clk, mutrig_lane_source_mux_0:clk, mutrig_lane_source_mux_1:clk, mutrig_lane_source_mux_2:clk, mutrig_lane_source_mux_3:clk, mutrig_lane_source_mux_4:clk, mutrig_lane_source_mux_5:clk, mutrig_lane_source_mux_6:clk, mutrig_lane_source_mux_7:clk, mutrig_reset_controller_0:i_lvds_dpa_clk, mux_mutrig2processor:clk, mux_mutrig2processor_0:clk, rst_controller:clk, rst_controller_001:clk, rst_controller_003:clk, rst_controller_004:clk, rst_controller_006:clk, rst_controller_009:clk, run_control_splitter:clk]
 	signal lvds_rx_controller_pro_0_ctrl_pllrst                                          : std_logic;                     -- lvds_rx_controller_pro_0:coe_ctrl_pllrst -> lvds_rx_28nm_0:pll_areset
 	signal lvds_rx_controller_pro_0_ctrl_dpahold                                         : std_logic_vector(8 downto 0);  -- lvds_rx_controller_pro_0:coe_ctrl_dpahold -> lvds_rx_28nm_0:rx_dpll_hold
 	signal lvds_rx_28nm_0_ctrl_plllock                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_locked -> lvds_rx_controller_pro_0:coe_ctrl_plllock
@@ -2878,6 +2984,16 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal master_datapath_master_readdatavalid                                          : std_logic;                     -- mm_interconnect_0:master_datapath_master_readdatavalid -> master_datapath:master_readdatavalid
 	signal master_datapath_master_write                                                  : std_logic;                     -- master_datapath:master_write -> mm_interconnect_0:master_datapath_master_write
 	signal master_datapath_master_writedata                                              : std_logic_vector(31 downto 0); -- master_datapath:master_writedata -> mm_interconnect_0:master_datapath_master_writedata
+	signal mm_clock_crossing_bridge_m0_waitrequest                                       : std_logic;                     -- mm_interconnect_0:mm_clock_crossing_bridge_m0_waitrequest -> mm_clock_crossing_bridge:m0_waitrequest
+	signal mm_clock_crossing_bridge_m0_readdata                                          : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_clock_crossing_bridge_m0_readdata -> mm_clock_crossing_bridge:m0_readdata
+	signal mm_clock_crossing_bridge_m0_debugaccess                                       : std_logic;                     -- mm_clock_crossing_bridge:m0_debugaccess -> mm_interconnect_0:mm_clock_crossing_bridge_m0_debugaccess
+	signal mm_clock_crossing_bridge_m0_address                                           : std_logic_vector(13 downto 0); -- mm_clock_crossing_bridge:m0_address -> mm_interconnect_0:mm_clock_crossing_bridge_m0_address
+	signal mm_clock_crossing_bridge_m0_read                                              : std_logic;                     -- mm_clock_crossing_bridge:m0_read -> mm_interconnect_0:mm_clock_crossing_bridge_m0_read
+	signal mm_clock_crossing_bridge_m0_byteenable                                        : std_logic_vector(3 downto 0);  -- mm_clock_crossing_bridge:m0_byteenable -> mm_interconnect_0:mm_clock_crossing_bridge_m0_byteenable
+	signal mm_clock_crossing_bridge_m0_readdatavalid                                     : std_logic;                     -- mm_interconnect_0:mm_clock_crossing_bridge_m0_readdatavalid -> mm_clock_crossing_bridge:m0_readdatavalid
+	signal mm_clock_crossing_bridge_m0_writedata                                         : std_logic_vector(31 downto 0); -- mm_clock_crossing_bridge:m0_writedata -> mm_interconnect_0:mm_clock_crossing_bridge_m0_writedata
+	signal mm_clock_crossing_bridge_m0_write                                             : std_logic;                     -- mm_clock_crossing_bridge:m0_write -> mm_interconnect_0:mm_clock_crossing_bridge_m0_write
+	signal mm_clock_crossing_bridge_m0_burstcount                                        : std_logic_vector(8 downto 0);  -- mm_clock_crossing_bridge:m0_burstcount -> mm_interconnect_0:mm_clock_crossing_bridge_m0_burstcount
 	signal mm_pipeline_lvds_csr_hitstack_ring_m0_waitrequest                             : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_m0_waitrequest -> mm_pipeline_lvds_csr_hitstack_ring:m0_waitrequest
 	signal mm_pipeline_lvds_csr_hitstack_ring_m0_readdata                                : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_m0_readdata -> mm_pipeline_lvds_csr_hitstack_ring:m0_readdata
 	signal mm_pipeline_lvds_csr_hitstack_ring_m0_debugaccess                             : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_ring:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_m0_debugaccess
@@ -2888,26 +3004,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_pipeline_lvds_csr_hitstack_ring_m0_writedata                               : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hitstack_ring:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_m0_writedata
 	signal mm_pipeline_lvds_csr_hitstack_ring_m0_write                                   : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_ring:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_m0_write
 	signal mm_pipeline_lvds_csr_hitstack_ring_m0_burstcount                              : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_hitstack_ring:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_m0_burstcount
-	signal mm_pipeline_lvds_csr_hist_m0_waitrequest                                      : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_waitrequest -> mm_pipeline_lvds_csr_hist:m0_waitrequest
-	signal mm_pipeline_lvds_csr_hist_m0_readdata                                         : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_readdata -> mm_pipeline_lvds_csr_hist:m0_readdata
-	signal mm_pipeline_lvds_csr_hist_m0_debugaccess                                      : std_logic;                     -- mm_pipeline_lvds_csr_hist:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_debugaccess
-	signal mm_pipeline_lvds_csr_hist_m0_address                                          : std_logic_vector(9 downto 0);  -- mm_pipeline_lvds_csr_hist:m0_address -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_address
-	signal mm_pipeline_lvds_csr_hist_m0_read                                             : std_logic;                     -- mm_pipeline_lvds_csr_hist:m0_read -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_read
-	signal mm_pipeline_lvds_csr_hist_m0_byteenable                                       : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_hist:m0_byteenable -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_byteenable
-	signal mm_pipeline_lvds_csr_hist_m0_readdatavalid                                    : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_readdatavalid -> mm_pipeline_lvds_csr_hist:m0_readdatavalid
-	signal mm_pipeline_lvds_csr_hist_m0_writedata                                        : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hist:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_writedata
-	signal mm_pipeline_lvds_csr_hist_m0_write                                            : std_logic;                     -- mm_pipeline_lvds_csr_hist:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_write
-	signal mm_pipeline_lvds_csr_hist_m0_burstcount                                       : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_hist:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_m0_burstcount
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest                            : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest -> mm_pipeline_lvds_csr_hitstack_frame:m0_waitrequest
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_readdata                               : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_readdata -> mm_pipeline_lvds_csr_hitstack_frame:m0_readdata
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess                            : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_address                                : std_logic_vector(4 downto 0);  -- mm_pipeline_lvds_csr_hitstack_frame:m0_address -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_address
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_read                                   : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:m0_read -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_read
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable                             : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_hitstack_frame:m0_byteenable -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid                          : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid -> mm_pipeline_lvds_csr_hitstack_frame:m0_readdatavalid
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_writedata                              : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hitstack_frame:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_writedata
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_write                                  : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_write
-	signal mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount                             : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_hitstack_frame:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount
 	signal mm_pipeline_lvds_csr_emu_dbg_m0_waitrequest                                   : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_m0_waitrequest -> mm_pipeline_lvds_csr_emu_dbg:m0_waitrequest
 	signal mm_pipeline_lvds_csr_emu_dbg_m0_readdata                                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_m0_readdata -> mm_pipeline_lvds_csr_emu_dbg:m0_readdata
 	signal mm_pipeline_lvds_csr_emu_dbg_m0_debugaccess                                   : std_logic;                     -- mm_pipeline_lvds_csr_emu_dbg:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_m0_debugaccess
@@ -2918,16 +3014,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_pipeline_lvds_csr_emu_dbg_m0_writedata                                     : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_emu_dbg:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_m0_writedata
 	signal mm_pipeline_lvds_csr_emu_dbg_m0_write                                         : std_logic;                     -- mm_pipeline_lvds_csr_emu_dbg:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_m0_write
 	signal mm_pipeline_lvds_csr_emu_dbg_m0_burstcount                                    : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_emu_dbg:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_m0_burstcount
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_waitrequest                              : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_waitrequest -> mm_pipeline_lvds_csr_mutrig4_mts0:m0_waitrequest
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdata                                 : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdata -> mm_pipeline_lvds_csr_mutrig4_mts0:m0_readdata
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_debugaccess                              : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_debugaccess
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_address                                  : std_logic_vector(9 downto 0);  -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_address -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_address
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_read                                     : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_read -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_read
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_byteenable                               : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_byteenable -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_byteenable
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdatavalid                            : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdatavalid -> mm_pipeline_lvds_csr_mutrig4_mts0:m0_readdatavalid
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_writedata                                : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_writedata
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_write                                    : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_write
-	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_burstcount                               : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_burstcount
 	signal mm_pipeline_lvds_csr_mutrig3_m0_waitrequest                                   : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_m0_waitrequest -> mm_pipeline_lvds_csr_mutrig3:m0_waitrequest
 	signal mm_pipeline_lvds_csr_mutrig3_m0_readdata                                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_m0_readdata -> mm_pipeline_lvds_csr_mutrig3:m0_readdata
 	signal mm_pipeline_lvds_csr_mutrig3_m0_debugaccess                                   : std_logic;                     -- mm_pipeline_lvds_csr_mutrig3:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_m0_debugaccess
@@ -2938,6 +3024,16 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_pipeline_lvds_csr_mutrig3_m0_writedata                                     : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig3:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_m0_writedata
 	signal mm_pipeline_lvds_csr_mutrig3_m0_write                                         : std_logic;                     -- mm_pipeline_lvds_csr_mutrig3:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_m0_write
 	signal mm_pipeline_lvds_csr_mutrig3_m0_burstcount                                    : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_mutrig3:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_m0_burstcount
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_waitrequest                              : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_waitrequest -> mm_pipeline_lvds_csr_mutrig4_mts0:m0_waitrequest
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdata                                 : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdata -> mm_pipeline_lvds_csr_mutrig4_mts0:m0_readdata
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_debugaccess                              : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_debugaccess
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_address                                  : std_logic_vector(9 downto 0);  -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_address -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_address
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_read                                     : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_read -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_read
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_byteenable                               : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_byteenable -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_byteenable
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdatavalid                            : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdatavalid -> mm_pipeline_lvds_csr_mutrig4_mts0:m0_readdatavalid
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_writedata                                : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_writedata
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_write                                    : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_write
+	signal mm_pipeline_lvds_csr_mutrig4_mts0_m0_burstcount                               : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_mutrig4_mts0:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_m0_burstcount
 	signal mm_pipeline_lvds_csr_mutrig5_m0_waitrequest                                   : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_m0_waitrequest -> mm_pipeline_lvds_csr_mutrig5:m0_waitrequest
 	signal mm_pipeline_lvds_csr_mutrig5_m0_readdata                                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_m0_readdata -> mm_pipeline_lvds_csr_mutrig5:m0_readdata
 	signal mm_pipeline_lvds_csr_mutrig5_m0_debugaccess                                   : std_logic;                     -- mm_pipeline_lvds_csr_mutrig5:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_m0_debugaccess
@@ -2968,16 +3064,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_pipeline_lvds_csr_mutrig7_m0_writedata                                     : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig7:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_m0_writedata
 	signal mm_pipeline_lvds_csr_mutrig7_m0_write                                         : std_logic;                     -- mm_pipeline_lvds_csr_mutrig7:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_m0_write
 	signal mm_pipeline_lvds_csr_mutrig7_m0_burstcount                                    : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_mutrig7:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_m0_burstcount
-	signal mm_pipeline_lvds_csr_mts1_m0_waitrequest                                      : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_waitrequest -> mm_pipeline_lvds_csr_mts1:m0_waitrequest
-	signal mm_pipeline_lvds_csr_mts1_m0_readdata                                         : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_readdata -> mm_pipeline_lvds_csr_mts1:m0_readdata
-	signal mm_pipeline_lvds_csr_mts1_m0_debugaccess                                      : std_logic;                     -- mm_pipeline_lvds_csr_mts1:m0_debugaccess -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_debugaccess
-	signal mm_pipeline_lvds_csr_mts1_m0_address                                          : std_logic_vector(2 downto 0);  -- mm_pipeline_lvds_csr_mts1:m0_address -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_address
-	signal mm_pipeline_lvds_csr_mts1_m0_read                                             : std_logic;                     -- mm_pipeline_lvds_csr_mts1:m0_read -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_read
-	signal mm_pipeline_lvds_csr_mts1_m0_byteenable                                       : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_mts1:m0_byteenable -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_byteenable
-	signal mm_pipeline_lvds_csr_mts1_m0_readdatavalid                                    : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_readdatavalid -> mm_pipeline_lvds_csr_mts1:m0_readdatavalid
-	signal mm_pipeline_lvds_csr_mts1_m0_writedata                                        : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mts1:m0_writedata -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_writedata
-	signal mm_pipeline_lvds_csr_mts1_m0_write                                            : std_logic;                     -- mm_pipeline_lvds_csr_mts1:m0_write -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_write
-	signal mm_pipeline_lvds_csr_mts1_m0_burstcount                                       : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_mts1:m0_burstcount -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_m0_burstcount
 	signal mm_interconnect_0_mutrig_datapath_subsystem_0_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_0:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_0_backpressure_fifo_csr_readdata
 	signal mm_interconnect_0_mutrig_datapath_subsystem_0_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_0_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_0:backpressure_fifo_csr_address
 	signal mm_interconnect_0_mutrig_datapath_subsystem_0_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_0_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_0:backpressure_fifo_csr_read
@@ -3016,48 +3102,12 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_write                     : std_logic;                     -- mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_s0_write -> mm_pipeline_jtagmaster2rstctrl:s0_write
 	signal mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_writedata                 : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_s0_writedata -> mm_pipeline_jtagmaster2rstctrl:s0_writedata
 	signal mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_burstcount                : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_s0_burstcount -> mm_pipeline_jtagmaster2rstctrl:s0_burstcount
-	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_7:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_readdata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_address
-	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_read
-	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_write
-	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_writedata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_6:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_readdata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_address
-	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_read
-	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_write
-	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_writedata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_5:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_readdata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_address
-	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_read
-	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_write
-	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_writedata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_4:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_readdata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_address
-	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_read
-	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_write
-	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_writedata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_3:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_readdata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_address
-	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_read
-	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_write
-	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_writedata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_2:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_readdata
-	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_address
-	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_read
-	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_write
-	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_writedata
 	signal mm_interconnect_0_mutrig_injector_0_csr_readdata                              : std_logic_vector(31 downto 0); -- mutrig_injector_0:avs_csr_readdata -> mm_interconnect_0:mutrig_injector_0_csr_readdata
 	signal mm_interconnect_0_mutrig_injector_0_csr_waitrequest                           : std_logic;                     -- mutrig_injector_0:avs_csr_waitrequest -> mm_interconnect_0:mutrig_injector_0_csr_waitrequest
 	signal mm_interconnect_0_mutrig_injector_0_csr_address                               : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_injector_0_csr_address -> mutrig_injector_0:avs_csr_address
 	signal mm_interconnect_0_mutrig_injector_0_csr_read                                  : std_logic;                     -- mm_interconnect_0:mutrig_injector_0_csr_read -> mutrig_injector_0:avs_csr_read
 	signal mm_interconnect_0_mutrig_injector_0_csr_write                                 : std_logic;                     -- mm_interconnect_0:mutrig_injector_0_csr_write -> mutrig_injector_0:avs_csr_write
 	signal mm_interconnect_0_mutrig_injector_0_csr_writedata                             : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_injector_0_csr_writedata -> mutrig_injector_0:avs_csr_writedata
-	signal mm_interconnect_0_mts_preprocessor_1_csr_readdata                             : std_logic_vector(31 downto 0); -- mts_preprocessor_1:avs_csr_readdata -> mm_interconnect_0:mts_preprocessor_1_csr_readdata
-	signal mm_interconnect_0_mts_preprocessor_1_csr_waitrequest                          : std_logic;                     -- mts_preprocessor_1:avs_csr_waitrequest -> mm_interconnect_0:mts_preprocessor_1_csr_waitrequest
-	signal mm_interconnect_0_mts_preprocessor_1_csr_address                              : std_logic_vector(2 downto 0);  -- mm_interconnect_0:mts_preprocessor_1_csr_address -> mts_preprocessor_1:avs_csr_address
-	signal mm_interconnect_0_mts_preprocessor_1_csr_read                                 : std_logic;                     -- mm_interconnect_0:mts_preprocessor_1_csr_read -> mts_preprocessor_1:avs_csr_read
-	signal mm_interconnect_0_mts_preprocessor_1_csr_write                                : std_logic;                     -- mm_interconnect_0:mts_preprocessor_1_csr_write -> mts_preprocessor_1:avs_csr_write
-	signal mm_interconnect_0_mts_preprocessor_1_csr_writedata                            : std_logic_vector(31 downto 0); -- mm_interconnect_0:mts_preprocessor_1_csr_writedata -> mts_preprocessor_1:avs_csr_writedata
 	signal mm_interconnect_0_mutrig_datapath_subsystem_7_csr_readdata                    : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_7:csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_7_csr_readdata
 	signal mm_interconnect_0_mutrig_datapath_subsystem_7_csr_waitrequest                 : std_logic;                     -- mutrig_datapath_subsystem_7:csr_waitrequest -> mm_interconnect_0:mutrig_datapath_subsystem_7_csr_waitrequest
 	signal mm_interconnect_0_mutrig_datapath_subsystem_7_csr_address                     : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_7_csr_address -> mutrig_datapath_subsystem_7:csr_address
@@ -3094,18 +3144,169 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_interconnect_0_mutrig_datapath_subsystem_2_csr_read                        : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_csr_read -> mutrig_datapath_subsystem_2:csr_read
 	signal mm_interconnect_0_mutrig_datapath_subsystem_2_csr_write                       : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_csr_write -> mutrig_datapath_subsystem_2:csr_write
 	signal mm_interconnect_0_mutrig_datapath_subsystem_2_csr_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_2_csr_writedata -> mutrig_datapath_subsystem_2:csr_writedata
-	signal mm_interconnect_0_histogram_statistics_0_csr_readdata                         : std_logic_vector(31 downto 0); -- histogram_statistics_0:avs_csr_readdata -> mm_interconnect_0:histogram_statistics_0_csr_readdata
-	signal mm_interconnect_0_histogram_statistics_0_csr_waitrequest                      : std_logic;                     -- histogram_statistics_0:avs_csr_waitrequest -> mm_interconnect_0:histogram_statistics_0_csr_waitrequest
-	signal mm_interconnect_0_histogram_statistics_0_csr_address                          : std_logic_vector(4 downto 0);  -- mm_interconnect_0:histogram_statistics_0_csr_address -> histogram_statistics_0:avs_csr_address
-	signal mm_interconnect_0_histogram_statistics_0_csr_read                             : std_logic;                     -- mm_interconnect_0:histogram_statistics_0_csr_read -> histogram_statistics_0:avs_csr_read
-	signal mm_interconnect_0_histogram_statistics_0_csr_write                            : std_logic;                     -- mm_interconnect_0:histogram_statistics_0_csr_write -> histogram_statistics_0:avs_csr_write
-	signal mm_interconnect_0_histogram_statistics_0_csr_writedata                        : std_logic_vector(31 downto 0); -- mm_interconnect_0:histogram_statistics_0_csr_writedata -> histogram_statistics_0:avs_csr_writedata
-	signal mm_interconnect_0_mts_preprocessor_0_csr_readdata                             : std_logic_vector(31 downto 0); -- mts_preprocessor_0:avs_csr_readdata -> mm_interconnect_0:mts_preprocessor_0_csr_readdata
-	signal mm_interconnect_0_mts_preprocessor_0_csr_waitrequest                          : std_logic;                     -- mts_preprocessor_0:avs_csr_waitrequest -> mm_interconnect_0:mts_preprocessor_0_csr_waitrequest
-	signal mm_interconnect_0_mts_preprocessor_0_csr_address                              : std_logic_vector(2 downto 0);  -- mm_interconnect_0:mts_preprocessor_0_csr_address -> mts_preprocessor_0:avs_csr_address
-	signal mm_interconnect_0_mts_preprocessor_0_csr_read                                 : std_logic;                     -- mm_interconnect_0:mts_preprocessor_0_csr_read -> mts_preprocessor_0:avs_csr_read
-	signal mm_interconnect_0_mts_preprocessor_0_csr_write                                : std_logic;                     -- mm_interconnect_0:mts_preprocessor_0_csr_write -> mts_preprocessor_0:avs_csr_write
-	signal mm_interconnect_0_mts_preprocessor_0_csr_writedata                            : std_logic_vector(31 downto 0); -- mm_interconnect_0:mts_preprocessor_0_csr_writedata -> mts_preprocessor_0:avs_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_0_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_0_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_0_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_0_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_1_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_1_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_1_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_1_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_2_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_2_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_2_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_2_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_3_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_3_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_writedata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_3_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_3_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_waitrequest
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_address
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_read
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_write
+	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_readdata                        : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_low:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_waitrequest                     : std_logic;                     -- mm_pipeline_lvds_csr_low:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_debugaccess                     : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_debugaccess -> mm_pipeline_lvds_csr_low:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_address                         : std_logic_vector(10 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_address -> mm_pipeline_lvds_csr_low:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_read                            : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_read -> mm_pipeline_lvds_csr_low:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_byteenable                      : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_byteenable -> mm_pipeline_lvds_csr_low:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_readdatavalid                   : std_logic;                     -- mm_pipeline_lvds_csr_low:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_write                           : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_write -> mm_pipeline_lvds_csr_low:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_writedata                       : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_writedata -> mm_pipeline_lvds_csr_low:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_burstcount                      : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_low_s0_burstcount -> mm_pipeline_lvds_csr_low:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_emu_dbg:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_emu_dbg:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess                 : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess -> mm_pipeline_lvds_csr_emu_dbg:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_address -> mm_pipeline_lvds_csr_emu_dbg:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_read                        : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_read -> mm_pipeline_lvds_csr_emu_dbg:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_byteenable -> mm_pipeline_lvds_csr_emu_dbg:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_emu_dbg:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_write                       : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_write -> mm_pipeline_lvds_csr_emu_dbg:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_writedata -> mm_pipeline_lvds_csr_emu_dbg:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_emu_dbg_s0_burstcount -> mm_pipeline_lvds_csr_emu_dbg:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig3:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig3:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_debugaccess                 : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig3:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_address -> mm_pipeline_lvds_csr_mutrig3:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_read                        : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_read -> mm_pipeline_lvds_csr_mutrig3:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_byteenable -> mm_pipeline_lvds_csr_mutrig3:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig3:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_write                       : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_write -> mm_pipeline_lvds_csr_mutrig3:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_writedata -> mm_pipeline_lvds_csr_mutrig3:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig3_s0_burstcount -> mm_pipeline_lvds_csr_mutrig3:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata               : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig4_mts0:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest            : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess            : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_address                : std_logic_vector(9 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_address -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_read                   : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_read -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable             : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid          : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_write                  : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_write -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata              : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount             : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig5:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig5:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_debugaccess                 : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig5:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_address -> mm_pipeline_lvds_csr_mutrig5:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_read                        : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_read -> mm_pipeline_lvds_csr_mutrig5:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_byteenable -> mm_pipeline_lvds_csr_mutrig5:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig5:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_write                       : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_write -> mm_pipeline_lvds_csr_mutrig5:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_writedata -> mm_pipeline_lvds_csr_mutrig5:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig5_s0_burstcount -> mm_pipeline_lvds_csr_mutrig5:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig6:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig6:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_debugaccess                 : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig6:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_address -> mm_pipeline_lvds_csr_mutrig6:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_read                        : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_read -> mm_pipeline_lvds_csr_mutrig6:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_byteenable -> mm_pipeline_lvds_csr_mutrig6:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig6:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_write                       : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_write -> mm_pipeline_lvds_csr_mutrig6:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_writedata -> mm_pipeline_lvds_csr_mutrig6:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig6_s0_burstcount -> mm_pipeline_lvds_csr_mutrig6:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig7:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig7:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_debugaccess                 : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig7:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_address -> mm_pipeline_lvds_csr_mutrig7:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_read                        : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_read -> mm_pipeline_lvds_csr_mutrig7:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_byteenable -> mm_pipeline_lvds_csr_mutrig7:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig7:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_write                       : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_write -> mm_pipeline_lvds_csr_mutrig7:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_writedata -> mm_pipeline_lvds_csr_mutrig7:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mutrig7_s0_burstcount -> mm_pipeline_lvds_csr_mutrig7:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_readdata                       : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mts1:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_waitrequest                    : std_logic;                     -- mm_pipeline_lvds_csr_mts1:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_debugaccess                    : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_debugaccess -> mm_pipeline_lvds_csr_mts1:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_address                        : std_logic_vector(2 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_address -> mm_pipeline_lvds_csr_mts1:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_read                           : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_read -> mm_pipeline_lvds_csr_mts1:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_byteenable                     : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_byteenable -> mm_pipeline_lvds_csr_mts1:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_readdatavalid                  : std_logic;                     -- mm_pipeline_lvds_csr_mts1:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_write                          : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_write -> mm_pipeline_lvds_csr_mts1:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_writedata -> mm_pipeline_lvds_csr_mts1:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_burstcount                     : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_mts1_s0_burstcount -> mm_pipeline_lvds_csr_mts1:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_readdata                       : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hist:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_waitrequest                    : std_logic;                     -- mm_pipeline_lvds_csr_hist:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_debugaccess                    : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_debugaccess -> mm_pipeline_lvds_csr_hist:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_address                        : std_logic_vector(9 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_address -> mm_pipeline_lvds_csr_hist:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_read                           : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_read -> mm_pipeline_lvds_csr_hist:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_byteenable                     : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_byteenable -> mm_pipeline_lvds_csr_hist:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_readdatavalid                  : std_logic;                     -- mm_pipeline_lvds_csr_hist:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_write                          : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_write -> mm_pipeline_lvds_csr_hist:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_writedata -> mm_pipeline_lvds_csr_hist:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_burstcount                     : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hist_s0_burstcount -> mm_pipeline_lvds_csr_hist:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_readdata             : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hitstack_frame:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest          : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess          : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess -> mm_pipeline_lvds_csr_hitstack_frame:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_address              : std_logic_vector(4 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_address -> mm_pipeline_lvds_csr_hitstack_frame:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_read                 : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_read -> mm_pipeline_lvds_csr_hitstack_frame:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable           : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable -> mm_pipeline_lvds_csr_hitstack_frame:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid        : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_write                : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_write -> mm_pipeline_lvds_csr_hitstack_frame:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_writedata            : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_writedata -> mm_pipeline_lvds_csr_hitstack_frame:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount           : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount -> mm_pipeline_lvds_csr_hitstack_frame:s0_burstcount
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_readdata              : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hitstack_ring:s0_readdata -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_readdata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest           : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_ring:s0_waitrequest -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess           : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess -> mm_pipeline_lvds_csr_hitstack_ring:s0_debugaccess
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_address               : std_logic_vector(8 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_address -> mm_pipeline_lvds_csr_hitstack_ring:s0_address
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_read                  : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_read -> mm_pipeline_lvds_csr_hitstack_ring:s0_read
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable            : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable -> mm_pipeline_lvds_csr_hitstack_ring:s0_byteenable
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid         : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_ring:s0_readdatavalid -> mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_write                 : std_logic;                     -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_write -> mm_pipeline_lvds_csr_hitstack_ring:s0_write
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_writedata             : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_writedata -> mm_pipeline_lvds_csr_hitstack_ring:s0_writedata
+	signal mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount            : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount -> mm_pipeline_lvds_csr_hitstack_ring:s0_burstcount
+	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_2:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_readdata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_address
+	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_read
+	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_write
+	signal mm_interconnect_0_mutrig_datapath_subsystem_2_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_2_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_2:backpressure_fifo_csr_writedata
 	signal mm_interconnect_0_dbg_mm2runctrl_0_csr_readdata                               : std_logic_vector(31 downto 0); -- dbg_mm2runctrl_0:avs_csr_readdata -> mm_interconnect_0:dbg_mm2runctrl_0_csr_readdata
 	signal mm_interconnect_0_dbg_mm2runctrl_0_csr_waitrequest                            : std_logic;                     -- dbg_mm2runctrl_0:avs_csr_waitrequest -> mm_interconnect_0:dbg_mm2runctrl_0_csr_waitrequest
 	signal mm_interconnect_0_dbg_mm2runctrl_0_csr_address                                : std_logic_vector(3 downto 0);  -- mm_interconnect_0:dbg_mm2runctrl_0_csr_address -> dbg_mm2runctrl_0:avs_csr_address
@@ -3160,218 +3361,171 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_interconnect_0_emulator_mutrig_7_csr_read                                  : std_logic;                     -- mm_interconnect_0:emulator_mutrig_7_csr_read -> emulator_mutrig_7:avs_csr_read
 	signal mm_interconnect_0_emulator_mutrig_7_csr_write                                 : std_logic;                     -- mm_interconnect_0:emulator_mutrig_7_csr_write -> emulator_mutrig_7:avs_csr_write
 	signal mm_interconnect_0_emulator_mutrig_7_csr_writedata                             : std_logic_vector(31 downto 0); -- mm_interconnect_0:emulator_mutrig_7_csr_writedata -> emulator_mutrig_7:avs_csr_writedata
-	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_readdata                     : std_logic_vector(31 downto 0); -- histogram_ingress_bridge_0:avs_csr_readdata -> mm_interconnect_0:histogram_ingress_bridge_0_csr_readdata
-	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_waitrequest                  : std_logic;                     -- histogram_ingress_bridge_0:avs_csr_waitrequest -> mm_interconnect_0:histogram_ingress_bridge_0_csr_waitrequest
-	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_address                      : std_logic_vector(1 downto 0);  -- mm_interconnect_0:histogram_ingress_bridge_0_csr_address -> histogram_ingress_bridge_0:avs_csr_address
-	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_read                         : std_logic;                     -- mm_interconnect_0:histogram_ingress_bridge_0_csr_read -> histogram_ingress_bridge_0:avs_csr_read
-	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_write                        : std_logic;                     -- mm_interconnect_0:histogram_ingress_bridge_0_csr_write -> histogram_ingress_bridge_0:avs_csr_write
-	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_writedata                    : std_logic_vector(31 downto 0); -- mm_interconnect_0:histogram_ingress_bridge_0_csr_writedata -> histogram_ingress_bridge_0:avs_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_readdata       : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:feb_frame_assembly_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest    : std_logic;                     -- hit_stack_subsystem_0:feb_frame_assembly_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_address        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_address -> hit_stack_subsystem_0:feb_frame_assembly_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_read           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_read -> hit_stack_subsystem_0:feb_frame_assembly_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_write          : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_write -> hit_stack_subsystem_0:feb_frame_assembly_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_writedata      : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_writedata -> hit_stack_subsystem_0:feb_frame_assembly_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_readdata       : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:feb_frame_assembly_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_feb_frame_assembly_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest    : std_logic;                     -- hit_stack_subsystem_1:feb_frame_assembly_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_address        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_feb_frame_assembly_csr_address -> hit_stack_subsystem_1:feb_frame_assembly_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_read           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_feb_frame_assembly_csr_read -> hit_stack_subsystem_1:feb_frame_assembly_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_write          : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_feb_frame_assembly_csr_write -> hit_stack_subsystem_1:feb_frame_assembly_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_writedata      : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_feb_frame_assembly_csr_writedata -> hit_stack_subsystem_1:feb_frame_assembly_csr_writedata
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_readdata                    : std_logic_vector(31 downto 0); -- histogram_statistics_0:avs_hist_bin_readdata -> mm_interconnect_0:histogram_statistics_0_hist_bin_readdata
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_waitrequest                 : std_logic;                     -- histogram_statistics_0:avs_hist_bin_waitrequest -> mm_interconnect_0:histogram_statistics_0_hist_bin_waitrequest
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_address                     : std_logic_vector(7 downto 0);  -- mm_interconnect_0:histogram_statistics_0_hist_bin_address -> histogram_statistics_0:avs_hist_bin_address
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_read                        : std_logic;                     -- mm_interconnect_0:histogram_statistics_0_hist_bin_read -> histogram_statistics_0:avs_hist_bin_read
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_readdatavalid               : std_logic;                     -- histogram_statistics_0:avs_hist_bin_readdatavalid -> mm_interconnect_0:histogram_statistics_0_hist_bin_readdatavalid
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_response                    : std_logic_vector(1 downto 0);  -- histogram_statistics_0:avs_hist_bin_response -> mm_interconnect_0:histogram_statistics_0_hist_bin_response
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_write                       : std_logic;                     -- mm_interconnect_0:histogram_statistics_0_hist_bin_write -> histogram_statistics_0:avs_hist_bin_write
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:histogram_statistics_0_hist_bin_writedata -> histogram_statistics_0:avs_hist_bin_writedata
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_writeresponsevalid          : std_logic;                     -- histogram_statistics_0:avs_hist_bin_writeresponsevalid -> mm_interconnect_0:histogram_statistics_0_hist_bin_writeresponsevalid
-	signal mm_interconnect_0_histogram_statistics_0_hist_bin_burstcount                  : std_logic_vector(8 downto 0);  -- mm_interconnect_0:histogram_statistics_0_hist_bin_burstcount -> histogram_statistics_0:avs_hist_bin_burstcount
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_0_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_0_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_0_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_0_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_0_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_0_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_1_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_1_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_1_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_1_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_1_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_1_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_1_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_1_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_2_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_2_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_2_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_2_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_2_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_2_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_2_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_2_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_3_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_3_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_read -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_write -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_3_csr_writedata -> hit_stack_subsystem_1:ring_buffer_cam_3_csr_writedata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_3_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_3_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_waitrequest
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_address -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_address
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_read            : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_read -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_read
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_write           : std_logic;                     -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_write -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_write
-	signal mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata       : std_logic_vector(31 downto 0); -- mm_interconnect_0:hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata -> hit_stack_subsystem_0:ring_buffer_cam_3_csr_writedata
-	signal mm_pipeline_jtagmaster2rstctrl_m0_waitrequest                                 : std_logic;                     -- mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_waitrequest -> mm_pipeline_jtagmaster2rstctrl:m0_waitrequest
-	signal mm_pipeline_jtagmaster2rstctrl_m0_readdata                                    : std_logic_vector(31 downto 0); -- mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_readdata -> mm_pipeline_jtagmaster2rstctrl:m0_readdata
-	signal mm_pipeline_jtagmaster2rstctrl_m0_debugaccess                                 : std_logic;                     -- mm_pipeline_jtagmaster2rstctrl:m0_debugaccess -> mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_debugaccess
-	signal mm_pipeline_jtagmaster2rstctrl_m0_address                                     : std_logic_vector(5 downto 0);  -- mm_pipeline_jtagmaster2rstctrl:m0_address -> mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_address
-	signal mm_pipeline_jtagmaster2rstctrl_m0_read                                        : std_logic;                     -- mm_pipeline_jtagmaster2rstctrl:m0_read -> mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_read
-	signal mm_pipeline_jtagmaster2rstctrl_m0_byteenable                                  : std_logic_vector(3 downto 0);  -- mm_pipeline_jtagmaster2rstctrl:m0_byteenable -> mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_byteenable
-	signal mm_pipeline_jtagmaster2rstctrl_m0_readdatavalid                               : std_logic;                     -- mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_readdatavalid -> mm_pipeline_jtagmaster2rstctrl:m0_readdatavalid
-	signal mm_pipeline_jtagmaster2rstctrl_m0_writedata                                   : std_logic_vector(31 downto 0); -- mm_pipeline_jtagmaster2rstctrl:m0_writedata -> mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_writedata
-	signal mm_pipeline_jtagmaster2rstctrl_m0_write                                       : std_logic;                     -- mm_pipeline_jtagmaster2rstctrl:m0_write -> mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_write
-	signal mm_pipeline_jtagmaster2rstctrl_m0_burstcount                                  : std_logic_vector(0 downto 0);  -- mm_pipeline_jtagmaster2rstctrl:m0_burstcount -> mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_m0_burstcount
-	signal mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_readdata            : std_logic_vector(31 downto 0); -- mutrig_reset_controller_0:avs_reconfig_mgmt_readdata -> mm_interconnect_1:mutrig_reset_controller_0_reconfig_mgmt_readdata
-	signal mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_waitrequest         : std_logic;                     -- mutrig_reset_controller_0:avs_reconfig_mgmt_waitrequest -> mm_interconnect_1:mutrig_reset_controller_0_reconfig_mgmt_waitrequest
-	signal mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_address             : std_logic_vector(5 downto 0);  -- mm_interconnect_1:mutrig_reset_controller_0_reconfig_mgmt_address -> mutrig_reset_controller_0:avs_reconfig_mgmt_address
-	signal mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_read                : std_logic;                     -- mm_interconnect_1:mutrig_reset_controller_0_reconfig_mgmt_read -> mutrig_reset_controller_0:avs_reconfig_mgmt_read
-	signal mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_write               : std_logic;                     -- mm_interconnect_1:mutrig_reset_controller_0_reconfig_mgmt_write -> mutrig_reset_controller_0:avs_reconfig_mgmt_write
-	signal mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_writedata           : std_logic_vector(31 downto 0); -- mm_interconnect_1:mutrig_reset_controller_0_reconfig_mgmt_writedata -> mutrig_reset_controller_0:avs_reconfig_mgmt_writedata
-	signal mm_clock_crossing_bridge_m0_waitrequest                                       : std_logic;                     -- mm_interconnect_2:mm_clock_crossing_bridge_m0_waitrequest -> mm_clock_crossing_bridge:m0_waitrequest
-	signal mm_clock_crossing_bridge_m0_readdata                                          : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_clock_crossing_bridge_m0_readdata -> mm_clock_crossing_bridge:m0_readdata
-	signal mm_clock_crossing_bridge_m0_debugaccess                                       : std_logic;                     -- mm_clock_crossing_bridge:m0_debugaccess -> mm_interconnect_2:mm_clock_crossing_bridge_m0_debugaccess
-	signal mm_clock_crossing_bridge_m0_address                                           : std_logic_vector(13 downto 0); -- mm_clock_crossing_bridge:m0_address -> mm_interconnect_2:mm_clock_crossing_bridge_m0_address
-	signal mm_clock_crossing_bridge_m0_read                                              : std_logic;                     -- mm_clock_crossing_bridge:m0_read -> mm_interconnect_2:mm_clock_crossing_bridge_m0_read
-	signal mm_clock_crossing_bridge_m0_byteenable                                        : std_logic_vector(3 downto 0);  -- mm_clock_crossing_bridge:m0_byteenable -> mm_interconnect_2:mm_clock_crossing_bridge_m0_byteenable
-	signal mm_clock_crossing_bridge_m0_readdatavalid                                     : std_logic;                     -- mm_interconnect_2:mm_clock_crossing_bridge_m0_readdatavalid -> mm_clock_crossing_bridge:m0_readdatavalid
-	signal mm_clock_crossing_bridge_m0_writedata                                         : std_logic_vector(31 downto 0); -- mm_clock_crossing_bridge:m0_writedata -> mm_interconnect_2:mm_clock_crossing_bridge_m0_writedata
-	signal mm_clock_crossing_bridge_m0_write                                             : std_logic;                     -- mm_clock_crossing_bridge:m0_write -> mm_interconnect_2:mm_clock_crossing_bridge_m0_write
-	signal mm_clock_crossing_bridge_m0_burstcount                                        : std_logic_vector(8 downto 0);  -- mm_clock_crossing_bridge:m0_burstcount -> mm_interconnect_2:mm_clock_crossing_bridge_m0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_readdata                        : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_low:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_waitrequest                     : std_logic;                     -- mm_pipeline_lvds_csr_low:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_debugaccess                     : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_debugaccess -> mm_pipeline_lvds_csr_low:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_address                         : std_logic_vector(10 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_address -> mm_pipeline_lvds_csr_low:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_read                            : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_read -> mm_pipeline_lvds_csr_low:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_byteenable                      : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_byteenable -> mm_pipeline_lvds_csr_low:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_readdatavalid                   : std_logic;                     -- mm_pipeline_lvds_csr_low:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_write                           : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_write -> mm_pipeline_lvds_csr_low:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_writedata                       : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_writedata -> mm_pipeline_lvds_csr_low:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_burstcount                      : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_low_s0_burstcount -> mm_pipeline_lvds_csr_low:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_emu_dbg:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_emu_dbg:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess                 : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess -> mm_pipeline_lvds_csr_emu_dbg:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_address -> mm_pipeline_lvds_csr_emu_dbg:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_read                        : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_read -> mm_pipeline_lvds_csr_emu_dbg:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_byteenable -> mm_pipeline_lvds_csr_emu_dbg:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_emu_dbg:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_write                       : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_write -> mm_pipeline_lvds_csr_emu_dbg:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_writedata -> mm_pipeline_lvds_csr_emu_dbg:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_emu_dbg_s0_burstcount -> mm_pipeline_lvds_csr_emu_dbg:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig3:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig3:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_debugaccess                 : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig3:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_address -> mm_pipeline_lvds_csr_mutrig3:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_read                        : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_read -> mm_pipeline_lvds_csr_mutrig3:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_byteenable -> mm_pipeline_lvds_csr_mutrig3:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig3:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_write                       : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_write -> mm_pipeline_lvds_csr_mutrig3:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_writedata -> mm_pipeline_lvds_csr_mutrig3:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig3_s0_burstcount -> mm_pipeline_lvds_csr_mutrig3:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata               : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig4_mts0:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest            : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess            : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_address                : std_logic_vector(9 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_address -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_read                   : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_read -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable             : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid          : std_logic;                     -- mm_pipeline_lvds_csr_mutrig4_mts0:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_write                  : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_write -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata              : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount             : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount -> mm_pipeline_lvds_csr_mutrig4_mts0:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig5:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig5:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_debugaccess                 : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig5:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_address -> mm_pipeline_lvds_csr_mutrig5:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_read                        : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_read -> mm_pipeline_lvds_csr_mutrig5:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_byteenable -> mm_pipeline_lvds_csr_mutrig5:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig5:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_write                       : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_write -> mm_pipeline_lvds_csr_mutrig5:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_writedata -> mm_pipeline_lvds_csr_mutrig5:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig5_s0_burstcount -> mm_pipeline_lvds_csr_mutrig5:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig6:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig6:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_debugaccess                 : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig6:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_address -> mm_pipeline_lvds_csr_mutrig6:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_read                        : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_read -> mm_pipeline_lvds_csr_mutrig6:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_byteenable -> mm_pipeline_lvds_csr_mutrig6:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig6:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_write                       : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_write -> mm_pipeline_lvds_csr_mutrig6:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_writedata -> mm_pipeline_lvds_csr_mutrig6:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig6_s0_burstcount -> mm_pipeline_lvds_csr_mutrig6:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_readdata                    : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mutrig7:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_waitrequest                 : std_logic;                     -- mm_pipeline_lvds_csr_mutrig7:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_debugaccess                 : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_debugaccess -> mm_pipeline_lvds_csr_mutrig7:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_address                     : std_logic_vector(9 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_address -> mm_pipeline_lvds_csr_mutrig7:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_read                        : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_read -> mm_pipeline_lvds_csr_mutrig7:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_byteenable -> mm_pipeline_lvds_csr_mutrig7:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid               : std_logic;                     -- mm_pipeline_lvds_csr_mutrig7:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_write                       : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_write -> mm_pipeline_lvds_csr_mutrig7:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_writedata -> mm_pipeline_lvds_csr_mutrig7:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mutrig7_s0_burstcount -> mm_pipeline_lvds_csr_mutrig7:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_readdata                       : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mts1:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_waitrequest                    : std_logic;                     -- mm_pipeline_lvds_csr_mts1:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_debugaccess                    : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_debugaccess -> mm_pipeline_lvds_csr_mts1:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_address                        : std_logic_vector(2 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_address -> mm_pipeline_lvds_csr_mts1:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_read                           : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_read -> mm_pipeline_lvds_csr_mts1:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_byteenable                     : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_byteenable -> mm_pipeline_lvds_csr_mts1:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_readdatavalid                  : std_logic;                     -- mm_pipeline_lvds_csr_mts1:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_write                          : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_write -> mm_pipeline_lvds_csr_mts1:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_writedata -> mm_pipeline_lvds_csr_mts1:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_burstcount                     : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_s0_burstcount -> mm_pipeline_lvds_csr_mts1:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_readdata                       : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hist:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_waitrequest                    : std_logic;                     -- mm_pipeline_lvds_csr_hist:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_debugaccess                    : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_debugaccess -> mm_pipeline_lvds_csr_hist:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_address                        : std_logic_vector(9 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_address -> mm_pipeline_lvds_csr_hist:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_read                           : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_read -> mm_pipeline_lvds_csr_hist:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_byteenable                     : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_byteenable -> mm_pipeline_lvds_csr_hist:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_readdatavalid                  : std_logic;                     -- mm_pipeline_lvds_csr_hist:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_write                          : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_write -> mm_pipeline_lvds_csr_hist:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_writedata -> mm_pipeline_lvds_csr_hist:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_burstcount                     : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hist_s0_burstcount -> mm_pipeline_lvds_csr_hist:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_readdata              : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hitstack_ring:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest           : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_ring:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess           : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess -> mm_pipeline_lvds_csr_hitstack_ring:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_address               : std_logic_vector(8 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_address -> mm_pipeline_lvds_csr_hitstack_ring:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_read                  : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_read -> mm_pipeline_lvds_csr_hitstack_ring:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable            : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable -> mm_pipeline_lvds_csr_hitstack_ring:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid         : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_ring:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_write                 : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_write -> mm_pipeline_lvds_csr_hitstack_ring:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_writedata             : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_writedata -> mm_pipeline_lvds_csr_hitstack_ring:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount            : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount -> mm_pipeline_lvds_csr_hitstack_ring:s0_burstcount
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_readdata             : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hitstack_frame:s0_readdata -> mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_readdata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest          : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:s0_waitrequest -> mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess          : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess -> mm_pipeline_lvds_csr_hitstack_frame:s0_debugaccess
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_address              : std_logic_vector(4 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_address -> mm_pipeline_lvds_csr_hitstack_frame:s0_address
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_read                 : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_read -> mm_pipeline_lvds_csr_hitstack_frame:s0_read
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable           : std_logic_vector(3 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable -> mm_pipeline_lvds_csr_hitstack_frame:s0_byteenable
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid        : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:s0_readdatavalid -> mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_write                : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_write -> mm_pipeline_lvds_csr_hitstack_frame:s0_write
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_writedata            : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_writedata -> mm_pipeline_lvds_csr_hitstack_frame:s0_writedata
-	signal mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount           : std_logic_vector(0 downto 0);  -- mm_interconnect_2:mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount -> mm_pipeline_lvds_csr_hitstack_frame:s0_burstcount
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_0:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_0_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_0:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_0_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_address -> mutrig_lane_source_mux_0:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_read -> mutrig_lane_source_mux_0:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_write -> mutrig_lane_source_mux_0:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_writedata -> mutrig_lane_source_mux_0:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_1:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_1_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_1:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_1_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_address -> mutrig_lane_source_mux_1:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_read -> mutrig_lane_source_mux_1:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_write -> mutrig_lane_source_mux_1:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_writedata -> mutrig_lane_source_mux_1:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_2:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_2_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_2:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_2_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_address -> mutrig_lane_source_mux_2:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_read -> mutrig_lane_source_mux_2:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_write -> mutrig_lane_source_mux_2:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_writedata -> mutrig_lane_source_mux_2:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_3:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_3_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_3:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_3_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_address -> mutrig_lane_source_mux_3:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_read -> mutrig_lane_source_mux_3:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_write -> mutrig_lane_source_mux_3:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_writedata -> mutrig_lane_source_mux_3:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_4:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_4_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_4:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_4_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_address -> mutrig_lane_source_mux_4:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_read -> mutrig_lane_source_mux_4:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_write -> mutrig_lane_source_mux_4:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_writedata -> mutrig_lane_source_mux_4:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_5:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_5_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_5:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_5_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_address -> mutrig_lane_source_mux_5:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_read -> mutrig_lane_source_mux_5:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_write -> mutrig_lane_source_mux_5:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_writedata -> mutrig_lane_source_mux_5:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_6:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_6_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_6:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_6_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_address -> mutrig_lane_source_mux_6:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_read -> mutrig_lane_source_mux_6:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_write -> mutrig_lane_source_mux_6:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_writedata -> mutrig_lane_source_mux_6:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_7:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_7_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_7:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_7_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_address -> mutrig_lane_source_mux_7:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_read -> mutrig_lane_source_mux_7:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_write -> mutrig_lane_source_mux_7:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_writedata -> mutrig_lane_source_mux_7:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_3:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_readdata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_address
+	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_read
+	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_write
+	signal mm_interconnect_0_mutrig_datapath_subsystem_3_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_3_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_3:backpressure_fifo_csr_writedata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_4:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_readdata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_address
+	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_read
+	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_write
+	signal mm_interconnect_0_mutrig_datapath_subsystem_4_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_4_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_4:backpressure_fifo_csr_writedata
+	signal mm_interconnect_0_mts_preprocessor_0_csr_readdata                             : std_logic_vector(31 downto 0); -- mts_preprocessor_0:avs_csr_readdata -> mm_interconnect_0:mts_preprocessor_0_csr_readdata
+	signal mm_interconnect_0_mts_preprocessor_0_csr_waitrequest                          : std_logic;                     -- mts_preprocessor_0:avs_csr_waitrequest -> mm_interconnect_0:mts_preprocessor_0_csr_waitrequest
+	signal mm_interconnect_0_mts_preprocessor_0_csr_address                              : std_logic_vector(2 downto 0);  -- mm_interconnect_0:mts_preprocessor_0_csr_address -> mts_preprocessor_0:avs_csr_address
+	signal mm_interconnect_0_mts_preprocessor_0_csr_read                                 : std_logic;                     -- mm_interconnect_0:mts_preprocessor_0_csr_read -> mts_preprocessor_0:avs_csr_read
+	signal mm_interconnect_0_mts_preprocessor_0_csr_write                                : std_logic;                     -- mm_interconnect_0:mts_preprocessor_0_csr_write -> mts_preprocessor_0:avs_csr_write
+	signal mm_interconnect_0_mts_preprocessor_0_csr_writedata                            : std_logic_vector(31 downto 0); -- mm_interconnect_0:mts_preprocessor_0_csr_writedata -> mts_preprocessor_0:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_5:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_readdata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_address
+	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_read
+	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_write
+	signal mm_interconnect_0_mutrig_datapath_subsystem_5_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_5_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_5:backpressure_fifo_csr_writedata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_6:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_readdata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_address
+	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_read
+	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_write
+	signal mm_interconnect_0_mutrig_datapath_subsystem_6_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_6_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_6:backpressure_fifo_csr_writedata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_readdata  : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_7:backpressure_fifo_csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_readdata
+	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_address   : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_address -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_address
+	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_read      : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_read -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_read
+	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_write     : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_write -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_write
+	signal mm_interconnect_0_mutrig_datapath_subsystem_7_backpressure_fifo_csr_writedata : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_7_backpressure_fifo_csr_writedata -> mutrig_datapath_subsystem_7:backpressure_fifo_csr_writedata
+	signal mm_pipeline_lvds_csr_hist_m0_waitrequest                                      : std_logic;                     -- mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_waitrequest -> mm_pipeline_lvds_csr_hist:m0_waitrequest
+	signal mm_pipeline_lvds_csr_hist_m0_readdata                                         : std_logic_vector(31 downto 0); -- mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_readdata -> mm_pipeline_lvds_csr_hist:m0_readdata
+	signal mm_pipeline_lvds_csr_hist_m0_debugaccess                                      : std_logic;                     -- mm_pipeline_lvds_csr_hist:m0_debugaccess -> mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_debugaccess
+	signal mm_pipeline_lvds_csr_hist_m0_address                                          : std_logic_vector(9 downto 0);  -- mm_pipeline_lvds_csr_hist:m0_address -> mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_address
+	signal mm_pipeline_lvds_csr_hist_m0_read                                             : std_logic;                     -- mm_pipeline_lvds_csr_hist:m0_read -> mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_read
+	signal mm_pipeline_lvds_csr_hist_m0_byteenable                                       : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_hist:m0_byteenable -> mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_byteenable
+	signal mm_pipeline_lvds_csr_hist_m0_readdatavalid                                    : std_logic;                     -- mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_readdatavalid -> mm_pipeline_lvds_csr_hist:m0_readdatavalid
+	signal mm_pipeline_lvds_csr_hist_m0_writedata                                        : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hist:m0_writedata -> mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_writedata
+	signal mm_pipeline_lvds_csr_hist_m0_write                                            : std_logic;                     -- mm_pipeline_lvds_csr_hist:m0_write -> mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_write
+	signal mm_pipeline_lvds_csr_hist_m0_burstcount                                       : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_hist:m0_burstcount -> mm_interconnect_1:mm_pipeline_lvds_csr_hist_m0_burstcount
+	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_readdata                     : std_logic_vector(31 downto 0); -- histogram_ingress_bridge_0:avs_csr_readdata -> mm_interconnect_1:histogram_ingress_bridge_0_csr_readdata
+	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_waitrequest                  : std_logic;                     -- histogram_ingress_bridge_0:avs_csr_waitrequest -> mm_interconnect_1:histogram_ingress_bridge_0_csr_waitrequest
+	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_address                      : std_logic_vector(1 downto 0);  -- mm_interconnect_1:histogram_ingress_bridge_0_csr_address -> histogram_ingress_bridge_0:avs_csr_address
+	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_read                         : std_logic;                     -- mm_interconnect_1:histogram_ingress_bridge_0_csr_read -> histogram_ingress_bridge_0:avs_csr_read
+	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_write                        : std_logic;                     -- mm_interconnect_1:histogram_ingress_bridge_0_csr_write -> histogram_ingress_bridge_0:avs_csr_write
+	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_writedata                    : std_logic_vector(31 downto 0); -- mm_interconnect_1:histogram_ingress_bridge_0_csr_writedata -> histogram_ingress_bridge_0:avs_csr_writedata
+	signal mm_interconnect_1_histogram_statistics_0_csr_readdata                         : std_logic_vector(31 downto 0); -- histogram_statistics_0:avs_csr_readdata -> mm_interconnect_1:histogram_statistics_0_csr_readdata
+	signal mm_interconnect_1_histogram_statistics_0_csr_waitrequest                      : std_logic;                     -- histogram_statistics_0:avs_csr_waitrequest -> mm_interconnect_1:histogram_statistics_0_csr_waitrequest
+	signal mm_interconnect_1_histogram_statistics_0_csr_address                          : std_logic_vector(4 downto 0);  -- mm_interconnect_1:histogram_statistics_0_csr_address -> histogram_statistics_0:avs_csr_address
+	signal mm_interconnect_1_histogram_statistics_0_csr_read                             : std_logic;                     -- mm_interconnect_1:histogram_statistics_0_csr_read -> histogram_statistics_0:avs_csr_read
+	signal mm_interconnect_1_histogram_statistics_0_csr_write                            : std_logic;                     -- mm_interconnect_1:histogram_statistics_0_csr_write -> histogram_statistics_0:avs_csr_write
+	signal mm_interconnect_1_histogram_statistics_0_csr_writedata                        : std_logic_vector(31 downto 0); -- mm_interconnect_1:histogram_statistics_0_csr_writedata -> histogram_statistics_0:avs_csr_writedata
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_readdata                    : std_logic_vector(31 downto 0); -- histogram_statistics_0:avs_hist_bin_readdata -> mm_interconnect_1:histogram_statistics_0_hist_bin_readdata
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_waitrequest                 : std_logic;                     -- histogram_statistics_0:avs_hist_bin_waitrequest -> mm_interconnect_1:histogram_statistics_0_hist_bin_waitrequest
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_address                     : std_logic_vector(7 downto 0);  -- mm_interconnect_1:histogram_statistics_0_hist_bin_address -> histogram_statistics_0:avs_hist_bin_address
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_read                        : std_logic;                     -- mm_interconnect_1:histogram_statistics_0_hist_bin_read -> histogram_statistics_0:avs_hist_bin_read
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_readdatavalid               : std_logic;                     -- histogram_statistics_0:avs_hist_bin_readdatavalid -> mm_interconnect_1:histogram_statistics_0_hist_bin_readdatavalid
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_response                    : std_logic_vector(1 downto 0);  -- histogram_statistics_0:avs_hist_bin_response -> mm_interconnect_1:histogram_statistics_0_hist_bin_response
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_write                       : std_logic;                     -- mm_interconnect_1:histogram_statistics_0_hist_bin_write -> histogram_statistics_0:avs_hist_bin_write
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_1:histogram_statistics_0_hist_bin_writedata -> histogram_statistics_0:avs_hist_bin_writedata
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_writeresponsevalid          : std_logic;                     -- histogram_statistics_0:avs_hist_bin_writeresponsevalid -> mm_interconnect_1:histogram_statistics_0_hist_bin_writeresponsevalid
+	signal mm_interconnect_1_histogram_statistics_0_hist_bin_burstcount                  : std_logic_vector(8 downto 0);  -- mm_interconnect_1:histogram_statistics_0_hist_bin_burstcount -> histogram_statistics_0:avs_hist_bin_burstcount
+	signal mm_pipeline_lvds_csr_mts1_m0_waitrequest                                      : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_waitrequest -> mm_pipeline_lvds_csr_mts1:m0_waitrequest
+	signal mm_pipeline_lvds_csr_mts1_m0_readdata                                         : std_logic_vector(31 downto 0); -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_readdata -> mm_pipeline_lvds_csr_mts1:m0_readdata
+	signal mm_pipeline_lvds_csr_mts1_m0_debugaccess                                      : std_logic;                     -- mm_pipeline_lvds_csr_mts1:m0_debugaccess -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_debugaccess
+	signal mm_pipeline_lvds_csr_mts1_m0_address                                          : std_logic_vector(2 downto 0);  -- mm_pipeline_lvds_csr_mts1:m0_address -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_address
+	signal mm_pipeline_lvds_csr_mts1_m0_read                                             : std_logic;                     -- mm_pipeline_lvds_csr_mts1:m0_read -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_read
+	signal mm_pipeline_lvds_csr_mts1_m0_byteenable                                       : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_mts1:m0_byteenable -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_byteenable
+	signal mm_pipeline_lvds_csr_mts1_m0_readdatavalid                                    : std_logic;                     -- mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_readdatavalid -> mm_pipeline_lvds_csr_mts1:m0_readdatavalid
+	signal mm_pipeline_lvds_csr_mts1_m0_writedata                                        : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_mts1:m0_writedata -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_writedata
+	signal mm_pipeline_lvds_csr_mts1_m0_write                                            : std_logic;                     -- mm_pipeline_lvds_csr_mts1:m0_write -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_write
+	signal mm_pipeline_lvds_csr_mts1_m0_burstcount                                       : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_mts1:m0_burstcount -> mm_interconnect_2:mm_pipeline_lvds_csr_mts1_m0_burstcount
+	signal mm_interconnect_2_mts_preprocessor_1_csr_readdata                             : std_logic_vector(31 downto 0); -- mts_preprocessor_1:avs_csr_readdata -> mm_interconnect_2:mts_preprocessor_1_csr_readdata
+	signal mm_interconnect_2_mts_preprocessor_1_csr_waitrequest                          : std_logic;                     -- mts_preprocessor_1:avs_csr_waitrequest -> mm_interconnect_2:mts_preprocessor_1_csr_waitrequest
+	signal mm_interconnect_2_mts_preprocessor_1_csr_address                              : std_logic_vector(2 downto 0);  -- mm_interconnect_2:mts_preprocessor_1_csr_address -> mts_preprocessor_1:avs_csr_address
+	signal mm_interconnect_2_mts_preprocessor_1_csr_read                                 : std_logic;                     -- mm_interconnect_2:mts_preprocessor_1_csr_read -> mts_preprocessor_1:avs_csr_read
+	signal mm_interconnect_2_mts_preprocessor_1_csr_write                                : std_logic;                     -- mm_interconnect_2:mts_preprocessor_1_csr_write -> mts_preprocessor_1:avs_csr_write
+	signal mm_interconnect_2_mts_preprocessor_1_csr_writedata                            : std_logic_vector(31 downto 0); -- mm_interconnect_2:mts_preprocessor_1_csr_writedata -> mts_preprocessor_1:avs_csr_writedata
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest                            : std_logic;                     -- mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest -> mm_pipeline_lvds_csr_hitstack_frame:m0_waitrequest
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_readdata                               : std_logic_vector(31 downto 0); -- mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_readdata -> mm_pipeline_lvds_csr_hitstack_frame:m0_readdata
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess                            : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:m0_debugaccess -> mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_address                                : std_logic_vector(4 downto 0);  -- mm_pipeline_lvds_csr_hitstack_frame:m0_address -> mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_address
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_read                                   : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:m0_read -> mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_read
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable                             : std_logic_vector(3 downto 0);  -- mm_pipeline_lvds_csr_hitstack_frame:m0_byteenable -> mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid                          : std_logic;                     -- mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid -> mm_pipeline_lvds_csr_hitstack_frame:m0_readdatavalid
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_writedata                              : std_logic_vector(31 downto 0); -- mm_pipeline_lvds_csr_hitstack_frame:m0_writedata -> mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_writedata
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_write                                  : std_logic;                     -- mm_pipeline_lvds_csr_hitstack_frame:m0_write -> mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_write
+	signal mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount                             : std_logic_vector(0 downto 0);  -- mm_pipeline_lvds_csr_hitstack_frame:m0_burstcount -> mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount
+	signal mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_readdata       : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:feb_frame_assembly_csr_readdata -> mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_readdata
+	signal mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest    : std_logic;                     -- hit_stack_subsystem_0:feb_frame_assembly_csr_waitrequest -> mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest
+	signal mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_address        : std_logic_vector(3 downto 0);  -- mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_address -> hit_stack_subsystem_0:feb_frame_assembly_csr_address
+	signal mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_read           : std_logic;                     -- mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_read -> hit_stack_subsystem_0:feb_frame_assembly_csr_read
+	signal mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_write          : std_logic;                     -- mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_write -> hit_stack_subsystem_0:feb_frame_assembly_csr_write
+	signal mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_writedata      : std_logic_vector(31 downto 0); -- mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_writedata -> hit_stack_subsystem_0:feb_frame_assembly_csr_writedata
+	signal mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_readdata       : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:feb_frame_assembly_csr_readdata -> mm_interconnect_3:hit_stack_subsystem_1_feb_frame_assembly_csr_readdata
+	signal mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest    : std_logic;                     -- hit_stack_subsystem_1:feb_frame_assembly_csr_waitrequest -> mm_interconnect_3:hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest
+	signal mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_address        : std_logic_vector(3 downto 0);  -- mm_interconnect_3:hit_stack_subsystem_1_feb_frame_assembly_csr_address -> hit_stack_subsystem_1:feb_frame_assembly_csr_address
+	signal mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_read           : std_logic;                     -- mm_interconnect_3:hit_stack_subsystem_1_feb_frame_assembly_csr_read -> hit_stack_subsystem_1:feb_frame_assembly_csr_read
+	signal mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_write          : std_logic;                     -- mm_interconnect_3:hit_stack_subsystem_1_feb_frame_assembly_csr_write -> hit_stack_subsystem_1:feb_frame_assembly_csr_write
+	signal mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_writedata      : std_logic_vector(31 downto 0); -- mm_interconnect_3:hit_stack_subsystem_1_feb_frame_assembly_csr_writedata -> hit_stack_subsystem_1:feb_frame_assembly_csr_writedata
+	signal mm_pipeline_jtagmaster2rstctrl_m0_waitrequest                                 : std_logic;                     -- mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_waitrequest -> mm_pipeline_jtagmaster2rstctrl:m0_waitrequest
+	signal mm_pipeline_jtagmaster2rstctrl_m0_readdata                                    : std_logic_vector(31 downto 0); -- mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_readdata -> mm_pipeline_jtagmaster2rstctrl:m0_readdata
+	signal mm_pipeline_jtagmaster2rstctrl_m0_debugaccess                                 : std_logic;                     -- mm_pipeline_jtagmaster2rstctrl:m0_debugaccess -> mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_debugaccess
+	signal mm_pipeline_jtagmaster2rstctrl_m0_address                                     : std_logic_vector(5 downto 0);  -- mm_pipeline_jtagmaster2rstctrl:m0_address -> mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_address
+	signal mm_pipeline_jtagmaster2rstctrl_m0_read                                        : std_logic;                     -- mm_pipeline_jtagmaster2rstctrl:m0_read -> mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_read
+	signal mm_pipeline_jtagmaster2rstctrl_m0_byteenable                                  : std_logic_vector(3 downto 0);  -- mm_pipeline_jtagmaster2rstctrl:m0_byteenable -> mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_byteenable
+	signal mm_pipeline_jtagmaster2rstctrl_m0_readdatavalid                               : std_logic;                     -- mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_readdatavalid -> mm_pipeline_jtagmaster2rstctrl:m0_readdatavalid
+	signal mm_pipeline_jtagmaster2rstctrl_m0_writedata                                   : std_logic_vector(31 downto 0); -- mm_pipeline_jtagmaster2rstctrl:m0_writedata -> mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_writedata
+	signal mm_pipeline_jtagmaster2rstctrl_m0_write                                       : std_logic;                     -- mm_pipeline_jtagmaster2rstctrl:m0_write -> mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_write
+	signal mm_pipeline_jtagmaster2rstctrl_m0_burstcount                                  : std_logic_vector(0 downto 0);  -- mm_pipeline_jtagmaster2rstctrl:m0_burstcount -> mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_m0_burstcount
+	signal mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_readdata            : std_logic_vector(31 downto 0); -- mutrig_reset_controller_0:avs_reconfig_mgmt_readdata -> mm_interconnect_4:mutrig_reset_controller_0_reconfig_mgmt_readdata
+	signal mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_waitrequest         : std_logic;                     -- mutrig_reset_controller_0:avs_reconfig_mgmt_waitrequest -> mm_interconnect_4:mutrig_reset_controller_0_reconfig_mgmt_waitrequest
+	signal mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_address             : std_logic_vector(5 downto 0);  -- mm_interconnect_4:mutrig_reset_controller_0_reconfig_mgmt_address -> mutrig_reset_controller_0:avs_reconfig_mgmt_address
+	signal mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_read                : std_logic;                     -- mm_interconnect_4:mutrig_reset_controller_0_reconfig_mgmt_read -> mutrig_reset_controller_0:avs_reconfig_mgmt_read
+	signal mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_write               : std_logic;                     -- mm_interconnect_4:mutrig_reset_controller_0_reconfig_mgmt_write -> mutrig_reset_controller_0:avs_reconfig_mgmt_write
+	signal mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_writedata           : std_logic_vector(31 downto 0); -- mm_interconnect_4:mutrig_reset_controller_0_reconfig_mgmt_writedata -> mutrig_reset_controller_0:avs_reconfig_mgmt_writedata
 	signal lvds_rx_controller_pro_0_decoded0_data                                        : std_logic_vector(8 downto 0);  -- lvds_rx_controller_pro_0:aso_decoded0_data -> avalon_st_adapter:in_0_data
 	signal lvds_rx_controller_pro_0_decoded0_channel                                     : std_logic_vector(3 downto 0);  -- lvds_rx_controller_pro_0:aso_decoded0_channel -> avalon_st_adapter:in_0_channel
 	signal lvds_rx_controller_pro_0_decoded0_error                                       : std_logic_vector(2 downto 0);  -- lvds_rx_controller_pro_0:aso_decoded0_error -> avalon_st_adapter:in_0_error
@@ -3439,110 +3593,132 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal avalon_st_adapter_008_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_008:out_0_startofpacket -> hist_post_splitter_0:in0_startofpacket
 	signal avalon_st_adapter_008_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_008:out_0_endofpacket -> hist_post_splitter_0:in0_endofpacket
 	signal avalon_st_adapter_008_out_0_empty                                             : std_logic;                     -- avalon_st_adapter_008:out_0_empty -> hist_post_splitter_0:in0_empty
-	signal run_control_splitter_out0_valid                                               : std_logic;                     -- run_control_splitter:out0_valid -> avalon_st_adapter_009:in_0_valid
-	signal run_control_splitter_out0_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out0_data -> avalon_st_adapter_009:in_0_data
-	signal avalon_st_adapter_009_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_009:out_0_valid -> histogram_statistics_0:asi_ctrl_valid
-	signal avalon_st_adapter_009_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_009:out_0_data -> histogram_statistics_0:asi_ctrl_data
-	signal avalon_st_adapter_009_out_0_ready                                             : std_logic;                     -- histogram_statistics_0:asi_ctrl_ready -> avalon_st_adapter_009:out_0_ready
-	signal hist_post_splitter_0_out1_valid                                               : std_logic;                     -- hist_post_splitter_0:out1_valid -> avalon_st_adapter_010:in_0_valid
-	signal hist_post_splitter_0_out1_data                                                : std_logic_vector(35 downto 0); -- hist_post_splitter_0:out1_data -> avalon_st_adapter_010:in_0_data
-	signal hist_post_splitter_0_out1_ready                                               : std_logic;                     -- avalon_st_adapter_010:in_0_ready -> hist_post_splitter_0:out1_ready
-	signal hist_post_splitter_0_out1_startofpacket                                       : std_logic;                     -- hist_post_splitter_0:out1_startofpacket -> avalon_st_adapter_010:in_0_startofpacket
-	signal hist_post_splitter_0_out1_endofpacket                                         : std_logic;                     -- hist_post_splitter_0:out1_endofpacket -> avalon_st_adapter_010:in_0_endofpacket
-	signal hist_post_splitter_0_out1_empty                                               : std_logic_vector(0 downto 0);  -- hist_post_splitter_0:out1_empty -> avalon_st_adapter_010:in_0_empty
-	signal avalon_st_adapter_010_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_010:out_0_valid -> hist_post_cdc_0:in_valid
-	signal avalon_st_adapter_010_out_0_data                                              : std_logic_vector(35 downto 0); -- avalon_st_adapter_010:out_0_data -> hist_post_cdc_0:in_data
-	signal avalon_st_adapter_010_out_0_ready                                             : std_logic;                     -- hist_post_cdc_0:in_ready -> avalon_st_adapter_010:out_0_ready
-	signal avalon_st_adapter_010_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_010:out_0_startofpacket -> hist_post_cdc_0:in_startofpacket
-	signal avalon_st_adapter_010_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_010:out_0_endofpacket -> hist_post_cdc_0:in_endofpacket
-	signal run_control_splitter_out1_valid                                               : std_logic;                     -- run_control_splitter:out1_valid -> avalon_st_adapter_011:in_0_valid
-	signal run_control_splitter_out1_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out1_data -> avalon_st_adapter_011:in_0_data
-	signal avalon_st_adapter_011_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_011:out_0_valid -> mts_preprocessor_0:asi_ctrl_valid
-	signal avalon_st_adapter_011_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_011:out_0_data -> mts_preprocessor_0:asi_ctrl_data
-	signal avalon_st_adapter_011_out_0_ready                                             : std_logic;                     -- mts_preprocessor_0:asi_ctrl_ready -> avalon_st_adapter_011:out_0_ready
-	signal run_control_splitter_out10_valid                                              : std_logic;                     -- run_control_splitter:out10_valid -> avalon_st_adapter_012:in_0_valid
-	signal run_control_splitter_out10_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out10_data -> avalon_st_adapter_012:in_0_data
-	signal avalon_st_adapter_012_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_012:out_0_valid -> mutrig_datapath_subsystem_6:run_ctrl_valid
-	signal avalon_st_adapter_012_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_012:out_0_data -> mutrig_datapath_subsystem_6:run_ctrl_data
-	signal avalon_st_adapter_012_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_6:run_ctrl_ready -> avalon_st_adapter_012:out_0_ready
-	signal run_control_splitter_out11_valid                                              : std_logic;                     -- run_control_splitter:out11_valid -> avalon_st_adapter_013:in_0_valid
-	signal run_control_splitter_out11_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out11_data -> avalon_st_adapter_013:in_0_data
-	signal avalon_st_adapter_013_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_013:out_0_valid -> mutrig_datapath_subsystem_7:run_ctrl_valid
-	signal avalon_st_adapter_013_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_013:out_0_data -> mutrig_datapath_subsystem_7:run_ctrl_data
-	signal avalon_st_adapter_013_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_7:run_ctrl_ready -> avalon_st_adapter_013:out_0_ready
-	signal run_control_splitter_out12_valid                                              : std_logic;                     -- run_control_splitter:out12_valid -> avalon_st_adapter_014:in_0_valid
-	signal run_control_splitter_out12_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out12_data -> avalon_st_adapter_014:in_0_data
-	signal avalon_st_adapter_014_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_014:out_0_valid -> mts_preprocessor_1:asi_ctrl_valid
-	signal avalon_st_adapter_014_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_014:out_0_data -> mts_preprocessor_1:asi_ctrl_data
-	signal avalon_st_adapter_014_out_0_ready                                             : std_logic;                     -- mts_preprocessor_1:asi_ctrl_ready -> avalon_st_adapter_014:out_0_ready
-	signal run_control_splitter_out13_valid                                              : std_logic;                     -- run_control_splitter:out13_valid -> avalon_st_adapter_015:in_0_valid
-	signal run_control_splitter_out13_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out13_data -> avalon_st_adapter_015:in_0_data
-	signal avalon_st_adapter_015_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_015:out_0_valid -> mutrig_injector_0:asi_runctl_valid
-	signal avalon_st_adapter_015_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_015:out_0_data -> mutrig_injector_0:asi_runctl_data
-	signal avalon_st_adapter_015_out_0_ready                                             : std_logic;                     -- mutrig_injector_0:asi_runctl_ready -> avalon_st_adapter_015:out_0_ready
-	signal run_control_splitter_out14_valid                                              : std_logic;                     -- run_control_splitter:out14_valid -> avalon_st_adapter_016:in_0_valid
-	signal run_control_splitter_out14_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out14_data -> avalon_st_adapter_016:in_0_data
-	signal avalon_st_adapter_016_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_016:out_0_valid -> hit_stack_subsystem_1:run_control_signal_valid
-	signal avalon_st_adapter_016_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_016:out_0_data -> hit_stack_subsystem_1:run_control_signal_data
-	signal avalon_st_adapter_016_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_1:run_control_signal_ready -> avalon_st_adapter_016:out_0_ready
-	signal run_control_splitter_out15_valid                                              : std_logic;                     -- run_control_splitter:out15_valid -> avalon_st_adapter_017:in_0_valid
-	signal run_control_splitter_out15_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out15_data -> avalon_st_adapter_017:in_0_data
-	signal avalon_st_adapter_017_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_017:out_0_valid -> emulator_ctrl_splitter:in0_valid
-	signal avalon_st_adapter_017_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_017:out_0_data -> emulator_ctrl_splitter:in0_data
-	signal avalon_st_adapter_017_out_0_ready                                             : std_logic;                     -- emulator_ctrl_splitter:in0_ready -> avalon_st_adapter_017:out_0_ready
-	signal run_control_splitter_out2_valid                                               : std_logic;                     -- run_control_splitter:out2_valid -> avalon_st_adapter_018:in_0_valid
-	signal run_control_splitter_out2_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out2_data -> avalon_st_adapter_018:in_0_data
-	signal avalon_st_adapter_018_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_018:out_0_valid -> mutrig_datapath_subsystem_0:run_ctrl_valid
-	signal avalon_st_adapter_018_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_018:out_0_data -> mutrig_datapath_subsystem_0:run_ctrl_data
-	signal avalon_st_adapter_018_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_0:run_ctrl_ready -> avalon_st_adapter_018:out_0_ready
-	signal run_control_splitter_out3_valid                                               : std_logic;                     -- run_control_splitter:out3_valid -> avalon_st_adapter_019:in_0_valid
-	signal run_control_splitter_out3_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out3_data -> avalon_st_adapter_019:in_0_data
-	signal avalon_st_adapter_019_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_019:out_0_valid -> mutrig_datapath_subsystem_1:run_ctrl_valid
-	signal avalon_st_adapter_019_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_019:out_0_data -> mutrig_datapath_subsystem_1:run_ctrl_data
-	signal avalon_st_adapter_019_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_1:run_ctrl_ready -> avalon_st_adapter_019:out_0_ready
-	signal run_control_splitter_out4_valid                                               : std_logic;                     -- run_control_splitter:out4_valid -> avalon_st_adapter_020:in_0_valid
-	signal run_control_splitter_out4_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out4_data -> avalon_st_adapter_020:in_0_data
-	signal avalon_st_adapter_020_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_020:out_0_valid -> mutrig_datapath_subsystem_2:run_ctrl_valid
-	signal avalon_st_adapter_020_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_020:out_0_data -> mutrig_datapath_subsystem_2:run_ctrl_data
-	signal avalon_st_adapter_020_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_2:run_ctrl_ready -> avalon_st_adapter_020:out_0_ready
-	signal run_control_splitter_out5_valid                                               : std_logic;                     -- run_control_splitter:out5_valid -> avalon_st_adapter_021:in_0_valid
-	signal run_control_splitter_out5_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out5_data -> avalon_st_adapter_021:in_0_data
-	signal avalon_st_adapter_021_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_021:out_0_valid -> mutrig_datapath_subsystem_3:run_ctrl_valid
-	signal avalon_st_adapter_021_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_021:out_0_data -> mutrig_datapath_subsystem_3:run_ctrl_data
-	signal avalon_st_adapter_021_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_3:run_ctrl_ready -> avalon_st_adapter_021:out_0_ready
-	signal run_control_splitter_out6_valid                                               : std_logic;                     -- run_control_splitter:out6_valid -> avalon_st_adapter_022:in_0_valid
-	signal run_control_splitter_out6_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out6_data -> avalon_st_adapter_022:in_0_data
-	signal avalon_st_adapter_022_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_022:out_0_valid -> hit_stack_subsystem_0:run_control_signal_valid
-	signal avalon_st_adapter_022_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_022:out_0_data -> hit_stack_subsystem_0:run_control_signal_data
-	signal avalon_st_adapter_022_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_0:run_control_signal_ready -> avalon_st_adapter_022:out_0_ready
-	signal run_control_splitter_out7_valid                                               : std_logic;                     -- run_control_splitter:out7_valid -> avalon_st_adapter_023:in_0_valid
-	signal run_control_splitter_out7_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out7_data -> avalon_st_adapter_023:in_0_data
-	signal avalon_st_adapter_023_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_023:out_0_valid -> mutrig_reset_controller_0:asi_runcontrol_valid
-	signal avalon_st_adapter_023_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_023:out_0_data -> mutrig_reset_controller_0:asi_runcontrol_data
-	signal avalon_st_adapter_023_out_0_ready                                             : std_logic;                     -- mutrig_reset_controller_0:asi_runcontrol_ready -> avalon_st_adapter_023:out_0_ready
-	signal run_control_splitter_out8_valid                                               : std_logic;                     -- run_control_splitter:out8_valid -> avalon_st_adapter_024:in_0_valid
-	signal run_control_splitter_out8_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out8_data -> avalon_st_adapter_024:in_0_data
-	signal avalon_st_adapter_024_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_024:out_0_valid -> mutrig_datapath_subsystem_4:run_ctrl_valid
-	signal avalon_st_adapter_024_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_024:out_0_data -> mutrig_datapath_subsystem_4:run_ctrl_data
-	signal avalon_st_adapter_024_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_4:run_ctrl_ready -> avalon_st_adapter_024:out_0_ready
-	signal run_control_splitter_out9_valid                                               : std_logic;                     -- run_control_splitter:out9_valid -> avalon_st_adapter_025:in_0_valid
-	signal run_control_splitter_out9_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out9_data -> avalon_st_adapter_025:in_0_data
-	signal avalon_st_adapter_025_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_025:out_0_valid -> mutrig_datapath_subsystem_5:run_ctrl_valid
-	signal avalon_st_adapter_025_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_025:out_0_data -> mutrig_datapath_subsystem_5:run_ctrl_data
-	signal avalon_st_adapter_025_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_5:run_ctrl_ready -> avalon_st_adapter_025:out_0_ready
+	signal hit_stack_subsystem_1_hit_type3_valid                                         : std_logic;                     -- hit_stack_subsystem_1:hit_type3_valid -> avalon_st_adapter_009:in_0_valid
+	signal hit_stack_subsystem_1_hit_type3_data                                          : std_logic_vector(35 downto 0); -- hit_stack_subsystem_1:hit_type3_data -> avalon_st_adapter_009:in_0_data
+	signal hit_stack_subsystem_1_hit_type3_ready                                         : std_logic;                     -- avalon_st_adapter_009:in_0_ready -> hit_stack_subsystem_1:hit_type3_ready
+	signal hit_stack_subsystem_1_hit_type3_startofpacket                                 : std_logic;                     -- hit_stack_subsystem_1:hit_type3_startofpacket -> avalon_st_adapter_009:in_0_startofpacket
+	signal hit_stack_subsystem_1_hit_type3_endofpacket                                   : std_logic;                     -- hit_stack_subsystem_1:hit_type3_endofpacket -> avalon_st_adapter_009:in_0_endofpacket
+	signal avalon_st_adapter_009_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_009:out_0_valid -> hist_post_lower_splitter_0:in0_valid
+	signal avalon_st_adapter_009_out_0_data                                              : std_logic_vector(35 downto 0); -- avalon_st_adapter_009:out_0_data -> hist_post_lower_splitter_0:in0_data
+	signal avalon_st_adapter_009_out_0_ready                                             : std_logic;                     -- hist_post_lower_splitter_0:in0_ready -> avalon_st_adapter_009:out_0_ready
+	signal avalon_st_adapter_009_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_009:out_0_startofpacket -> hist_post_lower_splitter_0:in0_startofpacket
+	signal avalon_st_adapter_009_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_009:out_0_endofpacket -> hist_post_lower_splitter_0:in0_endofpacket
+	signal avalon_st_adapter_009_out_0_empty                                             : std_logic;                     -- avalon_st_adapter_009:out_0_empty -> hist_post_lower_splitter_0:in0_empty
+	signal run_control_splitter_out0_valid                                               : std_logic;                     -- run_control_splitter:out0_valid -> avalon_st_adapter_010:in_0_valid
+	signal run_control_splitter_out0_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out0_data -> avalon_st_adapter_010:in_0_data
+	signal avalon_st_adapter_010_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_010:out_0_valid -> histogram_statistics_0:asi_ctrl_valid
+	signal avalon_st_adapter_010_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_010:out_0_data -> histogram_statistics_0:asi_ctrl_data
+	signal avalon_st_adapter_010_out_0_ready                                             : std_logic;                     -- histogram_statistics_0:asi_ctrl_ready -> avalon_st_adapter_010:out_0_ready
+	signal hist_post_splitter_0_out1_valid                                               : std_logic;                     -- hist_post_splitter_0:out1_valid -> avalon_st_adapter_011:in_0_valid
+	signal hist_post_splitter_0_out1_data                                                : std_logic_vector(35 downto 0); -- hist_post_splitter_0:out1_data -> avalon_st_adapter_011:in_0_data
+	signal hist_post_splitter_0_out1_ready                                               : std_logic;                     -- avalon_st_adapter_011:in_0_ready -> hist_post_splitter_0:out1_ready
+	signal hist_post_splitter_0_out1_startofpacket                                       : std_logic;                     -- hist_post_splitter_0:out1_startofpacket -> avalon_st_adapter_011:in_0_startofpacket
+	signal hist_post_splitter_0_out1_endofpacket                                         : std_logic;                     -- hist_post_splitter_0:out1_endofpacket -> avalon_st_adapter_011:in_0_endofpacket
+	signal hist_post_splitter_0_out1_empty                                               : std_logic_vector(0 downto 0);  -- hist_post_splitter_0:out1_empty -> avalon_st_adapter_011:in_0_empty
+	signal avalon_st_adapter_011_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_011:out_0_valid -> hist_post_merge_0:asi_in0_valid
+	signal avalon_st_adapter_011_out_0_data                                              : std_logic_vector(35 downto 0); -- avalon_st_adapter_011:out_0_data -> hist_post_merge_0:asi_in0_data
+	signal avalon_st_adapter_011_out_0_ready                                             : std_logic;                     -- hist_post_merge_0:asi_in0_ready -> avalon_st_adapter_011:out_0_ready
+	signal avalon_st_adapter_011_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_011:out_0_startofpacket -> hist_post_merge_0:asi_in0_startofpacket
+	signal avalon_st_adapter_011_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_011:out_0_endofpacket -> hist_post_merge_0:asi_in0_endofpacket
+	signal hist_post_lower_splitter_0_out1_valid                                         : std_logic;                     -- hist_post_lower_splitter_0:out1_valid -> avalon_st_adapter_012:in_0_valid
+	signal hist_post_lower_splitter_0_out1_data                                          : std_logic_vector(35 downto 0); -- hist_post_lower_splitter_0:out1_data -> avalon_st_adapter_012:in_0_data
+	signal hist_post_lower_splitter_0_out1_ready                                         : std_logic;                     -- avalon_st_adapter_012:in_0_ready -> hist_post_lower_splitter_0:out1_ready
+	signal hist_post_lower_splitter_0_out1_startofpacket                                 : std_logic;                     -- hist_post_lower_splitter_0:out1_startofpacket -> avalon_st_adapter_012:in_0_startofpacket
+	signal hist_post_lower_splitter_0_out1_endofpacket                                   : std_logic;                     -- hist_post_lower_splitter_0:out1_endofpacket -> avalon_st_adapter_012:in_0_endofpacket
+	signal hist_post_lower_splitter_0_out1_empty                                         : std_logic_vector(0 downto 0);  -- hist_post_lower_splitter_0:out1_empty -> avalon_st_adapter_012:in_0_empty
+	signal avalon_st_adapter_012_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_012:out_0_valid -> hist_post_merge_0:asi_in1_valid
+	signal avalon_st_adapter_012_out_0_data                                              : std_logic_vector(35 downto 0); -- avalon_st_adapter_012:out_0_data -> hist_post_merge_0:asi_in1_data
+	signal avalon_st_adapter_012_out_0_ready                                             : std_logic;                     -- hist_post_merge_0:asi_in1_ready -> avalon_st_adapter_012:out_0_ready
+	signal avalon_st_adapter_012_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_012:out_0_startofpacket -> hist_post_merge_0:asi_in1_startofpacket
+	signal avalon_st_adapter_012_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_012:out_0_endofpacket -> hist_post_merge_0:asi_in1_endofpacket
+	signal run_control_splitter_out1_valid                                               : std_logic;                     -- run_control_splitter:out1_valid -> avalon_st_adapter_013:in_0_valid
+	signal run_control_splitter_out1_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out1_data -> avalon_st_adapter_013:in_0_data
+	signal avalon_st_adapter_013_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_013:out_0_valid -> mts_preprocessor_0:asi_ctrl_valid
+	signal avalon_st_adapter_013_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_013:out_0_data -> mts_preprocessor_0:asi_ctrl_data
+	signal avalon_st_adapter_013_out_0_ready                                             : std_logic;                     -- mts_preprocessor_0:asi_ctrl_ready -> avalon_st_adapter_013:out_0_ready
+	signal run_control_splitter_out10_valid                                              : std_logic;                     -- run_control_splitter:out10_valid -> avalon_st_adapter_014:in_0_valid
+	signal run_control_splitter_out10_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out10_data -> avalon_st_adapter_014:in_0_data
+	signal avalon_st_adapter_014_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_014:out_0_valid -> mutrig_datapath_subsystem_6:run_ctrl_valid
+	signal avalon_st_adapter_014_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_014:out_0_data -> mutrig_datapath_subsystem_6:run_ctrl_data
+	signal avalon_st_adapter_014_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_6:run_ctrl_ready -> avalon_st_adapter_014:out_0_ready
+	signal run_control_splitter_out11_valid                                              : std_logic;                     -- run_control_splitter:out11_valid -> avalon_st_adapter_015:in_0_valid
+	signal run_control_splitter_out11_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out11_data -> avalon_st_adapter_015:in_0_data
+	signal avalon_st_adapter_015_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_015:out_0_valid -> mutrig_datapath_subsystem_7:run_ctrl_valid
+	signal avalon_st_adapter_015_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_015:out_0_data -> mutrig_datapath_subsystem_7:run_ctrl_data
+	signal avalon_st_adapter_015_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_7:run_ctrl_ready -> avalon_st_adapter_015:out_0_ready
+	signal run_control_splitter_out12_valid                                              : std_logic;                     -- run_control_splitter:out12_valid -> avalon_st_adapter_016:in_0_valid
+	signal run_control_splitter_out12_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out12_data -> avalon_st_adapter_016:in_0_data
+	signal avalon_st_adapter_016_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_016:out_0_valid -> mts_preprocessor_1:asi_ctrl_valid
+	signal avalon_st_adapter_016_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_016:out_0_data -> mts_preprocessor_1:asi_ctrl_data
+	signal avalon_st_adapter_016_out_0_ready                                             : std_logic;                     -- mts_preprocessor_1:asi_ctrl_ready -> avalon_st_adapter_016:out_0_ready
+	signal run_control_splitter_out13_valid                                              : std_logic;                     -- run_control_splitter:out13_valid -> avalon_st_adapter_017:in_0_valid
+	signal run_control_splitter_out13_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out13_data -> avalon_st_adapter_017:in_0_data
+	signal avalon_st_adapter_017_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_017:out_0_valid -> mutrig_injector_0:asi_runctl_valid
+	signal avalon_st_adapter_017_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_017:out_0_data -> mutrig_injector_0:asi_runctl_data
+	signal avalon_st_adapter_017_out_0_ready                                             : std_logic;                     -- mutrig_injector_0:asi_runctl_ready -> avalon_st_adapter_017:out_0_ready
+	signal run_control_splitter_out14_valid                                              : std_logic;                     -- run_control_splitter:out14_valid -> avalon_st_adapter_018:in_0_valid
+	signal run_control_splitter_out14_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out14_data -> avalon_st_adapter_018:in_0_data
+	signal avalon_st_adapter_018_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_018:out_0_valid -> hit_stack_subsystem_1:run_control_signal_valid
+	signal avalon_st_adapter_018_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_018:out_0_data -> hit_stack_subsystem_1:run_control_signal_data
+	signal avalon_st_adapter_018_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_1:run_control_signal_ready -> avalon_st_adapter_018:out_0_ready
+	signal run_control_splitter_out15_valid                                              : std_logic;                     -- run_control_splitter:out15_valid -> avalon_st_adapter_019:in_0_valid
+	signal run_control_splitter_out15_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out15_data -> avalon_st_adapter_019:in_0_data
+	signal avalon_st_adapter_019_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_019:out_0_valid -> emulator_ctrl_splitter:in0_valid
+	signal avalon_st_adapter_019_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_019:out_0_data -> emulator_ctrl_splitter:in0_data
+	signal avalon_st_adapter_019_out_0_ready                                             : std_logic;                     -- emulator_ctrl_splitter:in0_ready -> avalon_st_adapter_019:out_0_ready
+	signal run_control_splitter_out2_valid                                               : std_logic;                     -- run_control_splitter:out2_valid -> avalon_st_adapter_020:in_0_valid
+	signal run_control_splitter_out2_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out2_data -> avalon_st_adapter_020:in_0_data
+	signal avalon_st_adapter_020_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_020:out_0_valid -> mutrig_datapath_subsystem_0:run_ctrl_valid
+	signal avalon_st_adapter_020_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_020:out_0_data -> mutrig_datapath_subsystem_0:run_ctrl_data
+	signal avalon_st_adapter_020_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_0:run_ctrl_ready -> avalon_st_adapter_020:out_0_ready
+	signal run_control_splitter_out3_valid                                               : std_logic;                     -- run_control_splitter:out3_valid -> avalon_st_adapter_021:in_0_valid
+	signal run_control_splitter_out3_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out3_data -> avalon_st_adapter_021:in_0_data
+	signal avalon_st_adapter_021_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_021:out_0_valid -> mutrig_datapath_subsystem_1:run_ctrl_valid
+	signal avalon_st_adapter_021_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_021:out_0_data -> mutrig_datapath_subsystem_1:run_ctrl_data
+	signal avalon_st_adapter_021_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_1:run_ctrl_ready -> avalon_st_adapter_021:out_0_ready
+	signal run_control_splitter_out4_valid                                               : std_logic;                     -- run_control_splitter:out4_valid -> avalon_st_adapter_022:in_0_valid
+	signal run_control_splitter_out4_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out4_data -> avalon_st_adapter_022:in_0_data
+	signal avalon_st_adapter_022_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_022:out_0_valid -> mutrig_datapath_subsystem_2:run_ctrl_valid
+	signal avalon_st_adapter_022_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_022:out_0_data -> mutrig_datapath_subsystem_2:run_ctrl_data
+	signal avalon_st_adapter_022_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_2:run_ctrl_ready -> avalon_st_adapter_022:out_0_ready
+	signal run_control_splitter_out5_valid                                               : std_logic;                     -- run_control_splitter:out5_valid -> avalon_st_adapter_023:in_0_valid
+	signal run_control_splitter_out5_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out5_data -> avalon_st_adapter_023:in_0_data
+	signal avalon_st_adapter_023_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_023:out_0_valid -> mutrig_datapath_subsystem_3:run_ctrl_valid
+	signal avalon_st_adapter_023_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_023:out_0_data -> mutrig_datapath_subsystem_3:run_ctrl_data
+	signal avalon_st_adapter_023_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_3:run_ctrl_ready -> avalon_st_adapter_023:out_0_ready
+	signal run_control_splitter_out6_valid                                               : std_logic;                     -- run_control_splitter:out6_valid -> avalon_st_adapter_024:in_0_valid
+	signal run_control_splitter_out6_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out6_data -> avalon_st_adapter_024:in_0_data
+	signal avalon_st_adapter_024_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_024:out_0_valid -> hit_stack_subsystem_0:run_control_signal_valid
+	signal avalon_st_adapter_024_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_024:out_0_data -> hit_stack_subsystem_0:run_control_signal_data
+	signal avalon_st_adapter_024_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_0:run_control_signal_ready -> avalon_st_adapter_024:out_0_ready
+	signal run_control_splitter_out7_valid                                               : std_logic;                     -- run_control_splitter:out7_valid -> avalon_st_adapter_025:in_0_valid
+	signal run_control_splitter_out7_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out7_data -> avalon_st_adapter_025:in_0_data
+	signal avalon_st_adapter_025_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_025:out_0_valid -> mutrig_reset_controller_0:asi_runcontrol_valid
+	signal avalon_st_adapter_025_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_025:out_0_data -> mutrig_reset_controller_0:asi_runcontrol_data
+	signal avalon_st_adapter_025_out_0_ready                                             : std_logic;                     -- mutrig_reset_controller_0:asi_runcontrol_ready -> avalon_st_adapter_025:out_0_ready
+	signal run_control_splitter_out8_valid                                               : std_logic;                     -- run_control_splitter:out8_valid -> avalon_st_adapter_026:in_0_valid
+	signal run_control_splitter_out8_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out8_data -> avalon_st_adapter_026:in_0_data
+	signal avalon_st_adapter_026_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_026:out_0_valid -> mutrig_datapath_subsystem_4:run_ctrl_valid
+	signal avalon_st_adapter_026_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_026:out_0_data -> mutrig_datapath_subsystem_4:run_ctrl_data
+	signal avalon_st_adapter_026_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_4:run_ctrl_ready -> avalon_st_adapter_026:out_0_ready
+	signal run_control_splitter_out9_valid                                               : std_logic;                     -- run_control_splitter:out9_valid -> avalon_st_adapter_027:in_0_valid
+	signal run_control_splitter_out9_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out9_data -> avalon_st_adapter_027:in_0_data
+	signal avalon_st_adapter_027_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_027:out_0_valid -> mutrig_datapath_subsystem_5:run_ctrl_valid
+	signal avalon_st_adapter_027_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_027:out_0_data -> mutrig_datapath_subsystem_5:run_ctrl_data
+	signal avalon_st_adapter_027_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_5:run_ctrl_ready -> avalon_st_adapter_027:out_0_ready
 	signal rst_controller_reset_out_reset                                                : std_logic;                     -- rst_controller:reset_out -> [dbg_mm2runctrl_0:i_rst, emulator_inject_fanout:rsi_reset, mutrig_injector_0:i_rst, rst_controller_reset_out_reset:in]
 	signal master_datapath_master_reset_reset                                            : std_logic;                     -- master_datapath:master_reset_reset -> [rst_controller:reset_in0, rst_controller_001:reset_in0, rst_controller_006:reset_in1, rst_controller_007:reset_in1, rst_controller_008:reset_in1]
-	signal rst_controller_001_reset_out_reset                                            : std_logic;                     -- rst_controller_001:reset_out -> [avalon_st_adapter_009:in_rst_0_reset, avalon_st_adapter_011:in_rst_0_reset, avalon_st_adapter_012:in_rst_0_reset, avalon_st_adapter_013:in_rst_0_reset, avalon_st_adapter_014:in_rst_0_reset, avalon_st_adapter_015:in_rst_0_reset, avalon_st_adapter_016:in_rst_0_reset, avalon_st_adapter_017:in_rst_0_reset, avalon_st_adapter_018:in_rst_0_reset, avalon_st_adapter_019:in_rst_0_reset, avalon_st_adapter_020:in_rst_0_reset, avalon_st_adapter_021:in_rst_0_reset, avalon_st_adapter_022:in_rst_0_reset, avalon_st_adapter_023:in_rst_0_reset, avalon_st_adapter_024:in_rst_0_reset, avalon_st_adapter_025:in_rst_0_reset, emulator_ctrl_splitter:reset, emulator_mutrig_0:i_rst, emulator_mutrig_1:i_rst, emulator_mutrig_2:i_rst, emulator_mutrig_3:i_rst, emulator_mutrig_4:i_rst, emulator_mutrig_5:i_rst, emulator_mutrig_6:i_rst, emulator_mutrig_7:i_rst, histogram_ingress_bridge_0:rsi_reset_reset, histogram_statistics_0:i_rst, mm_interconnect_0:mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mutrig_injector_0_reset_interface_reset_bridge_in_reset_reset, mts_preprocessor_0:i_rst, mts_preprocessor_1:i_rst, mutrig_lane_source_mux_0:rst, mutrig_lane_source_mux_1:rst, mutrig_lane_source_mux_2:rst, mutrig_lane_source_mux_3:rst, mutrig_lane_source_mux_4:rst, mutrig_lane_source_mux_5:rst, mutrig_lane_source_mux_6:rst, mutrig_lane_source_mux_7:rst, rst_controller_001_reset_out_reset:in, run_control_splitter:reset]
-	signal rst_controller_002_reset_out_reset                                            : std_logic;                     -- rst_controller_002:reset_out -> [avalon_st_adapter_008:in_rst_0_reset, avalon_st_adapter_010:in_rst_0_reset, hist_post_splitter_0:reset, rst_controller_002_reset_out_reset:in]
+	signal rst_controller_001_reset_out_reset                                            : std_logic;                     -- rst_controller_001:reset_out -> [avalon_st_adapter_010:in_rst_0_reset, avalon_st_adapter_013:in_rst_0_reset, avalon_st_adapter_014:in_rst_0_reset, avalon_st_adapter_015:in_rst_0_reset, avalon_st_adapter_016:in_rst_0_reset, avalon_st_adapter_017:in_rst_0_reset, avalon_st_adapter_018:in_rst_0_reset, avalon_st_adapter_019:in_rst_0_reset, avalon_st_adapter_020:in_rst_0_reset, avalon_st_adapter_021:in_rst_0_reset, avalon_st_adapter_022:in_rst_0_reset, avalon_st_adapter_023:in_rst_0_reset, avalon_st_adapter_024:in_rst_0_reset, avalon_st_adapter_025:in_rst_0_reset, avalon_st_adapter_026:in_rst_0_reset, avalon_st_adapter_027:in_rst_0_reset, emulator_ctrl_splitter:reset, emulator_mutrig_0:i_rst, emulator_mutrig_1:i_rst, emulator_mutrig_2:i_rst, emulator_mutrig_3:i_rst, emulator_mutrig_4:i_rst, emulator_mutrig_5:i_rst, emulator_mutrig_6:i_rst, emulator_mutrig_7:i_rst, histogram_ingress_bridge_0:rsi_reset_reset, histogram_statistics_0:i_rst, mm_interconnect_0:mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mutrig_injector_0_reset_interface_reset_bridge_in_reset_reset, mm_interconnect_1:histogram_ingress_bridge_0_reset_reset_bridge_in_reset_reset, mm_interconnect_2:mts_preprocessor_1_reset_interface_reset_bridge_in_reset_reset, mm_interconnect_3:hit_stack_subsystem_0_datapath_reset_reset_bridge_in_reset_reset, mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_translator_reset_reset_bridge_in_reset_reset, mts_preprocessor_0:i_rst, mts_preprocessor_1:i_rst, mutrig_lane_source_mux_0:rst, mutrig_lane_source_mux_1:rst, mutrig_lane_source_mux_2:rst, mutrig_lane_source_mux_3:rst, mutrig_lane_source_mux_4:rst, mutrig_lane_source_mux_5:rst, mutrig_lane_source_mux_6:rst, mutrig_lane_source_mux_7:rst, rst_controller_001_reset_out_reset:in, run_control_splitter:reset]
+	signal rst_controller_002_reset_out_reset                                            : std_logic;                     -- rst_controller_002:reset_out -> [avalon_st_adapter_008:in_rst_0_reset, avalon_st_adapter_009:in_rst_0_reset, avalon_st_adapter_011:in_rst_0_reset, avalon_st_adapter_012:in_rst_0_reset, hist_post_lower_splitter_0:reset, hist_post_merge_0:reset, hist_post_splitter_0:reset, rst_controller_002_reset_out_reset:in]
 	signal rst_controller_003_reset_out_reset                                            : std_logic;                     -- rst_controller_003:reset_out -> histogram_statistics_0:i_interval_reset
 	signal rst_controller_004_reset_out_reset                                            : std_logic;                     -- rst_controller_004:reset_out -> lvds_rx_controller_pro_0:rsi_data_reset
 	signal rst_controller_005_reset_out_reset                                            : std_logic;                     -- rst_controller_005:reset_out -> lvds_rx_controller_pro_0:rsi_control_reset
-	signal rst_controller_006_reset_out_reset                                            : std_logic;                     -- rst_controller_006:reset_out -> [mm_clock_crossing_bridge:m0_reset, mm_interconnect_0:mm_pipeline_lvds_csr_low_reset_reset_bridge_in_reset_reset, mm_interconnect_2:mm_clock_crossing_bridge_m0_reset_reset_bridge_in_reset_reset, mm_pipeline_lvds_csr_emu_dbg:reset, mm_pipeline_lvds_csr_hist:reset, mm_pipeline_lvds_csr_hitstack_frame:reset, mm_pipeline_lvds_csr_hitstack_ring:reset, mm_pipeline_lvds_csr_low:reset, mm_pipeline_lvds_csr_mts1:reset, mm_pipeline_lvds_csr_mutrig3:reset, mm_pipeline_lvds_csr_mutrig4_mts0:reset, mm_pipeline_lvds_csr_mutrig5:reset, mm_pipeline_lvds_csr_mutrig6:reset, mm_pipeline_lvds_csr_mutrig7:reset]
+	signal rst_controller_006_reset_out_reset                                            : std_logic;                     -- rst_controller_006:reset_out -> [mm_clock_crossing_bridge:m0_reset, mm_interconnect_0:mm_pipeline_lvds_csr_low_reset_reset_bridge_in_reset_reset, mm_interconnect_1:mm_pipeline_lvds_csr_hist_reset_reset_bridge_in_reset_reset, mm_interconnect_2:mm_pipeline_lvds_csr_mts1_reset_reset_bridge_in_reset_reset, mm_interconnect_3:mm_pipeline_lvds_csr_hitstack_frame_reset_reset_bridge_in_reset_reset, mm_pipeline_lvds_csr_emu_dbg:reset, mm_pipeline_lvds_csr_hist:reset, mm_pipeline_lvds_csr_hitstack_frame:reset, mm_pipeline_lvds_csr_hitstack_ring:reset, mm_pipeline_lvds_csr_low:reset, mm_pipeline_lvds_csr_mts1:reset, mm_pipeline_lvds_csr_mutrig3:reset, mm_pipeline_lvds_csr_mutrig4_mts0:reset, mm_pipeline_lvds_csr_mutrig5:reset, mm_pipeline_lvds_csr_mutrig6:reset, mm_pipeline_lvds_csr_mutrig7:reset]
 	signal rst_controller_007_reset_out_reset                                            : std_logic;                     -- rst_controller_007:reset_out -> mutrig_reset_controller_0:i_lvds_dpa_rst
 	signal mutrig_reset_controller_0_pll_dynamic_phase_shift_clock_clk                   : std_logic;                     -- mutrig_reset_controller_0:o_pll_dps_clk -> rst_controller_007:clk
-	signal rst_controller_008_reset_out_reset                                            : std_logic;                     -- rst_controller_008:reset_out -> [mm_interconnect_1:mutrig_reset_controller_0_dpa_reset_reset_bridge_in_reset_reset, mm_interconnect_1:mutrig_reset_controller_0_reconfig_mgmt_translator_reset_reset_bridge_in_reset_reset]
+	signal rst_controller_008_reset_out_reset                                            : std_logic;                     -- rst_controller_008:reset_out -> [mm_interconnect_4:mutrig_reset_controller_0_dpa_reset_reset_bridge_in_reset_reset, mm_interconnect_4:mutrig_reset_controller_0_reconfig_mgmt_translator_reset_reset_bridge_in_reset_reset]
 	signal rst_controller_009_reset_out_reset                                            : std_logic;                     -- rst_controller_009:reset_out -> [avalon_st_adapter:in_rst_0_reset, avalon_st_adapter_001:in_rst_0_reset, avalon_st_adapter_002:in_rst_0_reset, avalon_st_adapter_003:in_rst_0_reset, avalon_st_adapter_004:in_rst_0_reset, avalon_st_adapter_005:in_rst_0_reset, avalon_st_adapter_006:in_rst_0_reset, avalon_st_adapter_007:in_rst_0_reset]
-	signal monitor_reset_in_reset_reset_n_ports_inv                                      : std_logic;                     -- monitor_reset_in_reset_reset_n:inv -> [master_datapath:clk_reset_reset, mm_interconnect_0:lvds_rx_controller_pro_0_control_reset_reset_bridge_in_reset_reset, mm_interconnect_0:master_datapath_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset, mm_interconnect_1:mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset, mm_pipeline_jtagmaster2rstctrl:reset, rst_controller_004:reset_in0, rst_controller_005:reset_in0, rst_controller_006:reset_in0, rst_controller_007:reset_in0, rst_controller_008:reset_in0, rst_controller_009:reset_in0]
+	signal monitor_reset_in_reset_reset_n_ports_inv                                      : std_logic;                     -- monitor_reset_in_reset_reset_n:inv -> [master_datapath:clk_reset_reset, mm_interconnect_0:lvds_rx_controller_pro_0_control_reset_reset_bridge_in_reset_reset, mm_interconnect_0:master_datapath_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset, mm_interconnect_4:mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset, mm_pipeline_jtagmaster2rstctrl:reset, rst_controller_004:reset_in0, rst_controller_005:reset_in0, rst_controller_006:reset_in0, rst_controller_007:reset_in0, rst_controller_008:reset_in0, rst_controller_009:reset_in0]
 	signal xcvr_reset_reset_n_ports_inv                                                  : std_logic;                     -- xcvr_reset_reset_n:inv -> rst_controller_002:reset_in0
 	signal rst_controller_reset_out_reset_ports_inv                                      : std_logic;                     -- rst_controller_reset_out_reset:inv -> [hit_stack_subsystem_0:datapath_reset_reset_n, hit_stack_subsystem_1:datapath_reset_reset_n]
 	signal rst_controller_001_reset_out_reset_ports_inv                                  : std_logic;                     -- rst_controller_001_reset_out_reset:inv -> [hist_post_cdc_0:out_reset_n, mutrig_datapath_subsystem_0:reset_reset_n, mutrig_datapath_subsystem_1:reset_reset_n, mutrig_datapath_subsystem_2:reset_reset_n, mutrig_datapath_subsystem_3:reset_reset_n, mutrig_datapath_subsystem_4:reset_reset_n, mutrig_datapath_subsystem_5:reset_reset_n, mutrig_datapath_subsystem_6:reset_reset_n, mutrig_datapath_subsystem_7:reset_reset_n, mux_mutrig2processor:reset_n, mux_mutrig2processor_0:reset_n]
@@ -3579,9 +3755,9 @@ begin
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,        --   clk.clk
 			reset               => rst_controller_001_reset_out_reset, -- reset.reset
-			in0_ready           => avalon_st_adapter_017_out_0_ready,  --    in.ready
-			in0_valid           => avalon_st_adapter_017_out_0_valid,  --      .valid
-			in0_data            => avalon_st_adapter_017_out_0_data,   --      .data
+			in0_ready           => avalon_st_adapter_019_out_0_ready,  --    in.ready
+			in0_valid           => avalon_st_adapter_019_out_0_valid,  --      .valid
+			in0_data            => avalon_st_adapter_019_out_0_data,   --      .data
 			out0_ready          => emulator_ctrl_splitter_out0_ready,  --  out0.ready
 			out0_valid          => emulator_ctrl_splitter_out0_valid,  --      .valid
 			out0_data           => emulator_ctrl_splitter_out0_data,   --      .data
@@ -3719,28 +3895,27 @@ begin
 
 	emulator_inject_fanout : component pulse_fanout8
 		port map (
-			csi_clk               => lvds_rx_28nm_0_outclock_clk,              --           clk.clk
-			rsi_reset             => rst_controller_reset_out_reset,           --         reset.reset
-			coe_inject_pulse      => mutrig_injector_0_inject_pulse,           --     inject_in.pulse
-			coe_aux_inject_pulse  => inject_aux_pulse,                         -- inject_aux_in.pulse
-			coe_out0_pulse        => emulator_inject_fanout_out0_pulse,        --          out0.pulse
-			coe_out0_masked_pulse => emulator_inject_fanout_out0_masked_pulse, --              .masked_pulse
-			coe_out1_pulse        => emulator_inject_fanout_out1_pulse,        --          out1.pulse
-			coe_out1_masked_pulse => emulator_inject_fanout_out1_masked_pulse, --              .masked_pulse
-			coe_out2_pulse        => emulator_inject_fanout_out2_pulse,        --          out2.pulse
-			coe_out2_masked_pulse => emulator_inject_fanout_out2_masked_pulse, --              .masked_pulse
-			coe_out3_pulse        => emulator_inject_fanout_out3_pulse,        --          out3.pulse
-			coe_out3_masked_pulse => emulator_inject_fanout_out3_masked_pulse, --              .masked_pulse
-			coe_out4_pulse        => emulator_inject_fanout_out4_pulse,        --          out4.pulse
-			coe_out4_masked_pulse => emulator_inject_fanout_out4_masked_pulse, --              .masked_pulse
-			coe_out5_pulse        => emulator_inject_fanout_out5_pulse,        --          out5.pulse
-			coe_out5_masked_pulse => emulator_inject_fanout_out5_masked_pulse, --              .masked_pulse
-			coe_out6_pulse        => emulator_inject_fanout_out6_pulse,        --          out6.pulse
-			coe_out6_masked_pulse => emulator_inject_fanout_out6_masked_pulse, --              .masked_pulse
-			coe_out7_pulse        => emulator_inject_fanout_out7_pulse,        --          out7.pulse
-			coe_out7_masked_pulse => emulator_inject_fanout_out7_masked_pulse, --              .masked_pulse
-			coe_out8_pulse        => inject_pulse,                             --          out8.pulse
-			coe_out8_masked_pulse => inject_masked_pulse                       --              .masked_pulse
+			csi_clk               => lvds_rx_28nm_0_outclock_clk,              --       clk.clk
+			rsi_reset             => rst_controller_reset_out_reset,           --     reset.reset
+			coe_inject_pulse      => mutrig_injector_0_inject_pulse,           -- inject_in.pulse
+			coe_out0_pulse        => emulator_inject_fanout_out0_pulse,        --      out0.pulse
+			coe_out0_masked_pulse => emulator_inject_fanout_out0_masked_pulse, --          .masked_pulse
+			coe_out1_pulse        => emulator_inject_fanout_out1_pulse,        --      out1.pulse
+			coe_out1_masked_pulse => emulator_inject_fanout_out1_masked_pulse, --          .masked_pulse
+			coe_out2_pulse        => emulator_inject_fanout_out2_pulse,        --      out2.pulse
+			coe_out2_masked_pulse => emulator_inject_fanout_out2_masked_pulse, --          .masked_pulse
+			coe_out3_pulse        => emulator_inject_fanout_out3_pulse,        --      out3.pulse
+			coe_out3_masked_pulse => emulator_inject_fanout_out3_masked_pulse, --          .masked_pulse
+			coe_out4_pulse        => emulator_inject_fanout_out4_pulse,        --      out4.pulse
+			coe_out4_masked_pulse => emulator_inject_fanout_out4_masked_pulse, --          .masked_pulse
+			coe_out5_pulse        => emulator_inject_fanout_out5_pulse,        --      out5.pulse
+			coe_out5_masked_pulse => emulator_inject_fanout_out5_masked_pulse, --          .masked_pulse
+			coe_out6_pulse        => emulator_inject_fanout_out6_pulse,        --      out6.pulse
+			coe_out6_masked_pulse => emulator_inject_fanout_out6_masked_pulse, --          .masked_pulse
+			coe_out7_pulse        => emulator_inject_fanout_out7_pulse,        --      out7.pulse
+			coe_out7_masked_pulse => emulator_inject_fanout_out7_masked_pulse, --          .masked_pulse
+			coe_out8_pulse        => inject_pulse,                             --      out8.pulse
+			coe_out8_masked_pulse => inject_masked_pulse                       --          .masked_pulse
 		);
 
 	emulator_mutrig_0 : component emulator_mutrig
@@ -4001,11 +4176,11 @@ begin
 			in_reset_n        => rst_controller_002_reset_out_reset_ports_inv, --  in_clk_reset.reset_n
 			out_clk           => lvds_rx_28nm_0_outclock_clk,                  --       out_clk.clk
 			out_reset_n       => rst_controller_001_reset_out_reset_ports_inv, -- out_clk_reset.reset_n
-			in_data           => avalon_st_adapter_010_out_0_data,             --            in.data
-			in_valid          => avalon_st_adapter_010_out_0_valid,            --              .valid
-			in_ready          => avalon_st_adapter_010_out_0_ready,            --              .ready
-			in_startofpacket  => avalon_st_adapter_010_out_0_startofpacket,    --              .startofpacket
-			in_endofpacket    => avalon_st_adapter_010_out_0_endofpacket,      --              .endofpacket
+			in_data           => hist_post_merge_0_out_data,                   --            in.data
+			in_valid          => hist_post_merge_0_out_valid,                  --              .valid
+			in_ready          => hist_post_merge_0_out_ready,                  --              .ready
+			in_startofpacket  => hist_post_merge_0_out_startofpacket,          --              .startofpacket
+			in_endofpacket    => hist_post_merge_0_out_endofpacket,            --              .endofpacket
 			out_data          => hist_post_cdc_0_out_data,                     --           out.data
 			out_valid         => hist_post_cdc_0_out_valid,                    --              .valid
 			out_ready         => hist_post_cdc_0_out_ready,                    --              .ready
@@ -4030,7 +4205,180 @@ begin
 			space_avail_data  => open                                          --   (terminated)
 		);
 
-	hist_post_splitter_0 : component feb_system_v3_pipe_data_path_subsystem_hist_post_splitter_0
+	hist_post_lower_splitter_0 : component feb_system_v3_pipe_data_path_subsystem_hist_post_lower_splitter_0
+		generic map (
+			NUMBER_OF_OUTPUTS => 2,
+			QUALIFY_VALID_OUT => 0,
+			USE_PACKETS       => 1,
+			DATA_WIDTH        => 36,
+			CHANNEL_WIDTH     => 1,
+			ERROR_WIDTH       => 1,
+			BITS_PER_SYMBOL   => 36,
+			EMPTY_WIDTH       => 1
+		)
+		port map (
+			clk                 => xcvr_clock_clk,                                --   clk.clk
+			reset               => rst_controller_002_reset_out_reset,            -- reset.reset
+			in0_ready           => avalon_st_adapter_009_out_0_ready,             --    in.ready
+			in0_valid           => avalon_st_adapter_009_out_0_valid,             --      .valid
+			in0_startofpacket   => avalon_st_adapter_009_out_0_startofpacket,     --      .startofpacket
+			in0_endofpacket     => avalon_st_adapter_009_out_0_endofpacket,       --      .endofpacket
+			in0_empty(0)        => avalon_st_adapter_009_out_0_empty,             --      .empty
+			in0_data            => avalon_st_adapter_009_out_0_data,              --      .data
+			out0_ready          => hit_type3_lower_ready,                         --  out0.ready
+			out0_valid          => hit_type3_lower_valid,                         --      .valid
+			out0_startofpacket  => hit_type3_lower_startofpacket,                 --      .startofpacket
+			out0_endofpacket    => hit_type3_lower_endofpacket,                   --      .endofpacket
+			out0_empty          => hit_type3_lower_empty,                         --      .empty
+			out0_data           => hit_type3_lower_data,                          --      .data
+			out1_ready          => hist_post_lower_splitter_0_out1_ready,         --  out1.ready
+			out1_valid          => hist_post_lower_splitter_0_out1_valid,         --      .valid
+			out1_startofpacket  => hist_post_lower_splitter_0_out1_startofpacket, --      .startofpacket
+			out1_endofpacket    => hist_post_lower_splitter_0_out1_endofpacket,   --      .endofpacket
+			out1_empty          => hist_post_lower_splitter_0_out1_empty,         --      .empty
+			out1_data           => hist_post_lower_splitter_0_out1_data,          --      .data
+			in0_channel         => "0",                                           -- (terminated)
+			in0_error           => "0",                                           -- (terminated)
+			out0_channel        => open,                                          -- (terminated)
+			out0_error          => open,                                          -- (terminated)
+			out1_channel        => open,                                          -- (terminated)
+			out1_error          => open,                                          -- (terminated)
+			out2_ready          => '1',                                           -- (terminated)
+			out2_valid          => open,                                          -- (terminated)
+			out2_startofpacket  => open,                                          -- (terminated)
+			out2_endofpacket    => open,                                          -- (terminated)
+			out2_empty          => open,                                          -- (terminated)
+			out2_channel        => open,                                          -- (terminated)
+			out2_error          => open,                                          -- (terminated)
+			out2_data           => open,                                          -- (terminated)
+			out3_ready          => '1',                                           -- (terminated)
+			out3_valid          => open,                                          -- (terminated)
+			out3_startofpacket  => open,                                          -- (terminated)
+			out3_endofpacket    => open,                                          -- (terminated)
+			out3_empty          => open,                                          -- (terminated)
+			out3_channel        => open,                                          -- (terminated)
+			out3_error          => open,                                          -- (terminated)
+			out3_data           => open,                                          -- (terminated)
+			out4_ready          => '1',                                           -- (terminated)
+			out4_valid          => open,                                          -- (terminated)
+			out4_startofpacket  => open,                                          -- (terminated)
+			out4_endofpacket    => open,                                          -- (terminated)
+			out4_empty          => open,                                          -- (terminated)
+			out4_channel        => open,                                          -- (terminated)
+			out4_error          => open,                                          -- (terminated)
+			out4_data           => open,                                          -- (terminated)
+			out5_ready          => '1',                                           -- (terminated)
+			out5_valid          => open,                                          -- (terminated)
+			out5_startofpacket  => open,                                          -- (terminated)
+			out5_endofpacket    => open,                                          -- (terminated)
+			out5_empty          => open,                                          -- (terminated)
+			out5_channel        => open,                                          -- (terminated)
+			out5_error          => open,                                          -- (terminated)
+			out5_data           => open,                                          -- (terminated)
+			out6_ready          => '1',                                           -- (terminated)
+			out6_valid          => open,                                          -- (terminated)
+			out6_startofpacket  => open,                                          -- (terminated)
+			out6_endofpacket    => open,                                          -- (terminated)
+			out6_empty          => open,                                          -- (terminated)
+			out6_channel        => open,                                          -- (terminated)
+			out6_error          => open,                                          -- (terminated)
+			out6_data           => open,                                          -- (terminated)
+			out7_ready          => '1',                                           -- (terminated)
+			out7_valid          => open,                                          -- (terminated)
+			out7_startofpacket  => open,                                          -- (terminated)
+			out7_endofpacket    => open,                                          -- (terminated)
+			out7_empty          => open,                                          -- (terminated)
+			out7_channel        => open,                                          -- (terminated)
+			out7_error          => open,                                          -- (terminated)
+			out7_data           => open,                                          -- (terminated)
+			out8_ready          => '1',                                           -- (terminated)
+			out8_valid          => open,                                          -- (terminated)
+			out8_startofpacket  => open,                                          -- (terminated)
+			out8_endofpacket    => open,                                          -- (terminated)
+			out8_empty          => open,                                          -- (terminated)
+			out8_channel        => open,                                          -- (terminated)
+			out8_error          => open,                                          -- (terminated)
+			out8_data           => open,                                          -- (terminated)
+			out9_ready          => '1',                                           -- (terminated)
+			out9_valid          => open,                                          -- (terminated)
+			out9_startofpacket  => open,                                          -- (terminated)
+			out9_endofpacket    => open,                                          -- (terminated)
+			out9_empty          => open,                                          -- (terminated)
+			out9_channel        => open,                                          -- (terminated)
+			out9_error          => open,                                          -- (terminated)
+			out9_data           => open,                                          -- (terminated)
+			out10_ready         => '1',                                           -- (terminated)
+			out10_valid         => open,                                          -- (terminated)
+			out10_startofpacket => open,                                          -- (terminated)
+			out10_endofpacket   => open,                                          -- (terminated)
+			out10_empty         => open,                                          -- (terminated)
+			out10_channel       => open,                                          -- (terminated)
+			out10_error         => open,                                          -- (terminated)
+			out10_data          => open,                                          -- (terminated)
+			out11_ready         => '1',                                           -- (terminated)
+			out11_valid         => open,                                          -- (terminated)
+			out11_startofpacket => open,                                          -- (terminated)
+			out11_endofpacket   => open,                                          -- (terminated)
+			out11_empty         => open,                                          -- (terminated)
+			out11_channel       => open,                                          -- (terminated)
+			out11_error         => open,                                          -- (terminated)
+			out11_data          => open,                                          -- (terminated)
+			out12_ready         => '1',                                           -- (terminated)
+			out12_valid         => open,                                          -- (terminated)
+			out12_startofpacket => open,                                          -- (terminated)
+			out12_endofpacket   => open,                                          -- (terminated)
+			out12_empty         => open,                                          -- (terminated)
+			out12_channel       => open,                                          -- (terminated)
+			out12_error         => open,                                          -- (terminated)
+			out12_data          => open,                                          -- (terminated)
+			out13_ready         => '1',                                           -- (terminated)
+			out13_valid         => open,                                          -- (terminated)
+			out13_startofpacket => open,                                          -- (terminated)
+			out13_endofpacket   => open,                                          -- (terminated)
+			out13_empty         => open,                                          -- (terminated)
+			out13_channel       => open,                                          -- (terminated)
+			out13_error         => open,                                          -- (terminated)
+			out13_data          => open,                                          -- (terminated)
+			out14_ready         => '1',                                           -- (terminated)
+			out14_valid         => open,                                          -- (terminated)
+			out14_startofpacket => open,                                          -- (terminated)
+			out14_endofpacket   => open,                                          -- (terminated)
+			out14_empty         => open,                                          -- (terminated)
+			out14_channel       => open,                                          -- (terminated)
+			out14_error         => open,                                          -- (terminated)
+			out14_data          => open,                                          -- (terminated)
+			out15_ready         => '1',                                           -- (terminated)
+			out15_valid         => open,                                          -- (terminated)
+			out15_startofpacket => open,                                          -- (terminated)
+			out15_endofpacket   => open,                                          -- (terminated)
+			out15_empty         => open,                                          -- (terminated)
+			out15_channel       => open,                                          -- (terminated)
+			out15_error         => open,                                          -- (terminated)
+			out15_data          => open                                           -- (terminated)
+		);
+
+	hist_post_merge_0 : component hit_type3_stream_merge
+		port map (
+			clk                   => xcvr_clock_clk,                            --   clk.clk
+			reset                 => rst_controller_002_reset_out_reset,        -- reset.reset
+			asi_in0_data          => avalon_st_adapter_011_out_0_data,          --   in0.data
+			asi_in0_valid         => avalon_st_adapter_011_out_0_valid,         --      .valid
+			asi_in0_ready         => avalon_st_adapter_011_out_0_ready,         --      .ready
+			asi_in0_startofpacket => avalon_st_adapter_011_out_0_startofpacket, --      .startofpacket
+			asi_in0_endofpacket   => avalon_st_adapter_011_out_0_endofpacket,   --      .endofpacket
+			asi_in1_data          => avalon_st_adapter_012_out_0_data,          --   in1.data
+			asi_in1_valid         => avalon_st_adapter_012_out_0_valid,         --      .valid
+			asi_in1_ready         => avalon_st_adapter_012_out_0_ready,         --      .ready
+			asi_in1_startofpacket => avalon_st_adapter_012_out_0_startofpacket, --      .startofpacket
+			asi_in1_endofpacket   => avalon_st_adapter_012_out_0_endofpacket,   --      .endofpacket
+			aso_out_data          => hist_post_merge_0_out_data,                --   out.data
+			aso_out_valid         => hist_post_merge_0_out_valid,               --      .valid
+			aso_out_ready         => hist_post_merge_0_out_ready,               --      .ready
+			aso_out_startofpacket => hist_post_merge_0_out_startofpacket,       --      .startofpacket
+			aso_out_endofpacket   => hist_post_merge_0_out_endofpacket          --      .endofpacket
+		);
+
+	hist_post_splitter_0 : component feb_system_v3_pipe_data_path_subsystem_hist_post_lower_splitter_0
 		generic map (
 			NUMBER_OF_OUTPUTS => 2,
 			QUALIFY_VALID_OUT => 0,
@@ -4199,12 +4547,12 @@ begin
 		port map (
 			csi_clock_clk          => lvds_rx_28nm_0_outclock_clk,                                  --    clock.clk
 			rsi_reset_reset        => rst_controller_001_reset_out_reset,                           --    reset.reset
-			avs_csr_address        => mm_interconnect_0_histogram_ingress_bridge_0_csr_address,     --      csr.address
-			avs_csr_write          => mm_interconnect_0_histogram_ingress_bridge_0_csr_write,       --         .write
-			avs_csr_read           => mm_interconnect_0_histogram_ingress_bridge_0_csr_read,        --         .read
-			avs_csr_writedata      => mm_interconnect_0_histogram_ingress_bridge_0_csr_writedata,   --         .writedata
-			avs_csr_readdata       => mm_interconnect_0_histogram_ingress_bridge_0_csr_readdata,    --         .readdata
-			avs_csr_waitrequest    => mm_interconnect_0_histogram_ingress_bridge_0_csr_waitrequest, --         .waitrequest
+			avs_csr_address        => mm_interconnect_1_histogram_ingress_bridge_0_csr_address,     --      csr.address
+			avs_csr_write          => mm_interconnect_1_histogram_ingress_bridge_0_csr_write,       --         .write
+			avs_csr_read           => mm_interconnect_1_histogram_ingress_bridge_0_csr_read,        --         .read
+			avs_csr_writedata      => mm_interconnect_1_histogram_ingress_bridge_0_csr_writedata,   --         .writedata
+			avs_csr_readdata       => mm_interconnect_1_histogram_ingress_bridge_0_csr_readdata,    --         .readdata
+			avs_csr_waitrequest    => mm_interconnect_1_histogram_ingress_bridge_0_csr_waitrequest, --         .waitrequest
 			asi_pre_data           => mts_preprocessor_0_hit_type1_out_data,                        --   pre_in.data
 			asi_pre_valid          => mts_preprocessor_0_hit_type1_out_valid,                       --         .valid
 			asi_pre_ready          => mts_preprocessor_0_hit_type1_out_ready,                       --         .ready
@@ -4253,7 +4601,7 @@ begin
 			SAR_TICK_WIDTH            => 16,
 			SAR_KEY_WIDTH             => 8,
 			N_PORTS                   => 1,
-			FIFO_ADDR_WIDTH           => 10,
+			FIFO_ADDR_WIDTH           => 8,
 			CHANNELS_PER_PORT         => 32,
 			COAL_QUEUE_DEPTH          => 256,
 			AVST_DATA_WIDTH           => 39,
@@ -4267,36 +4615,36 @@ begin
 			DEBUG                     => 0,
 			VERSION_MAJOR             => 26,
 			VERSION_MINOR             => 1,
-			VERSION_PATCH             => 2,
-			BUILD                     => 425,
+			VERSION_PATCH             => 4,
+			BUILD                     => 429,
 			IP_UID                    => 1212765012,
-			VERSION_DATE              => 20260425,
-			VERSION_GIT               => 1929539473,
+			VERSION_DATE              => 20260429,
+			VERSION_GIT               => 375124078,
 			INSTANCE_ID               => 0
 		)
 		port map (
 			i_clk                           => lvds_rx_28nm_0_outclock_clk,                                          --          clock.clk
 			i_rst                           => rst_controller_001_reset_out_reset,                                   --          reset.reset
 			i_interval_reset                => rst_controller_003_reset_out_reset,                                   -- interval_reset.reset
-			avs_hist_bin_address            => mm_interconnect_0_histogram_statistics_0_hist_bin_address,            --       hist_bin.address
-			avs_hist_bin_read               => mm_interconnect_0_histogram_statistics_0_hist_bin_read,               --               .read
-			avs_hist_bin_write              => mm_interconnect_0_histogram_statistics_0_hist_bin_write,              --               .write
-			avs_hist_bin_writedata          => mm_interconnect_0_histogram_statistics_0_hist_bin_writedata,          --               .writedata
-			avs_hist_bin_readdata           => mm_interconnect_0_histogram_statistics_0_hist_bin_readdata,           --               .readdata
-			avs_hist_bin_readdatavalid      => mm_interconnect_0_histogram_statistics_0_hist_bin_readdatavalid,      --               .readdatavalid
-			avs_hist_bin_waitrequest        => mm_interconnect_0_histogram_statistics_0_hist_bin_waitrequest,        --               .waitrequest
-			avs_hist_bin_burstcount         => mm_interconnect_0_histogram_statistics_0_hist_bin_burstcount,         --               .burstcount
-			avs_hist_bin_response           => mm_interconnect_0_histogram_statistics_0_hist_bin_response,           --               .response
-			avs_hist_bin_writeresponsevalid => mm_interconnect_0_histogram_statistics_0_hist_bin_writeresponsevalid, --               .writeresponsevalid
-			avs_csr_address                 => mm_interconnect_0_histogram_statistics_0_csr_address,                 --            csr.address
-			avs_csr_read                    => mm_interconnect_0_histogram_statistics_0_csr_read,                    --               .read
-			avs_csr_write                   => mm_interconnect_0_histogram_statistics_0_csr_write,                   --               .write
-			avs_csr_writedata               => mm_interconnect_0_histogram_statistics_0_csr_writedata,               --               .writedata
-			avs_csr_readdata                => mm_interconnect_0_histogram_statistics_0_csr_readdata,                --               .readdata
-			avs_csr_waitrequest             => mm_interconnect_0_histogram_statistics_0_csr_waitrequest,             --               .waitrequest
-			asi_ctrl_data                   => avalon_st_adapter_009_out_0_data,                                     --           ctrl.data
-			asi_ctrl_valid                  => avalon_st_adapter_009_out_0_valid,                                    --               .valid
-			asi_ctrl_ready                  => avalon_st_adapter_009_out_0_ready,                                    --               .ready
+			avs_hist_bin_address            => mm_interconnect_1_histogram_statistics_0_hist_bin_address,            --       hist_bin.address
+			avs_hist_bin_read               => mm_interconnect_1_histogram_statistics_0_hist_bin_read,               --               .read
+			avs_hist_bin_write              => mm_interconnect_1_histogram_statistics_0_hist_bin_write,              --               .write
+			avs_hist_bin_writedata          => mm_interconnect_1_histogram_statistics_0_hist_bin_writedata,          --               .writedata
+			avs_hist_bin_readdata           => mm_interconnect_1_histogram_statistics_0_hist_bin_readdata,           --               .readdata
+			avs_hist_bin_readdatavalid      => mm_interconnect_1_histogram_statistics_0_hist_bin_readdatavalid,      --               .readdatavalid
+			avs_hist_bin_waitrequest        => mm_interconnect_1_histogram_statistics_0_hist_bin_waitrequest,        --               .waitrequest
+			avs_hist_bin_burstcount         => mm_interconnect_1_histogram_statistics_0_hist_bin_burstcount,         --               .burstcount
+			avs_hist_bin_response           => mm_interconnect_1_histogram_statistics_0_hist_bin_response,           --               .response
+			avs_hist_bin_writeresponsevalid => mm_interconnect_1_histogram_statistics_0_hist_bin_writeresponsevalid, --               .writeresponsevalid
+			avs_csr_address                 => mm_interconnect_1_histogram_statistics_0_csr_address,                 --            csr.address
+			avs_csr_read                    => mm_interconnect_1_histogram_statistics_0_csr_read,                    --               .read
+			avs_csr_write                   => mm_interconnect_1_histogram_statistics_0_csr_write,                   --               .write
+			avs_csr_writedata               => mm_interconnect_1_histogram_statistics_0_csr_writedata,               --               .writedata
+			avs_csr_readdata                => mm_interconnect_1_histogram_statistics_0_csr_readdata,                --               .readdata
+			avs_csr_waitrequest             => mm_interconnect_1_histogram_statistics_0_csr_waitrequest,             --               .waitrequest
+			asi_ctrl_data                   => avalon_st_adapter_010_out_0_data,                                     --           ctrl.data
+			asi_ctrl_valid                  => avalon_st_adapter_010_out_0_valid,                                    --               .valid
+			asi_ctrl_ready                  => avalon_st_adapter_010_out_0_ready,                                    --               .ready
 			asi_hist_fill_in_valid          => histogram_ingress_bridge_0_hist_out_valid,                            --   hist_fill_in.valid
 			asi_hist_fill_in_ready          => histogram_ingress_bridge_0_hist_out_ready,                            --               .ready
 			asi_hist_fill_in_data           => histogram_ingress_bridge_0_hist_out_data,                             --               .data
@@ -4311,16 +4659,16 @@ begin
 			aso_hist_fill_out_channel       => open,                                                                 --               .channel
 			asi_debug_1_valid               => mts_preprocessor_0_ts_delta_valid,                                    --        debug_1.valid
 			asi_debug_1_data                => mts_preprocessor_0_ts_delta_data,                                     --               .data
-			asi_debug_2_valid               => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid,              --        debug_2.valid
-			asi_debug_2_data                => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data,               --               .data
-			asi_debug_3_valid               => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid,              --        debug_3.valid
-			asi_debug_3_data                => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data,               --               .data
-			asi_debug_4_valid               => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid,              --        debug_4.valid
-			asi_debug_4_data                => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data,               --               .data
-			asi_debug_5_valid               => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,              --        debug_5.valid
-			asi_debug_5_data                => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data,               --               .data
-			asi_debug_6_valid               => mts_preprocessor_0_debug_burst_valid,                                 --        debug_6.valid
-			asi_debug_6_data                => mts_preprocessor_0_debug_burst_data,                                  --               .data
+			asi_debug_2_valid               => mts_preprocessor_1_ts_delta_valid,                                    --        debug_2.valid
+			asi_debug_2_data                => mts_preprocessor_1_ts_delta_data,                                     --               .data
+			asi_debug_3_valid               => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid,              --        debug_3.valid
+			asi_debug_3_data                => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data,               --               .data
+			asi_debug_4_valid               => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid,              --        debug_4.valid
+			asi_debug_4_data                => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data,               --               .data
+			asi_debug_5_valid               => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid,              --        debug_5.valid
+			asi_debug_5_data                => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data,               --               .data
+			asi_debug_6_valid               => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,              --        debug_6.valid
+			asi_debug_6_data                => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data,               --               .data
 			asi_fill_in_1_valid             => '0',                                                                  --    (terminated)
 			asi_fill_in_1_ready             => open,                                                                 --    (terminated)
 			asi_fill_in_1_data              => "000000000000000000000000000000000000000",                            --    (terminated)
@@ -4369,12 +4717,12 @@ begin
 		port map (
 			datapath_clock_clk                 => lvds_rx_28nm_0_outclock_clk,                                                --              datapath_clock.clk
 			datapath_reset_reset_n             => rst_controller_reset_out_reset_ports_inv,                                   --              datapath_reset.reset_n
-			feb_frame_assembly_csr_readdata    => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_readdata,    --      feb_frame_assembly_csr.readdata
-			feb_frame_assembly_csr_read        => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_read,        --                            .read
-			feb_frame_assembly_csr_address     => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_address,     --                            .address
-			feb_frame_assembly_csr_waitrequest => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest, --                            .waitrequest
-			feb_frame_assembly_csr_write       => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_write,       --                            .write
-			feb_frame_assembly_csr_writedata   => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_writedata,   --                            .writedata
+			feb_frame_assembly_csr_readdata    => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_readdata,    --      feb_frame_assembly_csr.readdata
+			feb_frame_assembly_csr_read        => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_read,        --                            .read
+			feb_frame_assembly_csr_address     => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_address,     --                            .address
+			feb_frame_assembly_csr_waitrequest => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest, --                            .waitrequest
+			feb_frame_assembly_csr_write       => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_write,       --                            .write
+			feb_frame_assembly_csr_writedata   => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_writedata,   --                            .writedata
 			frame_debug_burst_valid            => open,                                                                       --           frame_debug_burst.valid
 			frame_debug_burst_data             => open,                                                                       --                            .data
 			frame_debug_delay8loss_valid       => open,                                                                       --      frame_debug_delay8loss.valid
@@ -4432,9 +4780,9 @@ begin
 			ring_buffer_cam_3_csr_writedata    => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata,    --                            .writedata
 			ring_buffer_cam_3_filllevel_data   => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data,                     -- ring_buffer_cam_3_filllevel.data
 			ring_buffer_cam_3_filllevel_valid  => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,                    --                            .valid
-			run_control_signal_ready           => avalon_st_adapter_022_out_0_ready,                                          --          run_control_signal.ready
-			run_control_signal_valid           => avalon_st_adapter_022_out_0_valid,                                          --                            .valid
-			run_control_signal_data            => avalon_st_adapter_022_out_0_data,                                           --                            .data
+			run_control_signal_ready           => avalon_st_adapter_024_out_0_ready,                                          --          run_control_signal.ready
+			run_control_signal_valid           => avalon_st_adapter_024_out_0_valid,                                          --                            .valid
+			run_control_signal_data            => avalon_st_adapter_024_out_0_data,                                           --                            .data
 			xcvr_clock_clk                     => xcvr_clock_clk,                                                             --                  xcvr_clock.clk
 			xcvr_reset_reset_n                 => xcvr_reset_reset_n                                                          --                  xcvr_reset.reset_n
 		);
@@ -4443,12 +4791,12 @@ begin
 		port map (
 			datapath_clock_clk                 => lvds_rx_28nm_0_outclock_clk,                                                --              datapath_clock.clk
 			datapath_reset_reset_n             => rst_controller_reset_out_reset_ports_inv,                                   --              datapath_reset.reset_n
-			feb_frame_assembly_csr_readdata    => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_readdata,    --      feb_frame_assembly_csr.readdata
-			feb_frame_assembly_csr_read        => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_read,        --                            .read
-			feb_frame_assembly_csr_address     => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_address,     --                            .address
-			feb_frame_assembly_csr_waitrequest => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest, --                            .waitrequest
-			feb_frame_assembly_csr_write       => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_write,       --                            .write
-			feb_frame_assembly_csr_writedata   => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_writedata,   --                            .writedata
+			feb_frame_assembly_csr_readdata    => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_readdata,    --      feb_frame_assembly_csr.readdata
+			feb_frame_assembly_csr_read        => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_read,        --                            .read
+			feb_frame_assembly_csr_address     => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_address,     --                            .address
+			feb_frame_assembly_csr_waitrequest => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest, --                            .waitrequest
+			feb_frame_assembly_csr_write       => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_write,       --                            .write
+			feb_frame_assembly_csr_writedata   => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_writedata,   --                            .writedata
 			frame_debug_burst_valid            => open,                                                                       --           frame_debug_burst.valid
 			frame_debug_burst_data             => open,                                                                       --                            .data
 			frame_debug_delay8loss_valid       => open,                                                                       --      frame_debug_delay8loss.valid
@@ -4461,11 +4809,11 @@ begin
 			frame_debug_ts_valid               => open,                                                                       --                            .valid
 			frame_ts_delta_valid               => open,                                                                       --              frame_ts_delta.valid
 			frame_ts_delta_data                => open,                                                                       --                            .data
-			hit_type3_data                     => hit_type3_lower_data,                                                       --                   hit_type3.data
-			hit_type3_valid                    => hit_type3_lower_valid,                                                      --                            .valid
-			hit_type3_ready                    => hit_type3_lower_ready,                                                      --                            .ready
-			hit_type3_startofpacket            => hit_type3_lower_startofpacket,                                              --                            .startofpacket
-			hit_type3_endofpacket              => hit_type3_lower_endofpacket,                                                --                            .endofpacket
+			hit_type3_data                     => hit_stack_subsystem_1_hit_type3_data,                                       --                   hit_type3.data
+			hit_type3_valid                    => hit_stack_subsystem_1_hit_type3_valid,                                      --                            .valid
+			hit_type3_ready                    => hit_stack_subsystem_1_hit_type3_ready,                                      --                            .ready
+			hit_type3_startofpacket            => hit_stack_subsystem_1_hit_type3_startofpacket,                              --                            .startofpacket
+			hit_type3_endofpacket              => hit_stack_subsystem_1_hit_type3_endofpacket,                                --                            .endofpacket
 			hit_type_1_ready                   => mts_preprocessor_1_hit_type1_out_ready,                                     --                  hit_type_1.ready
 			hit_type_1_valid                   => mts_preprocessor_1_hit_type1_out_valid,                                     --                            .valid
 			hit_type_1_startofpacket           => mts_preprocessor_1_hit_type1_out_startofpacket,                             --                            .startofpacket
@@ -4506,9 +4854,9 @@ begin
 			ring_buffer_cam_3_csr_writedata    => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_writedata,    --                            .writedata
 			ring_buffer_cam_3_filllevel_data   => open,                                                                       -- ring_buffer_cam_3_filllevel.data
 			ring_buffer_cam_3_filllevel_valid  => open,                                                                       --                            .valid
-			run_control_signal_ready           => avalon_st_adapter_016_out_0_ready,                                          --          run_control_signal.ready
-			run_control_signal_valid           => avalon_st_adapter_016_out_0_valid,                                          --                            .valid
-			run_control_signal_data            => avalon_st_adapter_016_out_0_data,                                           --                            .data
+			run_control_signal_ready           => avalon_st_adapter_018_out_0_ready,                                          --          run_control_signal.ready
+			run_control_signal_valid           => avalon_st_adapter_018_out_0_valid,                                          --                            .valid
+			run_control_signal_data            => avalon_st_adapter_018_out_0_data,                                           --                            .data
 			xcvr_clock_clk                     => xcvr_clock_clk,                                                             --                  xcvr_clock.clk
 			xcvr_reset_reset_n                 => xcvr_reset_reset_n                                                          --                  xcvr_reset.reset_n
 		);
@@ -4698,16 +5046,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                     --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                              -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_emu_dbg_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_emu_dbg_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_emu_dbg_m0_readdatavalid,                   --      .readdatavalid
@@ -4734,16 +5082,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                  --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                           -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_hist_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_hist_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_hist_m0_readdatavalid,                   --      .readdatavalid
@@ -4770,16 +5118,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                            --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                                     -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_hitstack_frame_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid,                   --      .readdatavalid
@@ -4806,16 +5154,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                           --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                                    -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_hitstack_ring_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_hitstack_ring_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_hitstack_ring_m0_readdatavalid,                   --      .readdatavalid
@@ -4842,16 +5190,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                 --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                          -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_low_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_low_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_low_m0_readdatavalid,                   --      .readdatavalid
@@ -4878,16 +5226,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                  --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                           -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_mts1_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_mts1_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_mts1_m0_readdatavalid,                   --      .readdatavalid
@@ -4914,16 +5262,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                     --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                              -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_mutrig3_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_mutrig3_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_mutrig3_m0_readdatavalid,                   --      .readdatavalid
@@ -4950,16 +5298,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                          --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                                   -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_mutrig4_mts0_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_mutrig4_mts0_m0_readdatavalid,                   --      .readdatavalid
@@ -4986,16 +5334,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                     --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                              -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_mutrig5_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_mutrig5_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_mutrig5_m0_readdatavalid,                   --      .readdatavalid
@@ -5022,16 +5370,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                     --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                              -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_mutrig6_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_mutrig6_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_mutrig6_m0_readdatavalid,                   --      .readdatavalid
@@ -5058,16 +5406,16 @@ begin
 		port map (
 			clk              => lvds_rx_28nm_0_outclock_clk,                                     --   clk.clk
 			reset            => rst_controller_006_reset_out_reset,                              -- reset.reset
-			s0_waitrequest   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_waitrequest,   --    s0.waitrequest
-			s0_readdata      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_readdata,      --      .readdata
-			s0_readdatavalid => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid, --      .readdatavalid
-			s0_burstcount    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_burstcount,    --      .burstcount
-			s0_writedata     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_writedata,     --      .writedata
-			s0_address       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_address,       --      .address
-			s0_write         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_write,         --      .write
-			s0_read          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_read,          --      .read
-			s0_byteenable    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_byteenable,    --      .byteenable
-			s0_debugaccess   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_debugaccess,   --      .debugaccess
+			s0_waitrequest   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_waitrequest,   --    s0.waitrequest
+			s0_readdata      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_readdata,      --      .readdata
+			s0_readdatavalid => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid, --      .readdatavalid
+			s0_burstcount    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_burstcount,    --      .burstcount
+			s0_writedata     => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_writedata,     --      .writedata
+			s0_address       => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_address,       --      .address
+			s0_write         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_write,         --      .write
+			s0_read          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_read,          --      .read
+			s0_byteenable    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_byteenable,    --      .byteenable
+			s0_debugaccess   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_debugaccess,   --      .debugaccess
 			m0_waitrequest   => mm_pipeline_lvds_csr_mutrig7_m0_waitrequest,                     --    m0.waitrequest
 			m0_readdata      => mm_pipeline_lvds_csr_mutrig7_m0_readdata,                        --      .readdata
 			m0_readdatavalid => mm_pipeline_lvds_csr_mutrig7_m0_readdatavalid,                   --      .readdatavalid
@@ -5092,7 +5440,7 @@ begin
 			ENABLED_CHANNEL_HI                => 3,
 			PADDING_EOP_WAIT_CYCLE            => 512,
 			LPM_DIV_PIPELINE                  => 4,
-			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 4096,
+			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 2000,
 			MUTRIG_OVERFLOW_LOOKBACK_8N       => 2000,
 			DEBUG                             => 1
 		)
@@ -5105,9 +5453,9 @@ begin
 			avs_csr_writedata           => mm_interconnect_0_mts_preprocessor_0_csr_writedata,   --                .writedata
 			i_clk                       => lvds_rx_28nm_0_outclock_clk,                          -- clock_interface.clk
 			i_rst                       => rst_controller_001_reset_out_reset,                   -- reset_interface.reset
-			asi_ctrl_data               => avalon_st_adapter_011_out_0_data,                     --        run_ctrl.data
-			asi_ctrl_valid              => avalon_st_adapter_011_out_0_valid,                    --                .valid
-			asi_ctrl_ready              => avalon_st_adapter_011_out_0_ready,                    --                .ready
+			asi_ctrl_data               => avalon_st_adapter_013_out_0_data,                     --        run_ctrl.data
+			asi_ctrl_valid              => avalon_st_adapter_013_out_0_valid,                    --                .valid
+			asi_ctrl_ready              => avalon_st_adapter_013_out_0_ready,                    --                .ready
 			asi_hit_type0_channel       => mux_mutrig2processor_out_channel,                     --    hit_type0_in.channel
 			asi_hit_type0_startofpacket => mux_mutrig2processor_out_startofpacket,               --                .startofpacket
 			asi_hit_type0_endofpacket   => mux_mutrig2processor_out_endofpacket,                 --                .endofpacket
@@ -5126,8 +5474,8 @@ begin
 			aso_hit_type1_error         => mts_preprocessor_0_hit_type1_out_error,               --                .error
 			aso_debug_ts_valid          => open,                                                 --        debug_ts.valid
 			aso_debug_ts_data           => open,                                                 --                .data
-			aso_debug_burst_valid       => mts_preprocessor_0_debug_burst_valid,                 --     debug_burst.valid
-			aso_debug_burst_data        => mts_preprocessor_0_debug_burst_data,                  --                .data
+			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
+			aso_debug_burst_data        => open,                                                 --                .data
 			aso_ts_delta_valid          => mts_preprocessor_0_ts_delta_valid,                    --        ts_delta.valid
 			aso_ts_delta_data           => mts_preprocessor_0_ts_delta_data                      --                .data
 		);
@@ -5142,22 +5490,22 @@ begin
 			ENABLED_CHANNEL_HI                => 3,
 			PADDING_EOP_WAIT_CYCLE            => 512,
 			LPM_DIV_PIPELINE                  => 4,
-			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 4096,
+			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 2000,
 			MUTRIG_OVERFLOW_LOOKBACK_8N       => 2000,
 			DEBUG                             => 1
 		)
 		port map (
-			avs_csr_readdata            => mm_interconnect_0_mts_preprocessor_1_csr_readdata,    --             csr.readdata
-			avs_csr_read                => mm_interconnect_0_mts_preprocessor_1_csr_read,        --                .read
-			avs_csr_address             => mm_interconnect_0_mts_preprocessor_1_csr_address,     --                .address
-			avs_csr_waitrequest         => mm_interconnect_0_mts_preprocessor_1_csr_waitrequest, --                .waitrequest
-			avs_csr_write               => mm_interconnect_0_mts_preprocessor_1_csr_write,       --                .write
-			avs_csr_writedata           => mm_interconnect_0_mts_preprocessor_1_csr_writedata,   --                .writedata
+			avs_csr_readdata            => mm_interconnect_2_mts_preprocessor_1_csr_readdata,    --             csr.readdata
+			avs_csr_read                => mm_interconnect_2_mts_preprocessor_1_csr_read,        --                .read
+			avs_csr_address             => mm_interconnect_2_mts_preprocessor_1_csr_address,     --                .address
+			avs_csr_waitrequest         => mm_interconnect_2_mts_preprocessor_1_csr_waitrequest, --                .waitrequest
+			avs_csr_write               => mm_interconnect_2_mts_preprocessor_1_csr_write,       --                .write
+			avs_csr_writedata           => mm_interconnect_2_mts_preprocessor_1_csr_writedata,   --                .writedata
 			i_clk                       => lvds_rx_28nm_0_outclock_clk,                          -- clock_interface.clk
 			i_rst                       => rst_controller_001_reset_out_reset,                   -- reset_interface.reset
-			asi_ctrl_data               => avalon_st_adapter_014_out_0_data,                     --        run_ctrl.data
-			asi_ctrl_valid              => avalon_st_adapter_014_out_0_valid,                    --                .valid
-			asi_ctrl_ready              => avalon_st_adapter_014_out_0_ready,                    --                .ready
+			asi_ctrl_data               => avalon_st_adapter_016_out_0_data,                     --        run_ctrl.data
+			asi_ctrl_valid              => avalon_st_adapter_016_out_0_valid,                    --                .valid
+			asi_ctrl_ready              => avalon_st_adapter_016_out_0_ready,                    --                .ready
 			asi_hit_type0_channel       => mux_mutrig2processor_0_out_channel,                   --    hit_type0_in.channel
 			asi_hit_type0_startofpacket => mux_mutrig2processor_0_out_startofpacket,             --                .startofpacket
 			asi_hit_type0_endofpacket   => mux_mutrig2processor_0_out_endofpacket,               --                .endofpacket
@@ -5178,8 +5526,8 @@ begin
 			aso_debug_ts_data           => open,                                                 --                .data
 			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
 			aso_debug_burst_data        => open,                                                 --                .data
-			aso_ts_delta_valid          => open,                                                 --        ts_delta.valid
-			aso_ts_delta_data           => open                                                  --                .data
+			aso_ts_delta_valid          => mts_preprocessor_1_ts_delta_valid,                    --        ts_delta.valid
+			aso_ts_delta_data           => mts_preprocessor_1_ts_delta_data                      --                .data
 		);
 
 	mutrig_datapath_subsystem_0 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_0
@@ -5211,9 +5559,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_0_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_0_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_018_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_018_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_018_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_020_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_020_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_020_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_1 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_1
@@ -5245,9 +5593,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_1_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_1_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_019_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_019_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_019_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_021_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_021_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_021_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_2 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_2
@@ -5279,9 +5627,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_2_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_2_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_020_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_020_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_020_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_022_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_022_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_022_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_3 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_3
@@ -5313,9 +5661,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_3_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_3_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_021_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_021_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_021_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_023_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_023_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_023_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_4 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_4
@@ -5347,9 +5695,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_4_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_4_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_024_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_024_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_024_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_026_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_026_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_026_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_5 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_5
@@ -5381,9 +5729,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_5_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_5_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_025_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_025_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_025_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_027_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_027_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_027_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_6 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_6
@@ -5415,9 +5763,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_6_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_6_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_012_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_012_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_012_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_014_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_014_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_014_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_7 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_7
@@ -5449,9 +5797,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_7_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_7_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_013_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_013_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_013_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_015_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_015_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_015_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_injector_0 : component mutrig_injector_multiheader
@@ -5468,9 +5816,9 @@ begin
 			avs_csr_read            => mm_interconnect_0_mutrig_injector_0_csr_read,        --                    .read
 			avs_csr_readdata        => mm_interconnect_0_mutrig_injector_0_csr_readdata,    --                    .readdata
 			avs_csr_address         => mm_interconnect_0_mutrig_injector_0_csr_address,     --                    .address
-			asi_runctl_data         => avalon_st_adapter_015_out_0_data,                    --              runctl.data
-			asi_runctl_valid        => avalon_st_adapter_015_out_0_valid,                   --                    .valid
-			asi_runctl_ready        => avalon_st_adapter_015_out_0_ready,                   --                    .ready
+			asi_runctl_data         => avalon_st_adapter_017_out_0_data,                    --              runctl.data
+			asi_runctl_valid        => avalon_st_adapter_017_out_0_valid,                   --                    .valid
+			asi_runctl_ready        => avalon_st_adapter_017_out_0_ready,                   --                    .ready
 			asi_headerinfo0_data    => mutrig_datapath_subsystem_0_headerinfo_data,         --         headerinfo0.data
 			asi_headerinfo0_valid   => mutrig_datapath_subsystem_0_headerinfo_valid,        --                    .valid
 			asi_headerinfo0_channel => mutrig_datapath_subsystem_0_headerinfo_channel,      --                    .channel
@@ -5500,170 +5848,282 @@ begin
 
 	mutrig_lane_source_mux_0 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 0
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_out_0_data,                  --      real_in.data
-			asi_real_valid   => avalon_st_adapter_out_0_valid,                 --             .valid
-			asi_real_error   => avalon_st_adapter_out_0_error,                 --             .error
-			asi_real_channel => avalon_st_adapter_out_0_channel,               --             .channel
-			asi_emu_data     => emulator_mutrig_0_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_0_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_0_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_0_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_0_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_0_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_0_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_0_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_0_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_0_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_0_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_0_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_0_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_0_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_out_0_data,                               --      real_in.data
+			asi_real_valid      => avalon_st_adapter_out_0_valid,                              --             .valid
+			asi_real_error      => avalon_st_adapter_out_0_error,                              --             .error
+			asi_real_channel    => avalon_st_adapter_out_0_channel,                            --             .channel
+			asi_emu_data        => emulator_mutrig_0_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_0_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_0_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_0_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_0_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_0_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_0_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_0_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_1 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 1
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_001_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_001_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_001_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_001_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_1_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_1_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_1_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_1_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_1_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_1_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_1_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_1_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_1_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_1_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_1_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_1_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_1_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_1_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_001_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_001_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_001_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_001_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_1_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_1_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_1_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_1_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_1_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_1_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_1_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_1_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_2 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 2
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_002_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_002_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_002_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_002_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_2_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_2_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_2_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_2_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_2_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_2_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_2_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_2_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_2_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_2_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_2_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_2_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_2_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_2_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_002_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_002_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_002_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_002_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_2_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_2_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_2_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_2_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_2_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_2_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_2_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_2_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_3 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 3
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_003_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_003_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_003_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_003_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_3_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_3_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_3_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_3_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_3_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_3_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_3_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_3_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_3_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_3_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_3_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_3_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_3_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_3_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_003_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_003_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_003_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_003_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_3_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_3_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_3_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_3_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_3_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_3_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_3_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_3_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_4 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 4
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_004_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_004_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_004_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_004_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_4_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_4_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_4_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_4_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_4_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_4_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_4_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_4_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_4_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_4_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_4_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_4_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_4_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_4_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_004_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_004_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_004_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_004_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_4_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_4_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_4_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_4_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_4_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_4_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_4_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_4_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_5 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 5
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_005_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_005_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_005_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_005_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_5_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_5_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_5_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_5_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_5_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_5_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_5_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_5_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_5_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_5_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_5_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_5_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_5_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_5_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_005_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_005_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_005_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_005_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_5_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_5_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_5_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_5_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_5_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_5_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_5_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_5_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_6 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 6
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_006_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_006_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_006_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_006_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_6_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_6_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_6_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_6_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_6_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_6_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_6_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_6_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_6_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_6_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_6_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_6_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_6_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_6_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_006_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_006_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_006_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_006_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_6_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_6_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_6_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_6_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_6_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_6_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_6_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_6_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_7 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 1,
+			VERSION_PATCH   => 0,
+			BUILD           => 427,
+			VERSION_DATE    => 20260427,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 7
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_007_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_007_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_007_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_007_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_7_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_7_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_7_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_7_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_7_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_7_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_7_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_7_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_7_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_7_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_7_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_7_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_7_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_7_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_007_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_007_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_007_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_007_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_7_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_7_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_7_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_7_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_7_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_7_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_7_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_7_selected_out_channel               --             .channel
 		);
 
 	mutrig_reset_controller_0 : component mutrig_reset_controller
@@ -5672,15 +6132,15 @@ begin
 			DEBUG      => 1
 		)
 		port map (
-			asi_runcontrol_data           => avalon_st_adapter_023_out_0_data,                                      --                    runcontrol.data
-			asi_runcontrol_valid          => avalon_st_adapter_023_out_0_valid,                                     --                              .valid
-			asi_runcontrol_ready          => avalon_st_adapter_023_out_0_ready,                                     --                              .ready
-			avs_reconfig_mgmt_address     => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_address,     --                 reconfig_mgmt.address
-			avs_reconfig_mgmt_read        => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_read,        --                              .read
-			avs_reconfig_mgmt_readdata    => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_readdata,    --                              .readdata
-			avs_reconfig_mgmt_write       => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_write,       --                              .write
-			avs_reconfig_mgmt_writedata   => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_writedata,   --                              .writedata
-			avs_reconfig_mgmt_waitrequest => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_waitrequest, --                              .waitrequest
+			asi_runcontrol_data           => avalon_st_adapter_025_out_0_data,                                      --                    runcontrol.data
+			asi_runcontrol_valid          => avalon_st_adapter_025_out_0_valid,                                     --                              .valid
+			asi_runcontrol_ready          => avalon_st_adapter_025_out_0_ready,                                     --                              .ready
+			avs_reconfig_mgmt_address     => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_address,     --                 reconfig_mgmt.address
+			avs_reconfig_mgmt_read        => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_read,        --                              .read
+			avs_reconfig_mgmt_readdata    => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_readdata,    --                              .readdata
+			avs_reconfig_mgmt_write       => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_write,       --                              .write
+			avs_reconfig_mgmt_writedata   => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_writedata,   --                              .writedata
+			avs_reconfig_mgmt_waitrequest => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_waitrequest, --                              .waitrequest
 			i_lvds_dpa_rst                => rst_controller_007_reset_out_reset,                                    --                     dpa_reset.reset
 			i_lvds_dpa_clk                => lvds_rx_28nm_0_outclock_clk,                                           --                     dpa_clock.clk
 			i_si_direct_clk               => monitor_clock_125_in_clk,                                              --               si_direct_clock.clk
@@ -5940,6 +6400,16 @@ begin
 			master_datapath_master_readdatavalid                               => master_datapath_master_readdatavalid,                                          --                                                             .readdatavalid
 			master_datapath_master_write                                       => master_datapath_master_write,                                                  --                                                             .write
 			master_datapath_master_writedata                                   => master_datapath_master_writedata,                                              --                                                             .writedata
+			mm_clock_crossing_bridge_m0_address                                => mm_clock_crossing_bridge_m0_address,                                           --                                  mm_clock_crossing_bridge_m0.address
+			mm_clock_crossing_bridge_m0_waitrequest                            => mm_clock_crossing_bridge_m0_waitrequest,                                       --                                                             .waitrequest
+			mm_clock_crossing_bridge_m0_burstcount                             => mm_clock_crossing_bridge_m0_burstcount,                                        --                                                             .burstcount
+			mm_clock_crossing_bridge_m0_byteenable                             => mm_clock_crossing_bridge_m0_byteenable,                                        --                                                             .byteenable
+			mm_clock_crossing_bridge_m0_read                                   => mm_clock_crossing_bridge_m0_read,                                              --                                                             .read
+			mm_clock_crossing_bridge_m0_readdata                               => mm_clock_crossing_bridge_m0_readdata,                                          --                                                             .readdata
+			mm_clock_crossing_bridge_m0_readdatavalid                          => mm_clock_crossing_bridge_m0_readdatavalid,                                     --                                                             .readdatavalid
+			mm_clock_crossing_bridge_m0_write                                  => mm_clock_crossing_bridge_m0_write,                                             --                                                             .write
+			mm_clock_crossing_bridge_m0_writedata                              => mm_clock_crossing_bridge_m0_writedata,                                         --                                                             .writedata
+			mm_clock_crossing_bridge_m0_debugaccess                            => mm_clock_crossing_bridge_m0_debugaccess,                                       --                                                             .debugaccess
 			mm_pipeline_lvds_csr_emu_dbg_m0_address                            => mm_pipeline_lvds_csr_emu_dbg_m0_address,                                       --                              mm_pipeline_lvds_csr_emu_dbg_m0.address
 			mm_pipeline_lvds_csr_emu_dbg_m0_waitrequest                        => mm_pipeline_lvds_csr_emu_dbg_m0_waitrequest,                                   --                                                             .waitrequest
 			mm_pipeline_lvds_csr_emu_dbg_m0_burstcount                         => mm_pipeline_lvds_csr_emu_dbg_m0_burstcount,                                    --                                                             .burstcount
@@ -5950,26 +6420,6 @@ begin
 			mm_pipeline_lvds_csr_emu_dbg_m0_write                              => mm_pipeline_lvds_csr_emu_dbg_m0_write,                                         --                                                             .write
 			mm_pipeline_lvds_csr_emu_dbg_m0_writedata                          => mm_pipeline_lvds_csr_emu_dbg_m0_writedata,                                     --                                                             .writedata
 			mm_pipeline_lvds_csr_emu_dbg_m0_debugaccess                        => mm_pipeline_lvds_csr_emu_dbg_m0_debugaccess,                                   --                                                             .debugaccess
-			mm_pipeline_lvds_csr_hist_m0_address                               => mm_pipeline_lvds_csr_hist_m0_address,                                          --                                 mm_pipeline_lvds_csr_hist_m0.address
-			mm_pipeline_lvds_csr_hist_m0_waitrequest                           => mm_pipeline_lvds_csr_hist_m0_waitrequest,                                      --                                                             .waitrequest
-			mm_pipeline_lvds_csr_hist_m0_burstcount                            => mm_pipeline_lvds_csr_hist_m0_burstcount,                                       --                                                             .burstcount
-			mm_pipeline_lvds_csr_hist_m0_byteenable                            => mm_pipeline_lvds_csr_hist_m0_byteenable,                                       --                                                             .byteenable
-			mm_pipeline_lvds_csr_hist_m0_read                                  => mm_pipeline_lvds_csr_hist_m0_read,                                             --                                                             .read
-			mm_pipeline_lvds_csr_hist_m0_readdata                              => mm_pipeline_lvds_csr_hist_m0_readdata,                                         --                                                             .readdata
-			mm_pipeline_lvds_csr_hist_m0_readdatavalid                         => mm_pipeline_lvds_csr_hist_m0_readdatavalid,                                    --                                                             .readdatavalid
-			mm_pipeline_lvds_csr_hist_m0_write                                 => mm_pipeline_lvds_csr_hist_m0_write,                                            --                                                             .write
-			mm_pipeline_lvds_csr_hist_m0_writedata                             => mm_pipeline_lvds_csr_hist_m0_writedata,                                        --                                                             .writedata
-			mm_pipeline_lvds_csr_hist_m0_debugaccess                           => mm_pipeline_lvds_csr_hist_m0_debugaccess,                                      --                                                             .debugaccess
-			mm_pipeline_lvds_csr_hitstack_frame_m0_address                     => mm_pipeline_lvds_csr_hitstack_frame_m0_address,                                --                       mm_pipeline_lvds_csr_hitstack_frame_m0.address
-			mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest                 => mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest,                            --                                                             .waitrequest
-			mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount                  => mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount,                             --                                                             .burstcount
-			mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable                  => mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable,                             --                                                             .byteenable
-			mm_pipeline_lvds_csr_hitstack_frame_m0_read                        => mm_pipeline_lvds_csr_hitstack_frame_m0_read,                                   --                                                             .read
-			mm_pipeline_lvds_csr_hitstack_frame_m0_readdata                    => mm_pipeline_lvds_csr_hitstack_frame_m0_readdata,                               --                                                             .readdata
-			mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid               => mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid,                          --                                                             .readdatavalid
-			mm_pipeline_lvds_csr_hitstack_frame_m0_write                       => mm_pipeline_lvds_csr_hitstack_frame_m0_write,                                  --                                                             .write
-			mm_pipeline_lvds_csr_hitstack_frame_m0_writedata                   => mm_pipeline_lvds_csr_hitstack_frame_m0_writedata,                              --                                                             .writedata
-			mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess                 => mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess,                            --                                                             .debugaccess
 			mm_pipeline_lvds_csr_hitstack_ring_m0_address                      => mm_pipeline_lvds_csr_hitstack_ring_m0_address,                                 --                        mm_pipeline_lvds_csr_hitstack_ring_m0.address
 			mm_pipeline_lvds_csr_hitstack_ring_m0_waitrequest                  => mm_pipeline_lvds_csr_hitstack_ring_m0_waitrequest,                             --                                                             .waitrequest
 			mm_pipeline_lvds_csr_hitstack_ring_m0_burstcount                   => mm_pipeline_lvds_csr_hitstack_ring_m0_burstcount,                              --                                                             .burstcount
@@ -5990,16 +6440,6 @@ begin
 			mm_pipeline_lvds_csr_low_m0_write                                  => mm_pipeline_lvds_csr_low_m0_write,                                             --                                                             .write
 			mm_pipeline_lvds_csr_low_m0_writedata                              => mm_pipeline_lvds_csr_low_m0_writedata,                                         --                                                             .writedata
 			mm_pipeline_lvds_csr_low_m0_debugaccess                            => mm_pipeline_lvds_csr_low_m0_debugaccess,                                       --                                                             .debugaccess
-			mm_pipeline_lvds_csr_mts1_m0_address                               => mm_pipeline_lvds_csr_mts1_m0_address,                                          --                                 mm_pipeline_lvds_csr_mts1_m0.address
-			mm_pipeline_lvds_csr_mts1_m0_waitrequest                           => mm_pipeline_lvds_csr_mts1_m0_waitrequest,                                      --                                                             .waitrequest
-			mm_pipeline_lvds_csr_mts1_m0_burstcount                            => mm_pipeline_lvds_csr_mts1_m0_burstcount,                                       --                                                             .burstcount
-			mm_pipeline_lvds_csr_mts1_m0_byteenable                            => mm_pipeline_lvds_csr_mts1_m0_byteenable,                                       --                                                             .byteenable
-			mm_pipeline_lvds_csr_mts1_m0_read                                  => mm_pipeline_lvds_csr_mts1_m0_read,                                             --                                                             .read
-			mm_pipeline_lvds_csr_mts1_m0_readdata                              => mm_pipeline_lvds_csr_mts1_m0_readdata,                                         --                                                             .readdata
-			mm_pipeline_lvds_csr_mts1_m0_readdatavalid                         => mm_pipeline_lvds_csr_mts1_m0_readdatavalid,                                    --                                                             .readdatavalid
-			mm_pipeline_lvds_csr_mts1_m0_write                                 => mm_pipeline_lvds_csr_mts1_m0_write,                                            --                                                             .write
-			mm_pipeline_lvds_csr_mts1_m0_writedata                             => mm_pipeline_lvds_csr_mts1_m0_writedata,                                        --                                                             .writedata
-			mm_pipeline_lvds_csr_mts1_m0_debugaccess                           => mm_pipeline_lvds_csr_mts1_m0_debugaccess,                                      --                                                             .debugaccess
 			mm_pipeline_lvds_csr_mutrig3_m0_address                            => mm_pipeline_lvds_csr_mutrig3_m0_address,                                       --                              mm_pipeline_lvds_csr_mutrig3_m0.address
 			mm_pipeline_lvds_csr_mutrig3_m0_waitrequest                        => mm_pipeline_lvds_csr_mutrig3_m0_waitrequest,                                   --                                                             .waitrequest
 			mm_pipeline_lvds_csr_mutrig3_m0_burstcount                         => mm_pipeline_lvds_csr_mutrig3_m0_burstcount,                                    --                                                             .burstcount
@@ -6104,34 +6544,6 @@ begin
 			emulator_mutrig_7_csr_readdata                                     => mm_interconnect_0_emulator_mutrig_7_csr_readdata,                              --                                                             .readdata
 			emulator_mutrig_7_csr_writedata                                    => mm_interconnect_0_emulator_mutrig_7_csr_writedata,                             --                                                             .writedata
 			emulator_mutrig_7_csr_waitrequest                                  => mm_interconnect_0_emulator_mutrig_7_csr_waitrequest,                           --                                                             .waitrequest
-			histogram_ingress_bridge_0_csr_address                             => mm_interconnect_0_histogram_ingress_bridge_0_csr_address,                      --                               histogram_ingress_bridge_0_csr.address
-			histogram_ingress_bridge_0_csr_write                               => mm_interconnect_0_histogram_ingress_bridge_0_csr_write,                        --                                                             .write
-			histogram_ingress_bridge_0_csr_read                                => mm_interconnect_0_histogram_ingress_bridge_0_csr_read,                         --                                                             .read
-			histogram_ingress_bridge_0_csr_readdata                            => mm_interconnect_0_histogram_ingress_bridge_0_csr_readdata,                     --                                                             .readdata
-			histogram_ingress_bridge_0_csr_writedata                           => mm_interconnect_0_histogram_ingress_bridge_0_csr_writedata,                    --                                                             .writedata
-			histogram_ingress_bridge_0_csr_waitrequest                         => mm_interconnect_0_histogram_ingress_bridge_0_csr_waitrequest,                  --                                                             .waitrequest
-			histogram_statistics_0_csr_address                                 => mm_interconnect_0_histogram_statistics_0_csr_address,                          --                                   histogram_statistics_0_csr.address
-			histogram_statistics_0_csr_write                                   => mm_interconnect_0_histogram_statistics_0_csr_write,                            --                                                             .write
-			histogram_statistics_0_csr_read                                    => mm_interconnect_0_histogram_statistics_0_csr_read,                             --                                                             .read
-			histogram_statistics_0_csr_readdata                                => mm_interconnect_0_histogram_statistics_0_csr_readdata,                         --                                                             .readdata
-			histogram_statistics_0_csr_writedata                               => mm_interconnect_0_histogram_statistics_0_csr_writedata,                        --                                                             .writedata
-			histogram_statistics_0_csr_waitrequest                             => mm_interconnect_0_histogram_statistics_0_csr_waitrequest,                      --                                                             .waitrequest
-			histogram_statistics_0_hist_bin_address                            => mm_interconnect_0_histogram_statistics_0_hist_bin_address,                     --                              histogram_statistics_0_hist_bin.address
-			histogram_statistics_0_hist_bin_write                              => mm_interconnect_0_histogram_statistics_0_hist_bin_write,                       --                                                             .write
-			histogram_statistics_0_hist_bin_read                               => mm_interconnect_0_histogram_statistics_0_hist_bin_read,                        --                                                             .read
-			histogram_statistics_0_hist_bin_readdata                           => mm_interconnect_0_histogram_statistics_0_hist_bin_readdata,                    --                                                             .readdata
-			histogram_statistics_0_hist_bin_writedata                          => mm_interconnect_0_histogram_statistics_0_hist_bin_writedata,                   --                                                             .writedata
-			histogram_statistics_0_hist_bin_burstcount                         => mm_interconnect_0_histogram_statistics_0_hist_bin_burstcount,                  --                                                             .burstcount
-			histogram_statistics_0_hist_bin_readdatavalid                      => mm_interconnect_0_histogram_statistics_0_hist_bin_readdatavalid,               --                                                             .readdatavalid
-			histogram_statistics_0_hist_bin_waitrequest                        => mm_interconnect_0_histogram_statistics_0_hist_bin_waitrequest,                 --                                                             .waitrequest
-			histogram_statistics_0_hist_bin_response                           => mm_interconnect_0_histogram_statistics_0_hist_bin_response,                    --                                                             .response
-			histogram_statistics_0_hist_bin_writeresponsevalid                 => mm_interconnect_0_histogram_statistics_0_hist_bin_writeresponsevalid,          --                                                             .writeresponsevalid
-			hit_stack_subsystem_0_feb_frame_assembly_csr_address               => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_address,        --                 hit_stack_subsystem_0_feb_frame_assembly_csr.address
-			hit_stack_subsystem_0_feb_frame_assembly_csr_write                 => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_write,          --                                                             .write
-			hit_stack_subsystem_0_feb_frame_assembly_csr_read                  => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_read,           --                                                             .read
-			hit_stack_subsystem_0_feb_frame_assembly_csr_readdata              => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_readdata,       --                                                             .readdata
-			hit_stack_subsystem_0_feb_frame_assembly_csr_writedata             => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_writedata,      --                                                             .writedata
-			hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest           => mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest,    --                                                             .waitrequest
 			hit_stack_subsystem_0_ring_buffer_cam_0_csr_address                => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_address,         --                  hit_stack_subsystem_0_ring_buffer_cam_0_csr.address
 			hit_stack_subsystem_0_ring_buffer_cam_0_csr_write                  => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_write,           --                                                             .write
 			hit_stack_subsystem_0_ring_buffer_cam_0_csr_read                   => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_read,            --                                                             .read
@@ -6156,12 +6568,6 @@ begin
 			hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata               => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata,        --                                                             .readdata
 			hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata              => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata,       --                                                             .writedata
 			hit_stack_subsystem_0_ring_buffer_cam_3_csr_waitrequest            => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_waitrequest,     --                                                             .waitrequest
-			hit_stack_subsystem_1_feb_frame_assembly_csr_address               => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_address,        --                 hit_stack_subsystem_1_feb_frame_assembly_csr.address
-			hit_stack_subsystem_1_feb_frame_assembly_csr_write                 => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_write,          --                                                             .write
-			hit_stack_subsystem_1_feb_frame_assembly_csr_read                  => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_read,           --                                                             .read
-			hit_stack_subsystem_1_feb_frame_assembly_csr_readdata              => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_readdata,       --                                                             .readdata
-			hit_stack_subsystem_1_feb_frame_assembly_csr_writedata             => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_writedata,      --                                                             .writedata
-			hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest           => mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest,    --                                                             .waitrequest
 			hit_stack_subsystem_1_ring_buffer_cam_0_csr_address                => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_address,         --                  hit_stack_subsystem_1_ring_buffer_cam_0_csr.address
 			hit_stack_subsystem_1_ring_buffer_cam_0_csr_write                  => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_write,           --                                                             .write
 			hit_stack_subsystem_1_ring_buffer_cam_0_csr_read                   => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_read,            --                                                             .read
@@ -6202,18 +6608,122 @@ begin
 			mm_pipeline_jtagmaster2rstctrl_s0_readdatavalid                    => mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_readdatavalid,             --                                                             .readdatavalid
 			mm_pipeline_jtagmaster2rstctrl_s0_waitrequest                      => mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_waitrequest,               --                                                             .waitrequest
 			mm_pipeline_jtagmaster2rstctrl_s0_debugaccess                      => mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_debugaccess,               --                                                             .debugaccess
+			mm_pipeline_lvds_csr_emu_dbg_s0_address                            => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_address,                     --                              mm_pipeline_lvds_csr_emu_dbg_s0.address
+			mm_pipeline_lvds_csr_emu_dbg_s0_write                              => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_write,                       --                                                             .write
+			mm_pipeline_lvds_csr_emu_dbg_s0_read                               => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_read,                        --                                                             .read
+			mm_pipeline_lvds_csr_emu_dbg_s0_readdata                           => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_readdata,                    --                                                             .readdata
+			mm_pipeline_lvds_csr_emu_dbg_s0_writedata                          => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_writedata,                   --                                                             .writedata
+			mm_pipeline_lvds_csr_emu_dbg_s0_burstcount                         => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_burstcount,                  --                                                             .burstcount
+			mm_pipeline_lvds_csr_emu_dbg_s0_byteenable                         => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_byteenable,                  --                                                             .byteenable
+			mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid                      => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid,               --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest                        => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest,                 --                                                             .waitrequest
+			mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess                        => mm_interconnect_0_mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess,                 --                                                             .debugaccess
+			mm_pipeline_lvds_csr_hist_s0_address                               => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_address,                        --                                 mm_pipeline_lvds_csr_hist_s0.address
+			mm_pipeline_lvds_csr_hist_s0_write                                 => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_write,                          --                                                             .write
+			mm_pipeline_lvds_csr_hist_s0_read                                  => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_read,                           --                                                             .read
+			mm_pipeline_lvds_csr_hist_s0_readdata                              => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_readdata,                       --                                                             .readdata
+			mm_pipeline_lvds_csr_hist_s0_writedata                             => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_writedata,                      --                                                             .writedata
+			mm_pipeline_lvds_csr_hist_s0_burstcount                            => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_burstcount,                     --                                                             .burstcount
+			mm_pipeline_lvds_csr_hist_s0_byteenable                            => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_byteenable,                     --                                                             .byteenable
+			mm_pipeline_lvds_csr_hist_s0_readdatavalid                         => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_readdatavalid,                  --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_hist_s0_waitrequest                           => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_waitrequest,                    --                                                             .waitrequest
+			mm_pipeline_lvds_csr_hist_s0_debugaccess                           => mm_interconnect_0_mm_pipeline_lvds_csr_hist_s0_debugaccess,                    --                                                             .debugaccess
+			mm_pipeline_lvds_csr_hitstack_frame_s0_address                     => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_address,              --                       mm_pipeline_lvds_csr_hitstack_frame_s0.address
+			mm_pipeline_lvds_csr_hitstack_frame_s0_write                       => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_write,                --                                                             .write
+			mm_pipeline_lvds_csr_hitstack_frame_s0_read                        => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_read,                 --                                                             .read
+			mm_pipeline_lvds_csr_hitstack_frame_s0_readdata                    => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_readdata,             --                                                             .readdata
+			mm_pipeline_lvds_csr_hitstack_frame_s0_writedata                   => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_writedata,            --                                                             .writedata
+			mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount                  => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount,           --                                                             .burstcount
+			mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable                  => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable,           --                                                             .byteenable
+			mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid               => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid,        --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest                 => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest,          --                                                             .waitrequest
+			mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess                 => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess,          --                                                             .debugaccess
+			mm_pipeline_lvds_csr_hitstack_ring_s0_address                      => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_address,               --                        mm_pipeline_lvds_csr_hitstack_ring_s0.address
+			mm_pipeline_lvds_csr_hitstack_ring_s0_write                        => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_write,                 --                                                             .write
+			mm_pipeline_lvds_csr_hitstack_ring_s0_read                         => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_read,                  --                                                             .read
+			mm_pipeline_lvds_csr_hitstack_ring_s0_readdata                     => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_readdata,              --                                                             .readdata
+			mm_pipeline_lvds_csr_hitstack_ring_s0_writedata                    => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_writedata,             --                                                             .writedata
+			mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount                   => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount,            --                                                             .burstcount
+			mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable                   => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable,            --                                                             .byteenable
+			mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid                => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid,         --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest                  => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest,           --                                                             .waitrequest
+			mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess                  => mm_interconnect_0_mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess,           --                                                             .debugaccess
+			mm_pipeline_lvds_csr_low_s0_address                                => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_address,                         --                                  mm_pipeline_lvds_csr_low_s0.address
+			mm_pipeline_lvds_csr_low_s0_write                                  => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_write,                           --                                                             .write
+			mm_pipeline_lvds_csr_low_s0_read                                   => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_read,                            --                                                             .read
+			mm_pipeline_lvds_csr_low_s0_readdata                               => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_readdata,                        --                                                             .readdata
+			mm_pipeline_lvds_csr_low_s0_writedata                              => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_writedata,                       --                                                             .writedata
+			mm_pipeline_lvds_csr_low_s0_burstcount                             => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_burstcount,                      --                                                             .burstcount
+			mm_pipeline_lvds_csr_low_s0_byteenable                             => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_byteenable,                      --                                                             .byteenable
+			mm_pipeline_lvds_csr_low_s0_readdatavalid                          => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_readdatavalid,                   --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_low_s0_waitrequest                            => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_waitrequest,                     --                                                             .waitrequest
+			mm_pipeline_lvds_csr_low_s0_debugaccess                            => mm_interconnect_0_mm_pipeline_lvds_csr_low_s0_debugaccess,                     --                                                             .debugaccess
+			mm_pipeline_lvds_csr_mts1_s0_address                               => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_address,                        --                                 mm_pipeline_lvds_csr_mts1_s0.address
+			mm_pipeline_lvds_csr_mts1_s0_write                                 => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_write,                          --                                                             .write
+			mm_pipeline_lvds_csr_mts1_s0_read                                  => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_read,                           --                                                             .read
+			mm_pipeline_lvds_csr_mts1_s0_readdata                              => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_readdata,                       --                                                             .readdata
+			mm_pipeline_lvds_csr_mts1_s0_writedata                             => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_writedata,                      --                                                             .writedata
+			mm_pipeline_lvds_csr_mts1_s0_burstcount                            => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_burstcount,                     --                                                             .burstcount
+			mm_pipeline_lvds_csr_mts1_s0_byteenable                            => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_byteenable,                     --                                                             .byteenable
+			mm_pipeline_lvds_csr_mts1_s0_readdatavalid                         => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_readdatavalid,                  --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_mts1_s0_waitrequest                           => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_waitrequest,                    --                                                             .waitrequest
+			mm_pipeline_lvds_csr_mts1_s0_debugaccess                           => mm_interconnect_0_mm_pipeline_lvds_csr_mts1_s0_debugaccess,                    --                                                             .debugaccess
+			mm_pipeline_lvds_csr_mutrig3_s0_address                            => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_address,                     --                              mm_pipeline_lvds_csr_mutrig3_s0.address
+			mm_pipeline_lvds_csr_mutrig3_s0_write                              => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_write,                       --                                                             .write
+			mm_pipeline_lvds_csr_mutrig3_s0_read                               => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_read,                        --                                                             .read
+			mm_pipeline_lvds_csr_mutrig3_s0_readdata                           => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_readdata,                    --                                                             .readdata
+			mm_pipeline_lvds_csr_mutrig3_s0_writedata                          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_writedata,                   --                                                             .writedata
+			mm_pipeline_lvds_csr_mutrig3_s0_burstcount                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_burstcount,                  --                                                             .burstcount
+			mm_pipeline_lvds_csr_mutrig3_s0_byteenable                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_byteenable,                  --                                                             .byteenable
+			mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid                      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid,               --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_mutrig3_s0_waitrequest                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_waitrequest,                 --                                                             .waitrequest
+			mm_pipeline_lvds_csr_mutrig3_s0_debugaccess                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig3_s0_debugaccess,                 --                                                             .debugaccess
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_address                       => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_address,                --                         mm_pipeline_lvds_csr_mutrig4_mts0_s0.address
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_write                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_write,                  --                                                             .write
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_read                          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_read,                   --                                                             .read
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata                      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata,               --                                                             .readdata
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata                     => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata,              --                                                             .writedata
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount                    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount,             --                                                             .burstcount
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable                    => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable,             --                                                             .byteenable
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid                 => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid,          --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest                   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest,            --                                                             .waitrequest
+			mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess                   => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess,            --                                                             .debugaccess
+			mm_pipeline_lvds_csr_mutrig5_s0_address                            => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_address,                     --                              mm_pipeline_lvds_csr_mutrig5_s0.address
+			mm_pipeline_lvds_csr_mutrig5_s0_write                              => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_write,                       --                                                             .write
+			mm_pipeline_lvds_csr_mutrig5_s0_read                               => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_read,                        --                                                             .read
+			mm_pipeline_lvds_csr_mutrig5_s0_readdata                           => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_readdata,                    --                                                             .readdata
+			mm_pipeline_lvds_csr_mutrig5_s0_writedata                          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_writedata,                   --                                                             .writedata
+			mm_pipeline_lvds_csr_mutrig5_s0_burstcount                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_burstcount,                  --                                                             .burstcount
+			mm_pipeline_lvds_csr_mutrig5_s0_byteenable                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_byteenable,                  --                                                             .byteenable
+			mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid                      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid,               --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_mutrig5_s0_waitrequest                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_waitrequest,                 --                                                             .waitrequest
+			mm_pipeline_lvds_csr_mutrig5_s0_debugaccess                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig5_s0_debugaccess,                 --                                                             .debugaccess
+			mm_pipeline_lvds_csr_mutrig6_s0_address                            => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_address,                     --                              mm_pipeline_lvds_csr_mutrig6_s0.address
+			mm_pipeline_lvds_csr_mutrig6_s0_write                              => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_write,                       --                                                             .write
+			mm_pipeline_lvds_csr_mutrig6_s0_read                               => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_read,                        --                                                             .read
+			mm_pipeline_lvds_csr_mutrig6_s0_readdata                           => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_readdata,                    --                                                             .readdata
+			mm_pipeline_lvds_csr_mutrig6_s0_writedata                          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_writedata,                   --                                                             .writedata
+			mm_pipeline_lvds_csr_mutrig6_s0_burstcount                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_burstcount,                  --                                                             .burstcount
+			mm_pipeline_lvds_csr_mutrig6_s0_byteenable                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_byteenable,                  --                                                             .byteenable
+			mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid                      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid,               --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_mutrig6_s0_waitrequest                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_waitrequest,                 --                                                             .waitrequest
+			mm_pipeline_lvds_csr_mutrig6_s0_debugaccess                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig6_s0_debugaccess,                 --                                                             .debugaccess
+			mm_pipeline_lvds_csr_mutrig7_s0_address                            => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_address,                     --                              mm_pipeline_lvds_csr_mutrig7_s0.address
+			mm_pipeline_lvds_csr_mutrig7_s0_write                              => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_write,                       --                                                             .write
+			mm_pipeline_lvds_csr_mutrig7_s0_read                               => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_read,                        --                                                             .read
+			mm_pipeline_lvds_csr_mutrig7_s0_readdata                           => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_readdata,                    --                                                             .readdata
+			mm_pipeline_lvds_csr_mutrig7_s0_writedata                          => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_writedata,                   --                                                             .writedata
+			mm_pipeline_lvds_csr_mutrig7_s0_burstcount                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_burstcount,                  --                                                             .burstcount
+			mm_pipeline_lvds_csr_mutrig7_s0_byteenable                         => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_byteenable,                  --                                                             .byteenable
+			mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid                      => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid,               --                                                             .readdatavalid
+			mm_pipeline_lvds_csr_mutrig7_s0_waitrequest                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_waitrequest,                 --                                                             .waitrequest
+			mm_pipeline_lvds_csr_mutrig7_s0_debugaccess                        => mm_interconnect_0_mm_pipeline_lvds_csr_mutrig7_s0_debugaccess,                 --                                                             .debugaccess
 			mts_preprocessor_0_csr_address                                     => mm_interconnect_0_mts_preprocessor_0_csr_address,                              --                                       mts_preprocessor_0_csr.address
 			mts_preprocessor_0_csr_write                                       => mm_interconnect_0_mts_preprocessor_0_csr_write,                                --                                                             .write
 			mts_preprocessor_0_csr_read                                        => mm_interconnect_0_mts_preprocessor_0_csr_read,                                 --                                                             .read
 			mts_preprocessor_0_csr_readdata                                    => mm_interconnect_0_mts_preprocessor_0_csr_readdata,                             --                                                             .readdata
 			mts_preprocessor_0_csr_writedata                                   => mm_interconnect_0_mts_preprocessor_0_csr_writedata,                            --                                                             .writedata
 			mts_preprocessor_0_csr_waitrequest                                 => mm_interconnect_0_mts_preprocessor_0_csr_waitrequest,                          --                                                             .waitrequest
-			mts_preprocessor_1_csr_address                                     => mm_interconnect_0_mts_preprocessor_1_csr_address,                              --                                       mts_preprocessor_1_csr.address
-			mts_preprocessor_1_csr_write                                       => mm_interconnect_0_mts_preprocessor_1_csr_write,                                --                                                             .write
-			mts_preprocessor_1_csr_read                                        => mm_interconnect_0_mts_preprocessor_1_csr_read,                                 --                                                             .read
-			mts_preprocessor_1_csr_readdata                                    => mm_interconnect_0_mts_preprocessor_1_csr_readdata,                             --                                                             .readdata
-			mts_preprocessor_1_csr_writedata                                   => mm_interconnect_0_mts_preprocessor_1_csr_writedata,                            --                                                             .writedata
-			mts_preprocessor_1_csr_waitrequest                                 => mm_interconnect_0_mts_preprocessor_1_csr_waitrequest,                          --                                                             .waitrequest
 			mutrig_datapath_subsystem_0_backpressure_fifo_csr_address          => mm_interconnect_0_mutrig_datapath_subsystem_0_backpressure_fifo_csr_address,   --            mutrig_datapath_subsystem_0_backpressure_fifo_csr.address
 			mutrig_datapath_subsystem_0_backpressure_fifo_csr_write            => mm_interconnect_0_mutrig_datapath_subsystem_0_backpressure_fifo_csr_write,     --                                                             .write
 			mutrig_datapath_subsystem_0_backpressure_fifo_csr_read             => mm_interconnect_0_mutrig_datapath_subsystem_0_backpressure_fifo_csr_read,      --                                                             .read
@@ -6307,10 +6817,150 @@ begin
 			mutrig_injector_0_csr_read                                         => mm_interconnect_0_mutrig_injector_0_csr_read,                                  --                                                             .read
 			mutrig_injector_0_csr_readdata                                     => mm_interconnect_0_mutrig_injector_0_csr_readdata,                              --                                                             .readdata
 			mutrig_injector_0_csr_writedata                                    => mm_interconnect_0_mutrig_injector_0_csr_writedata,                             --                                                             .writedata
-			mutrig_injector_0_csr_waitrequest                                  => mm_interconnect_0_mutrig_injector_0_csr_waitrequest                            --                                                             .waitrequest
+			mutrig_injector_0_csr_waitrequest                                  => mm_interconnect_0_mutrig_injector_0_csr_waitrequest,                           --                                                             .waitrequest
+			mutrig_lane_source_mux_0_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_0_csr_address,                        --                                 mutrig_lane_source_mux_0_csr.address
+			mutrig_lane_source_mux_0_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_0_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_0_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_0_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_0_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_0_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_0_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_0_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_0_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_0_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_1_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_1_csr_address,                        --                                 mutrig_lane_source_mux_1_csr.address
+			mutrig_lane_source_mux_1_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_1_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_1_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_1_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_1_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_1_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_1_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_1_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_1_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_1_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_2_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_2_csr_address,                        --                                 mutrig_lane_source_mux_2_csr.address
+			mutrig_lane_source_mux_2_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_2_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_2_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_2_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_2_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_2_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_2_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_2_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_2_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_2_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_3_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_3_csr_address,                        --                                 mutrig_lane_source_mux_3_csr.address
+			mutrig_lane_source_mux_3_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_3_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_3_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_3_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_3_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_3_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_3_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_3_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_3_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_3_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_4_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_4_csr_address,                        --                                 mutrig_lane_source_mux_4_csr.address
+			mutrig_lane_source_mux_4_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_4_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_4_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_4_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_4_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_4_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_4_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_4_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_4_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_4_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_5_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_5_csr_address,                        --                                 mutrig_lane_source_mux_5_csr.address
+			mutrig_lane_source_mux_5_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_5_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_5_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_5_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_5_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_5_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_5_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_5_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_5_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_5_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_6_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_6_csr_address,                        --                                 mutrig_lane_source_mux_6_csr.address
+			mutrig_lane_source_mux_6_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_6_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_6_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_6_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_6_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_6_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_6_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_6_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_6_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_6_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_7_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_7_csr_address,                        --                                 mutrig_lane_source_mux_7_csr.address
+			mutrig_lane_source_mux_7_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_7_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_7_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_7_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_7_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_7_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_7_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_7_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_7_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_7_csr_waitrequest                     --                                                             .waitrequest
 		);
 
 	mm_interconnect_1 : component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_1
+		port map (
+			lvds_rx_28nm_0_outclock_clk                                  => lvds_rx_28nm_0_outclock_clk,                                          --                                lvds_rx_28nm_0_outclock.clk
+			histogram_ingress_bridge_0_reset_reset_bridge_in_reset_reset => rst_controller_001_reset_out_reset,                                   -- histogram_ingress_bridge_0_reset_reset_bridge_in_reset.reset
+			mm_pipeline_lvds_csr_hist_reset_reset_bridge_in_reset_reset  => rst_controller_006_reset_out_reset,                                   --  mm_pipeline_lvds_csr_hist_reset_reset_bridge_in_reset.reset
+			mm_pipeline_lvds_csr_hist_m0_address                         => mm_pipeline_lvds_csr_hist_m0_address,                                 --                           mm_pipeline_lvds_csr_hist_m0.address
+			mm_pipeline_lvds_csr_hist_m0_waitrequest                     => mm_pipeline_lvds_csr_hist_m0_waitrequest,                             --                                                       .waitrequest
+			mm_pipeline_lvds_csr_hist_m0_burstcount                      => mm_pipeline_lvds_csr_hist_m0_burstcount,                              --                                                       .burstcount
+			mm_pipeline_lvds_csr_hist_m0_byteenable                      => mm_pipeline_lvds_csr_hist_m0_byteenable,                              --                                                       .byteenable
+			mm_pipeline_lvds_csr_hist_m0_read                            => mm_pipeline_lvds_csr_hist_m0_read,                                    --                                                       .read
+			mm_pipeline_lvds_csr_hist_m0_readdata                        => mm_pipeline_lvds_csr_hist_m0_readdata,                                --                                                       .readdata
+			mm_pipeline_lvds_csr_hist_m0_readdatavalid                   => mm_pipeline_lvds_csr_hist_m0_readdatavalid,                           --                                                       .readdatavalid
+			mm_pipeline_lvds_csr_hist_m0_write                           => mm_pipeline_lvds_csr_hist_m0_write,                                   --                                                       .write
+			mm_pipeline_lvds_csr_hist_m0_writedata                       => mm_pipeline_lvds_csr_hist_m0_writedata,                               --                                                       .writedata
+			mm_pipeline_lvds_csr_hist_m0_debugaccess                     => mm_pipeline_lvds_csr_hist_m0_debugaccess,                             --                                                       .debugaccess
+			histogram_ingress_bridge_0_csr_address                       => mm_interconnect_1_histogram_ingress_bridge_0_csr_address,             --                         histogram_ingress_bridge_0_csr.address
+			histogram_ingress_bridge_0_csr_write                         => mm_interconnect_1_histogram_ingress_bridge_0_csr_write,               --                                                       .write
+			histogram_ingress_bridge_0_csr_read                          => mm_interconnect_1_histogram_ingress_bridge_0_csr_read,                --                                                       .read
+			histogram_ingress_bridge_0_csr_readdata                      => mm_interconnect_1_histogram_ingress_bridge_0_csr_readdata,            --                                                       .readdata
+			histogram_ingress_bridge_0_csr_writedata                     => mm_interconnect_1_histogram_ingress_bridge_0_csr_writedata,           --                                                       .writedata
+			histogram_ingress_bridge_0_csr_waitrequest                   => mm_interconnect_1_histogram_ingress_bridge_0_csr_waitrequest,         --                                                       .waitrequest
+			histogram_statistics_0_csr_address                           => mm_interconnect_1_histogram_statistics_0_csr_address,                 --                             histogram_statistics_0_csr.address
+			histogram_statistics_0_csr_write                             => mm_interconnect_1_histogram_statistics_0_csr_write,                   --                                                       .write
+			histogram_statistics_0_csr_read                              => mm_interconnect_1_histogram_statistics_0_csr_read,                    --                                                       .read
+			histogram_statistics_0_csr_readdata                          => mm_interconnect_1_histogram_statistics_0_csr_readdata,                --                                                       .readdata
+			histogram_statistics_0_csr_writedata                         => mm_interconnect_1_histogram_statistics_0_csr_writedata,               --                                                       .writedata
+			histogram_statistics_0_csr_waitrequest                       => mm_interconnect_1_histogram_statistics_0_csr_waitrequest,             --                                                       .waitrequest
+			histogram_statistics_0_hist_bin_address                      => mm_interconnect_1_histogram_statistics_0_hist_bin_address,            --                        histogram_statistics_0_hist_bin.address
+			histogram_statistics_0_hist_bin_write                        => mm_interconnect_1_histogram_statistics_0_hist_bin_write,              --                                                       .write
+			histogram_statistics_0_hist_bin_read                         => mm_interconnect_1_histogram_statistics_0_hist_bin_read,               --                                                       .read
+			histogram_statistics_0_hist_bin_readdata                     => mm_interconnect_1_histogram_statistics_0_hist_bin_readdata,           --                                                       .readdata
+			histogram_statistics_0_hist_bin_writedata                    => mm_interconnect_1_histogram_statistics_0_hist_bin_writedata,          --                                                       .writedata
+			histogram_statistics_0_hist_bin_burstcount                   => mm_interconnect_1_histogram_statistics_0_hist_bin_burstcount,         --                                                       .burstcount
+			histogram_statistics_0_hist_bin_readdatavalid                => mm_interconnect_1_histogram_statistics_0_hist_bin_readdatavalid,      --                                                       .readdatavalid
+			histogram_statistics_0_hist_bin_waitrequest                  => mm_interconnect_1_histogram_statistics_0_hist_bin_waitrequest,        --                                                       .waitrequest
+			histogram_statistics_0_hist_bin_response                     => mm_interconnect_1_histogram_statistics_0_hist_bin_response,           --                                                       .response
+			histogram_statistics_0_hist_bin_writeresponsevalid           => mm_interconnect_1_histogram_statistics_0_hist_bin_writeresponsevalid  --                                                       .writeresponsevalid
+		);
+
+	mm_interconnect_2 : component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_2
+		port map (
+			lvds_rx_28nm_0_outclock_clk                                    => lvds_rx_28nm_0_outclock_clk,                          --                                  lvds_rx_28nm_0_outclock.clk
+			mm_pipeline_lvds_csr_mts1_reset_reset_bridge_in_reset_reset    => rst_controller_006_reset_out_reset,                   --    mm_pipeline_lvds_csr_mts1_reset_reset_bridge_in_reset.reset
+			mts_preprocessor_1_reset_interface_reset_bridge_in_reset_reset => rst_controller_001_reset_out_reset,                   -- mts_preprocessor_1_reset_interface_reset_bridge_in_reset.reset
+			mm_pipeline_lvds_csr_mts1_m0_address                           => mm_pipeline_lvds_csr_mts1_m0_address,                 --                             mm_pipeline_lvds_csr_mts1_m0.address
+			mm_pipeline_lvds_csr_mts1_m0_waitrequest                       => mm_pipeline_lvds_csr_mts1_m0_waitrequest,             --                                                         .waitrequest
+			mm_pipeline_lvds_csr_mts1_m0_burstcount                        => mm_pipeline_lvds_csr_mts1_m0_burstcount,              --                                                         .burstcount
+			mm_pipeline_lvds_csr_mts1_m0_byteenable                        => mm_pipeline_lvds_csr_mts1_m0_byteenable,              --                                                         .byteenable
+			mm_pipeline_lvds_csr_mts1_m0_read                              => mm_pipeline_lvds_csr_mts1_m0_read,                    --                                                         .read
+			mm_pipeline_lvds_csr_mts1_m0_readdata                          => mm_pipeline_lvds_csr_mts1_m0_readdata,                --                                                         .readdata
+			mm_pipeline_lvds_csr_mts1_m0_readdatavalid                     => mm_pipeline_lvds_csr_mts1_m0_readdatavalid,           --                                                         .readdatavalid
+			mm_pipeline_lvds_csr_mts1_m0_write                             => mm_pipeline_lvds_csr_mts1_m0_write,                   --                                                         .write
+			mm_pipeline_lvds_csr_mts1_m0_writedata                         => mm_pipeline_lvds_csr_mts1_m0_writedata,               --                                                         .writedata
+			mm_pipeline_lvds_csr_mts1_m0_debugaccess                       => mm_pipeline_lvds_csr_mts1_m0_debugaccess,             --                                                         .debugaccess
+			mts_preprocessor_1_csr_address                                 => mm_interconnect_2_mts_preprocessor_1_csr_address,     --                                   mts_preprocessor_1_csr.address
+			mts_preprocessor_1_csr_write                                   => mm_interconnect_2_mts_preprocessor_1_csr_write,       --                                                         .write
+			mts_preprocessor_1_csr_read                                    => mm_interconnect_2_mts_preprocessor_1_csr_read,        --                                                         .read
+			mts_preprocessor_1_csr_readdata                                => mm_interconnect_2_mts_preprocessor_1_csr_readdata,    --                                                         .readdata
+			mts_preprocessor_1_csr_writedata                               => mm_interconnect_2_mts_preprocessor_1_csr_writedata,   --                                                         .writedata
+			mts_preprocessor_1_csr_waitrequest                             => mm_interconnect_2_mts_preprocessor_1_csr_waitrequest  --                                                         .waitrequest
+		);
+
+	mm_interconnect_3 : component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_3
+		port map (
+			lvds_rx_28nm_0_outclock_clk                                                               => lvds_rx_28nm_0_outclock_clk,                                                --                                                             lvds_rx_28nm_0_outclock.clk
+			hit_stack_subsystem_0_datapath_reset_reset_bridge_in_reset_reset                          => rst_controller_001_reset_out_reset,                                         --                          hit_stack_subsystem_0_datapath_reset_reset_bridge_in_reset.reset
+			hit_stack_subsystem_0_feb_frame_assembly_csr_translator_reset_reset_bridge_in_reset_reset => rst_controller_001_reset_out_reset,                                         -- hit_stack_subsystem_0_feb_frame_assembly_csr_translator_reset_reset_bridge_in_reset.reset
+			mm_pipeline_lvds_csr_hitstack_frame_reset_reset_bridge_in_reset_reset                     => rst_controller_006_reset_out_reset,                                         --                     mm_pipeline_lvds_csr_hitstack_frame_reset_reset_bridge_in_reset.reset
+			mm_pipeline_lvds_csr_hitstack_frame_m0_address                                            => mm_pipeline_lvds_csr_hitstack_frame_m0_address,                             --                                              mm_pipeline_lvds_csr_hitstack_frame_m0.address
+			mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest                                        => mm_pipeline_lvds_csr_hitstack_frame_m0_waitrequest,                         --                                                                                    .waitrequest
+			mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount                                         => mm_pipeline_lvds_csr_hitstack_frame_m0_burstcount,                          --                                                                                    .burstcount
+			mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable                                         => mm_pipeline_lvds_csr_hitstack_frame_m0_byteenable,                          --                                                                                    .byteenable
+			mm_pipeline_lvds_csr_hitstack_frame_m0_read                                               => mm_pipeline_lvds_csr_hitstack_frame_m0_read,                                --                                                                                    .read
+			mm_pipeline_lvds_csr_hitstack_frame_m0_readdata                                           => mm_pipeline_lvds_csr_hitstack_frame_m0_readdata,                            --                                                                                    .readdata
+			mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid                                      => mm_pipeline_lvds_csr_hitstack_frame_m0_readdatavalid,                       --                                                                                    .readdatavalid
+			mm_pipeline_lvds_csr_hitstack_frame_m0_write                                              => mm_pipeline_lvds_csr_hitstack_frame_m0_write,                               --                                                                                    .write
+			mm_pipeline_lvds_csr_hitstack_frame_m0_writedata                                          => mm_pipeline_lvds_csr_hitstack_frame_m0_writedata,                           --                                                                                    .writedata
+			mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess                                        => mm_pipeline_lvds_csr_hitstack_frame_m0_debugaccess,                         --                                                                                    .debugaccess
+			hit_stack_subsystem_0_feb_frame_assembly_csr_address                                      => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_address,     --                                        hit_stack_subsystem_0_feb_frame_assembly_csr.address
+			hit_stack_subsystem_0_feb_frame_assembly_csr_write                                        => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_write,       --                                                                                    .write
+			hit_stack_subsystem_0_feb_frame_assembly_csr_read                                         => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_read,        --                                                                                    .read
+			hit_stack_subsystem_0_feb_frame_assembly_csr_readdata                                     => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_readdata,    --                                                                                    .readdata
+			hit_stack_subsystem_0_feb_frame_assembly_csr_writedata                                    => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_writedata,   --                                                                                    .writedata
+			hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest                                  => mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest, --                                                                                    .waitrequest
+			hit_stack_subsystem_1_feb_frame_assembly_csr_address                                      => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_address,     --                                        hit_stack_subsystem_1_feb_frame_assembly_csr.address
+			hit_stack_subsystem_1_feb_frame_assembly_csr_write                                        => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_write,       --                                                                                    .write
+			hit_stack_subsystem_1_feb_frame_assembly_csr_read                                         => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_read,        --                                                                                    .read
+			hit_stack_subsystem_1_feb_frame_assembly_csr_readdata                                     => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_readdata,    --                                                                                    .readdata
+			hit_stack_subsystem_1_feb_frame_assembly_csr_writedata                                    => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_writedata,   --                                                                                    .writedata
+			hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest                                  => mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_waitrequest  --                                                                                    .waitrequest
+		);
+
+	mm_interconnect_4 : component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_4
 		port map (
 			monitor_clock_125_clk_clk                                                            => monitor_clock_125_in_clk,                                              --                                                          monitor_clock_125_clk.clk
 			mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset                     => monitor_reset_in_reset_reset_n_ports_inv,                              --                     mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset.reset
@@ -6326,138 +6976,12 @@ begin
 			mm_pipeline_jtagmaster2rstctrl_m0_write                                              => mm_pipeline_jtagmaster2rstctrl_m0_write,                               --                                                                               .write
 			mm_pipeline_jtagmaster2rstctrl_m0_writedata                                          => mm_pipeline_jtagmaster2rstctrl_m0_writedata,                           --                                                                               .writedata
 			mm_pipeline_jtagmaster2rstctrl_m0_debugaccess                                        => mm_pipeline_jtagmaster2rstctrl_m0_debugaccess,                         --                                                                               .debugaccess
-			mutrig_reset_controller_0_reconfig_mgmt_address                                      => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_address,     --                                        mutrig_reset_controller_0_reconfig_mgmt.address
-			mutrig_reset_controller_0_reconfig_mgmt_write                                        => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_write,       --                                                                               .write
-			mutrig_reset_controller_0_reconfig_mgmt_read                                         => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_read,        --                                                                               .read
-			mutrig_reset_controller_0_reconfig_mgmt_readdata                                     => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_readdata,    --                                                                               .readdata
-			mutrig_reset_controller_0_reconfig_mgmt_writedata                                    => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_writedata,   --                                                                               .writedata
-			mutrig_reset_controller_0_reconfig_mgmt_waitrequest                                  => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_waitrequest  --                                                                               .waitrequest
-		);
-
-	mm_interconnect_2 : component feb_system_v3_pipe_data_path_subsystem_mm_interconnect_2
-		port map (
-			lvds_rx_28nm_0_outclock_clk                                   => lvds_rx_28nm_0_outclock_clk,                                            --                                 lvds_rx_28nm_0_outclock.clk
-			mm_clock_crossing_bridge_m0_reset_reset_bridge_in_reset_reset => rst_controller_006_reset_out_reset,                                     -- mm_clock_crossing_bridge_m0_reset_reset_bridge_in_reset.reset
-			mm_clock_crossing_bridge_m0_address                           => mm_clock_crossing_bridge_m0_address,                                    --                             mm_clock_crossing_bridge_m0.address
-			mm_clock_crossing_bridge_m0_waitrequest                       => mm_clock_crossing_bridge_m0_waitrequest,                                --                                                        .waitrequest
-			mm_clock_crossing_bridge_m0_burstcount                        => mm_clock_crossing_bridge_m0_burstcount,                                 --                                                        .burstcount
-			mm_clock_crossing_bridge_m0_byteenable                        => mm_clock_crossing_bridge_m0_byteenable,                                 --                                                        .byteenable
-			mm_clock_crossing_bridge_m0_read                              => mm_clock_crossing_bridge_m0_read,                                       --                                                        .read
-			mm_clock_crossing_bridge_m0_readdata                          => mm_clock_crossing_bridge_m0_readdata,                                   --                                                        .readdata
-			mm_clock_crossing_bridge_m0_readdatavalid                     => mm_clock_crossing_bridge_m0_readdatavalid,                              --                                                        .readdatavalid
-			mm_clock_crossing_bridge_m0_write                             => mm_clock_crossing_bridge_m0_write,                                      --                                                        .write
-			mm_clock_crossing_bridge_m0_writedata                         => mm_clock_crossing_bridge_m0_writedata,                                  --                                                        .writedata
-			mm_clock_crossing_bridge_m0_debugaccess                       => mm_clock_crossing_bridge_m0_debugaccess,                                --                                                        .debugaccess
-			mm_pipeline_lvds_csr_emu_dbg_s0_address                       => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_address,              --                         mm_pipeline_lvds_csr_emu_dbg_s0.address
-			mm_pipeline_lvds_csr_emu_dbg_s0_write                         => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_write,                --                                                        .write
-			mm_pipeline_lvds_csr_emu_dbg_s0_read                          => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_read,                 --                                                        .read
-			mm_pipeline_lvds_csr_emu_dbg_s0_readdata                      => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_readdata,             --                                                        .readdata
-			mm_pipeline_lvds_csr_emu_dbg_s0_writedata                     => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_writedata,            --                                                        .writedata
-			mm_pipeline_lvds_csr_emu_dbg_s0_burstcount                    => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_burstcount,           --                                                        .burstcount
-			mm_pipeline_lvds_csr_emu_dbg_s0_byteenable                    => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_byteenable,           --                                                        .byteenable
-			mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid                 => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_readdatavalid,        --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest                   => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_waitrequest,          --                                                        .waitrequest
-			mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess                   => mm_interconnect_2_mm_pipeline_lvds_csr_emu_dbg_s0_debugaccess,          --                                                        .debugaccess
-			mm_pipeline_lvds_csr_hist_s0_address                          => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_address,                 --                            mm_pipeline_lvds_csr_hist_s0.address
-			mm_pipeline_lvds_csr_hist_s0_write                            => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_write,                   --                                                        .write
-			mm_pipeline_lvds_csr_hist_s0_read                             => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_read,                    --                                                        .read
-			mm_pipeline_lvds_csr_hist_s0_readdata                         => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_readdata,                --                                                        .readdata
-			mm_pipeline_lvds_csr_hist_s0_writedata                        => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_writedata,               --                                                        .writedata
-			mm_pipeline_lvds_csr_hist_s0_burstcount                       => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_burstcount,              --                                                        .burstcount
-			mm_pipeline_lvds_csr_hist_s0_byteenable                       => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_byteenable,              --                                                        .byteenable
-			mm_pipeline_lvds_csr_hist_s0_readdatavalid                    => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_readdatavalid,           --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_hist_s0_waitrequest                      => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_waitrequest,             --                                                        .waitrequest
-			mm_pipeline_lvds_csr_hist_s0_debugaccess                      => mm_interconnect_2_mm_pipeline_lvds_csr_hist_s0_debugaccess,             --                                                        .debugaccess
-			mm_pipeline_lvds_csr_hitstack_frame_s0_address                => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_address,       --                  mm_pipeline_lvds_csr_hitstack_frame_s0.address
-			mm_pipeline_lvds_csr_hitstack_frame_s0_write                  => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_write,         --                                                        .write
-			mm_pipeline_lvds_csr_hitstack_frame_s0_read                   => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_read,          --                                                        .read
-			mm_pipeline_lvds_csr_hitstack_frame_s0_readdata               => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_readdata,      --                                                        .readdata
-			mm_pipeline_lvds_csr_hitstack_frame_s0_writedata              => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_writedata,     --                                                        .writedata
-			mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount             => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_burstcount,    --                                                        .burstcount
-			mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable             => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_byteenable,    --                                                        .byteenable
-			mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid          => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_readdatavalid, --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest            => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_waitrequest,   --                                                        .waitrequest
-			mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess            => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_frame_s0_debugaccess,   --                                                        .debugaccess
-			mm_pipeline_lvds_csr_hitstack_ring_s0_address                 => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_address,        --                   mm_pipeline_lvds_csr_hitstack_ring_s0.address
-			mm_pipeline_lvds_csr_hitstack_ring_s0_write                   => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_write,          --                                                        .write
-			mm_pipeline_lvds_csr_hitstack_ring_s0_read                    => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_read,           --                                                        .read
-			mm_pipeline_lvds_csr_hitstack_ring_s0_readdata                => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_readdata,       --                                                        .readdata
-			mm_pipeline_lvds_csr_hitstack_ring_s0_writedata               => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_writedata,      --                                                        .writedata
-			mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount              => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_burstcount,     --                                                        .burstcount
-			mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable              => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_byteenable,     --                                                        .byteenable
-			mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid           => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_readdatavalid,  --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest             => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_waitrequest,    --                                                        .waitrequest
-			mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess             => mm_interconnect_2_mm_pipeline_lvds_csr_hitstack_ring_s0_debugaccess,    --                                                        .debugaccess
-			mm_pipeline_lvds_csr_low_s0_address                           => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_address,                  --                             mm_pipeline_lvds_csr_low_s0.address
-			mm_pipeline_lvds_csr_low_s0_write                             => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_write,                    --                                                        .write
-			mm_pipeline_lvds_csr_low_s0_read                              => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_read,                     --                                                        .read
-			mm_pipeline_lvds_csr_low_s0_readdata                          => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_readdata,                 --                                                        .readdata
-			mm_pipeline_lvds_csr_low_s0_writedata                         => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_writedata,                --                                                        .writedata
-			mm_pipeline_lvds_csr_low_s0_burstcount                        => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_burstcount,               --                                                        .burstcount
-			mm_pipeline_lvds_csr_low_s0_byteenable                        => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_byteenable,               --                                                        .byteenable
-			mm_pipeline_lvds_csr_low_s0_readdatavalid                     => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_readdatavalid,            --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_low_s0_waitrequest                       => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_waitrequest,              --                                                        .waitrequest
-			mm_pipeline_lvds_csr_low_s0_debugaccess                       => mm_interconnect_2_mm_pipeline_lvds_csr_low_s0_debugaccess,              --                                                        .debugaccess
-			mm_pipeline_lvds_csr_mts1_s0_address                          => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_address,                 --                            mm_pipeline_lvds_csr_mts1_s0.address
-			mm_pipeline_lvds_csr_mts1_s0_write                            => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_write,                   --                                                        .write
-			mm_pipeline_lvds_csr_mts1_s0_read                             => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_read,                    --                                                        .read
-			mm_pipeline_lvds_csr_mts1_s0_readdata                         => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_readdata,                --                                                        .readdata
-			mm_pipeline_lvds_csr_mts1_s0_writedata                        => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_writedata,               --                                                        .writedata
-			mm_pipeline_lvds_csr_mts1_s0_burstcount                       => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_burstcount,              --                                                        .burstcount
-			mm_pipeline_lvds_csr_mts1_s0_byteenable                       => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_byteenable,              --                                                        .byteenable
-			mm_pipeline_lvds_csr_mts1_s0_readdatavalid                    => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_readdatavalid,           --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_mts1_s0_waitrequest                      => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_waitrequest,             --                                                        .waitrequest
-			mm_pipeline_lvds_csr_mts1_s0_debugaccess                      => mm_interconnect_2_mm_pipeline_lvds_csr_mts1_s0_debugaccess,             --                                                        .debugaccess
-			mm_pipeline_lvds_csr_mutrig3_s0_address                       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_address,              --                         mm_pipeline_lvds_csr_mutrig3_s0.address
-			mm_pipeline_lvds_csr_mutrig3_s0_write                         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_write,                --                                                        .write
-			mm_pipeline_lvds_csr_mutrig3_s0_read                          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_read,                 --                                                        .read
-			mm_pipeline_lvds_csr_mutrig3_s0_readdata                      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_readdata,             --                                                        .readdata
-			mm_pipeline_lvds_csr_mutrig3_s0_writedata                     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_writedata,            --                                                        .writedata
-			mm_pipeline_lvds_csr_mutrig3_s0_burstcount                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_burstcount,           --                                                        .burstcount
-			mm_pipeline_lvds_csr_mutrig3_s0_byteenable                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_byteenable,           --                                                        .byteenable
-			mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid                 => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_readdatavalid,        --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_mutrig3_s0_waitrequest                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_waitrequest,          --                                                        .waitrequest
-			mm_pipeline_lvds_csr_mutrig3_s0_debugaccess                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig3_s0_debugaccess,          --                                                        .debugaccess
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_address                  => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_address,         --                    mm_pipeline_lvds_csr_mutrig4_mts0_s0.address
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_write                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_write,           --                                                        .write
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_read                     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_read,            --                                                        .read
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata                 => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdata,        --                                                        .readdata
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata                => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_writedata,       --                                                        .writedata
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount               => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_burstcount,      --                                                        .burstcount
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable               => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_byteenable,      --                                                        .byteenable
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid            => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_readdatavalid,   --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest              => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_waitrequest,     --                                                        .waitrequest
-			mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess              => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig4_mts0_s0_debugaccess,     --                                                        .debugaccess
-			mm_pipeline_lvds_csr_mutrig5_s0_address                       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_address,              --                         mm_pipeline_lvds_csr_mutrig5_s0.address
-			mm_pipeline_lvds_csr_mutrig5_s0_write                         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_write,                --                                                        .write
-			mm_pipeline_lvds_csr_mutrig5_s0_read                          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_read,                 --                                                        .read
-			mm_pipeline_lvds_csr_mutrig5_s0_readdata                      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_readdata,             --                                                        .readdata
-			mm_pipeline_lvds_csr_mutrig5_s0_writedata                     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_writedata,            --                                                        .writedata
-			mm_pipeline_lvds_csr_mutrig5_s0_burstcount                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_burstcount,           --                                                        .burstcount
-			mm_pipeline_lvds_csr_mutrig5_s0_byteenable                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_byteenable,           --                                                        .byteenable
-			mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid                 => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_readdatavalid,        --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_mutrig5_s0_waitrequest                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_waitrequest,          --                                                        .waitrequest
-			mm_pipeline_lvds_csr_mutrig5_s0_debugaccess                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig5_s0_debugaccess,          --                                                        .debugaccess
-			mm_pipeline_lvds_csr_mutrig6_s0_address                       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_address,              --                         mm_pipeline_lvds_csr_mutrig6_s0.address
-			mm_pipeline_lvds_csr_mutrig6_s0_write                         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_write,                --                                                        .write
-			mm_pipeline_lvds_csr_mutrig6_s0_read                          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_read,                 --                                                        .read
-			mm_pipeline_lvds_csr_mutrig6_s0_readdata                      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_readdata,             --                                                        .readdata
-			mm_pipeline_lvds_csr_mutrig6_s0_writedata                     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_writedata,            --                                                        .writedata
-			mm_pipeline_lvds_csr_mutrig6_s0_burstcount                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_burstcount,           --                                                        .burstcount
-			mm_pipeline_lvds_csr_mutrig6_s0_byteenable                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_byteenable,           --                                                        .byteenable
-			mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid                 => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_readdatavalid,        --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_mutrig6_s0_waitrequest                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_waitrequest,          --                                                        .waitrequest
-			mm_pipeline_lvds_csr_mutrig6_s0_debugaccess                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig6_s0_debugaccess,          --                                                        .debugaccess
-			mm_pipeline_lvds_csr_mutrig7_s0_address                       => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_address,              --                         mm_pipeline_lvds_csr_mutrig7_s0.address
-			mm_pipeline_lvds_csr_mutrig7_s0_write                         => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_write,                --                                                        .write
-			mm_pipeline_lvds_csr_mutrig7_s0_read                          => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_read,                 --                                                        .read
-			mm_pipeline_lvds_csr_mutrig7_s0_readdata                      => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_readdata,             --                                                        .readdata
-			mm_pipeline_lvds_csr_mutrig7_s0_writedata                     => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_writedata,            --                                                        .writedata
-			mm_pipeline_lvds_csr_mutrig7_s0_burstcount                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_burstcount,           --                                                        .burstcount
-			mm_pipeline_lvds_csr_mutrig7_s0_byteenable                    => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_byteenable,           --                                                        .byteenable
-			mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid                 => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_readdatavalid,        --                                                        .readdatavalid
-			mm_pipeline_lvds_csr_mutrig7_s0_waitrequest                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_waitrequest,          --                                                        .waitrequest
-			mm_pipeline_lvds_csr_mutrig7_s0_debugaccess                   => mm_interconnect_2_mm_pipeline_lvds_csr_mutrig7_s0_debugaccess           --                                                        .debugaccess
+			mutrig_reset_controller_0_reconfig_mgmt_address                                      => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_address,     --                                        mutrig_reset_controller_0_reconfig_mgmt.address
+			mutrig_reset_controller_0_reconfig_mgmt_write                                        => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_write,       --                                                                               .write
+			mutrig_reset_controller_0_reconfig_mgmt_read                                         => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_read,        --                                                                               .read
+			mutrig_reset_controller_0_reconfig_mgmt_readdata                                     => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_readdata,    --                                                                               .readdata
+			mutrig_reset_controller_0_reconfig_mgmt_writedata                                    => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_writedata,   --                                                                               .writedata
+			mutrig_reset_controller_0_reconfig_mgmt_waitrequest                                  => mm_interconnect_4_mutrig_reset_controller_0_reconfig_mgmt_waitrequest  --                                                                               .waitrequest
 		);
 
 	avalon_st_adapter : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter
@@ -6743,7 +7267,42 @@ begin
 			out_0_empty         => avalon_st_adapter_008_out_0_empty              --         .empty
 		);
 
-	avalon_st_adapter_009 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_009 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_008
+		generic map (
+			inBitsPerSymbol => 36,
+			inUsePackets    => 1,
+			inDataWidth     => 36,
+			inChannelWidth  => 0,
+			inErrorWidth    => 0,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 36,
+			outChannelWidth => 0,
+			outErrorWidth   => 0,
+			outUseEmptyPort => 1,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk        => xcvr_clock_clk,                                -- in_clk_0.clk
+			in_rst_0_reset      => rst_controller_002_reset_out_reset,            -- in_rst_0.reset
+			in_0_data           => hit_stack_subsystem_1_hit_type3_data,          --     in_0.data
+			in_0_valid          => hit_stack_subsystem_1_hit_type3_valid,         --         .valid
+			in_0_ready          => hit_stack_subsystem_1_hit_type3_ready,         --         .ready
+			in_0_startofpacket  => hit_stack_subsystem_1_hit_type3_startofpacket, --         .startofpacket
+			in_0_endofpacket    => hit_stack_subsystem_1_hit_type3_endofpacket,   --         .endofpacket
+			out_0_data          => avalon_st_adapter_009_out_0_data,              --    out_0.data
+			out_0_valid         => avalon_st_adapter_009_out_0_valid,             --         .valid
+			out_0_ready         => avalon_st_adapter_009_out_0_ready,             --         .ready
+			out_0_startofpacket => avalon_st_adapter_009_out_0_startofpacket,     --         .startofpacket
+			out_0_endofpacket   => avalon_st_adapter_009_out_0_endofpacket,       --         .endofpacket
+			out_0_empty         => avalon_st_adapter_009_out_0_empty              --         .empty
+		);
+
+	avalon_st_adapter_010 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -6767,12 +7326,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out0_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out0_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_009_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_009_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_009_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_010_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_010_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_010_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_010 : component feb_system_v3_pipe_avalon_st_adapter
+	avalon_st_adapter_011 : component feb_system_v3_pipe_avalon_st_adapter
 		generic map (
 			inBitsPerSymbol => 36,
 			inUsePackets    => 1,
@@ -6800,14 +7359,49 @@ begin
 			in_0_startofpacket  => hist_post_splitter_0_out1_startofpacket,   --         .startofpacket
 			in_0_endofpacket    => hist_post_splitter_0_out1_endofpacket,     --         .endofpacket
 			in_0_empty          => hist_post_splitter_0_out1_empty(0),        --         .empty
-			out_0_data          => avalon_st_adapter_010_out_0_data,          --    out_0.data
-			out_0_valid         => avalon_st_adapter_010_out_0_valid,         --         .valid
-			out_0_ready         => avalon_st_adapter_010_out_0_ready,         --         .ready
-			out_0_startofpacket => avalon_st_adapter_010_out_0_startofpacket, --         .startofpacket
-			out_0_endofpacket   => avalon_st_adapter_010_out_0_endofpacket    --         .endofpacket
+			out_0_data          => avalon_st_adapter_011_out_0_data,          --    out_0.data
+			out_0_valid         => avalon_st_adapter_011_out_0_valid,         --         .valid
+			out_0_ready         => avalon_st_adapter_011_out_0_ready,         --         .ready
+			out_0_startofpacket => avalon_st_adapter_011_out_0_startofpacket, --         .startofpacket
+			out_0_endofpacket   => avalon_st_adapter_011_out_0_endofpacket    --         .endofpacket
 		);
 
-	avalon_st_adapter_011 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_012 : component feb_system_v3_pipe_avalon_st_adapter
+		generic map (
+			inBitsPerSymbol => 36,
+			inUsePackets    => 1,
+			inDataWidth     => 36,
+			inChannelWidth  => 0,
+			inErrorWidth    => 0,
+			inUseEmptyPort  => 1,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 36,
+			outChannelWidth => 0,
+			outErrorWidth   => 0,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk        => xcvr_clock_clk,                                -- in_clk_0.clk
+			in_rst_0_reset      => rst_controller_002_reset_out_reset,            -- in_rst_0.reset
+			in_0_data           => hist_post_lower_splitter_0_out1_data,          --     in_0.data
+			in_0_valid          => hist_post_lower_splitter_0_out1_valid,         --         .valid
+			in_0_ready          => hist_post_lower_splitter_0_out1_ready,         --         .ready
+			in_0_startofpacket  => hist_post_lower_splitter_0_out1_startofpacket, --         .startofpacket
+			in_0_endofpacket    => hist_post_lower_splitter_0_out1_endofpacket,   --         .endofpacket
+			in_0_empty          => hist_post_lower_splitter_0_out1_empty(0),      --         .empty
+			out_0_data          => avalon_st_adapter_012_out_0_data,              --    out_0.data
+			out_0_valid         => avalon_st_adapter_012_out_0_valid,             --         .valid
+			out_0_ready         => avalon_st_adapter_012_out_0_ready,             --         .ready
+			out_0_startofpacket => avalon_st_adapter_012_out_0_startofpacket,     --         .startofpacket
+			out_0_endofpacket   => avalon_st_adapter_012_out_0_endofpacket        --         .endofpacket
+		);
+
+	avalon_st_adapter_013 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -6831,12 +7425,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out1_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out1_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_011_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_011_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_011_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_013_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_013_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_013_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_012 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_014 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -6860,12 +7454,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out10_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out10_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_012_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_012_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_012_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_014_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_014_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_014_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_013 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_015 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -6889,12 +7483,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out11_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out11_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_013_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_013_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_013_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_015_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_015_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_015_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_014 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_016 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -6918,12 +7512,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out12_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out12_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_014_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_014_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_014_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_016_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_016_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_016_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_015 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_017 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -6947,12 +7541,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out13_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out13_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_015_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_015_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_015_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_017_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_017_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_017_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_016 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_018 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -6976,12 +7570,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out14_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out14_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_016_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_016_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_016_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_018_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_018_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_018_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_017 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_019 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7005,12 +7599,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out15_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out15_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_017_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_017_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_017_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_019_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_019_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_019_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_018 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_020 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7034,12 +7628,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out2_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out2_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_018_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_018_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_018_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_020_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_020_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_020_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_019 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_021 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7063,12 +7657,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out3_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out3_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_019_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_019_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_019_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_021_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_021_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_021_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_020 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_022 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7092,12 +7686,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out4_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out4_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_020_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_020_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_020_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_022_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_022_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_022_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_021 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_023 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7121,12 +7715,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out5_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out5_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_021_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_021_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_021_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_023_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_023_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_023_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_022 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_024 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7150,12 +7744,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out6_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out6_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_022_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_022_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_022_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_024_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_024_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_024_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_023 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_025 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7179,12 +7773,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out7_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out7_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_023_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_023_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_023_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_025_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_025_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_025_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_024 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_026 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7208,12 +7802,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out8_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out8_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_024_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_024_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_024_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_026_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_026_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_026_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_025 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_009
+	avalon_st_adapter_027 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_010
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7237,9 +7831,9 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out9_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out9_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_025_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_025_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_025_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_027_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_027_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_027_out_0_ready   --         .ready
 		);
 
 	rst_controller : component feb_system_v3_pipe_data_path_subsystem_rst_controller

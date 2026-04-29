@@ -13,11 +13,12 @@
 			avmm_port_debugaccess          : in  std_logic                     := 'X';             -- debugaccess
 			avmm_rst_reset                 : in  std_logic                     := 'X';             -- reset
 			counter_sclr_reset             : in  std_logic                     := 'X';             -- reset
-			hit_type3_lower_data           : out std_logic_vector(35 downto 0);                    -- data
-			hit_type3_lower_valid          : out std_logic;                                        -- valid
 			hit_type3_lower_ready          : in  std_logic                     := 'X';             -- ready
+			hit_type3_lower_valid          : out std_logic;                                        -- valid
 			hit_type3_lower_startofpacket  : out std_logic;                                        -- startofpacket
 			hit_type3_lower_endofpacket    : out std_logic;                                        -- endofpacket
+			hit_type3_lower_empty          : out std_logic_vector(0 downto 0);                     -- empty
+			hit_type3_lower_data           : out std_logic_vector(35 downto 0);                    -- data
 			hit_type3_upper_ready          : in  std_logic                     := 'X';             -- ready
 			hit_type3_upper_valid          : out std_logic;                                        -- valid
 			hit_type3_upper_startofpacket  : out std_logic;                                        -- startofpacket
@@ -26,7 +27,6 @@
 			hit_type3_upper_data           : out std_logic_vector(35 downto 0);                    -- data
 			inject_pulse                   : out std_logic;                                        -- pulse
 			inject_masked_pulse            : out std_logic;                                        -- masked_pulse
-			inject_aux_pulse               : in  std_logic                     := 'X';             -- pulse
 			lvds_outclock_clk              : out std_logic;                                        -- clk
 			lvds_pll_inclock_clk           : in  std_logic                     := 'X';             -- clk
 			monitor_clock_125_in_clk       : in  std_logic                     := 'X';             -- clk

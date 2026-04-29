@@ -252,8 +252,9 @@
     - `scifi_datapath_system_v3` now instantiates the updated emulator version
     - the datapath already provides `mutrig_injector_0` mode `2` as the
       periodic self-clock pulse source
-    - `feb_system_v3` now also connects `debug_sc_system_v3.charge_injection_pulser_0`
-      into the emulator fanout through the new datapath `inject_aux` seam
+    - the deprecated charge-injection pulser / `inject_aux` seam has now been
+      removed from the active datapath; `mutrig_injector_0` is the sole injector
+      source feeding the emulator fanout
     - for the rate sweep itself, the cleanest emulator configuration is
       `hit_rate=0`, `noise_rate=0`, `hit_mode=POISSON`, `burst_size=1`,
       `burst_center=16`, so only the external injection pulses generate hits

@@ -35,13 +35,15 @@ from probe_phase4_stage_counters import (  # noqa: E402
 from run_phase4_emulator import (  # noqa: E402
     EMU_BASE_WORD,
     EMU_STRIDE_WORD,
+    HIST_CSR_BASE_WORD,
+    HIST_KEY_LOC_CHANNEL_POST,
+    LVDS_CSR_BASE_WORD,
     SOURCE_MUX_BASE_WORD,
     SOURCE_MUX_CONTROL_CLEAR_COUNTERS,
     SOURCE_MUX_CONTROL_SELECT_EMULATOR,
     SOURCE_MUX_REG_CONTROL,
     SOURCE_MUX_STRIDE_WORD,
     clear_histogram,
-    configure_histogram,
     configure_lvds_lanes,
     fmt_hex,
     rc_send,
@@ -53,6 +55,8 @@ from run_phase4_emulator import (  # noqa: E402
 
 
 INJECTOR_BASE_WORD = 0x0AC80
+HIST_INTERVAL_CLOCKS_1S = 125_000_000
+HIST_KEY_LOC_GLOBAL_CHANNEL_POST = (38 << 24) | (35 << 16) | (38 << 8) | 30
 INJECT_MODE = {
     "off": 0,
     "header": 1,
@@ -66,6 +70,32 @@ EMU_HIT_MODE = {
     "burst": 1,
     "poisson-iid": 2,
     "periodic": 3,
+}
+HIST_PROFILE = {
+    "rate": {
+        "description": "post-hit channel/rate histogram",
+        "left_bound": 0,
+        "right_bound": 0xFF,
+        "bin_width": 1,
+        "control": 0x00000101,
+        "key_loc": None,
+    },
+    "delay-debug1": {
+        "description": "MTS debug_1 signed ts_delta delay histogram",
+        "left_bound": 0,
+        "right_bound": 0x0FFF,
+        "bin_width": 16,
+        "control": 0x000000F1,
+        "key_loc": None,
+    },
+    "delay-mts-both": {
+        "description": "combined signed MTS ts_delta delay histogram on debug_1/debug_2",
+        "left_bound": 0,
+        "right_bound": 0x0FFF,
+        "bin_width": 16,
+        "control": 0x00000091,
+        "key_loc": None,
+    },
 }
 
 
@@ -193,6 +223,91 @@ def configure_injector(args: argparse.Namespace, pulse_interval: int) -> dict[st
         "prbs_ctrl",
     ]
     return dict(zip(keys, words))
+
+
+def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
+    """Apply the requested histogram profile and return the readback contract.
+
+    `rate` programs the Phase-5 closure preset: one 1 s accumulation interval
+    with update key data[38:30], i.e. ASIC[38:35] concatenated with
+    channel[34:30].  That gives one bin per global MuTRiG channel across the
+    8 x 32-channel FEB.
+
+    `delay-debug1` uses histogram_statistics mode -1, which is wired in this
+    firmware to mts_preprocessor_0.ts_delta via the debug_1 stream.
+    `delay-mts-both` selects mode -7 in the 26.1.4 histogram image, sampling
+    debug_1 and debug_2 together so upper and lower MTS preprocessors share one
+    delay PDF.
+    """
+    profile = HIST_PROFILE[args.hist_profile]
+    filter_enable = bool(getattr(args, "hist_filter_enable", False))
+    filter_key_loc_override = getattr(args, "hist_filter_key_loc", None)
+    filter_key_value = int(getattr(args, "hist_filter_key_value", 0) or 0) & 0xFFFF
+    if args.hist_profile == "rate":
+        key_loc = HIST_KEY_LOC_GLOBAL_CHANNEL_POST
+        key_value = 0x00000000
+        control_word = profile["control"] & 0xFFFFFFFF
+        if filter_enable:
+            if filter_key_loc_override is not None:
+                key_loc = filter_key_loc_override
+            key_value = filter_key_value
+            control_word |= 0x00001000
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 3, [profile["left_bound"] & 0xFFFFFFFF])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 4, [profile["right_bound"] & 0xFFFFFFFF])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 5, [profile["bin_width"] & 0xFFFFFFFF])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 6, [key_loc])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 7, [key_value])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 10, [HIST_INTERVAL_CLOCKS_1S])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 2, [control_word])
+        for _ in range(20):
+            control = sc_read(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 2)[0]
+            if (control & 0x2) == 0:
+                break
+            time.sleep(0.01)
+        else:
+            raise RuntimeError(f"histogram profile {args.hist_profile} apply did not clear apply_pending")
+    else:
+        key_loc = HIST_KEY_LOC_CHANNEL_POST
+        key_value = 0x00000000
+        control_word = profile["control"] & 0xFFFFFFFF
+        if filter_enable:
+            if filter_key_loc_override is not None:
+                key_loc = filter_key_loc_override
+            key_value = filter_key_value
+            control_word |= 0x00001000
+        sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 3, [profile["left_bound"] & 0xFFFFFFFF])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 4, [profile["right_bound"] & 0xFFFFFFFF])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 5, [profile["bin_width"] & 0xFFFFFFFF])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 6, [key_loc])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 7, [key_value])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 10, [HIST_INTERVAL_CLOCKS_1S])
+        sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 2, [control_word])
+        for _ in range(20):
+            control = sc_read(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 2)[0]
+            if (control & 0x2) == 0:
+                break
+            time.sleep(0.01)
+        else:
+            raise RuntimeError(f"histogram profile {args.hist_profile} apply did not clear apply_pending")
+
+    words = {idx: sc_read(args.sc_tool, args.link, HIST_CSR_BASE_WORD + idx)[0] for idx in (0, 1, 2, 3, 4, 5, 6, 7, 10)}
+    return {
+        "profile": args.hist_profile,
+        "description": profile["description"],
+        "uid": words[0],
+        "meta": words[1],
+        "control": words[2],
+        "left_bound": words[3],
+        "right_bound": words[4],
+        "bin_width": words[5],
+        "key_loc": words[6],
+        "key_value": words[7],
+        "interval_cfg": words[10],
+        "filter_enable_requested": filter_enable,
+        "filter_key_loc_requested": filter_key_loc_override,
+        "filter_key_value_requested": filter_key_value,
+    }
 
 
 def apply_debug_overrides(args: argparse.Namespace) -> dict[str, Any]:
@@ -344,10 +459,13 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
     if args.post_stop_reset_ms > 0:
         time.sleep(args.post_stop_reset_ms / 1000.0)
 
-    lane_go = configure_lvds_lanes(args.sc_tool, args.link, args.lvds_lane_mask)
+    if args.skip_lvds_config:
+        lane_go = sc_read(args.sc_tool, args.link, LVDS_CSR_BASE_WORD + 4)[0]
+    else:
+        lane_go = configure_lvds_lanes(args.sc_tool, args.link, args.lvds_lane_mask)
     selected_source_mask = source_mask(args)
     source_rows = select_lane_sources(args.sc_tool, args.link, selected_source_mask, clear_counters=True)
-    configure_histogram(args.sc_tool, args.link)
+    histogram_config = configure_histogram_for_args(args)
     clear_histogram(args.sc_tool, args.link)
     ingress_status = select_histogram_ingress_post(args.sc_tool, args.link)
     emu_config = configure_emulators_for_injector(args)
@@ -389,6 +507,7 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         "lane_go": lane_go,
         "source_rows_after_select": source_rows,
         "ingress_status_after_select": ingress_status,
+        "histogram_config": histogram_config,
         "emulator_config": emu_config,
         "injector_config": injector_config,
         "debug_overrides": debug_overrides,
@@ -416,8 +535,13 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- Source: `{args.source}`",
         f"- Source emulator mask: `{fmt_hex(source_mask(args))}`",
         f"- LVDS lane-go mask: `{fmt_hex(args.lvds_lane_mask)}`",
+        f"- LVDS configured by runner: `{'no' if args.skip_lvds_config else 'yes'}`",
         f"- Active emulator lanes: `{fmt_hex(args.active_lanes_mask)}`",
         f"- Inject mode: `{args.inject_mode}`",
+        f"- Histogram profile: `{args.hist_profile}`",
+        f"- Histogram filter enable: `{getattr(args, 'hist_filter_enable', False)}`",
+        f"- Histogram filter key loc override: `{getattr(args, 'hist_filter_key_loc', None)}`",
+        f"- Histogram filter key value: `{fmt_hex(getattr(args, 'hist_filter_key_value', 0) or 0)}`",
         f"- MTS expected latency override: `{args.mts_expected_latency if args.mts_expected_latency is not None else 'keep'}`",
         f"- MTS delay-ts field override: `{args.mts_delay_ts_field}`",
         f"- MTS drop-delay-error override: `{args.mts_drop_delay_error}`",
@@ -465,7 +589,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
                 f"- Injector mode during run: `{case.get('injector_during', {}).get('mode', '?')}`",
                 f"- Injector mode after run: `{case.get('injector_after', {}).get('mode', '?')}`",
                 f"- Lane-go readback: `{fmt_hex(case.get('lane_go', 0))}`",
-                f"- Histogram ingress status: `{fmt_hex(case.get('ingress_status_after_select', {}).get('raw', 0))}`",
+            f"- Histogram ingress status: `{fmt_hex(case.get('ingress_status_after_select', {}).get('raw', 0))}`",
+            f"- Histogram profile/readback: `{case.get('histogram_config', {})}`",
                 f"- Debug overrides: `{case.get('debug_overrides', {})}`",
                 f"- Source mux selected beat delta: `{summary.get('source_mux_selected_delta', 0)}`",
                 f"- Emulator frame delta: `{summary.get('emu_frame_delta', 0)}`",
@@ -511,9 +636,14 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "selected_source_mask": source_mask(args),
             "active_lanes_mask": args.active_lanes_mask,
             "lvds_lane_mask": args.lvds_lane_mask,
+            "skip_lvds_config": args.skip_lvds_config,
             "inject_mode": args.inject_mode,
             "duration_ms": args.duration_ms,
             "pulse_intervals": args.pulse_intervals,
+            "hist_profile": args.hist_profile,
+            "hist_filter_enable": getattr(args, "hist_filter_enable", False),
+            "hist_filter_key_loc": getattr(args, "hist_filter_key_loc", None),
+            "hist_filter_key_value": getattr(args, "hist_filter_key_value", 0),
             "cluster_size": args.cluster_size,
             "cluster_center": args.cluster_center,
             "inject_channel_mask": args.inject_channel_mask,
@@ -546,8 +676,13 @@ def main() -> int:
     parser.add_argument("--source", choices=("emulator", "real", "mixed"), default="emulator")
     parser.add_argument("--emulator-source-mask", type=parse_mask)
     parser.add_argument("--lvds-lane-mask", type=parse_lane_mask, default=0x1FF)
+    parser.add_argument("--skip-lvds-config", action="store_true")
     parser.add_argument("--active-lanes-mask", type=parse_mask, default=0xFF)
     parser.add_argument("--inject-mode", choices=tuple(INJECT_MODE), default="periodic")
+    parser.add_argument("--hist-profile", choices=tuple(HIST_PROFILE), default="rate")
+    parser.add_argument("--hist-filter-enable", action="store_true")
+    parser.add_argument("--hist-filter-key-loc", type=parse_u32, default=None)
+    parser.add_argument("--hist-filter-key-value", type=parse_u32, default=0)
     parser.add_argument("--pulse-intervals", type=parse_intervals, default=[5000])
     parser.add_argument("--pulse-high-cycles", type=parse_u32, default=8)
     parser.add_argument("--onclick-count", type=int, default=16)

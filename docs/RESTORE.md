@@ -61,7 +61,7 @@ Local helper IP that is not carried as a dedicated submodule now lives under:
 
 Other cleanup:
 
-- `onewire_sense_vector_bridge_26p0p330_hw.tcl` was moved into `onewire_temp_sense/`
+- `onewire_sense_vector_bridge_26p0p330_hw.tcl` is now under `onewire_temp_sense/systems/system_20260428_onewire_controller_master/syn/ip/onewire_sense_vector_bridge/`
 - legacy `max10_prog_avmm` was folded under `feb_max10_comm/legacy/max10_prog_avmm`
 
 ## Platform Designer Source Of Truth

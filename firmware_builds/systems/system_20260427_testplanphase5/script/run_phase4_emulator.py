@@ -28,6 +28,19 @@ from check_run_control import default_rc_tool  # noqa: E402
 
 EMU_BASE_WORD = 0x08800
 EMU_STRIDE_WORD = 0x10
+SOURCE_MUX_BASE_WORD = 0x08890
+SOURCE_MUX_STRIDE_WORD = 0x10
+SOURCE_MUX_UID = 0x4D4C534D
+SOURCE_MUX_REG_UID = 0
+SOURCE_MUX_REG_CONTROL = 2
+SOURCE_MUX_REG_STATUS = 3
+SOURCE_MUX_REG_REAL_BEATS = 4
+SOURCE_MUX_REG_EMU_BEATS = 5
+SOURCE_MUX_REG_SELECTED_BEATS = 6
+SOURCE_MUX_REG_SWITCH_COUNT = 7
+SOURCE_MUX_REG_LAST_SELECTED = 8
+SOURCE_MUX_CONTROL_SELECT_EMULATOR = 0x1
+SOURCE_MUX_CONTROL_CLEAR_COUNTERS = 0x2
 LVDS_CSR_BASE_WORD = 0x08000
 LVDS_LANE_GO_MASK = 0x000001FF
 HIST_BIN_BASE_WORD = 0x0A800
@@ -43,20 +56,104 @@ def default_output() -> Path:
 
 
 def run_cmd(cmd: list[str]) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, capture_output=True, text=True)
+    timeout_s = float(os.environ.get("BOARD_TEST_CMD_TIMEOUT_S", "10"))
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout_s)
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout if isinstance(exc.stdout, str) else (exc.stdout or b"").decode(errors="replace")
+        stderr = exc.stderr if isinstance(exc.stderr, str) else (exc.stderr or b"").decode(errors="replace")
+        stderr += f"\ncommand timed out after {timeout_s:.1f}s\n"
+        return subprocess.CompletedProcess(cmd, 124, stdout, stderr)
 
 
-def checked_cmd(cmd: list[str]) -> str:
-    proc = run_cmd(cmd)
+def checked_cmd(cmd: list[str], attempts: int = 3, retry_delay_s: float = 0.05) -> str:
+    last_text = ""
+    for attempt in range(attempts):
+        proc = run_cmd(cmd)
+        last_text = proc.stdout + proc.stderr
+        if proc.returncode == 0:
+            return last_text
+        if (
+            attempt + 1 < attempts
+            and proc.returncode == 2
+            and "SC secondary did not report ready after reset" in last_text
+        ):
+            time.sleep(retry_delay_s)
+            continue
+        break
+
     if proc.returncode != 0:
         raise RuntimeError(
             f"command failed rc={proc.returncode}: {' '.join(cmd)}\n{proc.stdout}{proc.stderr}"
         )
-    return proc.stdout + proc.stderr
+    return last_text
+
+
+def sc_cmd_with_enable_mask(cmd: list[str], *, quiet: bool) -> list[str]:
+    argv = [*cmd]
+    if quiet:
+        argv.append("--quiet")
+    if os.environ.get("BOARD_TEST_SC_NO_RESET", "").strip().lower() in {"1", "true", "yes", "on"}:
+        argv.append("--no-reset")
+    reply_timeout_ms = os.environ.get("BOARD_TEST_SC_REPLY_TIMEOUT_MS", "").strip()
+    if reply_timeout_ms:
+        argv.extend(["--reply-timeout-ms", reply_timeout_ms])
+    argv.extend(sc_enable_mask_args())
+    return argv
+
+
+def sc_attempt(cmd: list[str], attempts: int = 3, retry_delay_s: float = 0.05) -> tuple[subprocess.CompletedProcess[str], str]:
+    last_proc: subprocess.CompletedProcess[str] | None = None
+    last_text = ""
+    pipelined_retry = os.environ.get("BOARD_TEST_SC_PIPELINED_RETRY", "").strip().lower() in {"1", "true", "yes", "on"}
+    for attempt in range(attempts):
+        proc = run_cmd(cmd)
+        text = proc.stdout + proc.stderr
+        last_proc = proc
+        last_text = text
+        if proc.returncode == 0:
+            return proc, text
+        retry_secondary_reset = proc.returncode == 2 and "SC secondary did not report ready after reset" in text
+        if attempt + 1 < attempts and (retry_secondary_reset or pipelined_retry):
+            time.sleep(retry_delay_s)
+            continue
+        break
+    assert last_proc is not None
+    return last_proc, last_text
 
 
 def parse_payload(text: str) -> list[int]:
     return [int(match.group(2), 16) for match in re.finditer(r"payload\[(\d+)\]\s*=\s*(0x[0-9A-Fa-f]+)", text)]
+
+
+def sc_rsp_has_bus_error(text: str) -> bool:
+    return bool(re.search(r"rsp\s*:\s*(SLVERR|DECERR)", text))
+
+
+def sc_verbose_first() -> bool:
+    return os.environ.get("BOARD_TEST_SC_VERBOSE_FIRST", "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def sc_transaction(cmd: list[str], expect_payload: int | None = None) -> str:
+    attempts = (False, True) if sc_verbose_first() else (True, False)
+    results: list[tuple[str, subprocess.CompletedProcess[str], str]] = []
+    for quiet in attempts:
+        label = "quiet" if quiet else "verbose"
+        argv = sc_cmd_with_enable_mask(cmd, quiet=quiet)
+        proc, text = sc_attempt(argv)
+        results.append((label, proc, text))
+        words = parse_payload(text)
+        ok = proc.returncode == 0 and not sc_rsp_has_bus_error(text)
+        if expect_payload is not None:
+            ok = ok and len(words) == expect_payload
+        if ok:
+            return text
+
+    details = []
+    for label, proc, text in results:
+        argv = sc_cmd_with_enable_mask(cmd, quiet=(label == "quiet"))
+        details.append(f"{label} rc={proc.returncode}: {' '.join(argv)}\n{text}")
+    raise RuntimeError("SC transaction failed after quiet/verbose attempts\n" + "\n".join(details))
 
 
 def sc_enable_mask_args() -> list[str]:
@@ -65,9 +162,8 @@ def sc_enable_mask_args() -> list[str]:
 
 
 def sc_read(sc_tool: Path, link: int, addr: int, count: int = 1) -> list[int]:
-    argv = [str(sc_tool), str(link), "read", f"0x{addr:05X}", str(count), "--quiet"]
-    argv.extend(sc_enable_mask_args())
-    out = checked_cmd(argv)
+    argv = [str(sc_tool), str(link), "read", f"0x{addr:05X}", str(count)]
+    out = sc_transaction(argv, expect_payload=count)
     words = parse_payload(out)
     if len(words) != count:
         raise RuntimeError(f"SC read 0x{addr:05X} count={count} returned {len(words)} words\n{out}")
@@ -75,10 +171,9 @@ def sc_read(sc_tool: Path, link: int, addr: int, count: int = 1) -> list[int]:
 
 
 def sc_write(sc_tool: Path, link: int, addr: int, words: list[int]) -> None:
-    argv = [str(sc_tool), str(link), "write", f"0x{addr:05X}", *[f"0x{word & 0xFFFFFFFF:08X}" for word in words], "--quiet"]
-    argv.extend(sc_enable_mask_args())
-    out = checked_cmd(argv)
-    if re.search(r"rsp\s*:\s*(SLVERR|DECERR)", out):
+    argv = [str(sc_tool), str(link), "write", f"0x{addr:05X}", *[f"0x{word & 0xFFFFFFFF:08X}" for word in words]]
+    out = sc_transaction(argv)
+    if sc_rsp_has_bus_error(out):
         raise RuntimeError(f"SC write 0x{addr:05X} got bus error\n{out}")
 
 
@@ -100,12 +195,92 @@ def emu_base(idx: int) -> int:
     return EMU_BASE_WORD + idx * EMU_STRIDE_WORD
 
 
+def source_mux_base(idx: int) -> int:
+    return SOURCE_MUX_BASE_WORD + idx * SOURCE_MUX_STRIDE_WORD
+
+
 def decode_emu_status(word: int) -> dict[str, int]:
     return {
         "raw": word,
         "frame_count": word & 0xFFFF,
         "event_count": (word >> 16) & 0x03FF,
     }
+
+
+def decode_source_mux_status(word: int) -> dict[str, int]:
+    return {
+        "raw": word,
+        "select_emulator": word & 0x1,
+        "real_valid": (word >> 1) & 0x1,
+        "emu_valid": (word >> 2) & 0x1,
+        "selected_valid": (word >> 3) & 0x1,
+        "selected_channel": (word >> 4) & 0xF,
+        "selected_error": (word >> 8) & 0x7,
+        "real_channel": (word >> 11) & 0xF,
+        "real_error": (word >> 15) & 0x7,
+        "emu_channel": (word >> 18) & 0xF,
+        "emu_error": (word >> 22) & 0x7,
+        "both_valid": (word >> 25) & 0x1,
+    }
+
+
+def decode_source_mux_last_selected(word: int) -> dict[str, int]:
+    return {
+        "raw": word,
+        "data": word & 0x1FF,
+        "channel": (word >> 9) & 0xF,
+        "error": (word >> 13) & 0x7,
+        "source_emulator": (word >> 16) & 0x1,
+    }
+
+
+def read_lane_source_mux(sc_tool: Path, link: int, idx: int) -> dict[str, Any]:
+    base = source_mux_base(idx)
+    words = sc_read(sc_tool, link, base, SOURCE_MUX_REG_LAST_SELECTED + 1)
+    status = decode_source_mux_status(words[SOURCE_MUX_REG_STATUS])
+    last_selected = decode_source_mux_last_selected(words[SOURCE_MUX_REG_LAST_SELECTED])
+    return {
+        "idx": idx,
+        "base": base,
+        "uid": words[SOURCE_MUX_REG_UID],
+        "control": words[SOURCE_MUX_REG_CONTROL],
+        "status": status,
+        "real_beats": words[SOURCE_MUX_REG_REAL_BEATS],
+        "emu_beats": words[SOURCE_MUX_REG_EMU_BEATS],
+        "selected_beats": words[SOURCE_MUX_REG_SELECTED_BEATS],
+        "switch_count": words[SOURCE_MUX_REG_SWITCH_COUNT],
+        "last_selected": last_selected,
+    }
+
+
+def read_lane_source_muxes(sc_tool: Path, link: int) -> list[dict[str, Any]]:
+    return [read_lane_source_mux(sc_tool, link, idx) for idx in range(8)]
+
+
+def select_lane_sources(
+    sc_tool: Path,
+    link: int,
+    emulator_mask: int,
+    clear_counters: bool = False,
+) -> list[dict[str, Any]]:
+    if emulator_mask < 0 or emulator_mask > 0xFF:
+        raise ValueError(f"invalid source emulator mask 0x{emulator_mask:X}; expected 0x00..0xff")
+
+    rows = []
+    for idx in range(8):
+        base = source_mux_base(idx)
+        uid = sc_read(sc_tool, link, base + SOURCE_MUX_REG_UID)[0]
+        if uid != SOURCE_MUX_UID:
+            raise RuntimeError(
+                f"mutrig_lane_source_mux_{idx} UID mismatch at 0x{base:05X}: "
+                f"got 0x{uid:08X}, expected 0x{SOURCE_MUX_UID:08X}"
+            )
+        control = SOURCE_MUX_CONTROL_SELECT_EMULATOR if (emulator_mask & (1 << idx)) else 0
+        if clear_counters:
+            control |= SOURCE_MUX_CONTROL_CLEAR_COUNTERS
+        sc_write(sc_tool, link, base + SOURCE_MUX_REG_CONTROL, [control])
+        rows.append(read_lane_source_mux(sc_tool, link, idx))
+    return rows
 
 
 def hist_snapshot(sc_tool: Path, link: int) -> dict[str, int]:
@@ -187,8 +362,10 @@ def configure_emulators(sc_tool: Path, link: int, hit_rate: int) -> None:
         sc_write(sc_tool, link, base + 0, [0x00000001])  # enable, poisson, long mode
 
 
-def configure_lvds_lanes(sc_tool: Path, link: int) -> int:
-    sc_write(sc_tool, link, LVDS_CSR_BASE_WORD + 4, [LVDS_LANE_GO_MASK])
+def configure_lvds_lanes(sc_tool: Path, link: int, lane_mask: int = LVDS_LANE_GO_MASK) -> int:
+    if lane_mask < 0 or lane_mask > LVDS_LANE_GO_MASK:
+        raise ValueError(f"invalid LVDS lane mask 0x{lane_mask:X}; expected 0x0..0x{LVDS_LANE_GO_MASK:X}")
+    sc_write(sc_tool, link, LVDS_CSR_BASE_WORD + 4, [lane_mask])
     return sc_read(sc_tool, link, LVDS_CSR_BASE_WORD + 4)[0]
 
 
@@ -219,13 +396,15 @@ def run_to_running(
 
 def run_measurement(args: argparse.Namespace, hit_rate: int, duration_s: float, label: str) -> dict[str, Any]:
     ingress_status: dict[str, int] = {}
+    source_mux_rows: list[dict[str, Any]] = []
     lane_go = 0
     quiet_emu_a: list[dict[str, int]] | None = None
     quiet_hist_a: dict[str, int] | None = None
 
     def configure_after_reset_release() -> None:
-        nonlocal ingress_status, lane_go, quiet_emu_a, quiet_hist_a
+        nonlocal ingress_status, source_mux_rows, lane_go, quiet_emu_a, quiet_hist_a
         lane_go = configure_lvds_lanes(args.sc_tool, args.link)
+        source_mux_rows = select_lane_sources(args.sc_tool, args.link, 0xFF, clear_counters=True)
         configure_histogram(args.sc_tool, args.link)
         clear_histogram(args.sc_tool, args.link)
         ingress_status = select_histogram_ingress_post(args.sc_tool, args.link)
@@ -297,6 +476,7 @@ def run_measurement(args: argparse.Namespace, hit_rate: int, duration_s: float, 
         "hist_b": hist_b,
         "hist_post_end": hist_post_end,
         "ingress_status": ingress_status,
+        "source_mux_rows": source_mux_rows,
         "lane_go": lane_go,
         "total_delta": total_delta,
         "dropped_delta": dropped_delta,
@@ -399,6 +579,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, primary: 
         f"- Histogram DROPPED_HITS delta: `{primary['dropped_delta']}`",
         f"- Post-end histogram FIFO/queue empty: `{'yes' if primary.get('post_end_clean', True) else 'no'}`",
         f"- LVDS lane-go after reset release: `{fmt_hex(primary['lane_go'])}`",
+        "- MuTRiG lane source mux: `emulator` selected for lanes 0..7",
         f"- Histogram ingress source: `post`",
         f"- Histogram ingress status after reset release: `{fmt_hex(primary['ingress_status'].get('raw', 0))}`",
         f"- Histogram binning: `LEFT_BOUND=0`, `BIN_WIDTH=1`, `RIGHT_BOUND=256 derived`",
@@ -410,6 +591,19 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, primary: 
         lines.append(
             f"| {row['idx']} | {row['before']['frame_count']} | {row['after']['frame_count']} | "
             f"{row['frame_delta']} | {row['after']['event_count']} | {'PASS' if row['pass'] else 'FAIL'} |"
+        )
+    lines.extend(
+        [
+            "",
+            "| Lane | Source Mux Base | Source | Real Beats | Emu Beats | Selected Beats |",
+            "|---:|---:|---|---:|---:|---:|",
+        ]
+    )
+    for row in primary.get("source_mux_rows", []):
+        source = "emulator" if (row["control"] & SOURCE_MUX_CONTROL_SELECT_EMULATOR) else "real"
+        lines.append(
+            f"| {row['idx']} | `{fmt_hex(row['base'])}` | `{source}` | "
+            f"{row['real_beats']} | {row['emu_beats']} | {row['selected_beats']} |"
         )
     lines.extend(
         [
