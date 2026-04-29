@@ -802,7 +802,16 @@ def main() -> int:
     parser.add_argument("--emulator-source-mask", type=parse_mask)
     parser.add_argument("--lvds-lane-mask", type=parse_lane_mask, default=0x1FF)
     parser.add_argument("--skip-lvds-config", action="store_true")
-    parser.add_argument("--active-lanes-mask", type=parse_mask, default=0xFF)
+    parser.add_argument(
+        "--active-lanes-mask",
+        type=parse_mask,
+        default=None,
+        help=(
+            "Emulator lanes to enable. Defaults to 0x00 for --source real so "
+            "non-requested lanes parked on emulator sources stay quiet, and "
+            "0xff for emulator/mixed runs."
+        ),
+    )
     parser.add_argument("--inject-mode", choices=tuple(INJECT_MODE), default="periodic")
     parser.add_argument("--hist-profile", choices=tuple(HIST_PROFILE), default="rate")
     parser.add_argument("--rate-tolerance-pct", type=float, default=1.0)
@@ -846,6 +855,8 @@ def main() -> int:
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--json-output", type=Path, default=None)
     args = parser.parse_args()
+    if args.active_lanes_mask is None:
+        args.active_lanes_mask = 0x00 if args.source == "real" else 0xFF
 
     timestamp = dt.datetime.now().isoformat(timespec="seconds")
     output = args.output or default_output()

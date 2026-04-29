@@ -250,12 +250,31 @@ Operational procedure:
 2. Increase `hitlogic` when the central delay peak is surrounded by noise.
 3. Before testing a new `vcodelay`, first write `vcodelay = 0x0+0` to fully unlock the PLL, then write the target value in the `<value>x<scale> + <offset>` form. The lock state can be sticky; skipping the explicit unlock can make a historically good `vcodelay` fail to re-lock.
 
-Observed Phase-5 blocker on 2026-04-29: single-lane 2000-cycle runs pass on
-lanes `0`, `1`, `4`, `5`, and `6`; lanes `2`, `3`, and `7` still show MTS
-timestamp-delay discard. Down-side lanes `5+6` together trigger ring-buffer CAM
-input errors even when lanes `5` and `6` pass alone. Treat that as the current
-inter-ASIC timestamp-alignment blocker before claiming 256-channel FEB/SWB
-end-to-end closure.
+Observed Phase-5 update on 2026-04-30:
+
+- Single-lane 2000-cycle delay runs can be made clean on all eight lanes with
+  ASIC-specific PLL/hitlogic overrides.
+- Scoped real-source runs must leave parked emulator lanes disabled. In
+  `run_phase5_injector_datapath_sanity.py`, this is now the default for
+  `--source real`; older manual runs used `--active-lanes-mask 0x00`.
+- Upper pair `lanes1+2` passes when ASIC1/2 are reduced to one TDC-test channel
+  and the parked emulators are quiet, but the full 32-channel pair still
+  produces ring-buffer CAM input errors. Treat that as a multiplicity/rate
+  problem, not as proof of an ASIC1/2 phase offset.
+- Lower pair `lanes5+6` still produces ring-buffer CAM input errors even with
+  one TDC-test channel per ASIC while lanes `5` and `6` pass alone. Header
+  `ext_trig_offset`, `sync_ch_rst`, the wiki `cml_sc=1` setting, and known
+  older SMB5 local-2 PLL points did not clear it. The ring error is forwarded
+  MTS `tserr`, meaning the hit reaches the ring outside the allowed
+  `0..2000` cycle timestamp-delay window.
+- The quick `rate` profile's `LAST_INTERVAL_TOTAL_HITS` is not closure evidence
+  in the current live runs; it stayed near `66560` for one-channel lane5 while
+  live/MTS counters changed with run duration. Use raw DMA/hit decode or a fixed
+  histogram-bin capture before claiming 100 kHz/channel rate closure.
+
+Do not claim 256-channel FEB/SWB end-to-end closure until the lower-pair MTS
+`tserr` source is removed and the host-disk capture shows 256 same-timestamp
+hits per bunch with 100 kHz bunch spacing.
 
 ## Analog Mode
 

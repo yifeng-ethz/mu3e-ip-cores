@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Phase-5 MuTRiG Tuning Report</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #182026;
+      background: #f6f7f8;
+    }
+    header {
+      padding: 24px 32px 18px;
+      background: #fff;
+      border-bottom: 1px solid #d8dde3;
+    }
+    main { padding: 24px 32px 40px; }
+    h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: 0; }
+    h2 { margin: 28px 0 12px; font-size: 18px; letter-spacing: 0; }
+    p { max-width: 1100px; line-height: 1.45; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #d8dde3;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e4e8ec;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #edf1f4; font-weight: 650; }
+    .badge {
+      display: inline-block;
+      min-width: 52px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: #fff;
+      text-align: center;
+      font-weight: 650;
+      font-size: 12px;
+    }
+    .pass { background: #1d7f45; }
+    .fail { background: #b73535; }
+    .missing { background: #6b7280; }
+    .note, .class {
+      margin-top: 4px;
+      color: #52606d;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .callout {
+      background: #fff;
+      border-left: 4px solid #b73535;
+      padding: 12px 14px;
+      margin: 16px 0;
+      max-width: 1120px;
+    }
+    code { background: #edf1f4; padding: 1px 4px; border-radius: 3px; }
+    a { color: #0a5ca8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Phase-5 MuTRiG Tuning Report</h1>
+    <div>Generated 2026-04-30T01:11:34 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+  </header>
+  <main>
+    <div class="callout">
+      <strong>Closure status: FAIL.</strong>
+      Single-lane delay can be made clean, but the lower pair <code>lanes5+6</code>
+      still forwards MTS timestamp errors into the lower ring-buffer CAM even at
+      one TDC-test channel per ASIC. No FEB/SWB host-disk 256-hit, 100 kHz
+      end-to-end claim is valid yet.
+    </div>
+
+    <h2>Current Read</h2>
+    <p>
+      The strongest blocker is not the deprecated injector path or XML mapping.
+      The active injector is the Phase-5 <code>mutrig_injector_0</code> path and
+      the XML split is SMB3 for ASICs 0..3 and SMB5 for ASICs 4..7. The lower
+      side fails because MTS asserts <code>tserr</code> before the ring stage;
+      the ring <code>inerr_count</code> is therefore a real timestamp-delay
+      failure, not a ring-local decode bug.
+    </p>
+    <p>
+      Tuning attempts that did not clear the lower pair include
+      <code>ext_trig_offset</code>, <code>sync_ch_rst</code>,
+      <code>cml_sc=1</code>, ASIC6 <code>40/30/30</code>, ASIC6 pll-half, and
+      the older SMB5 241204 local config. The upper pair behaves differently:
+      <code>lanes1+2</code> passes at one channel and fails at full multiplicity.
+    </p>
+    <p>
+      MuTRiG tuning reference: <a href="../../../doc/MUTRIG.md">MUTRIG.md</a>.
+      That page links the local MuTRiG wiki mirror and records the DMON/TDC
+      injection implications used here.
+    </p>
+
+    <h2>Evidence Table</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Run</th>
+          <th>Result</th>
+          <th>Scope</th>
+          <th>Pulse / Duration</th>
+          <th>Hist</th>
+          <th>MTS</th>
+          <th>MTS Disc</th>
+          <th>Ring InErr</th>
+          <th>Frame Actual</th>
+          <th>CRC</th>
+          <th>Artifact</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>Config</td><td>Restore full tuned baseline<div class="note">All eight ASICs reloaded full-channel with the single-lane-clean PLL overrides.</div></td><td><span class="badge pass">PASS</span><div class="class">8 / 8 configured</div></td><td>config<br>-</td><td>-<br>- ms</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430.json">phase5_mutrig_restore_full32_tuned_baseline_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Single-lane matrix<div class="note">Eight isolated lanes pass the 2000-cycle MTS/ring error gate.</div></td><td><span class="badge pass">PASS</span><div class="class">8 / 8 pass</div></td><td>lvds=0x0FF<br>emu=0x00</td><td>4<br>250 ms</td><td>9,019,570</td><td>38,411,543</td><td>0</td><td>0</td><td>47,843,393</td><td>0</td><td><a href="phase5_real_256ch_per_lane_best2_pulse4_delay_2000cyc_20260429.json">phase5_real_256ch_per_lane_best2_pulse4_delay_2000cyc_20260429.json</a></td></tr>
+<tr><td>Delay</td><td>All lanes together<div class="note">All-lane run still fails on ring input errors.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x0FF<br>emu=0x00</td><td>4<br>250 ms</td><td>14,859,250</td><td>39,898,636</td><td>0</td><td>36,028,969</td><td>40,079,631</td><td>0</td><td><a href="phase5_real_256ch_all_lanes_best2_pulse4_delay_2000cyc_20260429.json">phase5_real_256ch_all_lanes_best2_pulse4_delay_2000cyc_20260429.json</a></td></tr>
+<tr><td>Delay</td><td>Upper lanes 1+2, one channel<div class="note">Passes when parked emulator lanes are disabled.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x006<br>emu=0x00</td><td>4<br>250 ms</td><td>32,614</td><td>487,254</td><td>0</td><td>0</td><td>609,164</td><td>0</td><td><a href="phase5_real_upper_lanes12_ch1_quietemu_pulse4_delay_2000cyc_20260430.json">phase5_real_upper_lanes12_ch1_quietemu_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Upper lanes 1+2, full channels<div class="note">Fails only when full-channel multiplicity is restored.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x006<br>emu=0x00</td><td>4<br>250 ms</td><td>4,758,053</td><td>13,565,966</td><td>0</td><td>385,489</td><td>16,813,579</td><td>0</td><td><a href="phase5_real_upper_lanes12_best2_pulse4_delay_2000cyc_20260429.json">phase5_real_upper_lanes12_best2_pulse4_delay_2000cyc_20260429.json</a></td></tr>
+<tr><td>Delay</td><td>Lower lane 5, one channel<div class="note">Lane 5 alone passes.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>4<br>250 ms</td><td>61,790</td><td>174,690</td><td>0</td><td>0</td><td>216,467</td><td>0</td><td><a href="phase5_real_lane5_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json">phase5_real_lane5_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Lower lane 6, one channel<div class="note">Lane 6 alone passes.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x040<br>emu=0x00</td><td>4<br>250 ms</td><td>68,986</td><td>247,339</td><td>0</td><td>0</td><td>307,500</td><td>0</td><td><a href="phase5_real_lane6_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json">phase5_real_lane6_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Lower lanes 5+6, one channel<div class="note">Pair fails with MTS tserr forwarded into the ring.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>156,932</td><td>413,661</td><td>0</td><td>539,123</td><td>377,901</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_quietemu_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_quietemu_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC6 ext offset<div class="note">Header ext_trig_offset=1 on ASIC6 did not improve the lower pair.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>153,524</td><td>429,296</td><td>0</td><td>547,507</td><td>379,982</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_asic6_extoffset1_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_asic6_extoffset1_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC5 ext offset<div class="note">Header ext_trig_offset=1 on ASIC5 made accepted delay counts worse.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>57,951</td><td>437,830</td><td>0</td><td>560,451</td><td>387,643</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_asic5_extoffset1_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_asic5_extoffset1_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC6 sync_ch_rst=0<div class="note">Reset-sync flip on ASIC6 did not improve the lower pair.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>148,147</td><td>429,088</td><td>0</td><td>548,600</td><td>381,670</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_asic6_synchrst0_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_asic6_synchrst0_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC5 sync_ch_rst=0<div class="note">Reset-sync flip on ASIC5 did not improve the lower pair.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>45,199</td><td>450,371</td><td>0</td><td>577,064</td><td>398,692</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_asic5_synchrst0_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_asic5_synchrst0_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>Lower pair cml_sc=1<div class="note">Wiki CML-scale setting kills accepted delay counts while ring errors remain.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>7,630</td><td>415,825</td><td>0</td><td>535,272</td><td>373,402</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_cmlsc1_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_cmlsc1_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC6 40/30/30<div class="note">Known SMB5 local-2 PLL point did not clear the lower-pair error.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>143,767</td><td>410,048</td><td>0</td><td>529,614</td><td>369,063</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_asic6_cnt40_vcd30_hl30_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_asic6_cnt40_vcd30_hl30_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC6 PLL-half<div class="note">Older pll-half local-2 point did not clear the lower-pair error.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>130,702</td><td>418,060</td><td>0</td><td>541,336</td><td>375,119</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_asic6_cnt25off1_vcd20_hl40_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_asic6_cnt25off1_vcd20_hl40_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>SMB5 241204 pair config<div class="note">Full older ASIC5/6 local config is worse than good_ribbon_0.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>4,748</td><td>426,911</td><td>0</td><td>548,475</td><td>383,999</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_smb005_241204_pulse4_delay_2000cyc_20260430.json">phase5_real_lower_lanes56_ch1_smb005_241204_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Rate</td><td>Lane5 one-channel rate<div class="note">Quick rate profile is out of tolerance and not stable enough for closure.</div></td><td><span class="badge fail">FAIL</span><div class="class">rate_out_of_tolerance</div></td><td>lvds=0x020<br>emu=0x00</td><td>4<br>2,500 ms</td><td>66,561</td><td>325,070</td><td>0</td><td>0</td><td>367,912</td><td>0</td><td><a href="phase5_real_lane5_ch1_rate100k_goodribbon_pulse4_2500ms_20260430.json">phase5_real_lane5_ch1_rate100k_goodribbon_pulse4_2500ms_20260430.json</a></td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>
