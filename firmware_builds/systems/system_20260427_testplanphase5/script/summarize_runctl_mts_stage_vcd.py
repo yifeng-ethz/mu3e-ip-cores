@@ -82,8 +82,12 @@ def add_deasm_gate(mapping: dict[str, str], path_prefix: str, canonical_prefix: 
         mapping[f"{path_prefix}{name}"] = f"{canonical_prefix}.{name}"
     add_bus(mapping, path_prefix, canonical_prefix, "i_data", 8, "i_data")
     add_bus(mapping, path_prefix, canonical_prefix, "asi_rx8b1k_data", 9, "rx8b1k_data")
+    add_bus(mapping, path_prefix, canonical_prefix, "asi_rx8b1k_error", 3, "rx8b1k_error")
+    add_bus(mapping, path_prefix, canonical_prefix, "asi_rx8b1k_channel", 4, "rx8b1k_channel")
     add_bus(mapping, path_prefix, canonical_prefix, "p_frame_flags", 6, "p_frame_flags")
     add_bus(mapping, path_prefix, canonical_prefix, "p_frame_len", 10, "p_frame_len")
+    add_bus(mapping, path_prefix, canonical_prefix, "aso_hit_type0_error", 3, "hit_type0_error")
+    add_bus(mapping, path_prefix, canonical_prefix, "aso_hit_type0_channel", 4, "hit_type0_channel")
     for state in (
         "FS_IDLE",
         "FS_FRAME_COUNTER",
@@ -142,8 +146,12 @@ def add_vcd_deasm_gate(mapping: dict[str, str], scope_prefix: str, canonical_pre
         mapping[f"{scope_prefix}{name}"] = f"{canonical_prefix}.{name}"
     add_vcd_bus(mapping, scope_prefix, canonical_prefix, "i_data", 8, "i_data")
     add_vcd_bus(mapping, scope_prefix, canonical_prefix, "asi_rx8b1k_data", 9, "rx8b1k_data")
+    add_vcd_bus(mapping, scope_prefix, canonical_prefix, "asi_rx8b1k_error", 3, "rx8b1k_error")
+    add_vcd_bus(mapping, scope_prefix, canonical_prefix, "asi_rx8b1k_channel", 4, "rx8b1k_channel")
     add_vcd_bus(mapping, scope_prefix, canonical_prefix, "p_frame_flags", 6, "p_frame_flags")
     add_vcd_bus(mapping, scope_prefix, canonical_prefix, "p_frame_len", 10, "p_frame_len")
+    add_vcd_bus(mapping, scope_prefix, canonical_prefix, "aso_hit_type0_error", 3, "hit_type0_error")
+    add_vcd_bus(mapping, scope_prefix, canonical_prefix, "aso_hit_type0_channel", 4, "hit_type0_channel")
     for state in (
         "FS_IDLE",
         "FS_FRAME_COUNTER",
@@ -380,6 +388,13 @@ def count_rises(samples: list[tuple[int, dict[str, str]]], name: str) -> int:
     return rises
 
 
+def first_high_snapshot(samples: list[tuple[int, dict[str, str]]], name: str) -> tuple[int, dict[str, str]] | None:
+    for ts, snap in samples:
+        if snap.get(name) == "1":
+            return ts, snap
+    return None
+
+
 def summarize_stage(samples: list[tuple[int, dict[str, str]]], label: str, valid_name: str = "valid") -> str:
     signal = f"{label}.{valid_name}"
     first = first_high(samples, signal)
@@ -452,6 +467,14 @@ def main() -> int:
         f"{words_text(distinct_bus_words(samples, 'deasm0', 'rx8b1k_data', 9, 'rx8b1k_valid'))}"
     )
     print(
+        "deasm0.rx8b1k_errors="
+        f"{words_text(distinct_bus_words(samples, 'deasm0', 'rx8b1k_error', 3, 'rx8b1k_valid'), width=1)}"
+    )
+    print(
+        "deasm0.rx8b1k_channels="
+        f"{words_text(distinct_bus_words(samples, 'deasm0', 'rx8b1k_channel', 4, 'rx8b1k_valid'), width=1)}"
+    )
+    print(
         "deasm0.i_data_words="
         f"{words_text(distinct_bus_words(samples, 'deasm0', 'i_data', 8, 'rx8b1k_valid'), width=2)}"
     )
@@ -475,6 +498,38 @@ def main() -> int:
     }
     print(f"deasm0.parser_states={deasm_states}")
     print(f"deasm0.hit_type0_valid={int(ever_high(samples, 'deasm0.hit_type0_valid'))}")
+    print(
+        "deasm0.hit_type0_errors="
+        f"{words_text(distinct_bus_words(samples, 'deasm0', 'hit_type0_error', 3, 'hit_type0_valid'), width=1)}"
+    )
+    print(
+        "deasm0.hit_type0_channels="
+        f"{words_text(distinct_bus_words(samples, 'deasm0', 'hit_type0_channel', 4, 'hit_type0_valid'), width=1)}"
+    )
+    for bit in range(3):
+        signal = f"deasm0.hit_type0_error[{bit}]"
+        print(
+            f"{signal}: first={first_high(samples, signal) if first_high(samples, signal) is not None else '-'} "
+            f"rises={count_rises(samples, signal)}"
+        )
+    hiterr = first_high_snapshot(samples, "deasm0.hit_type0_error[0]")
+    if hiterr is not None:
+        ts, snap = hiterr
+        print(
+            "deasm0.first_hiterr_context="
+            f"time={ts} "
+            f"rx_valid={snap.get('deasm0.rx8b1k_valid', 'x')} "
+            f"rx_word=0x{bus_word(snap, 'deasm0', 'rx8b1k_data', 9):03X} "
+            f"rx_error=0x{bus_word(snap, 'deasm0', 'rx8b1k_error', 3):01X} "
+            f"rx_channel=0x{bus_word(snap, 'deasm0', 'rx8b1k_channel', 4):01X} "
+            f"i_data=0x{bus_word(snap, 'deasm0', 'i_data', 8):02X} "
+            f"i_byteisk={snap.get('deasm0.i_byteisk', 'x')} "
+            f"frame_flags=0x{bus_word(snap, 'deasm0', 'p_frame_flags', 6):02X} "
+            f"frame_len={bus_word(snap, 'deasm0', 'p_frame_len', 10)} "
+            f"hit_channel=0x{bus_word(snap, 'deasm0', 'hit_type0_channel', 4):01X} "
+            f"sop={snap.get('deasm0.aso_hit_type0_startofpacket', 'x')} "
+            f"eop={snap.get('deasm0.aso_hit_type0_endofpacket', 'x')}"
+        )
     print(f"emu0.ctrl_running={int(ever_high(samples, 'emu0.ctrl_running'))}")
     print(f"emu0.tx8b1k_valid={int(ever_high(samples, 'emu0.tx8b1k_valid'))}")
     return 0
