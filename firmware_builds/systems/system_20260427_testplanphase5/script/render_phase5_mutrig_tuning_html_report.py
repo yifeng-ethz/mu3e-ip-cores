@@ -22,7 +22,7 @@ EVIDENCE = [
     (
         "Restore full tuned baseline",
         "Config",
-        "phase5_mutrig_restore_full32_tuned_baseline_20260430d.json",
+        "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json",
         "All eight ASICs reloaded full-channel with the single-lane-clean PLL overrides.",
     ),
     (
@@ -132,6 +132,30 @@ EVIDENCE = [
         "Tune",
         "phase5_real_lower_lanes56_full32_hl60_latency2000_pulse4_20260430.json",
         "Raising vnhitlogic on both ASICs does not clear the pair-level full-channel failure.",
+    ),
+    (
+        "Lower pulse3 hitlogic 10",
+        "Pulse edge",
+        "phase5_real_lower_lanes56_full32_hl10_latency2000_pulse3_20260430.json",
+        "Pulse high 3 with vnhitlogic=10 is clean but far below full 32-channel multiplicity.",
+    ),
+    (
+        "Lower pulse3 hitlogic 5",
+        "Pulse edge",
+        "phase5_real_lower_lanes56_full32_hl5_latency2000_pulse3_20260430.json",
+        "Lowering hitlogic to 5 remains clean but still underfilled.",
+    ),
+    (
+        "Lower pulse4 hitlogic 5",
+        "Pulse edge",
+        "phase5_real_lower_lanes56_full32_hl5_latency2000_pulse4_20260430.json",
+        "The next integer pulse width restores multiplicity but also restores MTS/ring errors.",
+    ),
+    (
+        "Lower pulse3 cml_sc=1",
+        "Pulse edge",
+        "phase5_real_lower_lanes56_full32_hl10_cmlsc1_latency2000_pulse3_20260430.json",
+        "The wiki cml_sc=1 setting moves pulse3 farther away from the required multiplicity.",
     ),
     (
         "Lower pair at 10 kHz/channel",
@@ -405,7 +429,9 @@ def write_html() -> None:
       some groups are clean alone, but their union still fails. That points at
       a cross-ASIC ordering/epoch interaction in the lower MTS path, not a
       single dead lane. Bypassing the MTS lapse transform did not clear it, and
-      using the E timestamp field made it worse. The upper pair behaves differently:
+      using the E timestamp field made it worse. Pulse-width scans show a hard
+      threshold: pulse high 3 is clean but badly underfilled, while pulse high 4
+      has multiplicity but trips MTS/ring errors. The upper pair behaves differently:
       <code>lanes1+2</code> passes at one channel and fails at full
       multiplicity.
     </p>
