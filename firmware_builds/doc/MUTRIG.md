@@ -128,6 +128,71 @@ For the accepted latency gate, pass `--mts-expected-latency 2000
 --mts-delay-ts-field t`. A measurement with ring-buffer CAM input latency
 outside `0..2000` cycles is rejected even if the hit counters advance.
 
+### MuTRiG Wiki References for Tuning
+
+The online wiki is part of the `online_sc` checkout as the `online/wiki`
+submodule. The intended path is:
+
+```text
+/home/yifeng/packages/online_sc/online/wiki
+```
+
+If that path is empty, initialize or update the submodule from the `online`
+checkout with Bitbucket credentials. A populated local mirror used for the
+2026-04-29 tuning notes is:
+
+```text
+/home/yifeng/packages/online_si/online/wiki
+```
+
+Useful wiki pages for MuTRiG3 tuning:
+
+- `mutrig_hitTxData.md`: LVDS hit/scaler frame modes and frame format.
+- `mutrig_dmon.md`: digital monitor and TDC-injection signal semantics.
+- `mutrig_settings.md`: parameter meanings and MIDAS-to-MuTRiG name mapping.
+- `mutrig_clock_reset.md`: clock-domain and reset-tree behavior.
+- `mutrig_spi.md`: 2662-bit MuTRiG3 SPI shift-register behavior.
+
+Tuning consequences for Phase-5:
+
+- `tx_mode=4` is short-event transmission. It uses fixed 12.4 us frames and the
+  frame header hit counter is the number of real hits in that frame. If a
+  100 kHz/channel TDC-injection run does not produce the expected count, inspect
+  the MuTRiG frame hit counter and mode before blaming DMA or the FEB ring.
+- TDC injection enters through the DMON/TDC-test path. A rising edge on the
+  DMON0/Q input creates a timestamp; the DMON1/flag input selects timestamp
+  type. With no DMON1 pulse, `recv_all=1` is required to generate a hit for
+  each DMON0 rising edge. `recv_all=0` expects an energy/flag relation and is a
+  different test, not a fix for full-channel 100 kHz closure.
+- For TDC injection, the wiki says to disable channel digital monitoring
+  (`dmon_select=-1`, packed as `dmon_sel_enable=0`), enable TDC test input
+  (`tdctest_n=0`), and disable the analog frontend path with `cml=0`. It also
+  states `cml_sc=1`; the current `good_ribbon_0` TDC XML uses `cml=0` with
+  `cml_sc=0`, so audit the packed meaning before making `cml_sc` the next
+  hardware lever.
+- `vnhitlogic` is not an arbitrary noise knob. It biases the TDC hitlogic input
+  receiver. Wrong input swing, wrong CML/TDC-test setup, or wrong `vnhitlogic`
+  can cause no hits, extra noise hits, or poor timing. Treat it together with
+  injection pulse width and CML settings.
+- `vncnt=0` is a deliberate PLL-unlock setting. Use it before testing a new
+  `vnvcodelay` point. Increase `vncnt` if coarse-counter distributions show
+  spikes.
+- `vnvcodelay` tunes the VCO base-current path and is the primary PLL-frequency
+  search parameter when the lock point is wrong.
+- `ms_limits` and `ms_switch_sel` affect coarse-counter selection from the fine
+  counter. Use them only after the basic PLL/TDC-test source is sane; they are
+  candidates when delay histograms show side peaks around one coarse-counter
+  period.
+- The MuTRiG3 SPI bitmap is 2662 bits and is latched when chip-select returns
+  high. MISO reports the previous configuration stream, so response comparisons
+  must account for padding/shift alignment rather than treating any nonzero SPI
+  response as a new config echo.
+- The TDC PLL clock is asynchronous to the serializer/core clocks. The reset
+  input must be pulsed for at least 16 ns, and `sync_ch_rst=1` selects the
+  internally synchronized reset path for the coarse-counter reset. Keep reset
+  ordering tied to run-control evidence; configuration ACK alone does not prove
+  timestamp phase alignment.
+
 ### Reset and Run-Control State During SPI Load
 
 The MuTRiG reset input must be held at the inactive low level while the SPI
