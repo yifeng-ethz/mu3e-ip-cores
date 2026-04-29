@@ -34,6 +34,7 @@ BOARD_TEST_DIR = SCRIPT_DIR.parent
 HISTOGRAM_SVD = REPO_ROOT / "histogram_statistics" / "histogram_statistics.svd"
 HISTOGRAM_INGRESS_SVD = REPO_ROOT / "histogram_statistics" / "histogram_ingress_bridge.svd"
 RUNCTL_SVD = REPO_ROOT / "run-control_mgmt" / "runctl_mgmt_host.svd"
+SOURCE_MUX_UID = 0x4D4C534D
 
 
 def fmt_hex(value: int) -> str:
@@ -187,6 +188,29 @@ def main() -> int:
             "uid_raw": fmt_hex(words[0]),
             "version_raw": fmt_hex(words[1]),
         }
+
+    def source_mux_probe() -> dict[str, Any]:
+        rows = []
+        for lane in range(8):
+            key = f"data_path_subsystem_mutrig_lane_source_mux_{lane}.csr"
+            base = mm_bridge_sc_base + downstream_map[key] // 4
+            words = sc_read(args.sc_tool, args.link, base, 4)
+            uid = words[0]
+            if uid != SOURCE_MUX_UID:
+                raise RuntimeError(
+                    f"mutrig_lane_source_mux_{lane} UID mismatch: "
+                    f"got {fmt_hex(uid)}, expected {fmt_hex(SOURCE_MUX_UID)}"
+                )
+            rows.append(
+                {
+                    "lane": lane,
+                    "sc_addr": f"0x{base:05X}",
+                    "uid": fmt_hex(uid),
+                    "control": fmt_hex(words[2]),
+                    "status": fmt_hex(words[3]),
+                }
+            )
+        return {"lanes": rows}
 
     def dbg_mm2runctrl_probe() -> dict[str, Any]:
         base = mm_bridge_sc_base + downstream_map["data_path_subsystem_dbg_mm2runctrl_0.csr"] // 4
@@ -349,6 +373,7 @@ def main() -> int:
         )
     run_check(checks, "mm_bridge.histogram_ingress_bridge_0.uid_status", histogram_ingress_probe)
     run_check(checks, "mm_bridge.emulator_mutrig_0.reachability", emulator_probe)
+    run_check(checks, "mm_bridge.mutrig_lane_source_mux_0_7.uid_status", source_mux_probe)
     run_check(checks, "mm_bridge.dbg_mm2runctrl_0.reachability", dbg_mm2runctrl_probe)
     run_check(checks, "upload_mm_bridge.runctl.sc", runctl_sc_check)
     if not args.skip_jtag:

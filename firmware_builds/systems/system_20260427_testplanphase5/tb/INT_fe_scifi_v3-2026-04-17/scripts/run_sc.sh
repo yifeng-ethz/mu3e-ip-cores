@@ -68,6 +68,8 @@ proc first_existing_path {paths} {
   quit -code 1 -f
 }
 set sc_smoke_translator_reset_path [first_existing_path [list \
+  /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_4/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
+  /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_0/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_1/master_datapath_master_translator_reset_reset_bridge_in_reset_reset]]
 set sc_smoke_master_reset_path [first_existing_path [list \
@@ -77,6 +79,10 @@ set sc_smoke_master_clk_reset_path [first_existing_path [list \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_1/master_datapath_clk_reset_reset_bridge_in_reset_reset \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_0/master_datapath_clk_reset_reset_bridge_in_reset_reset]]
 set sc_smoke_lvds_reset_path [first_existing_path [list \
+  /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_0/mm_pipeline_lvds_csr_low_reset_reset_bridge_in_reset_reset \
+  /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_lvds_csr_hist_reset_reset_bridge_in_reset_reset \
+  /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_2/mm_pipeline_lvds_csr_mts1_reset_reset_bridge_in_reset_reset \
+  /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_3/mm_pipeline_lvds_csr_hitstack_frame_reset_reset_bridge_in_reset_reset \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_lvds_csr_reset_reset_bridge_in_reset_reset \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_0/mm_pipeline_lvds_csr_reset_reset_bridge_in_reset_reset \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_avmm_lvds_reset_reset_bridge_in_reset_reset \
@@ -84,20 +90,16 @@ set sc_smoke_lvds_reset_path [first_existing_path [list \
 set sc_smoke_mutrig_reset_path [first_existing_path [list \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_1/mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset \
   /tb_feb_system_sc_smoke/dut/data_path_subsystem/mm_interconnect_0/mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset]]
-set sc_smoke_charge_injection_reset_path [first_existing_path [list \
-  /tb_feb_system_sc_smoke/dut/control_path_subsystem/mm_interconnect_0/charge_injection_pulser_0_reset_interface_reset_bridge_in_reset_reset]]
 force -freeze $sc_smoke_master_reset_path 0 0
 force -freeze $sc_smoke_master_clk_reset_path 1 0
 force -freeze $sc_smoke_translator_reset_path 1 0
 force -freeze $sc_smoke_lvds_reset_path 1 0
 force -freeze $sc_smoke_mutrig_reset_path 1 0
-force -freeze $sc_smoke_charge_injection_reset_path 1 0
 run 340ns
 noforce $sc_smoke_master_clk_reset_path
 noforce $sc_smoke_translator_reset_path
 noforce $sc_smoke_lvds_reset_path
 noforce $sc_smoke_mutrig_reset_path
-noforce $sc_smoke_charge_injection_reset_path
 run -all
 quit -f
 EOF
@@ -115,6 +117,8 @@ proc first_existing_path {paths} {
   quit -code 1 -f
 }
 set sc_burst_translator_reset_path [first_existing_path [list \
+  /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_4/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
+  /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_0/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_1/master_datapath_master_translator_reset_reset_bridge_in_reset_reset]]
 set sc_burst_master_reset_path [first_existing_path [list \
@@ -124,6 +128,10 @@ set sc_burst_master_clk_reset_path [first_existing_path [list \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_1/master_datapath_clk_reset_reset_bridge_in_reset_reset \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_0/master_datapath_clk_reset_reset_bridge_in_reset_reset]]
 set sc_burst_lvds_reset_path [first_existing_path [list \
+  /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_0/mm_pipeline_lvds_csr_low_reset_reset_bridge_in_reset_reset \
+  /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_lvds_csr_hist_reset_reset_bridge_in_reset_reset \
+  /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_2/mm_pipeline_lvds_csr_mts1_reset_reset_bridge_in_reset_reset \
+  /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_3/mm_pipeline_lvds_csr_hitstack_frame_reset_reset_bridge_in_reset_reset \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_lvds_csr_reset_reset_bridge_in_reset_reset \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_0/mm_pipeline_lvds_csr_reset_reset_bridge_in_reset_reset \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_1/mm_pipeline_avmm_lvds_reset_reset_bridge_in_reset_reset \
@@ -131,20 +139,16 @@ set sc_burst_lvds_reset_path [first_existing_path [list \
 set sc_burst_mutrig_reset_path [first_existing_path [list \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_1/mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset \
   /tb_sc_dp_burst_vs_single/dut/data_path_subsystem/mm_interconnect_0/mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset]]
-set sc_burst_charge_injection_reset_path [first_existing_path [list \
-  /tb_sc_dp_burst_vs_single/dut/control_path_subsystem/mm_interconnect_0/charge_injection_pulser_0_reset_interface_reset_bridge_in_reset_reset]]
 force -freeze $sc_burst_master_reset_path 0 0
 force -freeze $sc_burst_master_clk_reset_path 1 0
 force -freeze $sc_burst_translator_reset_path 1 0
 force -freeze $sc_burst_lvds_reset_path 1 0
 force -freeze $sc_burst_mutrig_reset_path 1 0
-force -freeze $sc_burst_charge_injection_reset_path 1 0
 run 340ns
 noforce $sc_burst_master_clk_reset_path
 noforce $sc_burst_translator_reset_path
 noforce $sc_burst_lvds_reset_path
 noforce $sc_burst_mutrig_reset_path
-noforce $sc_burst_charge_injection_reset_path
 run -all
 quit -f
 EOF

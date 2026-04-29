@@ -199,11 +199,6 @@
    type="clock"
    dir="end" />
  <interface
-   name="pulse_out_conduit"
-   internal="control_path_subsystem.pulse_out_conduit"
-   type="conduit"
-   dir="end" />
- <interface
    name="redriver"
    internal="data_path_subsystem.redriver"
    type="conduit"

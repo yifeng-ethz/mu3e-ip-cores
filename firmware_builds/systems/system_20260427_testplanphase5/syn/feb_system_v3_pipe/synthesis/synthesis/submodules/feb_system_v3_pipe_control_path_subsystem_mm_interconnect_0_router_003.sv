@@ -47,12 +47,12 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_003_de
      parameter DEFAULT_CHANNEL = 0,
                DEFAULT_WR_CHANNEL = -1,
                DEFAULT_RD_CHANNEL = -1,
-               DEFAULT_DESTID = 10 
+               DEFAULT_DESTID = 9 
    )
   (output [102 - 99 : 0] default_destination_id,
-   output [12-1 : 0] default_wr_channel,
-   output [12-1 : 0] default_rd_channel,
-   output [12-1 : 0] default_src_channel
+   output [11-1 : 0] default_wr_channel,
+   output [11-1 : 0] default_rd_channel,
+   output [11-1 : 0] default_src_channel
   );
 
   assign default_destination_id = 
@@ -63,7 +63,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_003_de
       assign default_src_channel = '0;
     end
     else begin : default_channel_assignment
-      assign default_src_channel = 12'b1 << DEFAULT_CHANNEL;
+      assign default_src_channel = 11'b1 << DEFAULT_CHANNEL;
     end
   endgenerate
 
@@ -73,8 +73,8 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_003_de
       assign default_rd_channel = '0;
     end
     else begin : default_rw_channel_assignment
-      assign default_wr_channel = 12'b1 << DEFAULT_WR_CHANNEL;
-      assign default_rd_channel = 12'b1 << DEFAULT_RD_CHANNEL;
+      assign default_wr_channel = 11'b1 << DEFAULT_WR_CHANNEL;
+      assign default_rd_channel = 11'b1 << DEFAULT_RD_CHANNEL;
     end
   endgenerate
 
@@ -103,7 +103,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_003
     // -------------------
     output                          src_valid,
     output reg [116-1    : 0] src_data,
-    output reg [12-1 : 0] src_channel,
+    output reg [11-1 : 0] src_channel,
     output                          src_startofpacket,
     output                          src_endofpacket,
     input                           src_ready
@@ -119,7 +119,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_003
     localparam PKT_PROTECTION_H = 106;
     localparam PKT_PROTECTION_L = 104;
     localparam ST_DATA_W = 116;
-    localparam ST_CHANNEL_W = 12;
+    localparam ST_CHANNEL_W = 11;
     localparam DECODER_TYPE = 0;
 
     localparam PKT_TRANS_WRITE = 70;
@@ -159,7 +159,7 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_003
     assign src_startofpacket = sink_startofpacket;
     assign src_endofpacket   = sink_endofpacket;
     wire [PKT_DEST_ID_W-1:0] default_destid;
-    wire [12-1 : 0] default_src_channel;
+    wire [11-1 : 0] default_src_channel;
 
 
 
@@ -185,8 +185,8 @@ module feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0_router_003
            
          
           // ( 0 .. 400 )
-          src_channel = 12'b1;
-          src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 10;
+          src_channel = 11'b1;
+          src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 9;
 	     
         
 

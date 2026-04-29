@@ -1,10 +1,9 @@
 // hit_generator.sv
 // Compact MuTRiG event source with one RAM-backed L2 FIFO per lane.
-// Version : 26.1.9
-// Date    : 20260418
-// Change  : Recover the compact bank8 signoff target by keeping the advanced
-//           folded modes lightweight and removing redundant per-lane scan
-//           state from the shared-bank release path.
+// Version : 26.1.12
+// Date    : 20260425
+// Change  : Gate the simulation true-GTS mirror with generation enable so
+//           timestamp traces stay aligned across long run-control SYNC holds.
 //
 // External behavior intentionally stays aligned with the existing emulator:
 //   - frame_assembler still sees a single dequeue/data/event-count interface
@@ -520,7 +519,7 @@ module hit_generator
             launch_cluster_v = 1'b0;
             launch_cluster_start_v = '0;
 `ifndef SYNTHESIS
-            debug_true_gts_next_v = debug_true_gts_8n + 48'd1;
+            debug_true_gts_next_v = enable ? (debug_true_gts_8n + 48'd1) : debug_true_gts_8n;
             cluster_true_gts_anchor_next_v = cluster_true_gts_anchor;
             inject_masked_true_gts_anchor_next_v = inject_masked_true_gts_anchor;
 `endif

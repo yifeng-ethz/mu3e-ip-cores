@@ -126,7 +126,6 @@ must both be reachable before later phases are trusted.
 | `scratch_pad_ram` | `0x00000` | `0x00000` | n/a (RAM) | §1.2 |
 | `onewire_master_controller_0` | `0x11000` | `0x04400` | IP-specific | §1.3 |
 | `max10_prog_avmm_0` | `0x12000` | `0x04800` | IP-specific | §1.4 |
-| `charge_injection_pulser_0` | `0x13000` | `0x04C00` | **WO — skip read** | §1.5 |
 | `firefly_xcvr_ctrl_0` | `0x14000` | `0x05000` | IP-specific | §1.6 |
 | `on_die_temp_sense_ctrl` | `0x15000` | `0x05400` | IP-specific | §1.7 |
 | `legacy_firefly_bridge` | `0x16000` | `0x05800` | n/a (bridge) | §1.8 |
@@ -184,13 +183,6 @@ Same audit pattern as §1.3. UID and version register per
 `common/max10_prog_avmm/max10_prog_avmm.svd`. This slave is a programming
 interface — `start`/`command` bits are RW but must be left at zero after
 bring-up. Record the contents of the status register `[31:16]=rd_data`.
-
-### 1.5 charge_injection_pulser_0 (word `0x04C00`)
-
-**Write-only per SVD** (`charge_injection_pulser.svd`): reads are not
-implemented. Phase 1 behavior: issue one read to confirm the hub replies (OK
-or SLVERR — both are acceptable), then skip; the write paths are covered in
-Phase 4 under `enable=0` guard.
 
 ### 1.6 firefly_xcvr_ctrl_0 (word `0x05000`)
 
@@ -363,8 +355,8 @@ Using the SVD for each slave, enumerate RW registers. For each:
 | 6 | Write PRNG (16 values), read back after each. |
 | 7 | Restore original. |
 
-**Skip**: registers marked WO (e.g. `charge_injection_pulser_0`) — write-only
-fields are exercised functionally in Phase 4. Handle registers with
+**Skip**: registers marked WO by the SVD — write-only
+fields are exercised through their functional cases. Handle registers with
 side-effects per SVD: any register whose write triggers an I²C / one-wire
 transaction must have `start`/`enable` fields masked to 0 during this sweep.
 
@@ -570,7 +562,7 @@ monotonicity.
   one active instance `histogram_statistics_0`, fed by
   `histogram_ingress_bridge_0` so the same block can observe either the
   pre-hit-stack or post-hit-stack stream.
-- `mu3e-ip-cores/charge_injection/{charge_injection_pulser,mutrig_injector}.svd`.
+- `mu3e-ip-cores/charge_injection/mutrig_injector.svd`.
 - `mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/DV_FORMAL.md`
   — source of all SignalTap trigger conditions in §4.3.
 

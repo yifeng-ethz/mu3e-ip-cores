@@ -170,7 +170,7 @@ architecture rtl of scifi_datapath_system_v3_pipe_hit_stack_subsystem_0 is
 			VERSION_PATCH       : natural := 6;
 			BUILD               : natural := 422;
 			VERSION_DATE        : natural := 20260422;
-			VERSION_GIT         : natural := 267039347;
+			VERSION_GIT         : natural := 222328723;
 			INSTANCE_ID         : natural := 0
 		);
 		port (
@@ -954,7 +954,7 @@ begin
 			VERSION_PATCH       => 6,
 			BUILD               => 422,
 			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_GIT         => 222328723,
 			INSTANCE_ID         => 0
 		)
 		port map (
@@ -1005,7 +1005,7 @@ begin
 			VERSION_PATCH       => 6,
 			BUILD               => 422,
 			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_GIT         => 222328723,
 			INSTANCE_ID         => 0
 		)
 		port map (
@@ -1056,7 +1056,7 @@ begin
 			VERSION_PATCH       => 6,
 			BUILD               => 422,
 			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_GIT         => 222328723,
 			INSTANCE_ID         => 0
 		)
 		port map (
@@ -1107,7 +1107,7 @@ begin
 			VERSION_PATCH       => 6,
 			BUILD               => 422,
 			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_GIT         => 222328723,
 			INSTANCE_ID         => 0
 		)
 		port map (

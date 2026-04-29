@@ -7,16 +7,16 @@
 
 `timescale 1 ps / 1 ps
 module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
-		parameter inBitsPerSymbol = 36,
-		parameter inUsePackets    = 1,
-		parameter inDataWidth     = 36,
+		parameter inBitsPerSymbol = 9,
+		parameter inUsePackets    = 0,
+		parameter inDataWidth     = 9,
 		parameter inChannelWidth  = 0,
 		parameter inErrorWidth    = 0,
-		parameter inUseEmptyPort  = 1,
+		parameter inUseEmptyPort  = 0,
 		parameter inUseValid      = 1,
-		parameter inUseReady      = 1,
+		parameter inUseReady      = 0,
 		parameter inReadyLatency  = 0,
-		parameter outDataWidth    = 36,
+		parameter outDataWidth    = 9,
 		parameter outChannelWidth = 0,
 		parameter outErrorWidth   = 0,
 		parameter outUseEmptyPort = 0,
@@ -24,19 +24,13 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 		parameter outUseReady     = 1,
 		parameter outReadyLatency = 0
 	) (
-		input  wire        in_clk_0_clk,        // in_clk_0.clk
-		input  wire        in_rst_0_reset,      // in_rst_0.reset
-		input  wire [35:0] in_0_data,           //     in_0.data
-		input  wire        in_0_valid,          //         .valid
-		output wire        in_0_ready,          //         .ready
-		input  wire        in_0_startofpacket,  //         .startofpacket
-		input  wire        in_0_endofpacket,    //         .endofpacket
-		input  wire        in_0_empty,          //         .empty
-		output wire [35:0] out_0_data,          //    out_0.data
-		output wire        out_0_valid,         //         .valid
-		input  wire        out_0_ready,         //         .ready
-		output wire        out_0_startofpacket, //         .startofpacket
-		output wire        out_0_endofpacket    //         .endofpacket
+		input  wire       in_clk_0_clk,   // in_clk_0.clk
+		input  wire       in_rst_0_reset, // in_rst_0.reset
+		input  wire [8:0] in_0_data,      //     in_0.data
+		input  wire       in_0_valid,     //         .valid
+		output wire [8:0] out_0_data,     //    out_0.data
+		output wire       out_0_valid,    //         .valid
+		input  wire       out_0_ready     //         .ready
 	);
 
 	generate
@@ -45,7 +39,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 		// has been instantiated this module with a set of parameters different
 		// from those it was generated for.  This will usually result in a
 		// non-functioning system.
-		if (inBitsPerSymbol != 36)
+		if (inBitsPerSymbol != 9)
 		begin
 			initial begin
 				$display("Generated module instantiated with wrong parameters");
@@ -54,7 +48,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 			instantiated_with_wrong_parameters_error_see_comment_above
 					inbitspersymbol_check ( .error(1'b1) );
 		end
-		if (inUsePackets != 1)
+		if (inUsePackets != 0)
 		begin
 			initial begin
 				$display("Generated module instantiated with wrong parameters");
@@ -63,7 +57,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 			instantiated_with_wrong_parameters_error_see_comment_above
 					inusepackets_check ( .error(1'b1) );
 		end
-		if (inDataWidth != 36)
+		if (inDataWidth != 9)
 		begin
 			initial begin
 				$display("Generated module instantiated with wrong parameters");
@@ -90,7 +84,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 			instantiated_with_wrong_parameters_error_see_comment_above
 					inerrorwidth_check ( .error(1'b1) );
 		end
-		if (inUseEmptyPort != 1)
+		if (inUseEmptyPort != 0)
 		begin
 			initial begin
 				$display("Generated module instantiated with wrong parameters");
@@ -108,7 +102,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 			instantiated_with_wrong_parameters_error_see_comment_above
 					inusevalid_check ( .error(1'b1) );
 		end
-		if (inUseReady != 1)
+		if (inUseReady != 0)
 		begin
 			initial begin
 				$display("Generated module instantiated with wrong parameters");
@@ -126,7 +120,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 			instantiated_with_wrong_parameters_error_see_comment_above
 					inreadylatency_check ( .error(1'b1) );
 		end
-		if (outDataWidth != 36)
+		if (outDataWidth != 9)
 		begin
 			initial begin
 				$display("Generated module instantiated with wrong parameters");
@@ -191,20 +185,14 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_010 #(
 		end
 	endgenerate
 
-	scifi_datapath_system_v3_pipe_avalon_st_adapter_010_data_format_adapter_0 data_format_adapter_0 (
-		.clk               (in_clk_0_clk),        //   clk.clk
-		.reset_n           (~in_rst_0_reset),     // reset.reset_n
-		.in_data           (in_0_data),           //    in.data
-		.in_valid          (in_0_valid),          //      .valid
-		.in_ready          (in_0_ready),          //      .ready
-		.in_startofpacket  (in_0_startofpacket),  //      .startofpacket
-		.in_endofpacket    (in_0_endofpacket),    //      .endofpacket
-		.in_empty          (in_0_empty),          //      .empty
-		.out_data          (out_0_data),          //   out.data
-		.out_valid         (out_0_valid),         //      .valid
-		.out_ready         (out_0_ready),         //      .ready
-		.out_startofpacket (out_0_startofpacket), //      .startofpacket
-		.out_endofpacket   (out_0_endofpacket)    //      .endofpacket
+	scifi_datapath_system_v3_pipe_avalon_st_adapter_010_timing_adapter_0 timing_adapter_0 (
+		.clk       (in_clk_0_clk),    //   clk.clk
+		.reset_n   (~in_rst_0_reset), // reset.reset_n
+		.in_data   (in_0_data),       //    in.data
+		.in_valid  (in_0_valid),      //      .valid
+		.out_data  (out_0_data),      //   out.data
+		.out_valid (out_0_valid),     //      .valid
+		.out_ready (out_0_ready)      //      .ready
 	);
 
 endmodule

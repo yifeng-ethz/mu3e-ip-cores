@@ -1,7 +1,10 @@
 -- File name: mutrig_injector_multiheader.vhd
 -- Author: Yifeng Wang (yifenwan@phys.ethz.ch)
 -- =======================================
--- Version: 3.3 (Jul 24, 2025)
+-- Version: 26.0.2
+-- Date   : 20260429
+-- Change : Keep the Avalon-MM CSR waitrequest deasserted at idle so bridge
+--          masters can issue injector transactions without a permanent stall.
 -- =======================================
 -- Description:
 --   MuTRiG injector variant that monitors all 8 header streams directly.
@@ -436,14 +439,14 @@ begin
         if rising_edge(i_clk) then
             if i_rst = '1' then
                 csr                              <= CSR_DEF_CONST;
-                avs_csr_waitrequest              <= '1';
+                avs_csr_waitrequest              <= '0';
                 avs_csr_readdata                 <= (others => '0');
                 onclick_write_pulse              <= '0';
                 random_reseed_pulse              <= '0';
                 periodic_async_cfg_req           <= '0';
                 periodic_async_cfg_hold          <= (others => '0');
             else
-                avs_csr_waitrequest <= '1';
+                avs_csr_waitrequest <= '0';
                 avs_csr_readdata    <= (others => '0');
                 onclick_write_pulse <= '0';
                 random_reseed_pulse <= '0';

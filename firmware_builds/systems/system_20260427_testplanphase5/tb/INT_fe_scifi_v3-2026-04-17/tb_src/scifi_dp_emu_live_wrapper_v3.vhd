@@ -28,7 +28,6 @@ entity scifi_dp_emu_live_wrapper_v3 is
         hit_type3_upper_startofpacket  : out std_logic;
         hit_type3_upper_endofpacket    : out std_logic;
         inject_pulse                   : out std_logic;
-        inject_aux_pulse               : in  std_logic;
         lvds_outclock_clk              : out std_logic;
         lvds_pll_inclock_clk           : in  std_logic;
         monitor_clock_125_in_clk       : in  std_logic;
@@ -76,7 +75,6 @@ begin
             hit_type3_upper_startofpacket  => hit_type3_upper_startofpacket,
             hit_type3_upper_endofpacket    => hit_type3_upper_endofpacket,
             inject_pulse                   => inject_pulse,
-            inject_aux_pulse               => inject_aux_pulse,
             lvds_outclock_clk              => lvds_outclock_clk,
             lvds_pll_inclock_clk           => lvds_pll_inclock_clk,
             monitor_clock_125_in_clk       => monitor_clock_125_in_clk,

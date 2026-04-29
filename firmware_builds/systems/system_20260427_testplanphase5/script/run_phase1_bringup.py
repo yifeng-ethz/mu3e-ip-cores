@@ -329,7 +329,6 @@ def main() -> int:
         Probe("max10_prog_avmm_0.ID", 0x04800, 1, expect=max10_ip_id, note="expected from Qsys IP_ID parameter"),
         Probe("max10_prog_avmm_0.VERSION", 0x04801, 1, expect=0x00020000),
         Probe("max10_prog_avmm_0.STATUS", 0x04803, 1, note="ready/busy/fault status"),
-        Probe("charge_injection_pulser_0.read_probe", 0x04C00, 1, note="write-only SVD; OK/SLVERR/DECERR acceptable", allow_non_ok=True),
         Probe("firefly_xcvr_ctrl_0[0..13]", 0x05000, 14, note="read-only audit; no I2C start write issued"),
         Probe("on_die_temp_sense_ctrl.CSR", 0x05400, 1, note="temperature status"),
         Probe("legacy_firefly_bridge.word0", 0x05800, 1, note="bridge reachability", allow_non_ok=True),

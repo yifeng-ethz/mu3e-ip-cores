@@ -71,7 +71,6 @@ entity feb_system_v3_pipe_control_path_subsystem is
 		mutrig_cfg_ctrl_0_spi_export2top_mosi : out   std_logic;                                        --                                 .mosi
 		mutrig_cfg_ctrl_0_spi_export2top_sclk : out   std_logic;                                        --                                 .sclk
 		mutrig_cfg_ctrl_0_spi_export2top_ssn  : out   std_logic_vector(7 downto 0);                     --                                 .ssn
-		pulse_out_conduit_pulse               : out   std_logic;                                        --                pulse_out_conduit.pulse
 		sc_hub_hub_sc_packet_downlink_data    : in    std_logic_vector(31 downto 0) := (others => '0'); --    sc_hub_hub_sc_packet_downlink.data
 		sc_hub_hub_sc_packet_downlink_datak   : in    std_logic_vector(3 downto 0)  := (others => '0'); --                                 .datak
 		sc_hub_hub_sc_packet_downlink_ready   : out   std_logic;                                        --                                 .ready
@@ -89,25 +88,6 @@ entity feb_system_v3_pipe_control_path_subsystem is
 end entity feb_system_v3_pipe_control_path_subsystem;
 
 architecture rtl of feb_system_v3_pipe_control_path_subsystem is
-	component charge_inj_pulser is
-		generic (
-			DEF_PULSE_FREQ  : natural := 100000;
-			DEF_PULSE_WIDTH : natural := 2;
-			CLK_FREQUENCY   : natural := 125000000;
-			DEBUG           : natural := 1
-		);
-		port (
-			i_clk               : in  std_logic                     := 'X';             -- clk
-			avs_csr_writedata   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			avs_csr_readdata    : out std_logic_vector(31 downto 0);                    -- readdata
-			avs_csr_read        : in  std_logic                     := 'X';             -- read
-			avs_csr_write       : in  std_logic                     := 'X';             -- write
-			avs_csr_waitrequest : out std_logic;                                        -- waitrequest
-			o_pulse             : out std_logic;                                        -- pulse
-			i_rst               : in  std_logic                     := 'X'              -- reset
-		);
-	end component charge_inj_pulser;
-
 	component inactive_reset_source is
 		port (
 			csi_clk   : in  std_logic := 'X'; -- clk
@@ -349,7 +329,15 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 			AVST_CHANNEL_WIDTH : natural := 3;
 			N_DQ_LINES         : natural := 6;
 			SENSOR_TYPE        : string  := "DS18B20";
-			DEBUG_LV           : natural := 0
+			DEBUG_LV           : natural := 0;
+			IP_UID             : natural := 1331121475;
+			VERSION_MAJOR      : natural := 26;
+			VERSION_MINOR      : natural := 2;
+			VERSION_PATCH      : natural := 1;
+			BUILD              : natural := 428;
+			VERSION_DATE       : natural := 20260428;
+			VERSION_GIT        : natural := 0;
+			INSTANCE_ID        : natural := 0
 		);
 		port (
 			avm_ctrl_read        : out std_logic;                                        -- read
@@ -395,7 +383,7 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 			VERSION_PATCH              : natural := 10;
 			BUILD                      : natural := 423;
 			VERSION_DATE               : natural := 20260423;
-			VERSION_GIT                : natural := 33457150;
+			VERSION_GIT                : natural := 12647261;
 			INSTANCE_ID                : natural := 0;
 			BACKPRESSURE               : boolean := true;
 			SCHEDULER_USE_PKT_TRANSFER : boolean := true;
@@ -452,136 +440,130 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 
 	component feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0 is
 		port (
-			clk125_out_clk_clk                                                    : in  std_logic                     := 'X';             -- clk
-			pll_156t40_outclk0_clk                                                : in  std_logic                     := 'X';             -- clk
-			charge_injection_pulser_0_reset_interface_reset_bridge_in_reset_reset : in  std_logic                     := 'X';             -- reset
-			jtag_master_clk_reset_reset_bridge_in_reset_reset                     : in  std_logic                     := 'X';             -- reset
-			mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset_reset        : in  std_logic                     := 'X';             -- reset
-			on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset_reset       : in  std_logic                     := 'X';             -- reset
-			onewire_master_controller_0_reset_reset_bridge_in_reset_reset         : in  std_logic                     := 'X';             -- reset
-			sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset                     : in  std_logic                     := 'X';             -- reset
-			jtag_master_master_address                                            : in  std_logic_vector(31 downto 0) := (others => 'X'); -- address
-			jtag_master_master_waitrequest                                        : out std_logic;                                        -- waitrequest
-			jtag_master_master_byteenable                                         : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
-			jtag_master_master_read                                               : in  std_logic                     := 'X';             -- read
-			jtag_master_master_readdata                                           : out std_logic_vector(31 downto 0);                    -- readdata
-			jtag_master_master_readdatavalid                                      : out std_logic;                                        -- readdatavalid
-			jtag_master_master_write                                              : in  std_logic                     := 'X';             -- write
-			jtag_master_master_writedata                                          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			mutrig_cfg_ctrl_0_avmm_cnt_address                                    : in  std_logic_vector(15 downto 0) := (others => 'X'); -- address
-			mutrig_cfg_ctrl_0_avmm_cnt_waitrequest                                : out std_logic;                                        -- waitrequest
-			mutrig_cfg_ctrl_0_avmm_cnt_burstcount                                 : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- burstcount
-			mutrig_cfg_ctrl_0_avmm_cnt_read                                       : in  std_logic                     := 'X';             -- read
-			mutrig_cfg_ctrl_0_avmm_cnt_readdata                                   : out std_logic_vector(31 downto 0);                    -- readdata
-			mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid                              : out std_logic;                                        -- readdatavalid
-			mutrig_cfg_ctrl_0_avmm_cnt_response                                   : out std_logic_vector(1 downto 0);                     -- response
-			mutrig_cfg_ctrl_0_avmm_schpad_address                                 : in  std_logic_vector(10 downto 0) := (others => 'X'); -- address
-			mutrig_cfg_ctrl_0_avmm_schpad_waitrequest                             : out std_logic;                                        -- waitrequest
-			mutrig_cfg_ctrl_0_avmm_schpad_burstcount                              : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- burstcount
-			mutrig_cfg_ctrl_0_avmm_schpad_read                                    : in  std_logic                     := 'X';             -- read
-			mutrig_cfg_ctrl_0_avmm_schpad_readdata                                : out std_logic_vector(31 downto 0);                    -- readdata
-			mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid                           : out std_logic;                                        -- readdatavalid
-			mutrig_cfg_ctrl_0_avmm_schpad_response                                : out std_logic_vector(1 downto 0);                     -- response
-			sc_hub_cmd_pipe_m0_address                                            : in  std_logic_vector(15 downto 0) := (others => 'X'); -- address
-			sc_hub_cmd_pipe_m0_waitrequest                                        : out std_logic;                                        -- waitrequest
-			sc_hub_cmd_pipe_m0_burstcount                                         : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
-			sc_hub_cmd_pipe_m0_byteenable                                         : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
-			sc_hub_cmd_pipe_m0_read                                               : in  std_logic                     := 'X';             -- read
-			sc_hub_cmd_pipe_m0_readdata                                           : out std_logic_vector(31 downto 0);                    -- readdata
-			sc_hub_cmd_pipe_m0_readdatavalid                                      : out std_logic;                                        -- readdatavalid
-			sc_hub_cmd_pipe_m0_write                                              : in  std_logic                     := 'X';             -- write
-			sc_hub_cmd_pipe_m0_writedata                                          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			sc_hub_cmd_pipe_m0_debugaccess                                        : in  std_logic                     := 'X';             -- debugaccess
-			sc_hub_cmd_pipe_m0_response                                           : out std_logic_vector(1 downto 0);                     -- response
-			charge_injection_pulser_0_csr_avmm_write                              : out std_logic;                                        -- write
-			charge_injection_pulser_0_csr_avmm_read                               : out std_logic;                                        -- read
-			charge_injection_pulser_0_csr_avmm_readdata                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			charge_injection_pulser_0_csr_avmm_writedata                          : out std_logic_vector(31 downto 0);                    -- writedata
-			charge_injection_pulser_0_csr_avmm_waitrequest                        : in  std_logic                     := 'X';             -- waitrequest
-			firefly_xcvr_ctrl_0_firefly_address                                   : out std_logic_vector(4 downto 0);                     -- address
-			firefly_xcvr_ctrl_0_firefly_write                                     : out std_logic;                                        -- write
-			firefly_xcvr_ctrl_0_firefly_read                                      : out std_logic;                                        -- read
-			firefly_xcvr_ctrl_0_firefly_readdata                                  : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			firefly_xcvr_ctrl_0_firefly_writedata                                 : out std_logic_vector(31 downto 0);                    -- writedata
-			firefly_xcvr_ctrl_0_firefly_waitrequest                               : in  std_logic                     := 'X';             -- waitrequest
-			legacy_firefly_bridge_s0_address                                      : out std_logic_vector(7 downto 0);                     -- address
-			legacy_firefly_bridge_s0_write                                        : out std_logic;                                        -- write
-			legacy_firefly_bridge_s0_read                                         : out std_logic;                                        -- read
-			legacy_firefly_bridge_s0_readdata                                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			legacy_firefly_bridge_s0_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
-			legacy_firefly_bridge_s0_burstcount                                   : out std_logic_vector(0 downto 0);                     -- burstcount
-			legacy_firefly_bridge_s0_byteenable                                   : out std_logic_vector(3 downto 0);                     -- byteenable
-			legacy_firefly_bridge_s0_readdatavalid                                : in  std_logic                     := 'X';             -- readdatavalid
-			legacy_firefly_bridge_s0_waitrequest                                  : in  std_logic                     := 'X';             -- waitrequest
-			legacy_firefly_bridge_s0_debugaccess                                  : out std_logic;                                        -- debugaccess
-			legacy_firefly_bridge_s0_response                                     : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
-			max10_prog_avmm_0_csr_avmm_address                                    : out std_logic_vector(9 downto 0);                     -- address
-			max10_prog_avmm_0_csr_avmm_write                                      : out std_logic;                                        -- write
-			max10_prog_avmm_0_csr_avmm_read                                       : out std_logic;                                        -- read
-			max10_prog_avmm_0_csr_avmm_readdata                                   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			max10_prog_avmm_0_csr_avmm_writedata                                  : out std_logic_vector(31 downto 0);                    -- writedata
-			max10_prog_avmm_0_csr_avmm_burstcount                                 : out std_logic_vector(0 downto 0);                     -- burstcount
-			max10_prog_avmm_0_csr_avmm_readdatavalid                              : in  std_logic                     := 'X';             -- readdatavalid
-			max10_prog_avmm_0_csr_avmm_waitrequest                                : in  std_logic                     := 'X';             -- waitrequest
-			mm_bridge_s0_address                                                  : out std_logic_vector(13 downto 0);                    -- address
-			mm_bridge_s0_write                                                    : out std_logic;                                        -- write
-			mm_bridge_s0_read                                                     : out std_logic;                                        -- read
-			mm_bridge_s0_readdata                                                 : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mm_bridge_s0_writedata                                                : out std_logic_vector(31 downto 0);                    -- writedata
-			mm_bridge_s0_burstcount                                               : out std_logic_vector(0 downto 0);                     -- burstcount
-			mm_bridge_s0_byteenable                                               : out std_logic_vector(3 downto 0);                     -- byteenable
-			mm_bridge_s0_readdatavalid                                            : in  std_logic                     := 'X';             -- readdatavalid
-			mm_bridge_s0_waitrequest                                              : in  std_logic                     := 'X';             -- waitrequest
-			mm_bridge_s0_debugaccess                                              : out std_logic;                                        -- debugaccess
-			mm_bridge_s0_response                                                 : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
-			mutrig_cfg_ctrl_0_avmm_csr_address                                    : out std_logic_vector(1 downto 0);                     -- address
-			mutrig_cfg_ctrl_0_avmm_csr_write                                      : out std_logic;                                        -- write
-			mutrig_cfg_ctrl_0_avmm_csr_read                                       : out std_logic;                                        -- read
-			mutrig_cfg_ctrl_0_avmm_csr_readdata                                   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mutrig_cfg_ctrl_0_avmm_csr_writedata                                  : out std_logic_vector(31 downto 0);                    -- writedata
-			mutrig_cfg_ctrl_0_avmm_csr_waitrequest                                : in  std_logic                     := 'X';             -- waitrequest
-			mutrig_cfg_ctrl_0_avmm_csr_response                                   : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
-			mutrig_cfg_ctrl_0_avmm_scanresult_address                             : out std_logic_vector(13 downto 0);                    -- address
-			mutrig_cfg_ctrl_0_avmm_scanresult_read                                : out std_logic;                                        -- read
-			mutrig_cfg_ctrl_0_avmm_scanresult_readdata                            : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest                         : in  std_logic                     := 'X';             -- waitrequest
-			on_die_temp_sense_ctrl_csr_write                                      : out std_logic;                                        -- write
-			on_die_temp_sense_ctrl_csr_read                                       : out std_logic;                                        -- read
-			on_die_temp_sense_ctrl_csr_readdata                                   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			on_die_temp_sense_ctrl_csr_writedata                                  : out std_logic_vector(31 downto 0);                    -- writedata
-			on_die_temp_sense_ctrl_csr_waitrequest                                : in  std_logic                     := 'X';             -- waitrequest
-			onewire_master_controller_0_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
-			onewire_master_controller_0_csr_write                                 : out std_logic;                                        -- write
-			onewire_master_controller_0_csr_read                                  : out std_logic;                                        -- read
-			onewire_master_controller_0_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			onewire_master_controller_0_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
-			onewire_master_controller_0_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
-			sc_hub_csr_address                                                    : out std_logic_vector(4 downto 0);                     -- address
-			sc_hub_csr_write                                                      : out std_logic;                                        -- write
-			sc_hub_csr_read                                                       : out std_logic;                                        -- read
-			sc_hub_csr_readdata                                                   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			sc_hub_csr_writedata                                                  : out std_logic_vector(31 downto 0);                    -- writedata
-			sc_hub_csr_burstcount                                                 : out std_logic_vector(0 downto 0);                     -- burstcount
-			sc_hub_csr_readdatavalid                                              : in  std_logic                     := 'X';             -- readdatavalid
-			sc_hub_csr_waitrequest                                                : in  std_logic                     := 'X';             -- waitrequest
-			scratch_pad_ram_s1_address                                            : out std_logic_vector(7 downto 0);                     -- address
-			scratch_pad_ram_s1_write                                              : out std_logic;                                        -- write
-			scratch_pad_ram_s1_readdata                                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			scratch_pad_ram_s1_writedata                                          : out std_logic_vector(31 downto 0);                    -- writedata
-			scratch_pad_ram_s1_byteenable                                         : out std_logic_vector(3 downto 0);                     -- byteenable
-			scratch_pad_ram_s1_chipselect                                         : out std_logic;                                        -- chipselect
-			scratch_pad_ram_s1_clken                                              : out std_logic;                                        -- clken
-			upload_mm_bridge_s0_address                                           : out std_logic_vector(4 downto 0);                     -- address
-			upload_mm_bridge_s0_write                                             : out std_logic;                                        -- write
-			upload_mm_bridge_s0_read                                              : out std_logic;                                        -- read
-			upload_mm_bridge_s0_readdata                                          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
-			upload_mm_bridge_s0_writedata                                         : out std_logic_vector(31 downto 0);                    -- writedata
-			upload_mm_bridge_s0_burstcount                                        : out std_logic_vector(0 downto 0);                     -- burstcount
-			upload_mm_bridge_s0_byteenable                                        : out std_logic_vector(3 downto 0);                     -- byteenable
-			upload_mm_bridge_s0_readdatavalid                                     : in  std_logic                     := 'X';             -- readdatavalid
-			upload_mm_bridge_s0_waitrequest                                       : in  std_logic                     := 'X';             -- waitrequest
-			upload_mm_bridge_s0_debugaccess                                       : out std_logic;                                        -- debugaccess
-			upload_mm_bridge_s0_response                                          : in  std_logic_vector(1 downto 0)  := (others => 'X')  -- response
+			clk125_out_clk_clk                                              : in  std_logic                     := 'X';             -- clk
+			pll_156t40_outclk0_clk                                          : in  std_logic                     := 'X';             -- clk
+			jtag_master_clk_reset_reset_bridge_in_reset_reset               : in  std_logic                     := 'X';             -- reset
+			mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset_reset  : in  std_logic                     := 'X';             -- reset
+			on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset_reset : in  std_logic                     := 'X';             -- reset
+			onewire_master_controller_0_reset_reset_bridge_in_reset_reset   : in  std_logic                     := 'X';             -- reset
+			sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset               : in  std_logic                     := 'X';             -- reset
+			jtag_master_master_address                                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- address
+			jtag_master_master_waitrequest                                  : out std_logic;                                        -- waitrequest
+			jtag_master_master_byteenable                                   : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
+			jtag_master_master_read                                         : in  std_logic                     := 'X';             -- read
+			jtag_master_master_readdata                                     : out std_logic_vector(31 downto 0);                    -- readdata
+			jtag_master_master_readdatavalid                                : out std_logic;                                        -- readdatavalid
+			jtag_master_master_write                                        : in  std_logic                     := 'X';             -- write
+			jtag_master_master_writedata                                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			mutrig_cfg_ctrl_0_avmm_cnt_address                              : in  std_logic_vector(15 downto 0) := (others => 'X'); -- address
+			mutrig_cfg_ctrl_0_avmm_cnt_waitrequest                          : out std_logic;                                        -- waitrequest
+			mutrig_cfg_ctrl_0_avmm_cnt_burstcount                           : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- burstcount
+			mutrig_cfg_ctrl_0_avmm_cnt_read                                 : in  std_logic                     := 'X';             -- read
+			mutrig_cfg_ctrl_0_avmm_cnt_readdata                             : out std_logic_vector(31 downto 0);                    -- readdata
+			mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid                        : out std_logic;                                        -- readdatavalid
+			mutrig_cfg_ctrl_0_avmm_cnt_response                             : out std_logic_vector(1 downto 0);                     -- response
+			mutrig_cfg_ctrl_0_avmm_schpad_address                           : in  std_logic_vector(10 downto 0) := (others => 'X'); -- address
+			mutrig_cfg_ctrl_0_avmm_schpad_waitrequest                       : out std_logic;                                        -- waitrequest
+			mutrig_cfg_ctrl_0_avmm_schpad_burstcount                        : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- burstcount
+			mutrig_cfg_ctrl_0_avmm_schpad_read                              : in  std_logic                     := 'X';             -- read
+			mutrig_cfg_ctrl_0_avmm_schpad_readdata                          : out std_logic_vector(31 downto 0);                    -- readdata
+			mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid                     : out std_logic;                                        -- readdatavalid
+			mutrig_cfg_ctrl_0_avmm_schpad_response                          : out std_logic_vector(1 downto 0);                     -- response
+			sc_hub_cmd_pipe_m0_address                                      : in  std_logic_vector(15 downto 0) := (others => 'X'); -- address
+			sc_hub_cmd_pipe_m0_waitrequest                                  : out std_logic;                                        -- waitrequest
+			sc_hub_cmd_pipe_m0_burstcount                                   : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- burstcount
+			sc_hub_cmd_pipe_m0_byteenable                                   : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- byteenable
+			sc_hub_cmd_pipe_m0_read                                         : in  std_logic                     := 'X';             -- read
+			sc_hub_cmd_pipe_m0_readdata                                     : out std_logic_vector(31 downto 0);                    -- readdata
+			sc_hub_cmd_pipe_m0_readdatavalid                                : out std_logic;                                        -- readdatavalid
+			sc_hub_cmd_pipe_m0_write                                        : in  std_logic                     := 'X';             -- write
+			sc_hub_cmd_pipe_m0_writedata                                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			sc_hub_cmd_pipe_m0_debugaccess                                  : in  std_logic                     := 'X';             -- debugaccess
+			sc_hub_cmd_pipe_m0_response                                     : out std_logic_vector(1 downto 0);                     -- response
+			firefly_xcvr_ctrl_0_firefly_address                             : out std_logic_vector(4 downto 0);                     -- address
+			firefly_xcvr_ctrl_0_firefly_write                               : out std_logic;                                        -- write
+			firefly_xcvr_ctrl_0_firefly_read                                : out std_logic;                                        -- read
+			firefly_xcvr_ctrl_0_firefly_readdata                            : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			firefly_xcvr_ctrl_0_firefly_writedata                           : out std_logic_vector(31 downto 0);                    -- writedata
+			firefly_xcvr_ctrl_0_firefly_waitrequest                         : in  std_logic                     := 'X';             -- waitrequest
+			legacy_firefly_bridge_s0_address                                : out std_logic_vector(7 downto 0);                     -- address
+			legacy_firefly_bridge_s0_write                                  : out std_logic;                                        -- write
+			legacy_firefly_bridge_s0_read                                   : out std_logic;                                        -- read
+			legacy_firefly_bridge_s0_readdata                               : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			legacy_firefly_bridge_s0_writedata                              : out std_logic_vector(31 downto 0);                    -- writedata
+			legacy_firefly_bridge_s0_burstcount                             : out std_logic_vector(0 downto 0);                     -- burstcount
+			legacy_firefly_bridge_s0_byteenable                             : out std_logic_vector(3 downto 0);                     -- byteenable
+			legacy_firefly_bridge_s0_readdatavalid                          : in  std_logic                     := 'X';             -- readdatavalid
+			legacy_firefly_bridge_s0_waitrequest                            : in  std_logic                     := 'X';             -- waitrequest
+			legacy_firefly_bridge_s0_debugaccess                            : out std_logic;                                        -- debugaccess
+			legacy_firefly_bridge_s0_response                               : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
+			max10_prog_avmm_0_csr_avmm_address                              : out std_logic_vector(9 downto 0);                     -- address
+			max10_prog_avmm_0_csr_avmm_write                                : out std_logic;                                        -- write
+			max10_prog_avmm_0_csr_avmm_read                                 : out std_logic;                                        -- read
+			max10_prog_avmm_0_csr_avmm_readdata                             : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			max10_prog_avmm_0_csr_avmm_writedata                            : out std_logic_vector(31 downto 0);                    -- writedata
+			max10_prog_avmm_0_csr_avmm_burstcount                           : out std_logic_vector(0 downto 0);                     -- burstcount
+			max10_prog_avmm_0_csr_avmm_readdatavalid                        : in  std_logic                     := 'X';             -- readdatavalid
+			max10_prog_avmm_0_csr_avmm_waitrequest                          : in  std_logic                     := 'X';             -- waitrequest
+			mm_bridge_s0_address                                            : out std_logic_vector(13 downto 0);                    -- address
+			mm_bridge_s0_write                                              : out std_logic;                                        -- write
+			mm_bridge_s0_read                                               : out std_logic;                                        -- read
+			mm_bridge_s0_readdata                                           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mm_bridge_s0_writedata                                          : out std_logic_vector(31 downto 0);                    -- writedata
+			mm_bridge_s0_burstcount                                         : out std_logic_vector(0 downto 0);                     -- burstcount
+			mm_bridge_s0_byteenable                                         : out std_logic_vector(3 downto 0);                     -- byteenable
+			mm_bridge_s0_readdatavalid                                      : in  std_logic                     := 'X';             -- readdatavalid
+			mm_bridge_s0_waitrequest                                        : in  std_logic                     := 'X';             -- waitrequest
+			mm_bridge_s0_debugaccess                                        : out std_logic;                                        -- debugaccess
+			mm_bridge_s0_response                                           : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
+			mutrig_cfg_ctrl_0_avmm_csr_address                              : out std_logic_vector(1 downto 0);                     -- address
+			mutrig_cfg_ctrl_0_avmm_csr_write                                : out std_logic;                                        -- write
+			mutrig_cfg_ctrl_0_avmm_csr_read                                 : out std_logic;                                        -- read
+			mutrig_cfg_ctrl_0_avmm_csr_readdata                             : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_cfg_ctrl_0_avmm_csr_writedata                            : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_cfg_ctrl_0_avmm_csr_waitrequest                          : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_cfg_ctrl_0_avmm_csr_response                             : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- response
+			mutrig_cfg_ctrl_0_avmm_scanresult_address                       : out std_logic_vector(13 downto 0);                    -- address
+			mutrig_cfg_ctrl_0_avmm_scanresult_read                          : out std_logic;                                        -- read
+			mutrig_cfg_ctrl_0_avmm_scanresult_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
+			on_die_temp_sense_ctrl_csr_write                                : out std_logic;                                        -- write
+			on_die_temp_sense_ctrl_csr_read                                 : out std_logic;                                        -- read
+			on_die_temp_sense_ctrl_csr_readdata                             : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			on_die_temp_sense_ctrl_csr_writedata                            : out std_logic_vector(31 downto 0);                    -- writedata
+			on_die_temp_sense_ctrl_csr_waitrequest                          : in  std_logic                     := 'X';             -- waitrequest
+			onewire_master_controller_0_csr_address                         : out std_logic_vector(3 downto 0);                     -- address
+			onewire_master_controller_0_csr_write                           : out std_logic;                                        -- write
+			onewire_master_controller_0_csr_read                            : out std_logic;                                        -- read
+			onewire_master_controller_0_csr_readdata                        : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			onewire_master_controller_0_csr_writedata                       : out std_logic_vector(31 downto 0);                    -- writedata
+			onewire_master_controller_0_csr_waitrequest                     : in  std_logic                     := 'X';             -- waitrequest
+			sc_hub_csr_address                                              : out std_logic_vector(4 downto 0);                     -- address
+			sc_hub_csr_write                                                : out std_logic;                                        -- write
+			sc_hub_csr_read                                                 : out std_logic;                                        -- read
+			sc_hub_csr_readdata                                             : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			sc_hub_csr_writedata                                            : out std_logic_vector(31 downto 0);                    -- writedata
+			sc_hub_csr_burstcount                                           : out std_logic_vector(0 downto 0);                     -- burstcount
+			sc_hub_csr_readdatavalid                                        : in  std_logic                     := 'X';             -- readdatavalid
+			sc_hub_csr_waitrequest                                          : in  std_logic                     := 'X';             -- waitrequest
+			scratch_pad_ram_s1_address                                      : out std_logic_vector(7 downto 0);                     -- address
+			scratch_pad_ram_s1_write                                        : out std_logic;                                        -- write
+			scratch_pad_ram_s1_readdata                                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			scratch_pad_ram_s1_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
+			scratch_pad_ram_s1_byteenable                                   : out std_logic_vector(3 downto 0);                     -- byteenable
+			scratch_pad_ram_s1_chipselect                                   : out std_logic;                                        -- chipselect
+			scratch_pad_ram_s1_clken                                        : out std_logic;                                        -- clken
+			upload_mm_bridge_s0_address                                     : out std_logic_vector(4 downto 0);                     -- address
+			upload_mm_bridge_s0_write                                       : out std_logic;                                        -- write
+			upload_mm_bridge_s0_read                                        : out std_logic;                                        -- read
+			upload_mm_bridge_s0_readdata                                    : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			upload_mm_bridge_s0_writedata                                   : out std_logic_vector(31 downto 0);                    -- writedata
+			upload_mm_bridge_s0_burstcount                                  : out std_logic_vector(0 downto 0);                     -- burstcount
+			upload_mm_bridge_s0_byteenable                                  : out std_logic_vector(3 downto 0);                     -- byteenable
+			upload_mm_bridge_s0_readdatavalid                               : in  std_logic                     := 'X';             -- readdatavalid
+			upload_mm_bridge_s0_waitrequest                                 : in  std_logic                     := 'X';             -- waitrequest
+			upload_mm_bridge_s0_debugaccess                                 : out std_logic;                                        -- debugaccess
+			upload_mm_bridge_s0_response                                    : in  std_logic_vector(1 downto 0)  := (others => 'X')  -- response
 		);
 	end component feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0;
 
@@ -652,9 +634,10 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 		);
 		port (
 			reset_in0      : in  std_logic := 'X'; -- reset_in0.reset
+			reset_in1      : in  std_logic := 'X'; -- reset_in1.reset
 			clk            : in  std_logic := 'X'; --       clk.clk
 			reset_out      : out std_logic;        -- reset_out.reset
-			reset_in1      : in  std_logic := 'X';
+			reset_req      : out std_logic;        --          .reset_req
 			reset_in10     : in  std_logic := 'X';
 			reset_in11     : in  std_logic := 'X';
 			reset_in12     : in  std_logic := 'X';
@@ -669,7 +652,6 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 			reset_in7      : in  std_logic := 'X';
 			reset_in8      : in  std_logic := 'X';
 			reset_in9      : in  std_logic := 'X';
-			reset_req      : out std_logic;
 			reset_req_in0  : in  std_logic := 'X';
 			reset_req_in1  : in  std_logic := 'X';
 			reset_req_in10 : in  std_logic := 'X';
@@ -718,10 +700,9 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 		);
 		port (
 			reset_in0      : in  std_logic := 'X'; -- reset_in0.reset
-			reset_in1      : in  std_logic := 'X'; -- reset_in1.reset
 			clk            : in  std_logic := 'X'; --       clk.clk
 			reset_out      : out std_logic;        -- reset_out.reset
-			reset_req      : out std_logic;        --          .reset_req
+			reset_in1      : in  std_logic := 'X';
 			reset_in10     : in  std_logic := 'X';
 			reset_in11     : in  std_logic := 'X';
 			reset_in12     : in  std_logic := 'X';
@@ -736,6 +717,7 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 			reset_in7      : in  std_logic := 'X';
 			reset_in8      : in  std_logic := 'X';
 			reset_in9      : in  std_logic := 'X';
+			reset_req      : out std_logic;
 			reset_req_in0  : in  std_logic := 'X';
 			reset_req_in1  : in  std_logic := 'X';
 			reset_req_in10 : in  std_logic := 'X';
@@ -755,7 +737,7 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 		);
 	end component feb_system_v3_pipe_control_path_subsystem_rst_controller_001;
 
-	component feb_system_v3_pipe_control_path_subsystem_rst_controller_004 is
+	component feb_system_v3_pipe_control_path_subsystem_rst_controller_003 is
 		generic (
 			NUM_RESET_INPUTS          : integer := 6;
 			OUTPUT_RESET_SYNC_EDGES   : string  := "deassert";
@@ -819,7 +801,7 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 			reset_req_in8  : in  std_logic := 'X';
 			reset_req_in9  : in  std_logic := 'X'
 		);
-	end component feb_system_v3_pipe_control_path_subsystem_rst_controller_004;
+	end component feb_system_v3_pipe_control_path_subsystem_rst_controller_003;
 
 	component feb_system_v3_pipe_control_path_subsystem_legacy_firefly_bridge is
 		generic (
@@ -969,200 +951,176 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 		);
 	end component feb_system_v3_pipe_control_path_subsystem_sc_hub_cmd_pipe;
 
-	signal onewire_master_controller_0_ctrl_readdata                        : std_logic_vector(31 downto 0); -- onewire_master_0:avs_ctrl_readdata -> onewire_master_controller_0:avm_ctrl_readdata
-	signal onewire_master_controller_0_ctrl_waitrequest                     : std_logic;                     -- onewire_master_0:avs_ctrl_waitrequest -> onewire_master_controller_0:avm_ctrl_waitrequest
-	signal onewire_master_controller_0_ctrl_read                            : std_logic;                     -- onewire_master_controller_0:avm_ctrl_read -> onewire_master_0:avs_ctrl_read
-	signal onewire_master_controller_0_ctrl_address                         : std_logic_vector(3 downto 0);  -- onewire_master_controller_0:avm_ctrl_address -> onewire_master_0:avs_ctrl_address
-	signal onewire_master_controller_0_ctrl_write                           : std_logic;                     -- onewire_master_controller_0:avm_ctrl_write -> onewire_master_0:avs_ctrl_write
-	signal onewire_master_controller_0_ctrl_writedata                       : std_logic_vector(31 downto 0); -- onewire_master_controller_0:avm_ctrl_writedata -> onewire_master_0:avs_ctrl_writedata
-	signal onewire_master_0_rx_valid                                        : std_logic;                     -- onewire_master_0:aso_rx_valid -> onewire_master_controller_0:asi_rx_valid
-	signal onewire_master_0_rx_data                                         : std_logic_vector(7 downto 0);  -- onewire_master_0:aso_rx_data -> onewire_master_controller_0:asi_rx_data
-	signal onewire_master_0_rx_ready                                        : std_logic;                     -- onewire_master_controller_0:asi_rx_ready -> onewire_master_0:aso_rx_ready
-	signal onewire_master_0_rx_channel                                      : std_logic_vector(2 downto 0);  -- onewire_master_0:aso_rx_channel -> onewire_master_controller_0:asi_rx_channel
-	signal onewire_master_controller_0_tx_valid                             : std_logic;                     -- onewire_master_controller_0:aso_tx_valid -> onewire_master_0:asi_tx_valid
-	signal onewire_master_controller_0_tx_data                              : std_logic_vector(7 downto 0);  -- onewire_master_controller_0:aso_tx_data -> onewire_master_0:asi_tx_data
-	signal onewire_master_controller_0_tx_ready                             : std_logic;                     -- onewire_master_0:asi_tx_ready -> onewire_master_controller_0:aso_tx_ready
-	signal onewire_master_controller_0_tx_channel                           : std_logic_vector(2 downto 0);  -- onewire_master_controller_0:aso_tx_channel -> onewire_master_0:asi_tx_channel
-	signal pll_156t40_outclk0_clk                                           : std_logic;                     -- pll_156t40:outclk_0 -> [mm_interconnect_0:pll_156t40_outclk0_clk, mutrig_cfg_ctrl_0:i_clk_spi, on_die_temp_sense:clk, on_die_temp_sense_ctrl:i_clk, rst_controller_004:clk, rst_controller_005:clk]
-	signal on_die_temp_sense_ctrl_ce_ce                                     : std_logic;                     -- on_die_temp_sense_ctrl:ce -> on_die_temp_sense:ce
-	signal on_die_temp_sense_tsdcaldone_tsdcaldone                          : std_logic;                     -- on_die_temp_sense:tsdcaldone -> on_die_temp_sense_ctrl:tsdcaldone
-	signal on_die_temp_sense_tsdcalo_tsdcalo                                : std_logic_vector(7 downto 0);  -- on_die_temp_sense:tsdcalo -> on_die_temp_sense_ctrl:tsdcalo
-	signal pll_reset_inactive_reset_reset                                   : std_logic;                     -- pll_reset_inactive:rso_reset -> pll_156t40:rst
-	signal mutrig_cfg_ctrl_0_avmm_cnt_waitrequest                           : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_waitrequest -> mutrig_cfg_ctrl_0:avm_cnt_waitrequest
-	signal mutrig_cfg_ctrl_0_avmm_cnt_readdata                              : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_readdata -> mutrig_cfg_ctrl_0:avm_cnt_readdata
-	signal mutrig_cfg_ctrl_0_avmm_cnt_address                               : std_logic_vector(15 downto 0); -- mutrig_cfg_ctrl_0:avm_cnt_address -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_address
-	signal mutrig_cfg_ctrl_0_avmm_cnt_read                                  : std_logic;                     -- mutrig_cfg_ctrl_0:avm_cnt_read -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_read
-	signal mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid                         : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid -> mutrig_cfg_ctrl_0:avm_cnt_readdatavalid
-	signal mutrig_cfg_ctrl_0_avmm_cnt_response                              : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_response -> mutrig_cfg_ctrl_0:avm_cnt_response
-	signal mutrig_cfg_ctrl_0_avmm_cnt_burstcount                            : std_logic_vector(8 downto 0);  -- mutrig_cfg_ctrl_0:avm_cnt_burstcount -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_burstcount
-	signal sc_hub_cmd_pipe_m0_waitrequest                                   : std_logic;                     -- mm_interconnect_0:sc_hub_cmd_pipe_m0_waitrequest -> sc_hub_cmd_pipe:m0_waitrequest
-	signal sc_hub_cmd_pipe_m0_readdata                                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:sc_hub_cmd_pipe_m0_readdata -> sc_hub_cmd_pipe:m0_readdata
-	signal sc_hub_cmd_pipe_m0_debugaccess                                   : std_logic;                     -- sc_hub_cmd_pipe:m0_debugaccess -> mm_interconnect_0:sc_hub_cmd_pipe_m0_debugaccess
-	signal sc_hub_cmd_pipe_m0_address                                       : std_logic_vector(15 downto 0); -- sc_hub_cmd_pipe:m0_address -> mm_interconnect_0:sc_hub_cmd_pipe_m0_address
-	signal sc_hub_cmd_pipe_m0_read                                          : std_logic;                     -- sc_hub_cmd_pipe:m0_read -> mm_interconnect_0:sc_hub_cmd_pipe_m0_read
-	signal sc_hub_cmd_pipe_m0_byteenable                                    : std_logic_vector(3 downto 0);  -- sc_hub_cmd_pipe:m0_byteenable -> mm_interconnect_0:sc_hub_cmd_pipe_m0_byteenable
-	signal sc_hub_cmd_pipe_m0_readdatavalid                                 : std_logic;                     -- mm_interconnect_0:sc_hub_cmd_pipe_m0_readdatavalid -> sc_hub_cmd_pipe:m0_readdatavalid
-	signal sc_hub_cmd_pipe_m0_response                                      : std_logic_vector(1 downto 0);  -- mm_interconnect_0:sc_hub_cmd_pipe_m0_response -> sc_hub_cmd_pipe:m0_response
-	signal sc_hub_cmd_pipe_m0_writedata                                     : std_logic_vector(31 downto 0); -- sc_hub_cmd_pipe:m0_writedata -> mm_interconnect_0:sc_hub_cmd_pipe_m0_writedata
-	signal sc_hub_cmd_pipe_m0_write                                         : std_logic;                     -- sc_hub_cmd_pipe:m0_write -> mm_interconnect_0:sc_hub_cmd_pipe_m0_write
-	signal sc_hub_cmd_pipe_m0_burstcount                                    : std_logic_vector(0 downto 0);  -- sc_hub_cmd_pipe:m0_burstcount -> mm_interconnect_0:sc_hub_cmd_pipe_m0_burstcount
-	signal mutrig_cfg_ctrl_0_avmm_schpad_readdata                           : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_readdata -> mutrig_cfg_ctrl_0:avm_schpad_readdata
-	signal mutrig_cfg_ctrl_0_avmm_schpad_waitrequest                        : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_waitrequest -> mutrig_cfg_ctrl_0:avm_schpad_waitrequest
-	signal mutrig_cfg_ctrl_0_avmm_schpad_address                            : std_logic_vector(10 downto 0); -- mutrig_cfg_ctrl_0:avm_schpad_address -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_address
-	signal mutrig_cfg_ctrl_0_avmm_schpad_read                               : std_logic;                     -- mutrig_cfg_ctrl_0:avm_schpad_read -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_read
-	signal mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid                      : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid -> mutrig_cfg_ctrl_0:avm_schpad_readdatavalid
-	signal mutrig_cfg_ctrl_0_avmm_schpad_response                           : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_response -> mutrig_cfg_ctrl_0:avm_schpad_response
-	signal mutrig_cfg_ctrl_0_avmm_schpad_burstcount                         : std_logic_vector(8 downto 0);  -- mutrig_cfg_ctrl_0:avm_schpad_burstcount -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_burstcount
-	signal jtag_master_master_readdata                                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:jtag_master_master_readdata -> jtag_master:master_readdata
-	signal jtag_master_master_waitrequest                                   : std_logic;                     -- mm_interconnect_0:jtag_master_master_waitrequest -> jtag_master:master_waitrequest
-	signal jtag_master_master_address                                       : std_logic_vector(31 downto 0); -- jtag_master:master_address -> mm_interconnect_0:jtag_master_master_address
-	signal jtag_master_master_read                                          : std_logic;                     -- jtag_master:master_read -> mm_interconnect_0:jtag_master_master_read
-	signal jtag_master_master_byteenable                                    : std_logic_vector(3 downto 0);  -- jtag_master:master_byteenable -> mm_interconnect_0:jtag_master_master_byteenable
-	signal jtag_master_master_readdatavalid                                 : std_logic;                     -- mm_interconnect_0:jtag_master_master_readdatavalid -> jtag_master:master_readdatavalid
-	signal jtag_master_master_write                                         : std_logic;                     -- jtag_master:master_write -> mm_interconnect_0:jtag_master_master_write
-	signal jtag_master_master_writedata                                     : std_logic_vector(31 downto 0); -- jtag_master:master_writedata -> mm_interconnect_0:jtag_master_master_writedata
-	signal mm_interconnect_0_mm_bridge_s0_readdata                          : std_logic_vector(31 downto 0); -- mm_bridge:s0_readdata -> mm_interconnect_0:mm_bridge_s0_readdata
-	signal mm_interconnect_0_mm_bridge_s0_waitrequest                       : std_logic;                     -- mm_bridge:s0_waitrequest -> mm_interconnect_0:mm_bridge_s0_waitrequest
-	signal mm_interconnect_0_mm_bridge_s0_debugaccess                       : std_logic;                     -- mm_interconnect_0:mm_bridge_s0_debugaccess -> mm_bridge:s0_debugaccess
-	signal mm_interconnect_0_mm_bridge_s0_address                           : std_logic_vector(13 downto 0); -- mm_interconnect_0:mm_bridge_s0_address -> mm_bridge:s0_address
-	signal mm_interconnect_0_mm_bridge_s0_read                              : std_logic;                     -- mm_interconnect_0:mm_bridge_s0_read -> mm_bridge:s0_read
-	signal mm_interconnect_0_mm_bridge_s0_byteenable                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_bridge_s0_byteenable -> mm_bridge:s0_byteenable
-	signal mm_interconnect_0_mm_bridge_s0_readdatavalid                     : std_logic;                     -- mm_bridge:s0_readdatavalid -> mm_interconnect_0:mm_bridge_s0_readdatavalid
-	signal mm_interconnect_0_mm_bridge_s0_response                          : std_logic_vector(1 downto 0);  -- mm_bridge:s0_response -> mm_interconnect_0:mm_bridge_s0_response
-	signal mm_interconnect_0_mm_bridge_s0_write                             : std_logic;                     -- mm_interconnect_0:mm_bridge_s0_write -> mm_bridge:s0_write
-	signal mm_interconnect_0_mm_bridge_s0_writedata                         : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_bridge_s0_writedata -> mm_bridge:s0_writedata
-	signal mm_interconnect_0_mm_bridge_s0_burstcount                        : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_bridge_s0_burstcount -> mm_bridge:s0_burstcount
-	signal mm_interconnect_0_scratch_pad_ram_s1_chipselect                  : std_logic;                     -- mm_interconnect_0:scratch_pad_ram_s1_chipselect -> scratch_pad_ram:chipselect
-	signal mm_interconnect_0_scratch_pad_ram_s1_readdata                    : std_logic_vector(31 downto 0); -- scratch_pad_ram:readdata -> mm_interconnect_0:scratch_pad_ram_s1_readdata
-	signal mm_interconnect_0_scratch_pad_ram_s1_address                     : std_logic_vector(7 downto 0);  -- mm_interconnect_0:scratch_pad_ram_s1_address -> scratch_pad_ram:address
-	signal mm_interconnect_0_scratch_pad_ram_s1_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_0:scratch_pad_ram_s1_byteenable -> scratch_pad_ram:byteenable
-	signal mm_interconnect_0_scratch_pad_ram_s1_write                       : std_logic;                     -- mm_interconnect_0:scratch_pad_ram_s1_write -> scratch_pad_ram:write
-	signal mm_interconnect_0_scratch_pad_ram_s1_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:scratch_pad_ram_s1_writedata -> scratch_pad_ram:writedata
-	signal mm_interconnect_0_scratch_pad_ram_s1_clken                       : std_logic;                     -- mm_interconnect_0:scratch_pad_ram_s1_clken -> scratch_pad_ram:clken
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_readdata            : std_logic_vector(31 downto 0); -- mutrig_cfg_ctrl_0:avs_csr_readdata -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_readdata
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_waitrequest         : std_logic;                     -- mutrig_cfg_ctrl_0:avs_csr_waitrequest -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_waitrequest
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_address             : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_address -> mutrig_cfg_ctrl_0:avs_csr_address
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_read                : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_read -> mutrig_cfg_ctrl_0:avs_csr_read
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_response            : std_logic_vector(1 downto 0);  -- mutrig_cfg_ctrl_0:avs_csr_response -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_response
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_write               : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_write -> mutrig_cfg_ctrl_0:avs_csr_write
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_writedata           : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_writedata -> mutrig_cfg_ctrl_0:avs_csr_writedata
-	signal mm_interconnect_0_onewire_master_controller_0_csr_readdata       : std_logic_vector(31 downto 0); -- onewire_master_controller_0:avs_csr_readdata -> mm_interconnect_0:onewire_master_controller_0_csr_readdata
-	signal mm_interconnect_0_onewire_master_controller_0_csr_waitrequest    : std_logic;                     -- onewire_master_controller_0:avs_csr_waitrequest -> mm_interconnect_0:onewire_master_controller_0_csr_waitrequest
-	signal mm_interconnect_0_onewire_master_controller_0_csr_address        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:onewire_master_controller_0_csr_address -> onewire_master_controller_0:avs_csr_address
-	signal mm_interconnect_0_onewire_master_controller_0_csr_read           : std_logic;                     -- mm_interconnect_0:onewire_master_controller_0_csr_read -> onewire_master_controller_0:avs_csr_read
-	signal mm_interconnect_0_onewire_master_controller_0_csr_write          : std_logic;                     -- mm_interconnect_0:onewire_master_controller_0_csr_write -> onewire_master_controller_0:avs_csr_write
-	signal mm_interconnect_0_onewire_master_controller_0_csr_writedata      : std_logic_vector(31 downto 0); -- mm_interconnect_0:onewire_master_controller_0_csr_writedata -> onewire_master_controller_0:avs_csr_writedata
-	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_readdata            : std_logic_vector(31 downto 0); -- on_die_temp_sense_ctrl:avs_csr_readdata -> mm_interconnect_0:on_die_temp_sense_ctrl_csr_readdata
-	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_waitrequest         : std_logic;                     -- on_die_temp_sense_ctrl:avs_csr_waitrequest -> mm_interconnect_0:on_die_temp_sense_ctrl_csr_waitrequest
-	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_read                : std_logic;                     -- mm_interconnect_0:on_die_temp_sense_ctrl_csr_read -> on_die_temp_sense_ctrl:avs_csr_read
-	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_write               : std_logic;                     -- mm_interconnect_0:on_die_temp_sense_ctrl_csr_write -> on_die_temp_sense_ctrl:avs_csr_write
-	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_writedata           : std_logic_vector(31 downto 0); -- mm_interconnect_0:on_die_temp_sense_ctrl_csr_writedata -> on_die_temp_sense_ctrl:avs_csr_writedata
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdata            : std_logic_vector(31 downto 0); -- max10_prog_avmm_0:avs_csr_readdata -> mm_interconnect_0:max10_prog_avmm_0_csr_avmm_readdata
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_waitrequest         : std_logic;                     -- max10_prog_avmm_0:avs_csr_waitrequest -> mm_interconnect_0:max10_prog_avmm_0_csr_avmm_waitrequest
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_address             : std_logic_vector(9 downto 0);  -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_address -> max10_prog_avmm_0:avs_csr_address
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_read                : std_logic;                     -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_read -> max10_prog_avmm_0:avs_csr_read
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdatavalid       : std_logic;                     -- max10_prog_avmm_0:avs_csr_readdatavalid -> mm_interconnect_0:max10_prog_avmm_0_csr_avmm_readdatavalid
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_write               : std_logic;                     -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_write -> max10_prog_avmm_0:avs_csr_write
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_writedata           : std_logic_vector(31 downto 0); -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_writedata -> max10_prog_avmm_0:avs_csr_writedata
-	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_burstcount          : std_logic_vector(0 downto 0);  -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_burstcount -> max10_prog_avmm_0:avs_csr_burstcount
-	signal mm_interconnect_0_charge_injection_pulser_0_csr_avmm_readdata    : std_logic_vector(31 downto 0); -- charge_injection_pulser_0:avs_csr_readdata -> mm_interconnect_0:charge_injection_pulser_0_csr_avmm_readdata
-	signal mm_interconnect_0_charge_injection_pulser_0_csr_avmm_waitrequest : std_logic;                     -- charge_injection_pulser_0:avs_csr_waitrequest -> mm_interconnect_0:charge_injection_pulser_0_csr_avmm_waitrequest
-	signal mm_interconnect_0_charge_injection_pulser_0_csr_avmm_read        : std_logic;                     -- mm_interconnect_0:charge_injection_pulser_0_csr_avmm_read -> charge_injection_pulser_0:avs_csr_read
-	signal mm_interconnect_0_charge_injection_pulser_0_csr_avmm_write       : std_logic;                     -- mm_interconnect_0:charge_injection_pulser_0_csr_avmm_write -> charge_injection_pulser_0:avs_csr_write
-	signal mm_interconnect_0_charge_injection_pulser_0_csr_avmm_writedata   : std_logic_vector(31 downto 0); -- mm_interconnect_0:charge_injection_pulser_0_csr_avmm_writedata -> charge_injection_pulser_0:avs_csr_writedata
-	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_readdata           : std_logic_vector(31 downto 0); -- firefly_xcvr_ctrl_0:avs_firefly_readdata -> mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_readdata
-	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_waitrequest        : std_logic;                     -- firefly_xcvr_ctrl_0:avs_firefly_waitrequest -> mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_waitrequest
-	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_address            : std_logic_vector(4 downto 0);  -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_address -> firefly_xcvr_ctrl_0:avs_firefly_address
-	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_read               : std_logic;                     -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_read -> firefly_xcvr_ctrl_0:avs_firefly_read
-	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_write              : std_logic;                     -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_write -> firefly_xcvr_ctrl_0:avs_firefly_write
-	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_writedata          : std_logic_vector(31 downto 0); -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_writedata -> firefly_xcvr_ctrl_0:avs_firefly_writedata
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_readdata              : std_logic_vector(31 downto 0); -- legacy_firefly_bridge:s0_readdata -> mm_interconnect_0:legacy_firefly_bridge_s0_readdata
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_waitrequest           : std_logic;                     -- legacy_firefly_bridge:s0_waitrequest -> mm_interconnect_0:legacy_firefly_bridge_s0_waitrequest
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_debugaccess           : std_logic;                     -- mm_interconnect_0:legacy_firefly_bridge_s0_debugaccess -> legacy_firefly_bridge:s0_debugaccess
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_address               : std_logic_vector(7 downto 0);  -- mm_interconnect_0:legacy_firefly_bridge_s0_address -> legacy_firefly_bridge:s0_address
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_read                  : std_logic;                     -- mm_interconnect_0:legacy_firefly_bridge_s0_read -> legacy_firefly_bridge:s0_read
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_byteenable            : std_logic_vector(3 downto 0);  -- mm_interconnect_0:legacy_firefly_bridge_s0_byteenable -> legacy_firefly_bridge:s0_byteenable
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_readdatavalid         : std_logic;                     -- legacy_firefly_bridge:s0_readdatavalid -> mm_interconnect_0:legacy_firefly_bridge_s0_readdatavalid
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_response              : std_logic_vector(1 downto 0);  -- legacy_firefly_bridge:s0_response -> mm_interconnect_0:legacy_firefly_bridge_s0_response
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_write                 : std_logic;                     -- mm_interconnect_0:legacy_firefly_bridge_s0_write -> legacy_firefly_bridge:s0_write
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_writedata             : std_logic_vector(31 downto 0); -- mm_interconnect_0:legacy_firefly_bridge_s0_writedata -> legacy_firefly_bridge:s0_writedata
-	signal mm_interconnect_0_legacy_firefly_bridge_s0_burstcount            : std_logic_vector(0 downto 0);  -- mm_interconnect_0:legacy_firefly_bridge_s0_burstcount -> legacy_firefly_bridge:s0_burstcount
-	signal mm_interconnect_0_upload_mm_bridge_s0_readdata                   : std_logic_vector(31 downto 0); -- upload_mm_bridge:s0_readdata -> mm_interconnect_0:upload_mm_bridge_s0_readdata
-	signal mm_interconnect_0_upload_mm_bridge_s0_waitrequest                : std_logic;                     -- upload_mm_bridge:s0_waitrequest -> mm_interconnect_0:upload_mm_bridge_s0_waitrequest
-	signal mm_interconnect_0_upload_mm_bridge_s0_debugaccess                : std_logic;                     -- mm_interconnect_0:upload_mm_bridge_s0_debugaccess -> upload_mm_bridge:s0_debugaccess
-	signal mm_interconnect_0_upload_mm_bridge_s0_address                    : std_logic_vector(4 downto 0);  -- mm_interconnect_0:upload_mm_bridge_s0_address -> upload_mm_bridge:s0_address
-	signal mm_interconnect_0_upload_mm_bridge_s0_read                       : std_logic;                     -- mm_interconnect_0:upload_mm_bridge_s0_read -> upload_mm_bridge:s0_read
-	signal mm_interconnect_0_upload_mm_bridge_s0_byteenable                 : std_logic_vector(3 downto 0);  -- mm_interconnect_0:upload_mm_bridge_s0_byteenable -> upload_mm_bridge:s0_byteenable
-	signal mm_interconnect_0_upload_mm_bridge_s0_readdatavalid              : std_logic;                     -- upload_mm_bridge:s0_readdatavalid -> mm_interconnect_0:upload_mm_bridge_s0_readdatavalid
-	signal mm_interconnect_0_upload_mm_bridge_s0_response                   : std_logic_vector(1 downto 0);  -- upload_mm_bridge:s0_response -> mm_interconnect_0:upload_mm_bridge_s0_response
-	signal mm_interconnect_0_upload_mm_bridge_s0_write                      : std_logic;                     -- mm_interconnect_0:upload_mm_bridge_s0_write -> upload_mm_bridge:s0_write
-	signal mm_interconnect_0_upload_mm_bridge_s0_writedata                  : std_logic_vector(31 downto 0); -- mm_interconnect_0:upload_mm_bridge_s0_writedata -> upload_mm_bridge:s0_writedata
-	signal mm_interconnect_0_upload_mm_bridge_s0_burstcount                 : std_logic_vector(0 downto 0);  -- mm_interconnect_0:upload_mm_bridge_s0_burstcount -> upload_mm_bridge:s0_burstcount
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_readdata     : std_logic_vector(31 downto 0); -- mutrig_cfg_ctrl_0:avs_scanresult_readdata -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_readdata
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest  : std_logic;                     -- mutrig_cfg_ctrl_0:avs_scanresult_waitrequest -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_address      : std_logic_vector(13 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_address -> mutrig_cfg_ctrl_0:avs_scanresult_address
-	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_read         : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_read -> mutrig_cfg_ctrl_0:avs_scanresult_read
-	signal mm_interconnect_0_sc_hub_csr_readdata                            : std_logic_vector(31 downto 0); -- sc_hub:avs_csr_readdata -> mm_interconnect_0:sc_hub_csr_readdata
-	signal mm_interconnect_0_sc_hub_csr_waitrequest                         : std_logic;                     -- sc_hub:avs_csr_waitrequest -> mm_interconnect_0:sc_hub_csr_waitrequest
-	signal mm_interconnect_0_sc_hub_csr_address                             : std_logic_vector(4 downto 0);  -- mm_interconnect_0:sc_hub_csr_address -> sc_hub:avs_csr_address
-	signal mm_interconnect_0_sc_hub_csr_read                                : std_logic;                     -- mm_interconnect_0:sc_hub_csr_read -> sc_hub:avs_csr_read
-	signal mm_interconnect_0_sc_hub_csr_readdatavalid                       : std_logic;                     -- sc_hub:avs_csr_readdatavalid -> mm_interconnect_0:sc_hub_csr_readdatavalid
-	signal mm_interconnect_0_sc_hub_csr_write                               : std_logic;                     -- mm_interconnect_0:sc_hub_csr_write -> sc_hub:avs_csr_write
-	signal mm_interconnect_0_sc_hub_csr_writedata                           : std_logic_vector(31 downto 0); -- mm_interconnect_0:sc_hub_csr_writedata -> sc_hub:avs_csr_writedata
-	signal mm_interconnect_0_sc_hub_csr_burstcount                          : std_logic_vector(0 downto 0);  -- mm_interconnect_0:sc_hub_csr_burstcount -> sc_hub:avs_csr_burstcount
-	signal sc_hub_hub_readdata                                              : std_logic_vector(31 downto 0); -- mm_interconnect_2:sc_hub_hub_readdata -> sc_hub:avm_hub_readdata
-	signal sc_hub_hub_waitrequest                                           : std_logic;                     -- mm_interconnect_2:sc_hub_hub_waitrequest -> sc_hub:avm_hub_waitrequest
-	signal sc_hub_hub_address                                               : std_logic_vector(17 downto 0); -- sc_hub:avm_hub_address -> mm_interconnect_2:sc_hub_hub_address
-	signal sc_hub_hub_read                                                  : std_logic;                     -- sc_hub:avm_hub_read -> mm_interconnect_2:sc_hub_hub_read
-	signal sc_hub_hub_readdatavalid                                         : std_logic;                     -- mm_interconnect_2:sc_hub_hub_readdatavalid -> sc_hub:avm_hub_readdatavalid
-	signal sc_hub_hub_response                                              : std_logic_vector(1 downto 0);  -- mm_interconnect_2:sc_hub_hub_response -> sc_hub:avm_hub_response
-	signal sc_hub_hub_write                                                 : std_logic;                     -- sc_hub:avm_hub_write -> mm_interconnect_2:sc_hub_hub_write
-	signal sc_hub_hub_writedata                                             : std_logic_vector(31 downto 0); -- sc_hub:avm_hub_writedata -> mm_interconnect_2:sc_hub_hub_writedata
-	signal sc_hub_hub_writeresponsevalid                                    : std_logic;                     -- mm_interconnect_2:sc_hub_hub_writeresponsevalid -> sc_hub:avm_hub_writeresponsevalid
-	signal sc_hub_hub_burstcount                                            : std_logic_vector(8 downto 0);  -- sc_hub:avm_hub_burstcount -> mm_interconnect_2:sc_hub_hub_burstcount
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_readdata                    : std_logic_vector(31 downto 0); -- sc_hub_cmd_pipe:s0_readdata -> mm_interconnect_2:sc_hub_cmd_pipe_s0_readdata
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_waitrequest                 : std_logic;                     -- sc_hub_cmd_pipe:s0_waitrequest -> mm_interconnect_2:sc_hub_cmd_pipe_s0_waitrequest
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_debugaccess                 : std_logic;                     -- mm_interconnect_2:sc_hub_cmd_pipe_s0_debugaccess -> sc_hub_cmd_pipe:s0_debugaccess
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_address                     : std_logic_vector(15 downto 0); -- mm_interconnect_2:sc_hub_cmd_pipe_s0_address -> sc_hub_cmd_pipe:s0_address
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_read                        : std_logic;                     -- mm_interconnect_2:sc_hub_cmd_pipe_s0_read -> sc_hub_cmd_pipe:s0_read
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_byteenable                  : std_logic_vector(3 downto 0);  -- mm_interconnect_2:sc_hub_cmd_pipe_s0_byteenable -> sc_hub_cmd_pipe:s0_byteenable
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_readdatavalid               : std_logic;                     -- sc_hub_cmd_pipe:s0_readdatavalid -> mm_interconnect_2:sc_hub_cmd_pipe_s0_readdatavalid
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_response                    : std_logic_vector(1 downto 0);  -- sc_hub_cmd_pipe:s0_response -> mm_interconnect_2:sc_hub_cmd_pipe_s0_response
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_write                       : std_logic;                     -- mm_interconnect_2:sc_hub_cmd_pipe_s0_write -> sc_hub_cmd_pipe:s0_write
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_2:sc_hub_cmd_pipe_s0_writedata -> sc_hub_cmd_pipe:s0_writedata
-	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_burstcount                  : std_logic_vector(0 downto 0);  -- mm_interconnect_2:sc_hub_cmd_pipe_s0_burstcount -> sc_hub_cmd_pipe:s0_burstcount
-	signal irq_mapper_receiver0_irq                                         : std_logic;                     -- onewire_master_0:ins_complete_irq -> irq_mapper:receiver0_irq
-	signal onewire_master_controller_0_complete_irq                         : std_logic;                     -- irq_mapper:sender_irq -> onewire_master_controller_0:inr_complete_irq
-	signal rst_controller_reset_out_reset                                   : std_logic;                     -- rst_controller:reset_out -> [charge_injection_pulser_0:i_rst, mm_interconnect_0:charge_injection_pulser_0_reset_interface_reset_bridge_in_reset_reset]
-	signal jtag_master_master_reset_reset                                   : std_logic;                     -- jtag_master:master_reset_reset -> [rst_controller:reset_in0, rst_controller_001:reset_in1, rst_controller_004:reset_in1, rst_controller_006:reset_in1]
-	signal rst_controller_001_reset_out_reset                               : std_logic;                     -- rst_controller_001:reset_out -> [firefly_xcvr_ctrl_0:i_rst, irq_mapper:reset, max10_prog_avmm_0:rsi_csr_reset, mm_interconnect_0:mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset_reset, mm_interconnect_0:onewire_master_controller_0_reset_reset_bridge_in_reset_reset, mm_interconnect_2:sc_hub_hub_reset_reset_bridge_in_reset_reset, mutrig_cfg_ctrl_0:i_rst, rst_translator:in_reset, sc_hub:i_rst, scratch_pad_ram:reset]
-	signal rst_controller_001_reset_out_reset_req                           : std_logic;                     -- rst_controller_001:reset_req -> [rst_translator:reset_req_in, scratch_pad_ram:reset_req]
-	signal rst_controller_002_reset_out_reset                               : std_logic;                     -- rst_controller_002:reset_out -> [legacy_firefly_bridge:reset, mm_bridge:reset, mm_interconnect_0:jtag_master_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_0:sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset, mm_interconnect_2:sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset, sc_hub_cmd_pipe:reset, upload_mm_bridge:reset]
-	signal rst_controller_003_reset_out_reset                               : std_logic;                     -- rst_controller_003:reset_out -> max10_prog_avmm_0:rsi_link_reset
-	signal rst_controller_004_reset_out_reset                               : std_logic;                     -- rst_controller_004:reset_out -> [mm_interconnect_0:on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset_reset, mutrig_cfg_ctrl_0:i_rst_spi, on_die_temp_sense_ctrl:i_rst]
-	signal rst_controller_005_reset_out_reset                               : std_logic;                     -- rst_controller_005:reset_out -> on_die_temp_sense:clr
-	signal rst_controller_006_reset_out_reset                               : std_logic;                     -- rst_controller_006:reset_out -> [onewire_master_0:rsi_reset_reset, onewire_master_controller_0:rsi_reset_reset]
-	signal clk156_in_rst_reset_n_ports_inv                                  : std_logic;                     -- clk156_in_rst_reset_n:inv -> [jtag_master:clk_reset_reset, rst_controller_001:reset_in0, rst_controller_002:reset_in0, rst_controller_003:reset_in0, rst_controller_004:reset_in0, rst_controller_005:reset_in0, rst_controller_006:reset_in0]
+	signal onewire_master_controller_0_ctrl_readdata                       : std_logic_vector(31 downto 0); -- onewire_master_0:avs_ctrl_readdata -> onewire_master_controller_0:avm_ctrl_readdata
+	signal onewire_master_controller_0_ctrl_waitrequest                    : std_logic;                     -- onewire_master_0:avs_ctrl_waitrequest -> onewire_master_controller_0:avm_ctrl_waitrequest
+	signal onewire_master_controller_0_ctrl_read                           : std_logic;                     -- onewire_master_controller_0:avm_ctrl_read -> onewire_master_0:avs_ctrl_read
+	signal onewire_master_controller_0_ctrl_address                        : std_logic_vector(3 downto 0);  -- onewire_master_controller_0:avm_ctrl_address -> onewire_master_0:avs_ctrl_address
+	signal onewire_master_controller_0_ctrl_write                          : std_logic;                     -- onewire_master_controller_0:avm_ctrl_write -> onewire_master_0:avs_ctrl_write
+	signal onewire_master_controller_0_ctrl_writedata                      : std_logic_vector(31 downto 0); -- onewire_master_controller_0:avm_ctrl_writedata -> onewire_master_0:avs_ctrl_writedata
+	signal onewire_master_0_rx_valid                                       : std_logic;                     -- onewire_master_0:aso_rx_valid -> onewire_master_controller_0:asi_rx_valid
+	signal onewire_master_0_rx_data                                        : std_logic_vector(7 downto 0);  -- onewire_master_0:aso_rx_data -> onewire_master_controller_0:asi_rx_data
+	signal onewire_master_0_rx_ready                                       : std_logic;                     -- onewire_master_controller_0:asi_rx_ready -> onewire_master_0:aso_rx_ready
+	signal onewire_master_0_rx_channel                                     : std_logic_vector(2 downto 0);  -- onewire_master_0:aso_rx_channel -> onewire_master_controller_0:asi_rx_channel
+	signal onewire_master_controller_0_tx_valid                            : std_logic;                     -- onewire_master_controller_0:aso_tx_valid -> onewire_master_0:asi_tx_valid
+	signal onewire_master_controller_0_tx_data                             : std_logic_vector(7 downto 0);  -- onewire_master_controller_0:aso_tx_data -> onewire_master_0:asi_tx_data
+	signal onewire_master_controller_0_tx_ready                            : std_logic;                     -- onewire_master_0:asi_tx_ready -> onewire_master_controller_0:aso_tx_ready
+	signal onewire_master_controller_0_tx_channel                          : std_logic_vector(2 downto 0);  -- onewire_master_controller_0:aso_tx_channel -> onewire_master_0:asi_tx_channel
+	signal pll_156t40_outclk0_clk                                          : std_logic;                     -- pll_156t40:outclk_0 -> [mm_interconnect_0:pll_156t40_outclk0_clk, mutrig_cfg_ctrl_0:i_clk_spi, on_die_temp_sense:clk, on_die_temp_sense_ctrl:i_clk, rst_controller_003:clk, rst_controller_004:clk]
+	signal on_die_temp_sense_ctrl_ce_ce                                    : std_logic;                     -- on_die_temp_sense_ctrl:ce -> on_die_temp_sense:ce
+	signal on_die_temp_sense_tsdcaldone_tsdcaldone                         : std_logic;                     -- on_die_temp_sense:tsdcaldone -> on_die_temp_sense_ctrl:tsdcaldone
+	signal on_die_temp_sense_tsdcalo_tsdcalo                               : std_logic_vector(7 downto 0);  -- on_die_temp_sense:tsdcalo -> on_die_temp_sense_ctrl:tsdcalo
+	signal pll_reset_inactive_reset_reset                                  : std_logic;                     -- pll_reset_inactive:rso_reset -> pll_156t40:rst
+	signal mutrig_cfg_ctrl_0_avmm_cnt_waitrequest                          : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_waitrequest -> mutrig_cfg_ctrl_0:avm_cnt_waitrequest
+	signal mutrig_cfg_ctrl_0_avmm_cnt_readdata                             : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_readdata -> mutrig_cfg_ctrl_0:avm_cnt_readdata
+	signal mutrig_cfg_ctrl_0_avmm_cnt_address                              : std_logic_vector(15 downto 0); -- mutrig_cfg_ctrl_0:avm_cnt_address -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_address
+	signal mutrig_cfg_ctrl_0_avmm_cnt_read                                 : std_logic;                     -- mutrig_cfg_ctrl_0:avm_cnt_read -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_read
+	signal mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid                        : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid -> mutrig_cfg_ctrl_0:avm_cnt_readdatavalid
+	signal mutrig_cfg_ctrl_0_avmm_cnt_response                             : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_response -> mutrig_cfg_ctrl_0:avm_cnt_response
+	signal mutrig_cfg_ctrl_0_avmm_cnt_burstcount                           : std_logic_vector(8 downto 0);  -- mutrig_cfg_ctrl_0:avm_cnt_burstcount -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_cnt_burstcount
+	signal sc_hub_cmd_pipe_m0_waitrequest                                  : std_logic;                     -- mm_interconnect_0:sc_hub_cmd_pipe_m0_waitrequest -> sc_hub_cmd_pipe:m0_waitrequest
+	signal sc_hub_cmd_pipe_m0_readdata                                     : std_logic_vector(31 downto 0); -- mm_interconnect_0:sc_hub_cmd_pipe_m0_readdata -> sc_hub_cmd_pipe:m0_readdata
+	signal sc_hub_cmd_pipe_m0_debugaccess                                  : std_logic;                     -- sc_hub_cmd_pipe:m0_debugaccess -> mm_interconnect_0:sc_hub_cmd_pipe_m0_debugaccess
+	signal sc_hub_cmd_pipe_m0_address                                      : std_logic_vector(15 downto 0); -- sc_hub_cmd_pipe:m0_address -> mm_interconnect_0:sc_hub_cmd_pipe_m0_address
+	signal sc_hub_cmd_pipe_m0_read                                         : std_logic;                     -- sc_hub_cmd_pipe:m0_read -> mm_interconnect_0:sc_hub_cmd_pipe_m0_read
+	signal sc_hub_cmd_pipe_m0_byteenable                                   : std_logic_vector(3 downto 0);  -- sc_hub_cmd_pipe:m0_byteenable -> mm_interconnect_0:sc_hub_cmd_pipe_m0_byteenable
+	signal sc_hub_cmd_pipe_m0_readdatavalid                                : std_logic;                     -- mm_interconnect_0:sc_hub_cmd_pipe_m0_readdatavalid -> sc_hub_cmd_pipe:m0_readdatavalid
+	signal sc_hub_cmd_pipe_m0_response                                     : std_logic_vector(1 downto 0);  -- mm_interconnect_0:sc_hub_cmd_pipe_m0_response -> sc_hub_cmd_pipe:m0_response
+	signal sc_hub_cmd_pipe_m0_writedata                                    : std_logic_vector(31 downto 0); -- sc_hub_cmd_pipe:m0_writedata -> mm_interconnect_0:sc_hub_cmd_pipe_m0_writedata
+	signal sc_hub_cmd_pipe_m0_write                                        : std_logic;                     -- sc_hub_cmd_pipe:m0_write -> mm_interconnect_0:sc_hub_cmd_pipe_m0_write
+	signal sc_hub_cmd_pipe_m0_burstcount                                   : std_logic_vector(0 downto 0);  -- sc_hub_cmd_pipe:m0_burstcount -> mm_interconnect_0:sc_hub_cmd_pipe_m0_burstcount
+	signal mutrig_cfg_ctrl_0_avmm_schpad_readdata                          : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_readdata -> mutrig_cfg_ctrl_0:avm_schpad_readdata
+	signal mutrig_cfg_ctrl_0_avmm_schpad_waitrequest                       : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_waitrequest -> mutrig_cfg_ctrl_0:avm_schpad_waitrequest
+	signal mutrig_cfg_ctrl_0_avmm_schpad_address                           : std_logic_vector(10 downto 0); -- mutrig_cfg_ctrl_0:avm_schpad_address -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_address
+	signal mutrig_cfg_ctrl_0_avmm_schpad_read                              : std_logic;                     -- mutrig_cfg_ctrl_0:avm_schpad_read -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_read
+	signal mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid                     : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid -> mutrig_cfg_ctrl_0:avm_schpad_readdatavalid
+	signal mutrig_cfg_ctrl_0_avmm_schpad_response                          : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_response -> mutrig_cfg_ctrl_0:avm_schpad_response
+	signal mutrig_cfg_ctrl_0_avmm_schpad_burstcount                        : std_logic_vector(8 downto 0);  -- mutrig_cfg_ctrl_0:avm_schpad_burstcount -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_schpad_burstcount
+	signal jtag_master_master_readdata                                     : std_logic_vector(31 downto 0); -- mm_interconnect_0:jtag_master_master_readdata -> jtag_master:master_readdata
+	signal jtag_master_master_waitrequest                                  : std_logic;                     -- mm_interconnect_0:jtag_master_master_waitrequest -> jtag_master:master_waitrequest
+	signal jtag_master_master_address                                      : std_logic_vector(31 downto 0); -- jtag_master:master_address -> mm_interconnect_0:jtag_master_master_address
+	signal jtag_master_master_read                                         : std_logic;                     -- jtag_master:master_read -> mm_interconnect_0:jtag_master_master_read
+	signal jtag_master_master_byteenable                                   : std_logic_vector(3 downto 0);  -- jtag_master:master_byteenable -> mm_interconnect_0:jtag_master_master_byteenable
+	signal jtag_master_master_readdatavalid                                : std_logic;                     -- mm_interconnect_0:jtag_master_master_readdatavalid -> jtag_master:master_readdatavalid
+	signal jtag_master_master_write                                        : std_logic;                     -- jtag_master:master_write -> mm_interconnect_0:jtag_master_master_write
+	signal jtag_master_master_writedata                                    : std_logic_vector(31 downto 0); -- jtag_master:master_writedata -> mm_interconnect_0:jtag_master_master_writedata
+	signal mm_interconnect_0_mm_bridge_s0_readdata                         : std_logic_vector(31 downto 0); -- mm_bridge:s0_readdata -> mm_interconnect_0:mm_bridge_s0_readdata
+	signal mm_interconnect_0_mm_bridge_s0_waitrequest                      : std_logic;                     -- mm_bridge:s0_waitrequest -> mm_interconnect_0:mm_bridge_s0_waitrequest
+	signal mm_interconnect_0_mm_bridge_s0_debugaccess                      : std_logic;                     -- mm_interconnect_0:mm_bridge_s0_debugaccess -> mm_bridge:s0_debugaccess
+	signal mm_interconnect_0_mm_bridge_s0_address                          : std_logic_vector(13 downto 0); -- mm_interconnect_0:mm_bridge_s0_address -> mm_bridge:s0_address
+	signal mm_interconnect_0_mm_bridge_s0_read                             : std_logic;                     -- mm_interconnect_0:mm_bridge_s0_read -> mm_bridge:s0_read
+	signal mm_interconnect_0_mm_bridge_s0_byteenable                       : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mm_bridge_s0_byteenable -> mm_bridge:s0_byteenable
+	signal mm_interconnect_0_mm_bridge_s0_readdatavalid                    : std_logic;                     -- mm_bridge:s0_readdatavalid -> mm_interconnect_0:mm_bridge_s0_readdatavalid
+	signal mm_interconnect_0_mm_bridge_s0_response                         : std_logic_vector(1 downto 0);  -- mm_bridge:s0_response -> mm_interconnect_0:mm_bridge_s0_response
+	signal mm_interconnect_0_mm_bridge_s0_write                            : std_logic;                     -- mm_interconnect_0:mm_bridge_s0_write -> mm_bridge:s0_write
+	signal mm_interconnect_0_mm_bridge_s0_writedata                        : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_bridge_s0_writedata -> mm_bridge:s0_writedata
+	signal mm_interconnect_0_mm_bridge_s0_burstcount                       : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_bridge_s0_burstcount -> mm_bridge:s0_burstcount
+	signal mm_interconnect_0_scratch_pad_ram_s1_chipselect                 : std_logic;                     -- mm_interconnect_0:scratch_pad_ram_s1_chipselect -> scratch_pad_ram:chipselect
+	signal mm_interconnect_0_scratch_pad_ram_s1_readdata                   : std_logic_vector(31 downto 0); -- scratch_pad_ram:readdata -> mm_interconnect_0:scratch_pad_ram_s1_readdata
+	signal mm_interconnect_0_scratch_pad_ram_s1_address                    : std_logic_vector(7 downto 0);  -- mm_interconnect_0:scratch_pad_ram_s1_address -> scratch_pad_ram:address
+	signal mm_interconnect_0_scratch_pad_ram_s1_byteenable                 : std_logic_vector(3 downto 0);  -- mm_interconnect_0:scratch_pad_ram_s1_byteenable -> scratch_pad_ram:byteenable
+	signal mm_interconnect_0_scratch_pad_ram_s1_write                      : std_logic;                     -- mm_interconnect_0:scratch_pad_ram_s1_write -> scratch_pad_ram:write
+	signal mm_interconnect_0_scratch_pad_ram_s1_writedata                  : std_logic_vector(31 downto 0); -- mm_interconnect_0:scratch_pad_ram_s1_writedata -> scratch_pad_ram:writedata
+	signal mm_interconnect_0_scratch_pad_ram_s1_clken                      : std_logic;                     -- mm_interconnect_0:scratch_pad_ram_s1_clken -> scratch_pad_ram:clken
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_readdata           : std_logic_vector(31 downto 0); -- mutrig_cfg_ctrl_0:avs_csr_readdata -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_readdata
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_waitrequest        : std_logic;                     -- mutrig_cfg_ctrl_0:avs_csr_waitrequest -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_waitrequest
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_address            : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_address -> mutrig_cfg_ctrl_0:avs_csr_address
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_read               : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_read -> mutrig_cfg_ctrl_0:avs_csr_read
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_response           : std_logic_vector(1 downto 0);  -- mutrig_cfg_ctrl_0:avs_csr_response -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_response
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_write              : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_write -> mutrig_cfg_ctrl_0:avs_csr_write
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_writedata          : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_csr_writedata -> mutrig_cfg_ctrl_0:avs_csr_writedata
+	signal mm_interconnect_0_onewire_master_controller_0_csr_readdata      : std_logic_vector(31 downto 0); -- onewire_master_controller_0:avs_csr_readdata -> mm_interconnect_0:onewire_master_controller_0_csr_readdata
+	signal mm_interconnect_0_onewire_master_controller_0_csr_waitrequest   : std_logic;                     -- onewire_master_controller_0:avs_csr_waitrequest -> mm_interconnect_0:onewire_master_controller_0_csr_waitrequest
+	signal mm_interconnect_0_onewire_master_controller_0_csr_address       : std_logic_vector(3 downto 0);  -- mm_interconnect_0:onewire_master_controller_0_csr_address -> onewire_master_controller_0:avs_csr_address
+	signal mm_interconnect_0_onewire_master_controller_0_csr_read          : std_logic;                     -- mm_interconnect_0:onewire_master_controller_0_csr_read -> onewire_master_controller_0:avs_csr_read
+	signal mm_interconnect_0_onewire_master_controller_0_csr_write         : std_logic;                     -- mm_interconnect_0:onewire_master_controller_0_csr_write -> onewire_master_controller_0:avs_csr_write
+	signal mm_interconnect_0_onewire_master_controller_0_csr_writedata     : std_logic_vector(31 downto 0); -- mm_interconnect_0:onewire_master_controller_0_csr_writedata -> onewire_master_controller_0:avs_csr_writedata
+	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_readdata           : std_logic_vector(31 downto 0); -- on_die_temp_sense_ctrl:avs_csr_readdata -> mm_interconnect_0:on_die_temp_sense_ctrl_csr_readdata
+	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_waitrequest        : std_logic;                     -- on_die_temp_sense_ctrl:avs_csr_waitrequest -> mm_interconnect_0:on_die_temp_sense_ctrl_csr_waitrequest
+	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_read               : std_logic;                     -- mm_interconnect_0:on_die_temp_sense_ctrl_csr_read -> on_die_temp_sense_ctrl:avs_csr_read
+	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_write              : std_logic;                     -- mm_interconnect_0:on_die_temp_sense_ctrl_csr_write -> on_die_temp_sense_ctrl:avs_csr_write
+	signal mm_interconnect_0_on_die_temp_sense_ctrl_csr_writedata          : std_logic_vector(31 downto 0); -- mm_interconnect_0:on_die_temp_sense_ctrl_csr_writedata -> on_die_temp_sense_ctrl:avs_csr_writedata
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdata           : std_logic_vector(31 downto 0); -- max10_prog_avmm_0:avs_csr_readdata -> mm_interconnect_0:max10_prog_avmm_0_csr_avmm_readdata
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_waitrequest        : std_logic;                     -- max10_prog_avmm_0:avs_csr_waitrequest -> mm_interconnect_0:max10_prog_avmm_0_csr_avmm_waitrequest
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_address            : std_logic_vector(9 downto 0);  -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_address -> max10_prog_avmm_0:avs_csr_address
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_read               : std_logic;                     -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_read -> max10_prog_avmm_0:avs_csr_read
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdatavalid      : std_logic;                     -- max10_prog_avmm_0:avs_csr_readdatavalid -> mm_interconnect_0:max10_prog_avmm_0_csr_avmm_readdatavalid
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_write              : std_logic;                     -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_write -> max10_prog_avmm_0:avs_csr_write
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_writedata          : std_logic_vector(31 downto 0); -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_writedata -> max10_prog_avmm_0:avs_csr_writedata
+	signal mm_interconnect_0_max10_prog_avmm_0_csr_avmm_burstcount         : std_logic_vector(0 downto 0);  -- mm_interconnect_0:max10_prog_avmm_0_csr_avmm_burstcount -> max10_prog_avmm_0:avs_csr_burstcount
+	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_readdata          : std_logic_vector(31 downto 0); -- firefly_xcvr_ctrl_0:avs_firefly_readdata -> mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_readdata
+	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_waitrequest       : std_logic;                     -- firefly_xcvr_ctrl_0:avs_firefly_waitrequest -> mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_waitrequest
+	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_address           : std_logic_vector(4 downto 0);  -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_address -> firefly_xcvr_ctrl_0:avs_firefly_address
+	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_read              : std_logic;                     -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_read -> firefly_xcvr_ctrl_0:avs_firefly_read
+	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_write             : std_logic;                     -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_write -> firefly_xcvr_ctrl_0:avs_firefly_write
+	signal mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_writedata         : std_logic_vector(31 downto 0); -- mm_interconnect_0:firefly_xcvr_ctrl_0_firefly_writedata -> firefly_xcvr_ctrl_0:avs_firefly_writedata
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_readdata             : std_logic_vector(31 downto 0); -- legacy_firefly_bridge:s0_readdata -> mm_interconnect_0:legacy_firefly_bridge_s0_readdata
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_waitrequest          : std_logic;                     -- legacy_firefly_bridge:s0_waitrequest -> mm_interconnect_0:legacy_firefly_bridge_s0_waitrequest
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_debugaccess          : std_logic;                     -- mm_interconnect_0:legacy_firefly_bridge_s0_debugaccess -> legacy_firefly_bridge:s0_debugaccess
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_address              : std_logic_vector(7 downto 0);  -- mm_interconnect_0:legacy_firefly_bridge_s0_address -> legacy_firefly_bridge:s0_address
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_read                 : std_logic;                     -- mm_interconnect_0:legacy_firefly_bridge_s0_read -> legacy_firefly_bridge:s0_read
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_byteenable           : std_logic_vector(3 downto 0);  -- mm_interconnect_0:legacy_firefly_bridge_s0_byteenable -> legacy_firefly_bridge:s0_byteenable
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_readdatavalid        : std_logic;                     -- legacy_firefly_bridge:s0_readdatavalid -> mm_interconnect_0:legacy_firefly_bridge_s0_readdatavalid
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_response             : std_logic_vector(1 downto 0);  -- legacy_firefly_bridge:s0_response -> mm_interconnect_0:legacy_firefly_bridge_s0_response
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_write                : std_logic;                     -- mm_interconnect_0:legacy_firefly_bridge_s0_write -> legacy_firefly_bridge:s0_write
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_writedata            : std_logic_vector(31 downto 0); -- mm_interconnect_0:legacy_firefly_bridge_s0_writedata -> legacy_firefly_bridge:s0_writedata
+	signal mm_interconnect_0_legacy_firefly_bridge_s0_burstcount           : std_logic_vector(0 downto 0);  -- mm_interconnect_0:legacy_firefly_bridge_s0_burstcount -> legacy_firefly_bridge:s0_burstcount
+	signal mm_interconnect_0_upload_mm_bridge_s0_readdata                  : std_logic_vector(31 downto 0); -- upload_mm_bridge:s0_readdata -> mm_interconnect_0:upload_mm_bridge_s0_readdata
+	signal mm_interconnect_0_upload_mm_bridge_s0_waitrequest               : std_logic;                     -- upload_mm_bridge:s0_waitrequest -> mm_interconnect_0:upload_mm_bridge_s0_waitrequest
+	signal mm_interconnect_0_upload_mm_bridge_s0_debugaccess               : std_logic;                     -- mm_interconnect_0:upload_mm_bridge_s0_debugaccess -> upload_mm_bridge:s0_debugaccess
+	signal mm_interconnect_0_upload_mm_bridge_s0_address                   : std_logic_vector(4 downto 0);  -- mm_interconnect_0:upload_mm_bridge_s0_address -> upload_mm_bridge:s0_address
+	signal mm_interconnect_0_upload_mm_bridge_s0_read                      : std_logic;                     -- mm_interconnect_0:upload_mm_bridge_s0_read -> upload_mm_bridge:s0_read
+	signal mm_interconnect_0_upload_mm_bridge_s0_byteenable                : std_logic_vector(3 downto 0);  -- mm_interconnect_0:upload_mm_bridge_s0_byteenable -> upload_mm_bridge:s0_byteenable
+	signal mm_interconnect_0_upload_mm_bridge_s0_readdatavalid             : std_logic;                     -- upload_mm_bridge:s0_readdatavalid -> mm_interconnect_0:upload_mm_bridge_s0_readdatavalid
+	signal mm_interconnect_0_upload_mm_bridge_s0_response                  : std_logic_vector(1 downto 0);  -- upload_mm_bridge:s0_response -> mm_interconnect_0:upload_mm_bridge_s0_response
+	signal mm_interconnect_0_upload_mm_bridge_s0_write                     : std_logic;                     -- mm_interconnect_0:upload_mm_bridge_s0_write -> upload_mm_bridge:s0_write
+	signal mm_interconnect_0_upload_mm_bridge_s0_writedata                 : std_logic_vector(31 downto 0); -- mm_interconnect_0:upload_mm_bridge_s0_writedata -> upload_mm_bridge:s0_writedata
+	signal mm_interconnect_0_upload_mm_bridge_s0_burstcount                : std_logic_vector(0 downto 0);  -- mm_interconnect_0:upload_mm_bridge_s0_burstcount -> upload_mm_bridge:s0_burstcount
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_readdata    : std_logic_vector(31 downto 0); -- mutrig_cfg_ctrl_0:avs_scanresult_readdata -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_readdata
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest : std_logic;                     -- mutrig_cfg_ctrl_0:avs_scanresult_waitrequest -> mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_address     : std_logic_vector(13 downto 0); -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_address -> mutrig_cfg_ctrl_0:avs_scanresult_address
+	signal mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_read        : std_logic;                     -- mm_interconnect_0:mutrig_cfg_ctrl_0_avmm_scanresult_read -> mutrig_cfg_ctrl_0:avs_scanresult_read
+	signal mm_interconnect_0_sc_hub_csr_readdata                           : std_logic_vector(31 downto 0); -- sc_hub:avs_csr_readdata -> mm_interconnect_0:sc_hub_csr_readdata
+	signal mm_interconnect_0_sc_hub_csr_waitrequest                        : std_logic;                     -- sc_hub:avs_csr_waitrequest -> mm_interconnect_0:sc_hub_csr_waitrequest
+	signal mm_interconnect_0_sc_hub_csr_address                            : std_logic_vector(4 downto 0);  -- mm_interconnect_0:sc_hub_csr_address -> sc_hub:avs_csr_address
+	signal mm_interconnect_0_sc_hub_csr_read                               : std_logic;                     -- mm_interconnect_0:sc_hub_csr_read -> sc_hub:avs_csr_read
+	signal mm_interconnect_0_sc_hub_csr_readdatavalid                      : std_logic;                     -- sc_hub:avs_csr_readdatavalid -> mm_interconnect_0:sc_hub_csr_readdatavalid
+	signal mm_interconnect_0_sc_hub_csr_write                              : std_logic;                     -- mm_interconnect_0:sc_hub_csr_write -> sc_hub:avs_csr_write
+	signal mm_interconnect_0_sc_hub_csr_writedata                          : std_logic_vector(31 downto 0); -- mm_interconnect_0:sc_hub_csr_writedata -> sc_hub:avs_csr_writedata
+	signal mm_interconnect_0_sc_hub_csr_burstcount                         : std_logic_vector(0 downto 0);  -- mm_interconnect_0:sc_hub_csr_burstcount -> sc_hub:avs_csr_burstcount
+	signal sc_hub_hub_readdata                                             : std_logic_vector(31 downto 0); -- mm_interconnect_2:sc_hub_hub_readdata -> sc_hub:avm_hub_readdata
+	signal sc_hub_hub_waitrequest                                          : std_logic;                     -- mm_interconnect_2:sc_hub_hub_waitrequest -> sc_hub:avm_hub_waitrequest
+	signal sc_hub_hub_address                                              : std_logic_vector(17 downto 0); -- sc_hub:avm_hub_address -> mm_interconnect_2:sc_hub_hub_address
+	signal sc_hub_hub_read                                                 : std_logic;                     -- sc_hub:avm_hub_read -> mm_interconnect_2:sc_hub_hub_read
+	signal sc_hub_hub_readdatavalid                                        : std_logic;                     -- mm_interconnect_2:sc_hub_hub_readdatavalid -> sc_hub:avm_hub_readdatavalid
+	signal sc_hub_hub_response                                             : std_logic_vector(1 downto 0);  -- mm_interconnect_2:sc_hub_hub_response -> sc_hub:avm_hub_response
+	signal sc_hub_hub_write                                                : std_logic;                     -- sc_hub:avm_hub_write -> mm_interconnect_2:sc_hub_hub_write
+	signal sc_hub_hub_writedata                                            : std_logic_vector(31 downto 0); -- sc_hub:avm_hub_writedata -> mm_interconnect_2:sc_hub_hub_writedata
+	signal sc_hub_hub_writeresponsevalid                                   : std_logic;                     -- mm_interconnect_2:sc_hub_hub_writeresponsevalid -> sc_hub:avm_hub_writeresponsevalid
+	signal sc_hub_hub_burstcount                                           : std_logic_vector(8 downto 0);  -- sc_hub:avm_hub_burstcount -> mm_interconnect_2:sc_hub_hub_burstcount
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_readdata                   : std_logic_vector(31 downto 0); -- sc_hub_cmd_pipe:s0_readdata -> mm_interconnect_2:sc_hub_cmd_pipe_s0_readdata
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_waitrequest                : std_logic;                     -- sc_hub_cmd_pipe:s0_waitrequest -> mm_interconnect_2:sc_hub_cmd_pipe_s0_waitrequest
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_debugaccess                : std_logic;                     -- mm_interconnect_2:sc_hub_cmd_pipe_s0_debugaccess -> sc_hub_cmd_pipe:s0_debugaccess
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_address                    : std_logic_vector(15 downto 0); -- mm_interconnect_2:sc_hub_cmd_pipe_s0_address -> sc_hub_cmd_pipe:s0_address
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_read                       : std_logic;                     -- mm_interconnect_2:sc_hub_cmd_pipe_s0_read -> sc_hub_cmd_pipe:s0_read
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_byteenable                 : std_logic_vector(3 downto 0);  -- mm_interconnect_2:sc_hub_cmd_pipe_s0_byteenable -> sc_hub_cmd_pipe:s0_byteenable
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_readdatavalid              : std_logic;                     -- sc_hub_cmd_pipe:s0_readdatavalid -> mm_interconnect_2:sc_hub_cmd_pipe_s0_readdatavalid
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_response                   : std_logic_vector(1 downto 0);  -- sc_hub_cmd_pipe:s0_response -> mm_interconnect_2:sc_hub_cmd_pipe_s0_response
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_write                      : std_logic;                     -- mm_interconnect_2:sc_hub_cmd_pipe_s0_write -> sc_hub_cmd_pipe:s0_write
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_writedata                  : std_logic_vector(31 downto 0); -- mm_interconnect_2:sc_hub_cmd_pipe_s0_writedata -> sc_hub_cmd_pipe:s0_writedata
+	signal mm_interconnect_2_sc_hub_cmd_pipe_s0_burstcount                 : std_logic_vector(0 downto 0);  -- mm_interconnect_2:sc_hub_cmd_pipe_s0_burstcount -> sc_hub_cmd_pipe:s0_burstcount
+	signal irq_mapper_receiver0_irq                                        : std_logic;                     -- onewire_master_0:ins_complete_irq -> irq_mapper:receiver0_irq
+	signal onewire_master_controller_0_complete_irq                        : std_logic;                     -- irq_mapper:sender_irq -> onewire_master_controller_0:inr_complete_irq
+	signal rst_controller_reset_out_reset                                  : std_logic;                     -- rst_controller:reset_out -> [firefly_xcvr_ctrl_0:i_rst, irq_mapper:reset, max10_prog_avmm_0:rsi_csr_reset, mm_interconnect_0:mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset_reset, mm_interconnect_0:onewire_master_controller_0_reset_reset_bridge_in_reset_reset, mm_interconnect_2:sc_hub_hub_reset_reset_bridge_in_reset_reset, mutrig_cfg_ctrl_0:i_rst, rst_translator:in_reset, sc_hub:i_rst, scratch_pad_ram:reset]
+	signal rst_controller_reset_out_reset_req                              : std_logic;                     -- rst_controller:reset_req -> [rst_translator:reset_req_in, scratch_pad_ram:reset_req]
+	signal jtag_master_master_reset_reset                                  : std_logic;                     -- jtag_master:master_reset_reset -> [rst_controller:reset_in1, rst_controller_003:reset_in1, rst_controller_005:reset_in1]
+	signal rst_controller_001_reset_out_reset                              : std_logic;                     -- rst_controller_001:reset_out -> [legacy_firefly_bridge:reset, mm_bridge:reset, mm_interconnect_0:jtag_master_clk_reset_reset_bridge_in_reset_reset, mm_interconnect_0:sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset, mm_interconnect_2:sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset, sc_hub_cmd_pipe:reset, upload_mm_bridge:reset]
+	signal rst_controller_002_reset_out_reset                              : std_logic;                     -- rst_controller_002:reset_out -> max10_prog_avmm_0:rsi_link_reset
+	signal rst_controller_003_reset_out_reset                              : std_logic;                     -- rst_controller_003:reset_out -> [mm_interconnect_0:on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset_reset, mutrig_cfg_ctrl_0:i_rst_spi, on_die_temp_sense_ctrl:i_rst]
+	signal rst_controller_004_reset_out_reset                              : std_logic;                     -- rst_controller_004:reset_out -> on_die_temp_sense:clr
+	signal rst_controller_005_reset_out_reset                              : std_logic;                     -- rst_controller_005:reset_out -> [onewire_master_0:rsi_reset_reset, onewire_master_controller_0:rsi_reset_reset]
+	signal clk156_in_rst_reset_n_ports_inv                                 : std_logic;                     -- clk156_in_rst_reset_n:inv -> [jtag_master:clk_reset_reset, rst_controller:reset_in0, rst_controller_001:reset_in0, rst_controller_002:reset_in0, rst_controller_003:reset_in0, rst_controller_004:reset_in0, rst_controller_005:reset_in0]
 
 begin
-
-	charge_injection_pulser_0 : component charge_inj_pulser
-		generic map (
-			DEF_PULSE_FREQ  => 100000,
-			DEF_PULSE_WIDTH => 20,
-			CLK_FREQUENCY   => 125000000,
-			DEBUG           => 1
-		)
-		port map (
-			i_clk               => clk125_in_clk_clk,                                                --   clock_interface.clk
-			avs_csr_writedata   => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_writedata,   --          csr_avmm.writedata
-			avs_csr_readdata    => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_readdata,    --                  .readdata
-			avs_csr_read        => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_read,        --                  .read
-			avs_csr_write       => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_write,       --                  .write
-			avs_csr_waitrequest => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_waitrequest, --                  .waitrequest
-			o_pulse             => pulse_out_conduit_pulse,                                          -- pulse_out_conduit.pulse
-			i_rst               => rst_controller_reset_out_reset                                    --   reset_interface.reset
-		);
 
 	pll_reset_inactive : component inactive_reset_source
 		port map (
@@ -1185,7 +1143,7 @@ begin
 			avs_firefly_writedata   => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_writedata,   --                .writedata
 			avs_firefly_waitrequest => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_waitrequest, --                .waitrequest
 			i_clk                   => clk125_in_clk_clk,                                         --    system_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                        --    system_reset.reset
+			i_rst                   => rst_controller_reset_out_reset,                            --    system_reset.reset
 			io_firefly_scl          => to_firefly_ucc8_scl,                                       -- to_firefly_ucc8.scl
 			i_firefly_present_n     => to_firefly_ucc8_present_n,                                 --                .present_n
 			io_firefly_sda          => to_firefly_ucc8_sda,                                       --                .sda
@@ -1225,7 +1183,7 @@ begin
 		)
 		port map (
 			clk              => clk125_in_clk_clk,                                        --   clk.clk
-			reset            => rst_controller_002_reset_out_reset,                       -- reset.reset
+			reset            => rst_controller_001_reset_out_reset,                       -- reset.reset
 			s0_waitrequest   => mm_interconnect_0_legacy_firefly_bridge_s0_waitrequest,   --    s0.waitrequest
 			s0_readdata      => mm_interconnect_0_legacy_firefly_bridge_s0_readdata,      --      .readdata
 			s0_readdatavalid => mm_interconnect_0_legacy_firefly_bridge_s0_readdatavalid, --      .readdatavalid
@@ -1273,9 +1231,9 @@ begin
 			avs_csr_waitrequest    => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_waitrequest,   --           .waitrequest
 			avs_csr_burstcount     => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_burstcount,    --           .burstcount
 			csi_csr_clk            => clk125_in_clk_clk,                                          --  csr_clock.clk
-			rsi_csr_reset          => rst_controller_001_reset_out_reset,                         --  csr_reset.reset
+			rsi_csr_reset          => rst_controller_reset_out_reset,                             --  csr_reset.reset
 			csi_link_clk           => max10_link_clock_clk,                                       -- link_clock.clk
-			rsi_link_reset         => rst_controller_003_reset_out_reset,                         -- link_reset.reset
+			rsi_link_reset         => rst_controller_002_reset_out_reset,                         -- link_reset.reset
 			coe_max10_spi_csn      => max10_link_csn,                                             -- max10_link.csn
 			coe_max10_spi_clk      => max10_link_clk,                                             --           .clk
 			coe_max10_spi_mosi_in  => max10_link_mosi_in,                                         --           .mosi_in
@@ -1311,7 +1269,7 @@ begin
 		)
 		port map (
 			clk              => clk125_in_clk_clk,                            --   clk.clk
-			reset            => rst_controller_002_reset_out_reset,           -- reset.reset
+			reset            => rst_controller_001_reset_out_reset,           -- reset.reset
 			s0_waitrequest   => mm_interconnect_0_mm_bridge_s0_waitrequest,   --    s0.waitrequest
 			s0_readdata      => mm_interconnect_0_mm_bridge_s0_readdata,      --      .readdata
 			s0_readdatavalid => mm_interconnect_0_mm_bridge_s0_readdatavalid, --      .readdatavalid
@@ -1347,7 +1305,7 @@ begin
 		)
 		port map (
 			clk              => clk125_in_clk_clk,                                   --   clk.clk
-			reset            => rst_controller_002_reset_out_reset,                  -- reset.reset
+			reset            => rst_controller_001_reset_out_reset,                  -- reset.reset
 			s0_waitrequest   => mm_interconnect_0_upload_mm_bridge_s0_waitrequest,   --    s0.waitrequest
 			s0_readdata      => mm_interconnect_0_upload_mm_bridge_s0_readdata,      --      .readdata
 			s0_readdatavalid => mm_interconnect_0_upload_mm_bridge_s0_readdatavalid, --      .readdatavalid
@@ -1383,7 +1341,7 @@ begin
 		)
 		port map (
 			clk              => clk125_in_clk_clk,                                  --   clk.clk
-			reset            => rst_controller_002_reset_out_reset,                 -- reset.reset
+			reset            => rst_controller_001_reset_out_reset,                 -- reset.reset
 			s0_waitrequest   => mm_interconnect_2_sc_hub_cmd_pipe_s0_waitrequest,   --    s0.waitrequest
 			s0_readdata      => mm_interconnect_2_sc_hub_cmd_pipe_s0_readdata,      --      .readdata
 			s0_readdatavalid => mm_interconnect_2_sc_hub_cmd_pipe_s0_readdatavalid, --      .readdatavalid
@@ -1421,7 +1379,7 @@ begin
 		)
 		port map (
 			i_clk                      => clk125_in_clk_clk,                                               -- controller_clock.clk
-			i_rst                      => rst_controller_001_reset_out_reset,                              -- controller_reset.reset
+			i_rst                      => rst_controller_reset_out_reset,                                  -- controller_reset.reset
 			spi_miso                   => mutrig_cfg_ctrl_0_spi_export2top_miso,                           --   spi_export2top.miso
 			spi_mosi                   => mutrig_cfg_ctrl_0_spi_export2top_mosi,                           --                 .mosi
 			spi_sclk                   => mutrig_cfg_ctrl_0_spi_export2top_sclk,                           --                 .sclk
@@ -1454,7 +1412,7 @@ begin
 			avs_scanresult_readdata    => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_readdata,    --                 .readdata
 			avs_scanresult_waitrequest => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest, --                 .waitrequest
 			o_sclr_req                 => sclr_counter_req_reset,                                          -- sclr_counter_req.reset
-			i_rst_spi                  => rst_controller_004_reset_out_reset                               --        spi_reset.reset
+			i_rst_spi                  => rst_controller_003_reset_out_reset                               --        spi_reset.reset
 		);
 
 	on_die_temp_sense : component feb_system_v3_pipe_control_path_subsystem_on_die_temp_sense
@@ -1463,7 +1421,7 @@ begin
 			tsdcalo    => on_die_temp_sense_tsdcalo_tsdcalo,       --    tsdcalo.tsdcalo
 			tsdcaldone => on_die_temp_sense_tsdcaldone_tsdcaldone, -- tsdcaldone.tsdcaldone
 			ce         => on_die_temp_sense_ctrl_ce_ce,            --         ce.ce
-			clr        => rst_controller_005_reset_out_reset       --        clr.reset
+			clr        => rst_controller_004_reset_out_reset       --        clr.reset
 		);
 
 	on_die_temp_sense_ctrl : component altera_temp_sense_ctrl
@@ -1478,7 +1436,7 @@ begin
 			avs_csr_writedata   => mm_interconnect_0_on_die_temp_sense_ctrl_csr_writedata,   --             .writedata
 			avs_csr_waitrequest => mm_interconnect_0_on_die_temp_sense_ctrl_csr_waitrequest, --             .waitrequest
 			i_clk               => pll_156t40_outclk0_clk,                                   -- system_clock.clk
-			i_rst               => rst_controller_004_reset_out_reset,                       -- system_reset.reset
+			i_rst               => rst_controller_003_reset_out_reset,                       -- system_reset.reset
 			ce                  => on_die_temp_sense_ctrl_ce_ce,                             --           ce.ce
 			clr                 => open,                                                     --          clr.reset
 			tsdcaldone          => on_die_temp_sense_tsdcaldone_tsdcaldone,                  --   tsdcaldone.tsdcaldone
@@ -1530,7 +1488,7 @@ begin
 			coe_sense_dq_out     => sense_dq_out,                                 --         .out
 			coe_sense_dq_oe      => sense_dq_oe,                                  --         .oe
 			csi_clock_clk        => clk125_in_clk_clk,                            --    clock.clk
-			rsi_reset_reset      => rst_controller_006_reset_out_reset            --    reset.reset
+			rsi_reset_reset      => rst_controller_005_reset_out_reset            --    reset.reset
 		);
 
 	onewire_master_controller_0 : component onewire_master_controller
@@ -1541,7 +1499,15 @@ begin
 			AVST_CHANNEL_WIDTH => 3,
 			N_DQ_LINES         => 6,
 			SENSOR_TYPE        => "DS18B20",
-			DEBUG_LV           => 0
+			DEBUG_LV           => 0,
+			IP_UID             => 1331121475,
+			VERSION_MAJOR      => 26,
+			VERSION_MINOR      => 2,
+			VERSION_PATCH      => 1,
+			BUILD              => 428,
+			VERSION_DATE       => 20260428,
+			VERSION_GIT        => 0,
+			INSTANCE_ID        => 0
 		)
 		port map (
 			avm_ctrl_read        => onewire_master_controller_0_ctrl_read,                         --     ctrl.read
@@ -1565,7 +1531,7 @@ begin
 			aso_tx_ready         => onewire_master_controller_0_tx_ready,                          --         .ready
 			aso_tx_channel       => onewire_master_controller_0_tx_channel,                        --         .channel
 			inr_complete_irq     => onewire_master_controller_0_complete_irq,                      -- complete.irq
-			rsi_reset_reset      => rst_controller_006_reset_out_reset,                            --    reset.reset
+			rsi_reset_reset      => rst_controller_005_reset_out_reset,                            --    reset.reset
 			csi_clock_clk        => clk125_in_clk_clk                                              --    clock.clk
 		);
 
@@ -1594,7 +1560,7 @@ begin
 		)
 		port map (
 			i_clk                      => clk125_in_clk_clk,                          -- hub_clock.clk
-			i_rst                      => rst_controller_001_reset_out_reset,         -- hub_reset.reset
+			i_rst                      => rst_controller_reset_out_reset,             -- hub_reset.reset
 			i_download_data            => sc_hub_hub_sc_packet_downlink_data,         --  download.data
 			i_download_datak           => sc_hub_hub_sc_packet_downlink_datak,        --          .datak
 			o_download_ready           => sc_hub_hub_sc_packet_downlink_ready,        --          .ready
@@ -1633,150 +1599,144 @@ begin
 			readdata   => mm_interconnect_0_scratch_pad_ram_s1_readdata,   --       .readdata
 			writedata  => mm_interconnect_0_scratch_pad_ram_s1_writedata,  --       .writedata
 			byteenable => mm_interconnect_0_scratch_pad_ram_s1_byteenable, --       .byteenable
-			reset      => rst_controller_001_reset_out_reset,              -- reset1.reset
-			reset_req  => rst_controller_001_reset_out_reset_req,          --       .reset_req
+			reset      => rst_controller_reset_out_reset,                  -- reset1.reset
+			reset_req  => rst_controller_reset_out_reset_req,              --       .reset_req
 			freeze     => '0'                                              -- (terminated)
 		);
 
 	mm_interconnect_0 : component feb_system_v3_pipe_control_path_subsystem_mm_interconnect_0
 		port map (
-			clk125_out_clk_clk                                                    => clk125_in_clk_clk,                                                --                                                  clk125_out_clk.clk
-			pll_156t40_outclk0_clk                                                => pll_156t40_outclk0_clk,                                           --                                              pll_156t40_outclk0.clk
-			charge_injection_pulser_0_reset_interface_reset_bridge_in_reset_reset => rst_controller_reset_out_reset,                                   -- charge_injection_pulser_0_reset_interface_reset_bridge_in_reset.reset
-			jtag_master_clk_reset_reset_bridge_in_reset_reset                     => rst_controller_002_reset_out_reset,                               --                     jtag_master_clk_reset_reset_bridge_in_reset.reset
-			mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset_reset        => rst_controller_001_reset_out_reset,                               --        mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset.reset
-			on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset_reset       => rst_controller_004_reset_out_reset,                               --       on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset.reset
-			onewire_master_controller_0_reset_reset_bridge_in_reset_reset         => rst_controller_001_reset_out_reset,                               --         onewire_master_controller_0_reset_reset_bridge_in_reset.reset
-			sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset                     => rst_controller_002_reset_out_reset,                               --                     sc_hub_cmd_pipe_reset_reset_bridge_in_reset.reset
-			jtag_master_master_address                                            => jtag_master_master_address,                                       --                                              jtag_master_master.address
-			jtag_master_master_waitrequest                                        => jtag_master_master_waitrequest,                                   --                                                                .waitrequest
-			jtag_master_master_byteenable                                         => jtag_master_master_byteenable,                                    --                                                                .byteenable
-			jtag_master_master_read                                               => jtag_master_master_read,                                          --                                                                .read
-			jtag_master_master_readdata                                           => jtag_master_master_readdata,                                      --                                                                .readdata
-			jtag_master_master_readdatavalid                                      => jtag_master_master_readdatavalid,                                 --                                                                .readdatavalid
-			jtag_master_master_write                                              => jtag_master_master_write,                                         --                                                                .write
-			jtag_master_master_writedata                                          => jtag_master_master_writedata,                                     --                                                                .writedata
-			mutrig_cfg_ctrl_0_avmm_cnt_address                                    => mutrig_cfg_ctrl_0_avmm_cnt_address,                               --                                      mutrig_cfg_ctrl_0_avmm_cnt.address
-			mutrig_cfg_ctrl_0_avmm_cnt_waitrequest                                => mutrig_cfg_ctrl_0_avmm_cnt_waitrequest,                           --                                                                .waitrequest
-			mutrig_cfg_ctrl_0_avmm_cnt_burstcount                                 => mutrig_cfg_ctrl_0_avmm_cnt_burstcount,                            --                                                                .burstcount
-			mutrig_cfg_ctrl_0_avmm_cnt_read                                       => mutrig_cfg_ctrl_0_avmm_cnt_read,                                  --                                                                .read
-			mutrig_cfg_ctrl_0_avmm_cnt_readdata                                   => mutrig_cfg_ctrl_0_avmm_cnt_readdata,                              --                                                                .readdata
-			mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid                              => mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid,                         --                                                                .readdatavalid
-			mutrig_cfg_ctrl_0_avmm_cnt_response                                   => mutrig_cfg_ctrl_0_avmm_cnt_response,                              --                                                                .response
-			mutrig_cfg_ctrl_0_avmm_schpad_address                                 => mutrig_cfg_ctrl_0_avmm_schpad_address,                            --                                   mutrig_cfg_ctrl_0_avmm_schpad.address
-			mutrig_cfg_ctrl_0_avmm_schpad_waitrequest                             => mutrig_cfg_ctrl_0_avmm_schpad_waitrequest,                        --                                                                .waitrequest
-			mutrig_cfg_ctrl_0_avmm_schpad_burstcount                              => mutrig_cfg_ctrl_0_avmm_schpad_burstcount,                         --                                                                .burstcount
-			mutrig_cfg_ctrl_0_avmm_schpad_read                                    => mutrig_cfg_ctrl_0_avmm_schpad_read,                               --                                                                .read
-			mutrig_cfg_ctrl_0_avmm_schpad_readdata                                => mutrig_cfg_ctrl_0_avmm_schpad_readdata,                           --                                                                .readdata
-			mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid                           => mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid,                      --                                                                .readdatavalid
-			mutrig_cfg_ctrl_0_avmm_schpad_response                                => mutrig_cfg_ctrl_0_avmm_schpad_response,                           --                                                                .response
-			sc_hub_cmd_pipe_m0_address                                            => sc_hub_cmd_pipe_m0_address,                                       --                                              sc_hub_cmd_pipe_m0.address
-			sc_hub_cmd_pipe_m0_waitrequest                                        => sc_hub_cmd_pipe_m0_waitrequest,                                   --                                                                .waitrequest
-			sc_hub_cmd_pipe_m0_burstcount                                         => sc_hub_cmd_pipe_m0_burstcount,                                    --                                                                .burstcount
-			sc_hub_cmd_pipe_m0_byteenable                                         => sc_hub_cmd_pipe_m0_byteenable,                                    --                                                                .byteenable
-			sc_hub_cmd_pipe_m0_read                                               => sc_hub_cmd_pipe_m0_read,                                          --                                                                .read
-			sc_hub_cmd_pipe_m0_readdata                                           => sc_hub_cmd_pipe_m0_readdata,                                      --                                                                .readdata
-			sc_hub_cmd_pipe_m0_readdatavalid                                      => sc_hub_cmd_pipe_m0_readdatavalid,                                 --                                                                .readdatavalid
-			sc_hub_cmd_pipe_m0_write                                              => sc_hub_cmd_pipe_m0_write,                                         --                                                                .write
-			sc_hub_cmd_pipe_m0_writedata                                          => sc_hub_cmd_pipe_m0_writedata,                                     --                                                                .writedata
-			sc_hub_cmd_pipe_m0_debugaccess                                        => sc_hub_cmd_pipe_m0_debugaccess,                                   --                                                                .debugaccess
-			sc_hub_cmd_pipe_m0_response                                           => sc_hub_cmd_pipe_m0_response,                                      --                                                                .response
-			charge_injection_pulser_0_csr_avmm_write                              => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_write,       --                              charge_injection_pulser_0_csr_avmm.write
-			charge_injection_pulser_0_csr_avmm_read                               => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_read,        --                                                                .read
-			charge_injection_pulser_0_csr_avmm_readdata                           => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_readdata,    --                                                                .readdata
-			charge_injection_pulser_0_csr_avmm_writedata                          => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_writedata,   --                                                                .writedata
-			charge_injection_pulser_0_csr_avmm_waitrequest                        => mm_interconnect_0_charge_injection_pulser_0_csr_avmm_waitrequest, --                                                                .waitrequest
-			firefly_xcvr_ctrl_0_firefly_address                                   => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_address,            --                                     firefly_xcvr_ctrl_0_firefly.address
-			firefly_xcvr_ctrl_0_firefly_write                                     => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_write,              --                                                                .write
-			firefly_xcvr_ctrl_0_firefly_read                                      => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_read,               --                                                                .read
-			firefly_xcvr_ctrl_0_firefly_readdata                                  => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_readdata,           --                                                                .readdata
-			firefly_xcvr_ctrl_0_firefly_writedata                                 => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_writedata,          --                                                                .writedata
-			firefly_xcvr_ctrl_0_firefly_waitrequest                               => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_waitrequest,        --                                                                .waitrequest
-			legacy_firefly_bridge_s0_address                                      => mm_interconnect_0_legacy_firefly_bridge_s0_address,               --                                        legacy_firefly_bridge_s0.address
-			legacy_firefly_bridge_s0_write                                        => mm_interconnect_0_legacy_firefly_bridge_s0_write,                 --                                                                .write
-			legacy_firefly_bridge_s0_read                                         => mm_interconnect_0_legacy_firefly_bridge_s0_read,                  --                                                                .read
-			legacy_firefly_bridge_s0_readdata                                     => mm_interconnect_0_legacy_firefly_bridge_s0_readdata,              --                                                                .readdata
-			legacy_firefly_bridge_s0_writedata                                    => mm_interconnect_0_legacy_firefly_bridge_s0_writedata,             --                                                                .writedata
-			legacy_firefly_bridge_s0_burstcount                                   => mm_interconnect_0_legacy_firefly_bridge_s0_burstcount,            --                                                                .burstcount
-			legacy_firefly_bridge_s0_byteenable                                   => mm_interconnect_0_legacy_firefly_bridge_s0_byteenable,            --                                                                .byteenable
-			legacy_firefly_bridge_s0_readdatavalid                                => mm_interconnect_0_legacy_firefly_bridge_s0_readdatavalid,         --                                                                .readdatavalid
-			legacy_firefly_bridge_s0_waitrequest                                  => mm_interconnect_0_legacy_firefly_bridge_s0_waitrequest,           --                                                                .waitrequest
-			legacy_firefly_bridge_s0_debugaccess                                  => mm_interconnect_0_legacy_firefly_bridge_s0_debugaccess,           --                                                                .debugaccess
-			legacy_firefly_bridge_s0_response                                     => mm_interconnect_0_legacy_firefly_bridge_s0_response,              --                                                                .response
-			max10_prog_avmm_0_csr_avmm_address                                    => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_address,             --                                      max10_prog_avmm_0_csr_avmm.address
-			max10_prog_avmm_0_csr_avmm_write                                      => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_write,               --                                                                .write
-			max10_prog_avmm_0_csr_avmm_read                                       => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_read,                --                                                                .read
-			max10_prog_avmm_0_csr_avmm_readdata                                   => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdata,            --                                                                .readdata
-			max10_prog_avmm_0_csr_avmm_writedata                                  => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_writedata,           --                                                                .writedata
-			max10_prog_avmm_0_csr_avmm_burstcount                                 => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_burstcount,          --                                                                .burstcount
-			max10_prog_avmm_0_csr_avmm_readdatavalid                              => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdatavalid,       --                                                                .readdatavalid
-			max10_prog_avmm_0_csr_avmm_waitrequest                                => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_waitrequest,         --                                                                .waitrequest
-			mm_bridge_s0_address                                                  => mm_interconnect_0_mm_bridge_s0_address,                           --                                                    mm_bridge_s0.address
-			mm_bridge_s0_write                                                    => mm_interconnect_0_mm_bridge_s0_write,                             --                                                                .write
-			mm_bridge_s0_read                                                     => mm_interconnect_0_mm_bridge_s0_read,                              --                                                                .read
-			mm_bridge_s0_readdata                                                 => mm_interconnect_0_mm_bridge_s0_readdata,                          --                                                                .readdata
-			mm_bridge_s0_writedata                                                => mm_interconnect_0_mm_bridge_s0_writedata,                         --                                                                .writedata
-			mm_bridge_s0_burstcount                                               => mm_interconnect_0_mm_bridge_s0_burstcount,                        --                                                                .burstcount
-			mm_bridge_s0_byteenable                                               => mm_interconnect_0_mm_bridge_s0_byteenable,                        --                                                                .byteenable
-			mm_bridge_s0_readdatavalid                                            => mm_interconnect_0_mm_bridge_s0_readdatavalid,                     --                                                                .readdatavalid
-			mm_bridge_s0_waitrequest                                              => mm_interconnect_0_mm_bridge_s0_waitrequest,                       --                                                                .waitrequest
-			mm_bridge_s0_debugaccess                                              => mm_interconnect_0_mm_bridge_s0_debugaccess,                       --                                                                .debugaccess
-			mm_bridge_s0_response                                                 => mm_interconnect_0_mm_bridge_s0_response,                          --                                                                .response
-			mutrig_cfg_ctrl_0_avmm_csr_address                                    => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_address,             --                                      mutrig_cfg_ctrl_0_avmm_csr.address
-			mutrig_cfg_ctrl_0_avmm_csr_write                                      => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_write,               --                                                                .write
-			mutrig_cfg_ctrl_0_avmm_csr_read                                       => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_read,                --                                                                .read
-			mutrig_cfg_ctrl_0_avmm_csr_readdata                                   => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_readdata,            --                                                                .readdata
-			mutrig_cfg_ctrl_0_avmm_csr_writedata                                  => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_writedata,           --                                                                .writedata
-			mutrig_cfg_ctrl_0_avmm_csr_waitrequest                                => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_waitrequest,         --                                                                .waitrequest
-			mutrig_cfg_ctrl_0_avmm_csr_response                                   => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_response,            --                                                                .response
-			mutrig_cfg_ctrl_0_avmm_scanresult_address                             => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_address,      --                               mutrig_cfg_ctrl_0_avmm_scanresult.address
-			mutrig_cfg_ctrl_0_avmm_scanresult_read                                => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_read,         --                                                                .read
-			mutrig_cfg_ctrl_0_avmm_scanresult_readdata                            => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_readdata,     --                                                                .readdata
-			mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest                         => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest,  --                                                                .waitrequest
-			on_die_temp_sense_ctrl_csr_write                                      => mm_interconnect_0_on_die_temp_sense_ctrl_csr_write,               --                                      on_die_temp_sense_ctrl_csr.write
-			on_die_temp_sense_ctrl_csr_read                                       => mm_interconnect_0_on_die_temp_sense_ctrl_csr_read,                --                                                                .read
-			on_die_temp_sense_ctrl_csr_readdata                                   => mm_interconnect_0_on_die_temp_sense_ctrl_csr_readdata,            --                                                                .readdata
-			on_die_temp_sense_ctrl_csr_writedata                                  => mm_interconnect_0_on_die_temp_sense_ctrl_csr_writedata,           --                                                                .writedata
-			on_die_temp_sense_ctrl_csr_waitrequest                                => mm_interconnect_0_on_die_temp_sense_ctrl_csr_waitrequest,         --                                                                .waitrequest
-			onewire_master_controller_0_csr_address                               => mm_interconnect_0_onewire_master_controller_0_csr_address,        --                                 onewire_master_controller_0_csr.address
-			onewire_master_controller_0_csr_write                                 => mm_interconnect_0_onewire_master_controller_0_csr_write,          --                                                                .write
-			onewire_master_controller_0_csr_read                                  => mm_interconnect_0_onewire_master_controller_0_csr_read,           --                                                                .read
-			onewire_master_controller_0_csr_readdata                              => mm_interconnect_0_onewire_master_controller_0_csr_readdata,       --                                                                .readdata
-			onewire_master_controller_0_csr_writedata                             => mm_interconnect_0_onewire_master_controller_0_csr_writedata,      --                                                                .writedata
-			onewire_master_controller_0_csr_waitrequest                           => mm_interconnect_0_onewire_master_controller_0_csr_waitrequest,    --                                                                .waitrequest
-			sc_hub_csr_address                                                    => mm_interconnect_0_sc_hub_csr_address,                             --                                                      sc_hub_csr.address
-			sc_hub_csr_write                                                      => mm_interconnect_0_sc_hub_csr_write,                               --                                                                .write
-			sc_hub_csr_read                                                       => mm_interconnect_0_sc_hub_csr_read,                                --                                                                .read
-			sc_hub_csr_readdata                                                   => mm_interconnect_0_sc_hub_csr_readdata,                            --                                                                .readdata
-			sc_hub_csr_writedata                                                  => mm_interconnect_0_sc_hub_csr_writedata,                           --                                                                .writedata
-			sc_hub_csr_burstcount                                                 => mm_interconnect_0_sc_hub_csr_burstcount,                          --                                                                .burstcount
-			sc_hub_csr_readdatavalid                                              => mm_interconnect_0_sc_hub_csr_readdatavalid,                       --                                                                .readdatavalid
-			sc_hub_csr_waitrequest                                                => mm_interconnect_0_sc_hub_csr_waitrequest,                         --                                                                .waitrequest
-			scratch_pad_ram_s1_address                                            => mm_interconnect_0_scratch_pad_ram_s1_address,                     --                                              scratch_pad_ram_s1.address
-			scratch_pad_ram_s1_write                                              => mm_interconnect_0_scratch_pad_ram_s1_write,                       --                                                                .write
-			scratch_pad_ram_s1_readdata                                           => mm_interconnect_0_scratch_pad_ram_s1_readdata,                    --                                                                .readdata
-			scratch_pad_ram_s1_writedata                                          => mm_interconnect_0_scratch_pad_ram_s1_writedata,                   --                                                                .writedata
-			scratch_pad_ram_s1_byteenable                                         => mm_interconnect_0_scratch_pad_ram_s1_byteenable,                  --                                                                .byteenable
-			scratch_pad_ram_s1_chipselect                                         => mm_interconnect_0_scratch_pad_ram_s1_chipselect,                  --                                                                .chipselect
-			scratch_pad_ram_s1_clken                                              => mm_interconnect_0_scratch_pad_ram_s1_clken,                       --                                                                .clken
-			upload_mm_bridge_s0_address                                           => mm_interconnect_0_upload_mm_bridge_s0_address,                    --                                             upload_mm_bridge_s0.address
-			upload_mm_bridge_s0_write                                             => mm_interconnect_0_upload_mm_bridge_s0_write,                      --                                                                .write
-			upload_mm_bridge_s0_read                                              => mm_interconnect_0_upload_mm_bridge_s0_read,                       --                                                                .read
-			upload_mm_bridge_s0_readdata                                          => mm_interconnect_0_upload_mm_bridge_s0_readdata,                   --                                                                .readdata
-			upload_mm_bridge_s0_writedata                                         => mm_interconnect_0_upload_mm_bridge_s0_writedata,                  --                                                                .writedata
-			upload_mm_bridge_s0_burstcount                                        => mm_interconnect_0_upload_mm_bridge_s0_burstcount,                 --                                                                .burstcount
-			upload_mm_bridge_s0_byteenable                                        => mm_interconnect_0_upload_mm_bridge_s0_byteenable,                 --                                                                .byteenable
-			upload_mm_bridge_s0_readdatavalid                                     => mm_interconnect_0_upload_mm_bridge_s0_readdatavalid,              --                                                                .readdatavalid
-			upload_mm_bridge_s0_waitrequest                                       => mm_interconnect_0_upload_mm_bridge_s0_waitrequest,                --                                                                .waitrequest
-			upload_mm_bridge_s0_debugaccess                                       => mm_interconnect_0_upload_mm_bridge_s0_debugaccess,                --                                                                .debugaccess
-			upload_mm_bridge_s0_response                                          => mm_interconnect_0_upload_mm_bridge_s0_response                    --                                                                .response
+			clk125_out_clk_clk                                              => clk125_in_clk_clk,                                               --                                            clk125_out_clk.clk
+			pll_156t40_outclk0_clk                                          => pll_156t40_outclk0_clk,                                          --                                        pll_156t40_outclk0.clk
+			jtag_master_clk_reset_reset_bridge_in_reset_reset               => rst_controller_001_reset_out_reset,                              --               jtag_master_clk_reset_reset_bridge_in_reset.reset
+			mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset_reset  => rst_controller_reset_out_reset,                                  --  mutrig_cfg_ctrl_0_controller_reset_reset_bridge_in_reset.reset
+			on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset_reset => rst_controller_003_reset_out_reset,                              -- on_die_temp_sense_ctrl_system_reset_reset_bridge_in_reset.reset
+			onewire_master_controller_0_reset_reset_bridge_in_reset_reset   => rst_controller_reset_out_reset,                                  --   onewire_master_controller_0_reset_reset_bridge_in_reset.reset
+			sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset               => rst_controller_001_reset_out_reset,                              --               sc_hub_cmd_pipe_reset_reset_bridge_in_reset.reset
+			jtag_master_master_address                                      => jtag_master_master_address,                                      --                                        jtag_master_master.address
+			jtag_master_master_waitrequest                                  => jtag_master_master_waitrequest,                                  --                                                          .waitrequest
+			jtag_master_master_byteenable                                   => jtag_master_master_byteenable,                                   --                                                          .byteenable
+			jtag_master_master_read                                         => jtag_master_master_read,                                         --                                                          .read
+			jtag_master_master_readdata                                     => jtag_master_master_readdata,                                     --                                                          .readdata
+			jtag_master_master_readdatavalid                                => jtag_master_master_readdatavalid,                                --                                                          .readdatavalid
+			jtag_master_master_write                                        => jtag_master_master_write,                                        --                                                          .write
+			jtag_master_master_writedata                                    => jtag_master_master_writedata,                                    --                                                          .writedata
+			mutrig_cfg_ctrl_0_avmm_cnt_address                              => mutrig_cfg_ctrl_0_avmm_cnt_address,                              --                                mutrig_cfg_ctrl_0_avmm_cnt.address
+			mutrig_cfg_ctrl_0_avmm_cnt_waitrequest                          => mutrig_cfg_ctrl_0_avmm_cnt_waitrequest,                          --                                                          .waitrequest
+			mutrig_cfg_ctrl_0_avmm_cnt_burstcount                           => mutrig_cfg_ctrl_0_avmm_cnt_burstcount,                           --                                                          .burstcount
+			mutrig_cfg_ctrl_0_avmm_cnt_read                                 => mutrig_cfg_ctrl_0_avmm_cnt_read,                                 --                                                          .read
+			mutrig_cfg_ctrl_0_avmm_cnt_readdata                             => mutrig_cfg_ctrl_0_avmm_cnt_readdata,                             --                                                          .readdata
+			mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid                        => mutrig_cfg_ctrl_0_avmm_cnt_readdatavalid,                        --                                                          .readdatavalid
+			mutrig_cfg_ctrl_0_avmm_cnt_response                             => mutrig_cfg_ctrl_0_avmm_cnt_response,                             --                                                          .response
+			mutrig_cfg_ctrl_0_avmm_schpad_address                           => mutrig_cfg_ctrl_0_avmm_schpad_address,                           --                             mutrig_cfg_ctrl_0_avmm_schpad.address
+			mutrig_cfg_ctrl_0_avmm_schpad_waitrequest                       => mutrig_cfg_ctrl_0_avmm_schpad_waitrequest,                       --                                                          .waitrequest
+			mutrig_cfg_ctrl_0_avmm_schpad_burstcount                        => mutrig_cfg_ctrl_0_avmm_schpad_burstcount,                        --                                                          .burstcount
+			mutrig_cfg_ctrl_0_avmm_schpad_read                              => mutrig_cfg_ctrl_0_avmm_schpad_read,                              --                                                          .read
+			mutrig_cfg_ctrl_0_avmm_schpad_readdata                          => mutrig_cfg_ctrl_0_avmm_schpad_readdata,                          --                                                          .readdata
+			mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid                     => mutrig_cfg_ctrl_0_avmm_schpad_readdatavalid,                     --                                                          .readdatavalid
+			mutrig_cfg_ctrl_0_avmm_schpad_response                          => mutrig_cfg_ctrl_0_avmm_schpad_response,                          --                                                          .response
+			sc_hub_cmd_pipe_m0_address                                      => sc_hub_cmd_pipe_m0_address,                                      --                                        sc_hub_cmd_pipe_m0.address
+			sc_hub_cmd_pipe_m0_waitrequest                                  => sc_hub_cmd_pipe_m0_waitrequest,                                  --                                                          .waitrequest
+			sc_hub_cmd_pipe_m0_burstcount                                   => sc_hub_cmd_pipe_m0_burstcount,                                   --                                                          .burstcount
+			sc_hub_cmd_pipe_m0_byteenable                                   => sc_hub_cmd_pipe_m0_byteenable,                                   --                                                          .byteenable
+			sc_hub_cmd_pipe_m0_read                                         => sc_hub_cmd_pipe_m0_read,                                         --                                                          .read
+			sc_hub_cmd_pipe_m0_readdata                                     => sc_hub_cmd_pipe_m0_readdata,                                     --                                                          .readdata
+			sc_hub_cmd_pipe_m0_readdatavalid                                => sc_hub_cmd_pipe_m0_readdatavalid,                                --                                                          .readdatavalid
+			sc_hub_cmd_pipe_m0_write                                        => sc_hub_cmd_pipe_m0_write,                                        --                                                          .write
+			sc_hub_cmd_pipe_m0_writedata                                    => sc_hub_cmd_pipe_m0_writedata,                                    --                                                          .writedata
+			sc_hub_cmd_pipe_m0_debugaccess                                  => sc_hub_cmd_pipe_m0_debugaccess,                                  --                                                          .debugaccess
+			sc_hub_cmd_pipe_m0_response                                     => sc_hub_cmd_pipe_m0_response,                                     --                                                          .response
+			firefly_xcvr_ctrl_0_firefly_address                             => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_address,           --                               firefly_xcvr_ctrl_0_firefly.address
+			firefly_xcvr_ctrl_0_firefly_write                               => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_write,             --                                                          .write
+			firefly_xcvr_ctrl_0_firefly_read                                => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_read,              --                                                          .read
+			firefly_xcvr_ctrl_0_firefly_readdata                            => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_readdata,          --                                                          .readdata
+			firefly_xcvr_ctrl_0_firefly_writedata                           => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_writedata,         --                                                          .writedata
+			firefly_xcvr_ctrl_0_firefly_waitrequest                         => mm_interconnect_0_firefly_xcvr_ctrl_0_firefly_waitrequest,       --                                                          .waitrequest
+			legacy_firefly_bridge_s0_address                                => mm_interconnect_0_legacy_firefly_bridge_s0_address,              --                                  legacy_firefly_bridge_s0.address
+			legacy_firefly_bridge_s0_write                                  => mm_interconnect_0_legacy_firefly_bridge_s0_write,                --                                                          .write
+			legacy_firefly_bridge_s0_read                                   => mm_interconnect_0_legacy_firefly_bridge_s0_read,                 --                                                          .read
+			legacy_firefly_bridge_s0_readdata                               => mm_interconnect_0_legacy_firefly_bridge_s0_readdata,             --                                                          .readdata
+			legacy_firefly_bridge_s0_writedata                              => mm_interconnect_0_legacy_firefly_bridge_s0_writedata,            --                                                          .writedata
+			legacy_firefly_bridge_s0_burstcount                             => mm_interconnect_0_legacy_firefly_bridge_s0_burstcount,           --                                                          .burstcount
+			legacy_firefly_bridge_s0_byteenable                             => mm_interconnect_0_legacy_firefly_bridge_s0_byteenable,           --                                                          .byteenable
+			legacy_firefly_bridge_s0_readdatavalid                          => mm_interconnect_0_legacy_firefly_bridge_s0_readdatavalid,        --                                                          .readdatavalid
+			legacy_firefly_bridge_s0_waitrequest                            => mm_interconnect_0_legacy_firefly_bridge_s0_waitrequest,          --                                                          .waitrequest
+			legacy_firefly_bridge_s0_debugaccess                            => mm_interconnect_0_legacy_firefly_bridge_s0_debugaccess,          --                                                          .debugaccess
+			legacy_firefly_bridge_s0_response                               => mm_interconnect_0_legacy_firefly_bridge_s0_response,             --                                                          .response
+			max10_prog_avmm_0_csr_avmm_address                              => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_address,            --                                max10_prog_avmm_0_csr_avmm.address
+			max10_prog_avmm_0_csr_avmm_write                                => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_write,              --                                                          .write
+			max10_prog_avmm_0_csr_avmm_read                                 => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_read,               --                                                          .read
+			max10_prog_avmm_0_csr_avmm_readdata                             => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdata,           --                                                          .readdata
+			max10_prog_avmm_0_csr_avmm_writedata                            => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_writedata,          --                                                          .writedata
+			max10_prog_avmm_0_csr_avmm_burstcount                           => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_burstcount,         --                                                          .burstcount
+			max10_prog_avmm_0_csr_avmm_readdatavalid                        => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_readdatavalid,      --                                                          .readdatavalid
+			max10_prog_avmm_0_csr_avmm_waitrequest                          => mm_interconnect_0_max10_prog_avmm_0_csr_avmm_waitrequest,        --                                                          .waitrequest
+			mm_bridge_s0_address                                            => mm_interconnect_0_mm_bridge_s0_address,                          --                                              mm_bridge_s0.address
+			mm_bridge_s0_write                                              => mm_interconnect_0_mm_bridge_s0_write,                            --                                                          .write
+			mm_bridge_s0_read                                               => mm_interconnect_0_mm_bridge_s0_read,                             --                                                          .read
+			mm_bridge_s0_readdata                                           => mm_interconnect_0_mm_bridge_s0_readdata,                         --                                                          .readdata
+			mm_bridge_s0_writedata                                          => mm_interconnect_0_mm_bridge_s0_writedata,                        --                                                          .writedata
+			mm_bridge_s0_burstcount                                         => mm_interconnect_0_mm_bridge_s0_burstcount,                       --                                                          .burstcount
+			mm_bridge_s0_byteenable                                         => mm_interconnect_0_mm_bridge_s0_byteenable,                       --                                                          .byteenable
+			mm_bridge_s0_readdatavalid                                      => mm_interconnect_0_mm_bridge_s0_readdatavalid,                    --                                                          .readdatavalid
+			mm_bridge_s0_waitrequest                                        => mm_interconnect_0_mm_bridge_s0_waitrequest,                      --                                                          .waitrequest
+			mm_bridge_s0_debugaccess                                        => mm_interconnect_0_mm_bridge_s0_debugaccess,                      --                                                          .debugaccess
+			mm_bridge_s0_response                                           => mm_interconnect_0_mm_bridge_s0_response,                         --                                                          .response
+			mutrig_cfg_ctrl_0_avmm_csr_address                              => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_address,            --                                mutrig_cfg_ctrl_0_avmm_csr.address
+			mutrig_cfg_ctrl_0_avmm_csr_write                                => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_write,              --                                                          .write
+			mutrig_cfg_ctrl_0_avmm_csr_read                                 => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_read,               --                                                          .read
+			mutrig_cfg_ctrl_0_avmm_csr_readdata                             => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_readdata,           --                                                          .readdata
+			mutrig_cfg_ctrl_0_avmm_csr_writedata                            => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_writedata,          --                                                          .writedata
+			mutrig_cfg_ctrl_0_avmm_csr_waitrequest                          => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_waitrequest,        --                                                          .waitrequest
+			mutrig_cfg_ctrl_0_avmm_csr_response                             => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_csr_response,           --                                                          .response
+			mutrig_cfg_ctrl_0_avmm_scanresult_address                       => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_address,     --                         mutrig_cfg_ctrl_0_avmm_scanresult.address
+			mutrig_cfg_ctrl_0_avmm_scanresult_read                          => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_read,        --                                                          .read
+			mutrig_cfg_ctrl_0_avmm_scanresult_readdata                      => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_readdata,    --                                                          .readdata
+			mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest                   => mm_interconnect_0_mutrig_cfg_ctrl_0_avmm_scanresult_waitrequest, --                                                          .waitrequest
+			on_die_temp_sense_ctrl_csr_write                                => mm_interconnect_0_on_die_temp_sense_ctrl_csr_write,              --                                on_die_temp_sense_ctrl_csr.write
+			on_die_temp_sense_ctrl_csr_read                                 => mm_interconnect_0_on_die_temp_sense_ctrl_csr_read,               --                                                          .read
+			on_die_temp_sense_ctrl_csr_readdata                             => mm_interconnect_0_on_die_temp_sense_ctrl_csr_readdata,           --                                                          .readdata
+			on_die_temp_sense_ctrl_csr_writedata                            => mm_interconnect_0_on_die_temp_sense_ctrl_csr_writedata,          --                                                          .writedata
+			on_die_temp_sense_ctrl_csr_waitrequest                          => mm_interconnect_0_on_die_temp_sense_ctrl_csr_waitrequest,        --                                                          .waitrequest
+			onewire_master_controller_0_csr_address                         => mm_interconnect_0_onewire_master_controller_0_csr_address,       --                           onewire_master_controller_0_csr.address
+			onewire_master_controller_0_csr_write                           => mm_interconnect_0_onewire_master_controller_0_csr_write,         --                                                          .write
+			onewire_master_controller_0_csr_read                            => mm_interconnect_0_onewire_master_controller_0_csr_read,          --                                                          .read
+			onewire_master_controller_0_csr_readdata                        => mm_interconnect_0_onewire_master_controller_0_csr_readdata,      --                                                          .readdata
+			onewire_master_controller_0_csr_writedata                       => mm_interconnect_0_onewire_master_controller_0_csr_writedata,     --                                                          .writedata
+			onewire_master_controller_0_csr_waitrequest                     => mm_interconnect_0_onewire_master_controller_0_csr_waitrequest,   --                                                          .waitrequest
+			sc_hub_csr_address                                              => mm_interconnect_0_sc_hub_csr_address,                            --                                                sc_hub_csr.address
+			sc_hub_csr_write                                                => mm_interconnect_0_sc_hub_csr_write,                              --                                                          .write
+			sc_hub_csr_read                                                 => mm_interconnect_0_sc_hub_csr_read,                               --                                                          .read
+			sc_hub_csr_readdata                                             => mm_interconnect_0_sc_hub_csr_readdata,                           --                                                          .readdata
+			sc_hub_csr_writedata                                            => mm_interconnect_0_sc_hub_csr_writedata,                          --                                                          .writedata
+			sc_hub_csr_burstcount                                           => mm_interconnect_0_sc_hub_csr_burstcount,                         --                                                          .burstcount
+			sc_hub_csr_readdatavalid                                        => mm_interconnect_0_sc_hub_csr_readdatavalid,                      --                                                          .readdatavalid
+			sc_hub_csr_waitrequest                                          => mm_interconnect_0_sc_hub_csr_waitrequest,                        --                                                          .waitrequest
+			scratch_pad_ram_s1_address                                      => mm_interconnect_0_scratch_pad_ram_s1_address,                    --                                        scratch_pad_ram_s1.address
+			scratch_pad_ram_s1_write                                        => mm_interconnect_0_scratch_pad_ram_s1_write,                      --                                                          .write
+			scratch_pad_ram_s1_readdata                                     => mm_interconnect_0_scratch_pad_ram_s1_readdata,                   --                                                          .readdata
+			scratch_pad_ram_s1_writedata                                    => mm_interconnect_0_scratch_pad_ram_s1_writedata,                  --                                                          .writedata
+			scratch_pad_ram_s1_byteenable                                   => mm_interconnect_0_scratch_pad_ram_s1_byteenable,                 --                                                          .byteenable
+			scratch_pad_ram_s1_chipselect                                   => mm_interconnect_0_scratch_pad_ram_s1_chipselect,                 --                                                          .chipselect
+			scratch_pad_ram_s1_clken                                        => mm_interconnect_0_scratch_pad_ram_s1_clken,                      --                                                          .clken
+			upload_mm_bridge_s0_address                                     => mm_interconnect_0_upload_mm_bridge_s0_address,                   --                                       upload_mm_bridge_s0.address
+			upload_mm_bridge_s0_write                                       => mm_interconnect_0_upload_mm_bridge_s0_write,                     --                                                          .write
+			upload_mm_bridge_s0_read                                        => mm_interconnect_0_upload_mm_bridge_s0_read,                      --                                                          .read
+			upload_mm_bridge_s0_readdata                                    => mm_interconnect_0_upload_mm_bridge_s0_readdata,                  --                                                          .readdata
+			upload_mm_bridge_s0_writedata                                   => mm_interconnect_0_upload_mm_bridge_s0_writedata,                 --                                                          .writedata
+			upload_mm_bridge_s0_burstcount                                  => mm_interconnect_0_upload_mm_bridge_s0_burstcount,                --                                                          .burstcount
+			upload_mm_bridge_s0_byteenable                                  => mm_interconnect_0_upload_mm_bridge_s0_byteenable,                --                                                          .byteenable
+			upload_mm_bridge_s0_readdatavalid                               => mm_interconnect_0_upload_mm_bridge_s0_readdatavalid,             --                                                          .readdatavalid
+			upload_mm_bridge_s0_waitrequest                                 => mm_interconnect_0_upload_mm_bridge_s0_waitrequest,               --                                                          .waitrequest
+			upload_mm_bridge_s0_debugaccess                                 => mm_interconnect_0_upload_mm_bridge_s0_debugaccess,               --                                                          .debugaccess
+			upload_mm_bridge_s0_response                                    => mm_interconnect_0_upload_mm_bridge_s0_response                   --                                                          .response
 		);
 
 	mm_interconnect_2 : component feb_system_v3_pipe_control_path_subsystem_mm_interconnect_2
 		port map (
 			clk125_out_clk_clk                                => clk125_in_clk_clk,                                  --                              clk125_out_clk.clk
-			sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset => rst_controller_002_reset_out_reset,                 -- sc_hub_cmd_pipe_reset_reset_bridge_in_reset.reset
-			sc_hub_hub_reset_reset_bridge_in_reset_reset      => rst_controller_001_reset_out_reset,                 --      sc_hub_hub_reset_reset_bridge_in_reset.reset
+			sc_hub_cmd_pipe_reset_reset_bridge_in_reset_reset => rst_controller_001_reset_out_reset,                 -- sc_hub_cmd_pipe_reset_reset_bridge_in_reset.reset
+			sc_hub_hub_reset_reset_bridge_in_reset_reset      => rst_controller_reset_out_reset,                     --      sc_hub_hub_reset_reset_bridge_in_reset.reset
 			sc_hub_hub_address                                => sc_hub_hub_address,                                 --                                  sc_hub_hub.address
 			sc_hub_hub_waitrequest                            => sc_hub_hub_waitrequest,                             --                                            .waitrequest
 			sc_hub_hub_burstcount                             => sc_hub_hub_burstcount,                              --                                            .burstcount
@@ -1803,77 +1763,12 @@ begin
 	irq_mapper : component feb_system_v3_pipe_control_path_subsystem_irq_mapper
 		port map (
 			clk           => clk125_in_clk_clk,                        --       clk.clk
-			reset         => rst_controller_001_reset_out_reset,       -- clk_reset.reset
+			reset         => rst_controller_reset_out_reset,           -- clk_reset.reset
 			receiver0_irq => irq_mapper_receiver0_irq,                 -- receiver0.irq
 			sender_irq(0) => onewire_master_controller_0_complete_irq  --    sender.irq
 		);
 
 	rst_controller : component feb_system_v3_pipe_control_path_subsystem_rst_controller
-		generic map (
-			NUM_RESET_INPUTS          => 1,
-			OUTPUT_RESET_SYNC_EDGES   => "deassert",
-			SYNC_DEPTH                => 2,
-			RESET_REQUEST_PRESENT     => 0,
-			RESET_REQ_WAIT_TIME       => 1,
-			MIN_RST_ASSERTION_TIME    => 3,
-			RESET_REQ_EARLY_DSRT_TIME => 1,
-			USE_RESET_REQUEST_IN0     => 0,
-			USE_RESET_REQUEST_IN1     => 0,
-			USE_RESET_REQUEST_IN2     => 0,
-			USE_RESET_REQUEST_IN3     => 0,
-			USE_RESET_REQUEST_IN4     => 0,
-			USE_RESET_REQUEST_IN5     => 0,
-			USE_RESET_REQUEST_IN6     => 0,
-			USE_RESET_REQUEST_IN7     => 0,
-			USE_RESET_REQUEST_IN8     => 0,
-			USE_RESET_REQUEST_IN9     => 0,
-			USE_RESET_REQUEST_IN10    => 0,
-			USE_RESET_REQUEST_IN11    => 0,
-			USE_RESET_REQUEST_IN12    => 0,
-			USE_RESET_REQUEST_IN13    => 0,
-			USE_RESET_REQUEST_IN14    => 0,
-			USE_RESET_REQUEST_IN15    => 0,
-			ADAPT_RESET_REQUEST       => 0
-		)
-		port map (
-			reset_in0      => jtag_master_master_reset_reset, -- reset_in0.reset
-			clk            => clk125_in_clk_clk,              --       clk.clk
-			reset_out      => rst_controller_reset_out_reset, -- reset_out.reset
-			reset_req      => open,                           -- (terminated)
-			reset_req_in0  => '0',                            -- (terminated)
-			reset_in1      => '0',                            -- (terminated)
-			reset_req_in1  => '0',                            -- (terminated)
-			reset_in2      => '0',                            -- (terminated)
-			reset_req_in2  => '0',                            -- (terminated)
-			reset_in3      => '0',                            -- (terminated)
-			reset_req_in3  => '0',                            -- (terminated)
-			reset_in4      => '0',                            -- (terminated)
-			reset_req_in4  => '0',                            -- (terminated)
-			reset_in5      => '0',                            -- (terminated)
-			reset_req_in5  => '0',                            -- (terminated)
-			reset_in6      => '0',                            -- (terminated)
-			reset_req_in6  => '0',                            -- (terminated)
-			reset_in7      => '0',                            -- (terminated)
-			reset_req_in7  => '0',                            -- (terminated)
-			reset_in8      => '0',                            -- (terminated)
-			reset_req_in8  => '0',                            -- (terminated)
-			reset_in9      => '0',                            -- (terminated)
-			reset_req_in9  => '0',                            -- (terminated)
-			reset_in10     => '0',                            -- (terminated)
-			reset_req_in10 => '0',                            -- (terminated)
-			reset_in11     => '0',                            -- (terminated)
-			reset_req_in11 => '0',                            -- (terminated)
-			reset_in12     => '0',                            -- (terminated)
-			reset_req_in12 => '0',                            -- (terminated)
-			reset_in13     => '0',                            -- (terminated)
-			reset_req_in13 => '0',                            -- (terminated)
-			reset_in14     => '0',                            -- (terminated)
-			reset_req_in14 => '0',                            -- (terminated)
-			reset_in15     => '0',                            -- (terminated)
-			reset_req_in15 => '0'                             -- (terminated)
-		);
-
-	rst_controller_001 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_001
 		generic map (
 			NUM_RESET_INPUTS          => 2,
 			OUTPUT_RESET_SYNC_EDGES   => "deassert",
@@ -1901,44 +1796,44 @@ begin
 			ADAPT_RESET_REQUEST       => 0
 		)
 		port map (
-			reset_in0      => clk156_in_rst_reset_n_ports_inv,        -- reset_in0.reset
-			reset_in1      => jtag_master_master_reset_reset,         -- reset_in1.reset
-			clk            => clk125_in_clk_clk,                      --       clk.clk
-			reset_out      => rst_controller_001_reset_out_reset,     -- reset_out.reset
-			reset_req      => rst_controller_001_reset_out_reset_req, --          .reset_req
-			reset_req_in0  => '0',                                    -- (terminated)
-			reset_req_in1  => '0',                                    -- (terminated)
-			reset_in2      => '0',                                    -- (terminated)
-			reset_req_in2  => '0',                                    -- (terminated)
-			reset_in3      => '0',                                    -- (terminated)
-			reset_req_in3  => '0',                                    -- (terminated)
-			reset_in4      => '0',                                    -- (terminated)
-			reset_req_in4  => '0',                                    -- (terminated)
-			reset_in5      => '0',                                    -- (terminated)
-			reset_req_in5  => '0',                                    -- (terminated)
-			reset_in6      => '0',                                    -- (terminated)
-			reset_req_in6  => '0',                                    -- (terminated)
-			reset_in7      => '0',                                    -- (terminated)
-			reset_req_in7  => '0',                                    -- (terminated)
-			reset_in8      => '0',                                    -- (terminated)
-			reset_req_in8  => '0',                                    -- (terminated)
-			reset_in9      => '0',                                    -- (terminated)
-			reset_req_in9  => '0',                                    -- (terminated)
-			reset_in10     => '0',                                    -- (terminated)
-			reset_req_in10 => '0',                                    -- (terminated)
-			reset_in11     => '0',                                    -- (terminated)
-			reset_req_in11 => '0',                                    -- (terminated)
-			reset_in12     => '0',                                    -- (terminated)
-			reset_req_in12 => '0',                                    -- (terminated)
-			reset_in13     => '0',                                    -- (terminated)
-			reset_req_in13 => '0',                                    -- (terminated)
-			reset_in14     => '0',                                    -- (terminated)
-			reset_req_in14 => '0',                                    -- (terminated)
-			reset_in15     => '0',                                    -- (terminated)
-			reset_req_in15 => '0'                                     -- (terminated)
+			reset_in0      => clk156_in_rst_reset_n_ports_inv,    -- reset_in0.reset
+			reset_in1      => jtag_master_master_reset_reset,     -- reset_in1.reset
+			clk            => clk125_in_clk_clk,                  --       clk.clk
+			reset_out      => rst_controller_reset_out_reset,     -- reset_out.reset
+			reset_req      => rst_controller_reset_out_reset_req, --          .reset_req
+			reset_req_in0  => '0',                                -- (terminated)
+			reset_req_in1  => '0',                                -- (terminated)
+			reset_in2      => '0',                                -- (terminated)
+			reset_req_in2  => '0',                                -- (terminated)
+			reset_in3      => '0',                                -- (terminated)
+			reset_req_in3  => '0',                                -- (terminated)
+			reset_in4      => '0',                                -- (terminated)
+			reset_req_in4  => '0',                                -- (terminated)
+			reset_in5      => '0',                                -- (terminated)
+			reset_req_in5  => '0',                                -- (terminated)
+			reset_in6      => '0',                                -- (terminated)
+			reset_req_in6  => '0',                                -- (terminated)
+			reset_in7      => '0',                                -- (terminated)
+			reset_req_in7  => '0',                                -- (terminated)
+			reset_in8      => '0',                                -- (terminated)
+			reset_req_in8  => '0',                                -- (terminated)
+			reset_in9      => '0',                                -- (terminated)
+			reset_req_in9  => '0',                                -- (terminated)
+			reset_in10     => '0',                                -- (terminated)
+			reset_req_in10 => '0',                                -- (terminated)
+			reset_in11     => '0',                                -- (terminated)
+			reset_req_in11 => '0',                                -- (terminated)
+			reset_in12     => '0',                                -- (terminated)
+			reset_req_in12 => '0',                                -- (terminated)
+			reset_in13     => '0',                                -- (terminated)
+			reset_req_in13 => '0',                                -- (terminated)
+			reset_in14     => '0',                                -- (terminated)
+			reset_req_in14 => '0',                                -- (terminated)
+			reset_in15     => '0',                                -- (terminated)
+			reset_req_in15 => '0'                                 -- (terminated)
 		);
 
-	rst_controller_002 : component feb_system_v3_pipe_control_path_subsystem_rst_controller
+	rst_controller_001 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_001
 		generic map (
 			NUM_RESET_INPUTS          => 1,
 			OUTPUT_RESET_SYNC_EDGES   => "deassert",
@@ -1968,6 +1863,71 @@ begin
 		port map (
 			reset_in0      => clk156_in_rst_reset_n_ports_inv,    -- reset_in0.reset
 			clk            => clk125_in_clk_clk,                  --       clk.clk
+			reset_out      => rst_controller_001_reset_out_reset, -- reset_out.reset
+			reset_req      => open,                               -- (terminated)
+			reset_req_in0  => '0',                                -- (terminated)
+			reset_in1      => '0',                                -- (terminated)
+			reset_req_in1  => '0',                                -- (terminated)
+			reset_in2      => '0',                                -- (terminated)
+			reset_req_in2  => '0',                                -- (terminated)
+			reset_in3      => '0',                                -- (terminated)
+			reset_req_in3  => '0',                                -- (terminated)
+			reset_in4      => '0',                                -- (terminated)
+			reset_req_in4  => '0',                                -- (terminated)
+			reset_in5      => '0',                                -- (terminated)
+			reset_req_in5  => '0',                                -- (terminated)
+			reset_in6      => '0',                                -- (terminated)
+			reset_req_in6  => '0',                                -- (terminated)
+			reset_in7      => '0',                                -- (terminated)
+			reset_req_in7  => '0',                                -- (terminated)
+			reset_in8      => '0',                                -- (terminated)
+			reset_req_in8  => '0',                                -- (terminated)
+			reset_in9      => '0',                                -- (terminated)
+			reset_req_in9  => '0',                                -- (terminated)
+			reset_in10     => '0',                                -- (terminated)
+			reset_req_in10 => '0',                                -- (terminated)
+			reset_in11     => '0',                                -- (terminated)
+			reset_req_in11 => '0',                                -- (terminated)
+			reset_in12     => '0',                                -- (terminated)
+			reset_req_in12 => '0',                                -- (terminated)
+			reset_in13     => '0',                                -- (terminated)
+			reset_req_in13 => '0',                                -- (terminated)
+			reset_in14     => '0',                                -- (terminated)
+			reset_req_in14 => '0',                                -- (terminated)
+			reset_in15     => '0',                                -- (terminated)
+			reset_req_in15 => '0'                                 -- (terminated)
+		);
+
+	rst_controller_002 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_001
+		generic map (
+			NUM_RESET_INPUTS          => 1,
+			OUTPUT_RESET_SYNC_EDGES   => "deassert",
+			SYNC_DEPTH                => 2,
+			RESET_REQUEST_PRESENT     => 0,
+			RESET_REQ_WAIT_TIME       => 1,
+			MIN_RST_ASSERTION_TIME    => 3,
+			RESET_REQ_EARLY_DSRT_TIME => 1,
+			USE_RESET_REQUEST_IN0     => 0,
+			USE_RESET_REQUEST_IN1     => 0,
+			USE_RESET_REQUEST_IN2     => 0,
+			USE_RESET_REQUEST_IN3     => 0,
+			USE_RESET_REQUEST_IN4     => 0,
+			USE_RESET_REQUEST_IN5     => 0,
+			USE_RESET_REQUEST_IN6     => 0,
+			USE_RESET_REQUEST_IN7     => 0,
+			USE_RESET_REQUEST_IN8     => 0,
+			USE_RESET_REQUEST_IN9     => 0,
+			USE_RESET_REQUEST_IN10    => 0,
+			USE_RESET_REQUEST_IN11    => 0,
+			USE_RESET_REQUEST_IN12    => 0,
+			USE_RESET_REQUEST_IN13    => 0,
+			USE_RESET_REQUEST_IN14    => 0,
+			USE_RESET_REQUEST_IN15    => 0,
+			ADAPT_RESET_REQUEST       => 0
+		)
+		port map (
+			reset_in0      => clk156_in_rst_reset_n_ports_inv,    -- reset_in0.reset
+			clk            => max10_link_clock_clk,               --       clk.clk
 			reset_out      => rst_controller_002_reset_out_reset, -- reset_out.reset
 			reset_req      => open,                               -- (terminated)
 			reset_req_in0  => '0',                                -- (terminated)
@@ -2003,72 +1963,7 @@ begin
 			reset_req_in15 => '0'                                 -- (terminated)
 		);
 
-	rst_controller_003 : component feb_system_v3_pipe_control_path_subsystem_rst_controller
-		generic map (
-			NUM_RESET_INPUTS          => 1,
-			OUTPUT_RESET_SYNC_EDGES   => "deassert",
-			SYNC_DEPTH                => 2,
-			RESET_REQUEST_PRESENT     => 0,
-			RESET_REQ_WAIT_TIME       => 1,
-			MIN_RST_ASSERTION_TIME    => 3,
-			RESET_REQ_EARLY_DSRT_TIME => 1,
-			USE_RESET_REQUEST_IN0     => 0,
-			USE_RESET_REQUEST_IN1     => 0,
-			USE_RESET_REQUEST_IN2     => 0,
-			USE_RESET_REQUEST_IN3     => 0,
-			USE_RESET_REQUEST_IN4     => 0,
-			USE_RESET_REQUEST_IN5     => 0,
-			USE_RESET_REQUEST_IN6     => 0,
-			USE_RESET_REQUEST_IN7     => 0,
-			USE_RESET_REQUEST_IN8     => 0,
-			USE_RESET_REQUEST_IN9     => 0,
-			USE_RESET_REQUEST_IN10    => 0,
-			USE_RESET_REQUEST_IN11    => 0,
-			USE_RESET_REQUEST_IN12    => 0,
-			USE_RESET_REQUEST_IN13    => 0,
-			USE_RESET_REQUEST_IN14    => 0,
-			USE_RESET_REQUEST_IN15    => 0,
-			ADAPT_RESET_REQUEST       => 0
-		)
-		port map (
-			reset_in0      => clk156_in_rst_reset_n_ports_inv,    -- reset_in0.reset
-			clk            => max10_link_clock_clk,               --       clk.clk
-			reset_out      => rst_controller_003_reset_out_reset, -- reset_out.reset
-			reset_req      => open,                               -- (terminated)
-			reset_req_in0  => '0',                                -- (terminated)
-			reset_in1      => '0',                                -- (terminated)
-			reset_req_in1  => '0',                                -- (terminated)
-			reset_in2      => '0',                                -- (terminated)
-			reset_req_in2  => '0',                                -- (terminated)
-			reset_in3      => '0',                                -- (terminated)
-			reset_req_in3  => '0',                                -- (terminated)
-			reset_in4      => '0',                                -- (terminated)
-			reset_req_in4  => '0',                                -- (terminated)
-			reset_in5      => '0',                                -- (terminated)
-			reset_req_in5  => '0',                                -- (terminated)
-			reset_in6      => '0',                                -- (terminated)
-			reset_req_in6  => '0',                                -- (terminated)
-			reset_in7      => '0',                                -- (terminated)
-			reset_req_in7  => '0',                                -- (terminated)
-			reset_in8      => '0',                                -- (terminated)
-			reset_req_in8  => '0',                                -- (terminated)
-			reset_in9      => '0',                                -- (terminated)
-			reset_req_in9  => '0',                                -- (terminated)
-			reset_in10     => '0',                                -- (terminated)
-			reset_req_in10 => '0',                                -- (terminated)
-			reset_in11     => '0',                                -- (terminated)
-			reset_req_in11 => '0',                                -- (terminated)
-			reset_in12     => '0',                                -- (terminated)
-			reset_req_in12 => '0',                                -- (terminated)
-			reset_in13     => '0',                                -- (terminated)
-			reset_req_in13 => '0',                                -- (terminated)
-			reset_in14     => '0',                                -- (terminated)
-			reset_req_in14 => '0',                                -- (terminated)
-			reset_in15     => '0',                                -- (terminated)
-			reset_req_in15 => '0'                                 -- (terminated)
-		);
-
-	rst_controller_004 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_004
+	rst_controller_003 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_003
 		generic map (
 			NUM_RESET_INPUTS          => 2,
 			OUTPUT_RESET_SYNC_EDGES   => "deassert",
@@ -2099,7 +1994,7 @@ begin
 			reset_in0      => clk156_in_rst_reset_n_ports_inv,    -- reset_in0.reset
 			reset_in1      => jtag_master_master_reset_reset,     -- reset_in1.reset
 			clk            => pll_156t40_outclk0_clk,             --       clk.clk
-			reset_out      => rst_controller_004_reset_out_reset, -- reset_out.reset
+			reset_out      => rst_controller_003_reset_out_reset, -- reset_out.reset
 			reset_req      => open,                               -- (terminated)
 			reset_req_in0  => '0',                                -- (terminated)
 			reset_req_in1  => '0',                                -- (terminated)
@@ -2133,7 +2028,7 @@ begin
 			reset_req_in15 => '0'                                 -- (terminated)
 		);
 
-	rst_controller_005 : component feb_system_v3_pipe_control_path_subsystem_rst_controller
+	rst_controller_004 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_001
 		generic map (
 			NUM_RESET_INPUTS          => 1,
 			OUTPUT_RESET_SYNC_EDGES   => "deassert",
@@ -2163,7 +2058,7 @@ begin
 		port map (
 			reset_in0      => clk156_in_rst_reset_n_ports_inv,    -- reset_in0.reset
 			clk            => pll_156t40_outclk0_clk,             --       clk.clk
-			reset_out      => rst_controller_005_reset_out_reset, -- reset_out.reset
+			reset_out      => rst_controller_004_reset_out_reset, -- reset_out.reset
 			reset_req      => open,                               -- (terminated)
 			reset_req_in0  => '0',                                -- (terminated)
 			reset_in1      => '0',                                -- (terminated)
@@ -2198,7 +2093,7 @@ begin
 			reset_req_in15 => '0'                                 -- (terminated)
 		);
 
-	rst_controller_006 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_004
+	rst_controller_005 : component feb_system_v3_pipe_control_path_subsystem_rst_controller_003
 		generic map (
 			NUM_RESET_INPUTS          => 2,
 			OUTPUT_RESET_SYNC_EDGES   => "both",
@@ -2229,7 +2124,7 @@ begin
 			reset_in0      => clk156_in_rst_reset_n_ports_inv,    -- reset_in0.reset
 			reset_in1      => jtag_master_master_reset_reset,     -- reset_in1.reset
 			clk            => clk125_in_clk_clk,                  --       clk.clk
-			reset_out      => rst_controller_006_reset_out_reset, -- reset_out.reset
+			reset_out      => rst_controller_005_reset_out_reset, -- reset_out.reset
 			reset_req      => open,                               -- (terminated)
 			reset_req_in0  => '0',                                -- (terminated)
 			reset_req_in1  => '0',                                -- (terminated)

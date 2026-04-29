@@ -32,59 +32,18 @@ def replace_once(text: str, old: str, new: str) -> str:
     return text.replace(old, new, 1)
 
 
-def ensure_pulse_signal(text: str) -> str:
-    if "signal pulse_out_conduit" in text:
-        return text
-
-    anchor = "    signal mutrig_reset"
-    idx = text.find(anchor)
-    if idx < 0:
-        raise RuntimeError("Could not find mutrig_reset signal anchor")
-
-    line_end = text.find("\n", idx)
-    insertion = "    signal pulse_out_conduit          : std_logic;\n"
-    return text[: line_end + 1] + insertion + text[line_end + 1 :]
-
-
-def ensure_pulse_portmap(text: str) -> str:
-    if "pulse_out_conduit_pulse" in text:
-        return text
-    if "pulse_out_conduit_std_logic" in text:
-        return text.replace("pulse_out_conduit_std_logic", "pulse_out_conduit_pulse")
-
-    pattern = re.compile(
-        r"(?P<indent>\s*)osc_clock_50_in_clk\s*=>\s*clk50,\n",
-        re.MULTILINE,
-    )
-    match = pattern.search(text)
-    if not match:
-        raise RuntimeError("Could not find osc_clock_50_in_clk port-map anchor")
-
-    indent = match.group("indent")
-    insertion = (
-        f"{indent}osc_clock_50_in_clk                   => clk50,\n"
-        f"{indent}pulse_out_conduit_pulse               => pulse_out_conduit,\n"
-    )
-    return text[: match.start()] + insertion + text[match.end() :]
-
-
 def transform_vhdl(text: str, *, feb_entity: str, scratchpad_prefix: str) -> str:
     text = text.replace("entity work.feb_system_v2", f"entity work.{feb_entity}")
     text = text.replace(
         "feb_system_v2_control_path_subsystem_scratch_pad_ram",
         f"{scratchpad_prefix}_control_path_subsystem_scratch_pad_ram",
     )
-    text = ensure_pulse_signal(text)
-    text = ensure_pulse_portmap(text)
     return text
 
 
 def adapt_pipe_qsys_debug_aliases(text: str) -> str:
-    """FEB pipe Qsys emits 1-bit burstcount on exported bridge debug nets."""
+    """FEB pipe Qsys emits 1-bit burstcount on control bridge debug nets."""
     one_bit_names = (
-        "datapath_bridge_last_burstcount",
-        "datapath_accept_last_burstcount",
-        "datapath_avmm_burstcount",
         "control_mm_bridge_last_burstcount",
         "control_mm_bridge_accept_last_burstcount",
         "control_export_last_burstcount",
@@ -239,6 +198,23 @@ def transform_sc_smoke(text: str) -> str:
 """,
         "",
     )
+    return text
+
+
+def adapt_pipe_datapath_csr_aliases(text: str) -> str:
+    """Map SC smoke internal aliases onto the split datapath interconnects."""
+    replacements = {
+        "mm_interconnect_0_histogram_statistics_0_csr_read":
+            "mm_interconnect_1_histogram_statistics_0_csr_read",
+        "mm_interconnect_0_mts_preprocessor_1_csr_read":
+            "mm_interconnect_2_mts_preprocessor_1_csr_read",
+        "mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_read":
+            "mm_interconnect_3_hit_stack_subsystem_0_feb_frame_assembly_csr_read",
+        "mm_interconnect_0_hit_stack_subsystem_1_feb_frame_assembly_csr_read":
+            "mm_interconnect_3_hit_stack_subsystem_1_feb_frame_assembly_csr_read",
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
     return text
 
 
@@ -515,6 +491,8 @@ def main() -> int:
         text = transform_sc_burst_vs_single(text)
     if args.feb_entity.endswith("_pipe"):
         if args.case in ("sc_smoke", "sc_burst_vs_single"):
+            if args.case == "sc_smoke":
+                text = adapt_pipe_datapath_csr_aliases(text)
             text = insert_pipe_sc_downlink_cdc(text)
         text = adapt_pipe_qsys_debug_aliases(text)
     out_path.write_text(text)

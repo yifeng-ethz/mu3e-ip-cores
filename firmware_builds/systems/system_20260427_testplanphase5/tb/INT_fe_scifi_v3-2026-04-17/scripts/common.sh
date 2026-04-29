@@ -253,6 +253,10 @@ materialize_mif_runtime_aliases() {
 
   while IFS= read -r f; do
     [[ -n "${f}" ]] || continue
+    if [[ ! -e "${f}" ]]; then
+      echo "[mif-runtime] skipping stale/broken MIF link: ${f}" >&2
+      continue
+    fi
     mif_files+=("${f}")
   done < <(find "${target_dir}" -maxdepth 1 \( -type f -o -type l \) -name '*.mif' | sort)
 
@@ -260,7 +264,7 @@ materialize_mif_runtime_aliases() {
     return 0
   fi
 
-  python3 "${runtime_script}" --out-dir "${target_dir}" "${mif_files[@]}"
+  python3 "${runtime_script}" --force --out-dir "${target_dir}" "${mif_files[@]}"
 }
 
 run_vsim_logged() {

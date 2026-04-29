@@ -1,6 +1,6 @@
 # MUTRIG.md - MuTRiG3 configuration and lock notes
 
-Date: 2026-04-27
+Date: 2026-04-29
 
 ## Physical Mapping
 
@@ -31,6 +31,28 @@ for rate and channel alive/dead tests on lanes 0..3, but it does not always
 produce a locked PLL. For down-side PLL-lock work, start from the SMB5 TDC
 config.
 
+### Reset and Run-Control State During SPI Load
+
+The MuTRiG reset input must be held at the inactive low level while the SPI
+bitmap is loaded. In the FEB run-control sequence, `RUN_SYNC` asserts the
+MuTRiG reset, so do not issue `CMD_MUTRIG_ASIC_CFG` while the system is in
+`RUN_SYNC` or transitioning through it. The safe host sequence is `rc_tool reset`
+followed by `rc_tool stop-reset`, wait for the stop-reset settle time, and only
+then issue `CMD_MUTRIG_ASIC_CFG`.
+
+This run-state ordering is a synchronization-quality rule, not a hard
+rate-monitoring rule. If the ASICs are configured or reset-released at different
+times, their MuTRiG frame headers and timestamps may no longer line up across
+ASICs. That is unacceptable for delay/PLL-lock closure, but it can still be used
+for rate-only monitoring when the hit processor is configured to bypass or
+ignore the latency check and the resulting timestamp errors are not credited as
+delay evidence.
+
+After SPI configuration, execute the normal full run sequence before taking
+rate or delay evidence: `reset`, `stop-reset`, `run-prepare`, `sync`, and
+`start-run`. This restarts the MuTRiG TDC counters from a known global point and
+is the sequence expected for aligned headers across ASICs.
+
 ## Injection Mode
 
 With TDC injection enabled, the MuTRiG cuts off the analog frontend input. The
@@ -49,6 +71,22 @@ Recommended debug interpretation:
 Rate-only testing should keep the MTS timestamp-delay error sideband asserted
 and forwarded. Trim policy belongs downstream, usually in the ring-buffer CAM
 `filter_inerr` control bit. PLL-lock testing must never hide the error sideband.
+
+## PLL Lock Search
+
+The practical lock search uses three MuTRiG settings:
+
+| Setting | Role |
+|---|---|
+| `hitlogic` | noise rejection around the central delay peak |
+| `vcodelay` | main PLL-lock search parameter |
+| `cnt` | lock sensitivity / threshold helper |
+
+Operational procedure:
+
+1. Reduce `cnt` when searching for a lock at lower `vcodelay`.
+2. Increase `hitlogic` when the central delay peak is surrounded by noise.
+3. Before testing a new `vcodelay`, first write `vcodelay = 0x0+0` to fully unlock the PLL, then write the target value in the `<value>x<scale> + <offset>` form. The lock state can be sticky; skipping the explicit unlock can make a historically good `vcodelay` fail to re-lock.
 
 ## Analog Mode
 

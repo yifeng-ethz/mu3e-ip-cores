@@ -52,7 +52,6 @@ entity feb_system_v3_pipe is
 		mutrig_cfg_ctrl_0_spi_export2top_ssn  : out   std_logic_vector(7 downto 0);                     --                                 .ssn
 		mutrig_reset_reset                    : out   std_logic_vector(1 downto 0);                     --                     mutrig_reset.reset
 		osc_clock_50_in_clk                   : in    std_logic                     := '0';             --                  osc_clock_50_in.clk
-		pulse_out_conduit_pulse               : out   std_logic;                                        --                pulse_out_conduit.pulse
 		redriver_losn                         : in    std_logic_vector(8 downto 0)  := (others => '0'); --                         redriver.losn
 		reset_3_reset_n                       : in    std_logic                     := '0';             --                          reset_3.reset_n
 		sense_dq_in                           : in    std_logic_vector(5 downto 0)  := (others => '0'); --                         sense_dq.in
@@ -73,11 +72,12 @@ entity feb_system_v3_pipe is
 		upload_data0_sc_rc_startofpacket      : out   std_logic;                                        --                                 .startofpacket
 		upload_data0_sc_rc_endofpacket        : out   std_logic;                                        --                                 .endofpacket
 		upload_data0_sc_rc_channel            : out   std_logic_vector(1 downto 0);                     --                                 .channel
-		upload_data1_data                     : out   std_logic_vector(35 downto 0);                    --                     upload_data1.data
+		upload_data1_ready                    : in    std_logic                     := '0';             --                     upload_data1.ready
 		upload_data1_valid                    : out   std_logic;                                        --                                 .valid
-		upload_data1_ready                    : in    std_logic                     := '0';             --                                 .ready
 		upload_data1_startofpacket            : out   std_logic;                                        --                                 .startofpacket
-		upload_data1_endofpacket              : out   std_logic                                         --                                 .endofpacket
+		upload_data1_endofpacket              : out   std_logic;                                        --                                 .endofpacket
+		upload_data1_empty                    : out   std_logic_vector(0 downto 0);                     --                                 .empty
+		upload_data1_data                     : out   std_logic_vector(35 downto 0)                     --                                 .data
 	);
 end entity feb_system_v3_pipe;
 
@@ -156,7 +156,6 @@ architecture rtl of feb_system_v3_pipe is
 			mutrig_cfg_ctrl_0_spi_export2top_mosi : out   std_logic;                                        -- mosi
 			mutrig_cfg_ctrl_0_spi_export2top_sclk : out   std_logic;                                        -- sclk
 			mutrig_cfg_ctrl_0_spi_export2top_ssn  : out   std_logic_vector(7 downto 0);                     -- ssn
-			pulse_out_conduit_pulse               : out   std_logic;                                        -- pulse
 			sc_hub_hub_sc_packet_downlink_data    : in    std_logic_vector(31 downto 0) := (others => 'X'); -- data
 			sc_hub_hub_sc_packet_downlink_datak   : in    std_logic_vector(3 downto 0)  := (others => 'X'); -- datak
 			sc_hub_hub_sc_packet_downlink_ready   : out   std_logic;                                        -- ready
@@ -188,11 +187,12 @@ architecture rtl of feb_system_v3_pipe is
 			avmm_port_debugaccess          : in  std_logic                     := 'X';             -- debugaccess
 			avmm_rst_reset                 : in  std_logic                     := 'X';             -- reset
 			counter_sclr_reset             : in  std_logic                     := 'X';             -- reset
-			hit_type3_lower_data           : out std_logic_vector(35 downto 0);                    -- data
-			hit_type3_lower_valid          : out std_logic;                                        -- valid
 			hit_type3_lower_ready          : in  std_logic                     := 'X';             -- ready
+			hit_type3_lower_valid          : out std_logic;                                        -- valid
 			hit_type3_lower_startofpacket  : out std_logic;                                        -- startofpacket
 			hit_type3_lower_endofpacket    : out std_logic;                                        -- endofpacket
+			hit_type3_lower_empty          : out std_logic_vector(0 downto 0);                     -- empty
+			hit_type3_lower_data           : out std_logic_vector(35 downto 0);                    -- data
 			hit_type3_upper_ready          : in  std_logic                     := 'X';             -- ready
 			hit_type3_upper_valid          : out std_logic;                                        -- valid
 			hit_type3_upper_startofpacket  : out std_logic;                                        -- startofpacket
@@ -201,7 +201,6 @@ architecture rtl of feb_system_v3_pipe is
 			hit_type3_upper_data           : out std_logic_vector(35 downto 0);                    -- data
 			inject_pulse                   : out std_logic;                                        -- pulse
 			inject_masked_pulse            : out std_logic;                                        -- masked_pulse
-			inject_aux_pulse               : in  std_logic                     := 'X';             -- pulse
 			lvds_outclock_clk              : out std_logic;                                        -- clk
 			lvds_pll_inclock_clk           : in  std_logic                     := 'X';             -- clk
 			monitor_clock_125_in_clk       : in  std_logic                     := 'X';             -- clk
@@ -721,7 +720,6 @@ begin
 			mutrig_cfg_ctrl_0_spi_export2top_mosi => mutrig_cfg_ctrl_0_spi_export2top_mosi,                   --                                 .mosi
 			mutrig_cfg_ctrl_0_spi_export2top_sclk => mutrig_cfg_ctrl_0_spi_export2top_sclk,                   --                                 .sclk
 			mutrig_cfg_ctrl_0_spi_export2top_ssn  => mutrig_cfg_ctrl_0_spi_export2top_ssn,                    --                                 .ssn
-			pulse_out_conduit_pulse               => pulse_out_conduit_pulse,                                 --                pulse_out_conduit.pulse
 			sc_hub_hub_sc_packet_downlink_data    => download_sc_data,                                        --    sc_hub_hub_sc_packet_downlink.data
 			sc_hub_hub_sc_packet_downlink_datak   => download_sc_datak,                                       --                                 .datak
 			sc_hub_hub_sc_packet_downlink_ready   => download_sc_ready,                                       --                                 .ready
@@ -817,11 +815,12 @@ begin
 			avmm_port_debugaccess          => mm_interconnect_0_data_path_subsystem_avmm_port_debugaccess,   --                       .debugaccess
 			avmm_rst_reset                 => control_reset_sync_125_reset_out_reset,                        --               avmm_rst.reset
 			counter_sclr_reset             => control_path_subsystem_sclr_counter_req_reset,                 --           counter_sclr.reset
-			hit_type3_lower_data           => upload_data1_data,                                             --        hit_type3_lower.data
+			hit_type3_lower_ready          => upload_data1_ready,                                            --        hit_type3_lower.ready
 			hit_type3_lower_valid          => upload_data1_valid,                                            --                       .valid
-			hit_type3_lower_ready          => upload_data1_ready,                                            --                       .ready
 			hit_type3_lower_startofpacket  => upload_data1_startofpacket,                                    --                       .startofpacket
 			hit_type3_lower_endofpacket    => upload_data1_endofpacket,                                      --                       .endofpacket
+			hit_type3_lower_empty          => upload_data1_empty,                                            --                       .empty
+			hit_type3_lower_data           => upload_data1_data,                                             --                       .data
 			hit_type3_upper_ready          => data_path_subsystem_hit_type3_upper_ready,                     --        hit_type3_upper.ready
 			hit_type3_upper_valid          => data_path_subsystem_hit_type3_upper_valid,                     --                       .valid
 			hit_type3_upper_startofpacket  => data_path_subsystem_hit_type3_upper_startofpacket,             --                       .startofpacket
@@ -830,7 +829,6 @@ begin
 			hit_type3_upper_data           => data_path_subsystem_hit_type3_upper_data,                      --                       .data
 			inject_pulse                   => inject_pulse,                                                  --                 inject.pulse
 			inject_masked_pulse            => inject_masked_pulse,                                           --                       .masked_pulse
-			inject_aux_pulse               => open,                                                          --             inject_aux.pulse
 			lvds_outclock_clk              => data_path_subsystem_lvds_outclock_clk,                         --          lvds_outclock.clk
 			lvds_pll_inclock_clk           => lvds_pll_inclock_clk,                                          --       lvds_pll_inclock.clk
 			monitor_clock_125_in_clk       => mclk125_clk,                                                   --   monitor_clock_125_in.clk
