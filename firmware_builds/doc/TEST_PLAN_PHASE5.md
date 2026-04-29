@@ -1,10 +1,10 @@
 # TEST_PLAN_PHASE5.md — real-MuTRiG bring-up, frame-format signoff, injector closure
 
-**Revision**: 2026-04-27 / draft-0
+**Revision**: 2026-04-29 / draft-5
 **Target**: `mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe` on FEB SciFi prototype, with the eight live MuTRiG ASICs replacing the 8-lane `emulator_mutrig`. Build is under `firmware_builds/`.
 **Host**: teferi (`yifeng@teferi`, `/dev/mudaq0` via SWB on link 2 — see `TEST_PLAN.md` §0)
 **Companions**: [`TEST_PLAN.md`](TEST_PLAN.md) Phases 1..4 · [`phase4/TEST_PLAN_BASIC.md`](phase4/TEST_PLAN_BASIC.md) · [`phase4/TEST_PLAN_PUBLISH.md`](phase4/TEST_PLAN_PUBLISH.md)
-**Authoring scope**: this document is plan-only. It does not author or commit any RTL, test scripts, MIDAS hooks, or runner code. Phase-5 closure runs the existing bring-up tooling against a new MuTRiG-backed configuration and adds new SignalTap `.stp` images and report Markdown.
+**Authoring scope**: this document is the live Phase-5 plan and scoreboard. Helper scripts under `../systems/system_20260427_testplanphase5/script/` are allowed to implement read-only audits, address-map extraction, case-catalog validation, and run orchestration; generated `.stp` and report artifacts remain evidence, not the source of the test contract. The live injector boundary precheck is tracked in [`TEST_INJECTOR_PATH.md`](TEST_INJECTOR_PATH.md); it is a gate, not part of the 144-case bucket denominators.
 
 ---
 
@@ -12,12 +12,11 @@
 
 Phase 5 is the first sign-off on the **real MuTRiG ASIC** end-to-end. Phase 4 closed against the 8-lane `emulator_mutrig` LFSR; Phase 5 reuses the proven datapath and reset/SC plane and exercises the same observation surfaces against eight live MuTRiG ASICs.
 
-The plan is structured as four sequential closures:
+The plan is structured as two live stages plus one reserved stage:
 
-1. **Real-MuTRiG bring-up** — load each ASIC's known-good configuration via `mutrig_cfg_ctrl_0` (the MuTRiG Controller IP), sweep the per-channel TTH via the on-IP TTH-Scan-Automation (TSA) routine, and confirm every ASIC reports a stable, decoded MuTRiG frame.
-2. **Frame-format signoff with SignalTap (4k × 4 segments)** — capture the FEB egress side and the SWB ingress side over multiple complete packets and prove the deassembled frame is structurally identical at both ends.
-3. **Emulator vs real-MuTRiG packet equivalence** — re-run the same emulator stimulus the Phase 4 closure already passed against, capture the egress, and confirm the bit-for-bit framing is identical between emulator and real ASIC at the FEB egress and the SWB ingress (modulo the agreed-upon hit-payload differences listed in §4.4).
-4. **Injector + histogram closure** — sweep `mutrig_injector_0` across **every implemented mode** at multiple rates against eight live MuTRiG ASICs and compare the delay PDF and the channel/ASIC rate distribution against `histogram_statistics_0`. The live stimulus catalog has five 64-case groups; closure coverage is reported against the four required BASIC/EDGE/PROF/ERROR buckets in §1.6.
+1. **Real-MuTRiG bring-up** (§2) — load each ASIC's known-good configuration via `mutrig_cfg_ctrl_0` (the MuTRiG Controller IP), sweep the per-channel TTH via the on-IP TTH-Scan-Automation (TSA) routine, and confirm every ASIC reports a stable, decoded MuTRiG frame.
+2. **Directed verification** (§3) — IP-by-IP cascade SignalTap signoff against the live FEB datapath. Each case in [`TEST_BASIC.md`](TEST_BASIC.md), [`TEST_PROF.md`](TEST_PROF.md), [`TEST_EDGE.md`](TEST_EDGE.md), and [`TEST_ERROR.md`](TEST_ERROR.md) defines a stimulus configuration and the per-IP boundary evidence required to attest hits propagate through the chain. Each bucket has ≥ 144 cases; long-term target is 500–3000 per bucket. Per-IP segment depth is sized per IP (default 1024 × 4 segments; `feb_frame_assembly` defaults to 4096 × 4). One trigger condition per `.stp` instance per Quartus segmented-acquisition manual; multiple SignalTap instances are armed in parallel and aligned post-capture via a shared GTS slice. SWB-side packet receipt is cross-checked against the SWB per-link counter (§3.9) before the SWB-side `.stp` is in place.
+3. **Collective verification** (§4, RESERVED) — `histogram_statistics_0` rate / delay PDFs across injector modes; left empty in this revision and unblocked once §3 closes.
 
 Phase 5 does **not** redo Phase 4 closure on the emulator; Phase 4 is the prerequisite, not part of the Phase 5 evidence.
 
@@ -33,28 +32,80 @@ Phase 5 does **not** redo Phase 4 closure on the emulator; Phase 4 is the prereq
 | Phase 2 BIST | [`TEST_PLAN.md`](TEST_PLAN.md) §2 | zero bit-flips across all RW registers and the scratchpad; sc_hub admission/ordering hazards eliminated |
 | Phase 3 run-control | [`TEST_PLAN.md`](TEST_PLAN.md) §3 | every reset-link opcode advances the host counter exactly once on both SC and JTAG paths |
 | Phase 4 emulator + histogram | [`phase4/TEST_PLAN_BASIC.md`](phase4/TEST_PLAN_BASIC.md) closure contract | TPBH001..TPBH030 pre-gate PASS, TPB000..TPB100 PASS (no residual `OVERFLOW_COUNT`/`DROPPED_HITS`/`UNDERFLOW_COUNT`) |
+| Environmental monitors sane | this plan §1.2.1 | `check_environment_monitors.py` returns zero FAIL checks; WARN entries are explained in the report |
 | FEB SciFi v3 SOF flashed | this repo `firmware_builds/<feb_scifi_v3_project>/output_files/top.sof` | `script/check_ip_metadata.py` clean |
 | SWB SOF flashed from `online_sc` | per `TEST_PLAN.md` §0.2 | `/dev/mudaq0` BAR sane; `sc_tool read 0x00000` returns OK |
-| MuTRiG configuration bitstreams reviewed | `online_dpv2/online/switching_pc/MIDAS_FEcontrol/Mutrig_FEB.cpp` | a known-good 2662-bit cfg word stream is available for each MuTRiG3 ASIC variant on the SciFi DAB |
+| MuTRiG configuration bitstreams reviewed | `/home/yifeng/packages/online_dpv2/online/switching_pc/slowcontrol/mutrig/Mutrig_FEB.cpp` and `toolkits/fe_scifi/` | a known-good 84-word packed cfg stream is available for each MuTRiG3 ASIC variant on the SciFi DAB |
 
 If any prerequisite is open, Phase 5 does not start. Phase 4 closure attestation `TPB100` is the named gate.
 
+Current prerequisite scoreboard:
+
+| Gate | Status | Last evidence | Notes |
+|---|---|---|---|
+| Environmental monitors sane | `PASS` | [`../systems/system_20260427_testplanphase5/reports/phase5_environment_20260428_onewire_dividerfix_retry.md`](../systems/system_20260427_testplanphase5/reports/phase5_environment_20260428_onewire_dividerfix_retry.md), [`../systems/system_20260427_testplanphase5/reports/phase5_environment_20260428_onewire_dividerfix_retry.json`](../systems/system_20260427_testplanphase5/reports/phase5_environment_20260428_onewire_dividerfix_retry.json) | Divider-fix SOF passes the post-flash environmental gate with 62 PASS / 1 WARN / 0 FAIL. OneWire UID `0x4F574D43` is live, all six lines have `sample_valid=1`, temperatures are non-default (`29.688`, `33.125`, `21.500`, `21.938`, `39.875`, `39.875` C), and `crc_err/init_err` stay clear. FF2 matches the expected dangling-module sentinel pattern. The only warning is FF1 VCC raw code `57`, recorded as a monitor-scaling interpretation issue because FF1 temperature and RX optical powers are live. The helper now retries verbose `sc_tool` after quiet-mode packet loss on the noisy secondary ring. |
+| OneWire controller unit DV scaffold | `PASS` | [`../../onewire_temp_sense/tb/REPORT/run_20260428_191021`](../../onewire_temp_sense/tb/REPORT/run_20260428_191021), [`../../onewire_temp_sense/tb/REPORT/B131.md`](../../onewire_temp_sense/tb/REPORT/B131.md) | `make regress` passes the implemented 56-case BASIC/EDGE/ERROR/PROF/CROSS slice after adding `B131` for the shared odd/even microsecond divider. Evidence covers the common CSR header (`UID/META/SCRATCH`), six-line DS18B20 model path, intentional valid 0 C on line 0 (`0x00000000`), controller CSR negative-access features, serial-number probing, RC-line waveform modeling, documented DS18B20 model limitations, and the 125 MHz divider regression that blocked the board monitor loop. |
+| FEB generated-system `tb_int/` SC smoke | `PASS` | [`../systems/system_20260427_testplanphase5/syn/logs/feb_system_v3_pipe_qsys_generate_20260428_onewire_dividerfix.log`](../systems/system_20260427_testplanphase5/syn/logs/feb_system_v3_pipe_qsys_generate_20260428_onewire_dividerfix.log), [`../systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/REPORT/sc/run_sc_smoke.log`](../systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/REPORT/sc/run_sc_smoke.log), [`../systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/REPORT/sc/run_sc_burst_vs_single.log`](../systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/REPORT/sc/run_sc_burst_vs_single.log) | Current regenerated `feb_system_v3_pipe` authentic-Qsys sim passes `SC-001..003`, OneWire UID sweep/burst reads at `0x04400` return `0x4F574D43`, OneWire META single-read returns `0x1A0211AC` (`26.2.1.0428`), histogram UID sweep/burst reads return `0x48495354`, and the burst-vs-single matrix closes 144/144 compare cases. This verifies the divider-fix OneWire controller is present in the generated FEB image and reachable through the same SC boundary used by hardware. |
+| Datapath SC bridge audit | `PASS` | [`../systems/system_20260427_testplanphase5/reports/phase5_full_svd_address_map_20260429.json`](../systems/system_20260427_testplanphase5/reports/phase5_full_svd_address_map_20260429.json), [`../systems/system_20260427_testplanphase5/reports/phase5_debug_sc_svd_inventory_20260429.json`](../systems/system_20260427_testplanphase5/reports/phase5_debug_sc_svd_inventory_20260429.json) | After reloading the SWB with the `online_sc` SOF and recovering `/dev/mudaq0`, `check_sc_bridges.py --link 2 --skip-jtag` passed. `histogram_statistics_0.UID` reads `0x48495354`, `histogram_ingress_bridge_0.UID` reads `0x48495342`, all source-mux lane UIDs read `0x4D4C534D`, `dbg_mm2runctrl_0` reads `0x4D325243`, and upload run-control reads `0x52434D48`. Current datapath CSR access is SC-only; see §1.2. |
+| Frame-to-histogram SignalTap image | `PASS_DEBUG_ONLY` | [`../systems/system_20260427_testplanphase5/reports/phase5_frame_hist_mts_histstats_stp_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_frame_hist_mts_histstats_stp_20260429.md), [`../systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path.nodes.md`](../systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path.nodes.md), [`../systems/system_20260427_testplanphase5/syn/logs/quartus_compile_top_stp_pipe_phase5_frame_hist_mts_tserr_20260429.console.log`](../systems/system_20260427_testplanphase5/syn/logs/quartus_compile_top_stp_pipe_phase5_frame_hist_mts_tserr_20260429.console.log), [`../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/program_top_stp_pipe_phase5_frame_hist_mts_tserr_20260429.log`](../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/program_top_stp_pipe_phase5_frame_hist_mts_tserr_20260429.log) | The imported frame/MTS/histogram STP now compiles and runs: Node Finder found 1180/1180 probes; import succeeded with 0 errors; full compile/program succeeded (`rc=0`, 0 errors, checksum `0x16D84D15`). Runtime captures exported VCDs for MTS0 valid and histogram-statistics valid on real lanes 0/3, plus the matching emulator lane-0 histogram trigger. This is debug-only evidence because the STP revision has slow 85 C setup WNS `-0.860 ns` on the LVDS `pll_sclk`; use the no-STP image for timing signoff. |
+
 ### 1.2 Authoritative IP and address references (from this repo)
 
-| IP / instance | Address (sc_tool word) | Source of truth |
+The addresses below are external **`sc_tool` word addresses**. They are derived
+from the SC-hub word-addressed bridge base plus the generated Qsys byte offset
+divided by four; do not send the raw Qsys byte offsets to `sc_tool`.
+
+| IP / instance | `sc_tool` word address | Source of truth |
 |---|---|---|
 | `mutrig_cfg_ctrl_0.avmm_csr` (MuTRiG Controller CSR) | `0x0FC04` | [`../../mutrig_controller/mutrig_ctrl.vhd`](../../mutrig_controller/mutrig_ctrl.vhd), [`../../mutrig_controller/mutrig_cfg_ctrl.svd`](../../mutrig_controller/mutrig_cfg_ctrl.svd) |
 | `mutrig_cfg_ctrl_0` scratchpad host port (cfg bitstream stage) | aliased into `scratch_pad_ram` at `0x00000` | `TEST_PLAN.md` §1.2; controller's own AVMM host port reads it |
 | `mutrig_injector_0.csr` | `0x0AC80` | [`../../charge_injection/mutrig_injector_multiheader.vhd`](../../charge_injection/mutrig_injector_multiheader.vhd), [`../../charge_injection/mutrig_injector.svd`](../../charge_injection/mutrig_injector.svd) |
-| `charge_injection_pulser_0` (analog pulser) | `0x04C00` (write-only) | `TEST_PLAN.md` §1.5 |
 | `histogram_statistics_0.csr` | `0x0A900` | [`../../histogram_statistics/histogram_statistics.svd`](../../histogram_statistics/histogram_statistics.svd) |
 | `histogram_statistics_0.hist_bin` | `0x0A800` | same |
 | `histogram_ingress_bridge_0.csr` | `0x0AB00` | [`../../histogram_statistics/histogram_ingress_bridge.svd`](../../histogram_statistics/histogram_ingress_bridge.svd) |
+| `hit_stack_subsystem_0.ring_buffer_cam_0..3.csr` | `0x0AC00`, `0x0AC20`, `0x0AC40`, `0x0AC60` | per AVMM map in `feb_system_v3_pipe.qsys` line 285 |
+| `hit_stack_subsystem_1.ring_buffer_cam_0..3.csr` | `0x0AD00`, `0x0AD20`, `0x0AD40`, `0x0AD60` | same map |
 | `mutrig_frame_deassembly_0..7.csr` | `0x08240`, `0x08640`, `0x08A40`, `0x08E40`, `0x09240`, `0x09640`, `0x09A40`, `0x09E40` | per AVMM map in `feb_system_v3_pipe.qsys` line 285 |
 | `mts_preprocessor_{0,1}.csr` | `0x09000`, `0x0A000` | same map |
 | `feb_frame_assembly_{0,1}.csr` | `0x0B400`, `0x0B410` | same map |
 | `lvds_rx_controller_pro_0.csr` | `0x08000` | same map |
 | `runctl_mgmt_host_0.csr` | `0x0C000`..`0x0C013` | `TEST_PLAN.md` §1.10, §3.1 |
+| `onewire_master_controller_0.csr` | `0x04400`..`0x0440A` | [`../../onewire_temp_sense/script/onewire_master_controller.svd`](../../onewire_temp_sense/script/onewire_master_controller.svd) |
+| `max10_prog_avmm_0.csr_avmm` | `0x04800`..`0x04803` | [`../../feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd`](../../feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd) |
+| `firefly_xcvr_ctrl_0.firefly` | `0x05000`..`0x0500D` | [`../../firefly_xcvr_i2c_master/firefly_xcvr_ctrl.svd`](../../firefly_xcvr_i2c_master/firefly_xcvr_ctrl.svd) |
+| `on_die_temp_sense_ctrl.csr` | `0x05400` | [`../../alt_temp_sense_controller/altera_temp_sense_ctrl.svd`](../../alt_temp_sense_controller/altera_temp_sense_ctrl.svd) |
+| `legacy_firefly_bridge.s0` | `0x05800` | bridge reachability only; primary optical monitor is `firefly_xcvr_ctrl_0.firefly` |
+
+As of the 2026-04-29 generated `debug_sc_system_v3.qsys` audit, the headless
+`jtag_master.master` is not wired to `mm_bridge.s0`; it cannot access the
+datapath slaves in this table. Datapath CSR stimulus must use `sc_tool` word
+addresses through the SWB secondary ring. `phase5_injector_jtag_preset.tcl`
+now fails fast rather than writing SC byte addresses into an unmapped JTAG
+aperture.
+
+The full SC-visible address map, including bridged datapath and upload/run-control leaves, is generated by `../systems/system_20260427_testplanphase5/script/extract_full_svd_map.py`. The script resolves every active Qsys slave to an SVD where one exists and emits register offsets, absolute word addresses, bit fields, reset values, access modes, and descriptions. A Phase-5 map extraction is acceptable only when `missing_svd` is empty.
+
+#### 1.2.1 Environmental monitor sanity gate
+
+Run this gate after every FEB reflash and before any Phase-5 case changes MuTRiG thresholds, injector state, or run-control state:
+
+```bash
+../systems/system_20260427_testplanphase5/script/check_environment_monitors.py \
+  --link 2 \
+  --json-output ../systems/system_20260427_testplanphase5/reports/phase5_environment_$(date +%Y%m%d).json
+```
+
+The check is read-only. The helper asserts `STATUS.processor_go=1` for every synthesized 1-Wire DQ line before sampling and waits for the controller monitor loop to settle. It auto-detects the upgraded common-header map by reading `UID=0x4F574D43` at `0x04400`; old flashed images are still decoded as legacy for diagnostic continuity. In the upgraded controller package, `STATUS[26] sample_valid` must assert for each selected DQ line after a full DS18B20 scratchpad read. A persistent `1.0 C` float32 value after those writes is a failure boundary for the 1-Wire data path, not accepted environmental evidence. The helper first uses quiet `sc_tool` transactions and records `sc_transport`; if quiet mode times out or returns an incomplete payload on a noisy secondary ring, it retries the same transaction with verbose `sc_tool` and requires the final parsed response to be `rsp OK`.
+
+| Monitor | Words | Required sanity check |
+|---|---|---|
+| `onewire_master_controller_0` | upgraded map: `0x04400` UID, `0x04401` META, `0x04402` SCRATCH, `0x04403` CAPABILITY, `0x04404` STATUS, `0x04405`..`0x0440A` sensor float32 temperatures; legacy diagnostic map: `0x04400` capability, `0x04401` status, `0x04402`..`0x04407` temps | at least one DQ line, no sticky CRC/init error, `STATUS[26] sample_valid=1` for every selected line in upgraded images, at least one finite sensor in `[-40, 125] C` and normally within `[5, 85] C`; repeated default-looking `1.0 C` values block Phase 5 |
+| `max10_prog_avmm_0` | `0x04800` ID, `0x04801` version, `0x04802` command/data, `0x04803` status | expected ID/version, programmer idle, fault bit clear |
+| `firefly_xcvr_ctrl_0` | `0x05000` FF1 temp/status, `0x05001` FF1 VCC/reset, `0x05002`..`0x05005` FF1 RX powers, `0x05006` FF1 alarms, `0x05007` FF2 temp/status, `0x05008` FF2 VCC, `0x05009`..`0x0500C` FF2 RX powers, `0x0500D` FF2 alarms | temperatures non-sentinel and sane, VCC codes non-sentinel and near the module rail, optical-power words not `0xFFFF`; zero power is WARN unless the channel is known dark/unplugged |
+| `on_die_temp_sense_ctrl` | `0x05400` signed temperature byte | non-sentinel Arria temperature in `[-20, 110] C` |
+| `legacy_firefly_bridge` | `0x05800` one-word reachability probe | WARN-only legacy bridge visibility; do not use it as the optical-health source |
+
+Scoreboard rule: any `FAIL` blocks Phase 5. `WARN` is allowed only with a written explanation in the run report, for example an intentionally dark Firefly RX channel.
 
 ### 1.3 Frame-format constants used in §3 trigger expressions
 
@@ -73,12 +124,22 @@ If any prerequisite is open, Phase 5 does not start. Phase 4 closure attestation
 |---|---|
 | `sc_tool` | program the MuTRiG controller (load opcodes, poll status), program injector + histogram + ingress-bridge CSRs, snapshot histogram and counters |
 | `rc_tool` | issue CMD_RUN_PREPARE/CMD_SYNC/CMD_START_RUN/CMD_END_RUN to gate the histogram interval and any traffic |
-| `run_phase4_emulator.py` | reused as the closure runner skeleton — same SC/RC sequence, but with the per-bucket Phase-5 stimulus described in §5; this plan does **not** rewrite the script |
+| `run_phase4_emulator.py` | reused as the closure runner skeleton — same SC/RC sequence, but with the per-bucket Phase-5 stimulus described by the §3 bucket files; this plan does **not** rewrite the script |
 | `probe_phase4_stage_counters.py` | stage-counter snapshot before/after each Phase-5 case |
+| `phase5_case_catalog.py` | validates the four plaintext SignalTap bucket files as the live scoreboard |
+| `phase5_run_case.py` | board-run orchestration for cataloged Phase-5 cases |
+| `set_mutrig_lane_sources.py` | selects real MuTRiG, emulator, or mixed source per lane before a case |
+| `configure_mutrig_from_xml.py` | packs the FE SciFi MuTRiG XML files into the 84-word MuTRiG3 stream, stages the scratchpad, issues `CMD_MUTRIG_ASIC_CFG`, and checks frame-deassembly deltas |
+| `run_phase5_injector_datapath_sanity.py` | SC/RC live injector gate for emulator, real, and negative-control source selections |
+| `extract_full_svd_map.py` | emits the full SC-visible address map with resolved SVD register/field details |
+| `check_environment_monitors.py` | read-only environmental sanity gate for 1-Wire, MAX10, Firefly, on-die temperature, and legacy bridge visibility |
+| `generate_phase5_frame_hist_path_stp.py` | generates the frame-deassembly/MTS/histogram SignalTap profile; current `phase5_frame_hist_path.stp` validates 1180/1180 nodes against the pipe revision and includes MTS debug stream plus hit-stack-0 debug/fill-level probes |
+| `prepare_phase5_frame_hist_path_stp.sh` | required pre-compile SignalTap preparation step: regenerate, Node-Finder-check, and import the frame/hist STP into `top_stp_pipe_phase5_frame_hist` so Quartus emits the stripped `SLD_FILE` and CRC post-fit assignments |
 | `run_signaltap_capture.py` | invoke segmented `.stp` capture from a pre-authored Phase-5 image |
+| `run_phase5_injector_signaltap_capture.py` | concurrent injector + SignalTap wrapper retained as a debug tool; default runner mode now uses normal SC synchronization, with `--runner-no-sc-reset` opt-in only for known-safe sessions because no-reset can stale the secondary ring after FPGA reprogramming |
 | `check_ip_metadata.py` / `check_sc_bridges.py` | pre-flight gate after the FEB SOF is reflashed for Phase 5 |
 
-The cfg bitstream upload helper used by MIDAS production is `Mutrig_FEB.cpp` in `online_dpv2`. For Phase 5 bring-up under board_test the same bitstream is staged via `sc_tool` block writes into `scratch_pad_ram` and committed via `mutrig_cfg_ctrl_0.OPCODE_STATUS`. No new helper is authored as part of this plan; the existing tools are sufficient.
+The cfg bitstream upload helper used by MIDAS production is `/home/yifeng/packages/online_dpv2/online/switching_pc/slowcontrol/mutrig/Mutrig_FEB.cpp`. For Phase 5 bring-up under board_test, `configure_mutrig_from_xml.py` mirrors the FE SciFi toolkit parameter ordering, stages the 84-word packed bitstream via `sc_tool` writes into `scratch_pad_ram`, and commits it via `mutrig_cfg_ctrl_0.OPCODE_STATUS`. The production C++/toolkit flow remains the packing reference if the helper and hardware evidence disagree.
 
 ### 1.5 Document conventions reused from Phase 4
 
@@ -90,35 +151,70 @@ This plan adopts the BASIC catalog conventions from [`phase4/TEST_PLAN_BASIC.md`
 
 Phase 5 is on-board-first by construction; the TLM/RTL-SIM rows of Phase 4 are the **reference** that real-MuTRiG cases compare against.
 
-### 1.6 Functional coverage accounting
+### 1.6 Functional coverage accounting and bucket files
 
-Phase 5 uses four functional-coverage buckets for board and SignalTap closure:
+Phase 5 directed verification (§3) is split into four functional-coverage buckets, each with its own catalog Markdown:
 
-| Coverage bucket | Required points | Scope |
-|---|---:|---|
-| BASIC | 64 | Nominal bring-up, consecutive-frame framing, run-control, and one-rate histogram checks. |
-| EDGE | 64 | Boundary settings: short/long frames, first/last ASIC, first/last channel, TTH extremes, delay endpoints, and wire-cap edge rates. |
-| PROF | 64 | Rate, latency, queue, and sustained-run profiling checkpoints. |
-| ERROR | 64 | Negative triggers and fault checkpoints: torn frame, code/disp error, bad timestamp, overflow/drop/underflow, and misconfiguration detection. |
+| Coverage bucket | Catalog file | Minimum cases | Scope |
+|---|---|---:|---|
+| INJECTOR-PATH gate | [`TEST_INJECTOR_PATH.md`](TEST_INJECTOR_PATH.md) | gate only | Live `mutrig_injector_0` to fanout to source path boundary debug. This must pass or be explicitly bypassed before any real/injector-dependent BASIC/PROF cases are claimed. |
+| BASIC | [`TEST_BASIC.md`](TEST_BASIC.md) | ≥ 144 | Nominal end-to-end hit propagation across the full IP chain (`emulator_mutrig` / real MuTRiG → `mutrig_frame_deassembly` → `backpressure_fifo` → `mux_mutrig2processor` → `mts_processor` → `histogram_ingress_bridge` → `ring_buffer_cam` → `feb_frame_assembly` → SWB ingress) at low rate, with hits restricted to selected (ASIC, channel) combinations and counted at every IP boundary. |
+| PROF | [`TEST_PROF.md`](TEST_PROF.md) | ≥ 144 | Performance / rate-pressure cases — emulator and real-MuTRiG hit-rate sweeps, per-lane skew, ring-CAM and backpressure-FIFO fill-level pressure, sustained-run soak. Uses GTS-armed segmented acquisition to capture multi-frame propagation under load. |
+| EDGE | [`TEST_EDGE.md`](TEST_EDGE.md) | ≥ 144 | Run-state transition corner cases — first hit after `RUNNING`, terminating last hit before `TERMINATING`-idle-guard close, frame-counter rollover, GTS rollover, MTS subheader-timestamp wrap, abort during run, in-flight hits at SYNC and TERMINATING. |
+| ERROR | [`TEST_ERROR.md`](TEST_ERROR.md) | ≥ 144 | Negative-path / error-injection cases — bit-flip code/disp errors, torn frames, bad CRC, MTS `tsglitcherr`, FIFO overflow, ring-CAM saturation, terminating-idle-guard violation. Each case must be observable on a per-IP `*_error` AVST flag, a CSR overflow counter, or a SignalTap-tappable internal status. |
 
-The sign-off target is at least **50% functional coverage** over the 256 required points, with no open failure in any implemented checkpoint. Until the full catalog is implemented, every report must publish both views:
+**Minimum cases is a floor, not a target.** Each bucket is expected to grow into the 500–3000-case range as Mu3e-side experience and additional formal-cover-driven cases are added. The current revision provides ≥ 144 well-motivated cases per bucket as the directed-verification entry catalog.
 
-- implemented coverage by bucket: `implemented_pass / 64`
-- aggregate coverage: `sum(implemented_pass) / 256`
+The §3 bucket files own the case enumeration. The TEST_PLAN_PHASE5 §3 sections only list the IP-boundary tap stations, the multi-instance SignalTap arming model, and the bucket cross-references — the case rows themselves live in the four bucket files.
 
-The existing §5 A..E case catalog remains the live-MuTRiG stimulus catalog. Each case maps to one or more BASIC/EDGE/PROF/ERROR coverage points in the report. SignalTap trigger-condition cases also count as coverage points, but each segmented acquisition is one trigger condition with four consecutive trigger events, per §3.
+The four bucket files are the **plaintext SignalTap sub-test plans**. They are not optional appendices and must not be dropped from Phase-5 closure. Each row is an executable capture contract: stimulus, trigger mode, armed tap stations, expected evidence, and eventual `tb_int/` match. Generated `.stp` files under `../systems/system_20260427_testplanphase5/signaltap/` are derived implementation artifacts; if an `.stp` and a bucket row disagree, patch the generator or the `.stp` to match the plaintext bucket row before running hardware.
 
-Current implemented trigger/checkpoint coverage in this revision:
+Cross-source closure: every Phase-5 §3 BASIC/PROF/EDGE/ERROR case must have a matching `tb_int/` integration-sim case in the long term (closure requirement). The required match is *event-equivalence*: the same hit propagation pattern observed in SignalTap must be reproducible in `tb_int/` with the same per-IP boundary checkers. This plan does not enforce 1:1 today; the bucket files mark each case with `MATCH:` placeholder rows that will be backfilled as `tb_int/` covers grow.
 
-| Bucket | Implemented | Required | Current ratio |
+Current bucket catalog size in this revision:
+
+| Bucket | Cataloged cases (this revision) | Floor | Long-term target |
 |---|---:|---:|---:|
-| BASIC | 6 | 64 | 9.4% |
-| EDGE | 1 | 64 | 1.6% |
-| PROF | 0 | 64 | 0.0% |
-| ERROR | 2 | 64 | 3.1% |
-| **Aggregate** | **9** | **256** | **3.5%** |
+| BASIC | 144 | 144 | 500–3000 |
+| PROF | 144 | 144 | 500–3000 |
+| EDGE | 144 | 144 | 500–3000 |
+| ERROR | 144 | 144 | 500–3000 |
 
-These counts cover only concrete trigger/checkpoint cases that are enumerated in this document today: the five FEB trigger cases in §3.1 and the four SWB trigger cases in §3.2. Planned §5 stimulus rows do not count toward implemented coverage until the runner, report row, and pass/fail evidence exist.
+### 1.7 Scoreboard use
+
+This plan is also the live Phase-5 scoreboard. The four bucket files are updated after every board run, SignalTap capture, or matching `tb_int/` run. Use the following status vocabulary:
+
+| Status | Meaning |
+|---|---|
+| `not-run` | case or group is specified but has no accepted evidence yet |
+| `ready` | stimulus, `.stp`, trigger, and counters are prepared, but the case has not run |
+| `running` | capture/run is in progress or evidence is being reduced |
+| `PASS` | all listed evidence is present, counters match, and artifact links are recorded |
+| `FAIL` | case ran and violated the listed evidence |
+| `BLOCKED` | case cannot run because prerequisite hardware, `.stp`, source mux, or injector control is missing |
+| `WAIVED` | deliberately removed from closure, with a reason and reviewer/date recorded |
+
+Ranged case rows are not marked `PASS` unless every case in the range passed. If only part of a range runs, split the row or add an explicit subrange note in that bucket's scoreboard with the evidence artifact path. The group scoreboard in each bucket file is the first-level record; detailed evidence belongs under `../systems/system_20260427_testplanphase5/reports/phase5_<bucket>_<date>.md` and capture snapshots under `../systems/system_20260427_testplanphase5/signaltap/`.
+
+Current top-level scoreboard:
+
+| Bucket | Cases | not-run | ready | running | PASS | FAIL | BLOCKED | Last evidence |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| BASIC | 144 | 104 | 0 | 0 | 0 | 0 | 40 | [`../systems/system_20260427_testplanphase5/reports/phase5_frame_hist_mts_histstats_stp_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_frame_hist_mts_histstats_stp_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_real_mutrig_mts_tserr_debug_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_real_mutrig_mts_tserr_debug_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_strict_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_strict_20260429.md) |
+| PROF | 144 | 112 | 0 | 0 | 0 | 0 | 32 | [`../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_l0_histstats_valid_stp_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_l0_histstats_valid_stp_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_l0_broadcast_sweep_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_l0_broadcast_sweep_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_real_mutrig_mts_tserr_debug_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_real_mutrig_mts_tserr_debug_20260429.md) |
+| EDGE | 144 | 144 | 0 | 0 | 0 | 0 | 0 | none |
+| ERROR | 144 | 144 | 0 | 0 | 0 | 0 | 0 | none |
+
+Current pre-case injector gate:
+
+| Gate | Status | Evidence | Interpretation |
+|---|---|---|---|
+| Integration sim, injector mode 2 -> emulator path | `PASS` | [`../systems/system_20260427_testplanphase5/reports/phase5_injector_datapath_sim_20260428.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_datapath_sim_20260428.md), [`../systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/scripts/run_dp_injector_authentic.sh`](../systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/scripts/run_dp_injector_authentic.sh) | Authentic generated-system rerun disables the decoded-din force path and uses generated run-control fanout. It passes with source muxes programmed to emulator, 160 accepted type0 transfers, 160 MTS type1 outputs, 160 rate-hist hits, 160 latency-hist hits, and zero histogram drops/underflows/overflows. Rechecked after the 2026-04-29 regenerated histogram timing-fix image with the same 4/4 PASS result. |
+| Live board, emulator source, injector mode 2 | `PASS` | [`../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_l0_broadcast_sweep_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_l0_broadcast_sweep_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_lane0_rate_sweep_sc_recovered_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_emulator_lane0_rate_sweep_sc_recovered_20260429.md) | After SWB `online_sc` reload, PCIe recovery, and broadcast `rc_tool stop-reset --feb 7`, emulator lane 0 produces MTS/histogram hits with zero drops, zero MTS discards, zero ring input errors, and monotonic interval response. The strict rerun gives `25000 -> 12500 -> 6250` cycles = `14293 -> 28413 -> 55998` histogram hits. |
+| Live board, real source, injector mode 2 | `BLOCKED` | [`../systems/system_20260427_testplanphase5/reports/phase5_frame_hist_mts_histstats_stp_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_frame_hist_mts_histstats_stp_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_mts_valid_stp_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_mts_valid_stp_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_histstats_valid_stp_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_histstats_valid_stp_20260429.md), [`../systems/system_20260427_testplanphase5/reports/phase5_real_mutrig_mts_tserr_debug_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_real_mutrig_mts_tserr_debug_20260429.md) | Real lanes 0/3 are injector-correlated after ASIC0/ASIC3 XML configuration and channel-16-only overrides, and the recompiled frame/MTS/histogram STP proves the path can reach `histogram_statistics_0.asi_hist_fill_in_valid`. A strict retry with normal SC synchronization passed (`hist=29629`, `MTS=22257`, `ring_inerr=0`, `drops=0`, `frame_crc=0`), and an MTS-error-triggered capture timed out with 0 triggers. A later histogram-triggered real run also captured the downstream accept/queue sequence but had one MTS discard, so this is not yet closure-grade repeatability. Keep the gate blocked until a longer repeated run has zero MTS discards and zero ring input errors, and until lanes 1/2/4/5/6/7 are recovered or explicitly waived. |
+| No-STP firmware timing after histogram fix | `PASS` | [`../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.fit.summary`](../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.fit.summary), [`../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sta.summary`](../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sta.summary), [`../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof`](../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof) | The 2026-04-29 regenerated image includes the histogram timing fixes (`hit_fifo` peak-level register path and registered `rr_arbiter` select/pop). Map/Fit/ASM/STA complete with 0 errors; fit elapsed `00:35:50` and needed one routing retry on `ring_buffer_cam_2|pop_engine_state.FLUSHING`. STA is timing-clean: slow 85 C setup WNS `+0.266 ns` overall, LVDS `pll_sclk` `+0.463 ns`; slow 0 C setup WNS `+0.306 ns` overall, LVDS `pll_sclk` `+0.596 ns`; all TNS `0.000`. |
+| Directed SignalTap probe list | `PASS` | [`../systems/system_20260427_testplanphase5/signaltap/phase5_injector_path_lvds.nodes.md`](../systems/system_20260427_testplanphase5/signaltap/phase5_injector_path_lvds.nodes.md), [`../systems/system_20260427_testplanphase5/reports/phase5_injector_signaltap_compile_20260428.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_signaltap_compile_20260428.md), [`../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe_phase5_injector_stp/top_stp_pipe_phase5_injector.sof`](../systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe_phase5_injector_stp/top_stp_pipe_phase5_injector.sof) | Injector-path micro STP generation/import/compile is clean: 31/31 pre-synthesis probes, 95/95 post-map SignalTap pins, map/fit/ASM/STA with 0 errors. STA is timing-clean: slow 85 C setup WNS `+0.337 ns` overall and `+0.447 ns` on LVDS `pll_sclk`; slow 0 C setup WNS `+0.521 ns` on LVDS `pll_sclk`; all TNS `0.000`. The rebuilt 2026-04-29 micro SOF was programmed and used for the pre-armed capture. |
+| Injector micro STP runtime | `PASS_WITH_METHOD_NOTE` | [`../systems/system_20260427_testplanphase5/reports/phase5_injector_prearmed_stp_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_injector_prearmed_stp_20260429.md), [`../systems/system_20260427_testplanphase5/captures/phase5_injector_path_prearmed_periodic_20260429.vcd`](../systems/system_20260427_testplanphase5/captures/phase5_injector_path_prearmed_periodic_20260429.vcd), [`../systems/system_20260427_testplanphase5/reports/phase5_injector_signaltap_capture_20260429_063441.log`](../systems/system_20260427_testplanphase5/reports/phase5_injector_signaltap_capture_20260429_063441.log) | SC pre-arm method passes: program injector over SC first, capture in SignalTap while periodic pulses are already running, then stop injector over SC. VCD shows the pulse chain through `periodic_injector_pulse`, injector conduit, fanout lane 0, emulator input synchronizer, and `inject_pulse_clk`; `avs_csr_waitrequest` stays 0. The old concurrent wrapper remains a known-bad method because SC timed out while SignalTap was armed. |
 
 ---
 
@@ -126,11 +222,11 @@ These counts cover only concrete trigger/checkpoint cases that are enumerated in
 
 ### 2.1 What this stage proves
 
-After SOF reflash and Phases 1..4 PASS, the FEB SciFi v3 still has the eight `emulator_mutrig` cores driving the datapath. Phase 5.A is the act of switching the integration build from emulator-fed to **real-MuTRiG-fed** — by ensuring:
+After SOF reflash and Phases 1..4 PASS, the FEB SciFi v3 contains both the eight `emulator_mutrig` cores and the live LVDS/MuTRiG decode path. `mutrig_lane_source_mux_[0..7].csr` selects the source at run time; reset default is real MuTRiG for Phase 5, while `script/set_mutrig_lane_sources.py` can switch all lanes to emulator or any mixed 8-bit mask. Phase 5.A is the act of proving the integration build can run **real-MuTRiG-fed** by ensuring:
 
 1. The `mutrig_cfg_ctrl_0` IP can stage a 2662-bit cfg bitstream into the IP's internal CFG-mem RAM via DMA from `scratch_pad_ram`, then SPI-write that bitstream into each MuTRiG3.
 2. Every MuTRiG returns a frame_header + payload + trailer at the FEB-side `mutrig_frame_deassembly_N.csr` decoder for at least one full integration interval.
-3. The TSA (TTH Scan Automation) co-routine sweeps the per-channel threshold and reports a sane, monotonic dark-rate vs threshold curve — which then anchors a known-good operating threshold per ASIC for §3..§5.
+3. The TSA (TTH Scan Automation) co-routine sweeps the per-channel threshold and reports a sane, monotonic dark-rate vs threshold curve — which then anchors a known-good operating threshold per ASIC for §3 and the future §4 collective-PDF stage.
 
 ### 2.2 mutrig_cfg_ctrl_0 CSR contract
 
@@ -138,8 +234,8 @@ Per [`../../mutrig_controller/mutrig_ctrl.vhd`](../../mutrig_controller/mutrig_c
 
 | Word | Name | Direction | Field layout |
 |---|---|---|---|
-| `0x00` | `OPCODE_STATUS` | RW | write: `[31:20]=command`, `[19:16]=asic_id`, `[15:0]=cfglen`. Read: `[31:16]=opcode_echo`, `[15:0]=status_word` |
-| `0x01` | `OFFSET` | RW | scratchpad word offset where the cfg bitstream begins |
+| `0x00` | `OPCODE_STATUS` | RW | write: `[31:20]=command`, `[19:16]=asic_id`, `[15:0]=cfglen_words`. Read while busy: `[31:16]=opcode_echo`, `[15:0]=status_word`; read while idle: `0x00000000` |
+| `0x01` | `OFFSET` | RW | scratchpad byte offset where the cfg bitstream begins, matching `mutrig_ctrl.vhd` `avm_schpad_address` |
 | `0x02` | `MONITOR_SECONDS` | RW | counter integration interval in seconds |
 | `0x03` | reserved | — | reads zero |
 
@@ -147,42 +243,45 @@ Opcodes (per `mutrig_ctrl.vhd:202..204`):
 
 | Constant | Hex | Meaning |
 |---|---|---|
-| `CMD_MUTRIG_ASIC_CFG` | `0x011` | DMA cfg bitstream from `scratch_pad_ram[OFFSET..]` into the IP's CFG-mem partition for `asic_id`, then SPI-write to the MuTRiG. |
+| `CMD_MUTRIG_ASIC_CFG` | `0x011` | DMA `cfglen_words` 32-bit words from `scratch_pad_ram[OFFSET..]` into the IP's CFG-mem partition for `asic_id`, then SPI-write `MUTRIG_CFG_LENGTH_BIT` bits to the MuTRiG. |
 | `CMD_MUTRIG_ASIC_TTH_SCAN` | `0x012` | sweep per-channel TTH for `asic_id` over 64 steps; record per-(channel, TTH) hit-rate into the Result RAM exposed at `avs_scanresult_*`. Requires that the MuTRiG was already configured at least once via `CMD_MUTRIG_ASIC_CFG` (per the controller's note). |
-| `CMD_MUTRIG_ASIC_TTH_SCAN_ALL` | `0x014` | iterate `CMD_MUTRIG_ASIC_TTH_SCAN` across all 8 ASICs. |
+| `CMD_MUTRIG_ASIC_TTH_SCAN_ALL` | `0x014` | Intended all-ASIC TSA helper used by the FE SciFi toolkit. For Phase-5 board signoff, prefer the per-ASIC `0x012` loop unless `0x014` is first proven live on the flashed RTL; see §8. |
 
 **Important constants** (from `mutrig_ctrl.vhd:201, 210..213`):
 
 - `CFG_MEM_PARTITION_SIZE_WORD = 128` — each ASIC has a 128-word internal cfg-mem partition.
+- `MUTRIG_CFG_WORDS = ceil(2662/32) = 84 = 0x0054` — this is the value written to `cfglen_words` and matches `toolkits/fe_scifi/system_console/lib/mutrig_controller_toolkit_gui.tcl`.
 - `CFG_HEADER_LENGTH = 34` bits, `CFG_SINGLE_CH_LENGTH = 71` bits, `CFG_SINGLE_CH_TTH_OFFSET = 24` bits, `CFG_TTH_SETTING_LENGTH = 6` bits, `CFG_N_CH = 32`.
-- `MUTRIG_CFG_LENGTH_BIT = 2662` for MuTRiG3.
+- `MUTRIG_CFG_LENGTH_BIT = 2662` for MuTRiG3; the controller rounds this internally to 2688 bits for SPI shifting. This is **not** the `cfglen_words` field.
 
 ### 2.3 Bring-up procedure
 
-This is a procedure description; the actual execution wraps `sc_tool` and reuses `run_phase4_emulator.py`'s run-control sequence. **Do not** re-author either tool; only data values change.
+This is a procedure description; the actual execution wraps `sc_tool`, `configure_mutrig_from_xml.py`, and reuses `run_phase4_emulator.py`'s run-control sequence where a timed run window is needed. The production MuTRiG packing remains the reference; helper scripts are allowed only to stage, issue, poll, and report that flow.
 
 1. **Pre-flight**:
     - `script/check_ip_metadata.py` and `script/check_sc_bridges.py` clean.
+    - `script/set_mutrig_lane_sources.py --mode real --clear-counters` succeeds; use `--mode emulator` for Phase-4 reference reruns and `--mode mixed --mask 0xNN` for lane-by-lane A/B tests.
     - `rc_tool status` reports IDLE (no run armed).
-    - Read `mutrig_cfg_ctrl_0.OPCODE_STATUS` (`0x0FC04`) and confirm `[15:0]=0x0000` (idle status).
+    - Read `mutrig_cfg_ctrl_0.OPCODE_STATUS` (`0x0FC04`) and confirm the full word is `0x00000000` (idle).
 
 2. **Stage cfg bitstream** for ASIC `k ∈ {0..7}`:
-    - Compute the cfg-bitstream **word stream** from the production text file used by `Mutrig_FEB.cpp` (a sequence of 32-bit words holding the 2662-bit packed bitstream, padded to a word boundary; ⌈2662/32⌉ = 84 words per ASIC).
-    - Block-write that word stream into `scratch_pad_ram` at byte offset `OFFSET_BYTE_k = 0x000 + 84*4*k` (so all eight ASIC bitstreams sit back-to-back; each ASIC fits inside the existing scratchpad span, and each word offset stays inside the controller's 11-bit `avm_schpad_address` range).
-    - The 2662-bit length is encoded in `cfglen` field of the next opcode write.
+    - Compute the cfg-bitstream **word stream** from the production packing used by `/home/yifeng/packages/online_dpv2/online/switching_pc/slowcontrol/mutrig/Mutrig_FEB.cpp` and the FE SciFi toolkit (a sequence of 84 32-bit words holding the 2662-bit packed bitstream, padded to a word boundary). The board-test helper for this is `script/configure_mutrig_from_xml.py`; if its word order is questioned, compare it bit-for-bit against the production C++/Tcl path before changing hardware expectations.
+    - Block-write that single ASIC's 84-word stream into `scratch_pad_ram` at `OFFSET_BYTE = 0x000` (`sc_tool` word address `0x00000`). Reuse the same scratchpad window for each ASIC; do **not** stage all eight ASIC streams back-to-back.
+    - The next opcode's `cfglen_words` field is `0x0054` (84 words). The 2662-bit SPI length comes from the IP generic, not from the opcode.
 
 3. **Issue `CMD_MUTRIG_ASIC_CFG`** for ASIC `k`:
-    - `sc_tool write 0x0FC05 [OFFSET_WORD_k]` (where `OFFSET_WORD_k = OFFSET_BYTE_k / 4`).
-    - `sc_tool write 0x0FC04 [(0x011 << 20) | (k << 16) | 2662]`.
-    - Poll `OPCODE_STATUS` until `[15:0]` returns to idle. Record `[31:16]` for the opcode echo to confirm the controller acknowledged the write.
+    - `sc_tool write 0x0FC05 0x00000000` (`OFFSET` is a scratchpad byte offset as seen by the controller).
+    - `sc_tool write 0x0FC04 [(0x011 << 20) | (k << 16) | 0x0054]`.
+    - Poll `OPCODE_STATUS` until the full word returns `0x00000000`. While busy, record `[31:16]` for the opcode echo and `[15:0]` for progress/status.
 
 4. **Verify decoded frames** at `mutrig_frame_deassembly_k.csr`:
     - Read the per-IP UID/VERSION/STATUS aperture.
     - Confirm the per-IP frame-counter advances over a 100 ms interval (i.e. the deassembler is locked on the live K28.5 idle stream and decoding K28.0 SOPs).
-    - If any deassembler does not advance, halt — that ASIC was not configured (most likely scratchpad word stream was wrong), and `Mutrig_FEB.cpp` is the reference for the bit packing.
+    - If any deassembler does not advance, halt — that ASIC was not configured (most likely scratchpad word stream was wrong), and `/home/yifeng/packages/online_dpv2/online/switching_pc/slowcontrol/mutrig/Mutrig_FEB.cpp` is the reference for the bit packing.
 
-5. **Optional but mandatory before §5**: `CMD_MUTRIG_ASIC_TTH_SCAN_ALL`:
-    - `sc_tool write 0x0FC04 [(0x014 << 20)]`.
+5. **Run TSA before real-MuTRiG §3 cases**:
+    - Preferred signoff sequence: for each ASIC `k`, `sc_tool write 0x0FC04 [(0x012 << 20) | (k << 16) | 0x0054]`.
+    - `CMD_MUTRIG_ASIC_TTH_SCAN_ALL` (`0x01400054`) may be used only after it is proven on the flashed RTL. The current source tree contains both the toolkit all-scan command and a controller command-legalization path that should be checked if all-scan hangs.
     - The TSA increments TTH 0..63 and writes `(per-channel, per-TTH)` rate into the Result RAM exposed via `avs_scanresult_*` (14-bit address aperture).
     - Read out the full 8 × 32 × 64 result block; for each ASIC and each channel, record the TTH knee position. The knee per channel is the candidate operating threshold for that channel.
     - Bind the per-channel threshold into a *known-good* set in the cfg bitstream by re-running step 3 with the updated cfg word stream. Record this stream as the Phase-5 baseline.
@@ -198,344 +297,209 @@ Phase 5 §2 PASSES when:
 - The TSA result RAM contains a sane, per-channel monotonic rate-vs-TTH curve for every (ASIC, channel) pair (no zero columns; no flatline rows).
 - The baseline cfg word stream is recorded.
 
-Phase 5 §2 FAILS hard if any of the eight ASICs cannot lock its decoded frame within the integration interval — that is the prerequisite gate for §3..§5. A common symptom and its first-pass debug entry point are listed in §6.
+Phase 5 §2 FAILS hard if any of the eight ASICs cannot lock its decoded frame within the integration interval — that is the prerequisite gate for §3 and any future §4 collective-PDF work. A common symptom and its first-pass debug entry point are listed in §6.
+
+Current §2 scoreboard:
+
+| Check | Status | Evidence | Notes |
+|---|---|---|---|
+| XML pack dry-run, ASIC 0 | `PASS` | [`../systems/system_20260427_testplanphase5/reports/phase5_mutrig_config_dryrun_asic0_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_mutrig_config_dryrun_asic0_20260429.md) | Packed 84 words from the FE SciFi XML/Tcl parameter order without hardware writes. |
+| XML cfg command, ASIC 0 | `FAIL_LOCK` | [`../systems/system_20260427_testplanphase5/reports/phase5_mutrig_config_asic0_20260429.md`](../systems/system_20260427_testplanphase5/reports/phase5_mutrig_config_asic0_20260429.md) | `mutrig_cfg_ctrl_0` returned idle, but `mutrig_frame_deassembly_0` did not advance over the post-config window. LVDS status/error counters point to a lane training/config/physical-link issue that must be debugged before §3 real-source rows can move out of `BLOCKED`. |
 
 ---
 
-## 3. Frame-format SignalTap signoff (4096 samples × 4 segments)
+## 3. Directed verification — IP-by-IP cascade SignalTap signoff
 
-Capture two SignalTap image families, one for FEB egress and one for SWB ingress, both configured **4096 sample depth × 4 segments** (segmented capture on Quartus Stp).
+§3 is the **directed** Phase-5 closure: every nominal hit produced at the source must be observed at every IP boundary on the way to the SWB ingress. Each case in the four bucket files ([`TEST_BASIC.md`](TEST_BASIC.md), [`TEST_PROF.md`](TEST_PROF.md), [`TEST_EDGE.md`](TEST_EDGE.md), [`TEST_ERROR.md`](TEST_ERROR.md)) defines one stimulus configuration plus the SignalTap evidence required to attest the case.
 
-**SignalTap segmentation constraint**: one segmented `.stp` acquisition has exactly one trigger condition. The four segments are four consecutive occurrences of that same trigger condition. Do not specify a different trigger for each segment. When several trigger conditions are needed, create several `.stp` trigger-case images or several runs of the same image with the trigger edited between runs.
+### 3.1 SignalTap segmented-acquisition contract used in §3
 
-The goal of the 4×4096 layout is to capture four adjacent frames or four adjacent hit/framing events. The proof is not just "one packet is shaped correctly"; it is that adjacent frame counters, SOP cadence, EOP cadence, and payload/hit counts advance correctly across consecutive frames, which catches common missed-frame, double-SOP, and off-by-one bugs.
+Verified against the Intel Quartus Prime documentation and an example `.stp` in this repo:
 
-### 3.1 SignalTap image #1 — FEB egress
+- The default Basic / Advanced trigger flow has **one trigger condition per analyzer instance**. In segmented acquisition the analyzer fills the next segment on each trigger occurrence — the trigger expression is global, only the trigger position is per-acquisition.
+- Different per-segment trigger conditions exist only via **state-based trigger flow** (`<segment_trigger>` actions inside `<flow>/<state>` blocks). State-based flow is not used in this plan: each `.stp` instance below carries one trigger condition. When several trigger conditions are required, several `.stp` instances are armed in parallel, or the same `.stp` is re-armed with a different trigger between runs.
 
-**Image**: `../signaltap/phase5_feb_egress_aso_tx8b1k.stp` (to be authored on first run; this plan does not pre-author the `.stp`).
+Sources: Intel "Segmented Buffer" page in the Quartus Prime Pro 22.1 Debugging User Guide; KDB rd12022004_7762 (custom trigger position in segmented buffers); the example `firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4c_runctl_ready_fanout_high.stp` lines 239..242 (`segment_size="1"`, single `<level name="condition1" type="basic">`). The codex skill `signaltap-creation-co-debug` does not document segmented acquisition, so the verdict is based on Intel's docs.
 
-**Clock domain**: `lvds_rx_28nm_0.outclock` (the same clock that drives `aso_tx8b1k_*` per `feb_system_v3_pipe.qsys` and the Phase 4 trigger map in `TEST_PLAN.md` §4.3).
+**Segment depth is sized per IP, not globally.** A short MuTRiG frame is 910 cycles; capturing a SOP-anchored window with at least one full payload + one trailer comfortably fits in **1024 samples × 4 segments**, which is the default for IPs in the per-MuTRiG / per-deassembler / per-FIFO chain. The `feb_frame_assembly` outbound packet is longer at high rate — that instance uses **4096 × 4 segments**. Default depths per tap station are listed in §3.4.
 
-**Probed signals** (one per row, recorded for all four segments):
+**Capture position is 50% pre / 50% post-trigger** for SOP/EOP triggers so the segment retains both the inter-frame K28.5 idle preceding the SOP and the payload that follows. This is the position used unless a case explicitly overrides it.
 
-| Signal | Width | Source |
-|---|---|---|
-| `aso_tx8b1k_valid` | 1 | per-lane TX into LVDS PHY (already used in Phase 4 §4.3 SOP/EOP triggers) |
-| `aso_tx8b1k_data[8:0]` | 9 | same — bit 8 is K-flag, bits 7:0 are data |
-| `mutrig_frame_deassembly_k.frame_counter` | 16 | per-IP frame counter for cross-check |
-| `mutrig_frame_deassembly_k.error_flags` | n | decoder error mask |
-| `feb_frame_assembly_{0,1}.csr.<frame_id, hit_count>` shadow | n | end-of-pipe FEB frame ID/hit count |
-| `runctl_mgmt_host_0.run_state[8:0]` | 9 | one-hot run-state echo |
-| `histogram_ingress_bridge_0.live_select_post` + `.post_packet_active` | 2 | confirms ingress is in the expected mode for this capture |
+### 3.2 The chain under test (canonical IP boundaries)
 
-**Trigger-case matrix** (one trigger condition per image/run; each image stores four consecutive trigger events):
+```text
+  emulator_mutrig_N (or real MuTRiG via mutrig_cfg_ctrl_0)
+     │  aso_tx8b1k[8:0] (lvds_rx_28nm_0.outclock @ 156.25 MHz)
+     ▼
+  mutrig_frame_deassembly_N  (frame_rcv_ip.vhd)
+     │  aso_hit_type0 — channel[5:0], data[44:0], sop, eop, endofrun, error[2:0], valid, ready
+     │  csr.frame_counter / frame_counter_head / frame_counter_tail
+     ▼
+  backpressure_fifo_N        (alt_dcfifo wrapper, depth=128, USE_FILL_LEVEL=1)
+     │  aso (out) hit_type0 + filllevel[6:0]
+     ▼
+  mux_mutrig2processor_{0,1} (lane mux, 8 lanes → 1 processor each)
+     │  aso hit_type0 muxed
+     ▼
+  mts_processor_{0,1}        (mts_processor.vhd; gts_8n counter, mts→gts mapping)
+     │  aso_hit_type1 — channel[3:0], data[38:0], sop, eop, empty, error, valid, ready
+     │  d_gts_counter[47:0] (48-bit global timestamp at 8 ns step)
+     ▼
+  histogram_ingress_bridge_0 (pre/post tap selector)
+     │  pre_in / pre_out / post_out for hit_stack_subsystem_0; subsystem_1 bypasses this bridge
+     ▼
+  hit_stack_subsystem_M.ring_buffer_cam_K (M=0..1, K=0..3; depth=512, key=8 bits, side=31 bits)
+     │  asi_hit_type1 → aso_hit_type2 — channel[3:0], data[35:0], sop, eop, valid, ready, error
+     │  aso_filllevel[15:0]
+     ▼
+  feb_frame_assembly_{0,1}   (feb_frame_assembly.vhd; INTERLEAVING_FACTOR=4, N_SHD=128)
+     │  aso_hit_type3 — data[35:0], sop, eop, valid, ready
+     │  counter_gts_8n[47:0], frame_cnt[35:0], terminating_marker_*
+     ▼
+  upload_subsystem.upload_data → LVDS TX (xcvr_clock 156.25 MHz)
+     ▼  (link 2, 8b/10b)
+  SWB ingress 8b/10b decoder (online_sc) → SWB per-link hit counter
+```
 
-| case_id | Trigger condition (1-cycle combinational) | Captures | Coverage bucket |
-|---|---|---|---|
-| STP5-FEB-BASIC-SOP-L0 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` on lane 0 | four consecutive SOP-centered frame windows on lower bank | BASIC |
-| STP5-FEB-BASIC-EOP-L0 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h19C` on lane 0 | four consecutive EOP-centered frame windows on lower bank | BASIC |
-| STP5-FEB-BASIC-SOP-L4 | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` on lane 4 | four consecutive SOP-centered frame windows on upper bank | BASIC |
-| STP5-FEB-EDGE-LONG-SOP | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C` with `csr_short_mode=0` | four consecutive long-frame SOP windows | EDGE |
-| STP5-FEB-ERROR-SOP-IN-FRAME | `aso_tx8b1k_valid && aso_tx8b1k_data == 9'h11C && in_frame_q` | should not trigger during a 60 s nominal window; if it does, stores the first four torn-frame events | ERROR |
+Sources for the boundary signal lists and counter widths:
+- `mutrig_frame_deassembly/rtl/frame_rcv_ip.vhd:85..98, 119..121, 240, 260` (run_state, hit_type0 ports, frame_counter shadow).
+- `mutrig_timestamp_processor/mts_processor.vhd:158..182, 345, 411, 515..516, 547..549` (hit_type0 in, hit_type1 out, run_state_t, gts counter, delta_timestamp).
+- `ring-buffer_cam/rtl/ring_buffer_cam.vhd:37..58` (hit_type1 in, hit_type2 out, filllevel).
+- `feb_frame_assembly/feb_frame_assembly.vhd:51..96, 290..303, 485..487, 551, 585..610` (hit_type2 in, hit_type3 out, gts counter, frame_cnt, run_state_t).
+- `firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe.qsys` AVMM map (CSR address bases).
+- `firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe.qsys:1238..1266, 2308..2378, 2870..3029` (two hit-stack subsystems, four ring-CAM partitions each, and stream wiring).
 
-**Capture position**: 20% post-trigger so each segment retains 3276 cycles of pre-trigger context and ~820 cycles of post-trigger context. For SOP-triggered short-frame captures, this is enough to see the K28.5 idle stream before the SOP, the payload that follows, the EOP, and the next frame boundary context. Across four segments, verify four consecutive trigger events and the adjacent-frame relationships between them.
+### 3.3 Multi-instance SignalTap arming model
 
-For ERROR trigger cases, pass is normally "no trigger during the observation window." If a negative trigger fires, all four segments capture consecutive occurrences of that same error condition and the case fails with those captures as debug evidence.
+Phase-5 §3 arms **one SignalTap instance per IP boundary** in the same Quartus build. The analyzer instances run on their respective IP clocks (`lvds_rx_28nm_0.outclock @ 156.25 MHz` for the byte-stream end-points; `data_path_clock @ 125 MHz` for the AVST hit_type stages). Each instance taps the same `gts_8n_counter` (a low-bit slice mirrored into its own clock domain — `counter_gts_8n` in `feb_frame_assembly` and `d_gts_counter` in `mts_processor`; for upstream IPs a small free-running counter on the IP's own clock is used as the SignalTap-only timing anchor and the GTS-equivalent slice is correlated post-capture via a single common-clock cycle alignment).
 
-### 3.2 SignalTap image #2 — SWB ingress
+Each case in the four bucket files specifies:
 
-**Image**: `../signaltap/phase5_swb_ingress.stp` on the **SWB FPGA**, not the FEB. The SWB build is `online_sc/online/switching_pc/a10_board/output_files/top.sof` (per the FEB ↔ SWB mapping in `~/CLAUDE.md`); this plan does not modify the SWB SOF, but it does add a Phase-5 SignalTap image into the SWB Quartus project (or reuse an existing per-link ingress image if one is already in the SWB tree). The `.stp` author and check-in is a follow-up task in `online_sc`, not in this repo.
+1. The stimulus configuration (emulator CSR / real-MuTRiG cfg / injector mode + parameters / run-control sequence).
+2. The set of SignalTap instances that must be armed for the case.
+3. The trigger condition for each instance — typically equality on `gts_8n_counter[N:0] == TARGET_GTS` so all instances trigger on the same frame, or a packet-boundary K-symbol (K28.0/K28.4/sub-header) for byte-stream taps.
+4. The expected per-instance evidence: which channel-ID/lane appears in the captured AVST stream, which counter increments are expected at the IP's CSR shadow, and the per-IP `*_error` flag must stay deasserted (or assert if the case is in ERROR).
 
-**Clock domain**: SWB FEB-link RX recovered clock for link 2 (the SciFi FEB link per `~/CLAUDE.md` `feb_scifi_link_mapping`).
+### 3.4 Per-IP tap station defaults
 
-**Probed signals**:
+| ID | Tap station | `.stp` instance name | Clock | Default depth × segments | Probed signals (minimum) |
+|---|---|---|---|---|---|
+| T0 | `emulator_mutrig_N.aso_tx8b1k` (or real-MuTRiG byte-stream into LVDS-RX deassembler) | `phase5_t0_emulator_egress` | `lvds_rx_28nm_0.outclock` (156.25 MHz) | 1024 × 4 | `aso_tx8b1k_valid`, `aso_tx8b1k_data[8:0]`, `gts_8n_lo[15:0]`, `run_state[8:0]` |
+| T1 | `mutrig_frame_deassembly_N.aso_hit_type0` | `phase5_t1_frame_deassembly` | `data_path_clock` (125 MHz) | 1024 × 4 | `aso_hit_type0_{valid, ready, sop, eop, endofrun}`, `aso_hit_type0_data[44:0]`, `aso_hit_type0_channel[5:0]`, `aso_hit_type0_error[2:0]`, `csr.frame_counter[15:0]`, `gts_8n_lo[15:0]` |
+| T2 | `backpressure_fifo_N.out` + `filllevel` | `phase5_t2_backpressure_fifo` | `data_path_clock` | 1024 × 4 | hit_type0 AVST out, `filllevel[6:0]`, drop indicator (if exposed), `gts_8n_lo[15:0]` |
+| T3 | `mux_mutrig2processor_M.out` | `phase5_t3_lane_mux` | `data_path_clock` | 1024 × 4 | hit_type0 muxed AVST, `select[2:0]` if exposed, `gts_8n_lo[15:0]` |
+| T4 | `mts_processor_M.aso_hit_type1` | `phase5_t4_mts_processor` | `data_path_clock` | 1024 × 4 | `aso_hit_type1_{valid, ready, sop, eop, empty, error}`, `aso_hit_type1_data[38:0]`, `aso_hit_type1_channel[3:0]`, `d_gts_counter[15:0]`, `delta_timestamp[11:0]`, `run_state_cmd[3:0]` |
+| T5 | `histogram_ingress_bridge_0.{pre_in, pre_out}` (and optionally `post_in/post_out`) | `phase5_t5_hist_ingress_bridge` | `data_path_clock` | 1024 × 4 | both AVST sides of the bridge, `live_select_post`, `pre_packet_active`, `post_packet_active`, `gts_8n_lo[15:0]` |
+| T6 | `hit_stack_subsystem_M.ring_buffer_cam_K.aso_hit_type2` + `aso_filllevel` | `phase5_t6_ring_buffer_cam_M_K` (one per M=0..1, K=0..3; eight total) | `data_path_clock` | 1024 × 4 | `aso_hit_type2_*`, `aso_filllevel_data[15:0]`, `gts_8n_lo[15:0]` |
+| T7 | `hit_stack_subsystem_M.feb_frame_assembly.aso_hit_type3` | `phase5_t7_feb_frame_assembly_M` (one per M=0..1) | `xcvr_clock` (156.25 MHz) | **4096 × 4** | `aso_hit_type3_*`, `frame_cnt[35:0]`, `counter_gts_8n[15:0]`, `terminating_marker_*`, `run_state_cmd[3:0]` |
+| T8 | LVDS TX byte stream (final aso_tx8b1k into the lane mux) | `phase5_t8_lvds_tx` | `xcvr_clock` | 1024 × 4 | byte stream + K-flag, link-2 disparity, `gts_8n_lo[15:0]` |
+| TS | SWB ingress (in `online_sc`, not this repo) | `phase5_ts_swb_ingress` | SWB link-2 RX clock | 1024 × 4 | post-decoder `data[7:0]`, `is_k`, `disp_err`, `code_err`, RX FIFO state, SWB per-link hit counter shadow |
 
-| Signal | Width | Notes |
-|---|---|---|
-| Per-link 8b/10b decoder `data[7:0]`, `is_k`, `disp_err`, `code_err` | 1+1+1+8 | post-decoded byte stream |
-| Per-link RX FIFO `wr_en`, `level[*]`, `full`, `empty` | n | back-pressure state at the SWB ingress |
-| Per-link `LINK_LOCKED` bit | 1 | confirms link 2 is locked (the bit in the low link-lock register, not the upper register that contains other boards) |
-| SWB-side per-link hit counter shadow | 32 | the same counter `TEST_PLAN.md` §4.4 already references |
+The depths above are **defaults**; bucket cases may override per case (e.g. a sustained-rate PROF case may bump T2 to 2048×4 to capture FIFO fill ramps).
+When a bucket row names only T6 partition `K`, the hit-stack subsystem `M` is selected by the active source lane unless the row says otherwise: lanes 0..3 feed `M=0`, and lanes 4..7 feed `M=1`.
 
-**Trigger-case matrix** (one trigger condition per image/run; each image stores four consecutive trigger events):
+### 3.5 GTS-armed alignment
 
-| case_id | Trigger | Captures | Coverage bucket |
-|---|---|---|---|
-| STP5-SWB-BASIC-SOP | `is_k && data == 8'h1C` | four consecutive ingress SOP windows | BASIC |
-| STP5-SWB-BASIC-EOP | `is_k && data == 8'h9C` | four consecutive ingress EOP windows | BASIC |
-| STP5-SWB-BASIC-IDLE-AFTER-PAYLOAD | `is_k && data == 8'hBC && rising_edge(prev_payload_valid)` | four consecutive inter-frame transitions | BASIC |
-| STP5-SWB-ERROR-CODE-DISP | `code_err || disp_err` | should not trigger during a 60 s nominal window; if it does, stores the first four decoder-error events | ERROR |
+Multiple SignalTap instances cannot share a literal trigger wire across clock domains, but they can be armed before the run and triggered by the same event in their respective domains. Phase-5 §3 standardizes one of three triggering modes per instance per case:
 
-**Same depth and position as §3.1**: 4096 × 4 segments, 20% post-trigger.
+- **GTS-arm** — the instance triggers on `gts_8n_lo == TARGET` at its IP boundary. Because `gts_8n` is the global timestamp counter mirrored onto every IP's own clock domain, each instance triggers on the corresponding GTS bucket; the post-capture cross-IP alignment uses the captured GTS samples to pin events to the same simulated 8 ns step.
+- **K-symbol arm** — the instance triggers on a K-symbol pattern at its byte-stream boundary (T0, T7, T8, TS). Cross-IP alignment uses the captured GTS slice in the same window.
+- **State-arm** — the instance triggers on a run-state transition (e.g. `run_state_cmd → TERMINATING`) for EDGE cases that exercise the run sequence.
 
-### 3.3 What this image proves
+Every bucket-file case lists the trigger mode used per tap station.
 
-The pair of images proves the canonical 8b/10b framing contract end-to-end:
+### 3.6 Plaintext SignalTap implementation format
 
-- **K28.5 fill** — the inter-frame stream is K28.5 idles only; SOP and idle-after-payload trigger cases must show solid K28.5 between two K28.0 SOPs.
-- **K28.0 SOP at frame boundary** — the four SOP segments capture four adjacent frame starts on the same trigger case.
-- **K28.4 EOP closes the frame** — the four EOP segments capture four adjacent frame closes on the same trigger case.
-- **No torn frames** — the dedicated torn-frame/error trigger cases do not trigger during the 60 s nominal window.
-- **Adjacent frame counter increment** — for consecutive SOP and EOP trigger cases, `mutrig_frame_deassembly_k.frame_counter` and FEB frame ID shadows increment by exactly one between adjacent segments, modulo the documented counter width.
-- **Frame interval** — measured cycle distance between consecutive SOP events equals `FRAME_INTERVAL_SHORT` (910) for `csr_short_mode=1` and `FRAME_INTERVAL_LONG` (1550) for `csr_short_mode=0`, within the expected 1-cycle FIFO jitter.
-- **Multi-packet repetition** — the four segments are four consecutive events, so an off-by-one timing error, dropped frame, repeated frame counter, or missed EOP in any adjacent pair fails the alignment cross-check.
+The bucket tables are intentionally kept as plain Markdown instead of generated XML. For each case row, the SignalTap implementation expands the row into the following run manifest:
 
-### 3.4 Pass / fail
+```text
+CASE <case_id>
+STIMULUS <bucket-row stimulus field>
+SOURCE <EMU | REAL | MIXED>, lanes=<mask>, channels=<mask-or-list>
+RUN_CONTROL <IDLE->RUN_PREPARE->SYNC->RUNNING->TERMINATING->IDLE or bucket override>
+TAPS <T0..T8, TS from the bucket-row taps field>
+TRIGGER <GTS-arm | K-symbol arm | State-arm | error-trigger>, target=<case-specific value>
+DEPTH <tap-station default unless the bucket row overrides it>
+EXPECTED <bucket-row evidence field>
+COUNTERS <stage counters plus SWB per-link counter delta>
+MATCH <tb_int case path or pending>
+```
 
-Phase 5 §3 PASSES when:
+The manifest is the handoff format for the `.stp` author or generator. Runtime trigger edits are allowed only when they preserve the tap list, storage order, and depth recorded here. Any new probe, changed clock domain, changed storage width, or changed instance split requires a regenerated `.stp` and a fresh Node Finder validation report.
 
-- Both images arm and capture in the same FEB run; the SWB image was armed before the FEB-side stimulus started.
-- Every BASIC/EDGE trigger case produces four consecutive segments with clean decoded packet boundaries and K28.0 → payload → K28.4 → K28.5 idle ordering.
-- Adjacent segments in each SOP/EOP trigger case show frame counters and frame IDs incrementing by exactly one.
-- Dedicated ERROR trigger cases do not fire during the 60 s nominal observation window.
-- The cycle distance between consecutive SOP trigger events matches `FRAME_INTERVAL_{SHORT,LONG}` ± 1 cycle.
+### 3.7 Pass / fail per case
 
-Phase 5 §3 FAILS if any of:
+Each case in a bucket file passes when **every required tap station** captures the expected evidence under the case's stimulus, AND no case's ERROR-bucket negative trigger fires during the case's observation window. Per-case detail (which tap stations, which GTS targets, which counter deltas, which `*_error` flags must stay zero) lives inside the bucket-file row.
 
-- A K28.0 lands inside an already-open packet (the FEB torn-frame trigger case fires).
-- A code-err or disp-err lands at SWB ingress (the SWB decoder-error trigger case fires).
-- Adjacent captured frame counters skip, repeat, or advance by more than one.
-- The frame interval drifts beyond ± 4 cycles, indicating a clock-domain or FIFO-overflow hazard on the egress path.
+Each case fails if:
+- a required tap station does not see the expected hit envelope at the predicted GTS bucket;
+- an upstream tap shows a hit and the next downstream tap does not (lost hit);
+- a counter delta at the IP boundary is wrong (e.g. `frame_counter_head` advanced but `aso_hit_type1_valid` did not assert);
+- a per-IP `*_error` flag asserts when it should not.
 
-A failure here is treated as a **datapath regression** and routes back to the integration debug ladder in `phase4/TEST_PLAN_BASIC.md` "Disagreement protocol" — debug RTL (`emulator_mutrig.sv` / `mutrig_frame_deassembly`) before debugging the board fabric.
+For ERROR cases the inverse applies: the negative trigger **must** fire and the listed downstream IPs **must** record the propagation of the error (or the absence of cross-talk to other lanes).
+
+### 3.8 Closure cross-check vs `tb_int/`
+
+Long-term Phase-5 §3 closure requires every BASIC/PROF/EDGE/ERROR case to have a matching `tb_int/` integration-sim case that produces the same per-IP boundary evidence. The current `tb_int/` harness simulates an authentic regenerated `feb_system_v3_pipe` image and attaches custom checks at the SC/Qsys boundary; helper edits are allowed only to keep those boundary agents aligned with regenerated hierarchy, reset, and bus-width facts. Bucket-file rows have a `MATCH:` placeholder (e.g. `MATCH: tb_int/INT_fe_scifi_v3-2026-04-17/<case>`) reserved for case-level backfill. A bucket case can pass on board with `MATCH: pending` today; at final closure each row's `MATCH:` must point to a passing `tb_int/` run.
+
+### 3.9 SWB ingress arrival check (FEB→SWB end-to-end packet receipt)
+
+Even before the SWB-side `.stp` (`phase5_ts_swb_ingress`) is authored in `online_sc`, the SWB-side `LINK_LOCKED_*_REGISTER_R` and the SWB **per-link hit counter** are reachable via `sc_tool` against the SWB SC hub. Every Phase-5 §3 case must, at minimum, snapshot the SWB per-link hit counter before and after the run and confirm:
+
+- the counter delta is non-zero whenever any FEB-egress tap (T7/T8) saw outgoing hits,
+- the counter delta is zero in cases where no FEB egress traffic is expected (e.g. ERROR cases that terminate before any hit reaches `feb_frame_assembly`).
+
+This is the pre-`.stp` proxy for "SWB received any packet at all" and is the SWB-side gate the bucket files reference per case (alongside the eventual `phase5_ts_swb_ingress` capture).
 
 ---
 
-## 4. Emulator vs real-MuTRiG packet equivalence
+## 4. Collective verification — histogram-statistics rate / delay PDFs (RESERVED)
 
-### 4.1 What this stage proves
+**Reserved for the next revision.** §4 is the *collective* verification surface, complementary to §3's directed per-IP cascade. It uses `histogram_statistics_0` to measure rate distributions and delay PDFs for the full 8-MuTRiG hit stream under each injector mode and rate, and compares each measurement against the Phase 4 TLM/SIM/BOARD reference (slides 23 / 24 / 25 / 38 of `doc/Archive/ethhw_reordering.pdf`).
 
-Phase 4 closure attests that the emulator-fed datapath is correct. Phase 5 §4 attests that the real-MuTRiG datapath produces a frame stream **structurally indistinguishable** from the emulator stream at:
+§4 is intentionally empty in this revision because:
 
-- the FEB egress (post-`feb_frame_assembly`, the same `aso_tx8b1k` capture as §3.1)
-- the SWB ingress (post-decoder)
+- the live MuTRiG bring-up needs PLL-lock and per-ASIC TTH sign-off from §2 to be reliable before histogram-driven rate/delay PDFs are meaningful,
+- additional Mu3e-side experience with the live MuTRiG (T/E threshold trims and per-channel masking practice) is needed to define the right grid points,
+- §3 directed verification (BASIC/PROF/EDGE/ERROR via SignalTap) is the prerequisite — collective PDFs only become trustworthy once the directed chain is closed.
 
-up to a defined set of allowed payload differences (real MuTRiG hits carry real T/E TDC values; emulator hits carry LFSR-synthesized values).
-
-### 4.2 Capture pairs
-
-Two stimulus configurations are run back-to-back with the same SC/RC sequence, the same histogram CSR settings, the same SignalTap trigger-case images from §3, and the **same** segment depth × count:
-
-1. **Emulator stimulus** (Phase 4 reference): write `data_path_subsystem.source_select` (or its functional equivalent in the integration build's mux) to "emulator", program `emulator_mutrig_0..7.csr` for `enable=1, hit_mode=POISSON_IID, short_mode=1, hit_rate=0x0800`. Arm run-control `RUNNING`. Capture `phase5_emut_baseline_egress.stp` and `phase5_emut_baseline_swb.stp`.
-2. **Real-MuTRiG stimulus**: write the source select to "real" (the live ASIC path), with §2 baseline cfg already loaded. Same `short_mode`, same per-MuTRiG average rate (achieved on real ASICs by the dark-rate floor at the §2.5 known-good threshold). Capture `phase5_real_egress.stp` and `phase5_real_swb.stp`.
-
-Both image pairs are stored in `../signaltap/` and the equivalence comparison is run as a post-processing pass on the exported CSV — see §4.3.
-
-### 4.3 Comparison rules
-
-| Compare | Real vs Emulator must match |
-|---|---|
-| K28.5 idle byte count between SOPs | bit-exact |
-| K28.0 SOP arrival cadence | within ± 1 cycle of `FRAME_INTERVAL_{SHORT,LONG}` |
-| K28.4 EOP cadence | within ± 1 cycle |
-| Frame counter increment per second | within ± 1 frame over a 1 s window |
-| Per-frame number of K28.0 → K28.4 byte spans | identical distribution shape (Kolmogorov–Smirnov ≤ 0.05 across 1024 frames) |
-| Per-frame K28.5 fill ratio inside the SOP-EOP span | identical distribution shape |
-| `histogram_ingress_bridge_0.STATUS.post_hit_region` cadence | identical distribution shape |
-| `histogram_statistics_0.OVERFLOW_COUNT`, `UNDERFLOW_COUNT`, `DROPPED_HITS` deltas | both must be `delta = 0` |
-
-### 4.4 Allowed payload differences (do not flag as regressions)
-
-| Difference | Reason |
-|---|---|
-| Hit-record T/E TDC values | real MuTRiG produces analog/T-injected real timestamps; emulator produces LFSR-synthesized values |
-| Per-channel hit-rate microstructure | dark-noise rate per real channel is set by the cfg-bitstream TTH and by physical thermal noise; emulator's per-channel rate is the LFSR PRNG |
-| CRC byte content | the *byte position* and *width* of the CRC field is identical; the *value* is computed live and will differ |
-
-### 4.5 Pass / fail
-
-Phase 5 §4 PASSES when every "bit-exact / shape-exact" line in §4.3 passes for both image pairs and the histogram counter deltas in the last row are zero. Phase 5 §4 FAILS if any structural compare fails — which is treated as a real-MuTRiG framing regression and routed to the §6 debug ladder.
+Until §4 is filled, the closure target is §3 alone (the BASIC/PROF/EDGE/ERROR bucket files), plus §2 bring-up evidence and §3.9 SWB per-link counter cross-check.
 
 ---
 
-## 5. Injector + histogram closure (5 stimulus groups × 64 cases)
+## 5. Legacy stimulus mapping
 
-### 5.1 Common configuration
+The earlier 5 x 64 stimulus catalog (TPB5A..TPB5E) is superseded by the four directed §3 bucket files. Keep any future stimulus expansion in [`TEST_BASIC.md`](TEST_BASIC.md), [`TEST_PROF.md`](TEST_PROF.md), [`TEST_EDGE.md`](TEST_EDGE.md), or [`TEST_ERROR.md`](TEST_ERROR.md), where each row is tied to the tap stations in §3.4 and the SWB counter check in §3.9.
 
-For every Phase-5 §5 case below:
-
-- All eight MuTRiG3 ASICs are configured per §2 baseline cfg.
-- `histogram_ingress_bridge_0.CONTROL.select_post` is configured per the case's *primary observable* (delay PDF → post-hit-stack tap; channel/ASIC rate distribution → pre-hit-stack tap; the `histogram_statistics_0.CONTROL.mode` field selects the corresponding update-key extraction).
-- `histogram_statistics_0`:
-    - `LEFT_BOUND = 0`, `RIGHT_BOUND = 255` for channel/ASIC rate buckets (one bin per global channel ID).
-    - `LEFT_BOUND = 0`, `RIGHT_BOUND = 2047` (or `pipe + 2*FRAME_INTERVAL_SHORT`) for delay buckets, with `BIN_WIDTH = 1`.
-    - `INTERVAL_CFG` set so that one ping-pong interval contains ≥ 256 hits per active bin in the no-injection background and ≥ 16384 hits per active bin in the injection cases.
-    - `apply` written, `apply_pending` polled to clear before run start.
-- Run-control: CMD_RUN_PREPARE → CMD_SYNC → CMD_START_RUN, hold for the case's stated duration, then CMD_END_RUN.
-- Counters snapshotted before and after each case via `probe_phase4_stage_counters.py`.
-- Per-case report row written to `../reports/phase5_injector_<bucket>_<date>.md`.
-
-### 5.2 Implemented mutrig_injector_0 modes (live RTL)
-
-Per the active `scifi_datapath_system_v3_pipe.qsys` instance,
-`mutrig_injector_0` is `mutrig_injector_multiheader`. Its
-[`../../charge_injection/mutrig_injector_multiheader.vhd`](../../charge_injection/mutrig_injector_multiheader.vhd)
-`pulse_arb` and CSR `mode` field expose:
-
-| `mode` | Meaning | RTL state | Notes |
-|---|---|---|---|
-| `0` | off / onClick available | `coe_inject_pulse <= onclick_injector_pulse` | also the resting state of the IP. |
-| `1` | header-synchronized | `coe_inject_pulse <= header_injector_pulse` | armed by `asi_headerinfo_valid && channel == header_ch`; injects after `header_delay` cycles, then `injection_multiplicity` pulses each `pulse_high_cycles` long. |
-| `2` | periodic free-running | `coe_inject_pulse <= periodic_injector_pulse` | armed unconditionally inside the IP; fires every `pulse_interval` cycles. |
-| `3` | periodic_async | `coe_inject_pulse <= periodic_async_pulse` | generated in the `i_osc_clk` domain and synchronized from the CSR domain; directed RTL sim on 2026-04-27 passed the pre-RBCAM measurement harness with no drops/underflows/overflows. |
-| `4` | onclick (transient) | written into `csr.mode`; the write side resets `csr.mode` to 0 after one pulse | observable through onClick path (mode 0 arbiter output). |
-| `5` | random / PRNG-driven | `coe_inject_pulse <= random_injector_pulse` | PRBS-rate, pattern, seed, and control registers are CSR words 7..10; directed RTL sim on 2026-04-27 passed the pre-RBCAM measurement harness with no drops/underflows/overflows. |
-
-Phase 5 §5 buckets exercise all live modes: 0+onclick, 1, 2, 3, 4, and 5.
-
-### 5.3 Bucket summary
-
-| Bucket | ID range | Cases | Primary stimulus knob | Primary observable | Driving question |
-|---|---|---|---|---|---|
-| A | TPB5A01..TPB5A64 | 64 | per-channel TTH (via `mutrig_cfg_ctrl_0` + TSA) | channel/ASIC dark-rate distribution from `histogram_statistics_0` (pre-hit-stack tap, channel-ID key) | does each ASIC's dark-rate vs threshold curve match the TSA RAM and stay below the histogram-overflow ceiling at the operating threshold? |
-| B | TPB5B01..TPB5B64 | 64 | software-side **ASIC mask** (gating each MuTRiG's deassembled stream into the histogram path) and **channel mask** (programmed into the ASIC cfg bitstream) at fixed background rate | channel/ASIC rate distribution | does the histogram exactly count the unmasked (ASIC, channel) intersection? |
-| C | TPB5C01..TPB5C64 | 64 | mode-1 `header_delay` sweep over the full short-frame interval | delay PDF (post-hit-stack tap, delay key) | is the delay PDF a delta pulse at `FRAME_INTERVAL_SHORT - header_delay` for every header_delay (slide-24 truth on the live ASIC)? |
-| D | TPB5D01..TPB5D64 | 64 | mode-2 `pulse_interval` sweep covering 25 Mhit/s wire-floor down to wire-cap | delay PDF + per-MuTRiG accepted rate | does the delay PDF widen monotonically and the per-MuTRiG accepted rate clip exactly at the 25 Mhit/s wire-cap, matching slides 23/25/38? |
-| E | TPB5E01..TPB5E64 | 64 | mode-3 async periodic, mode-5 PRNG, mode-4 onClick burst stimulus, ASIC×channel-rate stress | channel/ASIC rate distribution **and** delay PDF | does the histogram correctly observe async, random, one-shot, and skewed-rate injection at the expected rate without overflow or dropped hits? |
-
-The stimulus catalog covers **delay** and **channel/ASIC rate** distributions explicitly per the Phase-5 closure ask, with five 64-case stimulus groups. Each row maps into the BASIC/EDGE/PROF/ERROR functional coverage buckets from §1.6 when reported; the coverage denominator is therefore 256 required functional points, not the 320 stimulus rows.
-
-### 5.4 Bucket A — real-MuTRiG threshold / dark-rate distribution (TPB5A01..TPB5A64)
-
-**Goal**: prove the live-MuTRiG dark-rate distribution at every (ASIC, threshold-step) cell matches the TSA result RAM and is observable on the histogram with no overflow or dropped hits. This is the bucket that anchors the §2 known-good baseline against the histogram observation surface.
-
-**Stimulus**: no injector. `mutrig_injector_0.mode = 0`. Background traffic is the real ASIC dark-rate floor.
-**Observable**: channel/ASIC rate distribution. `histogram_statistics_0.CONTROL.mode` set to the channel-ID key extraction; bin width 1; range [0, 255]. `histogram_ingress_bridge_0.select_post = 0` (pre-hit-stack tap, so each channel-tag write is one increment per accepted hit).
-**Method**: 64 cells = 8 ASICs × 8 representative TTH steps (`tth ∈ {16, 24, 32, 40, 48, 52, 56, 60}`) chosen from the TSA result-RAM knees identified in §2.5. For each cell, the bitstream of the corresponding ASIC has its 6-bit per-channel TTH field replaced with the cell's TTH value via a fresh `CMD_MUTRIG_ASIC_CFG` (offset, opcode); other ASICs are held at the §2.5 baseline.
-
-| case_id | method | implementation | scenario | primary checks | stage |
-|---|---|---|---|---|---|
-| TPB5A01 | D | live BOARD | ASIC 0, `tth=16` (low-threshold corner — high dark rate) | only the lane-0 slice (bins 0..31) populated; per-channel rate matches TSA result RAM ± 5%; `OVERFLOW_COUNT delta = 0`; `DROPPED_HITS delta = 0` | B |
-| TPB5A02 | D | live BOARD | ASIC 0, `tth=24` | same shape, lower per-channel rate; rate-vs-tth curve monotone | B |
-| TPB5A03 | D | live BOARD | ASIC 0, `tth=32` | lane-0 dark-rate at the operating-threshold reference | B |
-| TPB5A04 | D | live BOARD | ASIC 0, `tth=40` | lane-0 rate drops further | B |
-| TPB5A05 | D | live BOARD | ASIC 0, `tth=48` | lane-0 rate near the floor | B |
-| TPB5A06 | D | live BOARD | ASIC 0, `tth=52` | floor; per-channel rate is at the noise-only limit | B |
-| TPB5A07 | D | live BOARD | ASIC 0, `tth=56` | floor; cross-check that the histogram floor matches the SWB-side per-link counter (within 1%) | B |
-| TPB5A08 | D | live BOARD | ASIC 0, `tth=60` (high-threshold corner) | floor; many channels go quiescent | B |
-| TPB5A09..TPB5A16 | D | live BOARD | ASIC 1, `tth ∈ {16, 24, 32, 40, 48, 52, 56, 60}` | only lane-1 slice (bins 32..63) populated; per-channel rate vs TTH monotone | B |
-| TPB5A17..TPB5A24 | D | live BOARD | ASIC 2, same TTH grid | only lane-2 slice (bins 64..95) populated | B |
-| TPB5A25..TPB5A32 | D | live BOARD | ASIC 3, same TTH grid | only lane-3 slice (bins 96..127) populated | B |
-| TPB5A33..TPB5A40 | D | live BOARD | ASIC 4, same TTH grid | only lane-4 slice (bins 128..159) populated | B |
-| TPB5A41..TPB5A48 | D | live BOARD | ASIC 5, same TTH grid | only lane-5 slice (bins 160..191) populated | B |
-| TPB5A49..TPB5A56 | D | live BOARD | ASIC 6, same TTH grid | only lane-6 slice (bins 192..223) populated | B |
-| TPB5A57..TPB5A64 | D | live BOARD | ASIC 7, same TTH grid | only lane-7 slice (bins 224..255) populated; the eighth ASIC closes the per-ASIC sweep | B |
-
-**Bucket A pass aggregator**: every (ASIC, TTH) cell shows a populated lane-slice and a quiescent rest-of-spectrum, the per-channel rate vs TTH curve is monotone (within Poisson 3σ), and no `OVERFLOW_COUNT`/`DROPPED_HITS` advance. Cross-source compare: TSA result RAM ↔ histogram bin RAM; the two must agree within 5%.
-
-### 5.5 Bucket B — ASIC + channel mask sweep at fixed background (TPB5B01..TPB5B64)
-
-**Goal**: prove that the live-MuTRiG datapath responds to ASIC-level and channel-level masking exactly as the emulator did in Phase 4 TPB020..TPB031, but with a richer 64-case grid. The 64 cases are 8 channel-mask patterns × 8 ASIC-enable patterns. The ASIC-enable mask is applied **at the cfg-bitstream level** via TTH-field-effective masking (set channel TTH to 63 to silence) — no source-select hack is used.
-
-**Stimulus**: no injector. Each ASIC's cfg bitstream is rewritten via `CMD_MUTRIG_ASIC_CFG` to encode the desired channel mask in the 32 per-channel TTH slots (TTH=63 → channel quiescent; TTH=baseline → channel active). Each "ASIC enable" group is realized by silencing all channels of the masked-out ASICs.
-**Observable**: channel/ASIC rate distribution.
-
-| case_id | method | implementation | scenario (asic_enable, channel_mask) | primary checks | stage |
-|---|---|---|---|---|---|
-| TPB5B01 | D | live BOARD | asic_enable=0xFF, channel_mask=0xFFFFFFFF — all 8 ASICs, all 32 channels | all 256 bins populated; per-bin rate within Poisson 3σ of the dark-rate baseline | B |
-| TPB5B02 | D | live BOARD | asic_enable=0xFF, channel_mask=0x0000FFFF (lower half) | only channels 0..15 of every lane populated | B |
-| TPB5B03 | D | live BOARD | asic_enable=0xFF, channel_mask=0xFFFF0000 (upper half) | inverse | B |
-| TPB5B04 | D | live BOARD | asic_enable=0xFF, channel_mask=0x55555555 (even) | only even channels per lane populated | B |
-| TPB5B05 | D | live BOARD | asic_enable=0xFF, channel_mask=0xAAAAAAAA (odd) | only odd channels per lane populated | B |
-| TPB5B06 | D | live BOARD | asic_enable=0xFF, channel_mask=0x00000001 (one channel) | one channel per lane populated; cross-lane rate identical within Poisson tolerance | B |
-| TPB5B07 | D | live BOARD | asic_enable=0xFF, channel_mask=0x80000001 (corner pair) | two channels per lane populated | B |
-| TPB5B08 | D | live BOARD | asic_enable=0xFF, channel_mask=0x00FF00FF (byte stripe) | byte-stripe channels populated | B |
-| TPB5B09..TPB5B16 | D | live BOARD | asic_enable=0x01 (only ASIC 0 active), channel_mask sweep over the same 8 patterns above | only lane-0 slice populated, with the per-pattern channel geometry | B |
-| TPB5B17..TPB5B24 | D | live BOARD | asic_enable=0x02 (only ASIC 1), same 8 channel masks | only lane-1 slice populated | B |
-| TPB5B25..TPB5B32 | D | live BOARD | asic_enable=0x04 (only ASIC 2), same 8 channel masks | only lane-2 slice populated | B |
-| TPB5B33..TPB5B40 | D | live BOARD | asic_enable=0x08 (only ASIC 3), same 8 channel masks | only lane-3 slice populated | B |
-| TPB5B41..TPB5B48 | D | live BOARD | asic_enable=0x0F (lower 4 ASICs), same 8 channel masks | only lanes 0..3 populated | B |
-| TPB5B49..TPB5B56 | D | live BOARD | asic_enable=0xF0 (upper 4 ASICs), same 8 channel masks | only lanes 4..7 populated | B |
-| TPB5B57..TPB5B64 | D | live BOARD | asic_enable=0xAA (alternating ASICs), same 8 channel masks | only lanes 1, 3, 5, 7 populated | B |
-
-**Bucket B pass aggregator**: every (asic_enable, channel_mask) cell produces exactly the predicted bin geometry; non-selected lanes are silent (zero bin advance); `OVERFLOW_COUNT`/`DROPPED_HITS`/`UNDERFLOW_COUNT` deltas all zero. Cross-source compare against Phase 4 TPB020..TPB031 emulator runs: the two histograms must overlay within Poisson 3σ on every populated channel.
-
-### 5.6 Bucket C — mode-1 header_delay sweep on real MuTRiG (TPB5C01..TPB5C64)
-
-**Goal**: extend Phase 4 TPB032..TPB055 (slide-24 truth) onto the live ASIC. Sweep `mutrig_injector_0.header_delay` across the full `FRAME_INTERVAL_SHORT = 910`-cycle frame at 64 evenly-spaced points (stride ≈ 14 cycles).
-
-**Stimulus**: `mutrig_injector_0.mode = 1`, `header_interval = 1`, `injection_multiplicity = 1`, `pulse_high_cycles = 5`. Channel-mask via cfg-bitstream: one channel of one ASIC enabled per case. Background dark-rate from §5.4 baseline (other channels at TTH=63 → silent so they do not pollute the delay PDF).
-**Observable**: delay PDF. `histogram_ingress_bridge_0.select_post = 1` (post-hit-stack tap so the histogram sees the resequenced delay key); `histogram_statistics_0.CONTROL.mode` selects the delay-key extraction; `LEFT_BOUND = 0`, `RIGHT_BOUND = 2047`, `BIN_WIDTH = 1`.
-
-| case_id | method | implementation | scenario (active ASIC, channel, header_delay) | primary checks | stage |
-|---|---|---|---|---|---|
-| TPB5C01 | D | live BOARD | ASIC 0, ch 0, `header_delay = 14` | delay PDF is a delta pulse near 896 cycles ± 16 (`FRAME_INTERVAL_SHORT - header_delay`); width ≤ 120 cycles | B |
-| TPB5C02..TPB5C64 | D | live BOARD | sweep `header_delay ∈ {14, 28, 42, ..., 910}` (63 more points), ASIC ID rotates per case (`asic = floor(case_idx / 8) mod 8`), channel ID rotates per case (`channel = case_idx mod 32`) | each case shows one delta pulse at the predicted offset; pulse position vs header_delay is linear with slope -1 and intercept `FRAME_INTERVAL_SHORT`, replicating slide 24's continuous traversal | B |
-
-**Bucket C pass aggregator**: all 64 cases produce a single delta pulse at the predicted offset; the linear fit of (pulse position vs header_delay) has slope -1 ± 0.02 and intercept 910 ± 4 cycles; `OVERFLOW_COUNT delta = 0`. Cross-source compare against Phase 4 TPB032..TPB055 emulator runs: the per-(ASIC, channel) delta-pulse position must overlay within ± 16 cycles.
-
-### 5.7 Bucket D — mode-2 free-running rate sweep on real MuTRiG (TPB5D01..TPB5D64)
-
-**Goal**: extend Phase 4 TPB056..TPB079 (slides 23 / 25 / 38) onto the live ASIC. Sweep `pulse_interval` across the full live range — from a slow background (1 Mhit/s) up to the 25 Mhit/s per-MuTRiG wire-cap — at 64 logarithmically-spaced points.
-
-**Stimulus**: `mutrig_injector_0.mode = 2`, all 8 ASICs active, channel-mask = all 32 channels (per cfg). Per-MuTRiG injected pulse rate r(case) chosen so r(0) = 1 Mhit/s, r(63) = 25 Mhit/s, log-spaced in between.
-
-`pulse_interval ≈ CLK_FREQUENCY / r(case)` where `CLK_FREQUENCY = 125 MHz` per the IP generic.
-**Observable**: delay PDF (same histogram setup as §5.6) **and** the per-MuTRiG accepted rate captured via `histogram_statistics_0.TOTAL_HITS` over a fixed integration interval.
-
-| case_id | method | implementation | scenario | primary checks | stage |
-|---|---|---|---|---|---|
-| TPB5D01 | D | live BOARD | r ≈ 1 Mhit/s | delay PDF a narrow block near 800-1000 cycles; `DROPPED_HITS = 0`; `TOTAL_HITS` advances at ≈ 1 Mhit/s × 8 ASIC | B |
-| TPB5D02..TPB5D32 | D | live BOARD | r ∈ log-grid 1..10 Mhit/s (31 points) | delay block widens monotonically; `TOTAL_HITS` rate doubles at each octave; `DROPPED_HITS = 0` | B |
-| TPB5D33..TPB5D56 | D | live BOARD | r ∈ log-grid 10..23 Mhit/s (24 points) | block approaches the 0-to-2-frame envelope; `TOTAL_HITS` rate continues to scale; `DROPPED_HITS = 0` | B |
-| TPB5D57..TPB5D63 | D | live BOARD | r ∈ {23, 23.5, 24, 24.5, 24.8, 24.9, 25.0} Mhit/s | block fills the `pipe + 2*FRAME_INTERVAL_SHORT` envelope; `TOTAL_HITS` rate plateaus at ≈ 200 Mhit/s aggregate; `DROPPED_HITS` may begin to advance (recorded but not gated below 200 Mhit/s) | B |
-| TPB5D64 | D | live BOARD | r > 25 Mhit/s (overshoot, e.g. r = 30 Mhit/s requested) | accepted rate plateaus at the wire-cap; the **excess** is dropped at the MuTRiG side, not at the FEB datapath; `OVERFLOW_COUNT = 0` (this is the proof that the emulator's 25 Mhit/s wire-cap is matched by the real ASIC) | B |
-
-**Bucket D pass aggregator**: the rate-doubling ratio of `TOTAL_HITS` holds 2.0 ± 5% over the log-grid until the wire-cap, where it plateaus at 200 Mhit/s aggregate (8 ASICs × 25 Mhit/s) ± 1%; the delay PDF widens monotonically; `OVERFLOW_COUNT` stays at zero across the full sweep. Cross-source compare against Phase 4 TPB056..TPB079 emulator runs: per-rate delay-block envelope must overlay within ± 5%.
-
-### 5.8 Bucket E — mixed traffic + onClick + ASIC×channel rate stress (TPB5E01..TPB5E64)
-
-**Goal**: prove the histogram observation surface stays correct when multiple injection sources superpose on the live ASIC datapath, and exercise the mode-4 onClick path that Phase 4 did not (Phase 4 used periodic / synchronous modes only).
-
-**Stimulus**:
-
-- TPB5E01..TPB5E08 (8 cases): mode-3 async periodic stimulus. Sweep `pulse_interval` over an 8-point rate grid with `i_osc_clk` as the pulse source; compare the pre-RBCAM rate histogram and the post-hit-stack delay PDF against the mode-2 synchronous sweep at the same requested rates.
-- TPB5E09..TPB5E16 (8 cases): mode-5 PRNG stimulus. Sweep `{prbs_rate, prbs_ctrl.match_width, prbs_pattern}` over 8 deterministic seeds/patterns and confirm the accepted hit count follows the expected PRBS match probability within Poisson 3 sigma.
-- TPB5E17..TPB5E32 (16 cases): mode-4 onClick stimulus with varying `pulse_high_cycles ∈ {5, 7, 11, 16, 24, 32, 48, 64}` and `injection_multiplicity ∈ {1, 2, 4, 8}` (8 × 4 = 32 combinations, sampled at 16 representative points), single channel.
-- TPB5E33..TPB5E48 (16 cases): per-ASIC rate skew. ASIC k gets injection mode-2 at r = k × 3 Mhit/s (k=0..7), the other ASICs at the §5.4 baseline dark-rate. Eight base configurations × two rate scalings (½× and 1×) = 16 cases.
-- TPB5E49..TPB5E64 (16 cases): channel-rate stress. Single ASIC with all 32 channels active, mode-2 injection at r ∈ {12, 14, 16, 18, 20, 22, 24, 25} Mhit/s, repeated for two ASICs (ASIC 0 and ASIC 7) — 8 × 2 = 16 cases.
-
-**Observable**: channel/ASIC rate distribution **and** delay PDF, captured in two passes per case (one with `histogram_ingress_bridge_0.select_post = 0`, one with `select_post = 1`).
-
-| case_id | method | implementation | scenario summary | primary checks | stage |
-|---|---|---|---|---|---|
-| TPB5E01..TPB5E08 | D | live BOARD | mode-3 async periodic sweep | requested rate appears in the channel histogram; delay PDF overlays the mode-2 envelope at matching rate after accounting for async phase; `DROPPED_HITS = 0` | B |
-| TPB5E09..TPB5E16 | D | live BOARD | mode-5 PRNG sweep | accepted rate follows PRBS match probability; histogram has no dead bins in the selected ASIC/channel slice; `DROPPED_HITS = 0` | B |
-| TPB5E17..TPB5E32 | D | live BOARD | mode-4 onClick (16 (pulse_high_cycles × injection_multiplicity) pairs) | `histogram_statistics_0.TOTAL_HITS` advances by exactly `injection_multiplicity` per click; the channel-ID slice of the histogram contains the expected single-channel population; `INJ_ARM` SignalTap trigger from `TEST_PLAN.md` §4.3 must not fire outside `RUNNING` | B |
-| TPB5E33..TPB5E48 | D | live BOARD | per-ASIC rate skew (16 cases) | each lane slice's per-bin rate matches `r_k` for that lane within Poisson 3σ; aggregate `TOTAL_HITS` rate matches the sum; `OVERFLOW_COUNT = 0` | B |
-| TPB5E49..TPB5E64 | D | live BOARD | channel-rate stress on ASIC {0, 7} (16 cases) | per-channel rate scales with r linearly until the ASIC channel-aggregate hits the 25 Mhit/s cap; one-channel queueing tail visible in delay PDF beyond `FRAME_INTERVAL_SHORT` (matches Phase 4 TPB069 behaviour on emulator); `OVERFLOW_COUNT = 0` | B |
-
-**Bucket E pass aggregator**: every mode-3 async case overlays the matching mode-2 rate envelope after async-phase accounting; every mode-5 PRNG case matches the configured PRBS probability within Poisson 3σ; every onClick case advances `TOTAL_HITS` by exactly the configured multiplicity; per-ASIC skew cases show no cross-ASIC contamination; channel-rate stress cases stay below `OVERFLOW_COUNT = 0` and `DROPPED_HITS = 0` until the per-ASIC wire-cap is reached, beyond which dropped hits are counted at the MuTRiG side and the FEB-side counters stay at zero. Cross-source compare against Phase 4 emulator equivalents (TPB071, TPB072, TPB084, TPB085, TPB086, TPB087): each Phase-5 case overlays the corresponding Phase-4 case within Poisson 3σ.
-
-### 5.9 Cross-bucket pass aggregator
-
-| Aggregate | Pass when |
-|---|---|
-| Bucket A | every (ASIC, TTH) cell shows the predicted lane-slice population and rate-vs-TTH monotone, agrees with TSA RAM within 5%, `OVERFLOW_COUNT delta = 0` |
-| Bucket B | every (asic_enable, channel_mask) cell exactly matches the predicted bin geometry; cross-source overlay vs Phase 4 TPB020..TPB031 within Poisson 3σ |
-| Bucket C | linear delta-pulse fit slope -1, intercept 910 ± 4 cycles; cross-source overlay vs Phase 4 TPB032..TPB055 within ± 16 cycles |
-| Bucket D | rate-doubling ratio holds; aggregate clip at 200 Mhit/s; cross-source overlay vs Phase 4 TPB056..TPB079 within 5% |
-| Bucket E | superposed distributions match predictions; onClick advances `TOTAL_HITS` exactly; `OVERFLOW_COUNT = 0` and `DROPPED_HITS = 0` everywhere below the wire-cap |
-| All buckets | `histogram_statistics_0.OVERFLOW_COUNT delta = 0` across the full Phase-5 §5 sweep; `DROPPED_HITS delta = 0` below wire-cap; `UNDERFLOW_COUNT delta = 0` for the channel buckets |
+No Phase-5 closure credit is assigned to the legacy TPB5A..TPB5E IDs. They remain historical planning notes only; the active coverage denominator is the BASIC/PROF/EDGE/ERROR catalog floor in §1.6.
 
 ---
 
 ## 6. Failure debug ladder
 
-Phase 5 reuses the disagreement protocol from `phase4/TEST_PLAN_BASIC.md` §"Disagreement protocol" with one substitution: the **TLM is no longer the apex** for §3 onward. The Phase-4-passed **emulator path** is the fixed reference for §3 and §4; for §5, the per-bucket cross-source check is real-MuTRiG vs Phase-4-emulator (the buckets in §5.4..§5.8 each name the Phase-4 cases they overlay against).
+Phase 5 reuses the disagreement protocol from `phase4/TEST_PLAN_BASIC.md` §"Disagreement protocol" with one substitution: the **TLM is no longer the apex** for §3. The Phase-4-passed **emulator path** is the fixed reference; the per-bucket cross-source check is real-MuTRiG vs Phase-4-emulator at the same per-IP cascade tap stations.
 
 | Symptom | First-pass debug entry point |
 |---|---|
-| §2 some ASICs do not lock decoded frames | `mutrig_cfg_ctrl_0` cfglen / scratchpad word stream — confirm the 84-word block is bit-for-bit the production bitstream from `Mutrig_FEB.cpp`, then check the SPI clock domain (`i_clk_spi`) reset and the SS-N fan-out |
-| §3 FEB ERROR trigger case fires (torn frame) | `mutrig_frame_deassembly` decoder error, then `feb_frame_assembly` framing logic, then the `aso_tx8b1k` clock-domain crossing |
-| §3 SWB ERROR trigger case fires (code-err / disp-err) | SWB-side 8b/10b decoder, link-2 RX equalization, or the LVDS RX outclock |
-| §4 bit-exact compare fails | `aso_tx8b1k` width / K-flag wiring on the lane that diverges; cross-check against the Phase-4-emulator bits at the same byte position |
-| §5 Bucket A rate-vs-TTH non-monotone | TSA result-RAM vs cfg-bitstream TTH field offset (`CFG_HEADER_LENGTH + CFG_SINGLE_CH_TTH_OFFSET + CFG_SINGLE_CH_LENGTH*i`); then the per-channel TTH bit-width (`CFG_TTH_SETTING_LENGTH = 6`) |
-| §5 Bucket B mask not exact | cfg-bitstream channel-TTH-to-quiet-channel mapping; then the histogram_ingress_bridge `select_post` setting — pre-tap vs post-tap |
-| §5 Bucket C delta-pulse position drift | `mutrig_injector_0.header_delay` register width vs frame-boundary capture; then the pre-/post-tap routing via `histogram_ingress_bridge_0` |
-| §5 Bucket D rate clipping below 200 Mhit/s | check whether the historical 135 Mhit/s knee from Phase 4 `inputs/board/phase4_emulator_20260425_*` has reappeared — if so, route to Phase 4's open item (board rate-signoff at 200 Mhit/s) |
-| §5 Bucket E onClick `TOTAL_HITS` advances by != `injection_multiplicity` | check `proc_onclick_injecter` timer width vs pulse_high_cycles; then the channel-mask cfg encoding |
-| Any §5 `OVERFLOW_COUNT` advance | route to Phase 4 TPBH series — Phase 5 closure is gated on TPBH001..TPBH030 PASS, so any new overflow is a regression and Phase 4 evidence is invalidated until the regression is debugged |
+| Datapath CSR access works through `sc_tool` but times out through headless JTAG | current `debug_sc_system_v3.qsys` does not connect `jtag_master.master` to `mm_bridge.s0`; use SC word addresses for datapath CSRs and do not credit any JTAG datapath preset evidence |
+| §2 some ASICs do not lock decoded frames | `mutrig_cfg_ctrl_0` cfglen / scratchpad word stream — confirm the 84-word block is bit-for-bit the production bitstream from `/home/yifeng/packages/online_dpv2/online/switching_pc/slowcontrol/mutrig/Mutrig_FEB.cpp`, then check the SPI clock domain (`i_clk_spi`) reset and the SS-N fan-out |
+| §2 TSA all-scan (`0x01400054`) returns immediately or hangs | fall back to the per-ASIC `CMD_MUTRIG_ASIC_TTH_SCAN` loop (`0x012k0054`) and inspect `mutrig_ctrl.vhd` command legalization before trusting all-scan evidence |
+| Injector emulator path produces histogram/MTS hits but real-source path stays zero | injector/SC/fanout is no longer the first suspect; debug MuTRiG XML packing, SPI config completion, LVDS RX lane training, physical ribbon/lane mapping, and `mutrig_frame_deassembly_N` lock/error counters |
+| Real-source path produces frame/MTS/histogram hits but `ring_buffer_cam.INERR_COUNT` increments | first check `mts_processor_N.aso_hit_type1_error`, `aso_debug_ts_data`, selected `delay_ts_field_use_t`, and `EXPECTED_LATENCY`; if `ring_filter_inerr=off` drains cleanly, treat it as an MTS timestamp-error sideband/calibration bug, not a ring-CAM storage or histogram bug |
+| SignalTap capture arms but a simultaneous SC stimulus command times out | first check whether the wrapper forced `BOARD_TEST_SC_NO_RESET=1`; after FPGA reprogramming that can stale the SC secondary ring. Use the default synchronized `sc_tool` mode, then rerun the exact CSR write before blaming the tapped datapath. |
+| §3 BASIC tap T0 sees hits but T1 does not | `mutrig_frame_deassembly_N` decoder error / link-lock, then the LVDS RX outclock and 8b/10b alignment |
+| §3 BASIC tap T1 sees hits but T2 does not | `backpressure_fifo_N` write-side enable / fill_level rising / FIFO read-side ready stuck — usually upstream `mts_processor` not consuming |
+| §3 BASIC tap T4 sees hits but T6 (ring_buffer_cam) does not | for `M=0`, check `histogram_ingress_bridge_0` selector first; for either hit-stack, check partition decode, then ring_buffer_cam tag-search miss |
+| §3 BASIC tap T6 sees hits but T7 does not | `feb_frame_assembly` interleaving FIFO read-side, `terminating_marker_*` lane stuck, or run_state TERMINATING entered prematurely |
+| §3 BASIC tap T7 sees hits but SWB per-link counter (§3.9) shows zero delta | LVDS TX clock-domain crossing, SWB link-2 lock, link mux at the FEB egress |
+| §3 EDGE TERMINATING idle-guard violation | `feb_frame_assembly.TERMINATING_IDLE_GUARD_CONST = 2048` is documented; check `terminating_idle_guard_cnt` in capture, then `terminating_marker_valid` per lane |
+| §3 EDGE GTS rollover misalignment | `counter_gts_8n` 48-bit width on `feb_frame_assembly`, `d_gts_counter` width on `mts_processor`; verify both increment monotonically across the captured window |
+| §3 ERROR `disp_err` / `code_err` at SWB ingress | SWB-side 8b/10b decoder, link-2 RX equalization, then the FEB LVDS TX driver disparity |
+| §3 ERROR `tsglitcherr` on `aso_hit_type1_error` | `mts_processor` mts→gts mapping, `delta_timestamp` (12-bit) vs the captured GTS slice |
+| §3 PROF rate clipping below 200 Mhit/s | check whether the historical 135 Mhit/s knee from Phase 4 `inputs/board/phase4_emulator_20260425_*` has reappeared — if so, route to Phase 4's open item (board rate-signoff at 200 Mhit/s) |
+| Any §3 `OVERFLOW_COUNT` advance on `histogram_statistics_0` | route to Phase 4 TPBH series — Phase 5 closure is gated on TPBH001..TPBH030 PASS, so any new overflow is a regression and Phase 4 evidence is invalidated until the regression is debugged |
+| §4 (when written) collective PDF disagreement | revisit §3 directed evidence first; collective PDFs are the union of directed cases and cannot pass before the directed chain is closed |
 
 ---
 
@@ -546,30 +510,28 @@ Each Phase-5 stage produces a structured Markdown report under `../reports/`:
 | Report | Contents |
 |---|---|
 | `phase5_mutrig_baseline_<date>.md` | per-(ASIC, channel) known-good TTH from §2.5; the cfg-bitstream baseline word stream pointer; the `mutrig_frame_deassembly_*` lock evidence |
-| `phase5_frame_format_egress_<date>.md` | §3.1 SignalTap trigger-case summary, exported segment 0..3 PNG/CSV per trigger condition, adjacent-frame counter increments, frame-interval cycle distance histogram |
-| `phase5_frame_format_swb_<date>.md` | §3.2 SignalTap trigger-case summary on the SWB side, adjacent-frame counter increments, code-err/disp-err clean record |
-| `phase5_emulator_vs_real_<date>.md` | §4 four-way comparison (FEB egress emulator vs real, SWB ingress emulator vs real) with the §4.3 per-row pass/fail |
-| `phase5_injector_bucketA_<date>.md` | TPB5A01..TPB5A64 per-cell results |
-| `phase5_injector_bucketB_<date>.md` | TPB5B01..TPB5B64 per-cell results |
-| `phase5_injector_bucketC_<date>.md` | TPB5C01..TPB5C64 per-cell results |
-| `phase5_injector_bucketD_<date>.md` | TPB5D01..TPB5D64 per-cell results |
-| `phase5_injector_bucketE_<date>.md` | TPB5E01..TPB5E64 per-cell results |
-| `phase5_closure_<date>.md` | aggregated PASS/FAIL across §2..§5, BASIC/EDGE/PROF/ERROR coverage table as `implemented_pass / 64` per bucket and aggregate `sum(implemented_pass) / 256`, list of any cross-source discrepancies with their numeric ratios, pointer to the TLM/RTL-SIM Phase-4 reference each Phase-5 case overlays against |
+| `phase5_basic_<date>.md` | TEST_BASIC.md per-case results: per-IP cascade tap evidence (T0..T8 + TS), GTS arming targets, per-IP counter deltas |
+| `phase5_prof_<date>.md` | TEST_PROF.md per-case results: rate-pressure tap evidence, ring-CAM and backpressure-FIFO fill-level traces, sustained-run soak windows |
+| `phase5_edge_<date>.md` | TEST_EDGE.md per-case results: run-state-transition captures, GTS rollover, frame-counter rollover, terminating-idle-guard evidence |
+| `phase5_error_<date>.md` | TEST_ERROR.md per-case results: per-case negative-trigger fire, error-flag propagation through the cascade, recovery evidence |
+| `phase5_closure_<date>.md` | aggregated PASS/FAIL across §2..§3, per-bucket coverage as `implemented_pass / cases_in_bucket`, MATCH-with-tb_int rollup, and cross-source discrepancies with their numeric ratios |
 
 The reports are the sign-off artifact; Phase 5 is closed when:
 
-- §2..§5 all PASS per their stage aggregator,
+- §2..§3 all PASS per their stage aggregator (§4 is RESERVED in this revision),
 - the closure report is checked into `../reports/`,
-- BASIC/EDGE/PROF/ERROR functional coverage is at least 50% aggregate, reported as implemented passing checkpoints over the 256-point requirement,
+- BASIC/PROF/EDGE/ERROR per-bucket coverage is at least the documented per-case-floor (≥ 144) for each bucket,
 - every Phase-5 cross-source overlay is within the tolerance documented in the bucket's pass aggregator,
-- no Phase-4 Closure invariant (`OVERFLOW_COUNT`, `DROPPED_HITS`, `UNDERFLOW_COUNT` deltas all zero) is violated.
+- no Phase-4 closure invariant (`OVERFLOW_COUNT`, `DROPPED_HITS`, `UNDERFLOW_COUNT` deltas all zero) is violated.
 
 ---
 
 ## 8. Open items / known caveats
 
-- **One injector instance**: the integration build instantiates a single `mutrig_injector_0` shared across the eight MuTRiG ASICs. Two-source mode-1 + mode-2 superposition is no longer a Phase-5 catalog blocker; if dual-path analog routing is later proven, it can be added as an extension case outside TPB5E01..TPB5E64.
+- **One injector instance**: the integration build instantiates a single `mutrig_injector_0` shared across the eight MuTRiG ASICs. Two-source mode-1 + mode-2 superposition is no longer a Phase-5 catalog blocker; if dual-path analog routing is later proven, add the extension cases to the active BASIC/PROF/EDGE/ERROR bucket files instead of reviving the legacy TPB5E range.
 - **SWB-side `.stp` image** lives in the SWB Quartus project (`online_sc/online/switching_pc/a10_board/`), not in this repo. Authoring and check-in of `phase5_swb_ingress.stp` is a follow-up task in `online_sc`. This plan calls out the trigger conditions and the depth/segment configuration; the actual `.stp` author and check-in is expected to land in the SWB tree before §3.2 captures are run.
 - **Histogram delay key extraction**: `histogram_statistics_0.CONTROL.mode` selects which slice of the snooped data word is used as the update key. The exact bit slice for the delay key on the post-hit-stack tap is set by `histogram_statistics_0.KEY_LOC` and depends on the `feb_frame_assembly` / hit-stack output layout. The plan above assumes the slice was already pinned during Phase 4 §4.5; if Phase 5 needs a different slice (e.g. delay rather than channel), the slice is pinned per case via the `KEY_LOC` field. The `KEY_LOC` setting per case is part of the per-case configuration; this plan does not enumerate the bit positions because they are stable across Phase 4 → Phase 5.
-- **Cfg bitstream packing**: the production cfg-bitstream packing (LSB-first vs MSB-first per word, padding policy at the 2662-bit boundary) is defined in `Mutrig_FEB.cpp`. Phase-5 §2 reuses that packing exactly; this plan does not redefine it.
-- **TSA range and stride**: the controller's TSA increments TTH 0..63 (6-bit field). Bucket A samples the 8 representative steps `{16, 24, 32, 40, 48, 52, 56, 60}` to keep the bucket at 64 cases. A finer TTH grid is captured implicitly inside the TSA result-RAM during §2.5 and is reported there; Bucket A is the histogram-side observation cross-check at 8 representative TTH points per ASIC.
+- **Cfg bitstream packing**: the production cfg-bitstream packing (LSB-first vs MSB-first per word, padding policy at the 2662-bit boundary) is defined in `/home/yifeng/packages/online_dpv2/online/switching_pc/slowcontrol/mutrig/Mutrig_FEB.cpp` and mirrored by `toolkits/fe_scifi/`. Phase-5 §2 reuses that packing exactly; this plan does not redefine it.
+- **TSA range and stride**: the controller's TSA increments TTH 0..63 (6-bit field). The full 64-step per-channel TSA result-RAM dump is §2 baseline evidence; any reduced representative threshold grid belongs in the active bucket files as explicit cases.
+- **Datapath JTAG aperture**: the current generated debug system exposes the datapath CSRs through the SC hub, not through the headless JTAG master. Any future JTAG datapath helper must first add and regenerate an explicit JTAG-to-`mm_bridge.s0` connection; until then, `sc_tool` is the authoritative board CSR path for Phase 5.
+- **Real MuTRiG lock**: ASIC0/ASIC3 XML cfg now produces injector-correlated hits on lanes 0/3 after channel-16-only overrides, and the recompiled frame/MTS/histogram SignalTap image proves accepted real hits can reach `histogram_statistics_0`. The earlier MTS timestamp-error sideband blocker did not reproduce in the clean retry, but one later repetition recorded a single MTS discard, so this path still needs repeated/soak evidence before BASIC/PROF rows get closure credit. Lanes 1/2/4/5/6/7 still show link/fatal state in this setup and must be recovered or explicitly waived.
