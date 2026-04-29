@@ -187,6 +187,7 @@ def make_case_args(
         inject_mode=scenario["inject_mode"],
         hist_profile=scenario["hist_profile"],
         rate_tolerance_pct=args.rate_tolerance_pct,
+        real_hits_per_lane=args.real_hits_per_lane,
         pulse_intervals=[scenario["pulse_interval"]],
         pulse_high_cycles=args.pulse_high_cycles,
         onclick_count=16,
@@ -210,10 +211,10 @@ def make_case_args(
         cluster_lane_count=8,
         inject_channel_mask=0xFFFFFFFF,
         short_mode=False,
-        mts_expected_latency=None,
-        mts_delay_ts_field="keep",
-        mts_drop_delay_error="keep",
-        ring_filter_inerr="keep",
+        mts_expected_latency=args.mts_expected_latency,
+        mts_delay_ts_field=args.mts_delay_ts_field,
+        mts_drop_delay_error=args.mts_drop_delay_error,
+        ring_filter_inerr=args.ring_filter_inerr,
         continue_on_error=True,
     )
 
@@ -274,6 +275,11 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, records: 
         f"- Real-lane availability mask: `{fmt_hex(args.real_lane_mask)}`",
         f"- Mixed emulator-source mask: `{fmt_hex(args.mixed_emulator_mask)}`",
         f"- Duration per run: `{args.duration_ms} ms`",
+        f"- Real hits per lane for rate expectation: `{args.real_hits_per_lane}`",
+        f"- MTS expected latency override: `{args.mts_expected_latency if args.mts_expected_latency is not None else 'keep'}`",
+        f"- MTS delay-ts field override: `{args.mts_delay_ts_field}`",
+        f"- MTS drop-delay-error override: `{args.mts_drop_delay_error}`",
+        f"- Ring filter-inerr override: `{args.ring_filter_inerr}`",
         f"- Result: `{pass_count} PASS / {partial_count} PASS_PARTIAL / {fail_count} FAIL / {blocked_count} BLOCKED`",
         "",
         "## Summary",
@@ -316,6 +322,11 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, records: li
             "scenarios": args.scenarios,
             "real_lane_mask": args.real_lane_mask,
             "mixed_emulator_mask": args.mixed_emulator_mask,
+            "real_hits_per_lane": args.real_hits_per_lane,
+            "mts_expected_latency": args.mts_expected_latency,
+            "mts_delay_ts_field": args.mts_delay_ts_field,
+            "mts_drop_delay_error": args.mts_drop_delay_error,
+            "ring_filter_inerr": args.ring_filter_inerr,
         },
         "prime_logs": prime_logs,
         "records": records,
@@ -349,6 +360,16 @@ def main() -> int:
     parser.add_argument("--cluster-center", type=int, default=16)
     parser.add_argument("--emulator-seed", type=int, default=0xDEADBEEF)
     parser.add_argument("--rate-tolerance-pct", type=float, default=1.0)
+    parser.add_argument(
+        "--real-hits-per-lane",
+        type=int,
+        default=1,
+        help="Expected real MuTRiG TDC-test hits per enabled lane per injector pulse; use 32 for full-channel ASIC XML.",
+    )
+    parser.add_argument("--mts-expected-latency", type=lambda text: int(text, 0), default=None)
+    parser.add_argument("--mts-delay-ts-field", choices=("keep", "t", "e"), default="keep")
+    parser.add_argument("--mts-drop-delay-error", choices=("keep", "on", "off"), default="keep")
+    parser.add_argument("--ring-filter-inerr", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--max-runs", type=int, default=0, help="limit executed non-blocked runs; 0 means no limit")
     parser.add_argument("--no-prime", action="store_true")
     parser.add_argument("--firmware-note", default="top_stp_pipe_phase5_injector.sof checksum 0x13F0D32A")
