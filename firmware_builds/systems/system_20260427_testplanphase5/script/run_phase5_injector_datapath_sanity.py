@@ -212,10 +212,11 @@ def expected_periodic_rate_hits(args: argparse.Namespace, pulse_interval: int) -
         emulator_lanes = popcount(args.active_lanes_mask & source_select)
         real_lanes = popcount((args.lvds_lane_mask & 0xFF) & (~source_select & 0xFF))
 
-    # The emulator can fan one injector pulse into a configured cluster.  The
-    # real MuTRiG TDC-test configuration used by this runner is one channel per
-    # enabled ASIC unless a separate ASIC configuration flow changes it.
-    hits_per_pulse = (emulator_lanes * max(1, args.cluster_size)) + real_lanes
+    # The emulator can fan one injector pulse into a configured cluster.  Real
+    # MuTRiG TDC-test multiplicity depends on the XML channel mask loaded before
+    # the run; full Phase-5 TDC-injection closure uses 32 channels per ASIC.
+    real_hits_per_lane = max(1, int(getattr(args, "real_hits_per_lane", 1)))
+    hits_per_pulse = (emulator_lanes * max(1, args.cluster_size)) + (real_lanes * real_hits_per_lane)
     return int(round((HIST_INTERVAL_CLOCKS_1S / pulse_interval) * hits_per_pulse))
 
 
@@ -653,6 +654,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- Injector base/control offset: `{fmt_hex(INJECTOR_BASE_WORD)}` / `{getattr(args, 'injector_layout', {}).get('control_offset', 'unknown')}` words",
         f"- Histogram profile: `{args.hist_profile}`",
         f"- Rate tolerance: `{args.rate_tolerance_pct:.3f}%`",
+        f"- Real hits per lane for rate expectation: `{getattr(args, 'real_hits_per_lane', 1)}`",
         f"- Histogram filter enable: `{getattr(args, 'hist_filter_enable', False)}`",
         f"- Histogram filter key loc override: `{getattr(args, 'hist_filter_key_loc', None)}`",
         f"- Histogram filter key value: `{fmt_hex(getattr(args, 'hist_filter_key_value', 0) or 0)}`",
@@ -762,6 +764,7 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "pulse_intervals": args.pulse_intervals,
             "hist_profile": args.hist_profile,
             "rate_tolerance_pct": args.rate_tolerance_pct,
+            "real_hits_per_lane": getattr(args, "real_hits_per_lane", 1),
             "hist_filter_enable": getattr(args, "hist_filter_enable", False),
             "hist_filter_key_loc": getattr(args, "hist_filter_key_loc", None),
             "hist_filter_key_value": getattr(args, "hist_filter_key_value", 0),
@@ -803,6 +806,12 @@ def main() -> int:
     parser.add_argument("--inject-mode", choices=tuple(INJECT_MODE), default="periodic")
     parser.add_argument("--hist-profile", choices=tuple(HIST_PROFILE), default="rate")
     parser.add_argument("--rate-tolerance-pct", type=float, default=1.0)
+    parser.add_argument(
+        "--real-hits-per-lane",
+        type=parse_u32,
+        default=1,
+        help="Expected real MuTRiG TDC-test hits per enabled lane per injector pulse; use 32 for full-channel ASIC XML.",
+    )
     parser.add_argument("--hist-filter-enable", action="store_true")
     parser.add_argument("--hist-filter-key-loc", type=parse_u32, default=None)
     parser.add_argument("--hist-filter-key-value", type=parse_u32, default=0)

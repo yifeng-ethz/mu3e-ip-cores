@@ -71,6 +71,51 @@ def parse_channel_mask(text: str) -> int:
     return value
 
 
+def parse_asic_field_override(text: str) -> tuple[int, str, int]:
+    try:
+        asic_text, assignment = text.split(":", 1)
+        name, value_text = assignment.split("=", 1)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("override must use ASIC:tdc_field=value syntax") from exc
+    asic = int(asic_text, 0)
+    if asic < 0 or asic > 7:
+        raise argparse.ArgumentTypeError("override ASIC must be in range 0..7")
+    if not re.fullmatch(r"[A-Za-z0-9_]+", name):
+        raise argparse.ArgumentTypeError(f"invalid TDC field name {name!r}")
+    value = int(value_text, 0)
+    if value < 0:
+        raise argparse.ArgumentTypeError("TDC override value must be non-negative")
+    return asic, name, value
+
+
+def parse_field_override(text: str) -> tuple[str, int]:
+    try:
+        name, value_text = text.split("=", 1)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("override must use field=value syntax") from exc
+    if not re.fullmatch(r"[A-Za-z0-9_]+", name):
+        raise argparse.ArgumentTypeError(f"invalid field name {name!r}")
+    value = int(value_text, 0)
+    if value < 0:
+        raise argparse.ArgumentTypeError("override value must be non-negative")
+    return name, value
+
+
+def group_field_overrides(items: list[tuple[str, int]]) -> dict[str, int]:
+    return {name: value for name, value in items}
+
+
+def group_tdc_overrides(items: list[tuple[int, str, int]]) -> dict[int, dict[str, int]]:
+    grouped: dict[int, dict[str, int]] = {}
+    for asic, name, value in items:
+        grouped.setdefault(asic, {})[name] = value
+    return grouped
+
+
+def group_asic_field_overrides(items: list[tuple[int, str, int]]) -> dict[int, dict[str, int]]:
+    return group_tdc_overrides(items)
+
+
 def extract_param_info(bsp_path: Path) -> dict[str, list[tuple[str, int, int]]]:
     text = bsp_path.read_text(encoding="utf-8")
     spans = {
@@ -151,6 +196,55 @@ def apply_channel_overrides(
         if tdctest_channel_mask is not None:
             # tdctest_n is active-low: 0 enables the channel's test-pulse path.
             set_child_int(node, "tdctest_n", 0 if (tdctest_channel_mask & (1 << channel)) else 1)
+    return patched
+
+
+def apply_tdc_overrides(mutrig: ET.Element, overrides: dict[str, int]) -> ET.Element:
+    if not overrides:
+        return mutrig
+
+    patched = copy.deepcopy(mutrig)
+    params = patched.find("parameters")
+    tdc_root = params.find("TDC") if params is not None else None
+    if tdc_root is None:
+        raise RuntimeError("mutrig entry has no parameters/TDC node")
+
+    for name, value in overrides.items():
+        set_child_int(tdc_root, name, value)
+    return patched
+
+
+def apply_header_overrides(mutrig: ET.Element, overrides: dict[str, int]) -> ET.Element:
+    if not overrides:
+        return mutrig
+
+    patched = copy.deepcopy(mutrig)
+    params = patched.find("parameters")
+    header_root = params.find("Header") if params is not None else None
+    if header_root is None:
+        raise RuntimeError("mutrig entry has no parameters/Header node")
+
+    for name, value in overrides.items():
+        set_child_int(header_root, name, value)
+    return patched
+
+
+def apply_channel_field_overrides(mutrig: ET.Element, overrides: dict[str, int]) -> ET.Element:
+    if not overrides:
+        return mutrig
+
+    patched = copy.deepcopy(mutrig)
+    params = patched.find("parameters")
+    channel_root = params.find("Channel") if params is not None else None
+    if channel_root is None:
+        raise RuntimeError("mutrig entry has no parameters/Channel node")
+
+    for channel in range(32):
+        node = channel_root.find(f"ch{channel}")
+        if node is None:
+            raise RuntimeError(f"missing Channel/ch{channel} node")
+        for name, value in overrides.items():
+            set_child_int(node, name, value)
     return patched
 
 
@@ -259,7 +353,7 @@ def configure_one(args: argparse.Namespace, asic: int, mutrig: ET.Element, words
         "frame_after": after[asic],
         "frame_delta": frame_delta,
         "crc_delta": crc_delta,
-        "pass": final_status == 0 and (args.dry_run or frame_delta > 0),
+        "pass": final_status == 0 and (args.dry_run or args.allow_idle_after_config or frame_delta > 0),
     }
 
 
@@ -275,6 +369,10 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, rows: lis
         f"- Dry run: `{'yes' if args.dry_run else 'no'}`",
         f"- Channel enable override: `{f'0x{args.channel_enable_mask:08X}' if args.channel_enable_mask is not None else 'none'}`",
         f"- TDC-test channel override: `{f'0x{args.tdctest_channel_mask:08X}' if args.tdctest_channel_mask is not None else 'none'}`",
+        f"- Channel field overrides: `{args.set_channel if args.set_channel else 'none'}`",
+        f"- Header field overrides: `{args.set_header if args.set_header else 'none'}`",
+        f"- TDC field overrides: `{args.set_tdc if args.set_tdc else 'none'}`",
+        f"- Require frame delta after config: `{'no' if args.allow_idle_after_config else 'yes'}`",
         f"- Result: `{'PASS' if all(row['pass'] for row in rows) else 'FAIL'}`",
         "",
         "| ASIC | XML Local | Opcode | Words | Final Status | Frame Delta | CRC Delta | Result |",
@@ -330,6 +428,35 @@ def main() -> int:
     parser.add_argument("--post-config-ms", type=int, default=100)
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--set-tdc",
+        action="append",
+        type=parse_asic_field_override,
+        default=[],
+        metavar="ASIC:FIELD=VALUE",
+        help="Override one TDC XML field for one global ASIC before packing, e.g. 2:vnvcodelay=34.",
+    )
+    parser.add_argument(
+        "--set-header",
+        action="append",
+        type=parse_asic_field_override,
+        default=[],
+        metavar="ASIC:FIELD=VALUE",
+        help="Override one Header XML field for one global ASIC before packing, e.g. 6:ext_trig_offset=1.",
+    )
+    parser.add_argument(
+        "--set-channel",
+        action="append",
+        type=parse_field_override,
+        default=[],
+        metavar="FIELD=VALUE",
+        help="Override one channel XML field on all 32 channels of each selected ASIC before packing, e.g. recv_all=0.",
+    )
+    parser.add_argument(
+        "--allow-idle-after-config",
+        action="store_true",
+        help="Treat final_status=0 as PASS even if the post-config frame counter does not advance.",
+    )
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--json-output", type=Path, default=None)
     args = parser.parse_args()
@@ -341,6 +468,9 @@ def main() -> int:
     param_info = extract_param_info(args.bsp)
     smb3 = load_mutrigs(args.smb3_xml)
     smb5 = load_mutrigs(args.smb5_xml)
+    tdc_overrides = group_tdc_overrides(args.set_tdc)
+    header_overrides = group_asic_field_overrides(args.set_header)
+    channel_field_overrides = group_field_overrides(args.set_channel)
 
     rows: list[dict[str, Any]] = []
     for asic in args.asics:
@@ -353,10 +483,16 @@ def main() -> int:
             channel_enable_mask=args.channel_enable_mask,
             tdctest_channel_mask=args.tdctest_channel_mask,
         )
+        mutrig = apply_channel_field_overrides(mutrig, channel_field_overrides)
+        mutrig = apply_header_overrides(mutrig, header_overrides.get(asic, {}))
+        mutrig = apply_tdc_overrides(mutrig, tdc_overrides.get(asic, {}))
         words = pack_words(mutrig, param_info)
         row = configure_one(args, asic, mutrig, words)
         row["channel_enable_mask"] = args.channel_enable_mask
         row["tdctest_channel_mask"] = args.tdctest_channel_mask
+        row["channel_field_overrides"] = channel_field_overrides
+        row["header_overrides"] = header_overrides.get(asic, {})
+        row["tdc_overrides"] = tdc_overrides.get(asic, {})
         rows.append(row)
         print(
             "asic={asic} opcode=0x{opcode:08X} status=0x{status:08X} frame_delta={frame_delta} crc_delta={crc_delta} pass={passed}".format(
@@ -384,6 +520,10 @@ def main() -> int:
                     "dry_run": args.dry_run,
                     "channel_enable_mask": args.channel_enable_mask,
                     "tdctest_channel_mask": args.tdctest_channel_mask,
+                    "set_channel": [f"{name}={value}" for name, value in args.set_channel],
+                    "set_header": [f"{asic}:{name}={value}" for asic, name, value in args.set_header],
+                    "set_tdc": [f"{asic}:{name}={value}" for asic, name, value in args.set_tdc],
+                    "allow_idle_after_config": args.allow_idle_after_config,
                 },
                 "rows": rows,
             },

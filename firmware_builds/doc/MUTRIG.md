@@ -102,6 +102,32 @@ for rate and channel alive/dead tests on lanes 0..3, but it does not always
 produce a locked PLL. For down-side PLL-lock work, start from the SMB5 TDC
 config.
 
+### Phase-5 Tuning Command Controls
+
+Use `configure_mutrig_from_xml.py` for controlled ASIC-by-ASIC perturbations.
+The runner keeps the SMB3/SMB5 split above and only changes the selected XML
+fields before packing the SPI bitmap.
+
+Useful live-debug switches:
+
+- `--allow-idle-after-config`: accepts final MuTRiG controller status `0` even
+  when the frame counter is idle immediately after SPI load.
+- `--set-tdc ASIC:FIELD=VALUE`: changes one TDC field for one global ASIC, for
+  example `7:vnvcodelay=14`.
+- `--set-header ASIC:FIELD=VALUE`: changes one Header field for one global ASIC,
+  for example `6:ext_trig_offset=1`.
+- `--set-channel FIELD=VALUE`: changes one Channel field on all 32 channels of
+  each selected ASIC, for example `recv_all=0`.
+
+For full-channel rate accounting, pass `--real-hits-per-lane 32` to the
+Phase-5 injector sanity or matrix runners after loading all 32 TDC-test
+channels per ASIC. With the 125 MHz injector clock, 100 kHz is
+`--pulse-intervals 1250`.
+
+For the accepted latency gate, pass `--mts-expected-latency 2000
+--mts-delay-ts-field t`. A measurement with ring-buffer CAM input latency
+outside `0..2000` cycles is rejected even if the hit counters advance.
+
 ### Reset and Run-Control State During SPI Load
 
 The MuTRiG reset input must be held at the inactive low level while the SPI
@@ -158,6 +184,13 @@ Operational procedure:
 1. Reduce `cnt` when searching for a lock at lower `vcodelay`.
 2. Increase `hitlogic` when the central delay peak is surrounded by noise.
 3. Before testing a new `vcodelay`, first write `vcodelay = 0x0+0` to fully unlock the PLL, then write the target value in the `<value>x<scale> + <offset>` form. The lock state can be sticky; skipping the explicit unlock can make a historically good `vcodelay` fail to re-lock.
+
+Observed Phase-5 blocker on 2026-04-29: single-lane 2000-cycle runs pass on
+lanes `0`, `1`, `4`, `5`, and `6`; lanes `2`, `3`, and `7` still show MTS
+timestamp-delay discard. Down-side lanes `5+6` together trigger ring-buffer CAM
+input errors even when lanes `5` and `6` pass alone. Treat that as the current
+inter-ASIC timestamp-alignment blocker before claiming 256-channel FEB/SWB
+end-to-end closure.
 
 ## Analog Mode
 
