@@ -26,7 +26,7 @@ EXPLICIT_SVD_MAP = {
     "altera_temp_sense_ctrl": Path("alt_temp_sense_controller/altera_temp_sense_ctrl.svd"),
     "mutrig_cfg_ctrl": Path("mutrig_controller/mutrig_cfg_ctrl.svd"),
     "runctl_mgmt_host": Path("run-control_mgmt/runctl_mgmt_host.svd"),
-    "mutrig_injector_multiheader": Path("charge_injection/mutrig_injector.svd"),
+    "mutrig_injector_multiheader": Path("charge_injection/script/mutrig_injector.svd"),
     "emulator_mutrig": Path("emulator_mutrig/emulator_mutrig.svd"),
     "dbg_mm2runctrl": Path("misc/dbg_issp_fab/dbg_mm2runctrl.svd"),
     "mutrig_lane_source_mux": Path("misc/mutrig_lane_source_mux/mutrig_lane_source_mux.svd"),
@@ -236,7 +236,7 @@ def resolve_leaf_svd_path(slave_name: str, kind: str = "", instance: str = "") -
         ("emulator_mutrig", Path("emulator_mutrig/emulator_mutrig.svd")),
         ("dbg_mm2runctrl", Path("misc/dbg_issp_fab/dbg_mm2runctrl.svd")),
         ("mutrig_lane_source_mux", Path("misc/mutrig_lane_source_mux/mutrig_lane_source_mux.svd")),
-        ("mutrig_injector", Path("charge_injection/mutrig_injector.svd")),
+        ("mutrig_injector", Path("charge_injection/script/mutrig_injector.svd")),
         ("mutrig_reset_controller", Path("mutrig_reset_controller/mutrig_reset_controller.svd")),
         ("runctl_mgmt_host", Path("run-control_mgmt/runctl_mgmt_host.svd")),
     ]

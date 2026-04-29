@@ -55,6 +55,7 @@ from run_phase4_emulator import (  # noqa: E402
 
 
 INJECTOR_BASE_WORD = 0x0AC80
+INJECTOR_UID = 0x4D494E4A
 HIST_INTERVAL_CLOCKS_1S = 125_000_000
 HIST_KEY_LOC_GLOBAL_CHANNEL_POST = (38 << 24) | (35 << 16) | (38 << 8) | 30
 INJECT_MODE = {
@@ -65,6 +66,45 @@ INJECT_MODE = {
     "onclick": 4,
     "prbs": 5,
 }
+
+
+def detect_injector_layout(args: argparse.Namespace) -> dict[str, Any]:
+    """Detect old direct CSR layout vs. common UID/META header layout."""
+    word0 = sc_read(args.sc_tool, args.link, INJECTOR_BASE_WORD, 1)[0]
+    if word0 == INJECTOR_UID:
+        meta = {}
+        for page, name in ((0, "version"), (1, "date"), (2, "git"), (3, "instance_id")):
+            sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 1, [page])
+            meta[name] = sc_read(args.sc_tool, args.link, INJECTOR_BASE_WORD + 1, 1)[0]
+        return {
+            "name": "meta_header",
+            "control_offset": 2,
+            "uid": word0,
+            "meta": meta,
+        }
+    return {
+        "name": "legacy_direct",
+        "control_offset": 0,
+        "uid": None,
+        "meta": {},
+        "word0": word0,
+    }
+
+
+def injector_control_base(args: argparse.Namespace) -> int:
+    layout = getattr(args, "injector_layout", None)
+    offset = 0 if layout is None else int(layout.get("control_offset", 0))
+    return INJECTOR_BASE_WORD + offset
+
+
+def write_injector_mode(args: argparse.Namespace, mode: int) -> None:
+    sc_write(args.sc_tool, args.link, injector_control_base(args) + 0, [mode])
+
+
+def read_injector_regs_for_args(args: argparse.Namespace) -> dict[str, int]:
+    return read_injector_regs(args.sc_tool, args.link, int(getattr(args, "injector_layout", {}).get("control_offset", 0)))
+
+
 EMU_HIT_MODE = {
     "poisson": 0,
     "burst": 1,
@@ -247,18 +287,19 @@ def configure_emulators_for_injector(args: argparse.Namespace) -> list[dict[str,
 
 
 def configure_injector(args: argparse.Namespace, pulse_interval: int) -> dict[str, int]:
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 1, [args.header_delay])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 2, [args.header_interval])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 3, [args.injection_multiplicity])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 4, [args.header_channel])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 5, [pulse_interval])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 6, [args.pulse_high_cycles])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 7, [args.prbs_rate])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 8, [args.prbs_pattern])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 9, [args.prbs_seed])
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 10, [args.prbs_ctrl])
-    words = sc_read(args.sc_tool, args.link, INJECTOR_BASE_WORD, 11)
+    base = injector_control_base(args)
+    sc_write(args.sc_tool, args.link, base + 0, [0])
+    sc_write(args.sc_tool, args.link, base + 1, [args.header_delay])
+    sc_write(args.sc_tool, args.link, base + 2, [args.header_interval])
+    sc_write(args.sc_tool, args.link, base + 3, [args.injection_multiplicity])
+    sc_write(args.sc_tool, args.link, base + 4, [args.header_channel])
+    sc_write(args.sc_tool, args.link, base + 5, [pulse_interval])
+    sc_write(args.sc_tool, args.link, base + 6, [args.pulse_high_cycles])
+    sc_write(args.sc_tool, args.link, base + 7, [args.prbs_rate])
+    sc_write(args.sc_tool, args.link, base + 8, [args.prbs_pattern])
+    sc_write(args.sc_tool, args.link, base + 9, [args.prbs_seed])
+    sc_write(args.sc_tool, args.link, base + 10, [args.prbs_ctrl])
+    words = sc_read(args.sc_tool, args.link, base, 11)
     keys = [
         "mode",
         "header_delay",
@@ -325,7 +366,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
                 key_loc = filter_key_loc_override
             key_value = filter_key_value
             control_word |= 0x00001000
-        sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
+        write_injector_mode(args, 0)
         sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 3, [profile["left_bound"] & 0xFFFFFFFF])
         sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 4, [profile["right_bound"] & 0xFFFFFFFF])
         sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 5, [profile["bin_width"] & 0xFFFFFFFF])
@@ -419,37 +460,38 @@ def run_injector_window(args: argparse.Namespace, pulse_interval: int) -> dict[s
         actions.append({"action": "sleep_off", "duration_ms": args.duration_ms})
         return {
             "actions": actions,
-            "injector_during": read_injector_regs(args.sc_tool, args.link),
+            "injector_during": read_injector_regs_for_args(args),
             "sample": read_stage_snapshot(args.sc_tool, args.link),
         }
 
     if args.inject_mode == "onclick":
         for index in range(args.onclick_count):
-            sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [mode_value])
+            write_injector_mode(args, mode_value)
             actions.append({"action": "onclick", "index": index})
             if args.onclick_spacing_ms > 0 and index + 1 < args.onclick_count:
                 time.sleep(args.onclick_spacing_ms / 1000.0)
         settle_ms = max(args.duration_ms, args.onclick_spacing_ms)
         if settle_ms > 0:
             time.sleep(settle_ms / 1000.0)
-        injector_during = read_injector_regs(args.sc_tool, args.link)
+        injector_during = read_injector_regs_for_args(args)
         sample = read_stage_snapshot(args.sc_tool, args.link)
-        sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
+        write_injector_mode(args, 0)
         actions.append({"action": "force_off_after_onclick", "mode": 0})
         return {"actions": actions, "injector_during": injector_during, "sample": sample}
 
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [mode_value])
+    write_injector_mode(args, mode_value)
     actions.append({"action": "set_mode", "mode": mode_value})
     time.sleep(args.duration_ms / 1000.0)
-    injector_during = read_injector_regs(args.sc_tool, args.link)
+    injector_during = read_injector_regs_for_args(args)
     sample = read_stage_snapshot(args.sc_tool, args.link)
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
+    write_injector_mode(args, 0)
     actions.append({"action": "force_off", "mode": 0})
     return {"actions": actions, "injector_during": injector_during, "sample": sample}
 
 
-def read_injector_regs(sc_tool: Path, link: int) -> dict[str, int]:
-    words = sc_read(sc_tool, link, INJECTOR_BASE_WORD, 11)
+def read_injector_regs(sc_tool: Path, link: int, control_offset: int = 0) -> dict[str, int]:
+    base = INJECTOR_BASE_WORD + control_offset
+    words = sc_read(sc_tool, link, base, 11)
     keys = [
         "mode",
         "header_delay",
@@ -507,7 +549,7 @@ def classify(args: argparse.Namespace, summary: dict[str, Any]) -> str:
 def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[str, Any]:
     run_number = args.run_number_base + index
     rc_log: list[str] = []
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
+    write_injector_mode(args, 0)
 
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "reset", settle_us=args.rc_settle_us))
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "stop-reset", settle_us=args.rc_settle_us))
@@ -539,12 +581,12 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
     before = read_stage_snapshot(args.sc_tool, args.link)
     inject_window = run_injector_window(args, pulse_interval)
     sample = inject_window["sample"]
-    sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
+    write_injector_mode(args, 0)
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "end-run", settle_us=args.rc_settle_us))
     if args.post_end_ms > 0:
         time.sleep(args.post_end_ms / 1000.0)
     after = read_stage_snapshot(args.sc_tool, args.link)
-    injector_after = read_injector_regs(args.sc_tool, args.link)
+    injector_after = read_injector_regs_for_args(args)
 
     summary = summarize_cycle(before, sample, after)
     summary["hist_live_total_delta"] = summary.get("hist_total_delta", 0)
@@ -571,6 +613,7 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         "selected_source_mask": selected_source_mask,
         "active_lanes_mask": args.active_lanes_mask,
         "inject_mode": args.inject_mode,
+        "injector_layout": getattr(args, "injector_layout", {}),
         "duration_ms": args.duration_ms,
         "lane_go": lane_go,
         "source_rows_after_select": source_rows,
@@ -606,6 +649,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- LVDS configured by runner: `{'no' if args.skip_lvds_config else 'yes'}`",
         f"- Active emulator lanes: `{fmt_hex(args.active_lanes_mask)}`",
         f"- Inject mode: `{args.inject_mode}`",
+        f"- Injector layout: `{getattr(args, 'injector_layout', {}).get('name', 'unknown')}`",
+        f"- Injector base/control offset: `{fmt_hex(INJECTOR_BASE_WORD)}` / `{getattr(args, 'injector_layout', {}).get('control_offset', 'unknown')}` words",
         f"- Histogram profile: `{args.hist_profile}`",
         f"- Rate tolerance: `{args.rate_tolerance_pct:.3f}%`",
         f"- Histogram filter enable: `{getattr(args, 'hist_filter_enable', False)}`",
@@ -641,6 +686,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
             "- Channel sanity in this report is therefore represented by emulator cluster center/size; ASIC sanity is represented by `active_lanes_mask` and the per-lane source mux selection.",
             "- Scoped real-source runs select disabled emulator sources on non-requested lanes; otherwise an aligned idle/live MuTRiG lane can continue into MTS/histogram even when the LVDS lane-go mask requests a single lane.",
             "- The runner writes injector mode `0` before setup and immediately after the injection window because the current injector RTL accepts run-control but does not gate the pulse arbiter by RUNNING.",
+            "- The runner autodetects the injector CSR layout. Current programmed images without UID/META use MODE at base+0; packaged images with UID/META use MODE at base+2.",
             "",
             "## Per-Case Details",
             "",
@@ -726,6 +772,7 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "mts_delay_ts_field": args.mts_delay_ts_field,
             "mts_drop_delay_error": args.mts_drop_delay_error,
             "ring_filter_inerr": args.ring_filter_inerr,
+            "injector_layout": getattr(args, "injector_layout", {}),
         },
         "cases": cases,
     }
@@ -794,6 +841,7 @@ def main() -> int:
     timestamp = dt.datetime.now().isoformat(timespec="seconds")
     output = args.output or default_output()
     json_output = args.json_output or output.with_suffix(".json")
+    args.injector_layout = detect_injector_layout(args)
 
     cases: list[dict[str, Any]] = []
     try:
@@ -849,7 +897,7 @@ def main() -> int:
             )
     finally:
         try:
-            sc_write(args.sc_tool, args.link, INJECTOR_BASE_WORD + 0, [0])
+            write_injector_mode(args, 0)
         except Exception as exc:  # noqa: BLE001
             print(f"WARN failed to force injector off in cleanup: {exc}", file=sys.stderr)
 

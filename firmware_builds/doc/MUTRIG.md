@@ -26,6 +26,77 @@ Use these configs as known references:
 | Analog frontend | SMB3 | `board_test_system/trash_bin/good_ribbon_0/config_smb3_ana_asic-0123.txt` |
 | Analog frontend | SMB5 | `board_test_system/trash_bin/good_ribbon_0/config_smb5_ana_alt-asic2-fineTune.txt` |
 
+### ASIC/XML Mapping Contract
+
+Each SMB configuration file describes exactly four MuTRiG ASICs, with local
+`<mutrig><index>` values `0..3`. Do not apply one SMB file to all eight ASICs.
+The host-side ASIC map is:
+
+| Global ASIC | Physical side | Config file | Local XML index | LVDS lane |
+|---:|---|---|---:|---:|
+| 0 | SMB3 upper | `config_smb3_tdc.txt` | 0 | 0 |
+| 1 | SMB3 upper | `config_smb3_tdc.txt` | 1 | 1 |
+| 2 | SMB3 upper | `config_smb3_tdc.txt` | 2 | 2 |
+| 3 | SMB3 upper | `config_smb3_tdc.txt` | 3 | 3 |
+| 4 | SMB5 down | `config_smb5_tdc.txt` | 0 | 4 |
+| 5 | SMB5 down | `config_smb5_tdc.txt` | 1 | 5 |
+| 6 | SMB5 down | `config_smb5_tdc.txt` | 2 | 6 |
+| 7 | SMB5 down | `config_smb5_tdc.txt` | 3 | 7 |
+
+The Phase-5 config runner implements this as `local = asic % 4`, selecting the
+SMB3 XML for ASICs `0..3` and the SMB5 XML for ASICs `4..7`. For full 256-channel
+TDC injection, use all eight ASICs plus all 32 channels per ASIC:
+
+```text
+--configure-asics 0-7 --channel-enable-mask 0xffffffff --tdctest-channel-mask 0xffffffff
+```
+
+That command only overrides per-channel `mask` and `tdctest_n` inside each
+ASIC's local XML entry. It must not change the SMB3/SMB5 file split.
+
+Current `good_ribbon_0` TDC XML PLL-search values are:
+
+| ASIC | SMB | Local index | `cnt` | `vcodelay` | `hitlogic` | `cnt/vcodelay/hitlogic` offsets |
+|---:|---|---:|---:|---:|---:|---|
+| 0 | SMB3 | 0 | 48 | 20 | 30 | `3/3/3` |
+| 1 | SMB3 | 1 | 43 | 30 | 30 | `3/3/3` |
+| 2 | SMB3 | 2 | 45 | 35 | 20 | `3/3/3` |
+| 3 | SMB3 | 3 | 41 | 10 | 20 | `3/3/0` |
+| 4 | SMB5 | 0 | 43 | 15 | 20 | `3/3/3` |
+| 5 | SMB5 | 1 | 42 | 20 | 25 | `3/3/3` |
+| 6 | SMB5 | 2 | 37 | 27 | 15 | `3/3/3` |
+| 7 | SMB5 | 3 | 40 | 20 | 25 | `3/3/0` |
+
+If either XML file is retuned, regenerate this audit before interpreting
+lane-by-lane PLL or timestamp-delay evidence. A copied upper-side config on the
+down side is a bad test: it can make the SPI transaction pass while the physical
+ASIC tuning is wrong.
+
+### Active Phase-5 Injection Path
+
+For `system_20260427_testplanphase5`, the physical MuTRiG injection pins are
+driven from `feb_inject_pulse` in top-level RTL:
+
+- `src/top.vhd`: `scifi_inject`, `scifi_inject2`, and `scifi_ainj` are driven by
+  `feb_inject_pulse`
+- `src/wrappers/feb_system_v3/feb_system_pipe_top.vhd`: `o_inject_pulse` drives
+  `feb_inject_pulse`
+- `syn/feb_system_v3/synthesis/submodules/feb_system_v3_data_path_subsystem.vhd`:
+  `mutrig_injector_0` drives `emulator_inject_fanout`, whose out8 pulse drives
+  the exported physical `inject_pulse`
+
+Use the Phase-5 injector CSR path for external 100 kHz tests. In the current
+board-test scripts this is `mutrig_injector_0` at SC word base `0x0AC80`, with
+periodic mode `2`, interval `1250` cycles, and the mode register forced back to
+`0` after the measurement window.
+
+Do not use deprecated pulse-control constants such as `0x4502`,
+`MUTRIG_CNT_CTRL_REGISTER_W = 0x4100`, `pll_test_mode(0)`, or `o_pll_test` for
+Phase-5 injector tests. They are not mapped as the active injector control path
+in this Qsys image. A stale or disconnected slow-control address can ACK while
+driving no physical MuTRiG injection, which turns a per-ASIC pulse test into a
+false zero-hit result.
+
 Important caveat: `config_smb003_tdc_all_OK.xml` is upper-side only. It is fine
 for rate and channel alive/dead tests on lanes 0..3, but it does not always
 produce a locked PLL. For down-side PLL-lock work, start from the SMB5 TDC

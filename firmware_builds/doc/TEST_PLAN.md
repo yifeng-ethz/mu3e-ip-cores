@@ -562,7 +562,7 @@ monotonicity.
   one active instance `histogram_statistics_0`, fed by
   `histogram_ingress_bridge_0` so the same block can observe either the
   pre-hit-stack or post-hit-stack stream.
-- `mu3e-ip-cores/charge_injection/mutrig_injector.svd`.
+- `mu3e-ip-cores/charge_injection/script/mutrig_injector.svd`.
 - `mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/DV_FORMAL.md`
   — source of all SignalTap trigger conditions in §4.3.
 
