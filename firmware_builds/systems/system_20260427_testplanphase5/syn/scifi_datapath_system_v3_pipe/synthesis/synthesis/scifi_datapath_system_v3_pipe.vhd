@@ -283,7 +283,7 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			DEBUG                     : natural := 0;
 			VERSION_MAJOR             : natural := 26;
 			VERSION_MINOR             : natural := 1;
-			VERSION_PATCH             : natural := 5;
+			VERSION_PATCH             : natural := 6;
 			BUILD                     : natural := 429;
 			IP_UID                    : natural := 1212765012;
 			VERSION_DATE              : natural := 20260429;
@@ -4615,7 +4615,7 @@ begin
 			DEBUG                     => 0,
 			VERSION_MAJOR             => 26,
 			VERSION_MINOR             => 1,
-			VERSION_PATCH             => 5,
+			VERSION_PATCH             => 6,
 			BUILD                     => 429,
 			IP_UID                    => 1212765012,
 			VERSION_DATE              => 20260429,

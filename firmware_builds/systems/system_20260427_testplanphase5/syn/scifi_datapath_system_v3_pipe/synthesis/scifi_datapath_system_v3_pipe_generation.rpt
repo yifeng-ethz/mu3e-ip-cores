@@ -34,7 +34,7 @@ Progress: Adding hist_post_splitter_0 [altera_avalon_st_splitter 18.1]
 Progress: Parameterizing module hist_post_splitter_0
 Progress: Adding histogram_ingress_bridge_0 [histogram_ingress_bridge 26.0.2.425]
 Progress: Parameterizing module histogram_ingress_bridge_0
-Progress: Adding histogram_statistics_0 [histogram_statistics_v2 26.1.5.429]
+Progress: Adding histogram_statistics_0 [histogram_statistics_v2 26.1.6.429]
 Progress: Parameterizing module histogram_statistics_0
 Progress: Adding hit_stack_subsystem_0 [hit_stack_system 1.0]
 Progress: Parameterizing module hit_stack_subsystem_0
