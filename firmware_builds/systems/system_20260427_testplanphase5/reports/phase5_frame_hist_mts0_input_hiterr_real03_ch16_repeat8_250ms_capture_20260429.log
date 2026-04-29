@@ -1,0 +1,62 @@
+timestamp=2026-04-29T09:05:25
+stp=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_mts0_input_hiterr_runtime_20260429.stp
+out_vcd=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_input_hiterr_real03_ch16_repeat8_250ms_20260429.vcd
+capture_cmd=quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_mts0_input_hiterr_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_input_hiterr_real03_ch16_repeat8_250ms_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_mts0_input_hiterr_repeat8 260.0
+runner_cmd=/opt/anaconda3/bin/python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/run_phase5_injector_datapath_sanity.py --source mixed --emulator-source-mask 0xF6 --lvds-lane-mask 0x009 --active-lanes-mask 0x00 --inject-mode periodic --pulse-intervals 12500,12500,12500,12500,12500,12500,12500,12500 --pulse-high-cycles 5 --duration-ms 250 --run-number-base 47070 --continue-on-error --output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat8_250ms_mts0_input_hiterr_stp_20260429.md --json-output firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat8_250ms_mts0_input_hiterr_stp_20260429.json
+## runner stdout
+case=0 interval=12500 class=PASS hist=29113 drops=0 mts=24097 real=3201760748 emu=3201760748
+case=1 interval=12500 class=PASS hist=29115 drops=0 mts=24548 real=3151117036 emu=3151117036
+case=2 interval=12500 class=PASS hist=32007 drops=0 mts=25533 real=3211822312 emu=3211822312
+case=3 interval=12500 class=mts_discard_with_histogram_hits hist=31777 drops=0 mts=25008 real=3334597694 emu=3334597694
+case=4 interval=12500 class=PASS hist=32757 drops=0 mts=25066 real=3283456718 emu=3283456718
+case=5 interval=12500 class=PASS hist=32087 drops=0 mts=24449 real=3320434206 emu=3320434206
+case=6 interval=12500 class=PASS hist=30566 drops=0 mts=25072 real=3125221804 emu=3125221804
+case=7 interval=12500 class=PASS hist=28962 drops=0 mts=25267 real=3249382222 emu=3249382222
+report=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat8_250ms_mts0_input_hiterr_stp_20260429.md
+json=firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_injector_real03_ch16_repeat8_250ms_mts0_input_hiterr_stp_20260429.json
+SUMMARY pass=7 fail=1
+
+## runner stderr
+
+## quartus_stp stdout
+Info: *******************************************************************
+Info: Running Quartus Prime Signal Tap
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Wed Apr 29 09:05:25 2026
+Info: Command: quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_mts0_input_hiterr_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_input_hiterr_real03_ch16_repeat8_250ms_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_mts0_input_hiterr_repeat8 260.0
+Info: Quartus(args): /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_mts0_input_hiterr_runtime_20260429.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_input_hiterr_real03_ch16_repeat8_250ms_20260429.vcd phase5_frame_hist_path phase5_frame_hist_path hist_valid_high phase5_frame_hist_mts0_input_hiterr_repeat8 260.0
+Using hardware : USB-BlasterII [7-2]
+Using device   : @1: 5AGT(FC7H3|MC7G3)/5AGXBA7D4/.. (0x02A020DD)
+Opening STP    : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_frame_hist_path_mts0_input_hiterr_runtime_20260429.stp
+Signal set     : phase5_frame_hist_path
+Trigger        : hist_valid_high
+Data log       : phase5_frame_hist_mts0_input_hiterr_repeat8
+Output VCD     : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_input_hiterr_real03_ch16_repeat8_250ms_20260429.vcd
+Timeout (s)    : 260.0
+Info (16704): Signal Tap data acquisition is in IDLE state: 
+Info (16704): Signal Tap data acquisition is in FILL state: 
+Info (16704): Signal Tap data acquisition is in PRE state:  (0 triggers seen)
+Info (16704): Signal Tap data acquisition is in DONE state: 
+Wrote /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/captures/phase5_frame_hist_mts0_input_hiterr_real03_ch16_repeat8_250ms_20260429.vcd
+Info (23030): Evaluation of Tcl script /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl was successful
+Info: Quartus Prime Signal Tap was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 804 megabytes
+    Info: Processing ended: Wed Apr 29 09:06:31 2026
+    Info: Elapsed time: 00:01:06
+    Info: Total CPU time (on all processors): 00:00:02
+
+runner_rc=1
+capture_rc=0
