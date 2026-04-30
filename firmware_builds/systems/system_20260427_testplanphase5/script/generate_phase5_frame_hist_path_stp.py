@@ -7,6 +7,7 @@ sources at the same downstream boundaries:
 * per-lane source mux selected stream
 * per-lane frame deassembly type-0 hit outputs
 * MTS type-1 stream into the histogram ingress bridge
+* optional ring-buffer CAM type-2 and FEB frame-assembly type-3 streams
 * histogram ingress bridge selected hist stream
 * histogram_statistics input and accepted/dropped counters
 
@@ -102,6 +103,30 @@ def histogram_stream(prefix: str, name: str, data_width: int, channel_width: int
     return signals
 
 
+def type2_stream(prefix: str, name: str) -> list[str]:
+    signals = [
+        f"{prefix}{name}_valid",
+        f"{prefix}{name}_ready",
+        f"{prefix}{name}_startofpacket",
+        f"{prefix}{name}_endofpacket",
+        f"{prefix}{name}_error",
+    ]
+    signals.extend(bits(f"{prefix}{name}_channel", 4))
+    signals.extend(bits(f"{prefix}{name}_data", 36))
+    return signals
+
+
+def type3_stream(prefix: str, name: str) -> list[str]:
+    signals = [
+        f"{prefix}{name}_valid",
+        f"{prefix}{name}_ready",
+        f"{prefix}{name}_startofpacket",
+        f"{prefix}{name}_endofpacket",
+    ]
+    signals.extend(bits(f"{prefix}{name}_data", 36))
+    return signals
+
+
 def mts_debug_streams(prefix: str) -> list[str]:
     signals = [
         f"{prefix}aso_debug_ts_valid",
@@ -142,13 +167,22 @@ def hitstack_debug_ports(prefix: str, rings: int = 4) -> list[str]:
     return signals
 
 
+def frame_boundary_ports(prefix: str, rings: int = 4) -> list[str]:
+    signals: list[str] = []
+    for ring in range(rings):
+        ring_prefix = f"{prefix}ring_buffer_cam:ring_buffer_cam_{ring}|"
+        signals.extend(type2_stream(ring_prefix, "aso_hit_type2"))
+    signals.extend(type3_stream(prefix, "hit_type3"))
+    return signals
+
+
 def selected_hitstacks(hitstack: str) -> list[int]:
     if hitstack == "both":
         return [0, 1]
     return [int(hitstack)]
 
 
-def default_signals(hitstack: str = "0") -> list[str]:
+def default_signals(hitstack: str = "0", include_frame_boundaries: bool = False) -> list[str]:
     signals: list[str] = []
 
     signals.append(f"{RESET_PREFIX}reset_out")
@@ -206,7 +240,10 @@ def default_signals(hitstack: str = "0") -> list[str]:
         signals.extend(mts_debug_streams(mp))
 
     for stack in selected_hitstacks(hitstack):
-        signals.extend(hitstack_debug_ports(hitstack_prefix(stack)))
+        hp = hitstack_prefix(stack)
+        signals.extend(hitstack_debug_ports(hp))
+        if include_frame_boundaries:
+            signals.extend(frame_boundary_ports(hp))
 
     signals.extend(
         histogram_stream(HIST_BRIDGE_PREFIX, "asi_pre", data_width=39, channel_width=4)
@@ -254,11 +291,17 @@ def default_signals(hitstack: str = "0") -> list[str]:
     return unique
 
 
-def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str, hitstack: str) -> ET.ElementTree:
+def build_stp(
+    sample_depth: int,
+    trigger_signal: str,
+    trigger_mode: str,
+    hitstack: str,
+    include_frame_boundaries: bool,
+) -> ET.ElementTree:
     stamp = dt.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")
     signal_set_name = "phase5_frame_hist_path"
     trigger_name = f"hist_valid_{trigger_mode}"
-    signals = default_signals(hitstack)
+    signals = default_signals(hitstack, include_frame_boundaries=include_frame_boundaries)
 
     root = ET.Element("session", {"sof_file": ""})
     display_tree = ET.SubElement(root, "display_tree", {"gui_logging_enabled": "0"})
@@ -385,19 +428,33 @@ def parse_args() -> argparse.Namespace:
         default="rising_edge",
         help="Trigger expression kind",
     )
+    parser.add_argument(
+        "--include-frame-boundaries",
+        action="store_true",
+        help="Also probe RBCAM hit_type2 outputs and FEB frame-assembly hit_type3 output.",
+    )
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    tree = build_stp(args.sample_depth, args.trigger_signal, args.trigger_mode, args.hitstack)
+    tree = build_stp(
+        args.sample_depth,
+        args.trigger_signal,
+        args.trigger_mode,
+        args.hitstack,
+        include_frame_boundaries=args.include_frame_boundaries,
+    )
     indent(tree.getroot())
 
     output = Path(args.output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     tree.write(output, encoding="utf-8", xml_declaration=False)
     output.write_text(output.read_text(encoding="utf-8") + "\n", encoding="utf-8")
-    print(f"wrote {output} ({len(default_signals(args.hitstack))} probes)")
+    print(
+        f"wrote {output} "
+        f"({len(default_signals(args.hitstack, include_frame_boundaries=args.include_frame_boundaries))} probes)"
+    )
     return 0
 
 
