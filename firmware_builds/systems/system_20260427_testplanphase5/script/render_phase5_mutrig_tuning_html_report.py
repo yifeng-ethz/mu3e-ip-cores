@@ -74,6 +74,66 @@ EVIDENCE = [
         "ASIC5/lane5 and ASIC6/lane6 pass alone, the real two-lane pair fails, ASIC6 ext_trig_offset 0..15 does not clear it, and the two-lane emulator reference passes after settle.",
     ),
     (
+        "Phase-6 continued bounded cycle P6B006",
+        "Phase6",
+        "phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B006.json",
+        "Fresh ASIC5/lane5 one-channel control passes with zero ring input errors.",
+    ),
+    (
+        "Phase-6 continued bounded cycle P6B007",
+        "Phase6",
+        "phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B007.json",
+        "Fresh ASIC6/lane6 one-channel control passes with zero ring input errors.",
+    ),
+    (
+        "Phase-6 continued bounded cycle P6B010",
+        "Phase6",
+        "phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B010.json",
+        "Fresh ASIC5+6 one-channel pair still fails before SWB with ring input errors.",
+    ),
+    (
+        "Lower lanes 5+6 one-channel latency 2000",
+        "Latency",
+        "phase6_probe_lower56_ch1_latency2000_pulse4_20260430.json",
+        "Nominal 0..2000-cycle expected-latency gate fails for the two-real-ASIC lower pair.",
+    ),
+    (
+        "Lower lanes 5+6 one-channel latency 4000",
+        "Latency",
+        "phase6_probe_lower56_ch1_latency4000_pulse4_20260430.json",
+        "Opening the expected-latency gate to 4000 cycles does not clear the lower-pair failure.",
+    ),
+    (
+        "Lower lanes 5+6 one-channel latency 65535",
+        "Latency",
+        "phase6_probe_lower56_ch1_latency65535_pulse4_20260430.json",
+        "Even an effectively wide positive-latency gate leaves ring input errors, pointing away from a small positive delay tail.",
+    ),
+    (
+        "Lower lanes 5+6 header mode channel 5",
+        "Header",
+        "phase6_probe_lower56_ch1_header_ch5_hdelay100_pulse4_20260430.json",
+        "Header-synchronous injection on lower header channel 5 still fails for the real pair.",
+    ),
+    (
+        "Lower lanes 5+6 header mode channel 6",
+        "Header",
+        "phase6_probe_lower56_ch1_header_ch6_hdelay100_pulse4_20260430.json",
+        "Header-synchronous injection on lower header channel 6 still fails for the real pair.",
+    ),
+    (
+        "Lane 5 header mode control",
+        "Header",
+        "phase6_probe_lane5_ch1_header_hdelay100_pulse4_20260430.json",
+        "ASIC5/lane5 alone passes the same header-synchronous mode, so the mode itself is not the blocker.",
+    ),
+    (
+        "Lane 6 header mode control",
+        "Header",
+        "phase6_probe_lane6_ch1_header_hdelay100_pulse4_20260430.json",
+        "ASIC6/lane6 alone passes the same header-synchronous mode, so the pair failure is cross-ASIC.",
+    ),
+    (
         "Lane 6 zero VCO point",
         "Phase6",
         "phase6_lane6_vco000_pulse4_100k_20260430_192903.json",
@@ -212,8 +272,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. The single-ASIC lane6 FEB frame-boundary capture is now only a frame-format debug example until rerun with nonzero locked PLL settings and full RUN_PREP. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
-        "Rerun lane6/7 and P6-BUG-004-H from ASIC-specific nonzero cnt/vcodelay/hitlogic settings after full RUN_PREP, then debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS and close the RBCAM-to-FEB-frame same-window alignment.",
+        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Fresh continued cycle 20260430_live_continued_cycle1 records P6B006 PASS hist=52627/ring=0, P6B007 PASS hist=81880/ring=0, P6B010 FAIL hist=144364/ring_inerr_delta=563053, P6B020 expected fail ring=7146776, and P6E010 pulse-high 3 underfilled. Opening MTS expected latency to 4000 and 65535 still fails, so the failure is not a small positive-latency tail. Header-synchronous pair injection on lower header channels 5 and 6 fails, while single-lane header controls pass. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
+        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS, then rerun the RBCAM-to-FEB-frame same-window alignment from nonzero locked PLL settings and full RUN_PREP.",
     ),
     (
         "SWB input path",
@@ -226,7 +286,7 @@ PROGRESS = [
         "SWB OPQ to DMA",
         "PARTIAL_DMA",
         "Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.",
-        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. The online_sc fixed4 image compiled timing-clean, programmed checksum 0x31A72852, and recovered /dev/mudaq0. The updated repo-owned stream-datagen probe classifies raw host DMA as dma_payload_nonzero: 960 nonzero words, 64 nonpadding words, EVENT_BUILD payload count low32=0x10, and first payload words 0x0008884A/0x0008884B. The old frame reducer correctly reports raw_payload_no_legacy_frames for this musip_event_builder payload.",
+        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. The online_sc fixed4 image compiled timing-clean, programmed checksum 0x31A72852, and recovered /dev/mudaq0. Three fresh 10 s repo-owned stream-datagen runs classify raw host DMA as dma_payload_nonzero with 2048 nonzero words, 1024 nonpadding words, and 256 event-builder payload words each. First payload words differ across runs: 0x00088A0C, 0x0008818F, and 0x0008894F, so this is not stale-buffer reuse. The old frame reducer correctly reports raw_payload_no_legacy_frames for this musip_event_builder payload.",
         "Decode the active MuSiP/OPQ payload contract, clear the still-empty time-datagen path, then run real FEB-link captures and require 255 delivered hits plus one OPQ-accounted drop per 256-hit bunch before any FEB-link host-disk claim.",
     ),
     (
@@ -240,7 +300,7 @@ PROGRESS = [
         "Disk/offline timestamp check",
         "BLOCKED",
         "Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.",
-        "No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement. The Phase-6 DMA reducer now reports raw_payload_no_legacy_frames when host DMA contains nonpadding musip_event_builder payload without old FEB/SWB frame headers. That is useful SWB DMA evidence, not disk/offline timestamp closure.",
+        "No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement. The Phase-6 DMA reducer now reports raw_payload_no_legacy_frames when host DMA contains nonpadding musip_event_builder payload without old FEB/SWB frame headers. Three 10 s stream-datagen captures prove the raw SWB DMA buffer changes per run, but they are controls only and do not contain decoded real MuTRiG FEB-link bunches.",
         "Extend the reducer for the active MuSiP payload or capture legacy FEB-link frames, then require 255 delivered same-timestamp hits plus one OPQ-accounted drop before disk closure.",
     ),
 ]
@@ -575,13 +635,16 @@ def write_html() -> None:
       not a ring-local decode bug.
     </p>
     <p>
-      The latest fixed Phase-6 cycle explicitly loaded
-      <code>config_smb3_tdc.txt</code> and <code>config_smb5_tdc.txt</code>.
-      P6B010 configured ASIC5/6 one-channel mode successfully but failed as
-      <code>unexpected_fail</code>. The bounded cycle measured
-      <code>ring_inerr_delta=535108</code>; the later SignalTap rerun measured
-      <code>ring_inerr_delta=535373</code>, <code>mts_discard_delta=0</code>,
-      and LVDS error/DPA deltas were zero. P6B020 full-channel remains the
+      The fixed Phase-6 cycles explicitly loaded <code>config_smb3_tdc.txt</code>
+      and <code>config_smb5_tdc.txt</code>. The original timing-closed bounded
+      cycle measured P6B010 <code>ring_inerr_delta=535108</code>; the later
+      SignalTap rerun measured <code>ring_inerr_delta=535373</code>,
+      <code>mts_discard_delta=0</code>, and LVDS error/DPA deltas were zero.
+      The fresh continued cycle
+      <code>phase6_long_runs/20260430_live_continued_cycle1</code> reproduces
+      the split: P6B006 lane5 and P6B007 lane6 pass alone with zero ring input
+      errors, while P6B010 lower lanes5+6 one-channel fails with
+      <code>ring_inerr_delta=563053</code>. P6B020 full-channel remains the
       expected fail, and P6E010 pulse-high 3 is clean but underfilled. Reduced
       evidence:
       <a href="{esc(rel(phase6_report))}">{esc(phase6_report.name)}</a>.
@@ -595,6 +658,17 @@ def write_html() -> None:
       the same lower MTS/ring path passes after 50 ms post-sync/pre-inject
       settle. Reduced sweep evidence:
       <a href="{esc(rel(REPORT_DIR / 'phase6_lower56_cross_asic_sweep_20260430.md'))}">phase6_lower56_cross_asic_sweep_20260430.md</a>.
+    </p>
+    <p>
+      The latest direct probes rule out two weaker explanations. First, opening
+      the MTS expected-latency gate from <code>2000</code> to <code>4000</code>
+      and <code>65535</code> still leaves large lower-pair ring input-error
+      counts, so the reject is not just a small positive delay tail above the
+      nominal window. Second, header-synchronous injection on lower header
+      channels <code>5</code> and <code>6</code> still fails for the real
+      pair, while the same header mode passes for lane5 alone and lane6 alone.
+      The pair failure is therefore still cross-ASIC even when the injection is
+      locked to MuTRiG frame headers.
     </p>
     <p>
       The lane6/7 zero-point checks are invalidated as tuning evidence. A
@@ -668,14 +742,14 @@ def write_html() -> None:
       <code>dma_words.bin</code> for offline reduction.
     </p>
     <p>
-      The direct probe now proves the raw SWB DMA payload path is alive in the
-      stream-datagen configuration. The run
-      <code>post_tool_update_stream_datagen_generic_defaultstate</code>
-      recorded 960 nonzero DMA words, 64 nonpadding words, payload count
-      low32 <code>0x10</code>, payload drop-count low32
-      <code>0x091E2DD6</code>, and first payload words such as
-      <code>0x0008884A</code>. The updated probe classifies this as
-      <code>dma_payload_nonzero</code>. The old FEB/SWB frame reducer reports
+      The direct probe now proves the raw SWB DMA payload path is alive and
+      repeatable in the stream-datagen configuration. Three fresh 10 s runs
+      each recorded <code>2048</code> nonzero DMA words, <code>1024</code>
+      nonpadding words, and <code>256</code> event-builder payload words.
+      Their first payload words differ across runs
+      (<code>0x00088A0C</code>, <code>0x0008818F</code>,
+      <code>0x0008894F</code>), which rules out stale-buffer reuse for this
+      control. The old FEB/SWB frame reducer reports
       <code>raw_payload_no_legacy_frames</code>, which is the expected
       interpretation for active <code>musip_event_builder</code> raw 256-bit
       payload, not an end-to-end hit-frame pass. The time-datagen path still

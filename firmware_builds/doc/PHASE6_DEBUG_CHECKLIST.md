@@ -45,6 +45,16 @@ nonzero XML/default setting, full `RUN_PREPARE` synchronization, and a deeper or
 better-triggered capture that ties nonempty RBCAM `hit_type2` output to the
 later FEB `hit_type3` frame drain.
 
+Current continued evidence: lane5 and lane6 pass alone after explicit SMB5 XML
+reload, including header-synchronous injection controls. The same two real
+lower lanes fail together before SWB: P6B010 in
+`phase6_long_runs/20260430_live_continued_cycle1` has
+`ring_inerr_delta=563053` with `mts_discard_delta=0`, and header-sync pair
+probes on lower header channels 5 and 6 both fail with large ring input-error
+counts. Opening the MTS expected-latency CSR to `4000` and `65535` cycles still
+fails, so the next debug target is cross-ASIC timestamp/epoch/order coherence
+before or inside lower MTS, not a narrow positive-latency threshold.
+
 ### 2.1 RBCAM Input: `hit_type1`
 
 Probe before RBCAM at `hit_stack_subsystem_N.hit_type_1_*` and, when needed,
@@ -143,6 +153,11 @@ Do not move to performance cases until all relevant normal cases pass.
 If a negative control passes, stop and debug observability or stimulus before
 using that capture as evidence.
 
+Current C4 evidence: C4 still fails in periodic injection, header-synchronous
+injection, and loose expected-latency settings. A PASS in any one of those modes
+after a source change is useful only if the same run also proves zero MTS
+delay-error flags, zero ring input errors, and a valid RBCAM/FEB frame grammar.
+
 ## 5. SWB/DMA Disk Checklist
 
 Run SWB/DMA only after the FEB one-ASIC path is clean at the FEB output
@@ -168,6 +183,14 @@ For Mu3e Demo OPQ with `N_SHD=128` and `N_HIT=255`, a 256-hit source cluster is
 expected to deliver 255 hits plus exactly one accounted OPQ hit drop. A no-loss
 256-hit disk result under that profile is itself suspicious unless OPQ settings
 changed and the run manifest proves it.
+
+Current D2 evidence: three fresh 10 s stream-datagen controls after the fixed4
+SWB image each produced `dma_payload_nonzero` with `2048` nonzero words,
+`1024` nonpadding words, and `256` event-builder payload words. First payload
+words differed across runs (`0x00088A0C`, `0x0008818F`, `0x0008894F`), which
+rules out stale-buffer reuse for this raw-DMA control. The offline reducer still
+reports `raw_payload_no_legacy_frames`; this is a SWB host-DMA partial, not a
+FEB-link or disk timestamp pass.
 
 ## 6. Offline Analysis Requirements
 
