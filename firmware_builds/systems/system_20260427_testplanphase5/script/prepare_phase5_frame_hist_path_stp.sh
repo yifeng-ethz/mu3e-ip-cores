@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
     cat <<'EOF'
 Usage:
-  prepare_phase5_frame_hist_path_stp.sh [--sample-depth N] [--trigger-mode high|rising_edge] [--trigger-signal SIGNAL] [--hitstack 0|1|both]
+  prepare_phase5_frame_hist_path_stp.sh [--sample-depth N] [--trigger-mode high|rising_edge] [--trigger-signal SIGNAL] [--hitstack 0|1|both] [--include-frame-boundaries]
 
 Purpose:
   Regenerate the Phase-5 frame/deassembly/MTS/histogram SignalTap file,
@@ -21,6 +21,7 @@ sample_depth="1024"
 trigger_mode="rising_edge"
 trigger_signal=""
 hitstack="0"
+include_frame_boundaries="0"
 project="top"
 revision="top_stp_pipe_phase5_frame_hist"
 
@@ -41,6 +42,10 @@ while [[ $# -gt 0 ]]; do
         --hitstack)
             hitstack="$2"
             shift 2
+            ;;
+        --include-frame-boundaries)
+            include_frame_boundaries="1"
+            shift
             ;;
         -h|--help)
             usage
@@ -92,6 +97,7 @@ echo "PREPARE_PHASE5_STP_FILE         : ${stp_file}"
 echo "PREPARE_PHASE5_STP_REPORT       : ${report_file}"
 echo "PREPARE_PHASE5_STP_TRIGGER_MODE : ${trigger_mode}"
 echo "PREPARE_PHASE5_STP_HITSTACK     : ${hitstack}"
+echo "PREPARE_PHASE5_STP_FRAME_BOUNDS : ${include_frame_boundaries}"
 if [[ -n "${trigger_signal}" ]]; then
     echo "PREPARE_PHASE5_STP_TRIGGER_NODE : ${trigger_signal}"
 fi
@@ -105,6 +111,9 @@ generator_args=(
 )
 if [[ -n "${trigger_signal}" ]]; then
     generator_args+=(--trigger-signal "${trigger_signal}")
+fi
+if [[ "${include_frame_boundaries}" == "1" ]]; then
+    generator_args+=(--include-frame-boundaries)
 fi
 
 python3 "${generator}" "${generator_args[@]}"

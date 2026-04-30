@@ -35,6 +35,7 @@ CONFIGURE_MUTRIG = SCRIPT_DIR / "configure_mutrig_from_xml.py"
 INJECTOR_SANITY = SCRIPT_DIR / "run_phase5_injector_datapath_sanity.py"
 CHECK_ENV = SCRIPT_DIR / "check_environment_monitors.py"
 CHECK_SC = SCRIPT_DIR / "check_sc_bridges.py"
+ANALYZE_DMA = SCRIPT_DIR / "analyze_phase6_dma_memory.py"
 DEFAULT_SMB3_XML = REPO_ROOT / "board_test_system" / "trash_bin" / "good_ribbon_0" / "config_smb3_tdc.txt"
 DEFAULT_SMB5_XML = REPO_ROOT / "board_test_system" / "trash_bin" / "good_ribbon_0" / "config_smb5_tdc.txt"
 
@@ -589,7 +590,7 @@ class Runner:
             input_text=self.args.dma_menu_input,
         )
         memory_file = dma_dir / "memory_content.txt"
-        analysis = self.analyze_memory_file(memory_file)
+        analysis = self.analyze_memory_file(memory_file, dma_dir / "memory_decode")
         record = {
             "kind": "dma_capture",
             "timestamp": iso_now(),
@@ -602,41 +603,31 @@ class Runner:
         append_jsonl(self.summary_jsonl, record)
         return record
 
-    def analyze_memory_file(self, path: Path) -> dict[str, Any]:
+    def analyze_memory_file(self, path: Path, output_base: Path) -> dict[str, Any]:
         if self.args.dry_run:
             return {"dry_run": True}
         if not path.exists():
             return {"error": "memory_content.txt missing"}
-        total = 0
-        nonzero = 0
-        nonpadding = 0
-        first_words: list[str] = []
+        argv = [
+            str(PYTHON),
+            str(ANALYZE_DMA),
+            str(path),
+            "--json-output",
+            str(output_base.with_suffix(".json")),
+            "--md-output",
+            str(output_base.with_suffix(".md")),
+        ]
+        if self.args.dma_expect_ts_delta is not None:
+            argv.extend(["--expect-ts-delta", str(self.args.dma_expect_ts_delta)])
+        if self.args.dma_expect_hits_per_frame is not None:
+            argv.extend(["--expect-hits-per-frame", str(self.args.dma_expect_hits_per_frame)])
+        result = self.run_cmd("analyze_dma_memory", argv, timeout_s=120)
         try:
-            with path.open("r", encoding="utf-8", errors="replace") as handle:
-                for line in handle:
-                    parts = line.strip().split()
-                    if len(parts) < 2:
-                        continue
-                    try:
-                        word = int(parts[1], 16)
-                    except ValueError:
-                        continue
-                    total += 1
-                    if len(first_words) < 32:
-                        first_words.append(f"0x{word:08X}")
-                    if word != 0:
-                        nonzero += 1
-                    if word not in (0, 0xAFFEAFFE):
-                        nonpadding += 1
-        except OSError as exc:
-            return {"error": str(exc)}
-        return {
-            "total_words": total,
-            "nonzero_words": nonzero,
-            "nonpadding_words": nonpadding,
-            "first_words": first_words,
-            "format_decode": "not_implemented_for_phase6_active_packet_format",
-        }
+            payload = json.loads(output_base.with_suffix(".json").read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            payload = {"error": f"DMA decode JSON failed: {exc}"}
+        payload["decode_command"] = result.__dict__
+        return payload
 
     def write_manifest(self) -> None:
         write_json(
@@ -659,6 +650,8 @@ class Runner:
                     "preflight_settle_ms": self.args.preflight_settle_ms,
                     "run_dma_when_feb_passes": self.args.run_dma_when_feb_passes,
                     "swb_link_mask": self.args.swb_link_mask,
+                    "dma_expect_ts_delta": self.args.dma_expect_ts_delta,
+                    "dma_expect_hits_per_frame": self.args.dma_expect_hits_per_frame,
                     "dry_run": self.args.dry_run,
                 },
                 "cases": [case.__dict__ for case in PHASE6_CASES],
@@ -791,7 +784,21 @@ def main() -> int:
     parser.add_argument("--swb-detector", type=int, default=2)
     parser.add_argument("--dma-timeout-s", type=float, default=90.0)
     parser.add_argument("--dma-menu-input", default="1\n2\nq\n")
+    parser.add_argument(
+        "--dma-expect-ts-delta",
+        type=int,
+        default=None,
+        help="Expected timestamp delta between consecutive decoded DMA frames. Defaults to --pulse-interval.",
+    )
+    parser.add_argument(
+        "--dma-expect-hits-per-frame",
+        type=int,
+        default=None,
+        help="Expected decoded hit count per DMA frame, for example 255 for the Mu3e Demo OPQ limit case.",
+    )
     args = parser.parse_args()
+    if args.dma_expect_ts_delta is None:
+        args.dma_expect_ts_delta = args.pulse_interval
 
     if not args.dry_run:
         ensure_executable(args.sc_tool, "sc_tool")
@@ -801,6 +808,7 @@ def main() -> int:
         ensure_file(INJECTOR_SANITY, "run_phase5_injector_datapath_sanity.py")
         ensure_file(CHECK_ENV, "check_environment_monitors.py")
         ensure_file(CHECK_SC, "check_sc_bridges.py")
+        ensure_file(ANALYZE_DMA, "analyze_phase6_dma_memory.py")
         ensure_file(DEFAULT_SMB3_XML, "SMB3 MuTRiG config")
         ensure_file(DEFAULT_SMB5_XML, "SMB5 MuTRiG config")
         if args.run_dma_when_feb_passes:

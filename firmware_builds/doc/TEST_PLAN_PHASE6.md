@@ -3,7 +3,7 @@
 **Revision**: 2026-04-30 / draft-0
 **Target**: `firmware_builds/systems/system_20260427_testplanphase5/` plus the `online_sc` SWB image at `/home/yifeng/packages/online_sc/online/switching_pc/a10_board/output_files/top.sof`
 **Host**: teferi (`/dev/mudaq0`, FEB SciFi on SWB SC link 2)
-**Companions**: [`TEST_PLAN.md`](TEST_PLAN.md), [`TEST_PLAN_PHASE5.md`](TEST_PLAN_PHASE5.md), [`MUTRIG.md`](MUTRIG.md), [`RUNCTL_HITSTACK_SIGNALTAP_PLAN.md`](RUNCTL_HITSTACK_SIGNALTAP_PLAN.md)
+**Companions**: [`TEST_PLAN.md`](TEST_PLAN.md), [`TEST_PLAN_PHASE5.md`](TEST_PLAN_PHASE5.md), [`PHASE6_DEBUG_CHECKLIST.md`](PHASE6_DEBUG_CHECKLIST.md), [`MUTRIG.md`](MUTRIG.md), [`RUNCTL_HITSTACK_SIGNALTAP_PLAN.md`](RUNCTL_HITSTACK_SIGNALTAP_PLAN.md)
 
 ---
 
@@ -271,8 +271,12 @@ A DMA capture is not Phase-6 closure until the run directory contains:
   same timestamp per delivered bunch, OPQ `drop_hit=1` for each 256-hit source
   cluster, and 100 kHz bunch spacing.
 
-Until the decode is implemented for the exact active packet format, the disk
-stage remains `not-run` or `diagnostic_only`.
+The active disk reducer is
+`firmware_builds/systems/system_20260427_testplanphase5/script/analyze_phase6_dma_memory.py`.
+It scans `memory_content.txt` for FEB/SWB frame headers, trailers, subheaders,
+frame counters, timestamp deltas, and hit-count distributions. A disk run is
+still `diagnostic_only` until its decoded expectations match the injector
+configuration and the SWB counter snapshot from the same run.
 
 Current live checkpoint, 2026-04-30:
 
