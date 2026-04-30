@@ -56,8 +56,8 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | Lower pair single-channel | `PASS` | lanes 5+6 pass one TDC-test channel after clean good-ribbon restore |
 | Lower pair full 32-channel | `BLOCKED` | lanes 5+6 full-channel pulse-high 4 still produces MTS/ring timestamp errors |
 | SWB OPQ profile | `PASS` source/synthesis checkpoint | Mu3e Demo OPQ uses `N_SHD=128`, `N_HIT=255`; packet_scheduler `ed249da` merge includes the `25e204c` one-drop UVM proof; online_sc `ada3aea38` |
-| SWB image / PCIe | `PASS` image, `BLOCKED` link | online_sc `make flow` and `make pgm` passed; SOF checksum `0x31AA0589`; PCIe recovery restored `/dev/mudaq0`; corrected SWB diagnostics show `LINK_LOCKED_LOW=0x00000F00`, so FEB SC link 2 is not locked; [`../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md) |
-| DMA disk closure | `not-run` | no valid host-disk Mu3e Demo OPQ evidence yet: expected 255 delivered hits plus 1 accounted OPQ hit drop per 256-hit source cluster; blocked until SWB link 2 locks |
+| SWB image / PCIe | `PASS` image, `BLOCKED` SC return | online_sc `make flow` and `make pgm` passed; SOF checksum `0x31AA0589`; PCIe recovery restored `/dev/mudaq0`; FEB `sc_hub` latched a valid `0x0C000` read and `0x52434D48` data, but the SWB secondary ring returned zero host words; [`../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md) |
+| DMA disk closure | `not-run` | no valid host-disk Mu3e Demo OPQ evidence yet: expected 255 delivered hits plus 1 accounted OPQ hit drop per 256-hit source cluster; blocked until the SC reply path and SWB input gate pass |
 
 The current first hard blocker is before SWB/DMA closure: the lower SMB5 pair
 `lanes5+6` still fails the MTS/ring timestamp-delay gate when both ASICs run all
@@ -65,13 +65,16 @@ The current first hard blocker is before SWB/DMA closure: the lower SMB5 pair
 diagnostics clean, but that trims the offending hits before the ring and is not
 latency closure.
 
-The current SWB-side blocker is more basic: after programming the OPQ-aligned
-online_sc image and recovering PCIe, reset-link stop-reset/enable to FEB 7
-echoed through `RESET_LINK_STATUS_REGISTER_R` as `0x31000000` / `0x32000000`,
-but a secondary SC read on link 2 still timed out and the corrected SWB
-diagnostic registers read `LINK_LOCKED_LOW=0x00000F00`. Bit 2 is clear, so the
-FEB under test is not locked at the SWB input. Do not run OPQ/DMA/disk closure
-against this state except as environment health diagnostics.
+The current SWB-side blocker is now localized to the SC reply/capture path:
+after programming the OPQ-aligned online_sc image and recovering PCIe,
+reset-link stop-reset/enable to FEB 7 echoed through
+`RESET_LINK_STATUS_REGISTER_R` as `0x31000000` / `0x32000000`. Secondary SC
+reads still timed out at the host and the SWB secondary ring stayed empty, but
+FEB JTAG readback of `sc_hub` showed the request reached the FEB and completed a
+valid external read: `LAST_RD_ADDR=0x0000C000`, `LAST_RD_DATA=0x52434D48`
+(`RCMH`). Do not run OPQ/DMA/disk closure against this state except as
+environment health diagnostics; first prove the reply leaves FEB and is captured
+by the SWB secondary path.
 
 ## 2. Stage Gates
 
@@ -84,7 +87,7 @@ unless the run is explicitly marked diagnostic-only.
 | P6-FEB-IN | MuTRiG to FEB deassembly | per-ASIC frame counters advance; CRC/frame errors stay zero or are locally explained | all 8 ASICs active with correct SMB3/SMB5 XML mapping |
 | P6-MTS-RING | MTS to ring-buffer CAM / hit processor | MTS discard and ring input-error counters stay zero without trimming; accepted latency in `0..2000` cycles | full 256-channel 100 kHz source passes |
 | P6-FEB-OUT | FEB frame assembly output | FEB output frame counters and frame payload count match accepted hit count | FEB emits all accepted hits with stable run-control framing |
-| P6-SWB-IN | SWB optical/link input | SWB link-lock bit for SC link 2 is set; SWB SciFi link counters advance only on selected link mask; no link/CRC/reset errors | SWB sees FEB output for the same run window |
+| P6-SWB-IN | SWB optical/link input | SWB SC read/reply loop returns a host-visible FEB `sc_hub` UID read; SWB SciFi link counters advance only on selected link mask; no link/CRC/reset errors | SWB sees FEB output for the same run window |
 | P6-SWB-OUT | SWB merger output | time/stream merger counters match SWB input and chosen readout mode | no unexplained merger drops, reordering, or stale packets |
 | P6-HOST-DMA | `/dev/mudaq0` DMA buffer | `swb_dmatest` or MIDAS readout writes a nonzero disk buffer for the same run | DMA words are recorded to host disk and linked to run metadata |
 | P6-DISK-DECODE | offline decode | Mu3e Demo profile: decoded bunches contain 255 same-timestamp hits and OPQ `drop_hit` accounts exactly 1 lost hit from the 256-hit source cluster; bunch-to-bunch timestamp delta is 100 kHz | no stale, duplicate, timestamp-mismatched, or unaccounted missing hits |
@@ -101,7 +104,7 @@ unless the run is explicitly marked diagnostic-only.
 | P6B021 | same as P6B020 with LVDS SVD snapshots enabled | `PASS_DIAG`: ring fails while LVDS error/DPA deltas stay zero, so blocker is downstream of LVDS training | [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | P6B030 | all 8 lanes, full 256 channels, pulse high 4, 100 kHz | `BLOCKED` until P6B020 passes | same |
 | P6B040 | all 8 lanes, full 256 channels, diagnostic `drop_delay_error=on` | diagnostic-only downstream clean expected | proves downstream ring/SWB path only after labeling trimmed hits |
-| P6B050 | SWB Mu3e Demo OPQ, 256-hit source cluster | `BLOCKED` until link 2 locks; then `PASS` only if host/disk sees 255 delivered hits and OPQ drop ledger reports exactly 1 hit drop | OPQ CSR snapshot plus disk decode |
+| P6B050 | SWB Mu3e Demo OPQ, 256-hit source cluster | `BLOCKED` until the SC reply path and SWB input gate pass; then `PASS` only if host/disk sees 255 delivered hits and OPQ drop ledger reports exactly 1 hit drop | OPQ CSR snapshot plus disk decode |
 
 ### 3.2 PROF
 
@@ -248,9 +251,9 @@ Current live checkpoint, 2026-04-30:
   `mudaq_recover_pcie`.
 - Reset-link command path: `PASS_DIAG`, FEB 7 stop-reset/enable echoed
   `0x31000000` / `0x32000000`.
-- SWB input link: `BLOCKED`, corrected `sc_tool` diagnostics show
-  `LINK_LOCKED_LOW=0x00000F00`, so SC link 2 is not locked and secondary SC
-  replies do not return.
+- SWB SC return path: `BLOCKED`; valid SC requests reach FEB `sc_hub`
+  (`LAST_RD_ADDR=0x0000C000`, `LAST_RD_DATA=0x52434D48`), but host-visible
+  SWB secondary reads still return zero words.
 
 ## 7. Git and Evidence Hygiene
 
