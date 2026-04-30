@@ -182,35 +182,35 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "Full-channel lower ASIC5+6 and all-lane runs still produce MTS/ring timestamp errors. Single lanes and selected masks pass the 0..2000-cycle gate.",
-        "Keep tuning at MTS/ring boundary; do not claim FEB closure from single-lane evidence.",
+        "The timing-closed Phase-6 rerun now fails even the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload: P6B010 ring_inerr_delta=535108, MTS discard=0, LVDS error/DPA deltas=0. Full-channel P6B020 remains an expected MTS/ring fail with ring_inerr_delta=9022633.",
+        "Move SignalTap to the first MTS timestamp-delay/ring input-error causality point before spending a compile on SWB DMA.",
     ),
     (
         "SWB input path",
-        "BLOCKED",
+        "PASS_SC",
         "SWB must receive FEB data and the SC read/reply path must return host-visible replies from FEB.",
-        "online_sc commit ada3aea38 full flow, assembly, programming, and PCIe recovery passed with SOF checksum 0x31AA0589. Valid SC reads still time out at the host, FEB sc_hub latched LAST_RD_ADDR=0x0000C000 and LAST_RD_DATA=0x52434D48, and SWB SignalTap saw no swb_sc_secondary state.capture_head trigger for that read.",
-        "Move the next SignalTap scope upstream to the SC return link FIFO, optical RX/SC lane demux, or FEB sc_hub upload framing.",
+        "online_sc commit 11eada541 compiled timing-clean at all checked STA corners, programmed SOF checksum 0x31A704E1, recovered /dev/mudaq0, and returned host-visible SC link-2 reads: 0x00000 payload 0 and 0x0C000 payload 0x52434D48.",
+        "Hold SWB SciFi-hit input proof until FEB emits clean hit frames; the SC path itself is no longer the blocker.",
     ),
     (
         "SWB OPQ to DMA",
         "BLOCKED",
         "Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.",
-        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. Hardware OPQ proof is still blocked before SWB input/DMA because the SC reply path is not host-visible.",
-        "After the SC return path and SWB input gate pass, read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any host-disk claim.",
+        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. Hardware OPQ proof is now blocked by FEB MTS/ring output, not by SWB SC return.",
+        "After P6-MTS-RING passes, read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any host-disk claim.",
     ),
     (
         "Host DMA buffer",
         "BLOCKED",
         "/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.",
-        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming, but no valid host DMA capture exists for the new SWB OPQ image because the SWB-side return/input gate is still blocked.",
-        "Capture a bounded DMA run only after P6-SWB-IN passes with a returned FEB SC read and advancing FEB/SWB counters.",
+        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming. The earlier swb_dmatest segfault came from an invalid stale-config run and is not DMA closure evidence.",
+        "Capture a bounded DMA run only after FEB MTS/ring and SWB hit-input counters advance in the same run window.",
     ),
     (
         "Disk/offline timestamp check",
         "BLOCKED",
         "Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.",
-        "No disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement; the live blocker is upstream at SWB secondary return/input proof.",
+        "No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement; the live blocker is upstream at FEB MTS/ring.",
         "Add the offline reducer next to the long-run scripts, then run it on the first post-SWB-input DMA artifact.",
     ),
 ]
@@ -336,7 +336,7 @@ def summarize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def badge(result: str) -> str:
-    if result in {"PASS", "PASS_DIAG", "PASS_WITH_METHOD_NOTE", "PASS_DEBUG_ONLY"}:
+    if result in {"PASS", "PASS_SC", "PASS_DIAG", "PASS_WITH_METHOD_NOTE", "PASS_DEBUG_ONLY"}:
         klass = "pass"
     elif result in {"PENDING", "IN_PROGRESS", "MISSING"}:
         klass = "missing"
@@ -390,6 +390,7 @@ def write_html() -> None:
     REPORT_DIR.mkdir(parents=True, exist_ok=True)
     now = dt.datetime.now().isoformat(timespec="seconds")
     mutrig_doc = REPO_ROOT / "firmware_builds" / "doc" / "MUTRIG.md"
+    phase6_report = REPORT_DIR / "phase6_timingclosed_cycle1_20260430.md"
     html_text = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -467,15 +468,15 @@ def write_html() -> None:
   <main>
     <div class="callout">
       <strong>Closure status: FAIL.</strong>
-      Single-lane delay can be made clean and the lower <code>lanes5+6</code>
-      one-channel pair now passes after a clean good-ribbon restore. The blocker
-      is the full-channel pair: ASIC5 and ASIC6 each pass alone, but together
-      they still forward MTS timestamp errors into the lower ring-buffer CAM.
-      No FEB/SWB host-disk Mu3e Demo OPQ, 100 kHz end-to-end claim is valid
-      yet. Under the active <code>N_HIT=255</code> profile, a 256-hit source
-      cluster must deliver 255 hits and account exactly one OPQ hit drop.
-      The SWB OPQ image itself has compiled and programmed, but the SC reply
-      path is still not host-visible.
+      Older Phase-5 evidence showed single-lane delay could be made clean, but
+      the timing-closed Phase-6 rerun with explicit SMB3/SMB5 XML reload moved
+      the live blocker earlier: even the lower <code>lanes5+6</code>
+      one-channel case now trips MTS/ring input errors. No FEB/SWB host-disk
+      Mu3e Demo OPQ, 100 kHz end-to-end claim is valid yet. Under the active
+      <code>N_HIT=255</code> profile, a 256-hit source cluster must deliver
+      255 hits and account exactly one OPQ hit drop. The SWB OPQ image now has
+      timing-clean programming and host-visible SC replies, so SWB SC return is
+      no longer the first blocker.
     </div>
 
     <h2>Current Read</h2>
@@ -483,10 +484,20 @@ def write_html() -> None:
       The strongest blocker is not the deprecated injector path or XML mapping.
       The active injector is the Phase-5 <code>mutrig_injector_0</code> path and
       the XML split is SMB3 for ASICs 0..3 and SMB5 for ASICs 4..7. The lower
-      side fails at full multiplicity because MTS asserts
+      side fails because MTS asserts
       <code>tserr</code> before the ring stage; the ring
       <code>inerr_count</code> is therefore a real timestamp-delay failure,
       not a ring-local decode bug.
+    </p>
+    <p>
+      The latest fixed Phase-6 cycle explicitly loaded
+      <code>config_smb3_tdc.txt</code> and <code>config_smb5_tdc.txt</code>.
+      P6B010 configured ASIC5/6 one-channel mode successfully but failed as
+      <code>unexpected_fail</code>: <code>ring_inerr_delta=535108</code>,
+      <code>mts_discard_delta=0</code>, and LVDS error/DPA deltas were zero.
+      P6B020 full-channel remains the expected fail, and P6E010 pulse-high 3 is
+      clean but underfilled. Reduced evidence:
+      <a href="{esc(rel(phase6_report))}">{esc(phase6_report.name)}</a>.
     </p>
     <p>
       The lower full-channel pair also fails with the MTS expected-latency
@@ -506,18 +517,14 @@ def write_html() -> None:
       injection implications used here.
     </p>
     <p>
-      SWB live preflight on 2026-04-30 programmed the online_sc image
-      <code>ada3aea38</code> with SOF checksum <code>0x31AA0589</code>, recovered
-      PCIe, and restored <code>/dev/mudaq0</code>. Reset-link commands to FEB 7
-      echo state. Valid SC reads still time out at the host, but FEB
-      <code>sc_hub</code> JTAG readback latched
-      <code>LAST_RD_ADDR=0x0000C000</code> and
-      <code>LAST_RD_DATA=0x52434D48</code>. A SignalTap control trigger on
-      <code>swb_sc_secondary|state.waiting</code> passed, but the real
-      <code>state.capture_head</code> trigger around the same read timed out
-      with zero triggers. That localizes the blocker before the tapped SWB
-      secondary packet-capture boundary, before OPQ hardware counters, host DMA,
-      and disk decode can count.
+      SWB live preflight was superseded after the timing fix in online_sc
+      <code>11eada541</code>. The new SOF programmed with checksum
+      <code>0x31A704E1</code>, PCIe recovery restored <code>/dev/mudaq0</code>,
+      and host-visible SC link-2 reads now return in roughly 68-69 us, including
+      <code>0x0C000 -> 0x52434D48</code>. That clears the old SC reply blocker.
+      OPQ hardware counters, host DMA, and disk decode still cannot count as
+      end-to-end evidence until FEB MTS/ring emits clean hit frames into the SWB
+      input path.
     </p>
 
     <h2>Phase-6 End-to-End Progress</h2>
