@@ -80,6 +80,12 @@ EVIDENCE = [
         "ASIC6/lane6 still passes at vncnt=0, vnvcodelay=0, vnhitlogic=0; the zero-point assumption is not a no-hit/reset condition here.",
     ),
     (
+        "Lane 6 FEB frame boundary",
+        "Phase6",
+        "phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.json",
+        "ASIC6/lane6 single-channel active-window run passes counters while the boundary STP records nonzero FEB hit_type3 frame content; same-window nonempty RBCAM alignment remains open.",
+    ),
+    (
         "Lane 7 zero VCO point",
         "Phase6",
         "phase6_lane7_vco000_pulse4_100k_20260430_193008.json",
@@ -206,8 +212,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. New lane6/7 zero-point tests show ASIC6 and ASIC7 each pass at vncnt=0/vnvcodelay=0/vnhitlogic=0, but the lane6+7 pair fails with ring_inerr_delta=826978 and zero LVDS/DPA deltas. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window.",
-        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS; do not chase lane-local VCO as the primary blocker.",
+        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. New lane6/7 zero-point tests show ASIC6 and ASIC7 each pass at vncnt=0/vnvcodelay=0/vnhitlogic=0, but the lane6+7 pair fails with ring_inerr_delta=826978 and zero LVDS/DPA deltas. The single-ASIC lane6 FEB frame-boundary run passes counters and the active STP window shows nonzero hit_type3 frame content, but same-window nonempty RBCAM-to-frame-assembly alignment is still open. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
+        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS, and close the RBCAM-to-FEB-frame same-window alignment with a deeper or better-triggered STP/simulation correlation.",
     ),
     (
         "SWB input path",
@@ -550,6 +556,20 @@ def write_html() -> None:
       matching the lower multi-ASIC timestamp/order blocker rather than a
       lane-local PLL-lock problem. Reduced lane6/7 evidence:
       <a href="{esc(rel(REPORT_DIR / 'phase6_lane67_zero_point_20260430.md'))}">phase6_lane67_zero_point_20260430.md</a>.
+    </p>
+    <p>
+      The first good-ASIC frame-boundary capture is useful but not yet
+      closure-grade. ASIC6/lane6 at the zero-VCO point passes a 100 kHz
+      active-window run with zero MTS discards, zero ring input errors, zero
+      histogram drops, zero frame CRC errors, and zero LVDS/DPA deltas. The
+      boundary SignalTap capture records a legal FEB <code>hit_type3</code>
+      frame with nonzero subheader/hit content, but the same 1k-sample window
+      does not catch the matching nonempty RBCAM <code>hit_type2</code> beat.
+      That is an observability alignment gap, not an end-to-end closure claim.
+      Evidence:
+      <a href="{esc(rel(REPORT_DIR / 'phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.md'))}">phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.md</a>
+      and
+      <a href="{esc(rel(REPORT_DIR / 'phase6_frame_boundary_lane6_vco000_100k_active_vcd_summary_20260430.md'))}">phase6_frame_boundary_lane6_vco000_100k_active_vcd_summary_20260430.md</a>.
     </p>
     <p>
       The lower-MTS/ring SignalTap debug image programmed with checksum

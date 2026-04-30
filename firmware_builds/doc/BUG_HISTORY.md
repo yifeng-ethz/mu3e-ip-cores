@@ -15,6 +15,7 @@ Class legend:
 | [P6-BUG-001-R](#p6-bug-001-r-swb-datagen-words-stayed-idle-before-the-musip-mux) | R | patched in online_sc; A&S passed; full compile/board rerun pending | 2026-04-30 | SWB datagen drove data/datak but left `link32_t.idle=1`, so MuSiP mux ignored every generated word and DMA stayed empty. |
 | [P6-BUG-002-R](#p6-bug-002-r-lower-real-multi-asic-mutrig-streams-trip-mts-timestamp-errors-before-ring-buffer-cam) | R | open | 2026-04-30 | Lower real ASIC pairs pass alone but fail together with MTS timestamp errors before hit stack/ring. |
 | [P6-BUG-003-H](#p6-bug-003-h-mu3e-online-dma-tools-are-not-closure-quality-evidence) | H | fixed by repo-owned probe for DMA | 2026-04-30 | `swb_dmatest`, `rw`, MIDAS, and libmudaq-backed tools hide register and cleanup boundaries; closure now uses direct-MMIO tools under `tools/`. |
+| [P6-BUG-004-H](#p6-bug-004-h-frame-boundary-signaltap-window-is-not-yet-time-aligned-across-rbcam-and-feb-frame-assembly) | H | open | 2026-04-30 | Good-ASIC lane6 STP captures show clean FEB type-3 hit frames, but the same 1k-sample window does not yet catch the corresponding nonempty RBCAM type-2 beat. |
 
 ## 2026-04-30
 
@@ -93,3 +94,31 @@ Class legend:
   - policy:
     `swb_dmatest`, `rw`, MIDAS, and libmudaq-backed Mu3e online utilities are
     reference-only for Phase-6 closure.
+
+### P6-BUG-004-H: frame-boundary SignalTap window is not yet time-aligned across RBCAM and FEB frame assembly
+
+- First seen in:
+  `phase6_frame_boundary_lane6_vco000_100k_*_20260430` captures on the
+  timing-closed FEB boundary SignalTap image, checksum `0x173CFF8D`.
+- Symptom:
+  - ASIC6/lane6 single-channel, 100 kHz, zero-VCO-point stimulus passes the
+    live FEB counters with zero MTS discards, zero ring input errors, zero
+    histogram drops, zero frame CRC errors, and zero LVDS/DPA deltas.
+  - The FEB `hit_type3` frame snapshot contains a legal frame header/trailer
+    and nonzero subheader/hit content in the active injection window.
+  - The simultaneously decoded RBCAM `hit_type2` taps in that 1k-sample
+    window show only empty subheaders. This does not prove an RTL mismatch
+    because the RBCAM output and frame-assembly drain are not guaranteed to be
+    in the same short SignalTap window.
+- Root cause:
+  open. Current evidence points to an observability alignment gap: the
+  histogram-valid trigger catches frame drain activity, while the matching
+  nonempty RBCAM output likely occurred outside the sampled pre-trigger window.
+  A runtime-only edit to trigger on `ring_buffer_cam_1.aso_hit_type2_data[8]`
+  did not produce a reliable new boundary capture, so do not treat it as a
+  closure-grade trigger update.
+- Fix status:
+  open. Close this with one of: a rebuilt STP trigger that keys on nonempty
+  RBCAM subheaders with valid asserted, a deeper capture around both boundaries,
+  or a focused simulation/VCD correlation proving the expected FIFO latency
+  between RBCAM type-2 output and FEB type-3 frame output.

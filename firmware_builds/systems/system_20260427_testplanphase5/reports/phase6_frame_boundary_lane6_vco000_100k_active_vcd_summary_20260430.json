@@ -1,0 +1,381 @@
+{
+  "file": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/captures/phase6_frame_boundary_lane6_vco000_100k_active_20260430.vcd",
+  "first_events": {
+    "hs1.hit_type3_endofpacket": {
+      "first_high_ps": 248500,
+      "rising_edges": 1
+    },
+    "hs1.hit_type3_startofpacket": {
+      "first_high_ps": 500,
+      "rising_edges": 2
+    },
+    "hs1.hit_type3_valid": {
+      "first_high_ps": 500,
+      "rising_edges": 1
+    },
+    "hs1.rbcam0.aso_hit_type2_valid": {
+      "first_high_ps": 29500,
+      "rising_edges": 16
+    },
+    "hs1.rbcam1.aso_hit_type2_valid": {
+      "first_high_ps": 45500,
+      "rising_edges": 16
+    },
+    "hs1.rbcam2.aso_hit_type2_valid": {
+      "first_high_ps": 61500,
+      "rising_edges": 16
+    },
+    "hs1.rbcam3.aso_hit_type2_valid": {
+      "first_high_ps": 13500,
+      "rising_edges": 16
+    }
+  },
+  "hitstack": 1,
+  "samples": 318,
+  "time_window_ps": [
+    0,
+    1022500
+  ],
+  "tracked_probes": {
+    "hs1": 108,
+    "hs1.rbcam0": 45,
+    "hs1.rbcam1": 45,
+    "hs1.rbcam2": 45,
+    "hs1.rbcam3": 45
+  },
+  "type2": {
+    "hs1.rbcam0": {
+      "declared_hit_hist": {
+        "0": 16
+      },
+      "errors": 0,
+      "events": 16,
+      "first_subheaders": [
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 29500,
+          "ts_bucket": 16
+        },
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 93500,
+          "ts_bucket": 20
+        },
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 157500,
+          "ts_bucket": 24
+        },
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 221500,
+          "ts_bucket": 28
+        },
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 285500,
+          "ts_bucket": 32
+        },
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 349500,
+          "ts_bucket": 36
+        },
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 413500,
+          "ts_bucket": 40
+        },
+        {
+          "channel": 0,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 477500,
+          "ts_bucket": 44
+        }
+      ],
+      "hits": 0,
+      "hits_before_subheader": 0,
+      "mismatches": [],
+      "observed_hit_hist": {
+        "0": 16
+      },
+      "subheaders": 16,
+      "ts_bucket_delta_hist": {
+        "4": 15
+      }
+    },
+    "hs1.rbcam1": {
+      "declared_hit_hist": {
+        "0": 16
+      },
+      "errors": 0,
+      "events": 16,
+      "first_subheaders": [
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 45500,
+          "ts_bucket": 17
+        },
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 109500,
+          "ts_bucket": 21
+        },
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 173500,
+          "ts_bucket": 25
+        },
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 237500,
+          "ts_bucket": 29
+        },
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 301500,
+          "ts_bucket": 33
+        },
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 365500,
+          "ts_bucket": 37
+        },
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 429500,
+          "ts_bucket": 41
+        },
+        {
+          "channel": 1,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 493500,
+          "ts_bucket": 45
+        }
+      ],
+      "hits": 0,
+      "hits_before_subheader": 0,
+      "mismatches": [],
+      "observed_hit_hist": {
+        "0": 16
+      },
+      "subheaders": 16,
+      "ts_bucket_delta_hist": {
+        "4": 15
+      }
+    },
+    "hs1.rbcam2": {
+      "declared_hit_hist": {
+        "0": 16
+      },
+      "errors": 0,
+      "events": 16,
+      "first_subheaders": [
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 61500,
+          "ts_bucket": 18
+        },
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 125500,
+          "ts_bucket": 22
+        },
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 189500,
+          "ts_bucket": 26
+        },
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 253500,
+          "ts_bucket": 30
+        },
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 317500,
+          "ts_bucket": 34
+        },
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 381500,
+          "ts_bucket": 38
+        },
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 445500,
+          "ts_bucket": 42
+        },
+        {
+          "channel": 2,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 509500,
+          "ts_bucket": 46
+        }
+      ],
+      "hits": 0,
+      "hits_before_subheader": 0,
+      "mismatches": [],
+      "observed_hit_hist": {
+        "0": 16
+      },
+      "subheaders": 16,
+      "ts_bucket_delta_hist": {
+        "4": 15
+      }
+    },
+    "hs1.rbcam3": {
+      "declared_hit_hist": {
+        "0": 16
+      },
+      "errors": 0,
+      "events": 16,
+      "first_subheaders": [
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 13500,
+          "ts_bucket": 15
+        },
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 77500,
+          "ts_bucket": 19
+        },
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 141500,
+          "ts_bucket": 23
+        },
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 205500,
+          "ts_bucket": 27
+        },
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 269500,
+          "ts_bucket": 31
+        },
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 333500,
+          "ts_bucket": 35
+        },
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 397500,
+          "ts_bucket": 39
+        },
+        {
+          "channel": 3,
+          "declared_hits": 0,
+          "observed_hits": 0,
+          "time_ps": 461500,
+          "ts_bucket": 43
+        }
+      ],
+      "hits": 0,
+      "hits_before_subheader": 0,
+      "mismatches": [],
+      "observed_hit_hist": {
+        "0": 16
+      },
+      "subheaders": 16,
+      "ts_bucket_delta_hist": {
+        "4": 15
+      }
+    }
+  },
+  "type3": {
+    "events": 212,
+    "frame_length_hist": {
+      "212": 1
+    },
+    "frames": 1,
+    "marker_cleared_candidates": 1,
+    "reports": [
+      {
+        "debug_hits": 38960,
+        "debug_subheaders": 10640,
+        "decoded_hits": 2,
+        "decoded_subheaders": 203,
+        "first_marker_cleared_candidates": [
+          {
+            "data": "0x01A0001F7",
+            "time_ps": 62500
+          }
+        ],
+        "first_word": "0x1E00002BC",
+        "has_header": true,
+        "has_trailer": true,
+        "last_word": "0x10000009C",
+        "length_words": 212,
+        "marker_cleared_candidates": 1,
+        "start_time_ps": 37500,
+        "subheader_hit_hist": {
+          "0": 201,
+          "1": 2
+        }
+      }
+    ]
+  }
+}
