@@ -2531,18 +2531,31 @@ proc ::data_path_bts::gui::rate_histogram_ip_spec {} {
     return ""
 }
 
-proc ::data_path_bts::gui::rate_histogram_preset_spec {} {
+proc ::data_path_bts::gui::histogram_preset_spec {preset_name} {
     set ip_spec [::data_path_bts::gui::rate_histogram_ip_spec]
     if {$ip_spec eq "" || ![dict exists $ip_spec presets]} {
         return ""
     }
 
     foreach preset_spec [dict get $ip_spec presets] {
-        if {[dict exists $preset_spec id] && [dict get $preset_spec id] eq "rate"} {
+        if {[dict exists $preset_spec id] && [dict get $preset_spec id] eq $preset_name} {
             return $preset_spec
         }
     }
 
+    return ""
+}
+
+proc ::data_path_bts::gui::rate_histogram_preset_spec {} {
+    set rate_preset [::data_path_bts::gui::histogram_preset_spec rate]
+    if {$rate_preset ne ""} {
+        return $rate_preset
+    }
+
+    set ip_spec [::data_path_bts::gui::rate_histogram_ip_spec]
+    if {$ip_spec eq "" || ![dict exists $ip_spec presets]} {
+        return ""
+    }
     return [lindex [dict get $ip_spec presets] 0]
 }
 
@@ -2772,9 +2785,15 @@ proc ::data_path_bts::gui::histogram_wait_for_flush_complete {master_fd hist_csr
     return -code ok
 }
 
-proc ::data_path_bts::gui::rate_histogram_register_writes {} {
-    set preset_spec [::data_path_bts::gui::rate_histogram_preset_spec]
+proc ::data_path_bts::gui::histogram_register_writes_from_preset {preset_name} {
+    set preset_spec [::data_path_bts::gui::histogram_preset_spec $preset_name]
+    if {$preset_spec eq "" && $preset_name eq "rate"} {
+        set preset_spec [::data_path_bts::gui::rate_histogram_preset_spec]
+    }
     if {$preset_spec eq "" || ![dict exists $preset_spec field_values]} {
+        if {$preset_name ne "rate"} {
+            error "histogram preset \"$preset_name\" has no field_values in the board bring-up project spec"
+        }
         return [list \
             [list 0x4 0x0] \
             [list 0xc 0x1] \
@@ -2790,7 +2809,7 @@ proc ::data_path_bts::gui::rate_histogram_register_writes {} {
         if {![catch {::data_path_bts::gui::register_writes_from_contract [dict get $metadata contract] $field_values "csr.commit"} register_writes]} {
             return $register_writes
         }
-        toolkit_send_message warning "rate_histogram_register_writes: falling back to built-in register map because local contract packing failed: $register_writes"
+        toolkit_send_message warning "histogram_register_writes_from_preset: falling back to built-in register map for $preset_name because local contract packing failed: $register_writes"
     }
 
     set control_word [expr { \
@@ -2816,17 +2835,13 @@ proc ::data_path_bts::gui::rate_histogram_register_writes {} {
         [list 0x0 $control_word]]
 }
 
+proc ::data_path_bts::gui::rate_histogram_register_writes {} {
+    return [::data_path_bts::gui::histogram_register_writes_from_preset rate]
+}
+
 proc ::data_path_bts::gui::histogram_apply_preset {preset_name hist_csr_base} {
     set master_fd [::mu3e::helpers::cget_opened_master_path]
-
-    switch -- $preset_name {
-        rate {
-            set register_writes [::data_path_bts::gui::rate_histogram_register_writes]
-        }
-        default {
-            error "unknown histogram preset \"$preset_name\""
-        }
-    }
+    set register_writes [::data_path_bts::gui::histogram_register_writes_from_preset $preset_name]
 
     foreach write_spec $register_writes {
         lassign $write_spec register_offset register_value

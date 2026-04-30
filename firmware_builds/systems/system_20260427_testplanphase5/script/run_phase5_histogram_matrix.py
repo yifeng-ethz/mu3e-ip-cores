@@ -183,6 +183,13 @@ def make_case_args(
         emulator_source_mask=selected_emu_mask if source == "mixed" else None,
         lvds_lane_mask=lvds_mask,
         skip_lvds_config=False,
+        capture_lvds=source in ("real", "mixed"),
+        read_lvds_dpa_unlocks=args.read_lvds_dpa_unlocks,
+        require_lvds_snapshot=False,
+        dump_hist_bins=args.dump_hist_bins,
+        hist_bin_read_chunk_words=args.hist_bin_read_chunk_words,
+        hist_bin_read_delay_ms=args.hist_bin_read_delay_ms,
+        unsafe_bulk_hist_bin_read=False,
         active_lanes_mask=active_emu_mask,
         inject_mode=scenario["inject_mode"],
         hist_profile=scenario["hist_profile"],
@@ -275,6 +282,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, records: 
         f"- Real-lane availability mask: `{fmt_hex(args.real_lane_mask)}`",
         f"- Mixed emulator-source mask: `{fmt_hex(args.mixed_emulator_mask)}`",
         f"- Duration per run: `{args.duration_ms} ms`",
+        f"- LVDS DPA-unlock reads: `{'yes' if args.read_lvds_dpa_unlocks else 'no'}`",
+        f"- Histogram bin dump: `{'yes' if args.dump_hist_bins else 'no'}`",
         f"- Real hits per lane for rate expectation: `{args.real_hits_per_lane}`",
         f"- MTS expected latency override: `{args.mts_expected_latency if args.mts_expected_latency is not None else 'keep'}`",
         f"- MTS delay-ts field override: `{args.mts_delay_ts_field}`",
@@ -284,8 +293,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, records: 
         "",
         "## Summary",
         "",
-        "| # | Scenario | Source | Scope | Requested | Mux emu select | Effective emu | Effective real/LVDS | Hist profile | Hits | Rate Exp | Rate Err | Drops | MTS | Discard | CRC | Ring InErr | Status |",
-        "|---:|---|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
+        "| # | Scenario | Source | Scope | Requested | Mux emu select | Effective emu | Effective real/LVDS | Hist profile | Hits | Rate Exp | Rate Err | Drops | MTS | Discard | Ring InErr | Status |",
+        "|---:|---|---|---|---:|---:|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for rec in records:
         summary = rec.get("summary", {})
@@ -297,7 +306,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, records: 
             f"{summary.get('hist_total_delta', 0)} | {summary.get('rate_expected_hits', 0)} | "
             f"{summary.get('rate_error_hits', 0)} | {summary.get('hist_drop_delta', 0)} | "
             f"{summary.get('mts_total_delta', 0)} | {summary.get('mts_discard_delta', 0)} | "
-            f"{summary.get('frame_crc_delta', 0)} | {summary.get('ring_inerr_delta', 0)} | `{rec.get('status', 'UNKNOWN')}` |"
+            f"{summary.get('ring_inerr_delta', 0)} | `{rec.get('status', 'UNKNOWN')}` |"
         )
 
     lines.extend(["", "## Notes", ""])
@@ -323,6 +332,10 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, records: li
             "real_lane_mask": args.real_lane_mask,
             "mixed_emulator_mask": args.mixed_emulator_mask,
             "real_hits_per_lane": args.real_hits_per_lane,
+            "read_lvds_dpa_unlocks": args.read_lvds_dpa_unlocks,
+            "dump_hist_bins": args.dump_hist_bins,
+            "hist_bin_read_chunk_words": args.hist_bin_read_chunk_words,
+            "hist_bin_read_delay_ms": args.hist_bin_read_delay_ms,
             "mts_expected_latency": args.mts_expected_latency,
             "mts_delay_ts_field": args.mts_delay_ts_field,
             "mts_drop_delay_error": args.mts_drop_delay_error,
@@ -360,6 +373,10 @@ def main() -> int:
     parser.add_argument("--cluster-center", type=int, default=16)
     parser.add_argument("--emulator-seed", type=int, default=0xDEADBEEF)
     parser.add_argument("--rate-tolerance-pct", type=float, default=1.0)
+    parser.add_argument("--read-lvds-dpa-unlocks", action="store_true")
+    parser.add_argument("--dump-hist-bins", action="store_true")
+    parser.add_argument("--hist-bin-read-chunk-words", type=int, default=1)
+    parser.add_argument("--hist-bin-read-delay-ms", type=int, default=1)
     parser.add_argument(
         "--real-hits-per-lane",
         type=int,

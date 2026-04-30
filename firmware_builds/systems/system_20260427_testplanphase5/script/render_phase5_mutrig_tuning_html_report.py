@@ -16,6 +16,9 @@ SYSTEM_DIR = SCRIPT_DIR.parent
 REPO_ROOT = SYSTEM_DIR.parent.parent.parent
 REPORT_DIR = SYSTEM_DIR / "reports"
 OUT_HTML = REPORT_DIR / "phase5_mutrig_tuning_report_20260430.html"
+HIST_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase5_mutrig_tuning_20260430"
+HIST_ARTIFACT_MANIFEST = HIST_ARTIFACT_DIR / "phase5_histogram_artifacts_manifest.json"
+REQUIRED_MONITOR_MS = 1000
 
 
 EVIDENCE = [
@@ -24,6 +27,12 @@ EVIDENCE = [
         "Config",
         "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json",
         "All eight ASICs reloaded full-channel with the single-lane-clean PLL overrides.",
+    ),
+    (
+        "All-real lanes 1 s rate monitor",
+        "Rate",
+        "phase5_live_allreal_rate_1s_20260430.json",
+        "Fresh 1 s all-real-lane rate run: LVDS error/DPA deltas are zero and last-interval histogram total is nonzero, but MTS/ring errors remain and slow SC bin readback returned zero bins, so this is blocker evidence rather than a plotted-artifact pass.",
     ),
     (
         "Single-lane matrix",
@@ -272,7 +281,7 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Fresh continued cycle 20260430_live_continued_cycle1 records P6B006 PASS hist=52627/ring=0, P6B007 PASS hist=81880/ring=0, P6B010 FAIL hist=144364/ring_inerr_delta=563053, P6B020 expected fail ring=7146776, and P6E010 pulse-high 3 underfilled. Opening MTS expected latency to 4000 and 65535 still fails, so the failure is not a small positive-latency tail. Header-synchronous pair injection on lower header channels 5 and 6 fails, while single-lane header controls pass. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
+        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Fresh continued cycle 20260430_live_continued_cycle1 records P6B006 PASS hist=52627/ring=0, P6B007 PASS hist=81880/ring=0, P6B010 FAIL hist=144364/ring_inerr_delta=563053, P6B020 expected fail ring=7146776, and P6E010 pulse-high 3 underfilled. A fresh all-real 1 s rate monitor records LVDS error/DPA deltas of zero and LAST_INTERVAL_TOTAL_HITS=11851571, but still trips MTS/ring errors and exposes that the slow SC per-bin read misses the ping-pong bin bank. Opening MTS expected latency to 4000 and 65535 still fails, so the failure is not a small positive-latency tail. Header-synchronous pair injection on lower header channels 5 and 6 fails, while single-lane header controls pass. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
         "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS, then rerun the RBCAM-to-FEB-frame same-window alignment from nonzero locked PLL settings and full RUN_PREP.",
     ),
     (
@@ -343,8 +352,51 @@ def fmt_int(value: Any) -> str:
         return esc(value)
 
 
+def fmt_rate(value: Any) -> str:
+    if value is None:
+        return "-"
+    try:
+        rate = float(value)
+    except (TypeError, ValueError):
+        return esc(value)
+    if abs(rate) >= 1_000_000:
+        return f"{rate / 1_000_000:.3f} M/s"
+    if abs(rate) >= 1_000:
+        return f"{rate / 1_000:.3f} k/s"
+    return f"{rate:.3f} /s"
+
+
+def fmt_count_rate(count: Any, rate: Any) -> str:
+    return f"{fmt_int(count)}<div class=\"rate\">{fmt_rate(rate)}</div>"
+
+
+def monitor_status(duration_ms: Any) -> tuple[str, str]:
+    try:
+        duration = int(duration_ms)
+    except (TypeError, ValueError):
+        return "unknown", "missing"
+    if duration >= REQUIRED_MONITOR_MS:
+        return f"{duration} ms", "pass"
+    return f"{duration} ms; rerun 1 s", "fail"
+
+
+def float_or_none(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 def load_json(name: str) -> dict[str, Any] | None:
     path = REPORT_DIR / name
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_json_path(path: Path) -> dict[str, Any] | None:
     if not path.exists():
         return None
     return json.loads(path.read_text(encoding="utf-8"))
@@ -358,22 +410,89 @@ def first_case(cases: Any) -> dict[str, Any] | None:
     return None
 
 
-def summarize_case(case: dict[str, Any]) -> dict[str, Any]:
+def counter_rate(summary: dict[str, Any], name: str, delta_name: str | None = None) -> float | None:
+    rates = summary.get("counter_rates_hz", {})
+    if isinstance(rates, dict) and name in rates:
+        try:
+            return float(rates[name])
+        except (TypeError, ValueError):
+            return None
+    elapsed = summary.get("counter_rate_elapsed_s")
+    if elapsed is None:
+        return None
+    try:
+        elapsed_f = float(elapsed)
+    except (TypeError, ValueError):
+        return None
+    if elapsed_f <= 0:
+        return None
+    field = delta_name or f"{name}_delta"
+    try:
+        return float(summary.get(field, 0) or 0) / elapsed_f
+    except (TypeError, ValueError):
+        return None
+
+
+def lvds_text(case: dict[str, Any]) -> str:
+    lvds = case.get("lvds_summary", {})
+    if not isinstance(lvds, dict) or not lvds:
+        return "not captured"
+    if not lvds.get("captured"):
+        return "snapshot missing"
+    err_total = int(lvds.get("error_delta_total", 0) or 0)
+    dpa_total = int(lvds.get("dpa_unlock_delta_total", 0) or 0)
+    err_lanes = lvds.get("error_delta_lanes", [])
+    dpa_lanes = lvds.get("dpa_unlock_delta_lanes", [])
+    lane_go = int(lvds.get("lane_go_after", case.get("lane_go", 0)) or 0)
+    active = [lane for lane in range(8) if lane_go & (1 << lane)]
+    prefix = "OK" if err_total == 0 and dpa_total == 0 else "ERR"
+    details = f"errΔ={err_total}, dpaΔ={dpa_total}, active={active}"
+    if err_lanes or dpa_lanes:
+        details += f", err_lanes={err_lanes}, dpa_lanes={dpa_lanes}"
+    return f"{prefix}: {details}"
+
+
+def case_stage_summary(case: dict[str, Any]) -> dict[str, Any]:
     summary = case.get("summary", {})
+    duration_ms = case.get("duration_ms")
+    rate_elapsed_s = float_or_none(summary.get("counter_rate_elapsed_s"))
+    rbcam_reject = (
+        int(summary.get("ring_inerr_delta", 0) or 0)
+        + int(summary.get("ring_overwrite_delta", 0) or 0)
+    )
     return {
         "result": "PASS" if summary.get("pass") else "FAIL",
-        "class": summary.get("phase5_classification", "-"),
+        "class": summary.get("phase5_classification", summary.get("classification", "-")),
         "scope": f"lvds=0x{int(case.get('lane_go', 0)):03X}",
         "active": f"emu=0x{int(case.get('active_lanes_mask', 0)):02X}",
         "pulse": case.get("injector_config", {}).get("pulse_high_cycles"),
-        "duration": case.get("duration_ms"),
-        "hist": summary.get("hist_total_delta"),
-        "mts": summary.get("mts_total_delta"),
-        "mts_disc": summary.get("mts_discard_delta"),
-        "ring": summary.get("ring_inerr_delta"),
-        "frame": summary.get("frame_actual_delta"),
-        "crc": summary.get("frame_crc_delta"),
+        "duration": duration_ms,
+        "window_s": summary.get("counter_rate_elapsed_s"),
+        "hist_in": summary.get("hist_total_delta"),
+        "hist_drop": summary.get("hist_drop_delta"),
+        "hist_in_rate": counter_rate(summary, "hist_total", "hist_total_delta"),
+        "hist_drop_rate": counter_rate(summary, "hist_drop", "hist_drop_delta"),
+        "mts_in": summary.get("mts_total_delta"),
+        "mts_drop": summary.get("mts_discard_delta"),
+        "mts_in_rate": counter_rate(summary, "mts_total", "mts_total_delta"),
+        "mts_drop_rate": counter_rate(summary, "mts_discard", "mts_discard_delta"),
+        "rbcam_in": summary.get("ring_push_delta"),
+        "rbcam_out": summary.get("ring_pop_delta"),
+        "rbcam_reject": rbcam_reject,
+        "rbcam_cache_miss": summary.get("ring_cache_miss_delta"),
+        "rbcam_in_rate": counter_rate(summary, "ring_push", "ring_push_delta"),
+        "rbcam_out_rate": counter_rate(summary, "ring_pop", "ring_pop_delta"),
+        "rbcam_reject_rate": None if not rate_elapsed_s else rbcam_reject / rate_elapsed_s,
+        "feb_in": summary.get("frame_actual_delta"),
+        "feb_drop": summary.get("frame_missing_delta"),
+        "feb_in_rate": counter_rate(summary, "frame_actual", "frame_actual_delta"),
+        "feb_drop_rate": counter_rate(summary, "frame_missing", "frame_missing_delta"),
+        "lvds": lvds_text(case),
     }
+
+
+def summarize_case(case: dict[str, Any]) -> dict[str, Any]:
+    return case_stage_summary(case)
 
 
 def summarize_records(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -396,6 +515,16 @@ def summarize_records(records: list[dict[str, Any]]) -> dict[str, Any]:
     first = records[0]
     pulse = first.get("injector_config", {}).get("pulse_high_cycles")
     duration = first.get("duration_ms")
+    elapsed = sum(
+        float(record.get("summary", {}).get("counter_rate_elapsed_s", 0.0) or 0.0)
+        for record in records
+    )
+    def aggregate_rate(field: str) -> float | None:
+        if elapsed <= 0:
+            return None
+        return total(field) / elapsed
+
+    rbcam_reject = total("ring_inerr_delta") + total("ring_overwrite_delta")
     return {
         "result": "PASS" if not failures else "FAIL",
         "class": f"{len(records) - len(failures)} / {len(records)} pass",
@@ -403,12 +532,27 @@ def summarize_records(records: list[dict[str, Any]]) -> dict[str, Any]:
         "active": f"emu=0x{active_mask:02X}",
         "pulse": pulse,
         "duration": duration,
-        "hist": total("hist_total_delta"),
-        "mts": total("mts_total_delta"),
-        "mts_disc": total("mts_discard_delta"),
-        "ring": total("ring_inerr_delta"),
-        "frame": total("frame_actual_delta"),
-        "crc": total("frame_crc_delta"),
+        "window_s": elapsed if elapsed > 0 else None,
+        "hist_in": total("hist_total_delta"),
+        "hist_drop": total("hist_drop_delta"),
+        "hist_in_rate": aggregate_rate("hist_total_delta"),
+        "hist_drop_rate": aggregate_rate("hist_drop_delta"),
+        "mts_in": total("mts_total_delta"),
+        "mts_drop": total("mts_discard_delta"),
+        "mts_in_rate": aggregate_rate("mts_total_delta"),
+        "mts_drop_rate": aggregate_rate("mts_discard_delta"),
+        "rbcam_in": total("ring_push_delta"),
+        "rbcam_out": total("ring_pop_delta"),
+        "rbcam_reject": rbcam_reject,
+        "rbcam_cache_miss": total("ring_cache_miss_delta"),
+        "rbcam_in_rate": aggregate_rate("ring_push_delta"),
+        "rbcam_out_rate": aggregate_rate("ring_pop_delta"),
+        "rbcam_reject_rate": None if elapsed <= 0 else rbcam_reject / elapsed,
+        "feb_in": total("frame_actual_delta"),
+        "feb_drop": total("frame_missing_delta"),
+        "feb_in_rate": aggregate_rate("frame_actual_delta"),
+        "feb_drop_rate": aggregate_rate("frame_missing_delta"),
+        "lvds": "aggregate; inspect child JSON for lane table",
     }
 
 
@@ -435,12 +579,27 @@ def summarize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
             "active": "-",
             "pulse": "-",
             "duration": "-",
-            "hist": "-",
-            "mts": "-",
-            "mts_disc": "-",
-            "ring": "-",
-            "frame": "-",
-            "crc": "-",
+            "window_s": None,
+            "hist_in": "-",
+            "hist_drop": "-",
+            "hist_in_rate": None,
+            "hist_drop_rate": None,
+            "mts_in": "-",
+            "mts_drop": "-",
+            "mts_in_rate": None,
+            "mts_drop_rate": None,
+            "rbcam_in": "-",
+            "rbcam_out": "-",
+            "rbcam_reject": "-",
+            "rbcam_cache_miss": "-",
+            "rbcam_in_rate": None,
+            "rbcam_out_rate": None,
+            "rbcam_reject_rate": None,
+            "feb_in": "-",
+            "feb_drop": "-",
+            "feb_in_rate": None,
+            "feb_drop_rate": None,
+            "lvds": "-",
         }
     return {"result": "UNKNOWN"}
 
@@ -485,6 +644,75 @@ def tuning_rows() -> str:
     return "\n".join(rows)
 
 
+def hist_artifact_manifest() -> dict[str, Any]:
+    return load_json_path(HIST_ARTIFACT_MANIFEST) or {"artifacts": {}}
+
+
+def artifact_status_rows() -> str:
+    manifest = hist_artifact_manifest()
+    artifacts = manifest.get("artifacts", {})
+    required = [
+        ("rate_per_channel", "1 s 256-bin rate histogram", "Precise per-channel/per-ASIC rate evidence from histogram bins."),
+        ("header_delay", "Header-sync delay histogram", "Passing handle: one dominant delay bin, normally >=90% peak fraction."),
+    ]
+    rows = []
+    for key, title, contract in required:
+        artifact = artifacts.get(key, {"status": "missing", "reason": "not in manifest"})
+        status = artifact.get("status", "missing")
+        path_text = artifact.get("path")
+        if path_text:
+            path = Path(path_text)
+            if not path.is_absolute():
+                path = HIST_ARTIFACT_DIR / path
+            link = f'<a href="{esc(rel(path))}">{esc(path.name)}</a>' if path.exists() else esc(path.name)
+        else:
+            link = "-"
+        note_parts = []
+        if artifact.get("source"):
+            note_parts.append(f"source={Path(str(artifact['source'])).name}")
+        if artifact.get("total_hits") is not None:
+            note_parts.append(f"total={fmt_int(artifact.get('total_hits'))}")
+        if artifact.get("peak_fraction") is not None:
+            note_parts.append(f"peak={float(artifact.get('peak_fraction')):.3%}")
+        if artifact.get("toolkit_preset_id"):
+            note_parts.append(f"preset={artifact.get('toolkit_preset_id')}")
+        if artifact.get("visual_checkpoint"):
+            note_parts.append(str(artifact["visual_checkpoint"]))
+        if artifact.get("reason"):
+            note_parts.append(str(artifact["reason"]))
+        rows.append(
+            "<tr>"
+            f"<td>{esc(title)}</td>"
+            f"<td>{badge('PASS' if status == 'present' else 'MISSING')}</td>"
+            f"<td>{esc(contract)}<div class=\"note\">{esc('; '.join(note_parts) if note_parts else '-')}</div></td>"
+            f"<td>{link}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
+def artifact_figures() -> str:
+    manifest = hist_artifact_manifest()
+    figures = []
+    for artifact in manifest.get("artifacts", {}).values():
+        if artifact.get("status") != "present" or not artifact.get("path"):
+            continue
+        path = Path(str(artifact["path"]))
+        if not path.is_absolute():
+            path = HIST_ARTIFACT_DIR / path
+        if not path.exists():
+            continue
+        figures.append(
+            "<figure>"
+            f"<a href=\"{esc(rel(path))}\"><img src=\"{esc(rel(path))}\" alt=\"{esc(artifact.get('kind', path.name))}\"></a>"
+            f"<figcaption>{esc(artifact.get('kind', path.name))}</figcaption>"
+            "</figure>"
+        )
+    if not figures:
+        return "<p class=\"missing-text\">No plotted histogram artifacts are present yet. Raw JSON does not satisfy this gate.</p>"
+    return "\n".join(figures)
+
+
 def evidence_rows() -> str:
     rows = []
     for title, kind, filename, note in EVIDENCE:
@@ -492,19 +720,21 @@ def evidence_rows() -> str:
         summary = invalidate_zero_vcodelay(filename, summarize_payload(payload))
         path = REPORT_DIR / filename
         link = f'<a href="{esc(rel(path))}">{esc(filename)}</a>' if path.exists() else esc(filename)
+        monitor_text, monitor_klass = monitor_status(summary.get("duration"))
+        window = float_or_none(summary.get("window_s"))
+        window_text = f"{window:.3f} s" if window is not None else "rate window missing"
         rows.append(
             "<tr>"
             f"<td>{esc(kind)}</td>"
             f"<td>{esc(title)}<div class=\"note\">{esc(note)}</div></td>"
             f"<td>{badge(summary.get('result', '-'))}<div class=\"class\">{esc(summary.get('class', '-'))}</div></td>"
             f"<td>{esc(summary.get('scope', '-'))}<br>{esc(summary.get('active', '-'))}</td>"
-            f"<td>{fmt_int(summary.get('pulse'))}<br>{fmt_int(summary.get('duration'))} ms</td>"
-            f"<td>{fmt_int(summary.get('hist'))}</td>"
-            f"<td>{fmt_int(summary.get('mts'))}</td>"
-            f"<td>{fmt_int(summary.get('mts_disc'))}</td>"
-            f"<td>{fmt_int(summary.get('ring'))}</td>"
-            f"<td>{fmt_int(summary.get('frame'))}</td>"
-            f"<td>{fmt_int(summary.get('crc'))}</td>"
+            f"<td><span class=\"mini-badge {monitor_klass}\">{esc(monitor_text)}</span><div class=\"rate\">{esc(window_text)}</div></td>"
+            f"<td>{fmt_count_rate(summary.get('mts_in'), summary.get('mts_in_rate'))}<br>drop {fmt_count_rate(summary.get('mts_drop'), summary.get('mts_drop_rate'))}</td>"
+            f"<td>{fmt_count_rate(summary.get('hist_in'), summary.get('hist_in_rate'))}<br>drop {fmt_count_rate(summary.get('hist_drop'), summary.get('hist_drop_rate'))}</td>"
+            f"<td>in {fmt_count_rate(summary.get('rbcam_in'), summary.get('rbcam_in_rate'))}<br>out {fmt_count_rate(summary.get('rbcam_out'), summary.get('rbcam_out_rate'))}<br>reject {fmt_count_rate(summary.get('rbcam_reject'), summary.get('rbcam_reject_rate'))}</td>"
+            f"<td>in {fmt_count_rate(summary.get('feb_in'), summary.get('feb_in_rate'))}<br>miss {fmt_count_rate(summary.get('feb_drop'), summary.get('feb_drop_rate'))}</td>"
+            f"<td>{esc(summary.get('lvds', '-'))}</td>"
             f"<td>{link}</td>"
             "</tr>"
         )
@@ -582,9 +812,27 @@ def write_html() -> None:
     .warn {{ background: #ad6a00; }}
     .fail {{ background: #b73535; }}
     .missing {{ background: #6b7280; }}
+    .mini-badge {{
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 650;
+      white-space: nowrap;
+    }}
+    .mini-badge.pass {{ background: #1d7f45; }}
+    .mini-badge.fail {{ background: #b73535; }}
+    .mini-badge.missing {{ background: #6b7280; }}
     .progress-table td:nth-child(3),
     .progress-table td:nth-child(4),
     .progress-table td:nth-child(5) {{ min-width: 220px; }}
+    .rate {{
+      margin-top: 2px;
+      color: #52606d;
+      font-size: 11px;
+      line-height: 1.25;
+    }}
     .note, .class {{
       margin-top: 4px;
       color: #52606d;
@@ -597,6 +845,34 @@ def write_html() -> None:
       padding: 12px 14px;
       margin: 16px 0;
       max-width: 1120px;
+    }}
+    .plot-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 16px;
+      margin: 12px 0 16px;
+      max-width: 1280px;
+    }}
+    figure {{
+      margin: 0;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #d8dde3;
+      border-radius: 4px;
+    }}
+    figure img {{
+      display: block;
+      width: 100%;
+      height: auto;
+    }}
+    figcaption {{
+      margin-top: 6px;
+      color: #52606d;
+      font-size: 12px;
+    }}
+    .missing-text {{
+      color: #b73535;
+      font-weight: 650;
     }}
     code {{ background: #edf1f4; padding: 1px 4px; border-radius: 3px; }}
     a {{ color: #0a5ca8; text-decoration: none; }}
@@ -658,6 +934,21 @@ def write_html() -> None:
       the same lower MTS/ring path passes after 50 ms post-sync/pre-inject
       settle. Reduced sweep evidence:
       <a href="{esc(rel(REPORT_DIR / 'phase6_lower56_cross_asic_sweep_20260430.md'))}">phase6_lower56_cross_asic_sweep_20260430.md</a>.
+    </p>
+    <p>
+      A fresh all-real-lane 1 s rate monitor on 2026-05-01 is a blocker
+      checkpoint, not a pass. It used the toolkit-equivalent rate preset
+      metadata, all eight real LVDS lanes, <code>pulse_interval=1250</code>,
+      and <code>pulse_high=4</code>. LVDS error and DPA-unlock deltas were
+      zero, <code>LAST_INTERVAL_TOTAL_HITS=11851571</code>, and
+      <code>hist_drop_delta=0</code>, so real hits are reaching the histogram.
+      The same window still reports <code>MTS_DISCARD=1</code>,
+      <code>ring_inerr_delta=2787809</code>, and
+      <code>ring_overwrite_delta=79066</code>. The SC per-bin readback returned
+      zero bins despite the nonzero last-interval counter; that is a tooling
+      artifact from slow SC reads crossing the ping-pong histogram bank, so the
+      plotted rate artifact must come from the burst System Console/toolkit
+      path or a faster frozen-bin capture.
     </p>
     <p>
       The latest direct probes rule out two weaker explanations. First, opening
@@ -789,6 +1080,80 @@ def write_html() -> None:
       </tbody>
     </table>
 
+    <h2>Required Histogram Artifacts</h2>
+    <p>
+      Passing review requires plotted artifacts, not raw JSON alone. The
+      channel-rate plot must come from a 1 s, 256-bin histogram accumulation,
+      and the delay plot must be a header-synchronous <code>kind=delay</code>
+      capture where the in-band delay collapses toward a delta function. Stage
+      CSRs are intentionally shown as rates over the measured read window,
+      because those counters are not sampled simultaneously. The histogram bins
+      are the precision evidence for per-channel and per-ASIC rate.
+    </p>
+    <p>
+      The live histogram CSR setup must use the FE SciFi toolkit presets from
+      <code>toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl</code>.
+      For delay closure, the active pipe image is the only valid lower-side
+      source: <code>debug_1</code> is upper MTS <code>ts_delta</code> and
+      <code>debug_2</code> is lower MTS <code>ts_delta</code>. Older
+      non-pipe/latency images with upper-only debug wiring are rejected for
+      all-eight-ASIC delay conclusions.
+    </p>
+    <div class="plot-grid">
+{artifact_figures()}
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Artifact</th>
+          <th>Status</th>
+          <th>Contract / Inspection</th>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody>
+{artifact_status_rows()}
+      </tbody>
+    </table>
+
+    <h2>Physical Debug Checklist</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Check</th>
+          <th>Expected Response</th>
+          <th>Current Checkpoint</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Channel mask sanity</td>
+          <td>Masked channels vanish from the 256-bin rate plot while unmasked channels keep their rate scale.</td>
+          <td>Required before accepting any 256-channel rate artifact. Missing plot means this checkpoint is still open.</td>
+        </tr>
+        <tr>
+          <td>MuTRiG PLL/header-sync tuning</td>
+          <td>Starting from no-hit zero <code>vcodelay</code>, restore nonzero ASIC defaults, run <code>RUN_PREPARE</code>, and tune until the delay histogram moves from broad/flat toward one dominant bin.</td>
+          <td>Zero-vcodelay captures in this report are invalidated as tuning evidence. The next valid artifact must record cnt/vcodelay/hitlogic and the delay peak fraction.</td>
+        </tr>
+        <tr>
+          <td>Upper/lower delay input coverage</td>
+          <td>Delay histograms must isolate both source 0 (upper MTS) and source 1 (lower MTS), with lower-side evidence covering ASICs 4..7.</td>
+          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>; lower-side plotted evidence is still required.</td>
+        </tr>
+        <tr>
+          <td>Histogram-bin capture method</td>
+          <td>Read all 256 bins from the completed interval before the ping-pong bank is overwritten, preferably by the burst System Console/toolkit path.</td>
+          <td>The 1 s all-real SC run has nonzero last-interval hits but zero slow-read bins. The available STP JDI probe currently reports no System Console master services, so the burst-bin path is the next tooling blocker.</td>
+        </tr>
+        <tr>
+          <td>Anomaly loop</td>
+          <td>Every reviewed plot must state one anomaly or null anomaly and the next hardware hypothesis it supports.</td>
+          <td>Current anomaly: real lanes 5 and 6 pass alone but fail together even when latency is opened, while the emulator pair passes. That challenges a pure throughput or single-lane-lock explanation.</td>
+        </tr>
+      </tbody>
+    </table>
+
     <h2>MuTRiG Tuning Ledger</h2>
     <p>
       Triples are <code>cnt/vcodelay/hitlogic</code>. The zero point is a
@@ -814,6 +1179,11 @@ def write_html() -> None:
     </table>
 
     <h2>Evidence Table</h2>
+    <p>
+      Counter rows show count plus rate. The rate window is the measured
+      accumulation window for shaky CSR counters; linked JSON keeps the raw
+      before/sample/after snapshots for audit.
+    </p>
     <table>
       <thead>
         <tr>
@@ -821,13 +1191,12 @@ def write_html() -> None:
           <th>Run</th>
           <th>Result</th>
           <th>Scope</th>
-          <th>Pulse / Duration</th>
-          <th>Hist</th>
-          <th>MTS</th>
-          <th>MTS Disc</th>
-          <th>Ring InErr</th>
-          <th>Frame Actual</th>
-          <th>CRC</th>
+          <th>Monitor / Rate Window</th>
+          <th>MTS In / Drop</th>
+          <th>Hist In / Drop</th>
+          <th>RBCAM In / Out / Reject</th>
+          <th>FEB Assembly In / Miss</th>
+          <th>LVDS</th>
           <th>Artifact</th>
         </tr>
       </thead>

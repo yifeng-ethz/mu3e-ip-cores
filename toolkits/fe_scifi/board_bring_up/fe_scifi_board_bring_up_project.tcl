@@ -54,6 +54,66 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         "interval_cfg.interval_clocks" "0x07735940" \
                         "csr.commit" "0x1"]]
 
+        set histogram_delay_mts_both_preset [dict create \
+                id "delay_mts_both" \
+                label "Upper+Lower MTS Delay" \
+                sample_interval_ms 1000 \
+                sample_guard_ms 50 \
+                field_values [dict create \
+                        "csr.mode" "0x9" \
+                        "csr.representation" "0x0" \
+                        "csr.filter" "0x0" \
+                        "left_bound.left_bound" "0x0" \
+                        "bin_width.bin_width" "0x10" \
+                        "keys_location.update_key_low" "0x11" \
+                        "keys_location.update_key_high" "0x15" \
+                        "keys_location.filter_key_low" "0x23" \
+                        "keys_location.filter_key_high" "0x26" \
+                        "keys_value.filter_key_value" "0x0" \
+                        "keys_value.update_key_value" "0x0" \
+                        "interval_cfg.interval_clocks" "0x07735940" \
+                        "csr.commit" "0x1"]]
+
+        set histogram_delay_mts_upper_preset [dict create \
+                id "delay_mts_upper" \
+                label "Upper MTS Delay" \
+                sample_interval_ms 1000 \
+                sample_guard_ms 50 \
+                field_values [dict create \
+                        "csr.mode" "0x9" \
+                        "csr.representation" "0x0" \
+                        "csr.filter" "0x1" \
+                        "left_bound.left_bound" "0x0" \
+                        "bin_width.bin_width" "0x10" \
+                        "keys_location.update_key_low" "0x11" \
+                        "keys_location.update_key_high" "0x15" \
+                        "keys_location.filter_key_low" "0x10" \
+                        "keys_location.filter_key_high" "0x17" \
+                        "keys_value.filter_key_value" "0x0" \
+                        "keys_value.update_key_value" "0x0" \
+                        "interval_cfg.interval_clocks" "0x07735940" \
+                        "csr.commit" "0x1"]]
+
+        set histogram_delay_mts_lower_preset [dict create \
+                id "delay_mts_lower" \
+                label "Lower MTS Delay" \
+                sample_interval_ms 1000 \
+                sample_guard_ms 50 \
+                field_values [dict create \
+                        "csr.mode" "0x9" \
+                        "csr.representation" "0x0" \
+                        "csr.filter" "0x1" \
+                        "left_bound.left_bound" "0x0" \
+                        "bin_width.bin_width" "0x10" \
+                        "keys_location.update_key_low" "0x11" \
+                        "keys_location.update_key_high" "0x15" \
+                        "keys_location.filter_key_low" "0x10" \
+                        "keys_location.filter_key_high" "0x17" \
+                        "keys_value.filter_key_value" "0x1" \
+                        "keys_value.update_key_value" "0x0" \
+                        "interval_cfg.interval_clocks" "0x07735940" \
+                        "csr.commit" "0x1"]]
+
         set inventory [list \
                 [dict create type_name "lvds_rx_controller_pro.csr" copies 1 expected_bases [list "0x00000000"]] \
                 [dict create type_name "mutrig_frame_deassembly.csr" copies 8 expected_bases [list "0x00010900" "0x00011900" "0x00012900" "0x00013900" "0x00014900" "0x00015900" "0x00016900" "0x00017900"]] \
@@ -93,7 +153,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         hw_file [file join $repo_root histogram_statistics histogram_statistics_v2_hw.tcl] \
                         histogram_bins 256 \
                         histogram_clear_before_read 0 \
-                        presets [list $histogram_rate_preset]] \
+                        presets [list $histogram_rate_preset $histogram_delay_mts_both_preset $histogram_delay_mts_upper_preset $histogram_delay_mts_lower_preset]] \
                 [dict create \
                         id "mts_preprocessor" \
                         title "MuTRiG Timestamp Processor" \
@@ -163,7 +223,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                 notes [list \
                         "Project wrapper for scifi_datapath_v2_system master_datapath address map." \
                         "Write-back stays disabled until a successful read populates the dashboard state." \
-                        "Histogram Statistics 0 includes the preset for 8 MuTRiG channel-rate monitoring."] \
+                        "Histogram Statistics 0 includes toolkit presets for 8 MuTRiG channel-rate monitoring and upper/lower MTS delay monitoring."] \
                 inventory $inventory \
                 ip_sequence $ip_sequence]
 }

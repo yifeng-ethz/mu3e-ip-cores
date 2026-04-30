@@ -465,7 +465,7 @@ def main() -> int:
     parser.add_argument("--lane-mask", type=parse_mask, default=LVDS_LANE_MASK)
     parser.add_argument("--read-dpa-unlocks", action="store_true")
     parser.add_argument("--select-real", action="store_true", default=True)
-    parser.add_argument("--window-ms", type=int, default=250)
+    parser.add_argument("--window-ms", type=int, default=1000)
     parser.add_argument("--configure-asics", type=parse_asic_list, default=None)
     parser.add_argument(
         "--channel-enable-mask",

@@ -94,7 +94,7 @@ PHASE6_CASES: tuple[Phase6Case, ...] = (
         pulse_high_cycles=4,
         lvds_lane_mask=0x020,
         real_hits_per_lane=1,
-        duration_ms=250,
+        duration_ms=1000,
         expected="pass",
     ),
     Phase6Case(
@@ -104,7 +104,7 @@ PHASE6_CASES: tuple[Phase6Case, ...] = (
         pulse_high_cycles=4,
         lvds_lane_mask=0x040,
         real_hits_per_lane=1,
-        duration_ms=250,
+        duration_ms=1000,
         expected="pass",
     ),
     Phase6Case(
@@ -114,7 +114,7 @@ PHASE6_CASES: tuple[Phase6Case, ...] = (
         pulse_high_cycles=4,
         lvds_lane_mask=0x060,
         real_hits_per_lane=1,
-        duration_ms=250,
+        duration_ms=1000,
         expected="pass",
     ),
     Phase6Case(
@@ -124,7 +124,7 @@ PHASE6_CASES: tuple[Phase6Case, ...] = (
         pulse_high_cycles=4,
         lvds_lane_mask=0x060,
         real_hits_per_lane=32,
-        duration_ms=250,
+        duration_ms=1000,
         expected="fail",
     ),
     Phase6Case(
@@ -134,7 +134,7 @@ PHASE6_CASES: tuple[Phase6Case, ...] = (
         pulse_high_cycles=3,
         lvds_lane_mask=0x060,
         real_hits_per_lane=32,
-        duration_ms=250,
+        duration_ms=1000,
         expected="underfilled",
     ),
 )
@@ -495,6 +495,16 @@ class Runner:
             "--json-output",
             str(json_out),
         ]
+        if self.args.dump_hist_bins:
+            argv.extend(
+                [
+                    "--dump-hist-bins",
+                    "--hist-bin-read-chunk-words",
+                    str(self.args.hist_bin_read_chunk_words),
+                    "--hist-bin-read-delay-ms",
+                    str(self.args.hist_bin_read_delay_ms),
+                ]
+            )
         result = self.run_cmd(f"run_{case.case_id}", argv, timeout_s=max(60, case.duration_ms / 1000.0 + 60))
         parsed = self.parse_injector_json(json_out)
         classification = self.classify_case(case, result.rc, parsed)
@@ -536,7 +546,16 @@ class Runner:
             "hist_drop_delta": int(summary.get("hist_drop_delta", 0) or 0),
             "mts_total_delta": int(summary.get("mts_total_delta", 0) or 0),
             "mts_discard_delta": int(summary.get("mts_discard_delta", 0) or 0),
+            "ring_push_delta": int(summary.get("ring_push_delta", 0) or 0),
+            "ring_pop_delta": int(summary.get("ring_pop_delta", 0) or 0),
             "ring_inerr_delta": int(summary.get("ring_inerr_delta", 0) or 0),
+            "ring_overwrite_delta": int(summary.get("ring_overwrite_delta", 0) or 0),
+            "ring_cache_miss_delta": int(summary.get("ring_cache_miss_delta", 0) or 0),
+            "frame_declared_delta": int(summary.get("frame_declared_delta", 0) or 0),
+            "frame_actual_delta": int(summary.get("frame_actual_delta", 0) or 0),
+            "frame_missing_delta": int(summary.get("frame_missing_delta", 0) or 0),
+            "counter_rate_elapsed_s": summary.get("counter_rate_elapsed_s"),
+            "counter_rates_hz": summary.get("counter_rates_hz", {}),
             "source_mux_real_delta": int(summary.get("source_mux_real_delta", 0) or 0),
             "lvds_error_delta_total": int(summary.get("lvds_error_delta_total", 0) or 0),
             "lvds_error_delta_lanes": summary.get("lvds_error_delta_lanes", []),
@@ -678,6 +697,9 @@ class Runner:
                     "post_sync_ms": self.args.post_sync_ms,
                     "mts_expected_latency": self.args.mts_expected_latency,
                     "preflight_settle_ms": self.args.preflight_settle_ms,
+                    "dump_hist_bins": self.args.dump_hist_bins,
+                    "hist_bin_read_chunk_words": self.args.hist_bin_read_chunk_words,
+                    "hist_bin_read_delay_ms": self.args.hist_bin_read_delay_ms,
                     "run_dma_when_feb_passes": self.args.run_dma_when_feb_passes,
                     "swb_link_mask": self.args.swb_link_mask,
                     "swb_profile": self.args.swb_profile,
@@ -810,6 +832,9 @@ def main() -> int:
     )
     parser.add_argument("--mts-expected-latency", type=int, default=2000)
     parser.add_argument("--force-config-each-case", action="store_true")
+    parser.add_argument("--dump-hist-bins", action="store_true")
+    parser.add_argument("--hist-bin-read-chunk-words", type=int, default=1)
+    parser.add_argument("--hist-bin-read-delay-ms", type=int, default=1)
     parser.add_argument("--run-dma-when-feb-passes", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--swb-dma-probe", type=Path, default=default_swb_dma_probe())
     parser.add_argument("--swb-readout-mode", type=int, default=4)
