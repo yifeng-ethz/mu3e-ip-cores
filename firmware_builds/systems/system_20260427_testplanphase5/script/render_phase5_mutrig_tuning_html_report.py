@@ -189,15 +189,15 @@ PROGRESS = [
         "SWB input path",
         "IN_PROGRESS",
         "SWB must receive the FEB data links instead of tying the datapath off.",
-        "online_sc local commit 26d93ef61 sets g_NLINKS_DATA_GENERIC=8 and wires the musip four-lane OPQ ingress while keeping online_sc RC/SC.",
-        "Use the new SWB SOF once full fit/assembly closes, then verify the FEB link counters and OPQ ingress counters on hardware.",
+        "online_sc commit ada3aea38 keeps the 8-link datapath wiring and aligns the fixed4 OPQ package to Mu3e Demo N_SHD=128, N_HIT=255.",
+        "Use the new SWB SOF once full fit/assembly closes, then verify FEB link counters, OPQ ingress counters, and OPQ drop counters on hardware.",
     ),
     (
         "SWB OPQ to DMA",
         "IN_PROGRESS",
-        "Merged 256-bit hit words must drive the existing SWB DMA outputs without event-builder drops.",
-        "make flow_map passed with swb_block -> ingress_egress_adaptor -> opq_upstream_4lane -> ordered_priority_queue_dut_sv present in synthesis.",
-        "Full make flow is running from the committed SWB OPQ checkpoint; program only after timing and assembler output are clean enough for this debug stage.",
+        "Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.",
+        "packet_scheduler 25e204c UVM passes the 256-hit cluster diagnostic: N_HIT=255 delivers 255 hits and records exactly one drop; online_sc make flow_map passed.",
+        "Run the SWB hardware capture and require the same 255-delivered plus 1-drop ledger before any host-disk claim.",
     ),
     (
         "Host DMA buffer",
@@ -209,9 +209,9 @@ PROGRESS = [
     (
         "Disk/offline timestamp check",
         "PENDING",
-        "Every bunch must contain 256 hits with identical TS, and adjacent bunch TS spacing must match the 100 kHz injection cadence.",
-        "No disk artifact has been produced yet for the 256-channel, 100 kHz/channel end-to-end requirement.",
-        "Add the offline reducer next to the long-run scripts and emit a compact report with per-bunch TS equality and interval histograms.",
+        "Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.",
+        "No disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement.",
+        "Add the offline reducer next to the long-run scripts and emit per-bunch TS equality, interval histograms, and OPQ drop-ledger checks.",
     ),
 ]
 
@@ -471,7 +471,9 @@ def write_html() -> None:
       one-channel pair now passes after a clean good-ribbon restore. The blocker
       is the full-channel pair: ASIC5 and ASIC6 each pass alone, but together
       they still forward MTS timestamp errors into the lower ring-buffer CAM.
-      No FEB/SWB host-disk 256-hit, 100 kHz end-to-end claim is valid yet.
+      No FEB/SWB host-disk Mu3e Demo OPQ, 100 kHz end-to-end claim is valid
+      yet. Under the active <code>N_HIT=255</code> profile, a 256-hit source
+      cluster must deliver 255 hits and account exactly one OPQ hit drop.
     </div>
 
     <h2>Current Read</h2>
@@ -505,9 +507,13 @@ def write_html() -> None:
     <h2>Phase-6 End-to-End Progress</h2>
     <p>
       Closure still means the full hardware chain, not just a FEB-local
-      histogram. The required proof is 100 kHz injection on all 256 MuTRiG
-      channels, DMA data reaching the host disk, all 256 hits in a bunch sharing
-      one timestamp, and adjacent bunch timestamps matching the 100 kHz cadence.
+      histogram. The required source proof is 100 kHz injection on all 256
+      MuTRiG channels with one timestamp per 256-hit source bunch. The active
+      SWB/ER OPQ profile is Mu3e Demo: <code>N_SHD=128</code>,
+      <code>N_HIT=255</code>. Therefore the host-disk proof for this checkpoint
+      is 255 delivered same-timestamp hits plus exactly one accounted OPQ
+      <code>drop_hit</code> per 256-hit source cluster, with adjacent bunch
+      timestamps matching the 100 kHz cadence.
     </p>
     <table class="progress-table">
       <thead>
