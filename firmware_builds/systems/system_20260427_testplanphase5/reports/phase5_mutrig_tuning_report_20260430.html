@@ -70,7 +70,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-04-30T10:57:03 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-04-30T12:33:09 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -79,7 +79,9 @@
       one-channel pair now passes after a clean good-ribbon restore. The blocker
       is the full-channel pair: ASIC5 and ASIC6 each pass alone, but together
       they still forward MTS timestamp errors into the lower ring-buffer CAM.
-      No FEB/SWB host-disk 256-hit, 100 kHz end-to-end claim is valid yet.
+      No FEB/SWB host-disk Mu3e Demo OPQ, 100 kHz end-to-end claim is valid
+      yet. Under the active <code>N_HIT=255</code> profile, a 256-hit source
+      cluster must deliver 255 hits and account exactly one OPQ hit drop.
     </div>
 
     <h2>Current Read</h2>
@@ -113,9 +115,13 @@
     <h2>Phase-6 End-to-End Progress</h2>
     <p>
       Closure still means the full hardware chain, not just a FEB-local
-      histogram. The required proof is 100 kHz injection on all 256 MuTRiG
-      channels, DMA data reaching the host disk, all 256 hits in a bunch sharing
-      one timestamp, and adjacent bunch timestamps matching the 100 kHz cadence.
+      histogram. The required source proof is 100 kHz injection on all 256
+      MuTRiG channels with one timestamp per 256-hit source bunch. The active
+      SWB/ER OPQ profile is Mu3e Demo: <code>N_SHD=128</code>,
+      <code>N_HIT=255</code>. Therefore the host-disk proof for this checkpoint
+      is 255 delivered same-timestamp hits plus exactly one accounted OPQ
+      <code>drop_hit</code> per 256-hit source cluster, with adjacent bunch
+      timestamps matching the 100 kHz cadence.
     </p>
     <table class="progress-table">
       <thead>
@@ -129,10 +135,10 @@
       </thead>
       <tbody>
 <tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>Full-channel lower ASIC5+6 and all-lane runs still produce MTS/ring timestamp errors. Single lanes and selected masks pass the 0..2000-cycle gate.</td><td>Keep tuning at MTS/ring boundary; do not claim FEB closure from single-lane evidence.</td></tr>
-<tr><td>SWB input path</td><td><span class="badge missing">IN_PROGRESS</span></td><td>SWB must receive the FEB data links instead of tying the datapath off.</td><td>online_sc local commit 26d93ef61 sets g_NLINKS_DATA_GENERIC=8 and wires the musip four-lane OPQ ingress while keeping online_sc RC/SC.</td><td>Use the new SWB SOF once full fit/assembly closes, then verify the FEB link counters and OPQ ingress counters on hardware.</td></tr>
-<tr><td>SWB OPQ to DMA</td><td><span class="badge missing">IN_PROGRESS</span></td><td>Merged 256-bit hit words must drive the existing SWB DMA outputs without event-builder drops.</td><td>make flow_map passed with swb_block -&gt; ingress_egress_adaptor -&gt; opq_upstream_4lane -&gt; ordered_priority_queue_dut_sv present in synthesis.</td><td>Full make flow is running from the committed SWB OPQ checkpoint; program only after timing and assembler output are clean enough for this debug stage.</td></tr>
+<tr><td>SWB input path</td><td><span class="badge missing">IN_PROGRESS</span></td><td>SWB must receive the FEB data links instead of tying the datapath off.</td><td>online_sc commit ada3aea38 keeps the 8-link datapath wiring and aligns the fixed4 OPQ package to Mu3e Demo N_SHD=128, N_HIT=255.</td><td>Use the new SWB SOF once full fit/assembly closes, then verify FEB link counters, OPQ ingress counters, and OPQ drop counters on hardware.</td></tr>
+<tr><td>SWB OPQ to DMA</td><td><span class="badge missing">IN_PROGRESS</span></td><td>Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.</td><td>packet_scheduler 25e204c UVM passes the 256-hit cluster diagnostic: N_HIT=255 delivers 255 hits and records exactly one drop; online_sc make flow_map passed.</td><td>Run the SWB hardware capture and require the same 255-delivered plus 1-drop ledger before any host-disk claim.</td></tr>
 <tr><td>Host DMA buffer</td><td><span class="badge missing">PENDING</span></td><td>/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.</td><td>No valid host DMA capture exists yet for the new SWB OPQ image.</td><td>After SWB programming, recover PCIe, start DMA, and capture a bounded run before any disk/offline claim.</td></tr>
-<tr><td>Disk/offline timestamp check</td><td><span class="badge missing">PENDING</span></td><td>Every bunch must contain 256 hits with identical TS, and adjacent bunch TS spacing must match the 100 kHz injection cadence.</td><td>No disk artifact has been produced yet for the 256-channel, 100 kHz/channel end-to-end requirement.</td><td>Add the offline reducer next to the long-run scripts and emit a compact report with per-bunch TS equality and interval histograms.</td></tr>
+<tr><td>Disk/offline timestamp check</td><td><span class="badge missing">PENDING</span></td><td>Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.</td><td>No disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement.</td><td>Add the offline reducer next to the long-run scripts and emit per-bunch TS equality, interval histograms, and OPQ drop-ledger checks.</td></tr>
       </tbody>
     </table>
 

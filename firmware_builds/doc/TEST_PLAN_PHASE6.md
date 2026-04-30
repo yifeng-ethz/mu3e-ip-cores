@@ -24,11 +24,19 @@ MuTRiG TDC injection
   -> disk file and offline decoder
 ```
 
-The signoff target is strict: 100 kHz injection per channel across 256 channels
-must produce bunches of 256 hits at the host-disk decode point. The 256 hits in
-one bunch must have the same hit timestamp, and adjacent bunch timestamps must
-be separated by the 100 kHz period. At the 125 MHz injector clock, 100 kHz is
-`--pulse-intervals 1250`.
+The source signoff target is strict: 100 kHz injection per channel across 256
+MuTRiG channels must create source bunches of 256 hits. The 256 source hits in
+one bunch must have the same hit timestamp, and adjacent source-bunch
+timestamps must be separated by the 100 kHz period. At the 125 MHz injector
+clock, 100 kHz is `--pulse-intervals 1250`.
+
+The current SWB/ER OPQ debug profile is deliberately not a no-loss profile:
+Mu3e Demo uses `N_SHD=128` and `N_HIT=255`. A 256-hit source cluster must
+therefore produce exactly 255 delivered host hits plus exactly one accounted
+OPQ hit drop. The delivered 255 hits must share one timestamp, and the
+bunch-to-bunch timestamp interval must still match the 100 kHz source cadence.
+A future no-loss host-disk closure needs a different OPQ hit-limit profile; do
+not silently count the Mu3e Demo diagnostic profile as 256-hit no-loss closure.
 
 This phase is pessimistic by construction. Normal cases must pass before
 performance cases count. Negative controls must fail in the expected way. If a
@@ -47,7 +55,8 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | LVDS controller observability | `PASS` for current blocker probe | active `lvds_rx_controller_pro_0.csr` at SC word base `0x08000`, 16-word aperture; [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | Lower pair single-channel | `PASS` | lanes 5+6 pass one TDC-test channel after clean good-ribbon restore |
 | Lower pair full 32-channel | `BLOCKED` | lanes 5+6 full-channel pulse-high 4 still produces MTS/ring timestamp errors |
-| DMA disk closure | `not-run` | no valid host-disk 256-hit bunch evidence yet |
+| SWB OPQ profile | `PASS` source/synthesis checkpoint | Mu3e Demo OPQ uses `N_SHD=128`, `N_HIT=255`; packet_scheduler `25e204c`, mu3e-ip-cores pointer `125b24c`, online_sc `ada3aea38` |
+| DMA disk closure | `not-run` | no valid host-disk Mu3e Demo OPQ evidence yet: expected 255 delivered hits plus 1 accounted OPQ hit drop per 256-hit source cluster |
 
 The current first hard blocker is before SWB/DMA closure: the lower SMB5 pair
 `lanes5+6` still fails the MTS/ring timestamp-delay gate when both ASICs run all
@@ -69,7 +78,7 @@ unless the run is explicitly marked diagnostic-only.
 | P6-SWB-IN | SWB optical/link input | SWB SciFi link counters advance only on selected link mask; no link/CRC/reset errors | SWB sees FEB output for the same run window |
 | P6-SWB-OUT | SWB merger output | time/stream merger counters match SWB input and chosen readout mode | no unexplained merger drops, reordering, or stale packets |
 | P6-HOST-DMA | `/dev/mudaq0` DMA buffer | `swb_dmatest` or MIDAS readout writes a nonzero disk buffer for the same run | DMA words are recorded to host disk and linked to run metadata |
-| P6-DISK-DECODE | offline decode | decoded bunches contain 256 same-timestamp hits; bunch-to-bunch timestamp delta is 100 kHz | no missing, duplicate, stale, or timestamp-mismatched hits |
+| P6-DISK-DECODE | offline decode | Mu3e Demo profile: decoded bunches contain 255 same-timestamp hits and OPQ `drop_hit` accounts exactly 1 lost hit from the 256-hit source cluster; bunch-to-bunch timestamp delta is 100 kHz | no stale, duplicate, timestamp-mismatched, or unaccounted missing hits |
 
 ## 3. Case Buckets
 
@@ -83,6 +92,7 @@ unless the run is explicitly marked diagnostic-only.
 | P6B021 | same as P6B020 with LVDS SVD snapshots enabled | `PASS_DIAG`: ring fails while LVDS error/DPA deltas stay zero, so blocker is downstream of LVDS training | [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | P6B030 | all 8 lanes, full 256 channels, pulse high 4, 100 kHz | `BLOCKED` until P6B020 passes | same |
 | P6B040 | all 8 lanes, full 256 channels, diagnostic `drop_delay_error=on` | diagnostic-only downstream clean expected | proves downstream ring/SWB path only after labeling trimmed hits |
+| P6B050 | SWB Mu3e Demo OPQ, 256-hit source cluster | `PASS` only if host/disk sees 255 delivered hits and OPQ drop ledger reports exactly 1 hit drop | OPQ CSR snapshot plus disk decode |
 
 ### 3.2 PROF
 
@@ -94,6 +104,7 @@ Only run these after P6B020 passes without trimming.
 | P6P020 | mask sweep one ASIC, one SMB, both SMBs, all 8 ASICs | accepted hit count equals enabled-channel count per bunch | disk decode grouped by ASIC/channel |
 | P6P030 | long 168-hour 256-channel soak | no timestamp drift, no DMA stale-data reuse, no unexplained drops | JSONL long-run log plus reduced report |
 | P6P040 | SWB merger readout-mode comparison | time-merger and stream-merger expectations match their contracts | SWB counters and `memory_content.txt` decode |
+| P6P050 | OPQ hit-limit A/B profile | Mu3e Demo `N_HIT=255` loses exactly one hit from a 256-hit cluster; later no-loss profile must deliver 256 | packet_scheduler UVM, SWB CSR drop ledger, disk decode |
 
 ### 3.3 EDGE
 
@@ -213,8 +224,9 @@ A DMA capture is not Phase-6 closure until the run directory contains:
 - `memory_content.txt` copied from the command working directory;
 - SWB counter snapshot before and after capture;
 - FEB run metadata and injector/config JSON for the same run window;
-- offline decode showing 256 hits per bunch, same timestamp per bunch, and
-  100 kHz bunch spacing.
+- offline decode showing the Mu3e Demo result: 255 delivered hits per bunch,
+  same timestamp per delivered bunch, OPQ `drop_hit=1` for each 256-hit source
+  cluster, and 100 kHz bunch spacing.
 
 Until the decode is implemented for the exact active packet format, the disk
 stage remains `not-run` or `diagnostic_only`.
