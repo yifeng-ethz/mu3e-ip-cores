@@ -16,7 +16,17 @@ explicit raw-register contract.
 - writes only explicit register values requested on the command line;
 - captures all RW/RO registers plus raw SWB counter sweeps before cleanup;
 - dumps the host DMA buffer to disk as binary and optional text;
+- decodes the active `musip_event_builder` payload counters despite the stale
+  legacy register names;
 - writes JSON/Markdown summaries that can be reduced offline.
+
+The active SWB `musip_event_builder` writes raw 256-bit payload words to DMA.
+Its counters are exposed through old register names:
+`EVENT_BUILD_IDLE_NOT_HEADER_R` is the low 32 bits of payload words written,
+`EVENT_BUILD_CNT_EVENT_DMA_R` is the high 32 bits, and
+`EVENT_BUILD_SKIP_EVENT_DMA_R` is the low 32 bits of payload drops. A nonzero
+DMA payload capture is not by itself proof of old FEB/SWB frame headers or
+real FEB-link closure.
 
 ## Typical Datagen Probe
 
@@ -45,3 +55,19 @@ python3 tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py \
 
 Use `--no-cleanup` only for interactive live debug. Normal evidence runs should
 clean up so the next run starts from known register values.
+
+## Offline Frame Scan
+
+Use the repo-owned reducer entry point for old FEB/SWB frame scans:
+
+```bash
+python3 tools/phase6_swb_dma_probe/analyze_phase6_dma_memory.py \
+  firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_dma_probe_custom/scifi_time_links/dma_words.bin \
+  --expect-hits-per-frame 255 \
+  --expect-ts-delta 6250
+```
+
+`raw_payload_no_legacy_frames` means host DMA contains nonpadding payload data
+but the old frame scanner found no `E8..BC` headers or `..9C` trailers. Treat
+that as raw SWB DMA proof only, then decode the MuSiP payload contract or rerun
+with real FEB-link frames.

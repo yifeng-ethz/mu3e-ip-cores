@@ -77,25 +77,25 @@ EVIDENCE = [
         "Lane 6 zero VCO point",
         "Phase6",
         "phase6_lane6_vco000_pulse4_100k_20260430_192903.json",
-        "ASIC6/lane6 still passes at vncnt=0, vnvcodelay=0, vnhitlogic=0; the zero-point assumption is not a no-hit/reset condition here.",
+        "Invalidated: vnvcodelay=0 should produce no TDC-injection hits; rerun with nonzero ASIC-specific PLL settings and RUN_PREP.",
     ),
     (
         "Lane 6 FEB frame boundary",
         "Phase6",
         "phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.json",
-        "ASIC6/lane6 single-channel active-window run passes counters while the boundary STP records nonzero FEB hit_type3 frame content; same-window nonempty RBCAM alignment remains open.",
+        "Invalidated as tuning evidence by the vco000 label; keep only as a frame-format debug example until rerun with locked nonzero PLL settings.",
     ),
     (
         "Lane 7 zero VCO point",
         "Phase6",
         "phase6_lane7_vco000_pulse4_100k_20260430_193008.json",
-        "ASIC7/lane7 also passes at vncnt=0, vnvcodelay=0, vnhitlogic=0 with zero LVDS/DPA deltas.",
+        "Invalidated: zero vcodelay is the no-hit control, not a lock point.",
     ),
     (
         "Lanes 6+7 zero VCO pair",
         "Phase6",
         "phase6_lane67_vco000_pulse4_100k_20260430_193112.json",
-        "ASIC6+7 together fail with ring input errors while each lane passes alone, matching the lower multi-ASIC timestamp/order blocker.",
+        "Invalidated for PLL/timestamp conclusions until rerun from ASIC-specific nonzero defaults/restores after RUN_PREP.",
     ),
     (
         "Lower lanes 5+6, full channels",
@@ -212,8 +212,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. New lane6/7 zero-point tests show ASIC6 and ASIC7 each pass at vncnt=0/vnvcodelay=0/vnhitlogic=0, but the lane6+7 pair fails with ring_inerr_delta=826978 and zero LVDS/DPA deltas. The single-ASIC lane6 FEB frame-boundary run passes counters and the active STP window shows nonzero hit_type3 frame content, but same-window nonempty RBCAM-to-frame-assembly alignment is still open. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
-        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS, and close the RBCAM-to-FEB-frame same-window alignment with a deeper or better-triggered STP/simulation correlation.",
+        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. The single-ASIC lane6 FEB frame-boundary capture is now only a frame-format debug example until rerun with nonzero locked PLL settings and full RUN_PREP. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
+        "Rerun lane6/7 and P6-BUG-004-H from ASIC-specific nonzero cnt/vcodelay/hitlogic settings after full RUN_PREP, then debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS and close the RBCAM-to-FEB-frame same-window alignment.",
     ),
     (
         "SWB input path",
@@ -224,25 +224,45 @@ PROGRESS = [
     ),
     (
         "SWB OPQ to DMA",
-        "BLOCKED",
+        "PARTIAL_DMA",
         "Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.",
-        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. A repo-owned direct-MMIO datagen probe then found a separate SWB firmware blocker: datagen-driven runs produced no DMA words and no mux/event-builder counter movement because generated link records stayed idle before musip_mux_4_1. online_sc swb_block.vhd is patched to decode gen_link data/datak with work.mu3e.to_link(...); SWB make flow_map passed with 0 errors and 182 warnings, but full compile/reflash/board rerun are still required before closure.",
-        "Finish SWB full compile/reflash, rerun the datagen probe until mux/event-builder counters and DMA words advance, then read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any FEB-link host-disk claim.",
+        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. The online_sc fixed4 image compiled timing-clean, programmed checksum 0x31A72852, and recovered /dev/mudaq0. The updated repo-owned stream-datagen probe classifies raw host DMA as dma_payload_nonzero: 960 nonzero words, 64 nonpadding words, EVENT_BUILD payload count low32=0x10, and first payload words 0x0008884A/0x0008884B. The old frame reducer correctly reports raw_payload_no_legacy_frames for this musip_event_builder payload.",
+        "Decode the active MuSiP/OPQ payload contract, clear the still-empty time-datagen path, then run real FEB-link captures and require 255 delivered hits plus one OPQ-accounted drop per 256-hit bunch before any FEB-link host-disk claim.",
     ),
     (
         "Host DMA buffer",
-        "BLOCKED",
+        "PARTIAL_RAW_DMA",
         "/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.",
-        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming. Mu3e online software is deprecated as Phase-6 evidence; swb_dmatest, rw, MIDAS, libmudaq-backed utilities, and production cleanup flows are reference-only. The new tools/phase6_swb_dma_probe path directly mmaps /dev/mudaq0 and /dev/mudaq0_dmabuf, captures raw RW/RO registers and counter sweeps before cleanup, and writes dma_words.bin plus JSON/Markdown summaries.",
-        "Use only repo-owned direct-MMIO tools under tools/ for closure captures. If an online utility disagrees with raw registers, trust the repo-owned probe and hardware evidence. First make SWB datagen produce nonzero DMA words; then capture FEB-link runs with the same manifest and offline reducer.",
+        "PCIe recovery passed and /dev/mudaq0 plus /dev/mudaq0_dmabuf are present after the fixed4 SWB programming. Mu3e online software is deprecated as Phase-6 evidence; swb_dmatest, rw, MIDAS, libmudaq-backed utilities, and production cleanup flows are reference-only. The tools/phase6_swb_dma_probe path directly mmaps the devices, captures raw RW/RO registers and counter sweeps before cleanup, and now distinguishes raw 256-bit payload DMA from legacy frame decode.",
+        "Use only repo-owned direct-MMIO tools under tools/ for closure captures. If an online utility disagrees with raw registers, trust the repo-owned probe and hardware evidence. The next host-buffer gate is a real FEB-link run with persistent disk artifact and offline timestamp/hit-count reduction.",
     ),
     (
         "Disk/offline timestamp check",
         "BLOCKED",
         "Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.",
-        "No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement. The Phase-6 DMA reducer now decodes headers, trailers, frame counters, timestamp deltas, subheader distributions, and hit-count histograms from either memory_content.txt or the repo-owned probe's dma_words.bin once nonzero data exists.",
-        "Run the reducer on the first post-SWB-input DMA artifact and require 255-delivered plus one OPQ-accounted drop before disk closure.",
+        "No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement. The Phase-6 DMA reducer now reports raw_payload_no_legacy_frames when host DMA contains nonpadding musip_event_builder payload without old FEB/SWB frame headers. That is useful SWB DMA evidence, not disk/offline timestamp closure.",
+        "Extend the reducer for the active MuSiP payload or capture legacy FEB-link frames, then require 255 delivered same-timestamp hits plus one OPQ-accounted drop before disk closure.",
     ),
+]
+
+
+ZERO_VCODELAY_FILES = {
+    "phase6_lane6_vco000_pulse4_100k_20260430_192903.json",
+    "phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.json",
+    "phase6_lane7_vco000_pulse4_100k_20260430_193008.json",
+    "phase6_lane67_vco000_pulse4_100k_20260430_193112.json",
+}
+
+
+TUNING_LEDGER = [
+    (0, "SMB3", "48/20/30", "48/20/40", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
+    (1, "SMB3", "43/30/30", "43/30/30", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
+    (2, "SMB3", "45/35/20", "40/30/30", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
+    (3, "SMB3", "41/10/20", "35/12/25", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
+    (4, "SMB5", "43/15/20", "43/15/20", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
+    (5, "SMB5", "42/20/25", "42/20/25", "42/20/60 lane-only diagnostic", "phase5_real_lane5_full32_hl60_latency2000_pulse4_20260430.json"),
+    (6, "SMB5", "37/27/15", "37/27/15", "37/27/60 lane-only diagnostic", "phase5_real_lane6_full32_hl60_latency2000_pulse4_20260430.json"),
+    (7, "SMB5", "40/20/25", "30/14/40", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
 ]
 
 
@@ -368,6 +388,8 @@ def summarize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
 def badge(result: str) -> str:
     if result in {"PASS", "PASS_SC", "PASS_DIAG", "PASS_WITH_METHOD_NOTE", "PASS_DEBUG_ONLY"}:
         klass = "pass"
+    elif result.startswith("PARTIAL"):
+        klass = "warn"
     elif result in {"PENDING", "IN_PROGRESS", "MISSING"}:
         klass = "missing"
     else:
@@ -375,11 +397,39 @@ def badge(result: str) -> str:
     return f'<span class="badge {klass}">{esc(result)}</span>'
 
 
+def invalidate_zero_vcodelay(filename: str, summary: dict[str, Any]) -> dict[str, Any]:
+    if filename not in ZERO_VCODELAY_FILES:
+        return summary
+    updated = dict(summary)
+    updated["result"] = "INVALID"
+    updated["class"] = "zero-vcodelay no-hit control; rerun required"
+    return updated
+
+
+def tuning_rows() -> str:
+    rows = []
+    for asic, smb, default, restore, diagnostic, evidence in TUNING_LEDGER:
+        path = REPORT_DIR / evidence
+        link = f'<a href="{esc(rel(path))}">{esc(evidence)}</a>' if path.exists() else esc(evidence)
+        rows.append(
+            "<tr>"
+            f"<td>{asic}</td>"
+            f"<td>{esc(smb)}</td>"
+            f"<td><code>{esc(default)}</code></td>"
+            f"<td><code>{esc(restore)}</code></td>"
+            f"<td>{esc(diagnostic)}</td>"
+            f"<td>{link}</td>"
+            "<td>pending per-ASIC head-sync plot</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
 def evidence_rows() -> str:
     rows = []
     for title, kind, filename, note in EVIDENCE:
         payload = load_json(filename)
-        summary = summarize_payload(payload)
+        summary = invalidate_zero_vcodelay(filename, summarize_payload(payload))
         path = REPORT_DIR / filename
         link = f'<a href="{esc(rel(path))}">{esc(filename)}</a>' if path.exists() else esc(filename)
         rows.append(
@@ -469,6 +519,7 @@ def write_html() -> None:
       font-size: 12px;
     }}
     .pass {{ background: #1d7f45; }}
+    .warn {{ background: #ad6a00; }}
     .fail {{ background: #b73535; }}
     .missing {{ background: #6b7280; }}
     .progress-table td:nth-child(3),
@@ -546,27 +597,24 @@ def write_html() -> None:
       <a href="{esc(rel(REPORT_DIR / 'phase6_lower56_cross_asic_sweep_20260430.md'))}">phase6_lower56_cross_asic_sweep_20260430.md</a>.
     </p>
     <p>
-      The lane6/7 zero-point check makes the same conclusion sharper. ASIC6 and
-      ASIC7 were explicitly configured with <code>vncnt=0</code>,
-      <code>vnvcodelay=0</code>, and <code>vnhitlogic=0</code>. Each ASIC still
-      passes alone at 100 kHz with zero ring input errors and zero LVDS/DPA
-      deltas, so this zero setting is not a hard no-hit reset point in the
-      current packed configuration. The paired lane6+7 run fails with
-      <code>ring_inerr_delta=826978</code> while LVDS/DPA deltas remain zero,
-      matching the lower multi-ASIC timestamp/order blocker rather than a
-      lane-local PLL-lock problem. Reduced lane6/7 evidence:
+      The lane6/7 zero-point checks are invalidated as tuning evidence. A
+      MuTRiG with <code>vnvcodelay=0</code> should produce no TDC-injection
+      hits. The captures labeled <code>vncnt=0</code>,
+      <code>vnvcodelay=0</code>, and <code>vnhitlogic=0</code> therefore prove
+      a stale configuration, bad override, or run-sequence artifact unless the
+      manifest shows that a nonzero setting was actually loaded. Reduced
+      lane6/7 evidence remains archived only as bad-evidence input:
       <a href="{esc(rel(REPORT_DIR / 'phase6_lane67_zero_point_20260430.md'))}">phase6_lane67_zero_point_20260430.md</a>.
     </p>
     <p>
-      The first good-ASIC frame-boundary capture is useful but not yet
-      closure-grade. ASIC6/lane6 at the zero-VCO point passes a 100 kHz
-      active-window run with zero MTS discards, zero ring input errors, zero
-      histogram drops, zero frame CRC errors, and zero LVDS/DPA deltas. The
-      boundary SignalTap capture records a legal FEB <code>hit_type3</code>
-      frame with nonzero subheader/hit content, but the same 1k-sample window
-      does not catch the matching nonempty RBCAM <code>hit_type2</code> beat.
-      That is an observability alignment gap, not an end-to-end closure claim.
-      Evidence:
+      The first frame-boundary capture is a useful frame-format debug example
+      but not closure-grade. Because it is labeled <code>vco000</code>, it must
+      be rerun with ASIC-specific nonzero PLL settings and a full
+      <code>RUN_PREPARE</code> sequence before it can support P6-BUG-004-H.
+      The next valid capture must tie a nonempty RBCAM <code>hit_type2</code>
+      beat to the later FEB <code>hit_type3</code> frame drain in one deeper
+      SignalTap window or in a matched simulation/VCD replay. Archived
+      evidence:
       <a href="{esc(rel(REPORT_DIR / 'phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.md'))}">phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.md</a>
       and
       <a href="{esc(rel(REPORT_DIR / 'phase6_frame_boundary_lane6_vco000_100k_active_vcd_summary_20260430.md'))}">phase6_frame_boundary_lane6_vco000_100k_active_vcd_summary_20260430.md</a>.
@@ -607,6 +655,10 @@ def write_html() -> None:
       <code>0x31A704E1</code>, PCIe recovery restored <code>/dev/mudaq0</code>,
       and host-visible SC link-2 reads now return in roughly 68-69 us, including
       <code>0x0C000 -> 0x52434D48</code>. That clears the old SC reply blocker.
+      The later fixed4 SWB image for the mux/subtime pack path also completed
+      <code>make flow</code> with 0 errors and 298 warnings, programmed
+      checksum <code>0x31A72852</code>, and recovered
+      <code>/dev/mudaq0</code> plus <code>/dev/mudaq0_dmabuf</code>.
       The Mu3e online DMA tools are now deprecated for closure evidence:
       <code>swb_dmatest</code>, <code>rw</code>, MIDAS, and libmudaq-backed
       utilities are reference-only. The repo-owned
@@ -616,20 +668,22 @@ def write_html() -> None:
       <code>dma_words.bin</code> for offline reduction.
     </p>
     <p>
-      That direct probe found the current SWB DMA blocker before FEB-link
-      closure: generic time/stream datagen, minimal datagen, forced-DMA
-      datagen, and TB-style stream datagen all produced <code>no_dma_words</code>
-      while mux/event-builder counters stayed zero. The active SWB image already
-      contains the OPQ/MuSiP path and nonzero DMA address registers; the bug is
-      upstream of DMA address programming. Source inspection showed
-      <code>data_generator_a10</code> leaves generated <code>link32_t</code>
-      records idle, so <code>musip_mux_4_1</code> rejects them. The online_sc
-      source patch decodes <code>gen_link.data/gen_link.datak</code> through
-      <code>work.mu3e.to_link(...)</code> before the mux. Quartus
-      <code>make flow_map</code> now passes for that patch with 0 errors and 182
-      warnings. OPQ hardware counters, host DMA, and disk closure still cannot
-      count as end-to-end evidence until the patched SWB image is fully compiled,
-      reflashed, and the repo-owned probe records nonzero DMA words.
+      The direct probe now proves the raw SWB DMA payload path is alive in the
+      stream-datagen configuration. The run
+      <code>post_tool_update_stream_datagen_generic_defaultstate</code>
+      recorded 960 nonzero DMA words, 64 nonpadding words, payload count
+      low32 <code>0x10</code>, payload drop-count low32
+      <code>0x091E2DD6</code>, and first payload words such as
+      <code>0x0008884A</code>. The updated probe classifies this as
+      <code>dma_payload_nonzero</code>. The old FEB/SWB frame reducer reports
+      <code>raw_payload_no_legacy_frames</code>, which is the expected
+      interpretation for active <code>musip_event_builder</code> raw 256-bit
+      payload, not an end-to-end hit-frame pass. The time-datagen path still
+      records <code>no_dma_words</code> in
+      <code>post_tool_update_time_datagen_generic_defaultstate</code>. OPQ
+      hardware counters, real FEB-link host DMA, and disk closure remain open
+      until the active MuSiP payload is decoded or a real FEB-link artifact is
+      captured and reduced.
     </p>
 
     <h2>Phase-6 End-to-End Progress</h2>
@@ -655,6 +709,30 @@ def write_html() -> None:
       </thead>
       <tbody>
 {progress_rows()}
+      </tbody>
+    </table>
+
+    <h2>MuTRiG Tuning Ledger</h2>
+    <p>
+      Triples are <code>cnt/vcodelay/hitlogic</code>. The zero point is a
+      no-hit control, not a sweep start that should produce valid data. After
+      every FEB reconfiguration, reload the SMB XMLs, run through
+      <code>RUN_PREPARE</code>, then compare head-sync delay histograms.
+    </p>
+    <table class="tuning-table">
+      <thead>
+        <tr>
+          <th>ASIC</th>
+          <th>SMB</th>
+          <th>XML Default</th>
+          <th>Restore/Used</th>
+          <th>Diagnostic</th>
+          <th>Evidence</th>
+          <th>Head-Sync Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+{tuning_rows()}
       </tbody>
     </table>
 

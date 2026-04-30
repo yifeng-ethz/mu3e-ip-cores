@@ -274,6 +274,8 @@ def counter_deltas(values: list[int], bits: int) -> list[int]:
 def classify_summary(summary: dict[str, Any]) -> str:
     checks = summary["checks"]
     if not checks["has_frames"]:
+        if summary.get("nonpadding_words", 0) > 0:
+            return "raw_payload_no_legacy_frames"
         return "no_frames"
     if checks["malformed_frames"] != 0:
         return "malformed"
@@ -420,9 +422,15 @@ def render_markdown(summary: dict[str, Any]) -> str:
         f"- Subheader-count histogram: `{summary.get('subheader_count_hist')}`",
         f"- Subheader hit-count histogram: `{summary.get('subheader_hit_count_hist')}`",
         "",
-        "## First Frames",
-        "",
     ]
+    if summary.get("classification") == "raw_payload_no_legacy_frames":
+        lines.extend(
+            [
+                "This is raw host-DMA payload evidence only: nonpadding words are present, but the old frame scanner found no legacy FEB/SWB headers or trailers.",
+                "",
+            ]
+        )
+    lines.extend(["## First Frames", ""])
     for frame in summary.get("frame_reports", []):
         lines.append(
             f"- `{frame['start_index']}..{frame['end_index']}` "

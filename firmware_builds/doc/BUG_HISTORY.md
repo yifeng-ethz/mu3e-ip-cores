@@ -12,10 +12,11 @@ Class legend:
 
 | bug_id | class | status | first seen | summary |
 |---|---|---|---|---|
-| [P6-BUG-001-R](#p6-bug-001-r-swb-datagen-words-stayed-idle-before-the-musip-mux) | R | patched in online_sc; A&S passed; full compile/board rerun pending | 2026-04-30 | SWB datagen drove data/datak but left `link32_t.idle=1`, so MuSiP mux ignored every generated word and DMA stayed empty. |
-| [P6-BUG-002-R](#p6-bug-002-r-lower-real-multi-asic-mutrig-streams-trip-mts-timestamp-errors-before-ring-buffer-cam) | R | open | 2026-04-30 | Lower real ASIC pairs pass alone but fail together with MTS timestamp errors before hit stack/ring. |
+| [P6-BUG-001-R](#p6-bug-001-r-swb-datagen-words-stayed-idle-before-the-musip-mux) | R | fixed for stream-datagen raw DMA | 2026-04-30 | SWB datagen drove data/datak but left `link32_t.idle=1`, so MuSiP mux ignored every generated word and DMA stayed empty. |
+| [P6-BUG-002-R](#p6-bug-002-r-lower-real-multi-asic-mutrig-streams-trip-mts-timestamp-errors-before-ring-buffer-cam) | R | open; zero-VCO captures invalidated | 2026-04-30 | Lower real ASIC pairs pass alone but fail together with MTS timestamp errors before hit stack/ring; rerun lane6/7 with nonzero PLL settings before assigning root cause. |
 | [P6-BUG-003-H](#p6-bug-003-h-mu3e-online-dma-tools-are-not-closure-quality-evidence) | H | fixed by repo-owned probe for DMA | 2026-04-30 | `swb_dmatest`, `rw`, MIDAS, and libmudaq-backed tools hide register and cleanup boundaries; closure now uses direct-MMIO tools under `tools/`. |
-| [P6-BUG-004-H](#p6-bug-004-h-frame-boundary-signaltap-window-is-not-yet-time-aligned-across-rbcam-and-feb-frame-assembly) | H | open | 2026-04-30 | Good-ASIC lane6 STP captures show clean FEB type-3 hit frames, but the same 1k-sample window does not yet catch the corresponding nonempty RBCAM type-2 beat. |
+| [P6-BUG-004-H](#p6-bug-004-h-frame-boundary-signaltap-window-is-not-yet-time-aligned-across-rbcam-and-feb-frame-assembly) | H | open; zero-VCO evidence invalidated | 2026-04-30 | Lane6 STP captures show FEB type-3 hit frames under a `vco000` label, but `vnvcodelay=0` should produce no hits; rerun with nonzero locked settings and a time-aligned RBCAM/FEB capture. |
+| [P6-BUG-005-R](#p6-bug-005-r-swb-host-dma-now-has-raw-musip-payload-but-not-decoded-feb-hit-frames) | R | open; raw DMA partial pass only | 2026-04-30 | Fixed4 SWB image writes raw 256-bit stream-datagen payload to host DMA, but time-datagen is still empty and no real FEB-link/legacy-frame disk artifact exists. |
 
 ## 2026-04-30
 
@@ -39,18 +40,17 @@ Class legend:
     traffic was structurally invisible.
 - Fix status:
   - state:
-    patched in `/home/yifeng/packages/online_sc/online/common/firmware/a10/swb/swb_block.vhd`;
-    Quartus Analysis & Synthesis passed; full compile, reflash, and board rerun
-    are still required before closure.
+    fixed for the stream-datagen path in online_sc; this is not FEB-link or
+    time-datagen closure.
   - mechanism:
     `swb_block` now decodes `gen_link.data/gen_link.datak` with
     `work.mu3e.to_link(...)` before assigning `rx_data_sim(i)`.
   - before_fix_outcome:
     all repo-owned datagen DMA probes reported `no_dma_words`.
   - after_fix_outcome:
-    `make flow_map` in `online_sc/online/switching_pc/a10_board` passed with
-    0 errors and 182 warnings on `2026-04-30`; full compile, reflash, and
-    repeated datagen probe are pending.
+    the later fixed4 SWB image passed full `make flow` with 0 errors and 298
+    warnings, programmed checksum `0x31A72852`, recovered `/dev/mudaq0`, and a
+    repo-owned stream-datagen probe captured raw host-DMA payload.
 
 ### P6-BUG-002-R: lower real multi-ASIC MuTRiG streams trip MTS timestamp errors before ring buffer CAM
 
@@ -58,15 +58,20 @@ Class legend:
   Phase-6 lower ASIC5/6 and ASIC6/7 real-MuTRiG runs on `2026-04-30`.
 - Symptom:
   - ASIC5/lane5 and ASIC6/lane6 pass alone.
-  - ASIC6/lane6 and ASIC7/lane7 also pass alone at
-    `vncnt=0`, `vnvcodelay=0`, and `vnhitlogic=0`.
+  - Earlier ASIC6/lane6 and ASIC7/lane7 captures were labeled as passing alone
+    at `vncnt=0`, `vnvcodelay=0`, and `vnhitlogic=0`. Those runs are no longer
+    valid PLL-lock evidence: `vnvcodelay=0` should be a no-hit TDC-injection
+    control. Treat the hit-producing zero-VCO data as stale configuration, bad
+    override, or run-sequence artifact until the manifest proves otherwise.
   - Real two-lane pairs fail with large `ring_inerr_delta` while LVDS and DPA
     error deltas remain zero.
   - SignalTap shows `mts1.aso_hit_type1_error` rising before
     `hit_stack1.hit_type_1_error[0]`.
 - Root cause:
-  open; current evidence points to cross-ASIC timestamp/epoch/order coherence
-  before or inside lower MTS, not lane-local PLL lock.
+  open; current nonzero-PLL evidence still points to cross-ASIC
+  timestamp/epoch/order coherence before or inside lower MTS, but the lane6/7
+  `vco000` subset must be rerun with ASIC-specific nonzero defaults/restores
+  and full `RUN_PREPARE` before it can support that conclusion.
 - Fix status:
   open. Do not claim FEB output or downstream SWB/DMA closure until this stage
   has a clean boundary capture and matching offline evidence.
@@ -103,9 +108,13 @@ Class legend:
   `phase6_frame_boundary_lane6_vco000_100k_*_20260430` captures on the
   timing-closed FEB boundary SignalTap image, checksum `0x173CFF8D`.
 - Symptom:
-  - ASIC6/lane6 single-channel, 100 kHz, zero-VCO-point stimulus passes the
+  - ASIC6/lane6 single-channel, 100 kHz, `vco000`-labeled stimulus passes the
     live FEB counters with zero MTS discards, zero ring input errors, zero
     histogram drops, zero frame CRC errors, and zero LVDS/DPA deltas.
+  - That pass is invalid as PLL-lock evidence. With `vnvcodelay=0`, the MuTRiG
+    should generate no TDC-injection hits. Any nonzero-hit `vco000` run is a
+    configuration-state or run-sequence bug until the ASIC readback/manifest
+    proves a nonzero `vnvcodelay` was actually loaded.
   - The FEB `hit_type3` frame snapshot contains a legal frame header/trailer
     and nonzero subheader/hit content in the active injection window.
   - The simultaneously decoded RBCAM `hit_type2` taps in that 1k-sample
@@ -113,14 +122,49 @@ Class legend:
     because the RBCAM output and frame-assembly drain are not guaranteed to be
     in the same short SignalTap window.
 - Root cause:
-  open. Current evidence points to an observability alignment gap: the
-  histogram-valid trigger catches frame drain activity, while the matching
-  nonempty RBCAM output likely occurred outside the sampled pre-trigger window.
+  open. Two issues are now separated:
+  - the `vco000` data-quality premise is wrong and must be rerun with nonzero
+    ASIC-specific PLL settings after a full run sequence;
+  - after a valid locked run exists, the remaining observability task is to
+    catch the same nonempty RBCAM output and later FEB frame drain in one
+    capture or in a matched simulation/VCD replay.
   A runtime-only edit to trigger on `ring_buffer_cam_1.aso_hit_type2_data[8]`
   did not produce a reliable new boundary capture, so do not treat it as a
   closure-grade trigger update.
 - Fix status:
-  open. Close this with one of: a rebuilt STP trigger that keys on nonempty
-  RBCAM subheaders with valid asserted, a deeper capture around both boundaries,
-  or a focused simulation/VCD correlation proving the expected FIFO latency
-  between RBCAM type-2 output and FEB type-3 frame output.
+  open. Close this with a rerun using ASIC-specific nonzero PLL values and
+  full `RUN_PREPARE`, then one of: a rebuilt STP trigger that keys on nonempty
+  RBCAM subheaders with valid asserted, a deeper capture around both
+  boundaries, or a focused simulation/VCD correlation proving the expected FIFO
+  latency between RBCAM type-2 output and FEB type-3 frame output.
+
+### P6-BUG-005-R: SWB host DMA now has raw MuSiP payload but not decoded FEB hit frames
+
+- First seen in:
+  `post_compactor_fixed4_stream_datagen_generic_defaultstate` after programming
+  the fixed4 SWB image on `2026-04-30`.
+- Symptom:
+  - stream-datagen with generic/default readout state produced host DMA data:
+    960 nonzero words, 64 nonpadding words, first payload words like
+    `0x0008884A`, and event-builder payload count low32 `0x10`.
+  - the old FEB/SWB frame reducer found zero legacy frame headers/trailers and
+    now classifies this as `raw_payload_no_legacy_frames`.
+  - `time-datagen` still produced `no_dma_words` with zero event-builder
+    payload count and FEB-merge timeout activity.
+- Root cause:
+  open. The active `musip_event_builder` writes raw 256-bit payload words to
+  DMA; the legacy register names and old frame scanner do not imply FEB frame
+  grammar. The empty time-datagen path is a separate SWB routing/format blocker.
+- Fix status:
+  - state:
+    partial. The host DMA path is alive for raw stream-datagen payload, but this
+    is not end-to-end FEB hit evidence.
+  - mechanism:
+    `tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py` now decodes the
+    active event-builder payload counters despite stale register names, and the
+    repo-owned reducer reports `raw_payload_no_legacy_frames` when nonpadding
+    DMA payload lacks old FEB/SWB frame control words.
+  - next:
+    decode the active MuSiP/OPQ payload contract or capture real FEB-link
+    frames, then require 255 delivered same-timestamp hits plus one
+    OPQ-accounted drop per 256-hit source bunch.
