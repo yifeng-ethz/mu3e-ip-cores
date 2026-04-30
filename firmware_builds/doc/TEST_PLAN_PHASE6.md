@@ -110,7 +110,7 @@ unless the run is explicitly marked diagnostic-only.
 | P6-FEB-OUT | FEB frame assembly output | FEB output frame counters and frame payload count match accepted hit count | FEB emits all accepted hits with stable run-control framing |
 | P6-SWB-IN | SWB optical/link input | SWB SC read/reply loop returns a host-visible FEB `sc_hub` UID read; SWB SciFi link counters advance only on selected link mask; no link/CRC/reset errors | SWB sees FEB output for the same run window |
 | P6-SWB-OUT | SWB merger output | time/stream merger counters match SWB input and chosen readout mode | no unexplained merger drops, reordering, or stale packets |
-| P6-HOST-DMA | `/dev/mudaq0` DMA buffer | `swb_dmatest` or MIDAS readout writes a nonzero disk buffer for the same run | DMA words are recorded to host disk and linked to run metadata |
+| P6-HOST-DMA | `/dev/mudaq0` DMA buffer | repo-owned `phase6_swb_dma_probe.py` writes a nonzero disk buffer for the same run and captures pre-cleanup raw registers | DMA words are recorded to host disk and linked to run metadata |
 | P6-DISK-DECODE | offline decode | Mu3e Demo profile: decoded bunches contain 255 same-timestamp hits and OPQ `drop_hit` accounts exactly 1 lost hit from the 256-hit source cluster; bunch-to-bunch timestamp delta is 100 kHz | no stale, duplicate, timestamp-mismatched, or unaccounted missing hits |
 
 ## 3. Case Buckets
@@ -246,26 +246,35 @@ SignalTap scope order for Phase 6:
 
 ## 6. Host DMA and Disk Decode
 
-The current host diagnostic tool is:
+The current host diagnostic tool is the repo-owned probe:
 
 ```text
-/home/yifeng/packages/online_dpv2/online/build/farm_pc/tools/swb_dmatest
+tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py
 ```
 
-Relevant modes from `swb_dmatest.cpp`:
+`swb_dmatest`, `rw`, MIDAS readout, and libmudaq-backed Mu3e online utilities
+are reference-only for Phase-6 debug. They are not accepted as closure evidence
+because they have stale detector offsets, ambiguous mask semantics, and cleanup
+behavior that can clear the state needed to find the first bad boundary.
+Closure evidence must come from repo-owned direct-MMIO tools under `tools/`.
+
+Relevant probe modes:
 
 | Argument | Meaning |
 |---|---|
-| readout mode `4` | time merger reads links |
-| readout mode `0` | stream merger reads links |
-| detector/use-pixel `2` | SciFi |
-| detector/use-pixel `4` | SWB readout SciFi/Pixel |
+| `--mode time-links` | time/OPQ path reads external FEB links |
+| `--mode stream-links` | stream/direct path reads external FEB links |
+| `--mode time-datagen` | time/OPQ path reads the SWB datagen |
+| `--mode stream-datagen` | stream/direct path reads the SWB datagen |
+| `--profile generic` | MuSiP/OPQ-style path; writes `SWB_GENERIC_MASK_REGISTER_W` |
+| `--profile scifi` | legacy SciFi profile bit; use only when the active image consumes it |
 
 A DMA capture is not Phase-6 closure until the run directory contains:
 
-- the exact `swb_dmatest` command and stdout/stderr;
-- `memory_content.txt` copied from the command working directory;
-- SWB counter snapshot before and after capture;
+- the exact probe command and `manifest.json`;
+- `dma_words.bin` and, when text compatibility is needed, `memory_content.txt`;
+- SWB raw RW/RO register snapshots before cleanup;
+- raw SWB counter sweeps before cleanup;
 - FEB run metadata and injector/config JSON for the same run window;
 - offline decode showing the Mu3e Demo result: 255 delivered hits per bunch,
   same timestamp per delivered bunch, OPQ `drop_hit=1` for each 256-hit source

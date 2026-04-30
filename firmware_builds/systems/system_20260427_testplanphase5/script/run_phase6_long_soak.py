@@ -28,7 +28,6 @@ REPORT_DIR = BOARD_TEST_DIR / "reports"
 
 DEFAULT_SC_TOOL = BOARD_TEST_DIR / "bin" / "sc_tool"
 DEFAULT_RC_TOOL = BOARD_TEST_DIR / "bin" / "rc_tool"
-DEFAULT_SWB_DMATEST = Path("/home/yifeng/packages/online_dpv2/online/build/farm_pc/tools/swb_dmatest")
 PYTHON = Path(sys.executable or "python3")
 
 CONFIGURE_MUTRIG = SCRIPT_DIR / "configure_mutrig_from_xml.py"
@@ -36,10 +35,30 @@ INJECTOR_SANITY = SCRIPT_DIR / "run_phase5_injector_datapath_sanity.py"
 CHECK_ENV = SCRIPT_DIR / "check_environment_monitors.py"
 CHECK_SC = SCRIPT_DIR / "check_sc_bridges.py"
 ANALYZE_DMA = SCRIPT_DIR / "analyze_phase6_dma_memory.py"
+SWB_DMA_PROBE = REPO_ROOT / "tools" / "phase6_swb_dma_probe" / "phase6_swb_dma_probe.py"
 DEFAULT_SMB3_XML = REPO_ROOT / "board_test_system" / "trash_bin" / "good_ribbon_0" / "config_smb3_tdc.txt"
 DEFAULT_SMB5_XML = REPO_ROOT / "board_test_system" / "trash_bin" / "good_ribbon_0" / "config_smb5_tdc.txt"
 
 FREQ_HZ = 125_000_000
+
+
+def default_swb_dma_probe() -> Path:
+    env_path = os.environ.get("PHASE6_SWB_DMA_PROBE")
+    if env_path:
+        return Path(env_path)
+    return SWB_DMA_PROBE
+
+
+def swb_mode_name(mode: int) -> str:
+    names = {
+        0: "stream-links",
+        2: "stream-datagen",
+        3: "time-datagen",
+        4: "time-links",
+    }
+    if mode not in names:
+        raise ValueError(f"unsupported SWB readout mode {mode}; expected one of {sorted(names)}")
+    return names[mode]
 
 
 @dataclass(frozen=True)
@@ -573,23 +592,34 @@ class Runner:
     def run_dma_capture(self, cycle: int) -> dict[str, Any]:
         dma_dir = self.case_dir / f"cycle{cycle:05d}_P6_DMA"
         dma_dir.mkdir(parents=True, exist_ok=True)
+        generic_mask = self.args.swb_generic_mask if self.args.swb_generic_mask is not None else self.args.swb_link_mask
+        scifi_mask = self.args.swb_scifi_mask if self.args.swb_scifi_mask is not None else self.args.swb_link_mask
         argv = [
-            str(self.args.swb_dmatest),
-            str(self.args.swb_readout_mode),
-            "0",
-            "0",
-            fmt_mask(self.args.swb_link_mask),
-            str(self.args.swb_detector),
-            "0",
+            str(PYTHON),
+            str(self.args.swb_dma_probe),
+            "--out-dir",
+            str(dma_dir),
+            "--mode",
+            swb_mode_name(self.args.swb_readout_mode),
+            "--profile",
+            self.args.swb_profile,
+            "--generic-mask",
+            fmt_mask(generic_mask),
+            "--scifi-mask",
+            fmt_mask(scifi_mask),
+            "--hold-s",
+            str(self.args.dma_hold_s),
+            "--snapshot-period-s",
+            str(self.args.dma_snapshot_period_s),
         ]
+        if self.args.dma_dump_text:
+            argv.append("--dump-text")
         result = self.run_cmd(
-            "swb_dmatest",
+            "phase6_swb_dma_probe",
             argv,
-            cwd=dma_dir,
             timeout_s=self.args.dma_timeout_s,
-            input_text=self.args.dma_menu_input,
         )
-        memory_file = dma_dir / "memory_content.txt"
+        memory_file = dma_dir / ("memory_content.txt" if self.args.dma_dump_text else "dma_words.bin")
         analysis = self.analyze_memory_file(memory_file, dma_dir / "memory_decode")
         record = {
             "kind": "dma_capture",
@@ -650,6 +680,9 @@ class Runner:
                     "preflight_settle_ms": self.args.preflight_settle_ms,
                     "run_dma_when_feb_passes": self.args.run_dma_when_feb_passes,
                     "swb_link_mask": self.args.swb_link_mask,
+                    "swb_profile": self.args.swb_profile,
+                    "swb_generic_mask": self.args.swb_generic_mask,
+                    "swb_scifi_mask": self.args.swb_scifi_mask,
                     "dma_expect_ts_delta": self.args.dma_expect_ts_delta,
                     "dma_expect_hits_per_frame": self.args.dma_expect_hits_per_frame,
                     "dry_run": self.args.dry_run,
@@ -778,12 +811,21 @@ def main() -> int:
     parser.add_argument("--mts-expected-latency", type=int, default=2000)
     parser.add_argument("--force-config-each-case", action="store_true")
     parser.add_argument("--run-dma-when-feb-passes", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--swb-dmatest", type=Path, default=DEFAULT_SWB_DMATEST)
+    parser.add_argument("--swb-dma-probe", type=Path, default=default_swb_dma_probe())
     parser.add_argument("--swb-readout-mode", type=int, default=4)
+    parser.add_argument(
+        "--swb-profile",
+        choices=("none", "pixel-us", "pixel-ds", "scifi", "all", "generic"),
+        default="generic",
+        help="Profile bit set passed to the repo-owned SWB DMA probe. Generic is the OPQ/MuSiP path default.",
+    )
     parser.add_argument("--swb-link-mask", type=parse_int, default=0x4)
-    parser.add_argument("--swb-detector", type=int, default=2)
+    parser.add_argument("--swb-generic-mask", type=parse_int, default=None)
+    parser.add_argument("--swb-scifi-mask", type=parse_int, default=None)
     parser.add_argument("--dma-timeout-s", type=float, default=90.0)
-    parser.add_argument("--dma-menu-input", default="1\n2\nq\n")
+    parser.add_argument("--dma-hold-s", type=float, default=10.0)
+    parser.add_argument("--dma-snapshot-period-s", type=float, default=1.0)
+    parser.add_argument("--dma-dump-text", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument(
         "--dma-expect-ts-delta",
         type=int,
@@ -809,10 +851,11 @@ def main() -> int:
         ensure_file(CHECK_ENV, "check_environment_monitors.py")
         ensure_file(CHECK_SC, "check_sc_bridges.py")
         ensure_file(ANALYZE_DMA, "analyze_phase6_dma_memory.py")
+        ensure_file(SWB_DMA_PROBE, "phase6_swb_dma_probe.py")
         ensure_file(DEFAULT_SMB3_XML, "SMB3 MuTRiG config")
         ensure_file(DEFAULT_SMB5_XML, "SMB5 MuTRiG config")
         if args.run_dma_when_feb_passes:
-            ensure_executable(args.swb_dmatest, "swb_dmatest")
+            ensure_file(args.swb_dma_probe, "phase6_swb_dma_probe.py")
 
     if shutil.which("python3") is None:
         raise RuntimeError("python3 not found in PATH")

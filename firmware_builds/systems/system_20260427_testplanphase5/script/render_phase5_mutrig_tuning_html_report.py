@@ -74,6 +74,24 @@ EVIDENCE = [
         "ASIC5/lane5 and ASIC6/lane6 pass alone, the real two-lane pair fails, ASIC6 ext_trig_offset 0..15 does not clear it, and the two-lane emulator reference passes after settle.",
     ),
     (
+        "Lane 6 zero VCO point",
+        "Phase6",
+        "phase6_lane6_vco000_pulse4_100k_20260430_192903.json",
+        "ASIC6/lane6 still passes at vncnt=0, vnvcodelay=0, vnhitlogic=0; the zero-point assumption is not a no-hit/reset condition here.",
+    ),
+    (
+        "Lane 7 zero VCO point",
+        "Phase6",
+        "phase6_lane7_vco000_pulse4_100k_20260430_193008.json",
+        "ASIC7/lane7 also passes at vncnt=0, vnvcodelay=0, vnhitlogic=0 with zero LVDS/DPA deltas.",
+    ),
+    (
+        "Lanes 6+7 zero VCO pair",
+        "Phase6",
+        "phase6_lane67_vco000_pulse4_100k_20260430_193112.json",
+        "ASIC6+7 together fail with ring input errors while each lane passes alone, matching the lower multi-ASIC timestamp/order blocker.",
+    ),
+    (
         "Lower lanes 5+6, full channels",
         "Delay",
         "phase5_real_lower_lanes56_full32_postrestore_latency2000_pulse4_20260430.json",
@@ -188,8 +206,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window; LVDS error/DPA deltas stay zero.",
-        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS before spending a compile on SWB DMA.",
+        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. New lane6/7 zero-point tests show ASIC6 and ASIC7 each pass at vncnt=0/vnvcodelay=0/vnhitlogic=0, but the lane6+7 pair fails with ring_inerr_delta=826978 and zero LVDS/DPA deltas. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window.",
+        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS; do not chase lane-local VCO as the primary blocker.",
     ),
     (
         "SWB input path",
@@ -202,22 +220,22 @@ PROGRESS = [
         "SWB OPQ to DMA",
         "BLOCKED",
         "Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.",
-        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. Hardware OPQ proof is now blocked by FEB MTS/ring output, not by SWB SC return.",
-        "After P6-MTS-RING passes, read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any host-disk claim.",
+        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. A repo-owned direct-MMIO datagen probe then found a separate SWB firmware blocker: datagen-driven runs produced no DMA words and no mux/event-builder counter movement because generated link records stayed idle before musip_mux_4_1. online_sc swb_block.vhd is patched to decode gen_link data/datak with work.mu3e.to_link(...); SWB make flow_map passed with 0 errors and 182 warnings, but full compile/reflash/board rerun are still required before closure.",
+        "Finish SWB full compile/reflash, rerun the datagen probe until mux/event-builder counters and DMA words advance, then read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any FEB-link host-disk claim.",
     ),
     (
         "Host DMA buffer",
         "BLOCKED",
         "/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.",
-        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming. The earlier swb_dmatest segfault came from an invalid stale-config run and is not DMA closure evidence.",
-        "Capture a bounded DMA run only after FEB MTS/ring and SWB hit-input counters advance in the same run window.",
+        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming. Mu3e online DMA tools are deprecated as evidence; swb_dmatest, rw, MIDAS, and libmudaq-backed utilities are reference-only. The new tools/phase6_swb_dma_probe path directly mmaps /dev/mudaq0 and /dev/mudaq0_dmabuf, captures raw RW/RO registers and counter sweeps before cleanup, and writes dma_words.bin plus JSON/Markdown summaries.",
+        "Use only repo-owned direct-MMIO tools under tools/ for closure captures. First make SWB datagen produce nonzero DMA words; then capture FEB-link runs with the same manifest and offline reducer.",
     ),
     (
         "Disk/offline timestamp check",
         "BLOCKED",
         "Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.",
-        "No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement; the live blocker is upstream at FEB MTS/ring.",
-        "Add the offline reducer next to the long-run scripts, then run it on the first post-SWB-input DMA artifact.",
+        "No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement. The Phase-6 DMA reducer now decodes headers, trailers, frame counters, timestamp deltas, subheader distributions, and hit-count histograms from either memory_content.txt or the repo-owned probe's dma_words.bin once nonzero data exists.",
+        "Run the reducer on the first post-SWB-input DMA artifact and require 255-delivered plus one OPQ-accounted drop before disk closure.",
     ),
 ]
 
@@ -522,6 +540,18 @@ def write_html() -> None:
       <a href="{esc(rel(REPORT_DIR / 'phase6_lower56_cross_asic_sweep_20260430.md'))}">phase6_lower56_cross_asic_sweep_20260430.md</a>.
     </p>
     <p>
+      The lane6/7 zero-point check makes the same conclusion sharper. ASIC6 and
+      ASIC7 were explicitly configured with <code>vncnt=0</code>,
+      <code>vnvcodelay=0</code>, and <code>vnhitlogic=0</code>. Each ASIC still
+      passes alone at 100 kHz with zero ring input errors and zero LVDS/DPA
+      deltas, so this zero setting is not a hard no-hit reset point in the
+      current packed configuration. The paired lane6+7 run fails with
+      <code>ring_inerr_delta=826978</code> while LVDS/DPA deltas remain zero,
+      matching the lower multi-ASIC timestamp/order blocker rather than a
+      lane-local PLL-lock problem. Reduced lane6/7 evidence:
+      <a href="{esc(rel(REPORT_DIR / 'phase6_lane67_zero_point_20260430.md'))}">phase6_lane67_zero_point_20260430.md</a>.
+    </p>
+    <p>
       The lower-MTS/ring SignalTap debug image programmed with checksum
       <code>0x16B6BF30</code> and SOF SHA256
       <code>080f92844f868d33e142ce6e576911b728f9364fadd1d9c2824addd7d1cff2b9</code>.
@@ -557,9 +587,29 @@ def write_html() -> None:
       <code>0x31A704E1</code>, PCIe recovery restored <code>/dev/mudaq0</code>,
       and host-visible SC link-2 reads now return in roughly 68-69 us, including
       <code>0x0C000 -> 0x52434D48</code>. That clears the old SC reply blocker.
-      OPQ hardware counters, host DMA, and disk decode still cannot count as
-      end-to-end evidence until FEB MTS/ring emits clean hit frames into the SWB
-      input path.
+      The Mu3e online DMA tools are now deprecated for closure evidence:
+      <code>swb_dmatest</code>, <code>rw</code>, MIDAS, and libmudaq-backed
+      utilities are reference-only. The repo-owned
+      <code>tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py</code> directly
+      maps <code>/dev/mudaq0</code> and <code>/dev/mudaq0_dmabuf</code>, records
+      raw RW/RO registers plus SWB counter sweeps before cleanup, and writes
+      <code>dma_words.bin</code> for offline reduction.
+    </p>
+    <p>
+      That direct probe found the current SWB DMA blocker before FEB-link
+      closure: generic time/stream datagen, minimal datagen, forced-DMA
+      datagen, and TB-style stream datagen all produced <code>no_dma_words</code>
+      while mux/event-builder counters stayed zero. The active SWB image already
+      contains the OPQ/MuSiP path and nonzero DMA address registers; the bug is
+      upstream of DMA address programming. Source inspection showed
+      <code>data_generator_a10</code> leaves generated <code>link32_t</code>
+      records idle, so <code>musip_mux_4_1</code> rejects them. The online_sc
+      source patch decodes <code>gen_link.data/gen_link.datak</code> through
+      <code>work.mu3e.to_link(...)</code> before the mux. Quartus
+      <code>make flow_map</code> now passes for that patch with 0 errors and 182
+      warnings. OPQ hardware counters, host DMA, and disk closure still cannot
+      count as end-to-end evidence until the patched SWB image is fully compiled,
+      reflashed, and the repo-owned probe records nonzero DMA words.
     </p>
 
     <h2>Phase-6 End-to-End Progress</h2>

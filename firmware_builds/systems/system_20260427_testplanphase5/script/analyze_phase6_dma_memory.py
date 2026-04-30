@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import struct
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -39,6 +40,13 @@ def hist(values: list[int], *, limit: int = 64) -> dict[str, int]:
 
 
 def parse_memory_words(path: Path) -> list[MemoryWord]:
+    if path.suffix == ".bin":
+        data = path.read_bytes()
+        words: list[MemoryWord] = []
+        for index, (word,) in enumerate(struct.iter_unpack("<I", data[: len(data) - (len(data) % 4)])):
+            words.append(MemoryWord(index=index, word=word & 0xFFFFFFFF))
+        return words
+
     words: list[MemoryWord] = []
     with path.open("r", encoding="utf-8", errors="replace") as handle:
         for lineno, line in enumerate(handle, start=1):

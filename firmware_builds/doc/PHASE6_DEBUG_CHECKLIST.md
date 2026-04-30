@@ -133,6 +133,12 @@ using that capture as evidence.
 Run SWB/DMA only after the FEB one-ASIC path is clean at the FEB output
 boundary. Use several short disk captures before any long soak.
 
+Do not use `online_sc` `swb_dmatest`, `rw`, MIDAS, or libmudaq-backed Mu3e
+online tools as Phase-6 closure evidence. They are reference-only because their
+detector offsets, mask assumptions, and cleanup sequences can hide the first
+bad boundary. Use repo-owned direct-MMIO tools under `tools/`, currently:
+`tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py`.
+
 | Step | Action | Pass criteria |
 |---|---|---|
 | D1 | Verify `/dev/mudaq0`, SWB SC link-2 readback, and selected FEB optical link mask | `/dev/mudaq0` present; SC `0x0C000` returns `0x52434D48`; only selected link counters move |
@@ -151,7 +157,8 @@ changed and the run manifest proves it.
 The current reducer is
 `firmware_builds/systems/system_20260427_testplanphase5/script/analyze_phase6_dma_memory.py`.
 It is called automatically by `run_phase6_long_soak.py` for each SWB DMA
-capture and may also be run directly against a saved `memory_content.txt`.
+capture and may also be run directly against a saved `memory_content.txt` or
+the probe's `dma_words.bin`.
 
 The offline disk reducer must report, at minimum:
 
