@@ -189,8 +189,8 @@ PROGRESS = [
         "SWB input path",
         "BLOCKED",
         "SWB must receive FEB data and the SC read/reply path must return host-visible replies from FEB.",
-        "online_sc commit ada3aea38 full flow, assembly, programming, and PCIe recovery passed with SOF checksum 0x31AA0589. Reset-link stop-reset/enable echoed 0x31000000/0x32000000; valid SC reads still time out at the host, but FEB sc_hub JTAG latched LAST_RD_ADDR=0x0000C000 and LAST_RD_DATA=0x52434D48.",
-        "Use SWB SignalTap on swb_sc_secondary to decide whether the FEB reply reaches the secondary capture or is lost before the host ring.",
+        "online_sc commit ada3aea38 full flow, assembly, programming, and PCIe recovery passed with SOF checksum 0x31AA0589. Valid SC reads still time out at the host, FEB sc_hub latched LAST_RD_ADDR=0x0000C000 and LAST_RD_DATA=0x52434D48, and SWB SignalTap saw no swb_sc_secondary state.capture_head trigger for that read.",
+        "Move the next SignalTap scope upstream to the SC return link FIFO, optical RX/SC lane demux, or FEB sc_hub upload framing.",
     ),
     (
         "SWB OPQ to DMA",
@@ -512,9 +512,12 @@ def write_html() -> None:
       echo state. Valid SC reads still time out at the host, but FEB
       <code>sc_hub</code> JTAG readback latched
       <code>LAST_RD_ADDR=0x0000C000</code> and
-      <code>LAST_RD_DATA=0x52434D48</code>. That localizes the blocker to FEB
-      upload into SWB secondary capture, or the SWB secondary host-ring drain,
-      before OPQ hardware counters, host DMA, and disk decode can count.
+      <code>LAST_RD_DATA=0x52434D48</code>. A SignalTap control trigger on
+      <code>swb_sc_secondary|state.waiting</code> passed, but the real
+      <code>state.capture_head</code> trigger around the same read timed out
+      with zero triggers. That localizes the blocker before the tapped SWB
+      secondary packet-capture boundary, before OPQ hardware counters, host DMA,
+      and disk decode can count.
     </p>
 
     <h2>Phase-6 End-to-End Progress</h2>
