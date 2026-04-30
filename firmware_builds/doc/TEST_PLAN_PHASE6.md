@@ -53,29 +53,26 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | MuTRiG config mapping | `PASS` documented | `MUTRIG.md` ASIC/XML mapping, SMB3 lanes 0..3, SMB5 lanes 4..7 |
 | Injector control path | `PASS` for current image | `mutrig_injector_0` at SC word base `0x0AC80`; no deprecated `MUTRIG_CNT_CTRL_REGISTER_W` control |
 | LVDS controller observability | `PASS` for current blocker probe | active `lvds_rx_controller_pro_0.csr` at SC word base `0x08000`, 16-word aperture; [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
-| Lower pair single-channel | `PASS` | lanes 5+6 pass one TDC-test channel after clean good-ribbon restore |
+| Lower pair single-channel | `BLOCKED` live / prior `PASS` superseded | timing-closed Phase-6 cycle 1 loaded explicit SMB5 XML and P6B010 failed as `unexpected_fail`: `ring_inerr_delta=535108`, `mts_discard_delta=0`, LVDS error/DPA deltas zero; [`../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md) |
 | Lower pair full 32-channel | `BLOCKED` | lanes 5+6 full-channel pulse-high 4 still produces MTS/ring timestamp errors |
-| SWB OPQ profile | `PASS` source/synthesis checkpoint | Mu3e Demo OPQ uses `N_SHD=128`, `N_HIT=255`; packet_scheduler `ed249da` merge includes the `25e204c` one-drop UVM proof; online_sc `ada3aea38` |
-| SWB image / PCIe | `PASS` image, `BLOCKED` before secondary capture | online_sc `make flow` and `make pgm` passed; SOF checksum `0x31AA0589`; PCIe recovery restored `/dev/mudaq0`; FEB `sc_hub` latched a valid `0x0C000` read and `0x52434D48` data, but SignalTap saw no `swb_sc_secondary|state.capture_head` trigger for that transaction; [`../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md), [`../systems/system_20260427_testplanphase5/reports/phase6_swb_secondary_stp_capture_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_swb_secondary_stp_capture_20260430.md) |
-| DMA disk closure | `not-run` | no valid host-disk Mu3e Demo OPQ evidence yet: expected 255 delivered hits plus 1 accounted OPQ hit drop per 256-hit source cluster; blocked until the SC reply path and SWB input gate pass |
+| SWB OPQ profile | `PASS` source/synthesis checkpoint | Mu3e Demo OPQ uses `N_SHD=128`, `N_HIT=255`; packet_scheduler `ed249da` merge includes the `25e204c` one-drop UVM proof; timing-closed online_sc checkpoint is `11eada541` |
+| SWB image / PCIe / SC return | `PASS_SC` | online_sc `11eada541` timing-closed all checked STA corners, programmed SOF checksum `0x31A704E1` (SHA256 `15826df9f66187a6ffca1c2dd812334d1036c267a2f4f6899c833084761ef003`), recovered `/dev/mudaq0`, and returned host-visible SC link-2 reads including `0x0C000 -> 0x52434D48` (`RCMH`) in about 68 us; older `ada3aea38` secondary-capture blocker is superseded for SC return |
+| DMA disk closure | `not-run` | no valid host-disk Mu3e Demo OPQ evidence yet: expected 255 delivered hits plus 1 accounted OPQ hit drop per 256-hit source cluster; blocked until FEB MTS/ring emits clean hit frames and SWB hit input counters advance |
 
 The current first hard blocker is before SWB/DMA closure: the lower SMB5 pair
-`lanes5+6` still fails the MTS/ring timestamp-delay gate when both ASICs run all
-32 TDC-test channels. Enabling MTS `drop_delay_error` makes downstream ring
-diagnostics clean, but that trims the offending hits before the ring and is not
-latency closure.
+`lanes5+6` still fails the MTS/ring timestamp-delay gate, and the timing-closed
+Phase-6 cycle shows the failure is not limited to full 32-channel multiplicity.
+P6B010 reloaded ASIC5/6 from the explicit SMB5 XML in one-channel mode and still
+failed with ring input errors. Enabling MTS `drop_delay_error` makes downstream
+ring diagnostics clean, but that trims the offending hits before the ring and is
+not latency closure.
 
-The current SWB-side blocker is now localized before `swb_sc_secondary` packet
-capture: after programming the OPQ-aligned online_sc image and recovering PCIe,
-reset-link stop-reset/enable to FEB 7 echoed through
-`RESET_LINK_STATUS_REGISTER_R` as `0x31000000` / `0x32000000`. Secondary SC
-reads still timed out at the host and the SWB secondary ring stayed empty. FEB
-JTAG readback of `sc_hub` showed the request reached the FEB and completed a
-valid external read: `LAST_RD_ADDR=0x0000C000`, `LAST_RD_DATA=0x52434D48`
-(`RCMH`). SWB SignalTap then proved the STP session is healthy, but
-`swb_sc_secondary|state.capture_head` did not trigger for the same read. Do not
-run OPQ/DMA/disk closure against this state except as environment health
-diagnostics; first prove the FEB reply reaches the SWB secondary capture input.
+The old SWB-side SC-return blocker is closed for the timing-fixed online_sc
+image. `sc_tool 2 read 0x00000 1 --quiet` and
+`sc_tool 2 read 0x0C000 1` now return host-visible replies through `/dev/mudaq0`;
+the `0x0C000` payload is `0x52434D48` (`RCMH`). Do not run OPQ/DMA/disk closure
+as a source-hit claim yet: first prove clean FEB MTS/ring output, then prove the
+same run's FEB output reaches SWB SciFi hit input.
 
 ## 2. Stage Gates
 
@@ -100,7 +97,7 @@ unless the run is explicitly marked diagnostic-only.
 | ID | Scenario | Expected result | Evidence |
 |---|---|---|---|
 | P6B001 | all 8 ASICs reload full 32-channel TDC-test XML | `PASS` config, no stale SMB file use | `configure_mutrig_from_xml.py` JSON |
-| P6B010 | lower lanes 5+6, one channel per ASIC, pulse high 4, 100 kHz | `PASS` FEB MTS/ring | Phase-5 sanity JSON |
+| P6B010 | lower lanes 5+6, one channel per ASIC, pulse high 4, 100 kHz | nominal `PASS`, current live `UNEXPECTED_FAIL` after explicit SMB5 reload | Phase-5 sanity JSON, Phase-6 timing-closed cycle 1 |
 | P6B020 | lower lanes 5+6, full 32 channels, pulse high 4, 100 kHz | current expected `FAIL` at MTS/ring | Phase-5 sanity JSON, counters |
 | P6B021 | same as P6B020 with LVDS SVD snapshots enabled | `PASS_DIAG`: ring fails while LVDS error/DPA deltas stay zero, so blocker is downstream of LVDS training | [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | P6B030 | all 8 lanes, full 256 channels, pulse high 4, 100 kHz | `BLOCKED` until P6B020 passes | same |
@@ -156,6 +153,12 @@ firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_long_runs/
 
 Raw long-run output is ignored by git. Promote only reduced reports or plots
 that become durable evidence.
+
+The runner pins the live MuTRiG XML inputs to
+`board_test_system/trash_bin/good_ribbon_0/config_smb3_tdc.txt` and
+`config_smb5_tdc.txt`. A configuration failure is now a hard `config_failed`
+case classification and the injector case is skipped; stale MuTRiG configuration
+must not be counted as hardware evidence.
 
 The runner classifies each case as one of:
 
@@ -246,16 +249,20 @@ stage remains `not-run` or `diagnostic_only`.
 
 Current live checkpoint, 2026-04-30:
 
-- SWB OPQ image compile/program: `PASS`, online_sc `ada3aea38`, SOF checksum
-  `0x31AA0589`.
+- SWB OPQ image compile/program: `PASS_SC`, online_sc `11eada541`, SOF checksum
+  `0x31A704E1`, SHA256
+  `15826df9f66187a6ffca1c2dd812334d1036c267a2f4f6899c833084761ef003`.
+- Static timing after supported fitter settings: `PASS`; setup/hold slack is
+  positive in all checked slow/fast, 0C/100C STA corners.
 - PCIe endpoint recovery: `PASS`, `/dev/mudaq0` present after
   `mudaq_recover_pcie`.
-- Reset-link command path: `PASS_DIAG`, FEB 7 stop-reset/enable echoed
-  `0x31000000` / `0x32000000`.
-- SWB SC return path: `BLOCKED`; valid SC requests reach FEB `sc_hub`
-  (`LAST_RD_ADDR=0x0000C000`, `LAST_RD_DATA=0x52434D48`), SignalTap control on
-  `swb_sc_secondary|state.waiting` passes, but `state.capture_head` sees zero
-  triggers for the same transaction.
+- SWB SC return path: `PASS_SC`; `sc_tool 2 read 0x00000 1 --quiet` returned a
+  valid secondary packet with payload `0`, and `sc_tool 2 read 0x0C000 1`
+  returned `0x52434D48` (`RCMH`) in about 68 us.
+- Phase-6 bounded cycle after explicit SMB XML fix: `BLOCKED` at FEB MTS/ring.
+  P6B010 is `unexpected_fail` with `ring_inerr_delta=535108`, P6B020 is
+  `expected_fail` with `ring_inerr_delta=9022633`, and P6E010 is clean but
+  underfilled. No valid host DMA/disk evidence exists yet.
 
 ## 7. Git and Evidence Hygiene
 

@@ -35,6 +35,8 @@ CONFIGURE_MUTRIG = SCRIPT_DIR / "configure_mutrig_from_xml.py"
 INJECTOR_SANITY = SCRIPT_DIR / "run_phase5_injector_datapath_sanity.py"
 CHECK_ENV = SCRIPT_DIR / "check_environment_monitors.py"
 CHECK_SC = SCRIPT_DIR / "check_sc_bridges.py"
+DEFAULT_SMB3_XML = REPO_ROOT / "board_test_system" / "trash_bin" / "good_ribbon_0" / "config_smb3_tdc.txt"
+DEFAULT_SMB5_XML = REPO_ROOT / "board_test_system" / "trash_bin" / "good_ribbon_0" / "config_smb5_tdc.txt"
 
 FREQ_HZ = 125_000_000
 
@@ -287,6 +289,10 @@ class Runner:
             "--sc-tool",
             str(self.args.sc_tool),
             "--allow-idle-after-config",
+            "--smb3-xml",
+            str(DEFAULT_SMB3_XML),
+            "--smb5-xml",
+            str(DEFAULT_SMB5_XML),
             "--set-channel",
             "cml_sc=0",
             "--set-channel",
@@ -365,6 +371,38 @@ class Runner:
         case_base = self.case_dir / f"cycle{cycle:05d}_{case.case_id}"
         json_out = case_base.with_suffix(".json")
         md_out = case_base.with_suffix(".md")
+        if config_result.rc != 0:
+            result = CommandResult(
+                name=f"run_{case.case_id}_skipped_config_failed",
+                argv=[],
+                rc=125,
+                log="",
+                started=iso_now(),
+                finished=iso_now(),
+                timeout_s=None,
+            )
+            record = {
+                "kind": "phase6_case",
+                "timestamp": iso_now(),
+                "cycle": cycle,
+                "case_id": case.case_id,
+                "description": case.description,
+                "expected": case.expected,
+                "classification": "config_failed",
+                "expected_hits": self.expected_hits(case),
+                "config": config_result.__dict__,
+                "command": result.__dict__,
+                "json": str(json_out),
+                "report": str(md_out),
+                "parsed": {
+                    "error": "configuration failed",
+                    "config_rc": config_result.rc,
+                    "config_log": config_result.log,
+                },
+            }
+            append_jsonl(self.summary_jsonl, record)
+            return record
+
         argv = [
             str(PYTHON),
             str(INJECTOR_SANITY),
@@ -638,7 +676,7 @@ class Runner:
             for case in PHASE6_CASES:
                 record = self.run_injector_case(case, cycle)
                 cycle_records.append(record)
-                if record.get("classification") in ("unexpected_fail", "unexpected_pass"):
+                if record.get("classification") in ("unexpected_fail", "unexpected_pass", "config_failed"):
                     exit_code = 1
                 if self.stop_file.exists():
                     break
@@ -716,6 +754,8 @@ def main() -> int:
         ensure_file(INJECTOR_SANITY, "run_phase5_injector_datapath_sanity.py")
         ensure_file(CHECK_ENV, "check_environment_monitors.py")
         ensure_file(CHECK_SC, "check_sc_bridges.py")
+        ensure_file(DEFAULT_SMB3_XML, "SMB3 MuTRiG config")
+        ensure_file(DEFAULT_SMB5_XML, "SMB5 MuTRiG config")
         if args.run_dma_when_feb_passes:
             ensure_executable(args.swb_dmatest, "swb_dmatest")
 
