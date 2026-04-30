@@ -63,6 +63,23 @@ FRAME_ASM_BASE_WORDS = {
 }
 RING_CTRL_GO = 0x00000001
 RING_CTRL_FILTER_INERR = 0x00000010
+COUNTER_RATE_FIELDS = (
+    "source_mux_real_delta",
+    "source_mux_emu_delta",
+    "source_mux_selected_delta",
+    "mts_total_delta",
+    "mts_discard_delta",
+    "ring_push_delta",
+    "ring_pop_delta",
+    "ring_inerr_delta",
+    "ring_overwrite_delta",
+    "ring_cache_miss_delta",
+    "frame_declared_delta",
+    "frame_actual_delta",
+    "frame_missing_delta",
+    "hist_total_delta",
+    "hist_drop_delta",
+)
 
 
 def default_output() -> Path:
@@ -173,6 +190,34 @@ def read_stage_snapshot(sc_tool: Path, link: int) -> dict[str, Any]:
     }
 
 
+def timed_stage_snapshot(sc_tool: Path, link: int) -> tuple[dict[str, Any], dict[str, float]]:
+    started = time.monotonic()
+    snapshot = read_stage_snapshot(sc_tool, link)
+    finished = time.monotonic()
+    return snapshot, {
+        "read_started_s": started,
+        "read_finished_s": finished,
+        "read_midpoint_s": (started + finished) / 2.0,
+        "read_elapsed_s": finished - started,
+    }
+
+
+def add_counter_rate_summary(summary: dict[str, Any], elapsed_s: float | None) -> None:
+    if elapsed_s is None or elapsed_s <= 0:
+        summary["counter_rate_elapsed_s"] = None
+        summary["counter_rates_hz"] = {}
+        return
+
+    rates = {}
+    for field in COUNTER_RATE_FIELDS:
+        value = summary.get(field)
+        if value is None:
+            continue
+        rates[field.removesuffix("_delta")] = float(value) / elapsed_s
+    summary["counter_rate_elapsed_s"] = elapsed_s
+    summary["counter_rates_hz"] = rates
+
+
 def apply_debug_overrides(args: argparse.Namespace) -> dict[str, Any]:
     overrides: dict[str, Any] = {
         "ring_filter_inerr": args.ring_filter_inerr,
@@ -244,6 +289,10 @@ def summarize_cycle(before: dict[str, Any], sample: dict[str, Any], post_end: di
         counter_delta(before["ring"][name]["cache_miss_count"], sample["ring"][name]["cache_miss_count"])
         for name in RING_BASE_WORDS
     )
+    ring_overwrite_delta = sum(
+        counter_delta(before["ring"][name]["overwrite_count"], sample["ring"][name]["overwrite_count"])
+        for name in RING_BASE_WORDS
+    )
     ring_inerr_delta = sum(
         counter_delta(before["ring"][name]["inerr_count"], sample["ring"][name]["inerr_count"])
         for name in RING_BASE_WORDS
@@ -299,6 +348,7 @@ def summarize_cycle(before: dict[str, Any], sample: dict[str, Any], post_end: di
         "ring_push_delta": ring_push_delta,
         "ring_pop_delta": ring_pop_delta,
         "ring_inerr_delta": ring_inerr_delta,
+        "ring_overwrite_delta": ring_overwrite_delta,
         "ring_cache_miss_delta": ring_cache_miss_delta,
         "frame_declared_delta": frame_declared_delta,
         "frame_actual_delta": frame_actual_delta,
@@ -336,16 +386,20 @@ def run_cycle(args: argparse.Namespace, index: int) -> dict[str, Any]:
     if args.post_sync_ms > 0:
         time.sleep(args.post_sync_ms / 1000.0)
 
-    before = read_stage_snapshot(args.sc_tool, args.link)
+    before, before_timing = timed_stage_snapshot(args.sc_tool, args.link)
+    start_run_started_s = time.monotonic()
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "start-run", settle_us=args.rc_settle_us))
+    start_run_finished_s = time.monotonic()
     time.sleep(args.duration_ms / 1000.0)
-    sample = read_stage_snapshot(args.sc_tool, args.link)
+    sample, sample_timing = timed_stage_snapshot(args.sc_tool, args.link)
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "end-run", settle_us=args.rc_settle_us))
     if args.post_end_ms > 0:
         time.sleep(args.post_end_ms / 1000.0)
-    after = read_stage_snapshot(args.sc_tool, args.link)
+    after, after_timing = timed_stage_snapshot(args.sc_tool, args.link)
 
     summary = summarize_cycle(before, sample, after)
+    counter_elapsed_s = sample_timing["read_midpoint_s"] - before_timing["read_midpoint_s"]
+    add_counter_rate_summary(summary, counter_elapsed_s)
     return {
         "index": index,
         "run_number": run_number,
@@ -358,6 +412,15 @@ def run_cycle(args: argparse.Namespace, index: int) -> dict[str, Any]:
         "before": before,
         "sample": sample,
         "after": after,
+        "timing": {
+            "before": before_timing,
+            "sample": sample_timing,
+            "after": after_timing,
+            "start_run_started_s": start_run_started_s,
+            "start_run_finished_s": start_run_finished_s,
+            "counter_rate_elapsed_s": counter_elapsed_s,
+            "run_start_to_sample_s": sample_timing["read_midpoint_s"] - start_run_started_s,
+        },
         "summary": summary,
         "rc_log": rc_log,
     }
@@ -475,7 +538,7 @@ def main() -> int:
     parser.add_argument("--sc-tool", type=Path, default=_default_sc_tool())
     parser.add_argument("--rc-tool", type=Path, default=default_rc_tool())
     parser.add_argument("--hit-rate", type=lambda text: int(text, 0), default=0x0800)
-    parser.add_argument("--duration-ms", type=int, default=100)
+    parser.add_argument("--duration-ms", type=int, default=1000)
     parser.add_argument("--iterations", type=int, default=4)
     parser.add_argument("--rc-settle-us", type=int, default=10000)
     parser.add_argument("--post-stop-reset-ms", type=int, default=200)

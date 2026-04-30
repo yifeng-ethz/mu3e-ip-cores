@@ -100,7 +100,7 @@ def build_default_runner_args(report: Path) -> list[str]:
         "--pulse-high-cycles",
         "5",
         "--duration-ms",
-        "250",
+        "1000",
         "--run-number-base",
         "45200",
         "--output",

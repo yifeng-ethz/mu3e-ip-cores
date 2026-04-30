@@ -1,0 +1,20 @@
+{
+  "artifacts": {
+    "header_delay": {
+      "kind": "header_delay",
+      "reason": "No nonzero 256-bin delay/header histogram evidence found. Run phase5_histogram_bin_dump.tcl with the toolkit delay_mts_* preset during header-sync injection first.",
+      "status": "missing"
+    },
+    "rate_per_channel": {
+      "kind": "rate_per_channel",
+      "reason": "No nonzero all-real-lane 256-bin rate histogram evidence found. Run phase5_histogram_bin_dump.tcl with the toolkit rate preset for a 1 s dump first.",
+      "status": "missing"
+    }
+  },
+  "delay_candidates": 4,
+  "evidence_scanned": 5,
+  "generated_by": "plot_phase5_histogram_artifacts.py",
+  "plot_review_contract": "Visually inspect every rendered plot and record one anomaly or null anomaly before accepting the gate.",
+  "rate_candidates": 1,
+  "toolkit_preset_source": "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl"
+}

@@ -12,8 +12,12 @@
 !phase6_lower_mts_ring_vcd_summary_20260430.md
 !phase6_lower56_cross_asic_sweep_20260430.md
 !phase6_lower56_cross_asic_sweep_20260430.json
+!phase5_live_allreal_rate_1s_20260430.md
+!phase5_live_allreal_rate_1s_20260430.json
 !phase5_hist_matrix_dualmts_*_quick_20260429.json
 !assets/
+!assets/phase5_mutrig_tuning_20260430/
+!assets/phase5_mutrig_tuning_20260430/phase5_histogram_artifacts_manifest.json
 !assets/phase5_dualmts_20260429/
 !assets/phase5_dualmts_20260429/phase5_dualmts_*.png
 !screenshots/

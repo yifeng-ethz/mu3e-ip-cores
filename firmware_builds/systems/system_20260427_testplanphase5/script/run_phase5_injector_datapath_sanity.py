@@ -30,9 +30,11 @@ from probe_phase4_stage_counters import (  # noqa: E402
     RING_BASE_WORDS,
     RING_CTRL_FILTER_INERR,
     RING_CTRL_GO,
+    add_counter_rate_summary,
     counter_delta,
     read_stage_snapshot,
     summarize_cycle,
+    timed_stage_snapshot,
 )
 from phase5_real_mutrig_link_debug import read_lvds_snapshot  # noqa: E402
 from run_phase4_emulator import (  # noqa: E402
@@ -62,6 +64,7 @@ INJECTOR_BASE_WORD = 0x0AC80
 INJECTOR_UID = 0x4D494E4A
 HIST_INTERVAL_CLOCKS_1S = 125_000_000
 HIST_KEY_LOC_GLOBAL_CHANNEL_POST = (38 << 24) | (35 << 16) | (38 << 8) | 30
+TOOLKIT_PRESET_SOURCE = "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl"
 INJECT_MODE = {
     "off": 0,
     "header": 1,
@@ -118,27 +121,30 @@ EMU_HIT_MODE = {
 HIST_PROFILE = {
     "rate": {
         "description": "post-hit channel/rate histogram",
+        "toolkit_preset_id": "rate",
         "left_bound": 0,
         "right_bound": 0xFF,
         "bin_width": 1,
         "control": 0x00000101,
-        "key_loc": None,
+        "key_loc": HIST_KEY_LOC_GLOBAL_CHANNEL_POST,
     },
     "delay-debug1": {
         "description": "MTS debug_1 signed ts_delta delay histogram",
+        "toolkit_preset_id": None,
         "left_bound": 0,
         "right_bound": 0x0FFF,
         "bin_width": 16,
         "control": 0x000000F1,
-        "key_loc": None,
+        "key_loc": HIST_KEY_LOC_CHANNEL_POST,
     },
     "delay-mts-both": {
         "description": "combined signed MTS ts_delta delay histogram on debug_1/debug_2",
+        "toolkit_preset_id": "delay_mts_both",
         "left_bound": 0,
         "right_bound": 0x0FFF,
         "bin_width": 16,
         "control": 0x00000091,
-        "key_loc": None,
+        "key_loc": HIST_KEY_LOC_CHANNEL_POST,
     },
 }
 
@@ -474,7 +480,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
     filter_key_loc_override = getattr(args, "hist_filter_key_loc", None)
     filter_key_value = int(getattr(args, "hist_filter_key_value", 0) or 0) & 0xFFFF
     if args.hist_profile == "rate":
-        key_loc = HIST_KEY_LOC_GLOBAL_CHANNEL_POST
+        key_loc = int(profile["key_loc"])
         key_value = 0x00000000
         control_word = profile["control"] & 0xFFFFFFFF
         if filter_enable:
@@ -497,7 +503,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
         else:
             raise RuntimeError(f"histogram profile {args.hist_profile} apply did not clear apply_pending")
     else:
-        key_loc = HIST_KEY_LOC_CHANNEL_POST
+        key_loc = int(profile["key_loc"])
         key_value = 0x00000000
         control_word = profile["control"] & 0xFFFFFFFF
         if filter_enable:
@@ -525,6 +531,8 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
     return {
         "profile": args.hist_profile,
         "description": profile["description"],
+        "toolkit_preset_source": TOOLKIT_PRESET_SOURCE,
+        "toolkit_preset_id": profile.get("toolkit_preset_id"),
         "uid": words[0],
         "meta": words[1],
         "control": words[2],
@@ -601,10 +609,12 @@ def run_injector_window(args: argparse.Namespace, pulse_interval: int) -> dict[s
     if args.inject_mode == "off":
         time.sleep(args.duration_ms / 1000.0)
         actions.append({"action": "sleep_off", "duration_ms": args.duration_ms})
+        sample, sample_timing = timed_stage_snapshot(args.sc_tool, args.link)
         return {
             "actions": actions,
             "injector_during": read_injector_regs_for_args(args),
-            "sample": read_stage_snapshot(args.sc_tool, args.link),
+            "sample": sample,
+            "sample_timing": sample_timing,
         }
 
     if args.inject_mode == "onclick":
@@ -617,19 +627,19 @@ def run_injector_window(args: argparse.Namespace, pulse_interval: int) -> dict[s
         if settle_ms > 0:
             time.sleep(settle_ms / 1000.0)
         injector_during = read_injector_regs_for_args(args)
-        sample = read_stage_snapshot(args.sc_tool, args.link)
+        sample, sample_timing = timed_stage_snapshot(args.sc_tool, args.link)
         write_injector_mode(args, 0)
         actions.append({"action": "force_off_after_onclick", "mode": 0})
-        return {"actions": actions, "injector_during": injector_during, "sample": sample}
+        return {"actions": actions, "injector_during": injector_during, "sample": sample, "sample_timing": sample_timing}
 
     write_injector_mode(args, mode_value)
     actions.append({"action": "set_mode", "mode": mode_value})
     time.sleep(args.duration_ms / 1000.0)
     injector_during = read_injector_regs_for_args(args)
-    sample = read_stage_snapshot(args.sc_tool, args.link)
+    sample, sample_timing = timed_stage_snapshot(args.sc_tool, args.link)
     write_injector_mode(args, 0)
     actions.append({"action": "force_off", "mode": 0})
-    return {"actions": actions, "injector_during": injector_during, "sample": sample}
+    return {"actions": actions, "injector_during": injector_during, "sample": sample, "sample_timing": sample_timing}
 
 
 def read_injector_regs(sc_tool: Path, link: int, control_offset: int = 0) -> dict[str, int]:
@@ -716,20 +726,23 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "sync", settle_us=args.rc_settle_us))
     if args.post_sync_ms > 0:
         time.sleep(args.post_sync_ms / 1000.0)
+    start_run_started_s = time.monotonic()
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "start-run", settle_us=args.rc_settle_us))
+    start_run_finished_s = time.monotonic()
     if args.pre_inject_ms > 0:
         time.sleep(args.pre_inject_ms / 1000.0)
 
     clear_source_mux_counter_window(args, selected_source_mask)
-    before = read_stage_snapshot(args.sc_tool, args.link)
+    before, before_timing = timed_stage_snapshot(args.sc_tool, args.link)
     lvds_before = read_lvds_snapshot_for_args(args)
     inject_window = run_injector_window(args, pulse_interval)
     sample = inject_window["sample"]
+    sample_timing = inject_window["sample_timing"]
     write_injector_mode(args, 0)
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "end-run", settle_us=args.rc_settle_us))
     if args.post_end_ms > 0:
         time.sleep(args.post_end_ms / 1000.0)
-    after = read_stage_snapshot(args.sc_tool, args.link)
+    after, after_timing = timed_stage_snapshot(args.sc_tool, args.link)
     lvds_after = read_lvds_snapshot_for_args(args)
     injector_after = read_injector_regs_for_args(args)
     hist_bins = None
@@ -752,6 +765,8 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
             }
 
     summary = summarize_cycle(before, sample, after)
+    counter_elapsed_s = sample_timing["read_midpoint_s"] - before_timing["read_midpoint_s"]
+    add_counter_rate_summary(summary, counter_elapsed_s)
     summary["hist_live_total_delta"] = summary.get("hist_total_delta", 0)
     summary["hist_live_drop_delta"] = summary.get("hist_drop_delta", 0)
     summary["hist_last_interval_total"] = sample["histogram"].get("LAST_INTERVAL_TOTAL_HITS", 0)
@@ -766,6 +781,19 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
             summary["hist_rate_counter_source"] = "live_delta_no_last_interval"
     add_rate_acceptance(args, summary, pulse_interval)
     lvds_summary = summarize_lvds_window(lvds_before, lvds_after)
+    if (
+        hist_bin_summary.get("captured")
+        and int(hist_bin_summary.get("total", 0) or 0) == 0
+        and int(summary.get("hist_last_interval_total", 0) or 0) > 0
+    ):
+        hist_bin_summary["artifact_grade"] = False
+        hist_bin_summary["warning"] = (
+            "zero histogram bins with nonzero LAST_INTERVAL_TOTAL_HITS; "
+            "slow SC bin read likely crossed the ping-pong bank, use the burst "
+            "System Console/toolkit dump for plotted artifacts"
+        )
+    elif hist_bin_summary.get("captured"):
+        hist_bin_summary["artifact_grade"] = True
     if lvds_summary.get("captured"):
         summary["lvds_error_delta_total"] = lvds_summary.get("error_delta_total", 0)
         summary["lvds_error_delta_lanes"] = lvds_summary.get("error_delta_lanes", [])
@@ -802,6 +830,15 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         "injector_actions": {"actions": inject_window["actions"]},
         "injector_during": inject_window["injector_during"],
         "injector_after": injector_after,
+        "timing": {
+            "before": before_timing,
+            "sample": sample_timing,
+            "after": after_timing,
+            "start_run_started_s": start_run_started_s,
+            "start_run_finished_s": start_run_finished_s,
+            "counter_rate_elapsed_s": counter_elapsed_s,
+            "run_start_to_sample_s": sample_timing["read_midpoint_s"] - start_run_started_s,
+        },
         "rc_log": rc_log,
         "before": before,
         "sample": sample,
@@ -955,6 +992,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         hist_bin_summary = case.get("hist_bin_summary", {})
         if hist_bin_summary.get("error"):
             lines.extend([f"- Histogram bin dump error: `{hist_bin_summary.get('error')}`", ""])
+        if hist_bin_summary.get("warning"):
+            lines.extend([f"- Histogram bin dump warning: `{hist_bin_summary.get('warning')}`", ""])
         if hist_bin_summary.get("captured"):
             lines.extend(
                 [
@@ -1029,7 +1068,7 @@ def main() -> int:
     parser.add_argument("--post-sync-ms", type=int, default=0)
     parser.add_argument("--pre-inject-ms", type=int, default=5)
     parser.add_argument("--post-end-ms", type=int, default=80)
-    parser.add_argument("--duration-ms", type=int, default=250)
+    parser.add_argument("--duration-ms", type=int, default=1000)
     parser.add_argument("--source", choices=("emulator", "real", "mixed"), default="emulator")
     parser.add_argument("--emulator-source-mask", type=parse_mask)
     parser.add_argument("--lvds-lane-mask", type=parse_lane_mask, default=0x1FF)
