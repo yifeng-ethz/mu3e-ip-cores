@@ -65,7 +65,7 @@ EVIDENCE = [
         "Lower lanes 5+6, one channel",
         "Delay",
         "phase5_real_lower_lanes56_ch1_goodribbon_latency2000_retry_pulse4_20260430.json",
-        "After restoring ASIC5/6 from the good-ribbon config, the one-channel pair passes at the 2000-cycle gate.",
+        "This early good-ribbon pass is now superseded by the timing-closed Phase-6 image, where explicit SMB5 reload reproduced the lower one-channel MTS/ring failure.",
     ),
     (
         "Lower lanes 5+6, full channels",
@@ -182,8 +182,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun now fails even the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload: P6B010 ring_inerr_delta=535108, MTS discard=0, LVDS error/DPA deltas=0. Full-channel P6B020 remains an expected MTS/ring fail with ring_inerr_delta=9022633.",
-        "Move SignalTap to the first MTS timestamp-delay/ring input-error causality point before spending a compile on SWB DMA.",
+        "The timing-closed Phase-6 rerun now fails even the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The lower-MTS/ring SignalTap checkpoint shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window; live counters show ring_inerr_delta=535373, MTS discard=0, LVDS error/DPA deltas=0.",
+        "Debug the lower MTS timestamp-delay calculation, cross-ASIC ordering/epoch handling, or upstream timestamp formation before spending a compile on SWB DMA.",
     ),
     (
         "SWB input path",
@@ -391,6 +391,8 @@ def write_html() -> None:
     now = dt.datetime.now().isoformat(timespec="seconds")
     mutrig_doc = REPO_ROOT / "firmware_builds" / "doc" / "MUTRIG.md"
     phase6_report = REPORT_DIR / "phase6_timingclosed_cycle1_20260430.md"
+    phase6_signaltap_report = REPORT_DIR / "phase6_lower_mts_ring_signaltap_20260430.md"
+    phase6_vcd_summary = REPORT_DIR / "phase6_lower_mts_ring_vcd_summary_20260430.md"
     html_text = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -471,7 +473,9 @@ def write_html() -> None:
       Older Phase-5 evidence showed single-lane delay could be made clean, but
       the timing-closed Phase-6 rerun with explicit SMB3/SMB5 XML reload moved
       the live blocker earlier: even the lower <code>lanes5+6</code>
-      one-channel case now trips MTS/ring input errors. No FEB/SWB host-disk
+      one-channel case now trips MTS/ring input errors. The lower-MTS/ring
+      SignalTap checkpoint localizes the visible error sideband to MTS1 before
+      hit_stack1/ring sees the reject. No FEB/SWB host-disk
       Mu3e Demo OPQ, 100 kHz end-to-end claim is valid yet. Under the active
       <code>N_HIT=255</code> profile, a 256-hit source cluster must deliver
       255 hits and account exactly one OPQ hit drop. The SWB OPQ image now has
@@ -493,11 +497,26 @@ def write_html() -> None:
       The latest fixed Phase-6 cycle explicitly loaded
       <code>config_smb3_tdc.txt</code> and <code>config_smb5_tdc.txt</code>.
       P6B010 configured ASIC5/6 one-channel mode successfully but failed as
-      <code>unexpected_fail</code>: <code>ring_inerr_delta=535108</code>,
-      <code>mts_discard_delta=0</code>, and LVDS error/DPA deltas were zero.
-      P6B020 full-channel remains the expected fail, and P6E010 pulse-high 3 is
-      clean but underfilled. Reduced evidence:
+      <code>unexpected_fail</code>. The bounded cycle measured
+      <code>ring_inerr_delta=535108</code>; the later SignalTap rerun measured
+      <code>ring_inerr_delta=535373</code>, <code>mts_discard_delta=0</code>,
+      and LVDS error/DPA deltas were zero. P6B020 full-channel remains the
+      expected fail, and P6E010 pulse-high 3 is clean but underfilled. Reduced
+      evidence:
       <a href="{esc(rel(phase6_report))}">{esc(phase6_report.name)}</a>.
+    </p>
+    <p>
+      The lower-MTS/ring SignalTap debug image programmed with checksum
+      <code>0x16B6BF30</code> and SOF SHA256
+      <code>080f92844f868d33e142ce6e576911b728f9364fadd1d9c2824addd7d1cff2b9</code>.
+      It is an Arria V debug-only image: setup WNS is <code>-0.086 ns</code>
+      on <code>transceiver_pll_clock[0]</code>, within the clarified
+      about-200 ps FEB debug tolerance, while SWB Arria 10 still requires clean
+      timing closure. The VCD shows <code>mts1.aso_hit_type1_error</code> and
+      <code>hit_stack1.hit_type_1_error[0]</code> both first high at
+      <code>128500 ps</code>. Reduced SignalTap evidence:
+      <a href="{esc(rel(phase6_signaltap_report))}">{esc(phase6_signaltap_report.name)}</a>
+      and <a href="{esc(rel(phase6_vcd_summary))}">{esc(phase6_vcd_summary.name)}</a>.
     </p>
     <p>
       The lower full-channel pair also fails with the MTS expected-latency

@@ -50,6 +50,12 @@ Primary evidence:
   exact compiled image. Prefer at least `+0.20 ns` WNS for a comfortable
   non-debug baseline. Any negative-WNS image is debug-only, not a soak/signoff
   image.
+- 2026-04-30 FEB/Arria V clarification: a directed debug image with setup WNS
+  inside roughly `-0.200 ns` is acceptable when the worst paths are understood
+  and not part of the ambiguous/collective performance signal being judged.
+  Mark it debug-only. This exception does not apply to the SWB Arria 10 path;
+  the SWB image must close timing in all checked corners before its evidence is
+  trusted.
 
 ### SignalTap complexity guidance
 
@@ -76,6 +82,13 @@ Primary evidence:
   paths so debug instrumentation does not dominate functional hardware timing.
   Keep the exception scoped to the debug instance; do not hide real CDC,
   exported interfaces, or datapath boundaries.
+- Use formal reachability checks for suspected rare blocker states. Insert a
+  small cover property at the interface or inter-module boundary and ask the
+  tool whether the failing case can happen at all before spending another
+  board compile. For states that should be impossible by contract, write the
+  environment assumptions and the matching assertion together; this applies to
+  internal module-to-module handshakes as much as explicit SystemVerilog
+  interfaces.
 - Try Quartus design partitions or incremental block design to reduce debug
   compile time. Periodically run a full clean compile anyway; stale partitions
   can preserve old congestion and make routing worse after enough design drift.
