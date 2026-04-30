@@ -30,9 +30,11 @@ from probe_phase4_stage_counters import (  # noqa: E402
     RING_BASE_WORDS,
     RING_CTRL_FILTER_INERR,
     RING_CTRL_GO,
+    counter_delta,
     read_stage_snapshot,
     summarize_cycle,
 )
+from phase5_real_mutrig_link_debug import read_lvds_snapshot  # noqa: E402
 from run_phase4_emulator import (  # noqa: E402
     EMU_BASE_WORD,
     EMU_STRIDE_WORD,
@@ -195,6 +197,93 @@ def source_mask(args: argparse.Namespace) -> int:
 
 def popcount(value: int) -> int:
     return int(value & 0xFFFFFFFF).bit_count()
+
+
+def read_lvds_snapshot_for_args(args: argparse.Namespace) -> dict[str, Any] | None:
+    if not getattr(args, "capture_lvds", False):
+        return None
+    try:
+        return read_lvds_snapshot(args.sc_tool, args.link, read_dpa_unlocks=args.read_lvds_dpa_unlocks)
+    except Exception as exc:  # noqa: BLE001
+        if getattr(args, "require_lvds_snapshot", False):
+            raise
+        return {"error": str(exc)}
+
+
+def optional_counter_delta(old: int | None, new: int | None) -> int | None:
+    if old is None or new is None:
+        return None
+    if old == new:
+        return 0
+    if old == 0xFFFFFFFF or new == 0xFFFFFFFF:
+        return None
+    return counter_delta(old, new)
+
+
+def summarize_lvds_window(before: dict[str, Any] | None, after: dict[str, Any] | None) -> dict[str, Any]:
+    if before is None or after is None:
+        return {"captured": False}
+    if "error" in before or "error" in after:
+        return {
+            "captured": False,
+            "before_error": before.get("error") if isinstance(before, dict) else None,
+            "after_error": after.get("error") if isinstance(after, dict) else None,
+        }
+
+    before_lanes = {int(lane["lane"]): lane for lane in before.get("lanes", [])}
+    lane_rows = []
+    error_delta_total = 0
+    dpa_delta_total = 0
+    error_delta_lanes: list[int] = []
+    dpa_delta_lanes: list[int] = []
+    fatal_lanes: list[int] = []
+
+    for lane in after.get("lanes", []):
+        lane_idx = int(lane["lane"])
+        old = before_lanes.get(lane_idx, {})
+        err_delta = optional_counter_delta(old.get("error_counter"), lane.get("error_counter"))
+        dpa_delta = optional_counter_delta(old.get("dpa_unlocks"), lane.get("dpa_unlocks"))
+        if lane.get("error_counter") == 0xFFFFFFFF:
+            fatal_lanes.append(lane_idx)
+        if err_delta is not None and err_delta > 0:
+            error_delta_total += err_delta
+            error_delta_lanes.append(lane_idx)
+        if dpa_delta is not None and dpa_delta > 0:
+            dpa_delta_total += dpa_delta
+            dpa_delta_lanes.append(lane_idx)
+        lane_rows.append(
+            {
+                "lane": lane_idx,
+                "mode_adaptive": lane.get("mode_adaptive"),
+                "lane_go": lane.get("lane_go"),
+                "dpa_hold": lane.get("dpa_hold"),
+                "error_counter_before": old.get("error_counter"),
+                "error_counter_after": lane.get("error_counter"),
+                "error_delta": err_delta,
+                "dpa_unlocks_before": old.get("dpa_unlocks"),
+                "dpa_unlocks_after": lane.get("dpa_unlocks"),
+                "dpa_unlock_delta": dpa_delta,
+            }
+        )
+
+    return {
+        "captured": True,
+        "base": after.get("base"),
+        "n_lane": after.get("n_lane"),
+        "sync_pattern": after.get("sync_pattern"),
+        "mode_mask_before": before.get("mode_mask"),
+        "mode_mask_after": after.get("mode_mask"),
+        "dpa_hold_before": before.get("dpa_hold"),
+        "dpa_hold_after": after.get("dpa_hold"),
+        "lane_go_before": before.get("lane_go"),
+        "lane_go_after": after.get("lane_go"),
+        "error_delta_total": error_delta_total,
+        "error_delta_lanes": error_delta_lanes,
+        "dpa_unlock_delta_total": dpa_delta_total,
+        "dpa_unlock_delta_lanes": dpa_delta_lanes,
+        "fatal_lanes": fatal_lanes,
+        "lanes": lane_rows,
+    }
 
 
 def expected_periodic_rate_hits(args: argparse.Namespace, pulse_interval: int) -> int:
@@ -585,6 +674,7 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
 
     clear_source_mux_counter_window(args, selected_source_mask)
     before = read_stage_snapshot(args.sc_tool, args.link)
+    lvds_before = read_lvds_snapshot_for_args(args)
     inject_window = run_injector_window(args, pulse_interval)
     sample = inject_window["sample"]
     write_injector_mode(args, 0)
@@ -592,6 +682,7 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
     if args.post_end_ms > 0:
         time.sleep(args.post_end_ms / 1000.0)
     after = read_stage_snapshot(args.sc_tool, args.link)
+    lvds_after = read_lvds_snapshot_for_args(args)
     injector_after = read_injector_regs_for_args(args)
 
     summary = summarize_cycle(before, sample, after)
@@ -608,6 +699,15 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         else:
             summary["hist_rate_counter_source"] = "live_delta_no_last_interval"
     add_rate_acceptance(args, summary, pulse_interval)
+    lvds_summary = summarize_lvds_window(lvds_before, lvds_after)
+    if lvds_summary.get("captured"):
+        summary["lvds_error_delta_total"] = lvds_summary.get("error_delta_total", 0)
+        summary["lvds_error_delta_lanes"] = lvds_summary.get("error_delta_lanes", [])
+        summary["lvds_dpa_unlock_delta_total"] = lvds_summary.get("dpa_unlock_delta_total", 0)
+        summary["lvds_dpa_unlock_delta_lanes"] = lvds_summary.get("dpa_unlock_delta_lanes", [])
+        summary["lvds_fatal_lanes"] = lvds_summary.get("fatal_lanes", [])
+    else:
+        summary["lvds_snapshot_error"] = lvds_summary
     summary["phase5_classification"] = classify(args, summary)
     summary["pass"] = summary["phase5_classification"] == "PASS"
 
@@ -628,6 +728,9 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         "emulator_config": emu_config,
         "injector_config": injector_config,
         "debug_overrides": debug_overrides,
+        "lvds_before": lvds_before,
+        "lvds_after": lvds_after,
+        "lvds_summary": lvds_summary,
         "injector_actions": {"actions": inject_window["actions"]},
         "injector_during": inject_window["injector_during"],
         "injector_after": injector_after,
@@ -653,6 +756,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- Source emulator mask: `{fmt_hex(source_mask(args))}`",
         f"- LVDS lane-go mask: `{fmt_hex(args.lvds_lane_mask)}`",
         f"- LVDS configured by runner: `{'no' if args.skip_lvds_config else 'yes'}`",
+        f"- LVDS SVD snapshot: `{'yes' if args.capture_lvds else 'no'}`",
+        f"- LVDS per-lane DPA unlock reads: `{'yes' if args.read_lvds_dpa_unlocks else 'no'}`",
         f"- Active emulator lanes: `{fmt_hex(args.active_lanes_mask)}`",
         f"- Inject mode: `{args.inject_mode}`",
         f"- Injector layout: `{getattr(args, 'injector_layout', {}).get('name', 'unknown')}`",
@@ -672,8 +777,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         "",
         "## Case Summary",
         "",
-        "| Case | Run | Source | Mode | Interval | Hist Hits | Hist Drops | MTS Hits | Ring InErr | Real Beats | Emu Beats | Class |",
-        "|---:|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---|",
+        "| Case | Run | Source | Mode | Interval | Hist Hits | Hist Drops | MTS Hits | Ring InErr | Real Beats | LVDS Err Δ | DPA Unlock Δ | Class |",
+        "|---:|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for case in cases:
         summary = case.get("summary", {})
@@ -681,7 +786,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
             f"| {case.get('index', '?')} | {case.get('run_number', '?')} | `{case.get('source', args.source)}` | `{case.get('inject_mode', args.inject_mode)}` | "
             f"{case.get('pulse_interval', '?')} | {summary.get('hist_total_delta', 0)} | {summary.get('hist_drop_delta', 0)} | "
             f"{summary.get('mts_total_delta', 0)} | {summary.get('ring_inerr_delta', 0)} | "
-            f"{summary.get('source_mux_real_delta', 0)} | {summary.get('source_mux_emu_delta', 0)} | "
+            f"{summary.get('source_mux_real_delta', 0)} | "
+            f"{summary.get('lvds_error_delta_total', 'n/a')} | {summary.get('lvds_dpa_unlock_delta_total', 'n/a')} | "
             f"`{summary.get('phase5_classification', 'exception')}` |"
         )
 
@@ -713,8 +819,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
                 f"- Injector mode during run: `{case.get('injector_during', {}).get('mode', '?')}`",
                 f"- Injector mode after run: `{case.get('injector_after', {}).get('mode', '?')}`",
                 f"- Lane-go readback: `{fmt_hex(case.get('lane_go', 0))}`",
-            f"- Histogram ingress status: `{fmt_hex(case.get('ingress_status_after_select', {}).get('raw', 0))}`",
-            f"- Histogram profile/readback: `{case.get('histogram_config', {})}`",
+                f"- Histogram ingress status: `{fmt_hex(case.get('ingress_status_after_select', {}).get('raw', 0))}`",
+                f"- Histogram profile/readback: `{case.get('histogram_config', {})}`",
                 f"- Debug overrides: `{case.get('debug_overrides', {})}`",
                 f"- Source mux selected beat delta: `{summary.get('source_mux_selected_delta', 0)}`",
                 f"- Emulator frame delta: `{summary.get('emu_frame_delta', 0)}`",
@@ -725,6 +831,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
                 f"- Histogram last interval: `{summary.get('hist_last_interval_total', 0)}` / dropped `{summary.get('hist_last_interval_dropped', 0)}`",
                 f"- Rate expected/tolerance/error: `{summary.get('rate_expected_hits', 0)}` / `±{summary.get('rate_tolerance_hits', 0)}` / `{summary.get('rate_error_hits', 0)}` hits",
                 f"- Post-end clean: `{'yes' if summary.get('post_end_clean', False) else 'no'}`",
+                f"- LVDS error delta lanes: `{summary.get('lvds_error_delta_lanes', 'n/a')}`",
+                f"- LVDS DPA unlock delta lanes: `{summary.get('lvds_dpa_unlock_delta_lanes', 'n/a')}`",
                 "",
             ]
         )
@@ -748,6 +856,32 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
                 f"`{fmt_hex(emu_row['status'])}` |"
             )
         lines.append("")
+        lvds_summary = case.get("lvds_summary", {})
+        if lvds_summary.get("captured"):
+            lines.extend(
+                [
+                    "| Lane | Go | Mode | Hold | Err Before | Err After | Err Δ | DPA Before | DPA After | DPA Δ |",
+                    "|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|",
+                ]
+            )
+            for lane in lvds_summary.get("lanes", [])[:8]:
+                mode = "adaptive" if lane.get("mode_adaptive") else "bit_slip"
+                err_before = lane.get("error_counter_before")
+                err_after = lane.get("error_counter_after")
+                dpa_before = lane.get("dpa_unlocks_before")
+                dpa_after = lane.get("dpa_unlocks_after")
+                lines.append(
+                    f"| {lane.get('lane')} | {lane.get('lane_go')} | `{mode}` | {lane.get('dpa_hold')} | "
+                    f"`{fmt_hex(err_before) if err_before is not None else 'n/a'}` | "
+                    f"`{fmt_hex(err_after) if err_after is not None else 'n/a'}` | "
+                    f"{lane.get('error_delta', 'n/a')} | "
+                    f"{dpa_before if dpa_before is not None else 'n/a'} | "
+                    f"{dpa_after if dpa_after is not None else 'n/a'} | "
+                    f"{lane.get('dpa_unlock_delta', 'n/a')} |"
+                )
+            lines.append("")
+        elif lvds_summary:
+            lines.extend([f"- LVDS snapshot error: `{lvds_summary}`", ""])
 
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -765,6 +899,8 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "active_lanes_mask": args.active_lanes_mask,
             "lvds_lane_mask": args.lvds_lane_mask,
             "skip_lvds_config": args.skip_lvds_config,
+            "capture_lvds": args.capture_lvds,
+            "read_lvds_dpa_unlocks": args.read_lvds_dpa_unlocks,
             "inject_mode": args.inject_mode,
             "duration_ms": args.duration_ms,
             "pulse_intervals": args.pulse_intervals,
@@ -809,6 +945,9 @@ def main() -> int:
     parser.add_argument("--emulator-source-mask", type=parse_mask)
     parser.add_argument("--lvds-lane-mask", type=parse_lane_mask, default=0x1FF)
     parser.add_argument("--skip-lvds-config", action="store_true")
+    parser.add_argument("--capture-lvds", action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument("--read-lvds-dpa-unlocks", action="store_true")
+    parser.add_argument("--require-lvds-snapshot", action="store_true")
     parser.add_argument(
         "--active-lanes-mask",
         type=parse_mask,
@@ -865,6 +1004,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.active_lanes_mask is None:
         args.active_lanes_mask = 0x00 if args.source == "real" else 0xFF
+    if args.capture_lvds is None:
+        args.capture_lvds = args.source in ("real", "mixed")
 
     timestamp = dt.datetime.now().isoformat(timespec="seconds")
     output = args.output or default_output()
