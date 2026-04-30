@@ -54,7 +54,7 @@ TDC injection, use all eight ASICs plus all 32 channels per ASIC:
 That command only overrides per-channel `mask` and `tdctest_n` inside each
 ASIC's local XML entry. It must not change the SMB3/SMB5 file split.
 
-Current `good_ribbon_0` TDC XML PLL-search values are:
+Current `good_ribbon_0` TDC XML PLL-search defaults are:
 
 | ASIC | SMB | Local index | `cnt` | `vcodelay` | `hitlogic` | `cnt/vcodelay/hitlogic` offsets |
 |---:|---|---:|---:|---:|---:|---|
@@ -71,6 +71,26 @@ If either XML file is retuned, regenerate this audit before interpreting
 lane-by-lane PLL or timestamp-delay evidence. A copied upper-side config on the
 down side is a bad test: it can make the SPI transaction pass while the physical
 ASIC tuning is wrong.
+
+The current Phase-6 restore-load tuning ledger is:
+
+| ASIC | Default `cnt/vcodelay/hitlogic` | Restore-load `cnt/vcodelay/hitlogic` | Extra diagnostic setting | Evidence |
+|---:|---|---|---|---|
+| 0 | `48/20/30` | `48/20/40` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
+| 1 | `43/30/30` | `43/30/30` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
+| 2 | `45/35/20` | `40/30/30` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
+| 3 | `41/10/20` | `35/12/25` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
+| 4 | `43/15/20` | `43/15/20` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
+| 5 | `42/20/25` | `42/20/25` | `42/20/60` passes lane5 alone, fails with lane6 | `phase5_real_lane5_full32_hl60_latency2000_pulse4_20260430.json` |
+| 6 | `37/27/15` | `37/27/15` | `37/27/60` passes lane6 alone, fails with lane5 | `phase5_real_lane6_full32_hl60_latency2000_pulse4_20260430.json` |
+| 7 | `40/20/25` | `30/14/40` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
+
+No per-ASIC head-sync delay histogram PNG/SVG is closure-grade yet in this
+tree. The required artifacts for the next tuning pass are one plot per ASIC
+under `reports/screenshots/phase6_mutrig_headsync_YYYYMMDD/`, named
+`asicN_cntC_vcodelayV_hitlogicH.png`, plus the matching JSON/Markdown manifest.
+Do not replace these with the stale `vco000` captures; those are invalidated as
+PLL-lock evidence by the zero-vcodelay rule below.
 
 ### Active Phase-5 Injection Path
 
@@ -209,9 +229,10 @@ Tuning consequences for Phase-5:
   receiver. Wrong input swing, wrong CML/TDC-test setup, or wrong `vnhitlogic`
   can cause no hits, extra noise hits, or poor timing. Treat it together with
   injection pulse width and CML settings.
-- `vncnt=0` is a deliberate PLL-unlock setting. Use it before testing a new
-  `vnvcodelay` point. Increase `vncnt` if coarse-counter distributions show
-  spikes.
+- `vncnt=0` belongs to the deliberate no-hit reset/control point together with
+  `vnvcodelay=0`; it is not a passable lock setting. Once a lock point exists,
+  keep `vncnt` near the ASIC-specific XML/default value and perturb it only as
+  a secondary fine-tuning knob.
 - `vnvcodelay` tunes the VCO base-current path and is the primary PLL-frequency
   search parameter when the lock point is wrong.
 - `ms_limits` and `ms_switch_sel` affect coarse-counter selection from the fine
@@ -250,6 +271,12 @@ rate or delay evidence: `reset`, `stop-reset`, `run-prepare`, `sync`, and
 `start-run`. This restarts the MuTRiG TDC counters from a known global point and
 is the sequence expected for aligned headers across ASICs.
 
+After an FEB reconfiguration, assume every MuTRiG lost its useful configuration.
+During FEB configuration the Nios reprograms the Si clock chip that provides
+the 625 MHz MuTRiG clock, so the ASICs can lose clock/configuration state.
+Reload the SMB3/SMB5 MuTRiG XMLs and run the full sequence again before any
+rate, delay, or histogram claim.
+
 ## Injection Mode
 
 With TDC injection enabled, the MuTRiG cuts off the analog frontend input. The
@@ -281,9 +308,49 @@ The practical lock search uses three MuTRiG settings:
 
 Operational procedure:
 
-1. Reduce `cnt` when searching for a lock at lower `vcodelay`.
-2. Increase `hitlogic` when the central delay peak is surrounded by noise.
-3. Before testing a new `vcodelay`, first write `vcodelay = 0x0+0` to fully unlock the PLL, then write the target value in the `<value>x<scale> + <offset>` form. The lock state can be sticky; skipping the explicit unlock can make a historically good `vcodelay` fail to re-lock.
+1. Start from the explicit no-lock point: set TDC-related values to zero,
+   especially `vnvcodelay=0`. At this point the MuTRiG should generate no TDC
+   injection hits. If hits appear with `vnvcodelay=0`, treat the run as a
+   stale configuration, bad override, or run-sequence artifact, not as lock
+   evidence.
+2. Load the ASIC-specific XML/default value from the table above. A blind
+   monotonic sweep from zero is a bad MuTRiG tuning method because many points
+   are not lock candidates. Use the known board range first, then fine tune.
+3. After cold configuration, FEB reconfiguration, or any clock-loss event, run
+   the full sequence through `RUN_PREPARE` before judging the delay offset. The
+   PLL can be locked while the TDC phase is still not synchronized to the FPGA;
+   without `RUN_PREPARE`, a delta-like histogram can sit at the wrong offset.
+4. Once the run is already in `RUNNING` and the PLL is locked, small
+   `vnvcodelay`, `vncnt`, and `vnhitlogic` perturbations can be tested without
+   a full run restart. If the histogram collapses to the unlocked signature,
+   back out to the last safe `vnvcodelay`.
+5. Use `vnvcodelay` as the primary lock knob. Increase `vncnt` only when the
+   PLL is already near a stable region or when coarse-counter behavior demands
+   it. Increase `vnhitlogic` modestly for analog/noise cleanup; too much
+   `vnhitlogic` can remove useful hits or destabilize the setting.
+
+Histogram interpretation:
+
+- `vnvcodelay=0`: expected no TDC injection hits.
+- Unlocked PLL: expect a broad/random delay distribution; in the current
+  15-bit timestamp path this can look like roughly half of hits inside the
+  accepted delay window and half outside because of timestamp aliasing. That is
+  an unlock signature, not a partial pass.
+- Locked but not tuned: expect a dominant in-band delta plus possible sideband
+  hits. A workable but not final point can have about 90% in the delta and a
+  flat out-of-band sideband.
+- Tuned: target a stable delta with only small accounted loss. About
+  1000 ppm out-of-band/lost hits is acceptable for a good ASIC; a bad ASIC may
+  need an explicit waiver up to about 1% if the loss is stable, documented, and
+  not caused by the FEB/SWB datapath.
+- Over-tuned or lost lock: if a small `vnvcodelay`/`vncnt` increase turns the
+  distribution back into the roughly 50/50 alias pattern, the PLL was lost.
+  Return to the last safer `vnvcodelay`.
+
+The old `vco000` Phase-6 captures are not PLL-lock evidence. A label that says
+`vncnt=0`, `vnvcodelay=0`, and `vnhitlogic=0` must produce no hits. If a report
+shows hits under that label, debug the configuration manifest and run sequence
+before using the capture.
 
 Observed Phase-5 update on 2026-04-30:
 

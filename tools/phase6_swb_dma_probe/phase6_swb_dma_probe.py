@@ -99,6 +99,12 @@ def hex32(value: int) -> str:
     return f"0x{value & 0xFFFFFFFF:08X}"
 
 
+def parse_hex32(text: str | None) -> int:
+    if text is None:
+        return 0
+    return int(text, 16) & 0xFFFFFFFF
+
+
 def parse_int(text: str) -> int:
     return int(text, 0)
 
@@ -221,6 +227,7 @@ def write_sparse_dump(path: Path, sparse: list[dict[str, Any]]) -> None:
 
 
 def write_markdown(path: Path, summary: dict[str, Any]) -> None:
+    eb = summary["event_builder"]
     lines = [
         "# Phase 6 SWB DMA Probe",
         "",
@@ -233,8 +240,11 @@ def write_markdown(path: Path, summary: dict[str, Any]) -> None:
         f"- First nonzero index: `{summary['dma']['first_nonzero_index']}`",
         f"- Last nonzero index: `{summary['dma']['last_nonzero_index']}`",
         f"- Event-build status before cleanup: `{summary['final_pre_cleanup_ro'].get('EVENT_BUILD_STATUS_REGISTER_R')}`",
-        f"- Event-build count before cleanup: `{summary['final_pre_cleanup_ro'].get('EVENT_BUILD_CNT_EVENT_DMA_R')}`",
+        f"- Payload words written: `{eb['payload_words_written']}`",
+        f"- Payload drop count low32: `{eb['payload_drop_count_low32']}`",
+        f"- Payload FIFO full count low32: `{eb['payload_full_count_low32']}`",
         f"- DMA count words before cleanup: `{summary['final_pre_cleanup_ro'].get('DMA_CNT_WORDS_REGISTER_R')}`",
+        f"- Register note: {eb['legacy_register_note']}",
         "",
         "## First DMA Words",
         "",
@@ -284,13 +294,36 @@ class MappedDevice:
         return self.rw, self.ro, self.ctrl, self.data
 
 
-def classify(dma_summary: dict[str, Any], final_ro: dict[str, str]) -> str:
+def event_builder_summary(final_ro: dict[str, str]) -> dict[str, Any]:
+    payload_low = parse_hex32(final_ro.get("EVENT_BUILD_IDLE_NOT_HEADER_R"))
+    payload_high = parse_hex32(final_ro.get("EVENT_BUILD_CNT_EVENT_DMA_R"))
+    drop_low = parse_hex32(final_ro.get("EVENT_BUILD_SKIP_EVENT_DMA_R"))
+    full_low = parse_hex32(final_ro.get("BUFFER_STATUS_REGISTER_R"))
+    return {
+        "payload_words_written": (payload_high << 32) | payload_low,
+        "payload_words_written_low32": payload_low,
+        "payload_words_written_high32": payload_high,
+        "payload_drop_count_low32": drop_low,
+        "payload_full_count_low32": full_low,
+        "done": bool(parse_hex32(final_ro.get("EVENT_BUILD_STATUS_REGISTER_R")) & 0x1),
+        "legacy_register_note": (
+            "In the active musip_event_builder path, EVENT_BUILD_IDLE_NOT_HEADER_R "
+            "is o_hit_cnt[31:0], EVENT_BUILD_CNT_EVENT_DMA_R is o_hit_cnt[63:32], "
+            "and EVENT_BUILD_SKIP_EVENT_DMA_R is o_hit_drop_cnt[31:0]. The old "
+            "register names do not mean old FEB frame/header decode."
+        ),
+    }
+
+
+def classify(dma_summary: dict[str, Any], eb: dict[str, Any]) -> str:
     if dma_summary["nonzero_words"] > 0:
-        return "dma_nonzero"
-    if final_ro.get("EVENT_BUILD_CNT_EVENT_DMA_R") not in (None, "0x00000000"):
-        return "event_builder_no_dma_words"
-    if final_ro.get("EVENT_BUILD_IDLE_NOT_HEADER_R") not in (None, "0x00000000"):
-        return "event_builder_input_no_payload"
+        if eb["payload_words_written"] > 0:
+            return "dma_payload_nonzero"
+        return "dma_nonzero_unattributed"
+    if eb["payload_words_written"] > 0:
+        return "event_builder_payload_no_dma_words"
+    if eb["payload_drop_count_low32"] > 0:
+        return "payload_fifo_dropping_no_dma"
     return "no_dma_words"
 
 
@@ -404,9 +437,10 @@ def run_probe(args: argparse.Namespace) -> int:
             cleanup_snapshot = None
 
     final_ro = final_pre_cleanup["ro_named"]
+    eb_summary = event_builder_summary(final_ro)
     summary = {
         "created": iso_now(),
-        "classification": classify(dma_summary, final_ro),
+        "classification": classify(dma_summary, eb_summary),
         "mode": args.mode,
         "profile": args.profile,
         "readout_state": readout_state,
@@ -415,6 +449,7 @@ def run_probe(args: argparse.Namespace) -> int:
         "text_dump": str(out_dir / "memory_content.txt") if args.dump_text else None,
         "snapshots": str(snapshots_path),
         "dma": dma_summary,
+        "event_builder": eb_summary,
         "final_pre_cleanup_ro": final_ro,
         "post_disable_ro": post_disable["ro_named"],
         "post_cleanup_ro": cleanup_snapshot["ro_named"] if cleanup_snapshot is not None else None,
@@ -423,7 +458,7 @@ def run_probe(args: argparse.Namespace) -> int:
     (out_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     write_markdown(out_dir / "summary.md", summary)
     print(json.dumps({"classification": summary["classification"], "summary": str(out_dir / "summary.json")}, sort_keys=True))
-    return 0 if summary["classification"] == "dma_nonzero" else 2
+    return 0 if summary["classification"].startswith("dma_") else 2
 
 
 def parse_args() -> argparse.Namespace:

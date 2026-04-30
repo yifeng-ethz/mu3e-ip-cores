@@ -36,14 +36,14 @@ Use the current known-good isolated lower ASICs first:
 | G4 | Run matching authentic generated-system simulation or focused RTL replay with the same transaction identity | simulated boundary sequence matches STP packet grammar and count distributions |
 | G5 | Re-run the same stimulus on the timing-clean no-STP image | SC counters remain clean; STP-only timing perturbation is not counted as closure |
 
-Current 2026-04-30 status: ASIC6/lane6 at the zero-VCO point passes the live
-counter gate at 100 kHz with zero MTS discards, zero ring input errors, zero
-histogram drops, zero frame CRC errors, and zero LVDS/DPA deltas. The active
-SignalTap capture proves `hit_type3` frame output with nonzero subheader/hit
-content, but the same 1k-sample window did not catch the matching nonempty
-RBCAM `hit_type2` beat. Treat G3 as `OPEN_STP_ALIGNMENT` until a deeper or
-better-triggered capture, or a focused simulation/VCD correlation, ties the
-nonempty RBCAM beat to the later FEB frame drain.
+Current 2026-04-30 status: the earlier ASIC6/lane6 `vco000` capture is
+invalidated as PLL-lock evidence. With `vnvcodelay=0`, the MuTRiG should
+generate no TDC-injection hits; a hit-producing zero-VCO run is a stale
+configuration, bad override, or run-sequence artifact until the config manifest
+proves otherwise. Treat G3 as `OPEN_STP_ALIGNMENT`: rerun with the ASIC-specific
+nonzero XML/default setting, full `RUN_PREPARE` synchronization, and a deeper or
+better-triggered capture that ties nonempty RBCAM `hit_type2` output to the
+later FEB `hit_type3` frame drain.
 
 ### 2.1 RBCAM Input: `hit_type1`
 
@@ -102,22 +102,28 @@ For every captured frame, decode the body and compare:
   promises one deterministic hit timestamp;
 - adjacent source bunch timestamps are separated by the 100 kHz period.
 
-## 3. Lane 6/7 TDC/VCO Sweep Checklist
+## 3. Lane 6/7 TDC/VCO Tuning Checklist
 
-Lane 6 and lane 7 tuning starts from an explicit reset point and moves upward.
+Lane 6 and lane 7 tuning starts from an explicit no-hit reset point, then jumps
+to the ASIC-specific known-good board range before fine tuning. A blind sweep
+from zero is a bad MuTRiG tuning method.
 
 | Step | Action | Pass criteria |
 |---|---|---|
-| V1 | Set lane ASIC TDC/VCO-related fields to zero (`vncnt=0`, `vnvcodelay=0`, `vnhitlogic=0` when exposed by the config tool) | configuration ACKs and readback manifest records the zero point |
-| V2 | Enable one TDC-test channel only; use header-mode or the lowest-rate deterministic injector mode available | histogram and STP report a delta-function latency or no useful traffic; no silent broad distribution |
-| V3 | Sweep `vnvcodelay` upward from low values, then sweep `vncnt` only after a stable region appears | accepted-hit count rises into a stable plateau; latency distribution stays narrow |
-| V4 | Repeat at `pulse_intervals=1250` after the low-rate point is stable | zero MTS/ring errors, zero LVDS/DPA deltas, and deterministic bunch timestamp spacing |
-| V5 | Expand channel mask after one-channel closure | counts scale with enabled channels; no new timestamp-error class appears |
+| V1 | Set lane ASIC TDC/VCO-related fields to zero (`vncnt=0`, `vnvcodelay=0`, `vnhitlogic=0` when exposed by the config tool) | configuration ACK/readback records the zero point and the ASIC produces no TDC-injection hits |
+| V2 | Load the ASIC-specific SMB XML/default or recorded restore setting for `cnt/vcodelay/hitlogic`; run the full sequence through `RUN_PREPARE` before `RUNNING` | one enabled TDC-test channel produces a narrow head-sync delay peak at a legal offset |
+| V3 | Capture a per-ASIC head-sync delay histogram plot and config manifest | dominant delta peak is in band; broad/random or roughly 50/50 in-band/out-of-band alias means PLL unlock |
+| V4 | Fine-tune `vnvcodelay` first, then `vncnt`, and only modestly adjust `vnhitlogic`; do this during `RUNNING` only after lock is already established | stable delta peak with about 1000 ppm accounted out-of-band/lost hits on good ASICs, or documented waiver up to about 1% for a bad ASIC |
+| V5 | Repeat after FEB reconfiguration and MuTRiG XML reload, then expand the channel mask | counts scale with enabled channels; no new timestamp-error class appears |
 
 Reject a point if it has any of these symptoms: broad latency histogram,
 multi-peak latency, low accepted count outside an underfill control, MTS
 discard, ring input error, LVDS error delta, DPA-unlock delta, or an STP frame
 grammar violation.
+
+Reject any hit-producing `vco000` capture as a harness/configuration bug until
+the config manifest proves `vnvcodelay` was actually nonzero or the run is
+explicitly reclassified.
 
 ## 4. Corner-Case Matrix
 
@@ -146,15 +152,17 @@ Do not use `online_sc` `swb_dmatest`, `rw`, MIDAS, or libmudaq-backed Mu3e
 online tools as Phase-6 closure evidence. They are reference-only because their
 detector offsets, mask assumptions, and cleanup sequences can hide the first
 bad boundary. Use repo-owned direct-MMIO tools under `tools/`, currently:
-`tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py`.
+`tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py` and
+`tools/phase6_swb_dma_probe/analyze_phase6_dma_memory.py`.
 
 | Step | Action | Pass criteria |
 |---|---|---|
 | D1 | Verify `/dev/mudaq0`, SWB SC link-2 readback, and selected FEB optical link mask | `/dev/mudaq0` present; SC `0x0C000` returns `0x52434D48`; only selected link counters move |
-| D2 | Run one 10 s DMA capture with ASIC5/lane5 one-channel clean FEB output | disk file is nonzero and tied to the exact injector window |
-| D3 | Repeat D2 at least three times | no stale-buffer reuse; counters and disk word counts are monotonic |
-| D4 | Offline decode every disk file | legal frame grammar, no unexplained gaps, no duplicate/stale run tail |
+| D2 | Run SWB stream-datagen raw-DMA control | raw host DMA is nonzero; event-builder payload count advances; old-frame reducer may report `raw_payload_no_legacy_frames` |
+| D3 | Run one 10 s DMA capture with ASIC5/lane5 one-channel clean FEB output | disk file is nonzero and tied to the exact injector window |
+| D4 | Repeat D3 at least three times | no stale-buffer reuse; counters and disk word counts are monotonic |
 | D5 | Expand to ASIC6/lane6, then tuned lane7, then selected multi-lane cases | SWB input/output counters and disk decoder agree with FEB output counts |
+| D6 | Offline decode every disk file | legal frame grammar or explicitly decoded MuSiP payload, no unexplained gaps, no duplicate/stale run tail |
 
 For Mu3e Demo OPQ with `N_SHD=128` and `N_HIT=255`, a 256-hit source cluster is
 expected to deliver 255 hits plus exactly one accounted OPQ hit drop. A no-loss
@@ -163,11 +171,15 @@ changed and the run manifest proves it.
 
 ## 6. Offline Analysis Requirements
 
-The current reducer is
-`firmware_builds/systems/system_20260427_testplanphase5/script/analyze_phase6_dma_memory.py`.
-It is called automatically by `run_phase6_long_soak.py` for each SWB DMA
-capture and may also be run directly against a saved `memory_content.txt` or
-the probe's `dma_words.bin`.
+The current reducer entry point is
+`tools/phase6_swb_dma_probe/analyze_phase6_dma_memory.py`. It is called
+automatically by `run_phase6_long_soak.py` for each SWB DMA capture and may
+also be run directly against a saved `memory_content.txt` or the probe's
+`dma_words.bin`.
+
+`raw_payload_no_legacy_frames` is a partial SWB-DMA result, not a pass. It means
+the host buffer contains nonpadding raw `musip_event_builder` payload but the
+old FEB/SWB frame scanner found no legacy headers or trailers.
 
 The offline disk reducer must report, at minimum:
 
