@@ -33,6 +33,11 @@ those workflows here.
 - Shared System Console toolkit sources live under [`toolkits/`](toolkits/).
   The FE SciFi toolkit source of truth is [`toolkits/fe_scifi/`](toolkits/fe_scifi/).
   Do not add source changes through the `online_dpv2` deprecated snapshot path.
+- Treat Mu3e online software as reference material, not trusted validation
+  infrastructure. `online_dpv2`, MIDAS, `libmudaq`, `rw`, `swb_dmatest`, and
+  similar utilities may help identify register maps or legacy packing, but
+  closure evidence must be produced by repo-owned, direct tools under
+  [`tools/`](tools/) with explicit raw-register and disk-output artifacts.
 - For live FEB/SWB setup, programming, `/dev/mudaq0` recovery, and bridge
   preflight, follow [`firmware_builds/doc/SETUP.md`](firmware_builds/doc/SETUP.md)
   and [`firmware_builds/doc/TEST_PLAN.md`](firmware_builds/doc/TEST_PLAN.md).
@@ -76,3 +81,6 @@ those workflows here.
   [`firmware_builds/doc/SETUP.md`](firmware_builds/doc/SETUP.md) and
   [`firmware_builds/doc/TEST_PLAN.md`](firmware_builds/doc/TEST_PLAN.md).
   Do not use UIO binding when the next step expects `/dev/mudaq0`.
+- Mu3e online programs are not closure-quality tools for this bring-up. If an
+  online utility and a repo-owned tool disagree, debug against the raw register
+  contract and hardware evidence, not against the online utility behavior.

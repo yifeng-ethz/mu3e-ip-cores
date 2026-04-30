@@ -233,8 +233,8 @@ PROGRESS = [
         "Host DMA buffer",
         "BLOCKED",
         "/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.",
-        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming. Mu3e online DMA tools are deprecated as evidence; swb_dmatest, rw, MIDAS, and libmudaq-backed utilities are reference-only. The new tools/phase6_swb_dma_probe path directly mmaps /dev/mudaq0 and /dev/mudaq0_dmabuf, captures raw RW/RO registers and counter sweeps before cleanup, and writes dma_words.bin plus JSON/Markdown summaries.",
-        "Use only repo-owned direct-MMIO tools under tools/ for closure captures. First make SWB datagen produce nonzero DMA words; then capture FEB-link runs with the same manifest and offline reducer.",
+        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming. Mu3e online software is deprecated as Phase-6 evidence; swb_dmatest, rw, MIDAS, libmudaq-backed utilities, and production cleanup flows are reference-only. The new tools/phase6_swb_dma_probe path directly mmaps /dev/mudaq0 and /dev/mudaq0_dmabuf, captures raw RW/RO registers and counter sweeps before cleanup, and writes dma_words.bin plus JSON/Markdown summaries.",
+        "Use only repo-owned direct-MMIO tools under tools/ for closure captures. If an online utility disagrees with raw registers, trust the repo-owned probe and hardware evidence. First make SWB datagen produce nonzero DMA words; then capture FEB-link runs with the same manifest and offline reducer.",
     ),
     (
         "Disk/offline timestamp check",
