@@ -84,7 +84,7 @@ Class legend:
   pessimistic Phase-6 debug contract.
 - Fix status:
   - state:
-    fixed for the DMA evidence path.
+    fixed for the DMA evidence path; expanded to a repo-wide tooling policy.
   - mechanism:
     added `tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py`, which opens
     `/dev/mudaq0` and `/dev/mudaq0_dmabuf` directly, writes only explicit
@@ -93,7 +93,9 @@ Class legend:
     summaries.
   - policy:
     `swb_dmatest`, `rw`, MIDAS, and libmudaq-backed Mu3e online utilities are
-    reference-only for Phase-6 closure.
+    reference-only for Phase-6 closure. New validation work must extend
+    repo-owned tools under `tools/`; online software may supply legacy register
+    or packing hints, but it is not a trusted oracle.
 
 ### P6-BUG-004-H: frame-boundary SignalTap window is not yet time-aligned across RBCAM and FEB frame assembly
 

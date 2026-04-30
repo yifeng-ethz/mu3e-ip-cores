@@ -14,6 +14,10 @@ Primary evidence:
 
 - Serialize hardware access. Do not run `quartus_pgm`, `quartus_stp`, and board
   scripts against the same JTAG/SC path concurrently.
+- Treat Mu3e online software as reference-only. Do not trust `rw`,
+  `swb_dmatest`, MIDAS, `libmudaq`, or production cleanup flows for closure;
+  use repo-owned direct tools under `tools/` and keep their raw-register and
+  disk artifacts.
 - Program the FEB image with `quartus_pgm`; then recover the SWB PCIe path with
   `sudo -n /usr/local/sbin/mudaq_recover_pcie` before trusting `/dev/mudaq0`.
 - Run `rc_tool stop-reset --device /dev/mudaq0 --feb 7 --settle-us 5000`.
