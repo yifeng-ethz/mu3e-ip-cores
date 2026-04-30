@@ -3,7 +3,7 @@
 **Revision**: 2026-04-29 / draft-8
 **Target**: `mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe` on FEB SciFi prototype, with the eight live MuTRiG ASICs replacing the 8-lane `emulator_mutrig`. Build is under `firmware_builds/`.
 **Host**: teferi (`yifeng@teferi`, `/dev/mudaq0` via SWB on link 2 — see `TEST_PLAN.md` §0)
-**Companions**: [`TEST_PLAN.md`](TEST_PLAN.md) Phases 1..4 · [`phase4/TEST_PLAN_BASIC.md`](phase4/TEST_PLAN_BASIC.md) · [`phase4/TEST_PLAN_PUBLISH.md`](phase4/TEST_PLAN_PUBLISH.md)
+**Companions**: [`TEST_PLAN.md`](TEST_PLAN.md) Phases 1..4 · [`phase4/TEST_PLAN_BASIC.md`](phase4/TEST_PLAN_BASIC.md) · [`phase4/TEST_PLAN_PUBLISH.md`](phase4/TEST_PLAN_PUBLISH.md) · [`TEST_PLAN_PHASE6.md`](TEST_PLAN_PHASE6.md)
 **Authoring scope**: this document is the live Phase-5 plan and scoreboard. Helper scripts under `../systems/system_20260427_testplanphase5/script/` are allowed to implement read-only audits, address-map extraction, case-catalog validation, and run orchestration; generated `.stp` and report artifacts remain evidence, not the source of the test contract. The live injector boundary precheck is tracked in [`TEST_INJECTOR_PATH.md`](TEST_INJECTOR_PATH.md); it is a gate, not part of the 144-case bucket denominators.
 
 ---

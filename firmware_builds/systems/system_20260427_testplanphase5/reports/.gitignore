@@ -1,6 +1,7 @@
 *
 !.gitignore
-!*.md
+# Raw live-run reports are ignored by default. Promote a specific Markdown
+# report by adding a narrow exception here after it is reduced into evidence.
 !phase5_dualmts_quick_csr_closure_20260429.html
 !phase5_mutrig_tuning_report_*.html
 !phase5_hist_matrix_dualmts_*_quick_20260429.json
