@@ -36,6 +36,13 @@ constexpr uint32_t sc_preamble_mask = 0x1c0000bc;
 constexpr uint32_t sc_preamble_word = 0x1c0000bc;
 constexpr uint32_t sc_trailer_word = 0x0000009c;
 constexpr uint32_t sc_secondary_ready_mask = 0x20000000;
+// The live SWB is built from online_sc, while this local tool links against the
+// online_dpv2 libmudaq include path. The two a10_pcie register maps differ by
+// one slot after SWB_LINK_COUNTER_REGISTER_R, so pin the SWB-only diagnostic
+// registers here instead of trusting the imported header names.
+constexpr uint32_t swb_reset_link_status_reg = 0x35;
+constexpr uint32_t swb_link_locked_low_reg = 0x36;
+constexpr uint32_t swb_link_locked_high_reg = 0x37;
 // SC hub v2 host transactions use 18-bit word addresses (0x00000..0x3FFFF).
 // The user-facing CLI therefore accepts the exact word values documented in the
 // board-test plan and SVD-derived slave map; do not enforce byte alignment.
@@ -873,9 +880,9 @@ static void sc_print_board_status(mudaq::MudaqDevice& dev)
 	std::cout
 		<< "board:\n"
 		<< "  PLL_LOCKED_REGISTER_R      = " << hex_u32(dev.read_register_ro(PLL_LOCKED_REGISTER_R)) << '\n'
-		<< "  LINK_LOCKED_LOW_REGISTER_R = " << hex_u32(dev.read_register_ro(LINK_LOCKED_LOW_REGISTER_R)) << '\n'
-		<< "  LINK_LOCKED_HIGH_REGISTER_R= " << hex_u32(dev.read_register_ro(LINK_LOCKED_HIGH_REGISTER_R)) << '\n'
-		<< "  RESET_LINK_STATUS_REGISTER_R = " << hex_u32(dev.read_register_ro(RESET_LINK_STATUS_REGISTER_R)) << '\n';
+		<< "  LINK_LOCKED_LOW_REGISTER_R = " << hex_u32(dev.read_register_ro(swb_link_locked_low_reg)) << '\n'
+		<< "  LINK_LOCKED_HIGH_REGISTER_R= " << hex_u32(dev.read_register_ro(swb_link_locked_high_reg)) << '\n'
+		<< "  RESET_LINK_STATUS_REGISTER_R = " << hex_u32(dev.read_register_ro(swb_reset_link_status_reg)) << '\n';
 }
 
 } /* namespace */
