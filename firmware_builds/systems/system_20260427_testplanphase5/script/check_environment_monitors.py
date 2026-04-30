@@ -154,7 +154,13 @@ def add_onewire_line_status_checks(checks: list[dict[str, Any]], line_statuses: 
         add_check(checks, f"onewire.line{line}.processor_go", int(processor_go), status(processor_go), "processor_go must remain asserted to run the background temperature loop")
         add_check(checks, f"onewire.line{line}.crc_err", int(crc_err), status(not crc_err, crc_err), "CRC error should stay clear for a healthy 1-Wire sensor read")
         add_check(checks, f"onewire.line{line}.init_err", int(init_err), status(not init_err, init_err), "initialization error should stay clear for a detected/powered 1-Wire sensor")
-        add_check(checks, f"onewire.line{line}.sample_valid", int(sample_valid), status(sample_valid), "sample_valid should assert after a full DS18B20 scratchpad read")
+        add_check(
+            checks,
+            f"onewire.line{line}.sample_valid",
+            int(sample_valid),
+            "PASS" if sample_valid else "WARN",
+            "sample_valid can clear immediately after selecting a line; aggregate sensor temperatures are the hard health gate",
+        )
 
 
 def qsys_param_int(qsys_path: Path, instance: str, param_name: str, default: int) -> int:

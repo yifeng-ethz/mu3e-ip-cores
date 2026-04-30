@@ -125,5 +125,13 @@ Primary evidence:
 - If real traffic reaches MTS/histogram but MTS discard or ring error counters
   increment, inspect `mutrig_frame_deassembly` error outputs first. The previous
   discard symptom was already visible upstream as `aso_hit_type0_error[*]`.
+- 2026-04-30 Phase-6 lower-side update: on the timing-clean no-STP image,
+  ASIC5/lane5 and ASIC6/lane6 each pass one-channel pulse-high 4 alone, but
+  the two real lanes together fail with MTS-forwarded ring input errors and
+  zero LVDS error/DPA-unlock deltas. ASIC6 `ext_trig_offset=0..15` did not
+  clear the pair. A two-lane emulator reference through the same lower MTS/ring
+  path passes after 50 ms post-sync/pre-inject settle. Treat the current
+  blocker as real MuTRiG cross-ASIC timestamp/epoch/order coherence before
+  or inside lower MTS, not LVDS training or SWB/DMA.
 - Do not claim full Phase-5 real-source closure until lanes 1/2/4/5/6/7 are
   recovered or explicitly waived in the scoreboard.

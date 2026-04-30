@@ -53,7 +53,8 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | MuTRiG config mapping | `PASS` documented | `MUTRIG.md` ASIC/XML mapping, SMB3 lanes 0..3, SMB5 lanes 4..7 |
 | Injector control path | `PASS` for current image | `mutrig_injector_0` at SC word base `0x0AC80`; no deprecated `MUTRIG_CNT_CTRL_REGISTER_W` control |
 | LVDS controller observability | `PASS` for current blocker probe | active `lvds_rx_controller_pro_0.csr` at SC word base `0x08000`, 16-word aperture; [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
-| Lower pair single-channel | `BLOCKED` live / prior `PASS` superseded | timing-closed Phase-6 cycle 1 loaded explicit SMB5 XML and P6B010 failed as `unexpected_fail`: `ring_inerr_delta=535108`, `mts_discard_delta=0`, LVDS error/DPA deltas zero; [`../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md) |
+| Lower single ASIC guards | `PASS` live | ASIC5/lane5 and ASIC6/lane6 each pass alone in one-channel TDC-test mode at pulse-high 4 with zero ring input errors and zero LVDS error/DPA-unlock deltas; [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
+| Lower pair single-channel | `BLOCKED` live / prior `PASS` superseded | timing-closed Phase-6 cycle 1 loaded explicit SMB5 XML and P6B010 failed as `unexpected_fail`: `ring_inerr_delta=535108`, `mts_discard_delta=0`, LVDS error/DPA deltas zero; the later ASIC6 `ext_trig_offset=0..15` sweep also failed every point as `ring_input_errors_with_histogram_hits`; [`../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md), [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
 | Lower MTS/ring SignalTap | `PASS_DIAG` causality evidence | lower hit-stack STP `1180/1180` probes found; debug image checksum `0x16B6BF30`; P6B010 rerun captured `mts_preprocessor_1.aso_hit_type1_error` and `hit_stack_subsystem_1.hit_type_1_error[0]` rising in the same VCD window; [`../systems/system_20260427_testplanphase5/reports/phase6_lower_mts_ring_signaltap_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower_mts_ring_signaltap_20260430.md) |
 | Lower pair full 32-channel | `BLOCKED` | lanes 5+6 full-channel pulse-high 4 still produces MTS/ring timestamp errors |
 | SWB OPQ profile | `PASS` source/synthesis checkpoint | Mu3e Demo OPQ uses `N_SHD=128`, `N_HIT=255`; packet_scheduler `ed249da` merge includes the `25e204c` one-drop UVM proof; timing-closed online_sc checkpoint is `11eada541` |
@@ -67,6 +68,18 @@ P6B010 reloaded ASIC5/6 from the explicit SMB5 XML in one-channel mode and still
 failed with ring input errors. Enabling MTS `drop_delay_error` makes downstream
 ring diagnostics clean, but that trims the offending hits before the ring and is
 not latency closure.
+
+The 2026-04-30 cross-ASIC isolation sweep narrows this blocker. ASIC5/lane5
+alone and ASIC6/lane6 alone pass one-channel pulse-high 4/5 runs with zero ring
+input errors. The two real lanes together fail at pulse-high 4/5, while
+pulse-high 3 produces no useful one-channel histogram traffic. Sweeping ASIC6
+`ext_trig_offset` through the full 4-bit range `0..15` against ASIC5 offset 0
+does not find a clean point; every offset still reports
+`ring_input_errors_with_histogram_hits` with zero LVDS error and DPA-unlock
+deltas. A two-lane emulator reference through the same lower MTS/ring path
+passes after 50 ms post-sync/pre-inject settle, so the current hypothesis is
+real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower
+MTS, not LVDS training and not a generic lower hit-stack two-lane limit.
 
 The 2026-04-30 lower-MTS/ring debug image is accepted only for Arria V directed
 debug, not for soak/signoff. It compiled and programmed with checksum
@@ -107,7 +120,11 @@ unless the run is explicitly marked diagnostic-only.
 | ID | Scenario | Expected result | Evidence |
 |---|---|---|---|
 | P6B001 | all 8 ASICs reload full 32-channel TDC-test XML | `PASS` config, no stale SMB file use | `configure_mutrig_from_xml.py` JSON |
+| P6B006 | lower ASIC5/lane5, one TDC-test channel, pulse high 4, 100 kHz | `PASS`; current live guard passes with zero ring input errors | [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
+| P6B007 | lower ASIC6/lane6, one TDC-test channel, pulse high 4, 100 kHz | `PASS`; current live guard passes with zero ring input errors | [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
 | P6B010 | lower lanes 5+6, one channel per ASIC, pulse high 4, 100 kHz | nominal `PASS`, current live `UNEXPECTED_FAIL` after explicit SMB5 reload | Phase-5 sanity JSON, Phase-6 timing-closed cycle 1 |
+| P6B011 | lower lanes 5+6, one channel per ASIC, ASIC6 `ext_trig_offset=0..15`, pulse high 4, 100 kHz | `FAIL_DIAG`: no offset clears the MTS/ring error; do not repeat without a new timing hypothesis | [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
+| P6B012 | lower lanes 5+6 emulator reference, pulse high 4, 100 kHz, 50 ms settle | `PASS_DIAG`: lower MTS/ring accepts a valid two-lane stream | [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
 | P6B020 | lower lanes 5+6, full 32 channels, pulse high 4, 100 kHz | current expected `FAIL` at MTS/ring | Phase-5 sanity JSON, counters |
 | P6B021 | same as P6B020 with LVDS SVD snapshots enabled | `PASS_DIAG`: ring fails while LVDS error/DPA deltas stay zero, so blocker is downstream of LVDS training | [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | P6B030 | all 8 lanes, full 256 channels, pulse high 4, 100 kHz | `BLOCKED` until P6B020 passes | same |
@@ -273,6 +290,16 @@ Current live checkpoint, 2026-04-30:
   P6B010 is `unexpected_fail` with `ring_inerr_delta=535108`, P6B020 is
   `expected_fail` with `ring_inerr_delta=9022633`, and P6E010 is clean but
   underfilled. No valid host DMA/disk evidence exists yet.
+- Phase-6 lower ASIC5/6 isolation after the bounded cycle: `BLOCKED` at the
+  two-real-lane boundary. ASIC5/lane5 and ASIC6/lane6 pass alone at one channel
+  and pulse-high 4, but `lanes5+6` fail together; ASIC6 `ext_trig_offset=0..15`
+  fails every point; the lower two-lane emulator reference passes after settle.
+  The updated Phase-6 runner replay `20260430_190036` now carries those
+  single-ASIC guards as P6B006/P6B007: both are `expected_pass`, P6B010 remains
+  `unexpected_fail` with `ring_inerr_delta=534904`, P6B020 is `expected_fail`,
+  and P6E010 is clean but underfilled.
+  Reduced evidence:
+  [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md).
 - Lower-MTS/ring SignalTap debug checkpoint: `PASS_DIAG` causality only. The
   1180-probe lower hit-stack STP compiled into checksum `0x16B6BF30`, Node
   Finder found `1180/1180` probes, and the P6B010 capture showed

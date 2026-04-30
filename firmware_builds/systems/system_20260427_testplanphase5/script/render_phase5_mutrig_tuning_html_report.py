@@ -68,6 +68,12 @@ EVIDENCE = [
         "This early good-ribbon pass is now superseded by the timing-closed Phase-6 image, where explicit SMB5 reload reproduced the lower one-channel MTS/ring failure.",
     ),
     (
+        "Lower ASIC5/6 cross-ASIC sweep",
+        "Phase6",
+        "phase6_lower56_cross_asic_sweep_20260430.json",
+        "ASIC5/lane5 and ASIC6/lane6 pass alone, the real two-lane pair fails, ASIC6 ext_trig_offset 0..15 does not clear it, and the two-lane emulator reference passes after settle.",
+    ),
+    (
         "Lower lanes 5+6, full channels",
         "Delay",
         "phase5_real_lower_lanes56_full32_postrestore_latency2000_pulse4_20260430.json",
@@ -182,8 +188,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun now fails even the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The lower-MTS/ring SignalTap checkpoint shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window; live counters show ring_inerr_delta=535373, MTS discard=0, LVDS error/DPA deltas=0.",
-        "Debug the lower MTS timestamp-delay calculation, cross-ASIC ordering/epoch handling, or upstream timestamp formation before spending a compile on SWB DMA.",
+        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window; LVDS error/DPA deltas stay zero.",
+        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS before spending a compile on SWB DMA.",
     ),
     (
         "SWB input path",
@@ -473,7 +479,7 @@ def write_html() -> None:
       Older Phase-5 evidence showed single-lane delay could be made clean, but
       the timing-closed Phase-6 rerun with explicit SMB3/SMB5 XML reload moved
       the live blocker earlier: even the lower <code>lanes5+6</code>
-      one-channel case now trips MTS/ring input errors. The lower-MTS/ring
+      one-channel pair now trips MTS/ring input errors. The lower-MTS/ring
       SignalTap checkpoint localizes the visible error sideband to MTS1 before
       hit_stack1/ring sees the reject. No FEB/SWB host-disk
       Mu3e Demo OPQ, 100 kHz end-to-end claim is valid yet. Under the active
@@ -488,7 +494,7 @@ def write_html() -> None:
       The strongest blocker is not the deprecated injector path or XML mapping.
       The active injector is the Phase-5 <code>mutrig_injector_0</code> path and
       the XML split is SMB3 for ASICs 0..3 and SMB5 for ASICs 4..7. The lower
-      side fails because MTS asserts
+      side fails because two real lower streams together make MTS assert
       <code>tserr</code> before the ring stage; the ring
       <code>inerr_count</code> is therefore a real timestamp-delay failure,
       not a ring-local decode bug.
@@ -504,6 +510,16 @@ def write_html() -> None:
       expected fail, and P6E010 pulse-high 3 is clean but underfilled. Reduced
       evidence:
       <a href="{esc(rel(phase6_report))}">{esc(phase6_report.name)}</a>.
+    </p>
+    <p>
+      The follow-up lower ASIC5/6 sweep distinguishes lane-local health from
+      cross-ASIC failure. ASIC5/lane5 and ASIC6/lane6 each pass one-channel
+      pulse-high 4/5 runs alone with zero ring input errors. The two real lanes
+      together fail at pulse-high 4/5, and ASIC6 <code>ext_trig_offset</code>
+      values <code>0..15</code> all fail. A two-lane emulator reference through
+      the same lower MTS/ring path passes after 50 ms post-sync/pre-inject
+      settle. Reduced sweep evidence:
+      <a href="{esc(rel(REPORT_DIR / 'phase6_lower56_cross_asic_sweep_20260430.md'))}">phase6_lower56_cross_asic_sweep_20260430.md</a>.
     </p>
     <p>
       The lower-MTS/ring SignalTap debug image programmed with checksum
