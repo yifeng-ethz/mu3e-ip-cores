@@ -1,10 +1,19 @@
 #
 
-# false path for signaltap
-set signaltap_cells [get_cells -hierarchical -nowarn *sld_signaltap*]
-if { [get_collection_size $signaltap_cells] > 0 } {
-    set_false_path -to $signaltap_cells
+# False path for SignalTap debug probes.
+#
+# The generated SignalTap acquisition flops sample user signals for debug only.
+# They are not part of the functional datapath, and wide cross-domain probe
+# sets can otherwise dominate STA.  Keep this broad on purpose for debug
+# revisions, but do not use SignalTap captures as timing-signoff evidence.
+proc false_path_to_signaltap_regs { pattern } {
+    set regs [get_registers -nowarn $pattern]
+    if { [get_collection_size $regs] > 0 } {
+        set_false_path -to $regs
+    }
 }
+
+false_path_to_signaltap_regs {*sld_signaltap*}
 
 # false path for lvds controller, TODO: remove it by adding CDC
 set_false_path -from {*lvds_rx_controller_pro*|assembler_symbol_errors*} -to {*lvds_rx_controller_pro*|csr.symbol_errors*}

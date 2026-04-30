@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
     cat <<'EOF'
 Usage:
-  prepare_phase5_frame_hist_path_stp.sh [--sample-depth N] [--trigger-mode high|rising_edge] [--trigger-signal SIGNAL]
+  prepare_phase5_frame_hist_path_stp.sh [--sample-depth N] [--trigger-mode high|rising_edge] [--trigger-signal SIGNAL] [--hitstack 0|1|both]
 
 Purpose:
   Regenerate the Phase-5 frame/deassembly/MTS/histogram SignalTap file,
@@ -20,6 +20,7 @@ EOF
 sample_depth="1024"
 trigger_mode="rising_edge"
 trigger_signal=""
+hitstack="0"
 project="top"
 revision="top_stp_pipe_phase5_frame_hist"
 
@@ -35,6 +36,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --trigger-signal)
             trigger_signal="$2"
+            shift 2
+            ;;
+        --hitstack)
+            hitstack="$2"
             shift 2
             ;;
         -h|--help)
@@ -56,6 +61,11 @@ fi
 
 if [[ "${trigger_mode}" != "high" && "${trigger_mode}" != "rising_edge" ]]; then
     echo "ERROR: --trigger-mode must be 'high' or 'rising_edge' (got '${trigger_mode}')" >&2
+    exit 2
+fi
+
+if [[ "${hitstack}" != "0" && "${hitstack}" != "1" && "${hitstack}" != "both" ]]; then
+    echo "ERROR: --hitstack must be '0', '1', or 'both' (got '${hitstack}')" >&2
     exit 2
 fi
 
@@ -81,6 +91,7 @@ echo "PREPARE_PHASE5_STP_PROJECT_DIR  : ${project_dir}"
 echo "PREPARE_PHASE5_STP_FILE         : ${stp_file}"
 echo "PREPARE_PHASE5_STP_REPORT       : ${report_file}"
 echo "PREPARE_PHASE5_STP_TRIGGER_MODE : ${trigger_mode}"
+echo "PREPARE_PHASE5_STP_HITSTACK     : ${hitstack}"
 if [[ -n "${trigger_signal}" ]]; then
     echo "PREPARE_PHASE5_STP_TRIGGER_NODE : ${trigger_signal}"
 fi
@@ -89,6 +100,7 @@ echo "PREPARE_PHASE5_STP_SAMPLE_DEPTH : ${sample_depth}"
 generator_args=(
     --sample-depth "${sample_depth}"
     --trigger-mode "${trigger_mode}"
+    --hitstack "${hitstack}"
     --output "${stp_file}"
 )
 if [[ -n "${trigger_signal}" ]]; then

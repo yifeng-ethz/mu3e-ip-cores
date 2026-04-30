@@ -9,6 +9,9 @@ sources at the same downstream boundaries:
 * MTS type-1 stream into the histogram ingress bridge
 * histogram ingress bridge selected hist stream
 * histogram_statistics input and accepted/dropped counters
+
+Use ``--hitstack 1`` for the lower real-MuTRiG path. The historical default is
+hit-stack 0 so existing Phase-5 STP regeneration remains reproducible.
 """
 
 from __future__ import annotations
@@ -139,7 +142,13 @@ def hitstack_debug_ports(prefix: str, rings: int = 4) -> list[str]:
     return signals
 
 
-def default_signals() -> list[str]:
+def selected_hitstacks(hitstack: str) -> list[int]:
+    if hitstack == "both":
+        return [0, 1]
+    return [int(hitstack)]
+
+
+def default_signals(hitstack: str = "0") -> list[str]:
     signals: list[str] = []
 
     signals.append(f"{RESET_PREFIX}reset_out")
@@ -196,7 +205,8 @@ def default_signals() -> list[str]:
         signals.extend(type1_stream(mp, "aso_hit_type1"))
         signals.extend(mts_debug_streams(mp))
 
-    signals.extend(hitstack_debug_ports(hitstack_prefix(0)))
+    for stack in selected_hitstacks(hitstack):
+        signals.extend(hitstack_debug_ports(hitstack_prefix(stack)))
 
     signals.extend(
         histogram_stream(HIST_BRIDGE_PREFIX, "asi_pre", data_width=39, channel_width=4)
@@ -244,11 +254,11 @@ def default_signals() -> list[str]:
     return unique
 
 
-def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str) -> ET.ElementTree:
+def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str, hitstack: str) -> ET.ElementTree:
     stamp = dt.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")
     signal_set_name = "phase5_frame_hist_path"
     trigger_name = f"hist_valid_{trigger_mode}"
-    signals = default_signals()
+    signals = default_signals(hitstack)
 
     root = ET.Element("session", {"sof_file": ""})
     display_tree = ET.SubElement(root, "display_tree", {"gui_logging_enabled": "0"})
@@ -364,6 +374,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sample-depth", type=int, default=1024, help="SignalTap sample depth")
     parser.add_argument("--trigger-signal", default=DEFAULT_TRIGGER, help="SignalTap trigger signal name")
     parser.add_argument(
+        "--hitstack",
+        choices=("0", "1", "both"),
+        default="0",
+        help="Hit-stack debug port set to include; use 1 for lower lanes 4..7.",
+    )
+    parser.add_argument(
         "--trigger-mode",
         choices=("rising_edge", "high"),
         default="rising_edge",
@@ -374,14 +390,14 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    tree = build_stp(args.sample_depth, args.trigger_signal, args.trigger_mode)
+    tree = build_stp(args.sample_depth, args.trigger_signal, args.trigger_mode, args.hitstack)
     indent(tree.getroot())
 
     output = Path(args.output).resolve()
     output.parent.mkdir(parents=True, exist_ok=True)
     tree.write(output, encoding="utf-8", xml_declaration=False)
     output.write_text(output.read_text(encoding="utf-8") + "\n", encoding="utf-8")
-    print(f"wrote {output} ({len(default_signals())} probes)")
+    print(f"wrote {output} ({len(default_signals(args.hitstack))} probes)")
     return 0
 
 

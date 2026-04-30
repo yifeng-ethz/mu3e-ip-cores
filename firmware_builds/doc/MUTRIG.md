@@ -296,9 +296,11 @@ Observed Phase-5 update on 2026-04-30:
   and the parked emulators are quiet, but the full 32-channel pair still
   produces ring-buffer CAM input errors. Treat that as a multiplicity/rate
   problem, not as proof of an ASIC1/2 phase offset.
-- Lower pair `lanes5+6` now passes at one TDC-test channel per ASIC after a
-  clean good-ribbon restore of ASIC5/6. The earlier one-channel failure should
-  be treated as a stale/reset-sensitive observation, not the current blocker.
+- Lower pair `lanes5+6` one-channel is not a stable pass. An early
+  good-ribbon restore run passed, but the later timing-closed Phase-6 image with
+  explicit SMB5 XML reload reproduced P6B010 ring input errors while LVDS error
+  and DPA-unlock deltas stayed zero. Treat the earlier pass as stale/reset- or
+  image-sensitive until the same image passes after a clean reconfigure.
 - Lower pair `lanes5+6` still fails with all 32 TDC-test channels enabled on
   ASIC5 and ASIC6. Opening the MTS expected-latency window to `65535` does not
   remove the ring input errors, so the failure is not just a small positive
@@ -332,6 +334,11 @@ Observed Phase-5 update on 2026-04-30:
   diagnostic by removing the offending hits before the ring, but that is not
   latency closure. It only confirms the ring-buffer CAM is reacting to upstream
   MTS delay errors rather than creating the errors locally.
+- The lower MTS/ring SignalTap capture on 2026-04-30 shows
+  `mts_preprocessor_1.aso_hit_type1_error` and
+  `hit_stack_subsystem_1.hit_type_1_error[0]` both rising in the exported
+  window. That puts the failure at or before the lower MTS timestamp-delay
+  decision; it is not just a ring-local reject.
 - A Phase-6 LVDS SVD probe on 2026-04-30 reproduced the lower full-channel
   blocker with `2052049` ring input errors while lanes 5 and 6 had zero LVDS
   error-counter delta and zero DPA-unlock delta. Do not treat the new LVDS

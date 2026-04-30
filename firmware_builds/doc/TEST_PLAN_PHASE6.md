@@ -54,6 +54,7 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | Injector control path | `PASS` for current image | `mutrig_injector_0` at SC word base `0x0AC80`; no deprecated `MUTRIG_CNT_CTRL_REGISTER_W` control |
 | LVDS controller observability | `PASS` for current blocker probe | active `lvds_rx_controller_pro_0.csr` at SC word base `0x08000`, 16-word aperture; [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | Lower pair single-channel | `BLOCKED` live / prior `PASS` superseded | timing-closed Phase-6 cycle 1 loaded explicit SMB5 XML and P6B010 failed as `unexpected_fail`: `ring_inerr_delta=535108`, `mts_discard_delta=0`, LVDS error/DPA deltas zero; [`../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md) |
+| Lower MTS/ring SignalTap | `PASS_DIAG` causality evidence | lower hit-stack STP `1180/1180` probes found; debug image checksum `0x16B6BF30`; P6B010 rerun captured `mts_preprocessor_1.aso_hit_type1_error` and `hit_stack_subsystem_1.hit_type_1_error[0]` rising in the same VCD window; [`../systems/system_20260427_testplanphase5/reports/phase6_lower_mts_ring_signaltap_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower_mts_ring_signaltap_20260430.md) |
 | Lower pair full 32-channel | `BLOCKED` | lanes 5+6 full-channel pulse-high 4 still produces MTS/ring timestamp errors |
 | SWB OPQ profile | `PASS` source/synthesis checkpoint | Mu3e Demo OPQ uses `N_SHD=128`, `N_HIT=255`; packet_scheduler `ed249da` merge includes the `25e204c` one-drop UVM proof; timing-closed online_sc checkpoint is `11eada541` |
 | SWB image / PCIe / SC return | `PASS_SC` | online_sc `11eada541` timing-closed all checked STA corners, programmed SOF checksum `0x31A704E1` (SHA256 `15826df9f66187a6ffca1c2dd812334d1036c267a2f4f6899c833084761ef003`), recovered `/dev/mudaq0`, and returned host-visible SC link-2 reads including `0x0C000 -> 0x52434D48` (`RCMH`) in about 68 us; older `ada3aea38` secondary-capture blocker is superseded for SC return |
@@ -66,6 +67,15 @@ P6B010 reloaded ASIC5/6 from the explicit SMB5 XML in one-channel mode and still
 failed with ring input errors. Enabling MTS `drop_delay_error` makes downstream
 ring diagnostics clean, but that trims the offending hits before the ring and is
 not latency closure.
+
+The 2026-04-30 lower-MTS/ring debug image is accepted only for Arria V directed
+debug, not for soak/signoff. It compiled and programmed with checksum
+`0x16B6BF30`, SOF SHA256
+`080f92844f868d33e142ce6e576911b728f9364fadd1d9c2824addd7d1cff2b9`,
+and setup WNS `-0.086 ns` on `transceiver_pll_clock[0]`; LVDS `pll_sclk`
+setup is positive at `+0.319 ns`, and hold/recovery/removal are positive. This
+is inside the clarified Arria V debug tolerance, but the SWB Arria 10 rule
+remains hard timing closure in all checked corners.
 
 The old SWB-side SC-return blocker is closed for the timing-fixed online_sc
 image. `sc_tool 2 read 0x00000 1 --quiet` and
@@ -263,6 +273,13 @@ Current live checkpoint, 2026-04-30:
   P6B010 is `unexpected_fail` with `ring_inerr_delta=535108`, P6B020 is
   `expected_fail` with `ring_inerr_delta=9022633`, and P6E010 is clean but
   underfilled. No valid host DMA/disk evidence exists yet.
+- Lower-MTS/ring SignalTap debug checkpoint: `PASS_DIAG` causality only. The
+  1180-probe lower hit-stack STP compiled into checksum `0x16B6BF30`, Node
+  Finder found `1180/1180` probes, and the P6B010 capture showed
+  `mts1.aso_hit_type1_error` first high at `128500 ps` followed in the same
+  exported window by `hit_stack1.hit_type_1_error[0]`. The live run still failed
+  with `ring_inerr_delta=535373`, `mts_discard_delta=0`, and LVDS error/DPA
+  deltas zero; this is not closure.
 
 ## 7. Git and Evidence Hygiene
 
