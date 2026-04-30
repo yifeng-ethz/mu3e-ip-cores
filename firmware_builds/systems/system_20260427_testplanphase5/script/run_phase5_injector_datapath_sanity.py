@@ -38,6 +38,7 @@ from phase5_real_mutrig_link_debug import read_lvds_snapshot  # noqa: E402
 from run_phase4_emulator import (  # noqa: E402
     EMU_BASE_WORD,
     EMU_STRIDE_WORD,
+    HIST_BIN_BASE_WORD,
     HIST_CSR_BASE_WORD,
     HIST_KEY_LOC_CHANNEL_POST,
     LVDS_CSR_BASE_WORD,
@@ -283,6 +284,53 @@ def summarize_lvds_window(before: dict[str, Any] | None, after: dict[str, Any] |
         "dpa_unlock_delta_lanes": dpa_delta_lanes,
         "fatal_lanes": fatal_lanes,
         "lanes": lane_rows,
+    }
+
+
+def read_histogram_bins(
+    sc_tool: Path,
+    link: int,
+    *,
+    chunk_words: int = 1,
+    read_delay_s: float = 0.0,
+) -> list[int]:
+    """Read histogram bins over the slow-control path.
+
+    Keep the default conservative.  A 16-word read from the bin window has
+    been observed to desynchronize the SC secondary ring while real MuTRiG
+    traffic is active; use bulk reads only as an explicitly unsafe debug mode.
+    """
+    bins: list[int] = []
+    for offset in range(0, 256, chunk_words):
+        bins.extend(sc_read(sc_tool, link, HIST_BIN_BASE_WORD + offset, min(chunk_words, 256 - offset)))
+        if read_delay_s > 0 and offset + chunk_words < 256:
+            time.sleep(read_delay_s)
+    return bins
+
+
+def summarize_histogram_bins(bins: list[int], histogram_config: dict[str, Any]) -> dict[str, Any]:
+    left = int(histogram_config.get("left_bound", 0) or 0)
+    width = int(histogram_config.get("bin_width", 1) or 1)
+    nonzero = []
+    total = 0
+    for idx, count in enumerate(bins):
+        count_i = int(count or 0)
+        total += count_i
+        if count_i:
+            nonzero.append(
+                {
+                    "bin": idx,
+                    "center": left + idx * width + width / 2.0,
+                    "count": count_i,
+                }
+            )
+    top_bins = sorted(nonzero, key=lambda item: item["count"], reverse=True)[:16]
+    return {
+        "captured": True,
+        "total": total,
+        "nonzero_bins": len(nonzero),
+        "top_bins": top_bins,
+        "bins": bins,
     }
 
 
@@ -684,6 +732,24 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
     after = read_stage_snapshot(args.sc_tool, args.link)
     lvds_after = read_lvds_snapshot_for_args(args)
     injector_after = read_injector_regs_for_args(args)
+    hist_bins = None
+    hist_bin_summary: dict[str, Any] = {"captured": False}
+    if args.dump_hist_bins:
+        try:
+            hist_bins = read_histogram_bins(
+                args.sc_tool,
+                args.link,
+                chunk_words=args.hist_bin_read_chunk_words,
+                read_delay_s=args.hist_bin_read_delay_ms / 1000.0,
+            )
+            hist_bin_summary = summarize_histogram_bins(hist_bins, histogram_config)
+        except Exception as exc:  # noqa: BLE001
+            hist_bin_summary = {
+                "captured": False,
+                "error": str(exc),
+                "chunk_words": args.hist_bin_read_chunk_words,
+                "read_delay_ms": args.hist_bin_read_delay_ms,
+            }
 
     summary = summarize_cycle(before, sample, after)
     summary["hist_live_total_delta"] = summary.get("hist_total_delta", 0)
@@ -731,6 +797,8 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         "lvds_before": lvds_before,
         "lvds_after": lvds_after,
         "lvds_summary": lvds_summary,
+        "hist_bins": hist_bins,
+        "hist_bin_summary": hist_bin_summary,
         "injector_actions": {"actions": inject_window["actions"]},
         "injector_during": inject_window["injector_during"],
         "injector_after": injector_after,
@@ -758,6 +826,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- LVDS configured by runner: `{'no' if args.skip_lvds_config else 'yes'}`",
         f"- LVDS SVD snapshot: `{'yes' if args.capture_lvds else 'no'}`",
         f"- LVDS per-lane DPA unlock reads: `{'yes' if args.read_lvds_dpa_unlocks else 'no'}`",
+        f"- Histogram bin dump: `{'yes' if args.dump_hist_bins else 'no'}`",
+        f"- Histogram bin read chunk/delay: `{args.hist_bin_read_chunk_words}` words / `{args.hist_bin_read_delay_ms}` ms",
         f"- Active emulator lanes: `{fmt_hex(args.active_lanes_mask)}`",
         f"- Inject mode: `{args.inject_mode}`",
         f"- Injector layout: `{getattr(args, 'injector_layout', {}).get('name', 'unknown')}`",
@@ -882,6 +952,22 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
             lines.append("")
         elif lvds_summary:
             lines.extend([f"- LVDS snapshot error: `{lvds_summary}`", ""])
+        hist_bin_summary = case.get("hist_bin_summary", {})
+        if hist_bin_summary.get("error"):
+            lines.extend([f"- Histogram bin dump error: `{hist_bin_summary.get('error')}`", ""])
+        if hist_bin_summary.get("captured"):
+            lines.extend(
+                [
+                    "| Hist Bin | Center | Count |",
+                    "|---:|---:|---:|",
+                ]
+            )
+            for row in hist_bin_summary.get("top_bins", []):
+                lines.append(f"| {row['bin']} | {row['center']:.3f} | {row['count']} |")
+            lines.append(
+                f"\nHistogram bin dump total: `{hist_bin_summary.get('total', 0)}`, "
+                f"nonzero bins: `{hist_bin_summary.get('nonzero_bins', 0)}`.\n"
+            )
 
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
@@ -901,6 +987,9 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "skip_lvds_config": args.skip_lvds_config,
             "capture_lvds": args.capture_lvds,
             "read_lvds_dpa_unlocks": args.read_lvds_dpa_unlocks,
+            "dump_hist_bins": args.dump_hist_bins,
+            "hist_bin_read_chunk_words": args.hist_bin_read_chunk_words,
+            "hist_bin_read_delay_ms": args.hist_bin_read_delay_ms,
             "inject_mode": args.inject_mode,
             "duration_ms": args.duration_ms,
             "pulse_intervals": args.pulse_intervals,
@@ -948,6 +1037,15 @@ def main() -> int:
     parser.add_argument("--capture-lvds", action=argparse.BooleanOptionalAction, default=None)
     parser.add_argument("--read-lvds-dpa-unlocks", action="store_true")
     parser.add_argument("--require-lvds-snapshot", action="store_true")
+    parser.add_argument("--dump-hist-bins", action="store_true")
+    parser.add_argument(
+        "--hist-bin-read-chunk-words",
+        type=int,
+        default=1,
+        help="SC words per histogram-bin read. Default is conservative; values above 1 require --unsafe-bulk-hist-bin-read.",
+    )
+    parser.add_argument("--hist-bin-read-delay-ms", type=int, default=1)
+    parser.add_argument("--unsafe-bulk-hist-bin-read", action="store_true")
     parser.add_argument(
         "--active-lanes-mask",
         type=parse_mask,
@@ -1006,6 +1104,12 @@ def main() -> int:
         args.active_lanes_mask = 0x00 if args.source == "real" else 0xFF
     if args.capture_lvds is None:
         args.capture_lvds = args.source in ("real", "mixed")
+    if args.hist_bin_read_chunk_words <= 0 or args.hist_bin_read_chunk_words > 16:
+        parser.error("--hist-bin-read-chunk-words must be in range 1..16")
+    if args.hist_bin_read_delay_ms < 0:
+        parser.error("--hist-bin-read-delay-ms must be non-negative")
+    if args.hist_bin_read_chunk_words > 1 and not args.unsafe_bulk_hist_bin_read:
+        parser.error("histogram bin bulk reads require --unsafe-bulk-hist-bin-read")
 
     timestamp = dt.datetime.now().isoformat(timespec="seconds")
     output = args.output or default_output()

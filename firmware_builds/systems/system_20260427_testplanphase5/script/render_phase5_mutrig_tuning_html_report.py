@@ -177,6 +177,44 @@ EVIDENCE = [
     ),
 ]
 
+PROGRESS = [
+    (
+        "FEB MuTRiG output",
+        "BLOCKED",
+        "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
+        "Full-channel lower ASIC5+6 and all-lane runs still produce MTS/ring timestamp errors. Single lanes and selected masks pass the 0..2000-cycle gate.",
+        "Keep tuning at MTS/ring boundary; do not claim FEB closure from single-lane evidence.",
+    ),
+    (
+        "SWB input path",
+        "IN_PROGRESS",
+        "SWB must receive the FEB data links instead of tying the datapath off.",
+        "online_sc local commit 26d93ef61 sets g_NLINKS_DATA_GENERIC=8 and wires the musip four-lane OPQ ingress while keeping online_sc RC/SC.",
+        "Use the new SWB SOF once full fit/assembly closes, then verify the FEB link counters and OPQ ingress counters on hardware.",
+    ),
+    (
+        "SWB OPQ to DMA",
+        "IN_PROGRESS",
+        "Merged 256-bit hit words must drive the existing SWB DMA outputs without event-builder drops.",
+        "make flow_map passed with swb_block -> ingress_egress_adaptor -> opq_upstream_4lane -> ordered_priority_queue_dut_sv present in synthesis.",
+        "Full make flow is running from the committed SWB OPQ checkpoint; program only after timing and assembler output are clean enough for this debug stage.",
+    ),
+    (
+        "Host DMA buffer",
+        "PENDING",
+        "/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.",
+        "No valid host DMA capture exists yet for the new SWB OPQ image.",
+        "After SWB programming, recover PCIe, start DMA, and capture a bounded run before any disk/offline claim.",
+    ),
+    (
+        "Disk/offline timestamp check",
+        "PENDING",
+        "Every bunch must contain 256 hits with identical TS, and adjacent bunch TS spacing must match the 100 kHz injection cadence.",
+        "No disk artifact has been produced yet for the 256-channel, 100 kHz/channel end-to-end requirement.",
+        "Add the offline reducer next to the long-run scripts and emit a compact report with per-bunch TS equality and interval histograms.",
+    ),
+]
+
 
 def esc(value: Any) -> str:
     return html.escape(str(value), quote=True)
@@ -298,7 +336,12 @@ def summarize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def badge(result: str) -> str:
-    klass = "pass" if result == "PASS" else "missing" if result == "MISSING" else "fail"
+    if result in {"PASS", "PASS_DIAG", "PASS_WITH_METHOD_NOTE", "PASS_DEBUG_ONLY"}:
+        klass = "pass"
+    elif result in {"PENDING", "IN_PROGRESS", "MISSING"}:
+        klass = "missing"
+    else:
+        klass = "fail"
     return f'<span class="badge {klass}">{esc(result)}</span>'
 
 
@@ -323,6 +366,21 @@ def evidence_rows() -> str:
             f"<td>{fmt_int(summary.get('frame'))}</td>"
             f"<td>{fmt_int(summary.get('crc'))}</td>"
             f"<td>{link}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
+
+
+def progress_rows() -> str:
+    rows = []
+    for stage, result, gate, evidence, next_step in PROGRESS:
+        rows.append(
+            "<tr>"
+            f"<td>{esc(stage)}</td>"
+            f"<td>{badge(result)}</td>"
+            f"<td>{esc(gate)}</td>"
+            f"<td>{esc(evidence)}</td>"
+            f"<td>{esc(next_step)}</td>"
             "</tr>"
         )
     return "\n".join(rows)
@@ -380,6 +438,9 @@ def write_html() -> None:
     .pass {{ background: #1d7f45; }}
     .fail {{ background: #b73535; }}
     .missing {{ background: #6b7280; }}
+    .progress-table td:nth-child(3),
+    .progress-table td:nth-child(4),
+    .progress-table td:nth-child(5) {{ min-width: 220px; }}
     .note, .class {{
       margin-top: 4px;
       color: #52606d;
@@ -440,6 +501,28 @@ def write_html() -> None:
       That page links the local MuTRiG wiki mirror and records the DMON/TDC
       injection implications used here.
     </p>
+
+    <h2>Phase-6 End-to-End Progress</h2>
+    <p>
+      Closure still means the full hardware chain, not just a FEB-local
+      histogram. The required proof is 100 kHz injection on all 256 MuTRiG
+      channels, DMA data reaching the host disk, all 256 hits in a bunch sharing
+      one timestamp, and adjacent bunch timestamps matching the 100 kHz cadence.
+    </p>
+    <table class="progress-table">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Status</th>
+          <th>Gate</th>
+          <th>Current Evidence</th>
+          <th>Next Check</th>
+        </tr>
+      </thead>
+      <tbody>
+{progress_rows()}
+      </tbody>
+    </table>
 
     <h2>Evidence Table</h2>
     <table>
