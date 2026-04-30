@@ -382,6 +382,8 @@ class Runner:
             "real",
             "--lvds-lane-mask",
             fmt_mask(case.lvds_lane_mask),
+            "--capture-lvds",
+            "--read-lvds-dpa-unlocks",
             "--active-lanes-mask",
             "0x00",
             "--hist-profile",
@@ -452,6 +454,12 @@ class Runner:
             "mts_discard_delta": int(summary.get("mts_discard_delta", 0) or 0),
             "ring_inerr_delta": int(summary.get("ring_inerr_delta", 0) or 0),
             "source_mux_real_delta": int(summary.get("source_mux_real_delta", 0) or 0),
+            "lvds_error_delta_total": int(summary.get("lvds_error_delta_total", 0) or 0),
+            "lvds_error_delta_lanes": summary.get("lvds_error_delta_lanes", []),
+            "lvds_dpa_unlock_delta_total": int(summary.get("lvds_dpa_unlock_delta_total", 0) or 0),
+            "lvds_dpa_unlock_delta_lanes": summary.get("lvds_dpa_unlock_delta_lanes", []),
+            "lvds_fatal_lanes": summary.get("lvds_fatal_lanes", []),
+            "lvds_snapshot_error": summary.get("lvds_snapshot_error"),
             "post_end_clean": bool(summary.get("post_end_clean", False)),
         }
 

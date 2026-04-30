@@ -145,9 +145,12 @@ def read_lvds_snapshot(sc_tool: Path, link: int, *, read_dpa_unlocks: bool = Fal
     words = [sc_read_word(sc_tool, link, LVDS_CSR_BASE_WORD + offset) for offset in range(LVDS_REG_WORDS)]
     dpa_unlocks: dict[str, int] = {}
     if read_dpa_unlocks:
+        original_lane_selection = words[LVDS_REG_LANE_SELECTION] & 0xF
         for lane in range(LVDS_N_LANE):
             sc_write(sc_tool, link, LVDS_CSR_BASE_WORD + LVDS_REG_LANE_SELECTION, [lane])
             dpa_unlocks[str(lane)] = sc_read_word(sc_tool, link, LVDS_CSR_BASE_WORD + LVDS_REG_DPA_UNLOCKS)
+        if original_lane_selection < LVDS_N_LANE:
+            sc_write(sc_tool, link, LVDS_CSR_BASE_WORD + LVDS_REG_LANE_SELECTION, [original_lane_selection])
 
     lanes = []
     for lane in range(LVDS_N_LANE):

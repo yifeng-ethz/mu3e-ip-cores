@@ -44,6 +44,7 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | FEB no-STP image | `PASS` timing-clean board image | `TEST_PLAN_PHASE5.md` v26.1.6 checkpoint |
 | MuTRiG config mapping | `PASS` documented | `MUTRIG.md` ASIC/XML mapping, SMB3 lanes 0..3, SMB5 lanes 4..7 |
 | Injector control path | `PASS` for current image | `mutrig_injector_0` at SC word base `0x0AC80`; no deprecated `MUTRIG_CNT_CTRL_REGISTER_W` control |
+| LVDS controller observability | `PASS` for current blocker probe | active `lvds_rx_controller_pro_0.csr` at SC word base `0x08000`, 16-word aperture; [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | Lower pair single-channel | `PASS` | lanes 5+6 pass one TDC-test channel after clean good-ribbon restore |
 | Lower pair full 32-channel | `BLOCKED` | lanes 5+6 full-channel pulse-high 4 still produces MTS/ring timestamp errors |
 | DMA disk closure | `not-run` | no valid host-disk 256-hit bunch evidence yet |
@@ -79,6 +80,7 @@ unless the run is explicitly marked diagnostic-only.
 | P6B001 | all 8 ASICs reload full 32-channel TDC-test XML | `PASS` config, no stale SMB file use | `configure_mutrig_from_xml.py` JSON |
 | P6B010 | lower lanes 5+6, one channel per ASIC, pulse high 4, 100 kHz | `PASS` FEB MTS/ring | Phase-5 sanity JSON |
 | P6B020 | lower lanes 5+6, full 32 channels, pulse high 4, 100 kHz | current expected `FAIL` at MTS/ring | Phase-5 sanity JSON, counters |
+| P6B021 | same as P6B020 with LVDS SVD snapshots enabled | `PASS_DIAG`: ring fails while LVDS error/DPA deltas stay zero, so blocker is downstream of LVDS training | [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
 | P6B030 | all 8 lanes, full 256 channels, pulse high 4, 100 kHz | `BLOCKED` until P6B020 passes | same |
 | P6B040 | all 8 lanes, full 256 channels, diagnostic `drop_delay_error=on` | diagnostic-only downstream clean expected | proves downstream ring/SWB path only after labeling trimmed hits |
 
@@ -101,6 +103,7 @@ Only run these after P6B020 passes without trimming.
 | P6E020 | latency window 1990, 2000, 2010 around accepted boundary | only hits inside the configured window accepted | MTS/ring counters and SignalTap |
 | P6E030 | first bunch after SYNC, first bunch after START_RUN | no stale timestamp from prior run | disk decode bunch index |
 | P6E040 | END_RUN during active injection | run terminates cleanly with bounded drain | FEB/SWB counters and DMA tail decode |
+| P6E050 | lower lanes 5+6 full 32 channels with LVDS `dpa_hold` asserted after lock | only useful if P6B021 shows DPA unlocks; otherwise diagnostic-only | LVDS DPA counters plus MTS/ring counters |
 
 ### 3.4 ERROR
 
@@ -145,6 +148,18 @@ The long-run is allowed to continue after expected failures so later diagnostic
 and health probes still collect evidence. It must stop on environment/preflight
 failure, `/dev/mudaq0` loss, or a hardware command exception that prevents the
 runner from forcing the injector off.
+
+The Phase-6 runner now enables the live LVDS SVD snapshot path for real-source
+cases. Each case JSON records `lvds_summary` from `lvds_rx_controller_pro_0.csr`:
+capability, mode mask, DPA hold, lane-go, per-lane error-counter deltas, and
+per-lane DPA-unlock deltas. The current Qsys aperture is 16 words
+(`0x0..0x3f` internal bytes), so `lane_word_aligner_chosen` at word 16 is not
+read by the live scripts. If P6B020 fails with zero LVDS error/DPA deltas, do
+not spend a compile on an LVDS replacement first; move the next SignalTap scope
+to MTS timestamp-delay and ring input-error causality. If LVDS deltas correlate
+with the ring failure, follow the documented A/B path: control image, compatible
+LVDS-controller candidate preserving the external PHY/CSR/clock contract, then
+absorbed/full LVDS candidate only after the compatible candidate passes.
 
 ## 5. SignalTap and Simulation Loop
 

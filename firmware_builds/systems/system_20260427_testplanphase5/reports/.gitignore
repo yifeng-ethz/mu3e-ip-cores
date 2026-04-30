@@ -4,6 +4,7 @@
 # report by adding a narrow exception here after it is reduced into evidence.
 !phase5_dualmts_quick_csr_closure_20260429.html
 !phase5_mutrig_tuning_report_*.html
+!phase6_lvds_blocker_probe_20260430.md
 !phase5_hist_matrix_dualmts_*_quick_20260429.json
 !assets/
 !assets/phase5_dualmts_20260429/

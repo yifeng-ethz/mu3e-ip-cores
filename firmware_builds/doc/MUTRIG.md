@@ -90,6 +90,41 @@ board-test scripts this is `mutrig_injector_0` at SC word base `0x0AC80`, with
 periodic mode `2`, interval `1250` cycles, and the mode register forced back to
 `0` after the measurement window.
 
+### LVDS Controller Register Observability
+
+The active FEB datapath exposes `lvds_rx_controller_pro_0.csr` through the
+downstream datapath bridge at SC word base `0x08000`. Use the
+`mu3e_lvds_controller` SVD-backed map, not ad hoc word guesses:
+
+| Word offset | Register | Debug use |
+|---:|---|---|
+| 0 | `capability` | sync pattern and lane count |
+| 1 | `mode_mask` | per-lane adaptive alignment (`1`) vs bit-slip (`0`) |
+| 2 | `soft_reset_req` | per-lane soft reset request |
+| 3 | `dpa_hold` | per-lane DPA hold control |
+| 4 | `lane_go` | per-lane enable/readback |
+| 5..13 | `error_counter_lane0..8` | decode/parity/fatal training evidence |
+| 14 | `lane_selection` | selects the lane for indirect debug reads |
+| 15 | `lane_dpa_unlocks` | DPA unlock count for selected lane |
+
+The active Qsys aperture is 16 words. The newer SVD also describes
+`lane_word_aligner_chosen` at word 16, but that word is outside the current
+`0x0..0x3f` Platform Designer address range and must not be read until the
+component aperture is widened and the system is rebuilt.
+
+For live tuning, run the injector sanity path with `--capture-lvds
+--read-lvds-dpa-unlocks` or run `phase5_real_mutrig_link_debug.py
+--read-dpa-unlocks`. The DPA-unlock probe restores the original
+`lane_selection` value after the per-lane reads.
+
+Do not swap in a new LVDS-controller build just because a timestamp error is
+visible downstream. First prove whether LVDS error counters or DPA unlocks move
+during the failing lower-pair full-channel case. If those counters stay flat
+while MTS/ring errors advance, the next debug scope is MTS timestamp/epoch
+causality. If LVDS errors correlate, build a Platform Designer A/B candidate
+that preserves the old external PHY, `lvds_rx_controller_pro_0.csr` base, lane
+streams, clocks, and reset contract before trying any absorbed/full LVDS IP.
+
 Do not use deprecated pulse-control constants such as `0x4502`,
 `MUTRIG_CNT_CTRL_REGISTER_W = 0x4100`, `pll_test_mode(0)`, or `o_pll_test` for
 Phase-5 injector tests. They are not mapped as the active injector control path
@@ -297,6 +332,11 @@ Observed Phase-5 update on 2026-04-30:
   diagnostic by removing the offending hits before the ring, but that is not
   latency closure. It only confirms the ring-buffer CAM is reacting to upstream
   MTS delay errors rather than creating the errors locally.
+- A Phase-6 LVDS SVD probe on 2026-04-30 reproduced the lower full-channel
+  blocker with `2052049` ring input errors while lanes 5 and 6 had zero LVDS
+  error-counter delta and zero DPA-unlock delta. Do not treat the new LVDS
+  controller IP as the next primary fix unless a future run shows LVDS deltas
+  correlated with the MTS/ring failure.
 - The quick `rate` profile's `LAST_INTERVAL_TOTAL_HITS` is not closure evidence
   in the current live runs; it stayed near `66560` for one-channel lane5 while
   live/MTS counters changed with run duration. Use raw DMA/hit decode or a fixed
