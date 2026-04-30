@@ -68,6 +68,26 @@ class Phase6Case:
 
 PHASE6_CASES: tuple[Phase6Case, ...] = (
     Phase6Case(
+        case_id="P6B006",
+        description="lower lane5 / ASIC5 one TDC-test channel, 100 kHz, pulse-high 4",
+        config_kind="lower56_ch1",
+        pulse_high_cycles=4,
+        lvds_lane_mask=0x020,
+        real_hits_per_lane=1,
+        duration_ms=250,
+        expected="pass",
+    ),
+    Phase6Case(
+        case_id="P6B007",
+        description="lower lane6 / ASIC6 one TDC-test channel, 100 kHz, pulse-high 4",
+        config_kind="lower56_ch1",
+        pulse_high_cycles=4,
+        lvds_lane_mask=0x040,
+        real_hits_per_lane=1,
+        duration_ms=250,
+        expected="pass",
+    ),
+    Phase6Case(
         case_id="P6B010",
         description="lower lanes5+6 one TDC-test channel per ASIC, 100 kHz, pulse-high 4",
         config_kind="lower56_ch1",
@@ -223,6 +243,8 @@ class Runner:
     def preflight(self) -> bool:
         commands: list[CommandResult] = []
         commands.extend(self.stop_reset())
+        if self.args.preflight_settle_ms > 0 and not self.args.dry_run:
+            time.sleep(self.args.preflight_settle_ms / 1000.0)
         commands.append(
             self.run_cmd(
                 "check_sc_bridges",
@@ -434,6 +456,10 @@ class Runner:
             str(case.pulse_high_cycles),
             "--duration-ms",
             str(case.duration_ms),
+            "--pre-inject-ms",
+            str(self.args.pre_inject_ms),
+            "--post-sync-ms",
+            str(self.args.post_sync_ms),
             "--real-hits-per-lane",
             str(case.real_hits_per_lane),
             "--mts-expected-latency",
@@ -627,7 +653,10 @@ class Runner:
                     "feb": self.args.feb,
                     "device": self.args.device,
                     "pulse_interval": self.args.pulse_interval,
+                    "pre_inject_ms": self.args.pre_inject_ms,
+                    "post_sync_ms": self.args.post_sync_ms,
                     "mts_expected_latency": self.args.mts_expected_latency,
+                    "preflight_settle_ms": self.args.preflight_settle_ms,
                     "run_dma_when_feb_passes": self.args.run_dma_when_feb_passes,
                     "swb_link_mask": self.args.swb_link_mask,
                     "dry_run": self.args.dry_run,
@@ -734,7 +763,25 @@ def main() -> int:
     parser.add_argument("--sc-tool", type=Path, default=DEFAULT_SC_TOOL)
     parser.add_argument("--rc-tool", type=Path, default=DEFAULT_RC_TOOL)
     parser.add_argument("--rc-settle-us", type=int, default=5000)
+    parser.add_argument(
+        "--preflight-settle-ms",
+        type=int,
+        default=500,
+        help="Delay after reset/stop-reset before SC bridge preflight reads.",
+    )
     parser.add_argument("--pulse-interval", type=int, default=1250)
+    parser.add_argument(
+        "--pre-inject-ms",
+        type=int,
+        default=50,
+        help="Delay after setup before enabling injector pulses for each case.",
+    )
+    parser.add_argument(
+        "--post-sync-ms",
+        type=int,
+        default=50,
+        help="Delay after run-control sync before each injection window.",
+    )
     parser.add_argument("--mts-expected-latency", type=int, default=2000)
     parser.add_argument("--force-config-each-case", action="store_true")
     parser.add_argument("--run-dma-when-feb-passes", action=argparse.BooleanOptionalAction, default=True)

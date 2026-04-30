@@ -70,7 +70,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-04-30T18:09:13 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-04-30T19:04:49 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -78,7 +78,7 @@
       Older Phase-5 evidence showed single-lane delay could be made clean, but
       the timing-closed Phase-6 rerun with explicit SMB3/SMB5 XML reload moved
       the live blocker earlier: even the lower <code>lanes5+6</code>
-      one-channel case now trips MTS/ring input errors. The lower-MTS/ring
+      one-channel pair now trips MTS/ring input errors. The lower-MTS/ring
       SignalTap checkpoint localizes the visible error sideband to MTS1 before
       hit_stack1/ring sees the reject. No FEB/SWB host-disk
       Mu3e Demo OPQ, 100 kHz end-to-end claim is valid yet. Under the active
@@ -93,7 +93,7 @@
       The strongest blocker is not the deprecated injector path or XML mapping.
       The active injector is the Phase-5 <code>mutrig_injector_0</code> path and
       the XML split is SMB3 for ASICs 0..3 and SMB5 for ASICs 4..7. The lower
-      side fails because MTS asserts
+      side fails because two real lower streams together make MTS assert
       <code>tserr</code> before the ring stage; the ring
       <code>inerr_count</code> is therefore a real timestamp-delay failure,
       not a ring-local decode bug.
@@ -109,6 +109,16 @@
       expected fail, and P6E010 pulse-high 3 is clean but underfilled. Reduced
       evidence:
       <a href="phase6_timingclosed_cycle1_20260430.md">phase6_timingclosed_cycle1_20260430.md</a>.
+    </p>
+    <p>
+      The follow-up lower ASIC5/6 sweep distinguishes lane-local health from
+      cross-ASIC failure. ASIC5/lane5 and ASIC6/lane6 each pass one-channel
+      pulse-high 4/5 runs alone with zero ring input errors. The two real lanes
+      together fail at pulse-high 4/5, and ASIC6 <code>ext_trig_offset</code>
+      values <code>0..15</code> all fail. A two-lane emulator reference through
+      the same lower MTS/ring path passes after 50 ms post-sync/pre-inject
+      settle. Reduced sweep evidence:
+      <a href="phase6_lower56_cross_asic_sweep_20260430.md">phase6_lower56_cross_asic_sweep_20260430.md</a>.
     </p>
     <p>
       The lower-MTS/ring SignalTap debug image programmed with checksum
@@ -173,7 +183,7 @@
         </tr>
       </thead>
       <tbody>
-<tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>The timing-closed Phase-6 rerun now fails even the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The lower-MTS/ring SignalTap checkpoint shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window; live counters show ring_inerr_delta=535373, MTS discard=0, LVDS error/DPA deltas=0.</td><td>Debug the lower MTS timestamp-delay calculation, cross-ASIC ordering/epoch handling, or upstream timestamp formation before spending a compile on SWB DMA.</td></tr>
+<tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Runner replay 20260430_190036 records P6B006/P6B007 expected_pass, P6B010 unexpected_fail with ring_inerr_delta=534904, P6B020 expected_fail, and P6E010 underfilled. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window; LVDS error/DPA deltas stay zero.</td><td>Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS before spending a compile on SWB DMA.</td></tr>
 <tr><td>SWB input path</td><td><span class="badge pass">PASS_SC</span></td><td>SWB must receive FEB data and the SC read/reply path must return host-visible replies from FEB.</td><td>online_sc commit 11eada541 compiled timing-clean at all checked STA corners, programmed SOF checksum 0x31A704E1, recovered /dev/mudaq0, and returned host-visible SC link-2 reads: 0x00000 payload 0 and 0x0C000 payload 0x52434D48.</td><td>Hold SWB SciFi-hit input proof until FEB emits clean hit frames; the SC path itself is no longer the blocker.</td></tr>
 <tr><td>SWB OPQ to DMA</td><td><span class="badge fail">BLOCKED</span></td><td>Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.</td><td>packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. Hardware OPQ proof is now blocked by FEB MTS/ring output, not by SWB SC return.</td><td>After P6-MTS-RING passes, read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any host-disk claim.</td></tr>
 <tr><td>Host DMA buffer</td><td><span class="badge fail">BLOCKED</span></td><td>/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.</td><td>PCIe recovery passed and /dev/mudaq0 is present after SWB programming. The earlier swb_dmatest segfault came from an invalid stale-config run and is not DMA closure evidence.</td><td>Capture a bounded DMA run only after FEB MTS/ring and SWB hit-input counters advance in the same run window.</td></tr>
@@ -208,6 +218,7 @@
 <tr><td>Delay</td><td>Lower lane 5, one channel<div class="note">Lane 5 alone passes.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>4<br>250 ms</td><td>61,790</td><td>174,690</td><td>0</td><td>0</td><td>216,467</td><td>0</td><td><a href="phase5_real_lane5_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json">phase5_real_lane5_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json</a></td></tr>
 <tr><td>Delay</td><td>Lower lane 6, one channel<div class="note">Lane 6 alone passes.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x040<br>emu=0x00</td><td>4<br>250 ms</td><td>68,986</td><td>247,339</td><td>0</td><td>0</td><td>307,500</td><td>0</td><td><a href="phase5_real_lane6_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json">phase5_real_lane6_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json</a></td></tr>
 <tr><td>Delay</td><td>Lower lanes 5+6, one channel<div class="note">This early good-ribbon pass is now superseded by the timing-closed Phase-6 image, where explicit SMB5 reload reproduced the lower one-channel MTS/ring failure.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>70,935</td><td>419,896</td><td>0</td><td>0</td><td>532,836</td><td>0</td><td><a href="phase5_real_lower_lanes56_ch1_goodribbon_latency2000_retry_pulse4_20260430.json">phase5_real_lower_lanes56_ch1_goodribbon_latency2000_retry_pulse4_20260430.json</a></td></tr>
+<tr><td>Phase6</td><td>Lower ASIC5/6 cross-ASIC sweep<div class="note">ASIC5/lane5 and ASIC6/lane6 pass alone, the real two-lane pair fails, ASIC6 ext_trig_offset 0..15 does not clear it, and the two-lane emulator reference passes after settle.</div></td><td><span class="badge fail">FAIL</span><div class="class">7 / 30 pass</div></td><td>lvds=0x060<br>emu=0x60</td><td>3<br>100 ms</td><td>1,640,203</td><td>9,766,799</td><td>0</td><td>10,506,955</td><td>9,426,601</td><td>0</td><td><a href="phase6_lower56_cross_asic_sweep_20260430.json">phase6_lower56_cross_asic_sweep_20260430.json</a></td></tr>
 <tr><td>Delay</td><td>Lower lanes 5+6, full channels<div class="note">Fresh post-restore full 32-channel ASIC5+6 run fails the required 0..2000-cycle MTS/ring gate.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>1,415,471</td><td>9,859,630</td><td>0</td><td>1,990,485</td><td>11,694,757</td><td>0</td><td><a href="phase5_real_lower_lanes56_full32_postrestore_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_postrestore_latency2000_pulse4_20260430.json</a></td></tr>
 <tr><td>Delay</td><td>Lower full channels, loose latency<div class="note">Still fails even with expected latency opened to 65535, so this is not a small positive-latency tail.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>1,372,359</td><td>9,762,363</td><td>0</td><td>996,634</td><td>11,790,695</td><td>0</td><td><a href="phase5_real_lower_lanes56_full32_latency65535_pulse4_20260430.json">phase5_real_lower_lanes56_full32_latency65535_pulse4_20260430.json</a></td></tr>
 <tr><td>Diagnostic</td><td>Lower pair bypass-lapse<div class="note">Disabling the MTS GTS/lapse transform does not clear the lower-pair timestamp errors.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>4<br>250 ms</td><td>1,445,038</td><td>9,889,398</td><td>0</td><td>26,103,431</td><td>5,155,190</td><td>0</td><td><a href="phase5_real_lower_lanes56_full32_bypasslapse_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_bypasslapse_latency2000_pulse4_20260430.json</a></td></tr>

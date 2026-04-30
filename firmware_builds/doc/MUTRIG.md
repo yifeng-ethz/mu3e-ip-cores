@@ -174,10 +174,10 @@ submodule. The intended path is:
 
 If that path is empty, initialize or update the submodule from the `online`
 checkout with Bitbucket credentials. A populated local mirror used for the
-2026-04-29 tuning notes is:
+2026-04-30 tuning notes is:
 
 ```text
-/home/yifeng/packages/online_si/online/wiki
+/home/yifeng/packages/online_sc/online/wiki
 ```
 
 Useful wiki pages for MuTRiG3 tuning:
@@ -301,6 +301,19 @@ Observed Phase-5 update on 2026-04-30:
   explicit SMB5 XML reload reproduced P6B010 ring input errors while LVDS error
   and DPA-unlock deltas stayed zero. Treat the earlier pass as stale/reset- or
   image-sensitive until the same image passes after a clean reconfigure.
+- The follow-up Phase-6 isolation sweep on the timing-clean no-STP image proves
+  the lower blocker is cross-stream, not lane-local. ASIC5/lane5 and
+  ASIC6/lane6 each pass one-channel pulse-high 4/5 runs alone with zero ring
+  input errors. The two real lanes together fail at pulse-high 4/5, while
+  pulse-high 3 produces no useful one-channel histogram traffic. A two-lane
+  emulator reference through the same lower MTS/ring path passes after 50 ms
+  post-sync/pre-inject settle.
+- Sweeping ASIC6 `ext_trig_offset` through the full 4-bit range `0..15` against
+  ASIC5 offset 0 did not find a clean lower one-channel pair point. Every
+  offset still failed as `ring_input_errors_with_histogram_hits` with zero LVDS
+  error-counter and DPA-unlock deltas. Do not retry `ext_trig_offset` blindly;
+  the next useful lever must explain real MuTRiG cross-ASIC timestamp/epoch or
+  lower-MTS input ordering.
 - Lower pair `lanes5+6` still fails with all 32 TDC-test channels enabled on
   ASIC5 and ASIC6. Opening the MTS expected-latency window to `65535` does not
   remove the ring input errors, so the failure is not just a small positive
