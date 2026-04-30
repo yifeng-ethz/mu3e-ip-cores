@@ -191,6 +191,10 @@ def classify_word(data: int) -> str:
     return "other"
 
 
+def looks_like_k_marker_with_data_marker_cleared(data: int) -> bool:
+    return ((data >> 32) & 0xF) == 0 and (data & 0xFF) in {0xF7, 0xBC, 0x9C}
+
+
 def summarize_type2(events: list[dict[str, Any]]) -> dict[str, Any]:
     subheaders: list[dict[str, Any]] = []
     current: dict[str, Any] | None = None
@@ -254,12 +258,18 @@ def summarize_type3(events: list[dict[str, Any]]) -> dict[str, Any]:
         frames.append(current)
 
     reports: list[dict[str, Any]] = []
+    marker_cleared_total = 0
     for frame in frames[:16]:
         words = [int(event["data"]) for event in frame]
         kinds = [event["kind"] for event in frame]
         body = frame[5:-1] if len(frame) >= 6 and kinds[-1] == "frame_trailer" else frame[5:]
         subheaders = [event for event in body if event["kind"] == "subheader"]
         hits = [event for event in body if event["kind"] == "hit"]
+        marker_cleared = [
+            event for event in body
+            if looks_like_k_marker_with_data_marker_cleared(int(event["data"]))
+        ]
+        marker_cleared_total += len(marker_cleared)
         header_debug = words[3] if len(words) > 3 else 0
         reports.append(
             {
@@ -273,6 +283,14 @@ def summarize_type3(events: list[dict[str, Any]]) -> dict[str, Any]:
                 "debug_hits": header_debug & 0xFFFF,
                 "decoded_subheaders": len(subheaders),
                 "decoded_hits": len(hits),
+                "marker_cleared_candidates": len(marker_cleared),
+                "first_marker_cleared_candidates": [
+                    {
+                        "time_ps": event["time_ps"],
+                        "data": hex36(int(event["data"])),
+                    }
+                    for event in marker_cleared[:8]
+                ],
                 "subheader_hit_hist": hist([(int(event["data"]) >> 8) & 0xFF for event in subheaders]),
             }
         )
@@ -281,6 +299,7 @@ def summarize_type3(events: list[dict[str, Any]]) -> dict[str, Any]:
         "events": len(events),
         "frames": len(frames),
         "frame_length_hist": hist([len(frame) for frame in frames]),
+        "marker_cleared_candidates": marker_cleared_total,
         "reports": reports,
     }
 
@@ -357,13 +376,15 @@ def render_markdown(summary: dict[str, Any]) -> str:
     lines.append(f"- Events: `{t3['events']}`")
     lines.append(f"- Frames: `{t3['frames']}`")
     lines.append(f"- Frame length histogram: `{t3['frame_length_hist']}`")
+    lines.append(f"- K-marker-looking words with data marker cleared: `{t3['marker_cleared_candidates']}`")
     for frame in t3["reports"][:8]:
         lines.append(
             f"- frame @{frame['start_time_ps']} ps len `{frame['length_words']}` "
             f"first `{frame['first_word']}` last `{frame['last_word']}` "
             f"header/trailer `{frame['has_header']}/{frame['has_trailer']}` "
             f"debug sh/hit `{frame['debug_subheaders']}/{frame['debug_hits']}` "
-            f"decoded sh/hit `{frame['decoded_subheaders']}/{frame['decoded_hits']}`"
+            f"decoded sh/hit `{frame['decoded_subheaders']}/{frame['decoded_hits']}` "
+            f"marker-cleared candidates `{frame['marker_cleared_candidates']}`"
         )
     lines.append("")
     return "\n".join(lines)

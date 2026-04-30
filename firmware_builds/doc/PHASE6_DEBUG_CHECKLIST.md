@@ -36,6 +36,15 @@ Use the current known-good isolated lower ASICs first:
 | G4 | Run matching authentic generated-system simulation or focused RTL replay with the same transaction identity | simulated boundary sequence matches STP packet grammar and count distributions |
 | G5 | Re-run the same stimulus on the timing-clean no-STP image | SC counters remain clean; STP-only timing perturbation is not counted as closure |
 
+Current 2026-04-30 status: ASIC6/lane6 at the zero-VCO point passes the live
+counter gate at 100 kHz with zero MTS discards, zero ring input errors, zero
+histogram drops, zero frame CRC errors, and zero LVDS/DPA deltas. The active
+SignalTap capture proves `hit_type3` frame output with nonzero subheader/hit
+content, but the same 1k-sample window did not catch the matching nonempty
+RBCAM `hit_type2` beat. Treat G3 as `OPEN_STP_ALIGNMENT` until a deeper or
+better-triggered capture, or a focused simulation/VCD correlation, ties the
+nonempty RBCAM beat to the later FEB frame drain.
+
 ### 2.1 RBCAM Input: `hit_type1`
 
 Probe before RBCAM at `hit_stack_subsystem_N.hit_type_1_*` and, when needed,
