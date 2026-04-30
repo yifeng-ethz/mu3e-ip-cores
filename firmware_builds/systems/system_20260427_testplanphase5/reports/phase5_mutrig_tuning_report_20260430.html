@@ -46,6 +46,9 @@
     .pass { background: #1d7f45; }
     .fail { background: #b73535; }
     .missing { background: #6b7280; }
+    .progress-table td:nth-child(3),
+    .progress-table td:nth-child(4),
+    .progress-table td:nth-child(5) { min-width: 220px; }
     .note, .class {
       margin-top: 4px;
       color: #52606d;
@@ -67,7 +70,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-04-30T01:48:36 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-04-30T10:57:03 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -106,6 +109,32 @@
       That page links the local MuTRiG wiki mirror and records the DMON/TDC
       injection implications used here.
     </p>
+
+    <h2>Phase-6 End-to-End Progress</h2>
+    <p>
+      Closure still means the full hardware chain, not just a FEB-local
+      histogram. The required proof is 100 kHz injection on all 256 MuTRiG
+      channels, DMA data reaching the host disk, all 256 hits in a bunch sharing
+      one timestamp, and adjacent bunch timestamps matching the 100 kHz cadence.
+    </p>
+    <table class="progress-table">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Status</th>
+          <th>Gate</th>
+          <th>Current Evidence</th>
+          <th>Next Check</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>Full-channel lower ASIC5+6 and all-lane runs still produce MTS/ring timestamp errors. Single lanes and selected masks pass the 0..2000-cycle gate.</td><td>Keep tuning at MTS/ring boundary; do not claim FEB closure from single-lane evidence.</td></tr>
+<tr><td>SWB input path</td><td><span class="badge missing">IN_PROGRESS</span></td><td>SWB must receive the FEB data links instead of tying the datapath off.</td><td>online_sc local commit 26d93ef61 sets g_NLINKS_DATA_GENERIC=8 and wires the musip four-lane OPQ ingress while keeping online_sc RC/SC.</td><td>Use the new SWB SOF once full fit/assembly closes, then verify the FEB link counters and OPQ ingress counters on hardware.</td></tr>
+<tr><td>SWB OPQ to DMA</td><td><span class="badge missing">IN_PROGRESS</span></td><td>Merged 256-bit hit words must drive the existing SWB DMA outputs without event-builder drops.</td><td>make flow_map passed with swb_block -&gt; ingress_egress_adaptor -&gt; opq_upstream_4lane -&gt; ordered_priority_queue_dut_sv present in synthesis.</td><td>Full make flow is running from the committed SWB OPQ checkpoint; program only after timing and assembler output are clean enough for this debug stage.</td></tr>
+<tr><td>Host DMA buffer</td><td><span class="badge missing">PENDING</span></td><td>/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.</td><td>No valid host DMA capture exists yet for the new SWB OPQ image.</td><td>After SWB programming, recover PCIe, start DMA, and capture a bounded run before any disk/offline claim.</td></tr>
+<tr><td>Disk/offline timestamp check</td><td><span class="badge missing">PENDING</span></td><td>Every bunch must contain 256 hits with identical TS, and adjacent bunch TS spacing must match the 100 kHz injection cadence.</td><td>No disk artifact has been produced yet for the 256-channel, 100 kHz/channel end-to-end requirement.</td><td>Add the offline reducer next to the long-run scripts and emit a compact report with per-bunch TS equality and interval histograms.</td></tr>
+      </tbody>
+    </table>
 
     <h2>Evidence Table</h2>
     <table>
