@@ -29,6 +29,7 @@ REPORT_DIR = BOARD_TEST_DIR / "reports"
 DEFAULT_SC_TOOL = BOARD_TEST_DIR / "bin" / "sc_tool"
 DEFAULT_RC_TOOL = BOARD_TEST_DIR / "bin" / "rc_tool"
 DEFAULT_SWB_DMATEST = Path("/home/yifeng/packages/online_dpv2/online/build/farm_pc/tools/swb_dmatest")
+PYTHON = Path(sys.executable or "python3")
 
 CONFIGURE_MUTRIG = SCRIPT_DIR / "configure_mutrig_from_xml.py"
 INJECTOR_SANITY = SCRIPT_DIR / "run_phase5_injector_datapath_sanity.py"
@@ -224,6 +225,7 @@ class Runner:
             self.run_cmd(
                 "check_sc_bridges",
                 [
+                    str(PYTHON),
                     str(CHECK_SC),
                     "--link",
                     str(self.args.link),
@@ -240,6 +242,7 @@ class Runner:
             self.run_cmd(
                 "check_environment_monitors",
                 [
+                    str(PYTHON),
                     str(CHECK_ENV),
                     "--link",
                     str(self.args.link),
@@ -277,6 +280,7 @@ class Runner:
         self.stop_reset()
         out_base = self.case_dir / f"cycle{cycle:05d}_{kind}_config"
         argv = [
+            str(PYTHON),
             str(CONFIGURE_MUTRIG),
             "--link",
             str(self.args.link),
@@ -362,6 +366,7 @@ class Runner:
         json_out = case_base.with_suffix(".json")
         md_out = case_base.with_suffix(".md")
         argv = [
+            str(PYTHON),
             str(INJECTOR_SANITY),
             "--link",
             str(self.args.link),
@@ -663,6 +668,13 @@ def ensure_executable(path: Path, name: str) -> None:
         raise PermissionError(f"{name} is not executable: {path}")
 
 
+def ensure_file(path: Path, name: str) -> None:
+    if not path.exists():
+        raise FileNotFoundError(f"{name} not found: {path}")
+    if not path.is_file():
+        raise FileNotFoundError(f"{name} is not a file: {path}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-dir", type=Path, default=default_run_dir())
@@ -691,10 +703,11 @@ def main() -> int:
     if not args.dry_run:
         ensure_executable(args.sc_tool, "sc_tool")
         ensure_executable(args.rc_tool, "rc_tool")
-        ensure_executable(CONFIGURE_MUTRIG, "configure_mutrig_from_xml.py")
-        ensure_executable(INJECTOR_SANITY, "run_phase5_injector_datapath_sanity.py")
-        ensure_executable(CHECK_ENV, "check_environment_monitors.py")
-        ensure_executable(CHECK_SC, "check_sc_bridges.py")
+        ensure_executable(PYTHON, "python")
+        ensure_file(CONFIGURE_MUTRIG, "configure_mutrig_from_xml.py")
+        ensure_file(INJECTOR_SANITY, "run_phase5_injector_datapath_sanity.py")
+        ensure_file(CHECK_ENV, "check_environment_monitors.py")
+        ensure_file(CHECK_SC, "check_sc_bridges.py")
         if args.run_dma_when_feb_passes:
             ensure_executable(args.swb_dmatest, "swb_dmatest")
 
