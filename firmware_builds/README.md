@@ -13,6 +13,7 @@ Required Phase-5 references:
 - `doc/MUTRIG.md` — MuTRiG configuration files, TDC injection, analog mode, and PLL-lock interpretation.
 - `doc/MATH.md` — latency/rate model sketch and histogram queue-depth gate.
 - `doc/TEST_PLAN_PHASE5.md` — real-MuTRiG Phase-5 case catalog.
+- `doc/TEST_PLAN_PHASE6.md` — FEB/SWB/host-DMA/disk end-to-end hit closure plan.
 
 Top-level folders:
 
