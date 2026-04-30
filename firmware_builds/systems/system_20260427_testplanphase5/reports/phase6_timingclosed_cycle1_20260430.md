@@ -73,3 +73,45 @@ Do not claim SWB OPQ, host DMA, or disk timestamp closure from this checkpoint.
 The next closure gate is P6-MTS-RING with zero MTS discard, zero ring input
 errors, and accepted latency inside `0..2000` cycles for the same configured
 ASIC/channel set.
+
+## Continued Live Evidence
+
+Run directory:
+
+```text
+firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_long_runs/20260430_live_continued_cycle1/
+```
+
+Raw files are intentionally ignored by git. This section is the reduced durable
+checkpoint for the continued run.
+
+| Case | Stimulus | Result | Key counters |
+|---|---|---|---|
+| P6B006 | ASIC5/lane5, one TDC-test channel, pulse-high 4, 100 kHz | `PASS` | `hist_total_delta=52627`, `mts_total_delta=168411`, `mts_discard_delta=0`, `ring_inerr_delta=0` |
+| P6B007 | ASIC6/lane6, one TDC-test channel, pulse-high 4, 100 kHz | `PASS` | `hist_total_delta=81880`, `mts_total_delta=247011`, `mts_discard_delta=0`, `ring_inerr_delta=0` |
+| P6B010 | lower ASIC5+6, one TDC-test channel each, pulse-high 4, 100 kHz | `unexpected_fail` | `hist_total_delta=144364`, `mts_total_delta=440880`, `mts_discard_delta=0`, `ring_inerr_delta=563053` |
+| P6B020 | lower ASIC5+6, full 32 TDC-test channels each, pulse-high 4, 100 kHz | `expected_fail` | `hist_total_delta=168789`, `mts_total_delta=10226858`, `mts_discard_delta=0`, `ring_inerr_delta=7146776` |
+| P6E010 | lower ASIC5+6, full 32 TDC-test channels each, pulse-high 3, 100 kHz | `underfilled` | `hist_total_delta=1462`, `mts_total_delta=6652`, `mts_discard_delta=0`, `ring_inerr_delta=0` |
+
+Additional direct probes after this cycle:
+
+| Probe | Result | Observation |
+|---|---|---|
+| lower ASIC5+6 one-channel expected latency `2000` | `FAIL` | `ring_inerr_delta=534743` |
+| lower ASIC5+6 one-channel expected latency `4000` | `FAIL` | `ring_inerr_delta=368030` |
+| lower ASIC5+6 one-channel expected latency `65535` | `FAIL` | `ring_inerr_delta=319653`; this is not a small positive-latency tail |
+| lower ASIC5+6 header-sync, header channel 5 | `FAIL` | `ring_inerr_delta=748701` |
+| lower ASIC5+6 header-sync, header channel 6 | `FAIL` | `ring_inerr_delta=782985` |
+| lane5 header-sync control | `PASS` | `ring_inerr_delta=0` |
+| lane6 header-sync control | `PASS` | `ring_inerr_delta=0` |
+
+The header-sync controls are important: the injection mode can be clean for
+each ASIC alone, but the pair still trips MTS/ring. That keeps the first blocker
+at cross-ASIC timestamp/epoch/order coherence before or inside lower MTS.
+
+Three 10 s stream-datagen SWB host-DMA controls also passed as raw-DMA partials:
+each run captured `2048` nonzero words, `1024` nonpadding words, and `256`
+event-builder payload words. First payload words differed
+(`0x00088A0C`, `0x0008818F`, `0x0008894F`), so the buffer is not stale. The
+offline reducer still reports `raw_payload_no_legacy_frames`, so this is not
+FEB-link or disk timestamp closure.

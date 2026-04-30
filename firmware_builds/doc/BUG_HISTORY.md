@@ -13,7 +13,7 @@ Class legend:
 | bug_id | class | status | first seen | summary |
 |---|---|---|---|---|
 | [P6-BUG-001-R](#p6-bug-001-r-swb-datagen-words-stayed-idle-before-the-musip-mux) | R | fixed for stream-datagen raw DMA | 2026-04-30 | SWB datagen drove data/datak but left `link32_t.idle=1`, so MuSiP mux ignored every generated word and DMA stayed empty. |
-| [P6-BUG-002-R](#p6-bug-002-r-lower-real-multi-asic-mutrig-streams-trip-mts-timestamp-errors-before-ring-buffer-cam) | R | open; zero-VCO captures invalidated | 2026-04-30 | Lower real ASIC pairs pass alone but fail together with MTS timestamp errors before hit stack/ring; rerun lane6/7 with nonzero PLL settings before assigning root cause. |
+| [P6-BUG-002-R](#p6-bug-002-r-lower-real-multi-asic-mutrig-streams-trip-mts-timestamp-errors-before-ring-buffer-cam) | R | open; lower ASIC5+6 pair reproduced | 2026-04-30 | Lower real ASIC5/lane5 and ASIC6/lane6 pass alone but fail together with MTS timestamp errors before hit stack/ring; latency-window and header-sync controls do not clear it. |
 | [P6-BUG-003-H](#p6-bug-003-h-mu3e-online-dma-tools-are-not-closure-quality-evidence) | H | fixed by repo-owned probe for DMA | 2026-04-30 | `swb_dmatest`, `rw`, MIDAS, and libmudaq-backed tools hide register and cleanup boundaries; closure now uses direct-MMIO tools under `tools/`. |
 | [P6-BUG-004-H](#p6-bug-004-h-frame-boundary-signaltap-window-is-not-yet-time-aligned-across-rbcam-and-feb-frame-assembly) | H | open; zero-VCO evidence invalidated | 2026-04-30 | Lane6 STP captures show FEB type-3 hit frames under a `vco000` label, but `vnvcodelay=0` should produce no hits; rerun with nonzero locked settings and a time-aligned RBCAM/FEB capture. |
 | [P6-BUG-005-R](#p6-bug-005-r-swb-host-dma-now-has-raw-musip-payload-but-not-decoded-feb-hit-frames) | R | open; raw DMA partial pass only | 2026-04-30 | Fixed4 SWB image writes raw 256-bit stream-datagen payload to host DMA, but time-datagen is still empty and no real FEB-link/legacy-frame disk artifact exists. |
@@ -67,11 +67,37 @@ Class legend:
     error deltas remain zero.
   - SignalTap shows `mts1.aso_hit_type1_error` rising before
     `hit_stack1.hit_type_1_error[0]`.
+  - Fresh continued cycle
+    `phase6_long_runs/20260430_live_continued_cycle1` reproduces the same
+    split: P6B006 lane5 alone passes with `hist_total_delta=52627` and
+    `ring_inerr_delta=0`; P6B007 lane6 alone passes with
+    `hist_total_delta=81880` and `ring_inerr_delta=0`; P6B010 lower
+    lanes5+6 one-channel fails with `hist_total_delta=144364`,
+    `mts_total_delta=440880`, `mts_discard_delta=0`, and
+    `ring_inerr_delta=563053`.
+  - Opening the MTS expected-latency gate from `2000` to `4000` and `65535`
+    cycles does not clear P6B010. The 65535-cycle probe still measured
+    `hist_total_delta=155387`, `mts_total_delta=429181`,
+    `mts_discard_delta=0`, `ring_inerr_delta=319653`, and
+    `frame_actual_delta=442754`.
+  - Header-synchronous injection does not clear the pair failure. Lower header
+    channel 5 fails with `ring_inerr_delta=748701`; lower header channel 6
+    fails with `ring_inerr_delta=782985`. The same header mode passes for
+    lane5 alone and lane6 alone with zero ring input errors.
+  - ASIC6 `vnvcodelay` values `23,25,27,29,31` around the XML default did not
+    find a clean P6B010 point. The low value `23` underfilled badly, so blind
+    delay sweeps are not a valid tuning strategy.
+  - The histogram-bin dumper returned zero nonzero bins in the live
+    `latency65535_histbins` run despite live MTS/histogram counters. Treat that
+    specific bin-read path as an unreliable observable until the readout is
+    repaired.
 - Root cause:
-  open; current nonzero-PLL evidence still points to cross-ASIC
-  timestamp/epoch/order coherence before or inside lower MTS, but the lane6/7
-  `vco000` subset must be rerun with ASIC-specific nonzero defaults/restores
-  and full `RUN_PREPARE` before it can support that conclusion.
+  open. Current nonzero-PLL evidence points to cross-ASIC timestamp/epoch/order
+  coherence before or inside lower MTS. The lane6/7 `vco000` subset is still
+  invalid for PLL/tuning conclusions and must be rerun with ASIC-specific
+  nonzero defaults/restores and full `RUN_PREPARE` before it supports any
+  lane6/7 claim, but the ASIC5/6 lower-pair blocker no longer depends on that
+  stale zero-VCO premise.
 - Fix status:
   open. Do not claim FEB output or downstream SWB/DMA closure until this stage
   has a clean boundary capture and matching offline evidence.
@@ -147,6 +173,11 @@ Class legend:
   - stream-datagen with generic/default readout state produced host DMA data:
     960 nonzero words, 64 nonpadding words, first payload words like
     `0x0008884A`, and event-builder payload count low32 `0x10`.
+  - Three fresh 10 s stream-datagen controls after the fixed4 SWB image each
+    produced raw host DMA: `2048` nonzero words, `1024` nonpadding words, and
+    `256` event-builder payload words. The first payload words differed across
+    runs (`0x00088A0C`, `0x0008818F`, `0x0008894F`), so this is not
+    stale-buffer reuse.
   - the old FEB/SWB frame reducer found zero legacy frame headers/trailers and
     now classifies this as `raw_payload_no_legacy_frames`.
   - `time-datagen` still produced `no_dma_words` with zero event-builder
@@ -162,8 +193,8 @@ Class legend:
   until a generator with declared hit counts matching the payload exists.
 - Fix status:
   - state:
-    partial. The host DMA path is alive for raw stream-datagen payload, but this
-    is not end-to-end FEB hit evidence.
+    partial. The host DMA path is alive and repeatable for raw stream-datagen
+    payload, but this is not end-to-end FEB hit evidence.
   - mechanism:
     `tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py` now decodes the
     active event-builder payload counters despite stale register names, and the
