@@ -56,7 +56,7 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | Lower pair single-channel | `PASS` | lanes 5+6 pass one TDC-test channel after clean good-ribbon restore |
 | Lower pair full 32-channel | `BLOCKED` | lanes 5+6 full-channel pulse-high 4 still produces MTS/ring timestamp errors |
 | SWB OPQ profile | `PASS` source/synthesis checkpoint | Mu3e Demo OPQ uses `N_SHD=128`, `N_HIT=255`; packet_scheduler `ed249da` merge includes the `25e204c` one-drop UVM proof; online_sc `ada3aea38` |
-| SWB image / PCIe | `PASS` image, `BLOCKED` SC return | online_sc `make flow` and `make pgm` passed; SOF checksum `0x31AA0589`; PCIe recovery restored `/dev/mudaq0`; FEB `sc_hub` latched a valid `0x0C000` read and `0x52434D48` data, but the SWB secondary ring returned zero host words; [`../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md) |
+| SWB image / PCIe | `PASS` image, `BLOCKED` before secondary capture | online_sc `make flow` and `make pgm` passed; SOF checksum `0x31AA0589`; PCIe recovery restored `/dev/mudaq0`; FEB `sc_hub` latched a valid `0x0C000` read and `0x52434D48` data, but SignalTap saw no `swb_sc_secondary|state.capture_head` trigger for that transaction; [`../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_swb_opq_live_preflight_20260430.md), [`../systems/system_20260427_testplanphase5/reports/phase6_swb_secondary_stp_capture_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_swb_secondary_stp_capture_20260430.md) |
 | DMA disk closure | `not-run` | no valid host-disk Mu3e Demo OPQ evidence yet: expected 255 delivered hits plus 1 accounted OPQ hit drop per 256-hit source cluster; blocked until the SC reply path and SWB input gate pass |
 
 The current first hard blocker is before SWB/DMA closure: the lower SMB5 pair
@@ -65,16 +65,17 @@ The current first hard blocker is before SWB/DMA closure: the lower SMB5 pair
 diagnostics clean, but that trims the offending hits before the ring and is not
 latency closure.
 
-The current SWB-side blocker is now localized to the SC reply/capture path:
-after programming the OPQ-aligned online_sc image and recovering PCIe,
+The current SWB-side blocker is now localized before `swb_sc_secondary` packet
+capture: after programming the OPQ-aligned online_sc image and recovering PCIe,
 reset-link stop-reset/enable to FEB 7 echoed through
 `RESET_LINK_STATUS_REGISTER_R` as `0x31000000` / `0x32000000`. Secondary SC
-reads still timed out at the host and the SWB secondary ring stayed empty, but
-FEB JTAG readback of `sc_hub` showed the request reached the FEB and completed a
+reads still timed out at the host and the SWB secondary ring stayed empty. FEB
+JTAG readback of `sc_hub` showed the request reached the FEB and completed a
 valid external read: `LAST_RD_ADDR=0x0000C000`, `LAST_RD_DATA=0x52434D48`
-(`RCMH`). Do not run OPQ/DMA/disk closure against this state except as
-environment health diagnostics; first prove the reply leaves FEB and is captured
-by the SWB secondary path.
+(`RCMH`). SWB SignalTap then proved the STP session is healthy, but
+`swb_sc_secondary|state.capture_head` did not trigger for the same read. Do not
+run OPQ/DMA/disk closure against this state except as environment health
+diagnostics; first prove the FEB reply reaches the SWB secondary capture input.
 
 ## 2. Stage Gates
 
@@ -252,8 +253,9 @@ Current live checkpoint, 2026-04-30:
 - Reset-link command path: `PASS_DIAG`, FEB 7 stop-reset/enable echoed
   `0x31000000` / `0x32000000`.
 - SWB SC return path: `BLOCKED`; valid SC requests reach FEB `sc_hub`
-  (`LAST_RD_ADDR=0x0000C000`, `LAST_RD_DATA=0x52434D48`), but host-visible
-  SWB secondary reads still return zero words.
+  (`LAST_RD_ADDR=0x0000C000`, `LAST_RD_DATA=0x52434D48`), SignalTap control on
+  `swb_sc_secondary|state.waiting` passes, but `state.capture_head` sees zero
+  triggers for the same transaction.
 
 ## 7. Git and Evidence Hygiene
 

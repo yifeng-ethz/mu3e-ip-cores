@@ -22,21 +22,21 @@ SWB secondary ring.
 | valid-address sweep | `BLOCKED` | `0x0A900`, `0x0C000`, `0xFE84`, and `0xFE8F` all timed out at host; secondary ring delta stayed 0 |
 | link-id sweep | `BLOCKED` | `sc_tool <0..15> read 0x0C000 1` all timed out with secondary delta 0 |
 | corrected SWB diagnostics | `DIAG` | `LINK_LOCKED_LOW=0x00000F00` / later `0x00002F00`, `LINK_LOCKED_HIGH=0x00000000`; these do not explain away the observed FEB-side `sc_hub` read completion |
+| SWB secondary SignalTap | `BLOCKED` | `state.waiting` control trigger passed, but `state.capture_head` around `sc_tool 2 read 0x0C000 1` timed out with `0 triggers seen`; see [`phase6_swb_secondary_stp_capture_20260430.md`](phase6_swb_secondary_stp_capture_20260430.md) |
 
 ## Interpretation
 
 The live blocker is before OPQ and DMA, but it is no longer simply "the read
 does not reach FEB." The downlink reaches FEB `sc_hub` and performs a valid
-external read of the run-control management UID. The failing boundary is the
-return path from FEB upload into the SWB secondary capture, or the SWB
-host-visible secondary-ring drain.
+external read of the run-control management UID. The SignalTap control trigger
+passes, but the real `swb_sc_secondary|state.capture_head` trigger does not
+fire for the same SC read, so the failing boundary is now before the tapped SWB
+secondary packet capture.
 
 Do not credit SWB input counters, OPQ ingress/drop CSRs, host DMA, or disk
-decode as FEB end-to-end evidence in this state. The next action is a
-SignalTap-backed SWB secondary capture around the same `0x0C000` read, using
-`mem_wren_o`, `captured_link.data`, `current_link`, and the link-2 debug probes
-to determine whether the reply packet reaches `swb_sc_secondary` and whether it
-is dropped before the host ring.
+decode as FEB end-to-end evidence in this state. The next action is to move the
+SignalTap scope upstream to the SC return link FIFO, optical RX/SC lane demux,
+or FEB `sc_hub` upload framing and find where the `RCMH` reply disappears.
 
 The active Mu3e Demo OPQ profile is deliberately a one-drop diagnostic profile:
 a 256-hit source cluster must deliver 255 same-timestamp hits and account
