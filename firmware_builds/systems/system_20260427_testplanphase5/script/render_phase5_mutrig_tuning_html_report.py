@@ -680,10 +680,13 @@ def write_html() -> None:
       interpretation for active <code>musip_event_builder</code> raw 256-bit
       payload, not an end-to-end hit-frame pass. The time-datagen path still
       records <code>no_dma_words</code> in
-      <code>post_tool_update_time_datagen_generic_defaultstate</code>. OPQ
-      hardware counters, real FEB-link host DMA, and disk closure remain open
-      until the active MuSiP payload is decoded or a real FEB-link artifact is
-      captured and reduced.
+      <code>post_tool_update_time_datagen_generic_defaultstate</code> and with
+      all four generic lanes enabled. Source inspection makes that a weak
+      control: the legacy <code>data_generator_a10</code> does not guarantee
+      OPQ-compatible subheader hit-count fields matching the generated hit
+      body. OPQ hardware counters, real FEB-link host DMA, and disk closure
+      remain open until the active MuSiP payload is decoded or a real FEB-link
+      artifact is captured and reduced.
     </p>
 
     <h2>Phase-6 End-to-End Progress</h2>

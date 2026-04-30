@@ -150,11 +150,16 @@ Class legend:
   - the old FEB/SWB frame reducer found zero legacy frame headers/trailers and
     now classifies this as `raw_payload_no_legacy_frames`.
   - `time-datagen` still produced `no_dma_words` with zero event-builder
-    payload count and FEB-merge timeout activity.
+    payload count and FEB-merge timeout activity; enabling all four generic
+    lanes still left mux hit/subheader counters at zero while package counter
+    index 8 advanced.
 - Root cause:
   open. The active `musip_event_builder` writes raw 256-bit payload words to
   DMA; the legacy register names and old frame scanner do not imply FEB frame
-  grammar. The empty time-datagen path is a separate SWB routing/format blocker.
+  grammar. Source inspection shows the legacy `data_generator_a10` is not an
+  OPQ-quality time-merge stimulus because its subheader hit-count field is not
+  tied to the actual generated hit body. Treat time-datagen as a bad control
+  until a generator with declared hit counts matching the payload exists.
 - Fix status:
   - state:
     partial. The host DMA path is alive for raw stream-datagen payload, but this
