@@ -70,7 +70,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-04-30T12:33:09 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-04-30T13:11:20 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -82,6 +82,8 @@
       No FEB/SWB host-disk Mu3e Demo OPQ, 100 kHz end-to-end claim is valid
       yet. Under the active <code>N_HIT=255</code> profile, a 256-hit source
       cluster must deliver 255 hits and account exactly one OPQ hit drop.
+      The SWB OPQ image itself has compiled and programmed, but the live SWB
+      readback still shows SC link 2 unlocked.
     </div>
 
     <h2>Current Read</h2>
@@ -111,6 +113,15 @@
       That page links the local MuTRiG wiki mirror and records the DMON/TDC
       injection implications used here.
     </p>
+    <p>
+      SWB live preflight on 2026-04-30 programmed the online_sc image
+      <code>ada3aea38</code> with SOF checksum <code>0x31AA0589</code>, recovered
+      PCIe, and restored <code>/dev/mudaq0</code>. Reset-link commands to FEB 7
+      echo state, but the corrected SWB register-map diagnostics read
+      <code>LINK_LOCKED_LOW=0x00000F00</code> and the target FEB SC link 2 bit is
+      clear. That blocks SWB input, OPQ hardware counters, host DMA, and disk
+      decode.
+    </p>
 
     <h2>Phase-6 End-to-End Progress</h2>
     <p>
@@ -135,10 +146,10 @@
       </thead>
       <tbody>
 <tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>Full-channel lower ASIC5+6 and all-lane runs still produce MTS/ring timestamp errors. Single lanes and selected masks pass the 0..2000-cycle gate.</td><td>Keep tuning at MTS/ring boundary; do not claim FEB closure from single-lane evidence.</td></tr>
-<tr><td>SWB input path</td><td><span class="badge missing">IN_PROGRESS</span></td><td>SWB must receive the FEB data links instead of tying the datapath off.</td><td>online_sc commit ada3aea38 keeps the 8-link datapath wiring and aligns the fixed4 OPQ package to Mu3e Demo N_SHD=128, N_HIT=255.</td><td>Use the new SWB SOF once full fit/assembly closes, then verify FEB link counters, OPQ ingress counters, and OPQ drop counters on hardware.</td></tr>
-<tr><td>SWB OPQ to DMA</td><td><span class="badge missing">IN_PROGRESS</span></td><td>Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.</td><td>packet_scheduler 25e204c UVM passes the 256-hit cluster diagnostic: N_HIT=255 delivers 255 hits and records exactly one drop; online_sc make flow_map passed.</td><td>Run the SWB hardware capture and require the same 255-delivered plus 1-drop ledger before any host-disk claim.</td></tr>
-<tr><td>Host DMA buffer</td><td><span class="badge missing">PENDING</span></td><td>/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.</td><td>No valid host DMA capture exists yet for the new SWB OPQ image.</td><td>After SWB programming, recover PCIe, start DMA, and capture a bounded run before any disk/offline claim.</td></tr>
-<tr><td>Disk/offline timestamp check</td><td><span class="badge missing">PENDING</span></td><td>Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.</td><td>No disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement.</td><td>Add the offline reducer next to the long-run scripts and emit per-bunch TS equality, interval histograms, and OPQ drop-ledger checks.</td></tr>
+<tr><td>SWB input path</td><td><span class="badge fail">BLOCKED</span></td><td>SWB must receive the FEB data links and SC link 2 must lock after reset-link enable.</td><td>online_sc commit ada3aea38 full flow, assembly, programming, and PCIe recovery passed with SOF checksum 0x31AA0589. Reset-link stop-reset/enable echoed 0x31000000/0x32000000, but sc_tool showed LINK_LOCKED_LOW=0x00000F00 and link 2 is not locked.</td><td>Resolve the FEB image/link/cable/reset alignment before crediting SWB input or running OPQ/DMA proof.</td></tr>
+<tr><td>SWB OPQ to DMA</td><td><span class="badge fail">BLOCKED</span></td><td>Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.</td><td>packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. Hardware OPQ proof is still blocked by missing FEB link 2 lock.</td><td>After link 2 locks, read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any host-disk claim.</td></tr>
+<tr><td>Host DMA buffer</td><td><span class="badge fail">BLOCKED</span></td><td>/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.</td><td>PCIe recovery passed and /dev/mudaq0 is present after SWB programming, but no valid host DMA capture exists for the new SWB OPQ image because SWB link 2 is not locked.</td><td>Capture a bounded DMA run only after P6-SWB-IN passes with link 2 locked and advancing FEB counters.</td></tr>
+<tr><td>Disk/offline timestamp check</td><td><span class="badge fail">BLOCKED</span></td><td>Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.</td><td>No disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement; the live blocker is upstream at SWB link 2 lock.</td><td>Add the offline reducer next to the long-run scripts, then run it on the first post-link-lock DMA artifact.</td></tr>
       </tbody>
     </table>
 

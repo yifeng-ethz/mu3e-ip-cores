@@ -187,31 +187,31 @@ PROGRESS = [
     ),
     (
         "SWB input path",
-        "IN_PROGRESS",
-        "SWB must receive the FEB data links instead of tying the datapath off.",
-        "online_sc commit ada3aea38 keeps the 8-link datapath wiring and aligns the fixed4 OPQ package to Mu3e Demo N_SHD=128, N_HIT=255.",
-        "Use the new SWB SOF once full fit/assembly closes, then verify FEB link counters, OPQ ingress counters, and OPQ drop counters on hardware.",
+        "BLOCKED",
+        "SWB must receive the FEB data links and SC link 2 must lock after reset-link enable.",
+        "online_sc commit ada3aea38 full flow, assembly, programming, and PCIe recovery passed with SOF checksum 0x31AA0589. Reset-link stop-reset/enable echoed 0x31000000/0x32000000, but sc_tool showed LINK_LOCKED_LOW=0x00000F00 and link 2 is not locked.",
+        "Resolve the FEB image/link/cable/reset alignment before crediting SWB input or running OPQ/DMA proof.",
     ),
     (
         "SWB OPQ to DMA",
-        "IN_PROGRESS",
+        "BLOCKED",
         "Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.",
-        "packet_scheduler 25e204c UVM passes the 256-hit cluster diagnostic: N_HIT=255 delivers 255 hits and records exactly one drop; online_sc make flow_map passed.",
-        "Run the SWB hardware capture and require the same 255-delivered plus 1-drop ledger before any host-disk claim.",
+        "packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. Hardware OPQ proof is still blocked by missing FEB link 2 lock.",
+        "After link 2 locks, read OPQ ingress/drop CSRs and require the same 255-delivered plus 1-drop ledger before any host-disk claim.",
     ),
     (
         "Host DMA buffer",
-        "PENDING",
+        "BLOCKED",
         "/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.",
-        "No valid host DMA capture exists yet for the new SWB OPQ image.",
-        "After SWB programming, recover PCIe, start DMA, and capture a bounded run before any disk/offline claim.",
+        "PCIe recovery passed and /dev/mudaq0 is present after SWB programming, but no valid host DMA capture exists for the new SWB OPQ image because SWB link 2 is not locked.",
+        "Capture a bounded DMA run only after P6-SWB-IN passes with link 2 locked and advancing FEB counters.",
     ),
     (
         "Disk/offline timestamp check",
-        "PENDING",
+        "BLOCKED",
         "Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.",
-        "No disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement.",
-        "Add the offline reducer next to the long-run scripts and emit per-bunch TS equality, interval histograms, and OPQ drop-ledger checks.",
+        "No disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement; the live blocker is upstream at SWB link 2 lock.",
+        "Add the offline reducer next to the long-run scripts, then run it on the first post-link-lock DMA artifact.",
     ),
 ]
 
@@ -474,6 +474,8 @@ def write_html() -> None:
       No FEB/SWB host-disk Mu3e Demo OPQ, 100 kHz end-to-end claim is valid
       yet. Under the active <code>N_HIT=255</code> profile, a 256-hit source
       cluster must deliver 255 hits and account exactly one OPQ hit drop.
+      The SWB OPQ image itself has compiled and programmed, but the live SWB
+      readback still shows SC link 2 unlocked.
     </div>
 
     <h2>Current Read</h2>
@@ -502,6 +504,15 @@ def write_html() -> None:
       MuTRiG tuning reference: <a href="{esc(rel(mutrig_doc))}">MUTRIG.md</a>.
       That page links the local MuTRiG wiki mirror and records the DMON/TDC
       injection implications used here.
+    </p>
+    <p>
+      SWB live preflight on 2026-04-30 programmed the online_sc image
+      <code>ada3aea38</code> with SOF checksum <code>0x31AA0589</code>, recovered
+      PCIe, and restored <code>/dev/mudaq0</code>. Reset-link commands to FEB 7
+      echo state, but the corrected SWB register-map diagnostics read
+      <code>LINK_LOCKED_LOW=0x00000F00</code> and the target FEB SC link 2 bit is
+      clear. That blocks SWB input, OPQ hardware counters, host DMA, and disk
+      decode.
     </p>
 
     <h2>Phase-6 End-to-End Progress</h2>
