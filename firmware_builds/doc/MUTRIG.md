@@ -61,6 +61,20 @@ an isolated `RUN_PREPARE` toggle from `IDLE` as a shortcut to `RUNNING`;
 skipping `RUN_SYNC` leaves counter-clear behavior ambiguous, so the following
 rate or delay histogram is not valid Phase-6 evidence.
 
+After every MuTRiG load/loss configuration for TDC injection, run the channel
+CML charge flush before taking data:
+
+1. Load the intended ASIC XML/SPI bitmap with the selected channel mask,
+   `tdctest_n=0`, PLL/TDC tuning, and channel `cml=0`, `cml_sc=0`.
+2. Reload the same selected ASICs/channels with channel `cml=8` and
+   `cml_sc=0`.
+3. Reload the same selected ASICs/channels with channel `cml=0` and
+   `cml_sc=0`, then enter `run-prepare`, `sync`, and `start-run`.
+
+This flush removes residual charge between the digital and analog sides so the
+TDC-injection interception line responds uniformly. Repeat it after any FEB
+reconfiguration or other MuTRiG clock/configuration loss.
+
 Current `good_ribbon_0` TDC XML PLL-search defaults are:
 
 | ASIC | SMB | Local index | `cnt` | `vcodelay` | `hitlogic` | `cnt/vcodelay/hitlogic` offsets |
@@ -118,6 +132,32 @@ Use the Phase-5 injector CSR path for external 100 kHz tests. In the current
 board-test scripts this is `mutrig_injector_0` at SC word base `0x0AC80`, with
 periodic mode `2`, interval `1250` cycles, and the mode register forced back to
 `0` after the measurement window.
+
+For real-MuTRiG rate-mode injection, start with `pulse_high_cycles=5`. Treat
+the pulse width as a live tuning knob over `1..15` cycles: too short can
+underfill channels, while too long can worsen timing sidebands or timestamp
+errors. A non-optimal high time can also ring the TDC injection line; some
+channels may see two rising edges and report close to twice the intended rate,
+or an intermediate overcount if the second edge is marginal. Keep
+`pulse_interval=1250` for 100 kHz at the 125 MHz injector clock.
+
+The 2026-05-01 post-histogram-26.1.8 sweep is the current reference for this
+board state after all-ASIC CML `0-8-0`:
+
+| `pulse_high_cycles` | 1 s rate behavior |
+|---:|---|
+| 1..2 | no TDC-test hits |
+| 3 | only four channels respond; underfilled |
+| 4 | many channels respond but not all; underfilled |
+| 5 | all 256 channels respond, aggregate near 100 kHz/channel with one low-rate notch |
+| 6..7 | best current plateau: all 256 channels, mean about 99.8 kHz/channel, CV about 0.006 |
+| 8 | first clear overcount/ringing sidebands; some channels approach double rate |
+| 9..15 | overfilled; many channels approach the double-edge/ringing regime |
+
+Use `pulse_high_cycles=6` or `7` as the current rate-mode starting point, then
+verify downstream MTS/RBCAM behavior separately. A flat rate histogram only
+proves the MuTRiG TDC-test source; it does not by itself clear the hit
+timestamp-delay gate.
 
 ### LVDS Controller Register Observability
 
@@ -243,7 +283,9 @@ Tuning consequences for Phase-5:
   (`tdctest_n=0`), and disable the analog frontend path with `cml=0`. It also
   states `cml_sc=1`; the current `good_ribbon_0` TDC XML uses `cml=0` with
   `cml_sc=0`, so audit the packed meaning before making `cml_sc` the next
-  hardware lever.
+  hardware lever. Operationally, still perform the post-load CML flush
+  (`cml=0`, then `cml=8`, then `cml=0`) before data taking; this is a
+  charge-reset step, not a new final analog-mode setting.
 - `vnhitlogic` is not an arbitrary noise knob. It biases the TDC hitlogic input
   receiver. Wrong input swing, wrong CML/TDC-test setup, or wrong `vnhitlogic`
   can cause no hits, extra noise hits, or poor timing. Treat it together with

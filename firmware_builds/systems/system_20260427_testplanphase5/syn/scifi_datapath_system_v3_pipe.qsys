@@ -114,7 +114,7 @@
    {
       datum _sortIndex
       {
-         value = "39";
+         value = "56";
          type = "int";
       }
    }
@@ -122,7 +122,7 @@
    {
       datum _sortIndex
       {
-         value = "50";
+         value = "67";
          type = "int";
       }
    }
@@ -130,7 +130,7 @@
    {
       datum _sortIndex
       {
-         value = "51";
+         value = "68";
          type = "int";
       }
    }
@@ -138,7 +138,7 @@
    {
       datum _sortIndex
       {
-         value = "38";
+         value = "55";
          type = "int";
       }
    }
@@ -146,7 +146,7 @@
    {
       datum _sortIndex
       {
-         value = "53";
+         value = "70";
          type = "int";
       }
    }
@@ -154,7 +154,7 @@
    {
       datum _sortIndex
       {
-         value = "52";
+         value = "69";
          type = "int";
       }
    }
@@ -162,7 +162,7 @@
    {
       datum _sortIndex
       {
-         value = "37";
+         value = "54";
          type = "int";
       }
    }
@@ -170,7 +170,7 @@
    {
       datum _sortIndex
       {
-         value = "41";
+         value = "58";
          type = "int";
       }
    }
@@ -178,7 +178,7 @@
    {
       datum _sortIndex
       {
-         value = "30";
+         value = "47";
          type = "int";
       }
       datum sopceditor_expanded
@@ -217,7 +217,7 @@
    {
       datum _sortIndex
       {
-         value = "33";
+         value = "50";
          type = "int";
       }
       datum sopceditor_expanded
@@ -262,7 +262,7 @@
    {
       datum _sortIndex
       {
-         value = "36";
+         value = "53";
          type = "int";
       }
    }
@@ -328,7 +328,7 @@
    {
       datum _sortIndex
       {
-         value = "55";
+         value = "72";
          type = "int";
       }
    }
@@ -336,7 +336,7 @@
    {
       datum _sortIndex
       {
-         value = "62";
+         value = "79";
          type = "int";
       }
    }
@@ -344,7 +344,7 @@
    {
       datum _sortIndex
       {
-         value = "64";
+         value = "81";
          type = "int";
       }
    }
@@ -352,7 +352,7 @@
    {
       datum _sortIndex
       {
-         value = "63";
+         value = "80";
          type = "int";
       }
    }
@@ -360,7 +360,7 @@
    {
       datum _sortIndex
       {
-         value = "54";
+         value = "71";
          type = "int";
       }
    }
@@ -368,7 +368,7 @@
    {
       datum _sortIndex
       {
-         value = "61";
+         value = "78";
          type = "int";
       }
    }
@@ -376,7 +376,7 @@
    {
       datum _sortIndex
       {
-         value = "56";
+         value = "73";
          type = "int";
       }
    }
@@ -384,7 +384,7 @@
    {
       datum _sortIndex
       {
-         value = "57";
+         value = "74";
          type = "int";
       }
    }
@@ -392,7 +392,7 @@
    {
       datum _sortIndex
       {
-         value = "58";
+         value = "75";
          type = "int";
       }
    }
@@ -400,7 +400,7 @@
    {
       datum _sortIndex
       {
-         value = "59";
+         value = "76";
          type = "int";
       }
    }
@@ -408,7 +408,7 @@
    {
       datum _sortIndex
       {
-         value = "60";
+         value = "77";
          type = "int";
       }
    }
@@ -424,7 +424,7 @@
    {
       datum _sortIndex
       {
-         value = "32";
+         value = "49";
          type = "int";
       }
       datum sopceditor_expanded
@@ -450,7 +450,7 @@
    {
       datum _sortIndex
       {
-         value = "35";
+         value = "52";
          type = "int";
       }
    }
@@ -466,7 +466,7 @@
    {
       datum _sortIndex
       {
-         value = "22";
+         value = "24";
          type = "int";
       }
    }
@@ -495,7 +495,7 @@
    {
       datum _sortIndex
       {
-         value = "23";
+         value = "27";
          type = "int";
       }
    }
@@ -524,7 +524,7 @@
    {
       datum _sortIndex
       {
-         value = "24";
+         value = "30";
          type = "int";
       }
    }
@@ -553,7 +553,7 @@
    {
       datum _sortIndex
       {
-         value = "25";
+         value = "33";
          type = "int";
       }
    }
@@ -582,7 +582,7 @@
    {
       datum _sortIndex
       {
-         value = "26";
+         value = "36";
          type = "int";
       }
    }
@@ -606,7 +606,7 @@
    {
       datum _sortIndex
       {
-         value = "27";
+         value = "39";
          type = "int";
       }
    }
@@ -630,7 +630,7 @@
    {
       datum _sortIndex
       {
-         value = "28";
+         value = "42";
          type = "int";
       }
    }
@@ -654,7 +654,7 @@
    {
       datum _sortIndex
       {
-         value = "29";
+         value = "45";
          type = "int";
       }
    }
@@ -678,7 +678,7 @@
    {
       datum _sortIndex
       {
-         value = "40";
+         value = "57";
          type = "int";
       }
    }
@@ -694,7 +694,7 @@
    {
       datum _sortIndex
       {
-         value = "42";
+         value = "59";
          type = "int";
       }
    }
@@ -702,7 +702,7 @@
    {
       datum _sortIndex
       {
-         value = "43";
+         value = "60";
          type = "int";
       }
    }
@@ -710,7 +710,7 @@
    {
       datum _sortIndex
       {
-         value = "44";
+         value = "61";
          type = "int";
       }
    }
@@ -718,7 +718,7 @@
    {
       datum _sortIndex
       {
-         value = "45";
+         value = "62";
          type = "int";
       }
    }
@@ -726,7 +726,7 @@
    {
       datum _sortIndex
       {
-         value = "46";
+         value = "63";
          type = "int";
       }
    }
@@ -734,7 +734,7 @@
    {
       datum _sortIndex
       {
-         value = "47";
+         value = "64";
          type = "int";
       }
    }
@@ -742,7 +742,7 @@
    {
       datum _sortIndex
       {
-         value = "48";
+         value = "65";
          type = "int";
       }
    }
@@ -750,7 +750,7 @@
    {
       datum _sortIndex
       {
-         value = "49";
+         value = "66";
          type = "int";
       }
    }
@@ -784,7 +784,7 @@
    {
       datum _sortIndex
       {
-         value = "31";
+         value = "48";
          type = "int";
       }
       datum sopceditor_expanded
@@ -797,7 +797,7 @@
    {
       datum _sortIndex
       {
-         value = "34";
+         value = "51";
          type = "int";
       }
    }
@@ -1307,7 +1307,7 @@
  <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.1.7.501"
+   version="26.1.8.501"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
   <parameter name="AVST_DATA_WIDTH" value="39" />
@@ -1341,7 +1341,7 @@
   <parameter name="VERSION_GIT" value="375124078" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="7" />
+  <parameter name="VERSION_PATCH" value="8" />
  </module>
  <module
    name="hit_stack_subsystem_0"
@@ -1457,7 +1457,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="11" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1493,7 +1493,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1511,7 +1511,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="11" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1529,7 +1529,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="13" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1565,7 +1565,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1583,7 +1583,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="5" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1601,7 +1601,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1619,7 +1619,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1637,7 +1637,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>

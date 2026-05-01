@@ -20,7 +20,8 @@ Class legend:
 | [P6-BUG-006-H](#p6-bug-006-h-1-s-rate-plot-collapsed-to-bin-0-because-the-observation-path-was-wrong) | H | source patched; all-channel emulator plot present, precision open | 2026-05-01 | The first all-channel JTAG rate-bin plot now lights all 256 bins with zero histogram drops/MTS discards/ring timestamp errors, but RBCAM overwrite/cache counters and per-channel balance are still anomalous. |
 | [P6-BUG-007-R](#p6-bug-007-r-full-feb-generated-system-tied-the-lower-histogram-fill-input-off) | R | fixed for FEB emulator observability; real-source tuning resumes at P6-BUG-002 | 2026-05-01 | The nested lower-histogram source passed simulation, but the full FEB generated top still tied `histogram_statistics_0.fill_in_1` to zero, so live all-lane emulator rate was exactly upper-side only. |
 | [P6-BUG-008-R](#p6-bug-008-r-asic5-head-sync-delay-splits-only-when-mts-lapse-is-enabled) | R | open; points at MTS lapse/lookback tuning | 2026-05-01 | ASIC5 becomes a one-bin header-sync delta when MTS lapse is bypassed, but production lapse leaves a deterministic 79/21 two-bin split that runtime expected-latency writes do not move. |
-| [P6-BUG-009-H](#p6-bug-009-h-qsys-catalog-picked-stale-system-and-package-paths-during-mts-rebuild) | H | fixed for Qsys regeneration and standalone frame-deassembly signoff; FEB compile pending | 2026-05-01 | The MTS lookback rebuild was blocked by stale system `.qsys` catalog entries, a nested stale `mutrig_frame_deassembly` version pin, and a package rooted at `script/rtl`. |
+| [P6-BUG-009-H](#p6-bug-009-h-qsys-catalog-picked-stale-system-and-package-paths-during-mts-rebuild) | H | fixed; Qsys regeneration and FEB compile/program pass | 2026-05-01 | The MTS lookback rebuild was blocked by stale system `.qsys` catalog entries, a nested stale `mutrig_frame_deassembly` version pin, and a package rooted at `script/rtl`. |
+| [P6-BUG-010-R](#p6-bug-010-r-live-100-khz-rate-bin-dump-read-the-active-histogram-bank) | R | fixed; post-fix real sweep complete, downstream MTS still open | 2026-05-01 | Real-MuTRiG 100 kHz/channel sweeps reached the expected aggregate histogram rate, but per-channel bins alternated between frozen and partial-current intervals because deferred ping-pong reads selected the active bank. |
 
 ## 2026-05-01
 
@@ -174,10 +175,10 @@ Class legend:
   `mts_preprocessor_0` and `mts_preprocessor_1` as version `26.0.9.501`, sets
   compile defaults `expected_latency_8ns=2000` and
   `overflow_lookback_8ns=2000`, and inlines those parameters into
-  `feb_system_v3_pipe_data_path_subsystem.vhd`. The next gate is a full Quartus
-  compile, then an ASIC5/ASIC6 head-sync sweep using `--mts-overflow-lookback`
-  with production lapse enabled and bypass-lapse only as the diagnostic
-  control.
+  `feb_system_v3_pipe_data_path_subsystem.vhd`. The refreshed
+  `top_nostp_pipe` image compiled and programmed on 2026-05-01; the next gate
+  is an ASIC5/ASIC6 head-sync sweep using `--mts-overflow-lookback` with
+  production lapse enabled and bypass-lapse only as the diagnostic control.
 
 ### P6-BUG-009-H: Qsys catalog picked stale system and package paths during MTS rebuild
 
@@ -213,8 +214,8 @@ Class legend:
   - The legacy pipe-generation script also used Tcl forms that are unsafe in
     the Quartus 18.1 Qsys Tcl environment.
 - Fix status:
-  fixed for Qsys regeneration and standalone frame-deassembly signoff; full
-  FEB Quartus compile pending.
+  fixed for Qsys regeneration, standalone frame-deassembly signoff, and full
+  FEB Quartus compile/programming.
   - `tcl2qsys.sh` and `qsys-generate.sh` now use an isolated catalog, recurse
     to source component directories, and keep the active system directory
     opt-in rather than always indexing it.
@@ -238,6 +239,73 @@ Class legend:
     signoff `syn/quartus/run_signoff.sh` passed with 0 errors, setup WNS
     `+2.717 ns`, hold slack `+0.287 ns`, and 13 warnings limited to the
     standalone pin/harness cleanup class.
+  - The refreshed `top_nostp_pipe` image compiled successfully on 2026-05-01
+    with 0 errors, SOF SHA256
+    `66fc1e38e93cbc561c2e7f28904c33879d202603d6ead9e3e17790225b3394af`,
+    setup WNS `+0.065 ns`, hold slack `+0.192 ns`, zero visible TNS, and
+    programming checksum `0x13DD5EC5`.
+
+### P6-BUG-010-R: live 100 kHz rate-bin dump read the active histogram bank
+
+- First seen in:
+  `phase5_rate_per_channel_1s_20260501_real_full32_cml080_ph{4..15}_100k.*`
+  during the real-MuTRiG pulse-width sweep after the required CML `0-8-0`
+  flush.
+- Symptom:
+  - The live last-interval histogram counter for `pulse_high_cycles=5..7`
+    was near the expected `25.6 Mhit/s` aggregate rate for 256 channels at
+    100 kHz/channel.
+  - The JTAG per-bin CSV did not show a physical flat 256-channel
+    distribution; many bins alternated between about `100 kHz` and
+    partial-current values around `5 kHz`.
+  - The low bins moved with read order, so treating this plot as channel loss
+    or MuTRiG masking evidence is wrong.
+- Root cause:
+  `histogram_statistics/rtl/pingpong_sram.vhd` selected `ram_v_next_bank` for
+  deferred host reads after the active update pipeline drained. In ping-pong
+  mode that is the active write bank, not the frozen last-interval snapshot
+  bank. Immediate reads already selected `not ram_v_next_bank`, so the failure
+  only appeared when live traffic made some host reads defer.
+- Fix status:
+  fixed. `histogram_statistics` release `26.1.8.0501` is signed off, the
+  active FEB Qsys image was regenerated with histogram patch `8`, and
+  `top_nostp_pipe` compiled/programmed successfully on 2026-05-01.
+- Evidence:
+  - `make -C histogram_statistics/tb run_all SEED=42` passes `46 PASS, 0 FAIL`
+    with `P05_pending_read_frozen_bank`.
+  - `make -C histogram_statistics/tb run TEST=B04_version SEED=42` reports
+    `META[VERSION]=0x1a0181f5`.
+  - Questa static screen passes for `rtl/pingpong_sram.vhd` and
+    `rtl/histogram_statistics_v2.vhd` with lint error `0`, CDC violations `0`,
+    and RDC violations `0` under
+    `/data3/yifeng/mu3e_ip_dev/qverify/histogram_statistics_20260501/histogram_v2_static_release_26_1_8_pingpong/`.
+  - Standalone Quartus compile passes at the 7.273 ns signoff period with
+    slow-85 setup slack `+0.210 ns`, worst hold slack `+0.149 ns`, and zero
+    TNS.
+- Post-fix FEB evidence:
+  - `top_nostp_pipe.sof` compiled successfully at 10:17 on 2026-05-01 and
+    programmed at 10:21 with Quartus checksum `0x13DD5EC5`; link-2 SC reads
+    returned packaged `mutrig_injector` UID `0x4D494E4A`.
+  - All eight ASICs were reloaded from the SMB3/SMB5 XMLs with all 32
+    TDC-test channels enabled and the required CML `0-8-0` flush; the flush
+    report passed `24/24` phases.
+  - `render_phase6_highcycle_rate_dislin.sh` rendered the 1-channel-per-bin
+    DISLIN sweep from 15 System Console 1 s histogram CSVs under
+    `reports/assets/phase6_highcycle_rate_sweep_20260501/`.
+  - Pulse high `1..2` produced no TDC-test hits, `3` underfilled, `5..7`
+    populated all 256 channels near the expected 100 kHz/channel aggregate,
+    and `6/7` are the best current rate plateau (`~99.8 kHz/channel`, CV
+    about `0.006`).
+  - Pulse high `8` begins channel-local overcount sidebands, and `9..15`
+    overfill. This matches the physical TDC-line ringing model: a non-optimal
+    high time can produce a second rising-edge pickup on some channels, giving
+    rates near `2x` or intermediate overcounts. Treat these as MuTRiG
+    injection-shape evidence, not a histogram readout failure.
+- Remaining gate:
+  the ph5..ph7 rate artifacts are valid for MuTRiG source-rate tuning, but the
+  same runs still report MTS-discard/RBCAM-stage failures. End-to-end FEB/SWB
+  closure remains blocked by the timestamp path, not by this histogram readout
+  bug.
 
 ## 2026-04-30
 

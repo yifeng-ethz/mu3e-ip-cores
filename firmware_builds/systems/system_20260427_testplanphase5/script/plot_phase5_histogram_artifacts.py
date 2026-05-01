@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import math
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -28,6 +29,7 @@ REPORT_DIR = SYSTEM_DIR / "reports"
 DEFAULT_OUT_DIR = REPORT_DIR / "assets" / "phase5_mutrig_tuning_20260430"
 FREQ_HZ = 125_000_000.0
 TOOLKIT_PRESET_SOURCE = "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl"
+DEFAULT_DISLIN_ROOT = Path("/home/yifeng/packages/lib/dislin")
 
 
 @dataclass(frozen=True)
@@ -350,6 +352,190 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
         "toolkit_preset_id": evidence.toolkit_preset_id or "rate",
         "visual_checkpoint": inspection,
     }
+
+
+def load_dislin() -> Any | None:
+    try:
+        import dislin  # type: ignore[import-not-found]
+
+        return dislin
+    except Exception:
+        dislin_root = DEFAULT_DISLIN_ROOT
+        dislin_py = dislin_root / "python3"
+        if dislin_py.exists() and str(dislin_py) not in sys.path:
+            sys.path.insert(0, str(dislin_py))
+        try:
+            import dislin  # type: ignore[import-not-found]
+
+            return dislin
+        except Exception:
+            return None
+
+
+def rate_group_stats(evidence: HistogramEvidence, width_channels: int) -> dict[str, Any]:
+    width = max(1, min(256, int(width_channels)))
+    scale = 1.0 / evidence.interval_s if evidence.interval_s > 0 else 1.0
+    groups = []
+    for start in range(0, 256, width):
+        chunk = evidence.bins[start:start + width]
+        if not chunk:
+            continue
+        groups.append(sum(chunk) * scale / len(chunk))
+    mean = sum(groups) / len(groups) if groups else 0.0
+    variance = sum((value - mean) ** 2 for value in groups) / len(groups) if groups else 0.0
+    stdev = math.sqrt(variance)
+    return {
+        "width_channels": width,
+        "rates_hz_per_channel": groups,
+        "mean_hz_per_channel": mean,
+        "stdev_hz_per_channel": stdev,
+        "cv": stdev / mean if mean > 0.0 else 0.0,
+        "min_hz_per_channel": min(groups) if groups else 0.0,
+        "max_hz_per_channel": max(groups) if groups else 0.0,
+    }
+
+
+def render_rate_rebinned_matplotlib(
+    evidence: HistogramEvidence,
+    out: Path,
+    *,
+    width_channels: int,
+    renderer_note: str,
+) -> dict[str, Any]:
+    stats = rate_group_stats(evidence, width_channels)
+    rates = stats["rates_hz_per_channel"]
+    x = list(range(len(rates)))
+    fig, ax = plt.subplots(figsize=(12.8, 5.2), constrained_layout=True)
+    ax.bar(x, [rate / 1000.0 for rate in rates], width=0.78, color="#2f6f9f", linewidth=0)
+    for boundary in range(32 // stats["width_channels"], len(rates), 32 // stats["width_channels"]):
+        ax.axvline(boundary - 0.5, color="#8c8c8c", lw=0.8, alpha=0.7)
+    ax.axhline(stats["mean_hz_per_channel"] / 1000.0, color="#b73535", lw=1.2, label="measured mean")
+    ax.set_title(f"MuTRiG Rate Histogram, {stats['width_channels']} Channels / Bin")
+    ax.set_xlabel(f"Global channel bin ({stats['width_channels']} channels/bin)")
+    ax.set_ylabel("Mean rate [kHz/channel]")
+    ax.set_xlim(-0.6, len(rates) - 0.4)
+    if rates:
+        ax.set_ylim(0.0, max(rates) / 1000.0 * 1.22)
+    ax.grid(axis="y", color="#d9d9d9", lw=0.6)
+    ax.legend(loc="upper right", frameon=True)
+    ax.text(
+        0.01,
+        0.96,
+        (
+            f"source: {evidence.source.name}; raw 256-bin CV=0.573; "
+            f"rebinned CV={stats['cv']:.3f}"
+        ),
+        transform=ax.transAxes,
+        va="top",
+        fontsize=9,
+        bbox={"facecolor": "white", "edgecolor": "#d8dde3", "alpha": 0.86},
+    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    return rate_rebinned_manifest(evidence, out, stats, renderer_note)
+
+
+def rate_rebinned_manifest(
+    evidence: HistogramEvidence,
+    out: Path,
+    stats: dict[str, Any],
+    renderer: str,
+) -> dict[str, Any]:
+    visual_checkpoint = (
+        f"Display uses {stats['width_channels']} channels/bin. The rebinned view is much flatter "
+        f"(CV={stats['cv']:.3f}, min={stats['min_hz_per_channel']:.1f}/s, "
+        f"max={stats['max_hz_per_channel']:.1f}/s), but the raw 256-bin plot remains "
+        "the closure artifact for channel-uniformity."
+    )
+    return {
+        "status": "present",
+        "kind": "rate_per_channel_rebinned",
+        "path": str(out),
+        "source": str(evidence.source),
+        "interval_s": evidence.interval_s,
+        "total_hits": evidence.total,
+        "nonzero_bins": evidence.nonzero_bins,
+        "rebin_width_channels": stats["width_channels"],
+        "rebinned_bins": len(stats["rates_hz_per_channel"]),
+        "mean_rate_hz_per_channel": stats["mean_hz_per_channel"],
+        "min_rate_hz_per_channel": stats["min_hz_per_channel"],
+        "max_rate_hz_per_channel": stats["max_hz_per_channel"],
+        "cv_rebinned_rate": stats["cv"],
+        "renderer": renderer,
+        "toolkit_preset_source": TOOLKIT_PRESET_SOURCE,
+        "toolkit_preset_id": evidence.toolkit_preset_id or "rate",
+        "visual_checkpoint": visual_checkpoint,
+    }
+
+
+def render_rate_rebinned_plot(
+    evidence: HistogramEvidence,
+    out: Path,
+    *,
+    width_channels: int,
+) -> dict[str, Any]:
+    stats = rate_group_stats(evidence, width_channels)
+    rates = stats["rates_hz_per_channel"]
+    dislin = load_dislin()
+    if dislin is None:
+        return render_rate_rebinned_matplotlib(
+            evidence,
+            out,
+            width_channels=width_channels,
+            renderer_note="matplotlib fallback; DISLIN Python module unavailable",
+        )
+
+    y_khz = [rate / 1000.0 for rate in rates]
+    x = [idx + 0.5 for idx in range(len(rates))]
+    y0 = [0.0 for _ in rates]
+    ymax = max(120.0, math.ceil((max(y_khz) if y_khz else 100.0) * 1.18 / 20.0) * 20.0)
+    mean_khz = stats["mean_hz_per_channel"] / 1000.0
+
+    out.parent.mkdir(parents=True, exist_ok=True)
+    dislin.metafl("PNG")
+    dislin.setfil(str(out))
+    dislin.filmod("DELETE")
+    dislin.scrmod("REVERS")
+    dislin.imgfmt("RGB")
+    dislin.winsiz(1600, 900)
+    dislin.page(3200, 1800)
+    dislin.disini()
+    dislin.pagera()
+    dislin.complx()
+    dislin.height(42)
+    dislin.titlin(f"MuTRiG Rate Histogram, {stats['width_channels']} Channels / Bin", 1)
+    dislin.axspos(520, 1320)
+    dislin.axslen(2400, 900)
+    dislin.name(f"Global channel bin ({stats['width_channels']} channels/bin)", "X")
+    dislin.name("Mean rate [kHz/channel]", "Y")
+    dislin.ticks(4, "X")
+    dislin.ticks(2, "Y")
+    dislin.graf(0.0, float(len(rates)), 0.0, 4.0, 0.0, ymax, 0.0, 20.0)
+    dislin.grid(1, 1)
+    dislin.color("BLUE")
+    dislin.shdpat(16)
+    dislin.bars(x, y0, y_khz, len(rates))
+    dislin.color("RED")
+    dislin.curve([0.0, float(len(rates))], [mean_khz, mean_khz], 2)
+    dislin.color("FORE")
+    boundary_step = 32 // stats["width_channels"] if stats["width_channels"] <= 32 else 1
+    if boundary_step > 0:
+        for boundary in range(boundary_step, len(rates), boundary_step):
+            dislin.curve([float(boundary), float(boundary)], [0.0, ymax], 2)
+    dislin.endgrf()
+    dislin.height(34)
+    dislin.messag(
+        (
+            f"source={evidence.source.name}; measured mean={mean_khz:.1f} kHz/ch; "
+            f"rebinned CV={stats['cv']:.3f}; raw 256-bin plot remains anomaly"
+        ),
+        540,
+        1600,
+    )
+    dislin.title()
+    dislin.disfin()
+    return rate_rebinned_manifest(evidence, out, stats, "DISLIN 11.5")
 
 
 def render_delay_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:

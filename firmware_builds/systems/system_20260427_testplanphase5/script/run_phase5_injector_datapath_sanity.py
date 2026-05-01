@@ -1235,6 +1235,11 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "inject_mode": args.inject_mode,
             "duration_ms": args.duration_ms,
             "pulse_intervals": args.pulse_intervals,
+            "pulse_high_cycles": args.pulse_high_cycles,
+            "header_delay": args.header_delay,
+            "header_interval": args.header_interval,
+            "injection_multiplicity": args.injection_multiplicity,
+            "header_channel": args.header_channel,
             "hist_profile": args.hist_profile,
             "hist_ingress_source": args.hist_ingress_source,
             "rate_tolerance_pct": args.rate_tolerance_pct,
@@ -1341,7 +1346,7 @@ def main() -> int:
     parser.add_argument("--hist-filter-key-loc", type=parse_u32, default=None)
     parser.add_argument("--hist-filter-key-value", type=parse_u32, default=0)
     parser.add_argument("--pulse-intervals", type=parse_intervals, default=[5000])
-    parser.add_argument("--pulse-high-cycles", type=parse_u32, default=8)
+    parser.add_argument("--pulse-high-cycles", type=parse_u32, default=5)
     parser.add_argument("--onclick-count", type=int, default=16)
     parser.add_argument("--onclick-spacing-ms", type=int, default=2)
     parser.add_argument("--header-delay", type=parse_u32, default=100)

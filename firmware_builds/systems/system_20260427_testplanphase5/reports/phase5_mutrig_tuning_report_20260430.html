@@ -117,7 +117,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-05-01T08:40:12 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-05-01T10:39:05 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -377,7 +377,7 @@
         </tr>
       </thead>
       <tbody>
-<tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Fresh continued cycle 20260430_live_continued_cycle1 records P6B006 PASS hist=52627/ring=0, P6B007 PASS hist=81880/ring=0, P6B010 FAIL hist=144364/ring_inerr_delta=563053, P6B020 expected fail ring=7146776, and P6E010 pulse-high 3 underfilled. A fresh all-real 1 s rate monitor records LVDS error/DPA deltas of zero and LAST_INTERVAL_TOTAL_HITS=11851571, but still trips MTS/ring errors and exposes that the slow SC per-bin read misses the ping-pong bin bank. Opening MTS expected latency to 4000 and 65535 still fails, so the failure is not a small positive-latency tail. Header-synchronous pair injection on lower header channels 5 and 6 fails, while single-lane header controls pass. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair. The separate full-FEB lower histogram observability bug is now closed for emulator evidence: checksum 0x13E73362 exposes histogram_ingress_bridge_1 at SC word 0x0AB04 and passes upper-only, lower-only, all-lane 10 kHz, all-lane 100 kHz, and dual-MTS delay-profile 1 s emulator checks with zero drops.</td><td>Resume real MuTRiG tuning from nonzero ASIC-specific PLL defaults, run full RUN_PREP, require header-delay delta-function plots for upper and lower ASICs, then rerun the RBCAM-to-FEB-frame same-window alignment before SWB/DMA disk closure.</td></tr>
+<tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>The histogram 26.1.8 FEB image compiled at 10:17 on 2026-05-01, programmed at 10:21 with checksum 0x13DD5EC5, and responded with packaged injector UID 0x4D494E4A. After explicit all-ASIC reload and CML 0-8-0 flush, the 1 s high-cycle rate sweep shows the physical threshold: ph1/ph2 silent, ph3 underfilled, ph5/ph6/ph7 near 25.55 Mhit/s with all 256 channels populated, ph8 begins overcount spikes, and ph9+ overfills. The ph8+ shape is consistent with TDC injection-line ringing and second rising-edge pickup on some channels, so rates can approach 2x or land between 1x and 2x. The best rate artifacts are ph6/ph7 around 99.8 kHz/channel with CV about 0.006, but the same runs still classify as MTS-discard failures before full FEB output closure. Earlier lower-pair evidence still applies: ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; expected-latency sweeps, header-sync pair controls, and ext_trig_offset scans do not clear it. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.</td><td>Use ph6 or ph7 as the current rate-mode pulse-width starting point, then clear the MTS-discard/RBCAM boundary with header-delay delta plots and same-window RBCAM/FEB-frame captures before SWB/DMA disk closure.</td></tr>
 <tr><td>SWB input path</td><td><span class="badge pass">PASS_SC</span></td><td>SWB must receive FEB data and the SC read/reply path must return host-visible replies from FEB.</td><td>online_sc commit 11eada541 compiled timing-clean at all checked STA corners, programmed SOF checksum 0x31A704E1, recovered /dev/mudaq0, and returned host-visible SC link-2 reads: 0x00000 payload 0 and 0x0C000 payload 0x52434D48.</td><td>Hold SWB SciFi-hit input proof until FEB emits clean hit frames; the SC path itself is no longer the blocker.</td></tr>
 <tr><td>SWB OPQ to DMA</td><td><span class="badge warn">PARTIAL_DMA</span></td><td>Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.</td><td>packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. The online_sc fixed4 image compiled timing-clean, programmed checksum 0x31A72852, and recovered /dev/mudaq0. Three fresh 10 s repo-owned stream-datagen runs classify raw host DMA as dma_payload_nonzero with 2048 nonzero words, 1024 nonpadding words, and 256 event-builder payload words each. First payload words differ across runs: 0x00088A0C, 0x0008818F, and 0x0008894F, so this is not stale-buffer reuse. The old frame reducer correctly reports raw_payload_no_legacy_frames for this musip_event_builder payload.</td><td>Decode the active MuSiP/OPQ payload contract, clear the still-empty time-datagen path, then run real FEB-link captures and require 255 delivered hits plus one OPQ-accounted drop per 256-hit bunch before any FEB-link host-disk claim.</td></tr>
 <tr><td>Host DMA buffer</td><td><span class="badge warn">PARTIAL_RAW_DMA</span></td><td>/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.</td><td>PCIe recovery passed and /dev/mudaq0 plus /dev/mudaq0_dmabuf are present after the fixed4 SWB programming. Mu3e online software is deprecated as Phase-6 evidence; swb_dmatest, rw, MIDAS, libmudaq-backed utilities, and production cleanup flows are reference-only. The tools/phase6_swb_dma_probe path directly mmaps the devices, captures raw RW/RO registers and counter sweeps before cleanup, and now distinguishes raw 256-bit payload DMA from legacy frame decode.</td><td>Use only repo-owned direct-MMIO tools under tools/ for closure captures. If an online utility disagrees with raw registers, trust the repo-owned probe and hardware evidence. The next host-buffer gate is a real FEB-link run with persistent disk artifact and offline timestamp/hit-count reduction.</td></tr>
@@ -407,7 +407,7 @@
     <div class="plot-grid">
 <figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_histogram.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_histogram.png" alt="header_delay"></a><figcaption>header_delay - ASIC5 52/18/25 bypass lapse: header-sync delay is delta-like; inspect the absolute delay offset and matching run-control state.</figcaption></figure>
 <figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_comparison.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_comparison.png" alt="header_delay_comparison"></a><figcaption>header_delay_comparison - ANOMALY - Comparison inspected: ASIC5 default and production-lapse tuned runs show sidebands, while ASIC5 bypass-lapse and ASIC6 default collapse to a single bin. This points at the MTS lapse/overflow transform before treating ASIC5 as physically unlocked.</figcaption></figure>
-<figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png" alt="rate_per_channel"></a><figcaption>rate_per_channel - ANOMALY - ANOMALY: all 256 bins are populated, but the per-channel rate is not uniform enough for rate closure (CV=0.573, min=3091.0/s, max=122071.0/s).</figcaption></figure>
+<figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png" alt="rate_per_channel"></a><figcaption>rate_per_channel - ANOMALY - ANOMALY: all 256 bins are populated, but the per-channel rate is not uniform enough for rate closure (CV=0.463, min=5196.0/s, max=99840.0/s).</figcaption></figure>
     </div>
     <table>
       <thead>
@@ -419,9 +419,61 @@
         </tr>
       </thead>
       <tbody>
-<tr><td>1 s 256-bin rate histogram</td><td><span class="badge fail">ANOMALY</span></td><td>Precise per-channel/per-ASIC rate evidence from histogram bins.<div class="note">source=phase5_rate_per_channel_1s_20260501_allchan100k_emulator_periodic_r53.csv; total=20,594,683; nonzero_bins=256; active_asics=8; rate_cv=0.573; uniformity=fail; preset=rate; ANOMALY: all 256 bins are populated, but the per-channel rate is not uniform enough for rate closure (CV=0.573, min=3091.0/s, max=122071.0/s).</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png">phase5_rate_per_channel_1s.png</a></td></tr>
+<tr><td>1 s 256-bin rate histogram</td><td><span class="badge fail">ANOMALY</span></td><td>Precise per-channel/per-ASIC rate evidence from histogram bins.<div class="note">source=phase5_rate_per_channel_1s_20260501_real_full32_cml080_ph6_100k.csv; total=20,729,590; nonzero_bins=256; active_asics=8; rate_cv=0.463; uniformity=fail; preset=rate; ANOMALY: all 256 bins are populated, but the per-channel rate is not uniform enough for rate closure (CV=0.463, min=5196.0/s, max=99840.0/s).</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png">phase5_rate_per_channel_1s.png</a></td></tr>
 <tr><td>Header-sync delay histogram</td><td><span class="badge pass">PASS</span></td><td>Passing handle: one dominant delay bin, normally &gt;=90% peak fraction.<div class="note">source=phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv; total=91,574; nonzero_bins=1; peak=100.000%; preset=delay_mts_both; ASIC5 52/18/25 bypass lapse: header-sync delay is delta-like; inspect the absolute delay offset and matching run-control state.</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_histogram.png">phase5_header_delay_histogram.png</a></td></tr>
 <tr><td>Header-sync delay A/B comparison</td><td><span class="badge fail">ANOMALY</span></td><td>Physical-response check across production-lapse, bypass-lapse, and lane controls.<div class="note">preset=delay_mts_both; Comparison inspected: ASIC5 default and production-lapse tuned runs show sidebands, while ASIC5 bypass-lapse and ASIC6 default collapse to a single bin. This points at the MTS lapse/overflow transform before treating ASIC5 as physically unlocked.</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_comparison.png">phase5_header_delay_comparison.png</a></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Phase-6 High-Cycle Rate Sweep</h2>
+    <p>
+      This is the post-histogram-26.1.8 real-MuTRiG rate-mode sweep requested
+      for <code>pulse_high_cycles=1..15</code>. Every plot is rendered by
+      DISLIN from the 1 s System Console histogram CSV, with one global channel
+      per bin and the 100 kHz target marked in red. Overfilled cases are
+      interpreted as physical injection-shape evidence: a non-optimal high
+      time can ring the TDC injection line and produce a second rising edge on
+      selected channels, so the measured rate may approach 2x or sit between
+      the single-edge and double-edge limits.
+    </p>
+    <div class="plot-grid">
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph01_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph01_dislin.png" alt="pulse_high 1 rate plot"></a><figcaption>pulse_high=1; mean=0.000 kHz/channel; CV=0.0000</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph03_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph03_dislin.png" alt="pulse_high 3 rate plot"></a><figcaption>pulse_high=3; mean=0.756 kHz/channel; CV=10.9936</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph05_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph05_dislin.png" alt="pulse_high 5 rate plot"></a><figcaption>pulse_high=5; mean=99.750 kHz/channel; CV=0.0144</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph06_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph06_dislin.png" alt="pulse_high 6 rate plot"></a><figcaption>pulse_high=6; mean=99.804 kHz/channel; CV=0.0058</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph08_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph08_dislin.png" alt="pulse_high 8 rate plot"></a><figcaption>pulse_high=8; mean=100.507 kHz/channel; CV=0.0763</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph15_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph15_dislin.png" alt="pulse_high 15 rate plot"></a><figcaption>pulse_high=15; mean=124.799 kHz/channel; CV=0.3464</figcaption></figure>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Pulse High</th>
+          <th>Total Hits/s</th>
+          <th>Mean kHz/ch</th>
+          <th>Nonzero Channels</th>
+          <th>Min kHz/ch</th>
+          <th>Max kHz/ch</th>
+          <th>CV</th>
+          <th>Inspection</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>1</td><td>0</td><td>0.000</td><td>0</td><td>0.000</td><td>0.000</td><td>0.0000</td><td>silent</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph01_dislin.png">phase6_rate_per_channel_1s_ph01_dislin.png</a></td></tr>
+<tr><td>2</td><td>0</td><td>0.000</td><td>0</td><td>0.000</td><td>0.000</td><td>0.0000</td><td>silent</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph02_dislin.png">phase6_rate_per_channel_1s_ph02_dislin.png</a></td></tr>
+<tr><td>3</td><td>193,461</td><td>0.756</td><td>4</td><td>0.000</td><td>99.658</td><td>10.9936</td><td>underfilled</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph03_dislin.png">phase6_rate_per_channel_1s_ph03_dislin.png</a></td></tr>
+<tr><td>4</td><td>21,404,120</td><td>83.610</td><td>223</td><td>0.000</td><td>99.841</td><td>0.4329</td><td>underfilled</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph04_dislin.png">phase6_rate_per_channel_1s_ph04_dislin.png</a></td></tr>
+<tr><td>5</td><td>25,536,088</td><td>99.750</td><td>256</td><td>76.830</td><td>99.841</td><td>0.0144</td><td>rate plateau</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph05_dislin.png">phase6_rate_per_channel_1s_ph05_dislin.png</a></td></tr>
+<tr><td>6</td><td>25,549,931</td><td>99.804</td><td>256</td><td>90.525</td><td>99.841</td><td>0.0058</td><td>rate plateau</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph06_dislin.png">phase6_rate_per_channel_1s_ph06_dislin.png</a></td></tr>
+<tr><td>7</td><td>25,550,213</td><td>99.806</td><td>256</td><td>91.085</td><td>99.840</td><td>0.0055</td><td>rate plateau</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph07_dislin.png">phase6_rate_per_channel_1s_ph07_dislin.png</a></td></tr>
+<tr><td>8</td><td>25,729,880</td><td>100.507</td><td>256</td><td>94.932</td><td>196.165</td><td>0.0763</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph08_dislin.png">phase6_rate_per_channel_1s_ph08_dislin.png</a></td></tr>
+<tr><td>9</td><td>28,284,536</td><td>110.486</td><td>256</td><td>99.840</td><td>193.480</td><td>0.1952</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph09_dislin.png">phase6_rate_per_channel_1s_ph09_dislin.png</a></td></tr>
+<tr><td>10</td><td>28,967,327</td><td>113.154</td><td>256</td><td>91.236</td><td>199.590</td><td>0.2228</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph10_dislin.png">phase6_rate_per_channel_1s_ph10_dislin.png</a></td></tr>
+<tr><td>11</td><td>30,603,255</td><td>119.544</td><td>256</td><td>99.839</td><td>199.681</td><td>0.2946</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph11_dislin.png">phase6_rate_per_channel_1s_ph11_dislin.png</a></td></tr>
+<tr><td>12</td><td>31,393,140</td><td>122.629</td><td>256</td><td>98.851</td><td>199.680</td><td>0.3392</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph12_dislin.png">phase6_rate_per_channel_1s_ph12_dislin.png</a></td></tr>
+<tr><td>13</td><td>31,948,742</td><td>124.800</td><td>256</td><td>99.837</td><td>199.680</td><td>0.3464</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph13_dislin.png">phase6_rate_per_channel_1s_ph13_dislin.png</a></td></tr>
+<tr><td>14</td><td>31,948,368</td><td>124.798</td><td>256</td><td>99.837</td><td>199.678</td><td>0.3464</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph14_dislin.png">phase6_rate_per_channel_1s_ph14_dislin.png</a></td></tr>
+<tr><td>15</td><td>31,948,587</td><td>124.799</td><td>256</td><td>99.834</td><td>199.680</td><td>0.3464</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph15_dislin.png">phase6_rate_per_channel_1s_ph15_dislin.png</a></td></tr>
       </tbody>
     </table>
 
@@ -438,7 +490,7 @@
         <tr>
           <td>Channel mask sanity</td>
           <td>Masked channels vanish from the 256-bin rate plot while unmasked channels keep their rate scale.</td>
-          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The real-MuTRiG plotted 256-bin artifact is still open because the current all-real plot collapsed to one bin.</td>
+          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The post-26.1.8 real-MuTRiG high-cycle sweep now produces valid 256-bin plots; ph6/ph7 are the current rate-mode starting point, while ph8+ expose likely TDC-line ringing/double-edge sidebands.</td>
         </tr>
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>
@@ -453,7 +505,7 @@
         <tr>
           <td>Histogram-bin capture method</td>
           <td>Read all 256 bins from the completed interval before the ping-pong bank is overwritten, preferably by the burst System Console/toolkit path.</td>
-          <td>The 1 s all-real SC run has nonzero last-interval hits but zero slow-read bins. The available STP JDI probe currently reports no System Console master services, so the burst-bin path is the next tooling blocker.</td>
+          <td>The histogram 26.1.8 fix repaired deferred frozen-bank reads. The current accepted plot source is the 1 s System Console histogram CSV; slow SC bin reads remain diagnostic-only under live traffic.</td>
         </tr>
         <tr>
           <td>Anomaly loop</td>
