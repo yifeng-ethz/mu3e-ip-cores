@@ -283,7 +283,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			DEBUG                     : natural := 0;
 			VERSION_MAJOR             : natural := 26;
 			VERSION_MINOR             : natural := 1;
-			VERSION_PATCH             : natural := 8;
+			VERSION_PATCH             : natural := 9;
 			BUILD                     : natural := 501;
 			IP_UID                    : natural := 1212765012;
 			VERSION_DATE              : natural := 20260501;
@@ -692,7 +692,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			VERSION_PATCH                     : integer := 9;
 			BUILD                             : integer := 501;
 			VERSION_DATE                      : integer := 20260501;
-			VERSION_GIT                       : integer := 32923629;
+			VERSION_GIT                       : integer := 127221572;
 			INSTANCE_ID                       : integer := 0
 		);
 		port (
@@ -2917,6 +2917,10 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 		);
 	end component feb_system_v3_pipe_data_path_subsystem_run_control_splitter;
 
+	signal mts_preprocessor_0_debug_ts_valid                                             : std_logic;                     -- mts_preprocessor_0:aso_debug_ts_valid -> histogram_statistics_0:asi_debug_1_valid
+	signal mts_preprocessor_0_debug_ts_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_0:aso_debug_ts_data -> histogram_statistics_0:asi_debug_1_data
+	signal mts_preprocessor_1_debug_ts_valid                                             : std_logic;                     -- mts_preprocessor_1:aso_debug_ts_valid -> histogram_statistics_0:asi_debug_2_valid
+	signal mts_preprocessor_1_debug_ts_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_1:aso_debug_ts_data -> histogram_statistics_0:asi_debug_2_data
 	signal mutrig_datapath_subsystem_0_headerinfo_valid                                  : std_logic;                     -- mutrig_datapath_subsystem_0:headerinfo_valid -> mutrig_injector_0:asi_headerinfo0_valid
 	signal mutrig_datapath_subsystem_0_headerinfo_data                                   : std_logic_vector(41 downto 0); -- mutrig_datapath_subsystem_0:headerinfo_data -> mutrig_injector_0:asi_headerinfo0_data
 	signal mutrig_datapath_subsystem_0_headerinfo_channel                                : std_logic_vector(3 downto 0);  -- mutrig_datapath_subsystem_0:headerinfo_channel -> mutrig_injector_0:asi_headerinfo0_channel
@@ -3137,10 +3141,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mutrig_lane_source_mux_7_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_7:aso_data -> mutrig_datapath_subsystem_7:decoded_din_data
 	signal mutrig_lane_source_mux_7_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_7:aso_channel -> mutrig_datapath_subsystem_7:decoded_din_channel
 	signal mutrig_lane_source_mux_7_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_7:aso_error -> mutrig_datapath_subsystem_7:decoded_din_error
-	signal mts_preprocessor_0_ts_delta_valid                                             : std_logic;                     -- mts_preprocessor_0:aso_ts_delta_valid -> histogram_statistics_0:asi_debug_1_valid
-	signal mts_preprocessor_0_ts_delta_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_0:aso_ts_delta_data -> histogram_statistics_0:asi_debug_1_data
-	signal mts_preprocessor_1_ts_delta_valid                                             : std_logic;                     -- mts_preprocessor_1:aso_ts_delta_valid -> histogram_statistics_0:asi_debug_2_valid
-	signal mts_preprocessor_1_ts_delta_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_1:aso_ts_delta_data -> histogram_statistics_0:asi_debug_2_data
 	signal emulator_mutrig_0_tx8b1k_valid                                                : std_logic;                     -- emulator_mutrig_0:aso_tx8b1k_valid -> mutrig_lane_source_mux_0:asi_emu_valid
 	signal emulator_mutrig_0_tx8b1k_data                                                 : std_logic_vector(8 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_data -> mutrig_lane_source_mux_0:asi_emu_data
 	signal emulator_mutrig_0_tx8b1k_channel                                              : std_logic_vector(3 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_channel -> mutrig_lane_source_mux_0:asi_emu_channel
@@ -5073,7 +5073,7 @@ begin
 			DEBUG                     => 0,
 			VERSION_MAJOR             => 26,
 			VERSION_MINOR             => 1,
-			VERSION_PATCH             => 8,
+			VERSION_PATCH             => 9,
 			BUILD                     => 501,
 			IP_UID                    => 1212765012,
 			VERSION_DATE              => 20260501,
@@ -5121,10 +5121,10 @@ begin
 			aso_hist_fill_out_startofpacket => open,                                                                 --               .startofpacket
 			aso_hist_fill_out_endofpacket   => open,                                                                 --               .endofpacket
 			aso_hist_fill_out_channel       => open,                                                                 --               .channel
-			asi_debug_1_valid               => mts_preprocessor_0_ts_delta_valid,                                    --        debug_1.valid
-			asi_debug_1_data                => mts_preprocessor_0_ts_delta_data,                                     --               .data
-			asi_debug_2_valid               => mts_preprocessor_1_ts_delta_valid,                                    --        debug_2.valid
-			asi_debug_2_data                => mts_preprocessor_1_ts_delta_data,                                     --               .data
+			asi_debug_1_valid               => mts_preprocessor_0_debug_ts_valid,                                    --        debug_1.valid
+			asi_debug_1_data                => mts_preprocessor_0_debug_ts_data,                                     --               .data
+			asi_debug_2_valid               => mts_preprocessor_1_debug_ts_valid,                                    --        debug_2.valid
+			asi_debug_2_data                => mts_preprocessor_1_debug_ts_data,                                     --               .data
 			asi_debug_3_valid               => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid,              --        debug_3.valid
 			asi_debug_3_data                => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data,               --               .data
 			asi_debug_4_valid               => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid,              --        debug_4.valid
@@ -5938,12 +5938,12 @@ begin
 			aso_hit_type1_startofpacket => mts_preprocessor_0_hit_type1_out_startofpacket,       --                .startofpacket
 			aso_hit_type1_empty         => mts_preprocessor_0_hit_type1_out_empty,               --                .empty
 			aso_hit_type1_error         => mts_preprocessor_0_hit_type1_out_error,               --                .error
-			aso_debug_ts_valid          => open,                                                 --        debug_ts.valid
-			aso_debug_ts_data           => open,                                                 --                .data
+			aso_debug_ts_valid          => mts_preprocessor_0_debug_ts_valid,                    --        debug_ts.valid
+			aso_debug_ts_data           => mts_preprocessor_0_debug_ts_data,                     --                .data
 			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
 			aso_debug_burst_data        => open,                                                 --                .data
-			aso_ts_delta_valid          => mts_preprocessor_0_ts_delta_valid,                    --        ts_delta.valid
-			aso_ts_delta_data           => mts_preprocessor_0_ts_delta_data                      --                .data
+			aso_ts_delta_valid          => open,                                                 --        ts_delta.valid
+			aso_ts_delta_data           => open                                                  --                .data
 		);
 
 	mts_preprocessor_1 : component mts_processor
@@ -5996,12 +5996,12 @@ begin
 			aso_hit_type1_startofpacket => mts_preprocessor_1_hit_type1_out_startofpacket,       --                .startofpacket
 			aso_hit_type1_empty         => mts_preprocessor_1_hit_type1_out_empty,               --                .empty
 			aso_hit_type1_error         => mts_preprocessor_1_hit_type1_out_error,               --                .error
-			aso_debug_ts_valid          => open,                                                 --        debug_ts.valid
-			aso_debug_ts_data           => open,                                                 --                .data
+			aso_debug_ts_valid          => mts_preprocessor_1_debug_ts_valid,                    --        debug_ts.valid
+			aso_debug_ts_data           => mts_preprocessor_1_debug_ts_data,                     --                .data
 			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
 			aso_debug_burst_data        => open,                                                 --                .data
-			aso_ts_delta_valid          => mts_preprocessor_1_ts_delta_valid,                    --        ts_delta.valid
-			aso_ts_delta_data           => mts_preprocessor_1_ts_delta_data                      --                .data
+			aso_ts_delta_valid          => open,                                                 --        ts_delta.valid
+			aso_ts_delta_data           => open                                                  --                .data
 		);
 
 	mutrig_datapath_subsystem_0 : component feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_0

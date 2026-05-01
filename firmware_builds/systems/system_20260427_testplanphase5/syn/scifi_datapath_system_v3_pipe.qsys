@@ -1307,7 +1307,7 @@
  <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.1.8.501"
+   version="26.1.9.501"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
   <parameter name="AVST_DATA_WIDTH" value="39" />
@@ -1341,7 +1341,7 @@
   <parameter name="VERSION_GIT" value="375124078" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="8" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="hit_stack_subsystem_0"

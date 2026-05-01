@@ -1,0 +1,807 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Phase-6 MuTRiG/FEB Closure Report</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #182026;
+      background: #f6f7f8;
+    }
+    header {
+      padding: 24px 32px 18px;
+      background: #fff;
+      border-bottom: 1px solid #d8dde3;
+    }
+    main { padding: 24px 32px 40px; }
+    h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: 0; }
+    h2 { margin: 28px 0 12px; font-size: 18px; letter-spacing: 0; }
+    p { max-width: 1100px; line-height: 1.45; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #d8dde3;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e4e8ec;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #edf1f4; font-weight: 650; }
+    .badge {
+      display: inline-block;
+      min-width: 52px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      color: #fff;
+      text-align: center;
+      font-weight: 650;
+      font-size: 12px;
+    }
+    .pass { background: #1d7f45; }
+    .warn { background: #ad6a00; }
+    .fail { background: #b73535; }
+    .missing { background: #6b7280; }
+    .mini-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+    .mini-badge.pass { background: #1d7f45; }
+    .mini-badge.fail { background: #b73535; }
+    .mini-badge.missing { background: #6b7280; }
+    .progress-table td:nth-child(3),
+    .progress-table td:nth-child(4),
+    .progress-table td:nth-child(5) { min-width: 220px; }
+    .rate {
+      margin-top: 2px;
+      color: #52606d;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+    .note, .class {
+      margin-top: 4px;
+      color: #52606d;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .callout {
+      background: #fff;
+      border-left: 4px solid #b73535;
+      padding: 12px 14px;
+      margin: 16px 0;
+      max-width: 1120px;
+    }
+    .plot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 16px;
+      margin: 12px 0 16px;
+      max-width: 1280px;
+    }
+    figure {
+      margin: 0;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #d8dde3;
+      border-radius: 4px;
+    }
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    figcaption {
+      margin-top: 6px;
+      color: #52606d;
+      font-size: 12px;
+    }
+    .missing-text {
+      color: #b73535;
+      font-weight: 650;
+    }
+    code { background: #edf1f4; padding: 1px 4px; border-radius: 3px; }
+    a { color: #0a5ca8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Phase-6 MuTRiG/FEB Closure Report</h1>
+    <div>Generated 2026-05-01T13:49:19 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+  </header>
+  <main>
+    <div class="callout">
+      <strong>Closure status: FAIL.</strong>
+      Older Phase-5 evidence showed single-lane delay could be made clean, but
+      the timing-closed Phase-6 rerun with explicit SMB3/SMB5 XML reload moved
+      the live blocker earlier: even the lower <code>lanes5+6</code>
+      one-channel pair now trips MTS/ring input errors. The lower-MTS/ring
+      SignalTap checkpoint localizes the visible error sideband to MTS1 before
+      hit_stack1/ring sees the reject. No FEB/SWB host-disk
+      Mu3e Demo OPQ, 100 kHz end-to-end claim is valid yet. Under the active
+      <code>N_HIT=255</code> profile, a 256-hit source cluster must deliver
+      255 hits and account exactly one OPQ hit drop. The SWB OPQ image now has
+      timing-clean programming and host-visible SC replies, so SWB SC return is
+      no longer the first blocker.
+    </div>
+
+    <h2>Current Compile Checkpoint</h2>
+    <p>
+      This report is the clean 2026-05-01 checkpoint for the
+      <code>histogram_statistics_v2 26.1.9</code> delay-observability update.
+      The new positive histogram mode <code>mode=+1</code> keeps the normal
+      hit_type1 path and ASIC/channel filter while plotting
+      <code>local_run_counter[12:0] - data[29:17]</code>. The old negative
+      debug modes <code>-1</code> and <code>-2</code> remain as comparison
+      sources for upper/lower MTS <code>debug_ts</code>.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Gate</th>
+          <th>Status</th>
+          <th>Setup WNS</th>
+          <th>Hold WNS</th>
+          <th>Log</th>
+          <th>Fit Summary</th>
+          <th>SOF</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>RTL sim</td><td>histogram_statistics_v2 B12 normal-hit delay TB<div class="note">Standalone Questa regression includes B12 mode=+1 delay-T coverage.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../../../../histogram_statistics/tb/transcript">transcript</a></td><td>-</td><td>-</td></tr>
+<tr><td>Static</td><td>histogram_statistics_v2 qverify static screen<div class="note">Lint/CDC/RDC screen used the maintained v2 filelist and Intel altera_mf pre-do.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../../../../../../../../../../data3/yifeng/mu3e_ip_dev/qverify/histogram_statistics_20260501/histogram_v2_static_release_26_1_9_delay_t_clean/questa_static_screen.log">questa_static_screen.log</a></td><td>-</td><td>-</td></tr>
+<tr><td>IP syn</td><td>histogram_statistics_v2 standalone Quartus<div class="note">Standalone Arria V wrapper at 7.273 ns; current worst setup is reported explicitly.</div></td><td><span class="badge warn">WARN</span></td><td><span class="mini-badge fail">-0.051 ns</span></td><td><span class="mini-badge pass">+0.146 ns</span></td><td><a href="../../../../histogram_statistics/syn/quartus/histogram_statistics_v2_standalone_compile_26_1_9_delay_t_20260501.log">histogram_statistics_v2_standalone_compile_26_1_9_delay_t_20260501.log</a></td><td><a href="../../../../histogram_statistics/syn/quartus/output_files/histogram_statistics_v2_standalone.fit.summary">histogram_statistics_v2_standalone.fit.summary</a></td><td>-</td></tr>
+<tr><td>Qsys</td><td>scifi_datapath_system_v3_pipe Qsys script<div class="note">Source script restamped histogram_statistics_0 to 26.1.9 and preserved debug_ts wiring.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../syn/logs/qsys_script_scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.log">qsys_script_scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.log</a></td><td>-</td><td>-</td></tr>
+<tr><td>Qsys</td><td>scifi_datapath_system_v3_pipe Qsys generate<div class="note">Pipe synthesis output resolves histogram_statistics_v2 26.1.9.501.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../syn/logs/scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log">scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log</a></td><td>-</td><td>-</td></tr>
+<tr><td>Qsys</td><td>feb_system_v3_pipe Qsys generate<div class="note">Parent FEB generated HDL was refreshed after the pipe child system.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../syn/logs/feb_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log">feb_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log</a></td><td>-</td><td>-</td></tr>
+<tr><td>FEB compile</td><td>FEB top_nostp_pipe Quartus compile<div class="note">Full FEB build consuming histogram_statistics_v2 26.1.9.501.</div></td><td><span class="badge pass">PASS</span></td><td><span class="mini-badge pass">+0.055 ns</span></td><td><span class="mini-badge pass">+0.068 ns</span></td><td><a href="../syn/logs/quartus_compile_top_nostp_pipe_hist26_1_9_delay_t_20260501.console.log">quartus_compile_top_nostp_pipe_hist26_1_9_delay_t_20260501.console.log</a></td><td><a href="../syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.fit.summary">top_nostp_pipe.fit.summary</a></td><td><a href="../syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof">top_nostp_pipe.sof</a><div class="rate">sha256 1ebe635637412f9c...</div></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Current Read</h2>
+    <p>
+      The strongest blocker is not the deprecated injector path or XML mapping.
+      The active injector is the Phase-5 <code>mutrig_injector_0</code> path and
+      the XML split is SMB3 for ASICs 0..3 and SMB5 for ASICs 4..7. The lower
+      side fails because two real lower streams together make MTS assert
+      <code>tserr</code> before the ring stage; the ring
+      <code>inerr_count</code> is therefore a real timestamp-delay failure,
+      not a ring-local decode bug.
+    </p>
+    <p>
+      The fixed Phase-6 cycles explicitly loaded <code>config_smb3_tdc.txt</code>
+      and <code>config_smb5_tdc.txt</code>. The original timing-closed bounded
+      cycle measured P6B010 <code>ring_inerr_delta=535108</code>; the later
+      SignalTap rerun measured <code>ring_inerr_delta=535373</code>,
+      <code>mts_discard_delta=0</code>, and LVDS error/DPA deltas were zero.
+      The fresh continued cycle
+      <code>phase6_long_runs/20260430_live_continued_cycle1</code> reproduces
+      the split: P6B006 lane5 and P6B007 lane6 pass alone with zero ring input
+      errors, while P6B010 lower lanes5+6 one-channel fails with
+      <code>ring_inerr_delta=563053</code>. P6B020 full-channel remains the
+      expected fail, and P6E010 pulse-high 3 is clean but underfilled. Reduced
+      evidence:
+      <a href="phase6_timingclosed_cycle1_20260430.md">phase6_timingclosed_cycle1_20260430.md</a>.
+    </p>
+    <p>
+      The follow-up lower ASIC5/6 sweep distinguishes lane-local health from
+      cross-ASIC failure. ASIC5/lane5 and ASIC6/lane6 each pass one-channel
+      pulse-high 4/5 runs alone with zero ring input errors. The two real lanes
+      together fail at pulse-high 4/5, and ASIC6 <code>ext_trig_offset</code>
+      values <code>0..15</code> all fail. A two-lane emulator reference through
+      the same lower MTS/ring path passes after 50 ms post-sync/pre-inject
+      settle. Reduced sweep evidence:
+      <a href="phase6_lower56_cross_asic_sweep_20260430.md">phase6_lower56_cross_asic_sweep_20260430.md</a>.
+    </p>
+    <p>
+      A fresh all-real-lane 1 s rate monitor on 2026-05-01 is a blocker
+      checkpoint, not a pass. It used the toolkit-equivalent rate preset
+      metadata, all eight real LVDS lanes, <code>pulse_interval=1250</code>,
+      and <code>pulse_high=4</code>. LVDS error and DPA-unlock deltas were
+      zero, <code>LAST_INTERVAL_TOTAL_HITS=11851571</code>, and
+      <code>hist_drop_delta=0</code>, so real hits are reaching the histogram.
+      The same window still reports <code>MTS_DISCARD=1</code>,
+      <code>ring_inerr_delta=2787809</code>, and
+      <code>ring_overwrite_delta=79066</code>. The SC per-bin readback returned
+      zero bins despite the nonzero last-interval counter; that is a tooling
+      artifact from slow SC reads crossing the ping-pong histogram bank, so the
+      plotted rate artifact must come from the burst System Console/toolkit
+      path or a faster frozen-bin capture.
+    </p>
+    <p>
+      The 2026-05-01 Qsys patch fixes a separate observability bug: the
+      histogram source now defaults to pre-RBCAM <code>hit_type1</code>,
+      <code>histogram_statistics_0</code> has two fill inputs with global
+      <code>{ASIC, channel}</code> keys, and the lower MTS stream is split
+      into both <code>hit_stack_subsystem_1</code> and
+      <code>histogram_ingress_bridge_1</code>. The lower bridge
+      <code>pre_out</code> is explicitly drained so the tap copy cannot
+      backpressure MTS. Authentic integration simulation passed with all eight
+      lanes visible: each lane reported 20 MTS channel-16 payload hits and 20
+      histogram flushes, with zero histogram drops.
+    </p>
+    <p>
+      The full-FEB generated-image blocker is now closed for emulator evidence.
+      The stale image tied lower <code>histogram_statistics_0.fill_in_1</code>
+      off, giving a physically sharp four-lane rate in an all-lane emulator
+      run. The correct lower bridge address is Qsys byte
+      <code>0xAC10..0xAC20</code>, visible through the SC hub at word
+      <code>0x0AB04..0x0AB07</code>; <code>0x0AC10</code> was a bad SC-word
+      premise. The newly compiled/programmed <code>top_nostp_pipe</code> SOF
+      checksum <code>0x13E73362</code> exposes both bridge UIDs
+      (<code>0x0AB00</code> upper and <code>0x0AB04</code> lower, both
+      <code>0x48495342</code>) and passes the 1 s emulator mask matrix: all
+      lanes 10 kHz gives <code>79984</code> histogram hits, upper-only gives
+      <code>39996</code>, lower-only gives <code>39996</code>, all lanes
+      100 kHz gives <code>798728</code>, and the dual-MTS delay-profile smoke
+      gives <code>409080</code>; all have zero histogram drops. This is a
+      wiring and counter observability pass, not a real MuTRiG PLL lock claim.
+    </p>
+    <p>
+      The first all-channel plotted rate-bin checkpoint now uses the
+      System Console/JTAG histogram dump path with both histogram ingress
+      bridges forced to the pre-RBCAM stream. The emulator periodic
+      <code>r53</code> run produces nonzero counts in all 256
+      <code>{ASIC, channel}</code> bins and zero counts at the first
+      error gate (<code>hist_drop=0</code>,
+      <code>MTS_DISCARD=0</code>, <code>ring_inerr=0</code>). It is still an
+      anomaly for rate closure: RBCAM overwrite/cache counters are nonzero, and
+      the bin sum and per-channel balance do not match a uniform 100 kHz/channel
+      source. The earlier <code>cluster-size=32</code> test is explicitly
+      invalid as an all-channel cluster because the hardware field is five
+      bits, so 32 wraps to zero and normalizes to one channel per ASIC.
+    </p>
+    <p>
+      The latest direct probes rule out two weaker explanations. First, opening
+      the MTS expected-latency gate from <code>2000</code> to <code>4000</code>
+      and <code>65535</code> still leaves large lower-pair ring input-error
+      counts, so the reject is not just a small positive delay tail above the
+      nominal window. Second, header-synchronous injection on lower header
+      channels <code>5</code> and <code>6</code> still fails for the real
+      pair, while the same header mode passes for lane5 alone and lane6 alone.
+      The pair failure is therefore still cross-ASIC even when the injection is
+      locked to MuTRiG frame headers.
+    </p>
+    <p>
+      The 2026-05-01 head-sync histogram plots add a sharper physical split.
+      ASIC5 default production-lapse delay is not delta-like: <code>81759</code>
+      JTAG-bin hits occupy six bins with a <code>44.914%</code> peak. Tuning
+      ASIC5 to <code>cnt/vcodelay/hitlogic=52/18/25</code> improves it, but
+      production lapse still leaves two bins at <code>79.171%</code> and
+      <code>20.829%</code>. The same physical ASIC5 setting with
+      <code>--mts-bypass-lapse on</code> collapses to one bin
+      (<code>91574</code> hits, <code>100%</code> peak), while ASIC6 default
+      production-lapse also collapses to one bin at <code>904</code> cycles.
+      This is not a pure MuTRiG PLL unlock signature. It points at the MTS
+      lapse/overflow transform, or the compile-time lookback/padding threshold
+      feeding that transform, before blaming lane5 LVDS or TDC physics.
+    </p>
+    <p>
+      The all-eight header-sync delay scan changes the acceptance handle. The
+      useful loss proxy is the delay population outside the rbCAM
+      <code>0..2000</code> cycle ingress window. Raw MTS discard is kept as a
+      caveat because the MuTRiG fine-counter one-hot can be broken while the
+      coarse timestamp remains usable. Therefore a sub-1% MTS discard is not a
+      hard fail when the delay histogram is sharply in window; the next blocker
+      to clear is any nonzero rbCAM drop proxy or underflow/overflow tail.
+    </p>
+    <p>
+      The MTS IP now has a reviewed runtime CSR for that exact hypothesis:
+      <code>overflow_lookback_8ns</code> at CSR word <code>5</code>. The FEB
+      runners expose it as <code>--mts-overflow-lookback</code> and record the
+      readback in stage snapshots. This is not a substitute for the physical
+      MuTRiG scan; it is the control that separates a PLL/TDC response from an
+      MTS epoch-disambiguation response in the next ASIC5 production-lapse
+      A/B sweep.
+    </p>
+    <p>
+      The lane6/7 zero-point checks are invalidated as tuning evidence. A
+      MuTRiG with <code>vnvcodelay=0</code> should produce no TDC-injection
+      hits. The captures labeled <code>vncnt=0</code>,
+      <code>vnvcodelay=0</code>, and <code>vnhitlogic=0</code> therefore prove
+      a stale configuration, bad override, or run-sequence artifact unless the
+      manifest shows that a nonzero setting was actually loaded. Reduced
+      lane6/7 evidence remains archived only as bad-evidence input:
+      <a href="phase6_lane67_zero_point_20260430.md">phase6_lane67_zero_point_20260430.md</a>.
+    </p>
+    <p>
+      The first frame-boundary capture is a useful frame-format debug example
+      but not closure-grade. Because it is labeled <code>vco000</code>, it must
+      be rerun with ASIC-specific nonzero PLL settings and a full
+      <code>RUN_PREPARE</code> sequence before it can support P6-BUG-004-H.
+      The next valid capture must tie a nonempty RBCAM <code>hit_type2</code>
+      beat to the later FEB <code>hit_type3</code> frame drain in one deeper
+      SignalTap window or in a matched simulation/VCD replay. Archived
+      evidence:
+      <a href="phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.md">phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.md</a>
+      and
+      <a href="phase6_frame_boundary_lane6_vco000_100k_active_vcd_summary_20260430.md">phase6_frame_boundary_lane6_vco000_100k_active_vcd_summary_20260430.md</a>.
+    </p>
+    <p>
+      The lower-MTS/ring SignalTap debug image programmed with checksum
+      <code>0x16B6BF30</code> and SOF SHA256
+      <code>080f92844f868d33e142ce6e576911b728f9364fadd1d9c2824addd7d1cff2b9</code>.
+      It is an Arria V debug-only image: setup WNS is <code>-0.086 ns</code>
+      on <code>transceiver_pll_clock[0]</code>, within the clarified
+      about-200 ps FEB debug tolerance, while SWB Arria 10 still requires clean
+      timing closure. The VCD shows <code>mts1.aso_hit_type1_error</code> and
+      <code>hit_stack1.hit_type_1_error[0]</code> both first high at
+      <code>128500 ps</code>. Reduced SignalTap evidence:
+      <a href="phase6_lower_mts_ring_signaltap_20260430.md">phase6_lower_mts_ring_signaltap_20260430.md</a>
+      and <a href="phase6_lower_mts_ring_vcd_summary_20260430.md">phase6_lower_mts_ring_vcd_summary_20260430.md</a>.
+    </p>
+    <p>
+      The lower full-channel pair also fails with the MTS expected-latency
+      window opened to 65535 and at 10 kHz/channel. Channel-mask scans prove
+      some groups are clean alone, but their union still fails. That points at
+      a cross-ASIC ordering/epoch interaction in the lower MTS path, not a
+      single dead lane. Bypassing the MTS lapse transform did not clear it, and
+      using the E timestamp field made it worse. Pulse-width scans show a hard
+      threshold: pulse high 3 is clean but badly underfilled, while pulse high 4
+      has multiplicity but trips MTS/ring errors. The upper pair behaves differently:
+      <code>lanes1+2</code> passes at one channel and fails at full
+      multiplicity.
+    </p>
+    <p>
+      MuTRiG tuning reference: <a href="../../../doc/MUTRIG.md">MUTRIG.md</a>.
+      That page links the local MuTRiG wiki mirror and records the DMON/TDC
+      injection implications used here.
+    </p>
+    <p>
+      SWB live preflight was superseded after the timing fix in online_sc
+      <code>11eada541</code>. The new SOF programmed with checksum
+      <code>0x31A704E1</code>, PCIe recovery restored <code>/dev/mudaq0</code>,
+      and host-visible SC link-2 reads now return in roughly 68-69 us, including
+      <code>0x0C000 -> 0x52434D48</code>. That clears the old SC reply blocker.
+      The later fixed4 SWB image for the mux/subtime pack path also completed
+      <code>make flow</code> with 0 errors and 298 warnings, programmed
+      checksum <code>0x31A72852</code>, and recovered
+      <code>/dev/mudaq0</code> plus <code>/dev/mudaq0_dmabuf</code>.
+      The Mu3e online DMA tools are now deprecated for closure evidence:
+      <code>swb_dmatest</code>, <code>rw</code>, MIDAS, and libmudaq-backed
+      utilities are reference-only. The repo-owned
+      <code>tools/phase6_swb_dma_probe/phase6_swb_dma_probe.py</code> directly
+      maps <code>/dev/mudaq0</code> and <code>/dev/mudaq0_dmabuf</code>, records
+      raw RW/RO registers plus SWB counter sweeps before cleanup, and writes
+      <code>dma_words.bin</code> for offline reduction.
+    </p>
+    <p>
+      The direct probe now proves the raw SWB DMA payload path is alive and
+      repeatable in the stream-datagen configuration. Three fresh 10 s runs
+      each recorded <code>2048</code> nonzero DMA words, <code>1024</code>
+      nonpadding words, and <code>256</code> event-builder payload words.
+      Their first payload words differ across runs
+      (<code>0x00088A0C</code>, <code>0x0008818F</code>,
+      <code>0x0008894F</code>), which rules out stale-buffer reuse for this
+      control. The old FEB/SWB frame reducer reports
+      <code>raw_payload_no_legacy_frames</code>, which is the expected
+      interpretation for active <code>musip_event_builder</code> raw 256-bit
+      payload, not an end-to-end hit-frame pass. The time-datagen path still
+      records <code>no_dma_words</code> in
+      <code>post_tool_update_time_datagen_generic_defaultstate</code> and with
+      all four generic lanes enabled. Source inspection makes that a weak
+      control: the legacy <code>data_generator_a10</code> does not guarantee
+      OPQ-compatible subheader hit-count fields matching the generated hit
+      body. OPQ hardware counters, real FEB-link host DMA, and disk closure
+      remain open until the active MuSiP payload is decoded or a real FEB-link
+      artifact is captured and reduced.
+    </p>
+
+    <h2>Phase-6 End-to-End Progress</h2>
+    <p>
+      Closure still means the full hardware chain, not just a FEB-local
+      histogram. The required source proof is 100 kHz injection on all 256
+      MuTRiG channels with one timestamp per 256-hit source bunch. The active
+      SWB/ER OPQ profile is Mu3e Demo: <code>N_SHD=128</code>,
+      <code>N_HIT=255</code>. Therefore the host-disk proof for this checkpoint
+      is 255 delivered same-timestamp hits plus exactly one accounted OPQ
+      <code>drop_hit</code> per 256-hit source cluster, with adjacent bunch
+      timestamps matching the 100 kHz cadence.
+    </p>
+    <table class="progress-table">
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>Status</th>
+          <th>Gate</th>
+          <th>Current Evidence</th>
+          <th>Next Check</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>FEB MuTRiG output</td><td><span class="badge fail">BLOCKED</span></td><td>256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.</td><td>The histogram 26.1.8 FEB image compiled at 10:17 on 2026-05-01, programmed at 10:21 with checksum 0x13DD5EC5, and responded with packaged injector UID 0x4D494E4A. After explicit all-ASIC reload and CML 0-8-0 flush, the 1 s high-cycle rate sweep shows the physical threshold: ph1/ph2 silent, ph3 underfilled, ph5/ph6/ph7 near 25.55 Mhit/s with all 256 channels populated, ph8 begins overcount spikes, and ph9+ overfills. The ph8+ shape is consistent with TDC injection-line ringing and second rising-edge pickup on some channels, so rates can approach 2x or land between 1x and 2x. The best rate artifacts are ph6/ph7 around 99.8 kHz/channel with CV about 0.006, but the same runs still classify as MTS-discard failures before full FEB output closure. Earlier lower-pair evidence still applies: ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; expected-latency sweeps, header-sync pair controls, and ext_trig_offset scans do not clear it. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.</td><td>Use ph6 or ph7 as the current rate-mode pulse-width starting point, then clear the MTS-discard/RBCAM boundary with header-delay delta plots and same-window RBCAM/FEB-frame captures before SWB/DMA disk closure.</td></tr>
+<tr><td>SWB input path</td><td><span class="badge pass">PASS_SC</span></td><td>SWB must receive FEB data and the SC read/reply path must return host-visible replies from FEB.</td><td>online_sc commit 11eada541 compiled timing-clean at all checked STA corners, programmed SOF checksum 0x31A704E1, recovered /dev/mudaq0, and returned host-visible SC link-2 reads: 0x00000 payload 0 and 0x0C000 payload 0x52434D48.</td><td>Hold SWB SciFi-hit input proof until FEB emits clean hit frames; the SC path itself is no longer the blocker.</td></tr>
+<tr><td>SWB OPQ to DMA</td><td><span class="badge warn">PARTIAL_DMA</span></td><td>Merged hit words must drive the existing SWB DMA outputs with OPQ accounting matching the active hit-limit profile.</td><td>packet_scheduler ed249da carries the 26.5 Mu3e Demo signoff merge; the underlying 25e204c UVM case proves N_HIT=255 delivers 255 hits and records exactly one drop. The online_sc fixed4 image compiled timing-clean, programmed checksum 0x31A72852, and recovered /dev/mudaq0. Three fresh 10 s repo-owned stream-datagen runs classify raw host DMA as dma_payload_nonzero with 2048 nonzero words, 1024 nonpadding words, and 256 event-builder payload words each. First payload words differ across runs: 0x00088A0C, 0x0008818F, and 0x0008894F, so this is not stale-buffer reuse. The old frame reducer correctly reports raw_payload_no_legacy_frames for this musip_event_builder payload.</td><td>Decode the active MuSiP/OPQ payload contract, clear the still-empty time-datagen path, then run real FEB-link captures and require 255 delivered hits plus one OPQ-accounted drop per 256-hit bunch before any FEB-link host-disk claim.</td></tr>
+<tr><td>Host DMA buffer</td><td><span class="badge warn">PARTIAL_RAW_DMA</span></td><td>/dev/mudaq0 must receive SWB DMA data from the OPQ/event-builder chain.</td><td>PCIe recovery passed and /dev/mudaq0 plus /dev/mudaq0_dmabuf are present after the fixed4 SWB programming. Mu3e online software is deprecated as Phase-6 evidence; swb_dmatest, rw, MIDAS, libmudaq-backed utilities, and production cleanup flows are reference-only. The tools/phase6_swb_dma_probe path directly mmaps the devices, captures raw RW/RO registers and counter sweeps before cleanup, and now distinguishes raw 256-bit payload DMA from legacy frame decode.</td><td>Use only repo-owned direct-MMIO tools under tools/ for closure captures. If an online utility disagrees with raw registers, trust the repo-owned probe and hardware evidence. The next host-buffer gate is a real FEB-link run with persistent disk artifact and offline timestamp/hit-count reduction.</td></tr>
+<tr><td>Disk/offline timestamp check</td><td><span class="badge fail">BLOCKED</span></td><td>Mu3e Demo OPQ: every decoded bunch must contain 255 delivered hits with identical TS, OPQ must account exactly one dropped hit from the 256-hit source cluster, and adjacent bunch TS spacing must match 100 kHz.</td><td>No valid disk artifact has been produced yet for the 256-channel, 100 kHz/channel Mu3e Demo OPQ requirement. The Phase-6 DMA reducer now reports raw_payload_no_legacy_frames when host DMA contains nonpadding musip_event_builder payload without old FEB/SWB frame headers. Three 10 s stream-datagen captures prove the raw SWB DMA buffer changes per run, but they are controls only and do not contain decoded real MuTRiG FEB-link bunches.</td><td>Extend the reducer for the active MuSiP payload or capture legacy FEB-link frames, then require 255 delivered same-timestamp hits plus one OPQ-accounted drop before disk closure.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Required Histogram Artifacts</h2>
+    <p>
+      Passing review requires plotted artifacts, not raw JSON alone. The
+      channel-rate plot must come from a 1 s, 256-bin histogram accumulation,
+      and the delay plot must be a header-synchronous <code>kind=delay</code>
+      capture where the in-band delay collapses toward a delta function inside
+      the rbCAM <code>0..2000</code> cycle accept window. The ratio of delay
+      hits outside that window is the rbCAM ingress discard proxy and is more
+      useful for latency closure than raw MTS discard. Stage CSRs are
+      intentionally shown as rates over the measured read window, because those
+      counters are not sampled simultaneously. The histogram bins are the
+      precision evidence for per-channel and per-ASIC rate.
+    </p>
+    <p>
+      The live histogram CSR setup must use the FE SciFi toolkit presets from
+      <code>toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl</code>.
+      For delay closure, the active pipe image is the only valid lower-side
+      source: <code>debug_1</code> must be upper MTS <code>debug_ts</code>
+      and <code>debug_2</code> must be lower MTS <code>debug_ts</code>.
+      <code>ts_delta</code> is an inter-hit timestamp-delta diagnostic and is
+      rejected as rbCAM-latency evidence because it can make a false
+      zero-centered peak. The new <code>delay_hit_t</code> toolkit preset
+      uses the positive <code>mode=+1</code> path, so delay can be plotted
+      from normal hit_type1 traffic with native ASIC/channel filtering and
+      eight ASIC inputs instead of one debug source at a time.
+    </p>
+    <div class="plot-grid">
+<figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_histogram.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_histogram.png" alt="header_delay"></a><figcaption>header_delay - INVALID ts_delta source - ASIC5 52/18/25 bypass lapse: header-sync delay is delta-like; inspect the absolute delay offset and matching run-control state.</figcaption></figure>
+<figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_comparison.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_comparison.png" alt="header_delay_comparison"></a><figcaption>header_delay_comparison - INVALID ts_delta source - ANOMALY - Comparison inspected: ASIC5 default and production-lapse tuned runs show sidebands, while ASIC5 bypass-lapse and ASIC6 default collapse to a single bin. This points at the MTS lapse/overflow transform before treating ASIC5 as physically unlocked.</figcaption></figure>
+<figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png" alt="rate_per_channel"></a><figcaption>rate_per_channel - ANOMALY - ANOMALY: all 256 bins are populated, but the per-channel rate is not uniform enough for rate closure (CV=0.463, min=5196.0/s, max=99840.0/s).</figcaption></figure>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Artifact</th>
+          <th>Status</th>
+          <th>Contract / Inspection</th>
+          <th>File</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>1 s 256-bin rate histogram</td><td><span class="badge fail">ANOMALY</span></td><td>Precise per-channel/per-ASIC rate evidence from histogram bins.<div class="note">source=phase5_rate_per_channel_1s_20260501_real_full32_cml080_ph6_100k.csv; total=20,729,590; nonzero_bins=256; active_asics=8; rate_cv=0.463; uniformity=fail; preset=rate; ANOMALY: all 256 bins are populated, but the per-channel rate is not uniform enough for rate closure (CV=0.463, min=5196.0/s, max=99840.0/s).</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png">phase5_rate_per_channel_1s.png</a></td></tr>
+<tr><td>Header-sync delay histogram</td><td><span class="badge fail">INVALID</span></td><td>Invalidated: this artifact was captured from MTS ts_delta, not debug_ts latency.<div class="note">source=phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv; total=91,574; nonzero_bins=1; peak=100.000%; preset=delay_mts_both; ASIC5 52/18/25 bypass lapse: header-sync delay is delta-like; inspect the absolute delay offset and matching run-control state.</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_histogram.png">phase5_header_delay_histogram.png</a></td></tr>
+<tr><td>Header-sync delay A/B comparison</td><td><span class="badge fail">INVALID</span></td><td>Invalidated: this artifact was captured from MTS ts_delta, not debug_ts latency.<div class="note">preset=delay_mts_both; Comparison inspected: ASIC5 default and production-lapse tuned runs show sidebands, while ASIC5 bypass-lapse and ASIC6 default collapse to a single bin. This points at the MTS lapse/overflow transform before treating ASIC5 as physically unlocked.</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_header_delay_comparison.png">phase5_header_delay_comparison.png</a></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Phase-6 Header-Sync Delay by ASIC</h2>
+    <p>
+      The existing all-ASIC DISLIN plots have been moved under
+      <code>reports/assets/legacy/invalid_ts_delta_delay_20260501</code> and
+      are invalidated as rbCAM latency evidence. They isolated one real MuTRiG
+      ASIC at a time correctly, but the histogram debug inputs were wired to
+      MTS <code>ts_delta</code>, which is the signed delta between adjacent
+      hit timestamps. A physical hit cannot have zero construction latency
+      into rbCAM; the valid plot must use MTS
+      <code>debug_ts = counter_gts_8n - selected_timestamp</code> or the new
+      normal-hit <code>delay_hit_t</code> mode and should show a narrow peak
+      with finite offset, normally with about 100..500 cycles of width inside
+      the <code>0..2000</code> accept window.
+    </p>
+    <div class="plot-grid">
+<figure><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_contact_sheet.png"><img src="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_contact_sheet.png" alt="all ASIC header-sync delay contact sheet"></a><figcaption>Legacy invalidated header-sync ts_delta contact sheet per ASIC. The green boundary was drawn for the rbCAM latency window, but this artifact used inter-hit timestamp delta, not MTS debug_ts latency. It is kept only as a visual baseline for the rerun.</figcaption></figure>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ASIC</th>
+          <th>Status</th>
+          <th>Lane / Source</th>
+          <th>Total Delay Hits</th>
+          <th>Peak</th>
+          <th>0..2000 In-Band</th>
+          <th>Invalid rbCAM Proxy</th>
+          <th>&lt;0 / &gt;2000 Hits</th>
+          <th>UF / OF During 1 s</th>
+          <th>UF / OF During Read</th>
+          <th>MTS Discard</th>
+          <th>Ring InErr</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>0</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x01<div class="rate">header_ch=0; upper</div></td><td>4,395,584</td><td>96.875000%</td><td>100.000000%</td><td>0.000000%</td><td>0 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td>phase6_header_delay_asic0_hsync_ph05_dislin.png</td></tr>
+<tr><td>1</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x02<div class="rate">header_ch=1; upper</div></td><td>4,381,727</td><td>97.128256%</td><td>99.999270%</td><td>0.017684%</td><td>32 / 0</td><td>743 / 0</td><td>271 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td>phase6_header_delay_asic1_hsync_ph05_dislin.png</td></tr>
+<tr><td>2</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x04<div class="rate">header_ch=2; upper</div></td><td>4,380,934</td><td>95.561654%</td><td>99.506133%</td><td>0.509355%</td><td>21,196 / 440</td><td>682 / 0</td><td>266 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td>phase6_header_delay_asic2_hsync_ph05_dislin.png</td></tr>
+<tr><td>3</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x08<div class="rate">header_ch=3; upper</div></td><td>4,385,011</td><td>95.987513%</td><td>99.669100%</td><td>0.343672%</td><td>14,303 / 207</td><td>562 / 0</td><td>208 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td>phase6_header_delay_asic3_hsync_ph05_dislin.png</td></tr>
+<tr><td>4</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x10<div class="rate">header_ch=4; lower</div></td><td>4,395,584</td><td>96.875000%</td><td>100.000000%</td><td>0.000000%</td><td>0 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td>phase6_header_delay_asic4_hsync_ph05_dislin.png</td></tr>
+<tr><td>5</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x20<div class="rate">header_ch=5; lower</div></td><td>4,381,422</td><td>97.109021%</td><td>99.991236%</td><td>0.025809%</td><td>377 / 7</td><td>747 / 0</td><td>314 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td>phase6_header_delay_asic5_hsync_ph05_dislin.png</td></tr>
+<tr><td>6</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x40<div class="rate">header_ch=6; lower</div></td><td>4,360,295</td><td>93.847136%</td><td>98.878080%</td><td>1.158235%</td><td>47,773 / 1,146</td><td>1,602 / 0</td><td>570 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td>phase6_header_delay_asic6_hsync_ph05_dislin.png</td></tr>
+<tr><td>7</td><td><span class="badge fail">INVALID</span><div class="class">mts_discard_with_histogram_hits</div></td><td>0x80<div class="rate">header_ch=7; lower</div></td><td>4,319,301</td><td>95.008243%</td><td>99.208506%</td><td>0.838351%</td><td>33,369 / 818</td><td>2,041 / 0</td><td>718 / 0</td><td>22,081<div class="rate">0.043549%</div></td><td>0</td><td>phase6_header_delay_asic7_hsync_ph05_dislin.png</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Phase-6 High-Cycle Rate Sweep</h2>
+    <p>
+      This is the post-histogram-26.1.8 real-MuTRiG rate-mode sweep requested
+      for <code>pulse_high_cycles=1..15</code>. Every plot is rendered by
+      DISLIN from the 1 s System Console histogram CSV, with one global channel
+      per bin and the 100 kHz target marked in red. Overfilled cases are
+      interpreted as physical injection-shape evidence: a non-optimal high
+      time can ring the TDC injection line and produce a second rising edge on
+      selected channels, so the measured rate may approach 2x or sit between
+      the single-edge and double-edge limits.
+    </p>
+    <div class="plot-grid">
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph01_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph01_dislin.png" alt="pulse_high 1 rate plot"></a><figcaption>pulse_high=1; mean=0.000 kHz/channel; CV=0.0000</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph03_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph03_dislin.png" alt="pulse_high 3 rate plot"></a><figcaption>pulse_high=3; mean=0.756 kHz/channel; CV=10.9936</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph05_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph05_dislin.png" alt="pulse_high 5 rate plot"></a><figcaption>pulse_high=5; mean=99.750 kHz/channel; CV=0.0144</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph06_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph06_dislin.png" alt="pulse_high 6 rate plot"></a><figcaption>pulse_high=6; mean=99.804 kHz/channel; CV=0.0058</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph08_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph08_dislin.png" alt="pulse_high 8 rate plot"></a><figcaption>pulse_high=8; mean=100.507 kHz/channel; CV=0.0763</figcaption></figure>
+<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph15_dislin.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph15_dislin.png" alt="pulse_high 15 rate plot"></a><figcaption>pulse_high=15; mean=124.799 kHz/channel; CV=0.3464</figcaption></figure>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Pulse High</th>
+          <th>Total Hits/s</th>
+          <th>Mean kHz/ch</th>
+          <th>Nonzero Channels</th>
+          <th>Min kHz/ch</th>
+          <th>Max kHz/ch</th>
+          <th>CV</th>
+          <th>Inspection</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>1</td><td>0</td><td>0.000</td><td>0</td><td>0.000</td><td>0.000</td><td>0.0000</td><td>silent</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph01_dislin.png">phase6_rate_per_channel_1s_ph01_dislin.png</a></td></tr>
+<tr><td>2</td><td>0</td><td>0.000</td><td>0</td><td>0.000</td><td>0.000</td><td>0.0000</td><td>silent</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph02_dislin.png">phase6_rate_per_channel_1s_ph02_dislin.png</a></td></tr>
+<tr><td>3</td><td>193,461</td><td>0.756</td><td>4</td><td>0.000</td><td>99.658</td><td>10.9936</td><td>underfilled</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph03_dislin.png">phase6_rate_per_channel_1s_ph03_dislin.png</a></td></tr>
+<tr><td>4</td><td>21,404,120</td><td>83.610</td><td>223</td><td>0.000</td><td>99.841</td><td>0.4329</td><td>underfilled</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph04_dislin.png">phase6_rate_per_channel_1s_ph04_dislin.png</a></td></tr>
+<tr><td>5</td><td>25,536,088</td><td>99.750</td><td>256</td><td>76.830</td><td>99.841</td><td>0.0144</td><td>rate plateau</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph05_dislin.png">phase6_rate_per_channel_1s_ph05_dislin.png</a></td></tr>
+<tr><td>6</td><td>25,549,931</td><td>99.804</td><td>256</td><td>90.525</td><td>99.841</td><td>0.0058</td><td>rate plateau</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph06_dislin.png">phase6_rate_per_channel_1s_ph06_dislin.png</a></td></tr>
+<tr><td>7</td><td>25,550,213</td><td>99.806</td><td>256</td><td>91.085</td><td>99.840</td><td>0.0055</td><td>rate plateau</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph07_dislin.png">phase6_rate_per_channel_1s_ph07_dislin.png</a></td></tr>
+<tr><td>8</td><td>25,729,880</td><td>100.507</td><td>256</td><td>94.932</td><td>196.165</td><td>0.0763</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph08_dislin.png">phase6_rate_per_channel_1s_ph08_dislin.png</a></td></tr>
+<tr><td>9</td><td>28,284,536</td><td>110.486</td><td>256</td><td>99.840</td><td>193.480</td><td>0.1952</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph09_dislin.png">phase6_rate_per_channel_1s_ph09_dislin.png</a></td></tr>
+<tr><td>10</td><td>28,967,327</td><td>113.154</td><td>256</td><td>91.236</td><td>199.590</td><td>0.2228</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph10_dislin.png">phase6_rate_per_channel_1s_ph10_dislin.png</a></td></tr>
+<tr><td>11</td><td>30,603,255</td><td>119.544</td><td>256</td><td>99.839</td><td>199.681</td><td>0.2946</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph11_dislin.png">phase6_rate_per_channel_1s_ph11_dislin.png</a></td></tr>
+<tr><td>12</td><td>31,393,140</td><td>122.629</td><td>256</td><td>98.851</td><td>199.680</td><td>0.3392</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph12_dislin.png">phase6_rate_per_channel_1s_ph12_dislin.png</a></td></tr>
+<tr><td>13</td><td>31,948,742</td><td>124.800</td><td>256</td><td>99.837</td><td>199.680</td><td>0.3464</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph13_dislin.png">phase6_rate_per_channel_1s_ph13_dislin.png</a></td></tr>
+<tr><td>14</td><td>31,948,368</td><td>124.798</td><td>256</td><td>99.837</td><td>199.678</td><td>0.3464</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph14_dislin.png">phase6_rate_per_channel_1s_ph14_dislin.png</a></td></tr>
+<tr><td>15</td><td>31,948,587</td><td>124.799</td><td>256</td><td>99.834</td><td>199.680</td><td>0.3464</td><td>overfilled; possible TDC-line ringing/double-edge pickup</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_rate_per_channel_1s_ph15_dislin.png">phase6_rate_per_channel_1s_ph15_dislin.png</a></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Phase-6 Mask Response</h2>
+    <p>
+      These are the requested <code>pulse_high=5</code> physical-mask checks.
+      The ASIC set masks lanes in the LVDS controller and should remove whole
+      32-channel blocks. The channel set leaves all ASIC lanes enabled, reloads
+      every ASIC with the same random 32-bit TDC-test/channel mask, performs
+      the CML <code>0-8-0</code> flush, and should remove that repeated channel
+      pattern from each ASIC. The plots are DISLIN bar histograms from 1 s
+      System Console CSV captures.
+    </p>
+    <div class="plot-grid">
+<figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png" alt="ASIC LVDS mask response: whole 32-channel ASIC blocks vanish when the lane is masked."></a><figcaption>ASIC LVDS mask response: whole 32-channel ASIC blocks vanish when the lane is masked.</figcaption></figure>
+<figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png" alt="Channel mask response: the same random 32-bit channel mask repeats across all eight ASICs."></a><figcaption>Channel mask response: the same random 32-bit channel mask repeats across all eight ASICs.</figcaption></figure>
+    </div>
+<p><span class="badge pass">RAW CHECK</span> 16/16 cases match the intended nonzero channel set exactly, 16/16 pass the 50k-count on-bin gate, max off-bin count is 0, and min on-bin count is 71284. Raw TSV: <a href="phase6_mask_response_raw_mask_check_seed20260501.tsv">phase6_mask_response_raw_mask_check_seed20260501.tsv</a>.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Case</th>
+          <th>Total Mhit/s</th>
+          <th>Mean kHz/ch</th>
+          <th>Nonzero Channels</th>
+          <th>Max kHz/ch</th>
+          <th>CV</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>asic_lvds</td><td>01</td><td>6.390</td><td>24.960</td><td>64</td><td>99.841</td><td>1.7321</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case01_ph05_bar.png">phase6_mask_response_asic_lvds_case01_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>02</td><td>19.155</td><td>74.823</td><td>192</td><td>99.840</td><td>0.5775</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case02_ph05_bar.png">phase6_mask_response_asic_lvds_case02_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>03</td><td>6.390</td><td>24.960</td><td>64</td><td>99.839</td><td>1.7321</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case03_ph05_bar.png">phase6_mask_response_asic_lvds_case03_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>04</td><td>15.962</td><td>62.351</td><td>160</td><td>99.841</td><td>0.7747</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case04_ph05_bar.png">phase6_mask_response_asic_lvds_case04_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>05</td><td>3.195</td><td>12.480</td><td>32</td><td>99.839</td><td>2.6458</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case05_ph05_bar.png">phase6_mask_response_asic_lvds_case05_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>06</td><td>15.974</td><td>62.400</td><td>160</td><td>99.840</td><td>0.7746</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case06_ph05_bar.png">phase6_mask_response_asic_lvds_case06_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>07</td><td>25.531</td><td>99.729</td><td>256</td><td>99.841</td><td>0.0179</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case07_ph05_bar.png">phase6_mask_response_asic_lvds_case07_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>08</td><td>3.195</td><td>12.480</td><td>32</td><td>99.840</td><td>2.6458</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case08_ph05_bar.png">phase6_mask_response_asic_lvds_case08_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>01</td><td>17.572</td><td>68.639</td><td>176</td><td>99.839</td><td>0.6742</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case01_ph05_bar.png">phase6_mask_response_channel_mask_case01_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>02</td><td>11.981</td><td>46.800</td><td>120</td><td>99.840</td><td>1.0646</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case02_ph05_bar.png">phase6_mask_response_channel_mask_case02_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>03</td><td>15.176</td><td>59.281</td><td>152</td><td>99.841</td><td>0.8272</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case03_ph05_bar.png">phase6_mask_response_channel_mask_case03_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>04</td><td>8.786</td><td>34.320</td><td>88</td><td>99.840</td><td>1.3817</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case04_ph05_bar.png">phase6_mask_response_channel_mask_case04_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>05</td><td>15.974</td><td>62.400</td><td>160</td><td>99.840</td><td>0.7746</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case05_ph05_bar.png">phase6_mask_response_channel_mask_case05_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>06</td><td>10.383</td><td>40.560</td><td>104</td><td>99.840</td><td>1.2089</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case06_ph05_bar.png">phase6_mask_response_channel_mask_case06_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>07</td><td>11.981</td><td>46.800</td><td>120</td><td>99.841</td><td>1.0646</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case07_ph05_bar.png">phase6_mask_response_channel_mask_case07_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>08</td><td>15.974</td><td>62.400</td><td>160</td><td>99.840</td><td>0.7746</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case08_ph05_bar.png">phase6_mask_response_channel_mask_case08_ph05_bar.png</a></td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Case</th>
+          <th>Expected On</th>
+          <th>Observed Nonzero</th>
+          <th>Observed >=50k</th>
+          <th>Max Off Count</th>
+          <th>Min On Count</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>asic_lvds</td><td>01</td><td>64</td><td>64</td><td>64</td><td>0</td><td>99,841</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>02</td><td>192</td><td>192</td><td>192</td><td>0</td><td>85,270</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>03</td><td>64</td><td>64</td><td>64</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>04</td><td>160</td><td>160</td><td>160</td><td>0</td><td>87,200</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>05</td><td>32</td><td>32</td><td>32</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>06</td><td>160</td><td>160</td><td>160</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>07</td><td>256</td><td>256</td><td>256</td><td>0</td><td>71,284</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>08</td><td>32</td><td>32</td><td>32</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>01</td><td>176</td><td>176</td><td>176</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>02</td><td>120</td><td>120</td><td>120</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>03</td><td>152</td><td>152</td><td>152</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>04</td><td>88</td><td>88</td><td>88</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>05</td><td>160</td><td>160</td><td>160</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>06</td><td>104</td><td>104</td><td>104</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>07</td><td>120</td><td>120</td><td>120</td><td>0</td><td>99,841</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>08</td><td>160</td><td>160</td><td>160</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Physical Debug Checklist</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Check</th>
+          <th>Expected Response</th>
+          <th>Current Checkpoint</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Channel mask sanity</td>
+          <td>Masked channels vanish from the 256-bin rate plot while unmasked channels keep their rate scale.</td>
+          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The real-MuTRiG <code>pulse_high=5</code> mask-response sweep shows LVDS ASIC masks zero whole 32-channel blocks and random channel masks zero the repeated per-ASIC channel pattern, with enabled bins near 100 kHz/channel. ph6/ph7 remain the flattest full-rate starting point, while ph8+ expose likely TDC-line ringing/double-edge sidebands.</td>
+        </tr>
+        <tr>
+          <td>MuTRiG PLL/header-sync tuning</td>
+          <td>Starting from no-hit zero <code>vcodelay</code>, restore nonzero ASIC defaults, run <code>RUN_PREPARE</code>, and tune until the delay histogram moves from broad/flat toward one dominant bin.</td>
+          <td>The lane-mask/header-channel scan covered ASICs 0..7, but its delay artifact is invalidated because the histogram source was <code>ts_delta</code>. Recompile/regenerate with <code>debug_1/2=debug_ts</code>, then repeat the scan and use the rbCAM <code>0..2000</code> in-window ratio.</td>
+        </tr>
+        <tr>
+          <td>Upper/lower delay input coverage</td>
+          <td>Delay histograms must isolate both source 0 (upper MTS) and source 1 (lower MTS), with lower-side evidence covering ASICs 4..7.</td>
+          <td>The source Qsys patch connects <code>mts_preprocessor_0.debug_ts</code> to <code>debug_1</code> and <code>mts_preprocessor_1.debug_ts</code> to <code>debug_2</code>. Histogram 26.1.9 also adds <code>mode=+1</code> normal-hit delay for eight-ASIC filtered scans. The legacy all-ASIC plots remain invalid until the newly compiled image is programmed and the real-MuTRiG scan is rerun.</td>
+        </tr>
+        <tr>
+          <td>Histogram-bin capture method</td>
+          <td>Read all 256 bins from the completed interval before the ping-pong bank is overwritten, preferably by the burst System Console/toolkit path.</td>
+          <td>The histogram 26.1.8 fix repaired deferred frozen-bank reads. The current accepted plot source is the 1 s System Console histogram CSV; slow SC bin reads remain diagnostic-only under live traffic.</td>
+        </tr>
+        <tr>
+          <td>Anomaly loop</td>
+          <td>Every reviewed plot must state one anomaly or null anomaly and the next hardware hypothesis it supports.</td>
+          <td>Current anomaly: the all-eight scan has sharp in-window peaks, but several lanes still show histogram underflow while reading. Treat that as a tail/range diagnostic for rbCAM ingress loss, not as evidence that raw MTS discard is the root metric.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>MuTRiG Tuning Ledger</h2>
+    <p>
+      Triples are <code>cnt/vcodelay/hitlogic</code>. The zero point is a
+      no-hit control, not a sweep start that should produce valid data. After
+      every FEB reconfiguration, reload the SMB XMLs, run through
+      <code>RUN_PREPARE</code>, then compare head-sync delay histograms.
+    </p>
+    <table class="tuning-table">
+      <thead>
+        <tr>
+          <th>ASIC</th>
+          <th>SMB</th>
+          <th>XML Default</th>
+          <th>Restore/Used</th>
+          <th>Diagnostic</th>
+          <th>Evidence</th>
+          <th>Head-Sync Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>0</td><td>SMB3</td><td><code>48/20/30</code></td><td><code>48/20/40</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.000000%</td></tr>
+<tr><td>1</td><td>SMB3</td><td><code>43/30/30</code></td><td><code>43/30/30</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.017684% including underflow</td></tr>
+<tr><td>2</td><td>SMB3</td><td><code>45/35/20</code></td><td><code>40/30/30</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.509355% including underflow</td></tr>
+<tr><td>3</td><td>SMB3</td><td><code>41/10/20</code></td><td><code>35/12/25</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.343672% including underflow</td></tr>
+<tr><td>4</td><td>SMB5</td><td><code>43/15/20</code></td><td><code>43/15/20</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.000000%</td></tr>
+<tr><td>5</td><td>SMB5</td><td><code>42/20/25</code></td><td><code>52/18/25</code></td><td>bypass-lapse delta; production-lapse sideband</td><td><a href="phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv">phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv</a></td><td>comparison plot shows ASIC5 physical delta only when MTS lapse is bypassed; production lapse still splits 79/21</td></tr>
+<tr><td>6</td><td>SMB5</td><td><code>37/27/15</code></td><td><code>37/27/15</code></td><td>default production-lapse delta</td><td><a href="phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv">phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv</a></td><td>all-eight header-sync plot is delta-like but rbCAM drop proxy is 1.158235%; tune/check sideband</td></tr>
+<tr><td>7</td><td>SMB5</td><td><code>40/20/25</code></td><td><code>30/14/40</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.838351%; MTS discard is a sub-1% fine-counter caveat</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Evidence Table</h2>
+    <p>
+      Counter rows show count plus rate. The rate window is the measured
+      accumulation window for shaky CSR counters; linked JSON keeps the raw
+      before/sample/after snapshots for audit. Rows shorter than 1 s are
+      retained only as historical debug and fail the monitor gate.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Run</th>
+          <th>Result</th>
+          <th>Scope</th>
+          <th>MTS Config</th>
+          <th>Monitor / Rate Window</th>
+          <th>MTS In / Drop</th>
+          <th>Hist In / Drop</th>
+          <th>RBCAM In / Out / Reject</th>
+          <th>FEB Assembly In / Miss</th>
+          <th>LVDS</th>
+          <th>Artifact</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>Config</td><td>Restore full tuned baseline<div class="note">All eight ASICs reloaded full-channel with the single-lane-clean PLL overrides.</div></td><td><span class="badge pass">PASS</span><div class="class">8 / 8 configured</div></td><td>config<br>-</td><td>-</td><td><span class="mini-badge missing">unknown</span><div class="rate">rate window missing</div></td><td>-<div class="rate">-</div><br>drop -<div class="rate">-</div></td><td>-<div class="rate">-</div><br>drop -<div class="rate">-</div></td><td>in -<div class="rate">-</div><br>out -<div class="rate">-</div><br>reject -<div class="rate">-</div></td><td>in -<div class="rate">-</div><br>miss -<div class="rate">-</div></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td></tr>
+<tr><td>Rate</td><td>All-real lanes 1 s rate monitor<div class="note">Fresh 1 s all-real-lane rate run: LVDS error/DPA deltas are zero and last-interval histogram total is nonzero, but MTS/ring errors remain and slow SC bin readback returned zero bins, so this is blocker evidence rather than a plotted-artifact pass.</div></td><td><span class="badge fail">FAIL</span><div class="class">mts_discard_with_histogram_hits</div></td><td>lvds=0x0FF<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge pass">1000 ms</span><div class="rate">6.084 s</div></td><td>38,828,554<div class="rate">6.383 M/s</div><br>drop 1<div class="rate">0.164 /s</div></td><td>11,851,571<div class="rate">210.419 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 41,594,330<div class="rate">6.837 M/s</div><br>out 41,594,178<div class="rate">6.837 M/s</div><br>reject 2,866,875<div class="rate">471.247 k/s</div></td><td>in 45,734,763<div class="rate">7.518 M/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>OK: errΔ=0, dpaΔ=0, active=[0, 1, 2, 3, 4, 5, 6, 7]</td><td><a href="phase5_live_allreal_rate_1s_20260430.json">phase5_live_allreal_rate_1s_20260430.json</a></td></tr>
+<tr><td>Rate plot</td><td>Emulator r53 1 s all-channel rate bins<div class="note">First JTAG/toolkit-style rate-bin capture with both histogram ingress bridges forced pre-RBCAM and all 256 bins nonzero. Histogram drops, MTS discards, and ring input timestamp errors are zero, but RBCAM overwrite/cache counters and rate uniformity are not clean enough for closure.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x1FF<br>emu=0xFF</td><td>lat=None; lookback=None; lapse=keep; drop=keep; ts=keep</td><td><span class="mini-badge pass">1350 ms</span><div class="rate">11.068 s</div></td><td>285,544,580<div class="rate">25.799 M/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>25,878,856<div class="rate">386.691 M/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 286,168,740<div class="rate">25.855 M/s</div><br>out 286,168,686<div class="rate">25.855 M/s</div><br>reject 465,919<div class="rate">42.095 k/s</div></td><td>in 286,747,350<div class="rate">25.907 M/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>snapshot missing</td><td><a href="phase5_rate_per_channel_1s_20260501_allchan100k_emulator_periodic_r53.json">phase5_rate_per_channel_1s_20260501_allchan100k_emulator_periodic_r53.json</a></td></tr>
+<tr><td>Phase6 emu</td><td>Emulator all lanes 10 kHz 1 s<div class="note">Freshly compiled/programmed full-FEB image sees all eight emulator lanes; physical mask expectation is eight-lane rate, zero histogram drops, zero MTS/ring errors.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x1FF<br>emu=0xFF</td><td>lat=None; lookback=keep; lapse=keep; drop=keep; ts=keep</td><td><span class="mini-badge pass">1000 ms</span><div class="rate">3.831 s</div></td><td>247,020<div class="rate">64.484 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>79,984<div class="rate">14.266 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 269,856<div class="rate">70.446 k/s</div><br>out 269,856<div class="rate">70.446 k/s</div><br>reject 0<div class="rate">0.000 /s</div></td><td>in 292,952<div class="rate">76.475 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>snapshot missing</td><td><a href="phase6_histv7_emulator_all_rate10k_1s_lowerfix_20260501.json">phase6_histv7_emulator_all_rate10k_1s_lowerfix_20260501.json</a></td></tr>
+<tr><td>Phase6 emu</td><td>Emulator upper-only 10 kHz 1 s<div class="note">Upper-side mask control sees four-lane rate only.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x1FF<br>emu=0x0F</td><td>lat=None; lookback=keep; lapse=keep; drop=keep; ts=keep</td><td><span class="mini-badge pass">1000 ms</span><div class="rate">3.784 s</div></td><td>122,768<div class="rate">32.447 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>39,996<div class="rate">6.940 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 130,972<div class="rate">34.616 k/s</div><br>out 130,972<div class="rate">34.616 k/s</div><br>reject 0<div class="rate">0.000 /s</div></td><td>in 145,796<div class="rate">38.534 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>snapshot missing</td><td><a href="phase6_histv7_emulator_upper_rate10k_1s_lowerfix_20260501.json">phase6_histv7_emulator_upper_rate10k_1s_lowerfix_20260501.json</a></td></tr>
+<tr><td>Phase6 emu</td><td>Emulator lower-only 10 kHz 1 s<div class="note">Lower-side mask control now sees four-lane rate, proving the lower histogram bridge is live in the programmed image.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x1FF<br>emu=0xF0</td><td>lat=None; lookback=keep; lapse=keep; drop=keep; ts=keep</td><td><span class="mini-badge pass">1000 ms</span><div class="rate">3.801 s</div></td><td>124,940<div class="rate">32.873 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>39,996<div class="rate">6.866 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 140,448<div class="rate">36.954 k/s</div><br>out 140,448<div class="rate">36.954 k/s</div><br>reject 0<div class="rate">0.000 /s</div></td><td>in 148,576<div class="rate">39.092 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>snapshot missing</td><td><a href="phase6_histv7_emulator_lower_rate10k_1s_lowerfix_20260501.json">phase6_histv7_emulator_lower_rate10k_1s_lowerfix_20260501.json</a></td></tr>
+<tr><td>Phase6 emu</td><td>Emulator all lanes 100 kHz 1 s<div class="note">All eight emulator lanes pass the 100 kHz/channel smoke with zero histogram drops and zero MTS/ring rejects.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x1FF<br>emu=0xFF</td><td>lat=None; lookback=keep; lapse=keep; drop=keep; ts=keep</td><td><span class="mini-badge pass">1000 ms</span><div class="rate">3.820 s</div></td><td>2,465,060<div class="rate">645.252 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>798,728<div class="rate">151.202 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 2,691,820<div class="rate">704.608 k/s</div><br>out 2,691,808<div class="rate">704.605 k/s</div><br>reject 0<div class="rate">0.000 /s</div></td><td>in 2,912,700<div class="rate">762.425 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>snapshot missing</td><td><a href="phase6_histv7_emulator_all_rate100k_1s_lowerfix_20260501.json">phase6_histv7_emulator_all_rate100k_1s_lowerfix_20260501.json</a></td></tr>
+<tr><td>Phase6 emu</td><td>Emulator dual-MTS delay 100 kHz 1 s<div class="note">Delay-profile smoke exercises both upper and lower MTS debug sources; this is a wiring guard, not a real-MuTRiG PLL lock claim.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x1FF<br>emu=0xFF</td><td>lat=None; lookback=keep; lapse=keep; drop=keep; ts=keep</td><td><span class="mini-badge pass">1000 ms</span><div class="rate">3.753 s</div></td><td>2,419,092<div class="rate">644.592 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>409,080<div class="rate">109.004 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 2,648,992<div class="rate">705.851 k/s</div><br>out 2,648,984<div class="rate">705.849 k/s</div><br>reject 0<div class="rate">0.000 /s</div></td><td>in 2,874,044<div class="rate">765.819 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>snapshot missing</td><td><a href="phase6_histv7_emulator_all_delay100k_1s_lowerfix_20260501.json">phase6_histv7_emulator_all_delay100k_1s_lowerfix_20260501.json</a></td></tr>
+<tr><td>Header</td><td>ASIC5 head-sync default, lapse on<div class="note">JTAG 256-bin delay read shows a non-delta ASIC5 response under production MTS lapse: peak 44.914% with six nonzero bins.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge pass">1500 ms</span><div class="rate">12.984 s</div></td><td>942,873<div class="rate">72.619 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>13,392<div class="rate">1.031 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 977,291<div class="rate">75.270 k/s</div><br>out 977,288<div class="rate">75.270 k/s</div><br>reject 211<div class="rate">16.251 /s</div></td><td>in 995,924<div class="rate">76.705 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5]</td><td><a href="phase6_headsync_lane5_default_jtag_nodisplay_20260501.json">phase6_headsync_lane5_default_jtag_nodisplay_20260501.json</a></td></tr>
+<tr><td>Header</td><td>ASIC5 head-sync cnt52/vcd18, lapse on<div class="note">ASIC5 physical tuning improves the shape but production MTS lapse still leaves a two-bin 79.171%/20.829% split.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=off; ts=t</td><td><span class="mini-badge pass">1500 ms</span><div class="rate">12.931 s</div></td><td>940,033<div class="rate">72.698 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>12,108<div class="rate">936.379 /s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 974,448<div class="rate">75.359 k/s</div><br>out 974,448<div class="rate">75.359 k/s</div><br>reject 986<div class="rate">76.253 /s</div></td><td>in 992,063<div class="rate">76.722 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5]</td><td><a href="phase6_headsync_lane5_cnt52_vcd18_mtslat2000_jtag_nodisplay_20260501.json">phase6_headsync_lane5_cnt52_vcd18_mtslat2000_jtag_nodisplay_20260501.json</a></td></tr>
+<tr><td>Header diag</td><td>ASIC5 head-sync cnt52/vcd18, bypass lapse<div class="note">Diagnostic-only bypass-lapse run collapses ASIC5 to one delay bin, separating the physical TDC/LVDS response from the MTS lapse transform.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=on; drop=off; ts=t</td><td><span class="mini-badge pass">1500 ms</span><div class="rate">12.939 s</div></td><td>938,441<div class="rate">72.530 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>8,082<div class="rate">624.642 /s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 964,808<div class="rate">74.568 k/s</div><br>out 964,806<div class="rate">74.568 k/s</div><br>reject 1,177<div class="rate">90.968 /s</div></td><td>in 989,799<div class="rate">76.500 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5]</td><td><a href="phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.json">phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.json</a></td></tr>
+<tr><td>Header</td><td>ASIC6 head-sync default, lapse on<div class="note">ASIC6 default production-lapse control is a single-bin delta at 904 cycles with zero LVDS error/DPA deltas.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x040<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge pass">1500 ms</span><div class="rate">12.979 s</div></td><td>1,414,372<div class="rate">108.976 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>17,153<div class="rate">1.322 k/s</div><br>drop 0<div class="rate">0.000 /s</div></td><td>in 1,465,983<div class="rate">112.952 k/s</div><br>out 1,465,982<div class="rate">112.952 k/s</div><br>reject 0<div class="rate">0.000 /s</div></td><td>in 1,492,862<div class="rate">115.023 k/s</div><br>miss 0<div class="rate">0.000 /s</div></td><td>OK: errΔ=0, dpaΔ=0, active=[6]</td><td><a href="phase6_headsync_lane6_default_jtag_nodisplay_20260501.json">phase6_headsync_lane6_default_jtag_nodisplay_20260501.json</a></td></tr>
+<tr><td>Delay</td><td>Single-lane matrix<div class="note">Eight isolated lanes pass the 2000-cycle MTS/ring error gate.</div></td><td><span class="badge pass">PASS</span><div class="class">8 / 8 pass</div></td><td>lvds=0x0FF<br>emu=0x00</td><td>aggregate; inspect child JSON</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>38,411,543<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>9,019,570<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 43,022,057<div class="rate">-</div><br>out 43,021,857<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 47,843,393<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>aggregate; inspect child JSON for lane table</td><td><a href="phase5_real_256ch_per_lane_best2_pulse4_delay_2000cyc_20260429.json">phase5_real_256ch_per_lane_best2_pulse4_delay_2000cyc_20260429.json</a></td></tr>
+<tr><td>Delay</td><td>All lanes together<div class="note">All-lane run still fails on ring input errors.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x0FF<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=keep; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>39,898,636<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>14,859,250<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 35,652,315<div class="rate">-</div><br>out 35,652,230<div class="rate">-</div><br>reject 36,028,969<div class="rate">-</div></td><td>in 40,079,631<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_256ch_all_lanes_best2_pulse4_delay_2000cyc_20260429.json">phase5_real_256ch_all_lanes_best2_pulse4_delay_2000cyc_20260429.json</a></td></tr>
+<tr><td>Delay</td><td>Upper lanes 1+2, one channel<div class="note">Passes when parked emulator lanes are disabled.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x006<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>487,254<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>32,614<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 530,116<div class="rate">-</div><br>out 530,116<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 609,164<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_upper_lanes12_ch1_quietemu_pulse4_delay_2000cyc_20260430.json">phase5_real_upper_lanes12_ch1_quietemu_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Upper lanes 1+2, full channels<div class="note">Fails only when full-channel multiplicity is restored.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x006<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=keep; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>13,565,966<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>4,758,053<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 14,633,702<div class="rate">-</div><br>out 14,633,590<div class="rate">-</div><br>reject 385,489<div class="rate">-</div></td><td>in 16,813,579<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_upper_lanes12_best2_pulse4_delay_2000cyc_20260429.json">phase5_real_upper_lanes12_best2_pulse4_delay_2000cyc_20260429.json</a></td></tr>
+<tr><td>Delay</td><td>Lower lane 5, one channel<div class="note">Lane 5 alone passes.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>174,690<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>61,790<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 202,843<div class="rate">-</div><br>out 202,841<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 216,467<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lane5_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json">phase5_real_lane5_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Lower lane 6, one channel<div class="note">Lane 6 alone passes.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x040<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>247,339<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>68,986<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 285,991<div class="rate">-</div><br>out 285,990<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 307,500<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lane6_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json">phase5_real_lane6_ch1_goodribbon_pulse4_delay_2000cyc_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Lower lanes 5+6, one channel<div class="note">This early good-ribbon pass is now superseded by the timing-closed Phase-6 image, where explicit SMB5 reload reproduced the lower one-channel MTS/ring failure.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>419,896<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>70,935<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 483,956<div class="rate">-</div><br>out 483,954<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 532,836<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_ch1_goodribbon_latency2000_retry_pulse4_20260430.json">phase5_real_lower_lanes56_ch1_goodribbon_latency2000_retry_pulse4_20260430.json</a></td></tr>
+<tr><td>Phase6</td><td>Lower ASIC5/6 cross-ASIC sweep<div class="note">ASIC5/lane5 and ASIC6/lane6 pass alone, the real two-lane pair fails, ASIC6 ext_trig_offset 0..15 does not clear it, and the two-lane emulator reference passes after settle.</div></td><td><span class="badge fail">FAIL</span><div class="class">7 / 30 pass</div></td><td>lvds=0x060<br>emu=0x60</td><td>aggregate; inspect child JSON</td><td><span class="mini-badge fail">100 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>9,766,799<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,640,203<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 0<div class="rate">-</div><br>out 0<div class="rate">-</div><br>reject 10,506,955<div class="rate">-</div></td><td>in 9,426,601<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>aggregate; inspect child JSON for lane table</td><td><a href="phase6_lower56_cross_asic_sweep_20260430.json">phase6_lower56_cross_asic_sweep_20260430.json</a></td></tr>
+<tr><td>Phase6</td><td>Phase-6 continued bounded cycle P6B006<div class="note">Fresh ASIC5/lane5 one-channel control passes with zero ring input errors.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>168,411<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>52,627<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 198,382<div class="rate">-</div><br>out 198,382<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 213,120<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5]</td><td><a href="phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B006.json">phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B006.json</a></td></tr>
+<tr><td>Phase6</td><td>Phase-6 continued bounded cycle P6B007<div class="note">Fresh ASIC6/lane6 one-channel control passes with zero ring input errors.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x040<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>247,011<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>81,880<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 296,487<div class="rate">-</div><br>out 296,487<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 320,820<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[6]</td><td><a href="phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B007.json">phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B007.json</a></td></tr>
+<tr><td>Phase6</td><td>Phase-6 continued bounded cycle P6B010<div class="note">Fresh ASIC5+6 one-channel pair still fails before SWB with ring input errors.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>440,880<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>144,364<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 365,537<div class="rate">-</div><br>out 365,534<div class="rate">-</div><br>reject 563,053<div class="rate">-</div></td><td>in 390,663<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5, 6]</td><td><a href="phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B010.json">phase6_long_runs/20260430_live_continued_cycle1/cases/cycle00000_P6B010.json</a></td></tr>
+<tr><td>Latency</td><td>Lower lanes 5+6 one-channel latency 2000<div class="note">Nominal 0..2000-cycle expected-latency gate fails for the two-real-ASIC lower pair.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>413,458<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>118,260<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 346,657<div class="rate">-</div><br>out 346,656<div class="rate">-</div><br>reject 534,743<div class="rate">-</div></td><td>in 371,371<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5, 6]</td><td><a href="phase6_probe_lower56_ch1_latency2000_pulse4_20260430.json">phase6_probe_lower56_ch1_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Latency</td><td>Lower lanes 5+6 one-channel latency 4000<div class="note">Opening the expected-latency gate to 4000 cycles does not clear the lower-pair failure.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=4000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>412,183<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>50,771<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 384,886<div class="rate">-</div><br>out 384,883<div class="rate">-</div><br>reject 368,030<div class="rate">-</div></td><td>in 410,453<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5, 6]</td><td><a href="phase6_probe_lower56_ch1_latency4000_pulse4_20260430.json">phase6_probe_lower56_ch1_latency4000_pulse4_20260430.json</a></td></tr>
+<tr><td>Latency</td><td>Lower lanes 5+6 one-channel latency 65535<div class="note">Even an effectively wide positive-latency gate leaves ring input errors, pointing away from a small positive delay tail.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=65535; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>429,181<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>155,387<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 413,714<div class="rate">-</div><br>out 413,713<div class="rate">-</div><br>reject 319,653<div class="rate">-</div></td><td>in 442,754<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5, 6]</td><td><a href="phase6_probe_lower56_ch1_latency65535_pulse4_20260430.json">phase6_probe_lower56_ch1_latency65535_pulse4_20260430.json</a></td></tr>
+<tr><td>Header</td><td>Lower lanes 5+6 header mode channel 5<div class="note">Header-synchronous injection on lower header channel 5 still fails for the real pair.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>576,765<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>160,595<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 486,128<div class="rate">-</div><br>out 486,126<div class="rate">-</div><br>reject 748,701<div class="rate">-</div></td><td>in 522,845<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5, 6]</td><td><a href="phase6_probe_lower56_ch1_header_ch5_hdelay100_pulse4_20260430.json">phase6_probe_lower56_ch1_header_ch5_hdelay100_pulse4_20260430.json</a></td></tr>
+<tr><td>Header</td><td>Lower lanes 5+6 header mode channel 6<div class="note">Header-synchronous injection on lower header channel 6 still fails for the real pair.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>608,355<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>179,877<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 508,235<div class="rate">-</div><br>out 508,233<div class="rate">-</div><br>reject 782,985<div class="rate">-</div></td><td>in 543,743<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5, 6]</td><td><a href="phase6_probe_lower56_ch1_header_ch6_hdelay100_pulse4_20260430.json">phase6_probe_lower56_ch1_header_ch6_hdelay100_pulse4_20260430.json</a></td></tr>
+<tr><td>Header</td><td>Lane 5 header mode control<div class="note">ASIC5/lane5 alone passes the same header-synchronous mode, so the mode itself is not the blocker.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>234,526<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>72,758<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 272,768<div class="rate">-</div><br>out 272,768<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 293,388<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[5]</td><td><a href="phase6_probe_lane5_ch1_header_hdelay100_pulse4_20260430.json">phase6_probe_lane5_ch1_header_hdelay100_pulse4_20260430.json</a></td></tr>
+<tr><td>Header</td><td>Lane 6 header mode control<div class="note">ASIC6/lane6 alone passes the same header-synchronous mode, so the pair failure is cross-ASIC.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x040<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>366,132<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>38,614<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 422,300<div class="rate">-</div><br>out 422,299<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 453,985<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[6]</td><td><a href="phase6_probe_lane6_ch1_header_hdelay100_pulse4_20260430.json">phase6_probe_lane6_ch1_header_hdelay100_pulse4_20260430.json</a></td></tr>
+<tr><td>Phase6</td><td>Lane 6 zero VCO point<div class="note">Invalidated: vnvcodelay=0 should produce no TDC-injection hits; rerun with nonzero ASIC-specific PLL settings and RUN_PREP.</div></td><td><span class="badge fail">INVALID</span><div class="class">zero-vcodelay no-hit control; rerun required</div></td><td>lvds=0x040<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>261,411<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>19,591<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 301,193<div class="rate">-</div><br>out 301,193<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 322,626<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[6]</td><td><a href="phase6_lane6_vco000_pulse4_100k_20260430_192903.json">phase6_lane6_vco000_pulse4_100k_20260430_192903.json</a></td></tr>
+<tr><td>Phase6</td><td>Lane 6 FEB frame boundary<div class="note">Invalidated as tuning evidence by the vco000 label; keep only as a frame-format debug example until rerun with locked nonzero PLL settings.</div></td><td><span class="badge fail">INVALID</span><div class="class">zero-vcodelay no-hit control; rerun required</div></td><td>lvds=0x040<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge pass">5000 ms</span><div class="rate">rate window missing</div></td><td>733,764<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>59,907<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 771,792<div class="rate">-</div><br>out 771,792<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 795,708<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[6]</td><td><a href="phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.json">phase6_frame_boundary_lane6_vco000_100k_active_inject_20260430.json</a></td></tr>
+<tr><td>Phase6</td><td>Lane 7 zero VCO point<div class="note">Invalidated: zero vcodelay is the no-hit control, not a lock point.</div></td><td><span class="badge fail">INVALID</span><div class="class">zero-vcodelay no-hit control; rerun required</div></td><td>lvds=0x080<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>250,568<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>78,658<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 289,976<div class="rate">-</div><br>out 289,975<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 310,436<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[7]</td><td><a href="phase6_lane7_vco000_pulse4_100k_20260430_193008.json">phase6_lane7_vco000_pulse4_100k_20260430_193008.json</a></td></tr>
+<tr><td>Phase6</td><td>Lanes 6+7 zero VCO pair<div class="note">Invalidated for PLL/timestamp conclusions until rerun from ASIC-specific nonzero defaults/restores after RUN_PREP.</div></td><td><span class="badge fail">INVALID</span><div class="class">zero-vcodelay no-hit control; rerun required</div></td><td>lvds=0x0C0<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>515,946<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>170,444<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 387,881<div class="rate">-</div><br>out 387,875<div class="rate">-</div><br>reject 826,978<div class="rate">-</div></td><td>in 418,679<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>OK: errΔ=0, dpaΔ=0, active=[6, 7]</td><td><a href="phase6_lane67_vco000_pulse4_100k_20260430_193112.json">phase6_lane67_vco000_pulse4_100k_20260430_193112.json</a></td></tr>
+<tr><td>Delay</td><td>Lower lanes 5+6, full channels<div class="note">Fresh post-restore full 32-channel ASIC5+6 run fails the required 0..2000-cycle MTS/ring gate.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>9,859,630<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,415,471<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 10,900,391<div class="rate">-</div><br>out 10,900,318<div class="rate">-</div><br>reject 1,990,485<div class="rate">-</div></td><td>in 11,694,757<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_postrestore_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_postrestore_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Lower full channels, loose latency<div class="note">Still fails even with expected latency opened to 65535, so this is not a small positive-latency tail.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=65535; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>9,762,363<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,372,359<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 10,975,998<div class="rate">-</div><br>out 10,975,994<div class="rate">-</div><br>reject 996,634<div class="rate">-</div></td><td>in 11,790,695<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_latency65535_pulse4_20260430.json">phase5_real_lower_lanes56_full32_latency65535_pulse4_20260430.json</a></td></tr>
+<tr><td>Diagnostic</td><td>Lower pair bypass-lapse<div class="note">Disabling the MTS GTS/lapse transform does not clear the lower-pair timestamp errors.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=on; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>9,889,398<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,445,038<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 4,806,691<div class="rate">-</div><br>out 4,806,659<div class="rate">-</div><br>reject 26,103,431<div class="rate">-</div></td><td>in 5,155,190<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_bypasslapse_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_bypasslapse_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Diagnostic</td><td>Lower pair E-field delay<div class="note">Using E instead of T for delay calculation is worse, matching the short-mode TDC-injection expectation.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=off; ts=e</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>9,816,920<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,993,029<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 6,666,648<div class="rate">-</div><br>out 6,666,576<div class="rate">-</div><br>reject 18,496,961<div class="rate">-</div></td><td>in 7,207,838<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_delayfieldE_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_delayfieldE_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Diagnostic</td><td>Lower pair drop-delay<div class="note">Dropping MTS delay-error hits keeps the downstream ring clean, but this is diagnostic-only and not closure.</div></td><td><span class="badge fail">FAIL</span><div class="class">diagnostic_bypass_clean_not_closure</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=on; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>9,698,941<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>989,582<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 10,726,667<div class="rate">-</div><br>out 10,726,659<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 11,522,626<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_dropdelay_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_dropdelay_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Mask scan</td><td>Lower channels 0..3<div class="note">A four-channel mask can pass, proving full-channel failure is not a universal lane lock loss.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">200 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>1,441,962<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>251,283<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 1,670,307<div class="rate">-</div><br>out 1,670,301<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 1,788,513<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_chmask_00_03_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_chmask_00_03_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Mask scan</td><td>Lower channels 4..7<div class="note">This adjacent four-channel mask fails, showing channel grouping still matters.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">200 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>1,203,353<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>186,678<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 1,394,986<div class="rate">-</div><br>out 1,394,981<div class="rate">-</div><br>reject 16,910<div class="rate">-</div></td><td>in 1,507,412<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_chmask_04_07_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_chmask_04_07_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Mask scan</td><td>Lower pass-union mask<div class="note">The union of individually clean channel groups still fails when aggregated across ASIC5+6.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>6,645,781<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,004,562<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 7,421,673<div class="rate">-</div><br>out 7,421,622<div class="rate">-</div><br>reject 1,281,072<div class="rate">-</div></td><td>in 7,956,847<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_chmask_pass_union_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_chmask_pass_union_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Lane 5 full channels<div class="note">ASIC5/lane5 passes full 32 channels by itself with vnhitlogic=60.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x020<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>5,624,703<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>697,532<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 6,481,163<div class="rate">-</div><br>out 6,481,163<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 6,960,247<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lane5_full32_hl60_latency2000_pulse4_20260430.json">phase5_real_lane5_full32_hl60_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Delay</td><td>Lane 6 full channels<div class="note">ASIC6/lane6 passes full 32 channels by itself with vnhitlogic=60.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x040<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>3,657,580<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>322,500<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 4,209,481<div class="rate">-</div><br>out 4,209,448<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 4,521,434<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lane6_full32_hl60_latency2000_pulse4_20260430.json">phase5_real_lane6_full32_hl60_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>Lower pair hitlogic 60<div class="note">Raising vnhitlogic on both ASICs does not clear the pair-level full-channel failure.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">200 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>8,942,039<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,992,215<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 10,065,208<div class="rate">-</div><br>out 10,065,133<div class="rate">-</div><br>reject 1,551,965<div class="rate">-</div></td><td>in 10,783,606<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_hl60_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_hl60_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Pulse edge</td><td>Lower pulse3 hitlogic 10<div class="note">Pulse high 3 with vnhitlogic=10 is clean but far below full 32-channel multiplicity.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>171,878<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>33,364<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 200,211<div class="rate">-</div><br>out 200,211<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 214,543<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_hl10_latency2000_pulse3_20260430.json">phase5_real_lower_lanes56_full32_hl10_latency2000_pulse3_20260430.json</a></td></tr>
+<tr><td>Pulse edge</td><td>Lower pulse3 hitlogic 5<div class="note">Lowering hitlogic to 5 remains clean but still underfilled.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>166,676<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>27,986<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 193,469<div class="rate">-</div><br>out 193,467<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 207,254<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_hl5_latency2000_pulse3_20260430.json">phase5_real_lower_lanes56_full32_hl5_latency2000_pulse3_20260430.json</a></td></tr>
+<tr><td>Pulse edge</td><td>Lower pulse4 hitlogic 5<div class="note">The next integer pulse width restores multiplicity but also restores MTS/ring errors.</div></td><td><span class="badge fail">FAIL</span><div class="class">mts_discard_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>10,008,663<div class="rate">-</div><br>drop 1<div class="rate">-</div></td><td>1,276,457<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 10,996,662<div class="rate">-</div><br>out 10,996,625<div class="rate">-</div><br>reject 1,810,661<div class="rate">-</div></td><td>in 11,818,666<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_hl5_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_hl5_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Pulse edge</td><td>Lower pulse3 cml_sc=1<div class="note">The wiki cml_sc=1 setting moves pulse3 farther away from the required multiplicity.</div></td><td><span class="badge pass">PASS</span><div class="class">PASS</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=off; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>18,827<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>884<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 21,335<div class="rate">-</div><br>out 21,335<div class="rate">-</div><br>reject 0<div class="rate">-</div></td><td>in 22,115<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_hl10_cmlsc1_latency2000_pulse3_20260430.json">phase5_real_lower_lanes56_full32_hl10_cmlsc1_latency2000_pulse3_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>Lower pair at 10 kHz/channel<div class="note">Even 10 kHz/channel still fails, so the blocker is not only 100 kHz steady-state throughput.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>976,942<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>209,417<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 1,085,501<div class="rate">-</div><br>out 1,085,490<div class="rate">-</div><br>reject 187,920<div class="rate">-</div></td><td>in 1,164,544<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_hl60_latency2000_pulse4_interval12500_20260430.json">phase5_real_lower_lanes56_full32_hl60_latency2000_pulse4_interval12500_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC5 ext offset<div class="note">Header ext_trig_offset=1 on ASIC5 makes the full-channel pair worse, not better.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>9,572,470<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,946,625<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 10,629,063<div class="rate">-</div><br>out 10,629,061<div class="rate">-</div><br>reject 1,843,426<div class="rate">-</div></td><td>in 11,369,421<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_asic5_extoffset1_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_asic5_extoffset1_latency2000_pulse4_20260430.json</a></td></tr>
+<tr><td>Tune</td><td>ASIC6 ext offset<div class="note">Header ext_trig_offset=1 on ASIC6 also worsens the full-channel pair.</div></td><td><span class="badge fail">FAIL</span><div class="class">ring_input_errors_with_histogram_hits</div></td><td>lvds=0x060<br>emu=0x00</td><td>lat=2000; lookback=keep; lapse=keep; drop=off; ts=t</td><td><span class="mini-badge fail">250 ms; rerun 1 s</span><div class="rate">rate window missing</div></td><td>10,004,262<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>1,902,645<div class="rate">-</div><br>drop 0<div class="rate">-</div></td><td>in 11,089,755<div class="rate">-</div><br>out 11,089,683<div class="rate">-</div><br>reject 1,924,333<div class="rate">-</div></td><td>in 11,835,435<div class="rate">-</div><br>miss 0<div class="rate">-</div></td><td>not captured</td><td><a href="phase5_real_lower_lanes56_full32_asic6_extoffset1_latency2000_pulse4_20260430.json">phase5_real_lower_lanes56_full32_asic6_extoffset1_latency2000_pulse4_20260430.json</a></td></tr>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

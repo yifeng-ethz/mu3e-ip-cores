@@ -104,6 +104,9 @@ proc preset_id_for_profile {profile lane_filter} {
     if {$profile eq "rate"} {
         return "rate"
     }
+    if {$profile eq "delay-hit" || $profile eq "delay_hit" || $profile eq "delay-hit-t" || $profile eq "delay_hit_t"} {
+        return "delay_hit_t"
+    }
     if {$profile eq "delay" || $profile eq "header"} {
         if {$lane_filter eq ""} {
             return "delay_mts_both"
