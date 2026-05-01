@@ -120,9 +120,20 @@ Primary evidence:
   (`262220` hits), and lane4 delay-debug failed cleanly (`hist=0` while MTS
   advanced). Root cause: only `mts_preprocessor_0.ts_delta` was wired to
   `histogram_statistics_0.debug_1`; lower `mts_preprocessor_1.ts_delta` was
-  open. The next rebuild must use histogram v2 mode `-7` with debug_1=upper
-  MTS delta and debug_2=lower MTS delta before lower-side delay evidence is
-  meaningful.
+  open. The 2026-05-01 pipe regeneration fixes this class for simulation:
+  debug_1 is upper MTS delta, debug_2 is lower MTS delta, and the rate path has
+  a lower pre-RBCAM splitter feeding `histogram_ingress_bridge_1`.
+- For regenerated Qsys scripts in this worktree, use an isolated `HOME` and an
+  explicit search path that starts with
+  `run-control_mgmt/reference/feb_system_v2_snapshot_20260415` and the active
+  source-IP directories. Do not let the normal global catalog select the dirty
+  base checkout `mutrig_timestamp_processor` 26.0.9 when the worktree expects
+  26.0.8; that produces a plausible but untrustworthy generated system.
+- A 1 s rate PNG is not automatically evidence. The 2026-05-01 rate plot was
+  rendered correctly but all `647881` hits landed in bin 0. Treat any
+  collapsed-bin/all-one-ASIC rate shape as an observation bug until a mask
+  sanity check proves masked channels vanish and all active ASICs distribute
+  into the expected global `{ASIC, channel}` bins.
 - If the emulator path passes but the real path is zero, suspect MuTRiG XML/SPI
   configuration, LVDS lane training, physical lane mapping, or frame-deassembly
   lock/errors before changing histogram/MTS logic.

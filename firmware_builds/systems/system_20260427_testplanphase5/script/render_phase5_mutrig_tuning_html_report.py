@@ -659,6 +659,12 @@ def artifact_status_rows() -> str:
     for key, title, contract in required:
         artifact = artifacts.get(key, {"status": "missing", "reason": "not in manifest"})
         status = artifact.get("status", "missing")
+        if status == "present":
+            status_label = "PASS"
+        elif status == "anomaly":
+            status_label = "ANOMALY"
+        else:
+            status_label = "MISSING"
         path_text = artifact.get("path")
         if path_text:
             path = Path(path_text)
@@ -672,6 +678,10 @@ def artifact_status_rows() -> str:
             note_parts.append(f"source={Path(str(artifact['source'])).name}")
         if artifact.get("total_hits") is not None:
             note_parts.append(f"total={fmt_int(artifact.get('total_hits'))}")
+        if artifact.get("nonzero_bins") is not None:
+            note_parts.append(f"nonzero_bins={fmt_int(artifact.get('nonzero_bins'))}")
+        if artifact.get("active_asics") is not None:
+            note_parts.append(f"active_asics={fmt_int(artifact.get('active_asics'))}")
         if artifact.get("peak_fraction") is not None:
             note_parts.append(f"peak={float(artifact.get('peak_fraction')):.3%}")
         if artifact.get("toolkit_preset_id"):
@@ -683,7 +693,7 @@ def artifact_status_rows() -> str:
         rows.append(
             "<tr>"
             f"<td>{esc(title)}</td>"
-            f"<td>{badge('PASS' if status == 'present' else 'MISSING')}</td>"
+            f"<td>{badge(status_label)}</td>"
             f"<td>{esc(contract)}<div class=\"note\">{esc('; '.join(note_parts) if note_parts else '-')}</div></td>"
             f"<td>{link}</td>"
             "</tr>"
@@ -695,17 +705,22 @@ def artifact_figures() -> str:
     manifest = hist_artifact_manifest()
     figures = []
     for artifact in manifest.get("artifacts", {}).values():
-        if artifact.get("status") != "present" or not artifact.get("path"):
+        if artifact.get("status") not in {"present", "anomaly"} or not artifact.get("path"):
             continue
         path = Path(str(artifact["path"]))
         if not path.is_absolute():
             path = HIST_ARTIFACT_DIR / path
         if not path.exists():
             continue
+        caption_parts = [str(artifact.get("kind", path.name))]
+        if artifact.get("status") == "anomaly":
+            caption_parts.append("ANOMALY")
+        if artifact.get("visual_checkpoint"):
+            caption_parts.append(str(artifact["visual_checkpoint"]))
         figures.append(
             "<figure>"
             f"<a href=\"{esc(rel(path))}\"><img src=\"{esc(rel(path))}\" alt=\"{esc(artifact.get('kind', path.name))}\"></a>"
-            f"<figcaption>{esc(artifact.get('kind', path.name))}</figcaption>"
+            f"<figcaption>{esc(' - '.join(caption_parts))}</figcaption>"
             "</figure>"
         )
     if not figures:
@@ -951,6 +966,20 @@ def write_html() -> None:
       path or a faster frozen-bin capture.
     </p>
     <p>
+      The 2026-05-01 Qsys patch fixes a separate observability bug before the
+      next live run: the histogram source now defaults to pre-RBCAM
+      <code>hit_type1</code>, <code>histogram_statistics_0</code> has two
+      fill inputs with global <code>{{ASIC, channel}}</code> keys, and the
+      lower MTS stream is split into both <code>hit_stack_subsystem_1</code>
+      and <code>histogram_ingress_bridge_1</code>. The lower bridge
+      <code>pre_out</code> is explicitly drained so the tap copy cannot
+      backpressure MTS. Authentic integration simulation passed with all eight
+      lanes visible: each lane reported 20 MTS channel-16 payload hits and 20
+      histogram flushes, with zero histogram drops. This clears the upper-only
+      histogram wiring blocker, but it is simulation evidence; live 1 s
+      histogram and header-delay artifacts must be rerun.
+    </p>
+    <p>
       The latest direct probes rule out two weaker explanations. First, opening
       the MTS expected-latency gate from <code>2000</code> to <code>4000</code>
       and <code>65535</code> still leaves large lower-pair ring input-error
@@ -1182,7 +1211,8 @@ def write_html() -> None:
     <p>
       Counter rows show count plus rate. The rate window is the measured
       accumulation window for shaky CSR counters; linked JSON keeps the raw
-      before/sample/after snapshots for audit.
+      before/sample/after snapshots for audit. Rows shorter than 1 s are
+      retained only as historical debug and fail the monitor gate.
     </p>
     <table>
       <thead>

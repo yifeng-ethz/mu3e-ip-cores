@@ -214,6 +214,14 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
     scale = 1.0 / evidence.interval_s if evidence.interval_s > 0 else 1.0
     rates = [value * scale for value in evidence.bins]
     asic_rates = rate_per_asic(evidence.bins, evidence.interval_s)
+    active_asics = sum(1 for value in asic_rates if value > 0.0)
+    rate_distribution_pass = evidence.nonzero_bins >= 128 and active_asics >= 4
+    inspection = "Rate plot passes the coarse all-lane distribution check; still inspect masks and ASIC balance visually."
+    if not rate_distribution_pass:
+        inspection = (
+            "ANOMALY: rate evidence is not distributed like an all-lane 256-channel run "
+            f"(nonzero_bins={evidence.nonzero_bins}, active_asics={active_asics})."
+        )
 
     fig, (ax0, ax1) = plt.subplots(
         2,
@@ -244,12 +252,22 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
     ax1.set_ylabel("Rate [hits/s]")
     ax1.set_xticks(range(8))
     ax1.grid(axis="y", color="#d9d9d9", lw=0.6)
+    if not rate_distribution_pass:
+        ax0.text(
+            0.01,
+            0.86,
+            "Inspection FAIL: hits collapse into too few bins for all-lane rate evidence",
+            transform=ax0.transAxes,
+            va="top",
+            fontsize=9,
+            color="#b73535",
+        )
 
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=150)
     plt.close(fig)
     return {
-        "status": "present",
+        "status": "present" if rate_distribution_pass else "anomaly",
         "kind": "rate_per_channel",
         "path": str(out),
         "source": str(evidence.source),
@@ -258,11 +276,13 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
         "nonzero_bins": evidence.nonzero_bins,
         "max_rate_hz_per_channel": max(rates) if rates else 0.0,
         "asic_rates_hz": asic_rates,
+        "active_asics": active_asics,
+        "rate_distribution_pass": rate_distribution_pass,
         "source_type": evidence.source_type,
         "lane_go": evidence.lane_go,
         "toolkit_preset_source": TOOLKIT_PRESET_SOURCE,
         "toolkit_preset_id": evidence.toolkit_preset_id or "rate",
-        "visual_checkpoint": "Inspect that masked channels vanish and ASIC aggregates match the requested mask/rate.",
+        "visual_checkpoint": inspection,
     }
 
 
@@ -336,8 +356,13 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
         json_paths.extend(find_json_inputs(args.report_dir.resolve()))
     evidence = collect_json_evidence(sorted(set(json_paths)))
 
-    if args.rate_csv is not None:
-        evidence.append(evidence_from_csv(args.rate_csv.resolve(), "rate", args.rate_interval_s, args.rate_label))
+    rate_csv = args.rate_csv
+    if rate_csv is None:
+        rate_csv_candidates = sorted(args.report_dir.resolve().glob("phase5_rate_per_channel_1s_*.csv"))
+        if rate_csv_candidates:
+            rate_csv = rate_csv_candidates[-1]
+    if rate_csv is not None:
+        evidence.append(evidence_from_csv(rate_csv.resolve(), "rate", args.rate_interval_s, args.rate_label))
     if args.delay_csv is not None:
         evidence.append(evidence_from_csv(args.delay_csv.resolve(), "delay", args.delay_interval_s, args.delay_label))
 
@@ -395,10 +420,11 @@ def main() -> int:
 
     manifest = build_manifest(args)
     print(manifest["manifest_path"])
-    missing = [name for name, item in manifest["artifacts"].items() if item.get("status") != "present"]
+    missing = [name for name, item in manifest["artifacts"].items() if item.get("status") not in {"present", "anomaly"}]
+    anomalies = [name for name, item in manifest["artifacts"].items() if item.get("status") == "anomaly"]
     bad_delay = manifest["artifacts"].get("header_delay", {}).get("delta_function_pass") is False
-    if args.strict and (missing or bad_delay):
-        print(f"missing_or_invalid={missing} bad_delay={bad_delay}")
+    if args.strict and (missing or anomalies or bad_delay):
+        print(f"missing={missing} anomalies={anomalies} bad_delay={bad_delay}")
         return 2
     return 0
 

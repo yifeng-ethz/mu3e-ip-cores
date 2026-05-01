@@ -1,13 +1,10 @@
 package require -exact qsys 18.1
 
 proc abs_path {path} {
-    if {[string match "/*" $path]} {
-        return $path
+    if {[file pathtype $path] eq "absolute"} {
+        return [file normalize $path]
     }
-    if {[info exists ::env(PWD)] && [string match "/*" $::env(PWD)]} {
-        return [file join $::env(PWD) $path]
-    }
-    return [file join [pwd] $path]
+    return [file normalize [file join [pwd] $path]]
 }
 
 if {[info exists ::phase5_system_dir] && [string match "/*" $::phase5_system_dir]} {
@@ -19,19 +16,41 @@ if {[info exists ::phase5_system_dir] && [string match "/*" $::phase5_system_dir
     set system_root [file dirname $script_dir]
 }
 set syn_dir [file join $system_root syn]
-load_system [file join $syn_dir scifi_datapath_system_v3.qsys]
+set base_qsys [file join $syn_dir scifi_datapath_system_v3.qsys]
+if {![file exists $base_qsys]} {
+    error "Base Qsys file not found: $base_qsys"
+}
+load_system $base_qsys
+
+proc require_instance_interface {instance interface} {
+    if {[lsearch -exact [get_instance_interfaces $instance] $interface] < 0} {
+        error "Required Qsys interface missing: ${instance}.${interface}"
+    }
+}
+
+foreach {instance interface} {
+    mutrig_datapath_subsystem_0 decoded_din
+    mutrig_datapath_subsystem_0 headerinfo
+    hit_stack_subsystem_0 hit_type_1
+    hit_stack_subsystem_0 hit_type3
+    hit_stack_subsystem_0 ring_buffer_cam_0_filllevel
+    hit_stack_subsystem_1 hit_type_1
+    hit_stack_subsystem_1 hit_type3
+} {
+    require_instance_interface $instance $interface
+}
 
 # The FEB top-level run-control fanout is a broadcast path. It must not
 # depend on every downstream branch asserting ready, otherwise one blocked
 # datapath consumer can stall the run-control command globally.
 set_instance_parameter_value run_control_splitter USE_READY 0
 
-# In the pipe topology histogram_statistics_0 is fed from the post-hit-stack
-# copy. Keep the reset default aligned with that wiring so a run-control reset
-# cannot silently return the histogram tap to the pre-hit-stack stream. The
-# post stream is packetized hit_type3 traffic, so filter out frame protocol
-# words before presenting it to histogram_statistics_0.
-set_instance_parameter_value histogram_ingress_bridge_0 DEFAULT_SELECT_POST 1
+# In the pipe topology histogram_statistics_0 is the visible rate/delay
+# measurement point. Default it to the pre-RBCAM MTS stream so the toolkit rate
+# preset sees hit_type1 data[38:30] = {ASIC,channel}. Post-hit-stack traffic can
+# still be selected explicitly through the ingress bridge CSR for local debug.
+set_instance_parameter_value histogram_ingress_bridge_0 DEFAULT_SELECT_POST 0
+set_instance_parameter_value histogram_ingress_bridge_0 ENABLE_POST_FORWARD 0
 set_instance_parameter_value histogram_ingress_bridge_0 FILTER_POST_HIT_WORDS 1
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MAJOR 26
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MINOR 0
@@ -41,12 +60,14 @@ set_instance_parameter_value histogram_ingress_bridge_0 VERSION_DATE 20260425
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_GIT 481097348
 set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_HI 21
 set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_LO 17
+set_instance_parameter_value histogram_statistics_0 N_PORTS 2
+set_instance_parameter_value histogram_statistics_0 CHANNELS_PER_PORT 0
 set_instance_parameter_value histogram_statistics_0 COAL_QUEUE_DEPTH 256
 set_instance_parameter_value histogram_statistics_0 VERSION_MAJOR 26
 set_instance_parameter_value histogram_statistics_0 VERSION_MINOR 1
-set_instance_parameter_value histogram_statistics_0 VERSION_PATCH 6
-set_instance_parameter_value histogram_statistics_0 BUILD 429
-set_instance_parameter_value histogram_statistics_0 VERSION_DATE 20260429
+set_instance_parameter_value histogram_statistics_0 VERSION_PATCH 7
+set_instance_parameter_value histogram_statistics_0 BUILD 501
+set_instance_parameter_value histogram_statistics_0 VERSION_DATE 20260501
 set_instance_parameter_value histogram_statistics_0 VERSION_GIT 375124078
 # Keep the per-port FIFO at the signed-off Phase-5 depth. The histogram arbiter
 # drains a single active FIFO at one hit per clock; extra depth should cover
@@ -72,9 +93,83 @@ proc has_instance {name} {
     return [expr {[lsearch -exact [get_instances] $name] >= 0}]
 }
 
-proc remove_connection_if_present {path} {
-    catch {remove_connection $path}
+proc rebuild_mutrig_injector_multiheader {} {
+    set old_injector mutrig_injector_0
+    set new_injector mutrig_injector_0_replacement
+
+    if {[has_instance $new_injector]} {
+        remove_instance $new_injector
+    }
+
+    # Qsys hides mutrig_datapath_system_v3.headerinfo once the old injector is
+    # removed. Build and connect the replacement first, then remove the old
+    # instance and rename the replacement back to the stable instance name.
+    add_instance $new_injector mutrig_injector_multiheader 26.0.3.429
+    set_instance_parameter_value $new_injector HEADERINFO_CHANNEL_W 4
+    set_instance_parameter_value $new_injector VERSION_MAJOR 26
+    set_instance_parameter_value $new_injector VERSION_MINOR 0
+    set_instance_parameter_value $new_injector VERSION_PATCH 3
+    set_instance_parameter_value $new_injector BUILD 429
+    set_instance_parameter_value $new_injector VERSION_DATE 20260429
+    set_instance_parameter_value $new_injector VERSION_GIT 1385024213
+
+    add_connection lvds_rx_28nm_0.outclock/${new_injector}.clock_interface
+    add_connection master_datapath.master_reset/${new_injector}.reset_interface
+    catch {remove_interface osc_clock_50_in}
+    add_interface osc_clock_50_in clock sink
+    set_interface_property osc_clock_50_in EXPORT_OF ${new_injector}.osc_clock_interface
+
+    for {set idx 0} {$idx < 8} {incr idx} {
+        add_connection mutrig_datapath_subsystem_${idx}.headerinfo/${new_injector}.headerinfo${idx}
+    }
+    add_connection run_control_splitter.out13/${new_injector}.runctl
+    add_connection ${new_injector}.inject/emulator_inject_fanout.inject_in
+
+    add_connection mm_clock_crossing_bridge.m0/${new_injector}.csr
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/${new_injector}.csr baseAddress 0xb200
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/${new_injector}.csr arbitrationPriority 1
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/${new_injector}.csr defaultConnection 0
+
+    add_connection master_datapath.master/${new_injector}.csr
+    set_connection_parameter_value master_datapath.master/${new_injector}.csr baseAddress 0x00022000
+    set_connection_parameter_value master_datapath.master/${new_injector}.csr arbitrationPriority 1
+    set_connection_parameter_value master_datapath.master/${new_injector}.csr defaultConnection 0
+
+    if {[has_instance $old_injector]} {
+        remove_instance $old_injector
+    }
+    set_instance_property $new_injector NAME $old_injector
+    set_interface_property osc_clock_50_in EXPORT_OF ${old_injector}.osc_clock_interface
 }
+
+rebuild_mutrig_injector_multiheader
+
+proc remove_connection_if_present {path} {
+    if {[lsearch -exact [get_connections] $path] >= 0} {
+        remove_connection $path
+    }
+}
+
+proc require_connection {path} {
+    if {[lsearch -exact [get_connections] $path] < 0} {
+        error "Required Qsys connection missing: $path"
+    }
+}
+
+if {[has_instance histogram_ingress_bridge_1]} {
+    remove_instance histogram_ingress_bridge_1
+}
+add_instance histogram_ingress_bridge_1 histogram_ingress_bridge 26.0.2.425
+set_instance_parameter_value histogram_ingress_bridge_1 DEFAULT_SELECT_POST 0
+set_instance_parameter_value histogram_ingress_bridge_1 ENABLE_POST_FORWARD 0
+set_instance_parameter_value histogram_ingress_bridge_1 FILTER_POST_HIT_WORDS 1
+set_instance_parameter_value histogram_ingress_bridge_1 INSTANCE_ID 1
+set_instance_parameter_value histogram_ingress_bridge_1 VERSION_MAJOR 26
+set_instance_parameter_value histogram_ingress_bridge_1 VERSION_MINOR 0
+set_instance_parameter_value histogram_ingress_bridge_1 VERSION_PATCH 2
+set_instance_parameter_value histogram_ingress_bridge_1 BUILD 425
+set_instance_parameter_value histogram_ingress_bridge_1 VERSION_DATE 20260425
+set_instance_parameter_value histogram_ingress_bridge_1 VERSION_GIT 481097348
 
 proc replace_decoded_lane_mux_with_source_mux {lane} {
     set old_mux decoded_lane_mux_$lane
@@ -83,21 +178,6 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
     set emu emulator_mutrig_$lane
     set lane_dp mutrig_datapath_subsystem_${lane}
 
-    remove_connection_if_present lvds_rx_controller_pro_0.decoded${lane}/$old_mux.in0
-    remove_connection_if_present $emu.tx8b1k/$old_mux.in1
-    remove_connection_if_present $old_mux.out/$fifo.in
-    remove_connection_if_present $fifo.out/$lane_dp.decoded_din
-    remove_connection_if_present lvds_rx_28nm_0.outclock/$fifo.clk
-    remove_connection_if_present master_datapath.master_reset/$fifo.clk_reset
-    remove_connection_if_present lvds_rx_28nm_0.outclock/$old_mux.clk
-    remove_connection_if_present master_datapath.master_reset/$old_mux.reset
-
-    if {[has_instance $old_mux]} {
-        remove_instance $old_mux
-    }
-    if {[has_instance $fifo]} {
-        remove_instance $fifo
-    }
     if {[has_instance $new_mux]} {
         remove_instance $new_mux
     }
@@ -121,6 +201,22 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
     add_connection lvds_rx_controller_pro_0.decoded${lane}/$new_mux.real_in
     add_connection $emu.tx8b1k/$new_mux.emu_in
     add_connection $new_mux.selected_out/$lane_dp.decoded_din
+
+    remove_connection_if_present lvds_rx_controller_pro_0.decoded${lane}/$old_mux.in0
+    remove_connection_if_present $emu.tx8b1k/$old_mux.in1
+    remove_connection_if_present $old_mux.out/$fifo.in
+    remove_connection_if_present $fifo.out/$lane_dp.decoded_din
+    remove_connection_if_present lvds_rx_28nm_0.outclock/$fifo.clk
+    remove_connection_if_present master_datapath.master_reset/$fifo.clk_reset
+    remove_connection_if_present lvds_rx_28nm_0.outclock/$old_mux.clk
+    remove_connection_if_present master_datapath.master_reset/$old_mux.reset
+
+    if {[has_instance $old_mux]} {
+        remove_instance $old_mux
+    }
+    if {[has_instance $fifo]} {
+        remove_instance $fifo
+    }
 
     set mux_csr_base [expr {0x2240 + (0x40 * $lane)}]
     add_connection mm_clock_crossing_bridge.m0/$new_mux.csr
@@ -187,6 +283,41 @@ proc configure_hit_type3_splitter {name} {
     add_connection xcvr156_clock.clk_reset/$name.reset
 }
 
+proc configure_hit_type1_splitter {name} {
+    add_instance $name altera_avalon_st_splitter 18.1
+    set_instance_parameter_value $name BITS_PER_SYMBOL 39
+    set_instance_parameter_value $name CHANNEL_WIDTH 4
+    set_instance_parameter_value $name DATA_WIDTH 39
+    set_instance_parameter_value $name ERROR_DESCRIPTOR "tserr"
+    set_instance_parameter_value $name ERROR_WIDTH 1
+    # Qsys interprets MAX_CHANNELS as the largest encoded channel number.
+    # The MTS hit_type1 sideband is 4 bits, so the legal range is 0..15.
+    set_instance_parameter_value $name MAX_CHANNELS 15
+    set_instance_parameter_value $name NUMBER_OF_OUTPUTS 2
+    set_instance_parameter_value $name QUALIFY_VALID_OUT 0
+    set_instance_parameter_value $name READY_LATENCY 0
+    set_instance_parameter_value $name USE_CHANNEL 1
+    set_instance_parameter_value $name USE_DATA 1
+    set_instance_parameter_value $name USE_ERROR 1
+    set_instance_parameter_value $name USE_PACKETS 1
+    set_instance_parameter_value $name USE_READY 1
+    set_instance_parameter_value $name USE_VALID 1
+
+    add_connection lvds_rx_28nm_0.outclock/$name.clk
+    add_connection master_datapath.master_reset/$name.reset
+}
+
+proc configure_hit_type1_null_sink {name} {
+    add_instance $name altera_avalon_st_null_sink 18.1
+    set_instance_parameter_value $name inBitsPerSymbol 39
+    set_instance_parameter_value $name inSymbolsPerBeat 1
+    set_instance_parameter_value $name inUsePackets true
+    set_instance_parameter_value $name inReadyLatency 0
+
+    add_connection lvds_rx_28nm_0.outclock/$name.clk
+    add_connection master_datapath.master_reset/$name.reset
+}
+
 remove_connection_if_present hist_post_splitter_0.out1/hist_post_cdc_0.in
 
 configure_hit_type3_splitter hist_post_lower_splitter_0
@@ -202,6 +333,40 @@ add_connection hist_post_merge_0.out/hist_post_cdc_0.in
 catch {remove_interface hit_type3_lower}
 add_interface hit_type3_lower avalon_streaming start
 set_interface_property hit_type3_lower EXPORT_OF hist_post_lower_splitter_0.out0
+
+# Make the lower MTS stream first-class histogram evidence. The base topology
+# only routed mts_preprocessor_0 through histogram_ingress_bridge_0; the lower
+# half went directly into hit_stack_subsystem_1 and was therefore invisible to
+# the 256-bin rate plot. Insert the lower splitter while the original hit-stack
+# endpoint is still visible; this legacy hit_stack_system composition drops its
+# hit_type_1 boundary from the Qsys scripting API as soon as the original
+# connection is removed. CHANNELS_PER_PORT=0 above is intentional because
+# hit_type1 already carries a global ASIC ID.
+if {[has_instance hist_pre_lower_splitter_0]} {
+    remove_instance hist_pre_lower_splitter_0
+}
+if {[has_instance hist_pre_lower_drain_0]} {
+    remove_instance hist_pre_lower_drain_0
+}
+configure_hit_type1_splitter hist_pre_lower_splitter_0
+configure_hit_type1_null_sink hist_pre_lower_drain_0
+add_connection lvds_rx_28nm_0.outclock/histogram_ingress_bridge_1.clock
+add_connection master_datapath.master_reset/histogram_ingress_bridge_1.reset
+add_connection hist_pre_lower_splitter_0.out0/hit_stack_subsystem_1.hit_type_1
+add_connection mts_preprocessor_1.hit_type1_out/hist_pre_lower_splitter_0.in
+add_connection hist_pre_lower_splitter_0.out1/histogram_ingress_bridge_1.pre_in
+add_connection histogram_ingress_bridge_1.pre_out/hist_pre_lower_drain_0.in
+add_connection histogram_ingress_bridge_1.hist_out/histogram_statistics_0.fill_in_1
+
+add_connection mm_clock_crossing_bridge.m0/histogram_ingress_bridge_1.csr
+set_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_ingress_bridge_1.csr baseAddress 0xac10
+set_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_ingress_bridge_1.csr arbitrationPriority 1
+set_connection_parameter_value mm_clock_crossing_bridge.m0/histogram_ingress_bridge_1.csr defaultConnection false
+
+add_connection master_datapath.master/histogram_ingress_bridge_1.csr
+set_connection_parameter_value master_datapath.master/histogram_ingress_bridge_1.csr baseAddress 0x00020c10
+set_connection_parameter_value master_datapath.master/histogram_ingress_bridge_1.csr arbitrationPriority 1
+set_connection_parameter_value master_datapath.master/histogram_ingress_bridge_1.csr defaultConnection false
 
 # Split the LVDS-side CSR fanout into smaller Avalon-MM bridge islands.
 # This keeps the external SC map unchanged while reducing the generated
@@ -437,6 +602,19 @@ foreach master_start [list mm_clock_crossing_bridge.m0 master_datapath.master] {
         set_connection_parameter_value $upstream_path arbitrationPriority 1
         set_connection_parameter_value $upstream_path defaultConnection false
     }
+}
+
+foreach path {
+    mts_preprocessor_0.hit_type1_out/histogram_ingress_bridge_0.pre_in
+    histogram_ingress_bridge_0.pre_out/hit_stack_subsystem_0.hit_type_1
+    mts_preprocessor_1.hit_type1_out/hist_pre_lower_splitter_0.in
+    hist_pre_lower_splitter_0.out0/hit_stack_subsystem_1.hit_type_1
+    hist_pre_lower_splitter_0.out1/histogram_ingress_bridge_1.pre_in
+    histogram_ingress_bridge_1.pre_out/hist_pre_lower_drain_0.in
+    histogram_ingress_bridge_0.hist_out/histogram_statistics_0.hist_fill_in
+    histogram_ingress_bridge_1.hist_out/histogram_statistics_0.fill_in_1
+} {
+    require_connection $path
 }
 
 save_system [file join $syn_dir scifi_datapath_system_v3_pipe.qsys]

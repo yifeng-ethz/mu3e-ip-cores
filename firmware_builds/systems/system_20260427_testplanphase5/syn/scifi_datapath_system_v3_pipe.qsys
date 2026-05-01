@@ -122,7 +122,7 @@
    {
       datum _sortIndex
       {
-         value = "65";
+         value = "67";
          type = "int";
       }
    }
@@ -130,7 +130,7 @@
    {
       datum _sortIndex
       {
-         value = "66";
+         value = "68";
          type = "int";
       }
    }
@@ -142,11 +142,35 @@
          type = "int";
       }
    }
+   element hist_pre_lower_drain_0
+   {
+      datum _sortIndex
+      {
+         value = "70";
+         type = "int";
+      }
+   }
+   element hist_pre_lower_splitter_0
+   {
+      datum _sortIndex
+      {
+         value = "69";
+         type = "int";
+      }
+   }
    element histogram_ingress_bridge_0
    {
       datum _sortIndex
       {
          value = "54";
+         type = "int";
+      }
+   }
+   element histogram_ingress_bridge_1
+   {
+      datum _sortIndex
+      {
+         value = "58";
          type = "int";
       }
    }
@@ -304,7 +328,7 @@
    {
       datum _sortIndex
       {
-         value = "68";
+         value = "72";
          type = "int";
       }
    }
@@ -312,7 +336,7 @@
    {
       datum _sortIndex
       {
-         value = "75";
+         value = "79";
          type = "int";
       }
    }
@@ -320,7 +344,7 @@
    {
       datum _sortIndex
       {
-         value = "77";
+         value = "81";
          type = "int";
       }
    }
@@ -328,7 +352,7 @@
    {
       datum _sortIndex
       {
-         value = "76";
+         value = "80";
          type = "int";
       }
    }
@@ -336,7 +360,7 @@
    {
       datum _sortIndex
       {
-         value = "67";
+         value = "71";
          type = "int";
       }
    }
@@ -344,7 +368,7 @@
    {
       datum _sortIndex
       {
-         value = "74";
+         value = "78";
          type = "int";
       }
    }
@@ -352,7 +376,7 @@
    {
       datum _sortIndex
       {
-         value = "69";
+         value = "73";
          type = "int";
       }
    }
@@ -360,7 +384,7 @@
    {
       datum _sortIndex
       {
-         value = "70";
+         value = "74";
          type = "int";
       }
    }
@@ -368,7 +392,7 @@
    {
       datum _sortIndex
       {
-         value = "71";
+         value = "75";
          type = "int";
       }
    }
@@ -376,7 +400,7 @@
    {
       datum _sortIndex
       {
-         value = "72";
+         value = "76";
          type = "int";
       }
    }
@@ -384,7 +408,7 @@
    {
       datum _sortIndex
       {
-         value = "73";
+         value = "77";
          type = "int";
       }
    }
@@ -654,7 +678,7 @@
    {
       datum _sortIndex
       {
-         value = "46";
+         value = "57";
          type = "int";
       }
    }
@@ -670,7 +694,7 @@
    {
       datum _sortIndex
       {
-         value = "57";
+         value = "59";
          type = "int";
       }
    }
@@ -678,7 +702,7 @@
    {
       datum _sortIndex
       {
-         value = "58";
+         value = "60";
          type = "int";
       }
    }
@@ -686,7 +710,7 @@
    {
       datum _sortIndex
       {
-         value = "59";
+         value = "61";
          type = "int";
       }
    }
@@ -694,7 +718,7 @@
    {
       datum _sortIndex
       {
-         value = "60";
+         value = "62";
          type = "int";
       }
    }
@@ -702,7 +726,7 @@
    {
       datum _sortIndex
       {
-         value = "61";
+         value = "63";
          type = "int";
       }
    }
@@ -710,7 +734,7 @@
    {
       datum _sortIndex
       {
-         value = "62";
+         value = "64";
          type = "int";
       }
    }
@@ -718,7 +742,7 @@
    {
       datum _sortIndex
       {
-         value = "63";
+         value = "65";
          type = "int";
       }
    }
@@ -726,7 +750,7 @@
    {
       datum _sortIndex
       {
-         value = "64";
+         value = "66";
          type = "int";
       }
    }
@@ -1216,12 +1240,43 @@
   <parameter name="USE_VALID" value="1" />
  </module>
  <module
+   name="hist_pre_lower_drain_0"
+   kind="altera_avalon_st_null_sink"
+   version="18.1"
+   enabled="1">
+  <parameter name="inBitsPerSymbol" value="39" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="inSymbolsPerBeat" value="1" />
+  <parameter name="inUsePackets" value="true" />
+ </module>
+ <module
+   name="hist_pre_lower_splitter_0"
+   kind="altera_avalon_st_splitter"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="39" />
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="39" />
+  <parameter name="ERROR_DESCRIPTOR" value="tserr" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="15" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="2" />
+  <parameter name="QUALIFY_VALID_OUT" value="0" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="1" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
    name="histogram_ingress_bridge_0"
    kind="histogram_ingress_bridge"
    version="26.0.2.425"
    enabled="1">
   <parameter name="BUILD" value="425" />
-  <parameter name="DEFAULT_SELECT_POST" value="1" />
+  <parameter name="DEFAULT_SELECT_POST" value="0" />
   <parameter name="ENABLE_POST_FORWARD" value="0" />
   <parameter name="FILTER_POST_HIT_WORDS" value="1" />
   <parameter name="INSTANCE_ID" value="0" />
@@ -1233,15 +1288,32 @@
   <parameter name="VERSION_PATCH" value="2" />
  </module>
  <module
+   name="histogram_ingress_bridge_1"
+   kind="histogram_ingress_bridge"
+   version="26.0.2.425"
+   enabled="1">
+  <parameter name="BUILD" value="425" />
+  <parameter name="DEFAULT_SELECT_POST" value="0" />
+  <parameter name="ENABLE_POST_FORWARD" value="0" />
+  <parameter name="FILTER_POST_HIT_WORDS" value="1" />
+  <parameter name="INSTANCE_ID" value="1" />
+  <parameter name="IP_UID" value="1212764994" />
+  <parameter name="VERSION_DATE" value="20260425" />
+  <parameter name="VERSION_GIT" value="481097348" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="0" />
+  <parameter name="VERSION_PATCH" value="2" />
+ </module>
+ <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.1.6.429"
+   version="26.1.7.501"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
   <parameter name="AVST_DATA_WIDTH" value="39" />
   <parameter name="AVS_ADDR_WIDTH" value="8" />
-  <parameter name="BUILD" value="429" />
-  <parameter name="CHANNELS_PER_PORT" value="32" />
+  <parameter name="BUILD" value="501" />
+  <parameter name="CHANNELS_PER_PORT" value="0" />
   <parameter name="COAL_QUEUE_DEPTH" value="256" />
   <parameter name="DEBUG" value="0" />
   <parameter name="DEF_BIN_WIDTH" value="1" />
@@ -1258,18 +1330,18 @@
   <parameter name="MAX_COUNT_BITS" value="32" />
   <parameter name="N_BINS" value="256" />
   <parameter name="N_DEBUG_INTERFACE" value="6" />
-  <parameter name="N_PORTS" value="1" />
+  <parameter name="N_PORTS" value="2" />
   <parameter name="SAR_KEY_WIDTH" value="8" />
   <parameter name="SAR_TICK_WIDTH" value="16" />
   <parameter name="SNOOP_EN" value="false" />
   <parameter name="UPDATE_KEY_BIT_HI" value="21" />
   <parameter name="UPDATE_KEY_BIT_LO" value="17" />
   <parameter name="UPDATE_KEY_REPRESENTATION" value="SIGNED" />
-  <parameter name="VERSION_DATE" value="20260429" />
+  <parameter name="VERSION_DATE" value="20260501" />
   <parameter name="VERSION_GIT" value="375124078" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="6" />
+  <parameter name="VERSION_PATCH" value="7" />
  </module>
  <module
    name="hit_stack_subsystem_0"
@@ -1385,7 +1457,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="11" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1457,7 +1529,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="13" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1493,7 +1565,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1511,7 +1583,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="5" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1529,7 +1601,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1547,7 +1619,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1565,7 +1637,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1746,9 +1818,17 @@
  <module
    name="mutrig_injector_0"
    kind="mutrig_injector_multiheader"
-   version="26.0.2.429"
+   version="26.0.3.429"
    enabled="1">
+  <parameter name="BUILD" value="429" />
   <parameter name="HEADERINFO_CHANNEL_W" value="4" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1296649802" />
+  <parameter name="VERSION_DATE" value="20260429" />
+  <parameter name="VERSION_GIT" value="1385024213" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="0" />
+  <parameter name="VERSION_PATCH" value="3" />
  </module>
  <module
    name="mutrig_lane_source_mux_0"
@@ -2115,6 +2195,15 @@
    end="histogram_ingress_bridge_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0c00" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_hist.m0"
+   end="histogram_ingress_bridge_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0c10" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2526,15 +2615,6 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
-   end="mutrig_injector_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00022000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
    end="mutrig_datapath_subsystem_7.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00017900" />
@@ -2601,6 +2681,15 @@
    end="mutrig_datapath_subsystem_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00010900" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_injector_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00022000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2857,6 +2946,11 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="histogram_ingress_bridge_1.hist_out"
+   end="histogram_statistics_0.fill_in_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="histogram_ingress_bridge_0.hist_out"
    end="histogram_statistics_0.hist_fill_in" />
  <connection
@@ -2903,7 +2997,7 @@
    kind="avalon_streaming"
    version="18.1"
    start="mts_preprocessor_1.hit_type1_out"
-   end="hit_stack_subsystem_1.hit_type_1" />
+   end="hist_pre_lower_splitter_0.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -2952,6 +3046,11 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="hist_pre_lower_splitter_0.out0"
+   end="hit_stack_subsystem_1.hit_type_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="emulator_ctrl_splitter.out1"
    end="emulator_mutrig_1.ctrl" />
  <connection
@@ -2964,6 +3063,11 @@
    version="18.1"
    start="hist_post_lower_splitter_0.out1"
    end="hist_post_merge_0.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_pre_lower_splitter_0.out1"
+   end="histogram_ingress_bridge_1.pre_in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3074,6 +3178,11 @@
    version="18.1"
    start="histogram_ingress_bridge_0.pre_out"
    end="hit_stack_subsystem_0.hit_type_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="histogram_ingress_bridge_1.pre_out"
+   end="hist_pre_lower_drain_0.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3343,6 +3452,16 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="hist_pre_lower_splitter_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_pre_lower_drain_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="mm_pipeline_lvds_csr_low.clk" />
  <connection
    kind="clock"
@@ -3408,12 +3527,12 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
-   end="dbg_mm2runctrl_0.clock_interface" />
+   end="histogram_ingress_bridge_1.clock" />
  <connection
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
-   end="mutrig_injector_0.clock_interface" />
+   end="dbg_mm2runctrl_0.clock_interface" />
  <connection
    kind="clock"
    version="18.1"
@@ -3424,6 +3543,11 @@
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
    end="mts_preprocessor_0.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="mutrig_injector_0.clock_interface" />
  <connection
    kind="clock"
    version="18.1"
@@ -3879,6 +4003,21 @@
    kind="reset"
    version="18.1"
    start="master_datapath.master_reset"
+   end="hist_pre_lower_splitter_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="hist_pre_lower_drain_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="histogram_ingress_bridge_1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
    end="mm_pipeline_lvds_csr_low.reset" />
  <connection
    kind="reset"
@@ -3939,17 +4078,17 @@
    kind="reset"
    version="18.1"
    start="master_datapath.master_reset"
-   end="mutrig_injector_0.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
    end="mts_preprocessor_1.reset_interface" />
  <connection
    kind="reset"
    version="18.1"
    start="master_datapath.master_reset"
    end="mts_preprocessor_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="mutrig_injector_0.reset_interface" />
  <connection
    kind="reset"
    version="18.1"

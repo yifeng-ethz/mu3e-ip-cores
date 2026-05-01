@@ -17,6 +17,48 @@ Class legend:
 | [P6-BUG-003-H](#p6-bug-003-h-mu3e-online-dma-tools-are-not-closure-quality-evidence) | H | fixed by repo-owned probe for DMA | 2026-04-30 | `swb_dmatest`, `rw`, MIDAS, and libmudaq-backed tools hide register and cleanup boundaries; closure now uses direct-MMIO tools under `tools/`. |
 | [P6-BUG-004-H](#p6-bug-004-h-frame-boundary-signaltap-window-is-not-yet-time-aligned-across-rbcam-and-feb-frame-assembly) | H | open; zero-VCO evidence invalidated | 2026-04-30 | Lane6 STP captures show FEB type-3 hit frames under a `vco000` label, but `vnvcodelay=0` should produce no hits; rerun with nonzero locked settings and a time-aligned RBCAM/FEB capture. |
 | [P6-BUG-005-R](#p6-bug-005-r-swb-host-dma-now-has-raw-musip-payload-but-not-decoded-feb-hit-frames) | R | open; raw DMA partial pass only | 2026-04-30 | Fixed4 SWB image writes raw 256-bit stream-datagen payload to host DMA, but time-datagen is still empty and no real FEB-link/legacy-frame disk artifact exists. |
+| [P6-BUG-006-H](#p6-bug-006-h-1-s-rate-plot-collapsed-to-bin-0-because-the-observation-path-was-wrong) | H | source patched; live rerun required | 2026-05-01 | The required 1 s rate plot was scientifically rendered but all 647,881 hits landed in bin 0; root cause is a wrong histogram observation contract, not a pass. |
+
+## 2026-05-01
+
+### P6-BUG-006-H: 1 s rate plot collapsed to bin 0 because the observation path was wrong
+
+- First seen in:
+  `phase5_rate_per_channel_1s_20260501.csv` and
+  `reports/assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png`.
+- Symptom:
+  - The required 1 s, 256-bin rate artifact was rendered, but visual
+    inspection shows all `647881` hits in bin 0, one active ASIC aggregate,
+    and zero counts in the other 255 bins.
+  - That shape is physically wrong for an all-real 256-channel 100 kHz
+    stimulus. A working all-lane rate plot should distribute hits across the
+    selected `{ASIC, channel}` bins, and a channel mask should remove only the
+    masked channels.
+  - The HTML report now classifies this artifact as `ANOMALY`, not `PASS`.
+- Root cause:
+  mixed harness/firmware observation contract:
+  - the live runner could select the post-hit-stack `hit_type3` stream while
+    the toolkit rate preset expects the pre-RBCAM `hit_type1` key
+    `{ASIC[3:0], channel[4:0]}`;
+  - the lower MTS stream was not a first-class pre-RBCAM histogram source, so
+    lower ASICs were not observable in the same 256-bin rate artifact;
+  - slow SC per-bin reads can also miss the ping-pong histogram bin bank, so a
+    nonzero last-interval counter with zero bins is a readout anomaly, not a
+    data-path pass.
+- Fix status:
+  - source patched in `scifi_datapath_system_v3_pipe.tcl`: bridge 0 defaults
+    to pre-RBCAM, `histogram_statistics_0` has two fill inputs with
+    `CHANNELS_PER_PORT=0` global keys, and `hist_pre_lower_splitter_0` feeds
+    both `hit_stack_subsystem_1` and `histogram_ingress_bridge_1`.
+  - `histogram_ingress_bridge_1.pre_out` is drained through an Avalon-ST null
+    sink so the lower tap copy cannot backpressure MTS.
+  - Clean Qsys regeneration passes, and authentic integration simulation
+    passes with all eight lanes visible: 20 MTS channel-16 payload hits and 20
+    histogram flushes per lane, zero histogram drops.
+  - live closure remains open. Rerun the board with the toolkit rate preset,
+    1 s interval, burst/frozen bin readout, and a deliberate mask sanity check.
+    Accept the artifact only after the plotted distribution matches the
+    selected channels and all active ASICs.
 
 ## 2026-04-30
 

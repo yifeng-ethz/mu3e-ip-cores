@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -18,7 +20,12 @@ BOARD_TEST_DIR = SCRIPT_DIR.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from check_ip_metadata import _default_sc_tool  # noqa: E402
+from check_ip_metadata import (  # noqa: E402
+    _default_jdi,
+    _default_project_dir,
+    _default_sc_tool,
+    _default_system_console,
+)
 from check_run_control import default_rc_tool  # noqa: E402
 from probe_phase4_stage_counters import (  # noqa: E402
     MTS_BASE_WORDS,
@@ -42,6 +49,7 @@ from run_phase4_emulator import (  # noqa: E402
     EMU_STRIDE_WORD,
     HIST_BIN_BASE_WORD,
     HIST_CSR_BASE_WORD,
+    HIST_INGRESS_BASE_WORD,
     HIST_KEY_LOC_CHANNEL_POST,
     LVDS_CSR_BASE_WORD,
     SOURCE_MUX_BASE_WORD,
@@ -51,11 +59,11 @@ from run_phase4_emulator import (  # noqa: E402
     SOURCE_MUX_STRIDE_WORD,
     clear_histogram,
     configure_lvds_lanes,
+    decode_histogram_ingress_status,
     fmt_hex,
     rc_send,
     sc_read,
     sc_write,
-    select_histogram_ingress_post,
     select_lane_sources,
 )
 
@@ -120,7 +128,7 @@ EMU_HIT_MODE = {
 }
 HIST_PROFILE = {
     "rate": {
-        "description": "post-hit channel/rate histogram",
+        "description": "pre-RBCAM hit_type1 global channel/rate histogram",
         "toolkit_preset_id": "rate",
         "left_bound": 0,
         "right_bound": 0xFF,
@@ -147,6 +155,36 @@ HIST_PROFILE = {
         "key_loc": HIST_KEY_LOC_CHANNEL_POST,
     },
 }
+
+
+def select_histogram_ingress_source(sc_tool: Path, link: int, *, select_post: bool) -> dict[str, int]:
+    """Select the histogram ingress bridge source and wait for an idle switch.
+
+    Rate plots use the pre-RBCAM MTS hit_type1 stream because the toolkit rate
+    preset extracts data[38:30] = {ASIC,channel}. The post-hit-stack stream is
+    packetized hit_type3; using the rate preset there collapses valid hits into
+    meaningless bins.
+    """
+    target = 1 if select_post else 0
+    sc_write(sc_tool, link, HIST_INGRESS_BASE_WORD + 2, [target])
+    last_status = 0
+    for _ in range(50):
+        last_status = sc_read(sc_tool, link, HIST_INGRESS_BASE_WORD + 3)[0]
+        decoded = decode_histogram_ingress_status(last_status)
+        if (
+            decoded["live_select_post"] == target
+            and decoded["requested_select_post"] == target
+            and decoded["switch_pending"] == 0
+        ):
+            decoded["selected_source"] = "post" if select_post else "pre"
+            return decoded
+        time.sleep(0.01)
+    decoded = decode_histogram_ingress_status(last_status)
+    raise RuntimeError(
+        "histogram ingress bridge did not switch to requested stream: "
+        f"target={'post' if select_post else 'pre'} "
+        f"status=0x{last_status:08X} decoded={decoded}"
+    )
 
 
 def default_output() -> Path:
@@ -634,12 +672,113 @@ def run_injector_window(args: argparse.Namespace, pulse_interval: int) -> dict[s
 
     write_injector_mode(args, mode_value)
     actions.append({"action": "set_mode", "mode": mode_value})
-    time.sleep(args.duration_ms / 1000.0)
+    jtag_hist_dump = run_jtag_hist_dump(args)
+    remaining_s = max(0.0, (args.duration_ms / 1000.0) - float(jtag_hist_dump.get("elapsed_s", 0.0) or 0.0))
+    if remaining_s > 0:
+        time.sleep(remaining_s)
     injector_during = read_injector_regs_for_args(args)
     sample, sample_timing = timed_stage_snapshot(args.sc_tool, args.link)
     write_injector_mode(args, 0)
     actions.append({"action": "force_off", "mode": 0})
-    return {"actions": actions, "injector_during": injector_during, "sample": sample, "sample_timing": sample_timing}
+    return {
+        "actions": actions,
+        "injector_during": injector_during,
+        "sample": sample,
+        "sample_timing": sample_timing,
+        "jtag_hist_dump": jtag_hist_dump,
+    }
+
+
+def run_jtag_hist_dump(args: argparse.Namespace) -> dict[str, Any]:
+    if args.jtag_hist_csv is None:
+        return {"enabled": False}
+
+    profile = args.jtag_hist_profile
+    if profile is None:
+        profile = "rate" if args.hist_profile == "rate" else "delay"
+
+    csv_path = args.jtag_hist_csv.resolve()
+    log_path = (args.jtag_hist_log or csv_path.with_suffix(".log")).resolve()
+    csv_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    argv = [
+        str(args.system_console),
+        "-cli",
+        "-disable_readline",
+        "-disable_timeout",
+        f"--project_dir={args.jtag_project_dir}",
+        f"--jdi={args.jtag_jdi}",
+        f"--script={args.jtag_hist_script}",
+        "--",
+        "--profile",
+        profile,
+        "--out",
+        str(csv_path),
+    ]
+    if args.jtag_hist_wait_ms is not None:
+        argv.extend(["--wait-ms", str(args.jtag_hist_wait_ms)])
+    if args.jtag_hist_lane_filter is not None:
+        argv.extend(["--lane-filter", str(args.jtag_hist_lane_filter)])
+
+    env = os.environ.copy()
+    if args.jtag_hist_display:
+        env["DISPLAY"] = args.jtag_hist_display
+
+    started = dt.datetime.now().isoformat(timespec="seconds")
+    start_s = time.monotonic()
+    try:
+        proc = subprocess.run(
+            argv,
+            cwd=Path.cwd(),
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=args.jtag_hist_timeout_s,
+            check=False,
+        )
+        output = proc.stdout or ""
+        rc = proc.returncode
+        timed_out = False
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout or ""
+        rc = 124
+        timed_out = True
+    elapsed_s = time.monotonic() - start_s
+
+    log_path.write_text(
+        json.dumps(
+            {
+                "argv": argv,
+                "elapsed_s": elapsed_s,
+                "returncode": rc,
+                "started": started,
+                "timed_out": timed_out,
+                "timeout_s": args.jtag_hist_timeout_s,
+            },
+            sort_keys=True,
+        )
+        + "\n\n"
+        + output,
+        encoding="utf-8",
+    )
+
+    line_count = 0
+    if csv_path.exists():
+        with csv_path.open(encoding="utf-8") as handle:
+            line_count = sum(1 for _ in handle)
+    return {
+        "enabled": True,
+        "profile": profile,
+        "csv": str(csv_path),
+        "log": str(log_path),
+        "returncode": rc,
+        "timed_out": timed_out,
+        "elapsed_s": elapsed_s,
+        "csv_exists": csv_path.exists(),
+        "csv_line_count": line_count,
+    }
 
 
 def read_injector_regs(sc_tool: Path, link: int, control_offset: int = 0) -> dict[str, int]:
@@ -717,7 +856,11 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
     source_rows = select_lane_sources(args.sc_tool, args.link, selected_source_mask, clear_counters=True)
     histogram_config = configure_histogram_for_args(args)
     clear_histogram(args.sc_tool, args.link)
-    ingress_status = select_histogram_ingress_post(args.sc_tool, args.link)
+    ingress_status = select_histogram_ingress_source(
+        args.sc_tool,
+        args.link,
+        select_post=(args.hist_ingress_source == "post"),
+    )
     emu_config = configure_emulators_for_injector(args)
     injector_config = configure_injector(args, pulse_interval)
     debug_overrides = apply_debug_overrides(args)
@@ -828,6 +971,7 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         "hist_bins": hist_bins,
         "hist_bin_summary": hist_bin_summary,
         "injector_actions": {"actions": inject_window["actions"]},
+        "jtag_hist_dump": inject_window.get("jtag_hist_dump", {"enabled": False}),
         "injector_during": inject_window["injector_during"],
         "injector_after": injector_after,
         "timing": {
@@ -864,12 +1008,14 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- LVDS SVD snapshot: `{'yes' if args.capture_lvds else 'no'}`",
         f"- LVDS per-lane DPA unlock reads: `{'yes' if args.read_lvds_dpa_unlocks else 'no'}`",
         f"- Histogram bin dump: `{'yes' if args.dump_hist_bins else 'no'}`",
+        f"- JTAG histogram artifact dump: `{'yes' if args.jtag_hist_csv is not None else 'no'}`",
         f"- Histogram bin read chunk/delay: `{args.hist_bin_read_chunk_words}` words / `{args.hist_bin_read_delay_ms}` ms",
         f"- Active emulator lanes: `{fmt_hex(args.active_lanes_mask)}`",
         f"- Inject mode: `{args.inject_mode}`",
         f"- Injector layout: `{getattr(args, 'injector_layout', {}).get('name', 'unknown')}`",
         f"- Injector base/control offset: `{fmt_hex(INJECTOR_BASE_WORD)}` / `{getattr(args, 'injector_layout', {}).get('control_offset', 'unknown')}` words",
         f"- Histogram profile: `{args.hist_profile}`",
+        f"- Histogram ingress source: `{args.hist_ingress_source}`",
         f"- Rate tolerance: `{args.rate_tolerance_pct:.3f}%`",
         f"- Real hits per lane for rate expectation: `{getattr(args, 'real_hits_per_lane', 1)}`",
         f"- Histogram filter enable: `{getattr(args, 'hist_filter_enable', False)}`",
@@ -936,6 +1082,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
                 f"- Histogram rate counter source: `{summary.get('hist_rate_counter_source', 'live_delta')}`",
                 f"- Histogram live delta: `{summary.get('hist_live_total_delta', 0)}` / dropped `{summary.get('hist_live_drop_delta', 0)}`",
                 f"- Histogram last interval: `{summary.get('hist_last_interval_total', 0)}` / dropped `{summary.get('hist_last_interval_dropped', 0)}`",
+                f"- JTAG histogram artifact: `{case.get('jtag_hist_dump', {'enabled': False})}`",
                 f"- Rate expected/tolerance/error: `{summary.get('rate_expected_hits', 0)}` / `±{summary.get('rate_tolerance_hits', 0)}` / `{summary.get('rate_error_hits', 0)}` hits",
                 f"- Post-end clean: `{'yes' if summary.get('post_end_clean', False) else 'no'}`",
                 f"- LVDS error delta lanes: `{summary.get('lvds_error_delta_lanes', 'n/a')}`",
@@ -1029,10 +1176,15 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "dump_hist_bins": args.dump_hist_bins,
             "hist_bin_read_chunk_words": args.hist_bin_read_chunk_words,
             "hist_bin_read_delay_ms": args.hist_bin_read_delay_ms,
+            "jtag_hist_csv": str(args.jtag_hist_csv) if args.jtag_hist_csv else None,
+            "jtag_hist_profile": args.jtag_hist_profile,
+            "jtag_hist_wait_ms": args.jtag_hist_wait_ms,
+            "jtag_hist_lane_filter": args.jtag_hist_lane_filter,
             "inject_mode": args.inject_mode,
             "duration_ms": args.duration_ms,
             "pulse_intervals": args.pulse_intervals,
             "hist_profile": args.hist_profile,
+            "hist_ingress_source": args.hist_ingress_source,
             "rate_tolerance_pct": args.rate_tolerance_pct,
             "real_hits_per_lane": getattr(args, "real_hits_per_lane", 1),
             "hist_filter_enable": getattr(args, "hist_filter_enable", False),
@@ -1078,6 +1230,22 @@ def main() -> int:
     parser.add_argument("--require-lvds-snapshot", action="store_true")
     parser.add_argument("--dump-hist-bins", action="store_true")
     parser.add_argument(
+        "--jtag-hist-csv",
+        type=Path,
+        default=None,
+        help="Optional artifact-grade System Console/JTAG histogram CSV captured while injector pulses are active.",
+    )
+    parser.add_argument("--jtag-hist-log", type=Path, default=None)
+    parser.add_argument("--jtag-hist-script", type=Path, default=SCRIPT_DIR / "phase5_histogram_bin_dump.tcl")
+    parser.add_argument("--jtag-hist-profile", choices=("rate", "delay", "header"), default=None)
+    parser.add_argument("--jtag-hist-wait-ms", type=int, default=None)
+    parser.add_argument("--jtag-hist-lane-filter", type=int, default=None)
+    parser.add_argument("--jtag-hist-timeout-s", type=float, default=60.0)
+    parser.add_argument("--jtag-hist-display", default=os.environ.get("DISPLAY"))
+    parser.add_argument("--system-console", type=Path, default=_default_system_console())
+    parser.add_argument("--jtag-jdi", type=Path, default=_default_jdi())
+    parser.add_argument("--jtag-project-dir", type=Path, default=_default_project_dir())
+    parser.add_argument(
         "--hist-bin-read-chunk-words",
         type=int,
         default=1,
@@ -1097,6 +1265,12 @@ def main() -> int:
     )
     parser.add_argument("--inject-mode", choices=tuple(INJECT_MODE), default="periodic")
     parser.add_argument("--hist-profile", choices=tuple(HIST_PROFILE), default="rate")
+    parser.add_argument(
+        "--hist-ingress-source",
+        choices=("pre", "post"),
+        default="pre",
+        help="Source for histogram_ingress_bridge_0. Rate artifacts require pre so data[38:30] is hit_type1 {ASIC,channel}.",
+    )
     parser.add_argument("--rate-tolerance-pct", type=float, default=1.0)
     parser.add_argument(
         "--real-hits-per-lane",
@@ -1149,6 +1323,17 @@ def main() -> int:
         parser.error("--hist-bin-read-delay-ms must be non-negative")
     if args.hist_bin_read_chunk_words > 1 and not args.unsafe_bulk_hist_bin_read:
         parser.error("histogram bin bulk reads require --unsafe-bulk-hist-bin-read")
+    if args.jtag_hist_csv is not None:
+        if args.jtag_hist_timeout_s <= 0:
+            parser.error("--jtag-hist-timeout-s must be positive")
+        if args.jtag_hist_wait_ms is not None and args.jtag_hist_wait_ms < 0:
+            parser.error("--jtag-hist-wait-ms must be non-negative")
+        if args.jtag_hist_lane_filter is not None and not (0 <= args.jtag_hist_lane_filter <= 7):
+            parser.error("--jtag-hist-lane-filter must be 0..7")
+        for attr in ("system_console", "jtag_jdi", "jtag_project_dir", "jtag_hist_script"):
+            path = getattr(args, attr)
+            if not Path(path).exists():
+                parser.error(f"--{attr.replace('_', '-')} path does not exist: {path}")
 
     timestamp = dt.datetime.now().isoformat(timespec="seconds")
     output = args.output or default_output()
