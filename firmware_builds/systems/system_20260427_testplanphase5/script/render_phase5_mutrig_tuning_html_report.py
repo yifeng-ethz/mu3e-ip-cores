@@ -23,6 +23,7 @@ HIGHCYCLE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_highcycle_rate_sweep_20
 HIGHCYCLE_STATS = HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_stats.tsv"
 MASK_RESPONSE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_mask_response_seed20260501"
 MASK_RESPONSE_STATS = MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_bar_stats.tsv"
+MASK_RESPONSE_RAW_CHECK = REPORT_DIR / "phase6_mask_response_raw_mask_check_seed20260501.tsv"
 REQUIRED_MONITOR_MS = 1000
 
 
@@ -958,6 +959,52 @@ def mask_response_rows() -> str:
     return "\n".join(rows)
 
 
+def mask_response_raw_check() -> list[dict[str, str]]:
+    if not MASK_RESPONSE_RAW_CHECK.exists():
+        return []
+    with MASK_RESPONSE_RAW_CHECK.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle, delimiter="\t"))
+
+
+def mask_response_raw_summary() -> str:
+    rows = mask_response_raw_check()
+    if not rows:
+        return "<p class=\"missing-text\">Raw mask-check TSV is missing.</p>"
+    exact = sum(1 for row in rows if row.get("pass_exact_nonzero") == "1")
+    gated = sum(1 for row in rows if row.get("pass_50k_gate") == "1")
+    max_off = max((int(row.get("max_off_count", "0") or 0) for row in rows), default=0)
+    min_on = min((int(row.get("min_on_count", "0") or 0) for row in rows), default=0)
+    path_link = f'<a href="{esc(rel(MASK_RESPONSE_RAW_CHECK))}">{esc(MASK_RESPONSE_RAW_CHECK.name)}</a>'
+    klass = "pass" if exact == len(rows) and gated == len(rows) else "fail"
+    return (
+        f"<p><span class=\"badge {klass}\">RAW CHECK</span> {exact}/{len(rows)} cases match the "
+        f"intended nonzero channel set exactly, {gated}/{len(rows)} pass the 50k-count on-bin gate, "
+        f"max off-bin count is {max_off}, and min on-bin count is {min_on}. Raw TSV: {path_link}.</p>"
+    )
+
+
+def mask_response_raw_rows() -> str:
+    rows = []
+    for row in mask_response_raw_check():
+        status = "PASS" if row.get("pass_exact_nonzero") == "1" and row.get("pass_50k_gate") == "1" else "FAIL"
+        klass = "pass" if status == "PASS" else "fail"
+        rows.append(
+            "<tr>"
+            f"<td>{esc(row.get('kind', '-'))}</td>"
+            f"<td>{esc(row.get('case', '-'))}</td>"
+            f"<td>{fmt_int(row.get('expected_on'))}</td>"
+            f"<td>{fmt_int(row.get('observed_nonzero'))}</td>"
+            f"<td>{fmt_int(row.get('observed_ge_50k'))}</td>"
+            f"<td>{fmt_int(row.get('max_off_count'))}</td>"
+            f"<td>{fmt_int(row.get('min_on_count'))}</td>"
+            f"<td><span class=\"badge {klass}\">{status}</span></td>"
+            "</tr>"
+        )
+    if not rows:
+        return "<tr><td colspan=\"8\">Raw mask-check rows missing.</td></tr>"
+    return "\n".join(rows)
+
+
 def evidence_rows() -> str:
     rows = []
     for title, kind, filename, note in EVIDENCE:
@@ -1474,6 +1521,7 @@ def write_html() -> None:
     <div class="plot-grid">
 {mask_response_figures()}
     </div>
+{mask_response_raw_summary()}
     <table>
       <thead>
         <tr>
@@ -1489,6 +1537,23 @@ def write_html() -> None:
       </thead>
       <tbody>
 {mask_response_rows()}
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Case</th>
+          <th>Expected On</th>
+          <th>Observed Nonzero</th>
+          <th>Observed >=50k</th>
+          <th>Max Off Count</th>
+          <th>Min On Count</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+{mask_response_raw_rows()}
       </tbody>
     </table>
 

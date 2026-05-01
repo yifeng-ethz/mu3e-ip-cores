@@ -168,6 +168,10 @@ seeded random sweep passed the expected source behavior:
   `0-8-0` flush after each reload, remove the repeated per-ASIC channel
   pattern. The enabled-channel totals scale with the requested `11..22`
   channels per ASIC and show zero histogram drops.
+- The raw CSV check must compare the observed nonzero global-channel set
+  against the intended mask. For the seeded sweep, all `16/16` cases matched
+  exactly, every intended off-bin stayed at zero, and every intended on-bin was
+  above the 50k-count sanity gate.
 
 This is a source-rate and masking check only. The same high-rate cases can
 still expose the separate MTS/RBCAM timestamp/ring-buffer blocker.

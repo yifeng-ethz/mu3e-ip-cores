@@ -117,7 +117,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-05-01T11:17:43 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-05-01T11:30:45 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -491,6 +491,7 @@
 <figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png" alt="ASIC LVDS mask response: whole 32-channel ASIC blocks vanish when the lane is masked."></a><figcaption>ASIC LVDS mask response: whole 32-channel ASIC blocks vanish when the lane is masked.</figcaption></figure>
 <figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png" alt="Channel mask response: the same random 32-bit channel mask repeats across all eight ASICs."></a><figcaption>Channel mask response: the same random 32-bit channel mask repeats across all eight ASICs.</figcaption></figure>
     </div>
+<p><span class="badge pass">RAW CHECK</span> 16/16 cases match the intended nonzero channel set exactly, 16/16 pass the 50k-count on-bin gate, max off-bin count is 0, and min on-bin count is 71284. Raw TSV: <a href="phase6_mask_response_raw_mask_check_seed20260501.tsv">phase6_mask_response_raw_mask_check_seed20260501.tsv</a>.</p>
     <table>
       <thead>
         <tr>
@@ -521,6 +522,38 @@
 <tr><td>channel_mask</td><td>06</td><td>10.383</td><td>40.560</td><td>104</td><td>99.840</td><td>1.2089</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case06_ph05_bar.png">phase6_mask_response_channel_mask_case06_ph05_bar.png</a></td></tr>
 <tr><td>channel_mask</td><td>07</td><td>11.981</td><td>46.800</td><td>120</td><td>99.841</td><td>1.0646</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case07_ph05_bar.png">phase6_mask_response_channel_mask_case07_ph05_bar.png</a></td></tr>
 <tr><td>channel_mask</td><td>08</td><td>15.974</td><td>62.400</td><td>160</td><td>99.840</td><td>0.7746</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case08_ph05_bar.png">phase6_mask_response_channel_mask_case08_ph05_bar.png</a></td></tr>
+      </tbody>
+    </table>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Case</th>
+          <th>Expected On</th>
+          <th>Observed Nonzero</th>
+          <th>Observed >=50k</th>
+          <th>Max Off Count</th>
+          <th>Min On Count</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>asic_lvds</td><td>01</td><td>64</td><td>64</td><td>64</td><td>0</td><td>99,841</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>02</td><td>192</td><td>192</td><td>192</td><td>0</td><td>85,270</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>03</td><td>64</td><td>64</td><td>64</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>04</td><td>160</td><td>160</td><td>160</td><td>0</td><td>87,200</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>05</td><td>32</td><td>32</td><td>32</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>06</td><td>160</td><td>160</td><td>160</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>07</td><td>256</td><td>256</td><td>256</td><td>0</td><td>71,284</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>asic_lvds</td><td>08</td><td>32</td><td>32</td><td>32</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>01</td><td>176</td><td>176</td><td>176</td><td>0</td><td>99,839</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>02</td><td>120</td><td>120</td><td>120</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>03</td><td>152</td><td>152</td><td>152</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>04</td><td>88</td><td>88</td><td>88</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>05</td><td>160</td><td>160</td><td>160</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>06</td><td>104</td><td>104</td><td>104</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>07</td><td>120</td><td>120</td><td>120</td><td>0</td><td>99,841</td><td><span class="badge pass">PASS</span></td></tr>
+<tr><td>channel_mask</td><td>08</td><td>160</td><td>160</td><td>160</td><td>0</td><td>99,840</td><td><span class="badge pass">PASS</span></td></tr>
       </tbody>
     </table>
 
