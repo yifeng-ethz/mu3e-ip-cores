@@ -117,7 +117,7 @@
 <body>
   <header>
     <h1>Phase-6 MuTRiG/FEB Closure Report</h1>
-    <div>Generated 2026-05-01T13:49:19 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-05-01T17:15:39 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -138,7 +138,7 @@
     <h2>Current Compile Checkpoint</h2>
     <p>
       This report is the clean 2026-05-01 checkpoint for the
-      <code>histogram_statistics_v2 26.1.9</code> delay-observability update.
+      <code>histogram_statistics_v2 26.1.10</code> delay-observability update.
       The new positive histogram mode <code>mode=+1</code> keeps the normal
       hit_type1 path and ASIC/channel filter while plotting
       <code>local_run_counter[12:0] - data[29:17]</code>. The old negative
@@ -161,11 +161,52 @@
       <tbody>
 <tr><td>RTL sim</td><td>histogram_statistics_v2 B12 normal-hit delay TB<div class="note">Standalone Questa regression includes B12 mode=+1 delay-T coverage.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../../../../histogram_statistics/tb/transcript">transcript</a></td><td>-</td><td>-</td></tr>
 <tr><td>Static</td><td>histogram_statistics_v2 qverify static screen<div class="note">Lint/CDC/RDC screen used the maintained v2 filelist and Intel altera_mf pre-do.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../../../../../../../../../../data3/yifeng/mu3e_ip_dev/qverify/histogram_statistics_20260501/histogram_v2_static_release_26_1_9_delay_t_clean/questa_static_screen.log">questa_static_screen.log</a></td><td>-</td><td>-</td></tr>
-<tr><td>IP syn</td><td>histogram_statistics_v2 standalone Quartus<div class="note">Standalone Arria V wrapper at 7.273 ns; current worst setup is reported explicitly.</div></td><td><span class="badge warn">WARN</span></td><td><span class="mini-badge fail">-0.051 ns</span></td><td><span class="mini-badge pass">+0.146 ns</span></td><td><a href="../../../../histogram_statistics/syn/quartus/histogram_statistics_v2_standalone_compile_26_1_9_delay_t_20260501.log">histogram_statistics_v2_standalone_compile_26_1_9_delay_t_20260501.log</a></td><td><a href="../../../../histogram_statistics/syn/quartus/output_files/histogram_statistics_v2_standalone.fit.summary">histogram_statistics_v2_standalone.fit.summary</a></td><td>-</td></tr>
+<tr><td>IP syn</td><td>histogram_statistics_v2 standalone Quartus<div class="note">Standalone Arria V wrapper at 7.273 ns; current worst setup is reported explicitly.</div></td><td><span class="badge warn">WARN</span></td><td><span class="mini-badge fail">-0.343 ns</span></td><td><span class="mini-badge pass">+0.144 ns</span></td><td><a href="../../../../histogram_statistics/syn/quartus/histogram_statistics_v2_standalone_compile_26_1_9_delay_t_20260501.log">histogram_statistics_v2_standalone_compile_26_1_9_delay_t_20260501.log</a></td><td><a href="../../../../histogram_statistics/syn/quartus/output_files/histogram_statistics_v2_standalone.fit.summary">histogram_statistics_v2_standalone.fit.summary</a></td><td>-</td></tr>
 <tr><td>Qsys</td><td>scifi_datapath_system_v3_pipe Qsys script<div class="note">Source script restamped histogram_statistics_0 to 26.1.9 and preserved debug_ts wiring.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../syn/logs/qsys_script_scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.log">qsys_script_scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.log</a></td><td>-</td><td>-</td></tr>
 <tr><td>Qsys</td><td>scifi_datapath_system_v3_pipe Qsys generate<div class="note">Pipe synthesis output resolves histogram_statistics_v2 26.1.9.501.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../syn/logs/scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log">scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log</a></td><td>-</td><td>-</td></tr>
 <tr><td>Qsys</td><td>feb_system_v3_pipe Qsys generate<div class="note">Parent FEB generated HDL was refreshed after the pipe child system.</div></td><td><span class="badge pass">PASS</span></td><td>-</td><td>-</td><td><a href="../syn/logs/feb_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log">feb_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log</a></td><td>-</td><td>-</td></tr>
 <tr><td>FEB compile</td><td>FEB top_nostp_pipe Quartus compile<div class="note">Full FEB build consuming histogram_statistics_v2 26.1.9.501.</div></td><td><span class="badge pass">PASS</span></td><td><span class="mini-badge pass">+0.055 ns</span></td><td><span class="mini-badge pass">+0.068 ns</span></td><td><a href="../syn/logs/quartus_compile_top_nostp_pipe_hist26_1_9_delay_t_20260501.console.log">quartus_compile_top_nostp_pipe_hist26_1_9_delay_t_20260501.console.log</a></td><td><a href="../syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.fit.summary">top_nostp_pipe.fit.summary</a></td><td><a href="../syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.sof">top_nostp_pipe.sof</a><div class="rate">sha256 1ebe635637412f9c...</div></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Simulation Regression Checkpoint</h2>
+    <p>
+      The normal-hit delay mode now has both standalone and authentic generated
+      datapath simulation evidence. The FEB datapath TB uses the generated
+      <code>histogram_statistics_0</code> instance, not only the sidecar
+      wrapper, and requires the run-control sink to see <code>RUN_SYNC</code>
+      before the ping-pong interval snapshot is read.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Gate</th>
+          <th>Status</th>
+          <th>Command</th>
+          <th>Evidence</th>
+          <th>Artifact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Standalone histogram mode +1</td>
+          <td><span class="badge pass">PASS</span></td>
+          <td><code>make -C histogram_statistics/tb run_all SEED=42</code></td>
+          <td><code>51 PASS, 0 FAIL</code>; B12 proves <code>RUN_SYNC</code>
+            resets <code>delay_counter_8n</code> and advances it to 7 before
+            the hit sequence.</td>
+          <td><a href="../../../../histogram_statistics/tb/BUG_HISTORY.md">histogram BUG_HISTORY.md</a></td>
+        </tr>
+        <tr>
+          <td>Authentic FEB datapath generated hist0</td>
+          <td><span class="badge pass">PASS</span></td>
+          <td><code>./scripts/run_dp_injector_authentic.sh</code></td>
+          <td><code>12 PASSED, 0 FAILED</code>; <code>TB_HIST0_NORMAL_DELAY total=160</code>,
+            <code>ctrl_sync=2</code>, <code>interval pulse_count=1</code>,
+            and bridge accepts <code>80 + 80</code> type1 words with no range loss.</td>
+          <td><a href="../tb/INT_fe_scifi_v3-2026-04-17/REPORT/dp_injector_authentic/run_dp_injector_authentic.log">run log</a><br>
+            <a href="../tb/INT_fe_scifi_v3-2026-04-17/REPORT/dp_injector_authentic/hist0_normal_hit_delay.csv">hist0_normal_hit_delay.csv</a></td>
+        </tr>
       </tbody>
     </table>
 
