@@ -23,7 +23,8 @@ Class legend:
 | [P6-BUG-009-H](#p6-bug-009-h-qsys-catalog-picked-stale-system-and-package-paths-during-mts-rebuild) | H | fixed; Qsys regeneration and FEB compile/program pass | 2026-05-01 | The MTS lookback rebuild was blocked by stale system `.qsys` catalog entries, a nested stale `mutrig_frame_deassembly` version pin, and a package rooted at `script/rtl`. |
 | [P6-BUG-010-R](#p6-bug-010-r-live-100-khz-rate-bin-dump-read-the-active-histogram-bank) | R | fixed; post-fix real sweep complete, downstream MTS still open | 2026-05-01 | Real-MuTRiG 100 kHz/channel sweeps reached the expected aggregate histogram rate, but per-channel bins alternated between frozen and partial-current intervals because deferred ping-pong reads selected the active bank. |
 | [P6-BUG-011-H](#p6-bug-011-h-header-sync-asic-scan-starved-the-injector-by-watching-a-masked-lane) | H | fixed; scan script sets matching header channel | 2026-05-01 | The first per-ASIC header-sync delay scan masked to ASIC1..7 while the injector still watched header channel 0, producing false zero-hit artifacts. |
-| [P6-BUG-012-R](#p6-bug-012-r-header-sync-delay-plots-used-mts-ts_delta-instead-of-debug_ts) | R | source patched; recompile/rerun required | 2026-05-01 | All-eight header-sync plots peaked exactly at zero because the histogram debug ports were wired to MTS `ts_delta`, an inter-hit timestamp-delta diagnostic, not `debug_ts` latency. |
+| [P6-BUG-012-R](#p6-bug-012-r-header-sync-delay-plots-used-mts-ts_delta-instead-of-debug_ts) | R | source patched; normal-hit rerun path preferred | 2026-05-01 | All-eight header-sync plots peaked exactly at zero because the histogram debug ports were wired to MTS `ts_delta`, an inter-hit timestamp-delta diagnostic, not `debug_ts` latency. |
+| [P6-BUG-013-H](#p6-bug-013-h-header-sync-asic-scan-still-dumped-the-legacy-delay-profile) | H | fixed in scan/dump/report tooling; hardware rerun required | 2026-05-01 | The per-ASIC header-sync scan still requested the legacy `header`/MTS delay dump instead of the new positive normal-hit `delay_hit_t` histogram path, so the report could stay zero-peaked after the RTL fix. |
 
 ## 2026-05-01
 
@@ -370,6 +371,47 @@ Class legend:
   header-sync scan, and only accept DISLIN delay plots whose peak has finite
   latency, visible width, and a quantified out-of-window population against the
   `0..2000` rbCAM accept window.
+
+### P6-BUG-013-H: header-sync ASIC scan still dumped the legacy delay profile
+
+- First seen in:
+  the Phase-6 report rerender after `histogram_statistics_v2` mode `+1`
+  normal-hit delay passed standalone and integrated simulation, but the
+  ASIC-by-ASIC DISLIN artifact was still zero-peaked.
+- Symptom:
+  - Standalone `B12_normal_hit_delay_t` passed and put nonzero hits into the
+    expected delay bins.
+  - The integrated authentic datapath test reported nonzero normal-hit delay
+    bins spread away from zero.
+  - The live scan wrapper still selected `--hist-profile delay-mts-both` and
+    JTAG `--profile header`, so the plotted artifact remained on the old
+    MTS/debug path instead of the positive normal-hit delay path.
+- Root cause:
+  scan/report tooling drift. `phase5_histogram_bin_dump.tcl` only treated
+  `rate` as a pre-rbCAM normal-hit stream profile, `run_phase5_injector_datapath_sanity.py`
+  defaulted every non-rate JTAG artifact dump back to `delay`, and the Python
+  histogram filter packed the requested ASIC key into the low 16 CSR bits even
+  though the VHDL expects the filter key in CSR word 7 bits `31:16`. The first
+  corrected smoke also inherited a stale SSH X11 `DISPLAY=localhost:11.0`,
+  causing System Console 18.1 to throw an AWT desktop exception before master
+  enumeration and return `no master services found`.
+- Fix status:
+  scripts patched. `run_phase6_header_delay_asic_scan.sh` now uses
+  `delay-hit-t`, enables the ASIC filter, and passes matching JTAG
+  `delay-hit-t` plus `--lane-filter`. The Tcl dump helper switches normal-hit
+  delay to the pre-rbCAM ingress stream and applies the same ASIC filter. The
+  Python runner now preserves the requested non-rate JTAG profile and packs
+  `hist_filter_key_value << 16`. Headless JTAG artifact dumps no longer inherit
+  ambient `DISPLAY`; a display must be passed explicitly when GUI attachment is
+  actually intended.
+- Required evidence:
+  rerun all ASICs with the patched scan, render
+  `reports/assets/phase6_header_delay_asic_hitdelay_20260501/`, and accept the
+  artifact only if each ASIC has nonzero hits, a finite nonzero peak, and a
+  quantified population inside and outside the `0..2000` rbCAM window. The
+  first-pass signed-window ratio from `delay_hit_t` is review data until the
+  histogram delay sign/reference is reconciled with the hit processor RTL and
+  simulation counter.
 
 ## 2026-04-30
 

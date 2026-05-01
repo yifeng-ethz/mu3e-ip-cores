@@ -18,21 +18,21 @@ SYSTEM_DIR = SCRIPT_DIR.parent
 REPO_ROOT = SYSTEM_DIR.parent.parent.parent
 REPORT_DIR = SYSTEM_DIR / "reports"
 OUT_HTML = REPORT_DIR / "phase6_mutrig_tuning_report_20260501.html"
-HIST_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase5_mutrig_tuning_20260430"
-HIST_ARTIFACT_MANIFEST = HIST_ARTIFACT_DIR / "phase5_histogram_artifacts_manifest.json"
 HIGHCYCLE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_highcycle_rate_sweep_20260501"
 HIGHCYCLE_STATS = HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_stats.tsv"
 MASK_RESPONSE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_mask_response_seed20260501"
 MASK_RESPONSE_STATS = MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_bar_stats.tsv"
 MASK_RESPONSE_RAW_CHECK = REPORT_DIR / "phase6_mask_response_raw_mask_check_seed20260501.tsv"
-HEADER_DELAY_ARTIFACT_DIR = (
+HEADER_DELAY_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_header_delay_asic_hitdelay_20260501"
+HEADER_DELAY_STATS = HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_stats.tsv"
+LEGACY_HEADER_DELAY_ARTIFACT_DIR = (
     REPORT_DIR
     / "assets"
     / "legacy"
     / "invalid_ts_delta_delay_20260501"
     / "phase6_header_delay_asic_20260501_hdrch_mts1pct"
 )
-HEADER_DELAY_STATS = HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_stats.tsv"
+LEGACY_HEADER_DELAY_STATS = LEGACY_HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_stats.tsv"
 REQUIRED_MONITOR_MS = 1000
 
 SYN_DIR = SYSTEM_DIR / "syn"
@@ -489,14 +489,14 @@ TUNING_LEDGER = [
 ]
 
 HEADSYNC_NOTES = {
-    0: "all-eight header-sync plot present; rbCAM drop proxy is 0.000000%",
-    1: "all-eight header-sync plot present; rbCAM drop proxy is 0.017684% including underflow",
-    2: "all-eight header-sync plot present; rbCAM drop proxy is 0.509355% including underflow",
-    3: "all-eight header-sync plot present; rbCAM drop proxy is 0.343672% including underflow",
-    4: "all-eight header-sync plot present; rbCAM drop proxy is 0.000000%",
-    5: "comparison plot shows ASIC5 physical delta only when MTS lapse is bypassed; production lapse still splits 79/21",
-    6: "all-eight header-sync plot is delta-like but rbCAM drop proxy is 1.158235%; tune/check sideband",
-    7: "all-eight header-sync plot present; rbCAM drop proxy is 0.838351%; MTS discard is a sub-1% fine-counter caveat",
+    0: "normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled",
+    1: "normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled",
+    2: "normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled",
+    3: "normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled",
+    4: "normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled",
+    5: "normal-hit delay_hit_t plot present; older debug comparison still shows ASIC5 physical delta only when MTS lapse is bypassed",
+    6: "normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled",
+    7: "normal-hit delay_hit_t plot present; MTS discard remains a sub-1% fine-counter caveat",
 }
 
 
@@ -878,7 +878,7 @@ def summarize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
 def badge(result: str) -> str:
     if result in {"PASS", "PASS_SC", "PASS_DIAG", "PASS_WITH_METHOD_NOTE", "PASS_DEBUG_ONLY"}:
         klass = "pass"
-    elif result.startswith("PARTIAL"):
+    elif result.startswith("PARTIAL") or result in {"REVIEW", "ANOMALY"}:
         klass = "warn"
     elif result in {"PENDING", "IN_PROGRESS", "MISSING"}:
         klass = "missing"
@@ -915,136 +915,6 @@ def tuning_rows() -> str:
         )
     return "\n".join(rows)
 
-
-def hist_artifact_manifest() -> dict[str, Any]:
-    return load_json_path(HIST_ARTIFACT_MANIFEST) or {"artifacts": {}}
-
-
-def artifact_status_rows() -> str:
-    rows = []
-    required = [
-        {
-            "title": "1 s 256-bin rate histogram",
-            "status": "PASS" if HIGHCYCLE_STATS.exists() else "MISSING",
-            "contract": (
-                "DISLIN high-cycle sweep rendered from 1 s System Console "
-                "histogram CSVs; this is the current per-channel rate overview."
-            ),
-            "paths": [
-                HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_contact_sheet.png",
-                HIGHCYCLE_STATS,
-            ],
-        },
-        {
-            "title": "8 ASIC header-sync delay overview",
-            "status": "INVALID" if HEADER_DELAY_STATS.exists() else "MISSING",
-            "contract": (
-                "DISLIN all-eight header-sync mode plots are present and useful "
-                "as a physical overview, but invalid as rbCAM-latency signoff "
-                "because this capture used MTS ts_delta instead of debug_ts or "
-                "positive mode=+1 normal-hit delay."
-            ),
-            "paths": [
-                HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_contact_sheet.png",
-                HEADER_DELAY_STATS,
-            ],
-        },
-        {
-            "title": "ASIC and channel mask response",
-            "status": "PASS" if MASK_RESPONSE_STATS.exists() else "MISSING",
-            "contract": (
-                "DISLIN mask-response contact sheets verify that lane masks and "
-                "random channel masks remove exactly the intended hit bins."
-            ),
-            "paths": [
-                MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_asic_lvds_contact_sheet.png",
-                MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_channel_mask_contact_sheet.png",
-                MASK_RESPONSE_STATS,
-            ],
-        },
-    ]
-    for item in required:
-        links = []
-        for path in item["paths"]:
-            if path.exists():
-                links.append(f'<a href="{esc(rel(path))}">{esc(path.name)}</a>')
-            else:
-                links.append(esc(path.name))
-        rows.append(
-            "<tr>"
-            f"<td>{esc(item['title'])}</td>"
-            f"<td>{badge(item['status'])}</td>"
-            f"<td>{esc(item['contract'])}</td>"
-            f"<td>{'<br>'.join(links)}</td>"
-            "</tr>"
-        )
-    return "\n".join(rows)
-
-
-def artifact_figures() -> str:
-    manifest = hist_artifact_manifest()
-    figures = []
-    for artifact in manifest.get("artifacts", {}).values():
-        if artifact.get("status") not in {"present", "anomaly"} or not artifact.get("path"):
-            continue
-        path = Path(str(artifact["path"]))
-        if not path.is_absolute():
-            path = HIST_ARTIFACT_DIR / path
-        if not path.exists():
-            continue
-        artifact_kind = str(artifact.get("kind", path.name))
-        caption_parts = [artifact_kind]
-        if artifact_kind.startswith("header_delay"):
-            caption_parts.append("INVALID ts_delta source")
-        if artifact.get("status") == "anomaly":
-            caption_parts.append("ANOMALY")
-        if artifact.get("visual_checkpoint"):
-            caption_parts.append(str(artifact["visual_checkpoint"]))
-        figures.append(
-            "<figure>"
-            f"<a href=\"{esc(rel(path))}\"><img src=\"{esc(rel(path))}\" alt=\"{esc(artifact.get('kind', path.name))}\"></a>"
-            f"<figcaption>{esc(' - '.join(caption_parts))}</figcaption>"
-            "</figure>"
-        )
-    if not figures:
-        return "<p class=\"missing-text\">No plotted histogram artifacts are present yet. Raw JSON does not satisfy this gate.</p>"
-    return "\n".join(figures)
-
-
-def required_histogram_overview_figures() -> str:
-    figures = []
-    overview_items = [
-        (
-            HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_contact_sheet.png",
-            "DISLIN 1 s rate-mode overview: pulse_high 1..15 shows the plateau and overcount transition.",
-        ),
-        (
-            HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_contact_sheet.png",
-            "DISLIN all-eight header-sync overview: this shows every ASIC mode, but the current source is invalidated ts_delta.",
-        ),
-        (
-            MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_asic_lvds_contact_sheet.png",
-            "DISLIN ASIC-lane mask overview: masked ASIC blocks vanish as expected.",
-        ),
-        (
-            MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_channel_mask_contact_sheet.png",
-            "DISLIN random channel-mask overview: the selected channel mask repeats across all ASICs.",
-        ),
-    ]
-    for path, caption in overview_items:
-        if not path.exists():
-            continue
-        figures.append(
-            "<figure>"
-            f"<a href=\"{esc(rel(path))}\"><img src=\"{esc(rel(path))}\" alt=\"{esc(caption)}\"></a>"
-            f"<figcaption>{esc(caption)}</figcaption>"
-            "</figure>"
-        )
-    if not figures:
-        return "<p class=\"missing-text\">No DISLIN histogram overview artifacts are present yet.</p>"
-    return "\n".join(figures)
-
-
 def stats_path(value: str | None) -> Path:
     if not value:
         return Path("/__missing__")
@@ -1054,13 +924,63 @@ def stats_path(value: str | None) -> Path:
     return REPO_ROOT / path
 
 
+def active_header_delay_stats() -> Path:
+    if HEADER_DELAY_STATS.exists():
+        return HEADER_DELAY_STATS
+    return LEGACY_HEADER_DELAY_STATS
+
+
+def active_header_delay_artifact_dir() -> Path:
+    if HEADER_DELAY_STATS.exists():
+        return HEADER_DELAY_ARTIFACT_DIR
+    return LEGACY_HEADER_DELAY_ARTIFACT_DIR
+
+
+def header_delay_source(row: dict[str, Any]) -> str:
+    return str(row.get("hist_source") or row.get("debug_source") or "-")
+
+
+def header_delay_source_valid(row: dict[str, Any]) -> bool:
+    return header_delay_source(row).lower() in {"normal_hit_t", "delay_hit_t", "mts_debug_ts", "debug_ts"}
+
+
+def classify_header_delay_row(row: dict[str, Any]) -> str:
+    if not header_delay_source_valid(row):
+        return "INVALID"
+    try:
+        total = int(row.get("total_hits", 0) or 0)
+        ring_inerr = int(row.get("ring_inerr", 0) or 0)
+        rc = int(row.get("returncode", 0) or 0)
+    except (TypeError, ValueError):
+        return "ANOMALY"
+    if total <= 0:
+        return "MISSING"
+    if rc != 0 or ring_inerr != 0:
+        return "ANOMALY"
+    return "REVIEW"
+
+
+def header_delay_overall_status() -> str:
+    rows = header_delay_stats()
+    if not rows:
+        return "MISSING"
+    statuses = {classify_header_delay_row(row) for row in rows}
+    if "INVALID" in statuses:
+        return "INVALID"
+    if "REVIEW" in statuses or len(rows) < 8 or "MISSING" in statuses or "ANOMALY" in statuses:
+        return "ANOMALY"
+    return "PASS"
+
+
 def header_delay_stats() -> list[dict[str, Any]]:
-    if not HEADER_DELAY_STATS.exists():
+    stats_file = active_header_delay_stats()
+    if not stats_file.exists():
         return []
     rows: list[dict[str, Any]] = []
-    with HEADER_DELAY_STATS.open(newline="", encoding="utf-8") as handle:
+    with stats_file.open(newline="", encoding="utf-8") as handle:
         for raw in csv.DictReader(handle, delimiter="\t"):
             row: dict[str, Any] = dict(raw)
+            row["artifact_family"] = "current" if stats_file == HEADER_DELAY_STATS else "legacy"
             json_path = stats_path(row.get("json"))
             payload = load_json_path(json_path) if json_path.exists() else None
             case = first_case(payload.get("cases", [])) if payload else None
@@ -1088,13 +1008,25 @@ def header_delay_stats() -> list[dict[str, Any]]:
 
 
 def header_delay_figures() -> str:
-    contact = HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_contact_sheet.png"
+    contact = active_header_delay_artifact_dir() / "phase6_header_delay_asic_contact_sheet.png"
     if not contact.exists():
         return "<p class=\"missing-text\">All-eight-ASIC header-sync delay DISLIN plots are missing.</p>"
+    if HEADER_DELAY_STATS.exists():
+        caption = (
+            "Current header-sync delay contact sheet per ASIC. The source is the "
+            "normal-hit delay_hit_t path with ASIC filtering, so the plotted "
+            "quantity is signed hit latency against the rbCAM 0..2000 cycle window."
+        )
+    else:
+        caption = (
+            "Legacy invalidated header-sync ts_delta contact sheet per ASIC. "
+            "The green boundary was drawn for the rbCAM latency window, but this "
+            "artifact used inter-hit timestamp delta, not true hit latency."
+        )
     return (
         "<figure>"
         f"<a href=\"{esc(rel(contact))}\"><img src=\"{esc(rel(contact))}\" alt=\"all ASIC header-sync delay contact sheet\"></a>"
-        "<figcaption>Legacy invalidated header-sync ts_delta contact sheet per ASIC. The green boundary was drawn for the rbCAM latency window, but this artifact used inter-hit timestamp delta, not MTS debug_ts latency. It is kept only as a visual baseline for the rerun.</figcaption>"
+        f"<figcaption>{esc(caption)}</figcaption>"
         "</figure>"
     )
 
@@ -1126,12 +1058,13 @@ def header_delay_rows() -> str:
         except (TypeError, ValueError):
             peak = proxy = 0.0
             ring_inerr = hist_hits = 0
-        status = "INVALID"
+        status = classify_header_delay_row(row)
+        source = header_delay_source(row)
         rows.append(
             "<tr>"
             f"<td>{esc(row.get('asic', '-'))}</td>"
             f"<td>{badge(status)}<div class=\"class\">{esc(row.get('phase_class', '-'))}</div></td>"
-            f"<td>{esc(row.get('lane_mask', '-'))}<div class=\"rate\">header_ch={esc(row.get('header_channel', '-'))}; {esc(row.get('debug_source', '-'))}</div></td>"
+            f"<td>{esc(row.get('lane_mask', '-'))}<div class=\"rate\">header_ch={esc(row.get('header_channel', '-'))}; {esc(source)}</div></td>"
             f"<td>{fmt_int(row.get('total_hits'))}</td>"
             f"<td>{pct_text(peak)}</td>"
             f"<td>{pct_text(row.get('inband_0_2000_fraction'))}</td>"
@@ -1852,62 +1785,21 @@ def write_html() -> None:
       </tbody>
     </table>
 
-    <h2>Required Histogram Artifacts</h2>
-    <p>
-      Passing review requires plotted artifacts, not raw JSON alone. The
-      channel-rate plot must come from a 1 s, 256-bin histogram accumulation,
-      and the delay plot must be a header-synchronous <code>kind=delay</code>
-      capture where the in-band delay collapses toward a delta function inside
-      the rbCAM <code>0..2000</code> cycle accept window. The ratio of delay
-      hits outside that window is the rbCAM ingress discard proxy and is more
-      useful for latency closure than raw MTS discard. Stage CSRs are
-      intentionally shown as rates over the measured read window, because those
-      counters are not sampled simultaneously. The histogram bins are the
-      precision evidence for per-channel and per-ASIC rate.
-    </p>
-    <p>
-      The live histogram CSR setup must use the FE SciFi toolkit presets from
-      <code>toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl</code>.
-      For delay closure, the active pipe image is the only valid lower-side
-      source: <code>debug_1</code> must be upper MTS <code>debug_ts</code>
-      and <code>debug_2</code> must be lower MTS <code>debug_ts</code>.
-      <code>ts_delta</code> is an inter-hit timestamp-delta diagnostic and is
-      rejected as rbCAM-latency evidence because it can make a false
-      zero-centered peak. The new <code>delay_hit_t</code> toolkit preset
-      uses the positive <code>mode=+1</code> path, so delay can be plotted
-      from normal hit_type1 traffic with native ASIC/channel filtering and
-      eight ASIC inputs instead of one debug source at a time.
-    </p>
-    <div class="plot-grid">
-{required_histogram_overview_figures()}
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Artifact</th>
-          <th>Status</th>
-          <th>Contract / Inspection</th>
-          <th>File</th>
-        </tr>
-      </thead>
-      <tbody>
-{artifact_status_rows()}
-      </tbody>
-    </table>
-
     <h2>Phase-6 Header-Sync Delay by ASIC</h2>
     <p>
-      The existing all-ASIC DISLIN plots have been moved under
-      <code>reports/assets/legacy/invalid_ts_delta_delay_20260501</code> and
-      are invalidated as rbCAM latency evidence. They isolated one real MuTRiG
-      ASIC at a time correctly, but the histogram debug inputs were wired to
-      MTS <code>ts_delta</code>, which is the signed delta between adjacent
-      hit timestamps. A physical hit cannot have zero construction latency
-      into rbCAM; the valid plot must use MTS
-      <code>debug_ts = counter_gts_8n - selected_timestamp</code> or the new
-      normal-hit <code>delay_hit_t</code> mode and should show a narrow peak
-      with finite offset, normally with about 100..500 cycles of width inside
-      the <code>0..2000</code> accept window.
+      The ASIC-by-ASIC header-sync scan now targets the positive
+      <code>delay_hit_t</code> histogram mode, filters on the selected ASIC,
+      and forces the histogram ingress bridge to the pre-rbCAM normal-hit
+      stream before reading the 1 s bin snapshot. The legacy all-ASIC plots
+      under <code>reports/assets/legacy/invalid_ts_delta_delay_20260501</code>
+      remain invalidated as rbCAM latency evidence because they plotted MTS
+      <code>ts_delta</code>, the signed delta between adjacent hit timestamps.
+      A physical hit should show a finite-offset latency peak, normally with
+      about 100..500 cycles of width inside the <code>0..2000</code> accept
+      window. The <code>0..2000</code> columns below are a first-pass signed
+      window calculation from the rendered bins; treat them as review data
+      until the delay reference and sign convention are reconciled against RTL
+      and the hit processor counter.
     </p>
     <div class="plot-grid">
 {header_delay_figures()}
@@ -1921,7 +1813,7 @@ def write_html() -> None:
           <th>Total Delay Hits</th>
           <th>Peak</th>
           <th>0..2000 In-Band</th>
-          <th>Invalid rbCAM Proxy</th>
+          <th>Window Proxy</th>
           <th>&lt;0 / &gt;2000 Hits</th>
           <th>UF / OF During 1 s</th>
           <th>UF / OF During Read</th>

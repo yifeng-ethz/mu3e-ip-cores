@@ -32,7 +32,7 @@ source [locate_project_spec]
 proc usage {} {
     puts "Usage:"
     puts "  system-console -cli --jdi <top.jdi> --script=phase5_histogram_bin_dump.tcl --"
-    puts "      --profile <rate|delay|header> --out <bins.csv>"
+    puts "      --profile <rate|delay|header|delay-hit-t> --out <bins.csv>"
     puts "      optional: --wait-ms <preset interval + guard> --lane-filter <0..7> --csr-base 0x00020400 --bin-base 0x00020000"
     puts "      optional: --rate-ingress-base-list 0x00020C00,0x00020C10"
 }
@@ -122,6 +122,14 @@ proc preset_id_for_profile {profile lane_filter} {
         return "delay_mts_lower"
     }
     error "unsupported profile '$profile'"
+}
+
+proc profile_uses_pre_hit_stream {profile} {
+    return [expr {$profile eq "rate" || $profile eq "delay-hit" || $profile eq "delay_hit" || $profile eq "delay-hit-t" || $profile eq "delay_hit_t"}]
+}
+
+proc profile_supports_asic_filter {profile} {
+    return [profile_uses_pre_hit_stream $profile]
 }
 
 proc config_from_preset {preset_id} {
@@ -258,7 +266,7 @@ proc configure_histogram {svc csr_base profile lane_filter} {
     set interval_clocks [dict get $config interval_clocks]
     set control [parse_i [dict get $config control]]
 
-    if {$profile eq "rate" && $lane_filter ne ""} {
+    if {[profile_supports_asic_filter $profile] && $lane_filter ne ""} {
         if {$lane_filter < 0 || $lane_filter > 7} {
             error "--lane-filter must be 0..7"
         }
@@ -328,7 +336,7 @@ if {[catch {
     set master_path [dict get $claim path]
 
     set ingress_status [list]
-    if {$profile eq "rate"} {
+    if {[profile_uses_pre_hit_stream $profile]} {
         set ingress_status [select_rate_ingress_pre $svc $ingress_bases]
     }
     set config [configure_histogram $svc $csr_base $profile $lane_filter]

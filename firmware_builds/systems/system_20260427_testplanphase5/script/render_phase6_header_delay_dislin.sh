@@ -6,10 +6,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SYSTEM_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="$(cd "${SYSTEM_DIR}/../../.." && pwd)"
 REPORT_DIR="${REPORT_DIR:-${SYSTEM_DIR}/reports}"
-OUTPUT_DIR="${OUTPUT_DIR:-${REPORT_DIR}/assets/phase6_header_delay_asic_20260501}"
+OUTPUT_DIR="${OUTPUT_DIR:-${REPORT_DIR}/assets/phase6_header_delay_asic_hitdelay_20260501}"
 BUILD_DIR="${BUILD_DIR:-${OUTPUT_DIR}/.build_dislin}"
 DISLIN_DIR="${DISLIN_DIR:-${REPO_ROOT}/packet_scheduler/.vendor/dislin}"
-INPUT_SUMMARY="${INPUT_SUMMARY:-${REPORT_DIR}/phase6_header_delay_asic_hsync_ph05_20260501.summary.tsv}"
+INPUT_SUMMARY="${INPUT_SUMMARY:-${REPORT_DIR}/phase6_header_delay_asic_hsync_ph05_hitdelay_20260501.summary.tsv}"
 STATS_TSV="${STATS_TSV:-${OUTPUT_DIR}/phase6_header_delay_asic_stats.tsv}"
 
 usage() {
@@ -20,7 +20,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --report-dir)
       REPORT_DIR="$2"
-      INPUT_SUMMARY="${REPORT_DIR}/phase6_header_delay_asic_hsync_ph05_20260501.summary.tsv"
+      INPUT_SUMMARY="${REPORT_DIR}/phase6_header_delay_asic_hsync_ph05_hitdelay_20260501.summary.tsv"
       shift 2
       ;;
     --output-dir)
@@ -63,18 +63,18 @@ gcc -O2 -Wall -Wextra -std=c11 \
   -ldislin -lm \
   -o "${BUILD_DIR}/render_phase6_header_delay_dislin"
 
-printf 'asic\tlane_mask\tdebug_source\treturncode\ttotal_hits\tnonzero_bins\tpeak_bin\tpeak_center_cycles\tpeak_fraction\tinband_0_2000_hits\toutband_lt0_hits\toutband_gt2000_hits\tinband_0_2000_fraction\toutband_fraction\trbcam_drop_proxy_fraction\thist_underflow_wait_delta\thist_overflow_wait_delta\thist_underflow_read_delta\thist_overflow_read_delta\trbcam_drop_proxy_with_counter_fraction\tplot\tcsv\tjson\tlog\n' > "${STATS_TSV}"
+printf 'asic\tlane_mask\thist_source\treturncode\ttotal_hits\tnonzero_bins\tpeak_bin\tpeak_center_cycles\tpeak_fraction\tinband_0_2000_hits\toutband_lt0_hits\toutband_gt2000_hits\tinband_0_2000_fraction\toutband_fraction\trbcam_drop_proxy_fraction\thist_underflow_wait_delta\thist_overflow_wait_delta\thist_underflow_read_delta\thist_overflow_read_delta\trbcam_drop_proxy_with_counter_fraction\tplot\tcsv\tjson\tlog\n' > "${STATS_TSV}"
 
-while IFS=$'\t' read -r asic lane_mask debug_source csv json log returncode; do
+while IFS=$'\t' read -r asic lane_mask hist_source csv json log returncode; do
   [[ "${asic}" == "asic" ]] && continue
   if [[ ! -f "${csv}" ]]; then
     printf '%s\t%s\t%s\t%s\t0\t0\t0\t0.000\t0.000000000\t0\t0\t0\t0.000000000\t0.000000000\t0.000000000\t0\t0\t0\t0\t0.000000000\t\t%s\t%s\t%s\n' \
-      "${asic}" "${lane_mask}" "${debug_source}" "${returncode}" "${csv}" "${json}" "${log}" >> "${STATS_TSV}"
+      "${asic}" "${lane_mask}" "${hist_source}" "${returncode}" "${csv}" "${json}" "${log}" >> "${STATS_TSV}"
     continue
   fi
   out="${OUTPUT_DIR}/phase6_header_delay_asic${asic}_hsync_ph05_dislin.png"
   title="Phase-6 Header-Sync Delay: ASIC ${asic}"
-  subtitle="real MuTRiG; pulse_high=5; lane_mask=${lane_mask}; debug source=${debug_source}; range [-1000, 3096]"
+  subtitle="real MuTRiG; pulse_high=5; lane_mask=${lane_mask}; hist source=${hist_source}; range [-1000, 3096]"
   tmp_log="${BUILD_DIR}/render_asic${asic}.log"
   "${BUILD_DIR}/render_phase6_header_delay_dislin" "${csv}" "${out}" "${title}" "${subtitle}" > "${tmp_log}" 2>&1
   row="$(awk -F '\t' '/^[0-9]+\t/ { print; exit }' "${tmp_log}")"
@@ -95,7 +95,7 @@ while IFS=$'\t' read -r asic lane_mask debug_source csv json log returncode; do
     -v of="${of_wait:-0}" \
     'BEGIN { den = total + uf + of; if (den > 0) printf "%.9f", (below + above + uf + of) / den; else printf "0.000000000"; }')"
   printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "${asic}" "${lane_mask}" "${debug_source}" "${returncode}" \
+    "${asic}" "${lane_mask}" "${hist_source}" "${returncode}" \
     "${total_hits}" "${nonzero_bins}" "${peak_bin}" "${peak_center}" "${peak_fraction}" \
     "${inband_hits}" "${outband_lt0_hits}" "${outband_gt2000_hits}" \
     "${inband_fraction}" "${outband_fraction}" "${rbcam_drop_proxy_fraction}" \

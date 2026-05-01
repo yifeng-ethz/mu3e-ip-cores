@@ -212,7 +212,7 @@ static void render_delay_plot(const delay_table_t *table,
   start_page(out_path);
   titlin(title_text, 2);
   titlin(subtitle, 4);
-  name("signed MTS debug_ts latency bin center [cycles]", "x");
+  name("signed hit latency bin center [cycles]", "x");
   name("hits / bin [% of captured interval]", "y");
   labdig(0, "x");
   labdig(1, "y");

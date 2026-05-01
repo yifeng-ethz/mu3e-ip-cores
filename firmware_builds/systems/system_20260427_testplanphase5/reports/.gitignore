@@ -36,6 +36,14 @@
 !phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.json
 !phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv
 !phase6_headsync_lane6_default_jtag_nodisplay_20260501.json
+!phase6_header_delay_asic_hsync_ph05_hitdelay_20260501.summary.tsv
+!phase6_header_delay_asic*_hsync_ph05_hitdelay_20260501.csv
+!phase6_header_delay_asic*_hsync_ph05_hitdelay_20260501.json
+!phase6_header_delay_asic*_hsync_ph05_hitdelay_20260501.log
+!phase6_header_delay_asic*_hsync_ph05_hitdelay_20260501.md
+!assets/phase6_header_delay_asic_hitdelay_20260501/
+!assets/phase6_header_delay_asic_hitdelay_20260501/*.png
+!assets/phase6_header_delay_asic_hitdelay_20260501/*.tsv
 !assets/phase5_dualmts_20260429/
 !assets/phase5_dualmts_20260429/phase5_dualmts_*.png
 !screenshots/

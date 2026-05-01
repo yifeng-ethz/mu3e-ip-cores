@@ -109,8 +109,10 @@ The current Phase-6 restore-load tuning ledger is:
 Per-ASIC head-sync delay histogram artifacts are tracked for all eight ASICs
 under `reports/assets/phase6_header_delay_asic_YYYYMMDD_TAG/`, with one DISLIN
 plot per ASIC plus a TSV summary. The accepted format must identify the signal
-source. Valid rbCAM-latency evidence uses MTS `debug_ts`, defined in the MTS
-RTL as `counter_gts_8n - selected_timestamp`; MTS `ts_delta` is only an
+source. The preferred current path is histogram `delay_hit_t` mode on the
+pre-rbCAM normal hit stream, with the ASIC filter enabled and packed into CSR
+word 7 bits `31:16`. A true MTS `debug_ts` path is also valid; it is defined in
+the MTS RTL as `counter_gts_8n - selected_timestamp`. MTS `ts_delta` is only an
 inter-hit timestamp-delta diagnostic and must not be used as a latency proxy.
 
 The checkpoint
@@ -121,6 +123,15 @@ diagnostic proving per-ASIC lane masking and `header_channel` selection, but
 the zero-centered peak is not physical latency. A valid rerun should show a
 finite-offset peak, not exact zero, with an expected width around `100..500`
 cycles and a quantified population outside the `0..2000` rbCAM accept window.
+Use `run_phase6_header_delay_asic_scan.sh` after the histogram 26.1.9-style
+normal-delay image is programmed; it selects `delay-hit-t`, forces the
+histogram ingress bridge to the pre-rbCAM stream, filters one ASIC per run, and
+emits the ASIC-by-ASIC TSV/CSV inputs for the DISLIN renderer.
+Before using the `delay-hit-t` `0..2000` in-window ratio as physical rbCAM
+reject evidence, reconcile the histogram sign/reference against the hit
+processor RTL and simulation. The plotted CSV/TSV values are still useful for
+review because they prove the normal-hit path is active ASIC-by-ASIC and show
+the finite-offset distribution shape.
 
 ### Active Phase-5 Injection Path
 
@@ -256,9 +267,10 @@ For the accepted latency gate, pass `--mts-expected-latency 2000
 --mts-delay-ts-field t`. A measurement with ring-buffer CAM input latency
 outside `0..2000` cycles is rejected even if the hit counters advance.
 
-For header-sync delay tuning, the primary reject metric is the MTS `debug_ts`
+For header-sync delay tuning, the primary reject metric is the signed hit
 latency histogram population outside the rbCAM ingress window, not the raw MTS
-discard counter. Capture the signed `debug_ts` histogram over at least
+discard counter. Capture either the positive `delay_hit_t` normal-hit histogram
+or true MTS `debug_ts` over at least
 `[-1000, 3096]` cycles, then compute:
 
 ```text

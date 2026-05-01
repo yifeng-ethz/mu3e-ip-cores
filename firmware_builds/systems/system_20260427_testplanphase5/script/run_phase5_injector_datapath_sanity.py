@@ -590,7 +590,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
         if filter_enable:
             if filter_key_loc_override is not None:
                 key_loc = filter_key_loc_override
-            key_value = filter_key_value
+            key_value = (filter_key_value << 16) & 0xFFFF0000
             control_word |= 0x00001000
         sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 3, [profile["left_bound"] & 0xFFFFFFFF])
         sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 4, [profile["right_bound"] & 0xFFFFFFFF])
@@ -613,7 +613,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
         if filter_enable:
             if filter_key_loc_override is not None:
                 key_loc = filter_key_loc_override
-            key_value = filter_key_value
+            key_value = (filter_key_value << 16) & 0xFFFF0000
             control_word |= 0x00001000
         write_injector_mode(args, 0)
         sc_write(args.sc_tool, args.link, HIST_CSR_BASE_WORD + 3, [profile["left_bound"] & 0xFFFFFFFF])
@@ -778,7 +778,7 @@ def run_jtag_hist_dump(args: argparse.Namespace) -> dict[str, Any]:
 
     profile = args.jtag_hist_profile
     if profile is None:
-        profile = "rate" if args.hist_profile == "rate" else "delay"
+        profile = "rate" if args.hist_profile == "rate" else args.hist_profile
 
     csv_path = args.jtag_hist_csv.resolve()
     log_path = (args.jtag_hist_log or csv_path.with_suffix(".log")).resolve()
@@ -1343,11 +1343,15 @@ def main() -> int:
     )
     parser.add_argument("--jtag-hist-log", type=Path, default=None)
     parser.add_argument("--jtag-hist-script", type=Path, default=SCRIPT_DIR / "phase5_histogram_bin_dump.tcl")
-    parser.add_argument("--jtag-hist-profile", choices=("rate", "delay", "header"), default=None)
+    parser.add_argument(
+        "--jtag-hist-profile",
+        choices=("rate", "delay", "header", "delay-hit", "delay-hit-t", "delay_hit", "delay_hit_t"),
+        default=None,
+    )
     parser.add_argument("--jtag-hist-wait-ms", type=int, default=None)
     parser.add_argument("--jtag-hist-lane-filter", type=int, default=None)
     parser.add_argument("--jtag-hist-timeout-s", type=float, default=60.0)
-    parser.add_argument("--jtag-hist-display", default=os.environ.get("DISPLAY"))
+    parser.add_argument("--jtag-hist-display", default=None)
     parser.add_argument("--system-console", type=Path, default=_default_system_console())
     parser.add_argument("--jtag-jdi", type=Path, default=_default_jdi())
     parser.add_argument("--jtag-project-dir", type=Path, default=_default_project_dir())
