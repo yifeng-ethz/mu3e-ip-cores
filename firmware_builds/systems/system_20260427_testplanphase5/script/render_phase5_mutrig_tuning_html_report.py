@@ -1348,6 +1348,15 @@ def write_html() -> None:
     phase6_report = REPORT_DIR / "phase6_timingclosed_cycle1_20260430.md"
     phase6_signaltap_report = REPORT_DIR / "phase6_lower_mts_ring_signaltap_20260430.md"
     phase6_vcd_summary = REPORT_DIR / "phase6_lower_mts_ring_vcd_summary_20260430.md"
+    dp_auth_report_dir = (
+        SYSTEM_DIR
+        / "tb"
+        / "INT_fe_scifi_v3-2026-04-17"
+        / "REPORT"
+        / "dp_injector_authentic"
+    )
+    dp_auth_log = dp_auth_report_dir / "run_dp_injector_authentic.log"
+    dp_auth_hist0_csv = dp_auth_report_dir / "hist0_normal_hit_delay.csv"
     html_text = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -1488,7 +1497,7 @@ def write_html() -> None:
     <h2>Current Compile Checkpoint</h2>
     <p>
       This report is the clean 2026-05-01 checkpoint for the
-      <code>histogram_statistics_v2 26.1.9</code> delay-observability update.
+      <code>histogram_statistics_v2 26.1.10</code> delay-observability update.
       The new positive histogram mode <code>mode=+1</code> keeps the normal
       hit_type1 path and ASIC/channel filter while plotting
       <code>local_run_counter[12:0] - data[29:17]</code>. The old negative
@@ -1510,6 +1519,47 @@ def write_html() -> None:
       </thead>
       <tbody>
 {compile_evidence_rows()}
+      </tbody>
+    </table>
+
+    <h2>Simulation Regression Checkpoint</h2>
+    <p>
+      The normal-hit delay mode now has both standalone and authentic generated
+      datapath simulation evidence. The FEB datapath TB uses the generated
+      <code>histogram_statistics_0</code> instance, not only the sidecar
+      wrapper, and requires the run-control sink to see <code>RUN_SYNC</code>
+      before the ping-pong interval snapshot is read.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Gate</th>
+          <th>Status</th>
+          <th>Command</th>
+          <th>Evidence</th>
+          <th>Artifact</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Standalone histogram mode +1</td>
+          <td><span class="badge pass">PASS</span></td>
+          <td><code>make -C histogram_statistics/tb run_all SEED=42</code></td>
+          <td><code>51 PASS, 0 FAIL</code>; B12 proves <code>RUN_SYNC</code>
+            resets <code>delay_counter_8n</code> and advances it to 7 before
+            the hit sequence.</td>
+          <td><a href="{esc(rel(REPO_ROOT / 'histogram_statistics' / 'tb' / 'BUG_HISTORY.md'))}">histogram BUG_HISTORY.md</a></td>
+        </tr>
+        <tr>
+          <td>Authentic FEB datapath generated hist0</td>
+          <td><span class="badge pass">PASS</span></td>
+          <td><code>./scripts/run_dp_injector_authentic.sh</code></td>
+          <td><code>12 PASSED, 0 FAILED</code>; <code>TB_HIST0_NORMAL_DELAY total=160</code>,
+            <code>ctrl_sync=2</code>, <code>interval pulse_count=1</code>,
+            and bridge accepts <code>80 + 80</code> type1 words with no range loss.</td>
+          <td><a href="{esc(rel(dp_auth_log))}">run log</a><br>
+            <a href="{esc(rel(dp_auth_hist0_csv))}">hist0_normal_hit_delay.csv</a></td>
+        </tr>
       </tbody>
     </table>
 
