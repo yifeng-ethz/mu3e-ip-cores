@@ -1,5 +1,5 @@
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
 Progress: Loading syn/scifi_datapath_system_v3_pipe.qsys
 Progress: Reading input file
 Progress: Adding dbg_mm2runctrl_0 [dbg_mm2runctrl 1.0.0]
@@ -32,9 +32,15 @@ Progress: Adding hist_post_merge_0 [hit_type3_stream_merge 26.0.0.429]
 Progress: Parameterizing module hist_post_merge_0
 Progress: Adding hist_post_splitter_0 [altera_avalon_st_splitter 18.1]
 Progress: Parameterizing module hist_post_splitter_0
+Progress: Adding hist_pre_lower_drain_0 [altera_avalon_st_null_sink 18.1]
+Progress: Parameterizing module hist_pre_lower_drain_0
+Progress: Adding hist_pre_lower_splitter_0 [altera_avalon_st_splitter 18.1]
+Progress: Parameterizing module hist_pre_lower_splitter_0
 Progress: Adding histogram_ingress_bridge_0 [histogram_ingress_bridge 26.0.2.425]
 Progress: Parameterizing module histogram_ingress_bridge_0
-Progress: Adding histogram_statistics_0 [histogram_statistics_v2 26.1.6.429]
+Progress: Adding histogram_ingress_bridge_1 [histogram_ingress_bridge 26.0.2.425]
+Progress: Parameterizing module histogram_ingress_bridge_1
+Progress: Adding histogram_statistics_0 [histogram_statistics_v2 26.1.7.501]
 Progress: Parameterizing module histogram_statistics_0
 Progress: Adding hit_stack_subsystem_0 [hit_stack_system 1.0]
 Progress: Parameterizing module hit_stack_subsystem_0
@@ -94,7 +100,7 @@ Progress: Adding mutrig_datapath_subsystem_6 [mutrig_datapath_system_v3 1.0]
 Progress: Parameterizing module mutrig_datapath_subsystem_6
 Progress: Adding mutrig_datapath_subsystem_7 [mutrig_datapath_system_v3 1.0]
 Progress: Parameterizing module mutrig_datapath_subsystem_7
-Progress: Adding mutrig_injector_0 [mutrig_injector_multiheader 26.0.2.429]
+Progress: Adding mutrig_injector_0 [mutrig_injector_multiheader 26.0.3.429]
 Progress: Parameterizing module mutrig_injector_0
 Progress: Adding mutrig_lane_source_mux_0 [mutrig_lane_source_mux 26.1.0.427]
 Progress: Parameterizing module mutrig_lane_source_mux_0
@@ -193,8 +199,14 @@ Info: scifi_datapath_system_v3_pipe.run_control_splitter.out6/hit_stack_subsyste
 Info: scifi_datapath_system_v3_pipe.run_control_splitter.out7/mutrig_reset_controller_0.runcontrol: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
 Info: scifi_datapath_system_v3_pipe.run_control_splitter.out8/mutrig_datapath_subsystem_4.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
 Info: scifi_datapath_system_v3_pipe.run_control_splitter.out9/mutrig_datapath_subsystem_5.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.pre_out/hist_pre_lower_drain_0.in: Max channel is 15 for source and 0 for sink. Avalon-ST Adapter will be inserted..
+Info: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.pre_out/hist_pre_lower_drain_0.in: The source has a channel signal of 4 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.pre_out/hist_pre_lower_drain_0.in: The source has a error signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+Info: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.pre_out/hist_pre_lower_drain_0.in: The source has a empty signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
 Warning: scifi_datapath_system_v3_pipe.dbg_mm2runctrl_0.ctrl: dbg_mm2runctrl_0.ctrl must be connected to an Avalon-ST sink
 Warning: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_0.post_out: histogram_ingress_bridge_0.post_out must be connected to an Avalon-ST sink
+Warning: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.post_in: histogram_ingress_bridge_1.post_in must be connected to an Avalon-ST source
+Warning: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.post_out: histogram_ingress_bridge_1.post_out must be connected to an Avalon-ST sink
 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.fill_out: histogram_statistics_0.fill_out must be connected to an Avalon-ST sink
 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_debug_burst: hit_stack_subsystem_0.frame_debug_burst must be connected to an Avalon-ST sink
 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_debug_delay8loss: hit_stack_subsystem_0.frame_debug_delay8loss must be connected to an Avalon-ST sink
@@ -320,6 +332,9 @@ Info: avalon_st_adapter_024: Inserting timing_adapter: timing_adapter_0
 Info: avalon_st_adapter_025: Inserting timing_adapter: timing_adapter_0
 Info: avalon_st_adapter_026: Inserting timing_adapter: timing_adapter_0
 Info: avalon_st_adapter_027: Inserting timing_adapter: timing_adapter_0
+Info: avalon_st_adapter_028: Inserting data_format_adapter: data_format_adapter_0
+Info: avalon_st_adapter_028: Inserting channel_adapter: channel_adapter_0
+Info: avalon_st_adapter_028: Inserting error_adapter: error_adapter_0
 Warning: scifi_datapath_system_v3_pipe: "No matching role found for mts_preprocessor_0:hit_type0_in:asi_hit_type0_endofrun (endofrun)"
 Warning: scifi_datapath_system_v3_pipe: "No matching role found for mts_preprocessor_1:hit_type0_in:asi_hit_type0_endofrun (endofrun)"
 Info: dbg_mm2runctrl_0: "scifi_datapath_system_v3_pipe" instantiated dbg_mm2runctrl "dbg_mm2runctrl_0"
@@ -336,10 +351,10 @@ Info: lvds_rx_28nm_0: "scifi_datapath_system_v3_pipe" instantiated altera_lvds_r
 Info: lvds_rx_controller_pro_0: "scifi_datapath_system_v3_pipe" instantiated lvds_rx_controller_pro "lvds_rx_controller_pro_0"
 Info: master_datapath: "scifi_datapath_system_v3_pipe" instantiated altera_jtag_avalon_master "master_datapath"
 Info: mm_clock_crossing_bridge: "scifi_datapath_system_v3_pipe" instantiated altera_avalon_mm_clock_crossing_bridge "mm_clock_crossing_bridge"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_dc_fifo.v
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_dcfifo_synchronizer_bundle.v
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_dc_fifo.sdc
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_dc_fifo.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_dcfifo_synchronizer_bundle.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_dc_fifo.sdc
 Info: mm_pipeline_jtagmaster2rstctrl: "scifi_datapath_system_v3_pipe" instantiated altera_avalon_mm_bridge "mm_pipeline_jtagmaster2rstctrl"
 Info: mts_preprocessor_0: "scifi_datapath_system_v3_pipe" instantiated mts_preprocessor "mts_preprocessor_0"
 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
@@ -430,6 +445,7 @@ Info: mm_interconnect_0: "scifi_datapath_system_v3_pipe" instantiated altera_mm_
 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
 Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
 Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
 Info: mm_interconnect_1: "scifi_datapath_system_v3_pipe" instantiated altera_mm_interconnect "mm_interconnect_1"
 Info: mm_interconnect_2: "scifi_datapath_system_v3_pipe" instantiated altera_mm_interconnect "mm_interconnect_2"
 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
@@ -440,11 +456,12 @@ Info: avalon_st_adapter: "scifi_datapath_system_v3_pipe" instantiated altera_ava
 Info: avalon_st_adapter_008: "scifi_datapath_system_v3_pipe" instantiated altera_avalon_st_adapter "avalon_st_adapter_008"
 Info: avalon_st_adapter_010: "scifi_datapath_system_v3_pipe" instantiated altera_avalon_st_adapter "avalon_st_adapter_010"
 Info: avalon_st_adapter_011: "scifi_datapath_system_v3_pipe" instantiated altera_avalon_st_adapter "avalon_st_adapter_011"
+Info: avalon_st_adapter_028: "scifi_datapath_system_v3_pipe" instantiated altera_avalon_st_adapter "avalon_st_adapter_028"
 Info: rst_controller: "scifi_datapath_system_v3_pipe" instantiated altera_reset_controller "rst_controller"
 Info: feb_frame_assembly_0: "hit_stack_subsystem_0" instantiated feb_frame_assembly "feb_frame_assembly_0"
 Info: ring_buffer_cam_0: "hit_stack_subsystem_0" instantiated ring_buffer_cam "ring_buffer_cam_0"
 Info: jtag_phy_embedded_in_jtag_master: "master_datapath" instantiated altera_jtag_dc_streaming "jtag_phy_embedded_in_jtag_master"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
 Info: timing_adt: "master_datapath" instantiated timing_adapter "timing_adt"
 Info: fifo: "master_datapath" instantiated altera_avalon_sc_fifo "fifo"
 Info: b2p: "master_datapath" instantiated altera_avalon_st_bytes_to_packets "b2p"
@@ -486,11 +503,11 @@ Info: router_063: "mm_interconnect_0" instantiated altera_merlin_router "router_
 Info: router_064: "mm_interconnect_0" instantiated altera_merlin_router "router_064"
 Info: router_065: "mm_interconnect_0" instantiated altera_merlin_router "router_065"
 Info: mm_pipeline_lvds_csr_low_m0_limiter: "mm_interconnect_0" instantiated altera_merlin_traffic_limiter "mm_pipeline_lvds_csr_low_m0_limiter"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_sc_fifo.v
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_sc_fifo.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
 Info: mm_pipeline_lvds_csr_low_s0_burst_adapter: "mm_interconnect_0" instantiated altera_merlin_burst_adapter "mm_pipeline_lvds_csr_low_s0_burst_adapter"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_stage.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
 Info: cmd_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux"
 Info: cmd_demux_001: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_001"
 Info: cmd_demux_002: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_002"
@@ -500,51 +517,54 @@ Info: cmd_demux_005: "mm_interconnect_0" instantiated altera_merlin_demultiplexe
 Info: cmd_demux_006: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "cmd_demux_006"
 Info: cmd_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux"
 Info: cmd_mux_003: "mm_interconnect_0" instantiated altera_merlin_multiplexer "cmd_mux_003"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_demux: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux"
 Info: rsp_demux_003: "mm_interconnect_0" instantiated altera_merlin_demultiplexer "rsp_demux_003"
 Info: rsp_mux: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_001: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_001"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_002: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_002"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_003: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_003"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_004: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_004"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_005: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_005"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_mux_006: "mm_interconnect_0" instantiated altera_merlin_multiplexer "rsp_mux_006"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: crosser: "mm_interconnect_0" instantiated altera_avalon_st_handshake_clock_crosser "crosser"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_clock_crosser.v
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_clock_crosser.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_avalon_st_pipeline_base.v
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_std_synchronizer_nocut.v
 Info: avalon_st_adapter: "mm_interconnect_0" instantiated altera_avalon_st_adapter "avalon_st_adapter"
 Info: router: "mm_interconnect_1" instantiated altera_merlin_router "router"
 Info: router_001: "mm_interconnect_1" instantiated altera_merlin_router "router_001"
 Info: cmd_demux: "mm_interconnect_1" instantiated altera_merlin_demultiplexer "cmd_demux"
 Info: cmd_mux: "mm_interconnect_1" instantiated altera_merlin_multiplexer "cmd_mux"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_demux: "mm_interconnect_1" instantiated altera_merlin_demultiplexer "rsp_demux"
 Info: rsp_mux: "mm_interconnect_1" instantiated altera_merlin_multiplexer "rsp_mux"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: router: "mm_interconnect_3" instantiated altera_merlin_router "router"
 Info: router_001: "mm_interconnect_3" instantiated altera_merlin_router "router_001"
 Info: cmd_demux: "mm_interconnect_3" instantiated altera_merlin_demultiplexer "cmd_demux"
 Info: cmd_mux: "mm_interconnect_3" instantiated altera_merlin_multiplexer "cmd_mux"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: rsp_demux: "mm_interconnect_3" instantiated altera_merlin_demultiplexer "rsp_demux"
 Info: rsp_mux: "mm_interconnect_3" instantiated altera_merlin_multiplexer "rsp_mux"
-Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
+Info: Reusing file /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe/synthesis/synthesis/submodules/altera_merlin_arbitrator.sv
 Info: channel_adapter_0: "avalon_st_adapter" instantiated channel_adapter "channel_adapter_0"
 Info: timing_adapter_0: "avalon_st_adapter" instantiated timing_adapter "timing_adapter_0"
 Info: data_format_adapter_0: "avalon_st_adapter_008" instantiated data_format_adapter "data_format_adapter_0"
 Info: timing_adapter_0: "avalon_st_adapter_010" instantiated timing_adapter "timing_adapter_0"
 Info: data_format_adapter_0: "avalon_st_adapter_011" instantiated data_format_adapter "data_format_adapter_0"
+Info: data_format_adapter_0: "avalon_st_adapter_028" instantiated data_format_adapter "data_format_adapter_0"
+Info: channel_adapter_0: "avalon_st_adapter_028" instantiated channel_adapter "channel_adapter_0"
+Info: error_adapter_0: "avalon_st_adapter_028" instantiated error_adapter "error_adapter_0"
 Info: timing_adapter_0: "avalon_st_adapter" instantiated timing_adapter "timing_adapter_0"
 Info: error_adapter_0: "avalon_st_adapter" instantiated error_adapter "error_adapter_0"
-Info: scifi_datapath_system_v3_pipe: Done "scifi_datapath_system_v3_pipe" with 123 modules, 205 files
+Info: scifi_datapath_system_v3_pipe: Done "scifi_datapath_system_v3_pipe" with 127 modules, 210 files
 Info: qsys-generate succeeded.
 Info: Finished: Create HDL design files for synthesis

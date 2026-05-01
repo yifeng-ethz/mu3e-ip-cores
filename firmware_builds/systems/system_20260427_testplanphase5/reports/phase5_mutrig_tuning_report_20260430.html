@@ -117,7 +117,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-05-01T00:57:51 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-05-01T03:39:19 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -184,6 +184,20 @@
       artifact from slow SC reads crossing the ping-pong histogram bank, so the
       plotted rate artifact must come from the burst System Console/toolkit
       path or a faster frozen-bin capture.
+    </p>
+    <p>
+      The 2026-05-01 Qsys patch fixes a separate observability bug before the
+      next live run: the histogram source now defaults to pre-RBCAM
+      <code>hit_type1</code>, <code>histogram_statistics_0</code> has two
+      fill inputs with global <code>{ASIC, channel}</code> keys, and the
+      lower MTS stream is split into both <code>hit_stack_subsystem_1</code>
+      and <code>histogram_ingress_bridge_1</code>. The lower bridge
+      <code>pre_out</code> is explicitly drained so the tap copy cannot
+      backpressure MTS. Authentic integration simulation passed with all eight
+      lanes visible: each lane reported 20 MTS channel-16 payload hits and 20
+      histogram flushes, with zero histogram drops. This clears the upper-only
+      histogram wiring blocker, but it is simulation evidence; live 1 s
+      histogram and header-delay artifacts must be rerun.
     </p>
     <p>
       The latest direct probes rule out two weaker explanations. First, opening
@@ -339,7 +353,7 @@
       all-eight-ASIC delay conclusions.
     </p>
     <div class="plot-grid">
-<p class="missing-text">No plotted histogram artifacts are present yet. Raw JSON does not satisfy this gate.</p>
+<figure><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png"><img src="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png" alt="rate_per_channel"></a><figcaption>rate_per_channel - ANOMALY - ANOMALY: rate evidence is not distributed like an all-lane 256-channel run (nonzero_bins=1, active_asics=1).</figcaption></figure>
     </div>
     <table>
       <thead>
@@ -351,7 +365,7 @@
         </tr>
       </thead>
       <tbody>
-<tr><td>1 s 256-bin rate histogram</td><td><span class="badge missing">MISSING</span></td><td>Precise per-channel/per-ASIC rate evidence from histogram bins.<div class="note">No nonzero all-real-lane 256-bin rate histogram evidence found. Run phase5_histogram_bin_dump.tcl with the toolkit rate preset for a 1 s dump first.</div></td><td>-</td></tr>
+<tr><td>1 s 256-bin rate histogram</td><td><span class="badge fail">ANOMALY</span></td><td>Precise per-channel/per-ASIC rate evidence from histogram bins.<div class="note">source=phase5_rate_per_channel_1s_20260501.csv; total=647,881; nonzero_bins=1; active_asics=1; preset=rate; ANOMALY: rate evidence is not distributed like an all-lane 256-channel run (nonzero_bins=1, active_asics=1).</div></td><td><a href="assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png">phase5_rate_per_channel_1s.png</a></td></tr>
 <tr><td>Header-sync delay histogram</td><td><span class="badge missing">MISSING</span></td><td>Passing handle: one dominant delay bin, normally &gt;=90% peak fraction.<div class="note">No nonzero 256-bin delay/header histogram evidence found. Run phase5_histogram_bin_dump.tcl with the toolkit delay_mts_* preset during header-sync injection first.</div></td><td>-</td></tr>
       </tbody>
     </table>
@@ -429,7 +443,8 @@
     <p>
       Counter rows show count plus rate. The rate window is the measured
       accumulation window for shaky CSR counters; linked JSON keeps the raw
-      before/sample/after snapshots for audit.
+      before/sample/after snapshots for audit. Rows shorter than 1 s are
+      retained only as historical debug and fail the monitor gate.
     </p>
     <table>
       <thead>

@@ -16,6 +16,9 @@ serv_req_info.txt
 tmp/
 tr_db.log
 transcript
+/altera_mf/
+/lpm/
+/work/
 firmware_builds/board_test/phase4/work/
 docs/Archive.zip
 docs/Archive/

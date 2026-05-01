@@ -6,15 +6,37 @@
       "status": "missing"
     },
     "rate_per_channel": {
+      "active_asics": 1,
+      "asic_rates_hz": [
+        647881.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "interval_s": 1.0,
       "kind": "rate_per_channel",
-      "reason": "No nonzero all-real-lane 256-bin rate histogram evidence found. Run phase5_histogram_bin_dump.tcl with the toolkit rate preset for a 1 s dump first.",
-      "status": "missing"
+      "lane_go": null,
+      "max_rate_hz_per_channel": 647881.0,
+      "nonzero_bins": 1,
+      "path": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/assets/phase5_mutrig_tuning_20260430/phase5_rate_per_channel_1s.png",
+      "rate_distribution_pass": false,
+      "source": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/phase5_rate_per_channel_1s_20260501.csv",
+      "source_type": "csv",
+      "status": "anomaly",
+      "toolkit_preset_id": "rate",
+      "toolkit_preset_source": "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl",
+      "total_hits": 647881,
+      "visual_checkpoint": "ANOMALY: rate evidence is not distributed like an all-lane 256-channel run (nonzero_bins=1, active_asics=1)."
     }
   },
   "delay_candidates": 4,
-  "evidence_scanned": 5,
+  "evidence_scanned": 6,
   "generated_by": "plot_phase5_histogram_artifacts.py",
   "plot_review_contract": "Visually inspect every rendered plot and record one anomaly or null anomaly before accepting the gate.",
-  "rate_candidates": 1,
+  "rate_candidates": 2,
   "toolkit_preset_source": "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl"
 }

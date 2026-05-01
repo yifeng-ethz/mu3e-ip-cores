@@ -147,7 +147,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         type_name "histogram_statistics.csr" \
                         hist_type_name "histogram_statistics.hist_bin" \
                         instance_indices [list 0] \
-                        expected_version [dict create major 26 minor 1 patch 6 build 429] \
+                        expected_version [dict create major 26 minor 1 patch 7 build 501] \
                         meta_file [file join $repo_root histogram_statistics histogram_statistics_v2_csr_meta.tcl] \
                         meta_namespace "::board_bring_up::meta::histogram_statistics_v2" \
                         hw_file [file join $repo_root histogram_statistics histogram_statistics_v2_hw.tcl] \
