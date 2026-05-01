@@ -117,7 +117,7 @@
 <body>
   <header>
     <h1>Phase-6 MuTRiG/FEB Closure Report</h1>
-    <div>Generated 2026-05-01T17:24:37 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-05-01T17:53:22 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -469,70 +469,24 @@
       </tbody>
     </table>
 
-    <h2>Required Histogram Artifacts</h2>
-    <p>
-      Passing review requires plotted artifacts, not raw JSON alone. The
-      channel-rate plot must come from a 1 s, 256-bin histogram accumulation,
-      and the delay plot must be a header-synchronous <code>kind=delay</code>
-      capture where the in-band delay collapses toward a delta function inside
-      the rbCAM <code>0..2000</code> cycle accept window. The ratio of delay
-      hits outside that window is the rbCAM ingress discard proxy and is more
-      useful for latency closure than raw MTS discard. Stage CSRs are
-      intentionally shown as rates over the measured read window, because those
-      counters are not sampled simultaneously. The histogram bins are the
-      precision evidence for per-channel and per-ASIC rate.
-    </p>
-    <p>
-      The live histogram CSR setup must use the FE SciFi toolkit presets from
-      <code>toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl</code>.
-      For delay closure, the active pipe image is the only valid lower-side
-      source: <code>debug_1</code> must be upper MTS <code>debug_ts</code>
-      and <code>debug_2</code> must be lower MTS <code>debug_ts</code>.
-      <code>ts_delta</code> is an inter-hit timestamp-delta diagnostic and is
-      rejected as rbCAM-latency evidence because it can make a false
-      zero-centered peak. The new <code>delay_hit_t</code> toolkit preset
-      uses the positive <code>mode=+1</code> path, so delay can be plotted
-      from normal hit_type1 traffic with native ASIC/channel filtering and
-      eight ASIC inputs instead of one debug source at a time.
-    </p>
-    <div class="plot-grid">
-<figure><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_highcycle_rate_sweep_contact_sheet.png"><img src="assets/phase6_highcycle_rate_sweep_20260501/phase6_highcycle_rate_sweep_contact_sheet.png" alt="DISLIN 1 s rate-mode overview: pulse_high 1..15 shows the plateau and overcount transition."></a><figcaption>DISLIN 1 s rate-mode overview: pulse_high 1..15 shows the plateau and overcount transition.</figcaption></figure>
-<figure><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_contact_sheet.png"><img src="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_contact_sheet.png" alt="DISLIN all-eight header-sync overview: this shows every ASIC mode, but the current source is invalidated ts_delta."></a><figcaption>DISLIN all-eight header-sync overview: this shows every ASIC mode, but the current source is invalidated ts_delta.</figcaption></figure>
-<figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png" alt="DISLIN ASIC-lane mask overview: masked ASIC blocks vanish as expected."></a><figcaption>DISLIN ASIC-lane mask overview: masked ASIC blocks vanish as expected.</figcaption></figure>
-<figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png" alt="DISLIN random channel-mask overview: the selected channel mask repeats across all ASICs."></a><figcaption>DISLIN random channel-mask overview: the selected channel mask repeats across all ASICs.</figcaption></figure>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Artifact</th>
-          <th>Status</th>
-          <th>Contract / Inspection</th>
-          <th>File</th>
-        </tr>
-      </thead>
-      <tbody>
-<tr><td>1 s 256-bin rate histogram</td><td><span class="badge pass">PASS</span></td><td>DISLIN high-cycle sweep rendered from 1 s System Console histogram CSVs; this is the current per-channel rate overview.</td><td><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_highcycle_rate_sweep_contact_sheet.png">phase6_highcycle_rate_sweep_contact_sheet.png</a><br><a href="assets/phase6_highcycle_rate_sweep_20260501/phase6_highcycle_rate_sweep_stats.tsv">phase6_highcycle_rate_sweep_stats.tsv</a></td></tr>
-<tr><td>8 ASIC header-sync delay overview</td><td><span class="badge fail">INVALID</span></td><td>DISLIN all-eight header-sync mode plots are present and useful as a physical overview, but invalid as rbCAM-latency signoff because this capture used MTS ts_delta instead of debug_ts or positive mode=+1 normal-hit delay.</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_contact_sheet.png">phase6_header_delay_asic_contact_sheet.png</a><br><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_stats.tsv">phase6_header_delay_asic_stats.tsv</a></td></tr>
-<tr><td>ASIC and channel mask response</td><td><span class="badge pass">PASS</span></td><td>DISLIN mask-response contact sheets verify that lane masks and random channel masks remove exactly the intended hit bins.</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png">phase6_mask_response_asic_lvds_contact_sheet.png</a><br><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png">phase6_mask_response_channel_mask_contact_sheet.png</a><br><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_bar_stats.tsv">phase6_mask_response_bar_stats.tsv</a></td></tr>
-      </tbody>
-    </table>
-
     <h2>Phase-6 Header-Sync Delay by ASIC</h2>
     <p>
-      The existing all-ASIC DISLIN plots have been moved under
-      <code>reports/assets/legacy/invalid_ts_delta_delay_20260501</code> and
-      are invalidated as rbCAM latency evidence. They isolated one real MuTRiG
-      ASIC at a time correctly, but the histogram debug inputs were wired to
-      MTS <code>ts_delta</code>, which is the signed delta between adjacent
-      hit timestamps. A physical hit cannot have zero construction latency
-      into rbCAM; the valid plot must use MTS
-      <code>debug_ts = counter_gts_8n - selected_timestamp</code> or the new
-      normal-hit <code>delay_hit_t</code> mode and should show a narrow peak
-      with finite offset, normally with about 100..500 cycles of width inside
-      the <code>0..2000</code> accept window.
+      The ASIC-by-ASIC header-sync scan now targets the positive
+      <code>delay_hit_t</code> histogram mode, filters on the selected ASIC,
+      and forces the histogram ingress bridge to the pre-rbCAM normal-hit
+      stream before reading the 1 s bin snapshot. The legacy all-ASIC plots
+      under <code>reports/assets/legacy/invalid_ts_delta_delay_20260501</code>
+      remain invalidated as rbCAM latency evidence because they plotted MTS
+      <code>ts_delta</code>, the signed delta between adjacent hit timestamps.
+      A physical hit should show a finite-offset latency peak, normally with
+      about 100..500 cycles of width inside the <code>0..2000</code> accept
+      window. The <code>0..2000</code> columns below are a first-pass signed
+      window calculation from the rendered bins; treat them as review data
+      until the delay reference and sign convention are reconciled against RTL
+      and the hit processor counter.
     </p>
     <div class="plot-grid">
-<figure><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_contact_sheet.png"><img src="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic_contact_sheet.png" alt="all ASIC header-sync delay contact sheet"></a><figcaption>Legacy invalidated header-sync ts_delta contact sheet per ASIC. The green boundary was drawn for the rbCAM latency window, but this artifact used inter-hit timestamp delta, not MTS debug_ts latency. It is kept only as a visual baseline for the rerun.</figcaption></figure>
+<figure><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic_contact_sheet.png"><img src="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic_contact_sheet.png" alt="all ASIC header-sync delay contact sheet"></a><figcaption>Current header-sync delay contact sheet per ASIC. The source is the normal-hit delay_hit_t path with ASIC filtering, so the plotted quantity is signed hit latency against the rbCAM 0..2000 cycle window.</figcaption></figure>
     </div>
     <table>
       <thead>
@@ -543,7 +497,7 @@
           <th>Total Delay Hits</th>
           <th>Peak</th>
           <th>0..2000 In-Band</th>
-          <th>Invalid rbCAM Proxy</th>
+          <th>Window Proxy</th>
           <th>&lt;0 / &gt;2000 Hits</th>
           <th>UF / OF During 1 s</th>
           <th>UF / OF During Read</th>
@@ -553,14 +507,14 @@
         </tr>
       </thead>
       <tbody>
-<tr><td>0</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x01<div class="rate">header_ch=0; upper</div></td><td>4,395,584</td><td>96.875000%</td><td>100.000000%</td><td>0.000000%</td><td>0 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic0_hsync_ph05_dislin.png">phase6_header_delay_asic0_hsync_ph05_dislin.png</a></td></tr>
-<tr><td>1</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x02<div class="rate">header_ch=1; upper</div></td><td>4,381,727</td><td>97.128256%</td><td>99.999270%</td><td>0.017684%</td><td>32 / 0</td><td>743 / 0</td><td>271 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic1_hsync_ph05_dislin.png">phase6_header_delay_asic1_hsync_ph05_dislin.png</a></td></tr>
-<tr><td>2</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x04<div class="rate">header_ch=2; upper</div></td><td>4,380,934</td><td>95.561654%</td><td>99.506133%</td><td>0.509355%</td><td>21,196 / 440</td><td>682 / 0</td><td>266 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic2_hsync_ph05_dislin.png">phase6_header_delay_asic2_hsync_ph05_dislin.png</a></td></tr>
-<tr><td>3</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x08<div class="rate">header_ch=3; upper</div></td><td>4,385,011</td><td>95.987513%</td><td>99.669100%</td><td>0.343672%</td><td>14,303 / 207</td><td>562 / 0</td><td>208 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic3_hsync_ph05_dislin.png">phase6_header_delay_asic3_hsync_ph05_dislin.png</a></td></tr>
-<tr><td>4</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x10<div class="rate">header_ch=4; lower</div></td><td>4,395,584</td><td>96.875000%</td><td>100.000000%</td><td>0.000000%</td><td>0 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic4_hsync_ph05_dislin.png">phase6_header_delay_asic4_hsync_ph05_dislin.png</a></td></tr>
-<tr><td>5</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x20<div class="rate">header_ch=5; lower</div></td><td>4,381,422</td><td>97.109021%</td><td>99.991236%</td><td>0.025809%</td><td>377 / 7</td><td>747 / 0</td><td>314 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic5_hsync_ph05_dislin.png">phase6_header_delay_asic5_hsync_ph05_dislin.png</a></td></tr>
-<tr><td>6</td><td><span class="badge fail">INVALID</span><div class="class">PASS</div></td><td>0x40<div class="rate">header_ch=6; lower</div></td><td>4,360,295</td><td>93.847136%</td><td>98.878080%</td><td>1.158235%</td><td>47,773 / 1,146</td><td>1,602 / 0</td><td>570 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic6_hsync_ph05_dislin.png">phase6_header_delay_asic6_hsync_ph05_dislin.png</a></td></tr>
-<tr><td>7</td><td><span class="badge fail">INVALID</span><div class="class">mts_discard_with_histogram_hits</div></td><td>0x80<div class="rate">header_ch=7; lower</div></td><td>4,319,301</td><td>95.008243%</td><td>99.208506%</td><td>0.838351%</td><td>33,369 / 818</td><td>2,041 / 0</td><td>718 / 0</td><td>22,081<div class="rate">0.043549%</div></td><td>0</td><td><a href="assets/legacy/invalid_ts_delta_delay_20260501/phase6_header_delay_asic_20260501_hdrch_mts1pct/phase6_header_delay_asic7_hsync_ph05_dislin.png">phase6_header_delay_asic7_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>0</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x01<div class="rate">header_ch=0; normal_hit_t</div></td><td>4,395,599</td><td>6.266632%</td><td>53.052337%</td><td>46.947663%</td><td>2,063,631 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic0_hsync_ph05_dislin.png">phase6_header_delay_asic0_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>1</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x02<div class="rate">header_ch=1; normal_hit_t</div></td><td>4,395,584</td><td>6.346574%</td><td>53.103478%</td><td>46.896522%</td><td>2,061,376 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic1_hsync_ph05_dislin.png">phase6_header_delay_asic1_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>2</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x04<div class="rate">header_ch=2; normal_hit_t</div></td><td>4,395,585</td><td>6.260600%</td><td>53.108244%</td><td>46.891756%</td><td>2,061,167 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic2_hsync_ph05_dislin.png">phase6_header_delay_asic2_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>3</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x08<div class="rate">header_ch=3; normal_hit_t</div></td><td>4,395,602</td><td>6.266605%</td><td>53.060104%</td><td>46.939896%</td><td>2,063,291 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic3_hsync_ph05_dislin.png">phase6_header_delay_asic3_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>4</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x10<div class="rate">header_ch=4; normal_hit_t</div></td><td>4,395,616</td><td>6.266608%</td><td>53.065964%</td><td>46.934036%</td><td>2,063,040 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic4_hsync_ph05_dislin.png">phase6_header_delay_asic4_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>5</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x20<div class="rate">header_ch=5; normal_hit_t</div></td><td>4,395,601</td><td>6.322344%</td><td>53.152891%</td><td>46.847109%</td><td>2,059,212 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic5_hsync_ph05_dislin.png">phase6_header_delay_asic5_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>6</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x40<div class="rate">header_ch=6; normal_hit_t</div></td><td>4,395,616</td><td>6.258600%</td><td>53.127116%</td><td>46.872884%</td><td>2,060,352 / 0</td><td>0 / 0</td><td>0 / 0</td><td>0<div class="rate">0.000000%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic6_hsync_ph05_dislin.png">phase6_header_delay_asic6_hsync_ph05_dislin.png</a></td></tr>
+<tr><td>7</td><td><span class="badge warn">REVIEW</span><div class="class">PASS</div></td><td>0x80<div class="rate">header_ch=7; normal_hit_t</div></td><td>4,372,108</td><td>6.309657%</td><td>53.053927%</td><td>46.946073%</td><td>2,052,533 / 0</td><td>0 / 0</td><td>0 / 0</td><td>10,381<div class="rate">0.022845%</div></td><td>0</td><td><a href="assets/phase6_header_delay_asic_hitdelay_20260501/phase6_header_delay_asic7_hsync_ph05_dislin.png">phase6_header_delay_asic7_hsync_ph05_dislin.png</a></td></tr>
       </tbody>
     </table>
 
@@ -754,14 +708,14 @@
         </tr>
       </thead>
       <tbody>
-<tr><td>0</td><td>SMB3</td><td><code>48/20/30</code></td><td><code>48/20/40</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.000000%</td></tr>
-<tr><td>1</td><td>SMB3</td><td><code>43/30/30</code></td><td><code>43/30/30</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.017684% including underflow</td></tr>
-<tr><td>2</td><td>SMB3</td><td><code>45/35/20</code></td><td><code>40/30/30</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.509355% including underflow</td></tr>
-<tr><td>3</td><td>SMB3</td><td><code>41/10/20</code></td><td><code>35/12/25</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.343672% including underflow</td></tr>
-<tr><td>4</td><td>SMB5</td><td><code>43/15/20</code></td><td><code>43/15/20</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.000000%</td></tr>
-<tr><td>5</td><td>SMB5</td><td><code>42/20/25</code></td><td><code>52/18/25</code></td><td>bypass-lapse delta; production-lapse sideband</td><td><a href="phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv">phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv</a></td><td>comparison plot shows ASIC5 physical delta only when MTS lapse is bypassed; production lapse still splits 79/21</td></tr>
-<tr><td>6</td><td>SMB5</td><td><code>37/27/15</code></td><td><code>37/27/15</code></td><td>default production-lapse delta</td><td><a href="phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv">phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv</a></td><td>all-eight header-sync plot is delta-like but rbCAM drop proxy is 1.158235%; tune/check sideband</td></tr>
-<tr><td>7</td><td>SMB5</td><td><code>40/20/25</code></td><td><code>30/14/40</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>all-eight header-sync plot present; rbCAM drop proxy is 0.838351%; MTS discard is a sub-1% fine-counter caveat</td></tr>
+<tr><td>0</td><td>SMB3</td><td><code>48/20/30</code></td><td><code>48/20/40</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled</td></tr>
+<tr><td>1</td><td>SMB3</td><td><code>43/30/30</code></td><td><code>43/30/30</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled</td></tr>
+<tr><td>2</td><td>SMB3</td><td><code>45/35/20</code></td><td><code>40/30/30</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled</td></tr>
+<tr><td>3</td><td>SMB3</td><td><code>41/10/20</code></td><td><code>35/12/25</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled</td></tr>
+<tr><td>4</td><td>SMB5</td><td><code>43/15/20</code></td><td><code>43/15/20</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled</td></tr>
+<tr><td>5</td><td>SMB5</td><td><code>42/20/25</code></td><td><code>52/18/25</code></td><td>bypass-lapse delta; production-lapse sideband</td><td><a href="phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv">phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv</a></td><td>normal-hit delay_hit_t plot present; older debug comparison still shows ASIC5 physical delta only when MTS lapse is bypassed</td></tr>
+<tr><td>6</td><td>SMB5</td><td><code>37/27/15</code></td><td><code>37/27/15</code></td><td>default production-lapse delta</td><td><a href="phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv">phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv</a></td><td>normal-hit delay_hit_t header-sync plot present; signed-window proxy is review-only until reference/sign is reconciled</td></tr>
+<tr><td>7</td><td>SMB5</td><td><code>40/20/25</code></td><td><code>30/14/40</code></td><td>-</td><td><a href="phase5_mutrig_restore_full32_tuned_baseline_20260430e.json">phase5_mutrig_restore_full32_tuned_baseline_20260430e.json</a></td><td>normal-hit delay_hit_t plot present; MTS discard remains a sub-1% fine-counter caveat</td></tr>
       </tbody>
     </table>
 

@@ -1,0 +1,45 @@
+{"argv": ["/data1/intelFPGA/18.1/quartus/sopc_builder/bin/system-console", "-cli", "-disable_readline", "-disable_timeout", "--project_dir=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3", "--jdi=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3/output_files_pipe/top_nostp_pipe.jdi", "--script=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/script/phase5_histogram_bin_dump.tcl", "--", "--profile", "delay-hit-t", "--out", "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_header_delay_asic0_hsync_ph05_hitdelay_20260501.csv", "--lane-filter", "0"], "elapsed_s": 8.158513492904603, "returncode": 0, "started": "2026-05-01T17:44:29", "timed_out": false, "timeout_s": 90.0}
+
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+--------------------------------------------------------------------------------
+ Version 18.1 625
+ Copyright (C) 2018 Intel Corporation. All rights reserved.
+ Your use of Intel Corporation's design tools, logic functions
+ and other software and tools, and its AMPP partner logic
+ functions, and any output files from any of the foregoing
+ (including device programming or simulation files), and any
+ associated documentation or information is expressly subject
+ to the terms and conditions of the Intel Program License
+ Subscription Agreement, the Intel Quartus Prime License Agreement,
+ the Intel MegaCore Function License Agreement, or other
+ applicable license agreement, including, without limitation,
+ that your use is for the sole purpose of programming logic
+ devices manufactured by Intel and sold by Intel or its
+ authorized distributors.  Please refer to the applicable
+ agreement for further details.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+ Welcome to Intel's FPGA System Console
+
+ This Tcl console provides access to the hardware modules instantiated in your
+ FPGA. You can use System Console for all of the following purposes:
+
+    * To start, stop, or step a Nios II processor
+    * To read or write Avalon Memory-Mapped (Avalon-MM) slaves using special
+     masters
+    * To sample the SOPC system clock as well as system reset signal
+    * To run JTAG loopback tests to analyze board noise problems
+    * To shift arbitrary instruction register and data register values to
+     instantiated system level debug (SLD) nodes
+
+ In addition, the directory <QuartusII Dir>/sopc_builder/system_console/scripts
+ contains Tcl files that provide miscellaneous utilities and examples of how to
+ access the functionality provided. You can include those macros in your
+ scripts by issuing Tcl source commands.
+--------------------------------------------------------------------------------
+% JTAG_PROBE master={/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(110:132 v1 #0)/phy_0/master} status=PROBED uid=0xffffffff
+JTAG_PROBE master={/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(110:132 v1 #1)/phy_1/master} status=PROBED uid=0x00000000
+JTAG_PROBE master={/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(70:34 v3 #0)/nios2_0} status=PROBED uid=0xffffffff
+JTAG_PROBE master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #0)/phy_0/master} status=PROBED uid=0x00000000
+JTAG_PROBE master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master} status=PROBED uid=0x48495354
+PHASE5_HIST_DUMP_RESULT status=OK profile=delay-hit-t lane_filter={0} out={/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_header_delay_asic0_hsync_ph05_hitdelay_20260501.csv} master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master} csr_base=0x00020400 bin_base=0x00020000 ingress_status={{base 0x00020C00 present 1 uid 0x48495342 raw 0x00000500 live_select_post 0 requested_select_post 0 switch_pending 0 pre_packet_active 1 post_packet_active 0 post_hit_filter_enabled 1 post_hit_region 0} {base 0x00020C10 present 1 uid 0x48495342 raw 0x00000400 live_select_post 0 requested_select_post 0 switch_pending 0 pre_packet_active 0 post_packet_active 0 post_hit_filter_enabled 1 post_hit_region 0}} wait_ms=1050 stats_before_wait={underflow_count 0 overflow_count 0 total_hits 5280 dropped_hits 0 coal_status 0x00000100 coal_occupancy 0 coal_occupancy_max 1 coal_queue_overflow_count 0 last_interval_total_hits 0 last_interval_dropped_hits 0} stats_after_wait={underflow_count 0 overflow_count 0 total_hits 239563 dropped_hits 0 coal_status 0x00000100 coal_occupancy 0 coal_occupancy_max 1 coal_queue_overflow_count 0 last_interval_total_hits 4395605 last_interval_dropped_hits 0} stats_after_read={underflow_count 0 overflow_count 0 total_hits 319883 dropped_hits 0 coal_status 0x00000100 coal_occupancy 0 coal_occupancy_max 1 coal_queue_overflow_count 0 last_interval_total_hits 4395605 last_interval_dropped_hits 0} underflow_delta_read=0 overflow_delta_read=0 config={preset_id delay_hit_t preset_label {Normal Hit T Delay} left -1000 right 3096 bin_width 16 key_loc 0x26231D11 key_value 0x00000000 control 0x00001011 interval_clocks 125000000 sample_interval_ms 1000 sample_guard_ms 50}
