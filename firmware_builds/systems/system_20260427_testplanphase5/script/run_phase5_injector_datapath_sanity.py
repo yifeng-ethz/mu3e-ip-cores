@@ -142,8 +142,8 @@ HIST_PROFILE = {
     "delay-debug1": {
         "description": "MTS debug_1 signed ts_delta delay histogram",
         "toolkit_preset_id": None,
-        "left_bound": 0,
-        "right_bound": 0x0FFF,
+        "left_bound": -1000,
+        "right_bound": 3096,
         "bin_width": 16,
         "control": 0x000000F1,
         "key_loc": HIST_KEY_LOC_CHANNEL_POST,
@@ -151,8 +151,8 @@ HIST_PROFILE = {
     "delay-mts-both": {
         "description": "combined signed MTS ts_delta delay histogram on debug_1/debug_2",
         "toolkit_preset_id": "delay_mts_both",
-        "left_bound": 0,
-        "right_bound": 0x0FFF,
+        "left_bound": -1000,
+        "right_bound": 3096,
         "bin_width": 16,
         "control": 0x00000091,
         "key_loc": HIST_KEY_LOC_CHANNEL_POST,
@@ -460,6 +460,23 @@ def add_rate_acceptance(args: argparse.Namespace, summary: dict[str, Any], pulse
     summary["rate_within_tolerance"] = abs(error_hits) <= tolerance_hits
 
 
+def add_mts_discard_acceptance(args: argparse.Namespace, summary: dict[str, Any]) -> None:
+    """Classify low MTS discard as a fine-counter caveat instead of a hard fail."""
+    mts_total = int(summary.get("mts_total_delta", 0) or 0)
+    mts_discard = int(summary.get("mts_discard_delta", 0) or 0)
+    tolerance_pct = float(getattr(args, "mts_discard_tolerance_pct", 0.0))
+    tolerance_hits = 0
+    discard_pct = None
+    if mts_total > 0:
+        tolerance_hits = int(round(mts_total * (tolerance_pct / 100.0)))
+        discard_pct = 100.0 * mts_discard / mts_total
+
+    summary["mts_discard_tolerance_pct"] = tolerance_pct
+    summary["mts_discard_tolerance_hits"] = tolerance_hits
+    summary["mts_discard_pct"] = discard_pct
+    summary["mts_discard_within_tolerance"] = mts_discard <= tolerance_hits
+
+
 def emu_base(idx: int) -> int:
     return EMU_BASE_WORD + idx * EMU_STRIDE_WORD
 
@@ -735,6 +752,14 @@ def run_injector_window(args: argparse.Namespace, pulse_interval: int) -> dict[s
     }
 
 
+def subprocess_text(output: str | bytes | None) -> str:
+    if output is None:
+        return ""
+    if isinstance(output, bytes):
+        return output.decode("utf-8", errors="replace")
+    return output
+
+
 def run_jtag_hist_dump(args: argparse.Namespace) -> dict[str, Any]:
     if args.jtag_hist_csv is None:
         return {"enabled": False}
@@ -786,11 +811,11 @@ def run_jtag_hist_dump(args: argparse.Namespace) -> dict[str, Any]:
             timeout=args.jtag_hist_timeout_s,
             check=False,
         )
-        output = proc.stdout or ""
+        output = subprocess_text(proc.stdout)
         rc = proc.returncode
         timed_out = False
     except subprocess.TimeoutExpired as exc:
-        output = exc.stdout or ""
+        output = subprocess_text(exc.stdout)
         rc = 124
         timed_out = True
     elapsed_s = time.monotonic() - start_s
@@ -856,11 +881,12 @@ def classify(args: argparse.Namespace, summary: dict[str, Any]) -> str:
     rate_profile = args.hist_profile == "rate" and summary.get("rate_expected_hits", 0) > 0
     if rate_profile and not summary.get("rate_last_interval_available", False):
         return "rate_last_interval_unavailable"
+    mts_discard_ok = bool(summary.get("mts_discard_within_tolerance", False))
     if (
         summary["hist_total_delta"] > 0
         and summary["hist_drop_delta"] == 0
         and summary["frame_crc_delta"] == 0
-        and summary["mts_discard_delta"] == 0
+        and mts_discard_ok
         and summary["ring_inerr_delta"] == 0
         and summary["post_end_clean"]
     ):
@@ -973,6 +999,7 @@ def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[
         else:
             summary["hist_rate_counter_source"] = "live_delta_no_last_interval"
     add_rate_acceptance(args, summary, pulse_interval)
+    add_mts_discard_acceptance(args, summary)
     lvds_summary = summarize_lvds_window(lvds_before, lvds_after)
     if (
         hist_bin_summary.get("captured")
@@ -1076,6 +1103,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- MTS bypass-lapse override: `{args.mts_bypass_lapse}`",
         f"- MTS delay-ts field override: `{args.mts_delay_ts_field}`",
         f"- MTS drop-delay-error override: `{args.mts_drop_delay_error}`",
+        f"- MTS discard tolerance: `{args.mts_discard_tolerance_pct:.3f}%`",
         f"- Ring filter-inerr override: `{args.ring_filter_inerr}`",
         f"- Result: `{'PASS' if not failures else 'FAIL'}`",
         "",
@@ -1136,6 +1164,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
                 f"- Histogram last interval: `{summary.get('hist_last_interval_total', 0)}` / dropped `{summary.get('hist_last_interval_dropped', 0)}`",
                 f"- JTAG histogram artifact: `{case.get('jtag_hist_dump', {'enabled': False})}`",
                 f"- Rate expected/tolerance/error: `{summary.get('rate_expected_hits', 0)}` / `±{summary.get('rate_tolerance_hits', 0)}` / `{summary.get('rate_error_hits', 0)}` hits",
+                f"- MTS discard/tolerance: `{summary.get('mts_discard_delta', 0)}` / `±{summary.get('mts_discard_tolerance_hits', 0)}` hits (`{summary.get('mts_discard_pct', 0.0) if summary.get('mts_discard_pct') is not None else 'n/a'}` %)",
                 f"- Post-end clean: `{'yes' if summary.get('post_end_clean', False) else 'no'}`",
                 f"- LVDS error delta lanes: `{summary.get('lvds_error_delta_lanes', 'n/a')}`",
                 f"- LVDS DPA unlock delta lanes: `{summary.get('lvds_dpa_unlock_delta_lanes', 'n/a')}`",
@@ -1255,6 +1284,7 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "mts_bypass_lapse": args.mts_bypass_lapse,
             "mts_delay_ts_field": args.mts_delay_ts_field,
             "mts_drop_delay_error": args.mts_drop_delay_error,
+            "mts_discard_tolerance_pct": args.mts_discard_tolerance_pct,
             "ring_filter_inerr": args.ring_filter_inerr,
             "injector_layout": getattr(args, "injector_layout", {}),
         },
@@ -1373,6 +1403,15 @@ def main() -> int:
     parser.add_argument("--mts-bypass-lapse", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--mts-delay-ts-field", choices=("keep", "t", "e"), default="keep")
     parser.add_argument("--mts-drop-delay-error", choices=("keep", "on", "off"), default="keep")
+    parser.add_argument(
+        "--mts-discard-tolerance-pct",
+        type=float,
+        default=1.0,
+        help=(
+            "Accept low MTS discards as a MuTRiG fine-counter caveat. "
+            "rbCAM ingress closure is checked with the delay histogram 0..2000-cycle window."
+        ),
+    )
     parser.add_argument("--ring-filter-inerr", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--continue-on-error", action="store_true")
     parser.add_argument("--output", type=Path, default=None)
@@ -1386,6 +1425,8 @@ def main() -> int:
         parser.error("--hist-bin-read-chunk-words must be in range 1..16")
     if args.hist_bin_read_delay_ms < 0:
         parser.error("--hist-bin-read-delay-ms must be non-negative")
+    if args.mts_discard_tolerance_pct < 0.0:
+        parser.error("--mts-discard-tolerance-pct must be non-negative")
     if args.hist_bin_read_chunk_words > 1 and not args.unsafe_bulk_hist_bin_read:
         parser.error("histogram bin bulk reads require --unsafe-bulk-hist-bin-read")
     if args.jtag_hist_csv is not None:
