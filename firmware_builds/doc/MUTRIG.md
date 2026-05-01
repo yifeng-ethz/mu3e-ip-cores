@@ -159,6 +159,19 @@ verify downstream MTS/RBCAM behavior separately. A flat rate histogram only
 proves the MuTRiG TDC-test source; it does not by itself clear the hit
 timestamp-delay gate.
 
+For physical mask-response sanity at `pulse_high_cycles=5`, the 2026-05-01
+seeded random sweep passed the expected source behavior:
+
+- LVDS-controller ASIC masks remove whole 32-channel global-channel blocks,
+  while enabled ASIC bins stay near 100 kHz/channel.
+- MuTRiG channel masks, applied identically to all eight ASICs with the CML
+  `0-8-0` flush after each reload, remove the repeated per-ASIC channel
+  pattern. The enabled-channel totals scale with the requested `11..22`
+  channels per ASIC and show zero histogram drops.
+
+This is a source-rate and masking check only. The same high-rate cases can
+still expose the separate MTS/RBCAM timestamp/ring-buffer blocker.
+
 ### LVDS Controller Register Observability
 
 The active FEB datapath exposes `lvds_rx_controller_pro_0.csr` through the
