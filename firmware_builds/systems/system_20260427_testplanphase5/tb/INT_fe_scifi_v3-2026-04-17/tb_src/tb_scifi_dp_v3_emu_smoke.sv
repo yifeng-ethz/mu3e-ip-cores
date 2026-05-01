@@ -60,9 +60,9 @@ module tb_scifi_dp_v3_emu_smoke;
     localparam logic [3:0]  FA_FS_PACK      = 4'd4;
     localparam time        TB_WATCHDOG      = 2s;
 
-    localparam logic [13:0] INJECTOR_CSR_MODE         = INJECTOR_CSR_BASE + 14'd0;
-    localparam logic [13:0] INJECTOR_CSR_PULSE_PERIOD = INJECTOR_CSR_BASE + 14'd5;
-    localparam logic [13:0] INJECTOR_CSR_PULSE_HIGH   = INJECTOR_CSR_BASE + 14'd6;
+    localparam logic [13:0] INJECTOR_CSR_MODE         = INJECTOR_CSR_BASE + 14'd2;
+    localparam logic [13:0] INJECTOR_CSR_PULSE_PERIOD = INJECTOR_CSR_BASE + 14'd7;
+    localparam logic [13:0] INJECTOR_CSR_PULSE_HIGH   = INJECTOR_CSR_BASE + 14'd8;
 
     logic clk_125 = 1'b0;
     logic clk_50  = 1'b0;
@@ -173,6 +173,31 @@ module tb_scifi_dp_v3_emu_smoke;
     logic [31:0] hist_dropped_status;
     logic [31:0] hist_underflow_status;
     logic [31:0] hist_overflow_status;
+    int hist0_delay_total_hits;
+    int hist0_delay_active_bins;
+    int hist0_delay_min_nonzero;
+    int hist0_delay_max_nonzero;
+    int hist0_delay_peak_bin;
+    int hist0_delay_peak_count;
+    int hist0_ctrl_sync_count;
+    int hist0_ctrl_running_count;
+    int hist0_ctrl_seen_count;
+    logic [31:0] hist0_cfg_interval_target;
+    int hist0_reset_high_count;
+    int hist0_interval_reset_high_count;
+    int hist0_interval_pulse_count;
+    int hist0_csr_error_seen_count;
+    int hist0_normal_delay_seen_count;
+    int hist0_bridge_valid_count [2];
+    int hist0_bridge_ready_count [2];
+    int hist0_bridge_fire_count [2];
+    int hist0_bridge_sop_fire_count [2];
+    int hist0_bridge_eop_fire_count [2];
+    logic [38:0] hist0_bridge_first_data [2];
+    logic [38:0] hist0_bridge_last_data [2];
+    logic [3:0]  hist0_bridge_first_channel [2];
+    logic [3:0]  hist0_bridge_last_channel [2];
+    bit hist0_bridge_first_seen [2];
     int rate_hist_total_hits;
     int rate_hist_active_bins;
     int rate_hist_min_nonzero;
@@ -255,6 +280,7 @@ module tb_scifi_dp_v3_emu_smoke;
     logic [4:0]        measure_burst_center_lane [8];
     string             rate_hist_csv_path;
     string             lat_hist_csv_path;
+    string             hist0_delay_csv_path;
     int pass_count;
     int fail_count;
     bit                trace_ts_enable;
@@ -1002,6 +1028,32 @@ module tb_scifi_dp_v3_emu_smoke;
             hist_max_nonzero         = 0;
             injector_top_pulse_count = 0;
             injector_qsys_pulse_count = 0;
+            hist0_delay_total_hits   = 0;
+            hist0_delay_active_bins  = 0;
+            hist0_delay_min_nonzero  = 0;
+            hist0_delay_max_nonzero  = 0;
+            hist0_delay_peak_bin     = -1;
+            hist0_delay_peak_count   = 0;
+            hist0_ctrl_sync_count    = 0;
+            hist0_ctrl_running_count = 0;
+            hist0_ctrl_seen_count    = 0;
+            hist0_reset_high_count = 0;
+            hist0_interval_reset_high_count = 0;
+            hist0_interval_pulse_count = 0;
+            hist0_csr_error_seen_count = 0;
+            hist0_normal_delay_seen_count = 0;
+            for (int hist_port = 0; hist_port < 2; hist_port++) begin
+                hist0_bridge_valid_count[hist_port] = 0;
+                hist0_bridge_ready_count[hist_port] = 0;
+                hist0_bridge_fire_count[hist_port] = 0;
+                hist0_bridge_sop_fire_count[hist_port] = 0;
+                hist0_bridge_eop_fire_count[hist_port] = 0;
+                hist0_bridge_first_data[hist_port] = '0;
+                hist0_bridge_last_data[hist_port] = '0;
+                hist0_bridge_first_channel[hist_port] = '0;
+                hist0_bridge_last_channel[hist_port] = '0;
+                hist0_bridge_first_seen[hist_port] = 1'b0;
+            end
             rate_hist_total_hits     = 0;
             rate_hist_active_bins    = 0;
             rate_hist_min_nonzero    = 0;
@@ -1672,6 +1724,91 @@ module tb_scifi_dp_v3_emu_smoke;
             end
             if (active_bins == 0)
                 min_nonzero = 0;
+        end
+    endtask
+
+    task automatic hist0_summary_peak(
+        output int unsigned total_hits,
+        output int unsigned active_bins,
+        output int unsigned min_nonzero,
+        output int unsigned max_nonzero,
+        output int          peak_bin,
+        output int unsigned peak_count
+    );
+        logic [31:0] value;
+        begin
+            total_hits  = 0;
+            active_bins = 0;
+            min_nonzero = '1;
+            max_nonzero = 0;
+            peak_bin    = -1;
+            peak_count  = 0;
+            for (int idx = 0; idx < 256; idx++) begin
+                avmm_read32(HIST0_BIN_BASE + idx[13:0], value);
+                total_hits += value;
+                if (value != 0) begin
+                    active_bins++;
+                    if (value < min_nonzero)
+                        min_nonzero = value;
+                    if (value > max_nonzero) begin
+                        max_nonzero = value;
+                        peak_count  = value;
+                        peak_bin    = idx;
+                    end
+                end
+            end
+            if (active_bins == 0)
+                min_nonzero = 0;
+        end
+    endtask
+
+    task automatic wait_hist0_interval_snapshot(input int unsigned max_cycles);
+        int unsigned cycles;
+        begin
+            cycles = 0;
+            while (hist0_interval_pulse_count == 0) begin
+                @(posedge lvds_outclock);
+                cycles++;
+                if (cycles > max_cycles)
+                    $fatal(1, "Hist0 interval snapshot timeout after %0d cycles", cycles);
+            end
+
+            // The interval pulse flips the ping-pong banks. Give the newly
+            // active bank enough time to clear before host readout starts.
+            repeat (2048) @(posedge lvds_outclock);
+        end
+    endtask
+
+    task automatic configure_hist0_normal_delay;
+        begin
+            hist0_cfg_interval_target = measure_run_cycles[31:0] + 32'd8192;
+            avmm_write32(HIST0_CSR_LEFT,      32'hffff_f000);
+            avmm_write32(HIST0_CSR_BIN_WIDTH, 32'd32);
+            avmm_write32(HIST0_CSR_KEY_LOC,   32'h0000_0000);
+            avmm_write32(HIST0_CSR_KEY_VALUE, 32'h0000_0000);
+            avmm_write32(HIST0_CSR_INTERVAL,  hist0_cfg_interval_target);
+            avmm_write32(HIST0_CSR_CONTROL,   32'h0000_0011);
+            wait_hist0_cfg_applied();
+        end
+    endtask
+
+    task automatic dump_hist0_delay_csv(input string path);
+        int fd;
+        logic [31:0] value;
+        int signed delay_min;
+        int signed delay_max;
+        begin
+            fd = $fopen(path, "w");
+            if (fd == 0)
+                $fatal(1, "Failed to open hist0 normal-delay CSV %s", path);
+            $fwrite(fd, "bin,delay_min_cycles,delay_max_cycles,count\n");
+            for (int idx = 0; idx < 256; idx++) begin
+                avmm_read32(HIST0_BIN_BASE + idx[13:0], value);
+                delay_min = -4096 + (idx * 32);
+                delay_max = delay_min + 31;
+                $fwrite(fd, "%0d,%0d,%0d,%0d\n", idx, delay_min, delay_max, value);
+            end
+            $fclose(fd);
         end
     endtask
 
@@ -2449,6 +2586,8 @@ module tb_scifi_dp_v3_emu_smoke;
         .i_clk                       (lvds_outclock),
         .i_rst                       (avmm_rst || !xcvr_rst_n),
         .i_interval_reset            (1'b0),
+        .i_ctrl_data                  (runctl_data),
+        .i_ctrl_valid                 (runctl_valid),
         .i_stream_valid              (pre_rbcam_hist_stream_valid),
         .i_stream_sop                (pre_rbcam_hist_stream_sop),
         .i_stream_eop                (pre_rbcam_hist_stream_eop),
@@ -2498,6 +2637,8 @@ module tb_scifi_dp_v3_emu_smoke;
         .i_clk                       (clk_125),
         .i_rst                       (avmm_rst || !xcvr_rst_n),
         .i_interval_reset            (1'b0),
+        .i_ctrl_data                  (runctl_data),
+        .i_ctrl_valid                 (runctl_valid),
         .i_stream_valid              (emu_lat_hist_stream_valid),
         .i_stream_sop                (emu_lat_hist_stream_sop),
         .i_stream_eop                (emu_lat_hist_stream_eop),
@@ -3089,6 +3230,62 @@ module tb_scifi_dp_v3_emu_smoke;
     always_ff @(posedge lvds_outclock) begin
         injector_top_pulse_count  <= injector_top_pulse_count + (inject_pulse ? 1 : 0);
         injector_qsys_pulse_count <= injector_qsys_pulse_count + (injector_qsys_pulse ? 1 : 0);
+        hist0_reset_high_count <= hist0_reset_high_count
+                                + (dut_wrap.dut.rst_controller_001_reset_out_reset ? 1 : 0);
+        hist0_interval_reset_high_count <= hist0_interval_reset_high_count
+                                         + (dut_wrap.dut.rst_controller_003_reset_out_reset ? 1 : 0);
+        hist0_interval_pulse_count <= hist0_interval_pulse_count
+                                    + (dut_wrap.dut.histogram_statistics_0.interval_pulse ? 1 : 0);
+        hist0_csr_error_seen_count <= hist0_csr_error_seen_count
+                                    + (dut_wrap.dut.histogram_statistics_0.csr_error ? 1 : 0);
+        hist0_normal_delay_seen_count <= hist0_normal_delay_seen_count
+                                       + (dut_wrap.dut.histogram_statistics_0.cfg_normal_delay_t ? 1 : 0);
+        if (dut_wrap.dut.avalon_st_adapter_010_out_0_valid
+         && dut_wrap.dut.avalon_st_adapter_010_out_0_ready) begin
+            hist0_ctrl_seen_count <= hist0_ctrl_seen_count + 1;
+            if (dut_wrap.dut.avalon_st_adapter_010_out_0_data == CTRL_SYNC)
+                hist0_ctrl_sync_count <= hist0_ctrl_sync_count + 1;
+            if (dut_wrap.dut.avalon_st_adapter_010_out_0_data == CTRL_RUNNING)
+                hist0_ctrl_running_count <= hist0_ctrl_running_count + 1;
+        end
+        if (dut_wrap.dut.histogram_ingress_bridge_0_hist_out_valid)
+            hist0_bridge_valid_count[0] <= hist0_bridge_valid_count[0] + 1;
+        if (dut_wrap.dut.histogram_ingress_bridge_0_hist_out_ready)
+            hist0_bridge_ready_count[0] <= hist0_bridge_ready_count[0] + 1;
+        if (dut_wrap.dut.histogram_ingress_bridge_0_hist_out_valid
+         && dut_wrap.dut.histogram_ingress_bridge_0_hist_out_ready) begin
+            hist0_bridge_fire_count[0] <= hist0_bridge_fire_count[0] + 1;
+            hist0_bridge_sop_fire_count[0] <= hist0_bridge_sop_fire_count[0]
+                                            + (dut_wrap.dut.histogram_ingress_bridge_0_hist_out_startofpacket ? 1 : 0);
+            hist0_bridge_eop_fire_count[0] <= hist0_bridge_eop_fire_count[0]
+                                            + (dut_wrap.dut.histogram_ingress_bridge_0_hist_out_endofpacket ? 1 : 0);
+            if (!hist0_bridge_first_seen[0]) begin
+                hist0_bridge_first_seen[0] <= 1'b1;
+                hist0_bridge_first_data[0] <= dut_wrap.dut.histogram_ingress_bridge_0_hist_out_data;
+                hist0_bridge_first_channel[0] <= dut_wrap.dut.histogram_ingress_bridge_0_hist_out_channel;
+            end
+            hist0_bridge_last_data[0] <= dut_wrap.dut.histogram_ingress_bridge_0_hist_out_data;
+            hist0_bridge_last_channel[0] <= dut_wrap.dut.histogram_ingress_bridge_0_hist_out_channel;
+        end
+        if (dut_wrap.dut.histogram_ingress_bridge_1_hist_out_valid)
+            hist0_bridge_valid_count[1] <= hist0_bridge_valid_count[1] + 1;
+        if (dut_wrap.dut.histogram_ingress_bridge_1_hist_out_ready)
+            hist0_bridge_ready_count[1] <= hist0_bridge_ready_count[1] + 1;
+        if (dut_wrap.dut.histogram_ingress_bridge_1_hist_out_valid
+         && dut_wrap.dut.histogram_ingress_bridge_1_hist_out_ready) begin
+            hist0_bridge_fire_count[1] <= hist0_bridge_fire_count[1] + 1;
+            hist0_bridge_sop_fire_count[1] <= hist0_bridge_sop_fire_count[1]
+                                            + (dut_wrap.dut.histogram_ingress_bridge_1_hist_out_startofpacket ? 1 : 0);
+            hist0_bridge_eop_fire_count[1] <= hist0_bridge_eop_fire_count[1]
+                                            + (dut_wrap.dut.histogram_ingress_bridge_1_hist_out_endofpacket ? 1 : 0);
+            if (!hist0_bridge_first_seen[1]) begin
+                hist0_bridge_first_seen[1] <= 1'b1;
+                hist0_bridge_first_data[1] <= dut_wrap.dut.histogram_ingress_bridge_1_hist_out_data;
+                hist0_bridge_first_channel[1] <= dut_wrap.dut.histogram_ingress_bridge_1_hist_out_channel;
+            end
+            hist0_bridge_last_data[1] <= dut_wrap.dut.histogram_ingress_bridge_1_hist_out_data;
+            hist0_bridge_last_channel[1] <= dut_wrap.dut.histogram_ingress_bridge_1_hist_out_channel;
+        end
         for (int lane = 0; lane < 8; lane++) begin
             injector_fanout_pulse_count[lane] <= injector_fanout_pulse_count[lane]
                                                + (injector_fanout_pulse[lane] ? 1 : 0);
@@ -3196,6 +3393,7 @@ module tb_scifi_dp_v3_emu_smoke;
         end
         rate_hist_csv_path = $sformatf("%s/pre_rbcam_rate_hist.csv", measure_report_dir);
         lat_hist_csv_path  = $sformatf("%s/emulator_dispatch_latency_hist.csv", measure_report_dir);
+        hist0_delay_csv_path = $sformatf("%s/hist0_normal_hit_delay.csv", measure_report_dir);
         trace_detail_path  = $sformatf("%s/emulator_timestamp_trace.csv", measure_report_dir);
         if (trace_ts_enable) begin
             trace_detail_fd = $fopen(trace_detail_path, "w");
@@ -3255,10 +3453,14 @@ module tb_scifi_dp_v3_emu_smoke;
             wait_local_hist_cfg_applied(1'b0);
             clear_local_hist(1'b0);
             wait_local_hist_quiescent(1'b0, 16384);
+            configure_hist0_normal_delay();
+            clear_hist0();
+            repeat (2048) @(posedge lvds_outclock);
             reset_counters();
             enter_running();
             repeat (measure_run_cycles) @(posedge lvds_outclock);
             leave_running_with_drain(measure_short_mode ? 2048 : 4096);
+            wait_hist0_interval_snapshot(measure_run_cycles + 65536);
             flush_pre_rbcam_hist_shadow(1_000_000);
             flush_latency_hist_shadow(1_000_000);
             freeze_local_hist(1'b1);
@@ -3302,8 +3504,17 @@ module tb_scifi_dp_v3_emu_smoke;
                 lat_hist_underflow_status,
                 lat_hist_overflow_status
             );
+            hist0_summary_peak(
+                hist0_delay_total_hits,
+                hist0_delay_active_bins,
+                hist0_delay_min_nonzero,
+                hist0_delay_max_nonzero,
+                hist0_delay_peak_bin,
+                hist0_delay_peak_count
+            );
             dump_rate_hist_csv(rate_hist_csv_path);
             dump_latency_hist_csv(lat_hist_csv_path);
+            dump_hist0_delay_csv(hist0_delay_csv_path);
 
             report_emulator_status("PRE_RBCAM_MEAS");
             if (measure_use_periodic_injector) begin
@@ -3414,6 +3625,52 @@ module tb_scifi_dp_v3_emu_smoke;
                 lat_hist_underflow_status,
                 lat_hist_overflow_status
             );
+            $display(
+                "TB_HIST0_NORMAL_DELAY total=%0d active=%0d min_nonzero=%0d max_nonzero=%0d peak_bin=%0d peak_count=%0d csv=%s ctrl_sync=%0d ctrl_running=%0d ctrl_seen=%0d",
+                hist0_delay_total_hits,
+                hist0_delay_active_bins,
+                hist0_delay_min_nonzero,
+                hist0_delay_max_nonzero,
+                hist0_delay_peak_bin,
+                hist0_delay_peak_count,
+                hist0_delay_csv_path,
+                hist0_ctrl_sync_count,
+                hist0_ctrl_running_count,
+                hist0_ctrl_seen_count
+            );
+            $display(
+                "TB_HIST0_RESET rst_high=%0d interval_reset_high=%0d",
+                hist0_reset_high_count,
+                hist0_interval_reset_high_count
+            );
+            $display(
+                "TB_HIST0_INTERVAL target=0x%08h pulse_count=%0d",
+                hist0_cfg_interval_target,
+                hist0_interval_pulse_count
+            );
+            $display(
+                "TB_HIST0_CFG_DIRECT csr_error_seen=%0d normal_delay_seen=%0d cfg_normal_delay_now=%0b cfg_apply_pending_now=%0b",
+                hist0_csr_error_seen_count,
+                hist0_normal_delay_seen_count,
+                dut_wrap.dut.histogram_statistics_0.cfg_normal_delay_t,
+                dut_wrap.dut.histogram_statistics_0.cfg_apply_pending
+            );
+            for (int hist_port = 0; hist_port < 2; hist_port++) begin
+                $display(
+                    "TB_HIST0_INGRESS port=%0d valid_cycles=%0d ready_cycles=%0d fire=%0d sop_fire=%0d eop_fire=%0d first_seen=%0d first_channel=0x%0h first_data=0x%010h last_channel=0x%0h last_data=0x%010h",
+                    hist_port,
+                    hist0_bridge_valid_count[hist_port],
+                    hist0_bridge_ready_count[hist_port],
+                    hist0_bridge_fire_count[hist_port],
+                    hist0_bridge_sop_fire_count[hist_port],
+                    hist0_bridge_eop_fire_count[hist_port],
+                    hist0_bridge_first_seen[hist_port],
+                    hist0_bridge_first_channel[hist_port],
+                    hist0_bridge_first_data[hist_port],
+                    hist0_bridge_last_channel[hist_port],
+                    hist0_bridge_last_data[hist_port]
+                );
+            end
             for (int lane = 0; lane < 8; lane++) begin
                 $display(
                     "TB_MEAS_LAT_QUEUE lane=%0d live_max=%0d frozen_max=%0d live_residual=%0d frozen_residual=%0d overwrites=%0d",
@@ -3430,6 +3687,14 @@ module tb_scifi_dp_v3_emu_smoke;
             check("Pre-RBCAM measurement produced accepted type1 words", hit_stack_ingress_word_count > 0);
             check("Pre-RBCAM rate histogram CSR reported no configuration error", rate_hist_ctrl_word[24] == 1'b0);
             check("Pre-RBCAM latency histogram CSR reported no configuration error", lat_hist_ctrl_word[24] == 1'b0);
+            check("Generated hist0 saw RUN_SYNC on its ctrl sink", hist0_ctrl_sync_count > 0);
+            check("Generated hist0 normal-delay config applied with no direct CSR error", hist0_csr_error_seen_count == 0);
+            check("Generated hist0 normal-delay mode was active", hist0_normal_delay_seen_count > 0);
+            check("Generated hist0 interval reset stayed deasserted during measurement", hist0_interval_reset_high_count == 0);
+            check("Generated hist0 produced a ping-pong interval snapshot", hist0_interval_pulse_count > 0);
+            check("Generated hist0 ingress bridge accepted type1 words", (hist0_bridge_fire_count[0] + hist0_bridge_fire_count[1]) > 0);
+            check("Generated hist0 normal-delay histogram counted all accepted type1 payloads", hist0_delay_total_hits == hit_stack_ingress_payload_word_count);
+            check("Generated hist0 normal-delay histogram had no range loss", hist0_delay_total_hits == (hist0_bridge_fire_count[0] + hist0_bridge_fire_count[1]));
             if (require_no_mts_errors)
                 check("Pre-RBCAM measurement saw no MTS timestamp errors", hit_stack_ingress_payload_error_word_count == 0);
             if (rate_hist_total_hits != hit_stack_ingress_payload_word_count) begin

@@ -35,6 +35,8 @@ entity tb_int_histogram_wrap is
         i_clk                       : in  std_logic;
         i_rst                       : in  std_logic;
         i_interval_reset            : in  std_logic;
+        i_ctrl_data                  : in  std_logic_vector(8 downto 0) := (others => '0');
+        i_ctrl_valid                 : in  std_logic := '0';
 
         i_stream_valid              : in  std_logic_vector(7 downto 0);
         i_stream_sop                : in  std_logic_vector(7 downto 0);
@@ -226,8 +228,8 @@ begin
             aso_hist_fill_out_endofpacket   => unused_fill_out_eop,
             aso_hist_fill_out_channel       => unused_fill_out_ch,
 
-            asi_ctrl_data                   => (others => '0'),
-            asi_ctrl_valid                  => '0',
+            asi_ctrl_data                   => i_ctrl_data,
+            asi_ctrl_valid                  => i_ctrl_valid,
             asi_ctrl_ready                  => unused_ctrl_ready,
 
             asi_debug_1_valid               => '0',
