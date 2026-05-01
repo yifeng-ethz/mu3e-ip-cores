@@ -2866,6 +2866,16 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="mts_preprocessor_0.debug_ts"
+   end="histogram_statistics_0.debug_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mts_preprocessor_1.debug_ts"
+   end="histogram_statistics_0.debug_2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="lvds_rx_controller_pro_0.decoded0"
    end="mutrig_lane_source_mux_0.real_in" />
  <connection
@@ -3243,16 +3253,6 @@
    version="18.1"
    start="mutrig_lane_source_mux_7.selected_out"
    end="mutrig_datapath_subsystem_7.decoded_din" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mts_preprocessor_0.ts_delta"
-   end="histogram_statistics_0.debug_1" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mts_preprocessor_1.ts_delta"
-   end="histogram_statistics_0.debug_2" />
  <connection
    kind="avalon_streaming"
    version="18.1"

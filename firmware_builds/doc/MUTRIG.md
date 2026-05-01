@@ -106,20 +106,21 @@ The current Phase-6 restore-load tuning ledger is:
 | 6 | `37/27/15` | `37/27/15` | default production-lapse gives a one-bin head-sync delta | `phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv` |
 | 7 | `40/20/25` | `30/14/40` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
 
-Per-ASIC head-sync delay histogram artifacts are now tracked for all eight
-ASICs under `reports/assets/phase6_header_delay_asic_YYYYMMDD_TAG/`, with one
-DISLIN plot per ASIC plus a TSV summary. The current accepted format includes
-the dominant delay peak and the rbCAM ingress accept-window ratio for
-`0..2000` cycles. Do not replace these with the stale `vco000` captures; those
-are invalidated as PLL-lock evidence by the zero-vcodelay rule below.
+Per-ASIC head-sync delay histogram artifacts are tracked for all eight ASICs
+under `reports/assets/phase6_header_delay_asic_YYYYMMDD_TAG/`, with one DISLIN
+plot per ASIC plus a TSV summary. The accepted format must identify the signal
+source. Valid rbCAM-latency evidence uses MTS `debug_ts`, defined in the MTS
+RTL as `counter_gts_8n - selected_timestamp`; MTS `ts_delta` is only an
+inter-hit timestamp-delta diagnostic and must not be used as a latency proxy.
 
-The current plotted checkpoint is
-`reports/assets/phase6_header_delay_asic_20260501_hdrch_mts1pct/`. ASIC0 and
-ASIC4 are clean at the rbCAM window proxy, ASIC1/2/3/5/7 are below `1%`, and
-ASIC6 is the current delay-tail anomaly at about `1.158%` out of the rbCAM
-`0..2000` window after including histogram underflow. ASIC7's MTS discard is
-about `0.044%`; treat that as the fine-counter caveat described below, not as
-the primary rbCAM-loss metric.
+The checkpoint
+`reports/assets/phase6_header_delay_asic_20260501_hdrch_mts1pct/` is
+invalidated for rbCAM latency closure because `debug_1/2` were wired to
+`mts_preprocessor_*.ts_delta`. The plots are still useful as a harness
+diagnostic proving per-ASIC lane masking and `header_channel` selection, but
+the zero-centered peak is not physical latency. A valid rerun should show a
+finite-offset peak, not exact zero, with an expected width around `100..500`
+cycles and a quantified population outside the `0..2000` rbCAM accept window.
 
 ### Active Phase-5 Injection Path
 
@@ -255,10 +256,10 @@ For the accepted latency gate, pass `--mts-expected-latency 2000
 --mts-delay-ts-field t`. A measurement with ring-buffer CAM input latency
 outside `0..2000` cycles is rejected even if the hit counters advance.
 
-For header-sync delay tuning, the primary reject metric is the delay histogram
-population outside the rbCAM ingress window, not the raw MTS discard counter.
-Capture the signed delay histogram over at least `[-1000, 3096]` cycles, then
-compute:
+For header-sync delay tuning, the primary reject metric is the MTS `debug_ts`
+latency histogram population outside the rbCAM ingress window, not the raw MTS
+discard counter. Capture the signed `debug_ts` histogram over at least
+`[-1000, 3096]` cycles, then compute:
 
 ```text
 rbCAM accepted fraction = hits with 0 <= delay <= 2000 / total delay-bin hits

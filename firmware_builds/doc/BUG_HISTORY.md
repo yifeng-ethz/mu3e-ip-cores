@@ -23,6 +23,7 @@ Class legend:
 | [P6-BUG-009-H](#p6-bug-009-h-qsys-catalog-picked-stale-system-and-package-paths-during-mts-rebuild) | H | fixed; Qsys regeneration and FEB compile/program pass | 2026-05-01 | The MTS lookback rebuild was blocked by stale system `.qsys` catalog entries, a nested stale `mutrig_frame_deassembly` version pin, and a package rooted at `script/rtl`. |
 | [P6-BUG-010-R](#p6-bug-010-r-live-100-khz-rate-bin-dump-read-the-active-histogram-bank) | R | fixed; post-fix real sweep complete, downstream MTS still open | 2026-05-01 | Real-MuTRiG 100 kHz/channel sweeps reached the expected aggregate histogram rate, but per-channel bins alternated between frozen and partial-current intervals because deferred ping-pong reads selected the active bank. |
 | [P6-BUG-011-H](#p6-bug-011-h-header-sync-asic-scan-starved-the-injector-by-watching-a-masked-lane) | H | fixed; scan script sets matching header channel | 2026-05-01 | The first per-ASIC header-sync delay scan masked to ASIC1..7 while the injector still watched header channel 0, producing false zero-hit artifacts. |
+| [P6-BUG-012-R](#p6-bug-012-r-header-sync-delay-plots-used-mts-ts_delta-instead-of-debug_ts) | R | source patched; recompile/rerun required | 2026-05-01 | All-eight header-sync plots peaked exactly at zero because the histogram debug ports were wired to MTS `ts_delta`, an inter-hit timestamp-delta diagnostic, not `debug_ts` latency. |
 
 ## 2026-05-01
 
@@ -340,6 +341,35 @@ Class legend:
   - MTS discard below `1%` is recorded as a MuTRiG fine-counter caveat. It is
     not the primary latency-closure metric when the coarse delay stays inside
     the rbCAM window.
+
+### P6-BUG-012-R: header-sync delay plots used MTS ts_delta instead of debug_ts
+
+- First seen in:
+  `reports/assets/phase6_header_delay_asic_20260501_hdrch_mts1pct/`, where all
+  eight ASIC header-sync plots peaked at the bin centered on `0` cycles.
+- Symptom:
+  - A real hit should not have zero construction latency into rbCAM.
+  - The expected header-sync latency shape is a finite-offset peak with a
+    physical width of about `100..500` cycles, inside the `0..2000` rbCAM
+    accept window after the run sequence has synchronized the MuTRiG timestamp.
+  - The exact zero peak therefore invalidates the plotted rbCAM drop proxy,
+    even though the histogram bin range and signed mode were internally
+    consistent.
+- Root cause:
+  the generated pipe system connected `mts_preprocessor_0.ts_delta` and
+  `mts_preprocessor_1.ts_delta` to `histogram_statistics_0.debug_1/2`.
+  MTS `ts_delta` is the signed delta between adjacent hit timestamps, so
+  header-synchronous injection naturally collapses near zero. The physical MTS
+  latency stream is `debug_ts = counter_gts_8n - selected_timestamp`.
+- Fix status:
+  source patched. `scifi_datapath_system_v3_pipe.tcl` and the active `.qsys`
+  now connect `mts_preprocessor_*.debug_ts` to histogram `debug_1/2`; toolkit
+  labels and report text now reject `ts_delta` as latency evidence.
+- Required evidence:
+  regenerate/compile the FEB image, rerun the all-eight real-MuTRiG
+  header-sync scan, and only accept DISLIN delay plots whose peak has finite
+  latency, visible width, and a quantified out-of-window population against the
+  `0..2000` rbCAM accept window.
 
 ## 2026-04-30
 

@@ -56,7 +56,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
 
         set histogram_delay_mts_both_preset [dict create \
                 id "delay_mts_both" \
-                label "Upper+Lower MTS Delay" \
+                label "Upper+Lower MTS debug_ts Latency" \
                 sample_interval_ms 1000 \
                 sample_guard_ms 50 \
                 field_values [dict create \
@@ -76,7 +76,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
 
         set histogram_delay_mts_upper_preset [dict create \
                 id "delay_mts_upper" \
-                label "Upper MTS Delay" \
+                label "Upper MTS debug_ts Latency" \
                 sample_interval_ms 1000 \
                 sample_guard_ms 50 \
                 field_values [dict create \
@@ -96,7 +96,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
 
         set histogram_delay_mts_lower_preset [dict create \
                 id "delay_mts_lower" \
-                label "Lower MTS Delay" \
+                label "Lower MTS debug_ts Latency" \
                 sample_interval_ms 1000 \
                 sample_guard_ms 50 \
                 field_values [dict create \

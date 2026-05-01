@@ -250,13 +250,18 @@ for {set lane 0} {$lane < 8} {incr lane} {
 }
 
 # Phase-5 delay histograms must observe both hit-stack halves. Rewire the
-# optional histogram debug inputs so mode -7 samples the signed timestamp-delta
-# streams from both MTS preprocessors. Keep the ring-CAM fill-level streams on
-# debug_3..6; the older MTS debug_burst stream is sacrificed in this build
-# because the histogram IP exposes six debug sinks total.
+# optional histogram debug inputs so mode -7 samples the signed MTS hit-latency
+# streams from both MTS preprocessors. `ts_delta` is only an inter-hit
+# timestamp-delta diagnostic; using it as latency creates a false zero-centered
+# plot. Keep the ring-CAM fill-level streams on debug_3..6; the older MTS
+# debug_burst stream is sacrificed in this build because the histogram IP
+# exposes six debug sinks total.
 foreach path {
     mts_preprocessor_0.debug_burst/histogram_statistics_0.debug_6
     mts_preprocessor_0.ts_delta/histogram_statistics_0.debug_1
+    mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1
+    mts_preprocessor_1.ts_delta/histogram_statistics_0.debug_2
+    mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2
     hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_2
     hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_3
     hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_4
@@ -264,8 +269,8 @@ foreach path {
 } {
     remove_connection_if_present $path
 }
-add_connection mts_preprocessor_0.ts_delta/histogram_statistics_0.debug_1
-add_connection mts_preprocessor_1.ts_delta/histogram_statistics_0.debug_2
+add_connection mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1
+add_connection mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2
 add_connection hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_3
 add_connection hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_4
 add_connection hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5

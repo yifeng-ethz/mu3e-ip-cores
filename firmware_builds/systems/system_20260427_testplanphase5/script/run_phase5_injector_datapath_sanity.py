@@ -140,7 +140,7 @@ HIST_PROFILE = {
         "key_loc": HIST_KEY_LOC_GLOBAL_CHANNEL_POST,
     },
     "delay-debug1": {
-        "description": "MTS debug_1 signed ts_delta delay histogram",
+        "description": "MTS debug_1 signed debug_ts latency histogram",
         "toolkit_preset_id": None,
         "left_bound": -1000,
         "right_bound": 3096,
@@ -149,7 +149,7 @@ HIST_PROFILE = {
         "key_loc": HIST_KEY_LOC_CHANNEL_POST,
     },
     "delay-mts-both": {
-        "description": "combined signed MTS ts_delta delay histogram on debug_1/debug_2",
+        "description": "combined signed MTS debug_ts latency histogram on debug_1/debug_2",
         "toolkit_preset_id": "delay_mts_both",
         "left_bound": -1000,
         "right_bound": 3096,
@@ -562,7 +562,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
     8 x 32-channel FEB.
 
     `delay-debug1` uses histogram_statistics mode -1, which is wired in this
-    firmware to mts_preprocessor_0.ts_delta via the debug_1 stream.
+    firmware to mts_preprocessor_0.debug_ts via the debug_1 stream.
     `delay-mts-both` selects mode -7 in the 26.1.4 histogram image, sampling
     debug_1 and debug_2 together so upper and lower MTS preprocessors share one
     delay PDF.

@@ -758,7 +758,10 @@ def artifact_status_rows() -> str:
     for key, title, contract in required:
         artifact = artifacts.get(key, {"status": "missing", "reason": "not in manifest"})
         status = artifact.get("status", "missing")
-        if status == "present":
+        if key.startswith("header_delay") and status in {"present", "anomaly"}:
+            status_label = "INVALID"
+            contract = "Invalidated: this artifact was captured from MTS ts_delta, not debug_ts latency."
+        elif status == "present":
             status_label = "PASS"
         elif status == "anomaly":
             status_label = "ANOMALY"
@@ -815,7 +818,10 @@ def artifact_figures() -> str:
             path = HIST_ARTIFACT_DIR / path
         if not path.exists():
             continue
-        caption_parts = [str(artifact.get("kind", path.name))]
+        artifact_kind = str(artifact.get("kind", path.name))
+        caption_parts = [artifact_kind]
+        if artifact_kind.startswith("header_delay"):
+            caption_parts.append("INVALID ts_delta source")
         if artifact.get("status") == "anomaly":
             caption_parts.append("ANOMALY")
         if artifact.get("visual_checkpoint"):
@@ -880,7 +886,7 @@ def header_delay_figures() -> str:
     return (
         "<figure>"
         f"<a href=\"{esc(rel(contact))}\"><img src=\"{esc(rel(contact))}\" alt=\"all ASIC header-sync delay contact sheet\"></a>"
-        "<figcaption>Header-sync delay per ASIC. The green boundary marks the rbCAM 2000-cycle upper accept edge; the table below quantifies the out-of-window discard proxy.</figcaption>"
+        "<figcaption>Invalidated header-sync ts_delta diagnostic per ASIC. The green boundary was drawn for the rbCAM latency window, but this artifact used inter-hit timestamp delta, not MTS debug_ts latency.</figcaption>"
         "</figure>"
     )
 
@@ -912,7 +918,7 @@ def header_delay_rows() -> str:
         except (TypeError, ValueError):
             peak = proxy = 0.0
             ring_inerr = hist_hits = 0
-        status = "PASS" if hist_hits > 0 and ring_inerr == 0 and peak >= 0.90 and proxy <= 0.01 else "ANOMALY"
+        status = "INVALID"
         rows.append(
             "<tr>"
             f"<td>{esc(row.get('asic', '-'))}</td>"
@@ -1577,10 +1583,11 @@ def write_html() -> None:
       The live histogram CSR setup must use the FE SciFi toolkit presets from
       <code>toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl</code>.
       For delay closure, the active pipe image is the only valid lower-side
-      source: <code>debug_1</code> is upper MTS <code>ts_delta</code> and
-      <code>debug_2</code> is lower MTS <code>ts_delta</code>. Older
-      non-pipe/latency images with upper-only debug wiring are rejected for
-      all-eight-ASIC delay conclusions.
+      source: <code>debug_1</code> must be upper MTS <code>debug_ts</code>
+      and <code>debug_2</code> must be lower MTS <code>debug_ts</code>.
+      <code>ts_delta</code> is an inter-hit timestamp-delta diagnostic and is
+      rejected as rbCAM-latency evidence because it can make a false
+      zero-centered peak.
     </p>
     <div class="plot-grid">
 {artifact_figures()}
@@ -1601,14 +1608,14 @@ def write_html() -> None:
 
     <h2>Phase-6 Header-Sync Delay by ASIC</h2>
     <p>
-      These DISLIN plots isolate one real MuTRiG ASIC at a time with the LVDS
-      lane mask and set <code>header_channel=ASIC</code>, so the header-sync
-      injector monitors the same active lane. The acceptance calculation is
-      explicit: bins with <code>0 &lt;= delay &lt;= 2000</code> estimate hits
-      entering rbCAM, while bins outside that range plus histogram
-      underflow/overflow estimate rbCAM ingress rejects. MTS discard below
-      <code>1%</code> is recorded as a fine-counter caveat, not the primary
-      reject metric.
+      The existing all-ASIC DISLIN plots are invalidated as rbCAM latency
+      evidence. They isolated one real MuTRiG ASIC at a time correctly, but the
+      histogram debug inputs were wired to MTS <code>ts_delta</code>, which is
+      the signed delta between adjacent hit timestamps. A physical hit cannot
+      have zero construction latency into rbCAM; the valid plot must use MTS
+      <code>debug_ts = counter_gts_8n - selected_timestamp</code> and should
+      show a narrow peak with finite offset, normally with about 100..500
+      cycles of width inside the <code>0..2000</code> accept window.
     </p>
     <div class="plot-grid">
 {header_delay_figures()}
@@ -1622,7 +1629,7 @@ def write_html() -> None:
           <th>Total Delay Hits</th>
           <th>Peak</th>
           <th>0..2000 In-Band</th>
-          <th>rbCAM Drop Proxy</th>
+          <th>Invalid rbCAM Proxy</th>
           <th>&lt;0 / &gt;2000 Hits</th>
           <th>UF / OF During 1 s</th>
           <th>UF / OF During Read</th>
@@ -1736,12 +1743,12 @@ def write_html() -> None:
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>
           <td>Starting from no-hit zero <code>vcodelay</code>, restore nonzero ASIC defaults, run <code>RUN_PREPARE</code>, and tune until the delay histogram moves from broad/flat toward one dominant bin.</td>
-          <td>The lane-mask/header-channel scan now plots ASICs 0..7. The plotted acceptance handle is the rbCAM <code>0..2000</code> in-window ratio. Sub-1% MTS discard is marked as a fine-counter caveat instead of the main fail condition.</td>
+          <td>The lane-mask/header-channel scan covered ASICs 0..7, but its delay artifact is invalidated because the histogram source was <code>ts_delta</code>. Recompile/regenerate with <code>debug_1/2=debug_ts</code>, then repeat the scan and use the rbCAM <code>0..2000</code> in-window ratio.</td>
         </tr>
         <tr>
           <td>Upper/lower delay input coverage</td>
           <td>Delay histograms must isolate both source 0 (upper MTS) and source 1 (lower MTS), with lower-side evidence covering ASICs 4..7.</td>
-          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>. Upper ASICs 0..3 and lower ASICs 4..7 now have per-ASIC real plotted evidence using matched <code>header_channel</code>.</td>
+          <td>The source Qsys patch now connects <code>mts_preprocessor_0.debug_ts</code> to <code>debug_1</code> and <code>mts_preprocessor_1.debug_ts</code> to <code>debug_2</code>. The current all-ASIC plots remain invalid until a fresh firmware image is compiled and the real-MuTRiG scan is rerun.</td>
         </tr>
         <tr>
           <td>Histogram-bin capture method</td>
