@@ -56,17 +56,31 @@ def resolve_catalog_path(path_text, root, relative_var):
         prefixes.extend((f"${relative_var}/", f"${{{relative_var}}}/"))
     for prefix in prefixes:
         if path_text.startswith(prefix):
-            return (root / path_text[len(prefix) :]).resolve(strict=False)
+            return Path(os.path.abspath(root / path_text[len(prefix) :]))
     path = Path(path_text)
     if not path.is_absolute():
         path = root / path
-    return path.resolve(strict=False)
+    return Path(os.path.abspath(path))
 
 
 def is_excluded_path(path, root):
     try:
         rel_path = path.relative_to(root)
     except ValueError:
+        return True
+    if (
+        len(rel_path.parts) >= 3
+        and rel_path.parts[0] == "firmware_builds"
+        and rel_path.parts[1] == "systems"
+        and path.suffix == ".qsys"
+    ):
+        return True
+    if (
+        len(rel_path.parts) >= 3
+        and rel_path.parts[0] == "mutrig_frame_deassembly"
+        and rel_path.parts[1] == "script"
+        and path.name == "mutrig_frame_deassembly_hw.tcl"
+    ):
         return True
     for part in rel_path.parts:
         if part in EXCLUDED_PARTS:
@@ -119,11 +133,11 @@ def rewrite_nested_paths(entry, root, relative_var, catalog_dir):
         for key, value in list(node.attrib.items()):
             resolved_path = None
             if value.startswith(root_prefix):
-                resolved_path = Path(value).resolve(strict=False)
+                resolved_path = Path(os.path.abspath(value))
             else:
                 for prefix in prefixes:
                     if value.startswith(prefix):
-                        resolved_path = (root / value[len(prefix) :]).resolve(strict=False)
+                        resolved_path = Path(os.path.abspath(root / value[len(prefix) :]))
                         break
             if not resolved_path:
                 continue

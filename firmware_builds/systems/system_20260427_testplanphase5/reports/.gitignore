@@ -23,6 +23,10 @@
 !assets/phase5_mutrig_tuning_20260430/phase5_histogram_artifacts_manifest.json
 !assets/phase5_mutrig_tuning_20260430/*.png
 !phase5_rate_per_channel_1s_20260501.csv
+!phase5_rate_per_channel_1s_20260501_allchan*.csv
+!phase5_rate_per_channel_1s_20260501_allchan*.json
+!phase5_rate_per_channel_1s_20260501_allchan*.log
+!phase5_rate_per_channel_1s_20260501_allchan*.md
 !phase6_headsync_lane5_default_jtag_nodisplay_20260501.csv
 !phase6_headsync_lane5_default_jtag_nodisplay_20260501.json
 !phase6_headsync_lane5_cnt52_vcd18_mtslat2000_jtag_nodisplay_20260501.csv

@@ -27,9 +27,10 @@
 -- Revision 1.34 - YW: Replace synthetic idle EOP with a dedicated end-of-run pulse after the final drain frame.
 -- Revision 1.35 - YW: Guard TERMINATING idle-close until the upstream byte lane stays quiet long enough for a delayed final frame.
 -- Revision 1.36 - YW: Close TERMINATING on the first empty frame and keep the idle guard only as a fallback.
--- Version : 26.0.6
--- Date    : 20260417
--- Change  : Repository layout / packaging metadata refresh after the rtl/ + script/ split. No functional RTL change.
+-- Revision 1.37 - YW: Keep the dedicated CRC_CHECK cycle alive on idle-BC return so bad-CRC frames retire the sideband pulse and counter coherently.
+-- Version : 26.0.7
+-- Date    : 20260501
+-- Change  : Add packaging identity generics so the Qsys metadata and generated HDL wrapper stay coherent.
 
 -- Additional Comments:
 --      IP wrapper layer: 
@@ -55,6 +56,14 @@ generic (
     -- +------------+
 	CHANNEL_WIDTH           : natural := 4; -- width of the avst <channel> signal 
     CSR_ADDR_WIDTH          : natural := 2; -- width of the avmm csr <address> signal
+    IP_UID                  : integer := 1179804502; -- ASCII "FRCV" = 0x46524356
+    VERSION_MAJOR           : integer := 26;
+    VERSION_MINOR           : integer := 0;
+    VERSION_PATCH           : integer := 7;
+    BUILD                   : integer := 501;
+    VERSION_DATE            : integer := 20260501;
+    VERSION_GIT             : integer := 0;
+    INSTANCE_ID             : integer := 0;
     -- +----------------+
     -- | Error Handling |
     -- +----------------+
@@ -92,7 +101,7 @@ port(
     -- <bit2>           <bit1>      <bit0>
     -- =============================================================
 	-- "frame_corrupt" "crc_error" "hit_error"
-    -- crc_error available at "eop"
+    -- crc_error available as a post-frame sideband pulse
 	-- hit_error available at "valid"
 	aso_hit_type0_data				: out std_logic_vector(44 downto 0); -- valid is a seperate signal below
 	aso_hit_type0_valid 			: out std_logic;
@@ -748,12 +757,15 @@ begin
 		sop_comb			<= '0';
 		eop_comb			<= '0';
 
-        if ( i_byteisk = '1' and i_data = x"BC" ) then
+        if ( i_byteisk = '1' and i_data = x"BC" and p_state /= FS_CRC_CHECK ) then
             -- ---------------------------------------
             -- YW: restore to idle in the next cycle
             -- ---------------------------------------
             -- NOTE:    this is not a valid condition to happen during a frame transmission
             --          you must capture the exception yourself
+            --          Keep the dedicated CRC_CHECK cycle alive even if the
+            --          source has already returned to idle BC so the bad-CRC
+            --          flag and counter update can retire coherently.
             -- --------------
             -- "IDLE" mode
             -- --------------

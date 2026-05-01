@@ -34,6 +34,7 @@ proc usage {} {
     puts "  system-console -cli --jdi <top.jdi> --script=phase5_histogram_bin_dump.tcl --"
     puts "      --profile <rate|delay|header> --out <bins.csv>"
     puts "      optional: --wait-ms <preset interval + guard> --lane-filter <0..7> --csr-base 0x00020400 --bin-base 0x00020000"
+    puts "      optional: --rate-ingress-base-list 0x00020C00,0x00020C10"
 }
 
 proc parse_i {text} {
@@ -45,6 +46,36 @@ proc parse_i {text} {
 
 proc hex32 {value} {
     return [format "0x%08X" [expr {$value & 0xffffffff}]]
+}
+
+proc split_u32_csv {text default_values} {
+    if {$text eq ""} {
+        return $default_values
+    }
+    set out [list]
+    foreach item [split $text ","] {
+        set trimmed [string trim $item]
+        if {$trimmed eq ""} {
+            continue
+        }
+        lappend out [parse_i $trimmed]
+    }
+    if {[llength $out] == 0} {
+        error "empty integer CSV list '$text'"
+    }
+    return $out
+}
+
+proc decode_ingress_status {word} {
+    return [list \
+        raw [hex32 $word] \
+        live_select_post [expr {$word & 0x1}] \
+        requested_select_post [expr {($word >> 1) & 0x1}] \
+        switch_pending [expr {($word >> 2) & 0x1}] \
+        pre_packet_active [expr {($word >> 8) & 0x1}] \
+        post_packet_active [expr {($word >> 9) & 0x1}] \
+        post_hit_filter_enabled [expr {($word >> 10) & 0x1}] \
+        post_hit_region [expr {($word >> 11) & 0x1}]]
 }
 
 proc preset_spec_by_id {preset_id} {
@@ -154,6 +185,44 @@ proc wait_apply_clear {svc csr_base} {
     error "histogram apply_pending did not clear"
 }
 
+proc select_rate_ingress_pre {svc ingress_bases} {
+    set rows [list]
+    set present_count 0
+    foreach base $ingress_bases {
+        if {[catch {set uid [read_csr_word $svc $base 0]} err]} {
+            puts "PHASE5_HIST_DUMP_WARN ingress_base=[hex32 $base] status=UID_READ_FAIL err={$err}"
+            lappend rows [list base [hex32 $base] present 0 error "UID_READ_FAIL"]
+            continue
+        }
+        if {$uid != 0x48495342} {
+            puts "PHASE5_HIST_DUMP_WARN ingress_base=[hex32 $base] status=UID_MISMATCH uid=[hex32 $uid]"
+            lappend rows [list base [hex32 $base] present 0 uid [hex32 $uid] error "UID_MISMATCH"]
+            continue
+        }
+
+        write_csr_word $svc $base 2 0
+        set decoded [list]
+        for {set idx 0} {$idx < 100} {incr idx} {
+            set status [read_csr_word $svc $base 3]
+            set decoded [decode_ingress_status $status]
+            array set st $decoded
+            if {$st(live_select_post) == 0 && $st(requested_select_post) == 0 && $st(switch_pending) == 0} {
+                incr present_count
+                lappend rows [concat [list base [hex32 $base] present 1 uid [hex32 $uid]] $decoded]
+                break
+            }
+            after 10
+        }
+        if {$idx >= 100} {
+            error "histogram ingress bridge at [hex32 $base] did not switch to pre stream: $decoded"
+        }
+    }
+    if {$present_count == 0} {
+        error "no histogram ingress bridge responded at bases $ingress_bases"
+    }
+    return $rows
+}
+
 proc configure_histogram {svc csr_base profile lane_filter} {
     set preset_id [preset_id_for_profile $profile $lane_filter]
     set config [config_from_preset $preset_id]
@@ -189,7 +258,7 @@ proc configure_histogram {svc csr_base profile lane_filter} {
 if {[catch {
     lassign [::board_test::jtag::parse_args \
         $argv \
-        {profile out wait-ms lane-filter csr-base bin-base master-pattern fallback-pattern service-tag} \
+        {profile out wait-ms lane-filter csr-base bin-base rate-ingress-base-list master-pattern fallback-pattern service-tag} \
         {}] opt_kvs positional
     array set opts $opt_kvs
 
@@ -219,6 +288,7 @@ if {[catch {
     if {$opts(bin-base) ne ""} {
         set bin_base [parse_i $opts(bin-base)]
     }
+    set ingress_bases [split_u32_csv $opts(rate-ingress-base-list) [list 0x00020C00 0x00020C10]]
     set service_tag $::board_test::jtag::default_service_tag
     if {$opts(service-tag) ne ""} {
         set service_tag $opts(service-tag)
@@ -233,6 +303,10 @@ if {[catch {
     set svc [dict get $claim service]
     set master_path [dict get $claim path]
 
+    set ingress_status [list]
+    if {$profile eq "rate"} {
+        set ingress_status [select_rate_ingress_pre $svc $ingress_bases]
+    }
     set config [configure_histogram $svc $csr_base $profile $lane_filter]
     if {$wait_ms eq ""} {
         set wait_ms [expr {[dict get $config sample_interval_ms] + [dict get $config sample_guard_ms]}]
@@ -261,6 +335,7 @@ if {[catch {
         master "{$master_path}" \
         csr_base [hex32 $csr_base] \
         bin_base [hex32 $bin_base] \
+        ingress_status "{$ingress_status}" \
         wait_ms $wait_ms \
         config "{$config}"]
 } err]} {

@@ -32,6 +32,16 @@
 --		Change: Latch last-interval accepted and dropped hit counters
 --		        before the rate-window reset so a host can read a stable
 --		        one-second rate without racing TOTAL_HITS reset.
+-- Revision: 1.10
+--		Date: May 1, 2026
+--		Change: Register decoded debug-mode flags at configuration apply
+--		        time so the CSR mode field does not sit in the hot ingress
+--		        write-request timing cone.
+-- Revision: 1.11
+--		Date: May 1, 2026
+--		Change: Register the selected debug-source sample before ingress
+--		        filtering so static debug-source selection is not in the
+--		        same-cycle write-request path.
 -- Revision: 1.3
 --		Date: Apr 25, 2026
 --		Change: Parameterize the ingress FIFO depth for bursty post-stack
@@ -104,10 +114,10 @@ entity histogram_statistics_v2 is
         N_DEBUG_INTERFACE        : natural := 6;
         VERSION_MAJOR            : natural := 26;
         VERSION_MINOR            : natural := 1;
-        VERSION_PATCH            : natural := 6;
-        BUILD                    : natural := 429;
+        VERSION_PATCH            : natural := 7;
+        BUILD                    : natural := 501;
         IP_UID                   : natural := 1212765012;  -- ASCII "HIST" = 0x48495354
-        VERSION_DATE             : natural := 20260429;
+        VERSION_DATE             : natural := 20260501;
         VERSION_GIT              : natural := 375124078;
         INSTANCE_ID              : natural := 0;
         SNOOP_EN                 : boolean := true;
@@ -357,6 +367,18 @@ architecture rtl of histogram_statistics_v2 is
     signal cfg_filter_key_low_port : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(7 downto 0) := (others => to_unsigned(FILTER_KEY_BIT_LO, 8));
     signal cfg_filter_key_high_port: hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(7 downto 0) := (others => to_unsigned(FILTER_KEY_BIT_HI, 8));
     signal cfg_filter_key_port     : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(SAR_KEY_WIDTH - 1 downto 0) := (others => (others => '0'));
+    signal cfg_debug_negative      : std_logic := '0';
+    signal cfg_debug_dual_mts      : std_logic := '0';
+    signal cfg_debug_signed_key    : std_logic := '0';
+    signal cfg_debug_source        : unsigned(2 downto 0) := (others => '0');
+    signal cfg_debug_mode_abs      : unsigned(7 downto 0) := (others => '0');
+    signal cfg_debug_active_port   : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal debug_single_valid_d1   : std_logic := '0';
+    signal debug_single_data_d1    : std_logic_vector(15 downto 0) := (others => '0');
+    signal debug_single_source_d1  : unsigned(7 downto 0) := (others => '0');
+    signal debug_dual_valid_d1     : std_logic_vector(1 downto 0) := (others => '0');
+    signal debug_dual_data0_d1     : std_logic_vector(15 downto 0) := (others => '0');
+    signal debug_dual_data1_d1     : std_logic_vector(15 downto 0) := (others => '0');
 
     signal status_active_bank_shadow        : std_logic := '0';
     signal status_flushing_shadow           : std_logic := '0';
@@ -430,33 +452,26 @@ architecture rtl of histogram_statistics_v2 is
     end function build_key;
 
     function build_debug_key(
-        debug_mode : integer;
+        signed_key : std_logic;
         data_word  : std_logic_vector(15 downto 0)
     ) return std_logic_vector is
         variable result_v : tick_t := (others => '0');
     begin
-        case debug_mode is
-            when -1 | -7 =>
-                result_v := resize(signed(data_word), SAR_TICK_WIDTH);
-            when others =>
-                result_v := signed(resize(unsigned(data_word), SAR_TICK_WIDTH));
-        end case;
+        if signed_key = '1' then
+            result_v := resize(signed(data_word), SAR_TICK_WIDTH);
+        else
+            result_v := signed(resize(unsigned(data_word), SAR_TICK_WIDTH));
+        end if;
         return std_logic_vector(result_v);
     end function build_debug_key;
 
     function build_debug_filter_word(
-        debug_source : natural;
-        debug_mode   : integer;
+        debug_source : unsigned(7 downto 0);
+        debug_mode   : unsigned(7 downto 0);
         data_word    : std_logic_vector(15 downto 0)
     ) return std_logic_vector is
         variable result_v : std_logic_vector(AVST_DATA_WIDTH - 1 downto 0) := (others => '0');
-        variable source_v : unsigned(7 downto 0) := to_unsigned(debug_source, 8);
-        variable mode_v   : unsigned(7 downto 0) := (others => '0');
     begin
-        if debug_mode < 0 then
-            mode_v := to_unsigned(-debug_mode, 8);
-        end if;
-
         for bit_idx_v in 0 to 15 loop
             if bit_idx_v <= result_v'high then
                 result_v(bit_idx_v) := data_word(bit_idx_v);
@@ -465,10 +480,10 @@ architecture rtl of histogram_statistics_v2 is
 
         for bit_idx_v in 0 to 7 loop
             if bit_idx_v + 16 <= result_v'high then
-                result_v(bit_idx_v + 16) := source_v(bit_idx_v);
+                result_v(bit_idx_v + 16) := debug_source(bit_idx_v);
             end if;
             if bit_idx_v + 24 <= result_v'high then
-                result_v(bit_idx_v + 24) := mode_v(bit_idx_v);
+                result_v(bit_idx_v + 24) := debug_mode(bit_idx_v);
             end if;
         end loop;
 
@@ -567,17 +582,67 @@ begin
         end if;
     end process hist_writeresp_reg;
 
+    debug_capture_reg : process (i_clk)
+    begin
+        if rising_edge(i_clk) then
+            if i_rst = '1' or measure_clear_pulse = '1' or cfg_apply_pending = '1' then
+                debug_single_valid_d1  <= '0';
+                debug_single_data_d1   <= (others => '0');
+                debug_single_source_d1 <= (others => '0');
+                debug_dual_valid_d1    <= (others => '0');
+                debug_dual_data0_d1    <= (others => '0');
+                debug_dual_data1_d1    <= (others => '0');
+            elsif cfg_debug_negative = '1' then
+                debug_dual_valid_d1(0) <= asi_debug_1_valid;
+                debug_dual_valid_d1(1) <= asi_debug_2_valid;
+                debug_dual_data0_d1    <= asi_debug_1_data;
+                debug_dual_data1_d1    <= asi_debug_2_data;
+                debug_single_source_d1 <= resize(cfg_debug_source, debug_single_source_d1'length);
+
+                case to_integer(cfg_debug_source) is
+                    when 0 =>
+                        debug_single_valid_d1 <= asi_debug_1_valid;
+                        debug_single_data_d1  <= asi_debug_1_data;
+                    when 1 =>
+                        debug_single_valid_d1 <= asi_debug_2_valid;
+                        debug_single_data_d1  <= asi_debug_2_data;
+                    when 2 =>
+                        debug_single_valid_d1 <= asi_debug_3_valid;
+                        debug_single_data_d1  <= asi_debug_3_data;
+                    when 3 =>
+                        debug_single_valid_d1 <= asi_debug_4_valid;
+                        debug_single_data_d1  <= asi_debug_4_data;
+                    when 4 =>
+                        debug_single_valid_d1 <= asi_debug_5_valid;
+                        debug_single_data_d1  <= asi_debug_5_data;
+                    when 5 =>
+                        debug_single_valid_d1 <= asi_debug_6_valid;
+                        debug_single_data_d1  <= asi_debug_6_data;
+                    when others =>
+                        debug_single_valid_d1 <= '0';
+                        debug_single_data_d1  <= (others => '0');
+                end case;
+            else
+                debug_single_valid_d1  <= '0';
+                debug_single_data_d1   <= (others => '0');
+                debug_single_source_d1 <= (others => '0');
+                debug_dual_valid_d1    <= (others => '0');
+                debug_dual_data0_d1    <= (others => '0');
+                debug_dual_data1_d1    <= (others => '0');
+            end if;
+        end if;
+    end process debug_capture_reg;
+
     ingress_comb : process (all)
         variable sampled_v         : std_logic;
         variable stream_ready_v    : std_logic;
         variable stream_sampled_v  : std_logic;
         variable filter_pass_v     : boolean;
-        variable debug_mode_v      : integer;
         variable debug_dual_mts_v  : boolean;
         variable debug_active_v    : boolean;
         variable debug_valid_v     : std_logic;
         variable debug_data_v      : std_logic_vector(15 downto 0);
-        variable debug_source_v    : natural;
+        variable debug_source_v    : unsigned(7 downto 0);
         variable debug_filter_v    : std_logic_vector(AVST_DATA_WIDTH - 1 downto 0);
     begin
         fifo_write        <= (others => '0');
@@ -588,43 +653,14 @@ begin
         ingress_accept    <= (others => '0');
         ingress_write_req <= (others => '0');
         ingress_key_next  <= (others => (others => '0'));
-        debug_mode_v     := to_integer(signed(cfg_mode));
-        debug_dual_mts_v := debug_mode_v = -7;
+        debug_dual_mts_v := cfg_debug_dual_mts = '1';
         debug_valid_v    := '0';
         debug_data_v     := (others => '0');
-        debug_source_v   := 0;
+        debug_source_v   := (others => '0');
         debug_filter_v   := (others => '0');
 
-        case debug_mode_v is
-            when -1 =>
-                debug_valid_v := asi_debug_1_valid;
-                debug_data_v  := asi_debug_1_data;
-            when -2 =>
-                debug_valid_v := asi_debug_2_valid;
-                debug_data_v  := asi_debug_2_data;
-            when -3 =>
-                debug_valid_v := asi_debug_3_valid;
-                debug_data_v  := asi_debug_3_data;
-            when -4 =>
-                debug_valid_v := asi_debug_4_valid;
-                debug_data_v  := asi_debug_4_data;
-            when -5 =>
-                debug_valid_v := asi_debug_5_valid;
-                debug_data_v  := asi_debug_5_data;
-            when -6 =>
-                debug_valid_v := asi_debug_6_valid;
-                debug_data_v  := asi_debug_6_data;
-            when others =>
-                null;
-        end case;
-
         for idx in 0 to MAX_PORTS_CONST - 1 loop
-            debug_active_v := false;
-            if debug_dual_mts_v and idx < 2 then
-                debug_active_v := true;
-            elsif debug_mode_v < 0 and idx = 0 then
-                debug_active_v := true;
-            end if;
+            debug_active_v := cfg_debug_active_port(idx) = '1';
 
             if (idx < N_PORTS) or debug_active_v then
                 stream_ready_v   := '0';
@@ -647,26 +683,27 @@ begin
                 port_ready(idx) <= stream_ready_v;
 
                 sampled_v := stream_sampled_v;
-                if debug_mode_v < 0 then
-                    debug_source_v := 0;
+                if cfg_debug_negative = '1' then
+                    debug_source_v := debug_single_source_d1;
+                    debug_valid_v  := debug_single_valid_d1;
+                    debug_data_v   := debug_single_data_d1;
                     if debug_dual_mts_v then
                         case idx is
                             when 0 =>
-                                debug_valid_v := asi_debug_1_valid;
-                                debug_data_v  := asi_debug_1_data;
-                                debug_source_v := 0;
+                                debug_valid_v  := debug_dual_valid_d1(0);
+                                debug_data_v   := debug_dual_data0_d1;
+                                debug_source_v := (others => '0');
                             when 1 =>
-                                debug_valid_v := asi_debug_2_valid;
-                                debug_data_v  := asi_debug_2_data;
-                                debug_source_v := 1;
+                                debug_valid_v  := debug_dual_valid_d1(1);
+                                debug_data_v   := debug_dual_data1_d1;
+                                debug_source_v := to_unsigned(1, debug_source_v'length);
                             when others =>
-                                debug_valid_v := '0';
-                                debug_data_v  := (others => '0');
-                                debug_source_v := 0;
+                                debug_valid_v  := '0';
+                                debug_data_v   := (others => '0');
+                                debug_source_v := (others => '0');
                         end case;
                         sampled_v := debug_valid_v and not cfg_apply_pending;
                     elsif idx = 0 then
-                        debug_source_v := natural((-debug_mode_v) - 1);
                         sampled_v := debug_valid_v and not cfg_apply_pending;
                     else
                         sampled_v := '0';
@@ -677,14 +714,14 @@ begin
                 ingress_accept(idx) <= sampled_v;
 
                 if sampled_v = '1' then
-                    if debug_mode_v < 0 then
+                    if cfg_debug_negative = '1' then
                         ingress_key_next(idx) <= build_debug_key(
-                            debug_mode => debug_mode_v,
+                            signed_key => cfg_debug_signed_key,
                             data_word  => debug_data_v
                         );
                         debug_filter_v := build_debug_filter_word(
                             debug_source => debug_source_v,
-                            debug_mode   => debug_mode_v,
+                            debug_mode   => cfg_debug_mode_abs,
                             data_word    => debug_data_v
                         );
 
@@ -1123,6 +1160,8 @@ begin
 
     cfg_apply_reg : process (i_clk)
         variable ingress_empty_v : boolean;
+        variable mode_v          : integer;
+        variable mode_abs_v      : natural;
     begin
         if rising_edge(i_clk) then
             if i_rst = '1' then
@@ -1141,6 +1180,12 @@ begin
                 cfg_update_key      <= (others => '0');
                 cfg_filter_key      <= (others => '0');
                 cfg_interval_cfg    <= to_unsigned(DEF_INTERVAL_CLOCKS, 32);
+                cfg_debug_negative  <= '0';
+                cfg_debug_dual_mts  <= '0';
+                cfg_debug_signed_key <= '0';
+                cfg_debug_source    <= (others => '0');
+                cfg_debug_mode_abs  <= (others => '0');
+                cfg_debug_active_port <= (others => '0');
                 for idx in 0 to MAX_PORTS_CONST - 1 loop
                     cfg_filter_enable_port(idx)  <= '0';
                     cfg_filter_reject_port(idx)  <= '0';
@@ -1179,6 +1224,31 @@ begin
                         cfg_filter_key_high_port(idx) <= csr_filter_key_high;
                         cfg_filter_key_port(idx)     <= csr_filter_key;
                     end loop;
+
+                    mode_v := to_integer(signed(csr_mode));
+                    cfg_debug_negative    <= '0';
+                    cfg_debug_dual_mts    <= '0';
+                    cfg_debug_signed_key  <= '0';
+                    cfg_debug_source      <= (others => '0');
+                    cfg_debug_mode_abs    <= (others => '0');
+                    cfg_debug_active_port <= (others => '0');
+
+                    if mode_v < 0 then
+                        mode_abs_v := natural(-mode_v);
+                        cfg_debug_negative <= '1';
+                        cfg_debug_mode_abs <= to_unsigned(mode_abs_v, cfg_debug_mode_abs'length);
+                        if (mode_v = -1) or (mode_v = -7) then
+                            cfg_debug_signed_key <= '1';
+                        end if;
+                        if mode_v = -7 then
+                            cfg_debug_dual_mts <= '1';
+                            cfg_debug_active_port(0) <= '1';
+                            cfg_debug_active_port(1) <= '1';
+                        elsif mode_abs_v <= 6 then
+                            cfg_debug_source <= to_unsigned(mode_abs_v - 1, cfg_debug_source'length);
+                            cfg_debug_active_port(0) <= '1';
+                        end if;
+                    end if;
                 elsif cfg_apply_request = '1' then
                     cfg_apply_pending <= '1';
                 end if;

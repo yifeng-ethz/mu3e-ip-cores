@@ -28,9 +28,9 @@
 -- Revision 1.35 - YW: Guard TERMINATING idle-close until the upstream byte lane stays quiet long enough for a delayed final frame.
 -- Revision 1.36 - YW: Close TERMINATING on the first empty frame and keep the idle guard only as a fallback.
 -- Revision 1.37 - YW: Keep the dedicated CRC_CHECK cycle alive on idle-BC return so bad-CRC frames retire the sideband pulse and counter coherently.
--- Version : 26.0.6
--- Date    : 20260418
--- Change  : Keep CRC_CHECK alive on idle-BC return for bad-CRC accounting, then refresh the packaging/formal metadata around the verified fix batch.
+-- Version : 26.0.7
+-- Date    : 20260501
+-- Change  : Add packaging identity generics so the Qsys metadata and generated HDL wrapper stay coherent.
 
 -- Additional Comments:
 --      IP wrapper layer: 
@@ -56,6 +56,14 @@ generic (
     -- +------------+
 	CHANNEL_WIDTH           : natural := 4; -- width of the avst <channel> signal 
     CSR_ADDR_WIDTH          : natural := 2; -- width of the avmm csr <address> signal
+    IP_UID                  : integer := 1179804502; -- ASCII "FRCV" = 0x46524356
+    VERSION_MAJOR           : integer := 26;
+    VERSION_MINOR           : integer := 0;
+    VERSION_PATCH           : integer := 7;
+    BUILD                   : integer := 501;
+    VERSION_DATE            : integer := 20260501;
+    VERSION_GIT             : integer := 0;
+    INSTANCE_ID             : integer := 0;
     -- +----------------+
     -- | Error Handling |
     -- +----------------+

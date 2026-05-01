@@ -5,11 +5,11 @@
  version="1.0"
  fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2026.05.01.04:51:24 -->
+ <!-- 2026.05.01.08:17:40 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1777603883</value>
+  <value>1777616259</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -248,7 +248,7 @@
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -9692,7 +9692,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-   <value>1777603883</value>
+   <value>1777616259</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -9712,7 +9712,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-   <value>1777603883</value>
+   <value>1777616259</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -9728,7 +9728,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>
@@ -12518,7 +12518,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -36180,7 +36180,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -57440,7 +57440,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -72532,7 +72532,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -105408,7 +105408,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mts_preprocessor_0"
    kind="mts_preprocessor"
-   version="26.0.8.427"
+   version="26.0.9.501"
    path="data_path_subsystem.mts_preprocessor_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -105526,7 +105526,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>2</value>
+   <value>9</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -105534,7 +105534,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>416</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -105542,7 +105542,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260416</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -105558,7 +105558,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>30068584</value>
+   <value>76878657</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -106917,7 +106917,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mts_preprocessor_1"
    kind="mts_preprocessor"
-   version="26.0.8.427"
+   version="26.0.9.501"
    path="data_path_subsystem.mts_preprocessor_1">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -107035,7 +107035,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>2</value>
+   <value>9</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -107043,7 +107043,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>416</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -107051,7 +107051,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260416</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -107067,7 +107067,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>30068584</value>
+   <value>76878657</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -108432,7 +108432,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -111000,7 +111000,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_0_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -111062,7 +111062,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -111070,7 +111070,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -111078,7 +111078,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -111089,12 +111089,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -112487,7 +112487,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -115055,7 +115055,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_1_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -115117,7 +115117,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -115125,7 +115125,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -115133,7 +115133,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -115144,12 +115144,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -116542,7 +116542,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -119110,7 +119110,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_2_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -119172,7 +119172,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -119180,7 +119180,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -119188,7 +119188,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -119199,12 +119199,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -120597,7 +120597,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -123165,7 +123165,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_3_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -123227,7 +123227,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -123235,7 +123235,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -123243,7 +123243,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -123254,12 +123254,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -124652,7 +124652,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -127220,7 +127220,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_4_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -127282,7 +127282,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -127290,7 +127290,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -127298,7 +127298,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -127309,12 +127309,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -128707,7 +128707,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -131275,7 +131275,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_5_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -131337,7 +131337,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -131345,7 +131345,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -131353,7 +131353,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -131364,12 +131364,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -132762,7 +132762,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -135330,7 +135330,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_6_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -135392,7 +135392,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -135400,7 +135400,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -135408,7 +135408,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -135419,12 +135419,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -136817,7 +136817,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -139385,7 +139385,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_mutrig_datapath_subsystem_7_mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.418"
+   version="26.0.7.501"
    path="data_path_subsystem.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -139447,7 +139447,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -139455,7 +139455,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>418</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -139463,7 +139463,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260418</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -139474,12 +139474,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>21260387</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -158775,7 +158775,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777603883</value>
+   <value>1777616259</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -187571,7 +187571,7 @@ parameters are a RESULT of the module parameters. -->
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
   <displayName>MuTRiG Timestamp Processor</displayName>
-  <version>26.0.8.427</version>
+  <version>26.0.9.501</version>
  </plugin>
  <plugin>
   <instanceCount>8</instanceCount>
@@ -187595,7 +187595,7 @@ parameters are a RESULT of the module parameters. -->
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
   <displayName>MuTRiG Frame Deassembly</displayName>
-  <version>26.0.6.418</version>
+  <version>26.0.7.501</version>
  </plugin>
  <plugin>
   <instanceCount>1</instanceCount>

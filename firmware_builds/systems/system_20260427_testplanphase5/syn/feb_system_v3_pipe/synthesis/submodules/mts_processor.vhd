@@ -41,9 +41,16 @@
 --      Date: Apr 25, 2026
 -- Revision: 5.14 (Add timestamp-delay error forward/drop policy for MuTRiG bring-up)
 --      Date: Apr 27, 2026
--- Version : 26.0.8
--- Date    : 20260427
--- Change  : Register the corrected divider numerators in hit_prediv, then split divider launch and
+-- Revision: 5.15 (Expose overflow lookback as a runtime CSR for Phase-6 lapse tuning)
+--      Date: May 01, 2026
+-- Version : 26.0.9
+-- Date    : 20260501
+-- Change  : CONTROL_STATUS-compatible CSR word 5 now exposes the overflow disambiguation lookback in
+--           8 ns ticks. Runtime writes update the 1.6 ns lookback window and padding threshold together,
+--           clamped to the non-negative MuTRiG wrap range, so Phase-6 hardware tuning can distinguish
+--           physical MuTRiG lock from MTS lapse-window misclassification without rebuilding the IP for
+--           every candidate value.
+--           Register the corrected divider numerators in hit_prediv, then split divider launch and
 --           ToT subtraction into separate cycles. A one-cycle delayed copy of the divider outputs keeps
 --           the quotient/remainder aligned with the metadata shift pipeline. External RESET / OUT_OF_DAQ
 --           words now collapse to IDLE in the local control agent because this IP has no dedicated
@@ -140,7 +147,15 @@ generic (
     LPM_DIV_PIPELINE		: natural := 4;
     MUTRIG_BUFFER_EXPECTED_LATENCY_8N		: natural := 2000; -- affects the error signal on <hit_type1>
     MUTRIG_OVERFLOW_LOOKBACK_8N               : natural := 2000; -- controls post-wrap epoch disambiguation only
-    DEBUG					: natural := 1
+    DEBUG					: natural := 1;
+    IP_UID                  : integer := 1297376080;
+    VERSION_MAJOR           : integer := 26;
+    VERSION_MINOR           : integer := 0;
+    VERSION_PATCH           : integer := 9;
+    BUILD                   : integer := 501;
+    VERSION_DATE            : integer := 20260501;
+    VERSION_GIT             : integer := 0;
+    INSTANCE_ID             : integer := 0
 );
 port (
 
@@ -370,6 +385,7 @@ architecture rtl of mts_processor is
         drop_delay_error        : std_logic;
         discard_hiterr          : std_logic;
         expected_latency        : std_logic_vector(31 downto 0);
+        overflow_lookback       : std_logic_vector(31 downto 0);
     end record;
     signal csr                  : csr_t := (
         go                   => '1',
@@ -380,7 +396,8 @@ architecture rtl of mts_processor is
         bypass_lapse         => '0',
         drop_delay_error     => '0',
         discard_hiterr       => '1',
-        expected_latency     => std_logic_vector(to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N, 32))
+        expected_latency     => std_logic_vector(to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N, 32)),
+        overflow_lookback    => std_logic_vector(to_unsigned(MUTRIG_OVERFLOW_LOOKBACK_8N, 32))
     );
     
     type debug_msg_t is record
@@ -445,9 +462,10 @@ architecture rtl of mts_processor is
     --		 when count up, we use OVERFLOW_1N6.
     constant OVERFLOW_LOOKBACK_1N6_CONST      : natural := MUTRIG_OVERFLOW_LOOKBACK_8N * 5;
     constant OVERFLOW_PADDING_UPPER_CONST     : natural := OVERFLOW_1N6 - OVERFLOW_LOOKBACK_1N6_CONST;
+    constant OVERFLOW_LOOKBACK_MAX_8N_CONST   : natural := OVERFLOW_1N6 / 5;
     signal expected_latency_1n6         : unsigned(31 downto 0) := to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N * 5, 32);
-    signal overflow_lookback_1n6        : unsigned(31 downto 0);
-    signal padding_upper                : unsigned(14 downto 0);
+    signal overflow_lookback_1n6        : unsigned(31 downto 0) := to_unsigned(OVERFLOW_LOOKBACK_1N6_CONST, 32);
+    signal padding_upper                : unsigned(14 downto 0) := to_unsigned(OVERFLOW_PADDING_UPPER_CONST, 15);
     signal padding_logic_gray_ts		: unsigned(14 downto 0);
     signal padding_logic_gray_ts_e		: unsigned(14 downto 0);
     signal padding_logic_white_ts		: unsigned(49 downto 0);
@@ -567,6 +585,41 @@ architecture rtl of mts_processor is
         end if;
         return result_v;
     end function signmag_to_twos_comp16;
+
+    function clamp_overflow_lookback_8n(
+        lookback_8n : unsigned
+    ) return unsigned is
+        variable result_v : unsigned(31 downto 0) := (others => '0');
+    begin
+        if (lookback_8n > to_unsigned(OVERFLOW_LOOKBACK_MAX_8N_CONST, lookback_8n'length)) then
+            result_v := to_unsigned(OVERFLOW_LOOKBACK_MAX_8N_CONST, result_v'length);
+        else
+            result_v := resize(lookback_8n, result_v'length);
+        end if;
+        return result_v;
+    end function clamp_overflow_lookback_8n;
+
+    function lookback_8n_to_1n6(
+        lookback_8n : unsigned
+    ) return unsigned is
+        variable clamped_v : unsigned(31 downto 0) := (others => '0');
+    begin
+        clamped_v := clamp_overflow_lookback_8n(lookback_8n);
+        return clamped_v + shift_left(clamped_v, 2);
+    end function lookback_8n_to_1n6;
+
+    function padding_upper_from_lookback_1n6(
+        lookback_1n6 : unsigned
+    ) return unsigned is
+        variable result_v : unsigned(14 downto 0) := (others => '0');
+    begin
+        if (lookback_1n6 >= to_unsigned(OVERFLOW_1N6, lookback_1n6'length)) then
+            result_v := (others => '0');
+        else
+            result_v := to_unsigned(OVERFLOW_1N6, result_v'length) - resize(lookback_1n6, result_v'length);
+        end if;
+        return result_v;
+    end function padding_upper_from_lookback_1n6;
     
     
     
@@ -585,9 +638,6 @@ architecture rtl of mts_processor is
     
 
 begin
-
-    overflow_lookback_1n6 <= to_unsigned(OVERFLOW_LOOKBACK_1N6_CONST, overflow_lookback_1n6'length);
-    padding_upper         <= to_unsigned(OVERFLOW_PADDING_UPPER_CONST, padding_upper'length);
 
     -- Carry the overflow-correction window alongside the hit so late ToT
     -- arithmetic no longer depends directly on the live overflow counter.
@@ -772,6 +822,8 @@ begin
     
     proc_avmm_csr : process (i_rst,i_clk)
         variable csr_v_expected_latency_1n6 : unsigned(expected_latency_1n6'range);
+        variable csr_v_overflow_lookback_8n : unsigned(csr.overflow_lookback'range);
+        variable csr_v_overflow_lookback_1n6 : unsigned(overflow_lookback_1n6'range);
     -- avalon memory-mapped interface for accessing the control and status registers
     -- address map:
     -- 		0: control and status 
@@ -790,6 +842,9 @@ begin
             csr.drop_delay_error        <= '0';
             csr.expected_latency        <= std_logic_vector(to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N, csr.expected_latency'length));
             expected_latency_1n6        <= to_unsigned(MUTRIG_BUFFER_EXPECTED_LATENCY_8N * 5, expected_latency_1n6'length);
+            csr.overflow_lookback       <= std_logic_vector(to_unsigned(MUTRIG_OVERFLOW_LOOKBACK_8N, csr.overflow_lookback'length));
+            overflow_lookback_1n6       <= to_unsigned(OVERFLOW_LOOKBACK_1N6_CONST, overflow_lookback_1n6'length);
+            padding_upper               <= to_unsigned(OVERFLOW_PADDING_UPPER_CONST, padding_upper'length);
             csr.discard_hiterr          <= '1'; -- NOTE: default is discard hiterr
         elsif (rising_edge(i_clk)) then
             -- default
@@ -828,6 +883,12 @@ begin
                         csr_v_expected_latency_1n6 := csr_v_expected_latency_1n6 + shift_left(csr_v_expected_latency_1n6, 2);
                         csr.expected_latency       <= avs_csr_writedata;
                         expected_latency_1n6       <= csr_v_expected_latency_1n6;
+                    when 5 =>
+                        csr_v_overflow_lookback_8n := clamp_overflow_lookback_8n(unsigned(avs_csr_writedata));
+                        csr_v_overflow_lookback_1n6 := lookback_8n_to_1n6(csr_v_overflow_lookback_8n);
+                        csr.overflow_lookback      <= std_logic_vector(csr_v_overflow_lookback_8n);
+                        overflow_lookback_1n6      <= csr_v_overflow_lookback_1n6;
+                        padding_upper              <= padding_upper_from_lookback_1n6(csr_v_overflow_lookback_1n6);
                     when others =>
                         null;
                 end case;
@@ -856,6 +917,8 @@ begin
                         avs_csr_readdata(15 downto 0)       <= std_logic_vector(debug_msg.total_hit_cnt(47 downto 32));
                     when 4 =>
                         avs_csr_readdata                    <= std_logic_vector(debug_msg.total_hit_cnt(31 downto 0));
+                    when 5 =>
+                        avs_csr_readdata                    <= csr.overflow_lookback;
                     when others => 
                         null;
                 end case;
@@ -865,6 +928,11 @@ begin
                     csr_v_expected_latency_1n6 := resize(unsigned(csr.expected_latency), expected_latency_1n6'length);
                     csr_v_expected_latency_1n6 := csr_v_expected_latency_1n6 + shift_left(csr_v_expected_latency_1n6, 2);
                     expected_latency_1n6       <= csr_v_expected_latency_1n6;
+                    csr_v_overflow_lookback_8n := clamp_overflow_lookback_8n(unsigned(csr.overflow_lookback));
+                    csr_v_overflow_lookback_1n6 := lookback_8n_to_1n6(csr_v_overflow_lookback_8n);
+                    csr.overflow_lookback      <= std_logic_vector(csr_v_overflow_lookback_8n);
+                    overflow_lookback_1n6      <= csr_v_overflow_lookback_1n6;
+                    padding_upper              <= padding_upper_from_lookback_1n6(csr_v_overflow_lookback_1n6);
                 end if;
 
                 -- release reset by csr
