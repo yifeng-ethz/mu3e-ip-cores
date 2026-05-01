@@ -395,7 +395,7 @@
  <module
    name="onewire_master_0"
    kind="onewire_master"
-   version="24.0.911.1"
+   version="26.2.1.428"
    enabled="1">
   <parameter name="AVMM_DATA_WIDTH" value="32" />
   <parameter name="AVST_CHANNEL_WIDTH" value="3" />
@@ -424,7 +424,7 @@
  <module
    name="onewire_master_controller_0"
    kind="onewire_master_controller"
-   version="24.0.918"
+   version="26.2.1.428"
    enabled="1">
   <parameter name="AUTO_COMPLETE_INTERRUPTS_USED" value="1" />
   <parameter name="AVMM_DATA_WIDTH" value="32" />

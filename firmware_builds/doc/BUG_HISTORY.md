@@ -18,6 +18,7 @@ Class legend:
 | [P6-BUG-004-H](#p6-bug-004-h-frame-boundary-signaltap-window-is-not-yet-time-aligned-across-rbcam-and-feb-frame-assembly) | H | open; zero-VCO evidence invalidated | 2026-04-30 | Lane6 STP captures show FEB type-3 hit frames under a `vco000` label, but `vnvcodelay=0` should produce no hits; rerun with nonzero locked settings and a time-aligned RBCAM/FEB capture. |
 | [P6-BUG-005-R](#p6-bug-005-r-swb-host-dma-now-has-raw-musip-payload-but-not-decoded-feb-hit-frames) | R | open; raw DMA partial pass only | 2026-04-30 | Fixed4 SWB image writes raw 256-bit stream-datagen payload to host DMA, but time-datagen is still empty and no real FEB-link/legacy-frame disk artifact exists. |
 | [P6-BUG-006-H](#p6-bug-006-h-1-s-rate-plot-collapsed-to-bin-0-because-the-observation-path-was-wrong) | H | source patched; live rerun required | 2026-05-01 | The required 1 s rate plot was scientifically rendered but all 647,881 hits landed in bin 0; root cause is a wrong histogram observation contract, not a pass. |
+| [P6-BUG-007-R](#p6-bug-007-r-full-feb-generated-system-tied-the-lower-histogram-fill-input-off) | R | fixed for FEB emulator observability; real-source tuning resumes at P6-BUG-002 | 2026-05-01 | The nested lower-histogram source passed simulation, but the full FEB generated top still tied `histogram_statistics_0.fill_in_1` to zero, so live all-lane emulator rate was exactly upper-side only. |
 
 ## 2026-05-01
 
@@ -59,6 +60,62 @@ Class legend:
     1 s interval, burst/frozen bin readout, and a deliberate mask sanity check.
     Accept the artifact only after the plotted distribution matches the
     selected channels and all active ASICs.
+
+### P6-BUG-007-R: full FEB generated system tied the lower histogram fill input off
+
+- First seen in:
+  live all-lane emulator replay after the lower histogram source patch.
+- Symptom:
+  - A 1 s all-lane emulator run at 10 kHz/lane produced about `39992`
+    histogram hits instead of the expected `80000`; that is almost exactly the
+    four upper lanes only.
+  - The initially probed address `0x0AC10` read as zero because it was not the
+    lower histogram bridge SC word address. The correct lower histogram bridge
+    window is Qsys byte `0xAC10..0xAC20`, exposed through the SC hub at word
+    base `0x0AB04`; `0x0AC00/0x0AD00` are ring-buffer CAM CSR bases.
+  - The fitted/generated full FEB image still had
+    `histogram_statistics_0.asi_fill_in_1_valid` tied to ground, so the lower
+    MTS histogram copy could not reach the live histogram even though the
+    nested datapath source and integration simulation were already fixed.
+- Root cause:
+  stale full-FEB generated output. The source-level
+  `scifi_datapath_system_v3_pipe.qsys` fix was not sufficient until
+  `feb_system_v3_pipe` was regenerated. Full Qsys generation was also blocked
+  by obsolete one-wire component versions in `debug_sc_system_v3.qsys`:
+  `onewire_master 24.0.911.1` and `onewire_master_controller 24.0.918`
+  were no longer available from the active worktree catalog.
+- Fix status:
+  - state:
+    fixed for FEB emulator observability; real MuTRiG lower-pair tuning remains
+    the separate P6-BUG-002 blocker.
+  - mechanism:
+    `debug_sc_system_v3.qsys` now requests the active one-wire component
+    version `26.2.1.428`, and full `feb_system_v3_pipe` Qsys generation
+    succeeds.
+  - generated evidence:
+    `feb_system_v3_pipe_data_path_subsystem.vhd` now instantiates
+    `histogram_ingress_bridge_1`, connects its `hist_out` to
+    `histogram_statistics_0.fill_in_1`, and exposes
+    `data_path_subsystem_histogram_ingress_bridge_1.csr` at `0xAC10..0xAC20`
+    in `feb_system_v3_pipe.sopcinfo`.
+  - build evidence:
+    `top_nostp_pipe` compiled successfully on 2026-05-01 with SOF checksum
+    `0x13E73362`, SOF SHA256
+    `57ab5ec8338c54d8189b518c0ea61cf8453c4ff802290eeaa16f4ee1e4504fb6`,
+    setup WNS `+0.277 ns`, hold slack `+0.123 ns`, and zero TNS in the
+    reported timing groups.
+  - live bridge evidence:
+    after SWB reload/checksum `0x31A72852`, PCIe recovery, FEB programming,
+    and reset/address/stop-reset, link-2 SC reads returned
+    `histogram_ingress_bridge_0` UID/status at `0x0AB00..0x0AB03` and
+    `histogram_ingress_bridge_1` UID/status at `0x0AB04..0x0AB07`; both UIDs
+    were `0x48495342`.
+  - live emulator evidence:
+    1 s rate reruns with link mask `0x00000004` passed the expected physical
+    masks: all lanes at 10 kHz/lane produced `79984` histogram hits and zero
+    drops, upper-only produced `39996`, lower-only produced `39996`, all lanes
+    at 100 kHz/lane produced `798728`, and the dual-MTS delay-profile smoke
+    produced `409080` hits with zero drops.
 
 ## 2026-04-30
 

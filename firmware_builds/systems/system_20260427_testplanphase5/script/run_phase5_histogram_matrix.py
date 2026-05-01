@@ -172,6 +172,7 @@ def make_case_args(
         rc_tool=args.rc_tool,
         device=args.device,
         feb=args.feb,
+        address_feb=args.address_feb,
         run_number_base=run_number,
         rc_settle_us=args.rc_settle_us,
         post_stop_reset_ms=args.post_stop_reset_ms,
@@ -255,8 +256,9 @@ def blocked_record(index: int, run_number: int, source: str, scope: str, scenari
 
 def prime_sc_path(args: argparse.Namespace) -> list[str]:
     logs = []
+    address_feb = args.link if args.address_feb is None else args.address_feb
     logs.append(rc_send(args.rc_tool, args.device, args.feb, "reset", settle_us=args.rc_settle_us))
-    logs.append(rc_send(args.rc_tool, args.device, 2, "address", settle_us=args.rc_settle_us))
+    logs.append(rc_send(args.rc_tool, args.device, address_feb, "address", settle_us=args.rc_settle_us))
     logs.append(rc_send(args.rc_tool, args.device, args.feb, "stop-reset", settle_us=args.rc_settle_us))
     time.sleep(args.post_stop_reset_ms / 1000.0)
     uid = sc_read(args.sc_tool, args.link, 0x0A900)[0]
@@ -354,6 +356,12 @@ def main() -> int:
     parser.add_argument("--rc-tool", type=Path, default=default_rc_tool())
     parser.add_argument("--device", default="/dev/mudaq0")
     parser.add_argument("--feb", type=int, default=7)
+    parser.add_argument(
+        "--address-feb",
+        type=int,
+        default=None,
+        help="FEB id used for the reset-link address command after reset. Defaults to --link.",
+    )
     parser.add_argument("--run-number-base", type=int, default=48000)
     parser.add_argument("--rc-settle-us", type=int, default=50000)
     parser.add_argument("--post-stop-reset-ms", type=int, default=50)

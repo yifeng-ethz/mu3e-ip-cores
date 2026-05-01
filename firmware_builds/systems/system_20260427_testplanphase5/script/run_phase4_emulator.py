@@ -379,14 +379,15 @@ def run_to_running(
     rc_tool: Path,
     device: str,
     feb: int,
+    address_feb: int,
     run_number: int,
     settle_us: int,
     post_stop_reset_s: float,
     after_stop_reset: Callable[[], None] | None = None,
 ) -> list[str]:
     logs = []
-    for name, run in (("reset", None), ("stop-reset", None)):
-        logs.append(rc_send(rc_tool, device, feb, name, run, settle_us=settle_us))
+    for target_feb, name, run in ((feb, "reset", None), (address_feb, "address", None), (feb, "stop-reset", None)):
+        logs.append(rc_send(rc_tool, device, target_feb, name, run, settle_us=settle_us))
         if name == "stop-reset" and post_stop_reset_s > 0:
             time.sleep(post_stop_reset_s)
     if after_stop_reset is not None:
@@ -419,6 +420,7 @@ def run_measurement(args: argparse.Namespace, hit_rate: int, duration_s: float, 
         args.rc_tool,
         args.device,
         args.feb,
+        args.link if args.address_feb is None else args.address_feb,
         args.run_number,
         args.rc_settle_us,
         max(args.post_stop_reset_ms, 0) / 1000.0,
@@ -691,6 +693,12 @@ def main() -> int:
     parser.add_argument("--link", type=int, default=2)
     parser.add_argument("--device", default="/dev/mudaq0")
     parser.add_argument("--feb", type=int, default=7)
+    parser.add_argument(
+        "--address-feb",
+        type=int,
+        default=None,
+        help="FEB id used for the reset-link address command after reset. Defaults to --link.",
+    )
     parser.add_argument("--run-number", type=int, default=4242)
     parser.add_argument("--sc-tool", type=Path, default=_default_sc_tool())
     parser.add_argument("--rc-tool", type=Path, default=default_rc_tool())

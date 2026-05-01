@@ -283,37 +283,37 @@ module feb_system_v3_pipe_data_path_subsystem_mm_interconnect_0_router_001
 
     // ( 0x12900 .. 0x12910 )
     if ( {address[RG:PAD11],{PAD11{1'b0}}} == 18'h12900   ) begin
-            src_channel = 56'b0000000000000000001000000000;
+            src_channel = 56'b0000000000000000000100000000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 36;
     end
 
     // ( 0x13900 .. 0x13910 )
     if ( {address[RG:PAD12],{PAD12{1'b0}}} == 18'h13900   ) begin
-            src_channel = 56'b0000000000000000000100000000;
+            src_channel = 56'b0000000000000000000010000000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 38;
     end
 
     // ( 0x14900 .. 0x14910 )
     if ( {address[RG:PAD13],{PAD13{1'b0}}} == 18'h14900   ) begin
-            src_channel = 56'b0000000000000000000010000000;
+            src_channel = 56'b0000000000000000000001000000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 40;
     end
 
     // ( 0x15900 .. 0x15910 )
     if ( {address[RG:PAD14],{PAD14{1'b0}}} == 18'h15900   ) begin
-            src_channel = 56'b0000000000000000000001000000;
+            src_channel = 56'b0000000000000000000000100000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 42;
     end
 
     // ( 0x16900 .. 0x16910 )
     if ( {address[RG:PAD15],{PAD15{1'b0}}} == 18'h16900   ) begin
-            src_channel = 56'b0000000000000000000000100000;
+            src_channel = 56'b0000000000000000000000010000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 44;
     end
 
     // ( 0x17900 .. 0x17910 )
     if ( {address[RG:PAD16],{PAD16{1'b0}}} == 18'h17900   ) begin
-            src_channel = 56'b0000000000000000000000010000;
+            src_channel = 56'b0000000000000000000000001000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 46;
     end
 
@@ -349,7 +349,7 @@ module feb_system_v3_pipe_data_path_subsystem_mm_interconnect_0_router_001
 
     // ( 0x22000 .. 0x22040 )
     if ( {address[RG:PAD22],{PAD22{1'b0}}} == 18'h22000   ) begin
-            src_channel = 56'b0000000000000000000000001000;
+            src_channel = 56'b0000000000000000001000000000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 47;
     end
 

@@ -217,12 +217,12 @@ def main() -> int:
         value = sc_read(args.sc_tool, args.link, base, 1)[0]
         return {"sc_addr": f"0x{base:05X}", "word0": fmt_hex(value)}
 
-    def histogram_ingress_probe() -> dict[str, Any]:
-        base = mm_bridge_sc_base + downstream_map["data_path_subsystem_histogram_ingress_bridge_0.csr"] // 4
+    def histogram_ingress_probe(instance_name: str) -> dict[str, Any]:
+        base = mm_bridge_sc_base + downstream_map[f"{instance_name}.csr"] // 4
         uid = sc_read(args.sc_tool, args.link, base, 1)[0]
         if uid != histogram_ingress_uid_expected:
             raise RuntimeError(
-                "histogram_ingress_bridge_0 UID mismatch: "
+                f"{instance_name} UID mismatch: "
                 f"got {fmt_hex(uid)}, expected {fmt_hex(histogram_ingress_uid_expected)}"
             )
         status = sc_read(args.sc_tool, args.link, base + histogram_ingress_svd["registers"]["STATUS"] // 4, 1)[0]
@@ -368,10 +368,20 @@ def main() -> int:
             "mm_bridge.histogram_statistics_1.uid",
             {
                 "note": "not present in current downstream map",
-                "topology": "single histogram_statistics_0 instance fed by histogram_ingress_bridge_0",
+                "topology": "single histogram_statistics_0 instance fed by histogram_ingress_bridge_0/1 when both tap bridges are present",
             },
         )
-    run_check(checks, "mm_bridge.histogram_ingress_bridge_0.uid_status", histogram_ingress_probe)
+    for bridge_idx in range(2):
+        instance = f"data_path_subsystem_histogram_ingress_bridge_{bridge_idx}"
+        check_name = f"mm_bridge.histogram_ingress_bridge_{bridge_idx}.uid_status"
+        if f"{instance}.csr" in downstream_map:
+            run_check(checks, check_name, lambda instance=instance: histogram_ingress_probe(instance))
+        else:
+            add_pass(
+                checks,
+                check_name,
+                {"note": "not present in current downstream map"},
+            )
     run_check(checks, "mm_bridge.emulator_mutrig_0.reachability", emulator_probe)
     run_check(checks, "mm_bridge.mutrig_lane_source_mux_0_7.uid_status", source_mux_probe)
     run_check(checks, "mm_bridge.dbg_mm2runctrl_0.reachability", dbg_mm2runctrl_probe)

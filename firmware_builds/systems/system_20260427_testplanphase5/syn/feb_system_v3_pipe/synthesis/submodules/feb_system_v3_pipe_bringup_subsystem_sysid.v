@@ -49,7 +49,7 @@ module feb_system_v3_pipe_bringup_subsystem_sysid (
 
   wire    [ 31: 0] readdata;
   //control_slave, which is an e_avalon_slave
-  assign readdata = address ? 1777488279 : 1178944051;
+  assign readdata = address ? 1777603883 : 1178944051;
 
 endmodule
 

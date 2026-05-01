@@ -77,24 +77,54 @@ def _sc_enable_mask_args() -> list[str]:
     return ["--enable-mask", value] if value else []
 
 
+def _sc_extra_args(*, quiet: bool) -> list[str]:
+    args: list[str] = []
+    if quiet:
+        args.append("--quiet")
+    reply_timeout_ms = os.environ.get("BOARD_TEST_SC_REPLY_TIMEOUT_MS", "").strip()
+    if reply_timeout_ms:
+        args.extend(["--reply-timeout-ms", reply_timeout_ms])
+    args.extend(_sc_enable_mask_args())
+    return args
+
+
+def _sc_quiet_first() -> tuple[bool, bool]:
+    verbose_first = os.environ.get("BOARD_TEST_SC_VERBOSE_FIRST", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    return (False, True) if verbose_first else (True, False)
+
+
+def _run_sc_transaction(base_cmd: list[str], *, expect_payload: int | None = None) -> tuple[str, list[int]]:
+    attempts: list[str] = []
+    for quiet in _sc_quiet_first():
+        label = "quiet" if quiet else "verbose"
+        cmd = [*base_cmd, *_sc_extra_args(quiet=quiet)]
+        result = subprocess.run(cmd, check=False, capture_output=True, text=True)
+        text = result.stdout + result.stderr
+        try:
+            values = parse_sc_payload(text)
+            if result.returncode == 0 and (expect_payload is None or len(values) == expect_payload):
+                return text, values
+            attempts.append(f"{label} rc={result.returncode}: {' '.join(cmd)}\n{text}")
+        except Exception as exc:
+            attempts.append(f"{label} rc={result.returncode}: {' '.join(cmd)}\n{text}\nparse_error={exc}")
+    raise RuntimeError("SC transaction failed after quiet/verbose attempts\n" + "\n".join(attempts))
+
+
 def sc_read(sc_tool: Path, link: int, addr: int, count: int) -> list[int]:
-    cmd = [str(sc_tool), str(link), "read", f"0x{addr:05X}", str(count), "--quiet"]
-    cmd.extend(_sc_enable_mask_args())
-    result = run_checked(cmd)
-    values = parse_sc_payload(result.stdout)
-    if len(values) != count:
-        raise RuntimeError(f"expected {count} payload words, got {len(values)} from sc_tool")
+    cmd = [str(sc_tool), str(link), "read", f"0x{addr:05X}", str(count)]
+    _, values = _run_sc_transaction(cmd, expect_payload=count)
     return values
 
 
 def sc_write(sc_tool: Path, link: int, addr: int, words: list[int]) -> None:
     cmd = [str(sc_tool), str(link), "write", f"0x{addr:05X}"]
     cmd.extend(f"0x{word:08X}" for word in words)
-    cmd.append("--quiet")
-    cmd.extend(_sc_enable_mask_args())
-    result = run_checked(cmd)
-    if "rsp                 : OK" not in result.stdout and "rsp = OK" not in result.stdout:
-        raise RuntimeError(f"sc_tool write did not return OK:\n{result.stdout}")
+    _run_sc_transaction(cmd)
 
 
 def parse_jtag_output(output: str) -> tuple[list[int], dict[str, str]]:
