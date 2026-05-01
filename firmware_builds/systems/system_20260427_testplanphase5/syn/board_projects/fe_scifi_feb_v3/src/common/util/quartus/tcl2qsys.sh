@@ -11,6 +11,7 @@ SEARCH_PATH=""
 USER_COMPONENT_PATHS=""
 MU3E_IP_CORES_ROOT="${MU3E_IP_CORES_ROOT:-/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
 QSYS_ISOLATE_CATALOG="${QSYS_ISOLATE_CATALOG:-1}"
+QSYS_SEARCH_SYSTEM_DIR="${QSYS_SEARCH_SYSTEM_DIR:-1}"
 
 append_search_path() {
     local candidate="$1"
@@ -44,7 +45,7 @@ append_component_tree() {
     done < <(find "${root}" -maxdepth 3 -type f \( -name '*_hw.tcl' -o -name '*.qsys' \) -printf '%h\n' | sort -u)
 }
 
-if [ "${QSYS_SEARCH_SYSTEM_DIR:-0}" != "0" ]; then
+if [ "${QSYS_SEARCH_SYSTEM_DIR}" != "0" ]; then
     append_search_path "$(realpath -- "$QSYS_DIR")"
 fi
 

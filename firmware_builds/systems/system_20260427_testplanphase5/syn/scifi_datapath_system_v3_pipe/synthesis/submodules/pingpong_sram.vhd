@@ -3,6 +3,9 @@
 -- =======================================
 -- Revision: 1.0 (file created)
 --		Date: Mar 20, 2026
+-- Revision: 1.1
+--		Date: May 1, 2026
+--		Change: Keep deferred host reads on the frozen bank in ping-pong mode.
 -- =========
 -- Description:	[Dual-bank histogram storage with interval freeze/readout]
 --
@@ -402,7 +405,11 @@ begin
                     burst_active      <= '1';
                     burst_addr        <= hist_pending_addr;
                     burst_remaining   <= hist_pending_count;
-                    read_bank_latched <= ram_v_next_bank;
+                    if i_enable_pingpong = '1' then
+                        read_bank_latched <= not ram_v_next_bank;
+                    else
+                        read_bank_latched <= ram_v_next_bank;
+                    end if;
                     hist_read_pending <= '0';
                 elsif burst_active = '1' then
                     ram_v_hist_issue := '1';

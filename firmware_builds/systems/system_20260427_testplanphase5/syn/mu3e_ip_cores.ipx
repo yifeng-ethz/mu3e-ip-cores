@@ -249,7 +249,7 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="histogram_statistics_v2" file="../../../../histogram_statistics/histogram_statistics_v2_hw.tcl" displayName="Histogram Statistics" version="26.1.7.501" description="Histogram Statistics Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="histogram_statistics_v2" file="../../../../histogram_statistics/histogram_statistics_v2_hw.tcl" displayName="Histogram Statistics" version="26.1.8.501" description="Histogram Statistics Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />

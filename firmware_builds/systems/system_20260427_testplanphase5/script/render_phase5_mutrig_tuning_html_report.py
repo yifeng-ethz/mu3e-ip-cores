@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import csv
 import html
 import json
 import os
@@ -18,6 +19,8 @@ REPORT_DIR = SYSTEM_DIR / "reports"
 OUT_HTML = REPORT_DIR / "phase5_mutrig_tuning_report_20260430.html"
 HIST_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase5_mutrig_tuning_20260430"
 HIST_ARTIFACT_MANIFEST = HIST_ARTIFACT_DIR / "phase5_histogram_artifacts_manifest.json"
+HIGHCYCLE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_highcycle_rate_sweep_20260501"
+HIGHCYCLE_STATS = HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_stats.tsv"
 REQUIRED_MONITOR_MS = 1000
 
 
@@ -341,8 +344,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Fresh continued cycle 20260430_live_continued_cycle1 records P6B006 PASS hist=52627/ring=0, P6B007 PASS hist=81880/ring=0, P6B010 FAIL hist=144364/ring_inerr_delta=563053, P6B020 expected fail ring=7146776, and P6E010 pulse-high 3 underfilled. A fresh all-real 1 s rate monitor records LVDS error/DPA deltas of zero and LAST_INTERVAL_TOTAL_HITS=11851571, but still trips MTS/ring errors and exposes that the slow SC per-bin read misses the ping-pong bin bank. Opening MTS expected latency to 4000 and 65535 still fails, so the failure is not a small positive-latency tail. Header-synchronous pair injection on lower header channels 5 and 6 fails, while single-lane header controls pass. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair. The separate full-FEB lower histogram observability bug is now closed for emulator evidence: checksum 0x13E73362 exposes histogram_ingress_bridge_1 at SC word 0x0AB04 and passes upper-only, lower-only, all-lane 10 kHz, all-lane 100 kHz, and dual-MTS delay-profile 1 s emulator checks with zero drops.",
-        "Resume real MuTRiG tuning from nonzero ASIC-specific PLL defaults, run full RUN_PREP, require header-delay delta-function plots for upper and lower ASICs, then rerun the RBCAM-to-FEB-frame same-window alignment before SWB/DMA disk closure.",
+        "The histogram 26.1.8 FEB image compiled at 10:17 on 2026-05-01, programmed at 10:21 with checksum 0x13DD5EC5, and responded with packaged injector UID 0x4D494E4A. After explicit all-ASIC reload and CML 0-8-0 flush, the 1 s high-cycle rate sweep shows the physical threshold: ph1/ph2 silent, ph3 underfilled, ph5/ph6/ph7 near 25.55 Mhit/s with all 256 channels populated, ph8 begins overcount spikes, and ph9+ overfills. The ph8+ shape is consistent with TDC injection-line ringing and second rising-edge pickup on some channels, so rates can approach 2x or land between 1x and 2x. The best rate artifacts are ph6/ph7 around 99.8 kHz/channel with CV about 0.006, but the same runs still classify as MTS-discard failures before full FEB output closure. Earlier lower-pair evidence still applies: ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; expected-latency sweeps, header-sync pair controls, and ext_trig_offset scans do not clear it. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
+        "Use ph6 or ph7 as the current rate-mode pulse-width starting point, then clear the MTS-discard/RBCAM boundary with header-delay delta plots and same-window RBCAM/FEB-frame captures before SWB/DMA disk closure.",
     ),
     (
         "SWB input path",
@@ -817,6 +820,81 @@ def artifact_figures() -> str:
     return "\n".join(figures)
 
 
+def highcycle_stats() -> list[dict[str, str]]:
+    if not HIGHCYCLE_STATS.exists():
+        return []
+    with HIGHCYCLE_STATS.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle, delimiter="\t"))
+
+
+def highcycle_rows() -> str:
+    rows = []
+    for row in highcycle_stats():
+        plot = Path(row.get("plot", ""))
+        plot_link = f'<a href="{esc(rel(plot))}">{esc(plot.name)}</a>' if plot.exists() else esc(plot.name or "-")
+        try:
+            mean_khz = float(row.get("mean_hz_per_channel", "0")) / 1000.0
+            min_khz = float(row.get("min_hz_per_channel", "0")) / 1000.0
+            max_khz = float(row.get("max_hz_per_channel", "0")) / 1000.0
+            cv = float(row.get("cv_all_channels", "0"))
+        except ValueError:
+            mean_khz = min_khz = max_khz = cv = 0.0
+        pulse_high = row.get("pulse_high", "-")
+        note = "silent"
+        if mean_khz > 0.0:
+            if 98.0 <= mean_khz <= 102.0 and max_khz < 130.0:
+                note = "rate plateau"
+            elif mean_khz < 90.0:
+                note = "underfilled"
+            else:
+                note = "overfilled; possible TDC-line ringing/double-edge pickup"
+        rows.append(
+            "<tr>"
+            f"<td>{esc(pulse_high)}</td>"
+            f"<td>{fmt_int(row.get('total_hz'))}</td>"
+            f"<td>{mean_khz:.3f}</td>"
+            f"<td>{fmt_int(row.get('nonzero_channels'))}</td>"
+            f"<td>{min_khz:.3f}</td>"
+            f"<td>{max_khz:.3f}</td>"
+            f"<td>{cv:.4f}</td>"
+            f"<td>{esc(note)}</td>"
+            f"<td>{plot_link}</td>"
+            "</tr>"
+        )
+    if not rows:
+        return "<tr><td colspan=\"9\">High-cycle sweep artifacts missing.</td></tr>"
+    return "\n".join(rows)
+
+
+def highcycle_figures() -> str:
+    selected = {1, 3, 5, 6, 8, 15}
+    figures = []
+    by_ph = {}
+    for row in highcycle_stats():
+        try:
+            by_ph[int(row.get("pulse_high", "-1"))] = row
+        except ValueError:
+            continue
+    for pulse_high in sorted(selected):
+        row = by_ph.get(pulse_high)
+        if not row:
+            continue
+        plot = Path(row.get("plot", ""))
+        if not plot.exists():
+            continue
+        mean_khz = float(row.get("mean_hz_per_channel", "0")) / 1000.0
+        cv = float(row.get("cv_all_channels", "0"))
+        figures.append(
+            "<figure>"
+            f"<a href=\"{esc(rel(plot))}\"><img src=\"{esc(rel(plot))}\" alt=\"pulse_high {pulse_high} rate plot\"></a>"
+            f"<figcaption>pulse_high={pulse_high}; mean={mean_khz:.3f} kHz/channel; CV={cv:.4f}</figcaption>"
+            "</figure>"
+        )
+    if not figures:
+        return "<p class=\"missing-text\">No high-cycle DISLIN rate plots are present yet.</p>"
+    return "\n".join(figures)
+
+
 def evidence_rows() -> str:
     rows = []
     for title, kind, filename, note in EVIDENCE:
@@ -1287,6 +1365,39 @@ def write_html() -> None:
       </tbody>
     </table>
 
+    <h2>Phase-6 High-Cycle Rate Sweep</h2>
+    <p>
+      This is the post-histogram-26.1.8 real-MuTRiG rate-mode sweep requested
+      for <code>pulse_high_cycles=1..15</code>. Every plot is rendered by
+      DISLIN from the 1 s System Console histogram CSV, with one global channel
+      per bin and the 100 kHz target marked in red. Overfilled cases are
+      interpreted as physical injection-shape evidence: a non-optimal high
+      time can ring the TDC injection line and produce a second rising edge on
+      selected channels, so the measured rate may approach 2x or sit between
+      the single-edge and double-edge limits.
+    </p>
+    <div class="plot-grid">
+{highcycle_figures()}
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Pulse High</th>
+          <th>Total Hits/s</th>
+          <th>Mean kHz/ch</th>
+          <th>Nonzero Channels</th>
+          <th>Min kHz/ch</th>
+          <th>Max kHz/ch</th>
+          <th>CV</th>
+          <th>Inspection</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+{highcycle_rows()}
+      </tbody>
+    </table>
+
     <h2>Physical Debug Checklist</h2>
     <table>
       <thead>
@@ -1300,7 +1411,7 @@ def write_html() -> None:
         <tr>
           <td>Channel mask sanity</td>
           <td>Masked channels vanish from the 256-bin rate plot while unmasked channels keep their rate scale.</td>
-          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The real-MuTRiG plotted 256-bin artifact is still open because the current all-real plot collapsed to one bin.</td>
+          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The post-26.1.8 real-MuTRiG high-cycle sweep now produces valid 256-bin plots; ph6/ph7 are the current rate-mode starting point, while ph8+ expose likely TDC-line ringing/double-edge sidebands.</td>
         </tr>
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>
@@ -1315,7 +1426,7 @@ def write_html() -> None:
         <tr>
           <td>Histogram-bin capture method</td>
           <td>Read all 256 bins from the completed interval before the ping-pong bank is overwritten, preferably by the burst System Console/toolkit path.</td>
-          <td>The 1 s all-real SC run has nonzero last-interval hits but zero slow-read bins. The available STP JDI probe currently reports no System Console master services, so the burst-bin path is the next tooling blocker.</td>
+          <td>The histogram 26.1.8 fix repaired deferred frozen-bank reads. The current accepted plot source is the 1 s System Console histogram CSV; slow SC bin reads remain diagnostic-only under live traffic.</td>
         </tr>
         <tr>
           <td>Anomaly loop</td>

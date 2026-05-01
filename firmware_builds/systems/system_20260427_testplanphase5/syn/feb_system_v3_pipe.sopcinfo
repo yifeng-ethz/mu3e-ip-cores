@@ -5,11 +5,11 @@
  version="1.0"
  fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2026.05.01.08:17:40 -->
+ <!-- 2026.05.01.09:39:13 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1777616259</value>
+  <value>1777621152</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -248,7 +248,7 @@
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -9692,7 +9692,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-   <value>1777616259</value>
+   <value>1777621152</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -9712,7 +9712,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-   <value>1777616259</value>
+   <value>1777621152</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -9728,7 +9728,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>
@@ -12518,7 +12518,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -36180,7 +36180,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -54809,7 +54809,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.1.7.501"
+   version="26.1.8.501"
    path="data_path_subsystem.histogram_statistics_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -55023,7 +55023,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>7</value>
+   <value>8</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -57440,7 +57440,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -72532,7 +72532,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -108432,7 +108432,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -112487,7 +112487,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -116542,7 +116542,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -120597,7 +120597,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -124652,7 +124652,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -128707,7 +128707,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -132762,7 +132762,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -136817,7 +136817,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -158775,7 +158775,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777616259</value>
+   <value>1777621152</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -187515,7 +187515,7 @@ parameters are a RESULT of the module parameters. -->
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
   <displayName>Histogram Statistics</displayName>
-  <version>26.1.7.501</version>
+  <version>26.1.8.501</version>
  </plugin>
  <plugin>
   <instanceCount>2</instanceCount>

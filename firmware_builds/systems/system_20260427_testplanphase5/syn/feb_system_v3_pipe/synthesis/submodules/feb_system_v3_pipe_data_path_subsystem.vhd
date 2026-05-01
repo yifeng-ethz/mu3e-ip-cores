@@ -283,7 +283,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			DEBUG                     : natural := 0;
 			VERSION_MAJOR             : natural := 26;
 			VERSION_MINOR             : natural := 1;
-			VERSION_PATCH             : natural := 7;
+			VERSION_PATCH             : natural := 8;
 			BUILD                     : natural := 501;
 			IP_UID                    : natural := 1212765012;
 			VERSION_DATE              : natural := 20260501;
@@ -692,7 +692,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			VERSION_PATCH                     : integer := 9;
 			BUILD                             : integer := 501;
 			VERSION_DATE                      : integer := 20260501;
-			VERSION_GIT                       : integer := 242328347;
+			VERSION_GIT                       : integer := 32923629;
 			INSTANCE_ID                       : integer := 0
 		);
 		port (
@@ -5073,7 +5073,7 @@ begin
 			DEBUG                     => 0,
 			VERSION_MAJOR             => 26,
 			VERSION_MINOR             => 1,
-			VERSION_PATCH             => 7,
+			VERSION_PATCH             => 8,
 			BUILD                     => 501,
 			IP_UID                    => 1212765012,
 			VERSION_DATE              => 20260501,

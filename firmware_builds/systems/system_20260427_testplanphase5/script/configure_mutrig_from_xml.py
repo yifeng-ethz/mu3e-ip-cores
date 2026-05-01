@@ -372,15 +372,18 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, rows: lis
         f"- Channel field overrides: `{args.set_channel if args.set_channel else 'none'}`",
         f"- Header field overrides: `{args.set_header if args.set_header else 'none'}`",
         f"- TDC field overrides: `{args.set_tdc if args.set_tdc else 'none'}`",
+        f"- CML flush after config: `{'yes' if args.cml_flush_after_config else 'no'}`",
+        f"- CML start/flush/final values: `{args.cml_start_value}` / `{args.cml_flush_value}` / `{args.cml_final_value}`",
+        f"- Force `cml_sc=0` during CML flush/final: `{'yes' if args.cml_flush_set_cml_sc_zero else 'no'}`",
         f"- Require frame delta after config: `{'no' if args.allow_idle_after_config else 'yes'}`",
         f"- Result: `{'PASS' if all(row['pass'] for row in rows) else 'FAIL'}`",
         "",
-        "| ASIC | XML Local | Opcode | Words | Final Status | Frame Delta | CRC Delta | Result |",
-        "|---:|---:|---:|---:|---:|---:|---:|---|",
+        "| Phase | ASIC | XML Local | Opcode | Words | Final Status | Frame Delta | CRC Delta | Result |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---|",
     ]
     for row in rows:
         lines.append(
-            f"| {row['asic']} | {row['xml_local_index']} | `0x{row['opcode']:08X}` | {row['word_count']} | "
+            f"| `{row.get('phase', 'main')}` | {row['asic']} | {row['xml_local_index']} | `0x{row['opcode']:08X}` | {row['word_count']} | "
             f"`0x{row['final_status']:08X}` | {row['frame_delta']} | {row['crc_delta']} | "
             f"`{'PASS' if row['pass'] else 'FAIL'}` |"
         )
@@ -388,7 +391,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, rows: lis
     for row in rows:
         first_words = ", ".join(f"0x{word:08X}" for word in row["first_words"])
         last_words = ", ".join(f"0x{word:08X}" for word in row["last_words"])
-        lines.append(f"- ASIC {row['asic']}: first `{first_words}`, last `{last_words}`")
+        lines.append(f"- {row.get('phase', 'main')} ASIC {row['asic']}: first `{first_words}`, last `{last_words}`")
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -457,9 +460,45 @@ def main() -> int:
         action="store_true",
         help="Treat final_status=0 as PASS even if the post-config frame counter does not advance.",
     )
+    parser.add_argument(
+        "--cml-flush-after-config",
+        action="store_true",
+        help=(
+            "After the normal XML/SPI load, force the selected ASICs through "
+            "channel CML start/flush/final phases: cml=--cml-start-value, "
+            "cml=--cml-flush-value, then cml=--cml-final-value. Use this for "
+            "the TDC-injection CML 0-8-0 charge-flush sequence."
+        ),
+    )
+    parser.add_argument(
+        "--cml-start-value",
+        type=int,
+        default=0,
+        help="Channel cml value used for the explicit first phase of the CML charge flush.",
+    )
+    parser.add_argument(
+        "--cml-flush-value",
+        type=int,
+        default=8,
+        help="Channel cml value used for the high-CML flush phase.",
+    )
+    parser.add_argument(
+        "--cml-final-value",
+        type=int,
+        default=0,
+        help="Channel cml value restored after the high-CML flush phase.",
+    )
+    parser.add_argument(
+        "--cml-flush-set-cml-sc-zero",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Also force channel cml_sc=0 during the flush and final CML phases.",
+    )
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--json-output", type=Path, default=None)
     args = parser.parse_args()
+    if args.cml_start_value < 0 or args.cml_flush_value < 0 or args.cml_final_value < 0:
+        parser.error("--cml-start-value, --cml-flush-value, and --cml-final-value must be non-negative")
 
     timestamp = dt.datetime.now().isoformat(timespec="seconds")
     output = args.output or default_output()
@@ -472,38 +511,57 @@ def main() -> int:
     header_overrides = group_asic_field_overrides(args.set_header)
     channel_field_overrides = group_field_overrides(args.set_channel)
 
+    phase_overrides: list[tuple[str, dict[str, int]]] = [("main", {})]
+    if args.cml_flush_after_config:
+        start_override = {"cml": args.cml_start_value}
+        flush_override = {"cml": args.cml_flush_value}
+        final_override = {"cml": args.cml_final_value}
+        if args.cml_flush_set_cml_sc_zero:
+            start_override["cml_sc"] = 0
+            flush_override["cml_sc"] = 0
+            final_override["cml_sc"] = 0
+        phase_overrides = [
+            (f"cml_start_{args.cml_start_value}", start_override),
+            (f"cml_flush_{args.cml_flush_value}", flush_override),
+            (f"cml_final_{args.cml_final_value}", final_override),
+        ]
+
     rows: list[dict[str, Any]] = []
-    for asic in args.asics:
-        local = asic % 4
-        mutrigs = smb3 if asic < 4 else smb5
-        if local not in mutrigs:
-            raise RuntimeError(f"XML for ASIC {asic} missing local mutrig index {local}")
-        mutrig = apply_channel_overrides(
-            mutrigs[local],
-            channel_enable_mask=args.channel_enable_mask,
-            tdctest_channel_mask=args.tdctest_channel_mask,
-        )
-        mutrig = apply_channel_field_overrides(mutrig, channel_field_overrides)
-        mutrig = apply_header_overrides(mutrig, header_overrides.get(asic, {}))
-        mutrig = apply_tdc_overrides(mutrig, tdc_overrides.get(asic, {}))
-        words = pack_words(mutrig, param_info)
-        row = configure_one(args, asic, mutrig, words)
-        row["channel_enable_mask"] = args.channel_enable_mask
-        row["tdctest_channel_mask"] = args.tdctest_channel_mask
-        row["channel_field_overrides"] = channel_field_overrides
-        row["header_overrides"] = header_overrides.get(asic, {})
-        row["tdc_overrides"] = tdc_overrides.get(asic, {})
-        rows.append(row)
-        print(
-            "asic={asic} opcode=0x{opcode:08X} status=0x{status:08X} frame_delta={frame_delta} crc_delta={crc_delta} pass={passed}".format(
-                asic=asic,
-                opcode=row["opcode"],
-                status=row["final_status"],
-                frame_delta=row["frame_delta"],
-                crc_delta=row["crc_delta"],
-                passed=int(row["pass"]),
+    for phase, phase_channel_overrides in phase_overrides:
+        effective_channel_overrides = {**channel_field_overrides, **phase_channel_overrides}
+        for asic in args.asics:
+            local = asic % 4
+            mutrigs = smb3 if asic < 4 else smb5
+            if local not in mutrigs:
+                raise RuntimeError(f"XML for ASIC {asic} missing local mutrig index {local}")
+            mutrig = apply_channel_overrides(
+                mutrigs[local],
+                channel_enable_mask=args.channel_enable_mask,
+                tdctest_channel_mask=args.tdctest_channel_mask,
             )
-        )
+            mutrig = apply_channel_field_overrides(mutrig, effective_channel_overrides)
+            mutrig = apply_header_overrides(mutrig, header_overrides.get(asic, {}))
+            mutrig = apply_tdc_overrides(mutrig, tdc_overrides.get(asic, {}))
+            words = pack_words(mutrig, param_info)
+            row = configure_one(args, asic, mutrig, words)
+            row["phase"] = phase
+            row["channel_enable_mask"] = args.channel_enable_mask
+            row["tdctest_channel_mask"] = args.tdctest_channel_mask
+            row["channel_field_overrides"] = effective_channel_overrides
+            row["header_overrides"] = header_overrides.get(asic, {})
+            row["tdc_overrides"] = tdc_overrides.get(asic, {})
+            rows.append(row)
+            print(
+                "phase={phase} asic={asic} opcode=0x{opcode:08X} status=0x{status:08X} frame_delta={frame_delta} crc_delta={crc_delta} pass={passed}".format(
+                    phase=phase,
+                    asic=asic,
+                    opcode=row["opcode"],
+                    status=row["final_status"],
+                    frame_delta=row["frame_delta"],
+                    crc_delta=row["crc_delta"],
+                    passed=int(row["pass"]),
+                )
+            )
 
     write_report(output, timestamp, args, rows)
     json_output.parent.mkdir(parents=True, exist_ok=True)
@@ -524,6 +582,11 @@ def main() -> int:
                     "set_header": [f"{asic}:{name}={value}" for asic, name, value in args.set_header],
                     "set_tdc": [f"{asic}:{name}={value}" for asic, name, value in args.set_tdc],
                     "allow_idle_after_config": args.allow_idle_after_config,
+                    "cml_flush_after_config": args.cml_flush_after_config,
+                    "cml_start_value": args.cml_start_value,
+                    "cml_flush_value": args.cml_flush_value,
+                    "cml_final_value": args.cml_final_value,
+                    "cml_flush_set_cml_sc_zero": args.cml_flush_set_cml_sc_zero,
                 },
                 "rows": rows,
             },
