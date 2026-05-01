@@ -283,10 +283,10 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			DEBUG                     : natural := 0;
 			VERSION_MAJOR             : natural := 26;
 			VERSION_MINOR             : natural := 1;
-			VERSION_PATCH             : natural := 6;
-			BUILD                     : natural := 429;
+			VERSION_PATCH             : natural := 7;
+			BUILD                     : natural := 501;
 			IP_UID                    : natural := 1212765012;
-			VERSION_DATE              : natural := 20260429;
+			VERSION_DATE              : natural := 20260501;
 			VERSION_GIT               : natural := 375124078;
 			INSTANCE_ID               : natural := 0
 		);
@@ -319,6 +319,12 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			asi_hist_fill_in_startofpacket  : in  std_logic                     := 'X';             -- startofpacket
 			asi_hist_fill_in_endofpacket    : in  std_logic                     := 'X';             -- endofpacket
 			asi_hist_fill_in_channel        : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			asi_fill_in_1_valid             : in  std_logic                     := 'X';             -- valid
+			asi_fill_in_1_ready             : out std_logic;                                        -- ready
+			asi_fill_in_1_data              : in  std_logic_vector(38 downto 0) := (others => 'X'); -- data
+			asi_fill_in_1_startofpacket     : in  std_logic                     := 'X';             -- startofpacket
+			asi_fill_in_1_endofpacket       : in  std_logic                     := 'X';             -- endofpacket
+			asi_fill_in_1_channel           : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
 			aso_hist_fill_out_valid         : out std_logic;                                        -- valid
 			aso_hist_fill_out_ready         : in  std_logic                     := 'X';             -- ready
 			aso_hist_fill_out_data          : out std_logic_vector(38 downto 0);                    -- data
@@ -337,12 +343,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			asi_debug_5_data                : in  std_logic_vector(15 downto 0) := (others => 'X'); -- data
 			asi_debug_6_valid               : in  std_logic                     := 'X';             -- valid
 			asi_debug_6_data                : in  std_logic_vector(15 downto 0) := (others => 'X'); -- data
-			asi_fill_in_1_valid             : in  std_logic                     := 'X';             -- valid
-			asi_fill_in_1_ready             : out std_logic;                                        -- ready
-			asi_fill_in_1_data              : in  std_logic_vector(38 downto 0) := (others => 'X'); -- data
-			asi_fill_in_1_startofpacket     : in  std_logic                     := 'X';             -- startofpacket
-			asi_fill_in_1_endofpacket       : in  std_logic                     := 'X';             -- endofpacket
-			asi_fill_in_1_channel           : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
 			asi_fill_in_2_valid             : in  std_logic                     := 'X';             -- valid
 			asi_fill_in_2_ready             : out std_logic;                                        -- ready
 			asi_fill_in_2_data              : in  std_logic_vector(38 downto 0) := (others => 'X'); -- data
@@ -1006,7 +1006,15 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 
 	component mutrig_injector_multiheader is
 		generic (
-			HEADERINFO_CHANNEL_W : natural := 4
+			HEADERINFO_CHANNEL_W : natural := 4;
+			IP_UID               : natural := 1296649802;
+			VERSION_MAJOR        : natural := 26;
+			VERSION_MINOR        : natural := 0;
+			VERSION_PATCH        : natural := 3;
+			BUILD                : natural := 429;
+			VERSION_DATE         : natural := 20260429;
+			VERSION_GIT          : natural := 1385020117;
+			INSTANCE_ID          : natural := 0
 		);
 		port (
 			i_clk                   : in  std_logic                     := 'X';             -- clk
@@ -1658,6 +1666,12 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			histogram_ingress_bridge_0_csr_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
 			histogram_ingress_bridge_0_csr_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
 			histogram_ingress_bridge_0_csr_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
+			histogram_ingress_bridge_1_csr_address                       : out std_logic_vector(1 downto 0);                     -- address
+			histogram_ingress_bridge_1_csr_write                         : out std_logic;                                        -- write
+			histogram_ingress_bridge_1_csr_read                          : out std_logic;                                        -- read
+			histogram_ingress_bridge_1_csr_readdata                      : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			histogram_ingress_bridge_1_csr_writedata                     : out std_logic_vector(31 downto 0);                    -- writedata
+			histogram_ingress_bridge_1_csr_waitrequest                   : in  std_logic                     := 'X';             -- waitrequest
 			histogram_statistics_0_csr_address                           : out std_logic_vector(4 downto 0);                     -- address
 			histogram_statistics_0_csr_write                             : out std_logic;                                        -- write
 			histogram_statistics_0_csr_read                              : out std_logic;                                        -- read
@@ -1890,6 +1904,44 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			out_0_endofpacket   : out std_logic                                         -- endofpacket
 		);
 	end component feb_system_v3_pipe_avalon_st_adapter;
+
+	component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_028 is
+		generic (
+			inBitsPerSymbol : integer := 8;
+			inUsePackets    : integer := 0;
+			inDataWidth     : integer := 8;
+			inChannelWidth  : integer := 3;
+			inErrorWidth    : integer := 2;
+			inUseEmptyPort  : integer := 0;
+			inUseValid      : integer := 1;
+			inUseReady      : integer := 1;
+			inReadyLatency  : integer := 0;
+			outDataWidth    : integer := 32;
+			outChannelWidth : integer := 3;
+			outErrorWidth   : integer := 2;
+			outUseEmptyPort : integer := 0;
+			outUseValid     : integer := 1;
+			outUseReady     : integer := 1;
+			outReadyLatency : integer := 0
+		);
+		port (
+			in_clk_0_clk        : in  std_logic                     := 'X';             -- clk
+			in_rst_0_reset      : in  std_logic                     := 'X';             -- reset
+			in_0_data           : in  std_logic_vector(38 downto 0) := (others => 'X'); -- data
+			in_0_valid          : in  std_logic                     := 'X';             -- valid
+			in_0_ready          : out std_logic;                                        -- ready
+			in_0_startofpacket  : in  std_logic                     := 'X';             -- startofpacket
+			in_0_endofpacket    : in  std_logic                     := 'X';             -- endofpacket
+			in_0_empty          : in  std_logic                     := 'X';             -- empty
+			in_0_error          : in  std_logic                     := 'X';             -- error
+			in_0_channel        : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			out_0_data          : out std_logic_vector(38 downto 0);                    -- data
+			out_0_valid         : out std_logic;                                        -- valid
+			out_0_ready         : in  std_logic                     := 'X';             -- ready
+			out_0_startofpacket : out std_logic;                                        -- startofpacket
+			out_0_endofpacket   : out std_logic                                         -- endofpacket
+		);
+	end component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_028;
 
 	component feb_system_v3_pipe_data_path_subsystem_rst_controller is
 		generic (
@@ -2551,6 +2603,159 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 		);
 	end component feb_system_v3_pipe_data_path_subsystem_hist_post_lower_splitter_0;
 
+	component feb_system_v3_pipe_data_path_subsystem_hist_pre_lower_splitter_0 is
+		generic (
+			NUMBER_OF_OUTPUTS : integer := 2;
+			QUALIFY_VALID_OUT : integer := 1;
+			USE_PACKETS       : integer := 0;
+			DATA_WIDTH        : integer := 8;
+			CHANNEL_WIDTH     : integer := 1;
+			ERROR_WIDTH       : integer := 1;
+			BITS_PER_SYMBOL   : integer := 8;
+			EMPTY_WIDTH       : integer := 1
+		);
+		port (
+			clk                 : in  std_logic                     := 'X';             --   clk.clk
+			reset               : in  std_logic                     := 'X';             -- reset.reset
+			in0_ready           : out std_logic;                                        --    in.ready
+			in0_valid           : in  std_logic                     := 'X';             --      .valid
+			in0_startofpacket   : in  std_logic                     := 'X';             --      .startofpacket
+			in0_endofpacket     : in  std_logic                     := 'X';             --      .endofpacket
+			in0_empty           : in  std_logic_vector(0 downto 0)  := (others => 'X'); --      .empty
+			in0_channel         : in  std_logic_vector(3 downto 0)  := (others => 'X'); --      .channel
+			in0_error           : in  std_logic_vector(0 downto 0)  := (others => 'X'); --      .error
+			in0_data            : in  std_logic_vector(38 downto 0) := (others => 'X'); --      .data
+			out0_ready          : in  std_logic                     := 'X';             --  out0.ready
+			out0_valid          : out std_logic;                                        --      .valid
+			out0_startofpacket  : out std_logic;                                        --      .startofpacket
+			out0_endofpacket    : out std_logic;                                        --      .endofpacket
+			out0_empty          : out std_logic_vector(0 downto 0);                     --      .empty
+			out0_channel        : out std_logic_vector(3 downto 0);                     --      .channel
+			out0_error          : out std_logic_vector(0 downto 0);                     --      .error
+			out0_data           : out std_logic_vector(38 downto 0);                    --      .data
+			out1_ready          : in  std_logic                     := 'X';             --  out1.ready
+			out1_valid          : out std_logic;                                        --      .valid
+			out1_startofpacket  : out std_logic;                                        --      .startofpacket
+			out1_endofpacket    : out std_logic;                                        --      .endofpacket
+			out1_empty          : out std_logic_vector(0 downto 0);                     --      .empty
+			out1_channel        : out std_logic_vector(3 downto 0);                     --      .channel
+			out1_error          : out std_logic_vector(0 downto 0);                     --      .error
+			out1_data           : out std_logic_vector(38 downto 0);                    --      .data
+			out10_channel       : out std_logic_vector(3 downto 0);
+			out10_data          : out std_logic_vector(38 downto 0);
+			out10_empty         : out std_logic_vector(0 downto 0);
+			out10_endofpacket   : out std_logic;
+			out10_error         : out std_logic_vector(0 downto 0);
+			out10_ready         : in  std_logic                     := 'X';
+			out10_startofpacket : out std_logic;
+			out10_valid         : out std_logic;
+			out11_channel       : out std_logic_vector(3 downto 0);
+			out11_data          : out std_logic_vector(38 downto 0);
+			out11_empty         : out std_logic_vector(0 downto 0);
+			out11_endofpacket   : out std_logic;
+			out11_error         : out std_logic_vector(0 downto 0);
+			out11_ready         : in  std_logic                     := 'X';
+			out11_startofpacket : out std_logic;
+			out11_valid         : out std_logic;
+			out12_channel       : out std_logic_vector(3 downto 0);
+			out12_data          : out std_logic_vector(38 downto 0);
+			out12_empty         : out std_logic_vector(0 downto 0);
+			out12_endofpacket   : out std_logic;
+			out12_error         : out std_logic_vector(0 downto 0);
+			out12_ready         : in  std_logic                     := 'X';
+			out12_startofpacket : out std_logic;
+			out12_valid         : out std_logic;
+			out13_channel       : out std_logic_vector(3 downto 0);
+			out13_data          : out std_logic_vector(38 downto 0);
+			out13_empty         : out std_logic_vector(0 downto 0);
+			out13_endofpacket   : out std_logic;
+			out13_error         : out std_logic_vector(0 downto 0);
+			out13_ready         : in  std_logic                     := 'X';
+			out13_startofpacket : out std_logic;
+			out13_valid         : out std_logic;
+			out14_channel       : out std_logic_vector(3 downto 0);
+			out14_data          : out std_logic_vector(38 downto 0);
+			out14_empty         : out std_logic_vector(0 downto 0);
+			out14_endofpacket   : out std_logic;
+			out14_error         : out std_logic_vector(0 downto 0);
+			out14_ready         : in  std_logic                     := 'X';
+			out14_startofpacket : out std_logic;
+			out14_valid         : out std_logic;
+			out15_channel       : out std_logic_vector(3 downto 0);
+			out15_data          : out std_logic_vector(38 downto 0);
+			out15_empty         : out std_logic_vector(0 downto 0);
+			out15_endofpacket   : out std_logic;
+			out15_error         : out std_logic_vector(0 downto 0);
+			out15_ready         : in  std_logic                     := 'X';
+			out15_startofpacket : out std_logic;
+			out15_valid         : out std_logic;
+			out2_channel        : out std_logic_vector(3 downto 0);
+			out2_data           : out std_logic_vector(38 downto 0);
+			out2_empty          : out std_logic_vector(0 downto 0);
+			out2_endofpacket    : out std_logic;
+			out2_error          : out std_logic_vector(0 downto 0);
+			out2_ready          : in  std_logic                     := 'X';
+			out2_startofpacket  : out std_logic;
+			out2_valid          : out std_logic;
+			out3_channel        : out std_logic_vector(3 downto 0);
+			out3_data           : out std_logic_vector(38 downto 0);
+			out3_empty          : out std_logic_vector(0 downto 0);
+			out3_endofpacket    : out std_logic;
+			out3_error          : out std_logic_vector(0 downto 0);
+			out3_ready          : in  std_logic                     := 'X';
+			out3_startofpacket  : out std_logic;
+			out3_valid          : out std_logic;
+			out4_channel        : out std_logic_vector(3 downto 0);
+			out4_data           : out std_logic_vector(38 downto 0);
+			out4_empty          : out std_logic_vector(0 downto 0);
+			out4_endofpacket    : out std_logic;
+			out4_error          : out std_logic_vector(0 downto 0);
+			out4_ready          : in  std_logic                     := 'X';
+			out4_startofpacket  : out std_logic;
+			out4_valid          : out std_logic;
+			out5_channel        : out std_logic_vector(3 downto 0);
+			out5_data           : out std_logic_vector(38 downto 0);
+			out5_empty          : out std_logic_vector(0 downto 0);
+			out5_endofpacket    : out std_logic;
+			out5_error          : out std_logic_vector(0 downto 0);
+			out5_ready          : in  std_logic                     := 'X';
+			out5_startofpacket  : out std_logic;
+			out5_valid          : out std_logic;
+			out6_channel        : out std_logic_vector(3 downto 0);
+			out6_data           : out std_logic_vector(38 downto 0);
+			out6_empty          : out std_logic_vector(0 downto 0);
+			out6_endofpacket    : out std_logic;
+			out6_error          : out std_logic_vector(0 downto 0);
+			out6_ready          : in  std_logic                     := 'X';
+			out6_startofpacket  : out std_logic;
+			out6_valid          : out std_logic;
+			out7_channel        : out std_logic_vector(3 downto 0);
+			out7_data           : out std_logic_vector(38 downto 0);
+			out7_empty          : out std_logic_vector(0 downto 0);
+			out7_endofpacket    : out std_logic;
+			out7_error          : out std_logic_vector(0 downto 0);
+			out7_ready          : in  std_logic                     := 'X';
+			out7_startofpacket  : out std_logic;
+			out7_valid          : out std_logic;
+			out8_channel        : out std_logic_vector(3 downto 0);
+			out8_data           : out std_logic_vector(38 downto 0);
+			out8_empty          : out std_logic_vector(0 downto 0);
+			out8_endofpacket    : out std_logic;
+			out8_error          : out std_logic_vector(0 downto 0);
+			out8_ready          : in  std_logic                     := 'X';
+			out8_startofpacket  : out std_logic;
+			out8_valid          : out std_logic;
+			out9_channel        : out std_logic_vector(3 downto 0);
+			out9_data           : out std_logic_vector(38 downto 0);
+			out9_empty          : out std_logic_vector(0 downto 0);
+			out9_endofpacket    : out std_logic;
+			out9_error          : out std_logic_vector(0 downto 0);
+			out9_ready          : in  std_logic                     := 'X';
+			out9_startofpacket  : out std_logic;
+			out9_valid          : out std_logic
+		);
+	end component feb_system_v3_pipe_data_path_subsystem_hist_pre_lower_splitter_0;
+
 	component feb_system_v3_pipe_data_path_subsystem_run_control_splitter is
 		generic (
 			NUMBER_OF_OUTPUTS : integer := 2;
@@ -2728,6 +2933,12 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mutrig_datapath_subsystem_7_headerinfo_valid                                  : std_logic;                     -- mutrig_datapath_subsystem_7:headerinfo_valid -> mutrig_injector_0:asi_headerinfo7_valid
 	signal mutrig_datapath_subsystem_7_headerinfo_data                                   : std_logic_vector(41 downto 0); -- mutrig_datapath_subsystem_7:headerinfo_data -> mutrig_injector_0:asi_headerinfo7_data
 	signal mutrig_datapath_subsystem_7_headerinfo_channel                                : std_logic_vector(3 downto 0);  -- mutrig_datapath_subsystem_7:headerinfo_channel -> mutrig_injector_0:asi_headerinfo7_channel
+	signal histogram_ingress_bridge_1_hist_out_valid                                     : std_logic;                     -- histogram_ingress_bridge_1:aso_hist_valid -> histogram_statistics_0:asi_fill_in_1_valid
+	signal histogram_ingress_bridge_1_hist_out_data                                      : std_logic_vector(38 downto 0); -- histogram_ingress_bridge_1:aso_hist_data -> histogram_statistics_0:asi_fill_in_1_data
+	signal histogram_ingress_bridge_1_hist_out_ready                                     : std_logic;                     -- histogram_statistics_0:asi_fill_in_1_ready -> histogram_ingress_bridge_1:aso_hist_ready
+	signal histogram_ingress_bridge_1_hist_out_channel                                   : std_logic_vector(3 downto 0);  -- histogram_ingress_bridge_1:aso_hist_channel -> histogram_statistics_0:asi_fill_in_1_channel
+	signal histogram_ingress_bridge_1_hist_out_startofpacket                             : std_logic;                     -- histogram_ingress_bridge_1:aso_hist_startofpacket -> histogram_statistics_0:asi_fill_in_1_startofpacket
+	signal histogram_ingress_bridge_1_hist_out_endofpacket                               : std_logic;                     -- histogram_ingress_bridge_1:aso_hist_endofpacket -> histogram_statistics_0:asi_fill_in_1_endofpacket
 	signal histogram_ingress_bridge_0_hist_out_valid                                     : std_logic;                     -- histogram_ingress_bridge_0:aso_hist_valid -> histogram_statistics_0:asi_hist_fill_in_valid
 	signal histogram_ingress_bridge_0_hist_out_data                                      : std_logic_vector(38 downto 0); -- histogram_ingress_bridge_0:aso_hist_data -> histogram_statistics_0:asi_hist_fill_in_data
 	signal histogram_ingress_bridge_0_hist_out_ready                                     : std_logic;                     -- histogram_statistics_0:asi_hist_fill_in_ready -> histogram_ingress_bridge_0:aso_hist_ready
@@ -2790,14 +3001,14 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mutrig_datapath_subsystem_7_hit_type0_out_startofpacket                       : std_logic;                     -- mutrig_datapath_subsystem_7:hit_type0_out_startofpacket -> mux_mutrig2processor_0:in3_startofpacket
 	signal mutrig_datapath_subsystem_7_hit_type0_out_endofpacket                         : std_logic;                     -- mutrig_datapath_subsystem_7:hit_type0_out_endofpacket -> mux_mutrig2processor_0:in3_endofpacket
 	signal mutrig_datapath_subsystem_7_hit_type0_out_error                               : std_logic_vector(2 downto 0);  -- mutrig_datapath_subsystem_7:hit_type0_out_error -> mux_mutrig2processor_0:in3_error
-	signal mts_preprocessor_1_hit_type1_out_valid                                        : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_valid -> hit_stack_subsystem_1:hit_type_1_valid
-	signal mts_preprocessor_1_hit_type1_out_data                                         : std_logic_vector(38 downto 0); -- mts_preprocessor_1:aso_hit_type1_data -> hit_stack_subsystem_1:hit_type_1_data
-	signal mts_preprocessor_1_hit_type1_out_ready                                        : std_logic;                     -- hit_stack_subsystem_1:hit_type_1_ready -> mts_preprocessor_1:aso_hit_type1_ready
-	signal mts_preprocessor_1_hit_type1_out_channel                                      : std_logic_vector(3 downto 0);  -- mts_preprocessor_1:aso_hit_type1_channel -> hit_stack_subsystem_1:hit_type_1_channel
-	signal mts_preprocessor_1_hit_type1_out_startofpacket                                : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_startofpacket -> hit_stack_subsystem_1:hit_type_1_startofpacket
-	signal mts_preprocessor_1_hit_type1_out_endofpacket                                  : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_endofpacket -> hit_stack_subsystem_1:hit_type_1_endofpacket
-	signal mts_preprocessor_1_hit_type1_out_error                                        : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_error -> hit_stack_subsystem_1:hit_type_1_error
-	signal mts_preprocessor_1_hit_type1_out_empty                                        : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_empty -> hit_stack_subsystem_1:hit_type_1_empty
+	signal mts_preprocessor_1_hit_type1_out_valid                                        : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_valid -> hist_pre_lower_splitter_0:in0_valid
+	signal mts_preprocessor_1_hit_type1_out_data                                         : std_logic_vector(38 downto 0); -- mts_preprocessor_1:aso_hit_type1_data -> hist_pre_lower_splitter_0:in0_data
+	signal mts_preprocessor_1_hit_type1_out_ready                                        : std_logic;                     -- hist_pre_lower_splitter_0:in0_ready -> mts_preprocessor_1:aso_hit_type1_ready
+	signal mts_preprocessor_1_hit_type1_out_channel                                      : std_logic_vector(3 downto 0);  -- mts_preprocessor_1:aso_hit_type1_channel -> hist_pre_lower_splitter_0:in0_channel
+	signal mts_preprocessor_1_hit_type1_out_startofpacket                                : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_startofpacket -> hist_pre_lower_splitter_0:in0_startofpacket
+	signal mts_preprocessor_1_hit_type1_out_endofpacket                                  : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_endofpacket -> hist_pre_lower_splitter_0:in0_endofpacket
+	signal mts_preprocessor_1_hit_type1_out_error                                        : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_error -> hist_pre_lower_splitter_0:in0_error
+	signal mts_preprocessor_1_hit_type1_out_empty                                        : std_logic;                     -- mts_preprocessor_1:aso_hit_type1_empty -> hist_pre_lower_splitter_0:in0_empty
 	signal mts_preprocessor_0_hit_type1_out_valid                                        : std_logic;                     -- mts_preprocessor_0:aso_hit_type1_valid -> histogram_ingress_bridge_0:asi_pre_valid
 	signal mts_preprocessor_0_hit_type1_out_data                                         : std_logic_vector(38 downto 0); -- mts_preprocessor_0:aso_hit_type1_data -> histogram_ingress_bridge_0:asi_pre_data
 	signal mts_preprocessor_0_hit_type1_out_ready                                        : std_logic;                     -- histogram_ingress_bridge_0:asi_pre_ready -> mts_preprocessor_0:aso_hit_type1_ready
@@ -2833,9 +3044,25 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal emulator_ctrl_splitter_out0_valid                                             : std_logic;                     -- emulator_ctrl_splitter:out0_valid -> emulator_mutrig_0:asi_ctrl_valid
 	signal emulator_ctrl_splitter_out0_data                                              : std_logic_vector(8 downto 0);  -- emulator_ctrl_splitter:out0_data -> emulator_mutrig_0:asi_ctrl_data
 	signal emulator_ctrl_splitter_out0_ready                                             : std_logic;                     -- emulator_mutrig_0:asi_ctrl_ready -> emulator_ctrl_splitter:out0_ready
+	signal hist_pre_lower_splitter_0_out0_valid                                          : std_logic;                     -- hist_pre_lower_splitter_0:out0_valid -> hit_stack_subsystem_1:hit_type_1_valid
+	signal hist_pre_lower_splitter_0_out0_data                                           : std_logic_vector(38 downto 0); -- hist_pre_lower_splitter_0:out0_data -> hit_stack_subsystem_1:hit_type_1_data
+	signal hist_pre_lower_splitter_0_out0_ready                                          : std_logic;                     -- hit_stack_subsystem_1:hit_type_1_ready -> hist_pre_lower_splitter_0:out0_ready
+	signal hist_pre_lower_splitter_0_out0_channel                                        : std_logic_vector(3 downto 0);  -- hist_pre_lower_splitter_0:out0_channel -> hit_stack_subsystem_1:hit_type_1_channel
+	signal hist_pre_lower_splitter_0_out0_startofpacket                                  : std_logic;                     -- hist_pre_lower_splitter_0:out0_startofpacket -> hit_stack_subsystem_1:hit_type_1_startofpacket
+	signal hist_pre_lower_splitter_0_out0_endofpacket                                    : std_logic;                     -- hist_pre_lower_splitter_0:out0_endofpacket -> hit_stack_subsystem_1:hit_type_1_endofpacket
+	signal hist_pre_lower_splitter_0_out0_error                                          : std_logic_vector(0 downto 0);  -- hist_pre_lower_splitter_0:out0_error -> hit_stack_subsystem_1:hit_type_1_error
+	signal hist_pre_lower_splitter_0_out0_empty                                          : std_logic_vector(0 downto 0);  -- hist_pre_lower_splitter_0:out0_empty -> hit_stack_subsystem_1:hit_type_1_empty
 	signal emulator_ctrl_splitter_out1_valid                                             : std_logic;                     -- emulator_ctrl_splitter:out1_valid -> emulator_mutrig_1:asi_ctrl_valid
 	signal emulator_ctrl_splitter_out1_data                                              : std_logic_vector(8 downto 0);  -- emulator_ctrl_splitter:out1_data -> emulator_mutrig_1:asi_ctrl_data
 	signal emulator_ctrl_splitter_out1_ready                                             : std_logic;                     -- emulator_mutrig_1:asi_ctrl_ready -> emulator_ctrl_splitter:out1_ready
+	signal hist_pre_lower_splitter_0_out1_valid                                          : std_logic;                     -- hist_pre_lower_splitter_0:out1_valid -> histogram_ingress_bridge_1:asi_pre_valid
+	signal hist_pre_lower_splitter_0_out1_data                                           : std_logic_vector(38 downto 0); -- hist_pre_lower_splitter_0:out1_data -> histogram_ingress_bridge_1:asi_pre_data
+	signal hist_pre_lower_splitter_0_out1_ready                                          : std_logic;                     -- histogram_ingress_bridge_1:asi_pre_ready -> hist_pre_lower_splitter_0:out1_ready
+	signal hist_pre_lower_splitter_0_out1_channel                                        : std_logic_vector(3 downto 0);  -- hist_pre_lower_splitter_0:out1_channel -> histogram_ingress_bridge_1:asi_pre_channel
+	signal hist_pre_lower_splitter_0_out1_startofpacket                                  : std_logic;                     -- hist_pre_lower_splitter_0:out1_startofpacket -> histogram_ingress_bridge_1:asi_pre_startofpacket
+	signal hist_pre_lower_splitter_0_out1_endofpacket                                    : std_logic;                     -- hist_pre_lower_splitter_0:out1_endofpacket -> histogram_ingress_bridge_1:asi_pre_endofpacket
+	signal hist_pre_lower_splitter_0_out1_error                                          : std_logic_vector(0 downto 0);  -- hist_pre_lower_splitter_0:out1_error -> histogram_ingress_bridge_1:asi_pre_error
+	signal hist_pre_lower_splitter_0_out1_empty                                          : std_logic_vector(0 downto 0);  -- hist_pre_lower_splitter_0:out1_empty -> histogram_ingress_bridge_1:asi_pre_empty
 	signal emulator_ctrl_splitter_out2_valid                                             : std_logic;                     -- emulator_ctrl_splitter:out2_valid -> emulator_mutrig_2:asi_ctrl_valid
 	signal emulator_ctrl_splitter_out2_data                                              : std_logic_vector(8 downto 0);  -- emulator_ctrl_splitter:out2_data -> emulator_mutrig_2:asi_ctrl_data
 	signal emulator_ctrl_splitter_out2_ready                                             : std_logic;                     -- emulator_mutrig_2:asi_ctrl_ready -> emulator_ctrl_splitter:out2_ready
@@ -2938,7 +3165,7 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal emulator_mutrig_7_tx8b1k_data                                                 : std_logic_vector(8 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_data -> mutrig_lane_source_mux_7:asi_emu_data
 	signal emulator_mutrig_7_tx8b1k_channel                                              : std_logic_vector(3 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_channel -> mutrig_lane_source_mux_7:asi_emu_channel
 	signal emulator_mutrig_7_tx8b1k_error                                                : std_logic_vector(2 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_error -> mutrig_lane_source_mux_7:asi_emu_error
-	signal lvds_rx_28nm_0_outclock_clk                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_outclock -> [lvds_outclock_clk, avalon_st_adapter:in_clk_0_clk, avalon_st_adapter_001:in_clk_0_clk, avalon_st_adapter_002:in_clk_0_clk, avalon_st_adapter_003:in_clk_0_clk, avalon_st_adapter_004:in_clk_0_clk, avalon_st_adapter_005:in_clk_0_clk, avalon_st_adapter_006:in_clk_0_clk, avalon_st_adapter_007:in_clk_0_clk, avalon_st_adapter_010:in_clk_0_clk, avalon_st_adapter_013:in_clk_0_clk, avalon_st_adapter_014:in_clk_0_clk, avalon_st_adapter_015:in_clk_0_clk, avalon_st_adapter_016:in_clk_0_clk, avalon_st_adapter_017:in_clk_0_clk, avalon_st_adapter_018:in_clk_0_clk, avalon_st_adapter_019:in_clk_0_clk, avalon_st_adapter_020:in_clk_0_clk, avalon_st_adapter_021:in_clk_0_clk, avalon_st_adapter_022:in_clk_0_clk, avalon_st_adapter_023:in_clk_0_clk, avalon_st_adapter_024:in_clk_0_clk, avalon_st_adapter_025:in_clk_0_clk, avalon_st_adapter_026:in_clk_0_clk, avalon_st_adapter_027:in_clk_0_clk, dbg_mm2runctrl_0:i_clk, emulator_ctrl_splitter:clk, emulator_inject_fanout:csi_clk, emulator_mutrig_0:i_clk, emulator_mutrig_1:i_clk, emulator_mutrig_2:i_clk, emulator_mutrig_3:i_clk, emulator_mutrig_4:i_clk, emulator_mutrig_5:i_clk, emulator_mutrig_6:i_clk, emulator_mutrig_7:i_clk, hist_post_cdc_0:out_clk, histogram_ingress_bridge_0:csi_clock_clk, histogram_statistics_0:i_clk, hit_stack_subsystem_0:datapath_clock_clk, hit_stack_subsystem_1:datapath_clock_clk, lvds_rx_controller_pro_0:csi_data_clk, mm_clock_crossing_bridge:m0_clk, mm_interconnect_0:lvds_rx_28nm_0_outclock_clk, mm_interconnect_1:lvds_rx_28nm_0_outclock_clk, mm_interconnect_2:lvds_rx_28nm_0_outclock_clk, mm_interconnect_3:lvds_rx_28nm_0_outclock_clk, mm_pipeline_lvds_csr_emu_dbg:clk, mm_pipeline_lvds_csr_hist:clk, mm_pipeline_lvds_csr_hitstack_frame:clk, mm_pipeline_lvds_csr_hitstack_ring:clk, mm_pipeline_lvds_csr_low:clk, mm_pipeline_lvds_csr_mts1:clk, mm_pipeline_lvds_csr_mutrig3:clk, mm_pipeline_lvds_csr_mutrig4_mts0:clk, mm_pipeline_lvds_csr_mutrig5:clk, mm_pipeline_lvds_csr_mutrig6:clk, mm_pipeline_lvds_csr_mutrig7:clk, mts_preprocessor_0:i_clk, mts_preprocessor_1:i_clk, mutrig_datapath_subsystem_0:clk_clk, mutrig_datapath_subsystem_1:clk_clk, mutrig_datapath_subsystem_2:clk_clk, mutrig_datapath_subsystem_3:clk_clk, mutrig_datapath_subsystem_4:clk_clk, mutrig_datapath_subsystem_5:clk_clk, mutrig_datapath_subsystem_6:clk_clk, mutrig_datapath_subsystem_7:clk_clk, mutrig_injector_0:i_clk, mutrig_lane_source_mux_0:clk, mutrig_lane_source_mux_1:clk, mutrig_lane_source_mux_2:clk, mutrig_lane_source_mux_3:clk, mutrig_lane_source_mux_4:clk, mutrig_lane_source_mux_5:clk, mutrig_lane_source_mux_6:clk, mutrig_lane_source_mux_7:clk, mutrig_reset_controller_0:i_lvds_dpa_clk, mux_mutrig2processor:clk, mux_mutrig2processor_0:clk, rst_controller:clk, rst_controller_001:clk, rst_controller_003:clk, rst_controller_004:clk, rst_controller_006:clk, rst_controller_009:clk, run_control_splitter:clk]
+	signal lvds_rx_28nm_0_outclock_clk                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_outclock -> [lvds_outclock_clk, avalon_st_adapter:in_clk_0_clk, avalon_st_adapter_001:in_clk_0_clk, avalon_st_adapter_002:in_clk_0_clk, avalon_st_adapter_003:in_clk_0_clk, avalon_st_adapter_004:in_clk_0_clk, avalon_st_adapter_005:in_clk_0_clk, avalon_st_adapter_006:in_clk_0_clk, avalon_st_adapter_007:in_clk_0_clk, avalon_st_adapter_010:in_clk_0_clk, avalon_st_adapter_013:in_clk_0_clk, avalon_st_adapter_014:in_clk_0_clk, avalon_st_adapter_015:in_clk_0_clk, avalon_st_adapter_016:in_clk_0_clk, avalon_st_adapter_017:in_clk_0_clk, avalon_st_adapter_018:in_clk_0_clk, avalon_st_adapter_019:in_clk_0_clk, avalon_st_adapter_020:in_clk_0_clk, avalon_st_adapter_021:in_clk_0_clk, avalon_st_adapter_022:in_clk_0_clk, avalon_st_adapter_023:in_clk_0_clk, avalon_st_adapter_024:in_clk_0_clk, avalon_st_adapter_025:in_clk_0_clk, avalon_st_adapter_026:in_clk_0_clk, avalon_st_adapter_027:in_clk_0_clk, avalon_st_adapter_028:in_clk_0_clk, dbg_mm2runctrl_0:i_clk, emulator_ctrl_splitter:clk, emulator_inject_fanout:csi_clk, emulator_mutrig_0:i_clk, emulator_mutrig_1:i_clk, emulator_mutrig_2:i_clk, emulator_mutrig_3:i_clk, emulator_mutrig_4:i_clk, emulator_mutrig_5:i_clk, emulator_mutrig_6:i_clk, emulator_mutrig_7:i_clk, hist_post_cdc_0:out_clk, hist_pre_lower_splitter_0:clk, histogram_ingress_bridge_0:csi_clock_clk, histogram_ingress_bridge_1:csi_clock_clk, histogram_statistics_0:i_clk, hit_stack_subsystem_0:datapath_clock_clk, hit_stack_subsystem_1:datapath_clock_clk, lvds_rx_controller_pro_0:csi_data_clk, mm_clock_crossing_bridge:m0_clk, mm_interconnect_0:lvds_rx_28nm_0_outclock_clk, mm_interconnect_1:lvds_rx_28nm_0_outclock_clk, mm_interconnect_2:lvds_rx_28nm_0_outclock_clk, mm_interconnect_3:lvds_rx_28nm_0_outclock_clk, mm_pipeline_lvds_csr_emu_dbg:clk, mm_pipeline_lvds_csr_hist:clk, mm_pipeline_lvds_csr_hitstack_frame:clk, mm_pipeline_lvds_csr_hitstack_ring:clk, mm_pipeline_lvds_csr_low:clk, mm_pipeline_lvds_csr_mts1:clk, mm_pipeline_lvds_csr_mutrig3:clk, mm_pipeline_lvds_csr_mutrig4_mts0:clk, mm_pipeline_lvds_csr_mutrig5:clk, mm_pipeline_lvds_csr_mutrig6:clk, mm_pipeline_lvds_csr_mutrig7:clk, mts_preprocessor_0:i_clk, mts_preprocessor_1:i_clk, mutrig_datapath_subsystem_0:clk_clk, mutrig_datapath_subsystem_1:clk_clk, mutrig_datapath_subsystem_2:clk_clk, mutrig_datapath_subsystem_3:clk_clk, mutrig_datapath_subsystem_4:clk_clk, mutrig_datapath_subsystem_5:clk_clk, mutrig_datapath_subsystem_6:clk_clk, mutrig_datapath_subsystem_7:clk_clk, mutrig_injector_0:i_clk, mutrig_lane_source_mux_0:clk, mutrig_lane_source_mux_1:clk, mutrig_lane_source_mux_2:clk, mutrig_lane_source_mux_3:clk, mutrig_lane_source_mux_4:clk, mutrig_lane_source_mux_5:clk, mutrig_lane_source_mux_6:clk, mutrig_lane_source_mux_7:clk, mutrig_reset_controller_0:i_lvds_dpa_clk, mux_mutrig2processor:clk, mux_mutrig2processor_0:clk, rst_controller:clk, rst_controller_001:clk, rst_controller_003:clk, rst_controller_004:clk, rst_controller_006:clk, rst_controller_009:clk, run_control_splitter:clk]
 	signal lvds_rx_controller_pro_0_ctrl_pllrst                                          : std_logic;                     -- lvds_rx_controller_pro_0:coe_ctrl_pllrst -> lvds_rx_28nm_0:pll_areset
 	signal lvds_rx_controller_pro_0_ctrl_dpahold                                         : std_logic_vector(8 downto 0);  -- lvds_rx_controller_pro_0:coe_ctrl_dpahold -> lvds_rx_28nm_0:rx_dpll_hold
 	signal lvds_rx_28nm_0_ctrl_plllock                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_locked -> lvds_rx_controller_pro_0:coe_ctrl_plllock
@@ -3102,12 +3329,6 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_write                     : std_logic;                     -- mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_s0_write -> mm_pipeline_jtagmaster2rstctrl:s0_write
 	signal mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_writedata                 : std_logic_vector(31 downto 0); -- mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_s0_writedata -> mm_pipeline_jtagmaster2rstctrl:s0_writedata
 	signal mm_interconnect_0_mm_pipeline_jtagmaster2rstctrl_s0_burstcount                : std_logic_vector(0 downto 0);  -- mm_interconnect_0:mm_pipeline_jtagmaster2rstctrl_s0_burstcount -> mm_pipeline_jtagmaster2rstctrl:s0_burstcount
-	signal mm_interconnect_0_mutrig_injector_0_csr_readdata                              : std_logic_vector(31 downto 0); -- mutrig_injector_0:avs_csr_readdata -> mm_interconnect_0:mutrig_injector_0_csr_readdata
-	signal mm_interconnect_0_mutrig_injector_0_csr_waitrequest                           : std_logic;                     -- mutrig_injector_0:avs_csr_waitrequest -> mm_interconnect_0:mutrig_injector_0_csr_waitrequest
-	signal mm_interconnect_0_mutrig_injector_0_csr_address                               : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_injector_0_csr_address -> mutrig_injector_0:avs_csr_address
-	signal mm_interconnect_0_mutrig_injector_0_csr_read                                  : std_logic;                     -- mm_interconnect_0:mutrig_injector_0_csr_read -> mutrig_injector_0:avs_csr_read
-	signal mm_interconnect_0_mutrig_injector_0_csr_write                                 : std_logic;                     -- mm_interconnect_0:mutrig_injector_0_csr_write -> mutrig_injector_0:avs_csr_write
-	signal mm_interconnect_0_mutrig_injector_0_csr_writedata                             : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_injector_0_csr_writedata -> mutrig_injector_0:avs_csr_writedata
 	signal mm_interconnect_0_mutrig_datapath_subsystem_7_csr_readdata                    : std_logic_vector(31 downto 0); -- mutrig_datapath_subsystem_7:csr_readdata -> mm_interconnect_0:mutrig_datapath_subsystem_7_csr_readdata
 	signal mm_interconnect_0_mutrig_datapath_subsystem_7_csr_waitrequest                 : std_logic;                     -- mutrig_datapath_subsystem_7:csr_waitrequest -> mm_interconnect_0:mutrig_datapath_subsystem_7_csr_waitrequest
 	signal mm_interconnect_0_mutrig_datapath_subsystem_7_csr_address                     : std_logic_vector(1 downto 0);  -- mm_interconnect_0:mutrig_datapath_subsystem_7_csr_address -> mutrig_datapath_subsystem_7:csr_address
@@ -3144,6 +3365,12 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_interconnect_0_mutrig_datapath_subsystem_2_csr_read                        : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_csr_read -> mutrig_datapath_subsystem_2:csr_read
 	signal mm_interconnect_0_mutrig_datapath_subsystem_2_csr_write                       : std_logic;                     -- mm_interconnect_0:mutrig_datapath_subsystem_2_csr_write -> mutrig_datapath_subsystem_2:csr_write
 	signal mm_interconnect_0_mutrig_datapath_subsystem_2_csr_writedata                   : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_datapath_subsystem_2_csr_writedata -> mutrig_datapath_subsystem_2:csr_writedata
+	signal mm_interconnect_0_mutrig_injector_0_csr_readdata                              : std_logic_vector(31 downto 0); -- mutrig_injector_0:avs_csr_readdata -> mm_interconnect_0:mutrig_injector_0_csr_readdata
+	signal mm_interconnect_0_mutrig_injector_0_csr_waitrequest                           : std_logic;                     -- mutrig_injector_0:avs_csr_waitrequest -> mm_interconnect_0:mutrig_injector_0_csr_waitrequest
+	signal mm_interconnect_0_mutrig_injector_0_csr_address                               : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_injector_0_csr_address -> mutrig_injector_0:avs_csr_address
+	signal mm_interconnect_0_mutrig_injector_0_csr_read                                  : std_logic;                     -- mm_interconnect_0:mutrig_injector_0_csr_read -> mutrig_injector_0:avs_csr_read
+	signal mm_interconnect_0_mutrig_injector_0_csr_write                                 : std_logic;                     -- mm_interconnect_0:mutrig_injector_0_csr_write -> mutrig_injector_0:avs_csr_write
+	signal mm_interconnect_0_mutrig_injector_0_csr_writedata                             : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_injector_0_csr_writedata -> mutrig_injector_0:avs_csr_writedata
 	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata        : std_logic_vector(31 downto 0); -- hit_stack_subsystem_1:ring_buffer_cam_0_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata
 	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_waitrequest     : std_logic;                     -- hit_stack_subsystem_1:ring_buffer_cam_0_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_waitrequest
 	signal mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_address         : std_logic_vector(4 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_1_ring_buffer_cam_0_csr_address -> hit_stack_subsystem_1:ring_buffer_cam_0_csr_address
@@ -3456,6 +3683,12 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_read                         : std_logic;                     -- mm_interconnect_1:histogram_ingress_bridge_0_csr_read -> histogram_ingress_bridge_0:avs_csr_read
 	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_write                        : std_logic;                     -- mm_interconnect_1:histogram_ingress_bridge_0_csr_write -> histogram_ingress_bridge_0:avs_csr_write
 	signal mm_interconnect_1_histogram_ingress_bridge_0_csr_writedata                    : std_logic_vector(31 downto 0); -- mm_interconnect_1:histogram_ingress_bridge_0_csr_writedata -> histogram_ingress_bridge_0:avs_csr_writedata
+	signal mm_interconnect_1_histogram_ingress_bridge_1_csr_readdata                     : std_logic_vector(31 downto 0); -- histogram_ingress_bridge_1:avs_csr_readdata -> mm_interconnect_1:histogram_ingress_bridge_1_csr_readdata
+	signal mm_interconnect_1_histogram_ingress_bridge_1_csr_waitrequest                  : std_logic;                     -- histogram_ingress_bridge_1:avs_csr_waitrequest -> mm_interconnect_1:histogram_ingress_bridge_1_csr_waitrequest
+	signal mm_interconnect_1_histogram_ingress_bridge_1_csr_address                      : std_logic_vector(1 downto 0);  -- mm_interconnect_1:histogram_ingress_bridge_1_csr_address -> histogram_ingress_bridge_1:avs_csr_address
+	signal mm_interconnect_1_histogram_ingress_bridge_1_csr_read                         : std_logic;                     -- mm_interconnect_1:histogram_ingress_bridge_1_csr_read -> histogram_ingress_bridge_1:avs_csr_read
+	signal mm_interconnect_1_histogram_ingress_bridge_1_csr_write                        : std_logic;                     -- mm_interconnect_1:histogram_ingress_bridge_1_csr_write -> histogram_ingress_bridge_1:avs_csr_write
+	signal mm_interconnect_1_histogram_ingress_bridge_1_csr_writedata                    : std_logic_vector(31 downto 0); -- mm_interconnect_1:histogram_ingress_bridge_1_csr_writedata -> histogram_ingress_bridge_1:avs_csr_writedata
 	signal mm_interconnect_1_histogram_statistics_0_csr_readdata                         : std_logic_vector(31 downto 0); -- histogram_statistics_0:avs_csr_readdata -> mm_interconnect_1:histogram_statistics_0_csr_readdata
 	signal mm_interconnect_1_histogram_statistics_0_csr_waitrequest                      : std_logic;                     -- histogram_statistics_0:avs_csr_waitrequest -> mm_interconnect_1:histogram_statistics_0_csr_waitrequest
 	signal mm_interconnect_1_histogram_statistics_0_csr_address                          : std_logic_vector(4 downto 0);  -- mm_interconnect_1:histogram_statistics_0_csr_address -> histogram_statistics_0:avs_csr_address
@@ -3706,9 +3939,17 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 	signal avalon_st_adapter_027_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_027:out_0_valid -> mutrig_datapath_subsystem_5:run_ctrl_valid
 	signal avalon_st_adapter_027_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_027:out_0_data -> mutrig_datapath_subsystem_5:run_ctrl_data
 	signal avalon_st_adapter_027_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_5:run_ctrl_ready -> avalon_st_adapter_027:out_0_ready
+	signal histogram_ingress_bridge_1_pre_out_valid                                      : std_logic;                     -- histogram_ingress_bridge_1:aso_pre_valid -> avalon_st_adapter_028:in_0_valid
+	signal histogram_ingress_bridge_1_pre_out_data                                       : std_logic_vector(38 downto 0); -- histogram_ingress_bridge_1:aso_pre_data -> avalon_st_adapter_028:in_0_data
+	signal histogram_ingress_bridge_1_pre_out_ready                                      : std_logic;                     -- avalon_st_adapter_028:in_0_ready -> histogram_ingress_bridge_1:aso_pre_ready
+	signal histogram_ingress_bridge_1_pre_out_channel                                    : std_logic_vector(3 downto 0);  -- histogram_ingress_bridge_1:aso_pre_channel -> avalon_st_adapter_028:in_0_channel
+	signal histogram_ingress_bridge_1_pre_out_startofpacket                              : std_logic;                     -- histogram_ingress_bridge_1:aso_pre_startofpacket -> avalon_st_adapter_028:in_0_startofpacket
+	signal histogram_ingress_bridge_1_pre_out_endofpacket                                : std_logic;                     -- histogram_ingress_bridge_1:aso_pre_endofpacket -> avalon_st_adapter_028:in_0_endofpacket
+	signal histogram_ingress_bridge_1_pre_out_error                                      : std_logic;                     -- histogram_ingress_bridge_1:aso_pre_error -> avalon_st_adapter_028:in_0_error
+	signal histogram_ingress_bridge_1_pre_out_empty                                      : std_logic;                     -- histogram_ingress_bridge_1:aso_pre_empty -> avalon_st_adapter_028:in_0_empty
 	signal rst_controller_reset_out_reset                                                : std_logic;                     -- rst_controller:reset_out -> [dbg_mm2runctrl_0:i_rst, emulator_inject_fanout:rsi_reset, mutrig_injector_0:i_rst, rst_controller_reset_out_reset:in]
 	signal master_datapath_master_reset_reset                                            : std_logic;                     -- master_datapath:master_reset_reset -> [rst_controller:reset_in0, rst_controller_001:reset_in0, rst_controller_006:reset_in1, rst_controller_007:reset_in1, rst_controller_008:reset_in1]
-	signal rst_controller_001_reset_out_reset                                            : std_logic;                     -- rst_controller_001:reset_out -> [avalon_st_adapter_010:in_rst_0_reset, avalon_st_adapter_013:in_rst_0_reset, avalon_st_adapter_014:in_rst_0_reset, avalon_st_adapter_015:in_rst_0_reset, avalon_st_adapter_016:in_rst_0_reset, avalon_st_adapter_017:in_rst_0_reset, avalon_st_adapter_018:in_rst_0_reset, avalon_st_adapter_019:in_rst_0_reset, avalon_st_adapter_020:in_rst_0_reset, avalon_st_adapter_021:in_rst_0_reset, avalon_st_adapter_022:in_rst_0_reset, avalon_st_adapter_023:in_rst_0_reset, avalon_st_adapter_024:in_rst_0_reset, avalon_st_adapter_025:in_rst_0_reset, avalon_st_adapter_026:in_rst_0_reset, avalon_st_adapter_027:in_rst_0_reset, emulator_ctrl_splitter:reset, emulator_mutrig_0:i_rst, emulator_mutrig_1:i_rst, emulator_mutrig_2:i_rst, emulator_mutrig_3:i_rst, emulator_mutrig_4:i_rst, emulator_mutrig_5:i_rst, emulator_mutrig_6:i_rst, emulator_mutrig_7:i_rst, histogram_ingress_bridge_0:rsi_reset_reset, histogram_statistics_0:i_rst, mm_interconnect_0:mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mutrig_injector_0_reset_interface_reset_bridge_in_reset_reset, mm_interconnect_1:histogram_ingress_bridge_0_reset_reset_bridge_in_reset_reset, mm_interconnect_2:mts_preprocessor_1_reset_interface_reset_bridge_in_reset_reset, mm_interconnect_3:hit_stack_subsystem_0_datapath_reset_reset_bridge_in_reset_reset, mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_translator_reset_reset_bridge_in_reset_reset, mts_preprocessor_0:i_rst, mts_preprocessor_1:i_rst, mutrig_lane_source_mux_0:rst, mutrig_lane_source_mux_1:rst, mutrig_lane_source_mux_2:rst, mutrig_lane_source_mux_3:rst, mutrig_lane_source_mux_4:rst, mutrig_lane_source_mux_5:rst, mutrig_lane_source_mux_6:rst, mutrig_lane_source_mux_7:rst, rst_controller_001_reset_out_reset:in, run_control_splitter:reset]
+	signal rst_controller_001_reset_out_reset                                            : std_logic;                     -- rst_controller_001:reset_out -> [avalon_st_adapter_010:in_rst_0_reset, avalon_st_adapter_013:in_rst_0_reset, avalon_st_adapter_014:in_rst_0_reset, avalon_st_adapter_015:in_rst_0_reset, avalon_st_adapter_016:in_rst_0_reset, avalon_st_adapter_017:in_rst_0_reset, avalon_st_adapter_018:in_rst_0_reset, avalon_st_adapter_019:in_rst_0_reset, avalon_st_adapter_020:in_rst_0_reset, avalon_st_adapter_021:in_rst_0_reset, avalon_st_adapter_022:in_rst_0_reset, avalon_st_adapter_023:in_rst_0_reset, avalon_st_adapter_024:in_rst_0_reset, avalon_st_adapter_025:in_rst_0_reset, avalon_st_adapter_026:in_rst_0_reset, avalon_st_adapter_027:in_rst_0_reset, avalon_st_adapter_028:in_rst_0_reset, emulator_ctrl_splitter:reset, emulator_mutrig_0:i_rst, emulator_mutrig_1:i_rst, emulator_mutrig_2:i_rst, emulator_mutrig_3:i_rst, emulator_mutrig_4:i_rst, emulator_mutrig_5:i_rst, emulator_mutrig_6:i_rst, emulator_mutrig_7:i_rst, hist_pre_lower_splitter_0:reset, histogram_ingress_bridge_0:rsi_reset_reset, histogram_ingress_bridge_1:rsi_reset_reset, histogram_statistics_0:i_rst, mm_interconnect_0:mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mutrig_injector_0_reset_interface_reset_bridge_in_reset_reset, mm_interconnect_1:histogram_ingress_bridge_0_reset_reset_bridge_in_reset_reset, mm_interconnect_2:mts_preprocessor_1_reset_interface_reset_bridge_in_reset_reset, mm_interconnect_3:hit_stack_subsystem_0_datapath_reset_reset_bridge_in_reset_reset, mm_interconnect_3:hit_stack_subsystem_0_feb_frame_assembly_csr_translator_reset_reset_bridge_in_reset_reset, mts_preprocessor_0:i_rst, mts_preprocessor_1:i_rst, mutrig_lane_source_mux_0:rst, mutrig_lane_source_mux_1:rst, mutrig_lane_source_mux_2:rst, mutrig_lane_source_mux_3:rst, mutrig_lane_source_mux_4:rst, mutrig_lane_source_mux_5:rst, mutrig_lane_source_mux_6:rst, mutrig_lane_source_mux_7:rst, rst_controller_001_reset_out_reset:in, run_control_splitter:reset]
 	signal rst_controller_002_reset_out_reset                                            : std_logic;                     -- rst_controller_002:reset_out -> [avalon_st_adapter_008:in_rst_0_reset, avalon_st_adapter_009:in_rst_0_reset, avalon_st_adapter_011:in_rst_0_reset, avalon_st_adapter_012:in_rst_0_reset, hist_post_lower_splitter_0:reset, hist_post_merge_0:reset, hist_post_splitter_0:reset, rst_controller_002_reset_out_reset:in]
 	signal rst_controller_003_reset_out_reset                                            : std_logic;                     -- rst_controller_003:reset_out -> histogram_statistics_0:i_interval_reset
 	signal rst_controller_004_reset_out_reset                                            : std_logic;                     -- rst_controller_004:reset_out -> lvds_rx_controller_pro_0:rsi_data_reset
@@ -4530,9 +4771,161 @@ begin
 			out15_data          => open                                       -- (terminated)
 		);
 
+	hist_pre_lower_splitter_0 : component feb_system_v3_pipe_data_path_subsystem_hist_pre_lower_splitter_0
+		generic map (
+			NUMBER_OF_OUTPUTS => 2,
+			QUALIFY_VALID_OUT => 0,
+			USE_PACKETS       => 1,
+			DATA_WIDTH        => 39,
+			CHANNEL_WIDTH     => 4,
+			ERROR_WIDTH       => 1,
+			BITS_PER_SYMBOL   => 39,
+			EMPTY_WIDTH       => 1
+		)
+		port map (
+			clk                 => lvds_rx_28nm_0_outclock_clk,                    --   clk.clk
+			reset               => rst_controller_001_reset_out_reset,             -- reset.reset
+			in0_ready           => mts_preprocessor_1_hit_type1_out_ready,         --    in.ready
+			in0_valid           => mts_preprocessor_1_hit_type1_out_valid,         --      .valid
+			in0_startofpacket   => mts_preprocessor_1_hit_type1_out_startofpacket, --      .startofpacket
+			in0_endofpacket     => mts_preprocessor_1_hit_type1_out_endofpacket,   --      .endofpacket
+			in0_empty(0)        => mts_preprocessor_1_hit_type1_out_empty,         --      .empty
+			in0_channel         => mts_preprocessor_1_hit_type1_out_channel,       --      .channel
+			in0_error(0)        => mts_preprocessor_1_hit_type1_out_error,         --      .error
+			in0_data            => mts_preprocessor_1_hit_type1_out_data,          --      .data
+			out0_ready          => hist_pre_lower_splitter_0_out0_ready,           --  out0.ready
+			out0_valid          => hist_pre_lower_splitter_0_out0_valid,           --      .valid
+			out0_startofpacket  => hist_pre_lower_splitter_0_out0_startofpacket,   --      .startofpacket
+			out0_endofpacket    => hist_pre_lower_splitter_0_out0_endofpacket,     --      .endofpacket
+			out0_empty          => hist_pre_lower_splitter_0_out0_empty,           --      .empty
+			out0_channel        => hist_pre_lower_splitter_0_out0_channel,         --      .channel
+			out0_error          => hist_pre_lower_splitter_0_out0_error,           --      .error
+			out0_data           => hist_pre_lower_splitter_0_out0_data,            --      .data
+			out1_ready          => hist_pre_lower_splitter_0_out1_ready,           --  out1.ready
+			out1_valid          => hist_pre_lower_splitter_0_out1_valid,           --      .valid
+			out1_startofpacket  => hist_pre_lower_splitter_0_out1_startofpacket,   --      .startofpacket
+			out1_endofpacket    => hist_pre_lower_splitter_0_out1_endofpacket,     --      .endofpacket
+			out1_empty          => hist_pre_lower_splitter_0_out1_empty,           --      .empty
+			out1_channel        => hist_pre_lower_splitter_0_out1_channel,         --      .channel
+			out1_error          => hist_pre_lower_splitter_0_out1_error,           --      .error
+			out1_data           => hist_pre_lower_splitter_0_out1_data,            --      .data
+			out2_ready          => '1',                                            -- (terminated)
+			out2_valid          => open,                                           -- (terminated)
+			out2_startofpacket  => open,                                           -- (terminated)
+			out2_endofpacket    => open,                                           -- (terminated)
+			out2_empty          => open,                                           -- (terminated)
+			out2_channel        => open,                                           -- (terminated)
+			out2_error          => open,                                           -- (terminated)
+			out2_data           => open,                                           -- (terminated)
+			out3_ready          => '1',                                            -- (terminated)
+			out3_valid          => open,                                           -- (terminated)
+			out3_startofpacket  => open,                                           -- (terminated)
+			out3_endofpacket    => open,                                           -- (terminated)
+			out3_empty          => open,                                           -- (terminated)
+			out3_channel        => open,                                           -- (terminated)
+			out3_error          => open,                                           -- (terminated)
+			out3_data           => open,                                           -- (terminated)
+			out4_ready          => '1',                                            -- (terminated)
+			out4_valid          => open,                                           -- (terminated)
+			out4_startofpacket  => open,                                           -- (terminated)
+			out4_endofpacket    => open,                                           -- (terminated)
+			out4_empty          => open,                                           -- (terminated)
+			out4_channel        => open,                                           -- (terminated)
+			out4_error          => open,                                           -- (terminated)
+			out4_data           => open,                                           -- (terminated)
+			out5_ready          => '1',                                            -- (terminated)
+			out5_valid          => open,                                           -- (terminated)
+			out5_startofpacket  => open,                                           -- (terminated)
+			out5_endofpacket    => open,                                           -- (terminated)
+			out5_empty          => open,                                           -- (terminated)
+			out5_channel        => open,                                           -- (terminated)
+			out5_error          => open,                                           -- (terminated)
+			out5_data           => open,                                           -- (terminated)
+			out6_ready          => '1',                                            -- (terminated)
+			out6_valid          => open,                                           -- (terminated)
+			out6_startofpacket  => open,                                           -- (terminated)
+			out6_endofpacket    => open,                                           -- (terminated)
+			out6_empty          => open,                                           -- (terminated)
+			out6_channel        => open,                                           -- (terminated)
+			out6_error          => open,                                           -- (terminated)
+			out6_data           => open,                                           -- (terminated)
+			out7_ready          => '1',                                            -- (terminated)
+			out7_valid          => open,                                           -- (terminated)
+			out7_startofpacket  => open,                                           -- (terminated)
+			out7_endofpacket    => open,                                           -- (terminated)
+			out7_empty          => open,                                           -- (terminated)
+			out7_channel        => open,                                           -- (terminated)
+			out7_error          => open,                                           -- (terminated)
+			out7_data           => open,                                           -- (terminated)
+			out8_ready          => '1',                                            -- (terminated)
+			out8_valid          => open,                                           -- (terminated)
+			out8_startofpacket  => open,                                           -- (terminated)
+			out8_endofpacket    => open,                                           -- (terminated)
+			out8_empty          => open,                                           -- (terminated)
+			out8_channel        => open,                                           -- (terminated)
+			out8_error          => open,                                           -- (terminated)
+			out8_data           => open,                                           -- (terminated)
+			out9_ready          => '1',                                            -- (terminated)
+			out9_valid          => open,                                           -- (terminated)
+			out9_startofpacket  => open,                                           -- (terminated)
+			out9_endofpacket    => open,                                           -- (terminated)
+			out9_empty          => open,                                           -- (terminated)
+			out9_channel        => open,                                           -- (terminated)
+			out9_error          => open,                                           -- (terminated)
+			out9_data           => open,                                           -- (terminated)
+			out10_ready         => '1',                                            -- (terminated)
+			out10_valid         => open,                                           -- (terminated)
+			out10_startofpacket => open,                                           -- (terminated)
+			out10_endofpacket   => open,                                           -- (terminated)
+			out10_empty         => open,                                           -- (terminated)
+			out10_channel       => open,                                           -- (terminated)
+			out10_error         => open,                                           -- (terminated)
+			out10_data          => open,                                           -- (terminated)
+			out11_ready         => '1',                                            -- (terminated)
+			out11_valid         => open,                                           -- (terminated)
+			out11_startofpacket => open,                                           -- (terminated)
+			out11_endofpacket   => open,                                           -- (terminated)
+			out11_empty         => open,                                           -- (terminated)
+			out11_channel       => open,                                           -- (terminated)
+			out11_error         => open,                                           -- (terminated)
+			out11_data          => open,                                           -- (terminated)
+			out12_ready         => '1',                                            -- (terminated)
+			out12_valid         => open,                                           -- (terminated)
+			out12_startofpacket => open,                                           -- (terminated)
+			out12_endofpacket   => open,                                           -- (terminated)
+			out12_empty         => open,                                           -- (terminated)
+			out12_channel       => open,                                           -- (terminated)
+			out12_error         => open,                                           -- (terminated)
+			out12_data          => open,                                           -- (terminated)
+			out13_ready         => '1',                                            -- (terminated)
+			out13_valid         => open,                                           -- (terminated)
+			out13_startofpacket => open,                                           -- (terminated)
+			out13_endofpacket   => open,                                           -- (terminated)
+			out13_empty         => open,                                           -- (terminated)
+			out13_channel       => open,                                           -- (terminated)
+			out13_error         => open,                                           -- (terminated)
+			out13_data          => open,                                           -- (terminated)
+			out14_ready         => '1',                                            -- (terminated)
+			out14_valid         => open,                                           -- (terminated)
+			out14_startofpacket => open,                                           -- (terminated)
+			out14_endofpacket   => open,                                           -- (terminated)
+			out14_empty         => open,                                           -- (terminated)
+			out14_channel       => open,                                           -- (terminated)
+			out14_error         => open,                                           -- (terminated)
+			out14_data          => open,                                           -- (terminated)
+			out15_ready         => '1',                                            -- (terminated)
+			out15_valid         => open,                                           -- (terminated)
+			out15_startofpacket => open,                                           -- (terminated)
+			out15_endofpacket   => open,                                           -- (terminated)
+			out15_empty         => open,                                           -- (terminated)
+			out15_channel       => open,                                           -- (terminated)
+			out15_error         => open,                                           -- (terminated)
+			out15_data          => open                                            -- (terminated)
+		);
+
 	histogram_ingress_bridge_0 : component histogram_ingress_bridge
 		generic map (
-			DEFAULT_SELECT_POST   => 1,
+			DEFAULT_SELECT_POST   => 0,
 			ENABLE_POST_FORWARD   => 0,
 			FILTER_POST_HIT_WORDS => 1,
 			IP_UID                => 1212764994,
@@ -4587,6 +4980,63 @@ begin
 			aso_hist_channel       => histogram_ingress_bridge_0_hist_out_channel                   --         .channel
 		);
 
+	histogram_ingress_bridge_1 : component histogram_ingress_bridge
+		generic map (
+			DEFAULT_SELECT_POST   => 0,
+			ENABLE_POST_FORWARD   => 0,
+			FILTER_POST_HIT_WORDS => 1,
+			IP_UID                => 1212764994,
+			VERSION_MAJOR         => 26,
+			VERSION_MINOR         => 0,
+			VERSION_PATCH         => 2,
+			BUILD                 => 425,
+			VERSION_DATE          => 20260425,
+			VERSION_GIT           => 481097348,
+			INSTANCE_ID           => 1
+		)
+		port map (
+			csi_clock_clk          => lvds_rx_28nm_0_outclock_clk,                                  --    clock.clk
+			rsi_reset_reset        => rst_controller_001_reset_out_reset,                           --    reset.reset
+			avs_csr_address        => mm_interconnect_1_histogram_ingress_bridge_1_csr_address,     --      csr.address
+			avs_csr_write          => mm_interconnect_1_histogram_ingress_bridge_1_csr_write,       --         .write
+			avs_csr_read           => mm_interconnect_1_histogram_ingress_bridge_1_csr_read,        --         .read
+			avs_csr_writedata      => mm_interconnect_1_histogram_ingress_bridge_1_csr_writedata,   --         .writedata
+			avs_csr_readdata       => mm_interconnect_1_histogram_ingress_bridge_1_csr_readdata,    --         .readdata
+			avs_csr_waitrequest    => mm_interconnect_1_histogram_ingress_bridge_1_csr_waitrequest, --         .waitrequest
+			asi_pre_data           => hist_pre_lower_splitter_0_out1_data,                          --   pre_in.data
+			asi_pre_valid          => hist_pre_lower_splitter_0_out1_valid,                         --         .valid
+			asi_pre_ready          => hist_pre_lower_splitter_0_out1_ready,                         --         .ready
+			asi_pre_startofpacket  => hist_pre_lower_splitter_0_out1_startofpacket,                 --         .startofpacket
+			asi_pre_endofpacket    => hist_pre_lower_splitter_0_out1_endofpacket,                   --         .endofpacket
+			asi_pre_channel        => hist_pre_lower_splitter_0_out1_channel,                       --         .channel
+			asi_pre_empty          => hist_pre_lower_splitter_0_out1_empty(0),                      --         .empty
+			asi_pre_error          => hist_pre_lower_splitter_0_out1_error(0),                      --         .error
+			aso_pre_data           => histogram_ingress_bridge_1_pre_out_data,                      --  pre_out.data
+			aso_pre_valid          => histogram_ingress_bridge_1_pre_out_valid,                     --         .valid
+			aso_pre_ready          => histogram_ingress_bridge_1_pre_out_ready,                     --         .ready
+			aso_pre_startofpacket  => histogram_ingress_bridge_1_pre_out_startofpacket,             --         .startofpacket
+			aso_pre_endofpacket    => histogram_ingress_bridge_1_pre_out_endofpacket,               --         .endofpacket
+			aso_pre_channel        => histogram_ingress_bridge_1_pre_out_channel,                   --         .channel
+			aso_pre_empty          => histogram_ingress_bridge_1_pre_out_empty,                     --         .empty
+			aso_pre_error          => histogram_ingress_bridge_1_pre_out_error,                     --         .error
+			asi_post_data          => open,                                                         --  post_in.data
+			asi_post_valid         => open,                                                         --         .valid
+			asi_post_ready         => open,                                                         --         .ready
+			asi_post_startofpacket => open,                                                         --         .startofpacket
+			asi_post_endofpacket   => open,                                                         --         .endofpacket
+			aso_post_data          => open,                                                         -- post_out.data
+			aso_post_valid         => open,                                                         --         .valid
+			aso_post_ready         => open,                                                         --         .ready
+			aso_post_startofpacket => open,                                                         --         .startofpacket
+			aso_post_endofpacket   => open,                                                         --         .endofpacket
+			aso_hist_data          => histogram_ingress_bridge_1_hist_out_data,                     -- hist_out.data
+			aso_hist_valid         => histogram_ingress_bridge_1_hist_out_valid,                    --         .valid
+			aso_hist_ready         => histogram_ingress_bridge_1_hist_out_ready,                    --         .ready
+			aso_hist_startofpacket => histogram_ingress_bridge_1_hist_out_startofpacket,            --         .startofpacket
+			aso_hist_endofpacket   => histogram_ingress_bridge_1_hist_out_endofpacket,              --         .endofpacket
+			aso_hist_channel       => histogram_ingress_bridge_1_hist_out_channel                   --         .channel
+		);
+
 	histogram_statistics_0 : component histogram_statistics_v2
 		generic map (
 			N_BINS                    => 256,
@@ -4600,9 +5050,9 @@ begin
 			FILTER_KEY_BIT_LO         => 35,
 			SAR_TICK_WIDTH            => 16,
 			SAR_KEY_WIDTH             => 8,
-			N_PORTS                   => 1,
+			N_PORTS                   => 2,
 			FIFO_ADDR_WIDTH           => 8,
-			CHANNELS_PER_PORT         => 32,
+			CHANNELS_PER_PORT         => 0,
 			COAL_QUEUE_DEPTH          => 256,
 			AVST_DATA_WIDTH           => 39,
 			AVST_CHANNEL_WIDTH        => 4,
@@ -4615,10 +5065,10 @@ begin
 			DEBUG                     => 0,
 			VERSION_MAJOR             => 26,
 			VERSION_MINOR             => 1,
-			VERSION_PATCH             => 6,
-			BUILD                     => 429,
+			VERSION_PATCH             => 7,
+			BUILD                     => 501,
 			IP_UID                    => 1212765012,
-			VERSION_DATE              => 20260429,
+			VERSION_DATE              => 20260501,
 			VERSION_GIT               => 375124078,
 			INSTANCE_ID               => 0
 		)
@@ -4651,6 +5101,12 @@ begin
 			asi_hist_fill_in_startofpacket  => histogram_ingress_bridge_0_hist_out_startofpacket,                    --               .startofpacket
 			asi_hist_fill_in_endofpacket    => histogram_ingress_bridge_0_hist_out_endofpacket,                      --               .endofpacket
 			asi_hist_fill_in_channel        => histogram_ingress_bridge_0_hist_out_channel,                          --               .channel
+			asi_fill_in_1_valid             => histogram_ingress_bridge_1_hist_out_valid,                            --      fill_in_1.valid
+			asi_fill_in_1_ready             => histogram_ingress_bridge_1_hist_out_ready,                            --               .ready
+			asi_fill_in_1_data              => histogram_ingress_bridge_1_hist_out_data,                             --               .data
+			asi_fill_in_1_startofpacket     => histogram_ingress_bridge_1_hist_out_startofpacket,                    --               .startofpacket
+			asi_fill_in_1_endofpacket       => histogram_ingress_bridge_1_hist_out_endofpacket,                      --               .endofpacket
+			asi_fill_in_1_channel           => histogram_ingress_bridge_1_hist_out_channel,                          --               .channel
 			aso_hist_fill_out_valid         => open,                                                                 --       fill_out.valid
 			aso_hist_fill_out_ready         => open,                                                                 --               .ready
 			aso_hist_fill_out_data          => open,                                                                 --               .data
@@ -4669,12 +5125,6 @@ begin
 			asi_debug_5_data                => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data,               --               .data
 			asi_debug_6_valid               => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,              --        debug_6.valid
 			asi_debug_6_data                => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data,               --               .data
-			asi_fill_in_1_valid             => '0',                                                                  --    (terminated)
-			asi_fill_in_1_ready             => open,                                                                 --    (terminated)
-			asi_fill_in_1_data              => "000000000000000000000000000000000000000",                            --    (terminated)
-			asi_fill_in_1_startofpacket     => '0',                                                                  --    (terminated)
-			asi_fill_in_1_endofpacket       => '0',                                                                  --    (terminated)
-			asi_fill_in_1_channel           => "0000",                                                               --    (terminated)
 			asi_fill_in_2_valid             => '0',                                                                  --    (terminated)
 			asi_fill_in_2_ready             => open,                                                                 --    (terminated)
 			asi_fill_in_2_data              => "000000000000000000000000000000000000000",                            --    (terminated)
@@ -4814,14 +5264,14 @@ begin
 			hit_type3_ready                    => hit_stack_subsystem_1_hit_type3_ready,                                      --                            .ready
 			hit_type3_startofpacket            => hit_stack_subsystem_1_hit_type3_startofpacket,                              --                            .startofpacket
 			hit_type3_endofpacket              => hit_stack_subsystem_1_hit_type3_endofpacket,                                --                            .endofpacket
-			hit_type_1_ready                   => mts_preprocessor_1_hit_type1_out_ready,                                     --                  hit_type_1.ready
-			hit_type_1_valid                   => mts_preprocessor_1_hit_type1_out_valid,                                     --                            .valid
-			hit_type_1_startofpacket           => mts_preprocessor_1_hit_type1_out_startofpacket,                             --                            .startofpacket
-			hit_type_1_endofpacket             => mts_preprocessor_1_hit_type1_out_endofpacket,                               --                            .endofpacket
-			hit_type_1_empty(0)                => mts_preprocessor_1_hit_type1_out_empty,                                     --                            .empty
-			hit_type_1_channel                 => mts_preprocessor_1_hit_type1_out_channel,                                   --                            .channel
-			hit_type_1_error(0)                => mts_preprocessor_1_hit_type1_out_error,                                     --                            .error
-			hit_type_1_data                    => mts_preprocessor_1_hit_type1_out_data,                                      --                            .data
+			hit_type_1_ready                   => hist_pre_lower_splitter_0_out0_ready,                                       --                  hit_type_1.ready
+			hit_type_1_valid                   => hist_pre_lower_splitter_0_out0_valid,                                       --                            .valid
+			hit_type_1_startofpacket           => hist_pre_lower_splitter_0_out0_startofpacket,                               --                            .startofpacket
+			hit_type_1_endofpacket             => hist_pre_lower_splitter_0_out0_endofpacket,                                 --                            .endofpacket
+			hit_type_1_empty                   => hist_pre_lower_splitter_0_out0_empty,                                       --                            .empty
+			hit_type_1_channel                 => hist_pre_lower_splitter_0_out0_channel,                                     --                            .channel
+			hit_type_1_error                   => hist_pre_lower_splitter_0_out0_error,                                       --                            .error
+			hit_type_1_data                    => hist_pre_lower_splitter_0_out0_data,                                        --                            .data
 			ring_buffer_cam_0_csr_readdata     => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata,     --       ring_buffer_cam_0_csr.readdata
 			ring_buffer_cam_0_csr_read         => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_read,         --                            .read
 			ring_buffer_cam_0_csr_address      => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_address,      --                            .address
@@ -5804,7 +6254,15 @@ begin
 
 	mutrig_injector_0 : component mutrig_injector_multiheader
 		generic map (
-			HEADERINFO_CHANNEL_W => 4
+			HEADERINFO_CHANNEL_W => 4,
+			IP_UID               => 1296649802,
+			VERSION_MAJOR        => 26,
+			VERSION_MINOR        => 0,
+			VERSION_PATCH        => 3,
+			BUILD                => 429,
+			VERSION_DATE         => 20260429,
+			VERSION_GIT          => 1385024213,
+			INSTANCE_ID          => 0
 		)
 		port map (
 			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         --     clock_interface.clk
@@ -6889,6 +7347,12 @@ begin
 			histogram_ingress_bridge_0_csr_readdata                      => mm_interconnect_1_histogram_ingress_bridge_0_csr_readdata,            --                                                       .readdata
 			histogram_ingress_bridge_0_csr_writedata                     => mm_interconnect_1_histogram_ingress_bridge_0_csr_writedata,           --                                                       .writedata
 			histogram_ingress_bridge_0_csr_waitrequest                   => mm_interconnect_1_histogram_ingress_bridge_0_csr_waitrequest,         --                                                       .waitrequest
+			histogram_ingress_bridge_1_csr_address                       => mm_interconnect_1_histogram_ingress_bridge_1_csr_address,             --                         histogram_ingress_bridge_1_csr.address
+			histogram_ingress_bridge_1_csr_write                         => mm_interconnect_1_histogram_ingress_bridge_1_csr_write,               --                                                       .write
+			histogram_ingress_bridge_1_csr_read                          => mm_interconnect_1_histogram_ingress_bridge_1_csr_read,                --                                                       .read
+			histogram_ingress_bridge_1_csr_readdata                      => mm_interconnect_1_histogram_ingress_bridge_1_csr_readdata,            --                                                       .readdata
+			histogram_ingress_bridge_1_csr_writedata                     => mm_interconnect_1_histogram_ingress_bridge_1_csr_writedata,           --                                                       .writedata
+			histogram_ingress_bridge_1_csr_waitrequest                   => mm_interconnect_1_histogram_ingress_bridge_1_csr_waitrequest,         --                                                       .waitrequest
 			histogram_statistics_0_csr_address                           => mm_interconnect_1_histogram_statistics_0_csr_address,                 --                             histogram_statistics_0_csr.address
 			histogram_statistics_0_csr_write                             => mm_interconnect_1_histogram_statistics_0_csr_write,                   --                                                       .write
 			histogram_statistics_0_csr_read                              => mm_interconnect_1_histogram_statistics_0_csr_read,                    --                                                       .read
@@ -7834,6 +8298,43 @@ begin
 			out_0_data     => avalon_st_adapter_027_out_0_data,   --    out_0.data
 			out_0_valid    => avalon_st_adapter_027_out_0_valid,  --         .valid
 			out_0_ready    => avalon_st_adapter_027_out_0_ready   --         .ready
+		);
+
+	avalon_st_adapter_028 : component feb_system_v3_pipe_data_path_subsystem_avalon_st_adapter_028
+		generic map (
+			inBitsPerSymbol => 39,
+			inUsePackets    => 1,
+			inDataWidth     => 39,
+			inChannelWidth  => 4,
+			inErrorWidth    => 1,
+			inUseEmptyPort  => 1,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 39,
+			outChannelWidth => 0,
+			outErrorWidth   => 0,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk        => lvds_rx_28nm_0_outclock_clk,                      -- in_clk_0.clk
+			in_rst_0_reset      => rst_controller_001_reset_out_reset,               -- in_rst_0.reset
+			in_0_data           => histogram_ingress_bridge_1_pre_out_data,          --     in_0.data
+			in_0_valid          => histogram_ingress_bridge_1_pre_out_valid,         --         .valid
+			in_0_ready          => histogram_ingress_bridge_1_pre_out_ready,         --         .ready
+			in_0_startofpacket  => histogram_ingress_bridge_1_pre_out_startofpacket, --         .startofpacket
+			in_0_endofpacket    => histogram_ingress_bridge_1_pre_out_endofpacket,   --         .endofpacket
+			in_0_empty          => histogram_ingress_bridge_1_pre_out_empty,         --         .empty
+			in_0_error          => histogram_ingress_bridge_1_pre_out_error,         --         .error
+			in_0_channel        => histogram_ingress_bridge_1_pre_out_channel,       --         .channel
+			out_0_data          => open,                                             --    out_0.data
+			out_0_valid         => open,                                             --         .valid
+			out_0_ready         => '1',                                              --         .ready
+			out_0_startofpacket => open,                                             --         .startofpacket
+			out_0_endofpacket   => open                                              --         .endofpacket
 		);
 
 	rst_controller : component feb_system_v3_pipe_data_path_subsystem_rst_controller

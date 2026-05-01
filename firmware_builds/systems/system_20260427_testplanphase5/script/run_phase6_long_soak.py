@@ -242,6 +242,9 @@ class Runner:
         return CommandResult(name, argv, rc, str(log), started, finished, timeout_s)
 
     def rc_send(self, cmd: str, run_number: int | None = None) -> CommandResult:
+        target_feb = self.args.feb
+        if cmd == "address":
+            target_feb = self.args.link if self.args.address_feb is None else self.args.address_feb
         argv = [
             str(self.args.rc_tool),
             "send",
@@ -249,7 +252,7 @@ class Runner:
             "--device",
             self.args.device,
             "--feb",
-            str(self.args.feb),
+            str(target_feb),
             "--settle-us",
             str(self.args.rc_settle_us),
         ]
@@ -258,7 +261,7 @@ class Runner:
         return self.run_cmd(f"rc_{cmd}", argv, timeout_s=20)
 
     def stop_reset(self) -> list[CommandResult]:
-        return [self.rc_send("reset"), self.rc_send("stop-reset")]
+        return [self.rc_send("reset"), self.rc_send("address"), self.rc_send("stop-reset")]
 
     def preflight(self) -> bool:
         commands: list[CommandResult] = []
@@ -807,6 +810,12 @@ def main() -> int:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--link", type=int, default=2)
     parser.add_argument("--feb", type=int, default=7)
+    parser.add_argument(
+        "--address-feb",
+        type=int,
+        default=None,
+        help="FEB id used for the reset-link address command after reset. Defaults to --link.",
+    )
     parser.add_argument("--device", default="/dev/mudaq0")
     parser.add_argument("--sc-tool", type=Path, default=DEFAULT_SC_TOOL)
     parser.add_argument("--rc-tool", type=Path, default=DEFAULT_RC_TOOL)

@@ -35,6 +35,36 @@ EVIDENCE = [
         "Fresh 1 s all-real-lane rate run: LVDS error/DPA deltas are zero and last-interval histogram total is nonzero, but MTS/ring errors remain and slow SC bin readback returned zero bins, so this is blocker evidence rather than a plotted-artifact pass.",
     ),
     (
+        "Emulator all lanes 10 kHz 1 s",
+        "Phase6 emu",
+        "phase6_histv7_emulator_all_rate10k_1s_lowerfix_20260501.json",
+        "Freshly compiled/programmed full-FEB image sees all eight emulator lanes; physical mask expectation is eight-lane rate, zero histogram drops, zero MTS/ring errors.",
+    ),
+    (
+        "Emulator upper-only 10 kHz 1 s",
+        "Phase6 emu",
+        "phase6_histv7_emulator_upper_rate10k_1s_lowerfix_20260501.json",
+        "Upper-side mask control sees four-lane rate only.",
+    ),
+    (
+        "Emulator lower-only 10 kHz 1 s",
+        "Phase6 emu",
+        "phase6_histv7_emulator_lower_rate10k_1s_lowerfix_20260501.json",
+        "Lower-side mask control now sees four-lane rate, proving the lower histogram bridge is live in the programmed image.",
+    ),
+    (
+        "Emulator all lanes 100 kHz 1 s",
+        "Phase6 emu",
+        "phase6_histv7_emulator_all_rate100k_1s_lowerfix_20260501.json",
+        "All eight emulator lanes pass the 100 kHz/channel smoke with zero histogram drops and zero MTS/ring rejects.",
+    ),
+    (
+        "Emulator dual-MTS delay 100 kHz 1 s",
+        "Phase6 emu",
+        "phase6_histv7_emulator_all_delay100k_1s_lowerfix_20260501.json",
+        "Delay-profile smoke exercises both upper and lower MTS debug sources; this is a wiring guard, not a real-MuTRiG PLL lock claim.",
+    ),
+    (
         "Single-lane matrix",
         "Delay",
         "phase5_real_256ch_per_lane_best2_pulse4_delay_2000cyc_20260429.json",
@@ -281,8 +311,8 @@ PROGRESS = [
         "FEB MuTRiG output",
         "BLOCKED",
         "256 real channels at 100 kHz/channel must enter FEB DMA-side logic with matching 256-hit timestamps.",
-        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Fresh continued cycle 20260430_live_continued_cycle1 records P6B006 PASS hist=52627/ring=0, P6B007 PASS hist=81880/ring=0, P6B010 FAIL hist=144364/ring_inerr_delta=563053, P6B020 expected fail ring=7146776, and P6E010 pulse-high 3 underfilled. A fresh all-real 1 s rate monitor records LVDS error/DPA deltas of zero and LAST_INTERVAL_TOTAL_HITS=11851571, but still trips MTS/ring errors and exposes that the slow SC per-bin read misses the ping-pong bin bank. Opening MTS expected latency to 4000 and 65535 still fails, so the failure is not a small positive-latency tail. Header-synchronous pair injection on lower header channels 5 and 6 fails, while single-lane header controls pass. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair.",
-        "Debug real MuTRiG cross-ASIC timestamp/epoch/order coherence before or inside lower MTS, then rerun the RBCAM-to-FEB-frame same-window alignment from nonzero locked PLL settings and full RUN_PREP.",
+        "The timing-closed Phase-6 rerun fails the nominal lower ASIC5+6 one-channel case after explicit SMB5 XML reload. The follow-up sweep shows ASIC5/lane5 and ASIC6/lane6 pass alone, but the two real lanes fail together; ASIC6 ext_trig_offset 0..15 does not clear the error; the two-lane emulator reference through the same lower MTS/ring path passes after 50 ms settle. Fresh continued cycle 20260430_live_continued_cycle1 records P6B006 PASS hist=52627/ring=0, P6B007 PASS hist=81880/ring=0, P6B010 FAIL hist=144364/ring_inerr_delta=563053, P6B020 expected fail ring=7146776, and P6E010 pulse-high 3 underfilled. A fresh all-real 1 s rate monitor records LVDS error/DPA deltas of zero and LAST_INTERVAL_TOTAL_HITS=11851571, but still trips MTS/ring errors and exposes that the slow SC per-bin read misses the ping-pong bin bank. Opening MTS expected latency to 4000 and 65535 still fails, so the failure is not a small positive-latency tail. Header-synchronous pair injection on lower header channels 5 and 6 fails, while single-lane header controls pass. The lane6/7 vco000 captures are invalidated for tuning and timestamp conclusions because vnvcodelay=0 should produce no TDC-injection hits. SignalTap shows mts1.aso_hit_type1_error and hit_stack1.hit_type_1_error[0] rising in the same exported VCD window for the bad lower pair. The separate full-FEB lower histogram observability bug is now closed for emulator evidence: checksum 0x13E73362 exposes histogram_ingress_bridge_1 at SC word 0x0AB04 and passes upper-only, lower-only, all-lane 10 kHz, all-lane 100 kHz, and dual-MTS delay-profile 1 s emulator checks with zero drops.",
+        "Resume real MuTRiG tuning from nonzero ASIC-specific PLL defaults, run full RUN_PREP, require header-delay delta-function plots for upper and lower ASICs, then rerun the RBCAM-to-FEB-frame same-window alignment before SWB/DMA disk closure.",
     ),
     (
         "SWB input path",
@@ -966,18 +996,33 @@ def write_html() -> None:
       path or a faster frozen-bin capture.
     </p>
     <p>
-      The 2026-05-01 Qsys patch fixes a separate observability bug before the
-      next live run: the histogram source now defaults to pre-RBCAM
-      <code>hit_type1</code>, <code>histogram_statistics_0</code> has two
-      fill inputs with global <code>{{ASIC, channel}}</code> keys, and the
-      lower MTS stream is split into both <code>hit_stack_subsystem_1</code>
-      and <code>histogram_ingress_bridge_1</code>. The lower bridge
+      The 2026-05-01 Qsys patch fixes a separate observability bug: the
+      histogram source now defaults to pre-RBCAM <code>hit_type1</code>,
+      <code>histogram_statistics_0</code> has two fill inputs with global
+      <code>{{ASIC, channel}}</code> keys, and the lower MTS stream is split
+      into both <code>hit_stack_subsystem_1</code> and
+      <code>histogram_ingress_bridge_1</code>. The lower bridge
       <code>pre_out</code> is explicitly drained so the tap copy cannot
       backpressure MTS. Authentic integration simulation passed with all eight
       lanes visible: each lane reported 20 MTS channel-16 payload hits and 20
-      histogram flushes, with zero histogram drops. This clears the upper-only
-      histogram wiring blocker, but it is simulation evidence; live 1 s
-      histogram and header-delay artifacts must be rerun.
+      histogram flushes, with zero histogram drops.
+    </p>
+    <p>
+      The full-FEB generated-image blocker is now closed for emulator evidence.
+      The stale image tied lower <code>histogram_statistics_0.fill_in_1</code>
+      off, giving a physically sharp four-lane rate in an all-lane emulator
+      run. The correct lower bridge address is Qsys byte
+      <code>0xAC10..0xAC20</code>, visible through the SC hub at word
+      <code>0x0AB04..0x0AB07</code>; <code>0x0AC10</code> was a bad SC-word
+      premise. The newly compiled/programmed <code>top_nostp_pipe</code> SOF
+      checksum <code>0x13E73362</code> exposes both bridge UIDs
+      (<code>0x0AB00</code> upper and <code>0x0AB04</code> lower, both
+      <code>0x48495342</code>) and passes the 1 s emulator mask matrix: all
+      lanes 10 kHz gives <code>79984</code> histogram hits, upper-only gives
+      <code>39996</code>, lower-only gives <code>39996</code>, all lanes
+      100 kHz gives <code>798728</code>, and the dual-MTS delay-profile smoke
+      gives <code>409080</code>; all have zero histogram drops. This is a
+      wiring and counter observability pass, not a real MuTRiG PLL lock claim.
     </p>
     <p>
       The latest direct probes rule out two weaker explanations. First, opening
@@ -1158,7 +1203,7 @@ def write_html() -> None:
         <tr>
           <td>Channel mask sanity</td>
           <td>Masked channels vanish from the 256-bin rate plot while unmasked channels keep their rate scale.</td>
-          <td>Required before accepting any 256-channel rate artifact. Missing plot means this checkpoint is still open.</td>
+          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The real-MuTRiG plotted 256-bin artifact is still open because the current all-real plot collapsed to one bin.</td>
         </tr>
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>
@@ -1168,7 +1213,7 @@ def write_html() -> None:
         <tr>
           <td>Upper/lower delay input coverage</td>
           <td>Delay histograms must isolate both source 0 (upper MTS) and source 1 (lower MTS), with lower-side evidence covering ASICs 4..7.</td>
-          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>; lower-side plotted evidence is still required.</td>
+          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>; the dual-MTS emulator smoke passes, while real lower-side plotted delay evidence is still required.</td>
         </tr>
         <tr>
           <td>Histogram-bin capture method</td>

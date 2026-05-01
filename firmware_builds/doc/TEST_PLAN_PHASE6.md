@@ -53,6 +53,7 @@ Phase 6 starts from the 2026-04-30 Phase-5 state:
 | MuTRiG config mapping | `PASS` documented | `MUTRIG.md` ASIC/XML mapping, SMB3 lanes 0..3, SMB5 lanes 4..7 |
 | Injector control path | `PASS` for current image | `mutrig_injector_0` at SC word base `0x0AC80`; no deprecated `MUTRIG_CNT_CTRL_REGISTER_W` control |
 | LVDS controller observability | `PASS` for current blocker probe | active `lvds_rx_controller_pro_0.csr` at SC word base `0x08000`, 16-word aperture; [`../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lvds_blocker_probe_20260430.md) |
+| All-lane histogram observability | `PASS_EMULATOR` / real rerun pending | P6-BUG-007 found the previous full-FEB generated image tied lower `histogram_statistics_0.fill_in_1` off, giving upper-only all-lane emulator rate. The regenerated full-FEB VHDL now connects `histogram_ingress_bridge_1`; Qsys byte `0xAC10..0xAC20` is visible at SC word `0x0AB04..0x0AB07`. The newly compiled/programmed FEB checksum `0x13E73362` passes 1 s upper-only, lower-only, all-lane 10 kHz, all-lane 100 kHz, and dual-MTS delay-profile emulator checks with zero histogram drops. |
 | Lower single ASIC guards | `PASS` live | ASIC5/lane5 and ASIC6/lane6 each pass alone in one-channel TDC-test mode at pulse-high 4 with zero ring input errors and zero LVDS error/DPA-unlock deltas; [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
 | Lower pair single-channel | `BLOCKED` live / prior `PASS` superseded | timing-closed Phase-6 cycle 1 loaded explicit SMB5 XML and P6B010 failed as `unexpected_fail`: `ring_inerr_delta=535108`, `mts_discard_delta=0`, LVDS error/DPA deltas zero; the later ASIC6 `ext_trig_offset=0..15` sweep also failed every point as `ring_input_errors_with_histogram_hits`; [`../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_timingclosed_cycle1_20260430.md), [`../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower56_cross_asic_sweep_20260430.md) |
 | Lower MTS/ring SignalTap | `PASS_DIAG` causality evidence | lower hit-stack STP `1180/1180` probes found; debug image checksum `0x16B6BF30`; P6B010 rerun captured `mts_preprocessor_1.aso_hit_type1_error` and `hit_stack_subsystem_1.hit_type_1_error[0]` rising in the same VCD window; [`../systems/system_20260427_testplanphase5/reports/phase6_lower_mts_ring_signaltap_20260430.md`](../systems/system_20260427_testplanphase5/reports/phase6_lower_mts_ring_signaltap_20260430.md) |
@@ -322,6 +323,35 @@ Current live checkpoint, 2026-04-30:
   exported window by `hit_stack1.hit_type_1_error[0]`. The live run still failed
   with `ring_inerr_delta=535373`, `mts_discard_delta=0`, and LVDS error/DPA
   deltas zero; this is not closure.
+
+Current live checkpoint, 2026-05-01:
+
+- Full-FEB lower histogram observability is now `PASS_EMULATOR`. The
+  regenerated `top_nostp_pipe` image compiled with SOF checksum `0x13E73362`,
+  SHA256 `57ab5ec8338c54d8189b518c0ea61cf8453c4ff802290eeaa16f4ee1e4504fb6`,
+  setup WNS `+0.277 ns`, hold slack `+0.123 ns`, and zero reported TNS.
+- Fresh SWB/FEB cold-start sequence: SWB `top.sof` checksum `0x31A72852`, PCIe
+  recovery, FEB programming, `reset`, `address`, and `stop-reset`. Use link
+  mask `BOARD_TEST_SC_ENABLE_MASK=0x00000004` for these link-2 checks, and
+  force a verbose first transaction when the SC secondary ring may contain stale
+  replies.
+- SC bridge readback proves both histogram tap CSRs in the programmed image:
+  upper bridge UID/status at `0x0AB00..0x0AB03`, lower bridge UID/status at
+  `0x0AB04..0x0AB07`, both returning UID `0x48495342`. The apparent
+  `0x0AC10` lower-bridge address was a bad SC-word premise; it is not the
+  histogram bridge window.
+- One-second emulator masks now match the physical expectation: all eight lanes
+  at 10 kHz/lane gave `79984` histogram hits, upper-only gave `39996`,
+  lower-only gave `39996`, all eight lanes at 100 kHz/lane gave `798728`, and
+  a dual-MTS delay-profile smoke gave `409080`; all five checks had zero
+  histogram drops. Reduced artifacts are archived as
+  `phase6_histv7_emulator_*_lowerfix_20260501.{md,json}` and
+  `phase6_sc_bridge_histv7_lowerfix_20260501.json`.
+- This closes the generated-FEB lower observability blocker only. It does not
+  close real MuTRiG timing: P6-BUG-002 still requires nonzero locked PLL
+  settings, full `RUN_PREP`, header-delay delta-function evidence for upper and
+  lower ASICs, then clean MTS/RBCAM/FEB-frame counters before SWB/DMA disk
+  closure.
 
 ## 7. Git and Evidence Hygiene
 

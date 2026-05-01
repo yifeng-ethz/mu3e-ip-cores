@@ -140,6 +140,22 @@ Primary evidence:
 - If real traffic reaches MTS/histogram but MTS discard or ring error counters
   increment, inspect `mutrig_frame_deassembly` error outputs first. The previous
   discard symptom was already visible upstream as `aso_hit_type0_error[*]`.
+- Treat full-FEB Qsys regeneration as a separate hardware gate after nested
+  datapath edits. A clean nested Qsys simulation does not prove the programmed
+  image has the new lower-side wiring. Before a live histogram claim, inspect
+  the generated full-FEB VHDL for `histogram_statistics_0.fill_in_1` connected
+  to `histogram_ingress_bridge_1`, read the lower histogram bridge CSR at SC
+  word base `0x0AB04` (Qsys byte `0xAC10..0xAC20`), and reject any image where
+  `fill_in_1` is tied off or the CSR UID reads zero. Do not use `0x0AC10` as a
+  histogram bridge SC word address; `0x0AC00/0x0AD00` are RBCAM CSR bases.
+  Failed `qsys-script` resaves can also write incomplete
+  `AUTO_AVMM_PORT_ADDRESS_MAP` metadata; do not commit such source churn just
+  because `sopcinfo` from a separate generate pass is correct.
+- When the SWB or FEB image has just been reloaded, use the cold-start order
+  `SWB program -> PCIe recover -> FEB program -> reset/address/stop-reset`.
+  For link-2 FEB checks, set `BOARD_TEST_SC_ENABLE_MASK=0x00000004`; if the
+  SC secondary ring may contain stale replies, start with
+  `BOARD_TEST_SC_VERBOSE_FIRST=1` before trusting quiet reads.
 - 2026-04-30 Phase-6 lower-side update: on the timing-clean no-STP image,
   ASIC5/lane5 and ASIC6/lane6 each pass one-channel pulse-high 4 alone, but
   the two real lanes together fail with MTS-forwarded ring input errors and

@@ -841,12 +841,14 @@ def classify(args: argparse.Namespace, summary: dict[str, Any]) -> str:
 def run_case(args: argparse.Namespace, index: int, pulse_interval: int) -> dict[str, Any]:
     run_number = args.run_number_base + index
     rc_log: list[str] = []
-    write_injector_mode(args, 0)
 
+    address_feb = args.link if args.address_feb is None else args.address_feb
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "reset", settle_us=args.rc_settle_us))
+    rc_log.append(rc_send(args.rc_tool, args.device, address_feb, "address", settle_us=args.rc_settle_us))
     rc_log.append(rc_send(args.rc_tool, args.device, args.feb, "stop-reset", settle_us=args.rc_settle_us))
     if args.post_stop_reset_ms > 0:
         time.sleep(args.post_stop_reset_ms / 1000.0)
+    write_injector_mode(args, 0)
 
     if args.skip_lvds_config:
         lane_go = sc_read(args.sc_tool, args.link, LVDS_CSR_BASE_WORD + 4)[0]
@@ -1214,6 +1216,12 @@ def main() -> int:
     parser.add_argument("--rc-tool", type=Path, default=default_rc_tool())
     parser.add_argument("--device", default="/dev/mudaq0")
     parser.add_argument("--feb", type=int, default=7)
+    parser.add_argument(
+        "--address-feb",
+        type=int,
+        default=None,
+        help="FEB id used for the reset-link address command after reset. Defaults to --link.",
+    )
     parser.add_argument("--run-number-base", type=int, default=45000)
     parser.add_argument("--rc-settle-us", type=int, default=5000)
     parser.add_argument("--post-stop-reset-ms", type=int, default=50)

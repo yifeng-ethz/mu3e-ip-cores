@@ -188,7 +188,7 @@ module feb_system_v3_pipe_data_path_subsystem_mm_interconnect_0_router_020
             src_channel = 56'b01;
         end
 
-        if (destid == 6 ) begin
+        if (destid == 5 ) begin
             src_channel = 56'b10;
         end
 
