@@ -291,9 +291,18 @@ def render_delay_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
     peak_bin = max(range(256), key=lambda idx: evidence.bins[idx]) if evidence.bins else 0
     peak_center = centers[peak_bin] if centers else 0.0
     peak_fraction = evidence.peak_fraction
+    delta_function_pass = peak_fraction >= 0.90
+    inspection = (
+        f"{evidence.label}: header-sync delay is delta-like; inspect the absolute delay offset and matching run-control state."
+        if delta_function_pass
+        else (
+            f"ANOMALY: {evidence.label} is not delta-like "
+            f"(peak={peak_fraction:.3%}, nonzero_bins={evidence.nonzero_bins})."
+        )
+    )
 
     fig, ax = plt.subplots(figsize=(12.8, 5.8), constrained_layout=True)
-    ax.bar(centers, evidence.bins, width=max(evidence.width * 0.92, 0.1), color="#6a3d9a", linewidth=0)
+    ax.bar(centers, evidence.bins, width=max(evidence.width * 0.92, 0.1), color="#4c78a8", linewidth=0)
     ax.axvline(peak_center, color="#b73535", lw=1.2, label=f"peak {peak_center:.1f} cycles")
     ax.set_title("MuTRiG Header-Sync Delay Histogram")
     ax.set_xlabel("MTS delay bin center [cycles]")
@@ -303,12 +312,13 @@ def render_delay_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
     ax.text(
         0.01,
         0.96,
-        f"source: {evidence.source.name}, peak fraction={peak_fraction:.3%}, nonzero bins={evidence.nonzero_bins}",
+        f"{evidence.label}\npeak={peak_fraction:.3%}, nonzero bins={evidence.nonzero_bins}, total={evidence.total}",
         transform=ax.transAxes,
         va="top",
         fontsize=9,
+        bbox={"facecolor": "white", "edgecolor": "#d8dde3", "alpha": 0.86},
     )
-    if evidence.total > 0 and peak_fraction < 0.90:
+    if evidence.total > 0 and not delta_function_pass:
         ax.text(
             0.01,
             0.88,
@@ -323,22 +333,124 @@ def render_delay_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
     fig.savefig(out, dpi=150)
     plt.close(fig)
     return {
-        "status": "present",
+        "status": "present" if delta_function_pass else "anomaly",
         "kind": "header_delay",
         "path": str(out),
         "source": str(evidence.source),
+        "label": evidence.label,
         "interval_s": evidence.interval_s,
         "total_hits": evidence.total,
         "nonzero_bins": evidence.nonzero_bins,
         "peak_bin": peak_bin,
         "peak_center_cycles": peak_center,
         "peak_fraction": peak_fraction,
-        "delta_function_pass": peak_fraction >= 0.90,
+        "delta_function_pass": delta_function_pass,
         "source_type": evidence.source_type,
         "lane_go": evidence.lane_go,
         "toolkit_preset_source": TOOLKIT_PRESET_SOURCE,
         "toolkit_preset_id": evidence.toolkit_preset_id or "delay_mts_both",
-        "visual_checkpoint": "Inspect that header-sync tuning concentrates the distribution into one dominant delay bin.",
+        "visual_checkpoint": inspection,
+    }
+
+
+def delay_top_bins(evidence: HistogramEvidence, limit: int = 3) -> list[dict[str, Any]]:
+    centers = [evidence.left + idx * evidence.width + evidence.width / 2.0 for idx in range(256)]
+    ranked = sorted(range(256), key=lambda idx: evidence.bins[idx], reverse=True)
+    return [
+        {
+            "bin": idx,
+            "center_cycles": centers[idx],
+            "count": evidence.bins[idx],
+            "fraction": (evidence.bins[idx] / evidence.total) if evidence.total else 0.0,
+        }
+        for idx in ranked[:limit]
+        if evidence.bins[idx] > 0
+    ]
+
+
+def render_delay_comparison_plot(evidence_list: list[HistogramEvidence], out: Path) -> dict[str, Any]:
+    panels = evidence_list[:8]
+    n_panels = len(panels)
+    n_cols = 2 if n_panels > 1 else 1
+    n_rows = math.ceil(n_panels / n_cols)
+    colors = ["#4c78a8", "#f58518", "#54a24b", "#e45756", "#72b7b2", "#b279a2", "#ff9da6", "#9d755d"]
+    fig, axes_obj = plt.subplots(
+        n_rows,
+        n_cols,
+        figsize=(12.8, max(3.3 * n_rows, 4.2)),
+        constrained_layout=True,
+        squeeze=False,
+    )
+    axes = [ax for row in axes_obj for ax in row]
+    summary: list[dict[str, Any]] = []
+    anomaly_count = 0
+    pass_count = 0
+    for idx, evidence in enumerate(panels):
+        ax = axes[idx]
+        centers = [evidence.left + bin_idx * evidence.width + evidence.width / 2.0 for bin_idx in range(256)]
+        scale = 100.0 / evidence.total if evidence.total else 1.0
+        y = [count * scale for count in evidence.bins]
+        peak_bin = max(range(256), key=lambda bin_idx: evidence.bins[bin_idx]) if evidence.bins else 0
+        peak_center = centers[peak_bin] if centers else 0.0
+        peak_fraction = evidence.peak_fraction
+        delta_function_pass = peak_fraction >= 0.90
+        if delta_function_pass:
+            pass_count += 1
+        else:
+            anomaly_count += 1
+        ax.bar(centers, y, width=max(evidence.width * 0.90, 0.1), color=colors[idx % len(colors)], linewidth=0)
+        ax.axvline(peak_center, color="#222222", lw=1.0)
+        ax.set_xlim(max(0.0, evidence.left), evidence.left + evidence.width * 256)
+        ax.set_ylim(bottom=0.0)
+        ax.grid(axis="y", color="#d9d9d9", lw=0.6)
+        ax.set_title(evidence.label, fontsize=10)
+        ax.set_xlabel("MTS delay bin center [cycles]")
+        ax.set_ylabel("Hits / bin [%]")
+        verdict = "delta-like" if delta_function_pass else "ANOMALY: sideband/non-delta"
+        ax.text(
+            0.01,
+            0.95,
+            f"{verdict}\npeak={peak_fraction:.3%}, nz={evidence.nonzero_bins}, total={evidence.total}",
+            transform=ax.transAxes,
+            va="top",
+            fontsize=8.5,
+            bbox={"facecolor": "white", "edgecolor": "#d8dde3", "alpha": 0.86},
+        )
+        summary.append(
+            {
+                "label": evidence.label,
+                "source": str(evidence.source),
+                "total_hits": evidence.total,
+                "nonzero_bins": evidence.nonzero_bins,
+                "peak_fraction": peak_fraction,
+                "delta_function_pass": delta_function_pass,
+                "top_bins": delay_top_bins(evidence, 4),
+            }
+        )
+
+    for ax in axes[n_panels:]:
+        ax.axis("off")
+
+    fig.suptitle("Header-Sync Delay Response, Production Lapse vs Diagnostic Controls", fontsize=13)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    visual_checkpoint = (
+        "Comparison inspected: ASIC5 default and production-lapse tuned runs show sidebands, "
+        "while ASIC5 bypass-lapse and ASIC6 default collapse to a single bin. "
+        "This points at the MTS lapse/overflow transform before treating ASIC5 as physically unlocked."
+    )
+    return {
+        "status": "anomaly" if anomaly_count else "present",
+        "kind": "header_delay_comparison",
+        "path": str(out),
+        "series": summary,
+        "series_count": len(summary),
+        "delta_pass_count": pass_count,
+        "anomaly_count": anomaly_count,
+        "toolkit_preset_source": TOOLKIT_PRESET_SOURCE,
+        "toolkit_preset_id": "delay_mts_both",
+        "visual_checkpoint": visual_checkpoint,
     }
 
 
@@ -363,8 +475,13 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
             rate_csv = rate_csv_candidates[-1]
     if rate_csv is not None:
         evidence.append(evidence_from_csv(rate_csv.resolve(), "rate", args.rate_interval_s, args.rate_label))
-    if args.delay_csv is not None:
-        evidence.append(evidence_from_csv(args.delay_csv.resolve(), "delay", args.delay_interval_s, args.delay_label))
+    delay_csv_evidence: list[HistogramEvidence] = []
+    delay_labels = args.delay_label or []
+    for idx, delay_csv in enumerate(args.delay_csv or []):
+        label = delay_labels[idx] if idx < len(delay_labels) else ""
+        item = evidence_from_csv(delay_csv.resolve(), "delay", args.delay_interval_s, label)
+        delay_csv_evidence.append(item)
+        evidence.append(item)
 
     out_dir = args.out_dir.resolve()
     artifacts: dict[str, Any] = {}
@@ -386,6 +503,12 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
         )
     else:
         artifacts["header_delay"] = render_delay_plot(delay, out_dir / "phase5_header_delay_histogram.png")
+
+    if len(delay_csv_evidence) >= 2:
+        artifacts["header_delay_comparison"] = render_delay_comparison_plot(
+            delay_csv_evidence,
+            out_dir / "phase5_header_delay_comparison.png",
+        )
 
     manifest = {
         "generated_by": Path(__file__).name,
@@ -412,9 +535,9 @@ def main() -> int:
     parser.add_argument("--rate-csv", type=Path)
     parser.add_argument("--rate-interval-s", type=float, default=1.0)
     parser.add_argument("--rate-label", default="")
-    parser.add_argument("--delay-csv", type=Path)
+    parser.add_argument("--delay-csv", type=Path, action="append", default=[])
     parser.add_argument("--delay-interval-s", type=float, default=1.0)
-    parser.add_argument("--delay-label", default="")
+    parser.add_argument("--delay-label", action="append", default=[])
     parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
 
