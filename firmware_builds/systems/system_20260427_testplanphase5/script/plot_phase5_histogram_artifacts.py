@@ -166,6 +166,36 @@ def find_json_inputs(report_dir: Path) -> list[Path]:
     return sorted(report_dir.rglob("*.json"))
 
 
+def find_delay_csv_inputs(report_dir: Path) -> list[Path]:
+    preferred = [
+        "phase6_headsync_lane5_default_jtag_nodisplay_20260501.csv",
+        "phase6_headsync_lane5_cnt52_vcd18_mtslat2000_jtag_nodisplay_20260501.csv",
+        "phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv",
+        "phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv",
+    ]
+    preferred_paths = [report_dir / name for name in preferred]
+    if all(path.exists() for path in preferred_paths):
+        return preferred_paths
+    return sorted(report_dir.glob("phase6_headsync_*_jtag*.csv"))
+
+
+def delay_label_from_csv(path: Path) -> str:
+    stem = path.stem
+    production_lapse_tuned = "bypasslapse" not in stem and "cnt" in stem
+    label = stem.removeprefix("phase6_headsync_").removesuffix("_20260501")
+    label = label.replace("_jtag_nodisplay", "")
+    label = label.replace("_mtslat2000", "")
+    label = label.replace("lane", "ASIC")
+    label = label.replace("cnt52_vcd18", "52/18/25")
+    label = label.replace("bypasslapse", "bypass lapse")
+    label = label.replace("default", "default production lapse")
+    label = label.replace("_", " ")
+    label = label.strip()
+    if production_lapse_tuned and "production lapse" not in label:
+        label = f"{label} production lapse"
+    return label or path.name
+
+
 def rate_source_passes(item: HistogramEvidence) -> bool:
     if item.source_type == "csv":
         return True
@@ -475,10 +505,14 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
             rate_csv = rate_csv_candidates[-1]
     if rate_csv is not None:
         evidence.append(evidence_from_csv(rate_csv.resolve(), "rate", args.rate_interval_s, args.rate_label))
+    delay_csv_paths = list(args.delay_csv or [])
+    if not delay_csv_paths:
+        delay_csv_paths = find_delay_csv_inputs(args.report_dir.resolve())
+
     delay_csv_evidence: list[HistogramEvidence] = []
     delay_labels = args.delay_label or []
-    for idx, delay_csv in enumerate(args.delay_csv or []):
-        label = delay_labels[idx] if idx < len(delay_labels) else ""
+    for idx, delay_csv in enumerate(delay_csv_paths):
+        label = delay_labels[idx] if idx < len(delay_labels) else delay_label_from_csv(delay_csv)
         item = evidence_from_csv(delay_csv.resolve(), "delay", args.delay_interval_s, label)
         delay_csv_evidence.append(item)
         evidence.append(item)

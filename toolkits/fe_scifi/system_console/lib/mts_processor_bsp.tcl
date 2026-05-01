@@ -67,6 +67,12 @@ proc ::mts_processor::bsp::get_address_map {} {
               <access>read-write</access>
             </field>
             <field>
+              <name>drop_delay_error</name>
+              <description>drop hit_type1 payload beats whose timestamp-delay error sideband is asserted</description>
+              <bitRange>\[5:5\]</bitRange>
+              <access>read-write</access>
+            </field>
+            <field>
               <name>op_mode</name>
               <description>
                 3-bit of op mode: 
@@ -165,11 +171,31 @@ proc ::mts_processor::bsp::get_address_map {} {
         </fields>
     </register>
     "
-    
+
+    ################################################ overflow lookback ################################################
+    set csr_map(5)  \
+    "
+    <register>
+        <name>overflow_lookback_8ns</name>
+        <description>Post-wrap epoch-disambiguation lookback in 8ns</description>
+        <addressOffset>0x14</addressOffset>
+        <size>32</size>
+        <fields>
+
+            <field>
+              <name>overflow_lookback</name>
+              <description>runtime lapse/overflow lookback; default is 2000 and writes are clamped by the MTS IP</description>
+              <bitRange>\[31:0\]</bitRange>
+              <access>read-write</access>
+            </field>
+
+        </fields>
+    </register>
+    "
+
     return [array get csr_map]
     
 }
-
 
 
 

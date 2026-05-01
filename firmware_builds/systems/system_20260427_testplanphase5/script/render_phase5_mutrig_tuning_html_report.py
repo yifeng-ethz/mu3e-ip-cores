@@ -511,6 +511,21 @@ def lvds_text(case: dict[str, Any]) -> str:
     return f"{prefix}: {details}"
 
 
+def mts_config_text(case: dict[str, Any]) -> str:
+    overrides = case.get("debug_overrides", {})
+    if not isinstance(overrides, dict):
+        overrides = {}
+    args = case.get("args", {})
+    if not isinstance(args, dict):
+        args = {}
+    expected = overrides.get("mts_expected_latency", args.get("mts_expected_latency", "keep"))
+    lookback = overrides.get("mts_overflow_lookback", args.get("mts_overflow_lookback", "keep"))
+    bypass = overrides.get("mts_bypass_lapse", args.get("mts_bypass_lapse", "keep"))
+    drop = overrides.get("mts_drop_delay_error", args.get("mts_drop_delay_error", "keep"))
+    field = overrides.get("mts_delay_ts_field", args.get("mts_delay_ts_field", "keep"))
+    return f"lat={expected}; lookback={lookback}; lapse={bypass}; drop={drop}; ts={field}"
+
+
 def case_stage_summary(case: dict[str, Any]) -> dict[str, Any]:
     summary = case.get("summary", {})
     duration_ms = case.get("duration_ms")
@@ -524,6 +539,7 @@ def case_stage_summary(case: dict[str, Any]) -> dict[str, Any]:
         "class": summary.get("phase5_classification", summary.get("classification", "-")),
         "scope": f"lvds=0x{int(case.get('lane_go', 0)):03X}",
         "active": f"emu=0x{int(case.get('active_lanes_mask', 0)):02X}",
+        "mts_cfg": mts_config_text(case),
         "pulse": case.get("injector_config", {}).get("pulse_high_cycles"),
         "duration": duration_ms,
         "window_s": summary.get("counter_rate_elapsed_s"),
@@ -589,6 +605,7 @@ def summarize_records(records: list[dict[str, Any]]) -> dict[str, Any]:
         "class": f"{len(records) - len(failures)} / {len(records)} pass",
         "scope": f"lvds=0x{lane_mask:03X}",
         "active": f"emu=0x{active_mask:02X}",
+        "mts_cfg": "aggregate; inspect child JSON",
         "pulse": pulse,
         "duration": duration,
         "window_s": elapsed if elapsed > 0 else None,
@@ -636,6 +653,7 @@ def summarize_payload(payload: dict[str, Any] | None) -> dict[str, Any]:
             "class": f"{len(rows) - len(failures)} / {len(rows)} configured",
             "scope": "config",
             "active": "-",
+            "mts_cfg": "-",
             "pulse": "-",
             "duration": "-",
             "window_s": None,
@@ -805,6 +823,7 @@ def evidence_rows() -> str:
             f"<td>{esc(title)}<div class=\"note\">{esc(note)}</div></td>"
             f"<td>{badge(summary.get('result', '-'))}<div class=\"class\">{esc(summary.get('class', '-'))}</div></td>"
             f"<td>{esc(summary.get('scope', '-'))}<br>{esc(summary.get('active', '-'))}</td>"
+            f"<td>{esc(summary.get('mts_cfg', '-'))}</td>"
             f"<td><span class=\"mini-badge {monitor_klass}\">{esc(monitor_text)}</span><div class=\"rate\">{esc(window_text)}</div></td>"
             f"<td>{fmt_count_rate(summary.get('mts_in'), summary.get('mts_in_rate'))}<br>drop {fmt_count_rate(summary.get('mts_drop'), summary.get('mts_drop_rate'))}</td>"
             f"<td>{fmt_count_rate(summary.get('hist_in'), summary.get('hist_in_rate'))}<br>drop {fmt_count_rate(summary.get('hist_drop'), summary.get('hist_drop_rate'))}</td>"
@@ -1081,6 +1100,15 @@ def write_html() -> None:
       feeding that transform, before blaming lane5 LVDS or TDC physics.
     </p>
     <p>
+      The MTS IP now has a reviewed runtime CSR for that exact hypothesis:
+      <code>overflow_lookback_8ns</code> at CSR word <code>5</code>. The FEB
+      runners expose it as <code>--mts-overflow-lookback</code> and record the
+      readback in stage snapshots. This is not a substitute for the physical
+      MuTRiG scan; it is the control that separates a PLL/TDC response from an
+      MTS epoch-disambiguation response in the next ASIC5 production-lapse
+      A/B sweep.
+    </p>
+    <p>
       The lane6/7 zero-point checks are invalidated as tuning evidence. A
       MuTRiG with <code>vnvcodelay=0</code> should produce no TDC-injection
       hits. The captures labeled <code>vncnt=0</code>,
@@ -1311,6 +1339,7 @@ def write_html() -> None:
           <th>Run</th>
           <th>Result</th>
           <th>Scope</th>
+          <th>MTS Config</th>
           <th>Monitor / Rate Window</th>
           <th>MTS In / Drop</th>
           <th>Hist In / Drop</th>

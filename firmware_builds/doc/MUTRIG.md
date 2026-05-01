@@ -431,13 +431,14 @@ Observed Phase-5 update on 2026-04-30:
   delta at 904 cycles. Therefore the next useful lever is MTS
   lapse/overflow-lookback behavior, not more blind ASIC5 VCO sweeping.
 - Runtime `--mts-expected-latency` writes do not tune the active lapse
-  lookback. In the current `mutrig_timestamp_processor/mts_processor.vhd`,
-  `overflow_lookback_1n6` and `padding_upper` are derived from the compile-time
-  `MUTRIG_OVERFLOW_LOOKBACK_8N` parameter. A sweep from `800` to `2000` cycles
-  left the ASIC5 `52/18/25` production-lapse two-bin split unchanged. A real
-  fix requires either an A/B compile with a different lookback parameter or a
-  documented CSR-backed lookback/padding control with MTS TB/formal/synthesis
-  evidence before a Phase-6 claim.
+  lookback. The MTS source patch in commit `4951341` adds CSR word `5`,
+  `overflow_lookback_8ns`, so the Phase-6 runners now expose
+  `--mts-overflow-lookback` as the control for this hypothesis. Keep
+  `--mts-expected-latency 2000` as the downstream timestamp-error gate and
+  sweep `--mts-overflow-lookback` separately. A valid ASIC5 rerun must rebuild
+  the full FEB image with MTS `26.0.9.0501`, then compare production lapse
+  against the diagnostic bypass-lapse case using the same nonzero
+  `52/18/25` physical setting.
 - A Phase-6 LVDS SVD probe on 2026-04-30 reproduced the lower full-channel
   blocker with `2052049` ring input errors while lanes 5 and 6 had zero LVDS
   error-counter delta and zero DPA-unlock delta. Do not treat the new LVDS

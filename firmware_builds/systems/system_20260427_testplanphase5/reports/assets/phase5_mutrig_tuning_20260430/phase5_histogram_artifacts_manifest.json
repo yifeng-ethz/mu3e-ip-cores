@@ -4,7 +4,7 @@
       "delta_function_pass": true,
       "interval_s": 1.0,
       "kind": "header_delay",
-      "label": "ASIC5 cnt52/vcd18, bypass lapse",
+      "label": "ASIC5 52/18/25 bypass lapse",
       "lane_go": null,
       "nonzero_bins": 1,
       "path": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/assets/phase5_mutrig_tuning_20260430/phase5_header_delay_histogram.png",
@@ -17,7 +17,7 @@
       "toolkit_preset_id": "delay_mts_both",
       "toolkit_preset_source": "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl",
       "total_hits": 91574,
-      "visual_checkpoint": "ASIC5 cnt52/vcd18, bypass lapse: header-sync delay is delta-like; inspect the absolute delay offset and matching run-control state."
+      "visual_checkpoint": "ASIC5 52/18/25 bypass lapse: header-sync delay is delta-like; inspect the absolute delay offset and matching run-control state."
     },
     "header_delay_comparison": {
       "anomaly_count": 2,
@@ -27,7 +27,7 @@
       "series": [
         {
           "delta_function_pass": false,
-          "label": "ASIC5 default, lapse on",
+          "label": "ASIC5 default production lapse",
           "nonzero_bins": 6,
           "peak_fraction": 0.44913709805648305,
           "source": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_headsync_lane5_default_jtag_nodisplay_20260501.csv",
@@ -61,7 +61,7 @@
         },
         {
           "delta_function_pass": false,
-          "label": "ASIC5 cnt52/vcd18, lapse on",
+          "label": "ASIC5 52/18/25 production lapse",
           "nonzero_bins": 2,
           "peak_fraction": 0.7917094371764911,
           "source": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_headsync_lane5_cnt52_vcd18_mtslat2000_jtag_nodisplay_20260501.csv",
@@ -83,7 +83,7 @@
         },
         {
           "delta_function_pass": true,
-          "label": "ASIC5 cnt52/vcd18, bypass lapse",
+          "label": "ASIC5 52/18/25 bypass lapse",
           "nonzero_bins": 1,
           "peak_fraction": 1.0,
           "source": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv",
@@ -99,7 +99,7 @@
         },
         {
           "delta_function_pass": true,
-          "label": "ASIC6 default, lapse on",
+          "label": "ASIC6 default production lapse",
           "nonzero_bins": 1,
           "peak_fraction": 1.0,
           "source": "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports/phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv",
@@ -148,10 +148,10 @@
       "visual_checkpoint": "ANOMALY: rate evidence is not distributed like an all-lane 256-channel run (nonzero_bins=1, active_asics=1)."
     }
   },
-  "delay_candidates": 4,
-  "evidence_scanned": 5,
+  "delay_candidates": 10,
+  "evidence_scanned": 12,
   "generated_by": "plot_phase5_histogram_artifacts.py",
   "plot_review_contract": "Visually inspect every rendered plot and record one anomaly or null anomaly before accepting the gate.",
-  "rate_candidates": 1,
+  "rate_candidates": 2,
   "toolkit_preset_source": "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl"
 }

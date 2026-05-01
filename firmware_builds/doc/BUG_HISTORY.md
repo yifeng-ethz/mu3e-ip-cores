@@ -146,11 +146,15 @@ Class legend:
   parameter, not from the runtime expected-latency CSR. That explains why the
   runtime expected-latency sweep did not affect the split.
 - Fix status:
-  open. Next patch should either A/B compile a smaller
-  `MUTRIG_OVERFLOW_LOOKBACK_8N` value or expose the lapse lookback/padding
-  threshold through a documented CSR, then rerun standalone MTS TB/formal,
-  standalone synthesis, full FEB compile, and the ASIC5/ASIC6 head-sync
-  histogram comparison before claiming the lower real-source gate.
+  source patched; full-FEB rebuild and live A/B rerun required. MTS commit
+  `4951341` exposes CSR word `5` (`overflow_lookback_8ns`) as a runtime
+  version of the lapse/overflow lookback, clamps writes to the legal MuTRiG
+  wrap range, and keeps `expected_latency_8ns` as the timestamp-error gate.
+  Standalone MTS TB, SVD regeneration, static screen, and Quartus synthesis
+  signoff passed before the submodule pointer was advanced in mu3e-ip-cores
+  commit `905c045`. The next gate is a full FEB Qsys regeneration/compile,
+  then an ASIC5/ASIC6 head-sync sweep using `--mts-overflow-lookback` with
+  production lapse enabled and bypass-lapse only as the diagnostic control.
 
 ## 2026-04-30
 
