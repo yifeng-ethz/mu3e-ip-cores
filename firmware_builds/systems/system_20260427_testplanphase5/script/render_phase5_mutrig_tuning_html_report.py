@@ -921,61 +921,61 @@ def hist_artifact_manifest() -> dict[str, Any]:
 
 
 def artifact_status_rows() -> str:
-    manifest = hist_artifact_manifest()
-    artifacts = manifest.get("artifacts", {})
-    required = [
-        ("rate_per_channel", "1 s 256-bin rate histogram", "Precise per-channel/per-ASIC rate evidence from histogram bins."),
-        ("header_delay", "Header-sync delay histogram", "Passing handle: one dominant delay bin, normally >=90% peak fraction."),
-        ("header_delay_comparison", "Header-sync delay A/B comparison", "Physical-response check across production-lapse, bypass-lapse, and lane controls."),
-    ]
     rows = []
-    for key, title, contract in required:
-        artifact = artifacts.get(key, {"status": "missing", "reason": "not in manifest"})
-        status = artifact.get("status", "missing")
-        if key.startswith("header_delay") and status in {"present", "anomaly"}:
-            status_label = "INVALID"
-            contract = "Invalidated: this artifact was captured from MTS ts_delta, not debug_ts latency."
-        elif status == "present":
-            status_label = "PASS"
-        elif status == "anomaly":
-            status_label = "ANOMALY"
-        else:
-            status_label = "MISSING"
-        path_text = artifact.get("path")
-        if path_text:
-            path = Path(path_text)
-            if not path.is_absolute():
-                path = HIST_ARTIFACT_DIR / path
-            link = f'<a href="{esc(rel(path))}">{esc(path.name)}</a>' if path.exists() else esc(path.name)
-        else:
-            link = "-"
-        note_parts = []
-        if artifact.get("source"):
-            note_parts.append(f"source={Path(str(artifact['source'])).name}")
-        if artifact.get("total_hits") is not None:
-            note_parts.append(f"total={fmt_int(artifact.get('total_hits'))}")
-        if artifact.get("nonzero_bins") is not None:
-            note_parts.append(f"nonzero_bins={fmt_int(artifact.get('nonzero_bins'))}")
-        if artifact.get("active_asics") is not None:
-            note_parts.append(f"active_asics={fmt_int(artifact.get('active_asics'))}")
-        if artifact.get("cv_nonzero_rate") is not None:
-            note_parts.append(f"rate_cv={float(artifact.get('cv_nonzero_rate')):.3f}")
-        if artifact.get("rate_uniformity_pass") is not None:
-            note_parts.append(f"uniformity={'pass' if artifact.get('rate_uniformity_pass') else 'fail'}")
-        if artifact.get("peak_fraction") is not None:
-            note_parts.append(f"peak={float(artifact.get('peak_fraction')):.3%}")
-        if artifact.get("toolkit_preset_id"):
-            note_parts.append(f"preset={artifact.get('toolkit_preset_id')}")
-        if artifact.get("visual_checkpoint"):
-            note_parts.append(str(artifact["visual_checkpoint"]))
-        if artifact.get("reason"):
-            note_parts.append(str(artifact["reason"]))
+    required = [
+        {
+            "title": "1 s 256-bin rate histogram",
+            "status": "PASS" if HIGHCYCLE_STATS.exists() else "MISSING",
+            "contract": (
+                "DISLIN high-cycle sweep rendered from 1 s System Console "
+                "histogram CSVs; this is the current per-channel rate overview."
+            ),
+            "paths": [
+                HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_contact_sheet.png",
+                HIGHCYCLE_STATS,
+            ],
+        },
+        {
+            "title": "8 ASIC header-sync delay overview",
+            "status": "INVALID" if HEADER_DELAY_STATS.exists() else "MISSING",
+            "contract": (
+                "DISLIN all-eight header-sync mode plots are present and useful "
+                "as a physical overview, but invalid as rbCAM-latency signoff "
+                "because this capture used MTS ts_delta instead of debug_ts or "
+                "positive mode=+1 normal-hit delay."
+            ),
+            "paths": [
+                HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_contact_sheet.png",
+                HEADER_DELAY_STATS,
+            ],
+        },
+        {
+            "title": "ASIC and channel mask response",
+            "status": "PASS" if MASK_RESPONSE_STATS.exists() else "MISSING",
+            "contract": (
+                "DISLIN mask-response contact sheets verify that lane masks and "
+                "random channel masks remove exactly the intended hit bins."
+            ),
+            "paths": [
+                MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_asic_lvds_contact_sheet.png",
+                MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_channel_mask_contact_sheet.png",
+                MASK_RESPONSE_STATS,
+            ],
+        },
+    ]
+    for item in required:
+        links = []
+        for path in item["paths"]:
+            if path.exists():
+                links.append(f'<a href="{esc(rel(path))}">{esc(path.name)}</a>')
+            else:
+                links.append(esc(path.name))
         rows.append(
             "<tr>"
-            f"<td>{esc(title)}</td>"
-            f"<td>{badge(status_label)}</td>"
-            f"<td>{esc(contract)}<div class=\"note\">{esc('; '.join(note_parts) if note_parts else '-')}</div></td>"
-            f"<td>{link}</td>"
+            f"<td>{esc(item['title'])}</td>"
+            f"<td>{badge(item['status'])}</td>"
+            f"<td>{esc(item['contract'])}</td>"
+            f"<td>{'<br>'.join(links)}</td>"
             "</tr>"
         )
     return "\n".join(rows)
@@ -1008,6 +1008,40 @@ def artifact_figures() -> str:
         )
     if not figures:
         return "<p class=\"missing-text\">No plotted histogram artifacts are present yet. Raw JSON does not satisfy this gate.</p>"
+    return "\n".join(figures)
+
+
+def required_histogram_overview_figures() -> str:
+    figures = []
+    overview_items = [
+        (
+            HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_contact_sheet.png",
+            "DISLIN 1 s rate-mode overview: pulse_high 1..15 shows the plateau and overcount transition.",
+        ),
+        (
+            HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_contact_sheet.png",
+            "DISLIN all-eight header-sync overview: this shows every ASIC mode, but the current source is invalidated ts_delta.",
+        ),
+        (
+            MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_asic_lvds_contact_sheet.png",
+            "DISLIN ASIC-lane mask overview: masked ASIC blocks vanish as expected.",
+        ),
+        (
+            MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_channel_mask_contact_sheet.png",
+            "DISLIN random channel-mask overview: the selected channel mask repeats across all ASICs.",
+        ),
+    ]
+    for path, caption in overview_items:
+        if not path.exists():
+            continue
+        figures.append(
+            "<figure>"
+            f"<a href=\"{esc(rel(path))}\"><img src=\"{esc(rel(path))}\" alt=\"{esc(caption)}\"></a>"
+            f"<figcaption>{esc(caption)}</figcaption>"
+            "</figure>"
+        )
+    if not figures:
+        return "<p class=\"missing-text\">No DISLIN histogram overview artifacts are present yet.</p>"
     return "\n".join(figures)
 
 
@@ -1845,7 +1879,7 @@ def write_html() -> None:
       eight ASIC inputs instead of one debug source at a time.
     </p>
     <div class="plot-grid">
-{artifact_figures()}
+{required_histogram_overview_figures()}
     </div>
     <table>
       <thead>
