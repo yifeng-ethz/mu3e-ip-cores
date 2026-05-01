@@ -35,6 +35,12 @@ EVIDENCE = [
         "Fresh 1 s all-real-lane rate run: LVDS error/DPA deltas are zero and last-interval histogram total is nonzero, but MTS/ring errors remain and slow SC bin readback returned zero bins, so this is blocker evidence rather than a plotted-artifact pass.",
     ),
     (
+        "Emulator r53 1 s all-channel rate bins",
+        "Rate plot",
+        "phase5_rate_per_channel_1s_20260501_allchan100k_emulator_periodic_r53.json",
+        "First JTAG/toolkit-style rate-bin capture with both histogram ingress bridges forced pre-RBCAM and all 256 bins nonzero. Histogram drops, MTS discards, and ring input timestamp errors are zero, but RBCAM overwrite/cache counters and rate uniformity are not clean enough for closure.",
+    ),
+    (
         "Emulator all lanes 10 kHz 1 s",
         "Phase6 emu",
         "phase6_histv7_emulator_all_rate10k_1s_lowerfix_20260501.json",
@@ -761,6 +767,10 @@ def artifact_status_rows() -> str:
             note_parts.append(f"nonzero_bins={fmt_int(artifact.get('nonzero_bins'))}")
         if artifact.get("active_asics") is not None:
             note_parts.append(f"active_asics={fmt_int(artifact.get('active_asics'))}")
+        if artifact.get("cv_nonzero_rate") is not None:
+            note_parts.append(f"rate_cv={float(artifact.get('cv_nonzero_rate')):.3f}")
+        if artifact.get("rate_uniformity_pass") is not None:
+            note_parts.append(f"uniformity={'pass' if artifact.get('rate_uniformity_pass') else 'fail'}")
         if artifact.get("peak_fraction") is not None:
             note_parts.append(f"peak={float(artifact.get('peak_fraction')):.3%}")
         if artifact.get("toolkit_preset_id"):
@@ -1073,6 +1083,20 @@ def write_html() -> None:
       100 kHz gives <code>798728</code>, and the dual-MTS delay-profile smoke
       gives <code>409080</code>; all have zero histogram drops. This is a
       wiring and counter observability pass, not a real MuTRiG PLL lock claim.
+    </p>
+    <p>
+      The first all-channel plotted rate-bin checkpoint now uses the
+      System Console/JTAG histogram dump path with both histogram ingress
+      bridges forced to the pre-RBCAM stream. The emulator periodic
+      <code>r53</code> run produces nonzero counts in all 256
+      <code>{{ASIC, channel}}</code> bins and zero counts at the first
+      error gate (<code>hist_drop=0</code>,
+      <code>MTS_DISCARD=0</code>, <code>ring_inerr=0</code>). It is still an
+      anomaly for rate closure: RBCAM overwrite/cache counters are nonzero, and
+      the bin sum and per-channel balance do not match a uniform 100 kHz/channel
+      source. The earlier <code>cluster-size=32</code> test is explicitly
+      invalid as an all-channel cluster because the hardware field is five
+      bits, so 32 wraps to zero and normalizes to one channel per ASIC.
     </p>
     <p>
       The latest direct probes rule out two weaker explanations. First, opening

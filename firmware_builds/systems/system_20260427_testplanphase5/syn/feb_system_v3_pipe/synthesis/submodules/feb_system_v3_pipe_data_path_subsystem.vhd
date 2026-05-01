@@ -685,7 +685,15 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem is
 			LPM_DIV_PIPELINE                  : natural := 4;
 			MUTRIG_BUFFER_EXPECTED_LATENCY_8N : natural := 2000;
 			MUTRIG_OVERFLOW_LOOKBACK_8N       : natural := 2000;
-			DEBUG                             : natural := 1
+			DEBUG                             : natural := 1;
+			IP_UID                            : integer := 1297376080;
+			VERSION_MAJOR                     : integer := 26;
+			VERSION_MINOR                     : integer := 0;
+			VERSION_PATCH                     : integer := 9;
+			BUILD                             : integer := 501;
+			VERSION_DATE                      : integer := 20260501;
+			VERSION_GIT                       : integer := 242328347;
+			INSTANCE_ID                       : integer := 0
 		);
 		port (
 			avs_csr_readdata            : out std_logic_vector(31 downto 0);                    -- readdata
@@ -5892,7 +5900,15 @@ begin
 			LPM_DIV_PIPELINE                  => 4,
 			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 2000,
 			MUTRIG_OVERFLOW_LOOKBACK_8N       => 2000,
-			DEBUG                             => 1
+			DEBUG                             => 1,
+			IP_UID                            => 1297376080,
+			VERSION_MAJOR                     => 26,
+			VERSION_MINOR                     => 0,
+			VERSION_PATCH                     => 9,
+			BUILD                             => 501,
+			VERSION_DATE                      => 20260501,
+			VERSION_GIT                       => 76878657,
+			INSTANCE_ID                       => 0
 		)
 		port map (
 			avs_csr_readdata            => mm_interconnect_0_mts_preprocessor_0_csr_readdata,    --             csr.readdata
@@ -5942,7 +5958,15 @@ begin
 			LPM_DIV_PIPELINE                  => 4,
 			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 2000,
 			MUTRIG_OVERFLOW_LOOKBACK_8N       => 2000,
-			DEBUG                             => 1
+			DEBUG                             => 1,
+			IP_UID                            => 1297376080,
+			VERSION_MAJOR                     => 26,
+			VERSION_MINOR                     => 0,
+			VERSION_PATCH                     => 9,
+			BUILD                             => 501,
+			VERSION_DATE                      => 20260501,
+			VERSION_GIT                       => 76878657,
+			INSTANCE_ID                       => 0
 		)
 		port map (
 			avs_csr_readdata            => mm_interconnect_2_mts_preprocessor_1_csr_readdata,    --             csr.readdata

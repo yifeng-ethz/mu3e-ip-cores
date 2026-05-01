@@ -71,6 +71,8 @@ from run_phase4_emulator import (  # noqa: E402
 
 INJECTOR_BASE_WORD = 0x0AC80
 INJECTOR_UID = 0x4D494E4A
+HIST_INGRESS_BASE_WORDS = (HIST_INGRESS_BASE_WORD, HIST_INGRESS_BASE_WORD + 4)
+HIST_INGRESS_UID = 0x48495342
 HIST_INTERVAL_CLOCKS_1S = 125_000_000
 HIST_KEY_LOC_GLOBAL_CHANNEL_POST = (38 << 24) | (35 << 16) | (38 << 8) | 30
 TOOLKIT_PRESET_SOURCE = "toolkits/fe_scifi/board_bring_up/fe_scifi_board_bring_up_project.tcl"
@@ -158,8 +160,8 @@ HIST_PROFILE = {
 }
 
 
-def select_histogram_ingress_source(sc_tool: Path, link: int, *, select_post: bool) -> dict[str, int]:
-    """Select the histogram ingress bridge source and wait for an idle switch.
+def select_histogram_ingress_source(sc_tool: Path, link: int, *, select_post: bool) -> dict[str, Any]:
+    """Select all histogram ingress bridge sources and wait for idle switches.
 
     Rate plots use the pre-RBCAM MTS hit_type1 stream because the toolkit rate
     preset extracts data[38:30] = {ASIC,channel}. The post-hit-stack stream is
@@ -167,25 +169,59 @@ def select_histogram_ingress_source(sc_tool: Path, link: int, *, select_post: bo
     meaningless bins.
     """
     target = 1 if select_post else 0
-    sc_write(sc_tool, link, HIST_INGRESS_BASE_WORD + 2, [target])
-    last_status = 0
-    for _ in range(50):
-        last_status = sc_read(sc_tool, link, HIST_INGRESS_BASE_WORD + 3)[0]
-        decoded = decode_histogram_ingress_status(last_status)
-        if (
-            decoded["live_select_post"] == target
-            and decoded["requested_select_post"] == target
-            and decoded["switch_pending"] == 0
-        ):
-            decoded["selected_source"] = "post" if select_post else "pre"
-            return decoded
-        time.sleep(0.01)
-    decoded = decode_histogram_ingress_status(last_status)
-    raise RuntimeError(
-        "histogram ingress bridge did not switch to requested stream: "
-        f"target={'post' if select_post else 'pre'} "
-        f"status=0x{last_status:08X} decoded={decoded}"
-    )
+    bridge_rows: list[dict[str, Any]] = []
+    primary_status: dict[str, Any] | None = None
+    for base in HIST_INGRESS_BASE_WORDS:
+        try:
+            uid = sc_read(sc_tool, link, base + 0)[0]
+        except Exception as exc:  # noqa: BLE001
+            bridge_rows.append({"base": base, "present": False, "error": str(exc)})
+            continue
+        if uid != HIST_INGRESS_UID:
+            bridge_rows.append(
+                {
+                    "base": base,
+                    "present": False,
+                    "uid": uid,
+                    "error": f"unexpected UID 0x{uid:08X}",
+                }
+            )
+            continue
+
+        sc_write(sc_tool, link, base + 2, [target])
+        last_status = 0
+        decoded: dict[str, Any] = {}
+        for _ in range(50):
+            last_status = sc_read(sc_tool, link, base + 3)[0]
+            decoded = decode_histogram_ingress_status(last_status)
+            if (
+                decoded["live_select_post"] == target
+                and decoded["requested_select_post"] == target
+                and decoded["switch_pending"] == 0
+            ):
+                break
+            time.sleep(0.01)
+        else:
+            raise RuntimeError(
+                "histogram ingress bridge did not switch to requested stream: "
+                f"base=0x{base:05X} target={'post' if select_post else 'pre'} "
+                f"status=0x{last_status:08X} decoded={decoded}"
+            )
+
+        decoded["base"] = base
+        decoded["uid"] = uid
+        decoded["present"] = True
+        decoded["selected_source"] = "post" if select_post else "pre"
+        bridge_rows.append(decoded)
+        if primary_status is None:
+            primary_status = dict(decoded)
+
+    if primary_status is None:
+        raise RuntimeError(f"no histogram ingress bridge responded at {HIST_INGRESS_BASE_WORDS}")
+    primary_status["bridges"] = bridge_rows
+    primary_status["bridge_count"] = sum(1 for row in bridge_rows if row.get("present"))
+    primary_status["selected_source"] = "post" if select_post else "pre"
+    return primary_status
 
 
 def default_output() -> Path:
@@ -651,7 +687,10 @@ def run_injector_window(args: argparse.Namespace, pulse_interval: int) -> dict[s
     actions: list[dict[str, Any]] = []
 
     if args.inject_mode == "off":
-        time.sleep(args.duration_ms / 1000.0)
+        jtag_hist_dump = run_jtag_hist_dump(args)
+        remaining_s = max(0.0, (args.duration_ms / 1000.0) - float(jtag_hist_dump.get("elapsed_s", 0.0) or 0.0))
+        if remaining_s > 0:
+            time.sleep(remaining_s)
         actions.append({"action": "sleep_off", "duration_ms": args.duration_ms})
         sample, sample_timing = timed_stage_snapshot(args.sc_tool, args.link)
         return {
@@ -659,6 +698,7 @@ def run_injector_window(args: argparse.Namespace, pulse_interval: int) -> dict[s
             "injector_during": read_injector_regs_for_args(args),
             "sample": sample,
             "sample_timing": sample_timing,
+            "jtag_hist_dump": jtag_hist_dump,
         }
 
     if args.inject_mode == "onclick":
@@ -730,6 +770,8 @@ def run_jtag_hist_dump(args: argparse.Namespace) -> dict[str, Any]:
     env = os.environ.copy()
     if args.jtag_hist_display:
         env["DISPLAY"] = args.jtag_hist_display
+    else:
+        env.pop("DISPLAY", None)
 
     started = dt.datetime.now().isoformat(timespec="seconds")
     start_s = time.monotonic()
@@ -1060,6 +1102,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
             "",
             "- The active `mutrig_injector_0` exposes one `coe_inject_pulse` output. The emulator `inject_channel_mask` CSR is still written for visibility, but that mask only affects the separate masked-trigger conduit and is not driven by this injector instance.",
             "- Channel sanity in this report is therefore represented by emulator cluster center/size; ASIC sanity is represented by `active_lanes_mask` and the per-lane source mux selection.",
+            "- For `inject-mode=off` with `emulator-hit-mode=periodic`, channel population comes from the emulator's internal channel scan. Choose a rate word that does not phase-lock to the 32-channel scan; rate word `5` only lights a subset, while the current `r53` control lights all 256 bins but is still not uniform enough for rate closure.",
             "- Scoped real-source runs select disabled emulator sources on non-requested lanes; otherwise an aligned idle/live MuTRiG lane can continue into MTS/histogram even when the LVDS lane-go mask requests a single lane.",
             "- The runner writes injector mode `0` before setup and immediately after the injection window because the current injector RTL accepts run-control but does not gate the pulse arbiter by RUNNING.",
             "- The runner autodetects the injector CSR layout. Current programmed images without UID/META use MODE at base+0; packaged images with UID/META use MODE at base+2.",

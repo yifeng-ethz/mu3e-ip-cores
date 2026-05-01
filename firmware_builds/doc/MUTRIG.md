@@ -54,6 +54,13 @@ TDC injection, use all eight ASICs plus all 32 channels per ASIC:
 That command only overrides per-channel `mask` and `tdctest_n` inside each
 ASIC's local XML entry. It must not change the SMB3/SMB5 file split.
 
+Always configure MuTRiG from the `IDLE` run-control state: issue `reset`,
+`address`, and `stop-reset`, load the ASIC XML/SPI bitmap, then enter data
+taking through the full `run-prepare`, `sync`, `start-run` sequence. Do not use
+an isolated `RUN_PREPARE` toggle from `IDLE` as a shortcut to `RUNNING`;
+skipping `RUN_SYNC` leaves counter-clear behavior ambiguous, so the following
+rate or delay histogram is not valid Phase-6 evidence.
+
 Current `good_ribbon_0` TDC XML PLL-search defaults are:
 
 | ASIC | SMB | Local index | `cnt` | `vcodelay` | `hitlogic` | `cnt/vcodelay/hitlogic` offsets |
@@ -184,6 +191,16 @@ channels per ASIC. With the 125 MHz injector clock, 100 kHz is
 For the accepted latency gate, pass `--mts-expected-latency 2000
 --mts-delay-ts-field t`. A measurement with ring-buffer CAM input latency
 outside `0..2000` cycles is rejected even if the hit counters advance.
+
+For images using `mts_preprocessor` version `26.0.9.501` or newer, MTS CSR word
+5 exposes `overflow_lookback_8ns`. This is not the accepted-latency gate.
+`expected_latency_8ns` still decides whether a hit reaches the ring-buffer CAM;
+`overflow_lookback_8ns` only changes the post-wrap epoch/lapse disambiguation
+used before that gate. The 2026-05-01 Phase-6 Qsys rebuild stamps both upper
+and lower MTS instances with compile defaults `expected_latency_8ns=2000` and
+`overflow_lookback_8ns=2000`. Use runtime `--mts-overflow-lookback` only for the
+P6-BUG-008 ASIC5/ASIC6 A/B sweep, and keep bypass-lapse as a diagnostic control,
+not as a closure setting.
 
 ### MuTRiG Wiki References for Tuning
 
@@ -330,6 +347,17 @@ Operational procedure:
    PLL is already near a stable region or when coarse-counter behavior demands
    it. Increase `vnhitlogic` modestly for analog/noise cleanup; too much
    `vnhitlogic` can remove useful hits or destabilize the setting.
+6. If a locked ASIC shows a narrow delta plus sideband delay population, do a
+   physical channel-mask scan before changing global PLL knobs aggressively.
+   Mask one MuTRiG channel at a time in the ASIC XML/config, restart the normal
+   run sequence, and replot the delay histogram. The useful signature is:
+   delta population stays at the same delay, total rate drops by the masked
+   channel fraction, and the sideband disappears or strongly shrinks. That
+   identifies a bad/noisy/marginal channel. If the sideband remains under every
+   single-channel mask, treat it as ASIC-level PLL/phase behavior or an upstream
+   decode/source issue. Do not rely on the histogram debug input as a per-channel
+   reject filter unless the exact CSR path has been proven; the controlled
+   experiment is MuTRiG-side channel masking followed by a run restart.
 
 Histogram interpretation:
 

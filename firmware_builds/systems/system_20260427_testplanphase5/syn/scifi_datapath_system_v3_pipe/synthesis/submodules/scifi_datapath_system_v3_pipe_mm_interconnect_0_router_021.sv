@@ -188,7 +188,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_021
             src_channel = 56'b01;
         end
 
-        if (destid == 5 ) begin
+        if (destid == 2 ) begin
             src_channel = 56'b10;
         end
 

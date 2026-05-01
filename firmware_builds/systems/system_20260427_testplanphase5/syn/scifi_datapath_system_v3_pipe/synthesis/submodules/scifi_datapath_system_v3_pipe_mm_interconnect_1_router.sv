@@ -1,26 +1,26 @@
 // (C) 2001-2018 Intel Corporation. All rights reserved.
-// Your use of Intel Corporation's design tools, logic functions and other 
-// software and tools, and its AMPP partner logic functions, and any output 
-// files from any of the foregoing (including device programming or simulation 
-// files), and any associated documentation or information are expressly subject 
-// to the terms and conditions of the Intel Program License Subscription 
-// Agreement, Intel FPGA IP License Agreement, or other applicable 
-// license agreement, including, without limitation, that your use is for the 
-// sole purpose of programming logic devices manufactured by Intel and sold by 
-// Intel or its authorized distributors.  Please refer to the applicable 
+// Your use of Intel Corporation's design tools, logic functions and other
+// software and tools, and its AMPP partner logic functions, and any output
+// files from any of the foregoing (including device programming or simulation
+// files), and any associated documentation or information are expressly subject
+// to the terms and conditions of the Intel Program License Subscription
+// Agreement, Intel FPGA IP License Agreement, or other applicable
+// license agreement, including, without limitation, that your use is for the
+// sole purpose of programming logic devices manufactured by Intel and sold by
+// Intel or its authorized distributors.  Please refer to the applicable
 // agreement for further details.
 
 
 
-// Your use of Altera Corporation's design tools, logic functions and other 
-// software and tools, and its AMPP partner logic functions, and any output 
-// files any of the foregoing (including device programming or simulation 
-// files), and any associated documentation or information are expressly subject 
-// to the terms and conditions of the Altera Program License Subscription 
-// Agreement, Altera MegaCore Function License Agreement, or other applicable 
-// license agreement, including, without limitation, that your use is for the 
-// sole purpose of programming logic devices manufactured by Altera and sold by 
-// Altera or its authorized distributors.  Please refer to the applicable 
+// Your use of Altera Corporation's design tools, logic functions and other
+// software and tools, and its AMPP partner logic functions, and any output
+// files any of the foregoing (including device programming or simulation
+// files), and any associated documentation or information are expressly subject
+// to the terms and conditions of the Altera Program License Subscription
+// Agreement, Altera MegaCore Function License Agreement, or other applicable
+// license agreement, including, without limitation, that your use is for the
+// sole purpose of programming logic devices manufactured by Altera and sold by
+// Altera or its authorized distributors.  Please refer to the applicable
 // agreement for further details.
 
 
@@ -32,7 +32,7 @@
 // -------------------------------------------------------
 // Merlin Router
 //
-// Asserts the appropriate one-hot encoded channel based on 
+// Asserts the appropriate one-hot encoded channel based on
 // either (a) the address or (b) the dest id. The DECODER_TYPE
 // parameter controls this behaviour. 0 means address decoder,
 // 1 means dest id decoder.
@@ -44,18 +44,18 @@
 
 module scifi_datapath_system_v3_pipe_mm_interconnect_1_router_default_decode
   #(
-     parameter DEFAULT_CHANNEL = 2,
+     parameter DEFAULT_CHANNEL = 3,
                DEFAULT_WR_CHANNEL = -1,
                DEFAULT_RD_CHANNEL = -1,
-               DEFAULT_DESTID = 2 
+               DEFAULT_DESTID = 3
    )
   (output [78 - 77 : 0] default_destination_id,
-   output [3-1 : 0] default_wr_channel,
-   output [3-1 : 0] default_rd_channel,
-   output [3-1 : 0] default_src_channel
+   output [4-1 : 0] default_wr_channel,
+   output [4-1 : 0] default_rd_channel,
+   output [4-1 : 0] default_src_channel
   );
 
-  assign default_destination_id = 
+  assign default_destination_id =
     DEFAULT_DESTID[78 - 77 : 0];
 
   generate
@@ -63,7 +63,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router_default_decode
       assign default_src_channel = '0;
     end
     else begin : default_channel_assignment
-      assign default_src_channel = 3'b1 << DEFAULT_CHANNEL;
+      assign default_src_channel = 4'b1 << DEFAULT_CHANNEL;
     end
   endgenerate
 
@@ -73,8 +73,8 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router_default_decode
       assign default_rd_channel = '0;
     end
     else begin : default_rw_channel_assignment
-      assign default_wr_channel = 3'b1 << DEFAULT_WR_CHANNEL;
-      assign default_rd_channel = 3'b1 << DEFAULT_RD_CHANNEL;
+      assign default_wr_channel = 4'b1 << DEFAULT_WR_CHANNEL;
+      assign default_rd_channel = 4'b1 << DEFAULT_RD_CHANNEL;
     end
   endgenerate
 
@@ -103,7 +103,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router
     // -------------------
     output                          src_valid,
     output reg [92-1    : 0] src_data,
-    output reg [3-1 : 0] src_channel,
+    output reg [4-1 : 0] src_channel,
     output                          src_startofpacket,
     output                          src_endofpacket,
     input                           src_ready
@@ -119,7 +119,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router
     localparam PKT_PROTECTION_H = 82;
     localparam PKT_PROTECTION_L = 80;
     localparam ST_DATA_W = 92;
-    localparam ST_CHANNEL_W = 3;
+    localparam ST_CHANNEL_W = 4;
     localparam DECODER_TYPE = 0;
 
     localparam PKT_TRANS_WRITE = 50;
@@ -134,15 +134,16 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router
     // Figure out the number of bits to mask off for each slave span
     // during address decoding
     // -------------------------------------------------------
-    localparam PAD0 = log2ceil(64'h400 - 64'h0); 
-    localparam PAD1 = log2ceil(64'h480 - 64'h400); 
-    localparam PAD2 = log2ceil(64'hc10 - 64'hc00); 
+    localparam PAD0 = log2ceil(64'h400 - 64'h0);
+    localparam PAD1 = log2ceil(64'h480 - 64'h400);
+    localparam PAD2 = log2ceil(64'hc10 - 64'hc00);
+    localparam PAD3 = log2ceil(64'hc20 - 64'hc10);
     // -------------------------------------------------------
     // Work out which address bits are significant based on the
     // address range of the slaves. If the required width is too
     // large or too small, we use the address field width instead.
     // -------------------------------------------------------
-    localparam ADDR_RANGE = 64'hc10;
+    localparam ADDR_RANGE = 64'hc20;
     localparam RANGE_ADDR_WIDTH = log2ceil(ADDR_RANGE);
     localparam OPTIMIZED_ADDR_H = (RANGE_ADDR_WIDTH > PKT_ADDR_W) ||
                                   (RANGE_ADDR_WIDTH == 0) ?
@@ -156,7 +157,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router
       always @* begin
         address = {PKT_ADDR_W{1'b0}};
         address [REAL_ADDRESS_RANGE:0] = sink_data[OPTIMIZED_ADDR_H : PKT_ADDR_L];
-      end   
+      end
 
     // -------------------------------------------------------
     // Pass almost everything through, untouched
@@ -166,7 +167,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router
     assign src_startofpacket = sink_startofpacket;
     assign src_endofpacket   = sink_endofpacket;
     wire [PKT_DEST_ID_W-1:0] default_destid;
-    wire [3-1 : 0] default_src_channel;
+    wire [4-1 : 0] default_src_channel;
 
 
 
@@ -192,20 +193,26 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_1_router
 
     // ( 0x0 .. 0x400 )
     if ( {address[RG:PAD0],{PAD0{1'b0}}} == 12'h0   ) begin
-            src_channel = 3'b100;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 2;
+            src_channel = 4'b1000;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 3;
     end
 
     // ( 0x400 .. 0x480 )
     if ( {address[RG:PAD1],{PAD1{1'b0}}} == 12'h400   ) begin
-            src_channel = 3'b010;
-            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 1;
+            src_channel = 4'b0100;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 2;
     end
 
     // ( 0xc00 .. 0xc10 )
     if ( {address[RG:PAD2],{PAD2{1'b0}}} == 12'hc00   ) begin
-            src_channel = 3'b001;
+            src_channel = 4'b0001;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 0;
+    end
+
+    // ( 0xc10 .. 0xc20 )
+    if ( {address[RG:PAD3],{PAD3{1'b0}}} == 12'hc10   ) begin
+            src_channel = 4'b0010;
+            src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 1;
     end
 
 end
@@ -230,5 +237,3 @@ end
     endfunction
 
 endmodule
-
-

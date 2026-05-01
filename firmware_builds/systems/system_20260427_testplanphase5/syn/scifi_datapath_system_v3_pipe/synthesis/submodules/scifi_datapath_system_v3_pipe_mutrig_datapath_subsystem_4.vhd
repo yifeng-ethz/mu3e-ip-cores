@@ -91,7 +91,15 @@ architecture rtl of scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_4 is
 			CHANNEL_WIDTH  : natural := 4;
 			CSR_ADDR_WIDTH : natural := 2;
 			MODE_HALT      : natural := 0;
-			DEBUG_LV       : natural := 0
+			DEBUG_LV       : natural := 0;
+			IP_UID         : integer := 1179804502;
+			VERSION_MAJOR  : integer := 26;
+			VERSION_MINOR  : integer := 0;
+			VERSION_PATCH  : integer := 7;
+			BUILD          : integer := 501;
+			VERSION_DATE   : integer := 20260501;
+			VERSION_GIT    : integer := 191925093;
+			INSTANCE_ID    : integer := 0
 		);
 		port (
 			asi_rx8b1k_data             : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
@@ -292,7 +300,15 @@ begin
 			CHANNEL_WIDTH  => 4,
 			CSR_ADDR_WIDTH => 2,
 			MODE_HALT      => 0,
-			DEBUG_LV       => 0
+			DEBUG_LV       => 0,
+			IP_UID         => 1179804502,
+			VERSION_MAJOR  => 26,
+			VERSION_MINOR  => 0,
+			VERSION_PATCH  => 7,
+			BUILD          => 501,
+			VERSION_DATE   => 20260501,
+			VERSION_GIT    => 191925093,
+			INSTANCE_ID    => 0
 		)
 		port map (
 			asi_rx8b1k_data             => decoded_din_data,                                  --     rx8b1k.data

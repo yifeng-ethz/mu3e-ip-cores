@@ -28,12 +28,25 @@ append_search_path() {
 append_component_dir() {
     local candidate="$1"
     [ -d "${candidate}" ] || return 0
+    case "${candidate}" in
+        */mutrig_frame_deassembly/script) return 0 ;;
+    esac
     if [ -e "${candidate}/components.ipx" ] || find "${candidate}" -maxdepth 1 \( -name '*_hw.tcl' -o -name '*.qsys' \) | grep -q .; then
         append_search_path "${candidate}"
     fi
 }
 
-append_search_path "$(realpath -- "$QSYS_DIR")"
+append_component_tree() {
+    local root="$1"
+    [ -d "${root}" ] || return 0
+    while IFS= read -r candidate; do
+        append_component_dir "${candidate}"
+    done < <(find "${root}" -maxdepth 3 -type f \( -name '*_hw.tcl' -o -name '*.qsys' \) -printf '%h\n' | sort -u)
+}
+
+if [ "${QSYS_SEARCH_SYSTEM_DIR:-0}" != "0" ]; then
+    append_search_path "$(realpath -- "$QSYS_DIR")"
+fi
 
 if [ -d "${MU3E_IP_CORES_ROOT}" ]; then
     for candidate in "${MU3E_IP_CORES_ROOT}" "${MU3E_IP_CORES_ROOT}"/* "${MU3E_IP_CORES_ROOT}"/*/legacy/*; do
@@ -41,6 +54,7 @@ if [ -d "${MU3E_IP_CORES_ROOT}" ]; then
         append_component_dir "${candidate}"
     done
 
+    append_component_tree "${MU3E_IP_CORES_ROOT}"
     append_search_path "${MU3E_IP_CORES_ROOT}/histogram_statistics"
 fi
 

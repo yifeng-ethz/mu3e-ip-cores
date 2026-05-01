@@ -17,9 +17,10 @@ Class legend:
 | [P6-BUG-003-H](#p6-bug-003-h-mu3e-online-dma-tools-are-not-closure-quality-evidence) | H | fixed by repo-owned probe for DMA | 2026-04-30 | `swb_dmatest`, `rw`, MIDAS, and libmudaq-backed tools hide register and cleanup boundaries; closure now uses direct-MMIO tools under `tools/`. |
 | [P6-BUG-004-H](#p6-bug-004-h-frame-boundary-signaltap-window-is-not-yet-time-aligned-across-rbcam-and-feb-frame-assembly) | H | open; zero-VCO evidence invalidated | 2026-04-30 | Lane6 STP captures show FEB type-3 hit frames under a `vco000` label, but `vnvcodelay=0` should produce no hits; rerun with nonzero locked settings and a time-aligned RBCAM/FEB capture. |
 | [P6-BUG-005-R](#p6-bug-005-r-swb-host-dma-now-has-raw-musip-payload-but-not-decoded-feb-hit-frames) | R | open; raw DMA partial pass only | 2026-04-30 | Fixed4 SWB image writes raw 256-bit stream-datagen payload to host DMA, but time-datagen is still empty and no real FEB-link/legacy-frame disk artifact exists. |
-| [P6-BUG-006-H](#p6-bug-006-h-1-s-rate-plot-collapsed-to-bin-0-because-the-observation-path-was-wrong) | H | source patched; live rerun required | 2026-05-01 | The required 1 s rate plot was scientifically rendered but all 647,881 hits landed in bin 0; root cause is a wrong histogram observation contract, not a pass. |
+| [P6-BUG-006-H](#p6-bug-006-h-1-s-rate-plot-collapsed-to-bin-0-because-the-observation-path-was-wrong) | H | source patched; all-channel emulator plot present, precision open | 2026-05-01 | The first all-channel JTAG rate-bin plot now lights all 256 bins with zero histogram drops/MTS discards/ring timestamp errors, but RBCAM overwrite/cache counters and per-channel balance are still anomalous. |
 | [P6-BUG-007-R](#p6-bug-007-r-full-feb-generated-system-tied-the-lower-histogram-fill-input-off) | R | fixed for FEB emulator observability; real-source tuning resumes at P6-BUG-002 | 2026-05-01 | The nested lower-histogram source passed simulation, but the full FEB generated top still tied `histogram_statistics_0.fill_in_1` to zero, so live all-lane emulator rate was exactly upper-side only. |
 | [P6-BUG-008-R](#p6-bug-008-r-asic5-head-sync-delay-splits-only-when-mts-lapse-is-enabled) | R | open; points at MTS lapse/lookback tuning | 2026-05-01 | ASIC5 becomes a one-bin header-sync delta when MTS lapse is bypassed, but production lapse leaves a deterministic 79/21 two-bin split that runtime expected-latency writes do not move. |
+| [P6-BUG-009-H](#p6-bug-009-h-qsys-catalog-picked-stale-system-and-package-paths-during-mts-rebuild) | H | fixed for Qsys regeneration and standalone frame-deassembly signoff; FEB compile pending | 2026-05-01 | The MTS lookback rebuild was blocked by stale system `.qsys` catalog entries, a nested stale `mutrig_frame_deassembly` version pin, and a package rooted at `script/rtl`. |
 
 ## 2026-05-01
 
@@ -57,9 +58,26 @@ Class legend:
   - Clean Qsys regeneration passes, and authentic integration simulation
     passes with all eight lanes visible: 20 MTS channel-16 payload hits and 20
     histogram flushes per lane, zero histogram drops.
-  - live closure remains open. Rerun the board with the toolkit rate preset,
-    1 s interval, burst/frozen bin readout, and a deliberate mask sanity check.
-    Accept the artifact only after the plotted distribution matches the
+  - the JTAG histogram dumper now forces every present histogram ingress bridge
+    to the pre-RBCAM stream before a rate-bin dump and unsets a stale
+    `DISPLAY` when launched headless; both live bridge UIDs respond as
+    `0x48495342`.
+  - `phase5_rate_per_channel_1s_20260501_allchan10k_emulator_cluster32.*` is
+    invalid as a 32-channel cluster: the cluster-size CSR field is five bits,
+    so `32` writes as zero and the RTL normalizes that to one channel per ASIC.
+  - `phase5_rate_per_channel_1s_20260501_allchan10k_emulator_periodic.*`
+    shows that emulator periodic rate word `5` phase-locks to a small channel
+    subset rather than scanning all 32 channels.
+  - `phase5_rate_per_channel_1s_20260501_allchan100k_emulator_periodic_r53.*`
+    is the first useful all-channel plot checkpoint: all 256 bins are nonzero,
+    all eight ASIC groups are active, both bridges are forced pre-RBCAM, and
+    the first error gate is clean (`hist_drop=0`, `MTS_DISCARD=0`,
+    `ring_inerr=0`). It remains an `ANOMALY` for rate closure because RBCAM
+    overwrite/cache counters are nonzero, and the raw bin sum and per-channel
+    balance do not match a uniform 100 kHz/channel source.
+  - live precision closure remains open. Rerun the board with the toolkit rate
+    preset, 1 s interval, burst/frozen bin readout, and deliberate mask sanity
+    checks. Accept the artifact only after the plotted distribution matches the
     selected channels and all active ASICs.
 
 ### P6-BUG-007-R: full FEB generated system tied the lower histogram fill input off
@@ -146,15 +164,80 @@ Class legend:
   parameter, not from the runtime expected-latency CSR. That explains why the
   runtime expected-latency sweep did not affect the split.
 - Fix status:
-  source patched; full-FEB rebuild and live A/B rerun required. MTS commit
+  source patched; full-FEB compile and live A/B rerun required. MTS commit
   `4951341` exposes CSR word `5` (`overflow_lookback_8ns`) as a runtime
   version of the lapse/overflow lookback, clamps writes to the legal MuTRiG
   wrap range, and keeps `expected_latency_8ns` as the timestamp-error gate.
   Standalone MTS TB, SVD regeneration, static screen, and Quartus synthesis
   signoff passed before the submodule pointer was advanced in mu3e-ip-cores
-  commit `905c045`. The next gate is a full FEB Qsys regeneration/compile,
-  then an ASIC5/ASIC6 head-sync sweep using `--mts-overflow-lookback` with
-  production lapse enabled and bypass-lapse only as the diagnostic control.
+  commit `905c045`. The 2026-05-01 Qsys regeneration now stamps both
+  `mts_preprocessor_0` and `mts_preprocessor_1` as version `26.0.9.501`, sets
+  compile defaults `expected_latency_8ns=2000` and
+  `overflow_lookback_8ns=2000`, and inlines those parameters into
+  `feb_system_v3_pipe_data_path_subsystem.vhd`. The next gate is a full Quartus
+  compile, then an ASIC5/ASIC6 head-sync sweep using `--mts-overflow-lookback`
+  with production lapse enabled and bypass-lapse only as the diagnostic
+  control.
+
+### P6-BUG-009-H: Qsys catalog picked stale system and package paths during MTS rebuild
+
+- First seen in:
+  2026-05-01 MTS runtime-lookback rebuild for the active Phase-6 FEB image.
+- Symptom:
+  - `scifi_datapath_system_v3_pipe.qsys` still requested
+    `mts_preprocessor` version `26.0.8.427` even after the MTS source
+    submodule was advanced to version `26.0.9.501`.
+  - Full script regeneration hit missing interface ends such as
+    `mutrig_datapath_subsystem_0.decoded_din` and
+    `hit_stack_subsystem_1.hit_type3`.
+  - Qsys generation also failed inside `mutrig_frame_deassembly` with
+    `No parameter CHANNEL_WIDTH` and missing
+    `mutrig_frame_deassembly/script/rtl/frame_rcv_ip.vhd`.
+  - After the top-level package catalog was corrected, generated
+    `frame_rcv_ip.vhd` still stayed at version `26.0.6` because the nested
+    `mutrig_datapath_system_v3.qsys` pinned
+    `mutrig_frame_deassembly 26.0.6.0418`.
+- Root cause:
+  - The helper search path could index active system `.qsys` files under
+    `firmware_builds/systems/.../syn` as catalog components. That let stale
+    generated systems compete with source IPs and made Qsys resolve the wrong
+    interface shape.
+  - `mutrig_frame_deassembly/script/mutrig_frame_deassembly_hw.tcl` assumed the
+    current working directory was the IP root, so when Qsys loaded the package
+    from `script/`, relative fileset paths expanded to nonexistent
+    `script/rtl/...` files.
+  - The nested `mutrig_datapath_system_v3.qsys` version pin was independent of
+    the parent SciFi/FEB system pins. Updating the catalog alone was therefore
+    insufficient; the nested system had to be restamped and regenerated before
+    the parent wrappers could carry the new frame-deassembly generics.
+  - The legacy pipe-generation script also used Tcl forms that are unsafe in
+    the Quartus 18.1 Qsys Tcl environment.
+- Fix status:
+  fixed for Qsys regeneration and standalone frame-deassembly signoff; full
+  FEB Quartus compile pending.
+  - `tcl2qsys.sh` and `qsys-generate.sh` now use an isolated catalog, recurse
+    to source component directories, and keep the active system directory
+    opt-in rather than always indexing it.
+  - `normalize_ipx_catalog.py` excludes `firmware_builds/systems/**.qsys` and
+    the stale `mutrig_frame_deassembly/script` package entry while preserving
+    the top-level symlinked IP path.
+  - `mutrig_frame_deassembly` package version `26.0.7.501` resolves filesets
+    from the real IP root, no longer emits `script/rtl` paths, and exposes
+    HDL-backed identity generics so Qsys package metadata and generated VHDL
+    wrappers agree.
+  - `mutrig_datapath_system_v3.qsys` now pins `mutrig_frame_deassembly`
+    version `26.0.7.501`; regenerated nested and parent VHDL wrappers show
+    `frame_rcv_ip` version `26.0.7` and the expected identity generic map.
+  - `stamp_scifi_datapath_mts_runtime_lookback.tcl` restamps the existing pipe
+    Qsys, verifies the required upper/lower MTS and histogram connections, and
+    avoids the broken base-to-pipe reconstruction path.
+  - Clean Qsys generation passed for `mutrig_datapath_system_v3`,
+    `scifi_datapath_system_v3_pipe`, and `feb_system_v3_pipe`; their current
+    generation reports contain no `Error:` or `Critical Warning:` entries.
+  - Standalone frame-deassembly TB `make -C tb run` passed. Standalone Quartus
+    signoff `syn/quartus/run_signoff.sh` passed with 0 errors, setup WNS
+    `+2.717 ns`, hold slack `+0.287 ns`, and 13 warnings limited to the
+    standalone pin/harness cleanup class.
 
 ## 2026-04-30
 

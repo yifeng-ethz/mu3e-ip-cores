@@ -245,12 +245,37 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
     rates = [value * scale for value in evidence.bins]
     asic_rates = rate_per_asic(evidence.bins, evidence.interval_s)
     active_asics = sum(1 for value in asic_rates if value > 0.0)
-    rate_distribution_pass = evidence.nonzero_bins >= 128 and active_asics >= 4
-    inspection = "Rate plot passes the coarse all-lane distribution check; still inspect masks and ASIC balance visually."
-    if not rate_distribution_pass:
+    nonzero_rates = [rate for rate in rates if rate > 0.0]
+    mean_nonzero_rate = sum(nonzero_rates) / len(nonzero_rates) if nonzero_rates else 0.0
+    variance = (
+        sum((rate - mean_nonzero_rate) ** 2 for rate in nonzero_rates) / len(nonzero_rates)
+        if nonzero_rates
+        else 0.0
+    )
+    stdev_nonzero_rate = math.sqrt(variance)
+    cv_nonzero_rate = stdev_nonzero_rate / mean_nonzero_rate if mean_nonzero_rate > 0.0 else 0.0
+    min_nonzero_rate = min(nonzero_rates) if nonzero_rates else 0.0
+    max_nonzero_rate = max(nonzero_rates) if nonzero_rates else 0.0
+    all_channel_occupancy_pass = evidence.nonzero_bins == 256 and active_asics == 8
+    coarse_distribution_pass = evidence.nonzero_bins >= 128 and active_asics >= 4
+    rate_uniformity_pass = all_channel_occupancy_pass and cv_nonzero_rate <= 0.25
+    rate_distribution_pass = coarse_distribution_pass and (
+        not all_channel_occupancy_pass or rate_uniformity_pass
+    )
+    inspection = (
+        "Rate plot populates all 256 bins and passes the coarse occupancy check; "
+        "still inspect masks and ASIC balance visually."
+    )
+    if not coarse_distribution_pass:
         inspection = (
             "ANOMALY: rate evidence is not distributed like an all-lane 256-channel run "
             f"(nonzero_bins={evidence.nonzero_bins}, active_asics={active_asics})."
+        )
+    elif all_channel_occupancy_pass and not rate_uniformity_pass:
+        inspection = (
+            "ANOMALY: all 256 bins are populated, but the per-channel rate is not "
+            f"uniform enough for rate closure (CV={cv_nonzero_rate:.3f}, "
+            f"min={min_nonzero_rate:.1f}/s, max={max_nonzero_rate:.1f}/s)."
         )
 
     fig, (ax0, ax1) = plt.subplots(
@@ -260,20 +285,24 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
         gridspec_kw={"height_ratios": [3.0, 1.15]},
         constrained_layout=True,
     )
+    source_label = evidence.label if evidence.label else evidence.source.name
     ax0.bar(x, rates, width=0.9, color="#1f77b4", linewidth=0)
     for boundary in range(32, 256, 32):
         ax0.axvline(boundary - 0.5, color="#8c8c8c", lw=0.7, alpha=0.55)
     ax0.set_title("MuTRiG Rate Histogram, 256 Channels")
     ax0.set_ylabel("Rate [hits/s/channel]")
     ax0.set_xlim(-1, 256)
+    if rates:
+        ax0.set_ylim(0, max(rates) * 1.22)
     ax0.grid(axis="y", color="#d9d9d9", lw=0.6)
     ax0.text(
         0.01,
         0.96,
-        f"source: {evidence.source.name}, interval={evidence.interval_s:.6g} s",
+        f"source: {source_label}, interval={evidence.interval_s:.6g} s",
         transform=ax0.transAxes,
         va="top",
-        fontsize=9,
+        fontsize=8.5,
+        bbox={"facecolor": "white", "edgecolor": "#d8dde3", "alpha": 0.86},
     )
 
     ax1.bar(range(8), asic_rates, color="#2ca02c", width=0.72)
@@ -286,11 +315,12 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
         ax0.text(
             0.01,
             0.86,
-            "Inspection FAIL: hits collapse into too few bins for all-lane rate evidence",
+            "Inspection anomaly: occupancy/uniformity does not satisfy all-channel rate closure",
             transform=ax0.transAxes,
             va="top",
             fontsize=9,
             color="#b73535",
+            bbox={"facecolor": "white", "edgecolor": "#d8dde3", "alpha": 0.86},
         )
 
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -305,8 +335,14 @@ def render_rate_plot(evidence: HistogramEvidence, out: Path) -> dict[str, Any]:
         "total_hits": evidence.total,
         "nonzero_bins": evidence.nonzero_bins,
         "max_rate_hz_per_channel": max(rates) if rates else 0.0,
+        "min_nonzero_rate_hz_per_channel": min_nonzero_rate,
+        "mean_nonzero_rate_hz_per_channel": mean_nonzero_rate,
+        "stdev_nonzero_rate_hz_per_channel": stdev_nonzero_rate,
+        "cv_nonzero_rate": cv_nonzero_rate,
         "asic_rates_hz": asic_rates,
         "active_asics": active_asics,
+        "all_channel_occupancy_pass": all_channel_occupancy_pass,
+        "rate_uniformity_pass": rate_uniformity_pass,
         "rate_distribution_pass": rate_distribution_pass,
         "source_type": evidence.source_type,
         "lane_go": evidence.lane_go,

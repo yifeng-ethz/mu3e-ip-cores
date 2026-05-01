@@ -1,10 +1,10 @@
 -- File name: mutrig_injector_multiheader.vhd
 -- Author: Yifeng Wang (yifenwan@phys.ethz.ch)
 -- =======================================
--- Version: 26.0.2
+-- Version: 26.0.3
 -- Date   : 20260429
--- Change : Keep the Avalon-MM CSR waitrequest deasserted at idle so bridge
---          masters can issue injector transactions without a permanent stall.
+-- Change : Add common Mu3e UID/META CSR identity header and shift injector
+--          control registers behind the header.
 -- =======================================
 -- Description:
 --   MuTRiG injector variant that monitors all 8 header streams directly.
@@ -22,7 +22,15 @@ generic(
     CLK_FREQUENCY        : natural := 125000000;
     ASYNC_CLK_FREQUENCY  : natural := 50000000;
     HEADERINFO_CHANNEL_W : natural := 4;
-    DEBUG                : natural := 1
+    DEBUG                : natural := 1;
+    IP_UID               : natural := 16#4D494E4A#;
+    VERSION_MAJOR        : natural := 26;
+    VERSION_MINOR        : natural := 0;
+    VERSION_PATCH        : natural := 3;
+    BUILD                : natural := 429;
+    VERSION_DATE         : natural := 20260429;
+    VERSION_GIT          : natural := 16#528DBAD5#;
+    INSTANCE_ID          : natural := 0
 );
 port (
     -- AVMM <csr>
@@ -162,6 +170,21 @@ architecture rtl of mutrig_injector_multiheader is
             return 0;
         end if;
         return (num_v + den_v - 1) / den_v;
+    end function;
+
+    function pack_version_word(
+        major_v : natural;
+        minor_v : natural;
+        patch_v : natural;
+        build_v : natural
+    ) return std_logic_vector is
+        variable word_v : unsigned(31 downto 0) := (others => '0');
+    begin
+        word_v(31 downto 24) := to_unsigned(major_v, 8);
+        word_v(23 downto 16) := to_unsigned(minor_v, 8);
+        word_v(15 downto 12) := to_unsigned(patch_v, 4);
+        word_v(11 downto 0)  := to_unsigned(build_v, 12);
+        return std_logic_vector(word_v);
     end function;
 
     constant ASYNC_SCALE_GCD_CONST       : natural := gcd(CLK_FREQUENCY, ASYNC_CLK_FREQUENCY);
@@ -391,6 +414,7 @@ architecture rtl of mutrig_injector_multiheader is
     signal onclick_injector_started  : std_logic := '0';
     signal onclick_injector_timer    : unsigned(31 downto 0) := (others => '0');
     signal onclick_write_pulse       : std_logic := '0';
+    signal csr_meta_page_sel         : std_logic_vector(1 downto 0) := (others => '0');
 
     signal header_valid              : std_logic_vector(0 to 7);
     signal header_channel            : header_channel_array_t(0 to 7);
@@ -445,6 +469,7 @@ begin
                 random_reseed_pulse              <= '0';
                 periodic_async_cfg_req           <= '0';
                 periodic_async_cfg_hold          <= (others => '0');
+                csr_meta_page_sel                <= (others => '0');
             else
                 avs_csr_waitrequest <= '0';
                 avs_csr_readdata    <= (others => '0');
@@ -461,26 +486,39 @@ begin
                     avs_csr_waitrequest <= '0';
                     case to_integer(unsigned(avs_csr_address)) is
                         when 0 =>
-                            avs_csr_readdata(csr.mode'high downto 0) <= csr.mode;
+                            avs_csr_readdata <= std_logic_vector(to_unsigned(IP_UID, avs_csr_readdata'length));
                         when 1 =>
-                            avs_csr_readdata(csr.header_delay'high downto 0) <= csr.header_delay;
+                            case csr_meta_page_sel is
+                                when "00" =>
+                                    avs_csr_readdata <= pack_version_word(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, BUILD);
+                                when "01" =>
+                                    avs_csr_readdata <= std_logic_vector(to_unsigned(VERSION_DATE, avs_csr_readdata'length));
+                                when "10" =>
+                                    avs_csr_readdata <= std_logic_vector(to_unsigned(VERSION_GIT, avs_csr_readdata'length));
+                                when others =>
+                                    avs_csr_readdata <= std_logic_vector(to_unsigned(INSTANCE_ID, avs_csr_readdata'length));
+                            end case;
                         when 2 =>
-                            avs_csr_readdata(csr.header_interval'high downto 0) <= csr.header_interval;
+                            avs_csr_readdata(csr.mode'high downto 0) <= csr.mode;
                         when 3 =>
-                            avs_csr_readdata(csr.injection_multiplicity'high downto 0) <= csr.injection_multiplicity;
+                            avs_csr_readdata(csr.header_delay'high downto 0) <= csr.header_delay;
                         when 4 =>
-                            avs_csr_readdata(csr.header_ch'high downto 0) <= csr.header_ch;
+                            avs_csr_readdata(csr.header_interval'high downto 0) <= csr.header_interval;
                         when 5 =>
-                            avs_csr_readdata(csr.pulse_interval'high downto 0) <= csr.pulse_interval;
+                            avs_csr_readdata(csr.injection_multiplicity'high downto 0) <= csr.injection_multiplicity;
                         when 6 =>
-                            avs_csr_readdata(csr.pulse_high_cycles'high downto 0) <= csr.pulse_high_cycles;
+                            avs_csr_readdata(csr.header_ch'high downto 0) <= csr.header_ch;
                         when 7 =>
-                            avs_csr_readdata(csr.prbs_rate'high downto 0) <= csr.prbs_rate;
+                            avs_csr_readdata(csr.pulse_interval'high downto 0) <= csr.pulse_interval;
                         when 8 =>
-                            avs_csr_readdata(csr.prbs_pattern'high downto 0) <= csr.prbs_pattern;
+                            avs_csr_readdata(csr.pulse_high_cycles'high downto 0) <= csr.pulse_high_cycles;
                         when 9 =>
-                            avs_csr_readdata(csr.prbs_seed'high downto 0) <= csr.prbs_seed;
+                            avs_csr_readdata(csr.prbs_rate'high downto 0) <= csr.prbs_rate;
                         when 10 =>
+                            avs_csr_readdata(csr.prbs_pattern'high downto 0) <= csr.prbs_pattern;
+                        when 11 =>
+                            avs_csr_readdata(csr.prbs_seed'high downto 0) <= csr.prbs_seed;
+                        when 12 =>
                             avs_csr_readdata(csr.prbs_ctrl'high downto 0) <= csr.prbs_ctrl;
                         when others =>
                             null;
@@ -489,6 +527,10 @@ begin
                     avs_csr_waitrequest <= '0';
                     case to_integer(unsigned(avs_csr_address)) is
                         when 0 =>
+                            null;
+                        when 1 =>
+                            csr_meta_page_sel <= avs_csr_writedata(1 downto 0);
+                        when 2 =>
                             if to_integer(unsigned(avs_csr_writedata(csr.mode'high downto 0))) = 4 then
                                 onclick_write_pulse <= '1';
                                 csr.mode <= std_logic_vector(to_unsigned(0, csr.mode'length));
@@ -500,31 +542,31 @@ begin
                             end if;
                             periodic_async_cfg_req  <= '1';
                             periodic_async_cfg_hold <= to_unsigned(ASYNC_CFG_STRETCH_CYCLES_CONST - 1, periodic_async_cfg_hold'length);
-                        when 1 =>
-                            csr.header_delay <= avs_csr_writedata(csr.header_delay'high downto 0);
-                        when 2 =>
-                            csr.header_interval <= avs_csr_writedata(csr.header_interval'high downto 0);
                         when 3 =>
-                            csr.injection_multiplicity <= avs_csr_writedata(csr.injection_multiplicity'high downto 0);
+                            csr.header_delay <= avs_csr_writedata(csr.header_delay'high downto 0);
                         when 4 =>
-                            csr.header_ch <= avs_csr_writedata(csr.header_ch'high downto 0);
+                            csr.header_interval <= avs_csr_writedata(csr.header_interval'high downto 0);
                         when 5 =>
+                            csr.injection_multiplicity <= avs_csr_writedata(csr.injection_multiplicity'high downto 0);
+                        when 6 =>
+                            csr.header_ch <= avs_csr_writedata(csr.header_ch'high downto 0);
+                        when 7 =>
                             csr.pulse_interval <= avs_csr_writedata(csr.pulse_interval'high downto 0);
                             periodic_async_cfg_req        <= '1';
                             periodic_async_cfg_hold       <= to_unsigned(ASYNC_CFG_STRETCH_CYCLES_CONST - 1, periodic_async_cfg_hold'length);
-                        when 6 =>
+                        when 8 =>
                             csr.pulse_high_cycles <= avs_csr_writedata(csr.pulse_high_cycles'high downto 0);
                             periodic_async_cfg_req            <= '1';
                             periodic_async_cfg_hold           <= to_unsigned(ASYNC_CFG_STRETCH_CYCLES_CONST - 1, periodic_async_cfg_hold'length);
-                        when 7 =>
+                        when 9 =>
                             csr.prbs_rate <= avs_csr_writedata(csr.prbs_rate'high downto 0);
-                        when 8 =>
+                        when 10 =>
                             csr.prbs_pattern <= avs_csr_writedata(csr.prbs_pattern'high downto 0);
                             random_reseed_pulse <= '1';
-                        when 9 =>
+                        when 11 =>
                             csr.prbs_seed <= avs_csr_writedata(csr.prbs_seed'high downto 0);
                             random_reseed_pulse <= '1';
-                        when 10 =>
+                        when 12 =>
                             csr.prbs_ctrl <= avs_csr_writedata(csr.prbs_ctrl'high downto 0);
                             random_reseed_pulse <= '1';
                         when others =>

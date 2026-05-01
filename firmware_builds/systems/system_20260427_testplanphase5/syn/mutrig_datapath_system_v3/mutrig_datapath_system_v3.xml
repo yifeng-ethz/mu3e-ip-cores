@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2026.04.17.18:49:34"
- outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/">
+ date="2026.05.01.08:16:47"
+ outputDirectory="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/">
  <perimeter>
   <parameter
      name="AUTO_GENERATION_ID"
@@ -265,13 +265,13 @@
  </perimeter>
  <entity
    path=""
-   parameterizationKey="mutrig_datapath_system_v3:1.0:AUTO_CLK_CLOCK_DOMAIN=-1,AUTO_CLK_CLOCK_RATE=-1,AUTO_CLK_RESET_DOMAIN=-1,AUTO_DEVICE=5AGXBA7D4F31C5,AUTO_DEVICE_FAMILY=Arria V,AUTO_DEVICE_SPEEDGRADE=5_H4,AUTO_GENERATION_ID=1776444573,AUTO_UNIQUE_ID=(altera_avalon_sc_fifo:18.1:BITS_PER_SYMBOL=45,CHANNEL_WIDTH=4,EMPTY_LATENCY=3,ENABLE_EXPLICIT_MAXCHANNEL=true,ERROR_WIDTH=3,EXPLICIT_MAXCHANNEL=15,FIFO_DEPTH=128,SYMBOLS_PER_BEAT=1,USE_ALMOST_EMPTY_IF=1,USE_ALMOST_FULL_IF=0,USE_FILL_LEVEL=1,USE_MEMORY_BLOCKS=1,USE_PACKETS=1,USE_STORE_FORWARD=0)(mutrig_frame_deassembly:26.0.6.417:BUILD=417,CHANNEL_WIDTH=4,CSR_ADDR_WIDTH=2,DEBUG_LV=0,GIT_STAMP_OVERRIDE=false,INSTANCE_ID=0,IP_UID=1179804502,MODE_HALT=0,VERSION_DATE=20260417,VERSION_GIT=59543297,VERSION_MAJOR=26,VERSION_MINOR=0,VERSION_PATCH=6)(clock_source:18.1:clockFrequency=125000000,clockFrequencyKnown=true,inputClockFrequency=0,resetSynchronousEdges=DEASSERT)(clock:18.1:)(clock:18.1:)(reset:18.1:)(reset:18.1:)(avalon_streaming:18.1:)"
+   parameterizationKey="mutrig_datapath_system_v3:1.0:AUTO_CLK_CLOCK_DOMAIN=-1,AUTO_CLK_CLOCK_RATE=-1,AUTO_CLK_RESET_DOMAIN=-1,AUTO_DEVICE=5AGXBA7D4F31C5,AUTO_DEVICE_FAMILY=Arria V,AUTO_DEVICE_SPEEDGRADE=5_H4,AUTO_GENERATION_ID=1777616207,AUTO_UNIQUE_ID=(altera_avalon_sc_fifo:18.1:BITS_PER_SYMBOL=45,CHANNEL_WIDTH=4,EMPTY_LATENCY=3,ENABLE_EXPLICIT_MAXCHANNEL=true,ERROR_WIDTH=3,EXPLICIT_MAXCHANNEL=15,FIFO_DEPTH=128,SYMBOLS_PER_BEAT=1,USE_ALMOST_EMPTY_IF=1,USE_ALMOST_FULL_IF=0,USE_FILL_LEVEL=1,USE_MEMORY_BLOCKS=1,USE_PACKETS=1,USE_STORE_FORWARD=0)(mutrig_frame_deassembly:26.0.7.501:BUILD=501,CHANNEL_WIDTH=4,CSR_ADDR_WIDTH=2,DEBUG_LV=0,GIT_STAMP_OVERRIDE=false,INSTANCE_ID=0,IP_UID=1179804502,MODE_HALT=0,VERSION_DATE=20260501,VERSION_GIT=191925093,VERSION_MAJOR=26,VERSION_MINOR=0,VERSION_PATCH=7)(clock_source:18.1:clockFrequency=125000000,clockFrequencyKnown=true,inputClockFrequency=0,resetSynchronousEdges=DEASSERT)(clock:18.1:)(clock:18.1:)(reset:18.1:)(reset:18.1:)(avalon_streaming:18.1:)"
    instancePathKey="mutrig_datapath_system_v3"
    kind="mutrig_datapath_system_v3"
    version="1.0"
    name="mutrig_datapath_system_v3">
   <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
-  <parameter name="AUTO_GENERATION_ID" value="1776444573" />
+  <parameter name="AUTO_GENERATION_ID" value="1777616207" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
@@ -280,45 +280,45 @@
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/mutrig_datapath_system_v3.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/mutrig_datapath_system_v3.vhd"
        type="VHDL" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_avalon_sc_fifo.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_avalon_sc_fifo.v"
        type="VERILOG"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/frame_rcv_ip.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/frame_rcv_ip.vhd"
        type="VHDL"
        attributes="TOP_LEVEL_FILE" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/crc16_calc.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/crc16_calc.vhd"
        type="VHDL"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter.v"
        type="VERILOG" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
        type="SYSTEM_VERILOG"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.v"
        type="VERILOG"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_synchronizer.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_synchronizer.v"
        type="VERILOG"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.sdc"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.sdc"
        type="SDC"
        attributes="" />
   </childGeneratedFiles>
   <sourceFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3.qsys" />
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3.qsys" />
   </sourceFiles>
   <childSourceFiles>
    <file
@@ -326,7 +326,7 @@
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/mutrig_frame_deassembly_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/mutrig_frame_deassembly/mutrig_frame_deassembly_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_adapter/altera_avalon_st_adapter_hw.tcl" />
    <file
@@ -338,6 +338,65 @@
    <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 0 starting:mutrig_datapath_system_v3 "mutrig_datapath_system_v3"</message>
    <message level="Progress" culprit="min"></message>
    <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Debug">Transform: CustomInstructionTransform</message>
@@ -352,17 +411,135 @@
    <message level="Progress" culprit="max"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
    <message level="Info" culprit="avalon_st_adapter">Inserting timing_adapter: timing_adapter_0</message>
    <message level="Debug" culprit="avalon_st_adapter.clk_bridge_0">Timing: ELA:1/0.000s</message>
-   <message level="Debug" culprit="avalon_st_adapter.rst_bridge_0">Timing: ELA:2/0.000s/0.000s</message>
-   <message level="Debug" culprit="avalon_st_adapter.timing_adapter_0">Timing: ELA:1/0.004s</message>
-   <message level="Debug" culprit="avalon_st_adapter">Timing: COM:3/0.023s/0.035s</message>
+   <message level="Debug" culprit="avalon_st_adapter.rst_bridge_0">Timing: ELA:2/0.001s/0.001s</message>
+   <message level="Debug" culprit="avalon_st_adapter.timing_adapter_0">Timing: ELA:1/0.003s</message>
+   <message level="Debug" culprit="avalon_st_adapter">Timing: COM:3/0.024s/0.037s</message>
    <message
        level="Debug"
        culprit="com_altera_sopcmodel_transforms_avalonst_AvalonStreamingTransform"><![CDATA[After transform: <b>4</b> modules, <b>8</b> connections]]></message>
    <message level="Debug">Transform: ResetAdaptation</message>
    <message level="Progress" culprit="min"></message>
    <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Debug" culprit="reset_adaptation_transform"><![CDATA[After transform: <b>5</b> modules, <b>10</b> connections]]></message>
@@ -378,6 +555,65 @@
    <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 1 starting:altera_avalon_st_adapter "submodules/mutrig_datapath_system_v3_avalon_st_adapter"</message>
    <message level="Progress" culprit="min"></message>
    <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Debug">Transform: CustomInstructionTransform</message>
@@ -408,7 +644,7 @@
   <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="true" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_avalon_sc_fifo.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_avalon_sc_fifo.v"
        type="VERILOG"
        attributes="" />
   </generatedFiles>
@@ -428,38 +664,38 @@
  </entity>
  <entity
    path="submodules/"
-   parameterizationKey="mutrig_frame_deassembly:26.0.6.417:BUILD=417,CHANNEL_WIDTH=4,CSR_ADDR_WIDTH=2,DEBUG_LV=0,GIT_STAMP_OVERRIDE=false,INSTANCE_ID=0,IP_UID=1179804502,MODE_HALT=0,VERSION_DATE=20260417,VERSION_GIT=59543297,VERSION_MAJOR=26,VERSION_MINOR=0,VERSION_PATCH=6"
+   parameterizationKey="mutrig_frame_deassembly:26.0.7.501:BUILD=501,CHANNEL_WIDTH=4,CSR_ADDR_WIDTH=2,DEBUG_LV=0,GIT_STAMP_OVERRIDE=false,INSTANCE_ID=0,IP_UID=1179804502,MODE_HALT=0,VERSION_DATE=20260501,VERSION_GIT=191925093,VERSION_MAJOR=26,VERSION_MINOR=0,VERSION_PATCH=7"
    instancePathKey="mutrig_datapath_system_v3:.:mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.417"
+   version="26.0.7.501"
    name="frame_rcv_ip">
   <parameter name="CSR_ADDR_WIDTH" value="2" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="BUILD" value="417" />
+  <parameter name="BUILD" value="501" />
   <parameter name="MODE_HALT" value="0" />
   <parameter name="CHANNEL_WIDTH" value="4" />
-  <parameter name="VERSION_DATE" value="20260417" />
+  <parameter name="VERSION_DATE" value="20260501" />
   <parameter name="INSTANCE_ID" value="0" />
-  <parameter name="VERSION_GIT" value="59543297" />
+  <parameter name="VERSION_GIT" value="191925093" />
   <parameter name="VERSION_MINOR" value="0" />
   <parameter name="DEBUG_LV" value="0" />
   <parameter name="IP_UID" value="1179804502" />
-  <parameter name="VERSION_PATCH" value="6" />
+  <parameter name="VERSION_PATCH" value="7" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/frame_rcv_ip.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/frame_rcv_ip.vhd"
        type="VHDL"
        attributes="TOP_LEVEL_FILE" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/crc16_calc.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/crc16_calc.vhd"
        type="VHDL"
        attributes="" />
   </generatedFiles>
   <childGeneratedFiles/>
   <sourceFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/mutrig_frame_deassembly_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/mutrig_frame_deassembly/mutrig_frame_deassembly_hw.tcl" />
   </sourceFiles>
   <childSourceFiles/>
   <instantiator
@@ -504,12 +740,12 @@
   <parameter name="outEmptyWidth" value="1" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter.v"
        type="VERILOG" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
        type="SYSTEM_VERILOG"
        attributes="" />
   </childGeneratedFiles>
@@ -526,6 +762,65 @@
    <message level="Debug" culprit="mutrig_datapath_system_v3">queue size: 1 starting:altera_avalon_st_adapter "submodules/mutrig_datapath_system_v3_avalon_st_adapter"</message>
    <message level="Progress" culprit="min"></message>
    <message level="Progress" culprit="max"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
+   <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Progress" culprit="current"></message>
    <message level="Debug">Transform: CustomInstructionTransform</message>
@@ -552,15 +847,15 @@
    name="altera_reset_controller">
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.v"
        type="VERILOG"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_synchronizer.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_synchronizer.v"
        type="VERILOG"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.sdc"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/altera_reset_controller.sdc"
        type="SDC"
        attributes="" />
   </generatedFiles>
@@ -600,7 +895,7 @@
   <parameter name="inUsePackets" value="true" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis/submodules/mutrig_datapath_system_v3_avalon_st_adapter_timing_adapter_0.sv"
        type="SYSTEM_VERILOG"
        attributes="" />
   </generatedFiles>

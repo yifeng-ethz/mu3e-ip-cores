@@ -1,6 +1,6 @@
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/mutrig_datapath_system_v3/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
-Progress: Loading firmware_builds/mutrig_datapath_system_v3.qsys
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/syn/mutrig_datapath_system_v3/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading syn/mutrig_datapath_system_v3.qsys
 Progress: Reading input file
 Progress: Adding backpressure_fifo [altera_avalon_sc_fifo 18.1]
 Progress: Parameterizing module backpressure_fifo
@@ -12,8 +12,7 @@ Progress: Adding issp_cnt_sclr [altera_in_system_sources_probes 18.1]
 Progress: Parameterizing module issp_cnt_sclr
 Progress: Adding lvdserr_count_subsystem [avst_errcnt_system 1.0]
 Progress: Parameterizing module lvdserr_count_subsystem
-Progress: Adding mutrig_frame_deassembly_0 [mutrig_frame_deassembly 26.0.5.416]
-Warning: mutrig_frame_deassembly_0: Used mutrig_frame_deassembly 26.0.6.417 (instead of 26.0.5.416)
+Progress: Adding mutrig_frame_deassembly_0 [mutrig_frame_deassembly 26.0.7.501]
 Progress: Parameterizing module mutrig_frame_deassembly_0
 Progress: Adding system_clock_reset_interface [clock_source 18.1]
 Progress: Parameterizing module system_clock_reset_interface

@@ -2,7 +2,7 @@ set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datap
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_TOOL_VERSION "18.1"
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_TOOL_ENV "Qsys"
 set_global_assignment -library "mutrig_datapath_system_v3" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../../mutrig_datapath_system_v3.sopcinfo"]
-set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name SLD_INFO "QSYS_NAME mutrig_datapath_system_v3 HAS_SOPCINFO 1 GENERATION_ID 1776444573"
+set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name SLD_INFO "QSYS_NAME mutrig_datapath_system_v3 HAS_SOPCINFO 1 GENERATION_ID 1777616207"
 set_global_assignment -library "mutrig_datapath_system_v3" -name MISC_FILE [file join $::quartus(qip_path) "../mutrig_datapath_system_v3.cmp"]
 set_global_assignment -library "mutrig_datapath_system_v3" -name SLD_FILE [file join $::quartus(qip_path) "mutrig_datapath_system_v3.debuginfo"]
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_TARGETED_DEVICE_FAMILY "Arria V"
@@ -15,7 +15,7 @@ set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datap
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_REPORT_HIERARCHY "On"
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_INTERNAL "Off"
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_VERSION "MS4w"
-set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTc3NjQ0NDU3Mw==::QXV0byBHRU5FUkFUSU9OX0lE"
+set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTc3NzYxNjIwNw==::QXV0byBHRU5FUkFUSU9OX0lE"
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfRkFNSUxZ::QXJyaWEgVg==::QXV0byBERVZJQ0VfRkFNSUxZ"
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0U=::NUFHWEJBN0Q0RjMxQzU=::QXV0byBERVZJQ0U="
 set_global_assignment -entity "mutrig_datapath_system_v3" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfU1BFRURHUkFERQ==::NV9INA==::QXV0byBERVZJQ0VfU1BFRURHUkFERQ=="
@@ -107,7 +107,7 @@ set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3
 set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_REPORT_HIERARCHY "Off"
 set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_INTERNAL "Off"
 set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_AUTHOR "WWlmZW5nIFdhbmc="
-set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_VERSION "MjYuMC42LjQxNw=="
+set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_VERSION "MjYuMC43LjUwMQ=="
 set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_DESCRIPTION "TXVUUmlHIEZyYW1lIERlYXNzZW1ibHkgTXUzZSBJUCBDb3Jl"
 set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_PARAMETER "Q0hBTk5FTF9XSURUSA==::NA==::TGFuZSBDaGFubmVsIFdpZHRo"
 set_global_assignment -entity "frame_rcv_ip" -library "mutrig_datapath_system_v3" -name IP_COMPONENT_PARAMETER "Q1NSX0FERFJfV0lEVEg=::Mg==::Q1NSIEFkZHJlc3MgV2lkdGg="

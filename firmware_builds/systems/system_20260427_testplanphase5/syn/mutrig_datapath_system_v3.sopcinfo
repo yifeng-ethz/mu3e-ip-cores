@@ -5,11 +5,11 @@
  version="1.0"
  fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2026.04.17.18:49:33 -->
+ <!-- 2026.05.01.08:16:47 -->
  <!-- A collection of modules and connections -->
  <parameter name="AUTO_GENERATION_ID">
   <type>java.lang.Integer</type>
-  <value>1776444573</value>
+  <value>1777616207</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>false</visible>
@@ -1144,7 +1144,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
-   version="26.0.6.417"
+   version="26.0.7.501"
    path="mutrig_frame_deassembly_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -1206,7 +1206,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>6</value>
+   <value>7</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -1214,7 +1214,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="BUILD">
    <type>int</type>
-   <value>417</value>
+   <value>501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -1222,7 +1222,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_DATE">
    <type>int</type>
-   <value>20260417</value>
+   <value>20260501</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -1233,12 +1233,12 @@ the requested settings for a module instance. -->
    <value>false</value>
    <derived>false</derived>
    <enabled>true</enabled>
-   <visible>true</visible>
+   <visible>false</visible>
    <valid>true</valid>
   </parameter>
   <parameter name="VERSION_GIT">
    <type>int</type>
-   <value>59543297</value>
+   <value>191925093</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -2811,7 +2811,7 @@ parameters are a RESULT of the module parameters. -->
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
   <displayName>MuTRiG Frame Deassembly</displayName>
-  <version>26.0.6.417</version>
+  <version>26.0.7.501</version>
  </plugin>
  <plugin>
   <instanceCount>1</instanceCount>

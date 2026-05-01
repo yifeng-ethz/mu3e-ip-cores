@@ -1,10 +1,10 @@
 package require -exact qsys 18.1
 
 proc abs_path {path} {
-    if {[file pathtype $path] eq "absolute"} {
-        return [file normalize $path]
+    if {[string equal [file pathtype $path] "absolute"]} {
+        return $path
     }
-    return [file normalize [file join [pwd] $path]]
+    return [file join [pwd] $path]
 }
 
 if {[info exists ::phase5_system_dir] && [string match "/*" $::phase5_system_dir]} {
@@ -84,6 +84,21 @@ proc set_emulator_mutrig_crcfix_version {name} {
     set_instance_parameter_value $name BUILD 425
     set_instance_parameter_value $name VERSION_DATE 20260425
     set_instance_parameter_value $name VERSION_GIT 179563176
+}
+
+proc set_mts_runtime_lookback_version {name} {
+    set_instance_parameter_value $name MUTRIG_BUFFER_EXPECTED_LATENCY_8N 2000
+    set_instance_parameter_value $name MUTRIG_OVERFLOW_LOOKBACK_8N 2000
+    set_instance_parameter_value $name VERSION_MAJOR 26
+    set_instance_parameter_value $name VERSION_MINOR 0
+    set_instance_parameter_value $name VERSION_PATCH 9
+    set_instance_parameter_value $name BUILD 501
+    set_instance_parameter_value $name VERSION_DATE 20260501
+    set_instance_parameter_value $name VERSION_GIT 76878657
+}
+
+foreach mts_instance {mts_preprocessor_0 mts_preprocessor_1} {
+    set_mts_runtime_lookback_version $mts_instance
 }
 
 # Keep the clock-crossing bridge address width derived from the live map.
