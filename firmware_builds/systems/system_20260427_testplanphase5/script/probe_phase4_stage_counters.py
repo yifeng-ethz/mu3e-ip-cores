@@ -47,6 +47,7 @@ MTS_CTRL_BYPASS_LAPSE = 1 << 3
 MTS_CTRL_DISCARD_HITERR = 1 << 4
 MTS_CTRL_DROP_DELAY_ERROR = 1 << 5
 MTS_CTRL_DELAY_TS_FIELD_USE_T = 1 << 29
+MTS_REG_OVERFLOW_LOOKBACK = 5
 RING_BASE_WORDS = {
     "hs0_rb0": 0x0AC00,
     "hs0_rb1": 0x0AC20,
@@ -129,7 +130,7 @@ def read_frame_rcv_snapshot(sc_tool: Path, link: int) -> list[dict[str, int]]:
 def read_mts_snapshot(sc_tool: Path, link: int) -> list[dict[str, int]]:
     rows: list[dict[str, int]] = []
     for idx, base in enumerate(MTS_BASE_WORDS):
-        words = sc_read(sc_tool, link, base, 5)
+        words = sc_read(sc_tool, link, base, 6)
         rows.append(
             {
                 "idx": idx,
@@ -137,6 +138,7 @@ def read_mts_snapshot(sc_tool: Path, link: int) -> list[dict[str, int]]:
                 "discard_hits": words[1],
                 "expected_latency": words[2],
                 "total_hits": u48(words[3], words[4], high_bits=16),
+                "overflow_lookback": words[MTS_REG_OVERFLOW_LOOKBACK],
             }
         )
     return rows
@@ -222,12 +224,17 @@ def apply_debug_overrides(args: argparse.Namespace) -> dict[str, Any]:
     overrides: dict[str, Any] = {
         "ring_filter_inerr": args.ring_filter_inerr,
         "mts_expected_latency": args.mts_expected_latency,
+        "mts_overflow_lookback": args.mts_overflow_lookback,
         "mts_drop_delay_error": args.mts_drop_delay_error,
     }
 
     if args.mts_expected_latency is not None:
         for base in MTS_BASE_WORDS:
             sc_write(args.sc_tool, args.link, base + 2, [args.mts_expected_latency])
+
+    if args.mts_overflow_lookback is not None:
+        for base in MTS_BASE_WORDS:
+            sc_write(args.sc_tool, args.link, base + MTS_REG_OVERFLOW_LOOKBACK, [args.mts_overflow_lookback])
 
     if args.mts_drop_delay_error != "keep":
         ctrl = MTS_CTRL_GO | MTS_CTRL_DISCARD_HITERR | MTS_CTRL_DELAY_TS_FIELD_USE_T
@@ -445,6 +452,7 @@ def write_markdown(path: Path, args: argparse.Namespace, records: list[dict[str,
         f"- Iterations: `{len(records)}`",
         f"- Ring input-error filter override: `{args.ring_filter_inerr}`",
         f"- MTS expected latency override: `{args.mts_expected_latency}`",
+        f"- MTS overflow lookback override: `{args.mts_overflow_lookback}`",
         f"- MTS timestamp-delay local-drop override: `{args.mts_drop_delay_error}`",
         "",
         "## Summary",
@@ -562,6 +570,11 @@ def main() -> int:
         "--mts-expected-latency",
         type=lambda text: int(text, 0),
         help="Override MTS CSR expected_latency word after reset/config.",
+    )
+    parser.add_argument(
+        "--mts-overflow-lookback",
+        type=lambda text: int(text, 0),
+        help="Override MTS CSR overflow_lookback word after reset/config; requires MTS v26.0.9.0501 or newer.",
     )
     parser.add_argument(
         "--mts-drop-delay-error",

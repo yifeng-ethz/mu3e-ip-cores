@@ -34,6 +34,7 @@ from probe_phase4_stage_counters import (  # noqa: E402
     MTS_CTRL_DISCARD_HITERR,
     MTS_CTRL_DROP_DELAY_ERROR,
     MTS_CTRL_GO,
+    MTS_REG_OVERFLOW_LOOKBACK,
     RING_BASE_WORDS,
     RING_CTRL_FILTER_INERR,
     RING_CTRL_GO,
@@ -589,6 +590,7 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
 def apply_debug_overrides(args: argparse.Namespace) -> dict[str, Any]:
     overrides: dict[str, Any] = {
         "mts_expected_latency": args.mts_expected_latency,
+        "mts_overflow_lookback": args.mts_overflow_lookback,
         "mts_bypass_lapse": args.mts_bypass_lapse,
         "mts_delay_ts_field": args.mts_delay_ts_field,
         "mts_drop_delay_error": args.mts_drop_delay_error,
@@ -614,6 +616,10 @@ def apply_debug_overrides(args: argparse.Namespace) -> dict[str, Any]:
     if args.mts_expected_latency is not None:
         for base in MTS_BASE_WORDS:
             sc_write(args.sc_tool, args.link, base + 2, [args.mts_expected_latency])
+
+    if args.mts_overflow_lookback is not None:
+        for base in MTS_BASE_WORDS:
+            sc_write(args.sc_tool, args.link, base + MTS_REG_OVERFLOW_LOOKBACK, [args.mts_overflow_lookback])
 
     if args.ring_filter_inerr != "keep":
         ctrl = RING_CTRL_GO
@@ -1024,6 +1030,7 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, cases: li
         f"- Histogram filter key loc override: `{getattr(args, 'hist_filter_key_loc', None)}`",
         f"- Histogram filter key value: `{fmt_hex(getattr(args, 'hist_filter_key_value', 0) or 0)}`",
         f"- MTS expected latency override: `{args.mts_expected_latency if args.mts_expected_latency is not None else 'keep'}`",
+        f"- MTS overflow lookback override: `{args.mts_overflow_lookback if args.mts_overflow_lookback is not None else 'keep'}`",
         f"- MTS bypass-lapse override: `{args.mts_bypass_lapse}`",
         f"- MTS delay-ts field override: `{args.mts_delay_ts_field}`",
         f"- MTS drop-delay-error override: `{args.mts_drop_delay_error}`",
@@ -1196,6 +1203,7 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, cases: list
             "cluster_center": args.cluster_center,
             "inject_channel_mask": args.inject_channel_mask,
             "mts_expected_latency": args.mts_expected_latency,
+            "mts_overflow_lookback": args.mts_overflow_lookback,
             "mts_bypass_lapse": args.mts_bypass_lapse,
             "mts_delay_ts_field": args.mts_delay_ts_field,
             "mts_drop_delay_error": args.mts_drop_delay_error,
@@ -1313,6 +1321,7 @@ def main() -> int:
     parser.add_argument("--inject-channel-mask", type=parse_u32, default=0xFFFFFFFF)
     parser.add_argument("--short-mode", action="store_true")
     parser.add_argument("--mts-expected-latency", type=parse_u32, default=None)
+    parser.add_argument("--mts-overflow-lookback", type=parse_u32, default=None)
     parser.add_argument("--mts-bypass-lapse", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--mts-delay-ts-field", choices=("keep", "t", "e"), default="keep")
     parser.add_argument("--mts-drop-delay-error", choices=("keep", "on", "off"), default="keep")

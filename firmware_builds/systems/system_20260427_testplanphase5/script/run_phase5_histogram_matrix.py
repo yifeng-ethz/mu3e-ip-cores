@@ -220,6 +220,8 @@ def make_case_args(
         inject_channel_mask=0xFFFFFFFF,
         short_mode=False,
         mts_expected_latency=args.mts_expected_latency,
+        mts_overflow_lookback=args.mts_overflow_lookback,
+        mts_bypass_lapse=args.mts_bypass_lapse,
         mts_delay_ts_field=args.mts_delay_ts_field,
         mts_drop_delay_error=args.mts_drop_delay_error,
         ring_filter_inerr=args.ring_filter_inerr,
@@ -288,6 +290,8 @@ def write_report(path: Path, timestamp: str, args: argparse.Namespace, records: 
         f"- Histogram bin dump: `{'yes' if args.dump_hist_bins else 'no'}`",
         f"- Real hits per lane for rate expectation: `{args.real_hits_per_lane}`",
         f"- MTS expected latency override: `{args.mts_expected_latency if args.mts_expected_latency is not None else 'keep'}`",
+        f"- MTS overflow lookback override: `{args.mts_overflow_lookback if args.mts_overflow_lookback is not None else 'keep'}`",
+        f"- MTS bypass-lapse override: `{args.mts_bypass_lapse}`",
         f"- MTS delay-ts field override: `{args.mts_delay_ts_field}`",
         f"- MTS drop-delay-error override: `{args.mts_drop_delay_error}`",
         f"- Ring filter-inerr override: `{args.ring_filter_inerr}`",
@@ -339,6 +343,8 @@ def write_json(path: Path, timestamp: str, args: argparse.Namespace, records: li
             "hist_bin_read_chunk_words": args.hist_bin_read_chunk_words,
             "hist_bin_read_delay_ms": args.hist_bin_read_delay_ms,
             "mts_expected_latency": args.mts_expected_latency,
+            "mts_overflow_lookback": args.mts_overflow_lookback,
+            "mts_bypass_lapse": args.mts_bypass_lapse,
             "mts_delay_ts_field": args.mts_delay_ts_field,
             "mts_drop_delay_error": args.mts_drop_delay_error,
             "ring_filter_inerr": args.ring_filter_inerr,
@@ -392,6 +398,8 @@ def main() -> int:
         help="Expected real MuTRiG TDC-test hits per enabled lane per injector pulse; use 32 for full-channel ASIC XML.",
     )
     parser.add_argument("--mts-expected-latency", type=lambda text: int(text, 0), default=None)
+    parser.add_argument("--mts-overflow-lookback", type=lambda text: int(text, 0), default=None)
+    parser.add_argument("--mts-bypass-lapse", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--mts-delay-ts-field", choices=("keep", "t", "e"), default="keep")
     parser.add_argument("--mts-drop-delay-error", choices=("keep", "on", "off"), default="keep")
     parser.add_argument("--ring-filter-inerr", choices=("keep", "on", "off"), default="keep")
