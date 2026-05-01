@@ -65,6 +65,30 @@ EVIDENCE = [
         "Delay-profile smoke exercises both upper and lower MTS debug sources; this is a wiring guard, not a real-MuTRiG PLL lock claim.",
     ),
     (
+        "ASIC5 head-sync default, lapse on",
+        "Header",
+        "phase6_headsync_lane5_default_jtag_nodisplay_20260501.json",
+        "JTAG 256-bin delay read shows a non-delta ASIC5 response under production MTS lapse: peak 44.914% with six nonzero bins.",
+    ),
+    (
+        "ASIC5 head-sync cnt52/vcd18, lapse on",
+        "Header",
+        "phase6_headsync_lane5_cnt52_vcd18_mtslat2000_jtag_nodisplay_20260501.json",
+        "ASIC5 physical tuning improves the shape but production MTS lapse still leaves a two-bin 79.171%/20.829% split.",
+    ),
+    (
+        "ASIC5 head-sync cnt52/vcd18, bypass lapse",
+        "Header diag",
+        "phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.json",
+        "Diagnostic-only bypass-lapse run collapses ASIC5 to one delay bin, separating the physical TDC/LVDS response from the MTS lapse transform.",
+    ),
+    (
+        "ASIC6 head-sync default, lapse on",
+        "Header",
+        "phase6_headsync_lane6_default_jtag_nodisplay_20260501.json",
+        "ASIC6 default production-lapse control is a single-bin delta at 904 cycles with zero LVDS error/DPA deltas.",
+    ),
+    (
         "Single-lane matrix",
         "Delay",
         "phase5_real_256ch_per_lane_best2_pulse4_delay_2000cyc_20260429.json",
@@ -359,10 +383,15 @@ TUNING_LEDGER = [
     (2, "SMB3", "45/35/20", "40/30/30", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
     (3, "SMB3", "41/10/20", "35/12/25", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
     (4, "SMB5", "43/15/20", "43/15/20", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
-    (5, "SMB5", "42/20/25", "42/20/25", "42/20/60 lane-only diagnostic", "phase5_real_lane5_full32_hl60_latency2000_pulse4_20260430.json"),
-    (6, "SMB5", "37/27/15", "37/27/15", "37/27/60 lane-only diagnostic", "phase5_real_lane6_full32_hl60_latency2000_pulse4_20260430.json"),
+    (5, "SMB5", "42/20/25", "52/18/25", "bypass-lapse delta; production-lapse sideband", "phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv"),
+    (6, "SMB5", "37/27/15", "37/27/15", "default production-lapse delta", "phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv"),
     (7, "SMB5", "40/20/25", "30/14/40", "-", "phase5_mutrig_restore_full32_tuned_baseline_20260430e.json"),
 ]
+
+HEADSYNC_NOTES = {
+    5: "comparison plot shows ASIC5 physical delta only when MTS lapse is bypassed; production lapse still splits 79/21",
+    6: "single-bin head-sync delay at 904 cycles with production lapse enabled",
+}
 
 
 def esc(value: Any) -> str:
@@ -660,6 +689,7 @@ def tuning_rows() -> str:
     for asic, smb, default, restore, diagnostic, evidence in TUNING_LEDGER:
         path = REPORT_DIR / evidence
         link = f'<a href="{esc(rel(path))}">{esc(evidence)}</a>' if path.exists() else esc(evidence)
+        headsync_note = HEADSYNC_NOTES.get(asic, "pending per-ASIC head-sync plot")
         rows.append(
             "<tr>"
             f"<td>{asic}</td>"
@@ -668,7 +698,7 @@ def tuning_rows() -> str:
             f"<td><code>{esc(restore)}</code></td>"
             f"<td>{esc(diagnostic)}</td>"
             f"<td>{link}</td>"
-            "<td>pending per-ASIC head-sync plot</td>"
+            f"<td>{esc(headsync_note)}</td>"
             "</tr>"
         )
     return "\n".join(rows)
@@ -684,6 +714,7 @@ def artifact_status_rows() -> str:
     required = [
         ("rate_per_channel", "1 s 256-bin rate histogram", "Precise per-channel/per-ASIC rate evidence from histogram bins."),
         ("header_delay", "Header-sync delay histogram", "Passing handle: one dominant delay bin, normally >=90% peak fraction."),
+        ("header_delay_comparison", "Header-sync delay A/B comparison", "Physical-response check across production-lapse, bypass-lapse, and lane controls."),
     ]
     rows = []
     for key, title, contract in required:
@@ -1036,6 +1067,20 @@ def write_html() -> None:
       locked to MuTRiG frame headers.
     </p>
     <p>
+      The 2026-05-01 head-sync histogram plots add a sharper physical split.
+      ASIC5 default production-lapse delay is not delta-like: <code>81759</code>
+      JTAG-bin hits occupy six bins with a <code>44.914%</code> peak. Tuning
+      ASIC5 to <code>cnt/vcodelay/hitlogic=52/18/25</code> improves it, but
+      production lapse still leaves two bins at <code>79.171%</code> and
+      <code>20.829%</code>. The same physical ASIC5 setting with
+      <code>--mts-bypass-lapse on</code> collapses to one bin
+      (<code>91574</code> hits, <code>100%</code> peak), while ASIC6 default
+      production-lapse also collapses to one bin at <code>904</code> cycles.
+      This is not a pure MuTRiG PLL unlock signature. It points at the MTS
+      lapse/overflow transform, or the compile-time lookback/padding threshold
+      feeding that transform, before blaming lane5 LVDS or TDC physics.
+    </p>
+    <p>
       The lane6/7 zero-point checks are invalidated as tuning evidence. A
       MuTRiG with <code>vnvcodelay=0</code> should produce no TDC-injection
       hits. The captures labeled <code>vncnt=0</code>,
@@ -1208,12 +1253,12 @@ def write_html() -> None:
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>
           <td>Starting from no-hit zero <code>vcodelay</code>, restore nonzero ASIC defaults, run <code>RUN_PREPARE</code>, and tune until the delay histogram moves from broad/flat toward one dominant bin.</td>
-          <td>Zero-vcodelay captures in this report are invalidated as tuning evidence. The next valid artifact must record cnt/vcodelay/hitlogic and the delay peak fraction.</td>
+          <td>ASIC5 now has a valid nonzero setting: <code>52/18/25</code>. Production lapse still splits 79/21, but bypass-lapse gives a one-bin delta. ASIC6 default gives a one-bin delta with production lapse enabled.</td>
         </tr>
         <tr>
           <td>Upper/lower delay input coverage</td>
           <td>Delay histograms must isolate both source 0 (upper MTS) and source 1 (lower MTS), with lower-side evidence covering ASICs 4..7.</td>
-          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>; the dual-MTS emulator smoke passes, while real lower-side plotted delay evidence is still required.</td>
+          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>; the dual-MTS emulator smoke passes, and lower-side real plotted evidence now covers lanes 5 and 6. ASICs 4 and 7 still need the same treatment.</td>
         </tr>
         <tr>
           <td>Histogram-bin capture method</td>
@@ -1223,7 +1268,7 @@ def write_html() -> None:
         <tr>
           <td>Anomaly loop</td>
           <td>Every reviewed plot must state one anomaly or null anomaly and the next hardware hypothesis it supports.</td>
-          <td>Current anomaly: real lanes 5 and 6 pass alone but fail together even when latency is opened, while the emulator pair passes. That challenges a pure throughput or single-lane-lock explanation.</td>
+          <td>Current anomaly: ASIC5 becomes a perfect delta only when MTS lapse is bypassed; runtime expected-latency sweeps do not move the 79/21 production-lapse split. That challenges the premise that more MuTRiG VCO sweeping is the next best lever.</td>
         </tr>
       </tbody>
     </table>

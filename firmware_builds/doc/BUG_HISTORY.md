@@ -19,6 +19,7 @@ Class legend:
 | [P6-BUG-005-R](#p6-bug-005-r-swb-host-dma-now-has-raw-musip-payload-but-not-decoded-feb-hit-frames) | R | open; raw DMA partial pass only | 2026-04-30 | Fixed4 SWB image writes raw 256-bit stream-datagen payload to host DMA, but time-datagen is still empty and no real FEB-link/legacy-frame disk artifact exists. |
 | [P6-BUG-006-H](#p6-bug-006-h-1-s-rate-plot-collapsed-to-bin-0-because-the-observation-path-was-wrong) | H | source patched; live rerun required | 2026-05-01 | The required 1 s rate plot was scientifically rendered but all 647,881 hits landed in bin 0; root cause is a wrong histogram observation contract, not a pass. |
 | [P6-BUG-007-R](#p6-bug-007-r-full-feb-generated-system-tied-the-lower-histogram-fill-input-off) | R | fixed for FEB emulator observability; real-source tuning resumes at P6-BUG-002 | 2026-05-01 | The nested lower-histogram source passed simulation, but the full FEB generated top still tied `histogram_statistics_0.fill_in_1` to zero, so live all-lane emulator rate was exactly upper-side only. |
+| [P6-BUG-008-R](#p6-bug-008-r-asic5-head-sync-delay-splits-only-when-mts-lapse-is-enabled) | R | open; points at MTS lapse/lookback tuning | 2026-05-01 | ASIC5 becomes a one-bin header-sync delta when MTS lapse is bypassed, but production lapse leaves a deterministic 79/21 two-bin split that runtime expected-latency writes do not move. |
 
 ## 2026-05-01
 
@@ -117,6 +118,40 @@ Class legend:
     at 100 kHz/lane produced `798728`, and the dual-MTS delay-profile smoke
     produced `409080` hits with zero drops.
 
+### P6-BUG-008-R: ASIC5 head-sync delay splits only when MTS lapse is enabled
+
+- First seen in:
+  2026-05-01 JTAG histogram dumps after the lower-histogram full-FEB rebuild.
+- Symptom:
+  - ASIC5/lane5 default XML settings (`cnt/vcodelay/hitlogic=42/20/25`) under
+    production MTS lapse produced `81759` JTAG delay-bin hits in six nonzero
+    bins. The peak bin at 872 cycles carried only `44.914%` of hits, with
+    large sidebands at 1736 and 1752 cycles.
+  - ASIC5 tuned to `52/18/25` improved but did not pass the production-lapse
+    delta criterion: `91574` hits split into two bins, `79.171%` at 8 cycles
+    and `20.829%` at 408 cycles.
+  - The same physical ASIC5 setting with `--mts-bypass-lapse on` collapsed to
+    one bin: `91574` hits, one nonzero bin, `100%` peak at 8 cycles.
+  - ASIC6/lane6 default XML settings with production lapse enabled also
+    collapsed to one bin: `137362` hits, `100%` peak at 904 cycles.
+  - LVDS error-counter and DPA-unlock deltas stayed zero in these controls.
+  - Runtime sweeps of `--mts-expected-latency` from `800` through `2000`
+    cycles did not move the ASIC5 `79/21` production-lapse split.
+- Root cause:
+  open. The physical ASIC5 TDC/LVDS path can produce a deterministic delta when
+  the MTS lapse/GTS transform is bypassed, so blind MuTRiG VCO sweeping is no
+  longer the best hypothesis. Source inspection shows the active
+  `mutrig_timestamp_processor/mts_processor.vhd` derives the overflow lookback
+  and padding threshold from the compile-time `MUTRIG_OVERFLOW_LOOKBACK_8N`
+  parameter, not from the runtime expected-latency CSR. That explains why the
+  runtime expected-latency sweep did not affect the split.
+- Fix status:
+  open. Next patch should either A/B compile a smaller
+  `MUTRIG_OVERFLOW_LOOKBACK_8N` value or expose the lapse lookback/padding
+  threshold through a documented CSR, then rerun standalone MTS TB/formal,
+  standalone synthesis, full FEB compile, and the ASIC5/ASIC6 head-sync
+  histogram comparison before claiming the lower real-source gate.
+
 ## 2026-04-30
 
 ### P6-BUG-001-R: SWB datagen words stayed idle before the MuSiP mux
@@ -186,6 +221,13 @@ Class legend:
   - ASIC6 `vnvcodelay` values `23,25,27,29,31` around the XML default did not
     find a clean P6B010 point. The low value `23` underfilled badly, so blind
     delay sweeps are not a valid tuning strategy.
+  - The 2026-05-01 head-sync JTAG histograms sharpen the diagnosis. ASIC5
+    default production-lapse delay is not delta-like, ASIC5 `52/18/25` still
+    splits `79/21` with lapse enabled, but ASIC5 `52/18/25` with
+    `--mts-bypass-lapse on` becomes a one-bin delta. ASIC6 default production
+    lapse is also a one-bin delta. This keeps P6-BUG-002 open but moves the
+    next lever from blind PLL tuning toward P6-BUG-008 MTS lapse/lookback
+    tuning.
   - The histogram-bin dumper returned zero nonzero bins in the live
     `latency65535_histbins` run despite live MTS/histogram counters. Treat that
     specific bin-read path as an unreliable observable until the readout is

@@ -81,13 +81,15 @@ The current Phase-6 restore-load tuning ledger is:
 | 2 | `45/35/20` | `40/30/30` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
 | 3 | `41/10/20` | `35/12/25` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
 | 4 | `43/15/20` | `43/15/20` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
-| 5 | `42/20/25` | `42/20/25` | `42/20/60` passes lane5 alone, fails with lane6 | `phase5_real_lane5_full32_hl60_latency2000_pulse4_20260430.json` |
-| 6 | `37/27/15` | `37/27/15` | `37/27/60` passes lane6 alone, fails with lane5 | `phase5_real_lane6_full32_hl60_latency2000_pulse4_20260430.json` |
+| 5 | `42/20/25` | `52/18/25` | production-lapse still splits; bypass-lapse gives a one-bin head-sync delta | `phase6_headsync_lane5_cnt52_vcd18_bypasslapse_jtag_nodisplay_20260501.csv` |
+| 6 | `37/27/15` | `37/27/15` | default production-lapse gives a one-bin head-sync delta | `phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv` |
 | 7 | `40/20/25` | `30/14/40` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
 
-No per-ASIC head-sync delay histogram PNG/SVG is closure-grade yet in this
-tree. The required artifacts for the next tuning pass are one plot per ASIC
-under `reports/screenshots/phase6_mutrig_headsync_YYYYMMDD/`, named
+Per-ASIC head-sync delay histogram artifacts are now tracked for ASIC5 and
+ASIC6 in `reports/assets/phase5_mutrig_tuning_20260430/`; ASICs 0..4 and 7
+still need the same plotted treatment before all-eight-ASIC tuning closure. The
+required artifacts for the remaining tuning pass are one plot per ASIC under
+`reports/screenshots/phase6_mutrig_headsync_YYYYMMDD/`, named
 `asicN_cntC_vcodelayV_hitlogicH.png`, plus the matching JSON/Markdown manifest.
 Do not replace these with the stale `vco000` captures; those are invalidated as
 PLL-lock evidence by the zero-vcodelay rule below.
@@ -419,6 +421,23 @@ Observed Phase-5 update on 2026-04-30:
   `hit_stack_subsystem_1.hit_type_1_error[0]` both rising in the exported
   window. That puts the failure at or before the lower MTS timestamp-delay
   decision; it is not just a ring-local reject.
+- The 2026-05-01 ASIC5 head-sync JTAG histograms separate physical TDC behavior
+  from the MTS lapse transform. With production lapse enabled, the XML default
+  `42/20/25` has six nonzero delay bins and only a `44.914%` peak. Tuning to
+  `52/18/25` improves the shape, but production lapse still splits into two
+  bins: `79.171%` at 8 cycles and `20.829%` at 408 cycles. The same
+  `52/18/25` ASIC5 setting with `--mts-bypass-lapse on` becomes a one-bin
+  delta at 8 cycles, while ASIC6 default production-lapse is already a one-bin
+  delta at 904 cycles. Therefore the next useful lever is MTS
+  lapse/overflow-lookback behavior, not more blind ASIC5 VCO sweeping.
+- Runtime `--mts-expected-latency` writes do not tune the active lapse
+  lookback. In the current `mutrig_timestamp_processor/mts_processor.vhd`,
+  `overflow_lookback_1n6` and `padding_upper` are derived from the compile-time
+  `MUTRIG_OVERFLOW_LOOKBACK_8N` parameter. A sweep from `800` to `2000` cycles
+  left the ASIC5 `52/18/25` production-lapse two-bin split unchanged. A real
+  fix requires either an A/B compile with a different lookback parameter or a
+  documented CSR-backed lookback/padding control with MTS TB/formal/synthesis
+  evidence before a Phase-6 claim.
 - A Phase-6 LVDS SVD probe on 2026-04-30 reproduced the lower full-channel
   blocker with `2052049` ring input errors while lanes 5 and 6 had zero LVDS
   error-counter delta and zero DPA-unlock delta. Do not treat the new LVDS
