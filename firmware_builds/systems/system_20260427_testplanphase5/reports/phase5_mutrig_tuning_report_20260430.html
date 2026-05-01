@@ -117,7 +117,7 @@
 <body>
   <header>
     <h1>Phase-5 MuTRiG Tuning Report</h1>
-    <div>Generated 2026-05-01T10:39:05 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
+    <div>Generated 2026-05-01T11:17:43 from JSON evidence under <code>/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_phase6_closure_20260430/firmware_builds/systems/system_20260427_testplanphase5/reports</code>.</div>
   </header>
   <main>
     <div class="callout">
@@ -477,6 +477,53 @@
       </tbody>
     </table>
 
+    <h2>Phase-6 Mask Response</h2>
+    <p>
+      These are the requested <code>pulse_high=5</code> physical-mask checks.
+      The ASIC set masks lanes in the LVDS controller and should remove whole
+      32-channel blocks. The channel set leaves all ASIC lanes enabled, reloads
+      every ASIC with the same random 32-bit TDC-test/channel mask, performs
+      the CML <code>0-8-0</code> flush, and should remove that repeated channel
+      pattern from each ASIC. The plots are DISLIN bar histograms from 1 s
+      System Console CSV captures.
+    </p>
+    <div class="plot-grid">
+<figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_contact_sheet.png" alt="ASIC LVDS mask response: whole 32-channel ASIC blocks vanish when the lane is masked."></a><figcaption>ASIC LVDS mask response: whole 32-channel ASIC blocks vanish when the lane is masked.</figcaption></figure>
+<figure><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png"><img src="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_contact_sheet.png" alt="Channel mask response: the same random 32-bit channel mask repeats across all eight ASICs."></a><figcaption>Channel mask response: the same random 32-bit channel mask repeats across all eight ASICs.</figcaption></figure>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Case</th>
+          <th>Total Mhit/s</th>
+          <th>Mean kHz/ch</th>
+          <th>Nonzero Channels</th>
+          <th>Max kHz/ch</th>
+          <th>CV</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+<tr><td>asic_lvds</td><td>01</td><td>6.390</td><td>24.960</td><td>64</td><td>99.841</td><td>1.7321</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case01_ph05_bar.png">phase6_mask_response_asic_lvds_case01_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>02</td><td>19.155</td><td>74.823</td><td>192</td><td>99.840</td><td>0.5775</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case02_ph05_bar.png">phase6_mask_response_asic_lvds_case02_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>03</td><td>6.390</td><td>24.960</td><td>64</td><td>99.839</td><td>1.7321</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case03_ph05_bar.png">phase6_mask_response_asic_lvds_case03_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>04</td><td>15.962</td><td>62.351</td><td>160</td><td>99.841</td><td>0.7747</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case04_ph05_bar.png">phase6_mask_response_asic_lvds_case04_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>05</td><td>3.195</td><td>12.480</td><td>32</td><td>99.839</td><td>2.6458</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case05_ph05_bar.png">phase6_mask_response_asic_lvds_case05_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>06</td><td>15.974</td><td>62.400</td><td>160</td><td>99.840</td><td>0.7746</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case06_ph05_bar.png">phase6_mask_response_asic_lvds_case06_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>07</td><td>25.531</td><td>99.729</td><td>256</td><td>99.841</td><td>0.0179</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case07_ph05_bar.png">phase6_mask_response_asic_lvds_case07_ph05_bar.png</a></td></tr>
+<tr><td>asic_lvds</td><td>08</td><td>3.195</td><td>12.480</td><td>32</td><td>99.840</td><td>2.6458</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_asic_lvds_case08_ph05_bar.png">phase6_mask_response_asic_lvds_case08_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>01</td><td>17.572</td><td>68.639</td><td>176</td><td>99.839</td><td>0.6742</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case01_ph05_bar.png">phase6_mask_response_channel_mask_case01_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>02</td><td>11.981</td><td>46.800</td><td>120</td><td>99.840</td><td>1.0646</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case02_ph05_bar.png">phase6_mask_response_channel_mask_case02_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>03</td><td>15.176</td><td>59.281</td><td>152</td><td>99.841</td><td>0.8272</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case03_ph05_bar.png">phase6_mask_response_channel_mask_case03_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>04</td><td>8.786</td><td>34.320</td><td>88</td><td>99.840</td><td>1.3817</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case04_ph05_bar.png">phase6_mask_response_channel_mask_case04_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>05</td><td>15.974</td><td>62.400</td><td>160</td><td>99.840</td><td>0.7746</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case05_ph05_bar.png">phase6_mask_response_channel_mask_case05_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>06</td><td>10.383</td><td>40.560</td><td>104</td><td>99.840</td><td>1.2089</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case06_ph05_bar.png">phase6_mask_response_channel_mask_case06_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>07</td><td>11.981</td><td>46.800</td><td>120</td><td>99.841</td><td>1.0646</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case07_ph05_bar.png">phase6_mask_response_channel_mask_case07_ph05_bar.png</a></td></tr>
+<tr><td>channel_mask</td><td>08</td><td>15.974</td><td>62.400</td><td>160</td><td>99.840</td><td>0.7746</td><td><a href="assets/phase6_mask_response_seed20260501/phase6_mask_response_channel_mask_case08_ph05_bar.png">phase6_mask_response_channel_mask_case08_ph05_bar.png</a></td></tr>
+      </tbody>
+    </table>
+
     <h2>Physical Debug Checklist</h2>
     <table>
       <thead>
@@ -490,7 +537,7 @@
         <tr>
           <td>Channel mask sanity</td>
           <td>Masked channels vanish from the 256-bin rate plot while unmasked channels keep their rate scale.</td>
-          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The post-26.1.8 real-MuTRiG high-cycle sweep now produces valid 256-bin plots; ph6/ph7 are the current rate-mode starting point, while ph8+ expose likely TDC-line ringing/double-edge sidebands.</td>
+          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The real-MuTRiG <code>pulse_high=5</code> mask-response sweep shows LVDS ASIC masks zero whole 32-channel blocks and random channel masks zero the repeated per-ASIC channel pattern, with enabled bins near 100 kHz/channel. ph6/ph7 remain the flattest full-rate starting point, while ph8+ expose likely TDC-line ringing/double-edge sidebands.</td>
         </tr>
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>

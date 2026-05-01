@@ -21,6 +21,8 @@ HIST_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase5_mutrig_tuning_20260430"
 HIST_ARTIFACT_MANIFEST = HIST_ARTIFACT_DIR / "phase5_histogram_artifacts_manifest.json"
 HIGHCYCLE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_highcycle_rate_sweep_20260501"
 HIGHCYCLE_STATS = HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_stats.tsv"
+MASK_RESPONSE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_mask_response_seed20260501"
+MASK_RESPONSE_STATS = MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_bar_stats.tsv"
 REQUIRED_MONITOR_MS = 1000
 
 
@@ -895,6 +897,67 @@ def highcycle_figures() -> str:
     return "\n".join(figures)
 
 
+def mask_response_stats() -> list[dict[str, str]]:
+    if not MASK_RESPONSE_STATS.exists():
+        return []
+    with MASK_RESPONSE_STATS.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle, delimiter="\t"))
+
+
+def mask_response_figures() -> str:
+    figures = []
+    for filename, caption in (
+        (
+            "phase6_mask_response_asic_lvds_contact_sheet.png",
+            "ASIC LVDS mask response: whole 32-channel ASIC blocks vanish when the lane is masked.",
+        ),
+        (
+            "phase6_mask_response_channel_mask_contact_sheet.png",
+            "Channel mask response: the same random 32-bit channel mask repeats across all eight ASICs.",
+        ),
+    ):
+        path = MASK_RESPONSE_ARTIFACT_DIR / filename
+        if path.exists():
+            figures.append(
+                "<figure>"
+                f"<a href=\"{esc(rel(path))}\"><img src=\"{esc(rel(path))}\" alt=\"{esc(caption)}\"></a>"
+                f"<figcaption>{esc(caption)}</figcaption>"
+                "</figure>"
+            )
+    if not figures:
+        return "<p class=\"missing-text\">No Phase-6 mask-response bar plots are present yet.</p>"
+    return "\n".join(figures)
+
+
+def mask_response_rows() -> str:
+    rows = []
+    for row in mask_response_stats():
+        try:
+            total_mhz = float(row.get("total_hz", "0")) / 1_000_000.0
+            mean_khz = float(row.get("mean_hz_per_channel", "0")) / 1000.0
+            max_khz = float(row.get("max_hz_per_channel", "0")) / 1000.0
+            cv = float(row.get("cv_all_channels", "0"))
+        except ValueError:
+            total_mhz = mean_khz = max_khz = cv = 0.0
+        plot = Path(row.get("plot", ""))
+        plot_link = f'<a href="{esc(rel(plot))}">{esc(plot.name)}</a>' if plot.exists() else esc(plot.name or "-")
+        rows.append(
+            "<tr>"
+            f"<td>{esc(row.get('kind', '-'))}</td>"
+            f"<td>{esc(row.get('case', '-'))}</td>"
+            f"<td>{total_mhz:.3f}</td>"
+            f"<td>{mean_khz:.3f}</td>"
+            f"<td>{fmt_int(row.get('nonzero_channels'))}</td>"
+            f"<td>{max_khz:.3f}</td>"
+            f"<td>{cv:.4f}</td>"
+            f"<td>{plot_link}</td>"
+            "</tr>"
+        )
+    if not rows:
+        return "<tr><td colspan=\"8\">Mask-response artifacts missing.</td></tr>"
+    return "\n".join(rows)
+
+
 def evidence_rows() -> str:
     rows = []
     for title, kind, filename, note in EVIDENCE:
@@ -1398,6 +1461,37 @@ def write_html() -> None:
       </tbody>
     </table>
 
+    <h2>Phase-6 Mask Response</h2>
+    <p>
+      These are the requested <code>pulse_high=5</code> physical-mask checks.
+      The ASIC set masks lanes in the LVDS controller and should remove whole
+      32-channel blocks. The channel set leaves all ASIC lanes enabled, reloads
+      every ASIC with the same random 32-bit TDC-test/channel mask, performs
+      the CML <code>0-8-0</code> flush, and should remove that repeated channel
+      pattern from each ASIC. The plots are DISLIN bar histograms from 1 s
+      System Console CSV captures.
+    </p>
+    <div class="plot-grid">
+{mask_response_figures()}
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Case</th>
+          <th>Total Mhit/s</th>
+          <th>Mean kHz/ch</th>
+          <th>Nonzero Channels</th>
+          <th>Max kHz/ch</th>
+          <th>CV</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+{mask_response_rows()}
+      </tbody>
+    </table>
+
     <h2>Physical Debug Checklist</h2>
     <table>
       <thead>
@@ -1411,7 +1505,7 @@ def write_html() -> None:
         <tr>
           <td>Channel mask sanity</td>
           <td>Masked channels vanish from the 256-bin rate plot while unmasked channels keep their rate scale.</td>
-          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The post-26.1.8 real-MuTRiG high-cycle sweep now produces valid 256-bin plots; ph6/ph7 are the current rate-mode starting point, while ph8+ expose likely TDC-line ringing/double-edge sidebands.</td>
+          <td>The emulator mask matrix now passes upper-only, lower-only, and all-lane rate expectations on the fresh SOF. The real-MuTRiG <code>pulse_high=5</code> mask-response sweep shows LVDS ASIC masks zero whole 32-channel blocks and random channel masks zero the repeated per-ASIC channel pattern, with enabled bins near 100 kHz/channel. ph6/ph7 remain the flattest full-rate starting point, while ph8+ expose likely TDC-line ringing/double-edge sidebands.</td>
         </tr>
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>
