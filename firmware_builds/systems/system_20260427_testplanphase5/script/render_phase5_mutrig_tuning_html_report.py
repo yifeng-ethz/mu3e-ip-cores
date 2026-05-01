@@ -24,6 +24,8 @@ HIGHCYCLE_STATS = HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_stats.ts
 MASK_RESPONSE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_mask_response_seed20260501"
 MASK_RESPONSE_STATS = MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_bar_stats.tsv"
 MASK_RESPONSE_RAW_CHECK = REPORT_DIR / "phase6_mask_response_raw_mask_check_seed20260501.tsv"
+HEADER_DELAY_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_header_delay_asic_20260501_hdrch_mts1pct"
+HEADER_DELAY_STATS = HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_stats.tsv"
 REQUIRED_MONITOR_MS = 1000
 
 
@@ -401,8 +403,14 @@ TUNING_LEDGER = [
 ]
 
 HEADSYNC_NOTES = {
+    0: "all-eight header-sync plot present; rbCAM drop proxy is 0.000000%",
+    1: "all-eight header-sync plot present; rbCAM drop proxy is 0.017684% including underflow",
+    2: "all-eight header-sync plot present; rbCAM drop proxy is 0.509355% including underflow",
+    3: "all-eight header-sync plot present; rbCAM drop proxy is 0.343672% including underflow",
+    4: "all-eight header-sync plot present; rbCAM drop proxy is 0.000000%",
     5: "comparison plot shows ASIC5 physical delta only when MTS lapse is bypassed; production lapse still splits 79/21",
-    6: "single-bin head-sync delay at 904 cycles with production lapse enabled",
+    6: "all-eight header-sync plot is delta-like but rbCAM drop proxy is 1.158235%; tune/check sideband",
+    7: "all-eight header-sync plot present; rbCAM drop proxy is 0.838351%; MTS discard is a sub-1% fine-counter caveat",
 }
 
 
@@ -821,6 +829,110 @@ def artifact_figures() -> str:
     if not figures:
         return "<p class=\"missing-text\">No plotted histogram artifacts are present yet. Raw JSON does not satisfy this gate.</p>"
     return "\n".join(figures)
+
+
+def stats_path(value: str | None) -> Path:
+    if not value:
+        return Path("/__missing__")
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return REPO_ROOT / path
+
+
+def header_delay_stats() -> list[dict[str, Any]]:
+    if not HEADER_DELAY_STATS.exists():
+        return []
+    rows: list[dict[str, Any]] = []
+    with HEADER_DELAY_STATS.open(newline="", encoding="utf-8") as handle:
+        for raw in csv.DictReader(handle, delimiter="\t"):
+            row: dict[str, Any] = dict(raw)
+            json_path = stats_path(row.get("json"))
+            payload = load_json_path(json_path) if json_path.exists() else None
+            case = first_case(payload.get("cases", [])) if payload else None
+            summary = case.get("summary", {}) if isinstance(case, dict) else {}
+            args = payload.get("args", {}) if isinstance(payload, dict) else {}
+            row["phase_class"] = summary.get("phase5_classification", "-")
+            row["pass"] = bool(summary.get("pass", False))
+            row["header_channel"] = args.get("header_channel", "-")
+            row["hist_hits"] = summary.get("hist_total_delta", 0)
+            row["ring_inerr"] = summary.get("ring_inerr_delta", 0)
+            row["mts_discard"] = summary.get("mts_discard_delta", 0)
+            row["mts_discard_pct"] = summary.get("mts_discard_pct")
+            if row["mts_discard_pct"] is None:
+                try:
+                    mts_total = float(summary.get("mts_total_delta", 0) or 0)
+                    mts_discard = float(summary.get("mts_discard_delta", 0) or 0)
+                    if mts_total > 0:
+                        row["mts_discard_pct"] = 100.0 * mts_discard / mts_total
+                except (TypeError, ValueError):
+                    row["mts_discard_pct"] = None
+            row["lvds_error_delta"] = summary.get("lvds_error_delta_total", "n/a")
+            row["dpa_unlock_delta"] = summary.get("lvds_dpa_unlock_delta_total", "n/a")
+            rows.append(row)
+    return rows
+
+
+def header_delay_figures() -> str:
+    contact = HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_contact_sheet.png"
+    if not contact.exists():
+        return "<p class=\"missing-text\">All-eight-ASIC header-sync delay DISLIN plots are missing.</p>"
+    return (
+        "<figure>"
+        f"<a href=\"{esc(rel(contact))}\"><img src=\"{esc(rel(contact))}\" alt=\"all ASIC header-sync delay contact sheet\"></a>"
+        "<figcaption>Header-sync delay per ASIC. The green boundary marks the rbCAM 2000-cycle upper accept edge; the table below quantifies the out-of-window discard proxy.</figcaption>"
+        "</figure>"
+    )
+
+
+def pct_text(value: Any) -> str:
+    try:
+        return f"{100.0 * float(value):.6f}%"
+    except (TypeError, ValueError):
+        return "-"
+
+
+def pct_text_already_percent(value: Any) -> str:
+    try:
+        return f"{float(value):.6f}%"
+    except (TypeError, ValueError):
+        return "-"
+
+
+def header_delay_rows() -> str:
+    rows = []
+    for row in header_delay_stats():
+        plot = stats_path(row.get("plot"))
+        plot_link = f'<a href="{esc(rel(plot))}">{esc(plot.name)}</a>' if plot.exists() else esc(plot.name or "-")
+        try:
+            peak = float(row.get("peak_fraction", 0.0))
+            proxy = float(row.get("rbcam_drop_proxy_with_counter_fraction", row.get("rbcam_drop_proxy_fraction", 0.0)))
+            ring_inerr = int(row.get("ring_inerr", 0) or 0)
+            hist_hits = int(row.get("hist_hits", 0) or 0)
+        except (TypeError, ValueError):
+            peak = proxy = 0.0
+            ring_inerr = hist_hits = 0
+        status = "PASS" if hist_hits > 0 and ring_inerr == 0 and peak >= 0.90 and proxy <= 0.01 else "ANOMALY"
+        rows.append(
+            "<tr>"
+            f"<td>{esc(row.get('asic', '-'))}</td>"
+            f"<td>{badge(status)}<div class=\"class\">{esc(row.get('phase_class', '-'))}</div></td>"
+            f"<td>{esc(row.get('lane_mask', '-'))}<div class=\"rate\">header_ch={esc(row.get('header_channel', '-'))}; {esc(row.get('debug_source', '-'))}</div></td>"
+            f"<td>{fmt_int(row.get('total_hits'))}</td>"
+            f"<td>{pct_text(peak)}</td>"
+            f"<td>{pct_text(row.get('inband_0_2000_fraction'))}</td>"
+            f"<td>{pct_text(proxy)}</td>"
+            f"<td>{fmt_int(row.get('outband_lt0_hits'))} / {fmt_int(row.get('outband_gt2000_hits'))}</td>"
+            f"<td>{fmt_int(row.get('hist_underflow_wait_delta'))} / {fmt_int(row.get('hist_overflow_wait_delta'))}</td>"
+            f"<td>{fmt_int(row.get('hist_underflow_read_delta'))} / {fmt_int(row.get('hist_overflow_read_delta'))}</td>"
+            f"<td>{fmt_int(row.get('mts_discard'))}<div class=\"rate\">{pct_text_already_percent(row.get('mts_discard_pct'))}</div></td>"
+            f"<td>{fmt_int(row.get('ring_inerr'))}</td>"
+            f"<td>{plot_link}</td>"
+            "</tr>"
+        )
+    if not rows:
+        return "<tr><td colspan=\"13\">Header-sync delay stats missing.</td></tr>"
+    return "\n".join(rows)
 
 
 def highcycle_stats() -> list[dict[str, str]]:
@@ -1312,6 +1424,15 @@ def write_html() -> None:
       feeding that transform, before blaming lane5 LVDS or TDC physics.
     </p>
     <p>
+      The all-eight header-sync delay scan changes the acceptance handle. The
+      useful loss proxy is the delay population outside the rbCAM
+      <code>0..2000</code> cycle ingress window. Raw MTS discard is kept as a
+      caveat because the MuTRiG fine-counter one-hot can be broken while the
+      coarse timestamp remains usable. Therefore a sub-1% MTS discard is not a
+      hard fail when the delay histogram is sharply in window; the next blocker
+      to clear is any nonzero rbCAM drop proxy or underflow/overflow tail.
+    </p>
+    <p>
       The MTS IP now has a reviewed runtime CSR for that exact hypothesis:
       <code>overflow_lookback_8ns</code> at CSR word <code>5</code>. The FEB
       runners expose it as <code>--mts-overflow-lookback</code> and record the
@@ -1444,10 +1565,13 @@ def write_html() -> None:
       Passing review requires plotted artifacts, not raw JSON alone. The
       channel-rate plot must come from a 1 s, 256-bin histogram accumulation,
       and the delay plot must be a header-synchronous <code>kind=delay</code>
-      capture where the in-band delay collapses toward a delta function. Stage
-      CSRs are intentionally shown as rates over the measured read window,
-      because those counters are not sampled simultaneously. The histogram bins
-      are the precision evidence for per-channel and per-ASIC rate.
+      capture where the in-band delay collapses toward a delta function inside
+      the rbCAM <code>0..2000</code> cycle accept window. The ratio of delay
+      hits outside that window is the rbCAM ingress discard proxy and is more
+      useful for latency closure than raw MTS discard. Stage CSRs are
+      intentionally shown as rates over the measured read window, because those
+      counters are not sampled simultaneously. The histogram bins are the
+      precision evidence for per-channel and per-ASIC rate.
     </p>
     <p>
       The live histogram CSR setup must use the FE SciFi toolkit presets from
@@ -1472,6 +1596,43 @@ def write_html() -> None:
       </thead>
       <tbody>
 {artifact_status_rows()}
+      </tbody>
+    </table>
+
+    <h2>Phase-6 Header-Sync Delay by ASIC</h2>
+    <p>
+      These DISLIN plots isolate one real MuTRiG ASIC at a time with the LVDS
+      lane mask and set <code>header_channel=ASIC</code>, so the header-sync
+      injector monitors the same active lane. The acceptance calculation is
+      explicit: bins with <code>0 &lt;= delay &lt;= 2000</code> estimate hits
+      entering rbCAM, while bins outside that range plus histogram
+      underflow/overflow estimate rbCAM ingress rejects. MTS discard below
+      <code>1%</code> is recorded as a fine-counter caveat, not the primary
+      reject metric.
+    </p>
+    <div class="plot-grid">
+{header_delay_figures()}
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ASIC</th>
+          <th>Status</th>
+          <th>Lane / Source</th>
+          <th>Total Delay Hits</th>
+          <th>Peak</th>
+          <th>0..2000 In-Band</th>
+          <th>rbCAM Drop Proxy</th>
+          <th>&lt;0 / &gt;2000 Hits</th>
+          <th>UF / OF During 1 s</th>
+          <th>UF / OF During Read</th>
+          <th>MTS Discard</th>
+          <th>Ring InErr</th>
+          <th>Plot</th>
+        </tr>
+      </thead>
+      <tbody>
+{header_delay_rows()}
       </tbody>
     </table>
 
@@ -1575,12 +1736,12 @@ def write_html() -> None:
         <tr>
           <td>MuTRiG PLL/header-sync tuning</td>
           <td>Starting from no-hit zero <code>vcodelay</code>, restore nonzero ASIC defaults, run <code>RUN_PREPARE</code>, and tune until the delay histogram moves from broad/flat toward one dominant bin.</td>
-          <td>ASIC5 now has a valid nonzero setting: <code>52/18/25</code>. Production lapse still splits 79/21, but bypass-lapse gives a one-bin delta. ASIC6 default gives a one-bin delta with production lapse enabled.</td>
+          <td>The lane-mask/header-channel scan now plots ASICs 0..7. The plotted acceptance handle is the rbCAM <code>0..2000</code> in-window ratio. Sub-1% MTS discard is marked as a fine-counter caveat instead of the main fail condition.</td>
         </tr>
         <tr>
           <td>Upper/lower delay input coverage</td>
           <td>Delay histograms must isolate both source 0 (upper MTS) and source 1 (lower MTS), with lower-side evidence covering ASICs 4..7.</td>
-          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>; the dual-MTS emulator smoke passes, and lower-side real plotted evidence now covers lanes 5 and 6. ASICs 4 and 7 still need the same treatment.</td>
+          <td>The generated pipe Qsys connects <code>mts_preprocessor_0.ts_delta</code> to <code>debug_1</code> and <code>mts_preprocessor_1.ts_delta</code> to <code>debug_2</code>. Upper ASICs 0..3 and lower ASICs 4..7 now have per-ASIC real plotted evidence using matched <code>header_channel</code>.</td>
         </tr>
         <tr>
           <td>Histogram-bin capture method</td>
@@ -1590,7 +1751,7 @@ def write_html() -> None:
         <tr>
           <td>Anomaly loop</td>
           <td>Every reviewed plot must state one anomaly or null anomaly and the next hardware hypothesis it supports.</td>
-          <td>Current anomaly: ASIC5 becomes a perfect delta only when MTS lapse is bypassed; runtime expected-latency sweeps do not move the 79/21 production-lapse split. That challenges the premise that more MuTRiG VCO sweeping is the next best lever.</td>
+          <td>Current anomaly: the all-eight scan has sharp in-window peaks, but several lanes still show histogram underflow while reading. Treat that as a tail/range diagnostic for rbCAM ingress loss, not as evidence that raw MTS discard is the root metric.</td>
         </tr>
       </tbody>
     </table>

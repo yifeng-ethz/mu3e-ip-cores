@@ -174,6 +174,27 @@ proc read_csr_word {svc csr_base word_index} {
     return [parse_i [lindex $values 0]]
 }
 
+proc read_histogram_stats {svc csr_base} {
+    set underflow [read_csr_word $svc $csr_base 8]
+    set overflow [read_csr_word $svc $csr_base 9]
+    set total [read_csr_word $svc $csr_base 13]
+    set dropped [read_csr_word $svc $csr_base 14]
+    set coal_status [read_csr_word $svc $csr_base 15]
+    set last_total [read_csr_word $svc $csr_base 17]
+    set last_dropped [read_csr_word $svc $csr_base 18]
+    return [list \
+        underflow_count [expr {$underflow & 0xffffffff}] \
+        overflow_count [expr {$overflow & 0xffffffff}] \
+        total_hits [expr {$total & 0xffffffff}] \
+        dropped_hits [expr {$dropped & 0xffffffff}] \
+        coal_status [hex32 $coal_status] \
+        coal_occupancy [expr {$coal_status & 0xff}] \
+        coal_occupancy_max [expr {($coal_status >> 8) & 0xff}] \
+        coal_queue_overflow_count [expr {($coal_status >> 16) & 0xffff}] \
+        last_interval_total_hits [expr {$last_total & 0xffffffff}] \
+        last_interval_dropped_hits [expr {$last_dropped & 0xffffffff}]]
+}
+
 proc wait_apply_clear {svc csr_base} {
     for {set idx 0} {$idx < 100} {incr idx} {
         set control [read_csr_word $svc $csr_base 2]
@@ -312,8 +333,15 @@ if {[catch {
         set wait_ms [expr {[dict get $config sample_interval_ms] + [dict get $config sample_guard_ms]}]
     }
     master_write_32 $svc $bin_base 0
+    set stats_before_wait [read_histogram_stats $svc $csr_base]
     after $wait_ms
+    set stats_after_wait [read_histogram_stats $svc $csr_base]
     set bins [master_read_32 $svc $bin_base 256]
+    set stats_after_read [read_histogram_stats $svc $csr_base]
+    array set st_wait $stats_after_wait
+    array set st_read $stats_after_read
+    set underflow_delta_read [expr {($st_read(underflow_count) - $st_wait(underflow_count)) & 0xffffffff}]
+    set overflow_delta_read [expr {($st_read(overflow_count) - $st_wait(overflow_count)) & 0xffffffff}]
 
     set fd [open $out_path w]
     puts $fd "bin_index,bin_center,count"
@@ -337,6 +365,11 @@ if {[catch {
         bin_base [hex32 $bin_base] \
         ingress_status "{$ingress_status}" \
         wait_ms $wait_ms \
+        stats_before_wait "{$stats_before_wait}" \
+        stats_after_wait "{$stats_after_wait}" \
+        stats_after_read "{$stats_after_read}" \
+        underflow_delta_read $underflow_delta_read \
+        overflow_delta_read $overflow_delta_read \
         config "{$config}"]
 } err]} {
     catch {::board_test::jtag::close_claim $svc}

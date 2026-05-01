@@ -22,6 +22,7 @@ Class legend:
 | [P6-BUG-008-R](#p6-bug-008-r-asic5-head-sync-delay-splits-only-when-mts-lapse-is-enabled) | R | open; points at MTS lapse/lookback tuning | 2026-05-01 | ASIC5 becomes a one-bin header-sync delta when MTS lapse is bypassed, but production lapse leaves a deterministic 79/21 two-bin split that runtime expected-latency writes do not move. |
 | [P6-BUG-009-H](#p6-bug-009-h-qsys-catalog-picked-stale-system-and-package-paths-during-mts-rebuild) | H | fixed; Qsys regeneration and FEB compile/program pass | 2026-05-01 | The MTS lookback rebuild was blocked by stale system `.qsys` catalog entries, a nested stale `mutrig_frame_deassembly` version pin, and a package rooted at `script/rtl`. |
 | [P6-BUG-010-R](#p6-bug-010-r-live-100-khz-rate-bin-dump-read-the-active-histogram-bank) | R | fixed; post-fix real sweep complete, downstream MTS still open | 2026-05-01 | Real-MuTRiG 100 kHz/channel sweeps reached the expected aggregate histogram rate, but per-channel bins alternated between frozen and partial-current intervals because deferred ping-pong reads selected the active bank. |
+| [P6-BUG-011-H](#p6-bug-011-h-header-sync-asic-scan-starved-the-injector-by-watching-a-masked-lane) | H | fixed; scan script sets matching header channel | 2026-05-01 | The first per-ASIC header-sync delay scan masked to ASIC1..7 while the injector still watched header channel 0, producing false zero-hit artifacts. |
 
 ## 2026-05-01
 
@@ -306,6 +307,39 @@ Class legend:
   same runs still report MTS-discard/RBCAM-stage failures. End-to-end FEB/SWB
   closure remains blocked by the timestamp path, not by this histogram readout
   bug.
+
+### P6-BUG-011-H: header-sync ASIC scan starved the injector by watching a masked lane
+
+- First seen in:
+  `phase6_header_delay_asic*_hsync_ph05_20260501.*`, the first all-eight
+  header-sync delay scan.
+- Symptom:
+  - ASIC0 produced a valid delay histogram, but ASIC1..7 produced zero
+    histogram and MTS activity.
+  - The runs used LVDS lane masking for isolation, but the injector
+    `header_channel` remained at `0`.
+- Root cause:
+  the header-sync injector needs to observe a live MuTRiG header before issuing
+  the injection pulse. When the scan masked all lanes except ASIC1..7 while
+  still watching lane 0, it starved the trigger condition. This was a harness
+  setup error, not ASIC silence.
+- Fix status:
+  fixed in `run_phase6_header_delay_asic_scan.sh`: each ASIC run sets both the
+  LVDS lane mask and `--header-channel ASIC`.
+- Evidence:
+  - The corrected `20260501_hdrch` scan produced nonzero delay CSVs for
+    ASICs 0..7 with the peak at 0 cycles in all plots.
+  - A later `20260501_hdrch_mts1pct_lowerfix` lower-only rerun proved the live
+    runner gate clean for ASIC4..7 after the byte/string timeout-path fix, but
+    the lower JTAG histogram subprocess still timed out at 90 s and produced no
+    CSVs. The final all-eight DISLIN artifact therefore merges the new
+    ASIC0..3 CSVs with the earlier valid ASIC4..7 `20260501_hdrch` CSVs.
+  - The report renderer now computes the rbCAM ingress discard proxy from the
+    signed delay histogram: delay bins outside `0..2000` cycles, plus
+    histogram underflow/overflow counters, estimate the fraction rbCAM rejects.
+  - MTS discard below `1%` is recorded as a MuTRiG fine-counter caveat. It is
+    not the primary latency-closure metric when the coarse delay stays inside
+    the rbCAM window.
 
 ## 2026-04-30
 

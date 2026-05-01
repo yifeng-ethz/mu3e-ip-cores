@@ -106,14 +106,20 @@ The current Phase-6 restore-load tuning ledger is:
 | 6 | `37/27/15` | `37/27/15` | default production-lapse gives a one-bin head-sync delta | `phase6_headsync_lane6_default_jtag_nodisplay_20260501.csv` |
 | 7 | `40/20/25` | `30/14/40` | none | `phase5_mutrig_restore_full32_tuned_baseline_20260430e.json` |
 
-Per-ASIC head-sync delay histogram artifacts are now tracked for ASIC5 and
-ASIC6 in `reports/assets/phase5_mutrig_tuning_20260430/`; ASICs 0..4 and 7
-still need the same plotted treatment before all-eight-ASIC tuning closure. The
-required artifacts for the remaining tuning pass are one plot per ASIC under
-`reports/screenshots/phase6_mutrig_headsync_YYYYMMDD/`, named
-`asicN_cntC_vcodelayV_hitlogicH.png`, plus the matching JSON/Markdown manifest.
-Do not replace these with the stale `vco000` captures; those are invalidated as
-PLL-lock evidence by the zero-vcodelay rule below.
+Per-ASIC head-sync delay histogram artifacts are now tracked for all eight
+ASICs under `reports/assets/phase6_header_delay_asic_YYYYMMDD_TAG/`, with one
+DISLIN plot per ASIC plus a TSV summary. The current accepted format includes
+the dominant delay peak and the rbCAM ingress accept-window ratio for
+`0..2000` cycles. Do not replace these with the stale `vco000` captures; those
+are invalidated as PLL-lock evidence by the zero-vcodelay rule below.
+
+The current plotted checkpoint is
+`reports/assets/phase6_header_delay_asic_20260501_hdrch_mts1pct/`. ASIC0 and
+ASIC4 are clean at the rbCAM window proxy, ASIC1/2/3/5/7 are below `1%`, and
+ASIC6 is the current delay-tail anomaly at about `1.158%` out of the rbCAM
+`0..2000` window after including histogram underflow. ASIC7's MTS discard is
+about `0.044%`; treat that as the fine-counter caveat described below, not as
+the primary rbCAM-loss metric.
 
 ### Active Phase-5 Injection Path
 
@@ -248,6 +254,34 @@ channels per ASIC. With the 125 MHz injector clock, 100 kHz is
 For the accepted latency gate, pass `--mts-expected-latency 2000
 --mts-delay-ts-field t`. A measurement with ring-buffer CAM input latency
 outside `0..2000` cycles is rejected even if the hit counters advance.
+
+For header-sync delay tuning, the primary reject metric is the delay histogram
+population outside the rbCAM ingress window, not the raw MTS discard counter.
+Capture the signed delay histogram over at least `[-1000, 3096]` cycles, then
+compute:
+
+```text
+rbCAM accepted fraction = hits with 0 <= delay <= 2000 / total delay-bin hits
+rbCAM discard proxy     = hits with delay < 0 or delay > 2000 / total delay-bin hits
+```
+
+The out-of-window ratio estimates the hit fraction rbCAM will drop at ingress.
+This is the useful tuning handle for Phase-6 latency closure because it is
+directly tied to the `0..2000` cycle acceptance rule. By contrast, a low MTS
+discard rate below about `1%` is usually a MuTRiG fine-counter caveat: the
+one-hot fine counter can be broken while the coarse timestamp still lands in
+the correct rbCAM window. Record that caveat, but do not let it replace the
+rbCAM in-window/out-of-window delay ratio.
+
+When isolating one ASIC in header-sync mode with the LVDS controller lane mask,
+also set the injector `--header-channel` to the active ASIC/lane. If the
+injector still monitors lane 0 while another lane is the only unmasked input,
+the injector never sees the required MuTRiG header and the run becomes a false
+zero-hit test. Prefer LVDS lane masking as the primary isolation method because
+it does not depend on MuTRiG channel-mask behavior. Keep MuTRiG channel masking
+as the A/B sanity check: the same delay sideband should vanish when the
+responsible channel is masked in the ASIC config and the full run sequence is
+restarted.
 
 For images using `mts_preprocessor` version `26.0.9.501` or newer, MTS CSR word
 5 exposes `overflow_lookback_8ns`. This is not the accepted-latency gate.
@@ -429,9 +463,9 @@ Histogram interpretation:
   hits. A workable but not final point can have about 90% in the delta and a
   flat out-of-band sideband.
 - Tuned: target a stable delta with only small accounted loss. About
-  1000 ppm out-of-band/lost hits is acceptable for a good ASIC; a bad ASIC may
-  need an explicit waiver up to about 1% if the loss is stable, documented, and
-  not caused by the FEB/SWB datapath.
+  1000 ppm outside the rbCAM `0..2000` ingress window is acceptable for a good
+  ASIC; a bad ASIC may need an explicit waiver up to about 1% if the loss is
+  stable, documented, and not caused by the FEB/SWB datapath.
 - Over-tuned or lost lock: if a small `vnvcodelay`/`vncnt` increase turns the
   distribution back into the roughly 50/50 alias pattern, the PLL was lost.
   Return to the last safer `vnvcodelay`.
@@ -562,6 +596,11 @@ For a good TDC-injection lock case:
   coalescing queue overflow zero.
 - Deterministic injection produces a narrow delay feature rather than a broad
   random distribution.
+- The signed delay histogram has a small, accounted rbCAM discard proxy:
+  `delay < 0` plus `delay > 2000` divided by total delay-bin hits. Treat this
+  ratio as the rbCAM ingress-loss estimate.
+- MTS discard below `1%` is a warning about MuTRiG fine-counter trustworthiness,
+  not a hard rejection, when the rbCAM delay window ratio is clean.
 
 For rate-only acceptance:
 

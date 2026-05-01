@@ -63,7 +63,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         "csr.mode" "0x9" \
                         "csr.representation" "0x0" \
                         "csr.filter" "0x0" \
-                        "left_bound.left_bound" "0x0" \
+                        "left_bound.left_bound" "-1000" \
                         "bin_width.bin_width" "0x10" \
                         "keys_location.update_key_low" "0x11" \
                         "keys_location.update_key_high" "0x15" \
@@ -83,7 +83,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         "csr.mode" "0x9" \
                         "csr.representation" "0x0" \
                         "csr.filter" "0x1" \
-                        "left_bound.left_bound" "0x0" \
+                        "left_bound.left_bound" "-1000" \
                         "bin_width.bin_width" "0x10" \
                         "keys_location.update_key_low" "0x11" \
                         "keys_location.update_key_high" "0x15" \
@@ -103,7 +103,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         "csr.mode" "0x9" \
                         "csr.representation" "0x0" \
                         "csr.filter" "0x1" \
-                        "left_bound.left_bound" "0x0" \
+                        "left_bound.left_bound" "-1000" \
                         "bin_width.bin_width" "0x10" \
                         "keys_location.update_key_low" "0x11" \
                         "keys_location.update_key_high" "0x15" \
