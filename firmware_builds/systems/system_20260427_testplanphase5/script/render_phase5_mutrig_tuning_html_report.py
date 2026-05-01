@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Render the live Phase-5 MuTRiG tuning evidence into one HTML page."""
+"""Render the live Phase-6 MuTRiG/FEB closure evidence into one HTML page."""
 
 from __future__ import annotations
 
 import datetime as dt
 import csv
+import hashlib
 import html
 import json
 import os
@@ -16,7 +17,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SYSTEM_DIR = SCRIPT_DIR.parent
 REPO_ROOT = SYSTEM_DIR.parent.parent.parent
 REPORT_DIR = SYSTEM_DIR / "reports"
-OUT_HTML = REPORT_DIR / "phase5_mutrig_tuning_report_20260430.html"
+OUT_HTML = REPORT_DIR / "phase6_mutrig_tuning_report_20260501.html"
 HIST_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase5_mutrig_tuning_20260430"
 HIST_ARTIFACT_MANIFEST = HIST_ARTIFACT_DIR / "phase5_histogram_artifacts_manifest.json"
 HIGHCYCLE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_highcycle_rate_sweep_20260501"
@@ -24,9 +25,94 @@ HIGHCYCLE_STATS = HIGHCYCLE_ARTIFACT_DIR / "phase6_highcycle_rate_sweep_stats.ts
 MASK_RESPONSE_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_mask_response_seed20260501"
 MASK_RESPONSE_STATS = MASK_RESPONSE_ARTIFACT_DIR / "phase6_mask_response_bar_stats.tsv"
 MASK_RESPONSE_RAW_CHECK = REPORT_DIR / "phase6_mask_response_raw_mask_check_seed20260501.tsv"
-HEADER_DELAY_ARTIFACT_DIR = REPORT_DIR / "assets" / "phase6_header_delay_asic_20260501_hdrch_mts1pct"
+HEADER_DELAY_ARTIFACT_DIR = (
+    REPORT_DIR
+    / "assets"
+    / "legacy"
+    / "invalid_ts_delta_delay_20260501"
+    / "phase6_header_delay_asic_20260501_hdrch_mts1pct"
+)
 HEADER_DELAY_STATS = HEADER_DELAY_ARTIFACT_DIR / "phase6_header_delay_asic_stats.tsv"
 REQUIRED_MONITOR_MS = 1000
+
+SYN_DIR = SYSTEM_DIR / "syn"
+FEB_PROJECT_DIR = SYN_DIR / "board_projects" / "fe_scifi_feb_v3"
+FEB_OUTPUT_DIR = FEB_PROJECT_DIR / "output_files_pipe"
+COMPILE_EVIDENCE = [
+    {
+        "name": "histogram_statistics_v2 B12 normal-hit delay TB",
+        "kind": "RTL sim",
+        "path": REPO_ROOT / "histogram_statistics" / "tb" / "transcript",
+        "pass_text": "ALL TESTS PASSED",
+        "note": "Standalone Questa regression includes B12 mode=+1 delay-T coverage.",
+    },
+    {
+        "name": "histogram_statistics_v2 qverify static screen",
+        "kind": "Static",
+        "path": Path(
+            "/data3/yifeng/mu3e_ip_dev/qverify/"
+            "histogram_statistics_20260501/"
+            "histogram_v2_static_release_26_1_9_delay_t_clean/"
+            "questa_static_screen.log"
+        ),
+        "pass_text": "End of log",
+        "note": "Lint/CDC/RDC screen used the maintained v2 filelist and Intel altera_mf pre-do.",
+    },
+    {
+        "name": "histogram_statistics_v2 standalone Quartus",
+        "kind": "IP syn",
+        "path": REPO_ROOT
+        / "histogram_statistics"
+        / "syn"
+        / "quartus"
+        / "histogram_statistics_v2_standalone_compile_26_1_9_delay_t_20260501.log",
+        "pass_text": "Quartus Prime Full Compilation was successful",
+        "sta": REPO_ROOT
+        / "histogram_statistics"
+        / "syn"
+        / "quartus"
+        / "output_files"
+        / "histogram_statistics_v2_standalone.sta.summary",
+        "fit": REPO_ROOT
+        / "histogram_statistics"
+        / "syn"
+        / "quartus"
+        / "output_files"
+        / "histogram_statistics_v2_standalone.fit.summary",
+        "note": "Standalone Arria V wrapper at 7.273 ns; current worst setup is reported explicitly.",
+    },
+    {
+        "name": "scifi_datapath_system_v3_pipe Qsys script",
+        "kind": "Qsys",
+        "path": SYN_DIR / "logs" / "qsys_script_scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.log",
+        "pass_text": "save_system",
+        "note": "Source script restamped histogram_statistics_0 to 26.1.9 and preserved debug_ts wiring.",
+    },
+    {
+        "name": "scifi_datapath_system_v3_pipe Qsys generate",
+        "kind": "Qsys",
+        "path": SYN_DIR / "logs" / "scifi_datapath_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log",
+        "pass_text": "qsys-generate succeeded",
+        "note": "Pipe synthesis output resolves histogram_statistics_v2 26.1.9.501.",
+    },
+    {
+        "name": "feb_system_v3_pipe Qsys generate",
+        "kind": "Qsys",
+        "path": SYN_DIR / "logs" / "feb_system_v3_pipe_hist26_1_9_delay_t_20260501.qsys_generate.log",
+        "pass_text": "qsys-generate succeeded",
+        "note": "Parent FEB generated HDL was refreshed after the pipe child system.",
+    },
+    {
+        "name": "FEB top_nostp_pipe Quartus compile",
+        "kind": "FEB compile",
+        "path": SYN_DIR / "logs" / "quartus_compile_top_nostp_pipe_hist26_1_9_delay_t_20260501.console.log",
+        "pass_text": "Quartus Prime Full Compilation was successful",
+        "sta": FEB_OUTPUT_DIR / "top_nostp_pipe.sta.summary",
+        "fit": FEB_OUTPUT_DIR / "top_nostp_pipe.fit.summary",
+        "sof": FEB_OUTPUT_DIR / "top_nostp_pipe.sof",
+        "note": "Full FEB build consuming histogram_statistics_v2 26.1.9.501.",
+    },
+]
 
 
 EVIDENCE = [
@@ -420,6 +506,94 @@ def esc(value: Any) -> str:
 
 def rel(path: Path) -> str:
     return Path(os.path.relpath(path, REPORT_DIR)).as_posix()
+
+
+def file_link(path: Path) -> str:
+    return f'<a href="{esc(rel(path))}">{esc(path.name)}</a>' if path.exists() else esc(path.name)
+
+
+def read_text_if_exists(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
+def log_status(path: Path, pass_text: str) -> tuple[str, str]:
+    if not path.exists():
+        return "PENDING", "missing"
+    text = read_text_if_exists(path)
+    if pass_text and pass_text in text:
+        return "PASS", "pass"
+    if "Error:" in text or "failed" in text.lower() or "WATCH_QUARTUS_DONE         : rc=" in text:
+        return "FAIL", "fail"
+    return "RUNNING", "warn"
+
+
+def sta_min_slack(path: Path, timing_kind: str) -> float | None:
+    if not path.exists():
+        return None
+    best: float | None = None
+    active = False
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Type"):
+            active = timing_kind in stripped
+        elif active and stripped.startswith("Slack"):
+            try:
+                value = float(stripped.split(":", 1)[1].strip())
+            except (IndexError, ValueError):
+                value = None
+            if value is not None and (best is None or value < best):
+                best = value
+            active = False
+    return best
+
+
+def format_slack(value: float | None) -> str:
+    if value is None:
+        return "-"
+    klass = "fail" if value < 0.0 else "pass"
+    return f'<span class="mini-badge {klass}">{value:+.3f} ns</span>'
+
+
+def sha256_short(path: Path) -> str:
+    if not path.exists():
+        return "-"
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    return f"{digest[:16]}..."
+
+
+def compile_evidence_rows() -> str:
+    rows = []
+    for item in COMPILE_EVIDENCE:
+        path = Path(item["path"])
+        result, klass = log_status(path, str(item.get("pass_text", "")))
+        use_outputs = result == "PASS"
+        sta_path = Path(item["sta"]) if use_outputs and item.get("sta") else None
+        fit_path = Path(item["fit"]) if use_outputs and item.get("fit") else None
+        sof_path = Path(item["sof"]) if use_outputs and item.get("sof") else None
+        setup_value = sta_min_slack(sta_path, "Setup") if sta_path else None
+        hold_value = sta_min_slack(sta_path, "Hold") if sta_path else None
+        if result == "PASS" and setup_value is not None and setup_value < 0.0:
+            result = "WARN"
+            klass = "warn"
+        setup = format_slack(setup_value) if sta_path else "-"
+        hold = format_slack(hold_value) if sta_path else "-"
+        fit = file_link(fit_path) if fit_path else "-"
+        sof = f"{file_link(sof_path)}<div class=\"rate\">sha256 {esc(sha256_short(sof_path))}</div>" if sof_path else "-"
+        rows.append(
+            "<tr>"
+            f"<td>{esc(item['kind'])}</td>"
+            f"<td>{esc(item['name'])}<div class=\"note\">{esc(item.get('note', ''))}</div></td>"
+            f"<td><span class=\"badge {klass}\">{esc(result)}</span></td>"
+            f"<td>{setup}</td>"
+            f"<td>{hold}</td>"
+            f"<td>{file_link(path)}</td>"
+            f"<td>{fit}</td>"
+            f"<td>{sof}</td>"
+            "</tr>"
+        )
+    return "\n".join(rows)
 
 
 def fmt_int(value: Any) -> str:
@@ -886,7 +1060,7 @@ def header_delay_figures() -> str:
     return (
         "<figure>"
         f"<a href=\"{esc(rel(contact))}\"><img src=\"{esc(rel(contact))}\" alt=\"all ASIC header-sync delay contact sheet\"></a>"
-        "<figcaption>Invalidated header-sync ts_delta diagnostic per ASIC. The green boundary was drawn for the rbCAM latency window, but this artifact used inter-hit timestamp delta, not MTS debug_ts latency.</figcaption>"
+        "<figcaption>Legacy invalidated header-sync ts_delta contact sheet per ASIC. The green boundary was drawn for the rbCAM latency window, but this artifact used inter-hit timestamp delta, not MTS debug_ts latency. It is kept only as a visual baseline for the rerun.</figcaption>"
         "</figure>"
     )
 
@@ -1178,7 +1352,7 @@ def write_html() -> None:
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Phase-5 MuTRiG Tuning Report</title>
+  <title>Phase-6 MuTRiG/FEB Closure Report</title>
   <style>
     body {{
       margin: 0;
@@ -1292,7 +1466,7 @@ def write_html() -> None:
 </head>
 <body>
   <header>
-    <h1>Phase-5 MuTRiG Tuning Report</h1>
+    <h1>Phase-6 MuTRiG/FEB Closure Report</h1>
     <div>Generated {esc(now)} from JSON evidence under <code>{esc(REPORT_DIR)}</code>.</div>
   </header>
   <main>
@@ -1310,6 +1484,34 @@ def write_html() -> None:
       timing-clean programming and host-visible SC replies, so SWB SC return is
       no longer the first blocker.
     </div>
+
+    <h2>Current Compile Checkpoint</h2>
+    <p>
+      This report is the clean 2026-05-01 checkpoint for the
+      <code>histogram_statistics_v2 26.1.9</code> delay-observability update.
+      The new positive histogram mode <code>mode=+1</code> keeps the normal
+      hit_type1 path and ASIC/channel filter while plotting
+      <code>local_run_counter[12:0] - data[29:17]</code>. The old negative
+      debug modes <code>-1</code> and <code>-2</code> remain as comparison
+      sources for upper/lower MTS <code>debug_ts</code>.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Kind</th>
+          <th>Gate</th>
+          <th>Status</th>
+          <th>Setup WNS</th>
+          <th>Hold WNS</th>
+          <th>Log</th>
+          <th>Fit Summary</th>
+          <th>SOF</th>
+        </tr>
+      </thead>
+      <tbody>
+{compile_evidence_rows()}
+      </tbody>
+    </table>
 
     <h2>Current Read</h2>
     <p>
@@ -1587,7 +1789,10 @@ def write_html() -> None:
       and <code>debug_2</code> must be lower MTS <code>debug_ts</code>.
       <code>ts_delta</code> is an inter-hit timestamp-delta diagnostic and is
       rejected as rbCAM-latency evidence because it can make a false
-      zero-centered peak.
+      zero-centered peak. The new <code>delay_hit_t</code> toolkit preset
+      uses the positive <code>mode=+1</code> path, so delay can be plotted
+      from normal hit_type1 traffic with native ASIC/channel filtering and
+      eight ASIC inputs instead of one debug source at a time.
     </p>
     <div class="plot-grid">
 {artifact_figures()}
@@ -1608,14 +1813,17 @@ def write_html() -> None:
 
     <h2>Phase-6 Header-Sync Delay by ASIC</h2>
     <p>
-      The existing all-ASIC DISLIN plots are invalidated as rbCAM latency
-      evidence. They isolated one real MuTRiG ASIC at a time correctly, but the
-      histogram debug inputs were wired to MTS <code>ts_delta</code>, which is
-      the signed delta between adjacent hit timestamps. A physical hit cannot
-      have zero construction latency into rbCAM; the valid plot must use MTS
-      <code>debug_ts = counter_gts_8n - selected_timestamp</code> and should
-      show a narrow peak with finite offset, normally with about 100..500
-      cycles of width inside the <code>0..2000</code> accept window.
+      The existing all-ASIC DISLIN plots have been moved under
+      <code>reports/assets/legacy/invalid_ts_delta_delay_20260501</code> and
+      are invalidated as rbCAM latency evidence. They isolated one real MuTRiG
+      ASIC at a time correctly, but the histogram debug inputs were wired to
+      MTS <code>ts_delta</code>, which is the signed delta between adjacent
+      hit timestamps. A physical hit cannot have zero construction latency
+      into rbCAM; the valid plot must use MTS
+      <code>debug_ts = counter_gts_8n - selected_timestamp</code> or the new
+      normal-hit <code>delay_hit_t</code> mode and should show a narrow peak
+      with finite offset, normally with about 100..500 cycles of width inside
+      the <code>0..2000</code> accept window.
     </p>
     <div class="plot-grid">
 {header_delay_figures()}
@@ -1748,7 +1956,7 @@ def write_html() -> None:
         <tr>
           <td>Upper/lower delay input coverage</td>
           <td>Delay histograms must isolate both source 0 (upper MTS) and source 1 (lower MTS), with lower-side evidence covering ASICs 4..7.</td>
-          <td>The source Qsys patch now connects <code>mts_preprocessor_0.debug_ts</code> to <code>debug_1</code> and <code>mts_preprocessor_1.debug_ts</code> to <code>debug_2</code>. The current all-ASIC plots remain invalid until a fresh firmware image is compiled and the real-MuTRiG scan is rerun.</td>
+          <td>The source Qsys patch connects <code>mts_preprocessor_0.debug_ts</code> to <code>debug_1</code> and <code>mts_preprocessor_1.debug_ts</code> to <code>debug_2</code>. Histogram 26.1.9 also adds <code>mode=+1</code> normal-hit delay for eight-ASIC filtered scans. The legacy all-ASIC plots remain invalid until the newly compiled image is programmed and the real-MuTRiG scan is rerun.</td>
         </tr>
         <tr>
           <td>Histogram-bin capture method</td>

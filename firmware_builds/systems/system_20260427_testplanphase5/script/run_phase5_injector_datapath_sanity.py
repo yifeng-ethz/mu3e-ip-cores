@@ -157,6 +157,15 @@ HIST_PROFILE = {
         "control": 0x00000091,
         "key_loc": HIST_KEY_LOC_CHANNEL_POST,
     },
+    "delay-hit-t": {
+        "description": "normal hit_type1 T-delay histogram with native ASIC/channel filtering",
+        "toolkit_preset_id": "delay_hit_t",
+        "left_bound": -1000,
+        "right_bound": 3096,
+        "bin_width": 16,
+        "control": 0x00000011,
+        "key_loc": HIST_KEY_LOC_GLOBAL_CHANNEL_POST,
+    },
 }
 
 
@@ -566,6 +575,9 @@ def configure_histogram_for_args(args: argparse.Namespace) -> dict[str, Any]:
     `delay-mts-both` selects mode -7 in the 26.1.4 histogram image, sampling
     debug_1 and debug_2 together so upper and lower MTS preprocessors share one
     delay PDF.
+    `delay-hit-t` selects mode +1 in the 26.1.9 histogram image, deriving the
+    delay key from the normal hit_type1 T timestamp while keeping the normal
+    ASIC/channel filter fields.
     """
     profile = HIST_PROFILE[args.hist_profile]
     filter_enable = bool(getattr(args, "hist_filter_enable", False))

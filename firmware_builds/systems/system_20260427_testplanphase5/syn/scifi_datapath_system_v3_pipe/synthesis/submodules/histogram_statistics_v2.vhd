@@ -42,6 +42,12 @@
 --		Change: Register the selected debug-source sample before ingress
 --		        filtering so static debug-source selection is not in the
 --		        same-cycle write-request path.
+-- Revision: 1.12
+--		Date: May 1, 2026
+--		Change: Add positive mode +1 for normal hit_type1 T-timestamp
+--		        delay histograms. The normal filter path remains active,
+--		        while the update key is derived per hit from the local
+--		        run-synchronous counter minus data[29:17].
 -- Revision: 1.3
 --		Date: Apr 25, 2026
 --		Change: Parameterize the ingress FIFO depth for bursty post-stack
@@ -114,7 +120,7 @@ entity histogram_statistics_v2 is
         N_DEBUG_INTERFACE        : natural := 6;
         VERSION_MAJOR            : natural := 26;
         VERSION_MINOR            : natural := 1;
-        VERSION_PATCH            : natural := 7;
+        VERSION_PATCH            : natural := 9;
         BUILD                    : natural := 501;
         IP_UID                   : natural := 1212765012;  -- ASCII "HIST" = 0x48495354
         VERSION_DATE             : natural := 20260501;
@@ -239,6 +245,12 @@ architecture rtl of histogram_statistics_v2 is
     constant KICK_WIDTH_CONST       : natural := 8;
     constant COUNT_WIDTH_CONST      : natural := MAX_COUNT_BITS;
     constant PORT_WIDTH_CONST       : natural := clog2(MAX_PORTS_CONST);
+    constant MODE_NORMAL_DELAY_T_CONST : integer := 1;
+    constant CTRL_SYNC_CONST        : std_logic_vector(8 downto 0) := "000000100";
+    constant HIT_TYPE1_TCC8N_HI_CONST : natural := 29;
+    constant HIT_TYPE1_TCC8N_LO_CONST : natural := 17;
+    constant HIT_TYPE1_TCC8N_WIDTH_CONST : natural :=
+        HIT_TYPE1_TCC8N_HI_CONST - HIT_TYPE1_TCC8N_LO_CONST + 1;
 
     subtype tick_t      is signed(SAR_TICK_WIDTH - 1 downto 0);
     subtype tick_slv_t  is std_logic_vector(SAR_TICK_WIDTH - 1 downto 0);
@@ -373,6 +385,8 @@ architecture rtl of histogram_statistics_v2 is
     signal cfg_debug_source        : unsigned(2 downto 0) := (others => '0');
     signal cfg_debug_mode_abs      : unsigned(7 downto 0) := (others => '0');
     signal cfg_debug_active_port   : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal cfg_normal_delay_t      : std_logic := '0';
+    signal delay_counter_8n        : unsigned(HIT_TYPE1_TCC8N_WIDTH_CONST - 1 downto 0) := (others => '0');
     signal debug_single_valid_d1   : std_logic := '0';
     signal debug_single_data_d1    : std_logic_vector(15 downto 0) := (others => '0');
     signal debug_single_source_d1  : unsigned(7 downto 0) := (others => '0');
@@ -490,6 +504,27 @@ architecture rtl of histogram_statistics_v2 is
         return result_v;
     end function build_debug_filter_word;
 
+    function build_normal_delay_t_key(
+        data_word  : std_logic_vector;
+        counter_8n : unsigned
+    ) return std_logic_vector is
+        variable hit_ts_v    : unsigned(HIT_TYPE1_TCC8N_WIDTH_CONST - 1 downto 0) := (others => '0');
+        variable delta_mod_v : unsigned(HIT_TYPE1_TCC8N_WIDTH_CONST - 1 downto 0);
+        variable result_v    : signed(SAR_TICK_WIDTH - 1 downto 0);
+        variable src_idx_v   : natural;
+    begin
+        for idx_v in hit_ts_v'range loop
+            src_idx_v := HIT_TYPE1_TCC8N_LO_CONST + idx_v;
+            if src_idx_v <= data_word'high then
+                hit_ts_v(idx_v) := data_word(src_idx_v);
+            end if;
+        end loop;
+
+        delta_mod_v := counter_8n - hit_ts_v;
+        result_v    := resize(signed(delta_mod_v), result_v'length);
+        return std_logic_vector(result_v);
+    end function build_normal_delay_t_key;
+
     function clip_status_byte_f(
         value_in : unsigned
     ) return status_byte_t is
@@ -552,6 +587,20 @@ begin
     aso_hist_fill_out_channel       <= asi_hist_fill_in_channel when SNOOP_EN else (others => '0');
 
     asi_ctrl_ready <= '1';
+
+    delay_counter_reg : process (i_clk)
+    begin
+        if rising_edge(i_clk) then
+            if i_rst = '1' then
+                delay_counter_8n <= (others => '0');
+            elsif (asi_ctrl_valid = '1') and (asi_ctrl_data = CTRL_SYNC_CONST) then
+                delay_counter_8n <= (others => '0');
+            else
+                delay_counter_8n <= delay_counter_8n + 1;
+            end if;
+        end if;
+    end process delay_counter_reg;
+
     avs_hist_bin_waitrequest        <= '0';
     avs_hist_bin_writeresponsevalid <= hist_writeresp_valid;
     avs_hist_bin_response           <= (others => '0');
@@ -740,12 +789,19 @@ begin
                         -- Compute key unconditionally (don't gate by filter_pass)
                         -- to break timing from cfg_filter_key_low → ingress_stage_key.
                         -- Key value is don't-care when write_req = '0'.
-                        ingress_key_next(idx) <= build_key(
-                            data_word    => port_data(idx),
-                            key_hi       => cfg_update_key_high,
-                            key_lo       => cfg_update_key_low,
-                            key_unsigned => cfg_key_unsigned
-                        );
+                        if cfg_normal_delay_t = '1' then
+                            ingress_key_next(idx) <= build_normal_delay_t_key(
+                                data_word  => port_data(idx),
+                                counter_8n => delay_counter_8n
+                            );
+                        else
+                            ingress_key_next(idx) <= build_key(
+                                data_word    => port_data(idx),
+                                key_hi       => cfg_update_key_high,
+                                key_lo       => cfg_update_key_low,
+                                key_unsigned => cfg_key_unsigned
+                            );
+                        end if;
 
                         filter_pass_v := match_filter(
                             data_word      => port_data(idx),
@@ -865,7 +921,7 @@ begin
                 key_pipe       <= (others => '0');
 
                 if arb_pipe_valid = '1' then
-                    if to_integer(signed(cfg_mode)) < 0 then
+                    if (to_integer(signed(cfg_mode)) < 0) or (cfg_normal_delay_t = '1') then
                         port_offset_v := (others => '0');
                     else
                         port_offset_v := to_signed(to_integer(arb_pipe_port) * CHANNELS_PER_PORT, SAR_TICK_WIDTH);
@@ -1186,6 +1242,7 @@ begin
                 cfg_debug_source    <= (others => '0');
                 cfg_debug_mode_abs  <= (others => '0');
                 cfg_debug_active_port <= (others => '0');
+                cfg_normal_delay_t  <= '0';
                 for idx in 0 to MAX_PORTS_CONST - 1 loop
                     cfg_filter_enable_port(idx)  <= '0';
                     cfg_filter_reject_port(idx)  <= '0';
@@ -1232,6 +1289,7 @@ begin
                     cfg_debug_source      <= (others => '0');
                     cfg_debug_mode_abs    <= (others => '0');
                     cfg_debug_active_port <= (others => '0');
+                    cfg_normal_delay_t    <= '0';
 
                     if mode_v < 0 then
                         mode_abs_v := natural(-mode_v);
@@ -1248,6 +1306,8 @@ begin
                             cfg_debug_source <= to_unsigned(mode_abs_v - 1, cfg_debug_source'length);
                             cfg_debug_active_port(0) <= '1';
                         end if;
+                    elsif mode_v = MODE_NORMAL_DELAY_T_CONST then
+                        cfg_normal_delay_t <= '1';
                     end if;
                 elsif cfg_apply_request = '1' then
                     cfg_apply_pending <= '1';

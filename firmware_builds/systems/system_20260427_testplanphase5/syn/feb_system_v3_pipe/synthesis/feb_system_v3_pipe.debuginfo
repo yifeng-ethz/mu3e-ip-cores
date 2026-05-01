@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <EnsembleReport name="feb_system_v3_pipe" kind="system" version="18.1" fabric="QSYS">
  <!-- Format version 18.1 625 (Future versions may contain additional information.) -->
- <!-- 2026.05.01.09:39:46 -->
+ <!-- 2026.05.01.13:04:06 -->
  <!-- A collection of modules and connections -->
  <parameter name="clockCrossingAdapter">
   <type>com.altera.sopcmodel.ensemble.EClockAdapter</type>
@@ -53,7 +53,7 @@
  </parameter>
  <parameter name="generationId">
   <type>int</type>
-  <value>1777621152</value>
+  <value>1777633412</value>
   <derived>false</derived>
   <enabled>true</enabled>
   <visible>true</visible>
@@ -156,7 +156,7 @@
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -9600,7 +9600,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.CMacro.TIMESTAMP</name>
-   <value>1777621152</value>
+   <value>1777633412</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.compatible</name>
@@ -9620,7 +9620,7 @@ the requested settings for a module instance. -->
   </assignment>
   <assignment>
    <name>embeddedsw.dts.params.timestamp</name>
-   <value>1777621152</value>
+   <value>1777633412</value>
   </assignment>
   <assignment>
    <name>embeddedsw.dts.vendor</name>
@@ -9636,7 +9636,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="timestamp">
    <type>int</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>true</derived>
    <enabled>false</enabled>
    <visible>false</visible>
@@ -12480,7 +12480,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -33542,7 +33542,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -52201,7 +52201,7 @@ parameters are a RESULT of the module parameters. -->
  <module
    name="data_path_subsystem_histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.1.8.501"
+   version="26.1.9.501"
    path="data_path_subsystem.histogram_statistics_0">
   <!-- Describes a single module. Module parameters are
 the requested settings for a module instance. -->
@@ -52415,7 +52415,7 @@ the requested settings for a module instance. -->
   </parameter>
   <parameter name="VERSION_PATCH">
    <type>int</type>
-   <value>8</value>
+   <value>9</value>
    <derived>false</derived>
    <enabled>false</enabled>
    <visible>true</visible>
@@ -54832,7 +54832,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -69924,7 +69924,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -105854,7 +105854,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -109909,7 +109909,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -113964,7 +113964,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -118019,7 +118019,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -122074,7 +122074,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -126129,7 +126129,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -130184,7 +130184,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -134239,7 +134239,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -156251,7 +156251,7 @@ parameters are a RESULT of the module parameters. -->
 the requested settings for a module instance. -->
   <parameter name="AUTO_GENERATION_ID">
    <type>java.lang.Integer</type>
-   <value>1777621152</value>
+   <value>1777633412</value>
    <derived>false</derived>
    <enabled>true</enabled>
    <visible>false</visible>
@@ -183238,6 +183238,60 @@ parameters are a RESULT of the module parameters. -->
   <endConnectionPoint>s0</endConnectionPoint>
  </connection>
  <connection
+   name="data_path_subsystem_mts_preprocessor_0.debug_ts/data_path_subsystem_histogram_statistics_0.debug_1"
+   kind="avalon_streaming"
+   version="18.1"
+   start="data_path_subsystem_mts_preprocessor_0.debug_ts"
+   end="data_path_subsystem_histogram_statistics_0.debug_1">
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>data_path_subsystem_mts_preprocessor_0</startModule>
+  <startConnectionPoint>debug_ts</startConnectionPoint>
+  <endModule>data_path_subsystem_histogram_statistics_0</endModule>
+  <endConnectionPoint>debug_1</endConnectionPoint>
+ </connection>
+ <connection
+   name="data_path_subsystem_mts_preprocessor_1.debug_ts/data_path_subsystem_histogram_statistics_0.debug_2"
+   kind="avalon_streaming"
+   version="18.1"
+   start="data_path_subsystem_mts_preprocessor_1.debug_ts"
+   end="data_path_subsystem_histogram_statistics_0.debug_2">
+  <parameter name="deviceFamily">
+   <type>java.lang.String</type>
+   <value>UNKNOWN</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <parameter name="generateLegacySim">
+   <type>boolean</type>
+   <value>false</value>
+   <derived>false</derived>
+   <enabled>true</enabled>
+   <visible>true</visible>
+   <valid>true</valid>
+  </parameter>
+  <startModule>data_path_subsystem_mts_preprocessor_1</startModule>
+  <startConnectionPoint>debug_ts</startConnectionPoint>
+  <endModule>data_path_subsystem_histogram_statistics_0</endModule>
+  <endConnectionPoint>debug_2</endConnectionPoint>
+ </connection>
+ <connection
    name="data_path_subsystem_lvds_rx_controller_pro_0.decoded0/data_path_subsystem_mutrig_lane_source_mux_0.real_in"
    kind="avalon_streaming"
    version="18.1"
@@ -185288,60 +185342,6 @@ parameters are a RESULT of the module parameters. -->
   <startConnectionPoint>selected_out</startConnectionPoint>
   <endModule>data_path_subsystem_mutrig_datapath_subsystem_7_mutrig_frame_deassembly_0</endModule>
   <endConnectionPoint>rx8b1k</endConnectionPoint>
- </connection>
- <connection
-   name="data_path_subsystem_mts_preprocessor_0.ts_delta/data_path_subsystem_histogram_statistics_0.debug_1"
-   kind="avalon_streaming"
-   version="18.1"
-   start="data_path_subsystem_mts_preprocessor_0.ts_delta"
-   end="data_path_subsystem_histogram_statistics_0.debug_1">
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>data_path_subsystem_mts_preprocessor_0</startModule>
-  <startConnectionPoint>ts_delta</startConnectionPoint>
-  <endModule>data_path_subsystem_histogram_statistics_0</endModule>
-  <endConnectionPoint>debug_1</endConnectionPoint>
- </connection>
- <connection
-   name="data_path_subsystem_mts_preprocessor_1.ts_delta/data_path_subsystem_histogram_statistics_0.debug_2"
-   kind="avalon_streaming"
-   version="18.1"
-   start="data_path_subsystem_mts_preprocessor_1.ts_delta"
-   end="data_path_subsystem_histogram_statistics_0.debug_2">
-  <parameter name="deviceFamily">
-   <type>java.lang.String</type>
-   <value>UNKNOWN</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <parameter name="generateLegacySim">
-   <type>boolean</type>
-   <value>false</value>
-   <derived>false</derived>
-   <enabled>true</enabled>
-   <visible>true</visible>
-   <valid>true</valid>
-  </parameter>
-  <startModule>data_path_subsystem_mts_preprocessor_1</startModule>
-  <startConnectionPoint>ts_delta</startConnectionPoint>
-  <endModule>data_path_subsystem_histogram_statistics_0</endModule>
-  <endConnectionPoint>debug_2</endConnectionPoint>
  </connection>
  <connection
    name="data_path_subsystem_emulator_mutrig_0.tx8b1k/data_path_subsystem_mutrig_lane_source_mux_0.emu_in"
@@ -193391,7 +193391,7 @@ parameters are a RESULT of the module parameters. -->
   <type>com.altera.entityinterfaces.IElementClass</type>
   <subtype>com.altera.entityinterfaces.IModule</subtype>
   <displayName>Histogram Statistics</displayName>
-  <version>26.1.8.501</version>
+  <version>26.1.9.501</version>
  </plugin>
  <plugin>
   <instanceCount>2</instanceCount>
@@ -193626,5 +193626,5 @@ parameters are a RESULT of the module parameters. -->
   <version>18.1</version>
  </plugin>
  <reportVersion>18.1 625</reportVersion>
- <uniqueIdentifier>06674B9F126C0000019DE27A3F83</uniqueIdentifier>
+ <uniqueIdentifier>06674B9F126C0000019DE3355002</uniqueIdentifier>
 </EnsembleReport>

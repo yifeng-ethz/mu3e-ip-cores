@@ -74,6 +74,26 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         "interval_cfg.interval_clocks" "0x07735940" \
                         "csr.commit" "0x1"]]
 
+        set histogram_delay_hit_t_preset [dict create \
+                id "delay_hit_t" \
+                label "Normal Hit T Delay" \
+                sample_interval_ms 1000 \
+                sample_guard_ms 50 \
+                field_values [dict create \
+                        "csr.mode" "0x1" \
+                        "csr.representation" "0x0" \
+                        "csr.filter" "0x0" \
+                        "left_bound.left_bound" "-1000" \
+                        "bin_width.bin_width" "0x10" \
+                        "keys_location.update_key_low" "0x11" \
+                        "keys_location.update_key_high" "0x1d" \
+                        "keys_location.filter_key_low" "0x23" \
+                        "keys_location.filter_key_high" "0x26" \
+                        "keys_value.filter_key_value" "0x0" \
+                        "keys_value.update_key_value" "0x0" \
+                        "interval_cfg.interval_clocks" "0x07735940" \
+                        "csr.commit" "0x1"]]
+
         set histogram_delay_mts_upper_preset [dict create \
                 id "delay_mts_upper" \
                 label "Upper MTS debug_ts Latency" \
@@ -147,13 +167,13 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         type_name "histogram_statistics.csr" \
                         hist_type_name "histogram_statistics.hist_bin" \
                         instance_indices [list 0] \
-                        expected_version [dict create major 26 minor 1 patch 7 build 501] \
+                        expected_version [dict create major 26 minor 1 patch 9 build 501] \
                         meta_file [file join $repo_root histogram_statistics histogram_statistics_v2_csr_meta.tcl] \
                         meta_namespace "::board_bring_up::meta::histogram_statistics_v2" \
                         hw_file [file join $repo_root histogram_statistics histogram_statistics_v2_hw.tcl] \
                         histogram_bins 256 \
                         histogram_clear_before_read 0 \
-                        presets [list $histogram_rate_preset $histogram_delay_mts_both_preset $histogram_delay_mts_upper_preset $histogram_delay_mts_lower_preset]] \
+                        presets [list $histogram_rate_preset $histogram_delay_hit_t_preset $histogram_delay_mts_both_preset $histogram_delay_mts_upper_preset $histogram_delay_mts_lower_preset]] \
                 [dict create \
                         id "mts_preprocessor" \
                         title "MuTRiG Timestamp Processor" \
@@ -176,7 +196,7 @@ proc ::fe_scifi::board_bring_up::project::get_spec {} {
                         type_name "histogram_statistics.csr" \
                         hist_type_name "histogram_statistics.hist_bin" \
                         instance_indices [list 1] \
-                        expected_version [dict create major 26 minor 1 patch 6 build 429] \
+                        expected_version [dict create major 26 minor 1 patch 9 build 501] \
                         meta_file [file join $repo_root histogram_statistics histogram_statistics_v2_csr_meta.tcl] \
                         meta_namespace "::board_bring_up::meta::histogram_statistics_v2" \
                         hw_file [file join $repo_root histogram_statistics histogram_statistics_v2_hw.tcl] \
