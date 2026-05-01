@@ -171,6 +171,38 @@
   LVDS-error counting remains a separate follow-up if that subsystem is ever
   intentionally re-enabled.
 
+## 2026-05-01
+
+### Generated histogram normal-delay check returned all-zero bins
+- Symptom: the authentic datapath TB fed accepted type1 hits into the generated
+  `histogram_statistics_0` instance, but the new positive `mode=+1`
+  normal-hit delay readout initially reported zero bins.
+- Root cause:
+  - The local sidecar histogram wrappers had their run-control sink tied off,
+    so those harness histograms could not synchronize their internal
+    run-local delay counters to `RUN_SYNC`.
+  - The generated histogram was being read before a ping-pong interval snapshot
+    had frozen the filled bank. A CSR-drain polling helper advanced simulation
+    time enough to make the interval fire early, which produced partial or
+    empty readouts.
+  - The injector CSR offsets in the TB were stale after the injector gained
+    the UID/META header, so the bench was not checking the real mode/period
+    registers.
+- Fix:
+  - Routed `runctl_data/runctl_valid` into both local histogram wrappers.
+  - Shifted injector CSR accesses to the current headered map
+    (`MODE=+2`, `PULSE_PERIOD=+7`, `PULSE_HIGH=+8`).
+  - Added generated-`histogram_statistics_0` normal-delay evidence: direct
+    run-control monitor, direct config monitor, bridge ingress counters,
+    interval-pulse wait, bin CSV dump, and assertions that the histogram total
+    matches accepted type1 payloads.
+  - Removed the unused hist0 CSR-drain helper so the harness cannot accidentally
+    consume the interval window before readout.
+- Evidence: `./scripts/run_dp_injector_authentic.sh` passes with
+  `Results: 12 PASSED, 0 FAILED`; `TB_HIST0_NORMAL_DELAY total=160`,
+  `ctrl_sync=2`, `TB_HIST0_INTERVAL pulse_count=1`, and the two generated
+  histogram ingress bridges accept `80 + 80` type1 words with no range loss.
+
 ## 2026-04-25
 
 ### MTS overflow lookback was coupled to the main timestamp buffer latency
