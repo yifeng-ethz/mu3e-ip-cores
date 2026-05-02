@@ -13,9 +13,11 @@ and review against `firmware_builds/doc/TEST_PLAN.md`.
 | `common.sh` | local | Shared shell guardrails: tool discovery, JDI resolution, report directories, zero-trust environment checks. |
 | `headless_jtag_common.tcl` | local | Shared headless System Console helpers for deterministic master selection and claim/release handling. |
 | `jtag_rw.tcl` | local | Generic headless 32-bit AVMM read/write helper for the JTAG master path. |
+| `jtag_meta_batch.tcl` | local | Batched headless System Console reader for UID/VERSION/DATE/GIT metadata words through one claimed JTAG master. |
 | `inject_runcmd.tcl` | legacy idea, rewritten locally | Headless fallback for directly writing `runctl_mgmt_host_0.CSR_LOCAL_CMD` via the upload-subsystem JTAG master. |
 | `extract_svd_inventory.py` | local | Walk a Qsys system, resolve SVD files for each reachable IP, and emit a JSON inventory with SC/JTAG base addresses plus VERSION/GIT capability hints. |
 | `pull_current_ip_inventory.py` | local | Walk the current datapath Qsys, resolve each JTAG-master and SC-hub reachable aperture, classify header/config/status/port-mapped register regions from SVD, and optionally live-read UID/VERSION/DATE/GIT over both transports. |
+| `phase6_histogram_bin_dump_keep_ingress.tcl` | local | Phase-6 JTAG histogram-bin CSV snapshot helper that preserves the caller-selected histogram ingress source, including post-rbCAM delay-hit studies. |
 | `check_ip_metadata.py` | local | Bring-up metadata audit. Compares live VERSION and GIT readback over SC and JTAG against the SVD and Qsys metadata for reachable IPs. |
 | `check_sc_bridges.py` | local | Phase-1 bridge audit for the SC-exposed datapath and upload apertures. Verifies histogram UIDs, upload/runctl UID+META, and bridge reachability into emulator/debug windows. |
 | `run_phase1_bringup.py` | local | Phase-1 report runner. Calls the metadata/bridge gates, performs the read-only slave audit, and writes `../systems/system_20260427_testplanphase5/reports/phase1_bringup_<date>_pipe.md`. |
