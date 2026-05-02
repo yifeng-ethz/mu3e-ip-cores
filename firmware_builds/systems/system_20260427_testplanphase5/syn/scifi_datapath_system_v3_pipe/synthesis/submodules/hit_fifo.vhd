@@ -14,6 +14,13 @@
 --		Change: Keep the head register stable when the FIFO becomes empty.
 --		        The valid contract is carried by o_empty, so clearing stale
 --		        data only created a long read-pop to synchronous-clear path.
+-- Revision: 1.3
+--		Date: Apr 29, 2026
+--		Change: Update the diagnostic peak-level register from the already
+--		        registered FIFO level instead of the same-cycle next-level
+--		        variable. This keeps the arbiter pop/read cone out of the
+--		        max-level comparator while preserving exact peak tracking
+--		        with one-cycle reporting latency.
 -- =========
 -- Description:	[Small single-clock FIFO for serialized hit keys]
 --
@@ -130,8 +137,8 @@ begin
                 level_reg <= level_v;
                 empty_q   <= bool_to_sl(level_v = 0);
                 full_q    <= bool_to_sl(to_integer(level_v) = FIFO_DEPTH_CONST);
-                if level_v > max_reg then
-                    max_reg <= level_v;
+                if level_reg > max_reg then
+                    max_reg <= level_reg;
                 end if;
 
                 if write_v and (wr_addr_v = rd_ptr_v) then

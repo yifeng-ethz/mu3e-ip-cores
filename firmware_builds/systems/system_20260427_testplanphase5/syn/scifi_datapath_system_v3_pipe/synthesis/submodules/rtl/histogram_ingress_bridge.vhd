@@ -1,11 +1,16 @@
 -- File name: histogram_ingress_bridge.vhd
 -- Author: OpenAI Codex
 -- =======================================
--- Revision: 26.0.2
+-- Revision: 26.0.4
 --     Date: 20260425
 --     Change: Add optional post-hit-stack hit-word filtering so frame
 --             protocol words are drained locally and not counted by the
 --             histogram tap.
+--     Date: 20260502
+--     Change: Repack selected post-hit-stack words into the type1 histogram
+--             layout so channel/rate and local-GTS delay mode use the same
+--             key locations as the pre-hit-stack stream. The post stream only
+--             carries ts[11:0], so delay mode must select bits [28:17].
 -- =========
 -- Description:
 --     This bridge replaces the previous "duplicate the datapath into two histogram
@@ -37,10 +42,10 @@ entity histogram_ingress_bridge is
     generic (
         VERSION_MAJOR    : natural := 26;
         VERSION_MINOR    : natural := 0;
-        VERSION_PATCH    : natural := 2;
-        BUILD    : natural := 425;
+        VERSION_PATCH    : natural := 4;
+        BUILD    : natural := 502;
         IP_UID    : natural := 1212764994;  -- ASCII "HISB"
-        VERSION_DATE    : natural := 20260425;
+        VERSION_DATE    : natural := 20260502;
         VERSION_GIT    : natural := 481097348;
         INSTANCE_ID    : natural := 0;
         DEFAULT_SELECT_POST    : natural := 0;
@@ -145,6 +150,8 @@ architecture rtl of histogram_ingress_bridge is
     signal control_word    : std_logic_vector(31 downto 0);
     signal status_word    : std_logic_vector(31 downto 0);
     signal hist_post_data    : std_logic_vector(38 downto 0);
+    signal hist_post_data_repacked : std_logic_vector(38 downto 0);
+    signal post_subheader_ts_11_4 : std_logic_vector(7 downto 0) := (others => '0');
     signal post_hist_ready    : std_logic;
     signal post_word_is_k    : std_logic;
     signal post_word_is_subheader    : std_logic;
@@ -164,7 +171,13 @@ begin
     aso_pre_empty    <= asi_pre_empty;
     aso_pre_error    <= asi_pre_error;
 
-    hist_post_data    <= "000" & asi_post_data;
+    hist_post_data_repacked(38 downto 35) <= asi_post_data(25 downto 22); -- ASIC
+    hist_post_data_repacked(34 downto 30) <= asi_post_data(21 downto 17); -- channel
+    hist_post_data_repacked(29)           <= '0';                         -- post format has no ts[12]
+    hist_post_data_repacked(28 downto 21) <= post_subheader_ts_11_4;      -- ts[11:4]
+    hist_post_data_repacked(20 downto 17) <= asi_post_data(31 downto 28); -- ts[3:0]
+    hist_post_data_repacked(16 downto 0)  <= asi_post_data(16 downto 0);
+    hist_post_data <= hist_post_data_repacked when POST_HIT_FILTER_ENABLED_CONST else "000" & asi_post_data;
     post_word_is_k    <= '1' when asi_post_data(35 downto 32) = K_FLAG_CONST else '0';
     post_word_is_subheader <= '1' when post_word_is_k = '1' and asi_post_data(7 downto 0) = K237_CONST else '0';
     post_word_is_frame_header <= '1' when post_word_is_k = '1' and asi_post_data(7 downto 0) = K285_CONST else '0';
@@ -228,6 +241,7 @@ begin
                 pre_packet_active    <= '0';
                 post_packet_active <= '0';
                 post_hit_region <= '0';
+                post_subheader_ts_11_4 <= (others => '0');
             else
                 if avs_csr_write = '1' then
                     case to_integer(unsigned(avs_csr_address)) is
@@ -261,6 +275,7 @@ begin
                         post_hit_region <= '0';
                     elsif post_word_is_subheader = '1' then
                         post_hit_region <= '1';
+                        post_subheader_ts_11_4 <= asi_post_data(31 downto 24);
                     end if;
                 end if;
 

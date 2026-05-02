@@ -15,6 +15,7 @@ and review against `firmware_builds/doc/TEST_PLAN.md`.
 | `jtag_rw.tcl` | local | Generic headless 32-bit AVMM read/write helper for the JTAG master path. |
 | `inject_runcmd.tcl` | legacy idea, rewritten locally | Headless fallback for directly writing `runctl_mgmt_host_0.CSR_LOCAL_CMD` via the upload-subsystem JTAG master. |
 | `extract_svd_inventory.py` | local | Walk a Qsys system, resolve SVD files for each reachable IP, and emit a JSON inventory with SC/JTAG base addresses plus VERSION/GIT capability hints. |
+| `pull_current_ip_inventory.py` | local | Walk the current datapath Qsys, resolve each JTAG-master and SC-hub reachable aperture, classify header/config/status/port-mapped register regions from SVD, and optionally live-read UID/VERSION/DATE/GIT over both transports. |
 | `check_ip_metadata.py` | local | Bring-up metadata audit. Compares live VERSION and GIT readback over SC and JTAG against the SVD and Qsys metadata for reachable IPs. |
 | `check_sc_bridges.py` | local | Phase-1 bridge audit for the SC-exposed datapath and upload apertures. Verifies histogram UIDs, upload/runctl UID+META, and bridge reachability into emulator/debug windows. |
 | `run_phase1_bringup.py` | local | Phase-1 report runner. Calls the metadata/bridge gates, performs the read-only slave audit, and writes `../systems/system_20260427_testplanphase5/reports/phase1_bringup_<date>_pipe.md`. |
@@ -39,6 +40,7 @@ Typical operator flow:
 ```
 ./build_local_tools.py
 ./extract_svd_inventory.py --output ../generated/debug_sc_system_v3_inventory.json
+./pull_current_ip_inventory.py --filter 'mutrig_lane_source_mux|histogram_statistics'
 ./check_ip_metadata.py --inventory-out ../generated/debug_sc_system_v3_inventory.json
 ./check_sc_bridges.py
 ./run_phase1_bringup.py

@@ -1,7 +1,36 @@
 package require -exact qsys 18.1
 
-set script_dir [file dirname [file normalize [info script]]]
-set system_root [file normalize [file join $script_dir ..]]
+proc abs_path {path} {
+    if {[string equal [file pathtype $path] "absolute"]} {
+        return $path
+    }
+    return [file join [pwd] $path]
+}
+
+proc find_system_root {} {
+    set candidates [list]
+    set script_name [info script]
+
+    if {![string equal $script_name ""]} {
+        set script_dir_candidate [file dirname [abs_path $script_name]]
+        lappend candidates [file join $script_dir_candidate ..]
+    }
+
+    lappend candidates [file join [pwd] firmware_builds/systems/system_20260427_testplanphase5]
+    lappend candidates [file join [pwd] ..]
+    lappend candidates [pwd]
+
+    foreach candidate $candidates {
+        if {[file exists [file join $candidate syn scifi_datapath_system_v3.qsys]]} {
+            return $candidate
+        }
+    }
+
+    error "Cannot locate system_20260427_testplanphase5 root from qsys-script cwd"
+}
+
+set system_root [find_system_root]
+set script_dir [file join $system_root script]
 set syn_dir [file join $system_root syn]
 load_system [file join $syn_dir scifi_datapath_system_v3.qsys]
 
@@ -19,12 +48,18 @@ set_instance_parameter_value histogram_ingress_bridge_0 DEFAULT_SELECT_POST 1
 set_instance_parameter_value histogram_ingress_bridge_0 FILTER_POST_HIT_WORDS 1
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MAJOR 26
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MINOR 0
-set_instance_parameter_value histogram_ingress_bridge_0 VERSION_PATCH 2
-set_instance_parameter_value histogram_ingress_bridge_0 BUILD 425
-set_instance_parameter_value histogram_ingress_bridge_0 VERSION_DATE 20260425
+set_instance_parameter_value histogram_ingress_bridge_0 VERSION_PATCH 4
+set_instance_parameter_value histogram_ingress_bridge_0 BUILD 502
+set_instance_parameter_value histogram_ingress_bridge_0 VERSION_DATE 20260502
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_GIT 481097348
-set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_HI 21
-set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_LO 17
+set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_HI 34
+set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_LO 30
+set_instance_parameter_value histogram_statistics_0 N_DEBUG_INTERFACE 6
+set_instance_parameter_value histogram_statistics_0 VERSION_MAJOR 26
+set_instance_parameter_value histogram_statistics_0 VERSION_MINOR 1
+set_instance_parameter_value histogram_statistics_0 VERSION_PATCH 8
+set_instance_parameter_value histogram_statistics_0 BUILD 502
+set_instance_parameter_value histogram_statistics_0 VERSION_DATE 20260502
 
 # The emulator source was fixed to remove the obsolete pre-CRC delay byte.
 # Keep the pipe integration metadata explicit so Qsys does not preserve stale
@@ -47,6 +82,37 @@ proc has_instance {name} {
 
 proc remove_connection_if_present {path} {
     catch {remove_connection $path}
+}
+
+proc reroute_histogram_debug_inputs {} {
+    # Delay studies must use aso_debug_ts_data from the timestamp processors.
+    # ts_delta/debug_burst are inter-hit gap observables and must not feed the
+    # Phase-5 latency histogram debug inputs.
+    set old_connections [list \
+        mts_preprocessor_0.ts_delta/histogram_statistics_0.debug_1 \
+        mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1 \
+        mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2 \
+        hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_2 \
+        hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_3 \
+        hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_3 \
+        hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_4 \
+        hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_4 \
+        hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5 \
+        hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_5 \
+        hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_6 \
+        mts_preprocessor_0.debug_burst/histogram_statistics_0.debug_6 \
+    ]
+
+    foreach connection $old_connections {
+        remove_connection_if_present $connection
+    }
+
+    add_connection mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1
+    add_connection mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_3
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_4
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_6
 }
 
 proc replace_decoded_lane_mux_with_source_mux {lane} {
@@ -75,8 +141,10 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
         remove_instance $new_mux
     }
 
-    add_instance $new_mux mutrig_lane_source_mux 1.0
-    set_instance_parameter_value $new_mux SELECT_EMULATOR 1
+    add_instance $new_mux mutrig_lane_source_mux 26.2.0.0502
+    set_instance_parameter_value $new_mux SELECT_EMULATOR 0
+    set_instance_parameter_value $new_mux FIFO_DEPTH 4
+    set_instance_parameter_value $new_mux INSTANCE_ID $lane
 
     if {[has_instance $emu]} {
         set_emulator_mutrig_crcfix_version $emu
@@ -90,6 +158,17 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
     add_connection lvds_rx_controller_pro_0.decoded${lane}/$new_mux.real_in
     add_connection $emu.tx8b1k/$new_mux.emu_in
     add_connection $new_mux.selected_out/$lane_dp.decoded_din
+
+    set mux_csr_base [expr {0x2240 + (0x40 * $lane)}]
+    add_connection mm_clock_crossing_bridge.m0/$new_mux.csr
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/$new_mux.csr baseAddress [format "0x%04x" $mux_csr_base]
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/$new_mux.csr arbitrationPriority 1
+    set_connection_parameter_value mm_clock_crossing_bridge.m0/$new_mux.csr defaultConnection false
+
+    add_connection master_datapath.master/$new_mux.csr
+    set_connection_parameter_value master_datapath.master/$new_mux.csr baseAddress [format "0x%04x" $mux_csr_base]
+    set_connection_parameter_value master_datapath.master/$new_mux.csr arbitrationPriority 1
+    set_connection_parameter_value master_datapath.master/$new_mux.csr defaultConnection false
 }
 
 for {set lane 0} {$lane < 8} {incr lane} {
@@ -231,5 +310,7 @@ foreach group $lvds_csr_groups {
     set_connection_parameter_value $upstream_path arbitrationPriority 1
     set_connection_parameter_value $upstream_path defaultConnection false
 }
+
+reroute_histogram_debug_inputs
 
 save_system [file join $syn_dir scifi_datapath_system_v3_pipe.qsys]

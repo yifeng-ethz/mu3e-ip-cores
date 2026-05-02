@@ -42,7 +42,7 @@
 
 `timescale 1 ns / 1 ns
 
-module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_024_default_decode
+module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_052_default_decode
   #(
      parameter DEFAULT_CHANNEL = 0,
                DEFAULT_WR_CHANNEL = -1,
@@ -81,7 +81,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_024_default_decode
 endmodule
 
 
-module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_024
+module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_052
 (
     // -------------------
     // Clock & Reset
@@ -165,7 +165,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_024
 
 
 
-    scifi_datapath_system_v3_pipe_mm_interconnect_0_router_024_default_decode the_default_decode(
+    scifi_datapath_system_v3_pipe_mm_interconnect_0_router_052_default_decode the_default_decode(
       .default_destination_id (),
       .default_wr_channel   (),
       .default_rd_channel   (),
@@ -188,7 +188,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_024
             src_channel = 51'b01;
         end
 
-        if (destid == 4 ) begin
+        if (destid == 3 ) begin
             src_channel = 51'b10;
         end
 

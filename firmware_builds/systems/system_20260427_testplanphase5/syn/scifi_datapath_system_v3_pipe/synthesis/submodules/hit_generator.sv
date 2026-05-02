@@ -1,9 +1,10 @@
 // hit_generator.sv
 // Compact MuTRiG event source with one RAM-backed L2 FIFO per lane.
-// Version : 26.1.12
-// Date    : 20260425
-// Change  : Gate the simulation true-GTS mirror with generation enable so
-//           timestamp traces stay aligned across long run-control SYNC holds.
+// Version : 26.1.15
+// Date    : 20260502
+// Change  : Stall active ticket draining when the lane-local L2 FIFO cannot
+//           accept the next local hit, preserving queued-hit timestamps instead
+//           of dropping words under wire-rate backpressure.
 //
 // External behavior intentionally stays aligned with the existing emulator:
 //   - frame_assembler still sees a single dequeue/data/event-count interface
@@ -73,8 +74,16 @@ module hit_generator
     localparam int PRNG1_WIDTH = 21;
     localparam int PRNG2_WIDTH = 5;
     localparam logic [PRNG2_WIDTH-1:0] PRNG2_SEED_XOR = 5'h0F;
+    localparam int TICKET_FIFO_DEPTH = 16;
+    localparam int TICKET_FIFO_PTR_WIDTH = $clog2(TICKET_FIFO_DEPTH);
+    localparam int TICKET_FIFO_COUNT_WIDTH = TICKET_FIFO_PTR_WIDTH + 1;
 
     logic [47:0] l2_fifo_mem [0:FIFO_STORAGE_DEPTH-1];
+    logic [GLOBAL_CHANNEL_WIDTH-1:0] ticket_start_mem [0:TICKET_FIFO_DEPTH-1];
+    logic [4:0] ticket_size_mem [0:TICKET_FIFO_DEPTH-1];
+    logic [14:0] ticket_tcc_mem [0:TICKET_FIFO_DEPTH-1];
+    logic [14:0] ticket_ecc_mem [0:TICKET_FIFO_DEPTH-1];
+    logic [4:0] ticket_fine_mem [0:TICKET_FIFO_DEPTH-1];
 
     logic [PRNG1_WIDTH-1:0] prng_state;
     logic [PRNG2_WIDTH-1:0] prng2_state;
@@ -92,6 +101,9 @@ module hit_generator
     logic [FIFO_PTR_WIDTH-1:0] fifo_wr_ptr;
     logic [FIFO_PTR_WIDTH-1:0] fifo_rd_ptr;
     logic [FIFO_COUNT_WIDTH-1:0] fifo_count;
+    logic [TICKET_FIFO_PTR_WIDTH-1:0] ticket_wr_ptr;
+    logic [TICKET_FIFO_PTR_WIDTH-1:0] ticket_rd_ptr;
+    logic [TICKET_FIFO_COUNT_WIDTH-1:0] ticket_count;
     logic [15:0]              periodic_phase;
     logic                     inject_masked_active;
     logic [N_CHANNELS-1:0]    inject_masked_shift;
@@ -108,6 +120,7 @@ module hit_generator
     logic [47:0]              debug_hit_gen_gts_8n;
     logic [47:0]              cluster_true_gts_anchor;
     logic [47:0]              inject_masked_true_gts_anchor;
+    logic [47:0]              ticket_true_gts_mem [0:TICKET_FIFO_DEPTH-1];
 `endif
 
     // The frame assembler always consumes the long-word layout. Short-mode
@@ -127,6 +140,14 @@ module hit_generator
         if (ptr == FIFO_PTR_WIDTH'(FIFO_STORAGE_DEPTH - 1))
             return '0;
         return ptr + FIFO_PTR_WIDTH'(1);
+    endfunction
+
+    function automatic logic [TICKET_FIFO_PTR_WIDTH-1:0] ticket_ptr_next(
+        input logic [TICKET_FIFO_PTR_WIDTH-1:0] ptr
+    );
+        if (ptr == TICKET_FIFO_PTR_WIDTH'(TICKET_FIFO_DEPTH - 1))
+            return '0;
+        return ptr + TICKET_FIFO_PTR_WIDTH'(1);
     endfunction
 
     function automatic logic [CLUSTER_LANE_WIDTH-1:0] normalized_lane_count(input logic [3:0] lane_count);
@@ -401,7 +422,6 @@ module hit_generator
         logic [GLOBAL_CHANNEL_WIDTH-1:0] configured_center_v;
         logic [GLOBAL_CHANNEL_WIDTH-1:0] candidate_global_ch_v;
         logic [GLOBAL_CHANNEL_WIDTH-1:0] burst_start_v;
-        logic [4:0] cluster_size_v;
         logic [4:0] candidate_ch_v;
         logic [47:0] candidate_word_v;
         logic [PRNG1_WIDTH-1:0] prng_state_next_v;
@@ -413,7 +433,6 @@ module hit_generator
         logic [14:0] cluster_tcc_anchor_next_v;
         logic [14:0] cluster_ecc_anchor_next_v;
         logic [4:0]  cluster_fine_anchor_next_v;
-        logic inject_burst_pending_next_v;
         logic consume_cluster_word_v;
         logic candidate_local_valid_v;
         logic l2_push_valid_v;
@@ -422,6 +441,9 @@ module hit_generator
         logic accept_capacity_v;
         logic pending_valid_next_v;
         logic [47:0] pending_word_next_v;
+        logic [TICKET_FIFO_PTR_WIDTH-1:0] ticket_wr_ptr_next_v;
+        logic [TICKET_FIFO_PTR_WIDTH-1:0] ticket_rd_ptr_next_v;
+        logic [TICKET_FIFO_COUNT_WIDTH-1:0] ticket_count_next_v;
         logic [4:0] poisson_t_fine_v;
         logic [4:0] poisson_e_fine_v;
         logic inject_pulse_seen_v;
@@ -437,10 +459,21 @@ module hit_generator
         logic        masked_sequence_word_v;
         logic        launch_cluster_v;
         logic [GLOBAL_CHANNEL_WIDTH-1:0] launch_cluster_start_v;
+        logic [4:0]  launch_cluster_size_v;
+        logic        cluster_word_local_v;
+        logic        cluster_word_can_advance_v;
+        logic        can_load_ticket_v;
+        logic        enqueue_ticket_v;
+        logic [GLOBAL_CHANNEL_WIDTH-1:0] ticket_start_v;
+        logic [4:0]  ticket_size_v;
+        logic [14:0] ticket_tcc_v;
+        logic [14:0] ticket_ecc_v;
+        logic [4:0]  ticket_fine_v;
 `ifndef SYNTHESIS
         logic [47:0] debug_true_gts_next_v;
         logic [47:0] cluster_true_gts_anchor_next_v;
         logic [47:0] inject_masked_true_gts_anchor_next_v;
+        logic [47:0] ticket_true_gts_v;
 `endif
 
         if (rst) begin
@@ -459,6 +492,9 @@ module hit_generator
             fifo_wr_ptr          <= '0;
             fifo_rd_ptr          <= '0;
             fifo_count           <= '0;
+            ticket_wr_ptr        <= '0;
+            ticket_rd_ptr        <= '0;
+            ticket_count         <= '0;
             periodic_phase       <= periodic_phase_init(cfg_prng_seed, 5'd0);
             inject_masked_active <= 1'b0;
             inject_masked_shift <= '0;
@@ -491,7 +527,6 @@ module hit_generator
             cluster_ecc_anchor_next_v = cluster_ecc_anchor;
             cluster_fine_anchor_next_v = cluster_fine_anchor;
             inject_pulse_seen_v = inject_pulse;
-            inject_burst_pending_next_v = inject_burst_pending | inject_pulse_seen_v;
             burst_remaining_next_v = burst_remaining;
             burst_global_next_v = burst_global_ch;
             poisson_t_fine_v = prng_state[4:0];
@@ -506,6 +541,9 @@ module hit_generator
                                     !(pending_valid && (fifo_count == FIFO_COUNT_WIDTH'(FIFO_DEPTH - 1)));
             pending_valid_next_v = pending_valid;
             pending_word_next_v  = pending_word;
+            ticket_wr_ptr_next_v = ticket_wr_ptr;
+            ticket_rd_ptr_next_v = ticket_rd_ptr;
+            ticket_count_next_v  = ticket_count;
             folded_hit_rate_v    = folded_channel_rate(cfg_hit_rate, N_CHANNELS);
             periodic_phase_sum_v = 17'h0_0000;
             periodic_phase_next_v = periodic_phase;
@@ -518,10 +556,21 @@ module hit_generator
             masked_sequence_word_v = 1'b0;
             launch_cluster_v = 1'b0;
             launch_cluster_start_v = '0;
+            launch_cluster_size_v = normalized_cluster_size(cfg_burst_size);
+            cluster_word_local_v = 1'b0;
+            cluster_word_can_advance_v = 1'b0;
+            can_load_ticket_v = 1'b0;
+            enqueue_ticket_v = 1'b0;
+            ticket_start_v = '0;
+            ticket_size_v = '0;
+            ticket_tcc_v = LFSR15_INIT;
+            ticket_ecc_v = LFSR15_INIT;
+            ticket_fine_v = '0;
 `ifndef SYNTHESIS
             debug_true_gts_next_v = enable ? (debug_true_gts_8n + 48'd1) : debug_true_gts_8n;
             cluster_true_gts_anchor_next_v = cluster_true_gts_anchor;
             inject_masked_true_gts_anchor_next_v = inject_masked_true_gts_anchor;
+            ticket_true_gts_v = debug_true_gts_next_v;
 `endif
 
             if (l2_push_valid_v || l2_pop_from_pending_v)
@@ -532,8 +581,6 @@ module hit_generator
                 lane_index_v        = normalized_lane_index(cfg_cluster_cross_asic, cfg_cluster_lane_index, cfg_cluster_lane_count);
                 domain_last_ch_v    = domain_channels_v[GLOBAL_CHANNEL_WIDTH-1:0] - GLOBAL_CHANNEL_WIDTH'(1);
                 configured_center_v = cfg_cluster_cross_asic ? cfg_cluster_center_global : cfg_burst_center;
-                cluster_size_v      = normalized_cluster_size(cfg_burst_size);
-
                 prng_state_next_v  = prng1_step(prng_state);
                 prng2_state_next_v = prng2_step(prng2_state);
                 prng_state         <= prng_state_next_v;
@@ -582,19 +629,44 @@ module hit_generator
                             inject_masked_channel_next_v + CHANNEL_WIDTH'(1);
                     end
                 end else begin
-                    if (inject_burst_pending && (burst_remaining == 5'd0)) begin
+                    if (burst_remaining != 5'd0) begin
+                        candidate_global_ch_v = burst_global_ch;
+                        if (!cfg_cluster_cross_asic) begin
+                            cluster_word_local_v = 1'b1;
+                            candidate_ch_v = CHANNEL_WIDTH'(candidate_global_ch_v[CHANNEL_WIDTH-1:0]);
+                        end else if ((candidate_global_ch_v <= domain_last_ch_v) &&
+                                     (candidate_global_ch_v[GLOBAL_CHANNEL_WIDTH-1:5] == lane_index_v)) begin
+                            cluster_word_local_v = 1'b1;
+                            candidate_ch_v = CHANNEL_WIDTH'(candidate_global_ch_v[CHANNEL_WIDTH-1:0]);
+                        end
+
+                        cluster_word_can_advance_v = !cluster_word_local_v || accept_capacity_v;
+                        if (cluster_word_can_advance_v) begin
+                            consume_cluster_word_v = 1'b1;
+                            candidate_local_valid_v = cluster_word_local_v;
+                            burst_remaining_next_v = burst_remaining - 5'd1;
+                            if ((burst_remaining != 5'd1) && (burst_global_ch < domain_last_ch_v))
+                                burst_global_next_v = burst_global_ch + GLOBAL_CHANNEL_WIDTH'(1);
+                            else
+                                burst_global_next_v = burst_global_ch;
+                        end
+                    end else if (ticket_count != TICKET_FIFO_COUNT_WIDTH'(0)) begin
+                        burst_remaining_next_v = ticket_size_mem[ticket_rd_ptr];
+                        burst_global_next_v    = ticket_start_mem[ticket_rd_ptr];
+                        cluster_tcc_anchor_next_v  = ticket_tcc_mem[ticket_rd_ptr];
+                        cluster_ecc_anchor_next_v  = ticket_ecc_mem[ticket_rd_ptr];
+                        cluster_fine_anchor_next_v = ticket_fine_mem[ticket_rd_ptr];
+`ifndef SYNTHESIS
+                        cluster_true_gts_anchor_next_v = ticket_true_gts_mem[ticket_rd_ptr];
+`endif
+                        ticket_rd_ptr_next_v = ticket_ptr_next(ticket_rd_ptr);
+                        ticket_count_next_v  = ticket_count - TICKET_FIFO_COUNT_WIDTH'(1);
+                    end
+
+                    if (inject_pulse_seen_v) begin
                         launch_cluster_v = 1'b1;
                         launch_cluster_start_v =
                             clamp_cluster_start(configured_center_v, cfg_burst_size, domain_channels_v);
-                        inject_burst_pending_next_v = inject_pulse_seen_v;
-                    end else if (burst_remaining != 5'd0) begin
-                        consume_cluster_word_v = 1'b1;
-                        candidate_global_ch_v = burst_global_ch;
-                        burst_remaining_next_v = burst_remaining - 5'd1;
-                        if ((burst_remaining != 5'd1) && (burst_global_ch < domain_last_ch_v))
-                            burst_global_next_v = burst_global_ch + GLOBAL_CHANNEL_WIDTH'(1);
-                        else
-                            burst_global_next_v = burst_global_ch;
                     end else begin
                         unique case (hit_mode_t'(cfg_hit_mode))
                         HIT_MODE_POISSON: begin
@@ -617,8 +689,9 @@ module hit_generator
 
                         HIT_MODE_POISSON_IID: begin
                             if (prng_state[15:0] < folded_hit_rate_v) begin
-                                candidate_local_valid_v = 1'b1;
-                                candidate_ch_v = channel_scan_pos;
+                                launch_cluster_v = 1'b1;
+                                launch_cluster_start_v =
+                                    clamp_cluster_start(scan_pos, cfg_burst_size, domain_channels_v);
                             end
                         end
 
@@ -626,8 +699,9 @@ module hit_generator
                             periodic_phase_sum_v = {1'b0, periodic_phase} + {1'b0, folded_hit_rate_v};
                             periodic_phase_next_v = periodic_phase_sum_v[15:0];
                             if (periodic_phase_sum_v[16]) begin
-                                candidate_local_valid_v = 1'b1;
-                                candidate_ch_v = channel_scan_pos;
+                                launch_cluster_v = 1'b1;
+                                launch_cluster_start_v =
+                                    clamp_cluster_start(scan_pos, cfg_burst_size, domain_channels_v);
                             end
                         end
 
@@ -642,25 +716,42 @@ module hit_generator
                     end
 
                     if (launch_cluster_v) begin
-                        cluster_tcc_anchor_next_v = tcc_lfsr;
-                        cluster_ecc_anchor_next_v = ecc_lfsr;
-                        cluster_fine_anchor_next_v = prng2_state[4:0];
+                        ticket_start_v = launch_cluster_start_v;
+                        ticket_size_v  = launch_cluster_size_v;
+                        ticket_tcc_v   = tcc_lfsr;
+                        ticket_ecc_v   = ecc_lfsr;
+                        ticket_fine_v  = prng2_state[4:0];
 `ifndef SYNTHESIS
-                        cluster_true_gts_anchor_next_v = debug_true_gts_next_v;
+                        ticket_true_gts_v = debug_true_gts_next_v;
 `endif
-                        burst_remaining_next_v = cluster_size_v;
-                        burst_global_next_v = launch_cluster_start_v;
-                    end
-                end
+                        can_load_ticket_v =
+                            (burst_remaining_next_v == 5'd0) &&
+                            (ticket_count_next_v == TICKET_FIFO_COUNT_WIDTH'(0));
+                        enqueue_ticket_v =
+                            !can_load_ticket_v &&
+                            (ticket_count_next_v < TICKET_FIFO_COUNT_WIDTH'(TICKET_FIFO_DEPTH));
 
-                if (consume_cluster_word_v) begin
-                    if (!cfg_cluster_cross_asic) begin
-                        candidate_local_valid_v = 1'b1;
-                        candidate_ch_v = CHANNEL_WIDTH'(candidate_global_ch_v[CHANNEL_WIDTH-1:0]);
-                    end else if ((candidate_global_ch_v <= domain_last_ch_v) &&
-                                 (candidate_global_ch_v[GLOBAL_CHANNEL_WIDTH-1:5] == lane_index_v)) begin
-                        candidate_local_valid_v = 1'b1;
-                        candidate_ch_v = CHANNEL_WIDTH'(candidate_global_ch_v[CHANNEL_WIDTH-1:0]);
+                        if (can_load_ticket_v) begin
+                            burst_remaining_next_v = ticket_size_v;
+                            burst_global_next_v = ticket_start_v;
+                            cluster_tcc_anchor_next_v = ticket_tcc_v;
+                            cluster_ecc_anchor_next_v = ticket_ecc_v;
+                            cluster_fine_anchor_next_v = ticket_fine_v;
+`ifndef SYNTHESIS
+                            cluster_true_gts_anchor_next_v = ticket_true_gts_v;
+`endif
+                        end else if (enqueue_ticket_v) begin
+                            ticket_start_mem[ticket_wr_ptr_next_v] <= ticket_start_v;
+                            ticket_size_mem[ticket_wr_ptr_next_v]  <= ticket_size_v;
+                            ticket_tcc_mem[ticket_wr_ptr_next_v]   <= ticket_tcc_v;
+                            ticket_ecc_mem[ticket_wr_ptr_next_v]   <= ticket_ecc_v;
+                            ticket_fine_mem[ticket_wr_ptr_next_v]  <= ticket_fine_v;
+`ifndef SYNTHESIS
+                            ticket_true_gts_mem[ticket_wr_ptr_next_v] <= ticket_true_gts_v;
+`endif
+                            ticket_wr_ptr_next_v = ticket_ptr_next(ticket_wr_ptr_next_v);
+                            ticket_count_next_v  = ticket_count_next_v + TICKET_FIFO_COUNT_WIDTH'(1);
+                        end
                     end
                 end
 
@@ -673,9 +764,12 @@ module hit_generator
                 cluster_true_gts_anchor <= cluster_true_gts_anchor_next_v;
                 inject_masked_true_gts_anchor <= inject_masked_true_gts_anchor_next_v;
 `endif
-                inject_burst_pending <= inject_burst_pending_next_v;
+                inject_burst_pending <= (ticket_count_next_v != TICKET_FIFO_COUNT_WIDTH'(0));
                 burst_remaining      <= burst_remaining_next_v;
                 burst_global_ch      <= burst_global_next_v;
+                ticket_wr_ptr        <= ticket_wr_ptr_next_v;
+                ticket_rd_ptr        <= ticket_rd_ptr_next_v;
+                ticket_count         <= ticket_count_next_v;
                 periodic_phase       <= periodic_phase_next_v;
                 inject_masked_active <= inject_masked_active_next_v;
                 inject_masked_shift <= inject_masked_shift_next_v;
@@ -696,9 +790,9 @@ module hit_generator
                 end else if (consume_cluster_word_v) begin
                     candidate_word_v = build_l2_hit_cluster(
                         candidate_ch_v,
-                        cluster_tcc_anchor_next_v,
-                        cluster_ecc_anchor_next_v,
-                        cluster_fine_anchor_next_v,
+                        cluster_tcc_anchor,
+                        cluster_ecc_anchor,
+                        cluster_fine_anchor,
                         prng_state[2:0],
                         prng2_state[2:0],
                         prng_state[5:3],
@@ -721,7 +815,7 @@ module hit_generator
                 if (masked_sequence_word_v)
                     debug_hit_gen_gts_8n <= inject_masked_true_gts_anchor_next_v;
                 else if (consume_cluster_word_v)
-                    debug_hit_gen_gts_8n <= cluster_true_gts_anchor_next_v;
+                    debug_hit_gen_gts_8n <= cluster_true_gts_anchor;
                 else
                     debug_hit_gen_gts_8n <= debug_true_gts_next_v;
 `endif
