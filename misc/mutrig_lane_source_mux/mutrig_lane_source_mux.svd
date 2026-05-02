@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance">
+  <name>mutrig_lane_source_mux</name>
+  <version>26.2.0.0502</version>
+  <description>Runtime per-lane real, emulator, or mixed round-robin MuTRiG source selector.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <peripherals>
+    <peripheral>
+      <name>mutrig_lane_source_mux</name>
+      <description>One lane source selector CSR window.</description>
+      <baseAddress>0x00000000</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x40</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>UID</name>
+          <description>IP identifier, default ASCII MLSM.</description>
+          <addressOffset>0x00</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x4D4C534D</resetValue>
+        </register>
+        <register>
+          <name>META</name>
+          <description>Write page select: 0 VERSION, 1 VERSION_DATE, 2 VERSION_GIT, 3 INSTANCE_ID. Read returns selected page.</description>
+          <addressOffset>0x04</addressOffset>
+          <size>32</size>
+          <access>read-write</access>
+          <resetValue>0x1A0201F6</resetValue>
+        </register>
+        <register>
+          <name>CONTROL</name>
+          <description>Runtime source control. Bit 0 selects emulator in non-mixed mode. Bit 1 clears counters/FIFOs when written as one. Bit 2 enables mixed round-robin mode.</description>
+          <addressOffset>0x08</addressOffset>
+          <size>32</size>
+          <access>read-write</access>
+          <resetValue>0x00000000</resetValue>
+          <fields>
+            <field>
+              <name>SELECT_EMULATOR</name>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>CLEAR_COUNTERS</name>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>write-only</access>
+            </field>
+            <field>
+              <name>MIXED_RR</name>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>STATUS</name>
+          <description>Live source, sideband, FIFO, and arbitration status.</description>
+          <addressOffset>0x0C</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>REAL_BEATS</name>
+          <description>Saturating count of real input valid beats.</description>
+          <addressOffset>0x10</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>EMU_BEATS</name>
+          <description>Saturating count of emulator input valid beats.</description>
+          <addressOffset>0x14</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>SELECTED_BEATS</name>
+          <description>Saturating count of selected output valid beats.</description>
+          <addressOffset>0x18</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>SWITCH_COUNT</name>
+          <description>Saturating count of source-mode changes through CONTROL.</description>
+          <addressOffset>0x1C</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>LAST_SELECTED</name>
+          <description>Last selected source in bit 16, error in bits 15:13, channel in bits 12:9, data in bits 8:0.</description>
+          <addressOffset>0x20</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>FIFO_STATUS</name>
+          <description>Mixed-mode FIFO status: real level bits 7:0, emulator level bits 15:8, full/valid/grant bits 20:16.</description>
+          <addressOffset>0x24</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>REAL_DROPS</name>
+          <description>Real-input FIFO overflow drops in mixed mode.</description>
+          <addressOffset>0x28</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>EMU_DROPS</name>
+          <description>Emulator-input FIFO overflow drops in mixed mode.</description>
+          <addressOffset>0x2C</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>REAL_SELECTED</name>
+          <description>Selected output beats sourced from real input.</description>
+          <addressOffset>0x30</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+        <register>
+          <name>EMU_SELECTED</name>
+          <description>Selected output beats sourced from emulator input.</description>
+          <addressOffset>0x34</addressOffset>
+          <size>32</size>
+          <access>read-only</access>
+          <resetValue>0x00000000</resetValue>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

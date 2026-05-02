@@ -184,9 +184,9 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			IP_UID                : natural := 1212764994;
 			VERSION_MAJOR         : natural := 26;
 			VERSION_MINOR         : natural := 0;
-			VERSION_PATCH         : natural := 2;
-			BUILD                 : natural := 425;
-			VERSION_DATE          : natural := 20260425;
+			VERSION_PATCH         : natural := 4;
+			BUILD                 : natural := 502;
+			VERSION_DATE          : natural := 20260502;
 			VERSION_GIT           : natural := 481097348;
 			INSTANCE_ID           : natural := 0
 		);
@@ -262,11 +262,11 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			DEBUG                     : natural := 0;
 			VERSION_MAJOR             : natural := 26;
 			VERSION_MINOR             : natural := 1;
-			VERSION_PATCH             : natural := 2;
-			BUILD                     : natural := 425;
+			VERSION_PATCH             : natural := 8;
+			BUILD                     : natural := 502;
 			IP_UID                    : natural := 1212765012;
-			VERSION_DATE              : natural := 20260425;
-			VERSION_GIT               : natural := 1929539473;
+			VERSION_DATE              : natural := 20260502;
+			VERSION_GIT               : natural := 375124078;
 			INSTANCE_ID               : natural := 0
 		);
 		port (
@@ -985,7 +985,15 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 
 	component mutrig_injector_multiheader is
 		generic (
-			HEADERINFO_CHANNEL_W : natural := 4
+			HEADERINFO_CHANNEL_W : natural := 4;
+			IP_UID               : natural := 1296649802;
+			VERSION_MAJOR        : natural := 26;
+			VERSION_MINOR        : natural := 0;
+			VERSION_PATCH        : natural := 3;
+			BUILD                : natural := 429;
+			VERSION_DATE         : natural := 20260429;
+			VERSION_GIT          : natural := 1385020117;
+			INSTANCE_ID          : natural := 0
 		);
 		port (
 			i_clk                   : in  std_logic                     := 'X';             -- clk
@@ -1030,23 +1038,38 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 
 	component mutrig_lane_source_mux is
 		generic (
-			SELECT_EMULATOR : integer := 0
+			SELECT_EMULATOR : natural                       := 0;
+			FIFO_DEPTH      : natural                       := 4;
+			IP_UID          : std_logic_vector(31 downto 0) := "01001101010011000101001101001101";
+			VERSION_MAJOR   : natural                       := 26;
+			VERSION_MINOR   : natural                       := 2;
+			VERSION_PATCH   : natural                       := 0;
+			BUILD           : natural                       := 502;
+			VERSION_DATE    : natural                       := 20260502;
+			VERSION_GIT     : std_logic_vector(31 downto 0) := "00000101001010001101101110101101";
+			INSTANCE_ID     : natural                       := 0
 		);
 		port (
-			clk              : in  std_logic                    := 'X';             -- clk
-			rst              : in  std_logic                    := 'X';             -- reset
-			asi_real_data    : in  std_logic_vector(8 downto 0) := (others => 'X'); -- data
-			asi_real_valid   : in  std_logic                    := 'X';             -- valid
-			asi_real_error   : in  std_logic_vector(2 downto 0) := (others => 'X'); -- error
-			asi_real_channel : in  std_logic_vector(3 downto 0) := (others => 'X'); -- channel
-			asi_emu_data     : in  std_logic_vector(8 downto 0) := (others => 'X'); -- data
-			asi_emu_valid    : in  std_logic                    := 'X';             -- valid
-			asi_emu_error    : in  std_logic_vector(2 downto 0) := (others => 'X'); -- error
-			asi_emu_channel  : in  std_logic_vector(3 downto 0) := (others => 'X'); -- channel
-			aso_data         : out std_logic_vector(8 downto 0);                    -- data
-			aso_valid        : out std_logic;                                       -- valid
-			aso_error        : out std_logic_vector(2 downto 0);                    -- error
-			aso_channel      : out std_logic_vector(3 downto 0)                     -- channel
+			clk                 : in  std_logic                     := 'X';             -- clk
+			rst                 : in  std_logic                     := 'X';             -- reset
+			avs_csr_address     : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- address
+			avs_csr_write       : in  std_logic                     := 'X';             -- write
+			avs_csr_read        : in  std_logic                     := 'X';             -- read
+			avs_csr_writedata   : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			avs_csr_readdata    : out std_logic_vector(31 downto 0);                    -- readdata
+			avs_csr_waitrequest : out std_logic;                                        -- waitrequest
+			asi_real_data       : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_real_valid      : in  std_logic                     := 'X';             -- valid
+			asi_real_error      : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			asi_real_channel    : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			asi_emu_data        : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_emu_valid       : in  std_logic                     := 'X';             -- valid
+			asi_emu_error       : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			asi_emu_channel     : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			aso_data            : out std_logic_vector(8 downto 0);                     -- data
+			aso_valid           : out std_logic;                                        -- valid
+			aso_error           : out std_logic_vector(2 downto 0);                     -- error
+			aso_channel         : out std_logic_vector(3 downto 0)                      -- channel
 		);
 	end component mutrig_lane_source_mux;
 
@@ -1500,7 +1523,55 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			mutrig_injector_0_csr_read                                         : out std_logic;                                        -- read
 			mutrig_injector_0_csr_readdata                                     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
 			mutrig_injector_0_csr_writedata                                    : out std_logic_vector(31 downto 0);                    -- writedata
-			mutrig_injector_0_csr_waitrequest                                  : in  std_logic                     := 'X'              -- waitrequest
+			mutrig_injector_0_csr_waitrequest                                  : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_0_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_0_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_0_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_0_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_0_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_0_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_1_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_1_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_1_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_1_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_1_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_1_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_2_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_2_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_2_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_2_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_2_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_2_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_3_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_3_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_3_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_3_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_3_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_3_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_4_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_4_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_4_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_4_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_4_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_4_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_5_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_5_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_5_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_5_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_5_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_5_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_6_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_6_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_6_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_6_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_6_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_6_csr_waitrequest                           : in  std_logic                     := 'X';             -- waitrequest
+			mutrig_lane_source_mux_7_csr_address                               : out std_logic_vector(3 downto 0);                     -- address
+			mutrig_lane_source_mux_7_csr_write                                 : out std_logic;                                        -- write
+			mutrig_lane_source_mux_7_csr_read                                  : out std_logic;                                        -- read
+			mutrig_lane_source_mux_7_csr_readdata                              : in  std_logic_vector(31 downto 0) := (others => 'X'); -- readdata
+			mutrig_lane_source_mux_7_csr_writedata                             : out std_logic_vector(31 downto 0);                    -- writedata
+			mutrig_lane_source_mux_7_csr_waitrequest                           : in  std_logic                     := 'X'              -- waitrequest
 		);
 	end component scifi_datapath_system_v3_pipe_mm_interconnect_0;
 
@@ -2603,8 +2674,10 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 		);
 	end component scifi_datapath_system_v3_pipe_run_control_splitter;
 
-	signal mts_preprocessor_0_debug_burst_valid                                          : std_logic;                     -- mts_preprocessor_0:aso_debug_burst_valid -> histogram_statistics_0:asi_debug_6_valid
-	signal mts_preprocessor_0_debug_burst_data                                           : std_logic_vector(15 downto 0); -- mts_preprocessor_0:aso_debug_burst_data -> histogram_statistics_0:asi_debug_6_data
+	signal mts_preprocessor_0_debug_ts_valid                                             : std_logic;                     -- mts_preprocessor_0:aso_debug_ts_valid -> histogram_statistics_0:asi_debug_1_valid
+	signal mts_preprocessor_0_debug_ts_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_0:aso_debug_ts_data -> histogram_statistics_0:asi_debug_1_data
+	signal mts_preprocessor_1_debug_ts_valid                                             : std_logic;                     -- mts_preprocessor_1:aso_debug_ts_valid -> histogram_statistics_0:asi_debug_2_valid
+	signal mts_preprocessor_1_debug_ts_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_1:aso_debug_ts_data -> histogram_statistics_0:asi_debug_2_data
 	signal mutrig_datapath_subsystem_0_headerinfo_valid                                  : std_logic;                     -- mutrig_datapath_subsystem_0:headerinfo_valid -> mutrig_injector_0:asi_headerinfo0_valid
 	signal mutrig_datapath_subsystem_0_headerinfo_data                                   : std_logic_vector(41 downto 0); -- mutrig_datapath_subsystem_0:headerinfo_data -> mutrig_injector_0:asi_headerinfo0_data
 	signal mutrig_datapath_subsystem_0_headerinfo_channel                                : std_logic_vector(3 downto 0);  -- mutrig_datapath_subsystem_0:headerinfo_channel -> mutrig_injector_0:asi_headerinfo0_channel
@@ -2758,14 +2831,14 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 	signal histogram_ingress_bridge_0_pre_out_endofpacket                                : std_logic;                     -- histogram_ingress_bridge_0:aso_pre_endofpacket -> hit_stack_subsystem_0:hit_type_1_endofpacket
 	signal histogram_ingress_bridge_0_pre_out_error                                      : std_logic;                     -- histogram_ingress_bridge_0:aso_pre_error -> hit_stack_subsystem_0:hit_type_1_error
 	signal histogram_ingress_bridge_0_pre_out_empty                                      : std_logic;                     -- histogram_ingress_bridge_0:aso_pre_empty -> hit_stack_subsystem_0:hit_type_1_empty
-	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_valid -> histogram_statistics_0:asi_debug_2_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_data -> histogram_statistics_0:asi_debug_2_data
-	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_valid -> histogram_statistics_0:asi_debug_3_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_data -> histogram_statistics_0:asi_debug_3_data
-	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_valid -> histogram_statistics_0:asi_debug_4_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_data -> histogram_statistics_0:asi_debug_4_data
-	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_valid -> histogram_statistics_0:asi_debug_5_valid
-	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_data -> histogram_statistics_0:asi_debug_5_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_valid -> histogram_statistics_0:asi_debug_3_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_0_filllevel_data -> histogram_statistics_0:asi_debug_3_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_valid -> histogram_statistics_0:asi_debug_4_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_1_filllevel_data -> histogram_statistics_0:asi_debug_4_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_valid -> histogram_statistics_0:asi_debug_5_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_data -> histogram_statistics_0:asi_debug_5_data
+	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_valid -> histogram_statistics_0:asi_debug_6_valid
+	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_data -> histogram_statistics_0:asi_debug_6_data
 	signal mutrig_lane_source_mux_0_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_0:aso_valid -> mutrig_datapath_subsystem_0:decoded_din_valid
 	signal mutrig_lane_source_mux_0_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_0:aso_data -> mutrig_datapath_subsystem_0:decoded_din_data
 	signal mutrig_lane_source_mux_0_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_0:aso_channel -> mutrig_datapath_subsystem_0:decoded_din_channel
@@ -2798,8 +2871,6 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 	signal mutrig_lane_source_mux_7_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_7:aso_data -> mutrig_datapath_subsystem_7:decoded_din_data
 	signal mutrig_lane_source_mux_7_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_7:aso_channel -> mutrig_datapath_subsystem_7:decoded_din_channel
 	signal mutrig_lane_source_mux_7_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_7:aso_error -> mutrig_datapath_subsystem_7:decoded_din_error
-	signal mts_preprocessor_0_ts_delta_valid                                             : std_logic;                     -- mts_preprocessor_0:aso_ts_delta_valid -> histogram_statistics_0:asi_debug_1_valid
-	signal mts_preprocessor_0_ts_delta_data                                              : std_logic_vector(15 downto 0); -- mts_preprocessor_0:aso_ts_delta_data -> histogram_statistics_0:asi_debug_1_data
 	signal emulator_mutrig_0_tx8b1k_valid                                                : std_logic;                     -- emulator_mutrig_0:aso_tx8b1k_valid -> mutrig_lane_source_mux_0:asi_emu_valid
 	signal emulator_mutrig_0_tx8b1k_data                                                 : std_logic_vector(8 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_data -> mutrig_lane_source_mux_0:asi_emu_data
 	signal emulator_mutrig_0_tx8b1k_channel                                              : std_logic_vector(3 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_channel -> mutrig_lane_source_mux_0:asi_emu_channel
@@ -3166,6 +3237,54 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_read                         : std_logic;                     -- mm_interconnect_0:histogram_ingress_bridge_0_csr_read -> histogram_ingress_bridge_0:avs_csr_read
 	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_write                        : std_logic;                     -- mm_interconnect_0:histogram_ingress_bridge_0_csr_write -> histogram_ingress_bridge_0:avs_csr_write
 	signal mm_interconnect_0_histogram_ingress_bridge_0_csr_writedata                    : std_logic_vector(31 downto 0); -- mm_interconnect_0:histogram_ingress_bridge_0_csr_writedata -> histogram_ingress_bridge_0:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_0:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_0_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_0:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_0_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_address -> mutrig_lane_source_mux_0:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_read -> mutrig_lane_source_mux_0:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_write -> mutrig_lane_source_mux_0:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_0_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_0_csr_writedata -> mutrig_lane_source_mux_0:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_1:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_1_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_1:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_1_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_address -> mutrig_lane_source_mux_1:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_read -> mutrig_lane_source_mux_1:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_write -> mutrig_lane_source_mux_1:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_1_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_1_csr_writedata -> mutrig_lane_source_mux_1:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_2:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_2_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_2:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_2_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_address -> mutrig_lane_source_mux_2:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_read -> mutrig_lane_source_mux_2:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_write -> mutrig_lane_source_mux_2:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_2_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_2_csr_writedata -> mutrig_lane_source_mux_2:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_3:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_3_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_3:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_3_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_address -> mutrig_lane_source_mux_3:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_read -> mutrig_lane_source_mux_3:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_write -> mutrig_lane_source_mux_3:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_3_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_3_csr_writedata -> mutrig_lane_source_mux_3:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_4:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_4_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_4:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_4_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_address -> mutrig_lane_source_mux_4:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_read -> mutrig_lane_source_mux_4:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_write -> mutrig_lane_source_mux_4:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_4_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_4_csr_writedata -> mutrig_lane_source_mux_4:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_5:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_5_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_5:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_5_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_address -> mutrig_lane_source_mux_5:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_read -> mutrig_lane_source_mux_5:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_write -> mutrig_lane_source_mux_5:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_5_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_5_csr_writedata -> mutrig_lane_source_mux_5:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_6:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_6_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_6:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_6_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_address -> mutrig_lane_source_mux_6:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_read -> mutrig_lane_source_mux_6:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_write -> mutrig_lane_source_mux_6:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_6_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_6_csr_writedata -> mutrig_lane_source_mux_6:avs_csr_writedata
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_readdata                       : std_logic_vector(31 downto 0); -- mutrig_lane_source_mux_7:avs_csr_readdata -> mm_interconnect_0:mutrig_lane_source_mux_7_csr_readdata
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_waitrequest                    : std_logic;                     -- mutrig_lane_source_mux_7:avs_csr_waitrequest -> mm_interconnect_0:mutrig_lane_source_mux_7_csr_waitrequest
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_address                        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_address -> mutrig_lane_source_mux_7:avs_csr_address
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_read                           : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_read -> mutrig_lane_source_mux_7:avs_csr_read
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_write                          : std_logic;                     -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_write -> mutrig_lane_source_mux_7:avs_csr_write
+	signal mm_interconnect_0_mutrig_lane_source_mux_7_csr_writedata                      : std_logic_vector(31 downto 0); -- mm_interconnect_0:mutrig_lane_source_mux_7_csr_writedata -> mutrig_lane_source_mux_7:avs_csr_writedata
 	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_readdata       : std_logic_vector(31 downto 0); -- hit_stack_subsystem_0:feb_frame_assembly_csr_readdata -> mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_readdata
 	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest    : std_logic;                     -- hit_stack_subsystem_0:feb_frame_assembly_csr_waitrequest -> mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_waitrequest
 	signal mm_interconnect_0_hit_stack_subsystem_0_feb_frame_assembly_csr_address        : std_logic_vector(3 downto 0);  -- mm_interconnect_0:hit_stack_subsystem_0_feb_frame_assembly_csr_address -> hit_stack_subsystem_0:feb_frame_assembly_csr_address
@@ -4190,9 +4309,9 @@ begin
 			IP_UID                => 1212764994,
 			VERSION_MAJOR         => 26,
 			VERSION_MINOR         => 0,
-			VERSION_PATCH         => 2,
-			BUILD                 => 425,
-			VERSION_DATE          => 20260425,
+			VERSION_PATCH         => 4,
+			BUILD                 => 502,
+			VERSION_DATE          => 20260502,
 			VERSION_GIT           => 481097348,
 			INSTANCE_ID           => 0
 		)
@@ -4245,8 +4364,8 @@ begin
 			MAX_COUNT_BITS            => 32,
 			DEF_LEFT_BOUND            => 0,
 			DEF_BIN_WIDTH             => 1,
-			UPDATE_KEY_BIT_HI         => 21,
-			UPDATE_KEY_BIT_LO         => 17,
+			UPDATE_KEY_BIT_HI         => 34,
+			UPDATE_KEY_BIT_LO         => 30,
 			UPDATE_KEY_REPRESENTATION => "SIGNED",
 			FILTER_KEY_BIT_HI         => 38,
 			FILTER_KEY_BIT_LO         => 35,
@@ -4267,11 +4386,11 @@ begin
 			DEBUG                     => 0,
 			VERSION_MAJOR             => 26,
 			VERSION_MINOR             => 1,
-			VERSION_PATCH             => 2,
-			BUILD                     => 425,
+			VERSION_PATCH             => 8,
+			BUILD                     => 502,
 			IP_UID                    => 1212765012,
-			VERSION_DATE              => 20260425,
-			VERSION_GIT               => 1929539473,
+			VERSION_DATE              => 20260502,
+			VERSION_GIT               => 72231161,
 			INSTANCE_ID               => 0
 		)
 		port map (
@@ -4309,18 +4428,18 @@ begin
 			aso_hist_fill_out_startofpacket => open,                                                                 --               .startofpacket
 			aso_hist_fill_out_endofpacket   => open,                                                                 --               .endofpacket
 			aso_hist_fill_out_channel       => open,                                                                 --               .channel
-			asi_debug_1_valid               => mts_preprocessor_0_ts_delta_valid,                                    --        debug_1.valid
-			asi_debug_1_data                => mts_preprocessor_0_ts_delta_data,                                     --               .data
-			asi_debug_2_valid               => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid,              --        debug_2.valid
-			asi_debug_2_data                => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data,               --               .data
-			asi_debug_3_valid               => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid,              --        debug_3.valid
-			asi_debug_3_data                => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data,               --               .data
-			asi_debug_4_valid               => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid,              --        debug_4.valid
-			asi_debug_4_data                => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data,               --               .data
-			asi_debug_5_valid               => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,              --        debug_5.valid
-			asi_debug_5_data                => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data,               --               .data
-			asi_debug_6_valid               => mts_preprocessor_0_debug_burst_valid,                                 --        debug_6.valid
-			asi_debug_6_data                => mts_preprocessor_0_debug_burst_data,                                  --               .data
+			asi_debug_1_valid               => mts_preprocessor_0_debug_ts_valid,                                    --        debug_1.valid
+			asi_debug_1_data                => mts_preprocessor_0_debug_ts_data,                                     --               .data
+			asi_debug_2_valid               => mts_preprocessor_1_debug_ts_valid,                                    --        debug_2.valid
+			asi_debug_2_data                => mts_preprocessor_1_debug_ts_data,                                     --               .data
+			asi_debug_3_valid               => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid,              --        debug_3.valid
+			asi_debug_3_data                => hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_data,               --               .data
+			asi_debug_4_valid               => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid,              --        debug_4.valid
+			asi_debug_4_data                => hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_data,               --               .data
+			asi_debug_5_valid               => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid,              --        debug_5.valid
+			asi_debug_5_data                => hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data,               --               .data
+			asi_debug_6_valid               => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,              --        debug_6.valid
+			asi_debug_6_data                => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data,               --               .data
 			asi_fill_in_1_valid             => '0',                                                                  --    (terminated)
 			asi_fill_in_1_ready             => open,                                                                 --    (terminated)
 			asi_fill_in_1_data              => "000000000000000000000000000000000000000",                            --    (terminated)
@@ -5092,7 +5211,7 @@ begin
 			ENABLED_CHANNEL_HI                => 3,
 			PADDING_EOP_WAIT_CYCLE            => 512,
 			LPM_DIV_PIPELINE                  => 4,
-			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 4096,
+			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 2000,
 			MUTRIG_OVERFLOW_LOOKBACK_8N       => 2000,
 			DEBUG                             => 1
 		)
@@ -5124,12 +5243,12 @@ begin
 			aso_hit_type1_startofpacket => mts_preprocessor_0_hit_type1_out_startofpacket,       --                .startofpacket
 			aso_hit_type1_empty         => mts_preprocessor_0_hit_type1_out_empty,               --                .empty
 			aso_hit_type1_error         => mts_preprocessor_0_hit_type1_out_error,               --                .error
-			aso_debug_ts_valid          => open,                                                 --        debug_ts.valid
-			aso_debug_ts_data           => open,                                                 --                .data
-			aso_debug_burst_valid       => mts_preprocessor_0_debug_burst_valid,                 --     debug_burst.valid
-			aso_debug_burst_data        => mts_preprocessor_0_debug_burst_data,                  --                .data
-			aso_ts_delta_valid          => mts_preprocessor_0_ts_delta_valid,                    --        ts_delta.valid
-			aso_ts_delta_data           => mts_preprocessor_0_ts_delta_data                      --                .data
+			aso_debug_ts_valid          => mts_preprocessor_0_debug_ts_valid,                    --        debug_ts.valid
+			aso_debug_ts_data           => mts_preprocessor_0_debug_ts_data,                     --                .data
+			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
+			aso_debug_burst_data        => open,                                                 --                .data
+			aso_ts_delta_valid          => open,                                                 --        ts_delta.valid
+			aso_ts_delta_data           => open                                                  --                .data
 		);
 
 	mts_preprocessor_1 : component mts_processor
@@ -5142,7 +5261,7 @@ begin
 			ENABLED_CHANNEL_HI                => 3,
 			PADDING_EOP_WAIT_CYCLE            => 512,
 			LPM_DIV_PIPELINE                  => 4,
-			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 4096,
+			MUTRIG_BUFFER_EXPECTED_LATENCY_8N => 2000,
 			MUTRIG_OVERFLOW_LOOKBACK_8N       => 2000,
 			DEBUG                             => 1
 		)
@@ -5174,8 +5293,8 @@ begin
 			aso_hit_type1_startofpacket => mts_preprocessor_1_hit_type1_out_startofpacket,       --                .startofpacket
 			aso_hit_type1_empty         => mts_preprocessor_1_hit_type1_out_empty,               --                .empty
 			aso_hit_type1_error         => mts_preprocessor_1_hit_type1_out_error,               --                .error
-			aso_debug_ts_valid          => open,                                                 --        debug_ts.valid
-			aso_debug_ts_data           => open,                                                 --                .data
+			aso_debug_ts_valid          => mts_preprocessor_1_debug_ts_valid,                    --        debug_ts.valid
+			aso_debug_ts_data           => mts_preprocessor_1_debug_ts_data,                     --                .data
 			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
 			aso_debug_burst_data        => open,                                                 --                .data
 			aso_ts_delta_valid          => open,                                                 --        ts_delta.valid
@@ -5456,7 +5575,15 @@ begin
 
 	mutrig_injector_0 : component mutrig_injector_multiheader
 		generic map (
-			HEADERINFO_CHANNEL_W => 4
+			HEADERINFO_CHANNEL_W => 4,
+			IP_UID               => 1296649802,
+			VERSION_MAJOR        => 26,
+			VERSION_MINOR        => 0,
+			VERSION_PATCH        => 3,
+			BUILD                => 429,
+			VERSION_DATE         => 20260429,
+			VERSION_GIT          => 1385020117,
+			INSTANCE_ID          => 0
 		)
 		port map (
 			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         --     clock_interface.clk
@@ -5500,170 +5627,290 @@ begin
 
 	mutrig_lane_source_mux_0 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 0
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_out_0_data,                  --      real_in.data
-			asi_real_valid   => avalon_st_adapter_out_0_valid,                 --             .valid
-			asi_real_error   => avalon_st_adapter_out_0_error,                 --             .error
-			asi_real_channel => avalon_st_adapter_out_0_channel,               --             .channel
-			asi_emu_data     => emulator_mutrig_0_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_0_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_0_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_0_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_0_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_0_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_0_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_0_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_0_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_0_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_0_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_0_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_0_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_0_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_out_0_data,                               --      real_in.data
+			asi_real_valid      => avalon_st_adapter_out_0_valid,                              --             .valid
+			asi_real_error      => avalon_st_adapter_out_0_error,                              --             .error
+			asi_real_channel    => avalon_st_adapter_out_0_channel,                            --             .channel
+			asi_emu_data        => emulator_mutrig_0_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_0_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_0_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_0_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_0_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_0_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_0_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_0_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_1 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 1
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_001_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_001_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_001_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_001_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_1_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_1_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_1_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_1_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_1_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_1_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_1_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_1_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_1_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_1_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_1_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_1_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_1_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_1_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_001_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_001_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_001_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_001_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_1_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_1_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_1_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_1_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_1_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_1_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_1_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_1_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_2 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 2
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_002_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_002_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_002_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_002_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_2_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_2_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_2_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_2_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_2_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_2_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_2_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_2_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_2_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_2_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_2_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_2_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_2_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_2_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_002_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_002_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_002_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_002_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_2_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_2_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_2_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_2_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_2_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_2_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_2_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_2_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_3 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 3
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_003_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_003_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_003_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_003_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_3_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_3_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_3_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_3_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_3_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_3_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_3_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_3_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_3_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_3_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_3_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_3_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_3_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_3_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_003_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_003_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_003_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_003_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_3_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_3_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_3_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_3_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_3_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_3_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_3_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_3_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_4 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 4
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_004_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_004_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_004_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_004_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_4_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_4_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_4_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_4_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_4_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_4_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_4_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_4_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_4_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_4_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_4_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_4_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_4_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_4_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_004_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_004_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_004_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_004_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_4_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_4_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_4_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_4_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_4_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_4_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_4_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_4_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_5 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 5
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_005_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_005_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_005_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_005_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_5_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_5_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_5_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_5_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_5_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_5_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_5_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_5_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_5_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_5_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_5_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_5_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_5_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_5_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_005_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_005_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_005_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_005_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_5_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_5_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_5_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_5_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_5_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_5_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_5_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_5_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_6 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 6
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_006_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_006_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_006_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_006_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_6_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_6_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_6_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_6_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_6_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_6_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_6_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_6_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_6_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_6_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_6_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_6_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_6_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_6_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_006_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_006_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_006_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_006_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_6_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_6_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_6_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_6_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_6_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_6_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_6_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_6_selected_out_channel               --             .channel
 		);
 
 	mutrig_lane_source_mux_7 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 1
+			SELECT_EMULATOR => 0,
+			FIFO_DEPTH      => 4,
+			IP_UID          => "01001101010011000101001101001101",
+			VERSION_MAJOR   => 26,
+			VERSION_MINOR   => 2,
+			VERSION_PATCH   => 0,
+			BUILD           => 502,
+			VERSION_DATE    => 20260502,
+			VERSION_GIT     => "00000101001010001101101110101101",
+			INSTANCE_ID     => 7
 		)
 		port map (
-			clk              => lvds_rx_28nm_0_outclock_clk,                   --          clk.clk
-			rst              => rst_controller_001_reset_out_reset,            --          rst.reset
-			asi_real_data    => avalon_st_adapter_007_out_0_data,              --      real_in.data
-			asi_real_valid   => avalon_st_adapter_007_out_0_valid,             --             .valid
-			asi_real_error   => avalon_st_adapter_007_out_0_error,             --             .error
-			asi_real_channel => avalon_st_adapter_007_out_0_channel,           --             .channel
-			asi_emu_data     => emulator_mutrig_7_tx8b1k_data,                 --       emu_in.data
-			asi_emu_valid    => emulator_mutrig_7_tx8b1k_valid,                --             .valid
-			asi_emu_error    => emulator_mutrig_7_tx8b1k_error,                --             .error
-			asi_emu_channel  => emulator_mutrig_7_tx8b1k_channel,              --             .channel
-			aso_data         => mutrig_lane_source_mux_7_selected_out_data,    -- selected_out.data
-			aso_valid        => mutrig_lane_source_mux_7_selected_out_valid,   --             .valid
-			aso_error        => mutrig_lane_source_mux_7_selected_out_error,   --             .error
-			aso_channel      => mutrig_lane_source_mux_7_selected_out_channel  --             .channel
+			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
+			rst                 => rst_controller_001_reset_out_reset,                         --          rst.reset
+			avs_csr_address     => mm_interconnect_0_mutrig_lane_source_mux_7_csr_address,     --          csr.address
+			avs_csr_write       => mm_interconnect_0_mutrig_lane_source_mux_7_csr_write,       --             .write
+			avs_csr_read        => mm_interconnect_0_mutrig_lane_source_mux_7_csr_read,        --             .read
+			avs_csr_writedata   => mm_interconnect_0_mutrig_lane_source_mux_7_csr_writedata,   --             .writedata
+			avs_csr_readdata    => mm_interconnect_0_mutrig_lane_source_mux_7_csr_readdata,    --             .readdata
+			avs_csr_waitrequest => mm_interconnect_0_mutrig_lane_source_mux_7_csr_waitrequest, --             .waitrequest
+			asi_real_data       => avalon_st_adapter_007_out_0_data,                           --      real_in.data
+			asi_real_valid      => avalon_st_adapter_007_out_0_valid,                          --             .valid
+			asi_real_error      => avalon_st_adapter_007_out_0_error,                          --             .error
+			asi_real_channel    => avalon_st_adapter_007_out_0_channel,                        --             .channel
+			asi_emu_data        => emulator_mutrig_7_tx8b1k_data,                              --       emu_in.data
+			asi_emu_valid       => emulator_mutrig_7_tx8b1k_valid,                             --             .valid
+			asi_emu_error       => emulator_mutrig_7_tx8b1k_error,                             --             .error
+			asi_emu_channel     => emulator_mutrig_7_tx8b1k_channel,                           --             .channel
+			aso_data            => mutrig_lane_source_mux_7_selected_out_data,                 -- selected_out.data
+			aso_valid           => mutrig_lane_source_mux_7_selected_out_valid,                --             .valid
+			aso_error           => mutrig_lane_source_mux_7_selected_out_error,                --             .error
+			aso_channel         => mutrig_lane_source_mux_7_selected_out_channel               --             .channel
 		);
 
 	mutrig_reset_controller_0 : component mutrig_reset_controller
@@ -6307,7 +6554,55 @@ begin
 			mutrig_injector_0_csr_read                                         => mm_interconnect_0_mutrig_injector_0_csr_read,                                  --                                                             .read
 			mutrig_injector_0_csr_readdata                                     => mm_interconnect_0_mutrig_injector_0_csr_readdata,                              --                                                             .readdata
 			mutrig_injector_0_csr_writedata                                    => mm_interconnect_0_mutrig_injector_0_csr_writedata,                             --                                                             .writedata
-			mutrig_injector_0_csr_waitrequest                                  => mm_interconnect_0_mutrig_injector_0_csr_waitrequest                            --                                                             .waitrequest
+			mutrig_injector_0_csr_waitrequest                                  => mm_interconnect_0_mutrig_injector_0_csr_waitrequest,                           --                                                             .waitrequest
+			mutrig_lane_source_mux_0_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_0_csr_address,                        --                                 mutrig_lane_source_mux_0_csr.address
+			mutrig_lane_source_mux_0_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_0_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_0_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_0_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_0_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_0_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_0_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_0_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_0_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_0_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_1_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_1_csr_address,                        --                                 mutrig_lane_source_mux_1_csr.address
+			mutrig_lane_source_mux_1_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_1_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_1_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_1_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_1_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_1_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_1_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_1_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_1_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_1_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_2_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_2_csr_address,                        --                                 mutrig_lane_source_mux_2_csr.address
+			mutrig_lane_source_mux_2_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_2_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_2_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_2_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_2_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_2_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_2_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_2_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_2_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_2_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_3_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_3_csr_address,                        --                                 mutrig_lane_source_mux_3_csr.address
+			mutrig_lane_source_mux_3_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_3_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_3_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_3_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_3_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_3_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_3_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_3_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_3_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_3_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_4_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_4_csr_address,                        --                                 mutrig_lane_source_mux_4_csr.address
+			mutrig_lane_source_mux_4_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_4_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_4_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_4_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_4_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_4_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_4_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_4_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_4_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_4_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_5_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_5_csr_address,                        --                                 mutrig_lane_source_mux_5_csr.address
+			mutrig_lane_source_mux_5_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_5_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_5_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_5_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_5_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_5_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_5_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_5_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_5_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_5_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_6_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_6_csr_address,                        --                                 mutrig_lane_source_mux_6_csr.address
+			mutrig_lane_source_mux_6_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_6_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_6_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_6_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_6_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_6_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_6_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_6_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_6_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_6_csr_waitrequest,                    --                                                             .waitrequest
+			mutrig_lane_source_mux_7_csr_address                               => mm_interconnect_0_mutrig_lane_source_mux_7_csr_address,                        --                                 mutrig_lane_source_mux_7_csr.address
+			mutrig_lane_source_mux_7_csr_write                                 => mm_interconnect_0_mutrig_lane_source_mux_7_csr_write,                          --                                                             .write
+			mutrig_lane_source_mux_7_csr_read                                  => mm_interconnect_0_mutrig_lane_source_mux_7_csr_read,                           --                                                             .read
+			mutrig_lane_source_mux_7_csr_readdata                              => mm_interconnect_0_mutrig_lane_source_mux_7_csr_readdata,                       --                                                             .readdata
+			mutrig_lane_source_mux_7_csr_writedata                             => mm_interconnect_0_mutrig_lane_source_mux_7_csr_writedata,                      --                                                             .writedata
+			mutrig_lane_source_mux_7_csr_waitrequest                           => mm_interconnect_0_mutrig_lane_source_mux_7_csr_waitrequest                     --                                                             .waitrequest
 		);
 
 	mm_interconnect_1 : component scifi_datapath_system_v3_pipe_mm_interconnect_1

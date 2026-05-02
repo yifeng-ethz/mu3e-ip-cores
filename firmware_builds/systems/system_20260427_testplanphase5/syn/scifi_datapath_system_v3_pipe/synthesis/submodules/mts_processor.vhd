@@ -41,8 +41,10 @@
 --      Date: Apr 25, 2026
 -- Revision: 5.14 (Add timestamp-delay error forward/drop policy for MuTRiG bring-up)
 --      Date: Apr 27, 2026
--- Version : 26.0.8
--- Date    : 20260427
+-- Revision: 5.15 (Align timestamp-delay error classification with the output hit beat)
+--      Date: Apr 30, 2026
+-- Version : 26.0.9
+-- Date    : 20260430
 -- Change  : Register the corrected divider numerators in hit_prediv, then split divider launch and
 --           ToT subtraction into separate cycles. A one-cycle delayed copy of the divider outputs keeps
 --           the quotient/remainder aligned with the metadata shift pipeline. External RESET / OUT_OF_DAQ
@@ -60,6 +62,8 @@
 --           CONTROL_STATUS bit 5 now optionally drops hits whose timestamp-delay error sideband is
 --           asserted. The default behavior still forwards those hits with error asserted so downstream
 --           consumers can decide whether to trim or observe them.
+--           The timestamp-delay error sideband is now derived in the same registered pipeline stage that
+--           assembles hit_out, so mixed clean/error traffic cannot tag the neighboring output beat.
 -- =========
 -- Description:	[MuTRiG Timestamp Processor] 
     -- Processes the Timestamp TCC (15 bit)(1.6 ns) into TCC_8n (13 bit) and TCC_1n6 (3 bit).:
@@ -567,6 +571,20 @@ architecture rtl of mts_processor is
         end if;
         return result_v;
     end function signmag_to_twos_comp16;
+
+    function debug_delay_delta16(
+        arrival_8n : unsigned;
+        hit_ts_8n  : unsigned
+    ) return std_logic_vector is
+        variable arrival_v : signed(LPM_DIV_WIDTHN downto 0);
+        variable hit_ts_v  : signed(LPM_DIV_WIDTHN downto 0);
+        variable delta_v   : signed(LPM_DIV_WIDTHN downto 0);
+    begin
+        arrival_v := signed('0' & resize(arrival_8n, LPM_DIV_WIDTHN));
+        hit_ts_v  := signed('0' & resize(hit_ts_8n, LPM_DIV_WIDTHN));
+        delta_v   := arrival_v - hit_ts_v;
+        return std_logic_vector(resize(delta_v, 16));
+    end function debug_delay_delta16;
     
     
     
@@ -1171,7 +1189,11 @@ begin
     
     proc_datapath : process (i_rst, i_clk) 
     --	
-        variable et_delta_v : unsigned(49 downto 0);
+        variable et_delta_v                  : unsigned(49 downto 0);
+        variable hit_delay_arrival_v         : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
+        variable hit_delay_selected_ts_v     : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
+        variable hit_delay_delta_v           : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
+        variable hit_delay_expected_latency_v : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
     begin
         if (i_rst = '1') then 
             hit_in.asic     <= (others => '0');
@@ -1238,6 +1260,7 @@ begin
             hit_out.et_1n6  <= (others => '0');
             hit_out.valid   <= '0';
             hit_out.hiterr  <= '0';
+            hit_out_delay_error <= '0';
         
         elsif (rising_edge(i_clk)) then
             -- default 
@@ -1309,6 +1332,7 @@ begin
             hit_out.et_1n6		<= (others => '0');
             hit_out.valid		<= '0';
             hit_out.hiterr		<= '0';
+            hit_out_delay_error <= '0';
 
             -- input stage
             if (asi_hit_type0_valid = '1' and hit_in_ok = '1') then 
@@ -1403,6 +1427,25 @@ begin
                 hit_out.et_1n6		<= hit_div(LPM_DIV_PIPELINE).et_1n6;
                 hit_out.valid		<= '1';
                 hit_out.hiterr		<= hit_div(LPM_DIV_PIPELINE).hiterr;
+
+                hit_delay_arrival_v          := resize(counter_gts_8n, hit_delay_arrival_v'length);
+                hit_delay_expected_latency_v := resize(unsigned(csr.expected_latency), hit_delay_expected_latency_v'length);
+                if (csr.delay_ts_field_use_t = '1') then
+                    hit_delay_selected_ts_v := unsigned(tcc_div_quotient_d);
+                else
+                    hit_delay_selected_ts_v := unsigned(ecc_div_quotient_d);
+                end if;
+
+                if (hit_delay_arrival_v > hit_delay_selected_ts_v) then
+                    hit_delay_delta_v := hit_delay_arrival_v - hit_delay_selected_ts_v;
+                    if (hit_delay_delta_v < hit_delay_expected_latency_v) then
+                        hit_out_delay_error <= '0';
+                    else
+                        hit_out_delay_error <= '1';
+                    end if;
+                else
+                    hit_out_delay_error <= '1';
+                end if;
             end if;
 
         end if;
@@ -1560,28 +1603,13 @@ begin
         if (rising_edge(i_clk)) then
             if (hit_div(LPM_DIV_PIPELINE).valid = '1') then -- 48 bit - 48 bit (no of/df)
                 if (csr.delay_ts_field_use_t = '1') then  
-                    int_aso_debug_ts_data	<= std_logic_vector(to_signed(to_integer(counter_gts_8n) - to_integer(unsigned(tcc_div_quotient_d)),aso_debug_ts_data'length));
+                    int_aso_debug_ts_data <= debug_delay_delta16(counter_gts_8n, unsigned(tcc_div_quotient_d));
                 else 
-                    int_aso_debug_ts_data	<= std_logic_vector(to_signed(to_integer(counter_gts_8n) - to_integer(unsigned(ecc_div_quotient_d)),aso_debug_ts_data'length));
+                    int_aso_debug_ts_data <= debug_delay_delta16(counter_gts_8n, unsigned(ecc_div_quotient_d));
                 end if;
                 int_aso_debug_ts_valid  <= '1';
             else 
                 int_aso_debug_ts_valid  <= '0';
-            end if;
-            
-            -- --------------------------------------------
-            -- derive the error signals of the datapath
-            -- --------------------------------------------
-            -- default 
-            hit_out_delay_error              <= '0'; -- timing aligned with <hit_type1> output stage
-            if (int_aso_debug_ts_valid = '1') then 
-                -- ok: ts within range of (0,2000)
-                if (signed(int_aso_debug_ts_data) > to_signed(0, int_aso_debug_ts_data'length) and unsigned(int_aso_debug_ts_data) < unsigned(csr.expected_latency)) then -- refactor : use csr and better lint 
-                    hit_out_delay_error         <= '0';
-                -- error: ts out of range of (0,2000). possible pll unlocked or cml logic recv side is too low (generate a bit of side noise)
-                else 
-                    hit_out_delay_error         <= '1';
-                end if;
             end if;
         end if;
     end process;
