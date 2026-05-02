@@ -6,6 +6,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from functools import lru_cache
@@ -24,6 +25,8 @@ from check_ip_metadata import (
     _default_sc_tool,
     _default_system_console,
     jtag_rw,
+    run_checked,
+    split_jtag_patterns,
     sc_read,
     sc_write,
 )
@@ -32,11 +35,29 @@ from svd_inventory_lib import REPO_ROOT, SYN_DIR, load_svd_metadata, resolve_svd
 
 DEFAULT_DATA_QSYS = SYN_DIR / "scifi_datapath_system_v3_pipe.qsys"
 DEFAULT_DEBUG_QSYS = SYN_DIR / "debug_sc_system_v3.qsys"
+DEFAULT_FEB_SOPCINFO = SYN_DIR / "feb_system_v3_pipe.sopcinfo"
+DEFAULT_SYSTEM_DESC = DEFAULT_FEB_SOPCINFO if DEFAULT_FEB_SOPCINFO.is_file() else DEFAULT_DATA_QSYS
+DEFAULT_INVENTORY_JTAG_MASTER_PATTERN = os.environ.get(
+    "BOARD_TEST_JTAG_MASTER_PATTERN",
+    "*#7-2*/phy_1/master",
+)
+DEFAULT_INVENTORY_JTAG_FALLBACK_PATTERN = os.environ.get(
+    "BOARD_TEST_JTAG_FALLBACK_PATTERN",
+    ",".join(
+        [
+            "*phy_1/master",
+            DEFAULT_JTAG_MASTER_PATTERN,
+            DEFAULT_JTAG_FALLBACK_PATTERN,
+        ]
+    ),
+)
 
 SC_HUB_MASTER = "sc_hub_cmd_pipe.m0"
 SC_DATAPATH_BRIDGE = "mm_bridge.s0"
 DATA_SC_ROOT = "mm_clock_crossing_bridge.m0"
 DATA_JTAG_ROOT = "master_datapath.master"
+SOPCINFO_SC_HUB_MASTER = "control_path_subsystem_sc_hub_cmd_pipe.m0"
+SOPCINFO_JTAG_ROOT = "data_path_subsystem_master_datapath.master"
 
 BRIDGE_KINDS = {
     "altera_avalon_mm_bridge",
@@ -98,6 +119,10 @@ def split_endpoint(endpoint: str) -> tuple[str, str]:
     return endpoint.split(".", 1)
 
 
+def parameter_value(param: ET.Element) -> str:
+    return param.attrib.get("value") or param.findtext("value") or ""
+
+
 def parse_qsys(qsys_path: Path) -> tuple[dict[str, dict[str, Any]], dict[str, list[dict[str, Any]]]]:
     root = ET.parse(qsys_path).getroot()
     modules: dict[str, dict[str, Any]] = {}
@@ -111,7 +136,7 @@ def parse_qsys(qsys_path: Path) -> tuple[dict[str, dict[str, Any]], dict[str, li
         for param in module.findall("./parameter"):
             key = param.attrib.get("name")
             if key:
-                parameters[key] = param.attrib.get("value", "")
+                parameters[key] = parameter_value(param)
         modules[name] = {
             "name": name,
             "kind": module.attrib.get("kind", ""),
@@ -139,6 +164,79 @@ def parse_qsys(qsys_path: Path) -> tuple[dict[str, dict[str, Any]], dict[str, li
     for rows in by_start.values():
         rows.sort(key=lambda item: (item["base_byte"], item["end"]))
     return modules, by_start
+
+
+def parse_sopcinfo(
+    sopcinfo_path: Path,
+) -> tuple[dict[str, dict[str, Any]], dict[str, list[dict[str, Any]]]]:
+    root = ET.parse(sopcinfo_path).getroot()
+    modules: dict[str, dict[str, Any]] = {}
+    master_maps: dict[str, list[dict[str, Any]]] = {}
+
+    for module in root.findall("./module"):
+        name = module.attrib.get("name")
+        if not name:
+            continue
+        parameters: dict[str, str] = {}
+        for param in module.findall("./parameter"):
+            key = param.attrib.get("name")
+            if key:
+                parameters[key] = parameter_value(param)
+        modules[name] = {
+            "name": name,
+            "kind": module.attrib.get("kind", ""),
+            "module_version": module.attrib.get("version", ""),
+            "parameters": parameters,
+        }
+
+        for iface in module.findall("./interface"):
+            iface_name = iface.attrib.get("name", "")
+            if iface.attrib.get("kind") != "avalon_master" or not iface_name:
+                continue
+            master = f"{name}.{iface_name}"
+            rows: list[dict[str, Any]] = []
+            for block in iface.findall("./memoryBlock"):
+                endpoint = (block.findtext("name") or "").strip()
+                instance = (block.findtext("moduleName") or "").strip()
+                slave = (block.findtext("slaveName") or "").strip()
+                base = parse_int(block.findtext("baseAddress"))
+                span = parse_int(block.findtext("span"))
+                if not endpoint or not instance or base is None:
+                    continue
+                rows.append(
+                    {
+                        "endpoint": endpoint,
+                        "instance": instance,
+                        "interface": slave,
+                        "base_byte": base,
+                        "span_byte": span,
+                        "is_bridge": (block.findtext("isBridge") or "").strip().lower() == "true",
+                        "route": [f"{master}->{endpoint}@{fmt_hex(base)}"],
+                        "cycle": False,
+                    }
+                )
+            rows.sort(key=lambda item: (item["base_byte"], item["endpoint"]))
+            master_maps[master] = rows
+    return modules, master_maps
+
+
+def resolve_master(master_maps: dict[str, list[dict[str, Any]]], requested: str) -> str:
+    if requested in master_maps:
+        return requested
+    matches = [name for name in master_maps if name.endswith(requested)]
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise RuntimeError(f"{requested} is not an Avalon master in the SOPCInfo")
+    raise RuntimeError(f"{requested} is ambiguous in the SOPCInfo: {', '.join(matches)}")
+
+
+def sopcinfo_leaves_for_master(
+    master_maps: dict[str, list[dict[str, Any]]],
+    requested_master: str,
+) -> tuple[str, list[dict[str, Any]]]:
+    resolved = resolve_master(master_maps, requested_master)
+    return resolved, [row for row in master_maps[resolved] if not row.get("is_bridge")]
 
 
 def is_bridge(modules: dict[str, dict[str, Any]], instance: str, iface: str, by_start: dict[str, list[dict[str, Any]]]) -> bool:
@@ -310,6 +408,10 @@ def merge_reachable_maps(
     jtag_leaves: list[dict[str, Any]],
     sc_leaves: list[dict[str, Any]],
     sc_root_base_byte: int,
+    jtag_root: str,
+    sc_hub_master: str,
+    sc_local_root: str | None = None,
+    sc_bases_are_global: bool = False,
 ) -> list[dict[str, Any]]:
     entries: dict[str, dict[str, Any]] = {}
 
@@ -333,27 +435,31 @@ def merge_reachable_maps(
                 "transports": {},
             },
         )
+        if leaf.get("span_byte") is not None:
+            item.setdefault("span_byte", leaf.get("span_byte"))
         return item
 
     for leaf in jtag_leaves:
         item = entry_for(leaf)
         item["transports"]["jtag_master"] = {
-            "root": DATA_JTAG_ROOT,
+            "root": jtag_root,
             "base_byte": leaf["base_byte"],
             "base_word": leaf["base_byte"] // 4,
+            "span_byte": leaf.get("span_byte"),
             "route": leaf["route"],
         }
 
     for leaf in sc_leaves:
         item = entry_for(leaf)
-        sc_byte = sc_root_base_byte + leaf["base_byte"]
+        sc_byte = leaf["base_byte"] if sc_bases_are_global else sc_root_base_byte + leaf["base_byte"]
         item["transports"]["sc_hub"] = {
-            "root": SC_HUB_MASTER,
-            "local_root": DATA_SC_ROOT,
+            "root": sc_hub_master,
+            "local_root": sc_local_root,
             "sc_bridge_base_byte": sc_root_base_byte,
             "local_base_byte": leaf["base_byte"],
             "base_byte": sc_byte,
             "base_word": sc_byte // 4,
+            "span_byte": leaf.get("span_byte"),
             "route": leaf["route"],
         }
 
@@ -364,7 +470,7 @@ def merge_reachable_maps(
         item["svd"] = svd
         item["aperture"] = {
             "kind": classify_aperture(item["interface"], svd),
-            "span_byte": svd.get("address_block_size") if svd else None,
+            "span_byte": svd.get("address_block_size") if svd else item.get("span_byte"),
             "header": svd.get("register_groups", {}).get("header", []) if svd else [],
             "configure": svd.get("register_groups", {}).get("configure", []) if svd else [],
             "status_counter": svd.get("register_groups", {}).get("status_counter", []) if svd else [],
@@ -422,6 +528,22 @@ def read_meta_jtag(
     transport = entry.get("transports", {}).get("jtag_master")
     if not svd or not transport:
         return None
+
+    def uid_reset_value() -> int | None:
+        for reg in svd.get("register_detail", []):
+            if reg.get("name") == "UID" and reg.get("reset") is not None:
+                return int(reg["reset"])
+        return None
+
+    uid_offset = svd.get("uid_offset")
+    uid_expected = uid_reset_value()
+    probe_kwargs: dict[str, int] = {}
+    if uid_offset is not None and uid_expected is not None:
+        probe_kwargs = {
+            "uid_addr": int(transport["base_byte"]) + int(uid_offset),
+            "uid_expected": uid_expected,
+        }
+
     if which == "uid":
         offset = svd.get("uid_offset")
         if offset is None:
@@ -434,6 +556,7 @@ def read_meta_jtag(
             int(transport["base_byte"]) + int(offset),
             master_pattern=master_pattern,
             fallback_pattern=fallback_pattern,
+            **probe_kwargs,
         )[0]
 
     mode = svd.get(f"{which}_mode")
@@ -450,6 +573,7 @@ def read_meta_jtag(
             addr,
             master_pattern=master_pattern,
             fallback_pattern=fallback_pattern,
+            **probe_kwargs,
         )[0]
     if mode == "meta":
         page = int(svd[f"{which}_page"])
@@ -462,6 +586,7 @@ def read_meta_jtag(
             data=[page],
             master_pattern=master_pattern,
             fallback_pattern=fallback_pattern,
+            **probe_kwargs,
         )
         value = jtag_rw(
             system_console,
@@ -471,6 +596,7 @@ def read_meta_jtag(
             addr,
             master_pattern=master_pattern,
             fallback_pattern=fallback_pattern,
+            **probe_kwargs,
         )[0]
         if page != 0:
             jtag_rw(
@@ -482,14 +608,156 @@ def read_meta_jtag(
                 data=[0],
                 master_pattern=master_pattern,
                 fallback_pattern=fallback_pattern,
+                **probe_kwargs,
             )
         return value
     return None
 
 
+def uid_probe_for_jtag(entries: list[dict[str, Any]]) -> tuple[int | None, int | None]:
+    for entry in entries:
+        svd = entry.get("svd")
+        transport = entry.get("transports", {}).get("jtag_master")
+        if not svd or not transport:
+            continue
+        uid_offset = svd.get("uid_offset")
+        if uid_offset is None:
+            continue
+        for reg in svd.get("register_detail", []):
+            if reg.get("name") == "UID" and reg.get("reset") is not None:
+                return int(transport["base_byte"]) + int(uid_offset), int(reg["reset"])
+    return None, None
+
+
+def jtag_meta_read_specs(entries: list[dict[str, Any]]) -> tuple[list[str], dict[str, tuple[dict[str, Any], str]]]:
+    specs: list[str] = []
+    labels: dict[str, tuple[dict[str, Any], str]] = {}
+    for entry_index, entry in enumerate(entries):
+        svd = entry.get("svd")
+        transport = entry.get("transports", {}).get("jtag_master")
+        if not svd or not transport:
+            continue
+        base = int(transport["base_byte"])
+        for field in ("uid", "version", "date", "git"):
+            label = f"e{entry_index}_{field}"
+            if field == "uid":
+                offset = svd.get("uid_offset")
+                if offset is None:
+                    continue
+                specs.append(f"{label}:direct:0x{base + int(offset):08X}")
+            else:
+                mode = svd.get(f"{field}_mode")
+                offset = svd.get(f"{field}_offset")
+                if mode is None or offset is None:
+                    continue
+                addr = base + int(offset)
+                if mode == "direct":
+                    specs.append(f"{label}:direct:0x{addr:08X}")
+                elif mode == "meta":
+                    page = int(svd[f"{field}_page"])
+                    specs.append(f"{label}:meta:0x{addr:08X}:0x{page:08X}")
+                else:
+                    continue
+            labels[label] = (entry, field)
+    return specs, labels
+
+
+def parse_jtag_meta_output(output: str) -> tuple[dict[str, int], dict[str, str]]:
+    words: dict[str, int] = {}
+    result_line: dict[str, str] = {}
+    for line in output.splitlines():
+        line = line.strip()
+        if line.startswith("JTAG_META_WORD "):
+            label = None
+            value = None
+            for token in line.split()[1:]:
+                if "=" not in token:
+                    continue
+                key, text = token.split("=", 1)
+                if key == "label":
+                    label = text
+                elif key == "value":
+                    value = int(text, 16)
+            if label is None or value is None:
+                raise RuntimeError(f"failed to parse JTAG meta word line: {line}")
+            words[label] = value
+        elif line.startswith("JTAG_META_RESULT "):
+            for token in line.split()[1:]:
+                if "=" not in token:
+                    continue
+                key, value = token.split("=", 1)
+                result_line[key] = value
+    if result_line.get("status") != "OK":
+        raise RuntimeError(f"JTAG metadata helper failed:\n{output}")
+    return words, result_line
+
+
+def read_live_jtag_batch(
+    entries: list[dict[str, Any]],
+    system_console: Path,
+    jdi: Path,
+    project_dir: Path,
+    master_pattern: str,
+    fallback_pattern: str,
+) -> None:
+    entries_with_jtag = [entry for entry in entries if "jtag_master" in entry.get("transports", {})]
+    specs, labels = jtag_meta_read_specs(entries_with_jtag)
+    if not specs:
+        return
+
+    script = SCRIPT_DIR / "jtag_meta_batch.tcl"
+    env = os.environ.copy()
+    if "BOARD_TEST_DISPLAY" in env:
+        env["DISPLAY"] = env["BOARD_TEST_DISPLAY"]
+    else:
+        env.pop("DISPLAY", None)
+    env.setdefault("BOARD_TEST_SCRIPT_DIR", str(SCRIPT_DIR))
+
+    uid_addr, uid_expected = uid_probe_for_jtag(entries_with_jtag)
+    base_cmd = [
+        str(system_console),
+        "-cli",
+        "-disable_readline",
+        "-disable_timeout",
+        f"--project_dir={project_dir}",
+        f"--jdi={jdi}",
+        f"--script={script}",
+        "--reads",
+        ",".join(specs),
+        "--service-tag",
+        "board_test_inventory",
+    ]
+    if uid_addr is not None and uid_expected is not None:
+        base_cmd.extend(["--uid-addr", f"0x{uid_addr:08X}", "--uid-expected", f"0x{uid_expected:08X}"])
+
+    errors: list[str] = []
+    for pattern in split_jtag_patterns(master_pattern, fallback_pattern):
+        cmd = list(base_cmd)
+        cmd.extend(["--master-pattern", pattern, "--fallback-pattern", ""])
+        try:
+            output = run_checked(cmd, env=env).stdout
+            words, _ = parse_jtag_meta_output(output)
+            for label, value in words.items():
+                entry, field = labels[label]
+                entry.setdefault("live", {}).setdefault("jtag_master", {})[field] = value
+            return
+        except subprocess.CalledProcessError as exc:
+            errors.append((exc.stdout or "") + (exc.stderr or ""))
+        except Exception as exc:
+            errors.append(str(exc))
+
+    raise RuntimeError(
+        "JTAG metadata helper failed for all master patterns: "
+        + ", ".join(split_jtag_patterns(master_pattern, fallback_pattern))
+        + "\n"
+        + "\n---\n".join(errors)
+    )
+
+
 def attach_live_metadata(entries: list[dict[str, Any]], args: argparse.Namespace) -> None:
     for entry in entries:
         live: dict[str, Any] = {"sc_hub": {}, "jtag_master": {}, "errors": []}
+        entry["live"] = live
         if not args.skip_sc and "sc_hub" in entry.get("transports", {}):
             try:
                 for field in ("uid", "version", "date", "git"):
@@ -497,21 +765,22 @@ def attach_live_metadata(entries: list[dict[str, Any]], args: argparse.Namespace
             except Exception as exc:
                 live["errors"].append(f"sc_hub: {exc}")
 
-        if not args.skip_jtag and "jtag_master" in entry.get("transports", {}):
-            try:
-                for field in ("uid", "version", "date", "git"):
-                    live["jtag_master"][field] = read_meta_jtag(
-                        entry,
-                        args.system_console,
-                        args.jdi,
-                        args.project_dir,
-                        field,
-                        args.jtag_master_pattern,
-                        args.jtag_fallback_pattern,
-                    )
-            except Exception as exc:
-                live["errors"].append(f"jtag_master: {exc}")
-        entry["live"] = live
+    if args.skip_jtag:
+        return
+
+    try:
+        read_live_jtag_batch(
+            entries,
+            args.system_console,
+            args.jdi,
+            args.project_dir,
+            args.jtag_master_pattern,
+            args.jtag_fallback_pattern,
+        )
+    except Exception as exc:
+        for entry in entries:
+            if "jtag_master" in entry.get("transports", {}):
+                entry["live"]["errors"].append(f"jtag_master: {exc}")
 
 
 def match_instances(entries: list[dict[str, Any]], pattern: str) -> list[dict[str, Any]]:
@@ -534,11 +803,40 @@ def compact_reg_list(registers: list[dict[str, Any]], limit: int) -> str:
     return ", ".join(pieces)
 
 
+def compact_meta(entry: dict[str, Any]) -> str:
+    pieces = []
+    if entry.get("qsys_expected_version") is not None:
+        pieces.append(f"ver={fmt_hex(entry['qsys_expected_version'])}")
+    if entry.get("qsys_expected_date") is not None:
+        pieces.append(f"date={fmt_hex(entry['qsys_expected_date'])}")
+    if entry.get("qsys_expected_git") is not None:
+        pieces.append(f"git={fmt_hex(entry['qsys_expected_git'])}")
+    return ", ".join(pieces) if pieces else "-"
+
+
+def compact_live(entry: dict[str, Any]) -> str:
+    live = entry.get("live")
+    if not live:
+        return "-"
+    pieces = []
+    for transport in ("sc_hub", "jtag_master"):
+        values = live.get(transport, {})
+        sub = []
+        for field in ("uid", "version", "date", "git"):
+            if values.get(field) is not None:
+                sub.append(f"{field}={fmt_hex(values[field])}")
+        if sub:
+            pieces.append(f"{transport}: " + ",".join(sub))
+    if live.get("errors"):
+        pieces.append("errors=" + ";".join(live["errors"]))
+    return "<br>".join(pieces) if pieces else "-"
+
+
 def print_table(entries: list[dict[str, Any]]) -> None:
     print(
-        "| Endpoint | Kind | JTAG byte | SC word | Aperture | Header | Configure | Status/counter | SVD |"
+        "| Endpoint | Kind | JTAG byte | SC word | Meta | Live | Aperture | Header | Configure | Status/counter | Port-mapped | SVD |"
     )
-    print("|---|---|---:|---:|---|---|---|---|---|")
+    print("|---|---|---:|---:|---|---|---|---|---|---|---|---|")
     for entry in entries:
         jtag = entry["transports"].get("jtag_master", {})
         sc = entry["transports"].get("sc_hub", {})
@@ -547,30 +845,76 @@ def print_table(entries: list[dict[str, Any]]) -> None:
         print(
             f"| `{entry['endpoint']}` | `{entry['kind']}` | "
             f"`{fmt_hex(jtag.get('base_byte'))}` | `{fmt_hex(sc.get('base_word'), 5)}` | "
+            f"{compact_meta(entry)} | {compact_live(entry)} | "
             f"{aperture['kind']} span=`{fmt_hex(aperture.get('span_byte'))}` | "
             f"{compact_reg_list(aperture['header'], 4)} | "
             f"{compact_reg_list(aperture['configure'], 5)} | "
             f"{compact_reg_list(aperture['status_counter'], 5)} | "
+            f"{compact_reg_list(aperture['port_mapped'], 5)} | "
             f"`{svd.get('path', 'n/a')}` |"
         )
 
 
+def system_desc_kind(path: Path) -> str:
+    root = ET.parse(path).getroot()
+    if root.tag == "EnsembleReport":
+        return "sopcinfo"
+    return "qsys"
+
+
 def build_inventory(args: argparse.Namespace) -> dict[str, Any]:
-    modules, by_start = parse_qsys(args.data_qsys.resolve())
-    jtag_leaves = walk_avalon(modules, by_start, args.jtag_root)
-    sc_leaves = walk_avalon(modules, by_start, args.sc_root)
-    sc_bridge_base_byte = find_sc_hub_bridge_base(args.debug_qsys.resolve(), args.sc_hub_master, args.sc_datapath_bridge)
-    entries = merge_reachable_maps(modules, jtag_leaves, sc_leaves, sc_bridge_base_byte)
+    system_desc = (args.system_desc or args.data_qsys or DEFAULT_SYSTEM_DESC).resolve()
+    desc_kind = system_desc_kind(system_desc)
+
+    if desc_kind == "sopcinfo":
+        modules, master_maps = parse_sopcinfo(system_desc)
+        jtag_root = args.jtag_root or SOPCINFO_JTAG_ROOT
+        sc_hub_master = args.sc_hub_master or SOPCINFO_SC_HUB_MASTER
+        jtag_root, jtag_leaves = sopcinfo_leaves_for_master(master_maps, jtag_root)
+        sc_hub_master, sc_leaves = sopcinfo_leaves_for_master(master_maps, sc_hub_master)
+        sc_bridge_base_byte = 0
+        sc_root = None
+        entries = merge_reachable_maps(
+            modules,
+            jtag_leaves,
+            sc_leaves,
+            sc_bridge_base_byte,
+            jtag_root,
+            sc_hub_master,
+            sc_root,
+            sc_bases_are_global=True,
+        )
+    else:
+        modules, by_start = parse_qsys(system_desc)
+        jtag_root = args.jtag_root or DATA_JTAG_ROOT
+        sc_root = args.sc_root or DATA_SC_ROOT
+        sc_hub_master = args.sc_hub_master or SC_HUB_MASTER
+        sc_datapath_bridge = args.sc_datapath_bridge or SC_DATAPATH_BRIDGE
+        jtag_leaves = walk_avalon(modules, by_start, jtag_root)
+        sc_leaves = walk_avalon(modules, by_start, sc_root)
+        sc_bridge_base_byte = find_sc_hub_bridge_base(args.debug_qsys.resolve(), sc_hub_master, sc_datapath_bridge)
+        entries = merge_reachable_maps(
+            modules,
+            jtag_leaves,
+            sc_leaves,
+            sc_bridge_base_byte,
+            jtag_root,
+            sc_hub_master,
+            sc_root,
+        )
+
     entries = match_instances(entries, args.filter)
     if args.probe_live:
         attach_live_metadata(entries, args)
     return {
-        "data_qsys": str(args.data_qsys.resolve()),
+        "system_desc": str(system_desc),
+        "system_desc_kind": desc_kind,
+        "data_qsys": str(system_desc) if desc_kind == "qsys" else None,
         "debug_qsys": str(args.debug_qsys.resolve()),
         "roots": {
-            "jtag_master": args.jtag_root,
-            "sc_local_root": args.sc_root,
-            "sc_hub_master": args.sc_hub_master,
+            "jtag_master": jtag_root,
+            "sc_local_root": sc_root,
+            "sc_hub_master": sc_hub_master,
             "sc_datapath_bridge": args.sc_datapath_bridge,
             "sc_datapath_bridge_base_byte": sc_bridge_base_byte,
             "sc_datapath_bridge_base_word": sc_bridge_base_byte // 4,
@@ -586,12 +930,18 @@ def main() -> int:
             "layout, aperture grouping, and both JTAG-master and SC-hub base addresses."
         )
     )
-    parser.add_argument("--data-qsys", type=Path, default=DEFAULT_DATA_QSYS)
+    parser.add_argument(
+        "--system-desc",
+        type=Path,
+        default=None,
+        help=f"Qsys or generated SOPCInfo source. Default: {DEFAULT_SYSTEM_DESC}",
+    )
+    parser.add_argument("--data-qsys", type=Path, default=None, help="Legacy alias for --system-desc with a Qsys file.")
     parser.add_argument("--debug-qsys", type=Path, default=DEFAULT_DEBUG_QSYS)
-    parser.add_argument("--jtag-root", default=DATA_JTAG_ROOT)
-    parser.add_argument("--sc-root", default=DATA_SC_ROOT)
-    parser.add_argument("--sc-hub-master", default=SC_HUB_MASTER)
-    parser.add_argument("--sc-datapath-bridge", default=SC_DATAPATH_BRIDGE)
+    parser.add_argument("--jtag-root", default=None)
+    parser.add_argument("--sc-root", default=None)
+    parser.add_argument("--sc-hub-master", default=None)
+    parser.add_argument("--sc-datapath-bridge", default=None)
     parser.add_argument("--filter", default="", help="Regex over endpoint, instance, or kind.")
     parser.add_argument("--json", action="store_true", help="Emit JSON instead of Markdown table.")
     parser.add_argument("--output", type=Path, default=None)
@@ -605,11 +955,11 @@ def main() -> int:
     parser.add_argument("--skip-jtag", action="store_true")
     parser.add_argument(
         "--jtag-master-pattern",
-        default=os.environ.get("BOARD_TEST_JTAG_MASTER_PATTERN", DEFAULT_JTAG_MASTER_PATTERN),
+        default=DEFAULT_INVENTORY_JTAG_MASTER_PATTERN,
     )
     parser.add_argument(
         "--jtag-fallback-pattern",
-        default=os.environ.get("BOARD_TEST_JTAG_FALLBACK_PATTERN", DEFAULT_JTAG_FALLBACK_PATTERN),
+        default=DEFAULT_INVENTORY_JTAG_FALLBACK_PATTERN,
     )
     args = parser.parse_args()
 
