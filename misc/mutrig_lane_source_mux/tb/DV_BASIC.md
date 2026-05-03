@@ -1,7 +1,8 @@
-# DV Basic - mutrig_lane_source_mux
+# mutrig_lane_source_mux DV — Basic Functional Cases
 
 **Companion docs:** `README.md`, `DV_PLAN.md`, `DV_HARNESS.md`,
-`DV_PROF.md`, `DV_CROSS.md`, `DV_COV.md`, `BUG_HISTORY.md`
+`DV_EDGE.md`, `DV_PROF.md`, `DV_ERROR.md`, `DV_CROSS.md`, `DV_COV.md`,
+`BUG_HISTORY.md`
 
 **Parent:** [DV_PLAN.md](DV_PLAN.md)
 **ID Range:** B001-B064

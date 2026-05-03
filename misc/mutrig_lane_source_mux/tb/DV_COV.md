@@ -1,7 +1,11 @@
-# DV Coverage - mutrig_lane_source_mux
+# DV Coverage Summary — mutrig_lane_source_mux
 
 Coverage is collected by Questa code coverage and the `mlsm_coverage`
 functional covergroup in `uvm/mlsm_env_pkg.sv`.
+
+## Legend
+
+✅ pass / closed &middot; ⚠️ partial / below target / known limitation &middot; ❌ failed / missing evidence &middot; ❓ pending &middot; ℹ️ informational
 
 ## Coverage Category Status
 
@@ -38,3 +42,6 @@ functional covergroup in `uvm/mlsm_env_pkg.sv`.
 | 2026-05-04 | P001 30s soak, seed 101 | PASS, 46s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav0_case0_s101.log` |
 | 2026-05-04 | P002 30s soak, seed 102 | PASS, 49s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav1_case32_s102.log` |
 | 2026-05-04 | P003 30s soak, seed 103 | PASS, 50s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav1_case32_s103.log` |
+
+_Regenerate with `make -C misc/mutrig_lane_source_mux/tb/uvm directed64 bucket_frame soak`
+and refresh `DV_REPORT.json`, `DV_REPORT.md`, and `DV_COV.md` together._
