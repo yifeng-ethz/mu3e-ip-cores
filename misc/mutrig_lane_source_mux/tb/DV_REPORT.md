@@ -1,6 +1,6 @@
 # ✅ DV Report — mutrig_lane_source_mux UVM
 
-**DUT:** `mutrig_lane_source_mux` &nbsp; **Date:** `2026-05-03` &nbsp; **RTL variant:** `current worktree` &nbsp; **Seed:** `1`
+**DUT:** `mutrig_lane_source_mux` &nbsp; **Date:** `2026-05-04` &nbsp; **RTL variant:** `current worktree` &nbsp; **Seed:** `1, 11, 12, 101, 102, 103`
 
 This page is the chief-architect dashboard. The maintained testbench entry
 point is [`tb/uvm/`](uvm/), with case intent recorded in the companion DV docs.
