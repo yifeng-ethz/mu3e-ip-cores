@@ -14,7 +14,7 @@ CASE_ID           ?= 32
 TEST              ?= mlsm_directed_test
 SEED              ?= 1
 VERBOSITY         ?= UVM_MEDIUM
-SOAK_ITERS        ?= 4096
+SOAK_ITERS        ?= 150000
 
 COV_DIR     := $(UVM_DIR)/cov_rav$(REAL_ALWAYS_VALID)
 WORK_DIR    := $(UVM_DIR)/work_rav$(REAL_ALWAYS_VALID)_fd$(FIFO_DEPTH)

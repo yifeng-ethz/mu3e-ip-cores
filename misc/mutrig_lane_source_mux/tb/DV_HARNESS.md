@@ -31,7 +31,8 @@ still treat the real byte and sidebands as live.
 
 The downstream probe observes exactly what a downstream byte-input stage would
 consume: `aso_valid`, `aso_data`, `aso_error`, and `aso_channel`. The scoreboard
-checks the same output cycle-by-cycle and separately checks CSR accounting.
+checks the same output cycle-by-cycle, asserts the probe count/last-sideband
+snapshot, and separately checks CSR accounting.
 
 Mixed-mode reference modeling uses two FIFO queues and the documented
 round-robin rule:

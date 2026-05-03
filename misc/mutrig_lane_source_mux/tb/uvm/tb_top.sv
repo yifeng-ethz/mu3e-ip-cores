@@ -11,6 +11,7 @@
 module mlsm_downstream_input_probe (
     input  logic        clk,
     input  logic        rst,
+    input  logic        clear,
     input  logic [8:0]  aso_data,
     input  logic        aso_valid,
     input  logic [2:0]  aso_error,
@@ -20,8 +21,8 @@ module mlsm_downstream_input_probe (
     output logic [2:0]  last_error,
     output logic [3:0]  last_channel
 );
-    always_ff @(posedge clk or posedge rst) begin : probe_reg
-        if (rst) begin
+    always_ff @(posedge clk or posedge rst or posedge clear) begin : probe_reg
+        if (rst || clear) begin
             valid_count     <= 32'd0;
             last_data       <= 9'd0;
             last_error      <= 3'd0;
@@ -82,6 +83,7 @@ module tb_top;
     mlsm_downstream_input_probe probe (
         .clk(clk),
         .rst(mif.rst),
+        .clear(mif.probe_clear),
         .aso_data(mif.aso_data),
         .aso_valid(mif.aso_valid),
         .aso_error(mif.aso_error),

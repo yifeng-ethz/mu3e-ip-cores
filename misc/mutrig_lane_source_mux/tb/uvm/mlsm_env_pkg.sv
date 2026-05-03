@@ -218,11 +218,19 @@ package mlsm_env_pkg;
 
         task automatic reset_dut;
             vif.drive_quiet();
+            vif.probe_clear = 1'b0;
             vif.rst = 1'b1;
             reset_model();
             repeat (5) @(posedge vif.clk);
             vif.rst = 1'b0;
             repeat (2) @(posedge vif.clk);
+            #1;
+        endtask
+
+        task automatic clear_probe_window;
+            vif.probe_clear = 1'b1;
+            #1;
+            vif.probe_clear = 1'b0;
             #1;
         endtask
 
@@ -448,6 +456,7 @@ package mlsm_env_pkg;
 
         task automatic clear_counters(int unsigned case_id);
             csr_write32(4'h2, {29'd0, mixed_rr_enable, 1'b1, select_emulator}, case_id);
+            clear_probe_window();
         endtask
 
         task automatic expect_csr(string name, bit [3:0] address, bit [31:0] expected);
@@ -456,6 +465,29 @@ package mlsm_env_pkg;
             if (data !== expected) begin
                 `uvm_error("CSR",
                     $sformatf("%s addr=%0h expected=%08h got=%08h", name, address, expected, data))
+            end
+        endtask
+
+        task automatic expect_downstream_probe_snapshot(string name);
+            if (vif.probe_valid_count !== selected_beat_count[31:0]) begin
+                `uvm_error("DOWNSTREAM_PROBE",
+                    $sformatf("%s expected probe_count=%08h got=%08h",
+                              name, selected_beat_count[31:0], vif.probe_valid_count))
+            end
+            if (selected_beat_count != 0) begin
+                if ((vif.probe_last_data !== last_selected.data) ||
+                    (vif.probe_last_channel !== last_selected.channel) ||
+                    (vif.probe_last_error !== last_selected.error)) begin
+                    `uvm_error("DOWNSTREAM_PROBE",
+                        $sformatf("%s expected last data=%03h ch=%0h err=%0h got data=%03h ch=%0h err=%0h",
+                                  name,
+                                  last_selected.data,
+                                  last_selected.channel,
+                                  last_selected.error,
+                                  vif.probe_last_data,
+                                  vif.probe_last_channel,
+                                  vif.probe_last_error))
+                end
             end
         endtask
 
@@ -468,6 +500,7 @@ package mlsm_env_pkg;
             expect_csr({name, " emu_drop"}, 4'hb, emu_drop_count[31:0]);
             expect_csr({name, " real_selected"}, 4'hc, real_selected_count[31:0]);
             expect_csr({name, " emu_selected"}, 4'hd, emu_selected_count[31:0]);
+            expect_downstream_probe_snapshot({name, " downstream"});
         endtask
 
         task automatic expect_mixed_pressure_snapshot(string name, bit require_drop);
@@ -500,6 +533,7 @@ package mlsm_env_pkg;
             if (require_drop && ((data_real_drop + data_emu_drop) == 0)) begin
                 `uvm_error("CSR", $sformatf("%s expected at least one mixed FIFO drop", name))
             end
+            expect_downstream_probe_snapshot({name, " downstream"});
         endtask
 
         task automatic expect_validless_direct_snapshot(string name, bit emulator_mode);
@@ -539,6 +573,7 @@ package mlsm_env_pkg;
                                                 name, data_selected, data_real_selected, data_emu_selected))
                 end
             end
+            expect_downstream_probe_snapshot({name, " downstream"});
         endtask
 
         task automatic expect_validless_switch_snapshot(string name);
@@ -563,6 +598,7 @@ package mlsm_env_pkg;
                 `uvm_error("CSR", $sformatf("%s expected both sources selected during switching real_sel=%08h emu_sel=%08h",
                                             name, data_real_selected, data_emu_selected))
             end
+            expect_downstream_probe_snapshot({name, " downstream"});
         endtask
 
         task automatic expect_identity(int unsigned case_id);
