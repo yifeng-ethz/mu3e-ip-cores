@@ -29,6 +29,7 @@ interface mlsm_if(input logic clk);
     logic [8:0]  probe_last_data;
     logic [2:0]  probe_last_error;
     logic [3:0]  probe_last_channel;
+    logic        probe_clear;
 
     task automatic drive_quiet;
         avs_csr_address   = 4'd0;
@@ -43,5 +44,6 @@ interface mlsm_if(input logic clk);
         asi_emu_valid     = 1'b0;
         asi_emu_error     = 3'd0;
         asi_emu_channel   = 4'd0;
+        probe_clear       = 1'b0;
     endtask
 endinterface
