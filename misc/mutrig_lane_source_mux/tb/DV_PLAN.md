@@ -25,10 +25,11 @@ functional contract needed by the current timing-fix integration:
 
 ## 2. Non-Scope
 
-This bench does not decode full MuTRiG frames. The downstream monitor is the
-input-side contract of the following byte consumer: it captures the selected
-byte stream and sidebands exactly as a frame-input stage would see them. Full
-frame semantic checking remains owned by `mutrig_frame_deassembly`.
+This bench does not score full MuTRiG frames. The downstream monitor captures
+the selected byte stream and sidebands exactly as a frame-input stage would see
+them, and a real `frame_rcv_ip` instance is elaborated behind the monitor as a
+non-scoring downstream contract sink. Full frame semantic checking remains
+owned by `mutrig_frame_deassembly`.
 
 ## 3. Harness Summary
 

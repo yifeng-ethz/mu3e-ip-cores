@@ -2,6 +2,7 @@ include ../../../../scripts/questa_one.mk
 
 UVM_DIR     := $(abspath .)
 IP_DIR      := $(abspath ../..)
+REPO_DIR    := $(abspath ../../../..)
 LOG_DIR     := $(UVM_DIR)/logs
 UVM_HOME    ?= $(QUESTA_UVM_HOME)
 UVM_SRC     := $(UVM_HOME)/src
@@ -21,6 +22,11 @@ WORK_DIR    := $(UVM_DIR)/work_rav$(REAL_ALWAYS_VALID)_fd$(FIFO_DEPTH)
 TB_TOP := tb_top
 
 RTL_SRC = $(IP_DIR)/rtl/mutrig_lane_source_mux.sv
+FRCV_VHDL_SRC = \
+	$(REPO_DIR)/mutrig_frame_deassembly/rtl/crc16_calc.vhd \
+	$(REPO_DIR)/mutrig_frame_deassembly/rtl/frame_rcv_ip.vhd
+FRCV_SV_SRC = \
+	$(REPO_DIR)/mutrig_frame_deassembly/rtl/sv_ver/frame_rcv_ip/frame_rcv_ip_dut_sv.sv
 TB_SRC  = \
 	$(UVM_DIR)/mlsm_if.sv \
 	$(UVM_DIR)/mlsm_env_pkg.sv \
@@ -34,13 +40,14 @@ license_check:
 
 compile: license_check $(WORK_DIR)/.compiled
 
-$(WORK_DIR)/.compiled: $(RTL_SRC) $(TB_SRC)
+$(WORK_DIR)/.compiled: $(RTL_SRC) $(FRCV_VHDL_SRC) $(FRCV_SV_SRC) $(TB_SRC)
 	@rm -rf $(WORK_DIR)
 	@mkdir -p $(WORK_DIR) $(LOG_DIR) $(COV_DIR)
 	@cp $(QSIM_INI) $(WORK_DIR)/modelsim.ini
 	@chmod u+w $(WORK_DIR)/modelsim.ini
 	@cd $(WORK_DIR) && $(VLIB) work
 	@cd $(WORK_DIR) && $(VMAP) -modelsimini modelsim.ini work work > /dev/null
+	@cd $(WORK_DIR) && $(VCOM) -modelsimini modelsim.ini -2008 -work work $(FRCV_VHDL_SRC)
 	@cd $(WORK_DIR) && $(VLOG) -modelsimini modelsim.ini -work work +cover=bcesft -sv $(UVM_DIR)/mlsm_if.sv
 	@cd $(WORK_DIR) && $(VLOG) -modelsimini modelsim.ini -work work -mfcu +cover=bcesft \
 	  +define+MLSM_REAL_ALWAYS_VALID=$(REAL_ALWAYS_VALID) \
@@ -48,6 +55,7 @@ $(WORK_DIR)/.compiled: $(RTL_SRC) $(TB_SRC)
 	  +incdir+$(UVM_SRC) +incdir+$(UVM_DIR) -sv \
 	  $(UVM_SRC)/uvm_pkg.sv \
 	  $(RTL_SRC) \
+	  $(FRCV_SV_SRC) \
 	  $(UVM_DIR)/mlsm_env_pkg.sv \
 	  $(UVM_DIR)/tb_top.sv
 	@touch $@

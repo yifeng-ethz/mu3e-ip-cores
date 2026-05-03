@@ -6,8 +6,9 @@
 
 - `mutrig_lane_source_mux`
 - `mlsm_if`, the combined CSR and byte-stream test interface
-- `mlsm_downstream_input_probe`, a minimal downstream byte-input monitor that
-  records selected valid beats and last sidebands
+- `mlsm_downstream_input_probe`, which records selected valid beats and last
+  sidebands while also instantiating the real `frame_rcv_ip` downstream
+  byte-input stage as a non-scoring contract sink
 
 The UVM package is intentionally compact:
 
@@ -29,10 +30,13 @@ still treat the real byte and sidebands as live.
 
 ## 3. Monitor And Scoreboard
 
-The downstream probe observes exactly what a downstream byte-input stage would
-consume: `aso_valid`, `aso_data`, `aso_error`, and `aso_channel`. The scoreboard
-checks the same output cycle-by-cycle, asserts the probe count/last-sideband
-snapshot, and separately checks CSR accounting.
+The downstream probe observes exactly what the frame receiver byte-input stage
+would consume: `aso_valid`, `aso_data`, `aso_error`, and `aso_channel`. The
+scoreboard checks the same output cycle-by-cycle, asserts the probe
+count/last-sideband snapshot, and separately checks CSR accounting. A live
+`frame_rcv_ip` instance is connected behind the probe so the selected stream is
+compiled and elaborated against the real downstream input boundary, while full
+frame semantic scoring remains in the `mutrig_frame_deassembly` bench.
 
 Mixed-mode reference modeling uses two FIFO queues and the documented
 round-robin rule:
