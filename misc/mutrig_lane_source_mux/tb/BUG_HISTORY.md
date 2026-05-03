@@ -34,7 +34,7 @@ Historical formal note:
 
 | bug_id | class | severity | encounterability | status | first seen | commit | summary |
 |---|---|---|---|---|---|---|---|
-| [BUG-001-H](#bug-001-h-validless-csr-snapshot-readback-was-not-coherent-while-real-counter-ran) | H | non-datapath-refactor | `directed-only (harness readback)` | fixed | `mlsm_directed_test` case 32/48 bring-up | `pending` | Validless tests initially read multi-word CSR snapshots while the real input counter advanced every clock. |
+| [BUG-001-H](#bug-001-h-validless-csr-snapshot-readback-was-not-coherent-while-real-counter-ran) | H | non-datapath-refactor | `directed-only (harness readback)` | fixed | `mlsm_directed_test` case 32/48 bring-up | `c0e8fea` | Validless tests initially read multi-word CSR snapshots while the real input counter advanced every clock. |
 
 ## 2026-05-03
 
@@ -63,7 +63,7 @@ Historical formal note:
   - after_fix_outcome:
     - validless cases 56-63 and focused case 50 pass; directed32_rav1 reaches
       the final switching bucket after the snapshot repair
-    - three long soaks with `SOAK_ITERS=150000` pass at 34s, 37s, and 36s
+    - three long soaks with `SOAK_ITERS=150000` pass at 35s, 38s, and 38s
   - potential_hazard:
     - closed for current UVM harness; future CSR snapshot tests should continue
       to quiesce selected-output traffic before cycle-exact multi-word reads
@@ -72,4 +72,4 @@ Historical formal note:
 - Runtime / coverage context:
   - affects harness readback only; no RTL change was required
 - Commit:
-  - pending
+  - `c0e8fea` (`[PATCH] Add lane source mux UVM regression`)
