@@ -2,9 +2,9 @@ package require -exact qsys 16.1
 
 set VERSION_MAJOR_DEFAULT_CONST 26
 set VERSION_MINOR_DEFAULT_CONST 2
-set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         502
-set VERSION_DATE_DEFAULT_CONST  20260502
+set VERSION_PATCH_DEFAULT_CONST 1
+set BUILD_DEFAULT_CONST         503
+set VERSION_DATE_DEFAULT_CONST  20260503
 set VERSION_GIT_DEFAULT_CONST   0x0528DBAD
 set IP_UID_DEFAULT_CONST        0x4D4C534D
 set INSTANCE_ID_DEFAULT_CONST   0
@@ -47,6 +47,11 @@ proc validate {} {
     if {$fifo_depth < 2 || $fifo_depth > 16} {
         send_message error "FIFO_DEPTH must stay in the range 2..16."
     }
+
+    set real_always_valid [get_parameter_value REAL_ALWAYS_VALID]
+    if {$real_always_valid < 0 || $real_always_valid > 1} {
+        send_message error "REAL_ALWAYS_VALID must stay in the range 0..1."
+    }
 }
 
 proc elaborate {} {
@@ -81,6 +86,12 @@ set_parameter_property FIFO_DEPTH DISPLAY_NAME "Mixed FIFO Depth"
 set_parameter_property FIFO_DEPTH ALLOWED_RANGES 2:16
 set_parameter_property FIFO_DEPTH HDL_PARAMETER true
 set_parameter_property FIFO_DEPTH DESCRIPTION "Per-input FIFO depth used only when CONTROL.mixed_rr is set."
+
+add_parameter REAL_ALWAYS_VALID NATURAL 1
+set_parameter_property REAL_ALWAYS_VALID DISPLAY_NAME "Real Input Always Valid"
+set_parameter_property REAL_ALWAYS_VALID ALLOWED_RANGES 0:1
+set_parameter_property REAL_ALWAYS_VALID HDL_PARAMETER true
+set_parameter_property REAL_ALWAYS_VALID DESCRIPTION "When set, the real decoded-byte input is treated as valid every cycle. This matches the LVDS decoded stream, which carries data/error/channel but no valid port."
 
 add_parameter IP_UID STD_LOGIC_VECTOR $IP_UID_DEFAULT_CONST
 set_parameter_property IP_UID DISPLAY_NAME "UID"
@@ -141,9 +152,10 @@ add_display_item "" $TAB_CONFIGURATION GROUP tab
 add_display_item $TAB_CONFIGURATION "Overview" GROUP
 add_display_item $TAB_CONFIGURATION "Reset Policy" GROUP
 add_html_text "Overview" source_overview_html {<html><b>Runtime lane source select</b><br/>This IP forwards real LVDS/deassembly traffic, local emulator traffic, or an RR-arbitrated mixed stream into one MuTRiG datapath lane.</html>}
-add_html_text "Reset Policy" reset_policy_html {<html><b>Safe switching</b><br/>Software should switch modes while the run is stopped or the lane is otherwise quiescent. The selector is synchronous, but it does not frame-align or drain either 8b/1k stream before changing source. Entering or leaving mixed mode flushes the mixed-mode FIFOs.</html>}
+add_html_text "Reset Policy" reset_policy_html {<html><b>Safe switching</b><br/>Software should switch modes while the run is stopped or the lane is otherwise quiescent. The selector is synchronous, but it does not frame-align or drain either 8b/1k stream before changing source. Entering or leaving mixed mode flushes the mixed-mode FIFOs.<br/><br/><b>Real stream valid</b><br/>The LVDS controller decoded stream has no valid port, so real input valid defaults to always asserted. Set REAL_ALWAYS_VALID=0 only for integrations that provide a meaningful real_in.valid signal.</html>}
 add_display_item "Reset Policy" SELECT_EMULATOR parameter
 add_display_item "Reset Policy" FIFO_DEPTH parameter
+add_display_item "Reset Policy" REAL_ALWAYS_VALID parameter
 
 add_display_item "" $TAB_IDENTITY GROUP tab
 add_display_item $TAB_IDENTITY "Delivered Profile" GROUP

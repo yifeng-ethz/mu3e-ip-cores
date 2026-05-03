@@ -1,0 +1,49 @@
+# DV Harness - mutrig_lane_source_mux
+
+## 1. Topology
+
+`uvm/tb_top.sv` instantiates:
+
+- `mutrig_lane_source_mux`
+- `mlsm_if`, the combined CSR and byte-stream test interface
+- `mlsm_downstream_input_probe`, a minimal downstream byte-input monitor that
+  records selected valid beats and last sidebands
+
+The UVM package is intentionally compact:
+
+- `mlsm_directed_test`: isolated B001-B064 cases
+- `mlsm_bucket_frame_test`: ordered continuous frame for carry-over behavior
+- `mlsm_soak_test`: random directed-case pressure loop
+- `mlsm_coverage`: case, mode, real-valid mode, input-valid, and drop coverage
+
+## 2. Drivers
+
+The upstream driver uses the mux contract directly:
+
+- real source: 9-bit decoded byte plus valid, error, and channel sidebands
+- emulator source: same byte contract, independently valid-qualified
+- CSR source: Avalon-MM word writes and combinational reads to the mux CSR map
+
+For `REAL_ALWAYS_VALID=1`, the driver may hold `asi_real_valid=0`; the DUT must
+still treat the real byte and sidebands as live.
+
+## 3. Monitor And Scoreboard
+
+The downstream probe observes exactly what a downstream byte-input stage would
+consume: `aso_valid`, `aso_data`, `aso_error`, and `aso_channel`. The scoreboard
+checks the same output cycle-by-cycle and separately checks CSR accounting.
+
+Mixed-mode reference modeling uses two FIFO queues and the documented
+round-robin rule:
+
+- both FIFOs non-empty: select the `rr_next_emulator` source
+- one FIFO non-empty: select that source
+- after selecting real, next paired grant prefers emulator
+- after selecting emulator, next paired grant prefers real
+
+## 4. Snapshot Rule
+
+In validless mode, the real input count is an always-running clock-qualified
+counter. The harness therefore avoids false multi-word readback failures by
+checking coherent selected-output counters only after moving the selected side
+idle. Raw real input count is checked as nonzero/monotonic in validless cases.
