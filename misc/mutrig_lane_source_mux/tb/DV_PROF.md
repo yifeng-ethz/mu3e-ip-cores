@@ -1,7 +1,8 @@
-# DV Prof - mutrig_lane_source_mux
+# mutrig_lane_source_mux DV — Performance Cases
 
 **Companion docs:** `README.md`, `DV_PLAN.md`, `DV_HARNESS.md`,
-`DV_BASIC.md`, `DV_CROSS.md`, `DV_COV.md`, `BUG_HISTORY.md`
+`DV_BASIC.md`, `DV_EDGE.md`, `DV_ERROR.md`, `DV_CROSS.md`, `DV_COV.md`,
+`BUG_HISTORY.md`
 
 **Parent:** [DV_PLAN.md](DV_PLAN.md)
 **ID Range:** P001-P003

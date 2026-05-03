@@ -1,4 +1,8 @@
-# DV Cross - mutrig_lane_source_mux
+# mutrig_lane_source_mux DV — Cross Coverage
+
+**Companion docs:** `README.md`, `DV_PLAN.md`, `DV_HARNESS.md`,
+`DV_BASIC.md`, `DV_EDGE.md`, `DV_PROF.md`, `DV_ERROR.md`, `DV_COV.md`,
+`BUG_HISTORY.md`
 
 The cross baseline uses `mlsm_bucket_frame_test` to execute the directed cases
 without resetting between case bodies.

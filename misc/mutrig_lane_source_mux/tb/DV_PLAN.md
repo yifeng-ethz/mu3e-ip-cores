@@ -1,9 +1,13 @@
-# DV Plan - mutrig_lane_source_mux
+# DV Plan: mutrig_lane_source_mux
 
-**DUT:** `misc/mutrig_lane_source_mux/rtl/mutrig_lane_source_mux.sv`
-**Harness:** [`uvm/`](uvm/)
+**DUT:** `misc/mutrig_lane_source_mux/rtl/mutrig_lane_source_mux.sv`  
+**Harness:** [`uvm/`](uvm/)  
+**Author:** Codex  
+**Date:** 2026-05-04  
+**Status:** Active IP-local UVM plan for the runtime lane source mux.
 **Buckets:** [`DV_BASIC.md`](DV_BASIC.md), [`DV_PROF.md`](DV_PROF.md),
-[`DV_CROSS.md`](DV_CROSS.md), [`DV_COV.md`](DV_COV.md)
+[`DV_EDGE.md`](DV_EDGE.md), [`DV_ERROR.md`](DV_ERROR.md),
+[`DV_CROSS.md`](DV_CROSS.md), [`DV_COV.md`](DV_COV.md)  
 **Bug ledger:** [`BUG_HISTORY.md`](BUG_HISTORY.md)
 
 ## 1. Scope

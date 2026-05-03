@@ -1,0 +1,35 @@
+{
+  "dut": "mutrig_lane_source_mux",
+  "date": "2026-05-04",
+  "rtl_variant": "current worktree",
+  "seeds": [1, 11, 12, 101, 102, 103],
+  "health": {
+    "failed_cases": 0,
+    "signoff_runs_with_failures": 0,
+    "catalog_backlog_cases": 0,
+    "unimplemented_cases": 0,
+    "stale_artifacts": 0
+  },
+  "buckets": {
+    "BASIC": {
+      "planned": 64,
+      "promoted": 64,
+      "evidenced": 64,
+      "functional_pct": 100.0
+    },
+    "PROF": {
+      "planned": 3,
+      "promoted": 3,
+      "evidenced": 3,
+      "functional_pct": 100.0
+    }
+  },
+  "signoff_runs": [
+    {"run_id": "directed64", "kind": "isolated", "build": "REAL_ALWAYS_VALID=0/1", "txns": 64, "cross_pct": 100.0},
+    {"run_id": "bucket_frame", "kind": "bucket_frame", "build": "REAL_ALWAYS_VALID=0/1", "txns": 64, "cross_pct": 100.0},
+    {"run_id": "soak_150000_s101", "kind": "cross", "build": "REAL_ALWAYS_VALID=0", "txns": 150000, "cross_pct": 100.0},
+    {"run_id": "soak_150000_s102", "kind": "cross", "build": "REAL_ALWAYS_VALID=1", "txns": 150000, "cross_pct": 100.0},
+    {"run_id": "soak_150000_s103", "kind": "cross", "build": "REAL_ALWAYS_VALID=1", "txns": 150000, "cross_pct": 100.0}
+  ],
+  "regenerator": "make -C misc/mutrig_lane_source_mux/tb/uvm directed64 bucket_frame soak; refresh DV_REPORT.json, DV_REPORT.md, and DV_COV.md together"
+}

@@ -1,4 +1,9 @@
-# DV Harness - mutrig_lane_source_mux
+# DV Harness: mutrig_lane_source_mux
+
+**Harness root:** `misc/mutrig_lane_source_mux/tb/uvm`  
+**Author:** Codex  
+**Date:** 2026-05-04  
+**Status:** Active UVM harness for standalone mux functional regression.
 
 ## 1. Topology
 
