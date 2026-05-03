@@ -32,7 +32,7 @@ point is [`tb/uvm/`](uvm/), with case intent recorded in the companion DV docs.
 
 ## Non-Claims
 
-- The downstream probe validates the byte-stream input contract and does not claim full MuTRiG frame decode coverage.
+- The downstream probe includes a live `frame_rcv_ip` byte-input sink, but this mux bench does not claim full MuTRiG frame decode coverage.
 - Timing closure, CDC/RDC, and Platform Designer generated-system simulation are tracked outside this standalone UVM dashboard.
 
 ## Bucket Summary

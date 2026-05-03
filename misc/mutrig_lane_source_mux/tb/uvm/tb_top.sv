@@ -21,6 +21,12 @@ module mlsm_downstream_input_probe (
     output logic [2:0]  last_error,
     output logic [3:0]  last_channel
 );
+    localparam logic [8:0] RUNNING_CTRL_WORD_CONST = 9'b000001000;
+
+    logic [3:0] downstream_start_count = 4'd0;
+    logic       downstream_ctrl_valid;
+    logic       downstream_rst;
+
     always_ff @(posedge clk or posedge rst or posedge clear) begin : probe_reg
         if (rst || clear) begin
             valid_count     <= 32'd0;
@@ -34,6 +40,85 @@ module mlsm_downstream_input_probe (
             last_channel    <= aso_channel;
         end
     end
+
+    always_ff @(posedge clk or posedge rst) begin : downstream_start_reg
+        if (rst) begin
+            downstream_start_count <= 4'd0;
+        end else if (downstream_start_count != 4'hf) begin
+            downstream_start_count <= downstream_start_count + 4'd1;
+        end
+    end
+
+    assign downstream_ctrl_valid = (downstream_start_count == 4'hf);
+    assign downstream_rst        = rst || !downstream_ctrl_valid;
+
+    property selected_stream_is_known;
+        @(posedge clk) disable iff (rst)
+            aso_valid |-> !$isunknown({aso_data, aso_error, aso_channel});
+    endproperty
+
+    assert property (selected_stream_is_known)
+        else $error("selected mux output contains X/Z while valid");
+
+    frame_rcv_ip_dut_sv #(
+        .CHANNEL_WIDTH(4),
+        .CSR_ADDR_WIDTH(2),
+        .MODE_HALT(0),
+        .DEBUG_LV(0)
+    ) downstream_input_contract (
+        .asi_rx8b1k_data(aso_data),
+        .asi_rx8b1k_valid(aso_valid),
+        .asi_rx8b1k_error(aso_error),
+        .asi_rx8b1k_channel(aso_channel),
+        .aso_hit_type0_channel(),
+        .aso_hit_type0_startofpacket(),
+        .aso_hit_type0_endofpacket(),
+        .aso_hit_type0_endofrun(),
+        .aso_hit_type0_error(),
+        .aso_hit_type0_data(),
+        .aso_hit_type0_valid(),
+        .aso_headerinfo_data(),
+        .aso_headerinfo_valid(),
+        .aso_headerinfo_channel(),
+        .avs_csr_readdata(),
+        .avs_csr_read(1'b0),
+        .avs_csr_address(2'd0),
+        .avs_csr_waitrequest(),
+        .avs_csr_write(1'b0),
+        .avs_csr_writedata(32'd0),
+        .asi_ctrl_data(RUNNING_CTRL_WORD_CONST),
+        .asi_ctrl_valid(downstream_ctrl_valid),
+        .asi_ctrl_ready(),
+        .i_rst(downstream_rst),
+        .i_clk(clk),
+        .dbg_enable(),
+        .dbg_receiver_go(),
+        .dbg_receiver_force_go(),
+        .dbg_terminating_pending(),
+        .dbg_csr_control(),
+        .dbg_csr_status(),
+        .dbg_crc_err_counter(),
+        .dbg_frame_counter(),
+        .dbg_frame_counter_head(),
+        .dbg_frame_counter_tail(),
+        .dbg_n_new_frame(),
+        .dbg_n_new_word(),
+        .dbg_p_new_word(),
+        .dbg_n_word(),
+        .dbg_s_o_word(),
+        .dbg_n_word_cnt(),
+        .dbg_p_word_cnt(),
+        .dbg_n_frame_len(),
+        .dbg_p_frame_len(),
+        .dbg_n_frame_number(),
+        .dbg_n_frame_flags(),
+        .dbg_p_frame_flags(),
+        .dbg_n_frame_info_ready(),
+        .dbg_n_frame_info_ready_d1(),
+        .dbg_headerinfo_valid_comb(),
+        .dbg_n_crc_error(),
+        .dbg_p_crc_err_count()
+    );
 endmodule
 
 module tb_top;
