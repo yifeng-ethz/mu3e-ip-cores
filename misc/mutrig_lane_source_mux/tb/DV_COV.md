@@ -35,6 +35,6 @@ functional covergroup in `uvm/mlsm_env_pkg.sv`.
 | 2026-05-03 | `directed32_rav0` as part of `directed64` | PASS | `tb/uvm/logs/mlsm_directed_test_rav0_case*_s1.log` |
 | 2026-05-03 | `directed32_rav1` as part of clean `directed64` rerun | PASS | `tb/uvm/logs/mlsm_directed_test_rav1_case*_s1.log` |
 | 2026-05-03 | bucket-frame baseline, seeds 11/12 | PASS | `tb/uvm/logs/mlsm_bucket_frame_test_rav*_case*_s*.log` |
-| 2026-05-03 | P001 30s soak, seed 101 | PASS, 34s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav0_case0_s101.log` |
-| 2026-05-03 | P002 30s soak, seed 102 | PASS, 37s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav1_case32_s102.log` |
-| 2026-05-03 | P003 30s soak, seed 103 | PASS, 36s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav1_case32_s103.log` |
+| 2026-05-03 | P001 30s soak, seed 101 | PASS, 35s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav0_case0_s101.log` |
+| 2026-05-03 | P002 30s soak, seed 102 | PASS, 38s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav1_case32_s102.log` |
+| 2026-05-03 | P003 30s soak, seed 103 | PASS, 38s, `UVM_ERROR=0`, `UVM_FATAL=0` | `tb/uvm/logs/mlsm_soak_test_rav1_case32_s103.log` |

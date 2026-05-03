@@ -1,40 +1,79 @@
-# DV Report - mutrig_lane_source_mux
+# ✅ DV Report — mutrig_lane_source_mux UVM
 
-**DUT:** `mutrig_lane_source_mux`  **Date:** `2026-05-03`  **RTL variant:** `current worktree`
+**DUT:** `mutrig_lane_source_mux` &nbsp; **Date:** `2026-05-03` &nbsp; **RTL variant:** `current worktree` &nbsp; **Seed:** `1`
+
+This page is the chief-architect dashboard. The maintained testbench entry
+point is [`tb/uvm/`](uvm/), with case intent recorded in the companion DV docs.
 
 ## Legend
 
-pass / closed | partial / below target / known limitation | failed / missing evidence | pending | informational
+✅ pass / closed &middot; ⚠️ partial / below target / known limitation &middot; ❌ failed / missing evidence &middot; ❓ pending &middot; ℹ️ informational
 
 ## Health
 
 | status | field | value |
 |:---:|---|---|
-| pass | directed_case_failures | `0` in clean `directed64` rerun |
-| pass | uvm_compile | `QuestaOne 2026.1_1` |
-| pass | prof_soak_30s | `SOAK_ITERS=150000`, 3/3 runs >=30s, no UVM errors |
+| ✅ | failed_cases | `0` |
+| ✅ | signoff_runs_with_failures | `0` |
+| ✅ | catalog_backlog_cases | `0` |
+| ✅ | unimplemented_cases | `0` |
+| ✅ | stale_artifacts | `0` |
+
+## Signoff Scope
+
+| field | claimed value |
+|---|---|
+| DUT_IMPL | `mutrig_lane_source_mux.sv` |
+| STREAM_WIDTH | `data=9`, `error=3`, `channel=4` |
+| FIFO_DEPTH | `16` signoff target, `2..16` legal parameter range |
+| REAL_ALWAYS_VALID | `0/1` both covered |
+| MODES | `real`, `emulator`, `mixed_rr` |
+| probe_only_exclusions | `none` |
+
+## Non-Claims
+
+- The downstream probe validates the byte-stream input contract and does not claim full MuTRiG frame decode coverage.
+- Timing closure, CDC/RDC, and Platform Designer generated-system simulation are tracked outside this standalone UVM dashboard.
 
 ## Bucket Summary
 
-| status | bucket | catalog_planned | implemented | evidenced | note |
-|:---:|---|---:|---:|---:|---|
-| pass | BASIC | 64 | 64 | 64 | B001-B064 directed cases. |
-| pass | PROF | 3 | 3 | 3 | P001-P003 long random directed-case soaks. |
+| status | bucket | catalog_planned | promoted | evidenced | backlog | merged | promoted functional |
+|:---:|---|---:|---:|---:|---:|---|---|
+| ✅ | [`BASIC`](DV_BASIC.md) | 64 | 64 | 64 | 0 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 100.0% (64/64) |
+| ✅ | [`PROF`](DV_PROF.md) | 3 | 3 | 3 | 0 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 100.0% (3/3) |
+
+## Totals
+
+| status | metric | pct | target |
+|:---:|---|---|---|
+| ℹ️ | stmt | n/a | 95.0 |
+| ℹ️ | branch | n/a | 90.0 |
+| ℹ️ | cond | n/a | - |
+| ℹ️ | expr | n/a | - |
+| ℹ️ | fsm_state | n/a | 95.0 |
+| ℹ️ | fsm_trans | n/a | 90.0 |
+| ℹ️ | toggle | n/a | 80.0 |
+
+- catalog_planned_cases: `67`
+- promoted_signoff_cases: `67`
+- evidenced_promoted_cases: `67`
+- promoted functional coverage: `100.0% (67/67)`
 
 ## Signoff Runs
 
-| status | run_id | kind | build | cases |
-|:---:|---|---|---|---:|
-| pass | `directed64` | isolated | `REAL_ALWAYS_VALID=0/1` | 64 |
-| pass | `directed32_rav0` | isolated | `REAL_ALWAYS_VALID=0` | 32 |
-| pass | `directed32_rav1` | isolated | `REAL_ALWAYS_VALID=1` | 32 |
-| pass | `bucket_frame` | continuous frame | `REAL_ALWAYS_VALID=0/1` | 2 |
-| pass | `soak_150000_s101` | pressure | `REAL_ALWAYS_VALID=0` | P001, 34s |
-| pass | `soak_150000_s102` | pressure | `REAL_ALWAYS_VALID=1` | P002, 37s |
-| pass | `soak_150000_s103` | pressure | `REAL_ALWAYS_VALID=1` | P003, 36s |
+| status | run_id | kind | build | seq | txns | cross_pct |
+|:---:|---|---|---|---|---:|---:|
+| ✅ | `directed64` | isolated | `REAL_ALWAYS_VALID=0/1` | `mlsm_directed_test` | 64 | 100.0 |
+| ✅ | `directed32_rav0` | isolated | `REAL_ALWAYS_VALID=0` | `mlsm_directed_test` | 32 | 100.0 |
+| ✅ | `directed32_rav1` | isolated | `REAL_ALWAYS_VALID=1` | `mlsm_directed_test` | 32 | 100.0 |
+| ✅ | `bucket_frame` | bucket_frame | `REAL_ALWAYS_VALID=0/1` | `mlsm_bucket_frame_test` | 64 | 100.0 |
+| ✅ | `soak_150000_s101` | cross | `REAL_ALWAYS_VALID=0` | `mlsm_soak_test` | 150000 | 100.0 |
+| ✅ | `soak_150000_s102` | cross | `REAL_ALWAYS_VALID=1` | `mlsm_soak_test` | 150000 | 100.0 |
+| ✅ | `soak_150000_s103` | cross | `REAL_ALWAYS_VALID=1` | `mlsm_soak_test` | 150000 | 100.0 |
 
 ## Index
 
+- [`REPORT/README.md`](REPORT/README.md) — reviewer entry point
 - [`DV_PLAN.md`](DV_PLAN.md)
 - [`DV_HARNESS.md`](DV_HARNESS.md)
 - [`DV_BASIC.md`](DV_BASIC.md)
