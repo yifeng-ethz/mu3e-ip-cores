@@ -449,10 +449,10 @@ only observes the broadcast state.
 
 ## 6. File layout (per `rtl-file-structure-organization` skill)
 
-All Platform Designer `_hw.tcl` files live under `script/` per the
-skill's hard rule on `_hw.tcl` placement. Under this layout the IP
-exposes both the single-lane component and the bank wrapper from one
-repo:
+All Platform Designer `_hw.tcl` files live under `script/`, with
+purpose-split sub-files under `script/hw_tcl/` per the skill's hard
+rule. Reference example: `slow-control_hub/sc_hub_v2_hw.tcl` plus
+`slow-control_hub/hw_tcl/sc_hub_v2_*.tcl`.
 
 ```text
 misc/arb_hit_type0/
@@ -460,96 +460,118 @@ misc/arb_hit_type0/
 ├── doc/
 │   └── RTL_PLAN.md
 ├── rtl/
-│   ├── arb_hit_type0.sv          # top wrapper, single-lane
+│   ├── arb_hit_type0.sv               # top wrapper, single-lane
 │   ├── arb_hit_type0_fifo.sv
 │   ├── arb_hit_type0_arbiter.sv
 │   ├── arb_hit_type0_watchdog.sv
 │   ├── arb_hit_type0_runctl.sv
 │   └── arb_hit_type0_csr.sv
 ├── script/
-│   ├── arb_hit_type0_hw.tcl       # single-lane Qsys component
-│   └── arb_hit_type0_bank8_hw.tcl # 8-lane composed wrapper (§7)
+│   ├── arb_hit_type0_hw.tcl              # single-lane Qsys component (top)
+│   ├── arb_hit_type0_supercore_hw.tcl    # parameterised super-IP wrapper (top, §7)
+│   └── hw_tcl/                           # purpose-split sub-files sourced by both tops
+│       ├── arb_hit_type0_params.tcl
+│       ├── arb_hit_type0_presets.tcl
+│       ├── arb_hit_type0_gui.tcl
+│       ├── arb_hit_type0_validate.tcl
+│       ├── arb_hit_type0_composite.tcl
+│       ├── arb_hit_type0_tlm_preview.tcl
+│       ├── arb_hit_type0_report.tcl
+│       ├── arb_hit_type0_utils.tcl
+│       └── arb_hit_type0_supercore_composite.tcl
 ├── syn/
 └── tb/
     └── ...
 ```
 
 The IPX library (`firmware_builds/.../syn/mu3e_ip_cores.ipx`) carries
-two component entries pointing at the two `_hw.tcl` files.
+two component entries: one pointing at `arb_hit_type0_hw.tcl`, one
+pointing at `arb_hit_type0_supercore_hw.tcl`.
 
-## 7. Bank wrapper `arb_hit_type0_bank8`
+## 7. Super-IP wrapper `arb_hit_type0_supercore`
 
-A composed super-IP that instantiates eight `arb_hit_type0` lanes
-through Qsys's elaboration-stage `compose_*` API (see
-`~/.codex/skills/ip-packaging/SKILL.md` "Bank / Super-IP Composition
-Pattern"). The bank reduces the host system's Qsys instance count and
-connection load by ~3× without re-implementing per-lane logic.
+A parameterised composed super-IP that instantiates `LANE_COUNT`
+copies of `arb_hit_type0` through Qsys's elaboration-stage
+`add_instance` / `add_connection` API. Lane count is a CSR-visible
+elaboration parameter; the wrapper file name is **not** baked to a
+specific count. See `~/.codex/skills/ip-packaging/SKILL.md`
+"Super-IP Composition Pattern" for the canonical recipe.
 
-### 7.1 Boundary
+### 7.1 Parameters
+
+| Parameter | Type | Default | Range | Notes |
+|---|---|---:|---|---|
+| `LANE_COUNT` | INTEGER | 8 | 1..32 | composition-only (`HDL_PARAMETER false`); the wrapper instantiates exactly `LANE_COUNT` copies of `arb_hit_type0` |
+| `MODE_DEFAULT` | NATURAL | 0 | 0..2 | broadcast to every lane's `MODE_DEFAULT` parameter |
+| `WATCHDOG_DEFAULT` | NATURAL | 500 | 0..65535 | broadcast to every lane's `WATCHDOG_DEFAULT` parameter |
+
+### 7.2 Boundary
 
 | Interface | Type | Width | Direction | Notes |
 |---|---|---|---|---|
 | `clk` | clock | 1 | in | shared 125 MHz lane clock |
 | `rst` | reset | 1 | in | shared async reset |
-| `run_ctrl` | AVST sink | 9 | in | single 9-bit AVST sink, internally fanned to all 8 lanes via `add_connection` to a fan-out splitter inside the composition |
-| `csr_<i>` (i = 0..7) | AVMM slave | 5b word, 32b data | in/out | per-lane CSR slave; each lane keeps its independent CSR aperture; integration step assigns contiguous base addresses (e.g. `0x0000`, `0x0080`, ...) under the host SC bridge |
-| `real_in_<i>` (i = 0..7) | AVST sink | 45b + sop/eop/eor + error/channel | in | per-lane real-source ingress |
-| `emu_in_<i>` (i = 0..7) | AVST sink | 45b + sop/eop/eor + error/channel | in | per-lane emulator-source ingress |
-| `selected_out_<i>` (i = 0..7) | AVST source | 45b + sop/eop/eor + error/channel | out | per-lane merged egress |
+| `run_ctrl` | AVST sink | 9 | in | single 9-bit AVST sink at the supercore boundary, internally fanned to all `LANE_COUNT` lanes via an `altera_avalon_st_splitter` instantiated inside the composition callback |
+| `csr_<i>` (i = 0..LANE_COUNT-1) | AVMM slave | 5b word, 32b data | in/out | per-lane CSR slave; each lane keeps its independent aperture; integration step assigns contiguous base addresses under the host SC bridge |
+| `real_in_<i>` (i = 0..LANE_COUNT-1) | AVST sink | 45b + sop/eop/eor + error/channel | in | per-lane real-source ingress |
+| `emu_in_<i>` (i = 0..LANE_COUNT-1) | AVST sink | 45b + sop/eop/eor + error/channel | in | per-lane emulator-source ingress |
+| `selected_out_<i>` (i = 0..LANE_COUNT-1) | AVST source | 45b + sop/eop/eor + error/channel | out | per-lane merged egress |
 
-### 7.2 CSR aperture math
+### 7.3 CSR aperture math
 
-Per-lane CSR is 32 words × 32 bits = 128 bytes. Eight lanes consume
-8 × 128 B = 1 KB total. Each lane's aperture is well below the Qsys
-4 KB-per-slave limit. Eight separate slaves (one per lane) are kept
-deliberately to:
+Per-lane CSR is 32 words × 32 bits = 128 bytes. With `LANE_COUNT = 8`,
+the supercore consumes 8 × 128 B = 1 KB total. Each lane's aperture is
+well below the Qsys 4 KB-per-slave limit. Per-lane separate slaves are
+kept deliberately to:
 
 - decouple lanes — a CSR access on one lane never blocks another lane's CSR FSM,
 - preserve per-lane SignalTap probe boundaries,
 - keep the per-lane DV scoreboard reusable without an offset shift.
 
-### 7.3 Resource estimate
+### 7.4 Resource estimate (LANE_COUNT = 8)
 
-Per-lane is the dominant cost. The bank wrapper adds ~250 ALMs of
-plumbing (run-control fan-out, per-lane CSR routing, internal connection
-gating). Final estimate vs the alternatives:
+Per-lane is the dominant cost. The supercore wrapper adds ~250 ALMs of
+plumbing (run-control fan-out, per-lane CSR routing, internal
+connection gating). Final estimate vs the alternatives:
 
 | Topology | ALMs | Registers | Qsys connections |
 |---|---:|---:|---:|
 | 8 × standalone `arb_hit_type0` | ~ 2400 | ~ 7600 | ~ 80 |
-| **Bank wrapper `arb_hit_type0_bank8`** | **~ 2350** | **~ 7400** | **~ 27** |
+| **`arb_hit_type0_supercore` (`LANE_COUNT = 8`)** | **~ 2350** | **~ 7400** | **~ 27** |
 | Monolithic 8-lane re-implementation | ~ 2200 | ~ 7200 | ~ 27 |
 
-The bank wrapper recovers ~95 % of the monolithic resource savings
-without re-doing DV. The connection-count savings (3×) is the real win
-for system Qsys hygiene.
+The supercore recovers ~95 % of the monolithic resource savings without
+re-doing DV. The connection-count savings (3×) is the real win for
+system Qsys hygiene.
 
-### 7.4 Build sequence
+### 7.5 Sub-file responsibilities
 
-1. Sign off `arb_hit_type0` standalone (DV per `tb/DV_PLAN.md`,
-   `rtl-linter-and-checker` static screen, `timing-performance-resources-sign-off`
-   1.1× target Fmax).
-2. Author `script/arb_hit_type0_bank8_hw.tcl` per the
-   `ip-packaging` skill bank pattern. Composition callback only; no
-   wrapper RTL.
-3. Smoke DV: instantiate the bank in a Qsys testbench, drive distinct
-   patterns on each lane, prove independent egress streams and
-   independent CSR readback. The per-lane harness is reused; only a
-   thin "bank-level smoke" sequence is new.
-4. Wire the bank into `system_20260504_emulator_type0` (single-lane
-   focus build → graduates to 8-lane integration once the bank is
-   smoke-cleared).
-5. Update `firmware_builds/.../syn/mu3e_ip_cores.ipx` with the bank
-   component entry; the existing single-lane entry stays valid for
-   builds that prefer per-instance topology.
+Both `arb_hit_type0_hw.tcl` and `arb_hit_type0_supercore_hw.tcl` source
+the same `script/hw_tcl/arb_hit_type0_*.tcl` purpose-split files. The
+single-lane top sources only the per-lane subset; the supercore top
+additionally sources `arb_hit_type0_supercore_composite.tcl`.
 
-### 7.5 Out of scope for `arb_hit_type0_bank8` 26.2.0
+| Sub-file | Used by single | Used by supercore | Role |
+|---|:---:|:---:|---|
+| `arb_hit_type0_params.tcl` | yes | yes | parameter declarations and defaults; supercore adds `LANE_COUNT` |
+| `arb_hit_type0_presets.tcl` | yes | yes | preset matrix (perf × area × features) |
+| `arb_hit_type0_gui.tcl` | yes | yes | multi-tab Platform Designer GUI; supercore renders a lane-table view |
+| `arb_hit_type0_validate.tcl` | yes | yes | parameter cross-validation; emits Qsys warning / info on configure-static notes (e.g. MIX_RR mode message) |
+| `arb_hit_type0_composite.tcl` | yes | — | single-lane connection + HDL filelist rules |
+| `arb_hit_type0_tlm_preview.tcl` | yes | yes | analytical / TLM CSV lookup, performance preview tab |
+| `arb_hit_type0_report.tcl` | yes | yes | resource and timing-estimate report |
+| `arb_hit_type0_utils.tcl` | yes | yes | shared helpers |
+| `arb_hit_type0_supercore_composite.tcl` | — | yes | super-IP `COMPOSITION_CALLBACK` body: instantiates `LANE_COUNT` lanes, fans out clock / reset / run_ctrl, exports per-lane streams and CSRs |
 
-- Cross-lane shared CSR aperture (a single decoded slave that internally
-  decodes lane index from upper address bits). Possible follow-on if the
-  host SC bridge demands a single-aperture layout, but the per-lane
-  slave layout is the simpler default and matches the existing
-  `mutrig_lane_source_mux` pattern.
-- Runtime lane-count parameterization. The bank is named `bank8` for a
-  reason — the only legal value is 8 in this release. A separate
-  `bankN` parameterized variant can come later.
+### 7.6 Build sequence
+
+1. Sign off `arb_hit_type0` standalone (DV per `tb/DV_PLAN.md`, `rtl-linter-and-checker` static screen, `timing-performance-resources-sign-off` at 1.1× target Fmax).
+2. Author `script/hw_tcl/arb_hit_type0_supercore_composite.tcl` and the supercore top `script/arb_hit_type0_supercore_hw.tcl` per the `ip-packaging` skill super-IP pattern. Composition callback only; no wrapper RTL.
+3. Smoke DV: instantiate the supercore at `LANE_COUNT = 8` in a Qsys testbench, drive distinct patterns on each lane, prove independent egress streams and independent CSR readback. The per-lane harness is reused; only a thin "supercore-level smoke" sequence is new.
+4. Wire the supercore into `system_20260504_emulator_type0` (single-lane focus build → graduates to 8-lane integration once the supercore is smoke-cleared).
+5. Update `firmware_builds/.../syn/mu3e_ip_cores.ipx` with the supercore component entry; the existing single-lane entry stays valid for builds that prefer per-instance topology.
+
+### 7.7 Out of scope for `arb_hit_type0_supercore` 26.2.0
+
+- Cross-lane shared CSR aperture (a single decoded slave that internally decodes lane index from upper address bits). Possible follow-on if the host SC bridge demands a single-aperture layout, but the per-lane slave layout is the simpler default and matches the existing `mutrig_lane_source_mux` pattern.
+- Per-lane parameter overrides at the supercore boundary. `MODE_DEFAULT` and `WATCHDOG_DEFAULT` broadcast to every lane in 26.2.0; per-lane overrides can be added by widening the supercore parameter list later.
