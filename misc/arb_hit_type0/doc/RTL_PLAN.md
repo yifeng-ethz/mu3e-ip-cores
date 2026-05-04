@@ -198,15 +198,26 @@ boundary and is preserved across all three transitions
 #### Counter semantics
 
 Hit_type0 packs one hit per beat (45-bit hit word) and uses SOP/EOP
-to mark the **frame** boundary, not the hit boundary. So:
+to mark the **frame** boundary, not the hit boundary. So **hits**
+(per-beat) and **frames** (per-EOP) are separately observable, and the
+IP keeps both:
+
+Per-source **hit** counters (one beat = one hit):
 
 - `INGRESS_REAL_HITS` += 1 every cycle a real beat is accepted into the real FIFO (`asi_real_valid` true and FIFO not full)
 - `DROPS_REAL` += 1 every cycle a real beat is offered but the real FIFO is full (`asi_real_valid` true and FIFO full)
 - `EGRESS_REAL_HITS` += 1 every cycle an egress beat is granted from the real source (`aso_valid` true and `last_grant=0`)
 
-Symmetric counters for emu. Frame counting is intentionally not a
-counter in this IP; the merge changes frame semantics anyway and any
-frame-correlation logic belongs downstream.
+Per-source **frame** counters (one frame = one source EOP):
+
+- `INGRESS_REAL_FRAMES` += 1 every cycle the real input port presents `asi_real_valid && asi_real_endofpacket`, **regardless of FIFO accept**. Counts upstream-offered frames. The diff `INGRESS_REAL_FRAMES − EGRESS_REAL_FRAMES` is the count of frames lost in this IP (FIFO-full drops on EOP-bearing beats, watchdog-synthesized closes, or upstream-protocol-violation events).
+- `EGRESS_REAL_FRAMES` += 1 every cycle a granted egress beat carries source-side eop=1 from the real FIFO (`aso_valid` true, `last_grant=0`, the FIFO entry's `eop` bit set). This is **not** keyed off the merge-FSM-rewritten `aso_endofpacket` — the merge FSM may suppress a source-EOP when the other source is still mid-packet. The frame is counted as soon as that source's frame has fully traversed the egress, even if the merged egress packet stays open.
+
+Symmetric counters for emu (`INGRESS_EMU_HITS`, `DROPS_EMU`, `EGRESS_EMU_HITS`, `INGRESS_EMU_FRAMES`, `EGRESS_EMU_FRAMES`).
+
+In `REAL` and `EMU` mode, `INGRESS_*_FRAMES = EGRESS_*_FRAMES` for the active source under upstream-protocol compliance; in `MIX_RR` mode the equality holds **per source** (the merge FSM doesn't drop frames; it only collapses the merged egress packet boundary). A non-equality is the immediate signal of a fault and the syndrome registers should be inspected.
+
+Watchdog-synthesized egress beats do **not** increment any counter — they are control beats, not hits or frames. The synthesis event itself sets `STATUS.watchdog_synthesized_*` sticky.
 
 #### Invariants enforced by construction
 
@@ -344,7 +355,15 @@ toward `INGRESS_*_HITS` because the hit was never complete on the source side.
 | `0x13` | `EGRESS_REAL_HITS_H` | RO | |
 | `0x14` | `EGRESS_EMU_HITS_L` | RO | |
 | `0x15` | `EGRESS_EMU_HITS_H` | RO | |
-| `0x16..0x1F` | reserved | RO | reads as zero |
+| `0x16` | `INGRESS_REAL_FRAMES_L` | RO | per-source upstream-offered frames; low 32 bits; latches high on read |
+| `0x17` | `INGRESS_REAL_FRAMES_H` | RO | high 32 bits; reads previously latched value |
+| `0x18` | `INGRESS_EMU_FRAMES_L` | RO | |
+| `0x19` | `INGRESS_EMU_FRAMES_H` | RO | |
+| `0x1A` | `EGRESS_REAL_FRAMES_L` | RO | per-source frames whose source-EOP traversed egress; low 32 bits; latches high on read |
+| `0x1B` | `EGRESS_REAL_FRAMES_H` | RO | high 32 bits; reads previously latched value |
+| `0x1C` | `EGRESS_EMU_FRAMES_L` | RO | |
+| `0x1D` | `EGRESS_EMU_FRAMES_H` | RO | |
+| `0x1E..0x1F` | reserved | RO | reads as zero |
 
 `STATUS.last_grant` is 1-bit (0=real, 1=emulator). `STATUS.merged_open`
 is the union flag used for mode-switch defer. `STATUS.run_state[2:0]`
@@ -354,8 +373,8 @@ is the decoded run-control state observed on the `run_ctrl` AVST sink.
 
 | Item | Target |
 |---|---|
-| ALMs (single instance) | `< 200` |
-| Registers (single instance) | `~ 600` (mostly the 64-bit counters: 6 × 64 = 384 bits) |
+| ALMs (single instance) | `< 250` |
+| Registers (single instance) | `~ 850` (mostly the ten 64-bit counters: 10 × 64 = 640 bits) |
 | RAM blocks | `0` (FIFOs in distributed RAM) |
 | DSP blocks | `0` |
 
@@ -365,11 +384,13 @@ Standalone signoff at `137.5 MHz` (`1.1 × 125 MHz`) per the
 ### 2.5 Error counters and syndromes (upstream-bug recording)
 
 Two saturating 32-bit counters and two latch-once syndrome words
-record upstream-bug events without attempting recovery. The arbiter
-keeps operating after these events but the merged packet semantics
-are no longer trustworthy — the only guaranteed recovery is a clean
-reset (which the run-control sink in §2.6 will apply on the next
-`RUN_PREP` or `RESET` state).
+record upstream-bug events without attempting recovery. These are the
+**only** error-recording surface in the IP; sticky bits live in
+`STATUS` (§2.4 word `0x03`), counters in `0x06`/`0x07`, syndromes in
+`0x08`/`0x09`. The arbiter keeps operating after these events but the
+merged packet semantics are no longer trustworthy — the only
+guaranteed recovery is a clean reset (which the run-control sink in
+§2.6 will apply on the next `RUN_PREP` or `RESET` state).
 
 | Field | Trigger | Recorded |
 |---|---|---|
@@ -377,12 +398,20 @@ reset (which the run-control sink in §2.6 will apply on the next
 | `SYNDROME_PROTOCOL` | first such event after sticky clear | source, prior `_open` flags, beat fields, run_state |
 | `STATUS.protocol_violation_sticky` | as above | sticky-set; W1P clear via `CONTROL.bit[5]` |
 | `ERROR_COUNT_DROP_MID_PACKET` | beat with `valid && fifo_full` from one source while that source's `_open == 1` | +1 saturating |
-| `SYNDROME_DROP_MID_PACKET` | first such event after sticky clear | source, FIFO depth at drop, beat fields, run_state |
+| `SYNDROME_DROP_MID_PACKET` | first such event after sticky clear | source, FIFO depth at drop (`[5:0]` to encode `0..16`), beat fields, run_state |
 | `STATUS.drop_mid_packet_sticky` | as above | sticky-set; W1P clear via `CONTROL.bit[5]` |
 
 The syndrome words record only the **first** event per sticky-cleared
 window so the original cause stays visible for SignalTap/SC tool
 inspection while subsequent events still bump the counters.
+
+Diagnostic check (host-side software): for each source, audit
+`INGRESS_*_FRAMES`, `EGRESS_*_FRAMES`, `DROPS_*`,
+`ERROR_COUNT_DROP_MID_PACKET`, `ERROR_COUNT_PROTOCOL`,
+`STATUS.partial_packet_drop_sticky`, `STATUS.drop_mid_packet_sticky`,
+and `STATUS.protocol_violation_sticky`. A clean run satisfies
+`INGRESS_<S>_FRAMES == EGRESS_<S>_FRAMES` and all sticky / error
+counters at zero.
 
 ### 2.6 Run-control sink
 
