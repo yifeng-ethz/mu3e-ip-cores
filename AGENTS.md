@@ -1,5 +1,6 @@
 # Agent Notes
 
+- **Hard rule — Qsys edits go through Tcl, never raw XML.** Any change to a Platform Designer system (`*.qsys`, `*.sopcinfo`, `synthesis/`, `*.ipx`) must be made by a `qsys-script` or `qsys-edit` Tcl recipe under `script/` and applied through the Tcl regenerator. Direct hand-edits of the qsys XML, the generated synthesis tree, or the IPX library file are forbidden, even when "just one line." Reason: qsys files carry implicit address-map, mm_interconnect, and reset/clock fanout state that is recomputed at generate time; a hand edit silently desyncs against the regenerator script, and the next regenerate run loses the change. Each regenerator script must `chmod -R a-w` the generated `*.qsys`, `*.sopcinfo`, and `synthesis/` tree on success so the contract is enforced by the filesystem, not just by discipline.
 - Never modify generated RTL under any `functional/` output directory in-place. If a change is needed, create a copy and ask for approval before wiring it in.
 - Semantics-preserving edits for tool/simulator compatibility are OK; functional/behavior changes require explicit approval.
 - Shared System Console toolkit sources live under `toolkits/`.
