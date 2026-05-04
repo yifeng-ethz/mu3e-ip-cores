@@ -477,7 +477,7 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="arb_hit_type0" file="../../../../misc/arb_hit_type0/arb_hit_type0_hw.tcl" displayName="Arbiter hit_type0 (real / emu / mix RR)" version="26.2.0.504" description="Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source and packet-boundary round-robin." tags="CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
+ <component name="arb_hit_type0" file="../../../../misc/arb_hit_type0/script/arb_hit_type0_hw.tcl" displayName="Arbiter hit_type0 (real / emu / mix RR)" version="26.2.0.504" description="Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source and packet-boundary round-robin." tags="CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="true" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />

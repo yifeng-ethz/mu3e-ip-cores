@@ -39,7 +39,7 @@ The harness must support both reset-per-test execution and continuous no-restart
 The scoreboard runs a deterministic Python-friendly transaction-level model that ingests every accepted beat per source and emits the expected egress beats. The model owns:
 
 - 16-deep ingress FIFO model per source, with full/empty status and a wrap pointer.
-- Mode register with `mode_pending` and the egress-side `in_packet_active` flag; mode commit is observed at `endofpacket && valid` on egress.
+- Mode register with `mode_pending` and the egress-side `merged_open` flag; mode commit is observed when `merged_open == 0`.
 - Round-robin arbiter state (`last_grant` and pending switch).
 - Six 64-bit counters, identical saturating semantics to the DUT.
 - Sticky flags `partial_packet_drop_sticky` and `mode_reserved_seen`.

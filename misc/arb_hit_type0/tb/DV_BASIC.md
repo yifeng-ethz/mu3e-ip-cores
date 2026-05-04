@@ -159,7 +159,7 @@ This document expands every B-bucket entry in `DV_PLAN.md` section 4 into a dire
 
 ### B016_ingress_real_hit_counter
 
-- **Goal:** Each `endofpacket && valid` on real_in increments INGRESS_REAL_HITS by 1.
+- **Goal:** Each accepted real-input beat (`valid && !full`) increments INGRESS_REAL_HITS by 1.
 - **Stimulus sequence:** Drive 100 hits with mixed packet lengths.
 - **Expected result:** INGRESS_REAL_HITS_L = 100, INGRESS_REAL_HITS_H = 0.
 - **Status:** planned
@@ -181,7 +181,7 @@ This document expands every B-bucket entry in `DV_PLAN.md` section 4 into a dire
 
 ### B020_egress_real_counter
 
-- **Goal:** Each `endofpacket && valid` on egress with `last_grant=0` increments EGRESS_REAL_HITS by 1.
+- **Goal:** Each granted non-synthesized egress beat with `last_grant=0` increments EGRESS_REAL_HITS by 1.
 - **Status:** planned
 
 ### B021_egress_emu_counter
@@ -240,28 +240,9 @@ This document expands every B-bucket entry in `DV_PLAN.md` section 4 into a dire
 - **Goal:** A run_ctrl beat carrying RESET clears all counters (incl. ERROR_COUNT_*) and syndromes in addition to the RUN_PREP behaviour.
 - **Status:** planned
 
-### B029_ingress_real_frame_counter
+### B029_B032_frame_counter_reserved
 
-- **Goal:** Each cycle of `asi_real_valid && asi_real_endofpacket` increments INGRESS_REAL_FRAMES by 1, regardless of FIFO accept (a frame whose EOP is dropped at full FIFO still counts as offered).
-- **Stimulus sequence:** Drive 5 frames on real_in with FIFO non-full; then pre-fill FIFO and drive a 6th frame whose EOP arrives on a full cycle.
-- **Expected result:** INGRESS_REAL_FRAMES_L = 6 (low 32 bits), INGRESS_REAL_FRAMES_H = 0; ERROR_COUNT_DROP_MID_PACKET = 1 for the dropped EOP-bearing beat.
-- **Status:** planned
-
-### B030_ingress_emu_frame_counter
-
-- **Goal:** Symmetric of B029 for emu source.
-- **Status:** planned
-
-### B031_egress_real_frame_counter
-
-- **Goal:** Each granted egress beat with `last_grant=0` and the FIFO entry's source-side eop=1 increments EGRESS_REAL_FRAMES by 1, even when the merge-FSM suppresses the egress-side endofpacket because the other source is still mid-packet.
-- **Stimulus sequence:** MIX_RR mode. Drive a 4-beat real frame and a 4-beat emu frame overlapping. The real-source EOP arrives at egress while emu_open=1 (eop suppressed by merge FSM).
-- **Expected result:** EGRESS_REAL_FRAMES = 1 after the real frame's EOP-bearing beat passes egress, even though that egress beat shows aso_endofpacket=0.
-- **Status:** planned
-
-### B032_egress_emu_frame_counter
-
-- **Goal:** Symmetric of B031 for emu source.
+- **Goal:** Confirm frame-counter CSRs are intentionally not implemented in `26.2.0`; `0x16..0x1F` read as zero and hit counters remain per beat.
 - **Status:** planned
 
 ---

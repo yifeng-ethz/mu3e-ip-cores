@@ -1,0 +1,12 @@
+# Local Questa One workspace
+work/
+modelsim.ini
+transcript
+*.wlf
+
+# rtl-linter-and-checker scratch (PASS evidence is the manifest, not the workspace)
+.questa_static_screen/
+
+# Per-test simulation work dirs
+tb/sim/
+tb/work*/

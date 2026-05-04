@@ -35,12 +35,10 @@ responsibility to set `asic_id_base` correctly. DV case `B025` checks.
 
 - 16-deep ingress FIFO per source (real and emulator)
 - Frame-alignment watchdog with CSR-configurable threshold (default 500 cycles)
-- Ten 64-bit saturating counters with `_L`/`_H` pair atomicity (latched-on-read):
-  - per-source hits: `INGRESS_REAL_HITS`, `INGRESS_EMU_HITS`
+- Six 64-bit saturating counters with `_L`/`_H` pair atomicity (latched-on-read):
+  - per-source ingress beats/hits: `INGRESS_REAL_HITS`, `INGRESS_EMU_HITS`
   - per-source drops: `DROPS_REAL`, `DROPS_EMU`
-  - per-source egress hits: `EGRESS_REAL_HITS`, `EGRESS_EMU_HITS`
-  - per-source ingress frames: `INGRESS_REAL_FRAMES`, `INGRESS_EMU_FRAMES`
-  - per-source egress frames: `EGRESS_REAL_FRAMES`, `EGRESS_EMU_FRAMES` (counts source-EOP beats granted to egress, even when the merge-FSM suppresses the egress-side EOP)
+  - per-source egress beats/hits: `EGRESS_REAL_HITS`, `EGRESS_EMU_HITS`
 - Two 32-bit upstream-bug error counters with first-event syndrome snapshots:
   - `ERROR_COUNT_PROTOCOL`, `SYNDROME_PROTOCOL`
   - `ERROR_COUNT_DROP_MID_PACKET`, `SYNDROME_DROP_MID_PACKET`

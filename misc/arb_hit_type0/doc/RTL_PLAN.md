@@ -122,7 +122,7 @@ item below.
               +---------------------------------------------------------+
                                 |
                                 v
-                       AVMM CSR slave (4-bit word, 32-bit data)
+                       AVMM CSR slave (5-bit word, 32-bit data)
 ```
 
 ### 2.1 Per-source ingress FIFO
@@ -198,26 +198,17 @@ boundary and is preserved across all three transitions
 #### Counter semantics
 
 Hit_type0 packs one hit per beat (45-bit hit word) and uses SOP/EOP
-to mark the **frame** boundary, not the hit boundary. So **hits**
-(per-beat) and **frames** (per-EOP) are separately observable, and the
-IP keeps both:
-
-Per-source **hit** counters (one beat = one hit):
+to mark the **frame** boundary, not the hit boundary. The IP therefore
+counts hits per accepted/granted beat; it does not maintain separate
+frame counters.
 
 - `INGRESS_REAL_HITS` += 1 every cycle a real beat is accepted into the real FIFO (`asi_real_valid` true and FIFO not full)
 - `DROPS_REAL` += 1 every cycle a real beat is offered but the real FIFO is full (`asi_real_valid` true and FIFO full)
 - `EGRESS_REAL_HITS` += 1 every cycle an egress beat is granted from the real source (`aso_valid` true and `last_grant=0`)
 
-Per-source **frame** counters (one frame = one source EOP):
+Symmetric counters for emu (`INGRESS_EMU_HITS`, `DROPS_EMU`, `EGRESS_EMU_HITS`).
 
-- `INGRESS_REAL_FRAMES` += 1 every cycle the real input port presents `asi_real_valid && asi_real_endofpacket`, **regardless of FIFO accept**. Counts upstream-offered frames. The diff `INGRESS_REAL_FRAMES − EGRESS_REAL_FRAMES` is the count of frames lost in this IP (FIFO-full drops on EOP-bearing beats, watchdog-synthesized closes, or upstream-protocol-violation events).
-- `EGRESS_REAL_FRAMES` += 1 every cycle a granted egress beat carries source-side eop=1 from the real FIFO (`aso_valid` true, `last_grant=0`, the FIFO entry's `eop` bit set). This is **not** keyed off the merge-FSM-rewritten `aso_endofpacket` — the merge FSM may suppress a source-EOP when the other source is still mid-packet. The frame is counted as soon as that source's frame has fully traversed the egress, even if the merged egress packet stays open.
-
-Symmetric counters for emu (`INGRESS_EMU_HITS`, `DROPS_EMU`, `EGRESS_EMU_HITS`, `INGRESS_EMU_FRAMES`, `EGRESS_EMU_FRAMES`).
-
-In `REAL` and `EMU` mode, `INGRESS_*_FRAMES = EGRESS_*_FRAMES` for the active source under upstream-protocol compliance; in `MIX_RR` mode the equality holds **per source** (the merge FSM doesn't drop frames; it only collapses the merged egress packet boundary). A non-equality is the immediate signal of a fault and the syndrome registers should be inspected.
-
-Watchdog-synthesized egress beats do **not** increment any counter — they are control beats, not hits or frames. The synthesis event itself sets `STATUS.watchdog_synthesized_*` sticky.
+Watchdog-synthesized egress beats do **not** increment hit counters — they are control beats, not real hits. The synthesis event itself sets `STATUS.watchdog_synthesized_*` sticky.
 
 #### Invariants enforced by construction
 
@@ -313,21 +304,23 @@ Per-lane, per-source 64-bit saturating counters, latched on read for 64-bit
 pair atomicity (low word read latches the high word; reading high without
 first reading low returns the previously latched high):
 
-- `INGRESS_REAL_HITS` — count of real-input hits (`asi_real_endofpacket && asi_real_valid`)
-- `INGRESS_EMU_HITS` — count of emulator-input hits (`asi_emu_endofpacket && asi_emu_valid`)
+- `INGRESS_REAL_HITS` — count of real-input beats accepted into the real FIFO (`asi_real_valid && !real_full`)
+- `INGRESS_EMU_HITS` — count of emulator-input beats accepted into the emu FIFO (`asi_emu_valid && !emu_full`)
 - `DROPS_REAL` — count of real-input beats dropped because real FIFO was full
 - `DROPS_EMU` — count of emulator-input beats dropped because emulator FIFO was full
-- `EGRESS_REAL_HITS` — egress hits whose source was real
-- `EGRESS_EMU_HITS` — egress hits whose source was emulator
+- `EGRESS_REAL_HITS` — count of granted real-source egress beats
+- `EGRESS_EMU_HITS` — count of granted emulator-source egress beats
 
-Counters increment on **hit completion** (`endofpacket && valid`) for ingress
-and egress. Drops are byte-level and increment **on the dropped beat**, not on
-hit completion, because a dropped SOP loses the rest of the hit.
+Counters increment per **accepted or granted beat**, not on EOP. This follows
+the upstream hit_type0 contract from `mutrig_frame_deassembly`: one accepted
+45-bit beat is one hit, while SOP/EOP mark the frame boundary around those
+hits. Drops also increment on the dropped beat.
 
 A single-bit `STATUS.partial_packet_drop_sticky` flag is set if a SOP is
 accepted into the FIFO but the matching EOP is not (e.g. the FIFO fills
-mid-packet). This is a diagnostic flag; the corresponding hit does not count
-toward `INGRESS_*_HITS` because the hit was never complete on the source side.
+mid-packet). Accepted beats before the first dropped beat still count toward
+`INGRESS_*_HITS`; the dropped beat increments `DROPS_*` and records the
+upstream packet-boundary violation.
 
 ### 2.4 CSR map (5-bit word address, 32-bit data)
 
@@ -342,7 +335,7 @@ toward `INGRESS_*_HITS` because the hit was never complete on the source side.
 | `0x06` | `ERROR_COUNT_PROTOCOL` | RO | 32-bit saturating count of upstream-protocol-violation events |
 | `0x07` | `ERROR_COUNT_DROP_MID_PACKET` | RO | 32-bit saturating count of mid-packet drops |
 | `0x08` | `SYNDROME_PROTOCOL` | RO | snapshot of first protocol-violation event: `[3:0]` source channel, `[4]` source (0=real, 1=emu), `[5]` `prior_real_open`, `[6]` `prior_emu_open`, `[7]` beat.sop, `[8]` beat.eop, `[11:9]` beat.error, `[14:12]` run_state, `[31:15]` reserved |
-| `0x09` | `SYNDROME_DROP_MID_PACKET` | RO | snapshot of first drop-mid-packet event: `[3:0]` source channel, `[4]` source, `[8:5]` FIFO depth at drop, `[9]` source's `_open` at drop, `[12:10]` beat.error, `[15:13]` run_state, `[31:16]` reserved |
+| `0x09` | `SYNDROME_DROP_MID_PACKET` | RO | snapshot of first drop-mid-packet event: `[3:0]` source channel, `[4]` source, `[9:5]` FIFO depth at drop (`0..16`), `[10]` source's `_open` at drop, `[13:11]` beat.error, `[16:14]` run_state, `[31:17]` reserved |
 | `0x0A` | `INGRESS_REAL_HITS_L` | RO | low 32 bits; latches high on read |
 | `0x0B` | `INGRESS_REAL_HITS_H` | RO | high 32 bits; reads previously latched value |
 | `0x0C` | `INGRESS_EMU_HITS_L` | RO | |
@@ -355,15 +348,7 @@ toward `INGRESS_*_HITS` because the hit was never complete on the source side.
 | `0x13` | `EGRESS_REAL_HITS_H` | RO | |
 | `0x14` | `EGRESS_EMU_HITS_L` | RO | |
 | `0x15` | `EGRESS_EMU_HITS_H` | RO | |
-| `0x16` | `INGRESS_REAL_FRAMES_L` | RO | per-source upstream-offered frames; low 32 bits; latches high on read |
-| `0x17` | `INGRESS_REAL_FRAMES_H` | RO | high 32 bits; reads previously latched value |
-| `0x18` | `INGRESS_EMU_FRAMES_L` | RO | |
-| `0x19` | `INGRESS_EMU_FRAMES_H` | RO | |
-| `0x1A` | `EGRESS_REAL_FRAMES_L` | RO | per-source frames whose source-EOP traversed egress; low 32 bits; latches high on read |
-| `0x1B` | `EGRESS_REAL_FRAMES_H` | RO | high 32 bits; reads previously latched value |
-| `0x1C` | `EGRESS_EMU_FRAMES_L` | RO | |
-| `0x1D` | `EGRESS_EMU_FRAMES_H` | RO | |
-| `0x1E..0x1F` | reserved | RO | reads as zero |
+| `0x16..0x1F` | reserved | RO | reads as zero |
 
 `STATUS.last_grant` is 1-bit (0=real, 1=emulator). `STATUS.merged_open`
 is the union flag used for mode-switch defer. `STATUS.run_state[2:0]`
@@ -398,7 +383,7 @@ guaranteed recovery is a clean reset (which the run-control sink in
 | `SYNDROME_PROTOCOL` | first such event after sticky clear | source, prior `_open` flags, beat fields, run_state |
 | `STATUS.protocol_violation_sticky` | as above | sticky-set; W1P clear via `CONTROL.bit[5]` |
 | `ERROR_COUNT_DROP_MID_PACKET` | beat with `valid && fifo_full` from one source while that source's `_open == 1` | +1 saturating |
-| `SYNDROME_DROP_MID_PACKET` | first such event after sticky clear | source, FIFO depth at drop (`[5:0]` to encode `0..16`), beat fields, run_state |
+| `SYNDROME_DROP_MID_PACKET` | first such event after sticky clear | source, FIFO depth at drop (`[9:5]`, 5 bits to encode `0..16`), beat fields, run_state |
 | `STATUS.drop_mid_packet_sticky` | as above | sticky-set; W1P clear via `CONTROL.bit[5]` |
 
 The syndrome words record only the **first** event per sticky-cleared
@@ -406,12 +391,12 @@ window so the original cause stays visible for SignalTap/SC tool
 inspection while subsequent events still bump the counters.
 
 Diagnostic check (host-side software): for each source, audit
-`INGRESS_*_FRAMES`, `EGRESS_*_FRAMES`, `DROPS_*`,
+`INGRESS_*_HITS`, `EGRESS_*_HITS`, `DROPS_*`,
 `ERROR_COUNT_DROP_MID_PACKET`, `ERROR_COUNT_PROTOCOL`,
 `STATUS.partial_packet_drop_sticky`, `STATUS.drop_mid_packet_sticky`,
-and `STATUS.protocol_violation_sticky`. A clean run satisfies
-`INGRESS_<S>_FRAMES == EGRESS_<S>_FRAMES` and all sticky / error
-counters at zero.
+and `STATUS.protocol_violation_sticky`. A clean no-watchdog run
+satisfies `INGRESS_<S>_HITS == EGRESS_<S>_HITS` for active sources and
+all sticky / error counters at zero.
 
 ### 2.6 Run-control sink
 
@@ -461,3 +446,110 @@ only observes the broadcast state.
 - A "mix-priority" mode (real always wins on tie) is out of scope for 26.2.0; can be added on a future `CONTROL.mode[2]` encoding if the RR-fairness matrix is found insufficient during integration.
 - A 4-lane RR follow-on stage (4 instances of `arb_hit_type0` to one multi-channel egress) is the natural next IP. That IP must support per-lane `channel` tagging plus SOP/EOP and the same multi-channel packetized contract on its egress. Captured in a separate `RTL_PLAN_arb_hit_type0_4to1.md` once `arb_hit_type0` is signed off.
 - **Per-beat channel demux audit at downstream consumers.** Before `arb_hit_type0` MIX_RR is promoted from debug-only into a production datapath, `mutrig_timestamp_processor` and `ring_buffer_cam` must be independently verified to use per-beat `channel` for source attribution inside a single Avalon-ST packet. `maxChannel = 63` at `mts_processor.hit_type0_in` and `maxChannel = 15` at `ring_buffer_cam.hit_type1` declare the contract; the implementation audit is the gate.
+
+## 6. File layout (per `rtl-file-structure-organization` skill)
+
+All Platform Designer `_hw.tcl` files live under `script/` per the
+skill's hard rule on `_hw.tcl` placement. Under this layout the IP
+exposes both the single-lane component and the bank wrapper from one
+repo:
+
+```text
+misc/arb_hit_type0/
+├── README.md
+├── doc/
+│   └── RTL_PLAN.md
+├── rtl/
+│   ├── arb_hit_type0.sv          # top wrapper, single-lane
+│   ├── arb_hit_type0_fifo.sv
+│   ├── arb_hit_type0_arbiter.sv
+│   ├── arb_hit_type0_watchdog.sv
+│   ├── arb_hit_type0_runctl.sv
+│   └── arb_hit_type0_csr.sv
+├── script/
+│   ├── arb_hit_type0_hw.tcl       # single-lane Qsys component
+│   └── arb_hit_type0_bank8_hw.tcl # 8-lane composed wrapper (§7)
+├── syn/
+└── tb/
+    └── ...
+```
+
+The IPX library (`firmware_builds/.../syn/mu3e_ip_cores.ipx`) carries
+two component entries pointing at the two `_hw.tcl` files.
+
+## 7. Bank wrapper `arb_hit_type0_bank8`
+
+A composed super-IP that instantiates eight `arb_hit_type0` lanes
+through Qsys's elaboration-stage `compose_*` API (see
+`~/.codex/skills/ip-packaging/SKILL.md` "Bank / Super-IP Composition
+Pattern"). The bank reduces the host system's Qsys instance count and
+connection load by ~3× without re-implementing per-lane logic.
+
+### 7.1 Boundary
+
+| Interface | Type | Width | Direction | Notes |
+|---|---|---|---|---|
+| `clk` | clock | 1 | in | shared 125 MHz lane clock |
+| `rst` | reset | 1 | in | shared async reset |
+| `run_ctrl` | AVST sink | 9 | in | single 9-bit AVST sink, internally fanned to all 8 lanes via `add_connection` to a fan-out splitter inside the composition |
+| `csr_<i>` (i = 0..7) | AVMM slave | 5b word, 32b data | in/out | per-lane CSR slave; each lane keeps its independent CSR aperture; integration step assigns contiguous base addresses (e.g. `0x0000`, `0x0080`, ...) under the host SC bridge |
+| `real_in_<i>` (i = 0..7) | AVST sink | 45b + sop/eop/eor + error/channel | in | per-lane real-source ingress |
+| `emu_in_<i>` (i = 0..7) | AVST sink | 45b + sop/eop/eor + error/channel | in | per-lane emulator-source ingress |
+| `selected_out_<i>` (i = 0..7) | AVST source | 45b + sop/eop/eor + error/channel | out | per-lane merged egress |
+
+### 7.2 CSR aperture math
+
+Per-lane CSR is 32 words × 32 bits = 128 bytes. Eight lanes consume
+8 × 128 B = 1 KB total. Each lane's aperture is well below the Qsys
+4 KB-per-slave limit. Eight separate slaves (one per lane) are kept
+deliberately to:
+
+- decouple lanes — a CSR access on one lane never blocks another lane's CSR FSM,
+- preserve per-lane SignalTap probe boundaries,
+- keep the per-lane DV scoreboard reusable without an offset shift.
+
+### 7.3 Resource estimate
+
+Per-lane is the dominant cost. The bank wrapper adds ~250 ALMs of
+plumbing (run-control fan-out, per-lane CSR routing, internal connection
+gating). Final estimate vs the alternatives:
+
+| Topology | ALMs | Registers | Qsys connections |
+|---|---:|---:|---:|
+| 8 × standalone `arb_hit_type0` | ~ 2400 | ~ 7600 | ~ 80 |
+| **Bank wrapper `arb_hit_type0_bank8`** | **~ 2350** | **~ 7400** | **~ 27** |
+| Monolithic 8-lane re-implementation | ~ 2200 | ~ 7200 | ~ 27 |
+
+The bank wrapper recovers ~95 % of the monolithic resource savings
+without re-doing DV. The connection-count savings (3×) is the real win
+for system Qsys hygiene.
+
+### 7.4 Build sequence
+
+1. Sign off `arb_hit_type0` standalone (DV per `tb/DV_PLAN.md`,
+   `rtl-linter-and-checker` static screen, `timing-performance-resources-sign-off`
+   1.1× target Fmax).
+2. Author `script/arb_hit_type0_bank8_hw.tcl` per the
+   `ip-packaging` skill bank pattern. Composition callback only; no
+   wrapper RTL.
+3. Smoke DV: instantiate the bank in a Qsys testbench, drive distinct
+   patterns on each lane, prove independent egress streams and
+   independent CSR readback. The per-lane harness is reused; only a
+   thin "bank-level smoke" sequence is new.
+4. Wire the bank into `system_20260504_emulator_type0` (single-lane
+   focus build → graduates to 8-lane integration once the bank is
+   smoke-cleared).
+5. Update `firmware_builds/.../syn/mu3e_ip_cores.ipx` with the bank
+   component entry; the existing single-lane entry stays valid for
+   builds that prefer per-instance topology.
+
+### 7.5 Out of scope for `arb_hit_type0_bank8` 26.2.0
+
+- Cross-lane shared CSR aperture (a single decoded slave that internally
+  decodes lane index from upper address bits). Possible follow-on if the
+  host SC bridge demands a single-aperture layout, but the per-lane
+  slave layout is the simpler default and matches the existing
+  `mutrig_lane_source_mux` pattern.
+- Runtime lane-count parameterization. The bank is named `bank8` for a
+  reason — the only legal value is 8 in this release. A separate
+  `bankN` parameterized variant can come later.
