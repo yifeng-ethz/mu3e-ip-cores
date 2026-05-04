@@ -20,8 +20,9 @@ make -C misc/mutrig_lane_source_mux/tb/uvm bucket_frame
 make -C misc/mutrig_lane_source_mux/tb/uvm soak
 ```
 
-The default `soak` target uses `SOAK_ITERS=150000`, which is calibrated on the
-current host to keep each of the three pressure runs above 30 seconds.
+The default `soak` target uses `SOAK_ITERS=150000` and enforces
+`MIN_SOAK_SECONDS=30`, so each of the three pressure runs fails if it completes
+too quickly for the requested long-run pressure gate.
 
 The validless real input counter advances every clock by design. Multi-word CSR
 snapshot checks therefore make the selected-output side idle before reading

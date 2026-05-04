@@ -1,5 +1,6 @@
 include ../../../../scripts/questa_one.mk
 
+SHELL       := /bin/bash
 UVM_DIR     := $(abspath .)
 IP_DIR      := $(abspath ../..)
 REPO_DIR    := $(abspath ../../../..)
@@ -16,6 +17,8 @@ TEST              ?= mlsm_directed_test
 SEED              ?= 1
 VERBOSITY         ?= UVM_MEDIUM
 SOAK_ITERS        ?= 150000
+MIN_RUNTIME_SECONDS ?= 0
+MIN_SOAK_SECONDS    ?= 30
 
 COV_DIR     := $(UVM_DIR)/cov_rav$(REAL_ALWAYS_VALID)
 WORK_DIR    := $(UVM_DIR)/work_rav$(REAL_ALWAYS_VALID)_fd$(FIFO_DEPTH)
@@ -62,7 +65,8 @@ $(WORK_DIR)/.compiled: $(RTL_SRC) $(FRCV_VHDL_SRC) $(FRCV_SV_SRC) $(TB_SRC)
 
 run: compile
 	@mkdir -p $(LOG_DIR) $(COV_DIR)
-	@cd $(WORK_DIR) && $(VSIM) -modelsimini modelsim.ini -c -coverage \
+	@start_seconds=$$(date +%s); \
+	cd $(WORK_DIR) && $(VSIM) -modelsimini modelsim.ini -c -coverage \
 	  -dpicpppath $(DPI_CPP) -sv_lib $(UVM_DPI_LIB) \
 	  -sv_seed $(SEED) \
 	  +UVM_TESTNAME=$(TEST) +UVM_VERBOSITY=$(VERBOSITY) \
@@ -70,7 +74,12 @@ run: compile
 	  -suppress 3009 -suppress 3473 -voptargs="+acc" \
 	  work.$(TB_TOP) \
 	  -do "coverage save -onexit $(COV_DIR)/$(TEST)_case$(CASE_ID)_s$(SEED).ucdb; run -all; quit -f" \
-	  | tee $(LOG_DIR)/$(TEST)_rav$(REAL_ALWAYS_VALID)_case$(CASE_ID)_s$(SEED).log
+	  | tee $(LOG_DIR)/$(TEST)_rav$(REAL_ALWAYS_VALID)_case$(CASE_ID)_s$(SEED).log; \
+	elapsed_seconds=$$(($$(date +%s) - start_seconds)); \
+	echo "elapsed_seconds=$$elapsed_seconds" | tee $(LOG_DIR)/$(TEST)_rav$(REAL_ALWAYS_VALID)_case$(CASE_ID)_s$(SEED).time; \
+	if [ "$(MIN_RUNTIME_SECONDS)" -gt 0 ] && [ "$$elapsed_seconds" -lt "$(MIN_RUNTIME_SECONDS)" ]; then \
+	  echo "FAIL: $(TEST) rav=$(REAL_ALWAYS_VALID) case=$(CASE_ID) seed=$(SEED) elapsed $$elapsed_seconds s < $(MIN_RUNTIME_SECONDS) s"; exit 1; \
+	fi
 	@if grep -qE '^# UVM_(FATAL|ERROR) .* @|^# \\*\\* Fatal:|^# \\*\\* Error:' $(LOG_DIR)/$(TEST)_rav$(REAL_ALWAYS_VALID)_case$(CASE_ID)_s$(SEED).log; then \
 	  echo "FAIL: $(TEST) rav=$(REAL_ALWAYS_VALID) case=$(CASE_ID) seed=$(SEED)"; exit 1; \
 	elif ! grep -q '\*\*\* TEST PASSED \*\*\*' $(LOG_DIR)/$(TEST)_rav$(REAL_ALWAYS_VALID)_case$(CASE_ID)_s$(SEED).log; then \
@@ -99,9 +108,9 @@ bucket_frame:
 	@$(MAKE) -s run REAL_ALWAYS_VALID=1 CASE_ID=32 TEST=mlsm_bucket_frame_test SEED=12
 
 soak:
-	@$(MAKE) -s run REAL_ALWAYS_VALID=0 CASE_ID=0 TEST=mlsm_soak_test SEED=101 SOAK_ITERS=$(SOAK_ITERS)
-	@$(MAKE) -s run REAL_ALWAYS_VALID=1 CASE_ID=32 TEST=mlsm_soak_test SEED=102 SOAK_ITERS=$(SOAK_ITERS)
-	@$(MAKE) -s run REAL_ALWAYS_VALID=1 CASE_ID=32 TEST=mlsm_soak_test SEED=103 SOAK_ITERS=$(SOAK_ITERS)
+	@$(MAKE) -s run REAL_ALWAYS_VALID=0 CASE_ID=0 TEST=mlsm_soak_test SEED=101 SOAK_ITERS=$(SOAK_ITERS) MIN_RUNTIME_SECONDS=$(MIN_SOAK_SECONDS)
+	@$(MAKE) -s run REAL_ALWAYS_VALID=1 CASE_ID=32 TEST=mlsm_soak_test SEED=102 SOAK_ITERS=$(SOAK_ITERS) MIN_RUNTIME_SECONDS=$(MIN_SOAK_SECONDS)
+	@$(MAKE) -s run REAL_ALWAYS_VALID=1 CASE_ID=32 TEST=mlsm_soak_test SEED=103 SOAK_ITERS=$(SOAK_ITERS) MIN_RUNTIME_SECONDS=$(MIN_SOAK_SECONDS)
 
 clean:
 	rm -rf $(UVM_DIR)/work_* $(LOG_DIR) $(UVM_DIR)/cov_* transcript vsim.wlf
