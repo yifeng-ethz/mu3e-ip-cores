@@ -477,6 +477,16 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
+ <component name="mutrig_lane_hit_source_mux" file="../../../../misc/mutrig_lane_hit_source_mux/mutrig_lane_hit_source_mux_hw.tcl" displayName="MuTRiG Lane Hit-Type0 Source Mux" version="26.2.0.504" description="Selects between real-MuTRiG hit_type0 and emulator hit_type0 with packet-boundary deferred switching." tags="CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="true" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+ </component>
  <component name="mutrig_reset_controller" file="../../../../mutrig_reset_controller/mutrig_reset_controller_hw.tcl" displayName="MuTRiG Reset Controller" version="1.0.8" description="Issue reset to MuTRiG during run sync. Allows fine phase shift w.r.t a reference clock." tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="true" />
