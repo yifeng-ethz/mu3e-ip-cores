@@ -199,16 +199,22 @@ boundary and is preserved across all three transitions
 
 Hit_type0 packs one hit per beat (45-bit hit word) and uses SOP/EOP
 to mark the **frame** boundary, not the hit boundary. The IP therefore
-counts hits per accepted/granted beat; it does not maintain separate
-frame counters.
+counts hits per accepted/granted beat and counts frames from each
+source's native EOP bit, separately from the merge-FSM-rewritten
+egress EOP.
 
 - `INGRESS_REAL_HITS` += 1 every cycle a real beat is accepted into the real FIFO (`asi_real_valid` true and FIFO not full)
+- `INGRESS_REAL_FRAMES` += 1 every cycle `asi_real_valid && asi_real_endofpacket`, regardless of FIFO accept
 - `DROPS_REAL` += 1 every cycle a real beat is offered but the real FIFO is full (`asi_real_valid` true and FIFO full)
 - `EGRESS_REAL_HITS` += 1 every cycle an egress beat is granted from the real source (`aso_valid` true and `last_grant=0`)
+- `EGRESS_REAL_FRAMES` += 1 every cycle an egress beat is granted from the real source and the granted FIFO entry's native `eop` bit is 1; this is not keyed off the merge-FSM-rewritten `aso_endofpacket`
 
-Symmetric counters for emu (`INGRESS_EMU_HITS`, `DROPS_EMU`, `EGRESS_EMU_HITS`).
+Symmetric counters for emu (`INGRESS_EMU_HITS`, `INGRESS_EMU_FRAMES`,
+`DROPS_EMU`, `EGRESS_EMU_HITS`, `EGRESS_EMU_FRAMES`).
 
-Watchdog-synthesized egress beats do **not** increment hit counters — they are control beats, not real hits. The synthesis event itself sets `STATUS.watchdog_synthesized_*` sticky.
+Watchdog-synthesized egress beats do **not** increment hit or frame
+counters — they are control beats, not real hits/frames. The synthesis
+event itself sets `STATUS.watchdog_synthesized_*` sticky.
 
 #### Invariants enforced by construction
 
@@ -306,13 +312,18 @@ first reading low returns the previously latched high):
 
 - `INGRESS_REAL_HITS` — count of real-input beats accepted into the real FIFO (`asi_real_valid && !real_full`)
 - `INGRESS_EMU_HITS` — count of emulator-input beats accepted into the emu FIFO (`asi_emu_valid && !emu_full`)
+- `INGRESS_REAL_FRAMES` — count of offered real source-frame EOPs (`asi_real_valid && asi_real_endofpacket`), regardless of FIFO accept
+- `INGRESS_EMU_FRAMES` — symmetric offered emulator source-frame EOP count
 - `DROPS_REAL` — count of real-input beats dropped because real FIFO was full
 - `DROPS_EMU` — count of emulator-input beats dropped because emulator FIFO was full
 - `EGRESS_REAL_HITS` — count of granted real-source egress beats
 - `EGRESS_EMU_HITS` — count of granted emulator-source egress beats
+- `EGRESS_REAL_FRAMES` — count of granted real-source FIFO entries whose native `eop` bit is 1
+- `EGRESS_EMU_FRAMES` — symmetric native emulator source-frame egress count
 
-Counters increment per **accepted or granted beat**, not on EOP. This follows
-the upstream hit_type0 contract from `mutrig_frame_deassembly`: one accepted
+Hit counters increment per **accepted or granted beat**, not on EOP. Frame
+counters increment on the source-native EOP contract above. This follows the
+upstream hit_type0 contract from `mutrig_frame_deassembly`: one accepted
 45-bit beat is one hit, while SOP/EOP mark the frame boundary around those
 hits. Drops also increment on the dropped beat.
 
@@ -348,7 +359,15 @@ upstream packet-boundary violation.
 | `0x13` | `EGRESS_REAL_HITS_H` | RO | |
 | `0x14` | `EGRESS_EMU_HITS_L` | RO | |
 | `0x15` | `EGRESS_EMU_HITS_H` | RO | |
-| `0x16..0x1F` | reserved | RO | reads as zero |
+| `0x16` | `INGRESS_REAL_FRAMES_L` | RO | low 32 bits; latches high on read |
+| `0x17` | `INGRESS_REAL_FRAMES_H` | RO | high 32 bits; reads previously latched value |
+| `0x18` | `INGRESS_EMU_FRAMES_L` | RO | |
+| `0x19` | `INGRESS_EMU_FRAMES_H` | RO | |
+| `0x1A` | `EGRESS_REAL_FRAMES_L` | RO | native source EOP, not rewritten merged EOP |
+| `0x1B` | `EGRESS_REAL_FRAMES_H` | RO | |
+| `0x1C` | `EGRESS_EMU_FRAMES_L` | RO | |
+| `0x1D` | `EGRESS_EMU_FRAMES_H` | RO | |
+| `0x1E..0x1F` | reserved | RO | reads as zero |
 
 `STATUS.last_grant` is 1-bit (0=real, 1=emulator). `STATUS.merged_open`
 is the union flag used for mode-switch defer. `STATUS.run_state[2:0]`
@@ -392,11 +411,13 @@ inspection while subsequent events still bump the counters.
 
 Diagnostic check (host-side software): for each source, audit
 `INGRESS_*_HITS`, `EGRESS_*_HITS`, `DROPS_*`,
+`INGRESS_*_FRAMES`, `EGRESS_*_FRAMES`,
 `ERROR_COUNT_DROP_MID_PACKET`, `ERROR_COUNT_PROTOCOL`,
 `STATUS.partial_packet_drop_sticky`, `STATUS.drop_mid_packet_sticky`,
 and `STATUS.protocol_violation_sticky`. A clean no-watchdog run
 satisfies `INGRESS_<S>_HITS == EGRESS_<S>_HITS` for active sources and
-all sticky / error counters at zero.
+`INGRESS_<S>_FRAMES == EGRESS_<S>_FRAMES` for active sources, with all
+sticky / error counters at zero.
 
 ### 2.6 Run-control sink
 

@@ -3,7 +3,7 @@
 //
 // Version : 26.2.0
 // Date    : 20260504
-// Change  : Split RR grant and merge-packet state out of arb_hit_type0 top.
+// Change  : Add native-EOP egress frame pulses for CSR counters.
 
 module arb_hit_type0_arbiter (
     input  logic        clk,
@@ -53,6 +53,8 @@ module arb_hit_type0_arbiter (
     output logic        egress_startofpacket,
     output logic        egress_endofpacket,
     output logic        egress_endofrun,
+    output logic        egress_real_frame_pulse,
+    output logic        egress_emu_frame_pulse,
     output logic        protocol_event,
     output logic [2:0]  selected_error,
     output logic [3:0]  selected_channel,
@@ -123,6 +125,8 @@ module arb_hit_type0_arbiter (
         egress_startofpacket   = 1'b0;
         egress_endofpacket     = 1'b0;
         egress_endofrun        = 1'b0;
+        egress_real_frame_pulse = 1'b0;
+        egress_emu_frame_pulse  = 1'b0;
         protocol_event         = 1'b0;
 
         real_open_next         = real_open;
@@ -186,6 +190,8 @@ module arb_hit_type0_arbiter (
             selected_sop_comb     = selected_is_emu ? emu_head_startofpacket : real_head_startofpacket;
             selected_eop_comb     = selected_is_emu ? emu_head_endofpacket : real_head_endofpacket;
             selected_eor_comb     = selected_is_emu ? emu_head_endofrun : real_head_endofrun;
+            egress_real_frame_pulse = grant_real & selected_eop_comb;
+            egress_emu_frame_pulse  = grant_emu & selected_eop_comb;
 
             if (egress_valid) begin
                 was_open_self  = selected_is_emu ? emu_open : real_open;

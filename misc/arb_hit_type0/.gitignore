@@ -1,6 +1,7 @@
 # Local Questa One workspace
 work/
 modelsim.ini
+!tb/modelsim.ini
 transcript
 *.wlf
 
@@ -8,5 +9,8 @@ transcript
 .questa_static_screen/
 
 # Per-test simulation work dirs
-tb/sim/
+tb/sim/*
+!tb/sim/
+!tb/sim/.gitignore
+tb/emuwork*/
 tb/work*/
