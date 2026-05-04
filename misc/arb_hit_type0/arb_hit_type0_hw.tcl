@@ -66,7 +66,13 @@ add_parameter MODE_DEFAULT NATURAL 0
 set_parameter_property MODE_DEFAULT DISPLAY_NAME "Reset Mode (0=REAL, 1=EMU, 2=MIX_RR)"
 set_parameter_property MODE_DEFAULT ALLOWED_RANGES 0:2
 set_parameter_property MODE_DEFAULT HDL_PARAMETER true
-set_parameter_property MODE_DEFAULT DESCRIPTION "Reset value for CONTROL.mode. 0 = REAL (real-only, single-channel egress), 1 = EMU (emulator-only, single-channel egress), 2 = MIX_RR (beat-level round-robin, multi-channel packetized egress; requires per-channel packet support at every downstream consumer)."
+set_parameter_property MODE_DEFAULT DESCRIPTION "Reset value for CONTROL.mode. 0 = REAL (real-only, single-channel egress), 1 = EMU (emulator-only, single-channel egress), 2 = MIX_RR (beat-level round-robin with merge-packet FSM, per-beat channel demuxes source 0..7=real, 8..15=emu)."
+
+add_parameter WATCHDOG_DEFAULT NATURAL 500
+set_parameter_property WATCHDOG_DEFAULT DISPLAY_NAME "Frame-alignment watchdog default (cycles)"
+set_parameter_property WATCHDOG_DEFAULT ALLOWED_RANGES 0:65535
+set_parameter_property WATCHDOG_DEFAULT HDL_PARAMETER true
+set_parameter_property WATCHDOG_DEFAULT DESCRIPTION "Reset value for WATCHDOG_CYCLES CSR. After this many idle cycles on a stranded source while the peer has EORed or also gone silent, the watchdog synthesizes the missing EOP (and EOR if applicable) so the merged packet closes deterministically. 0 disables the watchdog (one-sided run-end then leaves the merged packet open until reset)."
 
 # Identity / Interfaces / Register Map tabs and the MIX_RR warning panel.
 set TAB_IDENTITY    "Identity"
@@ -153,12 +159,28 @@ set_interface_property csr setupTime 0
 set_interface_property csr timingUnits Cycles
 set_interface_property csr writeWaitTime 0
 set_interface_property csr ENABLED true
-add_interface_port csr avs_csr_address     address     Input  4
+add_interface_port csr avs_csr_address     address     Input  5
 add_interface_port csr avs_csr_write       write       Input  1
 add_interface_port csr avs_csr_read        read        Input  1
 add_interface_port csr avs_csr_writedata   writedata   Input  32
 add_interface_port csr avs_csr_readdata    readdata    Output 32
 add_interface_port csr avs_csr_waitrequest waitrequest Output 1
+
+# Run-control sink: 9-bit Avalon-ST sink, one cycle per state command.
+# IP sync-resets internal state on RUN_PREP and RESET states (decoded
+# inside the IP per the runctl_mgmt_host shared encoding).
+add_interface run_ctrl avalon_streaming end
+set_interface_property run_ctrl associatedClock clk
+set_interface_property run_ctrl associatedReset rst
+set_interface_property run_ctrl dataBitsPerSymbol 9
+set_interface_property run_ctrl errorDescriptor ""
+set_interface_property run_ctrl firstSymbolInHighOrderBits true
+set_interface_property run_ctrl maxChannel 0
+set_interface_property run_ctrl readyLatency 0
+set_interface_property run_ctrl ENABLED true
+add_interface_port run_ctrl asi_ctrl_data  data  Input 9
+add_interface_port run_ctrl asi_ctrl_valid valid Input 1
+add_interface_port run_ctrl asi_ctrl_ready ready Output 1
 
 add_interface real_in avalon_streaming sink
 set_interface_property real_in associatedClock clk

@@ -101,10 +101,19 @@
 - **Goal:** Both sources have EOR-bearing beats granted in adjacent egress cycles. The first fires row 9 (suppressed eop, sticky eor); the second fires row 10 (egress eop, egress eor). Single egress EOR.
 - **Status:** planned
 
-### E012e_eor_only_one_source
+### E012e_watchdog_synthesizes_eor_one_sided
 
-- **Goal:** Real emits EOR; emu never emits EOR (only relevant if upstream contract permits a graceful one-sided close). Without `force_close_run`, egress EOR never fires. STATUS.eor_seen_real = 1, STATUS.eor_seen_emu = 0, STATUS.merged_locked = 0. Documented as known limitation; planned mitigation is the `force_close_run` W1P bit (open item, not in 26.2.0).
-- **Status:** planned (negative test, asserts the documented limitation)
+- **Goal:** Real emits EOR; emu never emits EOR. After `WATCHDOG_CYCLES` of emu silence with `eor_seen_real = 1`, FAW synthesizes a 1-cycle egress beat with `eop = 1`, `eor = 1`, channel = `last_channel_emu`, error[2] = 1 (overflow flag indicates synthesis), data = 0. After this beat, `merged_locked = 1`, `STATUS.watchdog_synthesized_emu = 1`, no further egress beats until reset. Egress hit counters do NOT increment for the synthesized beat (it is a control beat, not a real hit).
+- **Stimulus sequence:** Drive a real packet whose final beat carries EOR. Hold `asi_emu_valid = 0` for at least `WATCHDOG_CYCLES + 16` clocks after real's EOR.
+- **Expected result:** Synthesized closing beat arrives at `WATCHDOG_CYCLES + (FSM latency)` after real's EOR. `EGRESS_EMU_HITS` unchanged across the synthesis event.
+- **Status:** planned
+
+### E012f_watchdog_disabled_leaves_packet_open
+
+- **Goal:** With `WATCHDOG_CYCLES = 0` (FAW disabled), a one-sided run-end leaves the merged packet open until reset; STATUS.merged_locked = 0; egress EOR never fires.
+- **Stimulus sequence:** Same as E012e but write `WATCHDOG_CYCLES = 0` first.
+- **Expected result:** No synthesized beat. Documented and asserted limitation.
+- **Status:** planned (negative test, asserts the disable-watchdog behaviour)
 
 ---
 

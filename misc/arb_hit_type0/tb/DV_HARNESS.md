@@ -24,12 +24,13 @@ UVM components:
 
 | Component | Role |
 |---|---|
-| `real_st_agent` | Active Avalon-ST source on `real_in`. Drives 45-bit data, error, channel, sop/eop/eor. `valid` controlled per sequence; no `ready` line on the IP side, so the agent is purely supply-side. |
-| `emu_st_agent` | Same shape on `emu_in`. |
-| `csr_agent` | Active AVMM master on `csr` (4-bit word, 32-bit data, read latency 1, no waitrequest). |
+| `real_st_agent` | Active Avalon-ST source on `real_in`. Drives 45-bit data, error, channel ∈ [0..7], sop/eop/eor. |
+| `emu_st_agent` | Active Avalon-ST source on `emu_in`. Drives 45-bit data, error, channel ∈ [8..15], sop/eop/eor. |
+| `csr_agent` | Active AVMM master on `csr` (5-bit word, 32-bit data, read latency 1, no waitrequest). |
+| `run_ctrl_agent` | Active Avalon-ST source on `run_ctrl`. Issues 9-bit run-state commands (RUN_PREP, SYNC, RUNNING, TERMINATING, RESET) per the runctl_mgmt_host shared encoding. |
 | `egress_st_agent` | Passive monitor on `selected_out`. Records beats and packet boundaries. |
-| `scoreboard` | Reference model: per-source FIFO model + arbiter model + counter model. Compares against egress-side observed beats and CSR readback. |
-| `assertion_pkg` | SVA module bound into the DUT for SOP/EOP balance, no-tear-on-mode-switch, drop-on-full, counter-clear correctness. |
+| `scoreboard` | Reference model: per-source FIFO + arbiter + merge-packet FSM + watchdog + counter model. Compares against egress-side observed beats and CSR readback. |
+| `assertion_pkg` | SVA module bound into the DUT for SOP/EOP balance, no-tear-on-mode-switch, drop-on-full, counter-clear correctness, watchdog synthesis correctness, run-control reset behaviour. |
 
 The harness must support both reset-per-test execution and continuous no-restart execution (for `bucket_frame` and `all_buckets_frame`).
 

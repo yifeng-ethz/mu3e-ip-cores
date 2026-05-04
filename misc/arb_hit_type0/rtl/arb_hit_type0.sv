@@ -26,29 +26,35 @@
 // Date    : 20260504
 
 module arb_hit_type0 #(
-    parameter integer MODE_DEFAULT    = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
-    parameter integer FIFO_DEPTH      = 16,
-    parameter integer IP_UID          = 32'h41485430, // ASCII "AHT0"
-    parameter integer VERSION_MAJOR   = 26,
-    parameter integer VERSION_MINOR   = 2,
-    parameter integer VERSION_PATCH   = 0,
-    parameter integer BUILD           = 504,
-    parameter integer VERSION_DATE    = 20260504,
-    parameter integer VERSION_GIT     = 32'h0000_0000,
-    parameter integer INSTANCE_ID     = 0
+    parameter integer MODE_DEFAULT      = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
+    parameter integer FIFO_DEPTH        = 16,
+    parameter integer WATCHDOG_DEFAULT  = 500,          // FAW threshold cycles, 0 disables
+    parameter integer IP_UID            = 32'h41485430, // ASCII "AHT0"
+    parameter integer VERSION_MAJOR     = 26,
+    parameter integer VERSION_MINOR     = 2,
+    parameter integer VERSION_PATCH     = 0,
+    parameter integer BUILD             = 504,
+    parameter integer VERSION_DATE      = 20260504,
+    parameter integer VERSION_GIT       = 32'h0000_0000,
+    parameter integer INSTANCE_ID       = 0
 ) (
     input  logic        clk,
     input  logic        rst,
 
-    // AVMM CSR slave (4-bit word, 32-bit data, 1-cycle read latency)
-    input  logic [3:0]  avs_csr_address,
+    // AVMM CSR slave (5-bit word, 32-bit data, 1-cycle read latency)
+    input  logic [4:0]  avs_csr_address,
     input  logic        avs_csr_write,
     input  logic        avs_csr_read,
     input  logic [31:0] avs_csr_writedata,
     output logic [31:0] avs_csr_readdata,
     output logic        avs_csr_waitrequest,
 
-    // Real MuTRiG hit_type0 (post-deassembly)
+    // Run-control sink (9-bit Avalon-ST, sync-reset on RUN_PREP / RESET)
+    input  logic [8:0]  asi_ctrl_data,
+    input  logic        asi_ctrl_valid,
+    output logic        asi_ctrl_ready,
+
+    // Real MuTRiG hit_type0 (post-deassembly); convention channel ∈ [0..7]
     input  logic [44:0] asi_real_data,
     input  logic        asi_real_valid,
     input  logic [2:0]  asi_real_error,
@@ -57,7 +63,7 @@ module arb_hit_type0 #(
     input  logic        asi_real_endofpacket,
     input  logic        asi_real_endofrun,
 
-    // Emulator hit_type0 (BYTE_STREAM_ENABLE = 0 path)
+    // Emulator hit_type0 (BYTE_STREAM_ENABLE = 0); convention channel ∈ [8..15]
     input  logic [44:0] asi_emu_data,
     input  logic        asi_emu_valid,
     input  logic [2:0]  asi_emu_error,
@@ -85,8 +91,9 @@ module arb_hit_type0 #(
     // a known-quiescent state until the implementation lands.
     // -------------------------------------------------------------------
 
-    assign avs_csr_readdata    = (avs_csr_address == 4'h0) ? IP_UID : 32'h0;
+    assign avs_csr_readdata    = (avs_csr_address == 5'h00) ? IP_UID : 32'h0;
     assign avs_csr_waitrequest = 1'b0;
+    assign asi_ctrl_ready      = 1'b1;
 
     assign aso_data          = '0;
     assign aso_valid         = 1'b0;

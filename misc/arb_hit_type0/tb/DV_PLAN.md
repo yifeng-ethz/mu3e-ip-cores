@@ -38,7 +38,8 @@
 |---|---|---|---|---|---|
 | `clk` | clock | 1b | self | in | single clock domain, target 125 MHz, signoff at 137.5 MHz |
 | `rst` | reset | 1b | clk | in | sync deassert |
-| `csr` | AVMM slave | addr 4b (word), data 32b | clk | in/out | read latency 1, no waitrequest |
+| `csr` | AVMM slave | addr 5b (word), data 32b | clk | in/out | read latency 1, no waitrequest |
+| `run_ctrl` | AVST sink | data 9b | clk | in | sync-reset on RUN_PREP / RESET states |
 | `real_in` | AVST sink | data 45b, error 3b, channel 4b, sop/eop/eor | clk | in | implicit always-ready (no `ready` line); FIFO accepts on `valid` or drops |
 | `emu_in` | AVST sink | data 45b, error 3b, channel 4b, sop/eop/eor | clk | in | same shape as `real_in` |
 | `selected_out` | AVST source | data 45b, error 3b, channel 4b, sop/eop/eor | clk | out | downstream is `backpressure_fifo` (`readyLatency=0`); the IP holds beats internally if the consumer cannot accept |
