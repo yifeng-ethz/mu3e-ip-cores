@@ -5,7 +5,7 @@
 //
 // Version : 26.2.0
 // Date    : 20260504
-// Change  : Split implementation into FIFO, arbiter, watchdog, runctl, and CSR helpers.
+// Change  : Wire per-source frame counter pulses through the split helpers.
 
 module arb_hit_type0 #(
     parameter integer MODE_DEFAULT      = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
@@ -79,6 +79,7 @@ module arb_hit_type0 #(
     logic [4:0]  real_fifo_depth;
     logic        real_push_accept;
     logic        real_push_drop;
+    logic        real_ingress_frame_pulse;
     logic        real_pop;
     logic        real_ingress_open;
     logic [15:0] real_idle_cycles;
@@ -95,6 +96,7 @@ module arb_hit_type0 #(
     logic [4:0]  emu_fifo_depth;
     logic        emu_push_accept;
     logic        emu_push_drop;
+    logic        emu_ingress_frame_pulse;
     logic        emu_pop;
     logic        emu_ingress_open;
     logic [15:0] emu_idle_cycles;
@@ -123,6 +125,8 @@ module arb_hit_type0 #(
     logic        arbiter_egress_startofpacket;
     logic        arbiter_egress_endofpacket;
     logic        arbiter_egress_endofrun;
+    logic        arbiter_egress_real_frame_pulse;
+    logic        arbiter_egress_emu_frame_pulse;
     logic        arbiter_protocol_event;
     logic [2:0]  arbiter_selected_error;
     logic [3:0]  arbiter_selected_channel;
@@ -173,6 +177,7 @@ module arb_hit_type0 #(
         .depth                 (real_fifo_depth),
         .push_accept           (real_push_accept),
         .push_drop             (real_push_drop),
+        .ingress_frame_pulse   (real_ingress_frame_pulse),
         .ingress_open          (real_ingress_open),
         .idle_cycles           (real_idle_cycles),
         .last_channel          (real_last_channel)
@@ -204,6 +209,7 @@ module arb_hit_type0 #(
         .depth                 (emu_fifo_depth),
         .push_accept           (emu_push_accept),
         .push_drop             (emu_push_drop),
+        .ingress_frame_pulse   (emu_ingress_frame_pulse),
         .ingress_open          (emu_ingress_open),
         .idle_cycles           (emu_idle_cycles),
         .last_channel          (emu_last_channel)
@@ -266,6 +272,8 @@ module arb_hit_type0 #(
         .egress_startofpacket      (arbiter_egress_startofpacket),
         .egress_endofpacket        (arbiter_egress_endofpacket),
         .egress_endofrun           (arbiter_egress_endofrun),
+        .egress_real_frame_pulse   (arbiter_egress_real_frame_pulse),
+        .egress_emu_frame_pulse    (arbiter_egress_emu_frame_pulse),
         .protocol_event            (arbiter_protocol_event),
         .selected_error            (arbiter_selected_error),
         .selected_channel          (arbiter_selected_channel),
@@ -317,9 +325,13 @@ module arb_hit_type0 #(
         .emu_push_accept           (emu_push_accept),
         .real_push_drop            (real_push_drop),
         .emu_push_drop             (emu_push_drop),
+        .ingress_real_frame_pulse  (real_ingress_frame_pulse),
+        .ingress_emu_frame_pulse   (emu_ingress_frame_pulse),
         .egress_valid              (arbiter_egress_valid),
         .egress_source_emu         (arbiter_egress_source_emu),
         .egress_synthesized        (arbiter_egress_synthesized),
+        .egress_real_frame_pulse   (arbiter_egress_real_frame_pulse),
+        .egress_emu_frame_pulse    (arbiter_egress_emu_frame_pulse),
         .protocol_event            (arbiter_protocol_event),
         .selected_error            (arbiter_selected_error),
         .selected_channel          (arbiter_selected_channel),

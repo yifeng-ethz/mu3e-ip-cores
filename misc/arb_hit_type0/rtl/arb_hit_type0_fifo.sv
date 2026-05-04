@@ -3,7 +3,7 @@
 //
 // Version : 26.2.0
 // Date    : 20260504
-// Change  : Split per-source FIFO state out of arb_hit_type0 top.
+// Change  : Add offered-EOP ingress frame pulse for CSR counters.
 
 module arb_hit_type0_fifo #(
     parameter integer FIFO_DEPTH = 16
@@ -35,6 +35,7 @@ module arb_hit_type0_fifo #(
     output logic [4:0]  depth,
     output logic        push_accept,
     output logic        push_drop,
+    output logic        ingress_frame_pulse,
     output logic        ingress_open,
     output logic [15:0] idle_cycles,
     output logic [3:0]  last_channel
@@ -82,6 +83,7 @@ module arb_hit_type0_fifo #(
     assign depth              = count;
     assign push_accept        = asi_valid & stream_active & ~full;
     assign push_drop          = asi_valid & stream_active & full;
+    assign ingress_frame_pulse = asi_valid & asi_endofpacket;
 
     always_ff @(posedge clk or posedge rst) begin : fifo_state
         if (rst) begin

@@ -3,7 +3,7 @@
 //
 // Version : 26.2.0
 // Date    : 20260504
-// Change  : Split CSR decode and diagnostic counters out of the top.
+// Change  : Add per-source native frame counters to the CSR map.
 
 module arb_hit_type0_csr #(
     parameter integer MODE_DEFAULT     = 0,
@@ -56,9 +56,13 @@ module arb_hit_type0_csr #(
     input  logic        emu_push_accept,
     input  logic        real_push_drop,
     input  logic        emu_push_drop,
+    input  logic        ingress_real_frame_pulse,
+    input  logic        ingress_emu_frame_pulse,
     input  logic        egress_valid,
     input  logic        egress_source_emu,
     input  logic        egress_synthesized,
+    input  logic        egress_real_frame_pulse,
+    input  logic        egress_emu_frame_pulse,
     input  logic        protocol_event,
     input  logic [2:0]  selected_error,
     input  logic [3:0]  selected_channel,
@@ -103,10 +107,14 @@ module arb_hit_type0_csr #(
 
         logic [63:0] ingress_real_hits;
         logic [63:0] ingress_emu_hits;
+        logic [63:0] ingress_real_frames;
+        logic [63:0] ingress_emu_frames;
         logic [63:0] drops_real;
         logic [63:0] drops_emu;
         logic [63:0] egress_real_hits;
         logic [63:0] egress_emu_hits;
+        logic [63:0] egress_real_frames;
+        logic [63:0] egress_emu_frames;
 
         logic [31:0] error_count_protocol;
         logic [31:0] error_count_drop_mid_packet;
@@ -115,10 +123,14 @@ module arb_hit_type0_csr #(
 
         logic [31:0] ingress_real_hits_h_snap;
         logic [31:0] ingress_emu_hits_h_snap;
+        logic [31:0] ingress_real_frames_h_snap;
+        logic [31:0] ingress_emu_frames_h_snap;
         logic [31:0] drops_real_h_snap;
         logic [31:0] drops_emu_h_snap;
         logic [31:0] egress_real_hits_h_snap;
         logic [31:0] egress_emu_hits_h_snap;
+        logic [31:0] egress_real_frames_h_snap;
+        logic [31:0] egress_emu_frames_h_snap;
 
         logic [31:0] readdata;
     } csr_state_t;
@@ -281,6 +293,14 @@ module arb_hit_type0_csr #(
             5'h13:   csr_read_data = csr.egress_real_hits_h_snap;
             5'h14:   csr_read_data = csr.egress_emu_hits[31:0];
             5'h15:   csr_read_data = csr.egress_emu_hits_h_snap;
+            5'h16:   csr_read_data = csr.ingress_real_frames[31:0];
+            5'h17:   csr_read_data = csr.ingress_real_frames_h_snap;
+            5'h18:   csr_read_data = csr.ingress_emu_frames[31:0];
+            5'h19:   csr_read_data = csr.ingress_emu_frames_h_snap;
+            5'h1A:   csr_read_data = csr.egress_real_frames[31:0];
+            5'h1B:   csr_read_data = csr.egress_real_frames_h_snap;
+            5'h1C:   csr_read_data = csr.egress_emu_frames[31:0];
+            5'h1D:   csr_read_data = csr.egress_emu_frames_h_snap;
             default: csr_read_data = 32'd0;
         endcase
     end
@@ -299,8 +319,14 @@ module arb_hit_type0_csr #(
         clear_sticky         = control_write & avs_csr_writedata[3];
         clear_error_counters = control_write & avs_csr_writedata[4];
         clear_syndromes      = control_write & avs_csr_writedata[5];
-        real_drop_mid_event  = real_push_drop & real_source_open;
-        emu_drop_mid_event   = emu_push_drop & emu_source_open;
+        // R007: drop-mid-packet event must fire when the FIFO is mid-packet
+        // on the ingress side, regardless of whether the arbiter has started
+        // draining that source on egress. Use *_ingress_open, which tracks
+        // the FIFO's SOP-without-EOP state; *_source_open is the egress-side
+        // flag and misses ingress-open drops while the arbiter is busy on
+        // the other source. See tb/doc/bugs_error.md R007.
+        real_drop_mid_event  = real_push_drop & real_ingress_open;
+        emu_drop_mid_event   = emu_push_drop & emu_ingress_open;
 
         csr_next             = csr;
         csr_next.readdata    = avs_csr_read ? csr_read_data : 32'd0;
@@ -319,20 +345,28 @@ module arb_hit_type0_csr #(
             if (counter_clear) begin
                 csr_next.ingress_real_hits            = 64'd0;
                 csr_next.ingress_emu_hits             = 64'd0;
+                csr_next.ingress_real_frames          = 64'd0;
+                csr_next.ingress_emu_frames           = 64'd0;
                 csr_next.drops_real                   = 64'd0;
                 csr_next.drops_emu                    = 64'd0;
                 csr_next.egress_real_hits             = 64'd0;
                 csr_next.egress_emu_hits              = 64'd0;
+                csr_next.egress_real_frames           = 64'd0;
+                csr_next.egress_emu_frames            = 64'd0;
                 csr_next.error_count_protocol         = 32'd0;
                 csr_next.error_count_drop_mid_packet  = 32'd0;
                 csr_next.syndrome_protocol            = 32'd0;
                 csr_next.syndrome_drop_mid_packet     = 32'd0;
                 csr_next.ingress_real_hits_h_snap     = 32'd0;
                 csr_next.ingress_emu_hits_h_snap      = 32'd0;
+                csr_next.ingress_real_frames_h_snap   = 32'd0;
+                csr_next.ingress_emu_frames_h_snap    = 32'd0;
                 csr_next.drops_real_h_snap            = 32'd0;
                 csr_next.drops_emu_h_snap             = 32'd0;
                 csr_next.egress_real_hits_h_snap      = 32'd0;
                 csr_next.egress_emu_hits_h_snap       = 32'd0;
+                csr_next.egress_real_frames_h_snap    = 32'd0;
+                csr_next.egress_emu_frames_h_snap     = 32'd0;
             end
 
             if (avs_csr_write) begin
@@ -344,16 +378,24 @@ module arb_hit_type0_csr #(
                         if (clear_counters) begin
                             csr_next.ingress_real_hits        = 64'd0;
                             csr_next.ingress_emu_hits         = 64'd0;
+                            csr_next.ingress_real_frames      = 64'd0;
+                            csr_next.ingress_emu_frames       = 64'd0;
                             csr_next.drops_real               = 64'd0;
                             csr_next.drops_emu                = 64'd0;
                             csr_next.egress_real_hits         = 64'd0;
                             csr_next.egress_emu_hits          = 64'd0;
+                            csr_next.egress_real_frames       = 64'd0;
+                            csr_next.egress_emu_frames        = 64'd0;
                             csr_next.ingress_real_hits_h_snap = 32'd0;
                             csr_next.ingress_emu_hits_h_snap  = 32'd0;
+                            csr_next.ingress_real_frames_h_snap = 32'd0;
+                            csr_next.ingress_emu_frames_h_snap  = 32'd0;
                             csr_next.drops_real_h_snap        = 32'd0;
                             csr_next.drops_emu_h_snap         = 32'd0;
                             csr_next.egress_real_hits_h_snap  = 32'd0;
                             csr_next.egress_emu_hits_h_snap   = 32'd0;
+                            csr_next.egress_real_frames_h_snap = 32'd0;
+                            csr_next.egress_emu_frames_h_snap  = 32'd0;
                         end
 
                         if (clear_sticky) begin
@@ -398,6 +440,16 @@ module arb_hit_type0_csr #(
                 csr_next.ingress_emu_hits = saturating_increment64(csr_next.ingress_emu_hits);
             end
 
+            if (ingress_real_frame_pulse) begin
+                csr_next.ingress_real_frames =
+                    saturating_increment64(csr_next.ingress_real_frames);
+            end
+
+            if (ingress_emu_frame_pulse) begin
+                csr_next.ingress_emu_frames =
+                    saturating_increment64(csr_next.ingress_emu_frames);
+            end
+
             if (real_push_drop) begin
                 csr_next.drops_real = saturating_increment64(csr_next.drops_real);
             end
@@ -412,6 +464,16 @@ module arb_hit_type0_csr #(
                 end else begin
                     csr_next.egress_real_hits = saturating_increment64(csr_next.egress_real_hits);
                 end
+            end
+
+            if (egress_real_frame_pulse) begin
+                csr_next.egress_real_frames =
+                    saturating_increment64(csr_next.egress_real_frames);
+            end
+
+            if (egress_emu_frame_pulse) begin
+                csr_next.egress_emu_frames =
+                    saturating_increment64(csr_next.egress_emu_frames);
             end
 
             if (real_push_drop & real_ingress_open) begin
@@ -495,6 +557,10 @@ module arb_hit_type0_csr #(
                     5'h10:   csr_next.drops_emu_h_snap         = csr.drops_emu[63:32];
                     5'h12:   csr_next.egress_real_hits_h_snap  = csr.egress_real_hits[63:32];
                     5'h14:   csr_next.egress_emu_hits_h_snap   = csr.egress_emu_hits[63:32];
+                    5'h16:   csr_next.ingress_real_frames_h_snap = csr.ingress_real_frames[63:32];
+                    5'h18:   csr_next.ingress_emu_frames_h_snap  = csr.ingress_emu_frames[63:32];
+                    5'h1A:   csr_next.egress_real_frames_h_snap  = csr.egress_real_frames[63:32];
+                    5'h1C:   csr_next.egress_emu_frames_h_snap   = csr.egress_emu_frames[63:32];
                     default: begin
                     end
                 endcase
