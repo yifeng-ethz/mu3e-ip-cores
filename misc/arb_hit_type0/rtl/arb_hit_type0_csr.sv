@@ -186,6 +186,20 @@ module arb_hit_type0_csr #(
         end
     endfunction
 
+    function automatic logic [31:0] saturating_add32(
+        input logic [31:0] value,
+        input logic [1:0]  increment
+    );
+        logic [32:0] sum;
+
+        sum = {1'b0, value} + {31'd0, increment};
+        if (sum[32]) begin
+            saturating_add32 = 32'hFFFF_FFFF;
+        end else begin
+            saturating_add32 = sum[31:0];
+        end
+    endfunction
+
     function automatic logic [31:0] make_protocol_syndrome(
         input logic       source_emu,
         input logic [3:0] source_channel,
@@ -313,6 +327,7 @@ module arb_hit_type0_csr #(
         logic clear_syndromes;
         logic real_drop_mid_event;
         logic emu_drop_mid_event;
+        logic [1:0] drop_mid_event_count;
 
         control_write        = avs_csr_write & (avs_csr_address == 5'h02);
         clear_counters       = control_write & avs_csr_writedata[2];
@@ -327,6 +342,8 @@ module arb_hit_type0_csr #(
         // the other source. See tb/doc/bugs_error.md R007.
         real_drop_mid_event  = real_push_drop & real_ingress_open;
         emu_drop_mid_event   = emu_push_drop & emu_ingress_open;
+        drop_mid_event_count =
+            {1'b0, real_drop_mid_event} + {1'b0, emu_drop_mid_event};
 
         csr_next             = csr;
         csr_next.readdata    = avs_csr_read ? csr_read_data : 32'd0;
@@ -516,8 +533,6 @@ module arb_hit_type0_csr #(
                 end
 
                 csr_next.drop_mid_packet_sticky      = 1'b1;
-                csr_next.error_count_drop_mid_packet =
-                    saturating_increment32(csr_next.error_count_drop_mid_packet);
             end
 
             if (emu_drop_mid_event) begin
@@ -533,8 +548,14 @@ module arb_hit_type0_csr #(
                 end
 
                 csr_next.drop_mid_packet_sticky      = 1'b1;
+            end
+
+            if (drop_mid_event_count != 2'd0) begin
                 csr_next.error_count_drop_mid_packet =
-                    saturating_increment32(csr_next.error_count_drop_mid_packet);
+                    saturating_add32(
+                        csr_next.error_count_drop_mid_packet,
+                        drop_mid_event_count
+                    );
             end
 
             if (watchdog_fire_real) begin

@@ -192,7 +192,7 @@ add_interface_port run_ctrl asi_ctrl_data  data  Input 9
 add_interface_port run_ctrl asi_ctrl_valid valid Input 1
 add_interface_port run_ctrl asi_ctrl_ready ready Output 1
 
-add_interface real_in avalon_streaming sink
+add_interface real_in avalon_streaming end
 set_interface_property real_in associatedClock clk
 set_interface_property real_in associatedReset rst
 set_interface_property real_in dataBitsPerSymbol 45
@@ -210,7 +210,7 @@ add_interface_port real_in asi_real_startofpacket startofpacket Input 1
 add_interface_port real_in asi_real_endofpacket   endofpacket   Input 1
 add_interface_port real_in asi_real_endofrun      endofrun      Input 1
 
-add_interface emu_in avalon_streaming sink
+add_interface emu_in avalon_streaming end
 set_interface_property emu_in associatedClock clk
 set_interface_property emu_in associatedReset rst
 set_interface_property emu_in dataBitsPerSymbol 45
@@ -228,7 +228,7 @@ add_interface_port emu_in asi_emu_startofpacket startofpacket Input 1
 add_interface_port emu_in asi_emu_endofpacket   endofpacket   Input 1
 add_interface_port emu_in asi_emu_endofrun      endofrun      Input 1
 
-add_interface selected_out avalon_streaming source
+add_interface selected_out avalon_streaming start
 set_interface_property selected_out associatedClock clk
 set_interface_property selected_out associatedReset rst
 set_interface_property selected_out dataBitsPerSymbol 45
