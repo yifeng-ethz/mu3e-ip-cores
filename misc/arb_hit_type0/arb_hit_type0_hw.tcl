@@ -6,7 +6,7 @@ set VERSION_PATCH_DEFAULT_CONST 0
 set BUILD_DEFAULT_CONST         504
 set VERSION_DATE_DEFAULT_CONST  20260504
 set VERSION_GIT_DEFAULT_CONST   0x00000000
-set IP_UID_DEFAULT_CONST        0x484C534D
+set IP_UID_DEFAULT_CONST        0x41485430 ;# ASCII "AHT0"
 set INSTANCE_ID_DEFAULT_CONST   0
 
 set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
@@ -15,10 +15,10 @@ set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
     $VERSION_PATCH_DEFAULT_CONST \
     $BUILD_DEFAULT_CONST]
 
-set_module_property NAME                         mutrig_lane_hit_source_mux
-set_module_property DISPLAY_NAME                 "MuTRiG Lane Hit-Type0 Source Mux"
+set_module_property NAME                         arb_hit_type0
+set_module_property DISPLAY_NAME                 "Arbiter hit_type0 (real / emu / mix RR)"
 set_module_property VERSION                      $VERSION_STRING_DEFAULT_CONST
-set_module_property DESCRIPTION                  "Selects between real-MuTRiG hit_type0 and emulator hit_type0 with packet-boundary deferred switching."
+set_module_property DESCRIPTION                  "Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source and packet-boundary round-robin."
 set_module_property GROUP                        "Mu3e Emulators/Modules"
 set_module_property AUTHOR                       "Mu3e IP team"
 set_module_property INTERNAL                     false
@@ -30,29 +30,35 @@ set_module_property ALLOW_GREYBOX_GENERATION     false
 set_module_property REPORT_HIERARCHY             false
 
 add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
-set_fileset_property QUARTUS_SYNTH TOP_LEVEL mutrig_lane_hit_source_mux
+set_fileset_property QUARTUS_SYNTH TOP_LEVEL arb_hit_type0
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE false
-add_fileset_file mutrig_lane_hit_source_mux.sv SYSTEM_VERILOG PATH rtl/mutrig_lane_hit_source_mux.sv TOP_LEVEL_FILE
+add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0.sv TOP_LEVEL_FILE
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
-set_fileset_property SIM_VERILOG TOP_LEVEL mutrig_lane_hit_source_mux
+set_fileset_property SIM_VERILOG TOP_LEVEL arb_hit_type0
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE false
-add_fileset_file mutrig_lane_hit_source_mux.sv SYSTEM_VERILOG PATH rtl/mutrig_lane_hit_source_mux.sv TOP_LEVEL_FILE
+add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0.sv TOP_LEVEL_FILE
 
-add_parameter SELECT_EMULATOR NATURAL 0
-set_parameter_property SELECT_EMULATOR DISPLAY_NAME "Reset Select Emulator"
-set_parameter_property SELECT_EMULATOR ALLOWED_RANGES 0:1
-set_parameter_property SELECT_EMULATOR HDL_PARAMETER true
-set_parameter_property SELECT_EMULATOR DESCRIPTION "Reset value for CONTROL.select_emulator. 0 selects real MuTRiG hit_type0, 1 selects emulator hit_type0."
+# ---------- Parameters ----------
+
+add_parameter MODE_DEFAULT NATURAL 0
+set_parameter_property MODE_DEFAULT DISPLAY_NAME "Reset Mode (0=REAL, 1=EMU, 2=MIX_RR)"
+set_parameter_property MODE_DEFAULT ALLOWED_RANGES 0:2
+set_parameter_property MODE_DEFAULT HDL_PARAMETER true
+
+add_parameter FIFO_DEPTH NATURAL 16
+set_parameter_property FIFO_DEPTH DISPLAY_NAME "Per-source ingress FIFO depth"
+set_parameter_property FIFO_DEPTH ALLOWED_RANGES {16}
+set_parameter_property FIFO_DEPTH HDL_PARAMETER true
 
 add_parameter IP_UID STD_LOGIC_VECTOR $IP_UID_DEFAULT_CONST
 set_parameter_property IP_UID DISPLAY_NAME "UID"
 set_parameter_property IP_UID WIDTH 32
 set_parameter_property IP_UID HDL_PARAMETER true
 set_parameter_property IP_UID DISPLAY_HINT hexadecimal
-set_parameter_property IP_UID DESCRIPTION {Software-visible IP identifier at CSR word 0. Default ASCII "HLSM".}
+set_parameter_property IP_UID DESCRIPTION {Software-visible IP identifier at CSR word 0. Default ASCII "AHT0".}
 
 add_parameter VERSION_MAJOR NATURAL $VERSION_MAJOR_DEFAULT_CONST
 set_parameter_property VERSION_MAJOR HDL_PARAMETER true
@@ -84,6 +90,8 @@ add_parameter INSTANCE_ID NATURAL $INSTANCE_ID_DEFAULT_CONST
 set_parameter_property INSTANCE_ID DISPLAY_NAME "Instance ID"
 set_parameter_property INSTANCE_ID HDL_PARAMETER true
 set_parameter_property INSTANCE_ID DESCRIPTION "Per-integration instance identifier exposed through META page 3."
+
+# ---------- Interfaces ----------
 
 add_interface clk clock end
 set_interface_property clk ENABLED true
