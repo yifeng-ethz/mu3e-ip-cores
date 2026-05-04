@@ -1,0 +1,4 @@
+QUARTUS_VERSION = "18.1"
+DATE = "12:00:00  May 04, 2026"
+
+PROJECT_REVISION = "top_nostp_emulator_type0"

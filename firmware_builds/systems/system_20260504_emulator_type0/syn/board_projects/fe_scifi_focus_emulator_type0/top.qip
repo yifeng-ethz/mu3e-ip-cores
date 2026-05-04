@@ -1,0 +1,11 @@
+#
+# Focus single-lane emulator/type0 board build.
+#
+
+set focus_syn_dir [file normalize [file join $::quartus(qip_path) ".." ".."]]
+
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/common/util/util_slv.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/common/registers/mudaq.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/top.vhd"]
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "src/top.sdc"]
+set_global_assignment -name QIP_FILE [file join $focus_syn_dir "focus_emulator_type0_system/synthesis/focus_emulator_type0_system.qip"]
