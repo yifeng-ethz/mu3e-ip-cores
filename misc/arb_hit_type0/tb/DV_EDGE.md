@@ -74,13 +74,37 @@
 
 ### E011_alternating_single_beat_packets_mix_rr
 
-- **Goal:** In MIX_RR, alternating single-beat packets on real and emu produce strict alternation on egress.
+- **Goal:** In MIX_RR with single-beat packets (sop=eop=1) on each source, egress alternates strictly per cycle and each beat carries its native channel/sop/eop unchanged.
 - **Status:** planned
 
 ### E012_one_source_silent_other_drains
 
-- **Goal:** In MIX_RR with emu_in idle, real_in drains continuously without round-robin gaps.
+- **Goal:** In MIX_RR with emu_in idle, real_in drains continuously without round-robin gaps. `last_grant` stays at 0 across the whole sequence; no spurious grants to the empty source.
 - **Status:** planned
+
+### E012b_overlapping_frames_merged_into_one_packet
+
+- **Goal:** In MIX_RR with overlapping source frames (real 8 beats, emu 6 beats, emu's SOP 2 cycles after real's SOP), the merge-packet FSM collapses both into **one** merged Avalon-ST packet of 14 beats. Egress emits exactly one SOP (on the first granted beat) and one EOP (on the last granted beat). Per-beat channel disambiguates the source within the merged packet.
+- **Stimulus sequence:** Real channel = 4'h0, emu channel = 4'h8. Drive real 8-beat frame starting at t = 0, emu 6-beat frame starting at t = 2.
+- **Expected result:** Egress single merged packet of 14 beats. The four interior source-EOP beats (one each from real and emu) carry `egress_eop = 0` because `was_open_other = 1` at the time of the suppressed eop; the FSM emits the merged EOP only on the last granted beat where `merged_open` transitions 1 → 0. Per-channel scoreboard reconstructs the original 8-beat real frame and 6-beat emu frame bit-exact from per-beat channel.
+- **Status:** planned
+
+### E012c_eor_after_other_active
+
+- **Goal:** Real emits EOR while emu is still mid-packet; egress EOR is held; emu later emits EOR; egress EOR fires on emu's closing beat.
+- **Stimulus sequence:** Real frame ends with EOR=1 on its EOP at t = 5. Emu frame from t = 3 to t = 9 (last beat carries EOR=1).
+- **Expected result:** Real's EOP suppressed (was_open_other = emu_open = 1), `eor_seen_real` sticky-set. Emu's final beat closes merged: egress_eop = 1, egress_eor = 1. `merged_locked = 1` after this beat; arbiter blocks further grants.
+- **Status:** planned
+
+### E012d_eor_simultaneous_at_egress
+
+- **Goal:** Both sources have EOR-bearing beats granted in adjacent egress cycles. The first fires row 9 (suppressed eop, sticky eor); the second fires row 10 (egress eop, egress eor). Single egress EOR.
+- **Status:** planned
+
+### E012e_eor_only_one_source
+
+- **Goal:** Real emits EOR; emu never emits EOR (only relevant if upstream contract permits a graceful one-sided close). Without `force_close_run`, egress EOR never fires. STATUS.eor_seen_real = 1, STATUS.eor_seen_emu = 0, STATUS.merged_locked = 0. Documented as known limitation; planned mitigation is the `force_close_run` W1P bit (open item, not in 26.2.0).
+- **Status:** planned (negative test, asserts the documented limitation)
 
 ---
 

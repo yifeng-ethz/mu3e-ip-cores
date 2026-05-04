@@ -1,14 +1,26 @@
 // arb_hit_type0.sv
-// Per-lane arbiter on the post-deassembly hit_type0 boundary. Selects between
-// the real MuTRiG hit_type0 stream and the emulator hit_type0 stream with
-// 16-deep ingress FIFOs per source and a packet-boundary round-robin
-// arbiter. See doc/RTL_PLAN.md for the full architecture and tb/DV_PLAN.md
-// for the verification contract.
+// Per-lane arbiter on the post-deassembly hit_type0 boundary. Selects
+// between the real MuTRiG hit_type0 stream and the emulator hit_type0
+// stream with 16-deep ingress FIFOs per source.
 //
-// Implementation status: signature is frozen by RTL_PLAN.md and DV_PLAN.md;
-// body is delegated to codex via the dv-workflow + rtl-writing skills once
-// the design is approved (see misc/arb_hit_type0/tb/DV_BASIC.md, DV_EDGE.md,
-// DV_PROF.md, DV_ERROR.md, DV_CROSS.md).
+//   REAL    : real-only, single-source egress (FSM passthrough).
+//   EMU     : emulator-only, single-source egress (FSM passthrough).
+//   MIX_RR  : beat-level round-robin combined with a merge-packet FSM
+//             that rewrites egress sop/eop/eor so the consumer sees one
+//             merged Avalon-ST packet per merged_open window. Per-beat
+//             channel still disambiguates source. Requires per-beat
+//             channel demultiplex support at the downstream consumer
+//             (hit processor, rbCAM, packet scheduler) when separating
+//             per-source contributions inside the merged packet.
+//
+// See doc/RTL_PLAN.md sections 1, 2.2 (merge-packet FSM and corner-case
+// coverage analysis), and tb/DV_PLAN.md for the verification contract.
+//
+// Implementation status: signature is frozen by RTL_PLAN.md and
+// DV_PLAN.md; body is delegated to codex via the dv-workflow +
+// rtl-writing skills once the design is approved (see
+// misc/arb_hit_type0/tb/DV_BASIC.md, DV_EDGE.md, DV_PROF.md, DV_ERROR.md,
+// DV_CROSS.md).
 //
 // Version : 26.2.0
 // Date    : 20260504

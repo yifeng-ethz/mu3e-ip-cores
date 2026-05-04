@@ -65,13 +65,17 @@ CSR sequences:
 
 ## 4. Assertions (SVA)
 
-`bind`-attached to the DUT:
+`bind`-attached to the DUT. SOP/EOP balance is checked on the **merged egress packet** (single-bit `merged_open`), not per-channel — the merge-packet FSM in §1 of `doc/RTL_PLAN.md` collapses two source frames into one merged Avalon-ST packet:
 
-1. `selected_out.endofpacket -> $past(selected_out.startofpacket, *)` — every EOP has a matching prior SOP on the same source ownership stretch.
-2. `mode_change @(posedge clk) |-> ##[0:$] (selected_out.endofpacket && selected_out.valid)` ahead of effective `mode == mode_pending`. (Encoded as a property-level checker.)
-3. FIFO full + ingress beat → drop counter for that source increments by exactly 1 in the next cycle.
-4. `selected_out.valid && selected_out.endofpacket` → exactly one of `egress_real_hits` or `egress_emu_hits` increments by 1.
-5. EOR propagated to egress → no further grants until reset.
+1. **Egress SOP/EOP balance.** Over any reset-bounded interval, the count of egress beats with `valid && startofpacket` equals the count of beats with `valid && endofpacket`, modulo a single open packet at the end of run (which closes only after row 10 fires).
+2. **No nested merged packets.** Two consecutive `valid && startofpacket` beats without an intervening `valid && endofpacket` is forbidden.
+3. **Merged_open consistency.** `STATUS.merged_open == (real_open | emu_open)` at every observable read.
+4. **Mode-switch defer.** `mode_pending != mode` and `merged_open == 1` → `mode` does not change in the next clock; `mode == mode_pending` may only happen on a clock where `merged_open == 0`.
+5. **Drop accounting.** FIFO full + ingress beat with `valid` → drop counter for that source increments by exactly 1 on the next cycle.
+6. **Egress hit counter coherence.** `selected_out.valid && last_grant_real` → `EGRESS_REAL_HITS` increments by 1 on the next cycle; symmetric for emu.
+7. **EOR final-grant lock.** Egress beat with `egress_eop && egress_eor` → no further egress beats until reset (`merged_locked` sticky-set).
+8. **Per-source FIFO order preserved.** For each source, the sequence of egress beats sourced from that source matches the sequence of beats accepted into its FIFO modulo drops.
+9. **EOR sticky.** `eor_seen_<source>` is set on the first egress beat from that source carrying `eor=1` and stays set until reset.
 
 ## 5. Coverage
 

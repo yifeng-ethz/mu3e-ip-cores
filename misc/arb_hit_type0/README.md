@@ -9,11 +9,13 @@ the emulator hit_type0 stream (`emulator_mutrig.aso_hit_type0` when built with
 
 | Mode | Encoding | Behaviour |
 |---|---:|---|
-| `REAL` | `2'b00` | drains real-input FIFO only |
-| `EMU` | `2'b01` | drains emulator-input FIFO only |
-| `MIX_RR` | `2'b10` | round-robin between sources at packet boundary |
+| `REAL` | `2'b00` | drains real-input FIFO only; single-channel egress |
+| `EMU` | `2'b01` | drains emulator-input FIFO only; single-channel egress |
+| `MIX_RR` | `2'b10` | **beat-level** round-robin combined with a **merge-packet FSM** that rewrites egress `sop`/`eop`/`eor` so the consumer sees one merged Avalon-ST packet per `merged_open` window. Per-beat `channel` still disambiguates source. |
 
-Mode change is deferred until the active source is between packets so SOP/EOP/EOR atomicity is preserved end-to-end.
+Mode-switch transitions are deferred until `merged_open == 0` (both source `_open` flags are 0) so SOP/EOP/EOR balance is preserved.
+
+> ⚠ **MIX_RR requires per-beat `channel` demultiplex support at the downstream consumer.** Egress is a single merged Avalon-ST packet, so single-packet boundary tracking is sufficient and any consumer that handles the single-source case still works. To separate per-source contributions inside the merged packet (e.g. for golden-reference plotting per source), the consumer must read `channel` per beat. The `mts_processor.hit_type0_in` (`maxChannel = 63`) and `ring_buffer_cam.hit_type1` (`maxChannel = 15`) interfaces declare per-beat `channel`; the implementation of per-beat channel use inside those IPs must be independently verified before MIX_RR is promoted to a production datapath. See `doc/RTL_PLAN.md` §2.2.
 
 ## Per-instance resources
 
