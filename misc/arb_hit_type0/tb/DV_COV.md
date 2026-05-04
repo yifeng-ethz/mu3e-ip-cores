@@ -32,6 +32,14 @@ Per the `dv-workflow` skill, this file is mandatory and must contain one maintai
 | B022 | low_high_pair_atomicity | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 | B023 | w1p_clear_counters | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 | B024 | csr_back_to_back_writes | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B025 | channel_convention | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B026 | watchdog_threshold_default | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B027 | run_control_run_prep_resets_state | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B028 | run_control_reset_clears_counters | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B029 | ingress_real_frame_counter | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B030 | ingress_emu_frame_counter | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B031 | egress_real_frame_counter | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| B032 | egress_emu_frame_counter | planned | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 
 - Iso merged code coverage: pending
 - Functional coverage: pending
