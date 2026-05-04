@@ -24,7 +24,8 @@
 
 ### P003_mix_rr_peak
 
-- **Goal:** Sustained traffic on both sources at 1 hit / 8 cycles each (combined ≈ 1 hit / 4 cycles aggregate). Egress alternates per packet; total egress hits = sum of ingress hits; drops zero.
+- **Goal:** Sustained traffic on both sources at the raw `1 hit / 3.5 cycles` reference each (combined ≈ `1 hit / 1.75 cycles` aggregate offered load). MIX_RR beat-level alternation keeps both FIFOs from filling; egress at ≤ `1 beat / cycle` consumes both streams without backpressure-induced drops; per-channel reconstruction sees zero loss.
+- **Pass criteria:** `INGRESS_REAL_HITS == EGRESS_REAL_HITS`, `INGRESS_EMU_HITS == EGRESS_EMU_HITS`, both DROPS zero, no SOP/EOP imbalance per channel.
 - **Status:** planned
 
 ### P004_emulator_raw_3p5_cycles_per_hit

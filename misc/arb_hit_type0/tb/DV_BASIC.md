@@ -82,11 +82,26 @@ This document expands every B-bucket entry in `DV_PLAN.md` section 4 into a dire
 - **Goal:** Symmetric of B007 for EMU mode.
 - **Status:** planned
 
-### B009_mix_rr_alternation
+### B009_mix_rr_merged_packet_alternation
 
-- **Goal:** In MIX_RR with both FIFOs primed, egress alternates per packet; `last_grant` toggles each EOP cycle.
-- **Stimulus sequence:** Pre-load real with 3 hits, emu with 3 hits, then enter MIX_RR.
-- **Expected result:** Egress sequence is real, emu, real, emu, real, emu (or emu, real, ... depending on initial last_grant; documented value).
+- **Goal:** In MIX_RR with both FIFOs primed, egress beats alternate at the cycle level (RR `last_grant` toggle) **and** the merge-packet FSM collapses both source frames into one merged Avalon-ST packet whose SOP fires once at the start and EOP fires once at the end. Each beat carries its source's `channel` and `error` unchanged so per-beat demux still works.
+- **Stimulus sequence:** Configure real source `channel = 4'h0`, emulator source `channel = 4'h8`. Pre-load real FIFO with one 4-beat frame and emu FIFO with one 2-beat frame, both with their own SOP/EOP set. Enter MIX_RR.
+- **Expected result:** Egress emits exactly **one** merged packet of 6 beats. Beat 1 carries `egress_sop = 1` (whichever source the RR grants first); beats 2..5 carry `egress_sop = 0, egress_eop = 0` and the granted source's data/channel; beat 6 carries `egress_eop = 1`. `INGRESS_REAL_HITS = 4`, `INGRESS_EMU_HITS = 2`, `EGRESS_REAL_HITS = 4`, `EGRESS_EMU_HITS = 2`. `STATUS.merged_open` reads as 1 between beats 1 and 6 inclusive and 0 outside that window.
+- **Pass criteria:** Exactly one egress SOP and one egress EOP across the merged window; per-channel beat reconstruction equals the input streams bit-exact; no source SOP/EOP propagates to egress except the first SOP and the last EOP.
+- **Status:** planned
+
+### B009b_mix_rr_single_beat_absorbed
+
+- **Goal:** In MIX_RR, a single-beat (sop=eop=1) packet from source X arriving while source Y is mid-packet is absorbed as a middle beat in the merged packet. Egress sop/eop are both suppressed for X's beat; X's hit is still counted and channel-tagged correctly.
+- **Stimulus sequence:** Real source emits a 6-beat frame at t=0. Emu source emits a 1-beat frame at t=2 (sop=1, eop=1).
+- **Expected result:** Egress emits one merged packet of 7 beats. Emu's beat lands somewhere in beats 2..6, carries `channel = 4'h8`, `egress_sop = 0`, `egress_eop = 0`. INGRESS_EMU_HITS = 1, EGRESS_EMU_HITS = 1, partial_packet_drop_sticky = 0.
+- **Status:** planned
+
+### B009c_mix_rr_single_beat_both_idle
+
+- **Goal:** In MIX_RR with both sources idle, a single-beat packet from source X opens and closes the merged packet in one egress cycle.
+- **Stimulus sequence:** Both FIFOs empty. Real emits one beat with sop=1, eop=1.
+- **Expected result:** Egress emits one beat with `egress_sop = 1, egress_eop = 1`. After that beat, merged_open = 0 again.
 - **Status:** planned
 
 ---
@@ -100,7 +115,7 @@ This document expands every B-bucket entry in `DV_PLAN.md` section 4 into a dire
 
 ### B011_switch_during_packet_defers
 
-- **Goal:** Mode change while real-source mid-packet is deferred until `endofpacket && valid`; pending bit stays set; `STATUS.mode` does not change yet.
+- **Goal:** A mode change requested while any source is mid-packet is deferred until **all in-flight packets are closed on egress**; pending bit stays set; `STATUS.mode` does not change yet.
 - **Stimulus sequence:** REAL mode, drive a 6-beat real packet, on cycle 3 write CONTROL.mode = EMU.
 - **Expected result:** Beats 1..6 emit on egress as the real packet; on cycle of beat 6 (eop), mode commits; STATUS.mode reads as EMU on the next cycle.
 - **Status:** planned
@@ -110,6 +125,13 @@ This document expands every B-bucket entry in `DV_PLAN.md` section 4 into a dire
 - **Goal:** Two pending mode writes within the same packet keep only the latest pending value at commit.
 - **Stimulus sequence:** REAL, mid-packet write EMU, then write MIX_RR before EOP.
 - **Expected result:** Mode commits to MIX_RR at EOP.
+- **Status:** planned
+
+### B012b_switch_mix_rr_to_real_drains_outstanding_emu
+
+- **Goal:** MIX_RR → REAL switch defers until BOTH sources are at packet boundary, including any in-flight emu packet on egress.
+- **Stimulus sequence:** MIX_RR mode with both sources active. While an emu-channel packet is mid-flight on egress (SOP issued, EOP not yet), write CONTROL.mode = REAL.
+- **Expected result:** Mode commit waits for the emu packet's EOP on egress; until commit, the arbiter still grants emu beats to close that packet; after commit, only real-source beats appear.
 - **Status:** planned
 
 ---

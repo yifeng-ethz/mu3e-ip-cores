@@ -18,8 +18,27 @@ set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
 set_module_property NAME                         arb_hit_type0
 set_module_property DISPLAY_NAME                 "Arbiter hit_type0 (real / emu / mix RR)"
 set_module_property VERSION                      $VERSION_STRING_DEFAULT_CONST
-set_module_property DESCRIPTION                  "Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source and packet-boundary round-robin."
+set_module_property DESCRIPTION                  "Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source. Modes: REAL (real-only), EMU (emulator-only), MIX_RR (beat-level round-robin, multi-channel packetized egress). MIX_RR requires multi-channel packet support in every downstream consumer (hit processor / rbCAM); see Identity tab warning."
 set_module_property GROUP                        "Mu3e Emulators/Modules"
+
+# Elaboration callback emits a Platform Designer warning when MIX_RR is the
+# default mode, because that selects the multi-channel packetized egress at
+# reset and every downstream consumer must support per-channel packet state.
+set_module_property ELABORATION_CALLBACK         elaborate
+set_module_property VALIDATION_CALLBACK          validate
+
+proc validate {} {
+    set mode [get_parameter_value MODE_DEFAULT]
+    if {$mode == 2} {
+        send_message warning "MODE_DEFAULT = MIX_RR. Merge-packet FSM collapses two source frames into one merged Avalon-ST packet (single-packet boundary, channel varies per beat). Per-beat channel demux at the downstream consumer is the audit gate before MIX_RR is promoted into a production datapath. See misc/arb_hit_type0/doc/RTL_PLAN.md sections 1 and 2.2."
+    }
+}
+
+proc elaborate {} {
+    catch {
+        set_display_item_property mix_rr_warning_html TEXT "<html><b>MIX_RR mode warning</b><br/>In MIX_RR a merge-packet FSM combines the two source frames into <b>one merged Avalon-ST packet per merged_open window</b>. Single-packet boundary tracking is sufficient at the consumer (no per-channel SOP/EOP tracking required). However, per-beat <b>channel</b> still varies across the merged packet, so any consumer that separates the two sources' contributions (e.g. for per-source golden-reference plots) must read <b>channel</b> per beat. The Avalon-ST <b>channel</b> sideband and <b>maxChannel &gt; 0</b> declared at <b>mts_processor.hit_type0_in</b> and <b>ring_buffer_cam.hit_type1</b> is the contract; the per-beat channel use inside those IPs must be independently verified before MIX_RR is promoted to a production datapath. Treat MIX_RR as debug/test-only until the downstream chain is verified.</html>"
+    }
+}
 set_module_property AUTHOR                       "Mu3e IP team"
 set_module_property INTERNAL                     false
 set_module_property OPAQUE_ADDRESS_MAP           true
@@ -47,6 +66,21 @@ add_parameter MODE_DEFAULT NATURAL 0
 set_parameter_property MODE_DEFAULT DISPLAY_NAME "Reset Mode (0=REAL, 1=EMU, 2=MIX_RR)"
 set_parameter_property MODE_DEFAULT ALLOWED_RANGES 0:2
 set_parameter_property MODE_DEFAULT HDL_PARAMETER true
+set_parameter_property MODE_DEFAULT DESCRIPTION "Reset value for CONTROL.mode. 0 = REAL (real-only, single-channel egress), 1 = EMU (emulator-only, single-channel egress), 2 = MIX_RR (beat-level round-robin, multi-channel packetized egress; requires per-channel packet support at every downstream consumer)."
+
+# Identity / Interfaces / Register Map tabs and the MIX_RR warning panel.
+set TAB_IDENTITY    "Identity"
+set TAB_INTERFACES  "Interfaces"
+set TAB_REGMAP      "Register Map"
+
+add_display_item "" $TAB_IDENTITY GROUP tab
+add_display_item $TAB_IDENTITY "MIX_RR Warning" GROUP
+add_display_item "MIX_RR Warning" mix_rr_warning_html TEXT ""
+set_display_item_property mix_rr_warning_html DISPLAY_HINT html
+set_display_item_property mix_rr_warning_html TEXT "<html><b>MIX_RR mode warning</b><br/>In MIX_RR a merge-packet FSM combines the two source frames into <b>one merged Avalon-ST packet per merged_open window</b>. Single-packet boundary tracking is sufficient at the consumer (no per-channel SOP/EOP tracking required). However, per-beat <b>channel</b> still varies across the merged packet, so any consumer that separates the two sources' contributions (e.g. for per-source golden-reference plots) must read <b>channel</b> per beat. The Avalon-ST <b>channel</b> sideband and <b>maxChannel &gt; 0</b> declared at <b>mts_processor.hit_type0_in</b> and <b>ring_buffer_cam.hit_type1</b> is the contract; the per-beat channel use inside those IPs must be independently verified before MIX_RR is promoted to a production datapath. Treat MIX_RR as debug/test-only until the downstream chain is verified.</html>"
+add_display_item $TAB_IDENTITY MODE_DEFAULT parameter
+add_display_item $TAB_IDENTITY IP_UID parameter
+add_display_item $TAB_IDENTITY INSTANCE_ID parameter
 
 add_parameter FIFO_DEPTH NATURAL 16
 set_parameter_property FIFO_DEPTH DISPLAY_NAME "Per-source ingress FIFO depth"
