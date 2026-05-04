@@ -50,26 +50,55 @@
 
 ## 3. Stream protocol violations (R007-R010)
 
-### R007_sop_without_eop_drop
+### R007_sop_without_eop_records_syndrome
 
-- **Goal:** Source emits SOP but the FIFO fills before EOP arrives; the partial packet is dropped; STATUS.partial_packet_drop_sticky asserts; INGRESS_*_HITS unchanged for this hit.
-- **Stimulus sequence:** Pre-fill real FIFO to 15 entries; emit a 5-beat packet on real_in.
-- **Expected result:** Beat 1 (sop) accepted, beats 2..5 dropped (FIFO full); DROPS_REAL = 4; INGRESS_REAL_HITS unchanged.
+- **Goal:** Source emits SOP, FIFO fills, EOP-bearing beat is dropped → upstream contract violated. The arbiter does NOT recover: `STATUS.drop_mid_packet_sticky = 1`, `ERROR_COUNT_DROP_MID_PACKET = 1`, `SYNDROME_DROP_MID_PACKET` snapshots source / FIFO depth / beat fields / run_state at the dropped beat. The merged packet is left in an undefined state; recovery is a clean reset (RUN_PREP / RESET / hard reset).
+- **Stimulus sequence:** Pre-fill real FIFO to 15 entries; emit a 5-beat packet on real_in. The 5th beat (eop) is dropped because the FIFO is full at that moment.
+- **Expected result:** Sticky asserted, error counter at 1, syndrome captures source=real, beat.eop=1, FIFO depth=16, source's _open=1.
 - **Status:** planned
 
-### R008_eop_without_sop
+### R008_protocol_violation_two_sops_records_syndrome
 
-- **Goal:** Source emits a beat with `eop=1, sop=0` while no packet is open. Defensive contract: this beat is admitted if FIFO has space (we trust the upstream contract); the model records it; STATUS.partial_packet_drop_sticky unaffected.
+- **Goal:** Source emits two SOPs without intervening EOP → upstream contract violated. `STATUS.protocol_violation_sticky = 1`, `ERROR_COUNT_PROTOCOL = 1`, `SYNDROME_PROTOCOL` snapshots source / prior `_open` flags / beat fields / run_state at the offending second SOP. The arbiter does NOT repair the merged packet; recovery is a clean reset.
 - **Status:** planned
 
 ### R009_eor_without_sop
 
-- **Goal:** Single-beat with `eor=1, eop=0` is illegal; treat as `eor && eop` (apply EOR semantics). Document the chosen contract here and validate against the RTL.
+- **Goal:** Single-beat with `eor=1, eop=0` is treated as `eor && eop` (apply EOR semantics on the implicit EOP). Document the chosen contract and validate against the RTL.
 - **Status:** planned
 
 ### R010_two_simultaneous_eors
 
-- **Goal:** Both sources assert EOR in the same cycle; arbiter picks last_grant peer first, emits the EOR; second EOR is also emitted on the next granted boundary; further grants blocked.
+- **Goal:** Both sources assert EOR in adjacent egress cycles; row 9 fires first (suppressed eop, sticky eor), row 10 fires second (egress eop, egress eor). Further grants blocked after the second.
+- **Status:** planned
+
+### R011_error_counter_saturation
+
+- **Goal:** Drive `ERROR_COUNT_PROTOCOL` and `ERROR_COUNT_DROP_MID_PACKET` to `0xFFFF_FFFF` via plusarg seed; further events hold (saturating). The first-event syndrome is preserved; W1P clear via `CONTROL.bit[5]` clears both error counters and both syndromes atomically.
+- **Status:** planned
+
+### R012_run_control_reset_clears_error_state
+
+- **Goal:** With sticky flags asserted and error counters non-zero, a RESET state on run_ctrl clears: both sticky flags, both error counters, both syndromes, all six 64-bit hit counters, the watchdog status, mode_pending → mode_default, both _open flags, eor_seen flags, merged_locked.
+- **Stimulus sequence:** Drive R007 first, then R008 in the same run, then issue run_ctrl RESET.
+- **Expected result:** All cleared after RESET.
+- **Status:** planned
+
+### R013_watchdog_synthesis_real
+
+- **Goal:** Real source goes silent mid-packet for `WATCHDOG_CYCLES + 1` while emu has EORed. FAW synthesizes a closing beat with `last_channel_real`, `eor=1`. `STATUS.watchdog_synthesized_real = 1`. Egress hit counters do NOT increment for the synthesized beat.
+- **Status:** planned
+
+### R014_watchdog_disabled_then_stuck
+
+- **Goal:** With `WATCHDOG_CYCLES = 0`, a one-sided EOR leaves merged_open stuck; egress EOR never fires; downstream sees a hung packet. Documented limitation; recovery via run_ctrl RESET.
+- **Status:** planned
+
+### R015_run_control_run_prep_during_packet
+
+- **Goal:** Mid-packet RUN_PREP synchronously flushes the in-flight packet without leaking partial beats to egress. After RUN_PREP, the next granted source's SOP is the start of a new merged packet.
+- **Stimulus sequence:** Drive a 6-beat real packet; issue RUN_PREP at beat 3.
+- **Expected result:** Beats 1..3 may have already reached egress; cycle 4 onwards egress is quiet (`aso_valid = 0`); ingress FIFOs empty; `STATUS.real_open = 0` after RUN_PREP. Counter pairs preserved (RUN_PREP does not clear hit counters).
 - **Status:** planned
 
 ---

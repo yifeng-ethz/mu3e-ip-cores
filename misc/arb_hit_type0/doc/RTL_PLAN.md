@@ -31,6 +31,26 @@ its EOP on the egress side). A pending request is held in `mode_pending`
 and committed when both sources are at packet boundary, so SOP/EOP/EOR
 atomicity per channel is preserved end-to-end on every switch.
 
+### 1.5 Channel mapping convention
+
+Real-MuTRiG hit_type0 beats and emulator hit_type0 beats both carry a
+4-bit `channel` field. By **upstream convention**, the two sources use
+disjoint channel ranges so per-beat source identification is a free
+SignalTap-friendly debug feature inside the merged Avalon-ST packet:
+
+| Source | `channel` range | Meaning |
+|---|---|---|
+| Real MuTRiG | `4'h0..4'h7` | ASIC ID 0..7 (mapped from `mutrig_frame_deassembly` channel field) |
+| Emulator MuTRiG | `4'h8..4'hF` | emulator lane index 0..7 mapped to `0x8 + lane` via the emulator's `asic_id_base` parameter |
+
+The arbiter does not enforce this convention — it passes `channel`
+through. Enforcement is at the integration step: the upstream
+`emulator_mutrig_qsys_lane.frontend_csr.asic_id_base` must be set so
+emu beats land in `[0x8..0xF]`. This is verified at standalone DV
+(case `B025_channel_convention`) by checking the egress beat sequence
+keeps real beats inside `[0..7]` and emu beats inside `[8..F]` for
+the duration of any test that spans both sources.
+
 ### Why beat-level interleave is safe at this stage
 
 - Each source caps at `1 hit / 3.5 cycles` raw saturation
@@ -210,12 +230,71 @@ The FSM handles:
 - Both EORs in adjacent egress cycles (row 9 then row 10, single egress EOR fires).
 - CSR mode change anywhere in time (deferred to next `merged_open == 0` boundary).
 
-It does **not** by itself handle:
+Out-of-protocol scenarios fall into two classes — recoverable (handled by the frame-alignment watchdog) and non-recoverable (recorded as upstream bugs in error counters and syndrome registers):
 
-- (a) Graceful run-end when only one source ever emits EOR. A CSR `force_close_run` W1P bit is the proposed mitigation; tracked as an open item below, not in 26.2.0.
-- (b) Upstream protocol violation (two SOPs without an intervening EOP from the same source). The FSM detects this as `was_open_self == 1 && beat.sop == 1` and sets `STATUS.upstream_protocol_violation_sticky`; the offending SOP is forced to 0 on egress so merged state stays consistent. Captured in `tb/DV_ERROR.md`.
-- (c) Drop mid-packet (FIFO fills after SOP is admitted but before EOP). `_open` stays 1 forever from the egress side. `STATUS.partial_packet_drop_sticky` flags it on the dropped beat. Mitigation is a CSR `force_close_<source>` W1P pulse that synthesizes the missing EOP. Tracked as an open item, not in 26.2.0.
-- (d) Channel collision (real and emu carry the same `channel` value). The FSM does not rewrite channel; upstream must configure distinct `asic_id`s. The `enforce_distinct_channel` parameter is an open item, not in 26.2.0.
+- (a) Graceful run-end when only one source ever emits EOR — **recoverable**. After `WATCHDOG_CYCLES` of inactivity from a stranded source while the peer has either EORed or has also been silent, the FAW synthesizes the missing EOP (and EOR if applicable). See §2.3.
+- (b) Upstream protocol violation (two SOPs without intervening EOP from the same source) — **intentional upstream bug, not recovered**. The arbiter does not attempt to repair the merged packet because the input stream itself violated the contract; doing so would mask a real hardware fault. Detection sets `STATUS.protocol_violation_sticky`, increments `ERROR_COUNT_PROTOCOL` (saturating 32-bit), and snapshots `SYNDROME_PROTOCOL` (source, prior `_open` state, beat fields, run-state) on the **first** event after reset. The merged packet is left in whatever state the violation produced; downstream is expected to recover at the next reset. See §2.5.
+- (c) Drop mid-packet (FIFO fills after SOP is admitted but before EOP) — **intentional upstream bug, not recovered**. Same recording surface: `STATUS.drop_mid_packet_sticky`, `ERROR_COUNT_DROP_MID_PACKET`, `SYNDROME_DROP_MID_PACKET` snapshot on first event. The arbiter relies on the upstream contract that hit_type0 packets either fully fit in a 16-deep ingress FIFO or are emitted slower than the egress can drain — both true for `1 hit / 3.5 cycles` MuTRiG sources. A drop mid-packet means upstream is misbehaving (over-rate or longer-than-FIFO frame); fix upstream rather than mask here.
+- (d) Channel collision is **not a fault — it's the convention**. See §1.5.
+
+### 2.3 Frame-alignment watchdog (FAW)
+
+Real and emulator hit_type0 streams are designed to emit frames at the
+same MuTRiG frame interval. After both sources have started a run, a
+prolonged silence on one source while the peer has either ended its run
+or also gone silent is interpreted as "the missing source's last frame
+has implicitly ended". The FAW synthesizes the missing EOP (and EOR if
+the peer has EORed) so the merged packet closes deterministically.
+
+**State:**
+
+| Var | Width | Update |
+|---|---:|---|
+| `idle_cycles_real` | 16 | reset on `asi_real_valid`; +1 every cycle otherwise; saturate at `0xFFFF` |
+| `idle_cycles_emu` | 16 | symmetric |
+| `last_channel_real` | 4 | latched on every real beat with `valid=1` |
+| `last_channel_emu` | 4 | symmetric |
+| `WATCHDOG_CYCLES` | 16, RW CSR | configurable (default 500); `0` disables the watchdog |
+| `STATUS.watchdog_synthesized_real` | 1, sticky | set on real-source synthesis event |
+| `STATUS.watchdog_synthesized_emu` | 1, sticky | symmetric |
+
+**Trigger.** FAW fires for source `S` when **all** of:
+
+1. `WATCHDOG_CYCLES != 0`
+2. `_open_S == 1` (S is mid-packet on egress)
+3. `idle_cycles_S > WATCHDOG_CYCLES`
+4. `eor_seen_other == 1` **or** (`_open_other == 0` and `idle_cycles_other > WATCHDOG_CYCLES`)
+
+Condition (4) means the peer is verifiably done (EORed) or also
+silent for a comparable interval, so it is safe to declare S also
+ended. Without (4), a brief gap on a normally-firing source must
+not synthesize an EOP.
+
+**Action.** On the cycle FAW fires for source `S`:
+
+- The arbiter inserts a one-cycle synthesized egress beat that bypasses the FIFO:
+  - `aso_valid = 1`
+  - `aso_data = 45'h0`
+  - `aso_error = 3'b100` (`overflow` bit set; identifies a watchdog-synthesized beat)
+  - `aso_channel = last_channel_S`
+  - `aso_startofpacket = 0`
+  - `aso_endofpacket = 1` (closes merged packet because `_open_other = 0` is implied by the trigger when paired with FSM state at synthesis time)
+  - `aso_endofrun = eor_seen_other` (fires merged EOR if the peer had EORed; otherwise the merged packet just closes and a new one can open)
+- `_open_S → 0`
+- `eor_seen_S → eor_seen_S | eor_seen_other` (mirror peer's EOR if peer was the run-ender)
+- `STATUS.watchdog_synthesized_S → 1` sticky
+- `EGRESS_<S>_HITS` does **not** increment (the synthesized beat is a control beat, not a real hit)
+
+If both sources are eligible to fire in the same cycle (rare:
+both stranded with peer EOR), FAW fires the source whose
+`idle_cycles_S` is larger; the other fires next cycle. After the
+second fire, both `_open` are 0, both `eor_seen` are 1, and
+`merged_locked = 1`.
+
+**Disabling.** `WATCHDOG_CYCLES = 0` disables FAW completely. The
+DV negative case (`tb/DV_ERROR.md` `R015`) verifies that a
+disabled watchdog leaves the merged packet stuck on a one-sided
+EOR run, matching the documented behaviour without watchdog.
 
 ### 2.3 Counters
 
@@ -239,29 +318,37 @@ accepted into the FIFO but the matching EOP is not (e.g. the FIFO fills
 mid-packet). This is a diagnostic flag; the corresponding hit does not count
 toward `INGRESS_*_HITS` because the hit was never complete on the source side.
 
-### 2.4 CSR map (4-bit word address, 32-bit data)
+### 2.4 CSR map (5-bit word address, 32-bit data)
 
 | Word | Name | Access | Notes |
 |---:|---|---|---|
-| `0x0` | `UID` | RO | `0x41485430` (ASCII `AHT0`) |
-| `0x1` | `META` | RW/RO | mux 0=VERSION, 1=DATE, 2=GIT, 3=INSTANCE_ID |
-| `0x2` | `CONTROL` | RW | bits[1:0]=mode (00=REAL,01=EMU,10=MIX_RR,11=resv); bit[2]=W1P clear counters; bit[3]=W1P clear sticky |
-| `0x3` | `STATUS` | RO | live mode, mode_pending, in_packet_active, real_full, real_empty, emu_full, emu_empty, last_grant, partial_packet_drop_sticky, mode_reserved_seen |
-| `0x4` | `INGRESS_REAL_HITS_L` | RO | low 32 bits; latches high on read |
-| `0x5` | `INGRESS_REAL_HITS_H` | RO | high 32 bits; reads previously latched value |
-| `0x6` | `INGRESS_EMU_HITS_L` | RO | |
-| `0x7` | `INGRESS_EMU_HITS_H` | RO | |
-| `0x8` | `DROPS_REAL_L` | RO | |
-| `0x9` | `DROPS_REAL_H` | RO | |
-| `0xa` | `DROPS_EMU_L` | RO | |
-| `0xb` | `DROPS_EMU_H` | RO | |
-| `0xc` | `EGRESS_REAL_HITS_L` | RO | |
-| `0xd` | `EGRESS_REAL_HITS_H` | RO | |
-| `0xe` | `EGRESS_EMU_HITS_L` | RO | |
-| `0xf` | `EGRESS_EMU_HITS_H` | RO | |
+| `0x00` | `UID` | RO | `0x41485430` (ASCII `AHT0`) |
+| `0x01` | `META` | RW/RO | mux 0=VERSION, 1=DATE, 2=GIT, 3=INSTANCE_ID |
+| `0x02` | `CONTROL` | RW | bits[1:0]=mode (00=REAL, 01=EMU, 10=MIX_RR, 11=resv); bit[2]=W1P clear counters; bit[3]=W1P clear sticky; bit[4]=W1P clear error counters; bit[5]=W1P clear syndromes |
+| `0x03` | `STATUS` | RO | live mode, mode_pending, merged_open, real_open, emu_open, real_full, real_empty, emu_full, emu_empty, last_grant, partial_packet_drop_sticky, mode_reserved_seen, protocol_violation_sticky, drop_mid_packet_sticky, watchdog_synthesized_real, watchdog_synthesized_emu, run_state[2:0] |
+| `0x04` | `WATCHDOG_CYCLES` | RW | `[15:0]` watchdog threshold (default `500`; `0` disables FAW) |
+| `0x05` | `WATCHDOG_STATUS` | RO | `[15:0]` `idle_cycles_real`, `[31:16]` `idle_cycles_emu` (live values, saturating at `0xFFFF`) |
+| `0x06` | `ERROR_COUNT_PROTOCOL` | RO | 32-bit saturating count of upstream-protocol-violation events |
+| `0x07` | `ERROR_COUNT_DROP_MID_PACKET` | RO | 32-bit saturating count of mid-packet drops |
+| `0x08` | `SYNDROME_PROTOCOL` | RO | snapshot of first protocol-violation event: `[3:0]` source channel, `[4]` source (0=real, 1=emu), `[5]` `prior_real_open`, `[6]` `prior_emu_open`, `[7]` beat.sop, `[8]` beat.eop, `[11:9]` beat.error, `[14:12]` run_state, `[31:15]` reserved |
+| `0x09` | `SYNDROME_DROP_MID_PACKET` | RO | snapshot of first drop-mid-packet event: `[3:0]` source channel, `[4]` source, `[8:5]` FIFO depth at drop, `[9]` source's `_open` at drop, `[12:10]` beat.error, `[15:13]` run_state, `[31:16]` reserved |
+| `0x0A` | `INGRESS_REAL_HITS_L` | RO | low 32 bits; latches high on read |
+| `0x0B` | `INGRESS_REAL_HITS_H` | RO | high 32 bits; reads previously latched value |
+| `0x0C` | `INGRESS_EMU_HITS_L` | RO | |
+| `0x0D` | `INGRESS_EMU_HITS_H` | RO | |
+| `0x0E` | `DROPS_REAL_L` | RO | |
+| `0x0F` | `DROPS_REAL_H` | RO | |
+| `0x10` | `DROPS_EMU_L` | RO | |
+| `0x11` | `DROPS_EMU_H` | RO | |
+| `0x12` | `EGRESS_REAL_HITS_L` | RO | |
+| `0x13` | `EGRESS_REAL_HITS_H` | RO | |
+| `0x14` | `EGRESS_EMU_HITS_L` | RO | |
+| `0x15` | `EGRESS_EMU_HITS_H` | RO | |
+| `0x16..0x1F` | reserved | RO | reads as zero |
 
-`STATUS.last_grant` is 1-bit (0=real, 1=emulator). `STATUS.in_packet_active`
-denotes the egress-side in-flight packet flag (used for mode-switch defer).
+`STATUS.last_grant` is 1-bit (0=real, 1=emulator). `STATUS.merged_open`
+is the union flag used for mode-switch defer. `STATUS.run_state[2:0]`
+is the decoded run-control state observed on the `run_ctrl` AVST sink.
 
 ## 3. Resource Model (target)
 
@@ -275,41 +362,73 @@ denotes the egress-side in-flight packet flag (used for mode-switch defer).
 Standalone signoff at `137.5 MHz` (`1.1 × 125 MHz`) per the
 `timing-performance-resources-sign-off` skill.
 
+### 2.5 Error counters and syndromes (upstream-bug recording)
+
+Two saturating 32-bit counters and two latch-once syndrome words
+record upstream-bug events without attempting recovery. The arbiter
+keeps operating after these events but the merged packet semantics
+are no longer trustworthy — the only guaranteed recovery is a clean
+reset (which the run-control sink in §2.6 will apply on the next
+`RUN_PREP` or `RESET` state).
+
+| Field | Trigger | Recorded |
+|---|---|---|
+| `ERROR_COUNT_PROTOCOL` | egress beat with `was_open_self == 1 && beat.sop == 1` from one source | +1 saturating |
+| `SYNDROME_PROTOCOL` | first such event after sticky clear | source, prior `_open` flags, beat fields, run_state |
+| `STATUS.protocol_violation_sticky` | as above | sticky-set; W1P clear via `CONTROL.bit[5]` |
+| `ERROR_COUNT_DROP_MID_PACKET` | beat with `valid && fifo_full` from one source while that source's `_open == 1` | +1 saturating |
+| `SYNDROME_DROP_MID_PACKET` | first such event after sticky clear | source, FIFO depth at drop, beat fields, run_state |
+| `STATUS.drop_mid_packet_sticky` | as above | sticky-set; W1P clear via `CONTROL.bit[5]` |
+
+The syndrome words record only the **first** event per sticky-cleared
+window so the original cause stays visible for SignalTap/SC tool
+inspection while subsequent events still bump the counters.
+
+### 2.6 Run-control sink
+
+A standard 9-bit `asi_ctrl_*` Avalon-ST sink mirrors the contract
+documented at `mutrig_timestamp_processor/mts_processor_hw.tcl:484` and
+`emulator_mutrig/emulator_mutrig_hw.tcl` (interface `ctrl`). The IP
+decodes the run-state per the shared run-control encoding owned by
+`runctl_mgmt_host` and exposes the decoded state at
+`STATUS.run_state[2:0]`.
+
+| State observed | Internal effect |
+|---|---|
+| `IDLE` | normal operation; counters and FIFOs hold |
+| `RUN_PREP` | **synchronous internal reset** — flush both ingress FIFOs, clear `_open`, `eor_seen`, `merged_locked`, `mode_pending → CONTROL.mode_default`, `STATUS.*_sticky` clear, `STATUS.watchdog_synthesized_*` clear, idle counters cleared. Counter pairs **not cleared** (so software can audit pre-prep counters during prep); explicit `CONTROL.bit[2]` clear remains the way to zero counters. |
+| `SYNC` | normal operation |
+| `RUNNING` | normal operation |
+| `TERMINATING` | normal operation; FAW continues to run |
+| `RESET` | **synchronous internal reset** — same as `RUN_PREP`, plus counters cleared and `ERROR_COUNT_*` cleared, syndromes cleared. Equivalent to a soft reset. |
+
+The internal reset is single-cycle and synchronous — no asynchronous
+reset path beyond the global `rst` input. This keeps STA simple and
+matches the staged-reset pattern documented in
+`/home/yifeng/CLAUDE.md` "Staged Reset Trick" rule.
+
+The IP does **not** ack run-control commands on a separate path; it
+only observes the broadcast state.
+
 ## 4. Functional Notes
 
 1. The arbiter is purely combinational up to the `selected_out` register
    stage; the egress beat is registered to keep the `backpressure_fifo`
    side-band timing budget healthy.
-2. `endofrun` propagates from whichever source is currently granted. In
-   `MIX_RR` mode an EOR on either source is granted at the next packet
-   boundary and locks out further grants until reset (matching the
-   `mutrig_frame_deassembly` end-of-run semantics).
+2. `endofrun` propagates only on the merged-packet-closing beat once
+   both `eor_seen` flags are set (or synthesized by FAW). After that the
+   `merged_locked` sticky bit blocks further grants until reset or until
+   run-control transitions to `RUN_PREP`/`RESET`.
 3. The CSR clock is the same as the data clock (single clock domain). No
    CDC inside the IP.
-4. Reset behaviour: on async reset assert, all FIFOs and counters clear,
-   `mode <= CONTROL.mode_default` (defaults to `REAL`), `mode_pending` matches
-   `mode`, sticky flags clear.
+4. Reset behaviour:
+   - **Hard reset (`rst` asserted):** all FIFOs and counters clear, mode
+     reverts to `CONTROL.mode_default`, every sticky and counter clears.
+   - **Run-control `RUN_PREP` or `RESET`:** synchronous internal flush per
+     §2.6; selected counters preserved as documented in that section.
 
 ## 5. Open Items
 
-- A "mix-priority" mode (real always wins on tie) is out of scope for
-  26.2.0; can be added on a `bit[3]` future encoding if the RR-fairness
-  matrix is found insufficient during integration.
-- A 4-lane RR follow-on stage (4 instances of `arb_hit_type0` to one
-  multi-channel egress) is the natural next IP. That IP must support
-  per-lane `channel` tagging plus SOP/EOP and the same multi-channel
-  packetized contract on its egress. It is captured in a separate
-  `RTL_PLAN_arb_hit_type0_4to1.md` once `arb_hit_type0` is signed off.
-- Per-lane `endofrun` arrival ordering: in `MIX_RR` two sources can both
-  emit EOR. The current contract is "the first-granted EOR locks egress;
-  the second-granted EOR is also propagated and after that further grants
-  are blocked until reset." Verify against the upstream contract during
-  DV (case `R010_two_simultaneous_eors`).
-- **Hit-processor compatibility audit.** Before `arb_hit_type0` MIX_RR is
-  promoted from debug-only into a production datapath, the
-  `mutrig_timestamp_processor` and `ring_buffer_cam` implementations
-  must be independently verified to track outstanding packets per
-  `channel`, not globally. The Avalon-ST channel sideband is declared at
-  both interfaces (`mts_processor.hit_type0_in` `maxChannel = 63`,
-  `ring_buffer_cam.hit_type1` `maxChannel = 15`) — that is the contract,
-  not a pass.
+- A "mix-priority" mode (real always wins on tie) is out of scope for 26.2.0; can be added on a future `CONTROL.mode[2]` encoding if the RR-fairness matrix is found insufficient during integration.
+- A 4-lane RR follow-on stage (4 instances of `arb_hit_type0` to one multi-channel egress) is the natural next IP. That IP must support per-lane `channel` tagging plus SOP/EOP and the same multi-channel packetized contract on its egress. Captured in a separate `RTL_PLAN_arb_hit_type0_4to1.md` once `arb_hit_type0` is signed off.
+- **Per-beat channel demux audit at downstream consumers.** Before `arb_hit_type0` MIX_RR is promoted from debug-only into a production datapath, `mutrig_timestamp_processor` and `ring_buffer_cam` must be independently verified to use per-beat `channel` for source attribution inside a single Avalon-ST packet. `maxChannel = 63` at `mts_processor.hit_type0_in` and `maxChannel = 15` at `ring_buffer_cam.hit_type1` declare the contract; the implementation audit is the gate.

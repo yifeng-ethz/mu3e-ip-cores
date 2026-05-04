@@ -214,6 +214,34 @@ This document expands every B-bucket entry in `DV_PLAN.md` section 4 into a dire
 
 ---
 
-## 7. Plan drift notes
+## 7. Watchdog, channel convention, run-control (B025-B028)
+
+### B025_channel_convention
+
+- **Goal:** Real beats emit channel ∈ [0..7]; emulator beats emit channel ∈ [8..15]. Egress preserves channel per beat.
+- **Stimulus sequence:** Configure real source to feed channels `{0, 3, 7}` across three packets; emulator source to feed `{8, 11, 15}`. Mode = MIX_RR.
+- **Expected result:** Egress channel histogram (per beat across the run) covers exactly `{0, 3, 7, 8, 11, 15}`. No real beat lands at channel ≥ 8; no emu beat lands at channel < 8.
+- **Status:** planned
+
+### B026_watchdog_threshold_default
+
+- **Goal:** WATCHDOG_CYCLES at reset reads back the WATCHDOG_DEFAULT parameter (500 by default).
+- **Status:** planned
+
+### B027_run_control_run_prep_resets_state
+
+- **Goal:** A run_ctrl beat carrying RUN_PREP synchronously flushes both ingress FIFOs, clears `_open` and sticky flags, reverts `mode_pending` to `CONTROL.mode_default`. Counter pairs are NOT cleared by RUN_PREP (only by `RESET` or by `CONTROL.bit[2]` W1P).
+- **Stimulus sequence:** Drive a partial real packet (SOP without EOP), accumulate counters, then issue RUN_PREP on run_ctrl.
+- **Expected result:** After RUN_PREP, `STATUS.real_open = 0`, `STATUS.merged_open = 0`, ingress FIFOs empty. INGRESS_REAL_HITS reads as the pre-prep value (preserved). No partial packet leaks to egress.
+- **Status:** planned
+
+### B028_run_control_reset_clears_counters
+
+- **Goal:** A run_ctrl beat carrying RESET clears all counters (incl. ERROR_COUNT_*) and syndromes in addition to the RUN_PREP behaviour.
+- **Status:** planned
+
+---
+
+## 8. Plan drift notes
 
 (none yet)

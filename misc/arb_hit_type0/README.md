@@ -17,14 +17,33 @@ Mode-switch transitions are deferred until `merged_open == 0` (both source `_ope
 
 > ⚠ **MIX_RR requires per-beat `channel` demultiplex support at the downstream consumer.** Egress is a single merged Avalon-ST packet, so single-packet boundary tracking is sufficient and any consumer that handles the single-source case still works. To separate per-source contributions inside the merged packet (e.g. for golden-reference plotting per source), the consumer must read `channel` per beat. The `mts_processor.hit_type0_in` (`maxChannel = 63`) and `ring_buffer_cam.hit_type1` (`maxChannel = 15`) interfaces declare per-beat `channel`; the implementation of per-beat channel use inside those IPs must be independently verified before MIX_RR is promoted to a production datapath. See `doc/RTL_PLAN.md` §2.2.
 
+## Channel mapping convention
+
+Real and emulator hit_type0 sources use disjoint channel ranges so the
+per-beat `channel` field is a free SignalTap-friendly source identifier
+inside merged Avalon-ST packets.
+
+| Source | `channel` range | Source-side configuration |
+|---|---|---|
+| Real MuTRiG | `4'h0..4'h7` | `mutrig_frame_deassembly` channel ≡ ASIC ID 0..7 |
+| Emulator MuTRiG | `4'h8..4'hF` | `emulator_mutrig_qsys_lane.frontend_csr.asic_id_base = 8 + lane_index` |
+
+The arbiter does not enforce this; it is the integration step's
+responsibility to set `asic_id_base` correctly. DV case `B025` checks.
+
 ## Per-instance resources
 
 - 16-deep ingress FIFO per source (real and emulator)
-- 64-bit saturating counters with `_L`/`_H` pair atomicity (latched-on-read):
+- Frame-alignment watchdog with CSR-configurable threshold (default 500 cycles)
+- Six 64-bit saturating counters with `_L`/`_H` pair atomicity (latched-on-read):
   - `INGRESS_REAL_HITS`, `INGRESS_EMU_HITS`
   - `DROPS_REAL`, `DROPS_EMU`
   - `EGRESS_REAL_HITS`, `EGRESS_EMU_HITS`
-- AVMM CSR slave, 4-bit word address, 32-bit data, single clock domain
+- Two 32-bit upstream-bug error counters with first-event syndrome snapshots:
+  - `ERROR_COUNT_PROTOCOL`, `SYNDROME_PROTOCOL`
+  - `ERROR_COUNT_DROP_MID_PACKET`, `SYNDROME_DROP_MID_PACKET`
+- 9-bit Avalon-ST `run_ctrl` sink — sync-reset on `RUN_PREP` and `RESET` run-control states
+- AVMM CSR slave, 5-bit word address, 32-bit data, single clock domain
 
 The CSR map and wave-level field meaning live in `arb_hit_type0_hw.tcl` (owned
 by the `ip-packaging` skill). DV bucket files do not duplicate the CSR map.
