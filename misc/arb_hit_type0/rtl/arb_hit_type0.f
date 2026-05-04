@@ -1,0 +1,6 @@
+arb_hit_type0_fifo.sv
+arb_hit_type0_arbiter.sv
+arb_hit_type0_watchdog.sv
+arb_hit_type0_runctl.sv
+arb_hit_type0_csr.sv
+arb_hit_type0.sv

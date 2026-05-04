@@ -52,10 +52,10 @@ The CSR map is owned by the IP packaging (`arb_hit_type0_hw.tcl` plus the ip-pac
 
 1. Identity (`UID`, `META`) read-only enforcement; reset values bit-exact.
 2. Mode selection: every `(initial_mode, target_mode)` pair in `{REAL, EMU, MIX_RR}` × `{REAL, EMU, MIX_RR}` produces the documented effective steady-state behaviour and the documented switch behaviour.
-3. Mode switch atomicity: a CSR-driven mode change while egress is mid-packet is deferred until `endofpacket && valid`; no SOP/EOP imbalance is observable on `selected_out`.
+3. Mode switch atomicity: a CSR-driven mode change while egress is mid-packet is deferred until `merged_open == 0`; no SOP/EOP imbalance is observable on `selected_out`.
 4. Per-source ingress FIFO: 16-deep, every beat with `valid=1` is accepted unless full; full → beat dropped, drop counter +1; never re-ordered.
 5. Round-robin arbiter (in `MIX_RR`): alternates per packet; if one FIFO is empty the other drains continuously; switching never tears packets; `last_grant` tracks the most recent winner.
-6. Counters: ingress-real, ingress-emu, egress-real, egress-emu increment on hit completion (`endofpacket && valid`); drops-real, drops-emu increment per dropped beat; saturating at `0xFFFF_FFFF_FFFF_FFFF`; W1P clear sets all six to zero atomically; `_L`/`_H` pair atomicity preserved when the high half is read after the low half.
+6. Counters: ingress-real and ingress-emu increment on every accepted ingress beat, egress-real and egress-emu increment on every granted non-synthesized egress beat; drops-real and drops-emu increment per dropped beat; saturating at `0xFFFF_FFFF_FFFF_FFFF`; W1P clear sets all six to zero atomically; `_L`/`_H` pair atomicity preserved when the high half is read after the low half.
 7. EOR (`endofrun`) propagation: once granted, EOR locks out further grants until reset; both mode and arbiter respect this.
 8. Sticky flags: `partial_packet_drop_sticky` set when a SOP-bearing beat is accepted but the matching EOP is later dropped; `mode_reserved_seen` set when CONTROL.mode is written as `2'b11`; W1P bit 3 clears both.
 9. Reset: all visible state returns to defaults inside one clock after reset deassert.
