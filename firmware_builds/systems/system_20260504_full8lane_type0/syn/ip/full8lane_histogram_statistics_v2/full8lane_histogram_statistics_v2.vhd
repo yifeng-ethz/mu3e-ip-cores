@@ -161,7 +161,7 @@ begin
             FIFO_ADDR_WIDTH           => FIFO_ADDR_WIDTH,
             CHANNELS_PER_PORT         => CHANNELS_PER_PORT,
             COAL_QUEUE_DEPTH          => COAL_QUEUE_DEPTH,
-            ENABLE_PINGPONG           => ENABLE_PINGPONG /= 0,
+            ENABLE_PINGPONG           => ENABLE_PINGPONG,
             DEF_INTERVAL_CLOCKS       => DEF_INTERVAL_CLOCKS,
             AVST_DATA_WIDTH           => AVST_DATA_WIDTH,
             AVST_CHANNEL_WIDTH        => AVST_CHANNEL_WIDTH,
@@ -174,8 +174,8 @@ begin
             VERSION_DATE              => VERSION_DATE,
             VERSION_GIT               => VERSION_GIT,
             INSTANCE_ID               => INSTANCE_ID,
-            SNOOP_EN                  => SNOOP_EN /= 0,
-            ENABLE_PACKET             => ENABLE_PACKET /= 0,
+            SNOOP_EN                  => SNOOP_EN,
+            ENABLE_PACKET             => ENABLE_PACKET,
             DEBUG                     => DEBUG
         )
         port map (

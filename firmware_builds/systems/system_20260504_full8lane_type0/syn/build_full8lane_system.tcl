@@ -32,6 +32,8 @@ set control_system_name full8lane_control_path_subsystem
 set inner_system_name full8lane_type0_datapath
 set supercore_system_name arb_hit_type0_supercore
 set outer_system_name full8lane_type0_system
+set inner_system_version 2.0
+set outer_system_version 2.0
 set control_ref_qsys_path [file join $ref_syn_dir debug_sc_system_v3.qsys]
 set inner_ref_qsys_path [file join $ref_syn_dir ${ref_inner_system_name}.qsys]
 set outer_ref_qsys_path [file join $ref_syn_dir feb_system_v3_pipe.qsys]
@@ -47,6 +49,9 @@ set full8lane_sc_hub_ip_dir [file join $syn_dir ip full8lane_sc_hub_v2]
 set full8lane_histogram_ip_dir [file join $syn_dir ip full8lane_histogram_statistics_v2]
 set histogram_compat_ip_dir [file join $syn_dir ip histogram_statistics_v2]
 set search_path [join [list $syn_dir $arb_script_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
+set lvds_controller_version 26.2.0.0505
+set lvds_controller_local_csr_base 0x9000
+set lvds_controller_master_csr_base 0x00030000
 
 proc set_required_param {inst name value} {
     set_instance_parameter_value $inst $name $value
@@ -107,6 +112,53 @@ proc add_reset_connection {start end} {
     add_connection $start $end
 }
 
+proc add_lvds_outclock_if_present {end} {
+    set inst [lindex [split $end .] 0]
+    if {[has_instance $inst]} {
+        add_clock_connection lvds_rx_controller_pro_0.outclock $end
+    }
+}
+
+proc connect_lvds_outclock_domains {} {
+    foreach end {
+        arb_hit_type0_supercore_0.clk
+        dbg_mm2runctrl_0.clock_interface
+        emulator_ctrl_splitter.clk
+        emulator_inject_fanout.clk
+        hist_post_cdc_0.out_clk
+        histogram_ingress_bridge_0.clock
+        histogram_statistics_0.clock
+        hit_stack_subsystem_0.datapath_clock
+        hit_stack_subsystem_1.datapath_clock
+        mm_clock_crossing_bridge.m0_clk
+        mm_pipeline_lvds_csr_emu_dbg.clk
+        mm_pipeline_lvds_csr_hist.clk
+        mm_pipeline_lvds_csr_hitstack_frame.clk
+        mm_pipeline_lvds_csr_hitstack_ring.clk
+        mm_pipeline_lvds_csr_low.clk
+        mm_pipeline_lvds_csr_mts1.clk
+        mm_pipeline_lvds_csr_mutrig3.clk
+        mm_pipeline_lvds_csr_mutrig4_mts0.clk
+        mm_pipeline_lvds_csr_mutrig5.clk
+        mm_pipeline_lvds_csr_mutrig6.clk
+        mm_pipeline_lvds_csr_mutrig7.clk
+        mts_preprocessor_0.clock_interface
+        mts_preprocessor_1.clock_interface
+        mutrig_injector_0.clock_interface
+        mutrig_reset_controller_0.dpa_clock
+        mux_mutrig2processor.clk
+        mux_mutrig2processor_0.clk
+        run_control_splitter.clk
+    } {
+        add_lvds_outclock_if_present $end
+    }
+    for {set lane 0} {$lane < 8} {incr lane} {
+        add_lvds_outclock_if_present emulator_mutrig_${lane}.data_clock
+        add_lvds_outclock_if_present mutrig_frame_deassembly_${lane}.clock_sink
+        add_lvds_outclock_if_present backpressure_fifo_${lane}.clk
+    }
+}
+
 proc ensure_export {name type dir internal} {
     if {[lsearch -exact [get_interfaces] $name] < 0} {
         add_interface $name $type $dir
@@ -120,6 +172,50 @@ proc force_export {name type dir internal} {
     }
     add_interface $name $type $dir
     set_interface_property $name EXPORT_OF $internal
+}
+
+proc patch_qsys_component_version {qsys_path version} {
+    set fd [open $qsys_path r]
+    set content [read $fd]
+    close $fd
+
+    set pattern {(<component[^>]*version=")[^"]+(")}
+    set replacement "\\1${version}\\2"
+    set count [regsub $pattern $content $replacement patched]
+    if {$count == 0} {
+        error "failed to patch root component version in $qsys_path"
+    }
+
+    exec chmod u+w $qsys_path
+    set fd [open $qsys_path w]
+    puts -nonewline $fd $patched
+    close $fd
+}
+
+proc ensure_qsys_interface_export {qsys_path name internal type dir before_name} {
+    set fd [open $qsys_path r]
+    set content [read $fd]
+    close $fd
+
+    set existing "   name=\"$name\"\n   internal=\"$internal\""
+    if {[string first $existing $content] >= 0} {
+        return
+    }
+
+    set block " <interface\n   name=\"$name\"\n   internal=\"$internal\"\n   type=\"$type\"\n   dir=\"$dir\" />\n"
+    set marker " <interface\n   name=\"$before_name\""
+    set idx [string first $marker $content]
+    if {$idx < 0} {
+        error "failed to find insertion point $before_name in $qsys_path"
+    }
+    set patched [string range $content 0 [expr {$idx - 1}]]
+    append patched $block
+    append patched [string range $content $idx end]
+
+    exec chmod u+w $qsys_path
+    set fd [open $qsys_path w]
+    puts -nonewline $fd $patched
+    close $fd
 }
 
 proc configure_backpressure_fifo {name depth} {
@@ -184,6 +280,48 @@ proc configure_frame_deassembly {name} {
     # its git-derived default into the signed-31-bit validator range, but
     # this explicit value keeps the bring-up image deterministic.
     set_required_param $name VERSION_GIT 0
+}
+
+proc adopt_sv_lvds_controller {} {
+    # MV2/B016/B017: the SV LVDS package now absorbs the Arria V PHY. Replace
+    # both stale pieces and keep only the external FEB-facing pins/streams.
+    foreach stale_inst {lvds_rx_controller_pro_0 lvds_rx_28nm_0 receiver_clock_125} {
+        remove_instance_if_present $stale_inst
+    }
+    remove_dangling_connections
+
+    add_instance lvds_rx_controller_pro_0 mu3e_lvds_controller $::lvds_controller_version
+    set_required_param lvds_rx_controller_pro_0 N_LANE 9
+    set_required_param lvds_rx_controller_pro_0 N_ENGINE 1
+    set_required_param lvds_rx_controller_pro_0 ROUTING_TOPOLOGY 1
+    set_required_param lvds_rx_controller_pro_0 SCORE_WINDOW_W 10
+    set_required_param lvds_rx_controller_pro_0 SCORE_ACCEPT 8
+    set_required_param lvds_rx_controller_pro_0 SCORE_REJECT 2
+    set_required_param lvds_rx_controller_pro_0 STEER_QUEUE_DEPTH 4
+    set_required_param lvds_rx_controller_pro_0 SYNC_PATTERN 0x0FA
+    set_required_param lvds_rx_controller_pro_0 DEBUG_LEVEL 0
+    set_required_param lvds_rx_controller_pro_0 IP_UID 0x4C564453
+    set_required_param lvds_rx_controller_pro_0 INSTANCE_ID 0
+    set_required_param lvds_rx_controller_pro_0 VERSION_MAJOR 26
+    set_required_param lvds_rx_controller_pro_0 VERSION_MINOR 2
+    set_required_param lvds_rx_controller_pro_0 VERSION_PATCH 0
+    set_required_param lvds_rx_controller_pro_0 BUILD 0x505
+    set_required_param lvds_rx_controller_pro_0 VERSION_DATE 0x20260505
+    set_required_param lvds_rx_controller_pro_0 VERSION_GIT 0x00000000
+
+    add_clock_connection monitor_clock_125.clk lvds_rx_controller_pro_0.control_clock
+    add_reset_connection monitor_clock_125.clk_reset lvds_rx_controller_pro_0.control_reset
+    add_reset_connection monitor_clock_125.clk_reset lvds_rx_controller_pro_0.data_reset
+    # The SV adapter exposes a 4 KiB CSR aperture. Keep it in a free upstream
+    # slot rather than expanding mm_pipeline_lvds_csr_low over lane 2/3 slots.
+    add_mm_connection mm_clock_crossing_bridge.m0 lvds_rx_controller_pro_0.csr $::lvds_controller_local_csr_base
+    add_mm_connection master_datapath.master lvds_rx_controller_pro_0.csr $::lvds_controller_master_csr_base
+
+    force_export lvds_pll_inclock clock end lvds_rx_controller_pro_0.inclock
+    force_export lvds_outclock clock start lvds_rx_controller_pro_0.outclock
+    force_export serial conduit end lvds_rx_controller_pro_0.serial
+    force_export redriver conduit end lvds_rx_controller_pro_0.redriver
+    force_export rstlink avalon_streaming start lvds_rx_controller_pro_0.decoded8
 }
 
 proc configure_emulator_for_type0_bank {name lane} {
@@ -319,13 +457,12 @@ proc insert_qip_line_before {qip_path marker line} {
     set content [read $fd]
     close $fd
 
-    if {[string first $line $content] >= 0} {
-        return
-    }
-
     set output_lines [list]
     set inserted 0
     foreach existing [split $content "\n"] {
+        if {[string equal $existing $line]} {
+            continue
+        }
         if {!$inserted && [string first $marker $existing] >= 0} {
             lappend output_lines $line
             set inserted 1
@@ -342,9 +479,9 @@ proc insert_qip_line_before {qip_path marker line} {
     close $fd
 }
 
-proc patch_outer_histogram_compatibility {syn_dir outer_system_name histogram_compat_ip_dir} {
-    set submodule_dir [file join $syn_dir $outer_system_name synthesis submodules]
-    set qip_path [file join $syn_dir $outer_system_name synthesis ${outer_system_name}.qip]
+proc patch_histogram_compatibility {syn_dir system_name histogram_compat_ip_dir} {
+    set submodule_dir [file join $syn_dir $system_name synthesis submodules]
+    set qip_path [file join $syn_dir $system_name synthesis ${system_name}.qip]
     set compat_wrapper_src [file join $histogram_compat_ip_dir histogram_statistics_v2.vhd]
     set bool_core_src [file join $histogram_compat_ip_dir histogram_statistics_v2_bool_core.vhd]
     set compat_wrapper_dst [file join $submodule_dir histogram_statistics_v2.vhd]
@@ -365,9 +502,9 @@ proc patch_outer_histogram_compatibility {syn_dir outer_system_name histogram_co
     file copy -force $bool_core_src $bool_core_dst
 
     set marker {submodules/histogram_statistics_v2.vhd}
-    set bool_core_line {set_global_assignment -library "full8lane_type0_system" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/histogram_statistics_v2_bool_core.vhd"]}
+    set bool_core_line [format {set_global_assignment -library "%s" -name VHDL_FILE [file join $::quartus(qip_path) "submodules/histogram_statistics_v2_bool_core.vhd"]} $system_name]
     insert_qip_line_before $qip_path $marker $bool_core_line
-    puts "INFO: patched outer histogram_statistics_v2 compatibility shim into generated synthesis tree"
+    puts "INFO: patched $system_name histogram_statistics_v2 compatibility shim into generated synthesis tree"
 }
 
 proc build_control_path_qsys {ref_qsys_path qsys_path} {
@@ -480,10 +617,10 @@ proc rebind_outer_control_path {kind} {
     add_reset_connection control_reset_sync_125.reset_out control_path_subsystem.clk156_in_rst
 }
 
-proc rebind_outer_data_path {kind} {
+proc rebind_outer_data_path {kind version} {
     remove_instance_if_present data_path_subsystem
     remove_dangling_connections
-    add_instance data_path_subsystem $kind 1.0
+    add_instance data_path_subsystem $kind $version
 
     force_export control_path_clk125 clock start mclk125_souce.clk
     ensure_export inject conduit end data_path_subsystem.inject
@@ -578,6 +715,7 @@ set_optional_param histogram_ingress_bridge_0 VERSION_GIT 481097348
 set_required_param mm_clock_crossing_bridge USE_AUTO_ADDRESS_WIDTH 1
 set_required_param run_control_splitter USE_READY 0
 set_required_param run_control_splitter NUMBER_OF_OUTPUTS 16
+adopt_sv_lvds_controller
 
 # Mu3e SciFi frames are 128 sub-headers x 16 cycles = 2048 datapath cycles.
 # N_SHD=128 is set inside hit_stack_subsystem composition; the dotted-path
@@ -611,7 +749,7 @@ configure_full8lane_histogram_statistics histogram_statistics_0
 # deferred — no standard altera_avalon_st_merger exists in Qsys 18.1 and a
 # non-packet multiplexer would mis-schedule the USE_PACKETS=0 run-ctrl stream.
 
-add_clock_connection lvds_rx_28nm_0.outclock arb_hit_type0_supercore_0.clk
+add_clock_connection lvds_rx_controller_pro_0.outclock arb_hit_type0_supercore_0.clk
 add_reset_connection master_datapath.master_reset arb_hit_type0_supercore_0.rst
 add_stream_connection run_control_splitter.out2 arb_hit_type0_supercore_0.run_ctrl
 
@@ -627,7 +765,7 @@ add_stream_connection hit_stack_subsystem_0.ring_buffer_cam_0_filllevel histogra
 add_stream_connection hit_stack_subsystem_0.ring_buffer_cam_1_filllevel histogram_statistics_0.debug_4
 add_stream_connection hit_stack_subsystem_0.ring_buffer_cam_2_filllevel histogram_statistics_0.debug_5
 add_stream_connection hit_stack_subsystem_0.ring_buffer_cam_3_filllevel histogram_statistics_0.debug_6
-add_clock_connection lvds_rx_28nm_0.outclock histogram_statistics_0.clock
+add_clock_connection lvds_rx_controller_pro_0.outclock histogram_statistics_0.clock
 add_reset_connection master_datapath.master_reset histogram_statistics_0.reset
 add_reset_connection reset_bridge_export.out_reset histogram_statistics_0.interval_reset
 
@@ -642,8 +780,8 @@ for {set lane 0} {$lane < 8} {incr lane} {
         configure_emulator_for_type0_bank $emu $lane
     }
 
-    add_clock_connection lvds_rx_28nm_0.outclock $fda.clock_sink
-    add_clock_connection lvds_rx_28nm_0.outclock $fifo.clk
+    add_clock_connection lvds_rx_controller_pro_0.outclock $fda.clock_sink
+    add_clock_connection lvds_rx_controller_pro_0.outclock $fifo.clk
     add_reset_connection master_datapath.master_reset $fda.reset_sink
     add_reset_connection master_datapath.master_reset $fifo.clk_reset
 
@@ -683,6 +821,8 @@ for {set lane 0} {$lane < 8} {incr lane} {
     add_mm_connection master_datapath.master arb_hit_type0_supercore_0.csr_$lane $arb_master_base
 }
 
+connect_lvds_outclock_domains
+
 set_interconnect_requirement {$system} qsys_mm.clockCrossingAdapter AUTO
 set_interconnect_requirement {$system} qsys_mm.enableEccProtection FALSE
 set_interconnect_requirement {$system} qsys_mm.enableInstrumentation FALSE
@@ -690,6 +830,14 @@ set_interconnect_requirement {$system} qsys_mm.insertDefaultSlave FALSE
 set_interconnect_requirement {$system} qsys_mm.maxAdditionalLatency 4
 
 save_system $inner_qsys_path
+patch_qsys_component_version $inner_qsys_path $inner_system_version
+ensure_qsys_interface_export \
+    $inner_qsys_path \
+    lvds_outclock \
+    lvds_rx_controller_pro_0.outclock \
+    clock \
+    start \
+    lvds_pll_inclock
 puts "INFO: saved full8lane inner datapath $inner_qsys_path"
 reload_ip_catalog
 
@@ -699,15 +847,17 @@ set_project_property DEVICE_FAMILY {Arria V}
 set_project_property DEVICE {5AGXBA7D4F31C5}
 set_project_property HIDE_FROM_IP_CATALOG {false}
 rebind_outer_control_path $control_system_name
-rebind_outer_data_path $inner_system_name
+rebind_outer_data_path $inner_system_name $inner_system_version
 save_system $outer_qsys_path
+patch_qsys_component_version $outer_qsys_path $outer_system_version
 puts "INFO: saved full8lane outer system $outer_qsys_path"
 
 generate_system $control_qsys_path $search_path
 generate_system $supercore_qsys_path $search_path
 generate_system $inner_qsys_path $search_path
 generate_system $outer_qsys_path $search_path
-patch_outer_histogram_compatibility $syn_dir $outer_system_name $histogram_compat_ip_dir
+patch_histogram_compatibility $syn_dir $inner_system_name $histogram_compat_ip_dir
+patch_histogram_compatibility $syn_dir $outer_system_name $histogram_compat_ip_dir
 
 chmod_generated_artifacts $syn_dir [list $control_system_name $supercore_system_name $inner_system_name $outer_system_name]
 puts "INFO: ${outer_system_name} generation complete; qsys/sopcinfo/synthesis artifacts are read-only."

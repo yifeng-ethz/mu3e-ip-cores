@@ -48,7 +48,7 @@ create_clock_if_exists 20.000 systemclock_bottom
 create_clock_if_exists 7.273 systemclock
 create_clock_if_exists 8.000 clk_125_top
 create_clock_if_exists 8.000 clk_125_bottom
-create_clock_if_exists 7.273 LVDS_clk_si1_fpga_A
+create_clock_if_exists 8.000 LVDS_clk_si1_fpga_A
 create_clock_if_exists 8.000 LVDS_clk_si1_fpga_B
 create_clock_if_exists 8.000 lvds_firefly_clk
 create_clock_if_exists 7.273 transceiver_pll_clock[0]

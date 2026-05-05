@@ -80,3 +80,8 @@ include script/buckets/error_b002.mk
 # PROF-INT-001 full-load latency benchmark (standalone top, not tb_int_top)
 # ---------------------------------------------------------------------------
 include script/buckets/prof_int_001.mk
+
+# ---------------------------------------------------------------------------
+# PROF-INT-002 full-pipeline real-RTL latency benchmark
+# ---------------------------------------------------------------------------
+include script/buckets/prof_int_002.mk

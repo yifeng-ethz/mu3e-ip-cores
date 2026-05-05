@@ -19,7 +19,7 @@ The testbench drives traffic at the **upstream LVDS PHY boundary** with a virtua
 1. **Run-control verification (RC):** `runctl_mgmt_host` ↔ `run_control_splitter` ↔ every IP. Verify `IDLE → RUN_PREP → SYNC → RUNNING → TERMINATING → IDLE` is broadcast correctly and every IP reacts per its own contract.
 2. **Slow-control verification (SC):** `sc_hub_v2` ↔ `mm_bridge` ↔ every CSR slave on the focus build. Verify CSR addressing, address-aperture bounds, and read/write atomicity.
 3. **Datapath verification (DT):** end-to-end hit tracking from virtual-MuTRiG-emitted hits to histogram-statistics bin counts. Per-bucket FIFO-ledger scoreboard catches dropped, reordered, mis-attributed, and corrupted hits.
-4. **Latency measurement at three observation points:** pre-rbCAM (after `arb_hit_type0` → before `ring_buffer_cam`), post-rbCAM (after `ring_buffer_cam`), FEB egress (after `packet_scheduler` framing). Latency CDFs, percentiles, and per-source breakdowns computed Python-side from exported CSV.
+4. **Latency measurement at three observation points:** pre-rbCAM (immediately at `ring_buffer_cam` input / aggregate `data_splitter_0_out[0:3]` boundary), post-rbCAM (after all four `ring_buffer_cam` hit_type2 outputs), FEB-egress (packet scheduler egress). Latency CDFs, percentiles, and per-source breakdowns computed Python-side from exported CSV.
 5. **Histogram cross-check:** compare the scoreboard's reconstructed delay distribution against `histogram_statistics_0`'s bin counts at the same tap point. Mismatch beyond the per-bucket-reconciliation threshold (set per case in `DV_COV.md`) is a fail.
 6. **Reusable UVM infra:** every agent, scoreboard, and coverage collector is built so the same harness can be reused for future Mu3e integration testbenches by swapping the DUT-binding interface.
 
@@ -45,7 +45,7 @@ All components under `tb_int/uvm/` follow the standard Mu3e UVM agent pattern (d
 | `mutrig_phy_agent` | active source on the LVDS PHY pin pair | Virtual MuTRiG ASIC. Generates **byte-stream-encoded** MuTRiG frames at the LVDS data-clock boundary, including 8b/10b encoding, frame headers, hit payloads, frame trailers, and idle K-codes. Emits hits with the canonical 45-bit `hit_type0` layout (`asic[3:0]`, `channel[4:0]`, `T_CC[14:0]`, `T_Fine[4:0]`, `E_CC[14:0]`, `E_Flag[0]`) per `frame_rcv_ip.vhd:580-585`. |
 | `runctl_phy_agent` | active source on the synclink AVST 9-bit boundary | Drives `runctl_mgmt_host`'s synclink input with run-state command bytes. |
 | `sc_phy_agent` | active master on the SC-bridge AVMM pin boundary | Drives the SC bridge's PCIe-mapped AVMM master. Mirrors what `sc_tool` does in software but at the simulated bus level. |
-| `lvds_decoded_monitor` | passive | Snoops the post-deassembly `aso_hit_type0` boundary inside the lane's `mutrig_datapath_subsystem` (the **pre-rbCAM tap**). |
+| `lvds_decoded_monitor` | passive | Used for PROF-INT-002 pre-rbCAM ingress. Four monitor instances fan into the scoreboard from `data_splitter_0_out0_*` through `data_splitter_0_out3_*`. |
 | `rbcam_egress_monitor` | passive | Snoops the post-`ring_buffer_cam` `aso_hit_type2` boundary (the **post-rbCAM tap**). |
 | `feb_egress_monitor` | passive | Snoops the FEB-egress framed boundary at `feb_frame_assembly` output (the **FEB egress tap**). |
 | `histogram_csr_monitor` | passive | Periodically polls `histogram_statistics_0`'s bin counters via the SC bridge for cross-check against scoreboard. |
@@ -229,6 +229,56 @@ Per-test reports under `tb_int/reports/<test>/`:
 - `latency_l2_commit_cdf.png`, `latency_pre_rbcam_cdf.png`, `latency_post_rbcam_cdf.png`, `latency_feb_egress_cdf.png` — per-stage latency CDFs (Python-side, computed from CSV).
 - `hist_xcheck_pre_rbcam.md`, `hist_xcheck_post_rbcam.md`, `hist_xcheck_feb_egress.md` — cross-check vs `histogram_statistics_0` IP at each tap.
 - `summary.md` — PASS/FAIL plus per-stage drop count, per-bucket ghost residual count, and the four latency percentiles (p50/p90/p99/p99.9).
+- `latency_summary.csv` — histogram-level roll-up for each of pre-rbCAM/post-rbCAM/FEB-egress.
+
+### PROF-INT-002 5s latency workflow and target list
+
+- Capture window definition (applied in all 5s PROF-INT-002 targets):
+  - `TB_INT_RUN_CYCLES=625000000` (5 s @125 MHz)
+  - `TB_INT_DRAIN_CYCLES=16384`
+  - `TB_INT_STABLE_WINDOW_CYCLES=125000000` (1 s stable-origin interval)
+  - `TB_INT_STABLE_ONLY_EXPORT=1`
+- 1-lane virtual MuTRiG, 100 kHz/channel, 5s with 1s stable window:
+  - Target: `make run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s`
+  - Sim dir: `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s/`
+  - Plot dir: `tb_int/reports/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s/`
+  - Contact sheet: `contact_sheet_dislin.png`
+- 8-lane virtual MuTRiG, 100 kHz/channel, 5s with 1s stable window:
+  - Target: `make run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s`
+  - Sim dir: `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s/`
+  - Plot dir: `tb_int/reports/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s/`
+  - Contact sheet: `contact_sheet_dislin.png`
+  - Monitor scope: eight Stage-A taps, four pre-rbCAM taps, and four post-rbCAM taps feed the same scoreboard.
+- Emulator/full RTL path, 100 kHz/channel, 8-lane equivalent, 5s with 1s stable window:
+  - Target: `make run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s`
+  - Sim dir: `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s/`
+  - Plot dir: `tb_int/reports/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s/`
+  - Contact sheet: `contact_sheet_dislin.png`
+  - Monitor scope: same multi-lane, multi-rbCAM fanout as the 8-lane virtual target.
+- Combined 5s convenience target:
+  - `make run_prof_int_002_full_pipeline_100khz_per_channel_5s`
+  - Executes all three runs above and corresponding plots via `plot_prof_int_002_full_pipeline_100khz_per_channel_5s` dependency chain.
+
+Current validation note, 2026-05-05: `make comp_prof_int_002` passes after the fanout patch, and the bounded short runtime
+`make run_prof_int_002_full_pipeline_100khz_per_channel_test PROF_INT_002_RUN_CYCLES=20000 PROF_INT_002_DRAIN_CYCLES=1024 SEED=2`
+elaborates and exports 52 closed records. It is not closure evidence for the 5s targets: the scoreboard reports `A=352 PRE=256 POST=64 FEB=52`, `stable_closed=52/352` (14 percent, below the 95 percent gate), run-control `010` misses ready bits `0x01080`, and the generated post-rbCAM/FEB-egress latencies sit outside the rbCAM reference aperture.
+
+### Latency reporter/metric conventions for these runs
+
+- Metric definitions:
+  - pre-rbCAM = `abs_ts_pre_rbcam - abs_ts_a`
+  - post-rbCAM = `abs_ts_post_rbcam - abs_ts_a`
+  - FEB-egress = `abs_ts_feb_egress - abs_ts_a`
+- Panel labels:
+  - `pre-rbCAM (ring_buffer_cam asi_hit_type1)`
+  - `post-rbCAM (ring_buffer_cam hit_type2)`
+  - `FEB-egress (packet scheduler egress)`
+- Axis labels:
+  - x-axis: `signed hit latency bin center [cycles]`
+  - y-axis: `hits / bin [% of captured interval]`
+- Reporter output requirement:
+  - Pre-rbCAM panel must represent the aggregate rbCAM-ingress boundary at `hit_stack_subsystem_0.data_splitter_0_out0_*` through `out3_*` (or equivalent `hit_stack_subsystem_0.hit_type_1_*` fanout).
+  - Each panel must include total/hits, nonzero bins, peak bin/fraction, black-peak note, green rbCAM-window note, in-window/out-window counts, and compact two-line title text.
 
 ### CSV column reference
 

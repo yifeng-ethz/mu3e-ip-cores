@@ -177,7 +177,12 @@ begin
     feb_si_status_in(1 downto 0) <= si45_intr_n;
     feb_si_status_in(3 downto 2) <= si45_lol_n;
     feb_si_status_in(5 downto 4) <= si45_spi_out;
-    feb_si_status_in(7 downto 6) <= (others => '0');
+    -- B012 (placeholder): pack the FEB backplane slot id into the spare two
+    -- bits of feb_si_status_in so synthesis preserves the ref_adr wire and
+    -- the next qsys regen can promote it into a dedicated identity register.
+    -- Today the firmware can read these as bits [7:6] of si_status_in but the
+    -- decoder downstream still needs to be added.
+    feb_si_status_in(7 downto 6) <= ref_adr(1 downto 0);
 
     lcd_csn <= '1';
     lcd_d_cn <= '1';
