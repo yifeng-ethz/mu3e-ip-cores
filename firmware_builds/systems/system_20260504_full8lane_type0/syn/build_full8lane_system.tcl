@@ -575,8 +575,8 @@ set_required_param run_control_splitter USE_READY 0
 set_required_param run_control_splitter NUMBER_OF_OUTPUTS 16
 
 # Mu3e SciFi frames are 128 sub-headers x 16 cycles = 2048 datapath cycles.
-set_instance_parameter_value hit_stack_subsystem_0.feb_frame_assembly_0 N_SHD 128
-set_instance_parameter_value hit_stack_subsystem_1.feb_frame_assembly_0 N_SHD 128
+set_required_param hit_stack_subsystem_0.feb_frame_assembly_0 N_SHD 128
+set_required_param hit_stack_subsystem_1.feb_frame_assembly_0 N_SHD 128
 
 # Remove the byte-stream source-mux path and the nested per-lane datapath
 # subsystem. The replacement is flattened in this Qsys recipe so the Type0
