@@ -160,17 +160,17 @@ proc configure_run_ctrl_splitter {name outputs} {
 }
 
 proc configure_arb_child {name lane mode watchdog} {
-    add_instance $name arb_hit_type0 26.2.0.0504
+    add_instance $name arb_hit_type0 26.4.0.0505
     set_required_param $name MODE_DEFAULT $mode
     set_required_param $name WATCHDOG_DEFAULT $watchdog
     set_required_param $name FIFO_DEPTH 16
     set_required_param $name IP_UID 1095263280
     set_required_param $name INSTANCE_ID $lane
     set_required_param $name VERSION_MAJOR 26
-    set_required_param $name VERSION_MINOR 2
+    set_required_param $name VERSION_MINOR 4
     set_required_param $name VERSION_PATCH 0
-    set_required_param $name BUILD 504
-    set_required_param $name VERSION_DATE 20260504
+    set_required_param $name BUILD 505
+    set_required_param $name VERSION_DATE 20260505
 }
 
 proc configure_frame_deassembly {name} {
