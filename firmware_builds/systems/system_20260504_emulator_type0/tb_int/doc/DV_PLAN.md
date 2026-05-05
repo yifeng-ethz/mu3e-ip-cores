@@ -12,16 +12,18 @@
 
 `tb_int/` is the **integration UVM testbench** that verifies the full datapath of `system_20260504_emulator_type0` end-to-end with all IPs in the loop. It is the layer between standalone IP DV (e.g. `mu3e-ip-cores/misc/arb_hit_type0/tb/`) and the on-board bring-up.
 
-The testbench drives traffic at the **upstream LVDS PHY boundary** with a virtual MuTRiG model, runs through the integrated datapath inside the focus build (`emulator_mutrig_qsys_lane`, `lvds_rx_controller_pro`, `mutrig_frame_deassembly`, `arb_hit_type0`, `backpressure_fifo`, `mutrig_timestamp_processor`, `ring_buffer_cam`, `histogram_ingress_bridge`, `histogram_statistics`), and reconciles every hit end-to-end through an out-of-order scoreboard.
+The testbench drives traffic at the **upstream LVDS PHY boundary** with a virtual MuTRiG model, runs through the integrated datapath inside the focus build (`emulator_mutrig_qsys_lane`, `lvds_rx_controller_pro`, `mutrig_frame_deassembly`, `arb_hit_type0`, `backpressure_fifo`, `mutrig_timestamp_processor`, `ring_buffer_cam`, `histogram_ingress_bridge`, `histogram_statistics`), and reconciles every hit end-to-end through a per-bucket FIFO-ledger scoreboard.
 
 ### In scope
 
 1. **Run-control verification (RC):** `runctl_mgmt_host` ↔ `run_control_splitter` ↔ every IP. Verify `IDLE → RUN_PREP → SYNC → RUNNING → TERMINATING → IDLE` is broadcast correctly and every IP reacts per its own contract.
 2. **Slow-control verification (SC):** `sc_hub_v2` ↔ `mm_bridge` ↔ every CSR slave on the focus build. Verify CSR addressing, address-aperture bounds, and read/write atomicity.
-3. **Datapath verification (DT):** end-to-end hit tracking from virtual-MuTRiG-emitted hits to histogram-statistics bin counts. Out-of-order scoreboard catches dropped, reordered, mis-attributed, and corrupted hits.
-4. **Latency measurement at three observation points:** pre-rbCAM (after `arb_hit_type0` → before `ring_buffer_cam`), post-rbCAM (after `ring_buffer_cam`), FEB egress (after `packet_scheduler` framing). Latency CDFs, percentiles, and per-source breakdowns.
-5. **Histogram cross-check:** compare the OoO scoreboard's reconstructed delay distribution against `histogram_statistics_0`'s bin counts at the same tap point. Mismatch is a hard fail.
+3. **Datapath verification (DT):** end-to-end hit tracking from virtual-MuTRiG-emitted hits to histogram-statistics bin counts. Per-bucket FIFO-ledger scoreboard catches dropped, reordered, mis-attributed, and corrupted hits.
+4. **Latency measurement at three observation points:** pre-rbCAM (after `arb_hit_type0` → before `ring_buffer_cam`), post-rbCAM (after `ring_buffer_cam`), FEB egress (after `packet_scheduler` framing). Latency CDFs, percentiles, and per-source breakdowns computed Python-side from exported CSV.
+5. **Histogram cross-check:** compare the scoreboard's reconstructed delay distribution against `histogram_statistics_0`'s bin counts at the same tap point. Mismatch beyond the per-bucket-reconciliation threshold (set per case in `DV_COV.md`) is a fail.
 6. **Reusable UVM infra:** every agent, scoreboard, and coverage collector is built so the same harness can be reused for future Mu3e integration testbenches by swapping the DUT-binding interface.
+
+The virtual MuTRiG model in `mutrig_phy_agent` emits directly into per-lane L2 FIFOs (matching the 26.2.x `emulator_mutrig` architecture, which removed L1 staging per `emulator_mutrig/doc/RTL_PLAN.md` §2.1). The real-ASIC 32-channel → 4 L1 FIFO → 1 L2 FIFO RR-arbitration reordering is therefore NOT exercised by this harness; it is deferred to a future harness that uses the real LVDS / `mutrig_frame_deassembly` path with the bring-up SOF on the FEB.
 
 ### Out of scope
 
@@ -40,71 +42,86 @@ All components under `tb_int/uvm/` follow the standard Mu3e UVM agent pattern (d
 
 | Agent | Direction | Role |
 |---|---|---|
-| `mutrig_phy_agent` | active source on the LVDS PHY pin pair | Virtual MuTRiG ASIC. Generates **byte-stream-encoded** MuTRiG frames at the LVDS data-clock boundary, including 8b/10b encoding, frame headers, hit payloads, frame trailers, and idle K-codes. Emits hits with the canonical 48-bit MuTRiG hit-type-1 layout (channel, T-fine, T-coarse, E-coarse, flags). |
+| `mutrig_phy_agent` | active source on the LVDS PHY pin pair | Virtual MuTRiG ASIC. Generates **byte-stream-encoded** MuTRiG frames at the LVDS data-clock boundary, including 8b/10b encoding, frame headers, hit payloads, frame trailers, and idle K-codes. Emits hits with the canonical 45-bit `hit_type0` layout (`asic[3:0]`, `channel[4:0]`, `T_CC[14:0]`, `T_Fine[4:0]`, `E_CC[14:0]`, `E_Flag[0]`) per `frame_rcv_ip.vhd:580-585`. |
 | `runctl_phy_agent` | active source on the synclink AVST 9-bit boundary | Drives `runctl_mgmt_host`'s synclink input with run-state command bytes. |
 | `sc_phy_agent` | active master on the SC-bridge AVMM pin boundary | Drives the SC bridge's PCIe-mapped AVMM master. Mirrors what `sc_tool` does in software but at the simulated bus level. |
 | `lvds_decoded_monitor` | passive | Snoops the post-deassembly `aso_hit_type0` boundary inside the lane's `mutrig_datapath_subsystem` (the **pre-rbCAM tap**). |
 | `rbcam_egress_monitor` | passive | Snoops the post-`ring_buffer_cam` `aso_hit_type2` boundary (the **post-rbCAM tap**). |
 | `feb_egress_monitor` | passive | Snoops the FEB-egress framed boundary at `feb_frame_assembly` output (the **FEB egress tap**). |
 | `histogram_csr_monitor` | passive | Periodically polls `histogram_statistics_0`'s bin counters via the SC bridge for cross-check against scoreboard. |
-| `l2_fifo_tlm_observer` | passive | TLM model of the per-lane MuTRiG L2 FIFO. **Wiggles a SystemVerilog `wire` per hit commit** so the scoreboard can timestamp the commit precisely. See §3.1. |
+| `l2_fifo_commit_monitor` | passive | Interface-bind monitor. Samples the actual emulator L2 FIFO commit strobe via a `mutrig_l2_commit_if` interface declared in the focus-build wrapper. Assigns the canonical 64-bit `hit_id` at the commit cycle and publishes a `hit_record` to the scoreboard. See §2.3. |
 
-Every monitor publishes via a `uvm_analysis_port` typed to a **`hit_record`** transaction. The transaction carries the on-wire hit fields plus two scoreboard-only metadata fields that make end-to-end OoO tracking deterministic:
+Every monitor publishes via a `uvm_analysis_port` typed to a **`hit_record`** transaction. The transaction carries the on-wire hit fields plus scoreboard metadata. The `hit_record` schema is:
 
 | Field | Source | Width / type | Role |
 |---|---|---|---|
-| `uid` | assigned by `mutrig_phy_agent` at emit | 64-bit monotonic | Global unique hit identifier; primary key for the OoO scoreboard. The agent increments it per generated hit, never reused, never re-shuffled. |
-| `true_ts_ps` | assigned by `mutrig_phy_agent` at emit | 64-bit ps | Ground-truth timestamp at the moment the hit was generated by the virtual MuTRiG, expressed in picoseconds (finer than the 8 ns datapath cycle). Used by the latency reporter as the time origin (every per-stage observation timestamp is `t_observed - true_ts_ps`). |
-| `asic_id`, `channel`, `T_coarse`, `T_fine`, `E_coarse`, `E_flag` | on-wire MuTRiG fields | per the hit_type-1 layout | Natural identity used by downstream monitors to look up the matching `(uid, true_ts_ps)` from the agent's emit table. |
-| `observation_point` | local to each monitor | enum {`L2_COMMIT`, `PRE_RBCAM`, `POST_RBCAM`, `FEB_EGRESS`} | Stage at which the monitor observed the hit. |
-| `t_observed_ps` | `$realtime` at observation, in ps | 64-bit ps | Sim-time at observation. The latency at this stage is `t_observed_ps - true_ts_ps`. |
+| `hit_id` | `mutrig_phy_agent` Stage-A monitor at FIFO-write commit | 64-bit monotonic counter | Source-of-truth lineage id, assigned at the cycle the hit enters the L2 FIFO inside the virtual MuTRiG. Propagated downstream as `root_hit_id` via FIFO-order matching, but never used as a primary lookup key for reconciliation. Mirrors `tb_int_pkg.sv:3773-3809` `static bit [63:0] next_hit_id`. |
+| `key` | derived from on-wire fields | 10-bit struct `{channel[4:0], t_fine[4:0]}` | Primary reconciliation bucket. Excludes T_coarse because T_coarse (`T_CC`, 15 bits) is a free-running counter that wraps every 52.4 µs (≈ 7 short-mode frames), is rewritten by `mutrig_timestamp_processor`, and therefore cannot serve as a per-hit unique discriminator. Mirrors `tb_int_pkg.sv:1117-1138` `hit_key_t`. |
+| `lane_id` | observation-point local | int | Per-lane FIFO ledger separator. |
+| `seq_in_bucket` | per-(lane, key) FIFO push order | int | Used only for `root_hit_id` propagation downstream, not for matching. |
+| `abs_ts` | `$realtime` at observation | 64-bit | Sim-time stamp, recorded for debug-dump and Python-side latency CDF computation (NOT used for SV-side per-hit latency). |
+| `feb_id`, `datapath_id` | observation-point local | small ints | Lineage tags for multi-FEB / multi-datapath cases (single-FEB focus build sets these to 0). |
+| `payload` | on-wire fields | 45-bit hit_type0 (or 36-bit hit_type2 at downstream stages) | Raw hit. Per wire layout: `asic[44:41]`, `channel[40:36]`, `T_CC[35:21]`, `T_Fine[20:16]`, `E_CC[15:1]`, `E_Flag[0]` per `frame_rcv_ip.vhd:580-585`. |
+| `run_origin` | `tb_int_run_window_db.is_stable_origin($time)` | 1-bit | Set if the hit was born inside the stable run window (between `stable_start` and `stable_end`). Used by the strict-window reconciliation pass. |
 
-**Uid + true_ts_ps propagation.** The DUT does not carry `uid` or `true_ts_ps` in the on-wire payload — the MuTRiG hit_type-1 layout has no room for them, and the user-visible CSR / SOF must not be polluted with DV-only metadata. Instead:
-
-1. The `mutrig_phy_agent` writes `(uid, true_ts_ps, asic_id, channel, T_coarse, T_fine, E_coarse, E_flag)` into a **shared ground-truth table** keyed by the natural identity tuple `(asic_id, channel, T_coarse, T_fine)` at the cycle it emits the hit.
-2. Each downstream monitor (`l2_fifo_tlm_observer`, `lvds_decoded_monitor`, `rbcam_egress_monitor`, `feb_egress_monitor`) decodes the hit's natural identity from its own observation point and **looks up** `(uid, true_ts_ps)` in the ground-truth table. The lookup is unique by construction because the natural-identity tuple is per-hit unique within a single run (T_coarse + T_fine within a frame are unique per channel, and the agent staggers emissions so two hits never share the full tuple).
-3. If a monitor sees a hit whose natural identity is **not** in the ground-truth table, it publishes a `hit_record` with `uid = 64'hFFFF_FFFF_FFFF_FFFF` (sentinel "ghost") and the OoO scoreboard hard-fails the test. Ghost hits are unambiguous bugs in the DUT, the lookup logic, or the natural-identity assumption.
-4. After `RUN_TERMINATING`, the OoO scoreboard iterates the ground-truth table; any `uid` whose `seen_at_<stage>` field is missing for at least one stage is logged as a `dropped_at_stage_X` row in `drops.csv`.
-
-This scheme keeps the DUT pure (no DV-only signals) while giving the scoreboard a per-hit identity that survives merge-FSM rewrites, RR arbitration, and FIFO reordering at every stage.
+Per-stage, per-`(lane, key)` FIFO ledgers track observations in arrival order. Each downstream monitor `push_back`s its observation onto the ledger for the same `(lane, key)`. Reconciliation runs at `extract_phase` and at `RUN_TERMINATING`: for every `(lane, key)` bucket, compare upstream-ledger length `up_n` vs downstream-ledger length `dn_n`; matched hits = `min(up_n, dn_n)`, missing = `max(0, up_n - dn_n)`, ghost = `max(0, dn_n - up_n)`. **Ghost is a count residual, not a per-hit hard-fail** — the threshold for fail is set per case in `DV_COV.md`. FIFO order within a bucket is preserved by the point-to-point datapath contract (no in-bucket reordering between Stage A and Stage Pre-RbCAM). Pattern mirrors `tb_int_pkg.sv:1300-1394` (ledger declarations) and `tb_int_pkg.sv:2656-2829` (`reconcile()`). For the failure modes this mechanism was designed to prevent, see `BUG_HISTORY.md` BUG-002-H from `packet_scheduler/tb_int/`, which records how natural-identity exact-match matching falsely reported thousands of missing/ghost hits when T_coarse was projected across stage boundaries incorrectly.
 
 ### 2.2 Scoreboard
 
-`tb_int_ooo_scoreboard` consumes analysis-port traffic from all monitors and runs an **out-of-order hit reconciliation engine**:
+`tb_int_per_bucket_ledger_scoreboard` consumes analysis-port traffic from all monitors and runs a **per-lane, per-stage, per-`hit_key_t` FIFO-ledger reconciliation engine**:
 
-- Every `hit_record` is keyed by the agent-assigned **`uid`** (the unique 64-bit primary key from §2.1), not by the natural-identity tuple. Lookup at downstream monitors converts natural identity → `uid` via the ground-truth table.
-- The hash table tracks per-`uid`: `true_ts_ps`, `t_l2_commit_ps`, `t_pre_rbcam_ps`, `t_post_rbcam_ps`, `t_feb_egress_ps`. Each `t_*_ps` is the picosecond observation time at that stage; missing fields are `64'hFFFF_FFFF_FFFF_FFFF` (sentinel "not yet seen").
-- Per-stage **latency = `t_<stage>_ps - true_ts_ps`**. CDFs and percentiles use this difference, not the bare sim time.
-- Hits that complete the four-stage path are removed from the table and added to a closed-record collection.
-- Hits that arrive at one stage but never reach the next within the configured stage timeout are flagged as **dropped at stage X** and recorded with their syndrome (last-seen stage, last-seen time, monitor port, run-state).
-- Hits that arrive at a downstream stage with `uid = sentinel` (i.e. natural identity not found in the ground-truth table) are **ghost hits** — hard fail.
-- `RUN_TERMINATING` triggers a final reconciliation pass: any open hit-records older than the latency budget are flagged as dropped.
+- Per-lane, per-stage, per-`hit_key_t` FIFO ledgers. Reconciliation is **count parity per `(lane, key)` bucket**, never per-hit lookup.
+- The 64-bit `hit_id` is propagated as candidate lineage from Stage A → Pre-RbCAM by FIFO-order matching: the n-th upstream observation in a bucket maps to the n-th downstream observation in the same bucket. At later stages where earlier loss has broken alignment, lineage is reported as `id=?` rather than guessed.
+- The ledger is declared as `obs_q_t stage_a_ledger[LANE_COUNT][bit [9:0]]` and equivalents per stage, directly mirroring `tb_int_pkg.sv:1362-1372`.
+- **Stage timeout / latency budgets** (derived from jamboree slides 4-10 and confirmed in `packet_scheduler/tb_int/DV_INT_PLAN.md` §3 decision #6; per-stage monitor placement is motivated by precedent bug `R-2026-04-18-01` from `mutrig_timestamp_processor/BUG_HISTORY.md`, where a per-stage pre-rbCAM monitor was the direct method that exposed a wrap-window timestamp reconstruction error causing silent pre-rbCAM drops):
+  - **Stage A → Pre-RbCAM:** `[0, 2000]` cycles. Matches the rbCAM ingress accept window (`ring_buffer_cam_v2_core.vhd:788`, default `EXPECTED_LATENCY = 2000`). Hits in Stage A's bucket without matching downstream within 2000 cycles are flagged as dropped.
+  - **Pre-RbCAM → Post-RbCAM:** `[2000, 3000]` cycles. Lower bound is `EXPECTED_LATENCY = 2000` (hits held in rbCAM until `gts - expected_latency` catches up; `ring_buffer_cam_v2_core.vhd:1100`). Upper bound adds ≤ 1000 cycles of drain overhead (worst-case SEARCH + LOAD + COUNT + DRAIN for the P4 default: descriptor gap ≤ 16 cycles + SEARCH 6 cycles + LOAD 4 cycles + COUNT ≤ 32 cycles + DRAIN ≤ 512 hits × ~2 cycles, bounded by the TC2 evidence of 382 cycles for 128 hits; `ring-buffer_cam/doc/rtl_note.md`).
+  - **Post-RbCAM → FEB egress:** `[4048, 7096]` cycles. Lower bound is post-rbCAM lower (2000) + one frame period (2048 cycles); upper bound is post-rbCAM upper (3000) + two frame periods (4096 cycles) worst-case store-and-forward. **Frame period derivation:** `feb_frame_assembly.N_SHD` is a Qsys instance parameter with `ALLOWED_RANGES {128, 256, 512}` and IP default 256 (`feb_frame_assembly_hw.tcl:100-105`). The Mu3e SciFi convention is **`N_SHD = 128`** (overridden at instantiation in the system Qsys-Tcl), giving 128 sub-headers × 16 datapath cycles per bucket (`d_gts_counter` at `feb_frame_assembly.vhd:1703`: increments every 125 MHz cycle, `ts[11:4] = gts[11:4]`) = **2048 datapath cycles per frame** = `0x800`. Store-and-forward is 1 frame best case (hit arrives at frame start) to 2 frames worst case (hit arrives at end of frame N, waits for frame N+1 to complete and emit). The 8-lane build's Qsys-Tcl recipe must `set_instance_parameter_value feb_frame_assembly_0 N_SHD 128`; the focus build does not instantiate `feb_frame_assembly`, so this stage is observable only when the harness binds against the 8-lane build.
+- Per-hit latency is exported to CSV with `hit_id`, per-stage `abs_ts` (when matched), and FIFO-pair indices. Latency CDF and histogram cross-check are computed Python-side from the CSV; the SV-side scoreboard does not produce per-stage CDFs (deferred follow-on work, mirroring `packet_scheduler/tb_int/DV_INT_PLAN.md` §3 decision #6, line 90: "Planned follow-on work. The intended end state is Python-side plotting from CSV keyed by stage-pair reconciliation").
+
+A separate orthogonal `tb_int_run_window_db` (singleton) records `run_start`, `stable_start`, `stable_end`, `run_end` timestamps from the run-control sink. Each Stage-A observation captures `run_origin = is_stable_origin(abs_ts)` at write time. The strict reconciliation pass keys on `root_hit_id` via a `stage_a_run_root_obs[lane]` map and counts losses only for hits born inside the stable window. The all-window pass is best-effort and absorbs deterministic boundary effects of `RUN_PREP` / `TERMINATING` transitions, including drain hits arriving after `RUN_TERMINATING`. Mirrors `tb_int_pkg.sv:160-236` (`tb_int_run_window_db` class declaration) and `tb_int_pkg.sv:4321-4411` (`run_window_db` calls inside the run-control driver). See `BUG_HISTORY.md` BUG-001-H from `packet_scheduler/tb_int/` (cluster-domain long-run cases falsely failed because legally quiet lanes were treated as hard errors — the `run_origin` / strict-window distinction fixed it) and BUG-003-H (sparse stochastic long-run cases falsely failed because silence on a lane with zero emitted hits was not distinguished from loss — the per-lane source-activity guard now correctly keys on `run_origin` within the stable window only).
 
 After every test, the scoreboard exports:
 
-1. Closed-record CSV under `tb_int/sim/<test>/closed_records.csv` (one row per hit, columns: `uid, true_ts_ps, asic, ch, t_coarse, t_fine, e_coarse, e_flag, t_l2_ps, t_pre_rbcam_ps, t_post_rbcam_ps, t_feb_egress_ps, lat_l2_ps, lat_pre_rbcam_ps, lat_post_rbcam_ps, lat_feb_egress_ps`). Each `lat_<stage>_ps = t_<stage>_ps - true_ts_ps`.
-2. Drop CSV under `tb_int/sim/<test>/drops.csv` (one row per missed hit, columns: `uid, true_ts_ps, asic, ch, t_coarse, t_fine, last_seen_stage, last_seen_time_ps, last_seen_monitor, run_state_at_drop`).
-3. **Per-stage latency CDF** (numpy / matplotlib) for the three required observation points, plus the L2-commit reference, written to `tb_int/reports/<test>/latency_<stage>_cdf.png`.
-4. **Histogram-vs-scoreboard cross-check report** at `tb_int/reports/<test>/hist_xcheck_<stage>.md` that overlays the IP histogram with the scoreboard's reconstructed delay distribution.
+1. Closed-record CSV under `tb_int/sim/<test>/closed_records.csv`. Columns: `hit_id, lane, channel, t_fine, t_coarse, root_hit_id, abs_ts_a, abs_ts_pre_rbcam, abs_ts_post_rbcam, abs_ts_feb_egress, run_origin`. The `lat_<stage>_ps` columns are derived Python-side from `abs_ts_<stage>` differences, not computed SV-side.
+2. Drop CSV under `tb_int/sim/<test>/drops.csv`. Columns: `hit_id, lane, key.channel, key.t_fine, t_coarse, last_seen_stage, last_seen_abs_ts, run_state_at_drop, run_origin`. Drops are detected by per-bucket count residuals, not per-hit timeouts; `last_seen_stage` is the latest stage where the hit's bucket position was reconciled.
+3. **Histogram-vs-scoreboard cross-check report** at `tb_int/reports/<test>/hist_xcheck_<stage>.md` overlaying the IP histogram with the scoreboard's reconstructed delay distribution.
 
-### 2.3 L2 FIFO commit observer (TLM)
+### 2.3 L2 FIFO commit observer (interface-bind)
 
-The MuTRiG L2 FIFO inside `emulator_mutrig` (and the equivalent decoder buffer inside the real-MuTRiG path) commits a hit at a deterministic point in its internal pipeline. The TLM observer:
+The MuTRiG L2 FIFO inside `emulator_mutrig` commits a hit at a deterministic point in its internal pipeline. The commit observer uses **interface-bind only** — no TLM model:
 
-- Models the L2 FIFO as a Python-friendly transaction queue (push on hit-write, pop on frame-assembly drain).
-- Drives a SystemVerilog `wire` named `tb_int_l2_commit` (one per source) that wiggles `1` for one cycle on each commit.
-- The `l2_fifo_tlm_observer` agent samples this wire every cycle and publishes a `hit_record` with `observation_point = L2_COMMIT` to the scoreboard.
-- The wire is bound into the DUT via `bind`-attached probe ports inside the focus build's tb wrapper. **No DUT RTL change is needed**; the bind probes the FIFO's internal `commit_strobe` signal.
-
-This gives the scoreboard a fourth, upstream-most observation point that anchors latency measurements to the moment the hit becomes "real" inside the model, not just when it was emitted from the virtual PHY.
+- A SystemVerilog interface declared in the focus-build wrapper at `tb_int/uvm/system_20260504_emulator_type0/`:
+  ```systemverilog
+  interface mutrig_l2_commit_if (
+      input clk,
+      input rst,
+      input valid,
+      input [44:0] payload,
+      input [3:0]  lane_id,
+      input [4:0]  channel,
+      input [14:0] t_coarse,
+      input [4:0]  t_fine
+  );
+  ```
+- A `bind` directive in the focus-build TB wrapper probes the actual emulator commit strobe. In the 26.2.x emulator (`be_mutrig_lane_emitter.sv`) the commit condition is `pending_valid & l2_wr_ready` (NOT `commit_strobe`, which is an incorrect name for this signal that does not exist in the 26.2.x source).
+- The `tb_int_l2_commit_monitor` samples on `posedge clk` when `valid` pulses: assigns the next monotonic `hit_id` from the static counter (mirroring `tb_int_pkg.sv:3773-3809`), captures `abs_ts = $time`, queries `tb_int_run_window_db::is_stable_origin($time)` for `run_origin`, and writes the analysis-port event.
+- No DUT RTL change is needed. No Python-friendly TLM transaction queue is interposed — such a model would decouple the scoreboard from cycle-accurate sim timing and conflicts with the bind-probe pattern established in `packet_scheduler/tb_int/`.
+- Cite `tb_int_pkg.sv:3773-3809` (`tb_int_stage_a_monitor` with monotonic `hit_id` counter and `posedge clk` sampling pattern) for the established pattern. The interface signal naming convention follows `tb_int_pkg.sv:3800-3805` (`feb_id`, `datapath_id`, `mutrig_ch`, `payload` fields).
 
 ### 2.4 Coverage
 
-- **Functional bins** (counter-based; no `covergroup` for portability):
-  - virtual MuTRiG mode × hit-rate × cluster-size × channel-mask
-  - run-state transition every-pair coverage
-  - `arb_hit_type0` mode (REAL / EMU / MIX_RR) crossed with watchdog enable
-  - frame-counter ingress/egress reconciliation per source
+Coverage bins reference `hit_key_t` (`{channel[4:0], t_fine[4:0]}`), not the broken `(asic_id, channel, T_coarse, T_fine)` natural-identity tuple:
+
+- **Functional bins** (counter-based; no `covergroup` for Questa FSE portability):
+  - Every `(mode, real_fifo_state, emu_fifo_state)` cell remains.
+  - virtual MuTRiG mode × hit-rate × cluster-size × channel-mask.
+  - run-state transition every-pair coverage.
+  - `arb_hit_type0` mode (REAL / EMU / MIX_RR) crossed with watchdog enable.
+  - frame-counter ingress/egress reconciliation per source.
+- **Per-lane × per-`hit_key_t` reconciliation closure:** every test case must have all `(lane, key)` buckets reconcile to count parity (within the threshold set per case in `DV_COV.md`) at `RUN_TERMINATING`.
+- **Run-state transition coverage:** every state-pair (`IDLE→RUN_PREP`, `RUN_PREP→SYNC`, `SYNC→RUNNING`, `RUNNING→TERMINATING`, `TERMINATING→IDLE`, and the shortcut paths) hit at least once via `tb_int_run_window_db` events.
+- **Latency CDF coverage** is Python-side, not SV; coverage of per-stage delay percentiles is reported in `tb_int/reports/<test>/latency_<stage>_cdf.png`.
 - **Code coverage**: line ≥ 90%, branch ≥ 85%, toggle ≥ 80% across the full focus-build hierarchy under `tb_int/sim/<test>/cov/<test>.ucdb`.
 
 ---
@@ -172,7 +189,7 @@ A single case = one (rate × multiplicity × spatial × temporal × phasing × s
 - **Source mix**: real-only (mode REAL), emu-only (mode EMU), MIX_RR with both sources active, single-lane vs cross-lane (one virtual ASIC vs multi-ASIC for cluster generation).
 - **Temporal placement around state changes**: no hits after `SYNC` (gate closed), all hits after `SYNC` (gate open), gate hits before `RUNNING` (must be discarded), drain hits after `TERMINATING` (must complete the in-flight frame and propagate `endofrun`).
 - **Frame-boundary phasing**: hits aligned to frame start, hits at frame end, hits straddling frame boundary, frames with zero hits.
-- **Latency target**: every case asserts the four-stage latency CDFs do not exceed the documented per-stage budget; histogram cross-check at every tap.
+- **Latency target**: every case asserts the four-stage latency budgets (§2.2) are not exceeded; histogram cross-check at every tap. Mismatch beyond the per-bucket-reconciliation threshold (set per case in `DV_COV.md`) is a fail.
 
 Bucket-specific DT scope:
 
@@ -204,14 +221,22 @@ For per-stage latency reporting, every PROF case automatically refreshes the fou
 Per-test artifacts under `tb_int/sim/<test>/`:
 
 - `<test>.log` — raw simulator transcript.
-- `closed_records.csv`, `drops.csv` — scoreboard results.
+- `closed_records.csv`, `drops.csv` — scoreboard results (columns defined in §2.2).
 - `cov/<test>.ucdb` — code + functional coverage.
 
 Per-test reports under `tb_int/reports/<test>/`:
 
-- `latency_l2_commit_cdf.png`, `latency_pre_rbcam_cdf.png`, `latency_post_rbcam_cdf.png`, `latency_feb_egress_cdf.png` — per-stage latency CDFs.
+- `latency_l2_commit_cdf.png`, `latency_pre_rbcam_cdf.png`, `latency_post_rbcam_cdf.png`, `latency_feb_egress_cdf.png` — per-stage latency CDFs (Python-side, computed from CSV).
 - `hist_xcheck_pre_rbcam.md`, `hist_xcheck_post_rbcam.md`, `hist_xcheck_feb_egress.md` — cross-check vs `histogram_statistics_0` IP at each tap.
-- `summary.md` — PASS/FAIL plus per-stage drop count, OoO ghost count, and the four latency percentiles (p50/p90/p99/p99.9).
+- `summary.md` — PASS/FAIL plus per-stage drop count, per-bucket ghost residual count, and the four latency percentiles (p50/p90/p99/p99.9).
+
+### CSV column reference
+
+**`closed_records.csv`** columns: `hit_id, lane, channel, t_fine, t_coarse, root_hit_id, abs_ts_a, abs_ts_pre_rbcam, abs_ts_post_rbcam, abs_ts_feb_egress, run_origin`.
+The `lat_<stage>_ps` columns are derived Python-side from `abs_ts_<stage>` differences; they are not written by the SV scoreboard.
+
+**`drops.csv`** columns: `hit_id, lane, key.channel, key.t_fine, t_coarse, last_seen_stage, last_seen_abs_ts, run_state_at_drop, run_origin`.
+Drops are detected by per-bucket count residuals (`up_n > dn_n`), not by per-hit timeouts. `last_seen_stage` is the latest stage where the hit's bucket position was reconciled before the residual was first detected.
 
 ---
 
@@ -221,12 +246,12 @@ The harness is structured so **future integration testbenches** (e.g. an 8-lane 
 
 - `tb_int/uvm/common/mutrig_phy_agent/` — virtual MuTRiG with parameterised lane count.
 - `tb_int/uvm/common/runctl_phy_agent/`, `sc_phy_agent/`.
-- `tb_int/uvm/common/l2_fifo_tlm_observer/`.
-- `tb_int/uvm/common/ground_truth_table/` — `uid + true_ts_ps` registry shared by the agent and every monitor; lookup keyed by natural-identity tuple.
-- `tb_int/uvm/common/ooo_scoreboard/` — accepts any hit_record-typed analysis ports; primary-keyed on `uid`.
-- `tb_int/uvm/common/latency_reporter/` — produces the three-stage CDFs and histogram cross-check.
+- `tb_int/uvm/common/l2_fifo_commit_monitor/` — interface-bind monitor (not TLM); assigns `hit_id` at commit, captures `run_origin` from `tb_int_run_window_db`.
+- `tb_int/uvm/common/per_bucket_ledger_scoreboard/` — count-parity reconciler keyed on `hit_key_t` (`{channel[4:0], t_fine[4:0]}`); primary pattern from `tb_int_pkg.sv:1300-1394` (ledger declarations) and `tb_int_pkg.sv:2656-2829` (`reconcile()`).
+- `tb_int/uvm/common/run_window_db/` — singleton tracking `run_start`, `stable_start`, `stable_end`, `run_end` for the strict reconciliation pass; direct adaptation of `tb_int_pkg.sv:160-236`.
+- `tb_int/uvm/common/latency_reporter/` — Python-side; produces the three-stage CDFs and histogram cross-check from the exported CSV.
 
-The DUT-specific layer (focus-build wrapper instantiating the focus build's `.qsys` system, the bind probes for the L2 FIFO observer wire, and the per-test plumbing) lives at `tb_int/uvm/<system>/`.
+The DUT-specific layer (focus-build wrapper instantiating the focus build's `.qsys` system, the bind probes for the L2 FIFO commit monitor's `mutrig_l2_commit_if`, and the per-test plumbing) lives at `tb_int/uvm/<system>/`.
 
 ---
 

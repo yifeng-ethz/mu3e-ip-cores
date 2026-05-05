@@ -1,0 +1,110 @@
+-- megafunction wizard: %Arria V Transceiver Native PHY Intel FPGA IP v18.0%
+-- GENERATION: XML
+-- Retrieval info: <?xml version="1.0"?>
+-- Retrieval info: <instance entity-name="altera_xcvr_native_av" version="18.0" >
+-- Retrieval info: 	<generic name="device_family" value="Arria V" />
+-- Retrieval info: 	<generic name="show_advanced_features" value="0" />
+-- Retrieval info: 	<generic name="device_speedgrade" value="5_H4" />
+-- Retrieval info: 	<generic name="message_level" value="error" />
+-- Retrieval info: 	<generic name="tx_enable" value="1" />
+-- Retrieval info: 	<generic name="rx_enable" value="1" />
+-- Retrieval info: 	<generic name="enable_std" value="1" />
+-- Retrieval info: 	<generic name="set_data_path_select" value="standard" />
+-- Retrieval info: 	<generic name="channels" value="4" />
+-- Retrieval info: 	<generic name="bonded_mode" value="non_bonded" />
+-- Retrieval info: 	<generic name="enable_simple_interface" value="1" />
+-- Retrieval info: 	<generic name="set_data_rate" value="6250" />
+-- Retrieval info: 	<generic name="pma_direct_width" value="64" />
+-- Retrieval info: 	<generic name="tx_pma_clk_div" value="1" />
+-- Retrieval info: 	<generic name="pll_reconfig_enable" value="0" />
+-- Retrieval info: 	<generic name="pll_external_enable" value="0" />
+-- Retrieval info: 	<generic name="plls" value="1" />
+-- Retrieval info: 	<generic name="pll_select" value="0" />
+-- Retrieval info: 	<generic name="pll_refclk_cnt" value="1" />
+-- Retrieval info: 	<generic name="cdr_reconfig_enable" value="0" />
+-- Retrieval info: 	<generic name="cdr_refclk_cnt" value="1" />
+-- Retrieval info: 	<generic name="cdr_refclk_select" value="0" />
+-- Retrieval info: 	<generic name="set_cdr_refclk_freq" value="156.25 MHz" />
+-- Retrieval info: 	<generic name="rx_ppm_detect_threshold" value="1000" />
+-- Retrieval info: 	<generic name="enable_port_rx_pma_clkout" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_is_lockedtodata" value="1" />
+-- Retrieval info: 	<generic name="enable_port_rx_is_lockedtoref" value="1" />
+-- Retrieval info: 	<generic name="enable_ports_rx_manual_cdr_mode" value="0" />
+-- Retrieval info: 	<generic name="rx_clkslip_enable" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_signaldetect" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_seriallpbken" value="1" />
+-- Retrieval info: 	<generic name="std_protocol_hint" value="basic" />
+-- Retrieval info: 	<generic name="std_pcs_pma_width" value="20" />
+-- Retrieval info: 	<generic name="std_low_latency_bypass_enable" value="0" />
+-- Retrieval info: 	<generic name="std_tx_pcfifo_mode" value="low_latency" />
+-- Retrieval info: 	<generic name="std_rx_pcfifo_mode" value="low_latency" />
+-- Retrieval info: 	<generic name="enable_port_tx_std_pcfifo_full" value="0" />
+-- Retrieval info: 	<generic name="enable_port_tx_std_pcfifo_empty" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_pcfifo_full" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_pcfifo_empty" value="0" />
+-- Retrieval info: 	<generic name="std_rx_byte_order_enable" value="1" />
+-- Retrieval info: 	<generic name="std_rx_byte_order_mode" value="manual" />
+-- Retrieval info: 	<generic name="std_rx_byte_order_symbol_count" value="1" />
+-- Retrieval info: 	<generic name="std_rx_byte_order_pattern" value="000000bc" />
+-- Retrieval info: 	<generic name="std_rx_byte_order_pad" value="000000bc" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_byteorder_ena" value="1" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_byteorder_flag" value="1" />
+-- Retrieval info: 	<generic name="std_tx_byte_ser_enable" value="1" />
+-- Retrieval info: 	<generic name="std_rx_byte_deser_enable" value="1" />
+-- Retrieval info: 	<generic name="std_tx_8b10b_enable" value="1" />
+-- Retrieval info: 	<generic name="std_tx_8b10b_disp_ctrl_enable" value="0" />
+-- Retrieval info: 	<generic name="std_rx_8b10b_enable" value="1" />
+-- Retrieval info: 	<generic name="std_rx_rmfifo_enable" value="0" />
+-- Retrieval info: 	<generic name="std_rx_rmfifo_pattern_p" value="00000" />
+-- Retrieval info: 	<generic name="std_rx_rmfifo_pattern_n" value="00000" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_rmfifo_full" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_rmfifo_empty" value="0" />
+-- Retrieval info: 	<generic name="std_tx_bitslip_enable" value="0" />
+-- Retrieval info: 	<generic name="enable_port_tx_std_bitslipboundarysel" value="0" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_mode" value="manual" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_pattern_len" value="10" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_pattern" value="283" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_rknumber" value="3" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_renumber" value="3" />
+-- Retrieval info: 	<generic name="std_rx_word_aligner_rgnumber" value="3" />
+-- Retrieval info: 	<generic name="std_rx_run_length_val" value="31" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_wa_patternalign" value="1" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_wa_a1a2size" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_bitslipboundarysel" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_bitslip" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_runlength_err" value="0" />
+-- Retrieval info: 	<generic name="std_tx_bitrev_enable" value="0" />
+-- Retrieval info: 	<generic name="std_rx_bitrev_enable" value="0" />
+-- Retrieval info: 	<generic name="std_tx_byterev_enable" value="0" />
+-- Retrieval info: 	<generic name="std_rx_byterev_enable" value="0" />
+-- Retrieval info: 	<generic name="std_tx_polinv_enable" value="0" />
+-- Retrieval info: 	<generic name="std_rx_polinv_enable" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_bitrev_ena" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_byterev_ena" value="0" />
+-- Retrieval info: 	<generic name="enable_port_tx_std_polinv" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_polinv" value="0" />
+-- Retrieval info: 	<generic name="enable_port_tx_std_elecidle" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_signaldetect" value="0" />
+-- Retrieval info: 	<generic name="enable_port_rx_std_prbs_status" value="0" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll0_pll_type" value="CMU" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll0_data_rate" value="1250 Mbps" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll0_refclk_freq" value="156.25 MHz" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll0_refclk_sel" value="0" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll0_clk_network" value="xN" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll1_pll_type" value="CMU" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll1_data_rate" value="1250 Mbps" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll1_refclk_freq" value="125.0 MHz" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll1_refclk_sel" value="0" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll1_clk_network" value="x1" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll2_pll_type" value="CMU" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll2_data_rate" value="1250 Mbps" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll2_refclk_freq" value="125.0 MHz" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll2_refclk_sel" value="0" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll2_clk_network" value="x1" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll3_pll_type" value="CMU" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll3_data_rate" value="1250 Mbps" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll3_refclk_freq" value="125.0 MHz" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll3_refclk_sel" value="0" />
+-- Retrieval info: 	<generic name="gui_pll_reconfig_pll3_clk_network" value="x1" />
+-- Retrieval info: </instance>
+-- IPFS_FILES : ip_altera_xcvr_native_av.vho

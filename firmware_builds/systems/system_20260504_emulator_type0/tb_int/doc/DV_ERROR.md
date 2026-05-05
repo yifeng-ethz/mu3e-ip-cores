@@ -30,7 +30,7 @@ ERROR tests failure injection: bad-CRC frames, dropped frames, mid-flight RESET,
 
 | Sub-set | Count | Scope |
 |---|---:|---|
-| Bad CRC injected | 16 | Virtual MuTRiG frame trailer carries wrong CRC; `mutrig_frame_deassembly` flags the frame; downstream stages drop. Scoreboard records the dropped uids in `drops.csv`. |
+| Bad CRC injected | 16 | Virtual MuTRiG frame trailer carries wrong CRC; `mutrig_frame_deassembly` flags the frame; downstream stages drop. Scoreboard records the dropped hits in `drops.csv` keyed on `hit_id` and `(lane, key.channel, key.t_fine)`. |
 | Frame dropped mid-cluster | 16 | Drop a frame mid-cluster of a multi-frame cluster; verify the partial cluster's hits are accounted (drops `+= partial`, `INGRESS_*_FRAMES` reflects the missed frame). |
 | `RUN_PREP` mid-frame | 16 | RC `RUN_PREP` injected while a frame is open at the deassembly; verify cleanup; verify counters preserved per the `RUN_PREP` contract. |
 | Channel collision (cross-source) | 16 | Real and emu both emit channel = 8 in MIX_RR (violates the `[0..7]` / `[8..15]` convention); scoreboard logs the convention violation; arbiter forwards both. |

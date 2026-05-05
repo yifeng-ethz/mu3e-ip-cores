@@ -1,0 +1,10 @@
+-- megafunction wizard: %Transceiver Reconfiguration Controller Intel FPGA IP v18.0%
+-- GENERATION: XML
+-- Retrieval info: <?xml version="1.0"?>
+-- Retrieval info: <instance entity-name="alt_xcvr_reconfig" version="18.0" >
+-- Retrieval info: 	<generic name="device_family" value="Arria V" />
+-- Retrieval info: 	<generic name="number_of_reconfig_interfaces" value="16" />
+-- Retrieval info: 	<generic name="gui_split_sizes" value="8" />
+-- Retrieval info: 	<generic name="enable_analog" value="0" />
+-- Retrieval info: </instance>
+-- IPFS_FILES : ip_alt_xcvr_reconfig.vho
