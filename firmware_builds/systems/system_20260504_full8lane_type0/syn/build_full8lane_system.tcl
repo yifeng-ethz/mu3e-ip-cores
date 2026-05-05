@@ -179,6 +179,11 @@ proc configure_frame_deassembly {name} {
     set_required_param $name CSR_ADDR_WIDTH 2
     set_required_param $name DEBUG_LV 0
     set_required_param $name MODE_HALT 0
+    # Keep a defensive build-level VERSION_GIT override for the generated
+    # datapath instances. The mutrig_frame_deassembly submodule now clamps
+    # its git-derived default into the signed-31-bit validator range, but
+    # this explicit value keeps the bring-up image deterministic.
+    set_required_param $name VERSION_GIT 0
 }
 
 proc configure_emulator_for_type0_bank {name lane} {
@@ -575,8 +580,10 @@ set_required_param run_control_splitter USE_READY 0
 set_required_param run_control_splitter NUMBER_OF_OUTPUTS 16
 
 # Mu3e SciFi frames are 128 sub-headers x 16 cycles = 2048 datapath cycles.
-set_required_param hit_stack_subsystem_0.feb_frame_assembly_0 N_SHD 128
-set_required_param hit_stack_subsystem_1.feb_frame_assembly_0 N_SHD 128
+# N_SHD=128 is set inside hit_stack_subsystem composition; the dotted-path
+# override here is rejected by qsys-script ("No interface named ...") and
+# isn't needed because the resolved sopcinfo already shows N_SHD=128 at
+# both feb_frame_assembly_0 instances. See BUG_HISTORY.md B008.
 
 # Remove the byte-stream source-mux path and the nested per-lane datapath
 # subsystem. The replacement is flattened in this Qsys recipe so the Type0
