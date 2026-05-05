@@ -18,11 +18,13 @@ supercore_name="arb_hit_type0_supercore"
 outer_name="full8lane_type0_system"
 ipx_path="${syn_dir}/mu3e_ip_cores.ipx"
 components_ipx_path="${syn_dir}/components.ipx"
+upload_readyless_ip_dir="${syn_dir}/ip/upload_system_v3_readyless"
+hit_stack_readyless_ip_dir="${syn_dir}/ip/hit_stack_system_readyless"
 full8lane_onewire_ip_dir="${syn_dir}/ip/full8lane_onewire_master"
 full8lane_sc_hub_ip_dir="${syn_dir}/ip/full8lane_sc_hub_v2"
 full8lane_histogram_ip_dir="${syn_dir}/ip/full8lane_histogram_statistics_v2"
 histogram_compat_ip_dir="${syn_dir}/ip/histogram_statistics_v2"
-search_path="${syn_dir},${repo_root}/misc/arb_hit_type0/script,${full8lane_onewire_ip_dir},${full8lane_sc_hub_ip_dir},${full8lane_histogram_ip_dir},${histogram_compat_ip_dir},${ipx_path},${components_ipx_path},\$"
+search_path="${syn_dir},${repo_root}/misc/arb_hit_type0/script,${upload_readyless_ip_dir},${hit_stack_readyless_ip_dir},${full8lane_onewire_ip_dir},${full8lane_sc_hub_ip_dir},${full8lane_histogram_ip_dir},${histogram_compat_ip_dir},${ipx_path},${components_ipx_path},\$"
 
 for name in "${control_name}" "${supercore_name}" "${inner_name}" "${outer_name}"; do
     for path in \
@@ -37,6 +39,8 @@ done
 
 (
     cd "${syn_dir}"
+
+    mkdir -p "${upload_readyless_ip_dir}" "${hit_stack_readyless_ip_dir}"
 
     for path in "${ipx_path}" "${components_ipx_path}"; do
         if [[ -e "${path}" ]]; then

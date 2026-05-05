@@ -18,9 +18,10 @@ Differences from plot_tb_int_latency_contact_sheet.py (the baseline renderer):
    of which landed outside the visible range.  Now derived from the xlim with a
    spacing matched to the integer bin grid.
 
-4. X-axis window -- all three panels use the reference rbCAM aperture view
-   [-1024, 3072] cycles, with green lines at 0 and 2000 cycles.  This matches
-   the phase-0 latency-plot convention used for visual comparison across cases.
+4. X-axis window -- each panel uses the stage budget from DV_PLAN.md:
+   pre-rbCAM [0, 2000], post-rbCAM [2000, 3000], and FEB-egress [4048, 7096]
+   cycles.  Green lines mark the stage budget edges, with padded display limits
+   around each range.
 
 Metric definitions
 ------------------
@@ -50,8 +51,8 @@ import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import Rectangle  # noqa: E402
 
 # ---------------------------------------------------------------------------
-# Stage definitions.  xlim and win_* follow the reference rbCAM latency
-# aperture used in the user-facing phase-0 histogram panels.
+# Stage definitions.  win_* follows tb_int/doc/DV_PLAN.md stage budgets.
+# xlim pads those budgets so outliers near the edge remain visible.
 # ---------------------------------------------------------------------------
 STAGES: list[dict[str, object]] = [
     {
@@ -60,6 +61,7 @@ STAGES: list[dict[str, object]] = [
         "col_diff": ("abs_ts_pre_rbcam", "abs_ts_a"),
         "win_left": 0.0,
         "win_right": 2000.0,
+        "window_label": "Stage A->pre-rbCAM budget",
         "xlim": (-1024.0, 3072.0),
         "xtick_step": 512,
     },
@@ -67,18 +69,20 @@ STAGES: list[dict[str, object]] = [
         "key": "post_rbcam",
         "label": "post-rbCAM (ring_buffer_cam hit_type2)",
         "col_diff": ("abs_ts_post_rbcam", "abs_ts_a"),
-        "win_left": 0.0,
-        "win_right": 2000.0,
-        "xlim": (-1024.0, 3072.0),
+        "win_left": 2000.0,
+        "win_right": 3000.0,
+        "window_label": "Stage A->post-rbCAM budget",
+        "xlim": (1024.0, 4096.0),
         "xtick_step": 512,
     },
     {
         "key": "feb_egress",
         "label": "FEB-egress (packet scheduler egress)",
         "col_diff": ("abs_ts_feb_egress", "abs_ts_a"),
-        "win_left": 0.0,
-        "win_right": 2000.0,
-        "xlim": (-1024.0, 3072.0),
+        "win_left": 4048.0,
+        "win_right": 7096.0,
+        "window_label": "Stage A->FEB-egress budget",
+        "xlim": (3072.0, 8192.0),
         "xtick_step": 512,
     },
 ]
@@ -349,11 +353,12 @@ def render_panel(
     # Footer info block (monospaced, 3 lines)
     peak_text = "None" if peak_c is None else f"{peak_c:.1f}"
     in_pct, out_pct = hist.pct(hist.in_window), hist.pct(hist.out_window)
+    window_label = str(stage.get("window_label", "DV budget"))
     footer_lines = [
         (f"total={hist.total} hits, nonzero={hist.nonzero_bins}/{len(hist.counts)}, "
          f"peak bin={hist.peak_bin_index} at {peak_text} cycles, "
          f"peak fraction={hist.peak_fraction_pct:.3f}%"),
-        (f"black=peak {peak_text} cycles; green=rbCAM window edges "
+        (f"black=peak {peak_text} cycles; green={window_label} edges "
          f"{win_left:.0f} and {win_right:.0f} cycles"),
         (f"{hist.stage_label} [{win_left:.0f},{win_right:.0f}]: "
          f"in={hist.in_window} ({in_pct:.6f}%), out={hist.out_window} ({out_pct:.6f}%)"),

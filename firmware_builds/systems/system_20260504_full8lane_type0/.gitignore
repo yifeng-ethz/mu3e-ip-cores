@@ -45,3 +45,7 @@ ip/
 !syn/ip/full8lane_histogram_statistics_v2/
 !syn/ip/full8lane_histogram_statistics_v2/full8lane_histogram_statistics_v2.vhd
 !syn/ip/full8lane_histogram_statistics_v2/full8lane_histogram_statistics_v2_hw.tcl
+
+# Materialized by syn/build_full8lane_system.tcl from the run-control snapshot.
+syn/ip/upload_system_v3_readyless/
+syn/ip/hit_stack_system_readyless/

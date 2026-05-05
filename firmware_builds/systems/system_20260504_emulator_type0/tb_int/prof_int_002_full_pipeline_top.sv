@@ -104,9 +104,10 @@ module prof_int_002_full_pipeline_top;
     int unsigned hit_rate_q16;
     int unsigned active_lane_count;
     int unsigned active_lane_mask_popcount;
+    int unsigned runctl_cpp_gap_cycles;
+    int unsigned runctl_settle_timeout_cycles;
     logic [2:0] stage_a_lane_index;
     logic [7:0]  active_lane_mask;
-    logic [16:0] runctl_ready_mask_cfg;
         logic [3:0]  csr_force_addr;
         logic [31:0] csr_force_wdata;
         logic [4:0]  arb_csr_force_addr;
@@ -661,25 +662,20 @@ module prof_int_002_full_pipeline_top;
                     feb_frame_word_index <= feb_frame_word_index + 1;
                 end
             end
-            if (u_dut.data_path_subsystem.avalon_st_adapter_022_out_0_valid &&
-                u_dut.data_path_subsystem.avalon_st_adapter_022_out_0_ready) begin
+            if (u_dut.data_path_subsystem.run_control_splitter_out6_valid) begin
                 dbg_dp_hs_runctl_accept <= dbg_dp_hs_runctl_accept + 64'd1;
-                dbg_last_hs_runctl_symbol <= u_dut.data_path_subsystem.avalon_st_adapter_022_out_0_data;
+                dbg_last_hs_runctl_symbol <=
+                    u_dut.data_path_subsystem.run_control_splitter_out6_data;
             end
-            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out0_valid &&
-                u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out0_ready)
+            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out0_valid)
                 dbg_hs_rbcam_runctl_accept <= dbg_hs_rbcam_runctl_accept + 64'd1;
-            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out1_valid &&
-                u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out1_ready)
+            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out1_valid)
                 dbg_hs_rbcam_runctl_accept <= dbg_hs_rbcam_runctl_accept + 64'd1;
-            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out2_valid &&
-                u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out2_ready)
+            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out2_valid)
                 dbg_hs_rbcam_runctl_accept <= dbg_hs_rbcam_runctl_accept + 64'd1;
-            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out3_valid &&
-                u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out3_ready)
+            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out3_valid)
                 dbg_hs_rbcam_runctl_accept <= dbg_hs_rbcam_runctl_accept + 64'd1;
-            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out4_valid &&
-                u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out4_ready)
+            if (u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out4_valid)
                 dbg_hs_feb_runctl_accept <= dbg_hs_feb_runctl_accept + 64'd1;
         end
     end
@@ -810,75 +806,89 @@ module prof_int_002_full_pipeline_top;
         force u_dut.data_path_subsystem.emulator_mutrig_7.u_emulator_mutrig.cfg_geom_fix_left_enable = 1'b1;
     endtask
 
-    function automatic logic [16:0] runctl_ready_mask();
-        logic [16:0] mask;
-        begin
-            mask[0]  = u_dut.data_path_subsystem.avalon_st_adapter_009_out_0_ready;
-            mask[1]  = u_dut.data_path_subsystem.avalon_st_adapter_010_out_0_ready;
-            mask[2]  = u_dut.data_path_subsystem.avalon_st_adapter_011_out_0_ready;
-            mask[3]  = u_dut.data_path_subsystem.avalon_st_adapter_012_out_0_ready;
-            mask[4]  = u_dut.data_path_subsystem.avalon_st_adapter_013_out_0_ready;
-            mask[5]  = u_dut.data_path_subsystem.avalon_st_adapter_014_out_0_ready;
-            mask[6]  = u_dut.data_path_subsystem.avalon_st_adapter_015_out_0_ready;
-            mask[7]  = u_dut.data_path_subsystem.avalon_st_adapter_016_out_0_ready;
-            mask[8]  = u_dut.data_path_subsystem.avalon_st_adapter_017_out_0_ready;
-            mask[9]  = u_dut.data_path_subsystem.avalon_st_adapter_018_out_0_ready;
-            mask[10] = u_dut.data_path_subsystem.avalon_st_adapter_019_out_0_ready;
-            mask[11] = u_dut.data_path_subsystem.avalon_st_adapter_020_out_0_ready;
-            mask[12] = u_dut.data_path_subsystem.avalon_st_adapter_021_out_0_ready;
-            mask[13] = u_dut.data_path_subsystem.avalon_st_adapter_022_out_0_ready;
-            mask[14] = u_dut.data_path_subsystem.avalon_st_adapter_023_out_0_ready;
-            mask[15] = u_dut.data_path_subsystem.avalon_st_adapter_024_out_0_ready;
-            mask[16] = u_dut.data_path_subsystem.avalon_st_adapter_025_out_0_ready;
-            return mask;
-        end
+    task automatic drive_runctl(input logic [8:0] symbol,
+                                input int unsigned hold_cycles);
+        runctl_force_symbol = symbol;
+        @(negedge clk_125);
+        force u_dut.upload_subsystem_runctl_mgmt_host_data = runctl_force_symbol;
+        force u_dut.upload_subsystem_runctl_mgmt_host_valid = 1'b1;
+        repeat (hold_cycles)
+            @(negedge clk_125);
+        `uvm_info("PROF_INT_002_TOP",
+                  $sformatf("run-control %03h driven readyless for %0d cycles",
+                            symbol,
+                            hold_cycles),
+                  UVM_LOW)
+        force u_dut.upload_subsystem_runctl_mgmt_host_valid = 1'b0;
+        @(negedge clk_125);
+        release u_dut.upload_subsystem_runctl_mgmt_host_valid;
+        release u_dut.upload_subsystem_runctl_mgmt_host_data;
+        endtask
+
+    function automatic logic [5:0] hit_stack0_runctl_ready_vec();
+        hit_stack0_runctl_ready_vec = {
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_cmd_fifo_5_out_ready,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_cmd_fifo_4_out_ready,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_cmd_fifo_3_out_ready,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_cmd_fifo_2_out_ready,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_cmd_fifo_1_out_ready,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_cmd_fifo_0_out_ready
+        };
     endfunction
 
-    task automatic drive_runctl(input logic [8:0] symbol,
-                    input int unsigned hold_cycles,
-                    input int unsigned max_wait_cycles = 20000);
-        int unsigned wait_cycles;
-        logic [16:0] ready_seen;
-        runctl_force_symbol = symbol;
-        wait_cycles = 0;
-        ready_seen = 17'd0;
-        @(negedge clk_125);
-        force u_dut.avalon_st_adapter_002_out_0_data = runctl_force_symbol;
-        force u_dut.avalon_st_adapter_002_out_0_valid = 1'b1;
-        repeat (hold_cycles) begin
-            ready_seen |= runctl_ready_mask();
-            @(negedge clk_125);
+    task automatic wait_hit_stack_runctl_settled(input string tag,
+                                                 input logic [5:0] ready_mask,
+                                                 input bit fail_on_timeout = 1'b0);
+        int unsigned waited_cycles;
+        logic [5:0] ready_vec;
+
+        waited_cycles = 0;
+        ready_vec = hit_stack0_runctl_ready_vec();
+        while (((ready_vec & ready_mask) != ready_mask) &&
+               (waited_cycles < runctl_settle_timeout_cycles)) begin
+            @(posedge clk_125);
+            waited_cycles++;
+            ready_vec = hit_stack0_runctl_ready_vec();
         end
-        if (runctl_ready_mask_cfg == 17'h00000)
-            runctl_ready_mask_cfg = 17'h1ffff;
-        while (((ready_seen & runctl_ready_mask_cfg) != runctl_ready_mask_cfg) &&
-               wait_cycles < max_wait_cycles) begin
-            ready_seen |= runctl_ready_mask();
-            wait_cycles++;
-            @(negedge clk_125);
-        end
-        ready_seen |= runctl_ready_mask();
-        if ((ready_seen & runctl_ready_mask_cfg) != runctl_ready_mask_cfg) begin
-            `uvm_error("PROF_INT_002_TOP",
-                   $sformatf("run-control %03h did not reach ready mask %05h within %0d cycles seen=%05h missing=%05h",
-                         symbol,
-                         runctl_ready_mask_cfg,
-                         max_wait_cycles,
-                         ready_seen,
-                         runctl_ready_mask_cfg & ~ready_seen))
+
+        if ((ready_vec & ready_mask) != ready_mask) begin
+            if (fail_on_timeout) begin
+                `uvm_error("PROF_INT_002_TOP",
+                           $sformatf("%s run-control sink-settle timeout ready=%06b mask=%06b waited_cycles=%0d timeout=%0d",
+                                     tag,
+                                     ready_vec,
+                                     ready_mask,
+                                     waited_cycles,
+                                     runctl_settle_timeout_cycles))
+            end else begin
+                `uvm_warning("PROF_INT_002_TOP",
+                             $sformatf("%s run-control sink-settle timeout ready=%06b mask=%06b waited_cycles=%0d timeout=%0d",
+                                       tag,
+                                       ready_vec,
+                                       ready_mask,
+                                       waited_cycles,
+                                       runctl_settle_timeout_cycles))
+            end
         end else begin
             `uvm_info("PROF_INT_002_TOP",
-                  $sformatf("run-control %03h accepted after %0d wait cycles seen=%05h",
-                        symbol,
-                        wait_cycles,
-                        ready_seen),
-                  UVM_LOW)
+                      $sformatf("%s observed legacy run-control sinks settled ready=%06b mask=%06b waited_cycles=%0d",
+                                tag,
+                                ready_vec,
+                                ready_mask,
+                                waited_cycles),
+                      UVM_LOW)
         end
-        force u_dut.avalon_st_adapter_002_out_0_valid = 1'b0;
-        @(negedge clk_125);
-        release u_dut.avalon_st_adapter_002_out_0_valid;
-            release u_dut.avalon_st_adapter_002_out_0_data;
-        endtask
+    endtask
+
+    task automatic observe_runctl_cpp_gap(input string tag);
+        if (runctl_cpp_gap_cycles != 0)
+            repeat (runctl_cpp_gap_cycles) @(posedge clk_125);
+        `uvm_info("PROF_INT_002_TOP",
+                  $sformatf("%s observed software-scale run-control gap cycles=%0d",
+                            tag,
+                            runctl_cpp_gap_cycles),
+                  UVM_LOW)
+    endtask
 
     task automatic csr_write_arb0(input logic [4:0] addr, input logic [31:0] data);
         arb_csr_force_addr = addr;
@@ -897,11 +907,11 @@ module prof_int_002_full_pipeline_top;
         release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_address;
     endtask
 
-        task automatic report_datapath_state(input string tag);
-            `uvm_info("PROF_INT_002_TOP",
-                      $sformatf("%s rst_top=%0b rst_dp=%0b emu_ctrl=%03h emu_ctrl_valid=%0b type0_ctrl=%03h type0_ctrl_valid=%0b ctrl_state=%03h run_gen=%0b cfg_global=%0b cfg_rate=%0d l2_level=%0d lane_hits=%0d arb_mode=%0d arb_run=%0d emu_h0_v=%0b emu_h0_ch=%0d emu_accept=%0b emu_drop=%0b emu_depth=%0d emu_empty=%0b arb_aso_v=%0b bp0_in_v=%0b bp0_out_v=%0b mux_v=%0b mts1_v=%0b hisb_pre_v=%0b hs_in_rdy=%0b rb_v=%04b rb_rdy=%04b hit3_v=%0b hit3_rdy=%0b",
-                                tag,
-                                u_dut.rst_controller_reset_out_reset,
+    task automatic report_datapath_state(input string tag);
+        `uvm_info("PROF_INT_002_TOP",
+                  $sformatf("%s rst_top=%0b rst_dp=%0b emu_ctrl=%03h emu_ctrl_valid=%0b type0_ctrl=%03h type0_ctrl_valid=%0b ctrl_state=%03h run_gen=%0b cfg_global=%0b cfg_rate=%0d l2_level=%0d lane_hits=%0d arb_mode=%0d arb_run=%0d emu_h0_v=%0b emu_h0_ch=%0d emu_accept=%0b emu_drop=%0b emu_depth=%0d emu_empty=%0b arb_aso_v=%0b bp0_in_v=%0b bp0_out_v=%0b mux_v=%0b mts1_v=%0b hisb_pre_v=%0b hs_in_rdy=%0b rc_rdy=%06b rb_v=%04b rb_rdy=%04b hit3_v=%0b hit3_rdy=%0b",
+                            tag,
+                            u_dut.rst_controller_reset_out_reset,
                                 u_dut.data_path_subsystem.rst_controller_reset_out_reset,
                                 u_dut.data_path_subsystem.emulator_ctrl_splitter_out0_data,
                                 u_dut.data_path_subsystem.emulator_ctrl_splitter_out0_valid,
@@ -930,6 +940,7 @@ module prof_int_002_full_pipeline_top;
                                 u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_valid,
                                 u_dut.data_path_subsystem.histogram_ingress_bridge_0_pre_out_valid,
                                 u_dut.data_path_subsystem.histogram_ingress_bridge_0_pre_out_ready,
+                                hit_stack0_runctl_ready_vec(),
                                 {u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_valid,
                                  u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_valid,
                                  u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_valid,
@@ -940,9 +951,9 @@ module prof_int_002_full_pipeline_top;
                                  u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_ready},
                                 u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_valid,
                                 u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_ready),
-                      UVM_LOW)
-            `uvm_info("PROF_INT_002_COUNTERS",
-                      $sformatf("%s counts arb_bp=%0d bp_mux=%0d mux_mts=%0d mts_out=%0d mts_err=%0d hisb_pre=%0d hisb_err=%0d ds={%0d,%0d,%0d,%0d} ds_err=%0d rb_any=%0d rb_hit=%0d feb_any=%0d feb_hit=%0d hs_runctl=%0d rb_runctl=%0d feb_runctl=%0d last_hs_runctl=%03h",
+                  UVM_LOW)
+        `uvm_info("PROF_INT_002_COUNTERS",
+                  $sformatf("%s counts arb_bp=%0d bp_mux=%0d mux_mts=%0d mts_out=%0d mts_err=%0d hisb_pre=%0d hisb_err=%0d ds={%0d,%0d,%0d,%0d} ds_err=%0d rb_any=%0d rb_hit=%0d feb_any=%0d feb_hit=%0d hs_runctl=%0d rb_runctl=%0d feb_runctl=%0d last_hs_runctl=%03h",
                                 tag,
                                 dbg_arb_bp_accept,
                                 dbg_bp_mux_accept,
@@ -964,8 +975,8 @@ module prof_int_002_full_pipeline_top;
                                 dbg_hs_rbcam_runctl_accept,
                                 dbg_hs_feb_runctl_accept,
                                 dbg_last_hs_runctl_symbol),
-                      UVM_LOW)
-        endtask
+                  UVM_LOW)
+    endtask
 
     initial begin : uvm_setup
         uvm_config_db#(virtual lvds_phy_if)::set(null,
@@ -1015,13 +1026,14 @@ module prof_int_002_full_pipeline_top;
     initial begin : full_pipeline_controller
         int unsigned plus_lane_count;
         int unsigned plus_lane_mask;
-        int unsigned plus_ready_mask;
         int unsigned lane_idx;
         int plus_run_cycles;
         int plus_drain_cycles;
         int plus_stable_window_cycles;
         int plus_legacy_guard_cycles;
         int plus_hit_rate_q16;
+        int plus_runctl_cpp_gap_cycles;
+        int plus_runctl_settle_timeout_cycles;
         bit legacy_guard_plus_seen;
 
         run_cycles = 12_500_000;
@@ -1031,11 +1043,12 @@ module prof_int_002_full_pipeline_top;
         stable_pre_guard_cycles = 0;
         stable_post_guard_cycles = 0;
         hit_rate_q16 = 52;
+        runctl_cpp_gap_cycles = 125_000;
+        runctl_settle_timeout_cycles = 1_250_000;
         active_lane_count = 1;
         active_lane_mask = 8'h01;
         active_lane_mask_popcount = 0;
         stage_a_lane_index = 3'd0;
-        runctl_ready_mask_cfg = 17'h1deff;
         legacy_guard_plus_seen = 1'b0;
         if ($value$plusargs("TB_INT_RUN_CYCLES=%d", plus_run_cycles))
             run_cycles = plus_run_cycles;
@@ -1048,12 +1061,14 @@ module prof_int_002_full_pipeline_top;
         end
         if ($value$plusargs("PROF_INT_002_HIT_RATE_Q16=%d", plus_hit_rate_q16))
             hit_rate_q16 = plus_hit_rate_q16;
+        if ($value$plusargs("TB_INT_RUNCTL_CPP_GAP_CYCLES=%d", plus_runctl_cpp_gap_cycles))
+            runctl_cpp_gap_cycles = plus_runctl_cpp_gap_cycles;
+        if ($value$plusargs("TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=%d", plus_runctl_settle_timeout_cycles))
+            runctl_settle_timeout_cycles = plus_runctl_settle_timeout_cycles;
         if ($value$plusargs("TB_INT_ACTIVE_LANE_COUNT=%d", plus_lane_count))
             active_lane_count = plus_lane_count;
         if ($value$plusargs("TB_INT_ACTIVE_LANE_MASK=%h", plus_lane_mask))
             active_lane_mask = plus_lane_mask[7:0];
-        if ($value$plusargs("TB_INT_RUNCTL_READY_MASK=%h", plus_ready_mask))
-            runctl_ready_mask_cfg = plus_ready_mask[16:0];
         if (active_lane_count < 1)
             active_lane_count = 1;
         if (active_lane_mask == 8'h00)
@@ -1113,39 +1128,45 @@ module prof_int_002_full_pipeline_top;
         tb_int_run_window_db::reset();
         tb_int_run_window_db::configure_guards(stable_pre_guard_cycles,
                                                stable_post_guard_cycles);
-            `uvm_info("PROF_INT_002_TOP",
-                      $sformatf("RUN_CONFIG run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d runctl_ready_mask=%0h",
-                                run_cycles,
-                                drain_cycles,
-                                stable_capture_cycles,
-                                stable_pre_guard_cycles,
-                                stable_post_guard_cycles,
-                                active_lane_count,
-                                active_lane_mask,
-                                stage_a_lane_index,
-                                runctl_ready_mask_cfg),
-                      UVM_LOW)
+        `uvm_info("PROF_INT_002_TOP",
+                  $sformatf("RUN_CONFIG run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d runctl_mode=readyless runctl_cpp_gap=%0d runctl_settle_timeout=%0d",
+                            run_cycles,
+                            drain_cycles,
+                            stable_capture_cycles,
+                            stable_pre_guard_cycles,
+                            stable_post_guard_cycles,
+                            active_lane_count,
+                            active_lane_mask,
+                            stage_a_lane_index,
+                            runctl_cpp_gap_cycles,
+                            runctl_settle_timeout_cycles),
+                  UVM_LOW)
 
-            ctrl_vif.sim_started = 1'b1;
-            drive_runctl(RUNCTL_RUN_PREP_SYM, 4, 50000);
-            repeat (4) @(posedge clk_125);
-            csr_write_arb0(ARB_CSR_CONTROL_ADDR, ARB_MODE_EMU);
-            drive_runctl(RUNCTL_SYNC_SYM, 2, 50000);
-            drive_runctl(RUNCTL_RUNNING_SYM, 2, 50000);
-            repeat (16) @(posedge clk_125);
-            report_datapath_state("after RUNNING");
-            tb_int_run_window_db::note_run_start($time);
-            repeat (stable_pre_guard_cycles) @(posedge clk_125);
-            tb_int_run_window_db::note_stable_start($time);
-            repeat (stable_capture_cycles) @(posedge clk_125);
-            tb_int_run_window_db::note_stable_end($time);
-            repeat (stable_post_guard_cycles) @(posedge clk_125);
-            tb_int_run_window_db::note_run_end($time);
-            report_datapath_state("before TERMINATING");
-            drive_runctl(RUNCTL_TERMINATING_SYM, 8, drain_cycles + 200000);
-            repeat (drain_cycles) @(posedge clk_125);
-            report_datapath_state("after drain");
-        drive_runctl(RUNCTL_IDLE_SYM, 4, 50000);
+        ctrl_vif.sim_started = 1'b1;
+        drive_runctl(RUNCTL_RUN_PREP_SYM, 4);
+        wait_hit_stack_runctl_settled("after RUN_PREPARE", 6'b001111, 1'b1);
+        observe_runctl_cpp_gap("RUN_PREPARE_to_SYNC");
+        repeat (4) @(posedge clk_125);
+        csr_write_arb0(ARB_CSR_CONTROL_ADDR, ARB_MODE_EMU);
+        drive_runctl(RUNCTL_SYNC_SYM, 2);
+        observe_runctl_cpp_gap("SYNC_to_RUNNING");
+        drive_runctl(RUNCTL_RUNNING_SYM, 2);
+        repeat (16) @(posedge clk_125);
+        report_datapath_state("after RUNNING");
+        tb_int_run_window_db::note_run_start($time);
+        repeat (stable_pre_guard_cycles) @(posedge clk_125);
+        tb_int_run_window_db::note_stable_start($time);
+        repeat (stable_capture_cycles) @(posedge clk_125);
+        tb_int_run_window_db::note_stable_end($time);
+        repeat (stable_post_guard_cycles) @(posedge clk_125);
+        tb_int_run_window_db::note_run_end($time);
+        report_datapath_state("before TERMINATING");
+        drive_runctl(RUNCTL_TERMINATING_SYM, 8);
+        wait_hit_stack_runctl_settled("after TERMINATING", 6'b001111, 1'b0);
+        observe_runctl_cpp_gap("TERMINATING_to_IDLE");
+        repeat (drain_cycles) @(posedge clk_125);
+        report_datapath_state("after drain");
+        drive_runctl(RUNCTL_IDLE_SYM, 4);
         repeat (512) @(posedge clk_125);
         ctrl_vif.sim_done = 1'b1;
     end

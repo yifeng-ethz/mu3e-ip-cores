@@ -1492,3 +1492,154 @@ configuration issue is closed.
 **Disposition.** Harness/plot bug fixed; full 5 s latency evidence remains open.
 
 ---
+
+---
+
+## MV2 — landing summary
+
+**Date:** 2026-05-05 (evening).
+
+**Pushed:**
+
+- Parent: `5239f993 [PATCH] Integrate MV2 LVDS controller full8lane build` on `feat/hit-type0-mux-20260504`. Tree clean.
+- LVDS submodule: `d65fa19 [PATCH] Bump LVDS controller package to 26.2.0.0505` on `mu3e_lvds_controller/master` (= the SV-rebuild branch fast-forwarded into master + a final package version bump). Tree clean.
+
+**What landed in the parent commit:**
+
+- Qsys `full8lane_type0_system` rev to **major 2.0**; consumes the SV `mu3e_lvds_controller` super-core with absorbed PHY adapter (replaces the legacy VHDL `lvds_rx_controller_pro.terp.vhd`).
+- LVDS CSR aperture moved to a free slot to resolve the regen-time CSR aperture overlap that initially blocked the codex2 dispatch.
+- Two Quartus revisions compiled cleanly:
+  - `top_nostp_full8lane.sof` (12,650,465 bytes, May 5 19:49) — no-STP MV2 production SOF.
+  - `top_stp_first_stage_full8lane.sof` (12,650,516 bytes, May 5 20:40) — first-stage STP probe SOF for B011/B017 follow-up captures.
+- `tb_int/PROF-INT-002` gained aggregate pre-rbCAM fan-out, aggregate post-rbCAM fan-out, stable-window export, and the contact-sheet latency renderer in the requested phase-0 reference format with stage-specific DV-budget windows.
+
+**Sub-agent caveat caught and fixed pre-commit:**
+
+The original PROF-INT-002 pre-rbCAM tap was `ring_buffer_cam_0`-only (single rbCAM ingress). Subagent review surfaced that the integration plan calls for the aggregate of all 4 rbCAM ingress fans-out, since hit_type0 fans across all 4 rbCAM instances. Fix landed before the parent commit.
+
+**Caveats recorded in this commit / kept open:**
+
+- **Timing debt — both MV2 SOFs:** the `lvds_firefly_clk` setup-timing residual that has been carried since the May-5-morning compile is still present (no slack regression but not yet closed). Same as the prior `lvds_rx_28nm_0|...|divclk` -31 ps category — tolerable for room-temp lab, not signoff-clean.
+- **STP alias caveat:** the pre-synthesis STP-helper reported one signal-name alias mismatch — the STP file uses `feb_redriver_losn[0]` but the actual top.vhd port is `scifi_ds_losn[...]`. The compile passed with the alias, but capturing in the SignalTap GUI may need a manual rebind on first launch.
+- **tb_int closure gate not met:** PROF-INT-002 short smoke exported 52 closed records but failed the 95 % closure gate with "missing run-control ready bits" — the full 5 s signoff sweep is still blocked on RC-ready handshake completion. Tracked as an open follow-up; does NOT block on-board MV2 testing because tb_int is sim-side only.
+
+**MV2 SV-vs-VHDL comparison plan (not yet executed):**
+
+The on-silicon VHDL-vs-SV comparison plan documented in the prior MV2 entry remains the next experiment. Both SOFs are programmable; the workflow is:
+
+1. Program FEB with `top_nostp_full8lane.sof` (MV2 SV controller).
+2. Run the canonical `configure_mutrig_from_xml.py` per B018.
+3. Read `lvds_rx_controller_pro_0` SYMBOL_ERRORS at `0x08000` (or whatever address the SV controller exposes — confirm against the new sopcinfo) and compare to the post-B018 baseline {L0=13699, L1=0, L2=12454, L3=0, L4=6915, L5=1034, L6=0, L7=0, L8=244719}.
+4. Drive the injector at 100 kHz/channel periodic, post-rbCAM histogram bin readout. Record per-channel rate.
+5. Reprogram with the prior MV1 VHDL-master SOF (`top_stp_full8lane.sof` from May 5 16:22, pre-MV2). Repeat measurements.
+6. Diff the two — that's the MV2 evidence whether the SV branch is silicon-equivalent or improved.
+
+---
+
+---
+
+## B019 — MV2 on-silicon SV-vs-VHDL LVDS controller comparison
+
+**Date:** 2026-05-05 (evening).
+
+**Setup.** Identical hardware (FEB SciFi on `USB-BlasterII [7-2]`, SWB on `DE5 [3-6.2]`). Identical MuTRiG configure (`configure_mutrig_from_xml.py` per B018 with the canonical Apr-29 args + `--bsp mutrig_controller_bsp.tcl`). Different SOF:
+
+- **MV1 VHDL:** `top_stp_full8lane.sof` (May 5 16:22) — `mu3e_lvds_controller` on master VHDL HEAD `f4e5d13`, B002 structural fix + B001 readLatency=1 + B007/B008/B009 build TCL fixes.
+- **MV2 SV:** `top_nostp_full8lane.sof` (May 5 19:49) — `mu3e_lvds_controller` on codex SV-rebuild fast-forwarded into master `d65fa19` (= the SV `mu3e_lvds_controller.sv` + `phy_adapter.sv`), MV2 super-core rev 2.0, LVDS CSR aperture moved to free slot.
+
+**LVDS RX `SYMBOL_ERRORS` per lane (after MuTRiG configure, post-CML toggle, before RC start):**
+
+| Lane | MV1 VHDL | MV2 SV | Δ |
+|---:|---:|---:|---|
+| 0 (SMB3 #0) | 16,626 | 0 | **clean win** |
+| 1 (SMB3 #1) | 0 | 0 | tie |
+| 2 (SMB3 #2) | 12,902 | 0 | **clean win** |
+| 3 (SMB3 #3) | 0 | 8 | SV slightly worse but trivial |
+| 4 (SMB5 #0) | 20,665 | 2 | **massive win** |
+| 5 (SMB5 #1) | **`0xFFFFFFFF` clane_error fatal** | 0 | **SV recovered a fatal lane** |
+| 6 (SMB5 #2) | 0 | 0 | tie |
+| 7 (SMB5 #3) | 0 | 0 | tie |
+| 8 (RC firefly) | 1,081,470 | 0 | **massive win — RC link error-free** |
+
+**SV is decisively better at the LVDS PHY level.** The codex SV-rebuild's claimed CDC + DPA training fixes translate to substantial real-silicon improvements. Lane 5 — fatal under VHDL — is fully clean under SV. Lane 8 (RC firefly synclink) drops from 1M errors to 0, meaning the SC ring should also be cleaner under MV2 (relevant to the SWB instability discussion).
+
+**RC propagation regression on MV2 (separate issue).**
+
+After driving `rc_tool send reset → stop-reset → run-prepare → sync → start-run` on the MV2 SV SOF:
+
+- arb_hit_type0_supercore_0 lane 0 `status_readdata` = `0x00000500` → bits[20:18] = `000` = `RUN_IDLE`. The arb never enters RUNNING.
+- All arb ingress / drop / egress counters stay at 0.
+- Histogram `TOTAL_HITS` = 0 (no hits flow because run state never advances).
+
+On the MV1 VHDL SOF with the same RC sequence:
+
+- arb status_readdata = `0x000C9300` → bits[20:18] = `011` = `RUN_RUNNING` ✓.
+- `drop_mid_packet` counter ticks at ~50 M/s (real arb activity).
+- `ingress_emu_hits` = 16 (FIFO accepted 16 before filling, then drops everything — same B002-era behavior).
+
+**This is a regression in MV2 — the SV adoption broke run-control propagation to the arb supercore.** Not the original B002 (which was 3-deep splitter chain + dangling ready); the new MV2 super-core has its own run-control plumbing that doesn't deliver `asi_ctrl_valid` to the arb's runctl FSM.
+
+The MV2 landing summary already flagged this at sim level (tb_int PROF-INT-002 short-smoke "missing run-control ready bits", 95 % closure gate not met, exports only 52 records). On silicon the same RC-ready regression manifests as run_state stuck at IDLE.
+
+**Conclusion.**
+
+- The SV LVDS controller is a real improvement and should stay (MV2 keeps it).
+- The MV2 RC plumbing regression is the **immediate blocker** for usable end-to-end real-MuTRiG rate measurement. Task #36 (RC-ready handshake gate) is now elevated from sim-side concern to silicon-blocker.
+- Concrete next action: trace the run-control fan-out in the regenerated `full8lane_type0_datapath` qsys (per the B003 standing-review obligation that should have run between MV2 Phase 2 and Phase 4 but didn't surface this gap), find where the SV super-core's `run_ctrl` Avalon-ST sink is unwired or misrouted, fix in `build_full8lane_system.tcl` or in the SV controller's `_hw.tcl`, regen + recompile.
+
+**Disposition.** B019 closed (comparison done, conclusion clear). Reopens / promotes task #36 from sim-only to silicon-blocking. The LVDS half of the SV adoption is a clear win and stays.
+
+---
+
+## B021 — Readyless run-control source and C++-scale command timing in PROF-INT-002
+
+**Date:** 2026-05-05 (night).
+
+**Context.** B019 promoted run-control propagation from a sim concern to a silicon blocker. The deployed FEB run sequence is driven by C++ software, so state changes are separated by software-scale time, normally milliseconds rather than adjacent FPGA cycles. The integration model must therefore prove two different things separately:
+
+- The run-control command source is readyless and cannot be blocked by a slave backpressuring a state command.
+- The latency TB observes software-scale gaps between `RUN_PREPARE`, `SYNC`, `RUNNING`, `TERMINATING`, and `IDLE`.
+
+**Fix.**
+
+- `run-control_mgmt` now publishes a readyless host (`runctl_mgmt_host_0` `26.3.0.505`); parent qsys Tcl materializes that override into the generated full8lane system.
+- `hit_stack_system` keeps local legacy readyful sinks buffered by six 9-bit command FIFOs after the readyless splitter, so old rbCAM/FEB consumers can stall locally without backpressuring the source command stream.
+- PROF-INT-002 now drives `upload_subsystem_runctl_mgmt_host_{data,valid}` directly as a readyless source and records the local hit-stack FIFO output ready vector as diagnostics.
+- `DV_PLAN.md` records the C++-scale command-gap assumption; the make bucket passes `TB_INT_RUNCTL_CPP_GAP_CYCLES` and `TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES`.
+- The PROF-INT-002 make bucket now prepares the generated MTS ROM symlink and pins the VHDL compile order for `histogram_statistics_v2` and `alt_dcfifo_w40d256_patched`.
+
+**Observed in short PROF-INT-002 smoke.**
+
+Command:
+
+`make run_prof_int_002_full_pipeline_100khz_per_channel_test WORK=work_prof_int_002_readyless_settle_postpatch2 PROF_INT_002_RUN_CYCLES=12000 PROF_INT_002_DRAIN_CYCLES=4096 PROF_INT_002_HIT_RATE_Q16=52`
+
+Evidence from `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_test/transcript`:
+
+- `RUN_CONFIG ... runctl_mode=readyless runctl_cpp_gap=125000 runctl_settle_timeout=1250000`
+- `after RUN_PREPARE observed legacy run-control sinks settled ready=111111 mask=001111 waited_cycles=131076`
+- `RUN_PREPARE_to_SYNC observed software-scale run-control gap cycles=125000`
+- `SYNC_to_RUNNING observed software-scale run-control gap cycles=125000`
+- `after TERMINATING run-control sink-settle timeout ready=110000 mask=001111 waited_cycles=1250000 timeout=1250000` is a `UVM_WARNING`, not a source-ready failure.
+- `TERMINATING_to_IDLE observed software-scale run-control gap cycles=125000`
+
+**Quartus recompile evidence.**
+
+- No-STP: `quartus_sh --flow compile top_nostp_full8lane -c top_nostp_full8lane` exited 0. Generated `output_files_full8lane/top_nostp_full8lane.sof` at 2026-05-06 00:43:42 +0200, 12,656,985 bytes.
+- STP first-stage: `quartus_sh --flow compile top_nostp_full8lane -c top_stp_first_stage_full8lane` exited 0. Generated `output_files_first_stage_full8lane/top_stp_first_stage_full8lane.sof` at 2026-05-06 01:30:46 +0200, 12,657,036 bytes.
+- Both builds report `Critical Warning (332148): Timing requirements not met` with setup WNS -2.730 ns, hold slack 0.166 ns, recovery slack 2.933 ns, and removal slack 0.391 ns. This is compile-success evidence, not timing-signoff evidence.
+
+**Remaining blocker after the readyless RC fix.**
+
+Run-control reaches the arb and emulator now (`arb_run=3`, emulator generating), but the pipeline still does not close:
+
+- before `TERMINATING`: `arb_bp=8`, `bp_mux=160`, `mux_mts=160`, `mts_out=0`, `hisb_pre=0`;
+- after drain counters: `arb_bp=16`, `bp_mux=224`, `mux_mts=224`, `mts_out=64`, `hisb_pre=64`, `rb_hit=86248`, `feb_hit=26`;
+- scoreboard: `A=224`, `PRE=256`, `POST=0`, `FEB=26`, `closed=0`, `UVM_ERROR : 1`, `UVM_FATAL : 0`;
+- scoreboard residuals: `A->PRE matched/missing/ghost=224/0/32`, `PRE->POST=0/256/0`, `POST->FEB=0/0/26`.
+
+This is no longer the old command-source ready-mask failure. The next blocker is inside or immediately after the MTS / rbCAM transition: typical-rate traffic reaches MTS input, but post-rbCAM remains empty and FEB egress contains ghosts. The post-`TERMINATING` local rbCAM ready vector also remains `110000` after the bounded observation, which is now tracked as cleanup-state diagnostic information rather than evidence that the source can backpressure a command.
+
+**Disposition.** Readyless run-control source and C++-scale timing assumption are folded into the generated qsys/TB flow. Full PROF-INT-002 latency plots remain blocked on the MTS/rbCAM transition producing zero post-rbCAM hits.
+
+---
