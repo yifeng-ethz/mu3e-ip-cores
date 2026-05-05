@@ -595,14 +595,18 @@ remove_dangling_connections
 add_instance arb_hit_type0_supercore_0 arb_hit_type0_supercore 1.0
 configure_full8lane_histogram_statistics histogram_statistics_0
 
-configure_run_ctrl_splitter type0_run_ctrl_splitter 2
-add_clock_connection lvds_rx_28nm_0.outclock type0_run_ctrl_splitter.clk
-add_reset_connection master_datapath.master_reset type0_run_ctrl_splitter.reset
-add_stream_connection run_control_splitter.out2 type0_run_ctrl_splitter.in
+# B002 defensive fix (2026-05-05): eliminate type0_run_ctrl_splitter intermediate
+# hop.  run_control_splitter.out2 feeds arb_hit_type0_supercore_0.run_ctrl
+# directly; mutrig_frame_deassembly_0.ctrl moves to run_control_splitter.out12
+# (previously unused).  The combinational splitter added no registers but gave
+# Quartus an extra net alias that could be optimised away in silicon-only runs.
+# NOTE: dbg_mm2runctrl_0.aso_ctrl merge into run_control_splitter.in is
+# deferred — no standard altera_avalon_st_merger exists in Qsys 18.1 and a
+# non-packet multiplexer would mis-schedule the USE_PACKETS=0 run-ctrl stream.
 
 add_clock_connection lvds_rx_28nm_0.outclock arb_hit_type0_supercore_0.clk
 add_reset_connection master_datapath.master_reset arb_hit_type0_supercore_0.rst
-add_stream_connection type0_run_ctrl_splitter.out0 arb_hit_type0_supercore_0.run_ctrl
+add_stream_connection run_control_splitter.out2 arb_hit_type0_supercore_0.run_ctrl
 
 add_mm_connection mm_pipeline_lvds_csr_hist.m0 histogram_statistics_0.hist_bin 0x0000
 add_mm_connection mm_pipeline_lvds_csr_hist.m0 histogram_statistics_0.csr 0x0400
@@ -643,7 +647,10 @@ for {set lane 0} {$lane < 8} {incr lane} {
     add_stream_connection $fifo.out $lane_mts_mux($lane)
     add_stream_connection $fda.headerinfo mutrig_injector_0.headerinfo$lane
     if {$lane == 0} {
-        add_stream_connection type0_run_ctrl_splitter.out1 $fda.ctrl
+        # B002 fix: fda_0.ctrl was type0_run_ctrl_splitter.out1; now uses
+        # run_control_splitter.out12 (previously unused) since out2 is taken
+        # directly by arb_hit_type0_supercore_0.run_ctrl.
+        add_stream_connection run_control_splitter.out12 $fda.ctrl
     } else {
         add_stream_connection run_control_splitter.out$lane_runctrl_out($lane) $fda.ctrl
     }
@@ -697,3 +704,4 @@ patch_outer_histogram_compatibility $syn_dir $outer_system_name $histogram_compa
 
 chmod_generated_artifacts $syn_dir [list $control_system_name $supercore_system_name $inner_system_name $outer_system_name]
 puts "INFO: ${outer_system_name} generation complete; qsys/sopcinfo/synthesis artifacts are read-only."
+exit 0
