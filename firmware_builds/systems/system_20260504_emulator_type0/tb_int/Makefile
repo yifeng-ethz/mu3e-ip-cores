@@ -16,6 +16,7 @@ WORK      ?= work_tb_int
 TB_TOP    := tb_int_top
 SEED      ?= 1
 SIM_ROOT  ?= sim
+TB_INT_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 SMOKE_DIR := $(SIM_ROOT)/tb_int_smoke_test
 UVM_SRC   := $(QUESTA_HOME)/verilog_src/uvm-1.2/src/uvm_pkg.sv
 UVM_INCDIR := +incdir+$(QUESTA_HOME)/verilog_src/uvm-1.2/src
@@ -68,3 +69,14 @@ static_screen:
 
 clean:
 	@echo "clean: non-destructive by policy. Remove work/ and sim/ manually if a clean tree is required."
+
+# ---------------------------------------------------------------------------
+# B002 integration repro bucket (error bucket — add run target only; existing
+# smoke / regress targets are not modified)
+# ---------------------------------------------------------------------------
+include script/buckets/error_b002.mk
+
+# ---------------------------------------------------------------------------
+# PROF-INT-001 full-load latency benchmark (standalone top, not tb_int_top)
+# ---------------------------------------------------------------------------
+include script/buckets/prof_int_001.mk

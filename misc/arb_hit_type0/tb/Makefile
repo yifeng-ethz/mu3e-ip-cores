@@ -51,7 +51,7 @@ CROSS_TESTS ?=
 # (one fragment per parallel codex2 session; each is `<BUCKET>_TESTS += ...`).
 -include $(IP_ROOT)/script/buckets/*.mk
 
-.PHONY: lib comp_uvm comp_dut static_screen run_% regress_basic regress_edge regress_prof regress_error regress_cross all_buckets_frame clean
+.PHONY: lib comp_uvm comp_dut static_screen run_% run_b002_% regress_basic regress_edge regress_prof regress_error regress_cross all_buckets_frame clean
 
 lib: $(LIB_STAMP)
 
@@ -83,6 +83,9 @@ $(DUT_STAMP): $(DUT_SRCS) $(TB_SRCS) | $(UVM_STAMP)
 	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/arb_hit_type0_pkg.sv"
 	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -mfcu -cuname arb_hit_type0_assertions_cu -work work "$(UVM_DIR)/arb_hit_type0_assertions.sv"
 	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/tb_top.sv"
+	@echo "=== Compiling B002 repro support (splitter model + b002 top) ==="
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work "$(UVM_DIR)/altera_avalon_st_splitter_model.sv"
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/tb_top_b002.sv"
 	@echo "=== Compiling BASIC bucket packages ==="
 	@for src in $$(find $(UVM_DIR)/sequence/basic $(UVM_DIR)/test/basic -maxdepth 1 -name '*.sv' 2>/dev/null | sort); do \
 	  echo "vlog $$src"; \
@@ -123,6 +126,44 @@ run_%: comp_dut
 	  echo "FAIL: $* did not report TEST PASSED"; exit 1; \
 	else \
 	  echo "PASS: $*"; \
+	fi
+
+# B002 repro target: uses tb_top_b002 as elaboration top.
+# The R016 seq + test are compiled together with tb_top_b002 in a single
+# compilation unit (b002_top_cu) so that the UVM factory registers the
+# R016 test class at elaboration time.  This step always recompiles the CU
+# so that any edit to R016_*.sv is picked up immediately.
+# REPRO_HIT outcome: the test emits UVM_ERROR and the run target exits 1.
+# NO_REPRO outcome:  the test passes cleanly (exit 0).
+run_b002_%: comp_dut
+	@echo "=== B002 Repro: compiling b002_top_cu ==="
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work \
+	  +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" \
+	  -mfcu -cuname b002_top_cu \
+	  "$(UVM_DIR)/sequence/error/R016_nested_splitter_runctl_propagation_seq.sv" \
+	  "$(UVM_DIR)/test/error/R016_nested_splitter_runctl_propagation_test.sv" \
+	  "$(UVM_DIR)/tb_top_b002.sv"
+	@echo "=== B002 Repro: vopt tb_top_b002 ==="
+	@cd "$(SIM_DIR)" && $(QUESTA_HOME)/linux_x86_64/vopt \
+	  -modelsimini "$(MODELSIM_INI)" -work work +acc tb_top_b002 -o tb_top_b002_opt \
+	  2>&1 | grep -v 'vopt-222\|vopt-10587'
+	@echo "=== B002 Repro: UVM_TESTNAME=$* (top=tb_top_b002) SEED=$(SEED) ==="
+	@set -o pipefail; cd "$(SIM_DIR)" && \
+	  "$(VSIM)" -modelsimini "$(MODELSIM_INI)" -c -work work -t ps \
+	    -dpicpppath "$(DPI_CPP)" -sv_lib "$(UVM_DPI_LIB)" \
+	    -suppress 19 -suppress 3009 \
+	    +UVM_TESTNAME=$* +ARB_SEED=$(SEED) $(PLUSARGS) \
+	    tb_top_b002_opt \
+	    -do "quietly set NumericStdNoWarnings 1; quietly set StdArithNoWarnings 1; run -all; quit -f" \
+	    | tee "b002_$*.log"
+	@if grep -q 'VERDICT: REPRO_HIT' "$(SIM_DIR)/b002_$*.log"; then \
+	  echo "B002-REPRO: $* -> REPRO_HIT (structural-depth root cause confirmed)"; exit 1; \
+	elif grep -q 'VERDICT: NO_REPRO' "$(SIM_DIR)/b002_$*.log"; then \
+	  echo "B002-NOREPRO: $* -> NO_REPRO (root cause is not structural depth alone)"; \
+	elif grep -qE '(^# )?UVM_(ERROR|FATAL) [^:]|\\*\\* (Fatal|Error):' "$(SIM_DIR)/b002_$*.log"; then \
+	  echo "FAIL: $* (UVM error or fatal)"; exit 1; \
+	else \
+	  echo "B002-UNKNOWN: $* did not emit verdict"; exit 1; \
 	fi
 
 regress_basic: comp_dut

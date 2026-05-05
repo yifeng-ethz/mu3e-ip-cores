@@ -19,3 +19,26 @@ transcript
 firmware_builds/board_test/phase4/work/
 docs/Archive.zip
 docs/Archive/
+
+# Generated FPGA/tool output. Keep Tcl/RTL/test sources tracked; regenerate
+# Platform Designer, Quartus, simulation, and report artifacts locally.
+**/synthesis/
+**/generated/
+**/db/
+**/incremental_db/
+**/output_files/
+**/output_files*/
+**/sim/
+**/work_*/
+**/*.sof
+**/*.rbf
+**/*.pof
+**/*.jic
+**/*.qdb
+**/*.rpt
+**/*.summary
+**/*.smsg
+**/*.jdi
+**/*.pin
+**/*.qws
+firmware_builds/systems/*/tb_int/reports/

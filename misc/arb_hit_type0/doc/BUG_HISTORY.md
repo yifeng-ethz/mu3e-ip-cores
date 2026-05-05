@@ -735,3 +735,102 @@ to the new direct connection from `run_control_splitter.out2` to
 Groups 00, 03–07 are unaffected by the fix.
 
 ---
+
+
+---
+
+## B007 — Tcl octal-parsing of leading-zero `BUILD_DEFAULT_CONST` breaks IP version match
+
+**Discovered:** 2026-05-05 by the qsys-regen attempt for the in-flight
+B002 SignalTap recompile.
+
+**Symptom.** `qsys-script` returned 8 errors, the first being
+`add_instance lane_0 arb_hit_type0 26.4.0.0505: No module type named
+arb_hit_type0`, despite the `arb_hit_type0_hw.tcl` being present in
+the IPX index and the version pin `26.4.0.0505` matching across
+`build_full8lane_system.tcl` and `arb_hit_type0_supercore_hw.tcl`.
+
+**Root cause.** Both `arb_hit_type0_hw.tcl` and
+`arb_hit_type0_supercore_hw.tcl` set
+`BUILD_DEFAULT_CONST` to the literal `0505` (with a leading zero).
+Tcl 8.x parses integer literals with a leading `0` as **octal**.
+`0505` octal = `5 * 64 + 0 * 8 + 5` = decimal `325`. Then
+`[format "%04d" $BUILD_DEFAULT_CONST]` produces `0325`, so the
+declared IP version becomes `26.4.0.0325`, **not** `26.4.0.0505`.
+The two pins (`build_full8lane_system.tcl` and the supercore
+compose() loop) literally say `26.4.0.0505`, so the lookup misses
+and `add_instance` fails with "No module type named arb_hit_type0".
+
+Confirmed by:
+```
+% tclsh
+% set BUILD 0505
+% format "%04d" $BUILD
+0325
+```
+
+**Fix applied.** Set `BUILD_DEFAULT_CONST 505` (no leading zero) in
+both `arb_hit_type0_hw.tcl` and `arb_hit_type0_supercore_hw.tcl`.
+The `%04d` format specifier handles the four-digit zero-pad without
+relying on Tcl's literal interpretation. The displayed IP version
+becomes the intended `26.4.0.0505`.
+
+**Disposition.** Closed in the same edit pass that surfaced it.
+The B003 standing review checklist gains a sub-rule: when bumping
+`BUILD_DEFAULT_CONST`, never use a leading zero — write the
+decimal value (e.g. `505`) and let the format string pad. Tracked
+as a one-line addition to the B003 checklist after the recompile
+closes the B002 thread.
+
+---
+
+---
+
+## B008 — `set_required_param` does not accept dotted nested-instance paths
+
+**Discovered:** 2026-05-05 by the qsys-regen for the in-flight B002 SignalTap recompile (immediately after B007 closed the leading-zero parsing issue).
+
+**Symptom.**
+```
+Error: set_instance_parameter_value hit_stack_subsystem_0.feb_frame_assembly_0 N_SHD 128:
+       No interface named hit_stack_subsystem_0.feb_frame_assembly_0.
+```
+
+The build TCL tried `set_required_param hit_stack_subsystem_0.feb_frame_assembly_0 N_SHD 128` to override `N_SHD` on a feb_frame_assembly_0 instance that lives **inside** the `hit_stack_subsystem_0` Qsys subsystem. Qsys 18.1 `set_instance_parameter_value` only addresses instances at the **current** system level; nested-instance dotted paths are not resolved.
+
+**Surprise.** Inspection of the regenerated sopcinfo (the one produced under the failing exit code 1) showed that **N_SHD = 128 was already set correctly on both `hit_stack_subsystem_0_feb_frame_assembly_0` and `hit_stack_subsystem_1_feb_frame_assembly_0`** — the hit_stack_subsystem composition propagates the SciFi convention internally. The override was both **unnecessary** and **broken**.
+
+**Fix applied.** The two `set_required_param hit_stack_subsystem_*.feb_frame_assembly_0 N_SHD 128` lines were removed from `build_full8lane_system.tcl`; a comment was left in their place pointing at this entry.
+
+**Disposition.** Closed in the same edit pass. The B003 standing review checklist gains a sub-rule: **never address a nested-subsystem instance with a dotted path from the parent's build TCL.** Either expose the parameter at the subsystem boundary (preferred when override is needed), or set it inside the subsystem's own composition. If the resolved sopcinfo already shows the desired value on the nested instance, the override is a no-op and should be omitted.
+
+---
+
+## B009 — `mutrig_frame_deassembly` VERSION_GIT default exceeds 31-bit signed range
+
+**Discovered:** 2026-05-05 by the same qsys-regen failure (B007/B008 cohort).
+
+**Symptom.** Eight Errors on regen, one per lane:
+```
+Error: full8lane_type0_datapath.mutrig_frame_deassembly_N: VERSION_GIT must stay in the signed 31-bit range.
+```
+
+The mutrig_frame_deassembly IP's `validate` proc enforces `0 ≤ VERSION_GIT ≤ 2147483647`. In the resolved sopcinfo, `VERSION_GIT = -1446924647` (signed) = `0xA9D58BD9` (unsigned 32-bit). The IP's hw.tcl computes the default by `scan $git_short_rev %x VERSION_GIT_DEFAULT_CONST`, which can produce a negative-when-signed value if the short rev's high nibble has bit 31 set.
+
+The current submodule HEAD short is `92ef8fe` (= 154,073,342 — fine), but the resolved value `0xA9D58BD9` corresponds to a different short rev, suggesting the hw.tcl is reading from a directory not pinned to the submodule's HEAD or the default has been latched from a prior generation.
+
+**Fix applied.** `mutrig_frame_deassembly/script/mutrig_frame_deassembly_hw.tcl`
+now clamps the scanned git short revision with `& 0x7FFFFFFF` immediately
+after the `%x` parse, so the default always satisfies the IP validator's
+signed-31-bit range. `configure_frame_deassembly` in
+`build_full8lane_system.tcl` also keeps a defensive `VERSION_GIT 0` override
+for generated datapath instances so the bring-up image remains deterministic.
+
+**Disposition.** Closed in the same edit pass and committed in the
+`mutrig_frame_deassembly` submodule. The B003 checklist gains a sub-rule:
+**when an IP validate proc enforces a signed-31-bit range on VERSION_GIT,
+the IP hw.tcl must clamp git-derived defaults before validation; system
+recipes may still override VERSION_GIT explicitly when deterministic
+bring-up metadata matters.**
+
+---

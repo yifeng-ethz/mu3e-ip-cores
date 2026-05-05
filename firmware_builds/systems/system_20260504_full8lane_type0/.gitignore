@@ -4,6 +4,7 @@
 
 syn/*.qsys
 syn/*.sopcinfo
+syn/*.ipx
 syn/*_system/
 syn/full8lane_control_path_subsystem/
 syn/arb_hit_type0_supercore/
