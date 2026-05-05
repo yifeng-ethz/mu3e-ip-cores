@@ -37,6 +37,7 @@ set outer_system_version 2.0
 set control_ref_qsys_path [file join $ref_syn_dir debug_sc_system_v3.qsys]
 set inner_ref_qsys_path [file join $ref_syn_dir ${ref_inner_system_name}.qsys]
 set outer_ref_qsys_path [file join $ref_syn_dir feb_system_v3_pipe.qsys]
+set ref_upload_qsys_path [file join $ref_syn_dir upload_system_v3.qsys]
 set control_qsys_path [file join $syn_dir ${control_system_name}.qsys]
 set supercore_qsys_path [file join $syn_dir ${supercore_system_name}.qsys]
 set inner_qsys_path [file join $syn_dir ${inner_system_name}.qsys]
@@ -44,12 +45,18 @@ set outer_qsys_path [file join $syn_dir ${outer_system_name}.qsys]
 set ipx_path [file join $syn_dir mu3e_ip_cores.ipx]
 set components_ipx_path [file join $syn_dir components.ipx]
 set arb_script_dir [file join $repo_dir misc arb_hit_type0 script]
+set ref_hit_stack_qsys_path [file join $repo_dir run-control_mgmt reference feb_system_v2_snapshot_20260415 hit_stack_system.qsys]
+set upload_readyless_ip_dir [file join $syn_dir ip upload_system_v3_readyless]
+set upload_readyless_qsys_path [file join $upload_readyless_ip_dir upload_system_v3.qsys]
+set hit_stack_readyless_ip_dir [file join $syn_dir ip hit_stack_system_readyless]
+set hit_stack_readyless_qsys_path [file join $hit_stack_readyless_ip_dir hit_stack_system.qsys]
 set full8lane_onewire_ip_dir [file join $syn_dir ip full8lane_onewire_master]
 set full8lane_sc_hub_ip_dir [file join $syn_dir ip full8lane_sc_hub_v2]
 set full8lane_histogram_ip_dir [file join $syn_dir ip full8lane_histogram_statistics_v2]
 set histogram_compat_ip_dir [file join $syn_dir ip histogram_statistics_v2]
-set search_path [join [list $syn_dir $arb_script_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
+set search_path [join [list $syn_dir $arb_script_dir $upload_readyless_ip_dir $hit_stack_readyless_ip_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
 set lvds_controller_version 26.2.0.0505
+set runctl_mgmt_host_readyless_version 26.3.0.505
 set lvds_controller_local_csr_base 0x9000
 set lvds_controller_master_csr_base 0x00030000
 
@@ -190,6 +197,228 @@ proc patch_qsys_component_version {qsys_path version} {
     set fd [open $qsys_path w]
     puts -nonewline $fd $patched
     close $fd
+}
+
+proc patch_qsys_module_parameter {content module_name param_name param_value} {
+    set marker " <module\n   name=\"$module_name\""
+    set start [string first $marker $content]
+    if {$start < 0} {
+        error "failed to find module $module_name"
+    }
+
+    set module_end [string first "\n <module" $content [expr {$start + 1}]]
+    set connection_start [string first "\n <connection" $content [expr {$start + 1}]]
+    if {$module_end < 0 || ($connection_start >= 0 && $connection_start < $module_end)} {
+        set module_end $connection_start
+    }
+    if {$module_end < 0} {
+        error "failed to find end of module $module_name"
+    }
+
+    set block [string range $content $start [expr {$module_end - 1}]]
+    set pattern "(<parameter name=\"$param_name\" value=\")\[^\"]+(\" />)"
+    set replacement "\\1${param_value}\\2"
+    set count [regsub $pattern $block $replacement patched_block]
+    if {$count != 1} {
+        error "failed to patch $module_name.$param_name"
+    }
+
+    set patched [string range $content 0 [expr {$start - 1}]]
+    append patched $patched_block
+    append patched [string range $content $module_end end]
+    return $patched
+}
+
+proc patch_qsys_module_version {content module_name module_version} {
+    set marker " <module\n   name=\"$module_name\""
+    set start [string first $marker $content]
+    if {$start < 0} {
+        error "failed to find module $module_name"
+    }
+
+    set module_end [string first "\n <module" $content [expr {$start + 1}]]
+    set connection_start [string first "\n <connection" $content [expr {$start + 1}]]
+    if {$module_end < 0 || ($connection_start >= 0 && $connection_start < $module_end)} {
+        set module_end $connection_start
+    }
+    if {$module_end < 0} {
+        error "failed to find end of module $module_name"
+    }
+
+    set block [string range $content $start [expr {$module_end - 1}]]
+    set pattern {(<module[^>]*version=")[^"]+(")}
+    set replacement "\\1${module_version}\\2"
+    set count [regsub $pattern $block $replacement patched_block]
+    if {$count != 1} {
+        error "failed to patch $module_name.version"
+    }
+
+    set patched [string range $content 0 [expr {$start - 1}]]
+    append patched $patched_block
+    append patched [string range $content $module_end end]
+    return $patched
+}
+
+proc materialize_readyless_upload_qsys {ref_qsys_path dst_qsys_path runctl_version} {
+    set fd [open $ref_qsys_path r]
+    set content [read $fd]
+    close $fd
+
+    # The reference upload subsystem pins runctl_mgmt_host to an older readyful
+    # package.  Keep the subsystem topology, but force the readyless host
+    # component so the exported runctl interface has no backpressure pin.
+    set content [patch_qsys_module_version \
+        $content \
+        runctl_mgmt_host_0 \
+        $runctl_version]
+
+    file mkdir [file dirname $dst_qsys_path]
+    if {[file exists $dst_qsys_path]} {
+        exec chmod u+w $dst_qsys_path
+    }
+    set fd [open $dst_qsys_path w]
+    puts -nonewline $fd $content
+    close $fd
+    puts "INFO: materialized readyless upload_system_v3 override at $dst_qsys_path"
+}
+
+proc materialize_readyless_hit_stack_qsys {ref_qsys_path dst_qsys_path} {
+    set fd [open $ref_qsys_path r]
+    set content [read $fd]
+    close $fd
+
+    # Keep the legacy hit-stack component local to the parent system, but make
+    # its run-control fanout a one-way broadcast so rbCAM/FEB ready cannot
+    # backpressure the run-control command source.
+    set content [patch_qsys_module_parameter \
+        $content \
+        run_control_splitter_0 \
+        USE_READY \
+        0]
+
+    # The legacy rbCAM/FEB run-control sinks still use their ready output as a
+    # local completion indication for slow states such as RUN_PREPARE and
+    # TERMINATING.  Once the upstream command fanout is readyless, Qsys would
+    # otherwise insert a pure timing adapter that forwards a one-cycle command
+    # pulse even while the sink is not ready.  Add small command FIFOs at those
+    # six legacy sinks so the readyless broadcast cannot be backpressured, but
+    # each sink still sees the command held until its readyful contract accepts
+    # it.
+    set content [patch_hit_stack_runctl_queues $content]
+
+    file mkdir [file dirname $dst_qsys_path]
+    if {[file exists $dst_qsys_path]} {
+        exec chmod u+w $dst_qsys_path
+    }
+    set fd [open $dst_qsys_path w]
+    puts -nonewline $fd $content
+    close $fd
+    puts "INFO: materialized readyless hit_stack_system override at $dst_qsys_path"
+}
+
+proc runctl_cmd_fifo_module_xml {name} {
+    return " <module
+   name=\"$name\"
+   kind=\"altera_avalon_sc_fifo\"
+   version=\"18.1\"
+   enabled=\"1\">
+  <parameter name=\"BITS_PER_SYMBOL\" value=\"9\" />
+  <parameter name=\"CHANNEL_WIDTH\" value=\"0\" />
+  <parameter name=\"EMPTY_LATENCY\" value=\"3\" />
+  <parameter name=\"ENABLE_EXPLICIT_MAXCHANNEL\" value=\"false\" />
+  <parameter name=\"ERROR_WIDTH\" value=\"0\" />
+  <parameter name=\"EXPLICIT_MAXCHANNEL\" value=\"0\" />
+  <parameter name=\"FIFO_DEPTH\" value=\"16\" />
+  <parameter name=\"SYMBOLS_PER_BEAT\" value=\"1\" />
+  <parameter name=\"USE_ALMOST_EMPTY_IF\" value=\"0\" />
+  <parameter name=\"USE_ALMOST_FULL_IF\" value=\"0\" />
+  <parameter name=\"USE_FILL_LEVEL\" value=\"0\" />
+  <parameter name=\"USE_MEMORY_BLOCKS\" value=\"0\" />
+  <parameter name=\"USE_PACKETS\" value=\"0\" />
+  <parameter name=\"USE_STORE_FORWARD\" value=\"0\" />
+ </module>
+"
+}
+
+proc runctl_cmd_fifo_connection_xml {idx fifo target} {
+    return " <connection
+   kind=\"avalon_streaming\"
+   version=\"18.1\"
+   start=\"run_control_splitter_0.out$idx\"
+   end=\"$fifo.in\" />
+ <connection
+   kind=\"avalon_streaming\"
+   version=\"18.1\"
+   start=\"$fifo.out\"
+   end=\"$target\" />
+ <connection
+   kind=\"clock\"
+   version=\"18.1\"
+   start=\"datapath_clock_0.clk\"
+   end=\"$fifo.clk\" />
+ <connection
+   kind=\"reset\"
+   version=\"18.1\"
+   start=\"datapath_clock_0.clk_reset\"
+   end=\"$fifo.clk_reset\" />
+"
+}
+
+proc patch_hit_stack_runctl_queues {content} {
+    set targets {
+        {0 ring_buffer_cam_0.run_control}
+        {1 ring_buffer_cam_1.run_control}
+        {2 ring_buffer_cam_2.run_control}
+        {3 ring_buffer_cam_3.run_control}
+        {4 feb_frame_assembly_0.ctrl_datapath}
+        {5 run_ctrl_cdc_d2x.in}
+    }
+
+    set modules ""
+    set connections ""
+    foreach target_pair $targets {
+        set idx [lindex $target_pair 0]
+        set target [lindex $target_pair 1]
+        set fifo run_control_cmd_fifo_$idx
+        if {[string first "name=\"$fifo\"" $content] < 0} {
+            append modules [runctl_cmd_fifo_module_xml $fifo]
+        }
+        append connections [runctl_cmd_fifo_connection_xml $idx $fifo $target]
+
+        set direct " <connection
+   kind=\"avalon_streaming\"
+   version=\"18.1\"
+   start=\"run_control_splitter_0.out$idx\"
+   end=\"$target\" />
+"
+        if {[string first $direct $content] < 0} {
+            error "failed to find hit-stack direct run-control connection run_control_splitter_0.out$idx -> $target"
+        }
+        set content [string map [list $direct ""] $content]
+    }
+
+    set insertion_marker " <module name=\"xcvr_clock_0\""
+    set insertion_idx [string first $insertion_marker $content]
+    if {$insertion_idx < 0} {
+        error "failed to find hit-stack module insertion marker $insertion_marker"
+    }
+    set patched [string range $content 0 [expr {$insertion_idx - 1}]]
+    append patched $modules
+    append patched [string range $content $insertion_idx end]
+
+    set connection_marker " <connection
+   kind=\"clock\"
+   version=\"18.1\"
+   start=\"datapath_clock_0.clk\"
+   end=\"run_control_splitter_0.clk\" />"
+    set connection_idx [string first $connection_marker $patched]
+    if {$connection_idx < 0} {
+        error "failed to find hit-stack connection insertion marker"
+    }
+    set content [string range $patched 0 [expr {$connection_idx - 1}]]
+    append content $connections
+    append content [string range $patched $connection_idx end]
+    return $content
 }
 
 proc ensure_qsys_interface_export {qsys_path name internal type dir before_name} {
@@ -690,7 +919,15 @@ if {![file exists $control_ref_qsys_path]} {
 if {![file exists $outer_ref_qsys_path]} {
     error "Reference outer qsys not found: $outer_ref_qsys_path"
 }
+if {![file exists $ref_upload_qsys_path]} {
+    error "Reference upload qsys not found: $ref_upload_qsys_path"
+}
+if {![file exists $ref_hit_stack_qsys_path]} {
+    error "Reference hit-stack qsys not found: $ref_hit_stack_qsys_path"
+}
 
+materialize_readyless_upload_qsys $ref_upload_qsys_path $upload_readyless_qsys_path $runctl_mgmt_host_readyless_version
+materialize_readyless_hit_stack_qsys $ref_hit_stack_qsys_path $hit_stack_readyless_qsys_path
 build_control_path_qsys $control_ref_qsys_path $control_qsys_path
 build_supercore_qsys $supercore_qsys_path
 reload_ip_catalog
@@ -711,10 +948,16 @@ set_required_param histogram_ingress_bridge_0 VERSION_PATCH 4
 set_required_param histogram_ingress_bridge_0 BUILD 502
 set_required_param histogram_ingress_bridge_0 VERSION_DATE 20260502
 set_optional_param histogram_ingress_bridge_0 VERSION_GIT 481097348
+set_required_param mts_preprocessor_0 DEBUG 0
+set_required_param mts_preprocessor_1 DEBUG 0
 
 set_required_param mm_clock_crossing_bridge USE_AUTO_ADDRESS_WIDTH 1
+# Run-control commands are broadcast pulses/words.  Keep every parent fanout
+# source readyless so generated ready plumbing cannot turn a slow consumer into
+# command-source backpressure.
 set_required_param run_control_splitter USE_READY 0
 set_required_param run_control_splitter NUMBER_OF_OUTPUTS 16
+set_required_param emulator_ctrl_splitter USE_READY 0
 adopt_sv_lvds_controller
 
 # Mu3e SciFi frames are 128 sub-headers x 16 cycles = 2048 datapath cycles.

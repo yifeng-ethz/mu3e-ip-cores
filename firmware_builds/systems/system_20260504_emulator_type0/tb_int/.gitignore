@@ -2,6 +2,8 @@ work/
 work_tb_int/
 sim/
 *.wlf
+*.log
 transcript
 .questa_static_screen/
+dual_port_rom_init.txt
 !modelsim.ini

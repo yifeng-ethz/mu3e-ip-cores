@@ -15,20 +15,20 @@ PROF_INT_002_REPORT_DIR_EMU_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_p
 PROF_INT_002_RUN_CYCLES_5S := 625000000
 PROF_INT_002_STABLE_WINDOW_CYCLES := 125000000
 PROF_INT_002_DRAIN_CYCLES_5S := 16384
-PROF_INT_002_RUNCTL_READY_MASK_1L := 1deff
-PROF_INT_002_RUNCTL_READY_MASK_8L := 1deff
-PROF_INT_002_RUNCTL_READY_MASK_FULL := 1ffff
 PROF_INT_002_SYN  := $(abspath $(TB_INT_ROOT)/../../system_20260504_full8lane_type0/syn/full8lane_type0_system/synthesis)
 PROF_INT_002_COMMON := $(abspath $(TB_INT_ROOT)/../../system_20260504_full8lane_type0/syn/board_projects/fe_scifi_full8lane/src/common)
+PROF_INT_002_MTS_ROM_INIT := $(PROF_INT_002_SYN)/submodules/dual_port_rom_init.txt
 PROF_INT_002_QUARTUS_SIMLIB ?= /data1/intelFPGA/18.1/quartus/eda/sim_lib
 PROF_INT_002_INCDIR := +incdir+$(PROF_INT_002_SYN) +incdir+$(PROF_INT_002_SYN)/submodules
 PROF_INT_002_RUN_CYCLES ?= 12500000
 PROF_INT_002_DRAIN_CYCLES ?= 16384
 PROF_INT_002_HIT_RATE_Q16 ?= 52
+PROF_INT_002_RUNCTL_CPP_GAP_CYCLES ?= 125000
+PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES ?= 1250000
 PROF_INT_002_STABLE_ONLY_EXPORT ?= 1
 PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh s -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
 
-.PHONY: comp_prof_int_002_dut comp_prof_int_002 \
+.PHONY: comp_prof_int_002_dut comp_prof_int_002 prepare_prof_int_002_mem_init \
 \trun_prof_int_002_full_pipeline_100khz_per_channel_test \
 \trun_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
 \trun_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
@@ -68,6 +68,7 @@ comp_prof_int_002_dut: lib
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/coalescing_queue.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/pingpong_sram.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/histogram_statistics_v2_bool_core.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/histogram_statistics_v2.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/ring_buffer_cam_v2_core.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/search_for_extreme3.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/i2c_master.vhd
@@ -75,6 +76,8 @@ comp_prof_int_002_dut: lib
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/onewire_master.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/simple_dual_port_ram_single_clock.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/write_mask_gen.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/alt_dcfifo_w40d256.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/alt_dcfifo_w40d256_patched.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/rtl/sc_hub_pkg.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/rtl/fifo/sc_hub_fifo_sc.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/rtl/fifo/sc_hub_fifo_sf.vhd
@@ -109,6 +112,7 @@ comp_prof_int_002_dut: lib
 	    ! -name coalescing_queue.vhd \
 	    ! -name pingpong_sram.vhd \
 	    ! -name histogram_statistics_v2_bool_core.vhd \
+	    ! -name histogram_statistics_v2.vhd \
 	    ! -name ring_buffer_cam_v2_core.vhd \
 	    ! -name search_for_extreme3.vhd \
 	    ! -name i2c_master.vhd \
@@ -116,6 +120,8 @@ comp_prof_int_002_dut: lib
 	    ! -name onewire_master.vhd \
 	    ! -name simple_dual_port_ram_single_clock.vhd \
 	    ! -name write_mask_gen.vhd \
+	    ! -name alt_dcfifo_w40d256.vhd \
+	    ! -name alt_dcfifo_w40d256_patched.vhd \
 	    ! -name sc_hub_pkg.vhd \
 	    ! -name sc_hub_fifo_sc.vhd \
 	    ! -name sc_hub_fifo_sf.vhd \
@@ -149,7 +155,11 @@ comp_prof_int_002: comp_uvm comp_prof_int_002_dut
 	    uvm/test/prof/prof_int_002_full_pipeline_100khz_per_channel_test.sv \
 	    prof_int_002_full_pipeline_top.sv
 
-run_prof_int_002_full_pipeline_100khz_per_channel_test: comp_prof_int_002
+prepare_prof_int_002_mem_init:
+	@test -f $(PROF_INT_002_MTS_ROM_INIT)
+	@ln -sf $(PROF_INT_002_MTS_ROM_INIT) dual_port_rom_init.txt
+
+run_prof_int_002_full_pipeline_100khz_per_channel_test: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR)
 	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
@@ -157,20 +167,21 @@ run_prof_int_002_full_pipeline_100khz_per_channel_test: comp_prof_int_002
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=95 \
-	    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES) \
-	    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES) \
-	    +TB_INT_STABLE_WINDOW_CYCLES=0 \
-	    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
+		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES) \
+		    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES) \
+		    +TB_INT_STABLE_WINDOW_CYCLES=0 \
+		    +TB_INT_RUNCTL_CPP_GAP_CYCLES=$(PROF_INT_002_RUNCTL_CPP_GAP_CYCLES) \
+		    +TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=$(PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES) \
+		    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
 	    +TB_INT_ACTIVE_LANE_COUNT=1 \
 	    +TB_INT_ACTIVE_LANE_MASK=1 \
-	    +TB_INT_RUNCTL_READY_MASK=$(PROF_INT_002_RUNCTL_READY_MASK_1L) \
 	    -l $(PROF_INT_002_DIR)/transcript \
 	    -do "run -all; quit -f"
 	@tail -n 80 $(PROF_INT_002_DIR)/transcript
 	@grep -q "\*\*\* TEST PASSED \*\*\*" $(PROF_INT_002_DIR)/transcript
 	@if grep -E "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(PROF_INT_002_DIR)/transcript; then exit 1; fi
 
-run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002
+run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_1L_5S)
 	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
@@ -178,14 +189,15 @@ run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR_1L_5S) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=95 \
-	    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
-	    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES_5S) \
-	    +TB_INT_STABLE_WINDOW_CYCLES=$(PROF_INT_002_STABLE_WINDOW_CYCLES) \
-	    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
+		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
+		    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES_5S) \
+		    +TB_INT_STABLE_WINDOW_CYCLES=$(PROF_INT_002_STABLE_WINDOW_CYCLES) \
+		    +TB_INT_RUNCTL_CPP_GAP_CYCLES=$(PROF_INT_002_RUNCTL_CPP_GAP_CYCLES) \
+		    +TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=$(PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES) \
+		    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
 	    +TB_INT_STABLE_ONLY_EXPORT=$(PROF_INT_002_STABLE_ONLY_EXPORT) \
 	    +TB_INT_ACTIVE_LANE_COUNT=1 \
 	    +TB_INT_ACTIVE_LANE_MASK=1 \
-	    +TB_INT_RUNCTL_READY_MASK=$(PROF_INT_002_RUNCTL_READY_MASK_1L) \
 	    -l $(PROF_INT_002_DIR_1L_5S)/transcript \
 	    -do "run -all; quit -f"
 	@echo "=== PROF-INT-002 1-lane 5s sim done; CSV at $(PROF_INT_002_DIR_1L_5S)/closed_records.csv ==="
@@ -194,7 +206,7 @@ run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002
 	@grep -q "\*\*\* TEST PASSED \*\*\*" $(PROF_INT_002_DIR_1L_5S)/transcript
 	@if grep -E "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(PROF_INT_002_DIR_1L_5S)/transcript; then exit 1; fi
 
-run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: comp_prof_int_002
+run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_8L_5S)
 	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
@@ -202,14 +214,15 @@ run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: comp_prof_int_002
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR_8L_5S) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=0 \
-	    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
-	    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES_5S) \
-	    +TB_INT_STABLE_WINDOW_CYCLES=$(PROF_INT_002_STABLE_WINDOW_CYCLES) \
-	    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
+		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
+		    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES_5S) \
+		    +TB_INT_STABLE_WINDOW_CYCLES=$(PROF_INT_002_STABLE_WINDOW_CYCLES) \
+		    +TB_INT_RUNCTL_CPP_GAP_CYCLES=$(PROF_INT_002_RUNCTL_CPP_GAP_CYCLES) \
+		    +TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=$(PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES) \
+		    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
 	    +TB_INT_STABLE_ONLY_EXPORT=$(PROF_INT_002_STABLE_ONLY_EXPORT) \
 	    +TB_INT_ACTIVE_LANE_COUNT=8 \
 	    +TB_INT_ACTIVE_LANE_MASK=ff \
-	    +TB_INT_RUNCTL_READY_MASK=$(PROF_INT_002_RUNCTL_READY_MASK_8L) \
 	    -l $(PROF_INT_002_DIR_8L_5S)/transcript \
 	    -do "run -all; quit -f"
 	@echo "=== PROF-INT-002 8-lane 5s sim done; CSV at $(PROF_INT_002_DIR_8L_5S)/closed_records.csv ==="
@@ -218,7 +231,7 @@ run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: comp_prof_int_002
 	@grep -q "\*\*\* TEST PASSED \*\*\*" $(PROF_INT_002_DIR_8L_5S)/transcript
 	@if grep -E "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(PROF_INT_002_DIR_8L_5S)/transcript; then exit 1; fi
 
-run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s: comp_prof_int_002
+run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_EMU_5S)
 	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
@@ -226,14 +239,15 @@ run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s: comp_pr
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR_EMU_5S) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=0 \
-	    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
-	    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES_5S) \
-	    +TB_INT_STABLE_WINDOW_CYCLES=$(PROF_INT_002_STABLE_WINDOW_CYCLES) \
-	    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
+		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
+		    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_DRAIN_CYCLES_5S) \
+		    +TB_INT_STABLE_WINDOW_CYCLES=$(PROF_INT_002_STABLE_WINDOW_CYCLES) \
+		    +TB_INT_RUNCTL_CPP_GAP_CYCLES=$(PROF_INT_002_RUNCTL_CPP_GAP_CYCLES) \
+		    +TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=$(PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES) \
+		    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
 	    +TB_INT_STABLE_ONLY_EXPORT=$(PROF_INT_002_STABLE_ONLY_EXPORT) \
 	    +TB_INT_ACTIVE_LANE_COUNT=8 \
 	    +TB_INT_ACTIVE_LANE_MASK=ff \
-	    +TB_INT_RUNCTL_READY_MASK=$(PROF_INT_002_RUNCTL_READY_MASK_FULL) \
 	    -l $(PROF_INT_002_DIR_EMU_5S)/transcript \
 	    -do "run -all; quit -f"
 	@echo "=== PROF-INT-002 emulator/full 5s sim done; CSV at $(PROF_INT_002_DIR_EMU_5S)/closed_records.csv ==="

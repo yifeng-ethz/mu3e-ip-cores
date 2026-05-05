@@ -25,6 +25,8 @@ The testbench drives traffic at the **upstream LVDS PHY boundary** with a virtua
 
 The virtual MuTRiG model in `mutrig_phy_agent` emits directly into per-lane L2 FIFOs (matching the 26.2.x `emulator_mutrig` architecture, which removed L1 staging per `emulator_mutrig/doc/RTL_PLAN.md` §2.1). The real-ASIC 32-channel → 4 L1 FIFO → 1 L2 FIFO RR-arbitration reordering is therefore NOT exercised by this harness; it is deferred to a future harness that uses the real LVDS / `mutrig_frame_deassembly` path with the bring-up SOF on the FEB.
 
+**Basic run-control timing assumption.** In the deployed FEB flow, run-control state changes are driven by C++ software and are normally separated by software-scale time, i.e. orders of milliseconds rather than adjacent FPGA cycles. The integration TB therefore must not qualify a full-pipeline latency run by issuing `RUN_PREPARE` / `SYNC` / `RUNNING` or `TERMINATING` / `IDLE` back-to-back. PROF-INT-002 models this with `TB_INT_RUNCTL_CPP_GAP_CYCLES` (default 125000 cycles = 1 ms at 125 MHz) and must log the observed gap before the next state is driven. PROF-INT-002 also samples the local legacy rbCAM/FEB readyful sinks around slow states: `RUN_PREPARE` readiness before `SYNC` is a qualification condition, while post-`TERMINATING` readiness is diagnostic because the command source is intentionally readyless and `IDLE` is driven through the same software-paced path.
+
 ### Out of scope
 
 - Quartus place-and-route timing closure (covered by `timing-performance-resources-sign-off` skill).
@@ -238,6 +240,8 @@ Per-test reports under `tb_int/reports/<test>/`:
   - `TB_INT_DRAIN_CYCLES=16384`
   - `TB_INT_STABLE_WINDOW_CYCLES=125000000` (1 s stable-origin interval)
   - `TB_INT_STABLE_ONLY_EXPORT=1`
+  - `TB_INT_RUNCTL_CPP_GAP_CYCLES=125000` (1 ms software-scale command gap, must be observed in the transcript before the next state)
+  - `TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=1250000` (10 ms bounded observation for local legacy rbCAM/FEB run-control sink readiness)
 - 1-lane virtual MuTRiG, 100 kHz/channel, 5s with 1s stable window:
   - Target: `make run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s`
   - Sim dir: `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s/`
@@ -278,7 +282,7 @@ elaborates and exports 52 closed records. It is not closure evidence for the 5s 
   - y-axis: `hits / bin [% of captured interval]`
 - Reporter output requirement:
   - Pre-rbCAM panel must represent the aggregate rbCAM-ingress boundary at `hit_stack_subsystem_0.data_splitter_0_out0_*` through `out3_*` (or equivalent `hit_stack_subsystem_0.hit_type_1_*` fanout).
-  - Each panel must include total/hits, nonzero bins, peak bin/fraction, black-peak note, green rbCAM-window note, in-window/out-window counts, and compact two-line title text.
+  - Each panel must include total/hits, nonzero bins, peak bin/fraction, black-peak note, green DV-budget note, in-window/out-window counts, and compact two-line title text.
 
 ### CSV column reference
 
