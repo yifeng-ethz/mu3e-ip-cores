@@ -34,7 +34,7 @@ SEED         ?= 1
 PLUSARGS     ?=
 TB_TOP       := tb_top
 
-DUT_SRCS := $(shell awk '/add_fileset_file/ { for (idx = 1; idx < NF; idx++) if ($$idx == "PATH") print "$(IP_ROOT)/"$$(idx + 1) }' $(HW_TCL) | awk '!seen[$$0]++')
+DUT_SRCS := $(patsubst ../rtl/%,$(IP_ROOT)/rtl/%,$(shell awk '/add_fileset_file/ { for (idx = 1; idx < NF; idx++) if ($$idx == "PATH") print $$(idx + 1) }' $(HW_TCL) | awk '!seen[$$0]++'))
 TB_SRCS  := $(shell find $(UVM_DIR) -name '*.sv' -print | sort)
 
 LIB_STAMP := $(SIM_DIR)/.lib.stamp
@@ -83,15 +83,26 @@ $(DUT_STAMP): $(DUT_SRCS) $(TB_SRCS) | $(UVM_STAMP)
 	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/arb_hit_type0_pkg.sv"
 	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -mfcu -cuname arb_hit_type0_assertions_cu -work work "$(UVM_DIR)/arb_hit_type0_assertions.sv"
 	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/tb_top.sv"
-	@echo "=== Compiling per-bucket sequences (tb/uvm/sequence/*/*.sv) ==="
-	@for src in $$(find $(UVM_DIR)/sequence -mindepth 2 -maxdepth 2 -name '*.sv' 2>/dev/null | sort); do \
+	@echo "=== Compiling BASIC bucket packages ==="
+	@for src in $$(find $(UVM_DIR)/sequence/basic $(UVM_DIR)/test/basic -maxdepth 1 -name '*.sv' 2>/dev/null | sort); do \
 	  echo "vlog $$src"; \
 	  $(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$$src" || exit $$?; \
 	done
-	@echo "=== Compiling per-bucket tests (tb/uvm/test/*/*.sv) ==="
-	@for src in $$(find $(UVM_DIR)/test -mindepth 2 -maxdepth 2 -name '*.sv' 2>/dev/null | sort); do \
-	  echo "vlog $$src"; \
-	  $(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$$src" || exit $$?; \
+	@echo "=== Compiling EDGE/PROF/ERROR bucket compilation units ==="
+	@for bucket in edge prof error; do \
+	  files=$$(find "$(UVM_DIR)/sequence/$$bucket" "$(UVM_DIR)/test/$$bucket" -maxdepth 1 -name '*.sv' 2>/dev/null | sort); \
+	  if [ -n "$$files" ]; then \
+	    prelude="$(SIM_DIR)/bucket_$${bucket}_prelude.sv"; \
+	    printf '%s\n' \
+	      'import uvm_pkg::*;' \
+	      'import lcg_prng_pkg::*;' \
+	      'import arb_hit_type0_reg_pkg::*;' \
+	      'import arb_hit_type0_pkg::*;' \
+	      '`include "uvm_macros.svh"' \
+	      > "$$prelude"; \
+	    echo "vlog $$bucket bucket"; \
+	    $(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -mfcu -cuname arb_hit_type0_$${bucket}_bucket_cu -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$$prelude" $$files || exit $$?; \
+	  fi; \
 	done
 	@touch "$@"
 
@@ -139,7 +150,7 @@ all_buckets_frame: comp_dut
 
 $(STATIC_FILELIST): $(HW_TCL)
 	@mkdir -p "$(SIM_DIR)"
-	@awk '/add_fileset_file/ { for (idx = 1; idx < NF; idx++) if ($$idx == "PATH") print "$(IP_ROOT)/"$$(idx + 1) }' "$(HW_TCL)" | awk '!seen[$$0]++' > "$@"
+	@printf '%s\n' $(DUT_SRCS) > "$@"
 	@printf '%s\n' "$(UVM_DIR)/arb_hit_type0_assertions.sv" >> "$@"
 
 $(STATIC_PRE_DO):

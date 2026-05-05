@@ -628,3 +628,28 @@ passed on 2026-05-05 with Questa lint `Error (0)`, CDC
 `Violations (0)`, and RDC `Violation (0)`.
 
 ---
+
+## B006 - closure (task #29)
+
+**Date:** 2026-05-05.
+
+**Disposition.** Closed by normalizing `DUT_SRCS` in
+`misc/arb_hit_type0/tb/Makefile`: source paths imported from
+`arb_hit_type0_hw.tcl` as `../rtl/<file>.sv` are now mapped to
+`$(IP_ROOT)/rtl/<file>.sv` instead of `$(IP_ROOT)/../rtl/<file>.sv`.
+The static-screen filelist is generated from the same normalized
+`DUT_SRCS` list.
+
+During verification, `comp_dut` then reached a separate existing TB
+compile-order issue: edge, prof, error, and cross bucket files with
+`$unit`-scoped base classes cannot be compiled one source at a time.
+The Makefile now leaves the cross bucket to `comp_cross` and compiles
+edge/prof/error buckets as per-bucket `-mfcu` units with generated
+prelude imports under `tb/sim/`.
+
+**Verification.** `make -B -C misc/arb_hit_type0/tb comp_dut` passed,
+and the standalone smoke
+`make -C misc/arb_hit_type0/tb run_B001_uid_read_test` passed with
+`UVM_ERROR=0`.
+
+---
