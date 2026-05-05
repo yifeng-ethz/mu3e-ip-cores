@@ -17,15 +17,18 @@ package tb_int_latency_pkg;
         int closed_fd;
         int drops_fd;
         string output_dir;
+        bit stable_only_export;
 
         function new(string name = "latency_reporter");
             super.new(name);
             closed_fd = 0;
             drops_fd  = 0;
+            stable_only_export = 1'b0;
         endfunction
 
-        function void open(string dir);
+        function void open(string dir, bit enable_stable_only = 1'b0);
             output_dir = dir;
+            stable_only_export = enable_stable_only;
             void'($system($sformatf("mkdir -p %s", output_dir)));
             closed_fd = $fopen({output_dir, "/closed_records.csv"}, "w");
             drops_fd  = $fopen({output_dir, "/drops.csv"}, "w");
@@ -56,6 +59,8 @@ package tb_int_latency_pkg;
         );
             bit [63:0] root_id;
 
+            if (stable_only_export && !(stage_a != null && stage_a.run_origin))
+                return;
             if (closed_fd == 0 || stage_a == null)
                 return;
             root_id = stage_a.root_hit_id_valid ? stage_a.root_hit_id : stage_a.hit_id;
@@ -80,6 +85,8 @@ package tb_int_latency_pkg;
             time last_seen_abs_ts,
             string run_state_at_drop
         );
+            if (stable_only_export && !(source != null && source.run_origin))
+                return;
             if (drops_fd == 0 || source == null)
                 return;
             $fdisplay(drops_fd,

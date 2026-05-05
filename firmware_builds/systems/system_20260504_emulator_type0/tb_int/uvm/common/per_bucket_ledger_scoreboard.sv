@@ -38,6 +38,7 @@ package tb_int_scoreboard_pkg;
         obs_q_t stage_feb_egress_ledger[NUM_LANES][bit [9:0]];
 
         int unsigned total_stage_a;
+        int unsigned total_stage_a_stable;
         int unsigned total_pre_rbcam;
         int unsigned total_post_rbcam;
         int unsigned total_feb_egress;
@@ -51,8 +52,15 @@ package tb_int_scoreboard_pkg;
         int unsigned total_missing_feb;
         int unsigned total_ghost_feb;
         int unsigned total_closed_records;
+        int unsigned total_closed_records_stable;
+        int unsigned stable_missing_pre;
+        int unsigned stable_missing_post;
+        int unsigned stable_missing_feb;
         int unsigned expected_closed_records;
+        int unsigned min_closed_pct;
+        bit          stable_only_export;
         bit          require_zero_residual;
+        bit          exported_records;
         string       output_dir;
         latency_reporter reporter;
 
@@ -63,6 +71,9 @@ package tb_int_scoreboard_pkg;
         virtual function void build_phase(uvm_phase phase);
             string plusarg_dir;
             int    plusarg_expected;
+            int    plusarg_require_zero;
+            int    plusarg_min_closed_pct;
+            int    plusarg_stable_only_export;
 
             super.build_phase(phase);
             stage_a_imp    = new("stage_a_imp", this);
@@ -72,17 +83,26 @@ package tb_int_scoreboard_pkg;
             histogram_imp  = new("histogram_imp", this);
             reporter       = latency_reporter::type_id::create("reporter");
             require_zero_residual = 1'b1;
+            min_closed_pct        = 0;
+            exported_records      = 1'b0;
             output_dir = "sim/tb_int";
             if ($value$plusargs("TB_INT_SIM_DIR=%s", plusarg_dir))
                 output_dir = plusarg_dir;
             expected_closed_records = 0;
             if ($value$plusargs("TB_INT_EXPECTED_HITS=%d", plusarg_expected))
                 expected_closed_records = plusarg_expected;
+            if ($value$plusargs("TB_INT_REQUIRE_ZERO_RESIDUAL=%d", plusarg_require_zero))
+                require_zero_residual = (plusarg_require_zero != 0);
+            if ($value$plusargs("TB_INT_MIN_CLOSED_PCT=%d", plusarg_min_closed_pct))
+                min_closed_pct = plusarg_min_closed_pct;
+            stable_only_export = 1'b0;
+            if ($value$plusargs("TB_INT_STABLE_ONLY_EXPORT=%d", plusarg_stable_only_export))
+                stable_only_export = (plusarg_stable_only_export != 0);
         endfunction
 
         virtual function void start_of_simulation_phase(uvm_phase phase);
             super.start_of_simulation_phase(phase);
-            reporter.open(output_dir);
+            reporter.open(output_dir, stable_only_export);
         endfunction
 
         function automatic void copy_root_hit_id(hit_record dst, hit_record src);
@@ -131,6 +151,8 @@ package tb_int_scoreboard_pkg;
             item.root_hit_id       = item.hit_id;
             push_obs(stage_a_ledger[lane_idx], item);
             total_stage_a++;
+            if (item.run_origin)
+                total_stage_a_stable++;
         endfunction
 
         virtual function void write_pre_rbcam(hit_record item);
@@ -246,7 +268,34 @@ package tb_int_scoreboard_pkg;
             end
         endfunction
 
-        function automatic void export_closed_and_drops();
+        function automatic int unsigned count_stable_missing(
+            ref obs_q_t up_ledger[bit [9:0]],
+            ref obs_q_t dn_ledger[bit [9:0]]
+        );
+            bit [9:0]    key_bits;
+            bit          ok;
+            int unsigned stable_missing;
+
+            stable_missing = 0;
+            if (up_ledger.first(key_bits)) begin
+                ok = 1'b1;
+                while (ok) begin
+                    int up_n;
+                    int dn_n;
+
+                    up_n = up_ledger[key_bits].size();
+                    dn_n = dn_ledger.exists(key_bits) ? dn_ledger[key_bits].size() : 0;
+                    for (int obs_idx = dn_n; obs_idx < up_n; obs_idx++) begin
+                        if (up_ledger[key_bits][obs_idx].run_origin)
+                            stable_missing++;
+                    end
+                    ok = up_ledger.next(key_bits);
+                end
+            end
+            return stable_missing;
+        endfunction
+
+        function automatic void export_closed_and_drops(bit do_export);
             for (int lane_idx = 0; lane_idx < NUM_LANES; lane_idx++) begin
                 bit [9:0] key_bits;
                 bit       ok;
@@ -276,16 +325,22 @@ package tb_int_scoreboard_pkg;
                             matched_all = feb_n;
 
                         for (int obs_idx = 0; obs_idx < matched_all; obs_idx++) begin
-                            reporter.write_closed(stage_a_ledger[lane_idx][key_bits][obs_idx],
-                                                  stage_pre_rbcam_ledger[lane_idx][key_bits][obs_idx],
-                                                  stage_post_rbcam_ledger[lane_idx][key_bits][obs_idx],
-                                                  stage_feb_egress_ledger[lane_idx][key_bits][obs_idx]);
+                            if (do_export &&
+                                (!stable_only_export || stage_a_ledger[lane_idx][key_bits][obs_idx].run_origin)) begin
+                                reporter.write_closed(stage_a_ledger[lane_idx][key_bits][obs_idx],
+                                                      stage_pre_rbcam_ledger[lane_idx][key_bits][obs_idx],
+                                                      stage_post_rbcam_ledger[lane_idx][key_bits][obs_idx],
+                                                      stage_feb_egress_ledger[lane_idx][key_bits][obs_idx]);
+                            end
                             total_closed_records++;
+                            if (stage_a_ledger[lane_idx][key_bits][obs_idx].run_origin)
+                                total_closed_records_stable++;
                         end
 
                         for (int obs_idx = matched_all; obs_idx < a_n; obs_idx++) begin
                             string stage_name;
                             time   last_seen_ts;
+                            bit is_stable;
 
                             stage_name   = "stage_a";
                             last_seen_ts = stage_a_ledger[lane_idx][key_bits][obs_idx].abs_ts;
@@ -297,10 +352,14 @@ package tb_int_scoreboard_pkg;
                                 stage_name   = "post_rbcam";
                                 last_seen_ts = stage_post_rbcam_ledger[lane_idx][key_bits][obs_idx].abs_ts;
                             end
-                            reporter.write_drop(stage_a_ledger[lane_idx][key_bits][obs_idx],
-                                                stage_name,
-                                                last_seen_ts,
-                                                "unknown");
+                            is_stable = stage_a_ledger[lane_idx][key_bits][obs_idx].run_origin;
+                            if (do_export &&
+                                (!stable_only_export || is_stable)) begin
+                                reporter.write_drop(stage_a_ledger[lane_idx][key_bits][obs_idx],
+                                                    stage_name,
+                                                    last_seen_ts,
+                                                    "unknown");
+                            end
                         end
                         ok = stage_a_ledger[lane_idx].next(key_bits);
                     end
@@ -308,7 +367,9 @@ package tb_int_scoreboard_pkg;
             end
         endfunction
 
-        virtual function void reconcile();
+        virtual function void reconcile(string phase_name = "unknown");
+            bit export_now;
+
             total_matched_a_pre   = 0;
             total_missing_pre     = 0;
             total_ghost_pre       = 0;
@@ -319,6 +380,10 @@ package tb_int_scoreboard_pkg;
             total_missing_feb     = 0;
             total_ghost_feb       = 0;
             total_closed_records  = 0;
+            total_closed_records_stable = 0;
+            stable_missing_pre    = 0;
+            stable_missing_post   = 0;
+            stable_missing_feb    = 0;
 
             for (int lane_idx = 0; lane_idx < NUM_LANES; lane_idx++) begin
                 int unsigned matched;
@@ -331,6 +396,8 @@ package tb_int_scoreboard_pkg;
                 total_matched_a_pre += matched;
                 total_missing_pre   += missing;
                 total_ghost_pre     += ghost;
+                stable_missing_pre  += count_stable_missing(stage_a_ledger[lane_idx],
+                                                            stage_pre_rbcam_ledger[lane_idx]);
 
                 reconcile_boundary(stage_pre_rbcam_ledger[lane_idx],
                                    stage_post_rbcam_ledger[lane_idx],
@@ -338,6 +405,8 @@ package tb_int_scoreboard_pkg;
                 total_matched_pre_post += matched;
                 total_missing_post     += missing;
                 total_ghost_post       += ghost;
+                stable_missing_post    += count_stable_missing(stage_pre_rbcam_ledger[lane_idx],
+                                                               stage_post_rbcam_ledger[lane_idx]);
 
                 reconcile_boundary(stage_post_rbcam_ledger[lane_idx],
                                    stage_feb_egress_ledger[lane_idx],
@@ -345,16 +414,24 @@ package tb_int_scoreboard_pkg;
                 total_matched_post_feb += matched;
                 total_missing_feb      += missing;
                 total_ghost_feb        += ghost;
+                stable_missing_feb     += count_stable_missing(stage_post_rbcam_ledger[lane_idx],
+                                                               stage_feb_egress_ledger[lane_idx]);
             end
 
-            export_closed_and_drops();
+            export_now = !exported_records;
+            export_closed_and_drops(export_now);
+            if (export_now)
+                exported_records = 1'b1;
             `uvm_info("TB_INT_SB",
-                      $sformatf("reconcile A=%0d PRE=%0d POST=%0d FEB=%0d closed=%0d A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d",
+                      $sformatf("reconcile[%s] A=%0d stable_A=%0d PRE=%0d POST=%0d FEB=%0d closed=%0d stable_closed=%0d residuals A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d stable_missing A->PRE/PRE->POST/POST->FEB=%0d/%0d/%0d",
+                                phase_name,
                                 total_stage_a,
+                                total_stage_a_stable,
                                 total_pre_rbcam,
                                 total_post_rbcam,
                                 total_feb_egress,
                                 total_closed_records,
+                                total_closed_records_stable,
                                 total_matched_a_pre,
                                 total_missing_pre,
                                 total_ghost_pre,
@@ -363,13 +440,21 @@ package tb_int_scoreboard_pkg;
                                 total_ghost_post,
                                 total_matched_post_feb,
                                 total_missing_feb,
-                                total_ghost_feb),
+                                total_ghost_feb,
+                                stable_missing_pre,
+                                stable_missing_post,
+                                stable_missing_feb),
                       UVM_LOW)
+        endfunction
+
+        virtual function void extract_phase(uvm_phase phase);
+            super.extract_phase(phase);
+            reconcile("extract");
         endfunction
 
         virtual function void check_phase(uvm_phase phase);
             super.check_phase(phase);
-            reconcile();
+            reconcile("check");
             if (require_zero_residual &&
                 (total_missing_pre != 0 || total_ghost_pre != 0 ||
                  total_missing_post != 0 || total_ghost_post != 0 ||
@@ -383,6 +468,24 @@ package tb_int_scoreboard_pkg;
                            $sformatf("closed_records mismatch expected=%0d actual=%0d",
                                      expected_closed_records,
                                      total_closed_records))
+            end
+            if (min_closed_pct != 0) begin
+                int unsigned actual_pct;
+
+                if (total_stage_a_stable == 0) begin
+                    `uvm_error("TB_INT_SB",
+                               "closed-record percentage gate has no stable-origin Stage-A observations")
+                end else begin
+                    actual_pct = (100 * total_closed_records_stable) / total_stage_a_stable;
+                    if (actual_pct < min_closed_pct) begin
+                        `uvm_error("TB_INT_SB",
+                                   $sformatf("closed-record percentage below gate min=%0d actual=%0d stable_closed=%0d stable_stage_a=%0d",
+                                             min_closed_pct,
+                                             actual_pct,
+                                             total_closed_records_stable,
+                                             total_stage_a_stable))
+                    end
+                end
             end
         endfunction
 
