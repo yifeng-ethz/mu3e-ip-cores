@@ -1,10 +1,10 @@
 package require -exact qsys 16.1
 
 set VERSION_MAJOR_DEFAULT_CONST 26
-set VERSION_MINOR_DEFAULT_CONST 2
+set VERSION_MINOR_DEFAULT_CONST 4
 set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         504
-set VERSION_DATE_DEFAULT_CONST  20260504
+set BUILD_DEFAULT_CONST         0505
+set VERSION_DATE_DEFAULT_CONST  20260505
 set VERSION_GIT_DEFAULT_CONST   0x00000000
 set IP_UID_DEFAULT_CONST        0x41485430 ;# ASCII "AHT0"
 set INSTANCE_ID_DEFAULT_CONST   0
@@ -163,7 +163,7 @@ set_interface_property csr explicitAddressSpan 0
 set_interface_property csr holdTime 0
 set_interface_property csr linewrapBursts false
 set_interface_property csr maximumPendingReadTransactions 0
-set_interface_property csr readLatency 0
+set_interface_property csr readLatency 1
 set_interface_property csr readWaitTime 1
 set_interface_property csr setupTime 0
 set_interface_property csr timingUnits Cycles
