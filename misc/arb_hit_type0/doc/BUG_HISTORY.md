@@ -653,3 +653,85 @@ and the standalone smoke
 `UVM_ERROR=0`.
 
 ---
+
+## B002 — fourth update (SignalTap probe set created; structural fix applied; awaiting silicon capture)
+
+**Date:** 2026-05-05.
+
+**What was done.**
+
+1. **SignalTap probe set created.**
+   `firmware_builds/systems/system_20260504_full8lane_type0/syn/board_projects/fe_scifi_full8lane/top_stp_b002_runctl.stp`
+   — 38-bit / 512-sample capture, clocked by `lvds_rx_28nm_0.outclock`
+   (~125 MHz), trigger on `altera_avalon_st_splitter:type0_run_ctrl_splitter|in0_valid`
+   rising edge. Seven probe groups cover the full run-ctrl chain:
+
+   | Group | Signal(s) | Width |
+   |---|---|---|
+   | 00 | run_ctrl_splitter.in0_valid + reset_n | 2 |
+   | 01 | type0_splitter in0_valid + in0_data[8:0] | 10 |
+   | 02 | type0_splitter out0_valid + out0_data[8:0] | 10 |
+   | 03 | arb_hit_type0_supercore_0 run_ctrl_valid + run_ctrl_data[8:0] | 10 |
+   | 04 | supercore-internal run_ctrl_splitter out0_valid | 1 |
+   | 05 | avalon_st_adapter out_0_valid | 1 |
+   | 06 | lane_0 asi_ctrl_valid | 1 |
+   | 07 | lane_0 u_runctl run_state[2:0] | 3 |
+
+2. **New QSF revision created.**
+   `firmware_builds/systems/system_20260504_full8lane_type0/syn/board_projects/fe_scifi_full8lane/top_stp_full8lane.qsf`
+   — identical to `top_nostp_full8lane.qsf` except:
+   - `ENABLE_SIGNALTAP ON`
+   - `USE_SIGNALTAP_FILE top_stp_b002_runctl.stp`
+   - `SIGNALTAP_FILE top_stp_b002_runctl.stp`
+
+   `top_nostp_full8lane.qsf` is untouched as the regression baseline.
+
+3. **B002 defensive structural fix applied in `build_full8lane_system.tcl`.**
+   Removed the intermediate `type0_run_ctrl_splitter` (2-out
+   `altera_avalon_st_splitter`). `run_control_splitter.out2` now
+   connects **directly** to `arb_hit_type0_supercore_0.run_ctrl`.
+   `mutrig_frame_deassembly_0.ctrl` (lane 0) moved from
+   `type0_run_ctrl_splitter.out1` to `run_control_splitter.out12`
+   (previously unused). This reduces the external hop count from
+   3 to 2 before the supercore's internal 8-way `run_ctrl_splitter`.
+
+   `dbg_mm2runctrl_0.aso_ctrl` merge into `run_control_splitter.in`
+   is deferred — no standard `altera_avalon_st_merger` exists in
+   Qsys 18.1, and the Avalon-ST `multiplexer` IP requires
+   `usePackets=true` which is incompatible with the `USE_PACKETS=0`
+   run-ctrl stream.
+
+4. **B003 standing review passed.** Reset network, run-ctrl fan-out
+   (all 8 lanes), datapath alignment, dangling sources, and version
+   stamping (`26.4.0.0505`, `VERSION_DATE=20260505`) all confirmed
+   against the updated TCL.
+
+**Pending steps (silicon capture not yet done).**
+
+- Run `qsys-generate` on the updated TCL to regenerate
+  `arb_hit_type0_supercore.qsys`, `full8lane_type0_datapath.qsys`,
+  and `full8lane_type0_system.qsys`.
+- Run `quartus_sh --flow compile top_nostp_full8lane.qpf -c top_stp_full8lane`.
+  Accept the known -31 ps `lvds_rx_28nm_0|...|divclk` residual.
+  Any new timing violation is a hard stop.
+- Validate STP probe names after map step via
+  `~/.codex/skills/signaltap-creation-co-debug/scripts/check_stp_nodes.py`.
+- Program FEB SciFi via `USB-BlasterII [7-2]` with
+  `output_files_full8lane/top_stp_full8lane.sof`.
+- Capture waveform under `~/.local/bin/swb_ring_lock` during
+  `rc_tool send run-prepare → sync → start-run`.
+- Inspect which hop the valid pulse stops at — or if it propagates
+  fully, confirming candidate C (reset-bridge sync timing) by
+  checking whether `run_state` stays 0 even when `asi_ctrl_valid=1`.
+
+**Note on hierarchy paths in the STP.** The STP was authored using
+the pre-B002-fix hierarchy (with `type0_run_ctrl_splitter` still
+present). After Qsys regen without the intermediate splitter, the
+supercore-boundary probe paths remain valid but groups 01/02
+(which reference `type0_run_ctrl_splitter`) will show "node not
+found" in Node Finder. Those two groups must be remapped post-regen
+to the new direct connection from `run_control_splitter.out2` to
+`arb_hit_type0_supercore_0.run_ctrl_valid` / `run_ctrl_data[8:0]`.
+Groups 00, 03–07 are unaffected by the fix.
+
+---
