@@ -1,0 +1,7 @@
+work/
+work_tb_int/
+sim/
+*.wlf
+transcript
+.questa_static_screen/
+!modelsim.ini

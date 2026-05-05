@@ -1,0 +1,395 @@
+// per_bucket_ledger_scoreboard.sv
+// Per-lane, per-key FIFO-ledger scoreboard for focus-build tb_int.
+// Author: Yifeng Wang
+// Version : 26.2.0
+// Date    : 20260504
+// Change  : Add reusable Stage-A/pre-rbCAM/post-rbCAM/FEB ledger scoreboard.
+
+package tb_int_scoreboard_pkg;
+
+    import uvm_pkg::*;
+    import tb_int_hit_key_pkg::*;
+    import tb_int_record_pkg::*;
+    import tb_int_latency_pkg::*;
+    `include "uvm_macros.svh"
+
+    `uvm_analysis_imp_decl(_stage_a)
+    `uvm_analysis_imp_decl(_pre_rbcam)
+    `uvm_analysis_imp_decl(_post_rbcam)
+    `uvm_analysis_imp_decl(_feb_egress)
+    `uvm_analysis_imp_decl(_histogram)
+
+    localparam int unsigned NUM_LANES = 8;
+
+    typedef hit_record obs_q_t [$];
+
+    class per_bucket_ledger_scoreboard extends uvm_component;
+        `uvm_component_utils(per_bucket_ledger_scoreboard)
+
+        uvm_analysis_imp_stage_a#(hit_record, per_bucket_ledger_scoreboard) stage_a_imp;
+        uvm_analysis_imp_pre_rbcam#(hit_record, per_bucket_ledger_scoreboard) pre_rbcam_imp;
+        uvm_analysis_imp_post_rbcam#(hit_record, per_bucket_ledger_scoreboard) post_rbcam_imp;
+        uvm_analysis_imp_feb_egress#(hit_record, per_bucket_ledger_scoreboard) feb_egress_imp;
+        uvm_analysis_imp_histogram#(hit_record, per_bucket_ledger_scoreboard) histogram_imp;
+
+        obs_q_t stage_a_ledger[NUM_LANES][bit [9:0]];
+        obs_q_t stage_pre_rbcam_ledger[NUM_LANES][bit [9:0]];
+        obs_q_t stage_post_rbcam_ledger[NUM_LANES][bit [9:0]];
+        obs_q_t stage_feb_egress_ledger[NUM_LANES][bit [9:0]];
+
+        int unsigned total_stage_a;
+        int unsigned total_pre_rbcam;
+        int unsigned total_post_rbcam;
+        int unsigned total_feb_egress;
+        int unsigned total_matched_a_pre;
+        int unsigned total_missing_pre;
+        int unsigned total_ghost_pre;
+        int unsigned total_matched_pre_post;
+        int unsigned total_missing_post;
+        int unsigned total_ghost_post;
+        int unsigned total_matched_post_feb;
+        int unsigned total_missing_feb;
+        int unsigned total_ghost_feb;
+        int unsigned total_closed_records;
+        int unsigned expected_closed_records;
+        bit          require_zero_residual;
+        string       output_dir;
+        latency_reporter reporter;
+
+        function new(string name, uvm_component parent);
+            super.new(name, parent);
+        endfunction
+
+        virtual function void build_phase(uvm_phase phase);
+            string plusarg_dir;
+            int    plusarg_expected;
+
+            super.build_phase(phase);
+            stage_a_imp    = new("stage_a_imp", this);
+            pre_rbcam_imp  = new("pre_rbcam_imp", this);
+            post_rbcam_imp = new("post_rbcam_imp", this);
+            feb_egress_imp = new("feb_egress_imp", this);
+            histogram_imp  = new("histogram_imp", this);
+            reporter       = latency_reporter::type_id::create("reporter");
+            require_zero_residual = 1'b1;
+            output_dir = "sim/tb_int";
+            if ($value$plusargs("TB_INT_SIM_DIR=%s", plusarg_dir))
+                output_dir = plusarg_dir;
+            expected_closed_records = 0;
+            if ($value$plusargs("TB_INT_EXPECTED_HITS=%d", plusarg_expected))
+                expected_closed_records = plusarg_expected;
+        endfunction
+
+        virtual function void start_of_simulation_phase(uvm_phase phase);
+            super.start_of_simulation_phase(phase);
+            reporter.open(output_dir);
+        endfunction
+
+        function automatic void copy_root_hit_id(hit_record dst, hit_record src);
+            if (dst == null || src == null)
+                return;
+            dst.run_origin = src.run_origin;
+            if (!src.root_hit_id_valid)
+                return;
+            dst.root_hit_id_valid = 1'b1;
+            dst.root_hit_id       = src.root_hit_id;
+        endfunction
+
+        function automatic hit_record clone_observation(hit_record item);
+            hit_record obs;
+
+            if (item == null)
+                return null;
+            obs = hit_record::type_id::create("ledger_obs");
+            obs.copy(item);
+            return obs;
+        endfunction
+
+        function automatic void push_obs(ref obs_q_t ledger[bit [9:0]],
+                                         hit_record item);
+            bit [9:0]  key_bits;
+            hit_record obs;
+
+            if (item == null)
+                return;
+            key_bits = item.key_bits();
+            obs = clone_observation(item);
+            obs.seq_in_bucket = ledger.exists(key_bits) ? ledger[key_bits].size() : 0;
+            ledger[key_bits].push_back(obs);
+        endfunction
+
+        virtual function void write_stage_a(hit_record item);
+            int unsigned lane_idx;
+
+            if (item == null)
+                return;
+            lane_idx = item.lane_id;
+            if (lane_idx >= NUM_LANES)
+                return;
+            item.observation_point = OBS_STAGE_A;
+            item.root_hit_id_valid = 1'b1;
+            item.root_hit_id       = item.hit_id;
+            push_obs(stage_a_ledger[lane_idx], item);
+            total_stage_a++;
+        endfunction
+
+        virtual function void write_pre_rbcam(hit_record item);
+            int unsigned lane_idx;
+            bit [9:0]    key_bits;
+            int unsigned match_seq;
+
+            if (item == null)
+                return;
+            lane_idx = item.lane_id;
+            if (lane_idx >= NUM_LANES)
+                return;
+            item.observation_point = OBS_STAGE_PRE_RBCAM;
+            key_bits = item.key_bits();
+            match_seq = stage_pre_rbcam_ledger[lane_idx].exists(key_bits)
+                        ? stage_pre_rbcam_ledger[lane_idx][key_bits].size() : 0;
+            if (stage_a_ledger[lane_idx].exists(key_bits) &&
+                stage_a_ledger[lane_idx][key_bits].size() > match_seq)
+                copy_root_hit_id(item, stage_a_ledger[lane_idx][key_bits][match_seq]);
+            push_obs(stage_pre_rbcam_ledger[lane_idx], item);
+            total_pre_rbcam++;
+        endfunction
+
+        virtual function void write_post_rbcam(hit_record item);
+            int unsigned lane_idx;
+            bit [9:0]    key_bits;
+            int unsigned match_seq;
+
+            if (item == null)
+                return;
+            lane_idx = item.lane_id;
+            if (lane_idx >= NUM_LANES)
+                return;
+            item.observation_point = OBS_STAGE_POST_RBCAM;
+            key_bits = item.key_bits();
+            match_seq = stage_post_rbcam_ledger[lane_idx].exists(key_bits)
+                        ? stage_post_rbcam_ledger[lane_idx][key_bits].size() : 0;
+            if (stage_pre_rbcam_ledger[lane_idx].exists(key_bits) &&
+                stage_pre_rbcam_ledger[lane_idx][key_bits].size() > match_seq)
+                copy_root_hit_id(item, stage_pre_rbcam_ledger[lane_idx][key_bits][match_seq]);
+            push_obs(stage_post_rbcam_ledger[lane_idx], item);
+            total_post_rbcam++;
+        endfunction
+
+        virtual function void write_feb_egress(hit_record item);
+            int unsigned lane_idx;
+            bit [9:0]    key_bits;
+            int unsigned match_seq;
+
+            if (item == null)
+                return;
+            lane_idx = item.lane_id;
+            if (lane_idx >= NUM_LANES)
+                return;
+            item.observation_point = OBS_STAGE_FEB_EGRESS;
+            key_bits = item.key_bits();
+            match_seq = stage_feb_egress_ledger[lane_idx].exists(key_bits)
+                        ? stage_feb_egress_ledger[lane_idx][key_bits].size() : 0;
+            if (stage_post_rbcam_ledger[lane_idx].exists(key_bits) &&
+                stage_post_rbcam_ledger[lane_idx][key_bits].size() > match_seq)
+                copy_root_hit_id(item, stage_post_rbcam_ledger[lane_idx][key_bits][match_seq]);
+            push_obs(stage_feb_egress_ledger[lane_idx], item);
+            total_feb_egress++;
+        endfunction
+
+        virtual function void write_histogram(hit_record item);
+            if (item != null)
+                `uvm_info("TB_INT_HIST", item.describe(), UVM_HIGH)
+        endfunction
+
+        function automatic void reconcile_boundary(
+            ref obs_q_t up_ledger[bit [9:0]],
+
+            ref obs_q_t dn_ledger[bit [9:0]],
+            output int unsigned matched,
+            output int unsigned missing,
+            output int unsigned ghost
+        );
+            bit [9:0] key_bits;
+            bit       ok;
+
+            matched = 0;
+            missing = 0;
+            ghost   = 0;
+
+            if (up_ledger.first(key_bits)) begin
+                ok = 1'b1;
+                while (ok) begin
+                    int up_n;
+                    int dn_n;
+
+                    up_n = up_ledger[key_bits].size();
+                    dn_n = dn_ledger.exists(key_bits) ? dn_ledger[key_bits].size() : 0;
+                    matched += (up_n < dn_n) ? up_n : dn_n;
+                    if (up_n > dn_n)
+                        missing += (up_n - dn_n);
+                    ok = up_ledger.next(key_bits);
+                end
+            end
+
+            if (dn_ledger.first(key_bits)) begin
+                ok = 1'b1;
+                while (ok) begin
+                    int up_n;
+                    int dn_n;
+
+                    dn_n = dn_ledger[key_bits].size();
+                    up_n = up_ledger.exists(key_bits) ? up_ledger[key_bits].size() : 0;
+                    if (dn_n > up_n)
+                        ghost += (dn_n - up_n);
+                    ok = dn_ledger.next(key_bits);
+                end
+            end
+        endfunction
+
+        function automatic void export_closed_and_drops();
+            for (int lane_idx = 0; lane_idx < NUM_LANES; lane_idx++) begin
+                bit [9:0] key_bits;
+                bit       ok;
+
+                if (stage_a_ledger[lane_idx].first(key_bits)) begin
+                    ok = 1'b1;
+                    while (ok) begin
+                        int a_n;
+                        int pre_n;
+                        int post_n;
+                        int feb_n;
+                        int matched_all;
+
+                        a_n = stage_a_ledger[lane_idx][key_bits].size();
+                        pre_n = stage_pre_rbcam_ledger[lane_idx].exists(key_bits)
+                                ? stage_pre_rbcam_ledger[lane_idx][key_bits].size() : 0;
+                        post_n = stage_post_rbcam_ledger[lane_idx].exists(key_bits)
+                                 ? stage_post_rbcam_ledger[lane_idx][key_bits].size() : 0;
+                        feb_n = stage_feb_egress_ledger[lane_idx].exists(key_bits)
+                                ? stage_feb_egress_ledger[lane_idx][key_bits].size() : 0;
+                        matched_all = a_n;
+                        if (pre_n < matched_all)
+                            matched_all = pre_n;
+                        if (post_n < matched_all)
+                            matched_all = post_n;
+                        if (feb_n < matched_all)
+                            matched_all = feb_n;
+
+                        for (int obs_idx = 0; obs_idx < matched_all; obs_idx++) begin
+                            reporter.write_closed(stage_a_ledger[lane_idx][key_bits][obs_idx],
+                                                  stage_pre_rbcam_ledger[lane_idx][key_bits][obs_idx],
+                                                  stage_post_rbcam_ledger[lane_idx][key_bits][obs_idx],
+                                                  stage_feb_egress_ledger[lane_idx][key_bits][obs_idx]);
+                            total_closed_records++;
+                        end
+
+                        for (int obs_idx = matched_all; obs_idx < a_n; obs_idx++) begin
+                            string stage_name;
+                            time   last_seen_ts;
+
+                            stage_name   = "stage_a";
+                            last_seen_ts = stage_a_ledger[lane_idx][key_bits][obs_idx].abs_ts;
+                            if (obs_idx < pre_n) begin
+                                stage_name   = "pre_rbcam";
+                                last_seen_ts = stage_pre_rbcam_ledger[lane_idx][key_bits][obs_idx].abs_ts;
+                            end
+                            if (obs_idx < post_n) begin
+                                stage_name   = "post_rbcam";
+                                last_seen_ts = stage_post_rbcam_ledger[lane_idx][key_bits][obs_idx].abs_ts;
+                            end
+                            reporter.write_drop(stage_a_ledger[lane_idx][key_bits][obs_idx],
+                                                stage_name,
+                                                last_seen_ts,
+                                                "unknown");
+                        end
+                        ok = stage_a_ledger[lane_idx].next(key_bits);
+                    end
+                end
+            end
+        endfunction
+
+        virtual function void reconcile();
+            total_matched_a_pre   = 0;
+            total_missing_pre     = 0;
+            total_ghost_pre       = 0;
+            total_matched_pre_post = 0;
+            total_missing_post    = 0;
+            total_ghost_post      = 0;
+            total_matched_post_feb = 0;
+            total_missing_feb     = 0;
+            total_ghost_feb       = 0;
+            total_closed_records  = 0;
+
+            for (int lane_idx = 0; lane_idx < NUM_LANES; lane_idx++) begin
+                int unsigned matched;
+                int unsigned missing;
+                int unsigned ghost;
+
+                reconcile_boundary(stage_a_ledger[lane_idx],
+                                   stage_pre_rbcam_ledger[lane_idx],
+                                   matched, missing, ghost);
+                total_matched_a_pre += matched;
+                total_missing_pre   += missing;
+                total_ghost_pre     += ghost;
+
+                reconcile_boundary(stage_pre_rbcam_ledger[lane_idx],
+                                   stage_post_rbcam_ledger[lane_idx],
+                                   matched, missing, ghost);
+                total_matched_pre_post += matched;
+                total_missing_post     += missing;
+                total_ghost_post       += ghost;
+
+                reconcile_boundary(stage_post_rbcam_ledger[lane_idx],
+                                   stage_feb_egress_ledger[lane_idx],
+                                   matched, missing, ghost);
+                total_matched_post_feb += matched;
+                total_missing_feb      += missing;
+                total_ghost_feb        += ghost;
+            end
+
+            export_closed_and_drops();
+            `uvm_info("TB_INT_SB",
+                      $sformatf("reconcile A=%0d PRE=%0d POST=%0d FEB=%0d closed=%0d A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d",
+                                total_stage_a,
+                                total_pre_rbcam,
+                                total_post_rbcam,
+                                total_feb_egress,
+                                total_closed_records,
+                                total_matched_a_pre,
+                                total_missing_pre,
+                                total_ghost_pre,
+                                total_matched_pre_post,
+                                total_missing_post,
+                                total_ghost_post,
+                                total_matched_post_feb,
+                                total_missing_feb,
+                                total_ghost_feb),
+                      UVM_LOW)
+        endfunction
+
+        virtual function void check_phase(uvm_phase phase);
+            super.check_phase(phase);
+            reconcile();
+            if (require_zero_residual &&
+                (total_missing_pre != 0 || total_ghost_pre != 0 ||
+                 total_missing_post != 0 || total_ghost_post != 0 ||
+                 total_missing_feb != 0 || total_ghost_feb != 0)) begin
+                `uvm_error("TB_INT_SB",
+                           "non-zero per-bucket residual in strict smoke scoreboard")
+            end
+            if (expected_closed_records != 0 &&
+                total_closed_records != expected_closed_records) begin
+                `uvm_error("TB_INT_SB",
+                           $sformatf("closed_records mismatch expected=%0d actual=%0d",
+                                     expected_closed_records,
+                                     total_closed_records))
+            end
+        endfunction
+
+        virtual function void final_phase(uvm_phase phase);
+            super.final_phase(phase);
+            reporter.close();
+        endfunction
+    endclass
+
+endpackage

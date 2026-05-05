@@ -1,0 +1,19 @@
+	component fastlink_small is
+		port (
+			pll_powerdown           : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- pll_powerdown
+			tx_analogreset          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- tx_analogreset
+			tx_digitalreset         : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- tx_digitalreset
+			tx_pll_refclk           : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- tx_pll_refclk
+			tx_serial_data          : out std_logic_vector(3 downto 0);                      -- tx_serial_data
+			pll_locked              : out std_logic_vector(3 downto 0);                      -- pll_locked
+			tx_std_coreclkin        : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- tx_std_coreclkin
+			tx_std_clkout           : out std_logic_vector(3 downto 0);                      -- tx_std_clkout
+			tx_cal_busy             : out std_logic_vector(3 downto 0);                      -- tx_cal_busy
+			reconfig_to_xcvr        : in  std_logic_vector(559 downto 0) := (others => 'X'); -- reconfig_to_xcvr
+			reconfig_from_xcvr      : out std_logic_vector(367 downto 0);                    -- reconfig_from_xcvr
+			tx_parallel_data        : in  std_logic_vector(127 downto 0) := (others => 'X'); -- tx_parallel_data
+			tx_datak                : in  std_logic_vector(15 downto 0)  := (others => 'X'); -- tx_datak
+			unused_tx_parallel_data : in  std_logic_vector(31 downto 0)  := (others => 'X')  -- unused_tx_parallel_data
+		);
+	end component fastlink_small;
+

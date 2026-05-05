@@ -52,23 +52,23 @@ add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL arb_hit_type0
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE false
-add_fileset_file arb_hit_type0_fifo.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_fifo.sv
-add_fileset_file arb_hit_type0_arbiter.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_arbiter.sv
-add_fileset_file arb_hit_type0_watchdog.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_watchdog.sv
-add_fileset_file arb_hit_type0_runctl.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_runctl.sv
-add_fileset_file arb_hit_type0_csr.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_csr.sv
-add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0.sv TOP_LEVEL_FILE
+add_fileset_file arb_hit_type0_fifo.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_fifo.sv
+add_fileset_file arb_hit_type0_arbiter.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_arbiter.sv
+add_fileset_file arb_hit_type0_watchdog.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_watchdog.sv
+add_fileset_file arb_hit_type0_runctl.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_runctl.sv
+add_fileset_file arb_hit_type0_csr.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr.sv
+add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0.sv TOP_LEVEL_FILE
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL arb_hit_type0
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE false
-add_fileset_file arb_hit_type0_fifo.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_fifo.sv
-add_fileset_file arb_hit_type0_arbiter.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_arbiter.sv
-add_fileset_file arb_hit_type0_watchdog.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_watchdog.sv
-add_fileset_file arb_hit_type0_runctl.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_runctl.sv
-add_fileset_file arb_hit_type0_csr.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0_csr.sv
-add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH rtl/arb_hit_type0.sv TOP_LEVEL_FILE
+add_fileset_file arb_hit_type0_fifo.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_fifo.sv
+add_fileset_file arb_hit_type0_arbiter.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_arbiter.sv
+add_fileset_file arb_hit_type0_watchdog.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_watchdog.sv
+add_fileset_file arb_hit_type0_runctl.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_runctl.sv
+add_fileset_file arb_hit_type0_csr.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr.sv
+add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0.sv TOP_LEVEL_FILE
 
 # ---------- Parameters ----------
 

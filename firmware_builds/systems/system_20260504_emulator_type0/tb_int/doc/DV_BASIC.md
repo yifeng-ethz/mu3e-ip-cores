@@ -96,7 +96,7 @@ Each case ends with `UVM_ERROR == 0` and the SC bridge arbitration logs zero sta
 
 ## DT section (BASIC-DT-001..BASIC-DT-128)
 
-A single case is one (rate × multiplicity × spatial × temporal × phasing × source-mix) combination. The OoO scoreboard is primary-keyed on `uid` (per `DV_PLAN.md` §2.1). Every case asserts: zero ghost hits, zero unaccounted drops, four-stage latency CDFs within budget, histogram cross-check matches at every tap.
+A single case is one (rate × multiplicity × spatial × temporal × phasing × source-mix) combination. The per-bucket ledger scoreboard reconciles by `(lane, hit_key_t)` FIFO ledgers with `hit_key_t = {channel[4:0], t_fine[4:0]}` (per `DV_PLAN.md` §2.1). Every case asserts: ghost residual and missing residual per `(lane, key)` bucket within the per-case threshold set in `DV_COV.md`, four-stage latency CDFs within budget (Python-side from `closed_records.csv`), histogram cross-check matches at every tap.
 
 ### DT-A: smoke + DUT-contract corners (BASIC-DT-001..BASIC-DT-016, 16 cases)
 
