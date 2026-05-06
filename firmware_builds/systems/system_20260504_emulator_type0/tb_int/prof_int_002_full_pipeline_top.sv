@@ -49,6 +49,7 @@ module prof_int_002_full_pipeline_top;
     localparam logic [2:0] EMU_TX_MODE_LONG         = 3'b000;
     localparam logic [2:0] EMU_TX_MODE_SHORT        = 3'b100;
     localparam logic [4:0] ARB_CSR_CONTROL_ADDR     = 5'h02;
+    localparam logic [31:0] ARB_MODE_REAL           = 32'h0000_0000;
     localparam logic [31:0] ARB_MODE_EMU            = 32'h0000_0001;
     localparam int unsigned MUTRIG_FRAME_CYCLES_SHORT = 910;
     localparam int unsigned MUTRIG_FRAME_CYCLES_LONG  = 1550;
@@ -129,9 +130,31 @@ module prof_int_002_full_pipeline_top;
     int unsigned runctl_settle_timeout_cycles;
     string       traffic_mode;
     string       inject_driver;
+    string       source_mode;
+    string       latency_scope;
     logic [2:0] stage_a_lane_index;
     logic [7:0]  active_lane_mask;
         logic        injection_window_active;
+        logic        enable_post_rbcam_checks;
+        logic        enable_feb_egress_checks;
+        logic        virtual_raw0_offer_valid;
+        logic        virtual_raw0_offer_ready;
+        logic [47:0] virtual_raw0_offer_word;
+        logic        virtual_raw0_accept_pulse;
+        logic        virtual_raw0_fifo_rd_en;
+        logic [9:0]  virtual_raw0_event_count;
+        logic        virtual_raw0_fifo_empty;
+        logic        virtual_raw0_fifo_full;
+        logic        virtual_raw0_fifo_almost_full;
+        logic [8:0]  virtual_raw0_tx_data;
+        logic        virtual_raw0_tx_valid;
+        logic [31:0] virtual_raw0_rate_accum;
+        logic [4:0]  virtual_raw0_next_channel;
+        int unsigned virtual_raw0_header_delay_count;
+        int unsigned virtual_raw0_burst_remaining;
+        int unsigned virtual_raw0_burst_spacing_count;
+        int unsigned virtual_raw0_frame_seen_count;
+        int unsigned virtual_raw0_source_hit_count;
         logic [3:0]  csr_force_addr;
         logic [31:0] csr_force_wdata;
         logic [3:0]  inj_csr_force_addr;
@@ -366,7 +389,29 @@ module prof_int_002_full_pipeline_top;
         .stage_a_valid    (stage_a_any_valid),
         .pre_rbcam_valid  (pre_rbcam_any_valid),
         .post_rbcam_valid (post_rbcam_any_valid),
-        .feb_egress_valid (feb_egress_vif.valid | feb_egress_vif1.valid)
+        .feb_egress_valid (feb_egress_vif.valid | feb_egress_vif1.valid),
+        .enable_post_rbcam_checks (enable_post_rbcam_checks),
+        .enable_feb_egress_checks (enable_feb_egress_checks)
+    );
+
+    raw_mutrig_frame_top u_virtual_mutrig_raw0 (
+        .i_clk                 (clk_125),
+        .i_rst                 (rst),
+        .i_start_trans         (u_dut.data_path_subsystem.emulator_mutrig_0
+                                    .u_emulator_mutrig.frame_start_req),
+        .i_short_mode          (mutrig_short_mode[0]),
+        .i_gen_idle            (1'b1),
+        .i_offer_valid         (virtual_raw0_offer_valid),
+        .i_offer_word          (virtual_raw0_offer_word),
+        .o_offer_ready         (virtual_raw0_offer_ready),
+        .o_accept_pulse        (virtual_raw0_accept_pulse),
+        .o_fifo_rd_en          (virtual_raw0_fifo_rd_en),
+        .o_event_count         (virtual_raw0_event_count),
+        .o_fifo_empty          (virtual_raw0_fifo_empty),
+        .o_fifo_full           (virtual_raw0_fifo_full),
+        .o_fifo_almost_full    (virtual_raw0_fifo_almost_full),
+        .o_tx_data             (virtual_raw0_tx_data),
+        .o_tx_valid            (virtual_raw0_tx_valid)
     );
 
     function automatic logic [44:0] raw48_to_hit0(
@@ -374,7 +419,14 @@ module prof_int_002_full_pipeline_top;
         input logic [3:0]  asic
     );
         return {asic, raw_word[47:43], raw_word[41:27],
-                raw_word[26:22], raw_word[19:5], raw_word[20]};
+                raw_word[26:22], raw_word[20:6], raw_word[0]};
+    endfunction
+
+    function automatic logic [47:0] build_virtual_raw_hit_word(
+        input logic [4:0]  channel,
+        input logic [14:0] tcc
+    );
+        return {channel, 1'b0, tcc, 5'd0, 1'b0, tcc, 5'd0, 1'b1};
     endfunction
 
     function automatic logic [44:0] hit2_to_hit0(input logic [35:0] hit2_word);
@@ -454,15 +506,94 @@ module prof_int_002_full_pipeline_top;
         return hit1_word[38:35];
     endfunction
 
+    always_ff @(posedge clk_125) begin : virtual_raw_source_driver
+        logic emit_hit_v;
+        logic [31:0] rate_acc_next_v;
+        logic [4:0] channel_v;
+
+        emit_hit_v = 1'b0;
+        rate_acc_next_v = virtual_raw0_rate_accum;
+        channel_v = virtual_raw0_next_channel;
+
+        if (rst || (source_mode != "virtual_mutrig_raw") || !injection_window_active) begin
+            virtual_raw0_offer_valid <= 1'b0;
+            virtual_raw0_offer_word <= 48'd0;
+            virtual_raw0_rate_accum <= 32'd0;
+            virtual_raw0_next_channel <= hit_channel_low[4:0];
+            virtual_raw0_header_delay_count <= 0;
+            virtual_raw0_burst_remaining <= 0;
+            virtual_raw0_burst_spacing_count <= 0;
+            virtual_raw0_frame_seen_count <= 0;
+            virtual_raw0_source_hit_count <= 0;
+        end else begin
+            if (virtual_raw0_offer_valid && virtual_raw0_offer_ready) begin
+                virtual_raw0_offer_valid <= 1'b0;
+                virtual_raw0_source_hit_count <= virtual_raw0_source_hit_count + 1;
+                if (virtual_raw0_next_channel >= hit_channel_high[4:0])
+                    virtual_raw0_next_channel <= hit_channel_low[4:0];
+                else
+                    virtual_raw0_next_channel <= virtual_raw0_next_channel + 5'd1;
+            end
+
+            if (!virtual_raw0_offer_valid) begin
+                if (traffic_is_periodic()) begin
+                    rate_acc_next_v = virtual_raw0_rate_accum + hit_rate_q16[31:0];
+                    if (hit_rate_q16 != 0 && rate_acc_next_v >= 32'd65536) begin
+                        emit_hit_v = 1'b1;
+                        virtual_raw0_rate_accum <= rate_acc_next_v - 32'd65536;
+                    end else begin
+                        virtual_raw0_rate_accum <= rate_acc_next_v;
+                    end
+                end else if (traffic_is_header_sync()) begin
+                    if (active_frame_start_seen()) begin
+                        if ((inject_frame_count == 0) ||
+                            (virtual_raw0_frame_seen_count < inject_frame_count)) begin
+                            virtual_raw0_header_delay_count <= inject_phase_cycles;
+                            virtual_raw0_burst_remaining <= inject_burst_count;
+                            virtual_raw0_burst_spacing_count <= 0;
+                            virtual_raw0_frame_seen_count <= virtual_raw0_frame_seen_count + 1;
+                        end
+                    end else if (virtual_raw0_burst_remaining != 0) begin
+                        if (virtual_raw0_header_delay_count != 0) begin
+                            virtual_raw0_header_delay_count <= virtual_raw0_header_delay_count - 1;
+                        end else if (virtual_raw0_burst_spacing_count != 0) begin
+                            virtual_raw0_burst_spacing_count <= virtual_raw0_burst_spacing_count - 1;
+                        end else begin
+                            emit_hit_v = 1'b1;
+                            virtual_raw0_burst_remaining <= virtual_raw0_burst_remaining - 1;
+                            virtual_raw0_burst_spacing_count <=
+                                (inject_burst_spacing_cycles > 1) ?
+                                    (inject_burst_spacing_cycles - 2) : 0;
+                        end
+                    end
+                end
+
+                if (emit_hit_v) begin
+                    virtual_raw0_offer_valid <= 1'b1;
+                    virtual_raw0_offer_word <= build_virtual_raw_hit_word(
+                        channel_v,
+                        virtual_raw0_source_hit_count[14:0]);
+                end
+            end
+        end
+    end
+
     always_comb begin
         logic [44:0] stage_a_payload;
-        stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_0
-            .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd0);
-        stage_a_vif0.valid = active_lane_mask[0] &&
-            u_dut.data_path_subsystem.emulator_mutrig_0
-                .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid &&
-            u_dut.data_path_subsystem.emulator_mutrig_0
-                .u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready;
+        if (source_mode == "virtual_mutrig_raw") begin
+            stage_a_payload = raw48_to_hit0(virtual_raw0_offer_word, 4'd0);
+            stage_a_vif0.valid = active_lane_mask[0] &&
+                                 virtual_raw0_offer_valid &&
+                                 virtual_raw0_offer_ready;
+        end else begin
+            stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_0
+                .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd0);
+            stage_a_vif0.valid = active_lane_mask[0] &&
+                u_dut.data_path_subsystem.emulator_mutrig_0
+                    .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid &&
+                u_dut.data_path_subsystem.emulator_mutrig_0
+                    .u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready;
+        end
         stage_a_vif0.payload = stage_a_payload;
         stage_a_vif0.lane_id = 4'd0;
         stage_a_vif0.channel = stage_a_payload[40:36];
@@ -1229,6 +1360,14 @@ module prof_int_002_full_pipeline_top;
         return (traffic_mode == "poisson");
     endfunction
 
+    function automatic logic source_is_emu_direct();
+        return (source_mode == "emu_direct");
+    endfunction
+
+    function automatic logic source_is_virtual_raw();
+        return (source_mode == "virtual_mutrig_raw");
+    endfunction
+
     function automatic logic traffic_uses_rtl_injector();
         return traffic_is_header_sync() && (inject_driver == "rtl_injector");
     endfunction
@@ -1433,6 +1572,22 @@ module prof_int_002_full_pipeline_top;
         force u_dut.data_path_subsystem.emulator_mutrig_5.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
         force u_dut.data_path_subsystem.emulator_mutrig_6.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
         force u_dut.data_path_subsystem.emulator_mutrig_7.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
+    endtask
+
+    task automatic configure_virtual_raw_source();
+        force u_dut.data_path_subsystem.lvds_rx_controller_pro_0_decoded0_data =
+            virtual_raw0_tx_data;
+        force u_dut.data_path_subsystem.lvds_rx_controller_pro_0_decoded0_error =
+            3'b000;
+        force u_dut.data_path_subsystem.lvds_rx_controller_pro_0_decoded0_channel =
+            4'd0;
+        `uvm_info("PROF_INT_002_SOURCE",
+                  $sformatf("configured source=%s on generated decoded lane0; raw_tx_valid=%0b fifo_empty=%0b fifo_full=%0b",
+                            source_mode,
+                            virtual_raw0_tx_valid,
+                            virtual_raw0_fifo_empty,
+                            virtual_raw0_fifo_full),
+                  UVM_LOW)
     endtask
 
     function automatic logic active_frame_start_seen();
@@ -1868,16 +2023,20 @@ module prof_int_002_full_pipeline_top;
 
     task automatic configure_active_arb_lanes();
         int unsigned programmed;
+        logic [31:0] selected_mode;
 
         programmed = 0;
+        selected_mode = source_is_virtual_raw() ? ARB_MODE_REAL : ARB_MODE_EMU;
         for (int lane_idx = 0; lane_idx < 8; lane_idx++) begin
             if (active_lane_mask[lane_idx]) begin
-                csr_write_arb_lane(lane_idx, ARB_CSR_CONTROL_ADDR, ARB_MODE_EMU);
+                csr_write_arb_lane(lane_idx, ARB_CSR_CONTROL_ADDR, selected_mode);
                 programmed++;
             end
         end
         `uvm_info("PROF_INT_002_ARB_CSR",
-                  $sformatf("programmed active arb lanes to EMU mode mask=%02h count=%0d mode_vec=%04h",
+                  $sformatf("programmed active arb lanes source=%s mode=%0d mask=%02h count=%0d mode_vec=%04h",
+                            source_mode,
+                            selected_mode,
                             active_lane_mask,
                             programmed,
                             arb_csr_mode_vec()),
@@ -2438,6 +2597,8 @@ module prof_int_002_full_pipeline_top;
         int plus_runctl_settle_timeout_cycles;
         string plus_traffic_mode;
         string plus_inject_driver;
+        string plus_source_mode;
+        string plus_latency_scope;
         bit legacy_guard_plus_seen;
 
         run_cycles = 12_500_000;
@@ -2460,6 +2621,8 @@ module prof_int_002_full_pipeline_top;
         runctl_settle_timeout_cycles = 1_250_000;
         traffic_mode = "poisson";
         inject_driver = "tb_force";
+        source_mode = "emu_direct";
+        latency_scope = "full";
         active_lane_count = 1;
         active_lane_mask = 8'h01;
         active_lane_mask_popcount = 0;
@@ -2499,6 +2662,10 @@ module prof_int_002_full_pipeline_top;
             traffic_mode = plus_traffic_mode;
         if ($value$plusargs("TB_INT_INJECT_DRIVER=%s", plus_inject_driver))
             inject_driver = plus_inject_driver;
+        if ($value$plusargs("TB_INT_SOURCE=%s", plus_source_mode))
+            source_mode = plus_source_mode;
+        if ($value$plusargs("TB_INT_LATENCY_SCOPE=%s", plus_latency_scope))
+            latency_scope = plus_latency_scope;
         if ($value$plusargs("TB_INT_RUNCTL_CPP_GAP_CYCLES=%d", plus_runctl_cpp_gap_cycles))
             runctl_cpp_gap_cycles = plus_runctl_cpp_gap_cycles;
         if ($value$plusargs("TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=%d", plus_runctl_settle_timeout_cycles))
@@ -2522,6 +2689,33 @@ module prof_int_002_full_pipeline_top;
                          $sformatf("unknown TB_INT_INJECT_DRIVER=%s; falling back to tb_force",
                                    inject_driver))
             inject_driver = "tb_force";
+        end
+        if (!(source_is_emu_direct() || source_is_virtual_raw())) begin
+            `uvm_warning("PROF_INT_002_TOP",
+                         $sformatf("unknown TB_INT_SOURCE=%s; falling back to emu_direct",
+                                   source_mode))
+            source_mode = "emu_direct";
+        end
+        if (!((latency_scope == "full") || (latency_scope == "pre_rbcam"))) begin
+            `uvm_warning("PROF_INT_002_TOP",
+                         $sformatf("unknown TB_INT_LATENCY_SCOPE=%s; falling back to full",
+                                   latency_scope))
+            latency_scope = "full";
+        end
+        if (source_is_virtual_raw()) begin
+            if (traffic_is_poisson()) begin
+                `uvm_warning("PROF_INT_002_TOP",
+                             "virtual_mutrig_raw source supports periodic/header_sync in PROF-INT-002; falling back to periodic")
+                traffic_mode = "periodic";
+            end
+            if ((active_lane_mask != 8'h01) || (active_lane_count != 1)) begin
+                `uvm_warning("PROF_INT_002_TOP",
+                             $sformatf("virtual_mutrig_raw first bring-up is lane0-only; overriding active_lanes=%0d mask=%02h to 1/01",
+                                       active_lane_count,
+                                       active_lane_mask))
+                active_lane_count = 1;
+                active_lane_mask = 8'h01;
+            end
         end
         if (inject_pulse_high_cycles < 1)
             inject_pulse_high_cycles = 1;
@@ -2582,11 +2776,15 @@ module prof_int_002_full_pipeline_top;
 
         ctrl_vif.run_cycles = run_cycles;
         ctrl_vif.drain_cycles = drain_cycles;
+        enable_post_rbcam_checks = (latency_scope == "full");
+        enable_feb_egress_checks = (latency_scope == "full");
 
         @(negedge rst);
         repeat (64) @(posedge clk_125);
 
         configure_active_emulators();
+        if (source_is_virtual_raw())
+            configure_virtual_raw_source();
         if (traffic_uses_rtl_injector())
             configure_rtl_injector();
         csr_write_emu0(EMU_CSR_SIGNAL_ADDR, 32'h0000_0000);
@@ -2597,7 +2795,11 @@ module prof_int_002_full_pipeline_top;
         tb_int_run_window_db::configure_guards(stable_pre_guard_cycles,
                                                stable_post_guard_cycles);
         `uvm_info("PROF_INT_002_TOP",
-                  $sformatf("RUN_CONFIG run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d traffic=%s inject_driver=%s hit_ch=%0d:%0d short_mode=%0d hit_rate_q16=%0d inject_phase=%0d inject_count=%0d inject_pulse_high=%0d inject_frame_count=%0d inject_burst_count=%0d inject_burst_spacing=%0d runctl_mode=readyless runctl_cpp_gap=%0d runctl_settle_timeout=%0d",
+                  $sformatf("RUN_CONFIG source=%s latency_scope=%s post_checks=%0b feb_checks=%0b run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d traffic=%s inject_driver=%s hit_ch=%0d:%0d short_mode=%0d hit_rate_q16=%0d inject_phase=%0d inject_count=%0d inject_pulse_high=%0d inject_frame_count=%0d inject_burst_count=%0d inject_burst_spacing=%0d runctl_mode=readyless runctl_cpp_gap=%0d runctl_settle_timeout=%0d",
+                            source_mode,
+                            latency_scope,
+                            enable_post_rbcam_checks,
+                            enable_feb_egress_checks,
                             run_cycles,
                             drain_cycles,
                             stable_capture_cycles,
@@ -2638,10 +2840,18 @@ module prof_int_002_full_pipeline_top;
         report_rbcam_csr_state("after RUNNING");
         tb_int_run_window_db::note_run_start($time);
         injection_window_active = 1'b1;
-        if (traffic_is_header_sync()) begin
+        if (traffic_is_header_sync() && source_is_emu_direct()) begin
             fork
                 drive_header_sync_injections();
             join_none
+        end else if (traffic_is_header_sync() && source_is_virtual_raw()) begin
+            `uvm_info("PROF_INT_002_INJECT",
+                      $sformatf("virtual_raw header-sync source owns injection scheduling frames=%0d burst=%0d spacing=%0d phase=%0d",
+                                inject_frame_count,
+                                inject_burst_count,
+                                inject_burst_spacing_cycles,
+                                inject_phase_cycles),
+                      UVM_LOW)
         end
         repeat (stable_pre_guard_cycles) @(posedge clk_125);
         tb_int_run_window_db::note_stable_start($time);

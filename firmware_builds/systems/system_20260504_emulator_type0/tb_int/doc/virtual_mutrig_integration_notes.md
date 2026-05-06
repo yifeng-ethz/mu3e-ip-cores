@@ -1,6 +1,6 @@
 # Virtual MuTRiG integration notes for tb_int
 
-Scope: planning notes only. No RTL, IP packaging, Qsys, or UVM source files are changed by this document.
+Scope: tb_int source-model notes for the first decoded-byte virtual MuTRiG integration. The implemented path is a simulation-only source selector in PROF-INT-002; it does not change Qsys or IP RTL.
 
 Golden source inspected:
 
@@ -12,18 +12,18 @@ The tag pins the smoke harness, `digital_all.vhdl`, and several hdlcore dependen
 
 ## Recommendation
 
-Add the tagged virtual MuTRiG as a second tb_int source mode beside the existing direct emulator path. For the first integration, use the decoded 9-bit raw MuTRiG frame source from the existing A/B bridge:
+Add the tagged virtual MuTRiG as a second tb_int source mode beside the existing direct emulator path. The first integration uses the decoded 9-bit raw MuTRiG frame source from the existing A/B bridge:
 
 `emulator_mutrig/tb/mutrig_true_ab/raw_mutrig_frame_top.vhd`
 
 This wrapper accepts golden MuTRiG 48-bit L2 words and emits decoded MuTRiG frame bytes as `{isk, byte}` on a 9-bit stream. It is the minimal useful boundary for tb_int because it feeds the real `mutrig_frame_deassembly_0.rx8b1k` input while avoiding Altera LVDS bit-serial/DPA lock behavior in a system integration test.
 
-Keep both source paths:
+The source is selected with `+TB_INT_SOURCE=emu_direct|virtual_mutrig_raw`, surfaced by the Makefile as `PROF_INT_002_SOURCE`. Keep both source paths:
 
 - Existing emulator path: `emulator_mutrig_qsys_lane` with `BYTE_STREAM_ENABLE=0`, direct `aso_hit_type0` into `arb_hit_type0_0`.
-- New virtual raw path: `raw_mutrig_frame_top` emits decoded frame bytes into `mutrig_frame_deassembly_0.rx8b1k`; `mutrig_frame_deassembly_0.aso_hit_type0` then feeds `arb_hit_type0_0`.
+- New virtual raw path: `raw_mutrig_frame_top` emits decoded frame bytes into generated decoded-lane 0 wiring, through the existing Avalon-ST adapter and `mutrig_frame_deassembly_0.rx8b1k`; `mutrig_frame_deassembly_0.aso_hit_type0` then feeds `arb_hit_type0_0`.
 
-Use a later plusarg or test parameter such as `+TB_INT_SOURCE=emu_direct|virtual_mutrig_raw|mixed`. The virtual raw mode should configure `arb_hit_type0_0` to accept the real/deassembly path. The existing emulator smoke path should keep the current emulator selection. Add `mixed` only after both source streams have independent monitors and deterministic source IDs.
+The virtual raw mode configures the active arb lane to REAL mode. The existing emulator smoke path keeps EMU selection. Add `mixed` only after both source streams have independent monitors and deterministic source IDs.
 
 ## Source files to reuse
 
@@ -35,8 +35,7 @@ Minimal decoded-9b source path:
    - `/home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/datapath_defs/source/rtl/vhdl/serial_comm_defs.vhd`
    - `/home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/datapath_defs/source/rtl/vhdl/txt_util.vhd`
 2. FIFO dependency:
-   - Prefer tagged golden file: `/home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/hdlcore_lib/generic_memory/generic_dp_fifo/source/rtl/vhdl/generic_dp_fifo.vhd`
-   - Existing A/B bridge fallback: `emulator_mutrig/tlm/raw_support/hdlcore_lib/generic_memory/generic_dp_fifo/source/rtl/vhdl/generic_dp_fifo.vhd`
+   - Existing A/B bridge dependency: `emulator_mutrig/tlm/raw_support/hdlcore_lib/generic_memory/generic_dp_fifo/source/rtl/vhdl/generic_dp_fifo.vhd`
 3. Golden MuTRiG frame generator:
    - `/home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/frame_generator/source/rtl/vhdl/crc16_8.vhd`
    - `/home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/frame_generator/source/rtl/vhdl/frame_generator.vhd`
@@ -64,18 +63,21 @@ Optional full digital virtual MuTRiG path:
 
 Decoded-9b virtual MuTRiG source:
 
-1. `vlib work` and map the same work library used by the DUT simulation.
+1. `vlib mutrig_raw` and map it beside the DUT simulation work library.
 2. `vcom -2008 /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/datapath_defs/source/rtl/vhdl/datapath_helpers.vhd`
 3. `vcom -2008 /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/datapath_defs/source/rtl/vhdl/datapath_types.vhd`
 4. `vcom -2008 /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/datapath_defs/source/rtl/vhdl/serial_comm_defs.vhd`
 5. `vcom -2008 /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/datapath_defs/source/rtl/vhdl/txt_util.vhd`
-6. `vcom -2008 /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/hdlcore_lib/generic_memory/generic_dp_fifo/source/rtl/vhdl/generic_dp_fifo.vhd`
+6. `vcom -2008 emulator_mutrig/tlm/raw_support/hdlcore_lib/generic_memory/generic_dp_fifo/source/rtl/vhdl/generic_dp_fifo.vhd`
 7. `vcom -2008 /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/frame_generator/source/rtl/vhdl/crc16_8.vhd`
 8. `vcom -2008 /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb/units/frame_generator/source/rtl/vhdl/frame_generator.vhd`
 9. `vcom -2008 emulator_mutrig/tb/mutrig_true_ab/raw_mutrig_frame_top.vhd`
-10. Compile generated `focus_emulator_type0_system` DUT sources using the existing tb_int DUT compile hook.
+10. Compile generated `focus_emulator_type0_system` DUT sources using the existing tb_int DUT compile hook in the normal DUT work library.
 11. Compile UVM and tb_int SV sources with `firmware_builds/systems/system_20260504_emulator_type0/tb_int/script/tb_int.f`.
 12. Compile the later tb_int virtual-source wrapper/top after the DUT and before `vsim`.
+13. Run PROF-INT-002 with `-L mutrig_raw` so `raw_mutrig_frame_top` elaborates against the tagged frame-generator and CRC units while generated-system design units remain in the normal work library.
+
+The separate library is required because both the generated full8lane system and the tagged MuTRiG source define a `crc16_8` design unit with incompatible interfaces. Keeping the virtual source in `mutrig_raw` prevents VHDL default binding from selecting the generated-system CRC for the tagged frame generator.
 
 Do not add the standalone SV emulator A/B model to the tb_int source list unless the test intentionally performs an A/B comparison inside tb_int. The system DUT already contains the emulator source path.
 
@@ -120,8 +122,8 @@ function automatic logic [44:0] raw48_to_hit0(logic [47:0] raw_word, logic [3:0]
     raw_word[47:43],
     raw_word[41:27],
     raw_word[26:22],
-    raw_word[19:5],
-    raw_word[20]
+    raw_word[20:6],
+    raw_word[0]
   };
 endfunction
 ```
@@ -136,14 +138,13 @@ The generated focus system connects LVDS decode to frame deassembly through:
 - `avalon_st_adapter_out_0_error[2:0]`
 - `mutrig_frame_deassembly_0.asi_rx8b1k_*`
 
-For virtual raw mode, drive the deassembly-side adapter output in simulation:
+For virtual raw mode, PROF-INT-002 drives the generated decoded-lane 0 input to the Avalon-ST adapter in simulation:
 
-- `avalon_st_adapter_out_0_data <= o_tx_data`
-- `avalon_st_adapter_out_0_valid <= o_tx_valid`
-- `avalon_st_adapter_out_0_channel <= lane_id[3:0]`
-- `avalon_st_adapter_out_0_error <= 3'b000`
+- `lvds_rx_controller_pro_0_decoded0_data <= o_tx_data`
+- `lvds_rx_controller_pro_0_decoded0_channel <= lane_id[3:0]`
+- `lvds_rx_controller_pro_0_decoded0_error <= 3'b000`
 
-Implement this later as a testbench-only hierarchical force, bind helper, or simulation wrapper. Do not change the Qsys system or IP RTL for this source mode.
+The generated adapter has no input-valid sideband in this build, and `raw_mutrig_frame_top.o_tx_valid` is always asserted while it emits MuTRiG frame or idle symbols. This is a testbench-only hierarchical force. It bypasses LVDS PHY/DPA behavior, but it keeps the generated adapter, `mutrig_frame_deassembly`, MTS, rbCAM, and FEB egress datapath in the loop.
 
 ## tb_int analysis fields
 
@@ -161,7 +162,7 @@ Current tb_int scoreboard records hits as `hit_record` objects. The virtual MuTR
 - `observation_point`: `stage_a` for accepted source words, then existing pre-rbCAM/post-rbCAM/FEB monitor names downstream
 - `root_hit_id`: set by the first source-stage monitor and propagated by the existing per-bucket ledger scoreboard
 
-Publish the source-stage record on `o_accept_pulse`, not on `o_tx_valid`. `o_accept_pulse` marks that a raw L2 word entered the virtual MuTRiG frame source. `o_tx_valid` marks byte-stream serialization and may span many cycles per accepted hit.
+Publish the source-stage record on the raw-source offer/ready acceptance, not on `o_tx_valid`. `o_tx_valid` marks byte-stream serialization and may span many cycles per accepted hit.
 
 For the downstream real path, `mutrig_frame_deassembly_0.aso_hit_type0_*` produces the 45-bit hit_type0 payload expected by the existing adapters and monitors. Existing pre-rbCAM and post-rbCAM monitors should remain the sink-side truth for ordering and loss checks.
 
