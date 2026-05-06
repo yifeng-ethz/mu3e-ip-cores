@@ -13,6 +13,9 @@ PROF_INT_002_PRE_RBCAM_INJECT_DRIVER ?= tb_force
 PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES ?= 100
 PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT ?= 128
 PROF_INT_002_PRE_RBCAM_INJECT_PULSE_HIGH_CYCLES ?= 5
+PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT ?= 0
+PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT ?= 1
+PROF_INT_002_PRE_RBCAM_INJECT_BURST_SPACING_CYCLES ?= 10
 PROF_INT_002_PRE_RBCAM_RUN_CYCLES ?= 200000
 PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES ?= 4096
 PROF_INT_002_PRE_RBCAM_CHANNEL_LOW ?= 0
@@ -20,16 +23,20 @@ PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH ?= 1
 PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT ?= 1
 PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK ?= 1
 PROF_INT_002_PRE_RBCAM_PHASE_SWEEP ?= 100 200 300 400 500 600 700 800 900
+PROF_INT_002_PRE_RBCAM_BURST_SWEEP ?= 1 2 3 4 5 6 7
 PROF_INT_002_PRE_RBCAM_CASE ?= prof_int_002_pre_rbcam_$(PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE)_phase$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES)
 PROF_INT_002_PRE_RBCAM_DIR := $(SIM_ROOT)/$(PROF_INT_002_PRE_RBCAM_CASE)
 PROF_INT_002_PRE_RBCAM_HIST_DIR := $(PROF_INT_002_PRE_RBCAM_DIR)/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_phase_sweep/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_RTL_INJ_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_ASIC_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100/pre_rbcam_hist
+PROF_INT_002_PRE_RBCAM_FULL8_BURST_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100/pre_rbcam_hist
 PROF_INT_002_REPORT_DIR := $(TB_INT_ROOT)/reports
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_RTL_INJ_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_channel_rate_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_1L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
 PROF_INT_002_REPORT_DIR_8L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s
 PROF_INT_002_REPORT_DIR_EMU_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s
@@ -63,6 +70,8 @@ PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh 
 \tplot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector \
 \trun_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
 \tplot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
+\trun_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
+\tplot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
 \trun_prof_int_002_pre_rbcam_periodic_2ch \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
@@ -233,6 +242,9 @@ run_prof_int_002_pre_rbcam_latency: comp_prof_int_002 prepare_prof_int_002_mem_i
 		    +TB_INT_INJECT_PHASE_CYCLES=$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES) \
 		    +TB_INT_INJECT_PULSE_COUNT=$(PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT) \
 		    +TB_INT_INJECT_PULSE_HIGH_CYCLES=$(PROF_INT_002_PRE_RBCAM_INJECT_PULSE_HIGH_CYCLES) \
+		    +TB_INT_INJECT_FRAME_COUNT=$(PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT) \
+		    +TB_INT_INJECT_BURST_COUNT=$(PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT) \
+		    +TB_INT_INJECT_BURST_SPACING_CYCLES=$(PROF_INT_002_PRE_RBCAM_INJECT_BURST_SPACING_CYCLES) \
 		    +TB_INT_INJECT_DRIVER=$(PROF_INT_002_PRE_RBCAM_INJECT_DRIVER) \
 	    +TB_INT_STABLE_ONLY_EXPORT=0 \
 	    +TB_INT_ACTIVE_LANE_COUNT=$(PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT) \
@@ -343,6 +355,64 @@ plot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100: run_prof_int_002_pre_r
 	    --channel-mode lane-local
 	@echo "=== PROF-INT-002 ASIC1-7 pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP)/contact_sheet_dislin_p1.png ==="
 	@echo "=== PROF-INT-002 ASIC1-7 pre-rbCAM channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
+
+run_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100:
+	@set -e; for burst in $(PROF_INT_002_PRE_RBCAM_BURST_SWEEP); do \
+	    $(MAKE) run_prof_int_002_pre_rbcam_latency \
+	        PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
+	        PROF_INT_002_PRE_RBCAM_INJECT_DRIVER=tb_force \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=100 \
+	        PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT=128 \
+	        PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT=$$burst \
+	        PROF_INT_002_PRE_RBCAM_INJECT_BURST_SPACING_CYCLES=10 \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT=0 \
+	        PROF_INT_002_PRE_RBCAM_RUN_CYCLES=400000 \
+	        PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES=131072 \
+	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT=8 \
+	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK=ff \
+	        PROF_INT_002_PRE_RBCAM_CHANNEL_LOW=0 \
+	        PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH=31 \
+	        PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_header_sync_full8ch_phase100_burst$${burst}; \
+	    csv="$(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_full8ch_phase100_burst$${burst}/pre_rbcam_records.csv"; \
+	    expected=$$((128 * burst * 8 * 32)); \
+	    if [ ! -s "$$csv" ]; then \
+	        echo "ERROR: $$csv missing or empty"; \
+	        exit 1; \
+	    fi; \
+	    actual=$$(awk 'NR > 1 {n++} END {print n + 0}' "$$csv"); \
+	    if [ "$$actual" -ne "$$expected" ]; then \
+	        echo "ERROR: full8/full32 header-sync burst$${burst} expected $$expected pre-rbCAM rows, got $$actual"; \
+	        echo "ERROR: sweep is blocked; direct-emulator multi-active identity must be fixed before plotting"; \
+	        exit 1; \
+	    fi; \
+	done
+	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_full8ch_phase100_burst[1-7]' \
+	    --hist-dir $(PROF_INT_002_PRE_RBCAM_FULL8_BURST_SWEEP_HIST_DIR) \
+	    --hist-formats csv,png \
+	    --aggregate
+
+plot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100: run_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_latency_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_full8ch_phase100_burst[1-7]' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP) \
+	    --rows-per-page 4 \
+	    --stage pre-rbcam \
+	    --title-tag "All ASICs/full32 header-sync phase100 burst sweep pre-rbCAM, x=[-1000,3096]"
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_full8ch_phase100_burst[1-7]' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL) \
+	    --rows-per-page 4 \
+	    --title-tag "All ASICs/full32 header-sync phase100 burst sweep" \
+	    --record-csv pre_rbcam_records.csv \
+	    --channel-mode lane-local
+	@echo "=== PROF-INT-002 full8/full32 header-sync burst sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP)/contact_sheet_dislin_p1.png ==="
+	@echo "=== PROF-INT-002 full8/full32 header-sync burst sweep channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
 
 run_prof_int_002_pre_rbcam_periodic_2ch:
 	$(MAKE) run_prof_int_002_pre_rbcam_latency \

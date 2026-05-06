@@ -120,6 +120,9 @@ module prof_int_002_full_pipeline_top;
     int unsigned inject_phase_cycles;
     int unsigned inject_pulse_count;
     int unsigned inject_pulse_high_cycles;
+    int unsigned inject_frame_count;
+    int unsigned inject_burst_count;
+    int unsigned inject_burst_spacing_cycles;
     int unsigned active_lane_count;
     int unsigned active_lane_mask_popcount;
     int unsigned runctl_cpp_gap_cycles;
@@ -1433,7 +1436,10 @@ module prof_int_002_full_pipeline_top;
         endcase
     endtask
 
-    task automatic drive_active_emulator_inject_pulse(input int unsigned pulse_idx);
+    task automatic drive_active_emulator_inject_pulse(
+        input int unsigned pulse_idx,
+        input logic        post_debug
+    );
         @(negedge clk_125);
         for (int lane_idx = 0; lane_idx < 8; lane_idx++) begin
             if (active_lane_mask[lane_idx])
@@ -1458,7 +1464,7 @@ module prof_int_002_full_pipeline_top;
             if (active_lane_mask[lane_idx])
                 force_emulator_inject_pulse_low(lane_idx);
         end
-        if (pulse_idx < 8) begin
+        if (post_debug && pulse_idx < 8) begin
             repeat (6) @(posedge clk_125);
             `uvm_info("PROF_INT_002_INJECT",
                       $sformatf("header_sync pulse=%0d post6 inj0=%0b sig0=%0b sig_ready0=%0b ticket0=%0b ticket_ready0=%0b ticket_count0=%0d pending0=%0b l2_level0=%0d hit_count0=%0d",
@@ -1506,11 +1512,6 @@ module prof_int_002_full_pipeline_top;
 
         sent = 0;
         frame_interval = active_frame_interval_cycles();
-        if (active_lane_mask_popcount != 1) begin
-            `uvm_warning("PROF_INT_002_INJECT",
-                         $sformatf("header_sync validation expects one active ASIC; active_mask=%02h",
-                                   active_lane_mask))
-        end
         if (traffic_uses_rtl_injector()) begin
             wait_active_frame_start(frame_seen);
             while (injection_window_active &&
@@ -1532,6 +1533,38 @@ module prof_int_002_full_pipeline_top;
                       UVM_LOW)
             return;
         end
+        if (inject_frame_count != 0) begin
+            int unsigned frame_sent;
+
+            frame_sent = 0;
+            while (injection_window_active && frame_sent < inject_frame_count) begin
+                wait_active_frame_start(frame_seen);
+                if (!injection_window_active || !frame_seen)
+                    break;
+                repeat (inject_phase_cycles) @(posedge clk_125);
+                for (int unsigned burst_idx = 0;
+                     burst_idx < inject_burst_count && injection_window_active;
+                     burst_idx++) begin
+                    drive_active_emulator_inject_pulse(sent, 1'b0);
+                    sent++;
+                    if (burst_idx + 1 < inject_burst_count &&
+                        inject_burst_spacing_cycles > 1)
+                        repeat (inject_burst_spacing_cycles - 1) @(posedge clk_125);
+                end
+                frame_sent++;
+            end
+            `uvm_info("PROF_INT_002_INJECT",
+                      $sformatf("header_sync frame-burst injection driver done frames=%0d requested_frames=%0d pulses=%0d burst_count=%0d burst_spacing=%0d phase=%0d active_mask=%02h",
+                                frame_sent,
+                                inject_frame_count,
+                                sent,
+                                inject_burst_count,
+                                inject_burst_spacing_cycles,
+                                inject_phase_cycles,
+                                active_lane_mask),
+                      UVM_LOW)
+            return;
+        end
         while (injection_window_active &&
                (inject_pulse_count == 0 || sent < inject_pulse_count)) begin
             wait_active_frame_start(frame_seen);
@@ -1540,7 +1573,7 @@ module prof_int_002_full_pipeline_top;
             repeat (inject_phase_cycles) @(posedge clk_125);
             if (!injection_window_active)
                 break;
-            drive_active_emulator_inject_pulse(sent);
+            drive_active_emulator_inject_pulse(sent, 1'b1);
             sent++;
         end
         `uvm_info("PROF_INT_002_INJECT",
@@ -2323,6 +2356,9 @@ module prof_int_002_full_pipeline_top;
         int plus_inject_phase_cycles;
         int plus_inject_pulse_count;
         int plus_inject_pulse_high_cycles;
+        int plus_inject_frame_count;
+        int plus_inject_burst_count;
+        int plus_inject_burst_spacing_cycles;
         int plus_runctl_cpp_gap_cycles;
         int plus_runctl_settle_timeout_cycles;
         string plus_traffic_mode;
@@ -2342,6 +2378,9 @@ module prof_int_002_full_pipeline_top;
         inject_phase_cycles = 100;
         inject_pulse_count = 0;
         inject_pulse_high_cycles = 5;
+        inject_frame_count = 0;
+        inject_burst_count = 1;
+        inject_burst_spacing_cycles = 10;
         runctl_cpp_gap_cycles = 125_000;
         runctl_settle_timeout_cycles = 1_250_000;
         traffic_mode = "poisson";
@@ -2375,6 +2414,12 @@ module prof_int_002_full_pipeline_top;
             inject_pulse_count = plus_inject_pulse_count;
         if ($value$plusargs("TB_INT_INJECT_PULSE_HIGH_CYCLES=%d", plus_inject_pulse_high_cycles))
             inject_pulse_high_cycles = plus_inject_pulse_high_cycles;
+        if ($value$plusargs("TB_INT_INJECT_FRAME_COUNT=%d", plus_inject_frame_count))
+            inject_frame_count = plus_inject_frame_count;
+        if ($value$plusargs("TB_INT_INJECT_BURST_COUNT=%d", plus_inject_burst_count))
+            inject_burst_count = plus_inject_burst_count;
+        if ($value$plusargs("TB_INT_INJECT_BURST_SPACING_CYCLES=%d", plus_inject_burst_spacing_cycles))
+            inject_burst_spacing_cycles = plus_inject_burst_spacing_cycles;
         if ($value$plusargs("TB_INT_TRAFFIC_MODE=%s", plus_traffic_mode))
             traffic_mode = plus_traffic_mode;
         if ($value$plusargs("TB_INT_INJECT_DRIVER=%s", plus_inject_driver))
@@ -2407,6 +2452,12 @@ module prof_int_002_full_pipeline_top;
             inject_pulse_high_cycles = 1;
         if (inject_pulse_high_cycles > 255)
             inject_pulse_high_cycles = 255;
+        if (inject_burst_count < 1)
+            inject_burst_count = 1;
+        if (inject_burst_count > 64)
+            inject_burst_count = 64;
+        if (inject_burst_spacing_cycles < 1)
+            inject_burst_spacing_cycles = 1;
         if (hit_channel_low > 31)
             hit_channel_low = 31;
         if (hit_channel_high > 31)
@@ -2471,7 +2522,7 @@ module prof_int_002_full_pipeline_top;
         tb_int_run_window_db::configure_guards(stable_pre_guard_cycles,
                                                stable_post_guard_cycles);
         `uvm_info("PROF_INT_002_TOP",
-                  $sformatf("RUN_CONFIG run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d traffic=%s inject_driver=%s hit_ch=%0d:%0d short_mode=%0d hit_rate_q16=%0d inject_phase=%0d inject_count=%0d inject_pulse_high=%0d runctl_mode=readyless runctl_cpp_gap=%0d runctl_settle_timeout=%0d",
+                  $sformatf("RUN_CONFIG run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d traffic=%s inject_driver=%s hit_ch=%0d:%0d short_mode=%0d hit_rate_q16=%0d inject_phase=%0d inject_count=%0d inject_pulse_high=%0d inject_frame_count=%0d inject_burst_count=%0d inject_burst_spacing=%0d runctl_mode=readyless runctl_cpp_gap=%0d runctl_settle_timeout=%0d",
                             run_cycles,
                             drain_cycles,
                             stable_capture_cycles,
@@ -2489,6 +2540,9 @@ module prof_int_002_full_pipeline_top;
                             inject_phase_cycles,
                             inject_pulse_count,
                             inject_pulse_high_cycles,
+                            inject_frame_count,
+                            inject_burst_count,
+                            inject_burst_spacing_cycles,
                             runctl_cpp_gap_cycles,
                             runctl_settle_timeout_cycles),
                   UVM_LOW)

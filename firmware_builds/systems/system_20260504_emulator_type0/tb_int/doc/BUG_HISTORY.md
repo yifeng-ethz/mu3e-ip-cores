@@ -43,6 +43,7 @@ Historical formal note:
 | [BUG-006-H](#bug-006-h-prof-int-002-non-asic0-header-sync-used-asic0-only-controls-and-lane-identity) | H | hard stuck error | `directed-only (non-ASIC0 header-sync source validation)` | fixed in harness; ASIC1-7 sweep passed | PROF-INT-002 ASIC1 pre-rbCAM diagnostic on `2026-05-06` | pending | Non-ASIC0 header-sync validation was blocked by ASIC0-only source controls, arb CSR setup, and scoreboard lane identity. |
 | [BUG-007-R](#bug-007-r-direct-emulator-source-does-not-produce-mutrig-injector-headerinfo) | R | hard stuck error | `directed-only (RTL-injector header-sync validation with direct emulator source)` | open RTL patch; simulation shim validated | PROF-INT-002 RTL-injector phase-sweep setup on `2026-05-06` | pending | The direct emulator source does not drive the FDA/headerinfo valid stream that `mutrig_injector_0` uses for CSR-controlled header-sync delay, so emulator-only RTL-injector scans need a temporary harness shim until the RTL/integration path is repaired. |
 | [BUG-008-R](#bug-008-r-unconnected-inject-aux-pulse-poisoned-injector-fanout) | R | hard stuck error | `directed-only (RTL-injector path using generated fanout)` | open Qsys tie-off; harness force validated | PROF-INT-002 RTL-injector smoke on `2026-05-06` | pending | `full8lane_type0_system` left `data_path_subsystem.inject_aux_pulse` unconnected, so `pulse_fanout8` ORed the real injector pulse with `X` and suppressed emulator hits in simulation. |
+| [BUG-009-H](#bug-009-h-full8-full32-header-sync-burst-sweep-has-ambiguous-direct-emulator-identity) | H | hard stuck error | `directed-only (multi-active direct-emulator header-sync burst reference)` | open blocker; plot guard added | PROF-INT-002 full8/full32 burst sweep on `2026-05-06` | pending | Full8/full32 direct-emulator header-sync burst sweeps cannot be accepted as golden pre-rbCAM latency plots because the current monitor identity aliases multi-active direct-emulator hits and the generated path drops most Stage-A offers before pre-rbCAM. |
 
 ## 2026-05-06
 
@@ -244,3 +245,30 @@ Historical formal note:
     focused rerun `prof_int_002_pre_rbcam_header_sync_rtlinj_phase100_diag4_tie_aux` produced 8 pre-rbCAM rows for four headers and two channels, with analyzer latency `min=818`, `p50=818.5`, `max=819` cycles. The full RTL-injector ASIC0/two-channel sweep then produced 256 rows per phase across phase100..phase900, confirming that the forced low auxiliary injector input restores deterministic fanout behavior for the simulation shim.
   - potential_hazard:
     medium until the Qsys tie-off is authored because any generated-system path using the injector fanout can inherit simulation `X` behavior from the unconnected auxiliary input; low for the temporary PROF-INT-002 shim after the explicit force
+
+### BUG-009-H: full8/full32 header-sync burst sweep has ambiguous direct-emulator identity
+
+- First seen in:
+  - PROF-INT-002 full8/full32 pre-rbCAM header-sync burst sweep at phase 100 on `2026-05-06`
+  - command family:
+    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int plot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 PROF_INT_002_RUNCTL_CPP_GAP_CYCLES=1000 PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES=20000`
+- Symptom:
+  - burst1 requested 128 frames x 1 pulse/frame x 8 ASICs x 32 channels = 32768 Stage-A offers, but the run ended with `A=32768 PRE=6656 POST=1096 FEB=1634`
+  - burst2 requested 65536 Stage-A offers and ended with `A=65536 PRE=5632 POST=774 FEB=1640`
+  - the Stage-A -> pre-rbCAM ledger reported large residuals (`6656/26112/0` matched/missing/ghost for burst1 and `5632/59904/0` for burst2), while MTS input counters saw all offered hits
+  - debug rows showed repeated pre-rbCAM payloads with an ASIC field of zero across multiple physical taps; attempted tap-based remapping can make a small smoke test look balanced but fabricates identity and produces negative latencies once drops or repeated buckets appear
+- Root cause:
+  - the current direct-emulator Stage-A monitor observes a source-internal boundary and assigns physical Qsys lane identity, while the downstream pre-rbCAM monitor sees hit_type1 payload identity after generated-system processing
+  - in multi-active direct-emulator header-sync mode, the `(lane, channel, t_fine)` FIFO-ledger buckets are not unique enough to recover lineage after most Stage-A offers do not reach pre-rbCAM
+  - this is a harness/source-model blocker for the all-active golden-reference sheet; it does not invalidate the single-active ASIC0 and ASIC1-7 phase-100 source checks, which keep one physical lane active and therefore avoid the multi-source alias
+- Fix status:
+  - state:
+    open blocker; report target fails closed
+  - mechanism:
+    PROF-INT-002 now supports frame-counted header-sync burst injection with configurable burst multiplicity and 10-cycle pulse spacing, but `run_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100` rejects each burst unless `pre_rbcam_records.csv` contains exactly `128 * burst_count * 8 * 32` rows. The multi-active pre-rbCAM monitor keeps using the on-wire payload lane instead of a tap-number substitute, so the harness does not hide the identity collapse.
+  - before_fix_outcome:
+    the sweep could continue into analysis/plotting even after burst1 and burst2 failed the expected pre-rbCAM row count by large margins
+  - after_fix_outcome:
+    the sweep is blocked before histogram analysis or DISLIN rendering whenever the observed pre-rbCAM row count is not exact; no full8/full32 header-sync burst plot is accepted as golden evidence yet
+  - potential_hazard:
+    high until a durable identity source is selected. Acceptable fixes include probing the actual generated hit_type0 source boundary with preserved ASIC identity, repairing the direct-emulator generated path so downstream payload identity matches the active source, or moving the golden reference to the real MuTRiG/LVDS/FDA path where headerinfo and source identity are naturally present.
