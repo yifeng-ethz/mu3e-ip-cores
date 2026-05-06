@@ -8,7 +8,10 @@ proc abs_dir {path} {
     return $result
 }
 
-if {[info exists env(FULL8LANE_SYN_DIR)] && [info exists env(FULL8LANE_SYSTEM_DIR)]} {
+if {[info exists full8lane_syn_dir] && [info exists full8lane_system_dir]} {
+    set syn_dir [abs_dir $full8lane_syn_dir]
+    set system_dir [abs_dir $full8lane_system_dir]
+} elseif {[info exists env(FULL8LANE_SYN_DIR)] && [info exists env(FULL8LANE_SYSTEM_DIR)]} {
     set syn_dir [abs_dir $env(FULL8LANE_SYN_DIR)]
     set system_dir [abs_dir $env(FULL8LANE_SYSTEM_DIR)]
 } else {
@@ -45,6 +48,13 @@ set outer_qsys_path [file join $syn_dir ${outer_system_name}.qsys]
 set ipx_path [file join $syn_dir mu3e_ip_cores.ipx]
 set components_ipx_path [file join $syn_dir components.ipx]
 set arb_script_dir [file join $repo_dir misc arb_hit_type0 script]
+set debug_sidecar_fanout_script_dir [file join $repo_dir misc debug_sidecar_fanout script]
+set debug_hit_sidecar_bank_bridge_script_dir [file join $repo_dir misc debug_hit_sidecar_bank_bridge script]
+set emulator_ip_dir [file join $repo_dir emulator_mutrig]
+set frame_deassembly_script_dir [file join $repo_dir mutrig_frame_deassembly script]
+set mts_processor_ip_dir [file join $repo_dir mutrig_timestamp_processor]
+set ring_buffer_cam_script_dir [file join $repo_dir ring-buffer_cam script]
+set feb_frame_assembly_ip_dir [file join $repo_dir feb_frame_assembly]
 set ref_hit_stack_qsys_path [file join $repo_dir run-control_mgmt reference feb_system_v2_snapshot_20260415 hit_stack_system.qsys]
 set upload_readyless_ip_dir [file join $syn_dir ip upload_system_v3_readyless]
 set upload_readyless_qsys_path [file join $upload_readyless_ip_dir upload_system_v3.qsys]
@@ -54,12 +64,56 @@ set full8lane_onewire_ip_dir [file join $syn_dir ip full8lane_onewire_master]
 set full8lane_sc_hub_ip_dir [file join $syn_dir ip full8lane_sc_hub_v2]
 set full8lane_histogram_ip_dir [file join $syn_dir ip full8lane_histogram_statistics_v2]
 set histogram_compat_ip_dir [file join $syn_dir ip histogram_statistics_v2]
-set search_path [join [list $syn_dir $arb_script_dir $upload_readyless_ip_dir $hit_stack_readyless_ip_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
+set search_path [join [list $syn_dir $arb_script_dir $debug_sidecar_fanout_script_dir $debug_hit_sidecar_bank_bridge_script_dir $emulator_ip_dir $frame_deassembly_script_dir $mts_processor_ip_dir $ring_buffer_cam_script_dir $feb_frame_assembly_ip_dir $upload_readyless_ip_dir $hit_stack_readyless_ip_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
 set lvds_controller_version 26.2.1.0506
+set debug_sidecar_fanout_version 26.0.0.0506
+set debug_hit_sidecar_bank_bridge_version 26.0.0.0506
+set emulator_mutrig_version 26.3.0.0506
+set frame_deassembly_version 26.1.0.0506
+set mts_preprocessor_version 26.1.0.0506
+set ring_buffer_cam_version 26.2.7.0506
+set feb_frame_assembly_version 26.1.0.0506
 set histogram_ingress_bridge_version 26.0.5.0506
 set runctl_mgmt_host_readyless_version 26.3.0.505
 set lvds_controller_local_csr_base 0x9000
 set lvds_controller_master_csr_base 0x00030000
+# qsys-script in some Quartus 18.1 launch environments does not preserve
+# arbitrary shell environment variables. Support both shell env and an explicit
+# Tcl override: qsys-script --cmd {set full8lane_debug_level 2} --script ...
+if {![info exists full8lane_debug_level]} {
+    set full8lane_debug_level 0
+}
+if {[info exists env(FULL8LANE_DEBUG_LEVEL)]} {
+    set full8lane_debug_level $env(FULL8LANE_DEBUG_LEVEL)
+} elseif {[info exists env(DEBUG_LEVEL)]} {
+    set full8lane_debug_level $env(DEBUG_LEVEL)
+}
+if {![string is integer -strict $full8lane_debug_level] || $full8lane_debug_level < 0 || $full8lane_debug_level > 2} {
+    error "FULL8LANE_DEBUG_LEVEL/DEBUG_LEVEL must be an integer in the range 0..2."
+}
+# Histogram mode -7 stages debug_1 and debug_2 through ingress FIFOs 0 and 1.
+# Keep the nominal datapath at one fill stream, but enable the second staging
+# FIFO in DEBUG_LEVEL=2 builds so both MTS timestamp debug streams can advance.
+set histogram_data_port_count [expr {$full8lane_debug_level >= 2 ? 2 : 1}]
+puts "INFO: full8lane debug level $full8lane_debug_level, histogram data ports $histogram_data_port_count"
+
+proc chmod_generated_artifacts_writable {syn_dir system_names} {
+    foreach name $system_names {
+        foreach path [list \
+            [file join $syn_dir ${name}.qsys] \
+            [file join $syn_dir ${name}.sopcinfo] \
+            [file join $syn_dir $name] \
+        ] {
+            if {[file exists $path]} {
+                exec chmod -R u+w $path
+            }
+        }
+    }
+}
+
+chmod_generated_artifacts_writable \
+    $syn_dir \
+    [list $control_system_name $supercore_system_name $inner_system_name $outer_system_name]
 
 proc set_required_param {inst name value} {
     set_instance_parameter_value $inst $name $value
@@ -116,6 +170,11 @@ proc add_clock_connection {start end} {
 }
 
 proc add_reset_connection {start end} {
+    remove_connection_if_present ${start}/${end}
+    add_connection $start $end
+}
+
+proc add_conduit_connection {start end} {
     remove_connection_if_present ${start}/${end}
     add_connection $start $end
 }
@@ -260,12 +319,88 @@ proc patch_qsys_module_version {content module_name module_version} {
     return $patched
 }
 
+proc ensure_qsys_interface_export_content {content name internal type dir} {
+    set existing "   name=\"$name\"\n   internal=\"$internal\""
+    if {[string first $existing $content] >= 0} {
+        return $content
+    }
+
+    set block " <interface\n   name=\"$name\"\n   internal=\"$internal\"\n   type=\"$type\"\n   dir=\"$dir\" />\n"
+    set marker "\n <module"
+    set idx [string first $marker $content]
+    if {$idx < 0} {
+        error "failed to find first module insertion point while adding interface $name"
+    }
+
+    set patched [string range $content 0 $idx]
+    append patched $block
+    append patched [string range $content [expr {$idx + 1}] end]
+    return $patched
+}
+
+proc ensure_qsys_connection_content {content kind start end} {
+    set existing "   start=\"$start\"\n   end=\"$end\""
+    if {[string first $existing $content] >= 0} {
+        return $content
+    }
+
+    set block " <connection\n   kind=\"$kind\"\n   version=\"18.1\"\n   start=\"$start\"\n   end=\"$end\""
+    if {[string equal $kind "conduit"]} {
+        append block ">\n"
+        append block "  <parameter name=\"endPort\" value=\"\" />\n"
+        append block "  <parameter name=\"endPortLSB\" value=\"0\" />\n"
+        append block "  <parameter name=\"startPort\" value=\"\" />\n"
+        append block "  <parameter name=\"startPortLSB\" value=\"0\" />\n"
+        append block "  <parameter name=\"width\" value=\"0\" />\n"
+        append block " </connection>\n"
+    } else {
+        append block " />\n"
+    }
+
+    set marker "\n</system>"
+    set idx [string last $marker $content]
+    if {$idx < 0} {
+        error "failed to find end-of-system insertion point while adding connection $start/$end"
+    }
+
+    set patched [string range $content 0 $idx]
+    append patched $block
+    append patched [string range $content [expr {$idx + 1}] end]
+    return $patched
+}
+
 proc patch_qsys_instance_version {qsys_path module_name module_version} {
     set fd [open $qsys_path r]
     set content [read $fd]
     close $fd
 
     set content [patch_qsys_module_version $content $module_name $module_version]
+
+    exec chmod u+w $qsys_path
+    set fd [open $qsys_path w]
+    puts -nonewline $fd $content
+    close $fd
+}
+
+proc patch_qsys_instance_parameter {qsys_path module_name param_name param_value} {
+    set fd [open $qsys_path r]
+    set content [read $fd]
+    close $fd
+
+    set content [patch_qsys_module_parameter $content $module_name $param_name $param_value]
+
+    exec chmod u+w $qsys_path
+    set fd [open $qsys_path w]
+    puts -nonewline $fd $content
+    close $fd
+}
+
+proc ensure_qsys_connection {qsys_path kind start end} {
+    set fd [open $qsys_path r]
+    set content [read $fd]
+    close $fd
+
+    set content [ensure_qsys_connection_content $content $kind $start $end]
 
     exec chmod u+w $qsys_path
     set fd [open $qsys_path w]
@@ -296,7 +431,7 @@ proc materialize_readyless_upload_qsys {ref_qsys_path dst_qsys_path runctl_versi
     puts "INFO: materialized readyless upload_system_v3 override at $dst_qsys_path"
 }
 
-proc materialize_readyless_hit_stack_qsys {ref_qsys_path dst_qsys_path} {
+proc materialize_readyless_hit_stack_qsys {ref_qsys_path dst_qsys_path debug_level ring_version feb_version} {
     set fd [open $ref_qsys_path r]
     set content [read $fd]
     close $fd
@@ -309,6 +444,70 @@ proc materialize_readyless_hit_stack_qsys {ref_qsys_path dst_qsys_path} {
         run_control_splitter_0 \
         USE_READY \
         0]
+
+    set content [patch_qsys_module_version \
+        $content \
+        feb_frame_assembly_0 \
+        $feb_version]
+    set content [patch_qsys_module_parameter \
+        $content \
+        feb_frame_assembly_0 \
+        DEBUG \
+        $debug_level]
+
+    for {set idx 0} {$idx < 4} {incr idx} {
+        set inst ring_buffer_cam_$idx
+        set content [patch_qsys_module_version \
+            $content \
+            $inst \
+            $ring_version]
+        set content [patch_qsys_module_parameter \
+            $content \
+            $inst \
+            DEBUG \
+            $debug_level]
+    }
+
+    if {$debug_level >= 1} {
+        set content [ensure_qsys_interface_export_content \
+            $content \
+            frame_debug_queue_status \
+            feb_frame_assembly_0.debug_queue_status \
+            avalon_streaming \
+            start]
+
+        for {set idx 0} {$idx < 4} {incr idx} {
+            set content [ensure_qsys_interface_export_content \
+                $content \
+                ring_buffer_cam_${idx}_debug_observability \
+                ring_buffer_cam_${idx}.debug_observability \
+                conduit \
+                start]
+        }
+    }
+
+    if {$debug_level >= 2} {
+        set content [ensure_qsys_interface_export_content \
+            $content \
+            frame_debug_hit_sidecar \
+            feb_frame_assembly_0.debug_hit_sidecar \
+            avalon_streaming \
+            start]
+
+        for {set idx 0} {$idx < 4} {incr idx} {
+            set content [ensure_qsys_interface_export_content \
+                $content \
+                hit_type1_${idx}_metadata \
+                ring_buffer_cam_${idx}.hit_type1_metadata \
+                conduit \
+                end]
+            set content [ensure_qsys_connection_content \
+                $content \
+                conduit \
+                ring_buffer_cam_${idx}.hit_type2_metadata \
+                feb_frame_assembly_0.hit_type2_${idx}_sidecar]
+        }
+    }
 
     file mkdir [file dirname $dst_qsys_path]
     if {[file exists $dst_qsys_path]} {
@@ -384,24 +583,25 @@ proc configure_run_ctrl_splitter {name outputs} {
 }
 
 proc configure_arb_child {name lane mode watchdog} {
-    add_instance $name arb_hit_type0 26.4.0.0505
+    add_instance $name arb_hit_type0 26.4.0.0506
     set_required_param $name MODE_DEFAULT $mode
     set_required_param $name WATCHDOG_DEFAULT $watchdog
     set_required_param $name FIFO_DEPTH 16
+    set_required_param $name DEBUG_LEVEL $::full8lane_debug_level
     set_required_param $name IP_UID 1095263280
     set_required_param $name INSTANCE_ID $lane
     set_required_param $name VERSION_MAJOR 26
     set_required_param $name VERSION_MINOR 4
     set_required_param $name VERSION_PATCH 0
-    set_required_param $name BUILD 505
-    set_required_param $name VERSION_DATE 20260505
+    set_required_param $name BUILD 506
+    set_required_param $name VERSION_DATE 20260506
 }
 
 proc configure_frame_deassembly {name} {
-    add_instance $name mutrig_frame_deassembly 26.0.6.0418
+    add_instance $name mutrig_frame_deassembly $::frame_deassembly_version
     set_required_param $name CHANNEL_WIDTH 4
     set_required_param $name CSR_ADDR_WIDTH 2
-    set_required_param $name DEBUG_LV 0
+    set_required_param $name DEBUG_LV $::full8lane_debug_level
     set_required_param $name MODE_HALT 0
     # Keep a defensive build-level VERSION_GIT override for the generated
     # datapath instances. The mutrig_frame_deassembly submodule now clamps
@@ -427,7 +627,7 @@ proc adopt_sv_lvds_controller {} {
     set_required_param lvds_rx_controller_pro_0 SCORE_REJECT 2
     set_required_param lvds_rx_controller_pro_0 STEER_QUEUE_DEPTH 4
     set_required_param lvds_rx_controller_pro_0 SYNC_PATTERN 0x0FA
-    set_required_param lvds_rx_controller_pro_0 DEBUG_LEVEL 0
+    set_required_param lvds_rx_controller_pro_0 DEBUG_LEVEL $::full8lane_debug_level
     set_required_param lvds_rx_controller_pro_0 IP_UID 0x4C564453
     set_required_param lvds_rx_controller_pro_0 INSTANCE_ID 0
     set_required_param lvds_rx_controller_pro_0 VERSION_MAJOR 26
@@ -459,10 +659,17 @@ proc configure_emulator_for_type0_bank {name lane} {
     set_optional_param $name FIFO_DEPTH 64
     set_optional_param $name GIT_STAMP_OVERRIDE true
     set_optional_param $name VERSION_MAJOR 26
-    set_optional_param $name VERSION_MINOR 2
+    set_optional_param $name VERSION_MINOR 3
     set_optional_param $name VERSION_PATCH 0
-    set_optional_param $name BUILD 502
-    set_optional_param $name VERSION_DATE 20260502
+    set_optional_param $name BUILD 506
+    set_optional_param $name VERSION_DATE 20260506
+    set_optional_param $name DEBUG_LEVEL $::full8lane_debug_level
+}
+
+proc instantiate_emulator_for_type0_bank {name lane} {
+    remove_instance_if_present $name
+    add_instance $name emulator_mutrig $::emulator_mutrig_version
+    configure_emulator_for_type0_bank $name $lane
 }
 
 proc configure_full8lane_onewire_master {name} {
@@ -531,7 +738,7 @@ proc configure_full8lane_histogram_statistics {name} {
     set_required_param $name BUILD 502
     set_required_param $name CHANNELS_PER_PORT 32
     set_required_param $name COAL_QUEUE_DEPTH 256
-    set_required_param $name DEBUG 0
+    set_required_param $name DEBUG $::full8lane_debug_level
     set_required_param $name DEF_BIN_WIDTH 1
     set_required_param $name DEF_INTERVAL_CLOCKS 125000000
     set_required_param $name DEF_LEFT_BOUND 0
@@ -545,7 +752,7 @@ proc configure_full8lane_histogram_statistics {name} {
     set_required_param $name MAX_COUNT_BITS 32
     set_required_param $name N_BINS 256
     set_required_param $name N_DEBUG_INTERFACE 6
-    set_required_param $name N_PORTS 1
+    set_required_param $name N_PORTS $::histogram_data_port_count
     set_required_param $name SAR_KEY_WIDTH 8
     set_required_param $name SAR_TICK_WIDTH 16
     set_required_param $name SNOOP_EN false
@@ -712,6 +919,18 @@ proc build_supercore_qsys {qsys_path} {
         set_interface_property emu_in_$lane EXPORT_OF $inst.emu_in
         add_interface selected_out_$lane avalon_streaming source
         set_interface_property selected_out_$lane EXPORT_OF $inst.selected_out
+        if {$::full8lane_debug_level >= 1} {
+            add_interface debug_fifo_$lane conduit start
+            set_interface_property debug_fifo_$lane EXPORT_OF $inst.debug_fifo
+        }
+        if {$::full8lane_debug_level >= 2} {
+            add_interface real_hit_debug_$lane conduit end
+            set_interface_property real_hit_debug_$lane EXPORT_OF $inst.real_hit_debug
+            add_interface emu_hit_debug_$lane conduit end
+            set_interface_property emu_hit_debug_$lane EXPORT_OF $inst.emu_hit_debug
+            add_interface selected_hit_debug_$lane conduit start
+            set_interface_property selected_hit_debug_$lane EXPORT_OF $inst.selected_hit_debug
+        }
     }
 
     set_interconnect_requirement {$system} qsys_mm.clockCrossingAdapter AUTO
@@ -826,7 +1045,12 @@ if {![file exists $ref_hit_stack_qsys_path]} {
 }
 
 materialize_readyless_upload_qsys $ref_upload_qsys_path $upload_readyless_qsys_path $runctl_mgmt_host_readyless_version
-materialize_readyless_hit_stack_qsys $ref_hit_stack_qsys_path $hit_stack_readyless_qsys_path
+materialize_readyless_hit_stack_qsys \
+    $ref_hit_stack_qsys_path \
+    $hit_stack_readyless_qsys_path \
+    $full8lane_debug_level \
+    $ring_buffer_cam_version \
+    $feb_frame_assembly_version
 build_control_path_qsys $control_ref_qsys_path $control_qsys_path
 build_supercore_qsys $supercore_qsys_path
 reload_ip_catalog
@@ -847,8 +1071,8 @@ set_required_param histogram_ingress_bridge_0 VERSION_PATCH 5
 set_required_param histogram_ingress_bridge_0 BUILD 506
 set_required_param histogram_ingress_bridge_0 VERSION_DATE 20260506
 set_optional_param histogram_ingress_bridge_0 VERSION_GIT 481097348
-set_required_param mts_preprocessor_0 DEBUG 0
-set_required_param mts_preprocessor_1 DEBUG 0
+set_required_param mts_preprocessor_0 DEBUG $full8lane_debug_level
+set_required_param mts_preprocessor_1 DEBUG $full8lane_debug_level
 
 set_required_param mm_clock_crossing_bridge USE_AUTO_ADDRESS_WIDTH 1
 # Run-control commands are broadcast pulses/words.  Keep every parent fanout
@@ -877,6 +1101,7 @@ for {set lane 0} {$lane < 8} {incr lane} {
     remove_instance_if_present mutrig_datapath_subsystem_$lane
     remove_instance_if_present mutrig_frame_deassembly_$lane
     remove_instance_if_present backpressure_fifo_$lane
+    remove_instance_if_present emulator_mutrig_$lane
 }
 remove_dangling_connections
 
@@ -911,6 +1136,11 @@ add_stream_connection mts_preprocessor_0.debug_ts histogram_statistics_0.debug_1
 add_stream_connection mts_preprocessor_1.debug_ts histogram_statistics_0.debug_2
 add_stream_connection histogram_ingress_bridge_0.hist_out histogram_statistics_0.hist_fill_in
 add_stream_connection run_control_splitter.out0 histogram_statistics_0.ctrl
+# DEBUG_LEVEL=1 fill-level map. The histogram core has six debug sinks:
+# debug_1/2 stay reserved for dual-MTS timing metadata, so debug_3..6 carry
+# the four no-ready rbCAM fill-level streams exported by hit_stack_subsystem_0.
+# The matching hit_stack_subsystem_1 and backpressure FIFO levels need an
+# upstream aggregation stream before they can be added losslessly here.
 add_stream_connection hit_stack_subsystem_0.ring_buffer_cam_0_filllevel histogram_statistics_0.debug_3
 add_stream_connection hit_stack_subsystem_0.ring_buffer_cam_1_filllevel histogram_statistics_0.debug_4
 add_stream_connection hit_stack_subsystem_0.ring_buffer_cam_2_filllevel histogram_statistics_0.debug_5
@@ -919,6 +1149,39 @@ add_clock_connection lvds_rx_controller_pro_0.outclock histogram_statistics_0.cl
 add_reset_connection master_datapath.master_reset histogram_statistics_0.reset
 add_reset_connection reset_bridge_export.out_reset histogram_statistics_0.interval_reset
 
+if {$full8lane_debug_level >= 2} {
+    foreach bank {0 1} {
+        set bridge mts${bank}_hit_type0_sidecar_bridge
+        add_instance $bridge debug_hit_sidecar_bank_bridge $debug_hit_sidecar_bank_bridge_version
+        set_required_param $bridge DATA_WIDTH 45
+        set_required_param $bridge CHANNEL_WIDTH 6
+        set_required_param $bridge ERROR_WIDTH 3
+        set_required_param $bridge METADATA_WIDTH 64
+        set_required_param $bridge FIFO_DEPTH 256
+        add_clock_connection lvds_rx_controller_pro_0.outclock $bridge.clock
+        add_reset_connection master_datapath.master_reset $bridge.reset
+
+        set fanout mts${bank}_hit_type1_sidecar_fanout
+        add_instance $fanout debug_sidecar_fanout $debug_sidecar_fanout_version
+        set_required_param $fanout DATA_WIDTH 64
+        add_clock_connection lvds_rx_controller_pro_0.outclock $fanout.clock
+        add_reset_connection master_datapath.master_reset $fanout.reset
+        # Existing reference-system MTS instances expose DEBUG-elaborated
+        # interfaces only after the saved system is reloaded by qsys-generate.
+        # The MTS-to-fanout input binding is patched into the saved Qsys below.
+        for {set idx 0} {$idx < 4} {incr idx} {
+            add_conduit_connection $fanout.out$idx hit_stack_subsystem_${bank}.hit_type1_${idx}_metadata
+        }
+    }
+
+    remove_connection_if_present mux_mutrig2processor.out/mts_preprocessor_0.hit_type0_in
+    remove_connection_if_present mux_mutrig2processor_0.out/mts_preprocessor_1.hit_type0_in
+    add_stream_connection mux_mutrig2processor.out mts0_hit_type0_sidecar_bridge.hit_type0_in
+    add_stream_connection mts0_hit_type0_sidecar_bridge.hit_type0_out mts_preprocessor_0.hit_type0_in
+    add_stream_connection mux_mutrig2processor_0.out mts1_hit_type0_sidecar_bridge.hit_type0_in
+    add_stream_connection mts1_hit_type0_sidecar_bridge.hit_type0_out mts_preprocessor_1.hit_type0_in
+}
+
 for {set lane 0} {$lane < 8} {incr lane} {
     set fda mutrig_frame_deassembly_$lane
     set fifo backpressure_fifo_$lane
@@ -926,18 +1189,29 @@ for {set lane 0} {$lane < 8} {incr lane} {
 
     configure_frame_deassembly $fda
     configure_backpressure_fifo $fifo 128
-    if {[has_instance $emu]} {
-        configure_emulator_for_type0_bank $emu $lane
-    }
+    instantiate_emulator_for_type0_bank $emu $lane
 
     add_clock_connection lvds_rx_controller_pro_0.outclock $fda.clock_sink
     add_clock_connection lvds_rx_controller_pro_0.outclock $fifo.clk
+    add_clock_connection lvds_rx_controller_pro_0.outclock $emu.data_clock
     add_reset_connection master_datapath.master_reset $fda.reset_sink
     add_reset_connection master_datapath.master_reset $fifo.clk_reset
+    add_reset_connection master_datapath.master_reset $emu.data_reset
+    add_stream_connection emulator_ctrl_splitter.out$lane $emu.ctrl
+    add_conduit_connection emulator_inject_fanout.out$lane $emu.inject
 
     add_stream_connection lvds_rx_controller_pro_0.decoded${lane} $fda.rx8b1k
     add_stream_connection $fda.hit_type0 arb_hit_type0_supercore_0.real_in_$lane
     add_stream_connection $emu.hit_type0 arb_hit_type0_supercore_0.emu_in_$lane
+    if {$full8lane_debug_level >= 2} {
+        add_conduit_connection $fda.debug_hit_metadata arb_hit_type0_supercore_0.real_hit_debug_$lane
+        add_conduit_connection $emu.hit_debug_metadata arb_hit_type0_supercore_0.emu_hit_debug_$lane
+        set sidecar_bank [expr {$lane < 4 ? 0 : 1}]
+        set sidecar_lane [expr {$lane % 4}]
+        add_conduit_connection \
+            arb_hit_type0_supercore_0.selected_hit_debug_$lane \
+            mts${sidecar_bank}_hit_type0_sidecar_bridge.lane${sidecar_lane}
+    }
     add_stream_connection arb_hit_type0_supercore_0.selected_out_$lane $fifo.in
     add_stream_connection $fifo.out $lane_mts_mux($lane)
     add_stream_connection $fda.headerinfo mutrig_injector_0.headerinfo$lane
@@ -961,11 +1235,15 @@ for {set lane 0} {$lane < 8} {incr lane} {
     set master_fifo_base [expr {0x00000860 + (0x1000 * $lane)}]
     set arb_local_base [expr {0x0280 + (0x80 * $lane)}]
     set arb_master_base [expr {0x2280 + (0x80 * $lane)}]
+    set emu_local_base [expr {0x0040 * $lane}]
+    set emu_master_base [expr {0x00002000 + (0x40 * $lane)}]
 
     add_mm_connection $bridge.m0 $fda.csr $local_frame_base
     add_mm_connection $bridge.m0 $fifo.csr $local_fifo_base
     add_mm_connection master_datapath.master $fda.csr $master_frame_base
     add_mm_connection master_datapath.master $fifo.csr $master_fifo_base
+    add_mm_connection mm_pipeline_lvds_csr_emu_dbg.m0 $emu.csr $emu_local_base
+    add_mm_connection master_datapath.master $emu.csr $emu_master_base
     add_mm_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_$lane $arb_local_base
     add_mm_connection master_datapath.master arb_hit_type0_supercore_0.csr_$lane $arb_master_base
 }
@@ -981,6 +1259,24 @@ set_interconnect_requirement {$system} qsys_mm.maxAdditionalLatency 4
 save_system $inner_qsys_path
 patch_qsys_component_version $inner_qsys_path $inner_system_version
 patch_qsys_instance_version $inner_qsys_path histogram_ingress_bridge_0 $histogram_ingress_bridge_version
+patch_qsys_instance_version $inner_qsys_path mts_preprocessor_0 $mts_preprocessor_version
+patch_qsys_instance_version $inner_qsys_path mts_preprocessor_1 $mts_preprocessor_version
+patch_qsys_instance_parameter $inner_qsys_path mts_preprocessor_0 DEBUG $full8lane_debug_level
+patch_qsys_instance_parameter $inner_qsys_path mts_preprocessor_1 DEBUG $full8lane_debug_level
+if {$full8lane_debug_level >= 2} {
+    foreach bank {0 1} {
+        ensure_qsys_connection \
+            $inner_qsys_path \
+            conduit \
+            mts${bank}_hit_type0_sidecar_bridge.hit_type0_sidecar \
+            mts_preprocessor_${bank}.hit_type0_sidecar
+        ensure_qsys_connection \
+            $inner_qsys_path \
+            conduit \
+            mts_preprocessor_${bank}.hit_type1_sidecar \
+            mts${bank}_hit_type1_sidecar_fanout.in
+    }
+}
 ensure_qsys_interface_export \
     $inner_qsys_path \
     lvds_outclock \

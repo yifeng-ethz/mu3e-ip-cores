@@ -1,9 +1,9 @@
 // hit_tap_if.sv
 // Generic synchronous hit observation tap used by passive stage monitors.
 // Author: Yifeng Wang
-// Version : 26.2.0
+// Version : 26.2.1
 // Date    : 20260504
-// Change  : Add reusable monitor tap interface for smoke and future binds.
+// Change  : Keep optional debug lineage fields available for exact hit tracking.
 
 interface hit_tap_if (
     input logic clk,
@@ -18,6 +18,7 @@ interface hit_tap_if (
     logic [63:0] root_hit_id;
     logic        root_hit_id_valid;
     logic        run_origin;
+    logic [1:0]  debug_level;
 
     task automatic clear();
         valid = 1'b0;
@@ -29,6 +30,7 @@ interface hit_tap_if (
         root_hit_id = '0;
         root_hit_id_valid = 1'b0;
         run_origin = 1'b0;
+        debug_level = 2'd0;
     endtask
 
     task automatic drive_hit(
@@ -38,7 +40,8 @@ interface hit_tap_if (
         input logic        drive_hit_id_valid,
         input logic [63:0] drive_root_hit_id,
         input logic        drive_root_hit_id_valid,
-        input logic        drive_run_origin
+        input logic        drive_run_origin,
+        input logic [1:0]  drive_debug_level = 2'd0
     );
         @(negedge clk);
         lane_id = drive_lane_id;
@@ -48,6 +51,7 @@ interface hit_tap_if (
         root_hit_id = drive_root_hit_id;
         root_hit_id_valid = drive_root_hit_id_valid;
         run_origin = drive_run_origin;
+        debug_level = drive_debug_level;
         valid = 1'b1;
         @(negedge clk);
         valid = 1'b0;

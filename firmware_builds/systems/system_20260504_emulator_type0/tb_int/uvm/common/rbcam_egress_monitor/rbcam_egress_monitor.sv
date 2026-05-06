@@ -1,9 +1,9 @@
 // rbcam_egress_monitor.sv
 // Passive post-rbCAM observation monitor.
 // Author: Yifeng Wang
-// Version : 26.2.1
+// Version : 26.2.2
 // Date    : 20260506
-// Change  : Allow optional aggregate monitor slots to be left unbound.
+// Change  : Preserve source-supplied debug lineage when available.
 
 package tb_int_rbcam_egress_monitor_pkg;
 
@@ -47,6 +47,10 @@ package tb_int_rbcam_egress_monitor_pkg;
                                       OBS_STAGE_POST_RBCAM);
                     rec.root_hit_id_valid = vif.root_hit_id_valid;
                     rec.root_hit_id       = vif.root_hit_id;
+                    rec.monitor_debug_valid = vif.root_hit_id_valid | vif.hit_id_valid;
+                    rec.monitor_debug_id = vif.root_hit_id_valid ? vif.root_hit_id :
+                                           (vif.hit_id_valid ? vif.hit_id : 64'd0);
+                    rec.monitor_debug_level = vif.debug_level;
                     rec.run_origin        = vif.run_origin |
                                             tb_int_run_window_db::is_stable_origin($time);
                     ap.write(rec);

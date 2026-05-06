@@ -3,8 +3,8 @@ package require -exact qsys 16.1
 set VERSION_MAJOR_DEFAULT_CONST 26
 set VERSION_MINOR_DEFAULT_CONST 4
 set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         505
-set VERSION_DATE_DEFAULT_CONST  20260505
+set BUILD_DEFAULT_CONST         506
+set VERSION_DATE_DEFAULT_CONST  20260506
 set VERSION_GIT_DEFAULT_CONST   0x00000000
 set IP_UID_DEFAULT_CONST        0x41485430 ;# ASCII "AHT0"
 
@@ -62,11 +62,19 @@ set_parameter_property FIFO_DEPTH ALLOWED_RANGES {16}
 set_parameter_property FIFO_DEPTH HDL_PARAMETER false
 set_parameter_property FIFO_DEPTH DESCRIPTION "Per-source ingress FIFO depth propagated to each lane."
 
+add_parameter DEBUG_LEVEL NATURAL 0
+set_parameter_property DEBUG_LEVEL DISPLAY_NAME "Debug Level"
+set_parameter_property DEBUG_LEVEL ALLOWED_RANGES 0:2
+set_parameter_property DEBUG_LEVEL HDL_PARAMETER false
+set_parameter_property DEBUG_LEVEL AFFECTS_ELABORATION true
+set_parameter_property DEBUG_LEVEL DESCRIPTION "Debug level propagated to every lane. 0 disables optional debug exports, 1 exports per-lane FIFO levels, and 2 also exports per-hit metadata conduits."
+
 add_display_item "" "Configuration" GROUP tab
 add_display_item "Configuration" LANE_COUNT parameter
 add_display_item "Configuration" MODE_DEFAULT parameter
 add_display_item "Configuration" WATCHDOG_DEFAULT parameter
 add_display_item "Configuration" FIFO_DEPTH parameter
+add_display_item "Configuration" DEBUG_LEVEL parameter
 
 add_display_item "" "Interfaces" GROUP tab
 add_html_text "Interfaces" interfaces_html {<html>
@@ -80,6 +88,8 @@ For every lane <b>i</b>, the component exports:
 <li><b>real_in_i</b>: real post-deassembly hit_type0 stream</li>
 <li><b>emu_in_i</b>: emulator hit_type0 stream</li>
 <li><b>selected_out_i</b>: selected hit_type0 stream to downstream FIFO/MTS</li>
+<li><b>debug_fifo_i</b>: optional DEBUG_LEVEL &gt;= 1 FIFO fill-level conduit</li>
+<li><b>real_hit_debug_i</b>, <b>emu_hit_debug_i</b>, <b>selected_hit_debug_i</b>: optional DEBUG_LEVEL &gt;= 2 64-bit per-hit metadata conduits</li>
 </ul>
 </html>}
 
@@ -144,6 +154,20 @@ proc add_static_hit_stream_interface {name dir enabled} {
     set_interface_property $name ENABLED $enabled
 }
 
+proc add_static_debug_fifo_interface {name enabled} {
+    add_interface $name conduit start
+    set_interface_property $name associatedClock clk
+    set_interface_property $name associatedReset rst
+    set_interface_property $name ENABLED $enabled
+}
+
+proc add_static_hit_debug_interface {name dir enabled} {
+    add_interface $name conduit $dir
+    set_interface_property $name associatedClock clk
+    set_interface_property $name associatedReset rst
+    set_interface_property $name ENABLED $enabled
+}
+
 add_static_clock_reset_runctrl_interfaces
 for {set lane 0} {$lane < $SUPERCORE_MAX_STATIC_LANES} {incr lane} {
     set enabled [expr {$lane < 8}]
@@ -151,18 +175,27 @@ for {set lane 0} {$lane < $SUPERCORE_MAX_STATIC_LANES} {incr lane} {
     add_static_hit_stream_interface real_in_$lane end $enabled
     add_static_hit_stream_interface emu_in_$lane end $enabled
     add_static_hit_stream_interface selected_out_$lane start $enabled
+    add_static_debug_fifo_interface debug_fifo_$lane false
+    add_static_hit_debug_interface real_hit_debug_$lane end false
+    add_static_hit_debug_interface emu_hit_debug_$lane end false
+    add_static_hit_debug_interface selected_hit_debug_$lane start false
 }
 
-proc set_lane_interfaces_enabled {lane enabled} {
+proc set_lane_interfaces_enabled {lane enabled debug_level} {
     foreach prefix {csr real_in emu_in selected_out} {
         catch {set_interface_property ${prefix}_$lane ENABLED $enabled}
+    }
+    catch {set_interface_property debug_fifo_$lane ENABLED [expr {$enabled && ($debug_level >= 1)}]}
+    foreach prefix {real_hit_debug emu_hit_debug selected_hit_debug} {
+        catch {set_interface_property ${prefix}_$lane ENABLED [expr {$enabled && ($debug_level >= 2)}]}
     }
 }
 
 proc elaborate {} {
     set lane_count [get_parameter_value LANE_COUNT]
+    set debug_level [get_parameter_value DEBUG_LEVEL]
     for {set lane 0} {$lane < $::SUPERCORE_MAX_STATIC_LANES} {incr lane} {
-        set_lane_interfaces_enabled $lane [expr {$lane < $lane_count}]
+        set_lane_interfaces_enabled $lane [expr {$lane < $lane_count}] $debug_level
     }
 }
 
@@ -171,6 +204,7 @@ proc validate {} {
     set mode_default [get_parameter_value MODE_DEFAULT]
     set watchdog_default [get_parameter_value WATCHDOG_DEFAULT]
     set fifo_depth [get_parameter_value FIFO_DEPTH]
+    set debug_level [get_parameter_value DEBUG_LEVEL]
 
     if {$lane_count < 1 || $lane_count > 32} {
         send_message error "LANE_COUNT must be in the range 1..32."
@@ -183,6 +217,9 @@ proc validate {} {
     }
     if {$fifo_depth != 16} {
         send_message error "FIFO_DEPTH is fixed at 16 for arb_hit_type0."
+    }
+    if {$debug_level < 0 || $debug_level > 2} {
+        send_message error "DEBUG_LEVEL must be 0 (off), 1 (FIFO levels), or 2 (FIFO levels plus per-hit metadata)."
     }
     if {$mode_default == 2} {
         send_message warning "MODE_DEFAULT = MIX_RR. Downstream per-beat channel handling must be verified before production use."
@@ -206,6 +243,7 @@ proc compose {} {
     set mode_default [get_parameter_value MODE_DEFAULT]
     set watchdog_default [get_parameter_value WATCHDOG_DEFAULT]
     set fifo_depth [get_parameter_value FIFO_DEPTH]
+    set debug_level [get_parameter_value DEBUG_LEVEL]
 
     add_instance clk_bridge altera_clock_bridge 18.1
     set_instance_parameter_value clk_bridge EXPLICIT_CLOCK_RATE 0.0
@@ -240,10 +278,11 @@ proc compose {} {
 
     for {set lane 0} {$lane < $lane_count} {incr lane} {
         set inst lane_$lane
-        add_instance $inst arb_hit_type0 26.4.0.0505
+        add_instance $inst arb_hit_type0 26.4.0.0506
         set_instance_parameter_value $inst MODE_DEFAULT $mode_default
         set_instance_parameter_value $inst WATCHDOG_DEFAULT $watchdog_default
         set_instance_parameter_value $inst FIFO_DEPTH $fifo_depth
+        set_child_param_if_present $inst DEBUG_LEVEL $debug_level
         set_instance_parameter_value $inst IP_UID $IP_UID_DEFAULT_CONST
         set_instance_parameter_value $inst INSTANCE_ID $lane
         set_child_param_if_present $inst VERSION_MAJOR $VERSION_MAJOR_DEFAULT_CONST
@@ -261,6 +300,14 @@ proc compose {} {
         export_existing_interface real_in_$lane avalon_streaming end $inst.real_in
         export_existing_interface emu_in_$lane avalon_streaming end $inst.emu_in
         export_existing_interface selected_out_$lane avalon_streaming start $inst.selected_out
+        if {$debug_level >= 1} {
+            export_existing_interface debug_fifo_$lane conduit start $inst.debug_fifo
+        }
+        if {$debug_level >= 2} {
+            export_existing_interface real_hit_debug_$lane conduit end $inst.real_hit_debug
+            export_existing_interface emu_hit_debug_$lane conduit end $inst.emu_hit_debug
+            export_existing_interface selected_hit_debug_$lane conduit start $inst.selected_hit_debug
+        }
     }
 
     export_existing_interface clk clock end clk_bridge.in_clk

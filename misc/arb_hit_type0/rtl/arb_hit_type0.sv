@@ -3,20 +3,21 @@
 // between the real MuTRiG hit_type0 stream and the emulator hit_type0
 // stream with 16-deep ingress FIFOs per source.
 //
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Wire per-source frame counter pulses through the split helpers.
+// Version : 26.4.0
+// Date    : 20260506
+// Change  : Add DEBUG_LEVEL FIFO observability and per-hit metadata sidebands.
 
 module arb_hit_type0 #(
     parameter integer MODE_DEFAULT      = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
     parameter integer FIFO_DEPTH        = 16,
+    parameter integer DEBUG_LEVEL       = 0,            // 0=off, 1=FIFO levels, 2=hit metadata
     parameter integer WATCHDOG_DEFAULT  = 500,          // FAW threshold cycles, 0 disables
     parameter integer IP_UID            = 32'h41485430, // ASCII "AHT0"
     parameter integer VERSION_MAJOR     = 26,
-    parameter integer VERSION_MINOR     = 2,
+    parameter integer VERSION_MINOR     = 4,
     parameter integer VERSION_PATCH     = 0,
-    parameter integer BUILD             = 504,
-    parameter integer VERSION_DATE      = 20260504,
+    parameter integer BUILD             = 506,
+    parameter integer VERSION_DATE      = 20260506,
     parameter integer VERSION_GIT       = 32'h0000_0000,
     parameter integer INSTANCE_ID       = 0
 ) (
@@ -61,7 +62,18 @@ module arb_hit_type0 #(
     output logic [3:0]  aso_channel,
     output logic        aso_startofpacket,
     output logic        aso_endofpacket,
-    output logic        aso_endofrun
+    output logic        aso_endofrun,
+
+    // Optional debug conduits. Tcl exposes these only when DEBUG_LEVEL enables them.
+    output logic [4:0]  coe_debug_real_fifo_level,
+    output logic [4:0]  coe_debug_emu_fifo_level,
+    output logic [7:0]  coe_debug_fifo_flags,
+    input  logic [63:0] coe_debug_real_hit_metadata,
+    input  logic        coe_debug_real_hit_metadata_valid,
+    input  logic [63:0] coe_debug_emu_hit_metadata,
+    input  logic        coe_debug_emu_hit_metadata_valid,
+    output logic [63:0] coe_debug_selected_hit_metadata,
+    output logic        coe_debug_selected_hit_metadata_valid
 );
 
     logic        runctl_reset_start;
@@ -90,6 +102,7 @@ module arb_hit_type0 #(
     logic        real_head_startofpacket;
     logic        real_head_endofpacket;
     logic        real_head_endofrun;
+    logic [63:0] real_head_debug_metadata;
 
     logic        emu_fifo_empty;
     logic        emu_fifo_full;
@@ -107,6 +120,7 @@ module arb_hit_type0 #(
     logic        emu_head_startofpacket;
     logic        emu_head_endofpacket;
     logic        emu_head_endofrun;
+    logic [63:0] emu_head_debug_metadata;
 
     logic        arbiter_real_open;
     logic        arbiter_emu_open;
@@ -135,8 +149,34 @@ module arb_hit_type0 #(
 
     logic        watchdog_fire_real;
     logic        watchdog_fire_emu;
+    logic [63:0] debug_selected_hit_metadata;
 
     assign stream_active = ~(runctl_reset_active | runctl_reset_start);
+    assign debug_selected_hit_metadata =
+        (arbiter_egress_valid & ~arbiter_egress_synthesized) ?
+            (arbiter_egress_source_emu ? emu_head_debug_metadata : real_head_debug_metadata) :
+            64'd0;
+
+    generate
+        if (DEBUG_LEVEL >= 1) begin : debug_fifo_observability
+            assign coe_debug_real_fifo_level = real_fifo_depth;
+            assign coe_debug_emu_fifo_level  = emu_fifo_depth;
+            assign coe_debug_fifo_flags      = {
+                emu_pop,
+                emu_push_accept,
+                real_pop,
+                real_push_accept,
+                emu_fifo_full,
+                emu_fifo_empty,
+                real_fifo_full,
+                real_fifo_empty
+            };
+        end else begin : no_debug_fifo_observability
+            assign coe_debug_real_fifo_level = 5'd0;
+            assign coe_debug_emu_fifo_level  = 5'd0;
+            assign coe_debug_fifo_flags      = 8'd0;
+        end
+    endgenerate
 
     arb_hit_type0_runctl u_runctl (
         .clk                   (clk),
@@ -152,7 +192,8 @@ module arb_hit_type0 #(
     );
 
     arb_hit_type0_fifo #(
-        .FIFO_DEPTH            (FIFO_DEPTH)
+        .FIFO_DEPTH            (FIFO_DEPTH),
+        .DEBUG_LEVEL           (DEBUG_LEVEL)
     ) u_real_fifo (
         .clk                   (clk),
         .rst                   (rst),
@@ -165,6 +206,8 @@ module arb_hit_type0 #(
         .asi_startofpacket     (asi_real_startofpacket),
         .asi_endofpacket       (asi_real_endofpacket),
         .asi_endofrun          (asi_real_endofrun),
+        .asi_debug_metadata        (coe_debug_real_hit_metadata),
+        .asi_debug_metadata_valid  (coe_debug_real_hit_metadata_valid),
         .pop                   (real_pop),
         .head_data             (real_head_data),
         .head_error            (real_head_error),
@@ -172,6 +215,7 @@ module arb_hit_type0 #(
         .head_startofpacket    (real_head_startofpacket),
         .head_endofpacket      (real_head_endofpacket),
         .head_endofrun         (real_head_endofrun),
+        .head_debug_metadata   (real_head_debug_metadata),
         .empty                 (real_fifo_empty),
         .full                  (real_fifo_full),
         .depth                 (real_fifo_depth),
@@ -184,7 +228,8 @@ module arb_hit_type0 #(
     );
 
     arb_hit_type0_fifo #(
-        .FIFO_DEPTH            (FIFO_DEPTH)
+        .FIFO_DEPTH            (FIFO_DEPTH),
+        .DEBUG_LEVEL           (DEBUG_LEVEL)
     ) u_emu_fifo (
         .clk                   (clk),
         .rst                   (rst),
@@ -197,6 +242,8 @@ module arb_hit_type0 #(
         .asi_startofpacket     (asi_emu_startofpacket),
         .asi_endofpacket       (asi_emu_endofpacket),
         .asi_endofrun          (asi_emu_endofrun),
+        .asi_debug_metadata        (coe_debug_emu_hit_metadata),
+        .asi_debug_metadata_valid  (coe_debug_emu_hit_metadata_valid),
         .pop                   (emu_pop),
         .head_data             (emu_head_data),
         .head_error            (emu_head_error),
@@ -204,6 +251,7 @@ module arb_hit_type0 #(
         .head_startofpacket    (emu_head_startofpacket),
         .head_endofpacket      (emu_head_endofpacket),
         .head_endofrun         (emu_head_endofrun),
+        .head_debug_metadata   (emu_head_debug_metadata),
         .empty                 (emu_fifo_empty),
         .full                  (emu_fifo_full),
         .depth                 (emu_fifo_depth),
@@ -372,5 +420,34 @@ module arb_hit_type0 #(
             aso_endofrun         <= arbiter_egress_endofrun;
         end
     end
+
+    generate
+        if (DEBUG_LEVEL >= 2) begin : debug_hit_metadata_export
+            always_ff @(posedge clk or posedge rst) begin : debug_hit_metadata_register
+                if (rst) begin
+                    coe_debug_selected_hit_metadata          <= 64'd0;
+                    coe_debug_selected_hit_metadata_valid    <= 1'b0;
+                end else if (runctl_stream_clear) begin
+                    coe_debug_selected_hit_metadata          <= 64'd0;
+                    coe_debug_selected_hit_metadata_valid    <= 1'b0;
+                end else begin
+                    coe_debug_selected_hit_metadata          <= debug_selected_hit_metadata;
+                    coe_debug_selected_hit_metadata_valid    <=
+                        arbiter_egress_valid & ~arbiter_egress_synthesized;
+                end
+            end
+        end else begin : no_debug_hit_metadata_export
+            assign coe_debug_selected_hit_metadata       = 64'd0;
+            assign coe_debug_selected_hit_metadata_valid = 1'b0;
+        end
+    endgenerate
+
+    // synthesis translate_off
+    initial begin : debug_parameter_guard
+        if ((DEBUG_LEVEL < 0) || (DEBUG_LEVEL > 2)) begin
+            $error("arb_hit_type0 supports DEBUG_LEVEL in the range 0..2");
+        end
+    end
+    // synthesis translate_on
 
 endmodule

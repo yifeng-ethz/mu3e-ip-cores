@@ -2,9 +2,9 @@
 // Standalone PROF-INT-002 full-pipeline real-RTL simulation top.
 //
 // Author: Yifeng Wang <yifenwan@phys.ethz.ch>
-// Version : 26.2.1
+// Version : 26.2.2
 // Date    : 20260506
-// Change  : Aggregate both hit-stack monitor banks and treat run-control ready as a diagnostic only.
+// Change  : Export scoreboard counter snapshots and explicit no-debug tap metadata.
 
 module prof_int_002_full_pipeline_top;
     timeunit 1ps;
@@ -200,6 +200,7 @@ module prof_int_002_full_pipeline_top;
     hit_tap_if           feb_egress_vif(.clk(clk_125), .rst(rst));
     hit_tap_if           feb_egress_vif1(.clk(clk_125), .rst(rst));
     prof_int_002_ctrl_if ctrl_vif(.clk(clk_125), .rst(rst));
+    tb_int_counter_if    counter_vif(.clk(clk_125), .rst(rst));
     logic                stage_a_any_valid;
     logic                pre_rbcam_any_valid;
     logic                post_rbcam_any_valid;
@@ -216,6 +217,76 @@ module prof_int_002_full_pipeline_top;
                                   post_rbcam_vif2.valid | post_rbcam_vif3.valid |
                                   post_rbcam_vif4.valid | post_rbcam_vif5.valid |
                                   post_rbcam_vif6.valid | post_rbcam_vif7.valid;
+
+    always_comb begin
+        counter_vif.available = ctrl_vif.sim_done;
+        counter_vif.stage_a_count = ctrl_vif.stage_a_count;
+        counter_vif.pre_rbcam_count = ctrl_vif.pre_rbcam_count;
+        counter_vif.post_rbcam_count = ctrl_vif.post_rbcam_count;
+        counter_vif.feb_egress_count = ctrl_vif.feb_egress_count;
+    end
+
+    always_comb begin
+        stage_a_vif0.hit_id = 64'd0;
+        stage_a_vif0.hit_id_valid = 1'b0;
+        stage_a_vif0.root_hit_id = 64'd0;
+        stage_a_vif0.root_hit_id_valid = 1'b0;
+        stage_a_vif0.debug_level = 2'd0;
+        stage_a_vif1.hit_id = 64'd0;
+        stage_a_vif1.hit_id_valid = 1'b0;
+        stage_a_vif1.root_hit_id = 64'd0;
+        stage_a_vif1.root_hit_id_valid = 1'b0;
+        stage_a_vif1.debug_level = 2'd0;
+        stage_a_vif2.hit_id = 64'd0;
+        stage_a_vif2.hit_id_valid = 1'b0;
+        stage_a_vif2.root_hit_id = 64'd0;
+        stage_a_vif2.root_hit_id_valid = 1'b0;
+        stage_a_vif2.debug_level = 2'd0;
+        stage_a_vif3.hit_id = 64'd0;
+        stage_a_vif3.hit_id_valid = 1'b0;
+        stage_a_vif3.root_hit_id = 64'd0;
+        stage_a_vif3.root_hit_id_valid = 1'b0;
+        stage_a_vif3.debug_level = 2'd0;
+        stage_a_vif4.hit_id = 64'd0;
+        stage_a_vif4.hit_id_valid = 1'b0;
+        stage_a_vif4.root_hit_id = 64'd0;
+        stage_a_vif4.root_hit_id_valid = 1'b0;
+        stage_a_vif4.debug_level = 2'd0;
+        stage_a_vif5.hit_id = 64'd0;
+        stage_a_vif5.hit_id_valid = 1'b0;
+        stage_a_vif5.root_hit_id = 64'd0;
+        stage_a_vif5.root_hit_id_valid = 1'b0;
+        stage_a_vif5.debug_level = 2'd0;
+        stage_a_vif6.hit_id = 64'd0;
+        stage_a_vif6.hit_id_valid = 1'b0;
+        stage_a_vif6.root_hit_id = 64'd0;
+        stage_a_vif6.root_hit_id_valid = 1'b0;
+        stage_a_vif6.debug_level = 2'd0;
+        stage_a_vif7.hit_id = 64'd0;
+        stage_a_vif7.hit_id_valid = 1'b0;
+        stage_a_vif7.root_hit_id = 64'd0;
+        stage_a_vif7.root_hit_id_valid = 1'b0;
+        stage_a_vif7.debug_level = 2'd0;
+
+        pre_rbcam_vif0.debug_level = 2'd0;
+        pre_rbcam_vif1.debug_level = 2'd0;
+        pre_rbcam_vif2.debug_level = 2'd0;
+        pre_rbcam_vif3.debug_level = 2'd0;
+        pre_rbcam_vif4.debug_level = 2'd0;
+        pre_rbcam_vif5.debug_level = 2'd0;
+        pre_rbcam_vif6.debug_level = 2'd0;
+        pre_rbcam_vif7.debug_level = 2'd0;
+        post_rbcam_vif0.debug_level = 2'd0;
+        post_rbcam_vif1.debug_level = 2'd0;
+        post_rbcam_vif2.debug_level = 2'd0;
+        post_rbcam_vif3.debug_level = 2'd0;
+        post_rbcam_vif4.debug_level = 2'd0;
+        post_rbcam_vif5.debug_level = 2'd0;
+        post_rbcam_vif6.debug_level = 2'd0;
+        post_rbcam_vif7.debug_level = 2'd0;
+        feb_egress_vif.debug_level = 2'd0;
+        feb_egress_vif1.debug_level = 2'd0;
+    end
 
     full8lane_type0_system u_dut (
         .cclk156_clk                           (cclk156),
@@ -2334,6 +2405,10 @@ module prof_int_002_full_pipeline_top;
         uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.post_rbcam_mon7", "vif", post_rbcam_vif7);
         uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.feb_egress_mon0", "vif", feb_egress_vif);
         uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.feb_egress_mon1", "vif", feb_egress_vif1);
+        uvm_config_db#(virtual tb_int_counter_if)::set(null,
+                                                       "uvm_test_top.env.scoreboard",
+                                                       "counter_vif",
+                                                       counter_vif);
         uvm_config_db#(virtual prof_int_002_ctrl_if)::set(null,
                                                           "uvm_test_top",
                                                           "ctrl_vif",

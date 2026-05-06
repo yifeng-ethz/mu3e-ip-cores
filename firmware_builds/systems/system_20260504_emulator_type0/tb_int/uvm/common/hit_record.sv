@@ -1,9 +1,9 @@
 // hit_record.sv
 // Canonical hit observation transaction for tb_int integration stages.
 // Author: Yifeng Wang
-// Version : 26.2.0
+// Version : 26.2.1
 // Date    : 20260504
-// Change  : Add reusable hit_record transaction with lineage metadata.
+// Change  : Track source-supplied debug lineage independently from inferred IDs.
 
 package tb_int_record_pkg;
 
@@ -46,6 +46,9 @@ package tb_int_record_pkg;
         bit                 root_hit_id_valid;
         bit [63:0]          root_hit_id;
         bit [14:0]          t_coarse;
+        bit                 monitor_debug_valid;
+        bit [63:0]          monitor_debug_id;
+        int unsigned        monitor_debug_level;
 
         function new(string name = "hit_record");
             super.new(name);
@@ -88,10 +91,12 @@ package tb_int_record_pkg;
                 id_desc = $sformatf("0x%016h", root_hit_id);
             else
                 id_desc = "?";
-            return $sformatf("{point=%s hit_id=0x%016h lane=%0d ch=%0d tfine=%0d seq=%0d t=%0t root=%s run_origin=%0b payload=0x%016h}",
+            return $sformatf("{point=%s hit_id=0x%016h lane=%0d ch=%0d tfine=%0d seq=%0d t=%0t root=%s dbg_valid=%0b dbg_id=0x%016h dbg_level=%0d run_origin=%0b payload=0x%016h}",
                              observation_point_name(observation_point),
                              hit_id, lane_id, key.channel, key.t_fine,
                              seq_in_bucket, abs_ts, id_desc,
+                             monitor_debug_valid, monitor_debug_id,
+                             monitor_debug_level,
                              run_origin, payload);
         endfunction
 
@@ -114,6 +119,9 @@ package tb_int_record_pkg;
             root_hit_id_valid = rhs_record.root_hit_id_valid;
             root_hit_id       = rhs_record.root_hit_id;
             t_coarse          = rhs_record.t_coarse;
+            monitor_debug_valid = rhs_record.monitor_debug_valid;
+            monitor_debug_id    = rhs_record.monitor_debug_id;
+            monitor_debug_level = rhs_record.monitor_debug_level;
         endfunction
     endclass
 
