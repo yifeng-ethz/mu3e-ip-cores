@@ -25,6 +25,9 @@ PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK ?= 1
 PROF_INT_002_PRE_RBCAM_PHASE_SWEEP ?= 100 200 300 400 500 600 700 800 900
 PROF_INT_002_PRE_RBCAM_BURST_SWEEP ?= 1 2 3 4 5 6 7
 PROF_INT_002_PRE_RBCAM_PERIODIC_RATE_SWEEP ?= 010k:5 025k:13 050k:26 100k:52 200k:105 500k:262 1000k:524
+PROF_INT_002_SOURCE ?= emu_direct
+PROF_INT_002_LATENCY_SCOPE ?= full
+PROF_INT_002_PRE_RBCAM_LATENCY_SCOPE ?= pre_rbcam
 PROF_INT_002_PRE_RBCAM_CASE ?= prof_int_002_pre_rbcam_$(PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE)_phase$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES)
 PROF_INT_002_PRE_RBCAM_DIR := $(SIM_ROOT)/$(PROF_INT_002_PRE_RBCAM_CASE)
 PROF_INT_002_PRE_RBCAM_HIST_DIR := $(PROF_INT_002_PRE_RBCAM_DIR)/pre_rbcam_hist
@@ -32,6 +35,7 @@ PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_head
 PROF_INT_002_PRE_RBCAM_RTL_INJ_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_ASIC_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_FULL8_BURST_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100/pre_rbcam_hist
+PROF_INT_002_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_PERIODIC_RATE_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep/pre_rbcam_hist
 PROF_INT_002_REPORT_DIR := $(TB_INT_ROOT)/reports
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_phase_sweep_dislin
@@ -42,6 +46,8 @@ PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_channel_rate_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_1L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
@@ -52,6 +58,14 @@ PROF_INT_002_STABLE_WINDOW_CYCLES := 125000000
 PROF_INT_002_DRAIN_CYCLES_5S := 16384
 PROF_INT_002_SYN  := $(abspath $(TB_INT_ROOT)/../../system_20260504_full8lane_type0/syn/full8lane_type0_system/synthesis)
 PROF_INT_002_COMMON := $(abspath $(TB_INT_ROOT)/../../system_20260504_full8lane_type0/syn/board_projects/fe_scifi_full8lane/src/common)
+PROF_INT_002_REPO_ROOT := $(abspath $(TB_INT_ROOT)/../../../..)
+MUTRIG_GOLDEN_ROOT ?= /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb
+PROF_INT_002_RAW_LIB := mutrig_raw
+PROF_INT_002_RAW_WORK ?= work_tb_int_mutrig_raw
+PROF_INT_002_VSIM_LIBS := -L $(PROF_INT_002_RAW_LIB)
+PROF_INT_002_RAW_SUPPORT := $(PROF_INT_002_REPO_ROOT)/emulator_mutrig/tlm/raw_support
+PROF_INT_002_MUTRIG_TRUE_AB := $(PROF_INT_002_REPO_ROOT)/emulator_mutrig/tb/mutrig_true_ab
+PROF_INT_002_GOLDEN_UNITS := $(MUTRIG_GOLDEN_ROOT)/units
 PROF_INT_002_MTS_ROM_INIT := $(PROF_INT_002_SYN)/submodules/dual_port_rom_init.txt
 PROF_INT_002_QUARTUS_SIMLIB ?= /data1/intelFPGA/18.1/quartus/eda/sim_lib
 PROF_INT_002_INCDIR := +incdir+$(PROF_INT_002_SYN) +incdir+$(PROF_INT_002_SYN)/submodules
@@ -80,6 +94,8 @@ PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh 
 \tplot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
 \trun_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
 \tplot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
+\trun_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100 \
+\tplot_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100 \
 \trun_prof_int_002_pre_rbcam_periodic_2ch \
 \trun_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
 \tplot_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
@@ -104,6 +120,16 @@ comp_prof_int_002_dut: lib
 	$(VLOG) -modelsimini modelsim.ini -work $(WORK) -timescale 1ps/1ps \
 	    $(PROF_INT_002_QUARTUS_SIMLIB)/arriav_atoms.v \
 	    $(PROF_INT_002_QUARTUS_SIMLIB)/mentor/arriav_atoms_ncrypt.v
+	$(VLIB) $(PROF_INT_002_RAW_WORK)
+	$(VMAP) -modelsimini modelsim.ini $(PROF_INT_002_RAW_LIB) $(PROF_INT_002_RAW_WORK)
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_GOLDEN_UNITS)/datapath_defs/source/rtl/vhdl/datapath_helpers.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_GOLDEN_UNITS)/datapath_defs/source/rtl/vhdl/datapath_types.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_GOLDEN_UNITS)/datapath_defs/source/rtl/vhdl/serial_comm_defs.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_GOLDEN_UNITS)/datapath_defs/source/rtl/vhdl/txt_util.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_RAW_SUPPORT)/hdlcore_lib/generic_memory/generic_dp_fifo/source/rtl/vhdl/generic_dp_fifo.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_GOLDEN_UNITS)/frame_generator/source/rtl/vhdl/crc16_8.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_GOLDEN_UNITS)/frame_generator/source/rtl/vhdl/frame_generator.vhd
+	$(VCOM) -modelsimini modelsim.ini -work $(PROF_INT_002_RAW_LIB) -2008 $(PROF_INT_002_MUTRIG_TRUE_AB)/raw_mutrig_frame_top.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/firefly_constants.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/cam_helper_pkg.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/histogram_statistics_v2_pkg.vhd
@@ -211,10 +237,12 @@ prepare_prof_int_002_mem_init:
 
 run_prof_int_002_full_pipeline_100khz_per_channel_test: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR)
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports $(PROF_INT_002_VSIM_LIBS) -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
 	    +ARB_SEED=$(SEED) \
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR) \
+	    +TB_INT_SOURCE=$(PROF_INT_002_SOURCE) \
+	    +TB_INT_LATENCY_SCOPE=$(PROF_INT_002_LATENCY_SCOPE) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=95 \
 		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES) \
@@ -233,10 +261,12 @@ run_prof_int_002_full_pipeline_100khz_per_channel_test: comp_prof_int_002 prepar
 
 run_prof_int_002_pre_rbcam_latency: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_PRE_RBCAM_DIR)
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports $(PROF_INT_002_VSIM_LIBS) -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
 	    +ARB_SEED=$(SEED) \
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_PRE_RBCAM_DIR) \
+	    +TB_INT_SOURCE=$(PROF_INT_002_SOURCE) \
+	    +TB_INT_LATENCY_SCOPE=$(PROF_INT_002_PRE_RBCAM_LATENCY_SCOPE) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=0 \
 		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_PRE_RBCAM_RUN_CYCLES) \
@@ -455,6 +485,65 @@ plot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100: run_prof_i
 	@echo "=== PROF-INT-002 full8/full32 header-sync burst sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP)/contact_sheet_dislin_p1.png ==="
 	@echo "=== PROF-INT-002 full8/full32 header-sync burst sweep channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
 
+run_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100:
+	@set -e; for burst in 1 2 5 7; do \
+	    $(MAKE) run_prof_int_002_pre_rbcam_latency \
+	        PROF_INT_002_SOURCE=virtual_mutrig_raw \
+	        PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=100 \
+	        PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT=128 \
+	        PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT=$$burst \
+	        PROF_INT_002_PRE_RBCAM_INJECT_BURST_SPACING_CYCLES=10 \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT=0 \
+	        PROF_INT_002_PRE_RBCAM_RUN_CYCLES=125000 \
+	        PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES=65536 \
+	        PROF_INT_002_RUNCTL_CPP_GAP_CYCLES=1000 \
+	        PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES=20000 \
+	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT=1 \
+	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK=1 \
+	        PROF_INT_002_PRE_RBCAM_CHANNEL_LOW=0 \
+	        PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH=0 \
+	        PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst$${burst}; \
+	    csv="$(SIM_ROOT)/prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst$${burst}/pre_rbcam_records.csv"; \
+	    expected=$$((128 * burst)); \
+	    if [ ! -s "$$csv" ]; then \
+	        echo "ERROR: $$csv missing or empty"; \
+	        exit 1; \
+	    fi; \
+	    actual=$$(awk 'NR > 1 {n++} END {print n + 0}' "$$csv"); \
+	    if [ "$$actual" -ne "$$expected" ]; then \
+	        echo "ERROR: virtual_raw burst$${burst} expected $$expected pre-rbCAM rows, got $$actual"; \
+	        exit 1; \
+	    fi; \
+	done
+	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst[1257]' \
+	    --hist-dir $(PROF_INT_002_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_HIST_DIR) \
+	    --hist-formats csv,png \
+	    --aggregate
+
+plot_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100: run_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_latency_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst[1257]' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP) \
+	    --rows-per-page 4 \
+	    --stage pre-rbcam \
+	    --title-tag "ASIC0 virtual-raw MuTRiG header-sync phase100 burst sweep pre-rbCAM, x=[-1000,3096]"
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst[1257]' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL) \
+	    --rows-per-page 4 \
+	    --title-tag "ASIC0 virtual-raw MuTRiG header-sync phase100 burst sweep" \
+	    --record-csv pre_rbcam_records.csv \
+	    --channel-mode lane-local
+	@echo "=== PROF-INT-002 virtual-raw header-sync burst sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP)/contact_sheet_dislin.png ==="
+	@echo "=== PROF-INT-002 virtual-raw header-sync burst sweep channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL)/channel_rate_dislin.png ==="
+
 run_prof_int_002_pre_rbcam_periodic_2ch:
 	$(MAKE) run_prof_int_002_pre_rbcam_latency \
 	    PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=periodic \
@@ -511,10 +600,12 @@ plot_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep: run_prof_int_002_p
 
 run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_1L_5S)
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports $(PROF_INT_002_VSIM_LIBS) -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
 	    +ARB_SEED=$(SEED) \
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR_1L_5S) \
+	    +TB_INT_SOURCE=$(PROF_INT_002_SOURCE) \
+	    +TB_INT_LATENCY_SCOPE=$(PROF_INT_002_LATENCY_SCOPE) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=95 \
 		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
@@ -536,10 +627,12 @@ run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002 pr
 
 run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_8L_5S)
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports $(PROF_INT_002_VSIM_LIBS) -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
 	    +ARB_SEED=$(SEED) \
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR_8L_5S) \
+	    +TB_INT_SOURCE=$(PROF_INT_002_SOURCE) \
+	    +TB_INT_LATENCY_SCOPE=$(PROF_INT_002_LATENCY_SCOPE) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=0 \
 		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \
@@ -561,10 +654,12 @@ run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: comp_prof_int_002 pr
 
 run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_EMU_5S)
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports $(PROF_INT_002_VSIM_LIBS) -work $(WORK) $(PROF_INT_002_TOP) \
 	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
 	    +ARB_SEED=$(SEED) \
 	    +TB_INT_SIM_DIR=$(PROF_INT_002_DIR_EMU_5S) \
+	    +TB_INT_SOURCE=$(PROF_INT_002_SOURCE) \
+	    +TB_INT_LATENCY_SCOPE=$(PROF_INT_002_LATENCY_SCOPE) \
 	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
 	    +TB_INT_MIN_CLOSED_PCT=0 \
 		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_RUN_CYCLES_5S) \

@@ -11,7 +11,9 @@ module tb_int_assertions (
     input logic stage_a_valid,
     input logic pre_rbcam_valid,
     input logic post_rbcam_valid,
-    input logic feb_egress_valid
+    input logic feb_egress_valid,
+    input logic enable_post_rbcam_checks,
+    input logic enable_feb_egress_checks
 );
     int unsigned cycle_count;
     int unsigned last_stage_a_cycle;
@@ -46,7 +48,7 @@ module tb_int_assertions (
     endproperty
 
     property pre_rbcam_to_post_rbcam_p;
-        @(posedge clk) disable iff (rst)
+        @(posedge clk) disable iff (rst || !enable_post_rbcam_checks)
             pre_rbcam_valid |-> ##[0:POST_RBCAM_MAX_CYCLES_CONST] post_rbcam_valid;
     endproperty
 
@@ -59,7 +61,7 @@ module tb_int_assertions (
     // The relative Post-rbCAM -> FEB-egress SVA upper is 2 frames plus 1000 cycles
     // of drain residue: 4096 + 1000 = 5096 cycles.
     property post_rbcam_to_feb_egress_p;
-        @(posedge clk) disable iff (rst)
+        @(posedge clk) disable iff (rst || !enable_feb_egress_checks)
             post_rbcam_valid |-> ##[0:POST_RBCAM_TO_FEB_EGRESS_MAX_CYCLES_CONST] feb_egress_valid;
     endproperty
 

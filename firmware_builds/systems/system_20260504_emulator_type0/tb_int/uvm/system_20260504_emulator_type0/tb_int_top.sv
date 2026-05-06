@@ -66,7 +66,9 @@ module tb_int_top;
         .stage_a_valid    (stage_a_vif.valid),
         .pre_rbcam_valid  (pre_rbcam_vif.valid),
         .post_rbcam_valid (post_rbcam_vif.valid),
-        .feb_egress_valid (feb_egress_vif.valid)
+        .feb_egress_valid (feb_egress_vif.valid),
+        .enable_post_rbcam_checks (1'b1),
+        .enable_feb_egress_checks (1'b1)
     );
 
     initial begin
