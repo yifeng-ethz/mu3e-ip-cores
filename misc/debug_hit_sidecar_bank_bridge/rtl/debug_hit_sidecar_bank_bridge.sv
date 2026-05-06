@@ -1,9 +1,9 @@
 // debug_hit_sidecar_bank_bridge.sv
 // Aligns four lane-local DEBUG metadata conduits with a 4-input hit_type0 mux.
 //
-// Version : 26.0.1
+// Version : 26.0.2
 // Date    : 20260506
-// Change  : Export per-lane sidecar FIFO fill levels and sticky overflow flags.
+// Change  : Do not gate metadata alignment on optional mux endofrun.
 
 module debug_hit_sidecar_bank_bridge #(
     parameter int DATA_WIDTH = 45,
@@ -116,7 +116,7 @@ module debug_hit_sidecar_bank_bridge #(
     end
 
     assign coe_hit_type0_sidecar_valid =
-        transfer && !asi_hit_type0_endofrun && selected_metadata_present;
+        transfer && selected_metadata_present;
     assign coe_debug_fifo_levels = {
         debug_fifo_level[3],
         debug_fifo_level[2],
@@ -145,7 +145,6 @@ module debug_hit_sidecar_bank_bridge #(
             debug_fifo_level[lane_idx][FIFO_ADDR_WIDTH_CONST:0] = fifo_count[lane_idx];
             sidecar_read_accept[lane_idx] =
                 transfer
-                && !asi_hit_type0_endofrun
                 && (selected_lane == lane_idx[1:0])
                 && (fifo_count[lane_idx] != '0);
             sidecar_write_accept[lane_idx] =

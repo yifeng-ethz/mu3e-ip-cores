@@ -6,7 +6,7 @@
 package require -exact qsys 16.1
 
 set_module_property NAME debug_hit_sidecar_bank_bridge
-set_module_property VERSION 26.0.1.0506
+set_module_property VERSION 26.0.2.0506
 set_module_property DISPLAY_NAME "DEBUG Hit Sidecar Bank Bridge"
 set_module_property GROUP "Mu3e Data Plane/Utility"
 set_module_property DESCRIPTION "Queues four lane-local 64-bit DEBUG metadata conduits and emits the metadata aligned with a 4-input hit_type0 mux output."

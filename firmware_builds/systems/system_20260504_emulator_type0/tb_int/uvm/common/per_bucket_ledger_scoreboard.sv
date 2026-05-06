@@ -90,6 +90,7 @@ package tb_int_scoreboard_pkg;
         bit          require_zero_residual;
         bit          exported_records;
         bit          exported_counter_status;
+        string       scoreboard_scope;
         string       output_dir;
         latency_reporter reporter;
 
@@ -103,6 +104,7 @@ package tb_int_scoreboard_pkg;
             int    plusarg_require_zero;
             int    plusarg_min_closed_pct;
             int    plusarg_stable_only_export;
+            string plusarg_scoreboard_scope;
 
             super.build_phase(phase);
             stage_a_imp    = new("stage_a_imp", this);
@@ -119,6 +121,7 @@ package tb_int_scoreboard_pkg;
             exported_records      = 1'b0;
             exported_counter_status = 1'b0;
             counter_vif = null;
+            scoreboard_scope = "full";
             void'(uvm_config_db#(virtual tb_int_counter_if)::get(this,
                                                                  "",
                                                                  "counter_vif",
@@ -136,6 +139,14 @@ package tb_int_scoreboard_pkg;
             stable_only_export = 1'b0;
             if ($value$plusargs("TB_INT_STABLE_ONLY_EXPORT=%d", plusarg_stable_only_export))
                 stable_only_export = (plusarg_stable_only_export != 0);
+            if ($value$plusargs("TB_INT_SCOREBOARD_SCOPE=%s", plusarg_scoreboard_scope))
+                scoreboard_scope = plusarg_scoreboard_scope;
+            if (!((scoreboard_scope == "full") || (scoreboard_scope == "pre_rbcam"))) begin
+                `uvm_warning("TB_INT_SB",
+                             $sformatf("unknown TB_INT_SCOREBOARD_SCOPE=%s; using full",
+                                       scoreboard_scope))
+                scoreboard_scope = "full";
+            end
         endfunction
 
         virtual function void start_of_simulation_phase(uvm_phase phase);
@@ -487,11 +498,18 @@ package tb_int_scoreboard_pkg;
         endfunction
 
         function automatic bit selected_model_has_residuals();
-            if (debug_path_active())
+            if (debug_path_active()) begin
+                if (scoreboard_scope == "pre_rbcam")
+                    return (total_debug_missing_pre != 0 ||
+                            total_debug_ghost_pre != 0 ||
+                            total_debug_duplicate_ids != 0);
                 return (total_debug_missing_pre != 0 || total_debug_ghost_pre != 0 ||
                         total_debug_missing_post != 0 || total_debug_ghost_post != 0 ||
                         total_debug_missing_feb != 0 || total_debug_ghost_feb != 0 ||
                         total_debug_duplicate_ids != 0);
+            end
+            if (scoreboard_scope == "pre_rbcam")
+                return (total_missing_pre != 0 || total_ghost_pre != 0);
             return (total_missing_pre != 0 || total_ghost_pre != 0 ||
                     total_missing_post != 0 || total_ghost_post != 0 ||
                     total_missing_feb != 0 || total_ghost_feb != 0);
@@ -640,6 +658,7 @@ package tb_int_scoreboard_pkg;
 
         virtual function void reconcile(string phase_name = "unknown");
             bit export_now;
+            bit use_debug_export;
 
             total_matched_a_pre   = 0;
             total_missing_pre     = 0;
@@ -715,12 +734,18 @@ package tb_int_scoreboard_pkg;
                                      total_debug_ghost_feb);
 
             export_now = !exported_records;
-            export_closed_and_drops(export_now);
+            use_debug_export = debug_path_active();
+            if (use_debug_export)
+                export_debug_closed_and_drops(export_now);
+            else
+                export_closed_and_drops(export_now);
             if (export_now)
                 exported_records = 1'b1;
             `uvm_info("TB_INT_SB",
-                      $sformatf("reconcile[%s] export_model=fifo_key sidecar_model=%s A=%0d stable_A=%0d PRE=%0d pre_fanout_dupe=%0d POST=%0d FEB=%0d closed=%0d stable_closed=%0d residuals fifo A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d stable_missing A->PRE/PRE->POST/POST->FEB=%0d/%0d/%0d debug_obs A/SRC/PRE/POST/FEB=%0d/%0d/%0d/%0d/%0d debug_residuals SRC->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d debug_duplicate_ids=%0d",
+                      $sformatf("reconcile[%s] export_model=%s scoreboard_scope=%s sidecar_model=%s A=%0d stable_A=%0d PRE=%0d pre_fanout_dupe=%0d POST=%0d FEB=%0d closed=%0d stable_closed=%0d residuals fifo A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d stable_missing A->PRE/PRE->POST/POST->FEB=%0d/%0d/%0d debug_obs A/SRC/PRE/POST/FEB=%0d/%0d/%0d/%0d/%0d debug_residuals SRC->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d debug_duplicate_ids=%0d",
                                 phase_name,
+                                use_debug_export ? "debug_id" : "fifo_key",
+                                scoreboard_scope,
                                 debug_path_active() ? "debug_id" : "inactive",
                                 total_stage_a,
                                 total_stage_a_stable,

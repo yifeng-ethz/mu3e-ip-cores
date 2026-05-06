@@ -67,7 +67,7 @@ set histogram_compat_ip_dir [file join $syn_dir ip histogram_statistics_v2]
 set search_path [join [list $syn_dir $arb_script_dir $debug_sidecar_fanout_script_dir $debug_hit_sidecar_bank_bridge_script_dir $emulator_ip_dir $frame_deassembly_script_dir $mts_processor_ip_dir $ring_buffer_cam_script_dir $feb_frame_assembly_ip_dir $upload_readyless_ip_dir $hit_stack_readyless_ip_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
 set lvds_controller_version 26.2.1.0506
 set debug_sidecar_fanout_version 26.0.0.0506
-set debug_hit_sidecar_bank_bridge_version 26.0.1.0506
+set debug_hit_sidecar_bank_bridge_version 26.0.2.0506
 set emulator_mutrig_version 26.3.0.0506
 set frame_deassembly_version 26.1.0.0506
 set mts_preprocessor_version 26.1.0.0506

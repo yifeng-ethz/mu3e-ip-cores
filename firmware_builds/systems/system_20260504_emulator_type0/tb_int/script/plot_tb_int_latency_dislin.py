@@ -107,11 +107,19 @@ class Hist:
     stage_label: str
     win_left: float
     win_right: float
+    raw_total: int
+    raw_in_window: int
+    raw_below_xlim: int
+    raw_above_xlim: int
     centers: list[float]
     counts: list[int]
 
     @property
     def total(self) -> int:
+        return self.raw_total
+
+    @property
+    def display_total(self) -> int:
         return sum(self.counts)
 
     @property
@@ -120,7 +128,7 @@ class Hist:
 
     @property
     def peak_bin_index(self) -> int | None:
-        if not self.counts or self.total <= 0:
+        if not self.counts or self.display_total <= 0:
             return None
         return max(range(len(self.counts)), key=self.counts.__getitem__)
 
@@ -131,29 +139,23 @@ class Hist:
 
     @property
     def peak_fraction_pct(self) -> float:
-        total = self.total
-        return 100.0 * max(self.counts) / total if total > 0 else 0.0
+        return 100.0 * max(self.counts) / self.raw_total if self.raw_total > 0 else 0.0
 
     @property
     def in_window(self) -> int:
-        return sum(
-            count
-            for center, count in zip(self.centers, self.counts)
-            if self.win_left <= center < self.win_right
-        )
+        return self.raw_in_window
 
     @property
     def out_window(self) -> int:
-        return self.total - self.in_window
+        return self.raw_total - self.raw_in_window
 
     def pct(self, value: int) -> float:
         return 100.0 * value / self.total if self.total else 0.0
 
     def normalized_counts(self) -> list[float]:
-        total = self.total
-        if total <= 0:
+        if self.raw_total <= 0:
             return [0.0] * len(self.counts)
-        return [100.0 * c / total for c in self.counts]
+        return [100.0 * c / self.raw_total for c in self.counts]
 
     def summary_row(self) -> dict[str, object]:
         pc = self.peak_center
@@ -161,6 +163,9 @@ class Hist:
             "case": self.case_name,
             "stage": self.stage_label,
             "total": self.total,
+            "display_count": self.display_total,
+            "below_xlim_count": self.raw_below_xlim,
+            "above_xlim_count": self.raw_above_xlim,
             "nonzero_bins": self.nonzero_bins,
             "peak_bin_index": self.peak_bin_index,
             "peak_cycles": pc,
@@ -257,11 +262,19 @@ def load_case(case_dir: Path, stages: list[dict[str, object]], stable_only: bool
             return None
         xlim_s = (float(stage["xlim"][0]), float(stage["xlim"][1]))  # type: ignore[index]
         centers, counts = build_integer_histogram(latencies, xlim=xlim_s)
+        raw_in_window = sum(1 for v in latencies
+                            if float(stage["win_left"]) <= v < float(stage["win_right"]))  # type: ignore[arg-type]
+        raw_below_xlim = sum(1 for v in latencies if v < xlim_s[0])
+        raw_above_xlim = sum(1 for v in latencies if v >= xlim_s[1])
         hists.append(Hist(
             case_name=case_dir.name,
             stage_label=str(stage["label"]),
             win_left=float(stage["win_left"]),  # type: ignore[arg-type]
             win_right=float(stage["win_right"]),  # type: ignore[arg-type]
+            raw_total=len(latencies),
+            raw_in_window=raw_in_window,
+            raw_below_xlim=raw_below_xlim,
+            raw_above_xlim=raw_above_xlim,
             centers=centers,
             counts=counts,
         ))
@@ -379,13 +392,14 @@ def render_panel(
     in_pct, out_pct = hist.pct(hist.in_window), hist.pct(hist.out_window)
     window_label = str(stage.get("window_label", "DV budget"))
     footer_lines = [
-        (f"total={hist.total} hits, nonzero={hist.nonzero_bins}/{len(hist.counts)}, "
+        (f"total={hist.total} hits, displayed={hist.display_total}, nonzero={hist.nonzero_bins}/{len(hist.counts)}, "
          f"peak bin={hist.peak_bin_index} at {peak_text} cycles, "
          f"peak fraction={hist.peak_fraction_pct:.3f}%"),
         (f"black=peak {peak_text} cycles; green={window_label} edges "
          f"{win_left:.0f} and {win_right:.0f} cycles"),
         (f"{hist.stage_label} [{win_left:.0f},{win_right:.0f}]: "
-         f"in={hist.in_window} ({in_pct:.6f}%), out={hist.out_window} ({out_pct:.6f}%)"),
+         f"in={hist.in_window} ({in_pct:.6f}%), out={hist.out_window} ({out_pct:.6f}%); "
+         f"xclip below={hist.raw_below_xlim}, above={hist.raw_above_xlim}"),
     ]
     footer_y = bottom + 0.128 * height
     for i, line in enumerate(footer_lines):
@@ -477,7 +491,8 @@ def paginate(all_cases: list[tuple[str, list[Hist]]], out_dir: Path,
 
 def write_summary_csv(all_cases: list[tuple[str, list[Hist]]], out_dir: Path) -> Path:
     out_path = out_dir / "latency_summary.csv"
-    fieldnames = ["case", "stage", "total", "nonzero_bins", "peak_bin_index", "peak_cycles",
+    fieldnames = ["case", "stage", "total", "display_count", "below_xlim_count", "above_xlim_count",
+                  "nonzero_bins", "peak_bin_index", "peak_cycles",
                   "peak_fraction_pct", "win_left", "win_right",
                   "in_window_count", "in_window_pct", "out_window_count", "out_window_pct"]
     out_dir.mkdir(parents=True, exist_ok=True)
