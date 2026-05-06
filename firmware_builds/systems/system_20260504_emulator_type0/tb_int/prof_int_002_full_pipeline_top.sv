@@ -485,10 +485,12 @@ module prof_int_002_full_pipeline_top;
     always_ff @(posedge clk_125) begin : virtual_mutrig_source_driver
         logic emit_hit_v;
         logic [31:0] rate_acc_next_v;
+        int unsigned rate_step_v;
         logic [4:0] channel_v;
 
         emit_hit_v = 1'b0;
         rate_acc_next_v = virtual_mutrig0_rate_accum;
+        rate_step_v = 0;
         channel_v = virtual_mutrig0_next_channel;
 
         if (rst || (source_mode != "virtual_mutrig") || !injection_window_active) begin
@@ -513,7 +515,8 @@ module prof_int_002_full_pipeline_top;
 
             if (!virtual_mutrig0_offer_valid) begin
                 if (traffic_is_periodic()) begin
-                    rate_acc_next_v = virtual_mutrig0_rate_accum + hit_rate_q16[31:0];
+                    rate_step_v = hit_rate_q16 * active_hit_channel_count();
+                    rate_acc_next_v = virtual_mutrig0_rate_accum + rate_step_v;
                     if (hit_rate_q16 != 0 && rate_acc_next_v >= 32'd65536) begin
                         emit_hit_v = 1'b1;
                         virtual_mutrig0_rate_accum <= rate_acc_next_v - 32'd65536;
@@ -1479,6 +1482,12 @@ module prof_int_002_full_pipeline_top;
 
     function automatic logic source_is_virtual_mutrig();
         return ((source_mode == "virtual_mutrig") || (source_mode == "virtual_mutrig_raw"));
+    endfunction
+
+    function automatic int unsigned active_hit_channel_count();
+        if (hit_channel_high >= hit_channel_low)
+            return hit_channel_high - hit_channel_low + 1;
+        return 1;
     endfunction
 
     function automatic logic traffic_uses_rtl_injector();

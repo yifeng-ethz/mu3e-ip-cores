@@ -48,6 +48,8 @@ Historical formal note:
 | [BUG-011-H](#bug-011-h-tagged-mutrig-frame-generator-bound-to-generated-system-crc) | H | hard stuck error | `directed-only (virtual MuTRiG source simulation)` | fixed in Makefile library isolation; compile passed | PROF-INT-002 virtual MuTRiG smoke on `2026-05-06` | pending | The tagged MuTRiG frame generator component-bound to the generated-system `crc16_8` entity with a different port list, preventing virtual MuTRiG simulation elaboration. |
 | [BUG-012-H](#bug-012-h-pre-rbcam-source-validation-enforced-downstream-sva-scope) | H | soft error | `directed-only (pre-rbCAM-only source-validation runs)` | fixed in assertion scope control; virtual MuTRiG burst sweep passed | PROF-INT-002 virtual MuTRiG smoke on `2026-05-06` | pending | Pre-rbCAM-only source-validation runs still enforced post-rbCAM/FEB SVA windows, so downstream residuals polluted a source-stage latency contract. |
 | [BUG-013-H](#bug-013-h-dual-uvm-sidecar-lineage-was-not-bound-for-all-source-modes) | H | hard stuck error | `common (DEBUG_LEVEL=2 sidecar lineage closure)` | partial; dual UVM harness fixed, generated-system refresh pending | PROF-INT-002 DEBUG_LEVEL=2 sidecar smoke on `2026-05-06` | pending | tb_int had a nominal latency path but no fully independent sidecar-source path for every source mode, so OoO sidecar lineage could be inactive or stale while latency plots still exported normally. |
+| [BUG-014-R](#bug-014-r-debug-sidecar-bank-bridge-gated-lineage-on-unconnected-endofrun) | R | hard stuck error | `common (DEBUG_LEVEL=2 full8lane generated simulation)` | fixed in IP source and regenerated Qsys sim RTL; full downstream closure pending | PROF-INT-002 virtual MuTRiG sidecar rerun on `2026-05-06` | pending | `debug_hit_sidecar_bank_bridge` gated sidecar-valid/read-accept on an optional `endofrun` input that the generated full8lane system left open, suppressing source IDs at pre-rbCAM. |
+| [BUG-015-H](#bug-015-h-dislin-latency-renderer-dropped-out-of-display-stage-records) | H | soft error | `directed-only (post-rbCAM/FEB latency plotting with outliers)` | fixed in plotting script; regenerated 10/100 kHz all-stage plot exposes blocker | PROF-INT-002 post-rbCAM/FEB plot generation on `2026-05-06` | pending | The DISLIN renderer counted only bins inside the display range, so post-rbCAM/FEB records outside the DV_PLAN aperture could be reported as zero total instead of out-of-window hits. |
 
 ## 2026-05-06
 
@@ -375,3 +377,51 @@ Historical formal note:
     `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_latency PROF_INT_002_SOURCE=virtual_mutrig PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT=16 PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT=1 PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_virtual_mutrig_smoke` passed with `UVM_ERROR=0`, `UVM_FATAL=0`, and a 16-row pre-rbCAM delta latency at 837 cycles. The run confirmed the new source label and debug-source tap are active (`debug_obs SRC/PRE=16/16`) but still reported stale generated-system sidecar mismatch (`debug_residuals SRC->PRE=0/16/16`), so full DEBUG_LEVEL=2 OoO closure remains blocked on regenerating the generated full8lane simulation RTL from the fixed Qsys Tcl/IP versions.
   - potential_hazard:
     medium until the generated full8lane simulation RTL is regenerated from the fixed Qsys Tcl/IP versions. The source-tree fix is the required durable repair; generated `synthesis/` RTL remains evidence and must not be treated as authored source.
+
+### BUG-014-R: debug sidecar bank bridge gated lineage on unconnected `endofrun`
+
+- First seen in:
+  - PROF-INT-002 virtual MuTRiG DEBUG_LEVEL=2 sidecar rerun on `2026-05-06`
+  - command family:
+    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_latency PROF_INT_002_SOURCE=virtual_mutrig PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=periodic`
+- Symptom:
+  - before the bridge fix, the debug-source ledger saw source IDs but pre-rbCAM records carried local MTS fallback IDs, so `debug_residuals SRC->PRE` showed no useful source-ID closure
+  - after Qsys regeneration, the generated full8lane wrapper still leaves `.asi_hit_type0_endofrun()` open on the bridge instance, proving this input cannot be part of the sidecar-valid contract in the current system
+- Root cause:
+  - `debug_hit_sidecar_bank_bridge` treated `asi_hit_type0_endofrun` as a required qualifier for `coe_hit_type0_sidecar_valid` and per-bank read accept
+  - the upstream generated type0 mux stream has no matching end-of-run sideband, so the optional conduit is open in the generated full8lane system and suppresses or poisons sidecar metadata even while the hit payload handshake succeeds
+- Fix status:
+  - state:
+    fixed in `misc/debug_hit_sidecar_bank_bridge` and regenerated full8lane DEBUG_LEVEL=2 simulation RTL; full downstream closure remains blocked by post-rbCAM/FEB residuals
+  - mechanism:
+    bridge v26.0.2 removes the optional end-of-run gate from sidecar-valid and sidecar FIFO read-accept, making metadata advance on the same hit payload valid/ready contract as the authored stream. `build_full8lane_system.tcl` pins `debug_hit_sidecar_bank_bridge_version` to `26.0.2.0506`, and `FULL8LANE_DEBUG_LEVEL=2 ./script/regen_full8lane_system.sh` refreshes the generated simulation RTL.
+  - before_fix_outcome:
+    virtual-MuTRiG periodic sidecar runs could not match source IDs into pre-rbCAM even though nominal pre-rbCAM payload records existed
+  - after_fix_outcome:
+    the 1 ms ASIC0/full32 10 kHz/channel virtual-MuTRiG checkpoint passed the pre-rbCAM strict scoreboard with `SRC->PRE=304/0/0`, `A->PRE=304/0/0`, `UVM_ERROR=0`, and a 304-row `pre_rbcam_records.csv`. The 100 kHz/channel checkpoint still reports `SRC->PRE=1048/2047/0`, which is now a real throughput/drain or configuration blocker rather than a sidecar-ID ghosting artifact.
+  - potential_hazard:
+    low for Stage-A -> pre-rbCAM lineage after regeneration; medium for full-pipeline closure because downstream post-rbCAM/FEB sidecar and datapath behavior still have residuals that must be fixed or locally explained before using those plots as signoff evidence
+
+### BUG-015-H: DISLIN latency renderer dropped out-of-display stage records
+
+- First seen in:
+  - PROF-INT-002 post-rbCAM/FEB plot generation on `2026-05-06`
+  - command:
+    `python3 script/plot_tb_int_latency_dislin.py --sim-root sim --cases prof_int_002_pre_rbcam_periodic_asic0_full32_virtual_mutrig_010k_1ms --out-dir reports/prof_int_002_pipeline_periodic_asic0_full32_virtual_mutrig_010k_1ms_dislin`
+- Symptom:
+  - `closed_records.csv` had 105 scoreboard-closed rows for the 10 kHz/channel checkpoint, but the post-rbCAM and FEB-egress panels reported total zero because all stage latencies were above the fixed display ranges
+  - this hid the actual blocker: the generated post-rbCAM/FEB timestamps were out of the DV_PLAN apertures instead of absent from the scoreboard export
+- Root cause:
+  - `plot_tb_int_latency_dislin.py` computed `Hist.total` from the sum of displayed bins after applying the stage `xlim`
+  - rows outside the plot range were removed before the in-window/out-window accounting, so clipping changed the quantitative report
+- Fix status:
+  - state:
+    fixed in plotting script; regenerated all-stage 10/100 kHz contact sheet exposes the post-rbCAM/FEB blocker
+  - mechanism:
+    the renderer now keeps raw row count, raw DV-window count, and below/above-display clipping counts separate from displayed bin count. The footer and `latency_summary.csv` report `display_count`, `below_xlim_count`, and `above_xlim_count` so empty panels remain quantitative evidence.
+  - before_fix_outcome:
+    post-rbCAM/FEB panels could be misread as no matched records, even though the scoreboard exported rows with out-of-aperture timestamps
+  - after_fix_outcome:
+    `reports/prof_int_002_pipeline_periodic_asic0_full32_virtual_mutrig_010k_100k_1ms_dislin/latency_summary.csv` reports, for 10 kHz/channel, post-rbCAM `total=105 display_count=0 above_xlim=105 out_window=105`, and for 100 kHz/channel, post-rbCAM `total=364 display_count=0 above_xlim=364 out_window=364`; FEB-egress has the same all-above-window signature. This is a visible blocker, not a plotting artifact.
+  - potential_hazard:
+    low after the renderer fix; any future per-stage plot with all hits outside the display aperture now reports raw out-of-window counts instead of silently dropping them
