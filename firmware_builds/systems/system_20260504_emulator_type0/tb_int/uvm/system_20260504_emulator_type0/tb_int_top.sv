@@ -1,9 +1,9 @@
 // tb_int_top.sv
 // Top-level simulator shell for system_20260504_emulator_type0/tb_int.
 // Author: Yifeng Wang
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Add UVM top, clocks, reset, focus-DUT hook, and interface wiring.
+// Version : 26.2.1
+// Date    : 20260506
+// Change  : Bind the single smoke taps into aggregate monitor slot zero.
 
 module tb_int_top;
     timeunit 1ps;
@@ -118,19 +118,19 @@ module tb_int_top;
                                                 "vif",
                                                 sc_phy_vif);
         uvm_config_db#(virtual mutrig_l2_commit_if)::set(null,
-                                                         "uvm_test_top.env.l2_commit_mon",
+                                                         "uvm_test_top.env.l2_commit_mon0",
                                                          "vif",
                                                          stage_a_vif);
         uvm_config_db#(virtual hit_tap_if)::set(null,
-                                                "uvm_test_top.env.pre_rbcam_mon",
+                                                "uvm_test_top.env.pre_rbcam_mon0",
                                                 "vif",
                                                 pre_rbcam_vif);
         uvm_config_db#(virtual hit_tap_if)::set(null,
-                                                "uvm_test_top.env.post_rbcam_mon",
+                                                "uvm_test_top.env.post_rbcam_mon0",
                                                 "vif",
                                                 post_rbcam_vif);
         uvm_config_db#(virtual hit_tap_if)::set(null,
-                                                "uvm_test_top.env.feb_egress_mon",
+                                                "uvm_test_top.env.feb_egress_mon0",
                                                 "vif",
                                                 feb_egress_vif);
         uvm_config_db#(virtual mutrig_l2_commit_if)::set(null,

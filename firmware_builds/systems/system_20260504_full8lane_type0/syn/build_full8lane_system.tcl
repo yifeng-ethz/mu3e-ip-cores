@@ -55,7 +55,8 @@ set full8lane_sc_hub_ip_dir [file join $syn_dir ip full8lane_sc_hub_v2]
 set full8lane_histogram_ip_dir [file join $syn_dir ip full8lane_histogram_statistics_v2]
 set histogram_compat_ip_dir [file join $syn_dir ip histogram_statistics_v2]
 set search_path [join [list $syn_dir $arb_script_dir $upload_readyless_ip_dir $hit_stack_readyless_ip_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
-set lvds_controller_version 26.2.0.0505
+set lvds_controller_version 26.2.1.0506
+set histogram_ingress_bridge_version 26.0.5.0506
 set runctl_mgmt_host_readyless_version 26.3.0.505
 set lvds_controller_local_csr_base 0x9000
 set lvds_controller_master_csr_base 0x00030000
@@ -259,6 +260,19 @@ proc patch_qsys_module_version {content module_name module_version} {
     return $patched
 }
 
+proc patch_qsys_instance_version {qsys_path module_name module_version} {
+    set fd [open $qsys_path r]
+    set content [read $fd]
+    close $fd
+
+    set content [patch_qsys_module_version $content $module_name $module_version]
+
+    exec chmod u+w $qsys_path
+    set fd [open $qsys_path w]
+    puts -nonewline $fd $content
+    close $fd
+}
+
 proc materialize_readyless_upload_qsys {ref_qsys_path dst_qsys_path runctl_version} {
     set fd [open $ref_qsys_path r]
     set content [read $fd]
@@ -296,16 +310,6 @@ proc materialize_readyless_hit_stack_qsys {ref_qsys_path dst_qsys_path} {
         USE_READY \
         0]
 
-    # The legacy rbCAM/FEB run-control sinks still use their ready output as a
-    # local completion indication for slow states such as RUN_PREPARE and
-    # TERMINATING.  Once the upstream command fanout is readyless, Qsys would
-    # otherwise insert a pure timing adapter that forwards a one-cycle command
-    # pulse even while the sink is not ready.  Add small command FIFOs at those
-    # six legacy sinks so the readyless broadcast cannot be backpressured, but
-    # each sink still sees the command held until its readyful contract accepts
-    # it.
-    set content [patch_hit_stack_runctl_queues $content]
-
     file mkdir [file dirname $dst_qsys_path]
     if {[file exists $dst_qsys_path]} {
         exec chmod u+w $dst_qsys_path
@@ -314,111 +318,6 @@ proc materialize_readyless_hit_stack_qsys {ref_qsys_path dst_qsys_path} {
     puts -nonewline $fd $content
     close $fd
     puts "INFO: materialized readyless hit_stack_system override at $dst_qsys_path"
-}
-
-proc runctl_cmd_fifo_module_xml {name} {
-    return " <module
-   name=\"$name\"
-   kind=\"altera_avalon_sc_fifo\"
-   version=\"18.1\"
-   enabled=\"1\">
-  <parameter name=\"BITS_PER_SYMBOL\" value=\"9\" />
-  <parameter name=\"CHANNEL_WIDTH\" value=\"0\" />
-  <parameter name=\"EMPTY_LATENCY\" value=\"3\" />
-  <parameter name=\"ENABLE_EXPLICIT_MAXCHANNEL\" value=\"false\" />
-  <parameter name=\"ERROR_WIDTH\" value=\"0\" />
-  <parameter name=\"EXPLICIT_MAXCHANNEL\" value=\"0\" />
-  <parameter name=\"FIFO_DEPTH\" value=\"16\" />
-  <parameter name=\"SYMBOLS_PER_BEAT\" value=\"1\" />
-  <parameter name=\"USE_ALMOST_EMPTY_IF\" value=\"0\" />
-  <parameter name=\"USE_ALMOST_FULL_IF\" value=\"0\" />
-  <parameter name=\"USE_FILL_LEVEL\" value=\"0\" />
-  <parameter name=\"USE_MEMORY_BLOCKS\" value=\"0\" />
-  <parameter name=\"USE_PACKETS\" value=\"0\" />
-  <parameter name=\"USE_STORE_FORWARD\" value=\"0\" />
- </module>
-"
-}
-
-proc runctl_cmd_fifo_connection_xml {idx fifo target} {
-    return " <connection
-   kind=\"avalon_streaming\"
-   version=\"18.1\"
-   start=\"run_control_splitter_0.out$idx\"
-   end=\"$fifo.in\" />
- <connection
-   kind=\"avalon_streaming\"
-   version=\"18.1\"
-   start=\"$fifo.out\"
-   end=\"$target\" />
- <connection
-   kind=\"clock\"
-   version=\"18.1\"
-   start=\"datapath_clock_0.clk\"
-   end=\"$fifo.clk\" />
- <connection
-   kind=\"reset\"
-   version=\"18.1\"
-   start=\"datapath_clock_0.clk_reset\"
-   end=\"$fifo.clk_reset\" />
-"
-}
-
-proc patch_hit_stack_runctl_queues {content} {
-    set targets {
-        {0 ring_buffer_cam_0.run_control}
-        {1 ring_buffer_cam_1.run_control}
-        {2 ring_buffer_cam_2.run_control}
-        {3 ring_buffer_cam_3.run_control}
-        {4 feb_frame_assembly_0.ctrl_datapath}
-        {5 run_ctrl_cdc_d2x.in}
-    }
-
-    set modules ""
-    set connections ""
-    foreach target_pair $targets {
-        set idx [lindex $target_pair 0]
-        set target [lindex $target_pair 1]
-        set fifo run_control_cmd_fifo_$idx
-        if {[string first "name=\"$fifo\"" $content] < 0} {
-            append modules [runctl_cmd_fifo_module_xml $fifo]
-        }
-        append connections [runctl_cmd_fifo_connection_xml $idx $fifo $target]
-
-        set direct " <connection
-   kind=\"avalon_streaming\"
-   version=\"18.1\"
-   start=\"run_control_splitter_0.out$idx\"
-   end=\"$target\" />
-"
-        if {[string first $direct $content] < 0} {
-            error "failed to find hit-stack direct run-control connection run_control_splitter_0.out$idx -> $target"
-        }
-        set content [string map [list $direct ""] $content]
-    }
-
-    set insertion_marker " <module name=\"xcvr_clock_0\""
-    set insertion_idx [string first $insertion_marker $content]
-    if {$insertion_idx < 0} {
-        error "failed to find hit-stack module insertion marker $insertion_marker"
-    }
-    set patched [string range $content 0 [expr {$insertion_idx - 1}]]
-    append patched $modules
-    append patched [string range $content $insertion_idx end]
-
-    set connection_marker " <connection
-   kind=\"clock\"
-   version=\"18.1\"
-   start=\"datapath_clock_0.clk\"
-   end=\"run_control_splitter_0.clk\" />"
-    set connection_idx [string first $connection_marker $patched]
-    if {$connection_idx < 0} {
-        error "failed to find hit-stack connection insertion marker"
-    }
-    set content [string range $patched 0 [expr {$connection_idx - 1}]]
-    append content $connections
-    append content [string range $patched $connection_idx end]
-    return $content
 }
 
 proc ensure_qsys_interface_export {qsys_path name internal type dir before_name} {
@@ -533,9 +432,9 @@ proc adopt_sv_lvds_controller {} {
     set_required_param lvds_rx_controller_pro_0 INSTANCE_ID 0
     set_required_param lvds_rx_controller_pro_0 VERSION_MAJOR 26
     set_required_param lvds_rx_controller_pro_0 VERSION_MINOR 2
-    set_required_param lvds_rx_controller_pro_0 VERSION_PATCH 0
-    set_required_param lvds_rx_controller_pro_0 BUILD 0x505
-    set_required_param lvds_rx_controller_pro_0 VERSION_DATE 0x20260505
+    set_required_param lvds_rx_controller_pro_0 VERSION_PATCH 1
+    set_required_param lvds_rx_controller_pro_0 BUILD 0x506
+    set_required_param lvds_rx_controller_pro_0 VERSION_DATE 0x20260506
     set_required_param lvds_rx_controller_pro_0 VERSION_GIT 0x00000000
 
     add_clock_connection monitor_clock_125.clk lvds_rx_controller_pro_0.control_clock
@@ -944,9 +843,9 @@ set_required_param histogram_ingress_bridge_0 DEFAULT_SELECT_POST 1
 set_required_param histogram_ingress_bridge_0 FILTER_POST_HIT_WORDS 1
 set_required_param histogram_ingress_bridge_0 VERSION_MAJOR 26
 set_required_param histogram_ingress_bridge_0 VERSION_MINOR 0
-set_required_param histogram_ingress_bridge_0 VERSION_PATCH 4
-set_required_param histogram_ingress_bridge_0 BUILD 502
-set_required_param histogram_ingress_bridge_0 VERSION_DATE 20260502
+set_required_param histogram_ingress_bridge_0 VERSION_PATCH 5
+set_required_param histogram_ingress_bridge_0 BUILD 506
+set_required_param histogram_ingress_bridge_0 VERSION_DATE 20260506
 set_optional_param histogram_ingress_bridge_0 VERSION_GIT 481097348
 set_required_param mts_preprocessor_0 DEBUG 0
 set_required_param mts_preprocessor_1 DEBUG 0
@@ -971,6 +870,7 @@ adopt_sv_lvds_controller
 # arbiter sits on the post-deassembly hit_type0 boundary.
 remove_instance_if_present arb_hit_type0_supercore_0
 remove_instance_if_present type0_run_ctrl_splitter
+remove_instance_if_present run_control_mts1_fda0_splitter
 remove_instance_if_present histogram_statistics_0
 for {set lane 0} {$lane < 8} {incr lane} {
     remove_instance_if_present mutrig_lane_source_mux_$lane
@@ -985,9 +885,9 @@ configure_full8lane_histogram_statistics histogram_statistics_0
 
 # B002 defensive fix (2026-05-05): eliminate type0_run_ctrl_splitter intermediate
 # hop.  run_control_splitter.out2 feeds arb_hit_type0_supercore_0.run_ctrl
-# directly; mutrig_frame_deassembly_0.ctrl moves to run_control_splitter.out12
-# (previously unused).  The combinational splitter added no registers but gave
-# Quartus an extra net alias that could be optimised away in silicon-only runs.
+# directly.  The Intel 18.1 splitter tops out at 16 outputs, so preserve the
+# reference out12 slot by cascading a two-output readyless splitter for MTS1 and
+# mutrig_frame_deassembly_0.ctrl.
 # NOTE: dbg_mm2runctrl_0.aso_ctrl merge into run_control_splitter.in is
 # deferred — no standard altera_avalon_st_merger exists in Qsys 18.1 and a
 # non-packet multiplexer would mis-schedule the USE_PACKETS=0 run-ctrl stream.
@@ -995,6 +895,13 @@ configure_full8lane_histogram_statistics histogram_statistics_0
 add_clock_connection lvds_rx_controller_pro_0.outclock arb_hit_type0_supercore_0.clk
 add_reset_connection master_datapath.master_reset arb_hit_type0_supercore_0.rst
 add_stream_connection run_control_splitter.out2 arb_hit_type0_supercore_0.run_ctrl
+
+configure_run_ctrl_splitter run_control_mts1_fda0_splitter 2
+add_clock_connection lvds_rx_controller_pro_0.outclock run_control_mts1_fda0_splitter.clk
+add_reset_connection master_datapath.master_reset run_control_mts1_fda0_splitter.reset
+remove_connection_if_present run_control_splitter.out12/mts_preprocessor_1.run_ctrl
+add_stream_connection run_control_splitter.out12 run_control_mts1_fda0_splitter.in
+add_stream_connection run_control_mts1_fda0_splitter.out0 mts_preprocessor_1.run_ctrl
 
 add_mm_connection mm_pipeline_lvds_csr_hist.m0 histogram_statistics_0.hist_bin 0x0000
 add_mm_connection mm_pipeline_lvds_csr_hist.m0 histogram_statistics_0.csr 0x0400
@@ -1035,10 +942,9 @@ for {set lane 0} {$lane < 8} {incr lane} {
     add_stream_connection $fifo.out $lane_mts_mux($lane)
     add_stream_connection $fda.headerinfo mutrig_injector_0.headerinfo$lane
     if {$lane == 0} {
-        # B002 fix: fda_0.ctrl was type0_run_ctrl_splitter.out1; now uses
-        # run_control_splitter.out12 (previously unused) since out2 is taken
-        # directly by arb_hit_type0_supercore_0.run_ctrl.
-        add_stream_connection run_control_splitter.out12 $fda.ctrl
+        # B002/B1 follow-up: fda_0.ctrl was type0_run_ctrl_splitter.out1.
+        # run_control_mts1_fda0_splitter.out0 preserves MTS1; out1 drives FDA0.
+        add_stream_connection run_control_mts1_fda0_splitter.out1 $fda.ctrl
     } else {
         add_stream_connection run_control_splitter.out$lane_runctrl_out($lane) $fda.ctrl
     }
@@ -1074,6 +980,7 @@ set_interconnect_requirement {$system} qsys_mm.maxAdditionalLatency 4
 
 save_system $inner_qsys_path
 patch_qsys_component_version $inner_qsys_path $inner_system_version
+patch_qsys_instance_version $inner_qsys_path histogram_ingress_bridge_0 $histogram_ingress_bridge_version
 ensure_qsys_interface_export \
     $inner_qsys_path \
     lvds_outclock \

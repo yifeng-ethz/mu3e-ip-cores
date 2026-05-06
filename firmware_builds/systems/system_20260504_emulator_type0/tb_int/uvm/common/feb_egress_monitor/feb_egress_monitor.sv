@@ -1,9 +1,9 @@
 // feb_egress_monitor.sv
 // Passive FEB-egress framed-payload observation monitor.
 // Author: Yifeng Wang
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Add reusable FEB-egress monitor shell.
+// Version : 26.2.1
+// Date    : 20260506
+// Change  : Allow optional aggregate monitor slots to be left unbound.
 
 package tb_int_feb_egress_monitor_pkg;
 
@@ -26,10 +26,12 @@ package tb_int_feb_egress_monitor_pkg;
             super.build_phase(phase);
             ap = new("ap", this);
             if (!uvm_config_db#(virtual hit_tap_if)::get(this, "", "vif", vif))
-                `uvm_fatal("FEB_MON", "hit_tap_if not found")
+                `uvm_info("FEB_MON", "hit_tap_if not configured; monitor disabled", UVM_LOW)
         endfunction
 
         virtual task run_phase(uvm_phase phase);
+            if (vif == null)
+                return;
             forever begin
                 @(posedge vif.clk);
                 if (vif.rst === 1'b1)

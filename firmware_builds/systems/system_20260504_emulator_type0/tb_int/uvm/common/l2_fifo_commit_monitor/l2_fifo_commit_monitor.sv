@@ -1,9 +1,9 @@
 // l2_fifo_commit_monitor.sv
 // Passive Stage-A monitor for the emulator MuTRiG L2 FIFO commit point.
 // Author: Yifeng Wang
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Add monotonic hit_id assignment at pending_valid/l2_wr_ready.
+// Version : 26.2.1
+// Date    : 20260506
+// Change  : Allow optional aggregate monitor slots to be left unbound.
 
 package tb_int_l2_fifo_commit_monitor_pkg;
 
@@ -33,10 +33,12 @@ package tb_int_l2_fifo_commit_monitor_pkg;
             super.build_phase(phase);
             ap = new("ap", this);
             if (!uvm_config_db#(virtual mutrig_l2_commit_if)::get(this, "", "vif", vif))
-                `uvm_fatal("L2_COMMIT", "mutrig_l2_commit_if not found")
+                `uvm_info("L2_COMMIT", "mutrig_l2_commit_if not configured; monitor disabled", UVM_LOW)
         endfunction
 
         virtual task run_phase(uvm_phase phase);
+            if (vif == null)
+                return;
             forever begin
                 @(posedge vif.clk);
                 if (vif.rst === 1'b1)
