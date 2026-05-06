@@ -41,6 +41,8 @@ Historical formal note:
 | [BUG-004-R](#bug-004-r-readyless-hit-stack-run-control-was-materialized-through-command-fifos) | R | hard stuck error | `common (software-paced run-control in generated hit-stack subsystem)` | fixed in Qsys Tcl and harness diagnostics; regeneration/compile evidence pending | PROF-INT-002 short run on `2026-05-06` | 9a2d526c | Readyless hit-stack run-control was converted through command FIFOs that waited for local slave ready, so rbCAM GO asserted but rbCAM FSMs did not enter RUNNING. |
 | [BUG-005-R](#bug-005-r-registered-emulator-ticket-offer-replayed-one-cycle-after-accept) | R | hard stuck error | `common (header-sync source injection with ready asserted)` | fixed in IP source; phase sweep passed | PROF-INT-002 pre-rbCAM two-channel diagnostic on `2026-05-06` | 1849caa | `frontend_trigger_engine` replayed one accepted signal ticket, so one two-channel injection produced four hits instead of two. |
 | [BUG-006-H](#bug-006-h-prof-int-002-non-asic0-header-sync-used-asic0-only-controls-and-lane-identity) | H | hard stuck error | `directed-only (non-ASIC0 header-sync source validation)` | fixed in harness; ASIC1-7 sweep passed | PROF-INT-002 ASIC1 pre-rbCAM diagnostic on `2026-05-06` | pending | Non-ASIC0 header-sync validation was blocked by ASIC0-only source controls, arb CSR setup, and scoreboard lane identity. |
+| [BUG-007-R](#bug-007-r-direct-emulator-source-does-not-produce-mutrig-injector-headerinfo) | R | hard stuck error | `directed-only (RTL-injector header-sync validation with direct emulator source)` | open RTL patch; simulation shim validated | PROF-INT-002 RTL-injector phase-sweep setup on `2026-05-06` | pending | The direct emulator source does not drive the FDA/headerinfo valid stream that `mutrig_injector_0` uses for CSR-controlled header-sync delay, so emulator-only RTL-injector scans need a temporary harness shim until the RTL/integration path is repaired. |
+| [BUG-008-R](#bug-008-r-unconnected-inject-aux-pulse-poisoned-injector-fanout) | R | hard stuck error | `directed-only (RTL-injector path using generated fanout)` | open Qsys tie-off; harness force validated | PROF-INT-002 RTL-injector smoke on `2026-05-06` | pending | `full8lane_type0_system` left `data_path_subsystem.inject_aux_pulse` unconnected, so `pulse_fanout8` ORed the real injector pulse with `X` and suppressed emulator hits in simulation. |
 
 ## 2026-05-06
 
@@ -193,3 +195,52 @@ Historical formal note:
     the ASIC1 four-pulse rerun `prof_int_002_pre_rbcam_header_sync_asic1_phase100_diag4_lane_remap` passes with 8 pre-rbCAM rows, `A->PRE matched/missing/ghost=8/0/0`, and analyzer latency `min=822`, `p50=822.5`, `max=823` cycles. The full ASIC1-7 individual phase-100 sweep passes all seven 128-pulse runs with 256 rows per ASIC, `A->PRE matched/missing/ghost=256/0/0` for every ASIC, and aggregate analyzer min/p05/p50/p95/max = `821/821/822/823/823` cycles. The DISLIN-style evidence renderer covers the pre-rbCAM latency range `[-1000, 3096]` cycles and the 8-ASIC channel-rate range `0..255`.
   - potential_hazard:
     this fix is scoped to single-active direct-emulator source-validation runs; multi-lane and real-LVDS runs must keep using the physical monitor binding appropriate to their source boundary and must not infer a real external ASIC lane from this harness-only remap
+
+### BUG-007-R: direct emulator source does not produce `mutrig_injector` headerinfo
+
+- First seen in:
+  - PROF-INT-002 RTL-injector ASIC0/two-channel phase-sweep setup on `2026-05-06`
+  - planned command family:
+    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector`
+- Symptom:
+  - the generated full8lane system contains the real `mutrig_injector_0` CSR-controlled header-sync path, and its output fans out to every `emulator_mutrig_N.coe_inject_pulse`
+  - direct emulator source mode exposes the emulator `frame_start_req` boundary used by the existing harness, but it does not drive the `mutrig_frame_deassembly_N_headerinfo_valid/channel/data` stream consumed by `mutrig_injector_0`
+  - a pure emulator-only CSR scan of injector mode 1 would therefore produce no delayed injector pulse unless the harness temporarily synthesizes a headerinfo match
+- Root cause:
+  - the real MuTRiG/LVDS path produces headerinfo through `mutrig_frame_deassembly`, while the direct internal emulator path bypasses that deassembly boundary
+  - `mutrig_injector_multiheader` intentionally keys mode-1 injection from headerinfo, so direct emulator profiling currently lacks the same header-valid contract as the real source path
+- Fix status:
+  - state:
+    open RTL/integration patch; simulation shim validated
+  - mechanism:
+    the temporary PROF-INT-002 harness shim force-drives a virtual MuTRiG headerinfo-valid pulse at a 910-cycle short-frame interval, phase-locked to the emulator `frame_start_req`, and programs the real `mutrig_injector_0` CSR delay/mode registers. The injector delay FSM and fanout path remain real RTL; the durable fix should make the direct emulator or Qsys integration produce an authored headerinfo-valid stream equivalent to the real MuTRiG/FDA path instead of relying on a hierarchical force.
+  - before_fix_outcome:
+    the existing header-sync phase scan bypassed `mutrig_injector_0` entirely by delaying in the testbench and forcing `emulator_mutrig_N.coe_inject_pulse`
+  - after_fix_outcome:
+    PROF-INT-002 RTL-injector ASIC0/two-channel phase sweep `prof_int_002_pre_rbcam_header_sync_rtlinj_phase[1-9]00` passed on `2026-05-06` with 256 pre-rbCAM rows per phase, aggregate 2304 rows, and DISLIN contract sheets under `tb_int/reports/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep_dislin/`. Analyzer medians were phase100=818.5, phase200=718.5, phase300=618.5, phase400=518.5, phase500=418.5, phase600=318.5, phase700=218.5, phase800=118.5, and phase900=928.5 cycles, matching the 910-cycle modulo-frame latency model. The later authored RTL patch must be revalidated with the same 100..900-cycle ASIC0/two-channel contract sheet.
+  - potential_hazard:
+    medium for emulator-source golden-reference work because a harness-generated headerinfo match can validate the injector delay FSM but cannot prove the final real-source/emulator-source headerinfo equivalence; low for real-MuTRiG runs where FDA headerinfo is naturally present
+
+### BUG-008-R: unconnected `inject_aux_pulse` poisoned injector fanout
+
+- First seen in:
+  - PROF-INT-002 RTL-injector ASIC0/two-channel smoke on `2026-05-06`
+  - command:
+    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_latency PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync PROF_INT_002_PRE_RBCAM_INJECT_DRIVER=rtl_injector PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=100 PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT=4`
+- Symptom:
+  - the real `mutrig_injector_0` was CSR-programmed and the virtual headerinfo shim emitted four headers, but `lane_hits=0`, `A=0`, and `PRE=0`
+  - debug prints showed the generated fanout output and emulator injector input as `X`, while the injector raw pulse path was otherwise reachable
+- Root cause:
+  - `full8lane_type0_system.v` instantiates `data_path_subsystem` with `.inject_aux_pulse()` unconnected
+  - `pulse_fanout8` computes `merged_inject_pulse = coe_inject_pulse | coe_aux_inject_pulse`, so the unconnected auxiliary conduit poisons the generated injector fanout in simulation
+- Fix status:
+  - state:
+    open Qsys tie-off; harness force validated
+  - mechanism:
+    the PROF-INT-002 harness now forces `u_dut.data_path_subsystem.inject_aux_pulse = 1'b0` for the RTL-injector scan. The authored Qsys Tcl should tie the unused auxiliary injector conduit to ground, or expose and drive it explicitly, so generated simulation and synthesis do not depend on a hierarchical force.
+  - before_fix_outcome:
+    four virtual headers produced no Stage-A/pre-rbCAM rows and the analyzer failed with no valid latency rows
+  - after_fix_outcome:
+    focused rerun `prof_int_002_pre_rbcam_header_sync_rtlinj_phase100_diag4_tie_aux` produced 8 pre-rbCAM rows for four headers and two channels, with analyzer latency `min=818`, `p50=818.5`, `max=819` cycles. The full RTL-injector ASIC0/two-channel sweep then produced 256 rows per phase across phase100..phase900, confirming that the forced low auxiliary injector input restores deterministic fanout behavior for the simulation shim.
+  - potential_hazard:
+    medium until the Qsys tie-off is authored because any generated-system path using the injector fanout can inherit simulation `X` behavior from the unconnected auxiliary input; low for the temporary PROF-INT-002 shim after the explicit force

@@ -38,6 +38,14 @@ module prof_int_002_full_pipeline_top;
     localparam logic [3:0] EMU_CSR_SIGNAL_ADDR      = 4'h8;
     localparam logic [3:0] EMU_CSR_RATES_ADDR       = 4'hB;
     localparam logic [3:0] EMU_CSR_CLUSTER_FIX_ADDR = 4'hC;
+    localparam logic [3:0] INJ_CSR_MODE_ADDR        = 4'h2;
+    localparam logic [3:0] INJ_CSR_HEADER_DELAY_ADDR = 4'h3;
+    localparam logic [3:0] INJ_CSR_HEADER_INTERVAL_ADDR = 4'h4;
+    localparam logic [3:0] INJ_CSR_MULTIPLICITY_ADDR = 4'h5;
+    localparam logic [3:0] INJ_CSR_HEADER_CH_ADDR   = 4'h6;
+    localparam logic [3:0] INJ_CSR_PULSE_HIGH_ADDR  = 4'h8;
+    localparam logic [31:0] INJ_MODE_OFF            = 32'h0000_0000;
+    localparam logic [31:0] INJ_MODE_HEADER_SYNC    = 32'h0000_0001;
     localparam logic [2:0] EMU_TX_MODE_LONG         = 3'b000;
     localparam logic [2:0] EMU_TX_MODE_SHORT        = 3'b100;
     localparam logic [4:0] ARB_CSR_CONTROL_ADDR     = 5'h02;
@@ -111,16 +119,20 @@ module prof_int_002_full_pipeline_top;
     int unsigned mutrig_short_mode;
     int unsigned inject_phase_cycles;
     int unsigned inject_pulse_count;
+    int unsigned inject_pulse_high_cycles;
     int unsigned active_lane_count;
     int unsigned active_lane_mask_popcount;
     int unsigned runctl_cpp_gap_cycles;
     int unsigned runctl_settle_timeout_cycles;
     string       traffic_mode;
+    string       inject_driver;
     logic [2:0] stage_a_lane_index;
     logic [7:0]  active_lane_mask;
         logic        injection_window_active;
         logic [3:0]  csr_force_addr;
         logic [31:0] csr_force_wdata;
+        logic [3:0]  inj_csr_force_addr;
+        logic [31:0] inj_csr_force_wdata;
         logic [4:0]  arb_csr_force_addr;
         logic [31:0] arb_csr_force_wdata;
         logic [8:0]  runctl_force_symbol;
@@ -1066,6 +1078,7 @@ module prof_int_002_full_pipeline_top;
     initial begin
         force u_dut.data_path_subsystem_lvds_outclock_clk = clk_125;
         force u_dut.data_path_subsystem.master_datapath_master_reset_reset = datapath_reset_req;
+        force u_dut.data_path_subsystem.inject_aux_pulse = 1'b0;
     end
 
     initial begin
@@ -1113,6 +1126,23 @@ module prof_int_002_full_pipeline_top;
         release u_dut.data_path_subsystem.mm_interconnect_0_emulator_mutrig_0_csr_address;
     endtask
 
+    task automatic csr_write_injector(input logic [3:0] addr, input logic [31:0] data);
+        inj_csr_force_addr = addr;
+        inj_csr_force_wdata = data;
+        @(negedge clk_125);
+        force u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_address = inj_csr_force_addr;
+        force u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_writedata = inj_csr_force_wdata;
+        force u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_read = 1'b0;
+        force u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_write = 1'b1;
+        @(negedge clk_125);
+        force u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_write = 1'b0;
+        repeat (2) @(posedge clk_125);
+        release u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_write;
+        release u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_read;
+        release u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_writedata;
+        release u_dut.data_path_subsystem.mm_interconnect_0_mutrig_injector_0_csr_address;
+    endtask
+
     function automatic logic traffic_is_header_sync();
         return (traffic_mode == "header_sync");
     endfunction
@@ -1124,6 +1154,38 @@ module prof_int_002_full_pipeline_top;
     function automatic logic traffic_is_poisson();
         return (traffic_mode == "poisson");
     endfunction
+
+    function automatic logic traffic_uses_rtl_injector();
+        return traffic_is_header_sync() && (inject_driver == "rtl_injector");
+    endfunction
+
+    task automatic force_rtl_injector_headerinfo_idle();
+        force u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_valid = 1'b0;
+        force u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_data = 42'd0;
+        force u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_channel = 4'd0;
+    endtask
+
+    task automatic release_rtl_injector_headerinfo();
+        release u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_valid;
+        release u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_data;
+        release u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_channel;
+    endtask
+
+    task automatic configure_rtl_injector();
+        force_rtl_injector_headerinfo_idle();
+        csr_write_injector(INJ_CSR_MODE_ADDR, INJ_MODE_OFF);
+        csr_write_injector(INJ_CSR_HEADER_CH_ADDR, 32'd0);
+        csr_write_injector(INJ_CSR_HEADER_INTERVAL_ADDR, 32'd1);
+        csr_write_injector(INJ_CSR_MULTIPLICITY_ADDR, 32'd1);
+        csr_write_injector(INJ_CSR_PULSE_HIGH_ADDR, inject_pulse_high_cycles[31:0]);
+        csr_write_injector(INJ_CSR_HEADER_DELAY_ADDR, inject_phase_cycles[31:0]);
+        csr_write_injector(INJ_CSR_MODE_ADDR, INJ_MODE_HEADER_SYNC);
+        `uvm_info("PROF_INT_002_INJECT",
+                  $sformatf("programmed RTL mutrig_injector_0 mode=header_sync header_ch=0 delay=%0d interval=1 multiplicity=1 pulse_high=%0d",
+                            inject_phase_cycles,
+                            inject_pulse_high_cycles),
+                  UVM_LOW)
+    endtask
 
     task automatic configure_active_emulators();
         force u_dut.data_path_subsystem.emulator_mutrig_0.u_emulator_mutrig.cfg_global_enable =
@@ -1271,22 +1333,24 @@ module prof_int_002_full_pipeline_top;
         force u_dut.data_path_subsystem.emulator_mutrig_6.u_emulator_mutrig.cfg_asic_id_base = 4'd6;
         force u_dut.data_path_subsystem.emulator_mutrig_7.u_emulator_mutrig.cfg_asic_id_base = 4'd7;
 
-        force u_dut.data_path_subsystem.emulator_mutrig_0.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_1.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_2.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_3.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_4.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_5.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_6.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_7.coe_inject_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_0.coe_inject_masked_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_1.coe_inject_masked_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_2.coe_inject_masked_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_3.coe_inject_masked_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_4.coe_inject_masked_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_5.coe_inject_masked_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_6.coe_inject_masked_pulse = 1'b0;
-        force u_dut.data_path_subsystem.emulator_mutrig_7.coe_inject_masked_pulse = 1'b0;
+        if (!traffic_uses_rtl_injector()) begin
+            force u_dut.data_path_subsystem.emulator_mutrig_0.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_1.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_2.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_3.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_4.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_5.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_6.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_7.coe_inject_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_0.coe_inject_masked_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_1.coe_inject_masked_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_2.coe_inject_masked_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_3.coe_inject_masked_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_4.coe_inject_masked_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_5.coe_inject_masked_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_6.coe_inject_masked_pulse = 1'b0;
+            force u_dut.data_path_subsystem.emulator_mutrig_7.coe_inject_masked_pulse = 1'b0;
+        end
         force u_dut.data_path_subsystem.emulator_mutrig_0.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
         force u_dut.data_path_subsystem.emulator_mutrig_1.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
         force u_dut.data_path_subsystem.emulator_mutrig_2.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
@@ -1416,15 +1480,57 @@ module prof_int_002_full_pipeline_top;
         end
     endtask
 
+    task automatic drive_rtl_injector_headerinfo_pulse(input int unsigned pulse_idx);
+        force u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_valid = 1'b1;
+        force u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_data = 42'd0;
+        force u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_channel = 4'd0;
+        `uvm_info("PROF_INT_002_INJECT",
+                  $sformatf("rtl_injector virtual MuTRiG header=%0d interval=%0d csr_delay=%0d active_mask=%02h t=%0t inj_raw=%0b fanout=%0b emu0_inj=%0b",
+                            pulse_idx,
+                            active_frame_interval_cycles(),
+                            inject_phase_cycles,
+                            active_lane_mask,
+                            $time,
+                            u_dut.data_path_subsystem.mutrig_injector_0_inject_pulse,
+                            inject_pulse,
+                            u_dut.data_path_subsystem.emulator_mutrig_0.u_emulator_mutrig.inject_pulse),
+                  UVM_LOW)
+        @(negedge clk_125);
+        force u_dut.data_path_subsystem.mutrig_frame_deassembly_0_headerinfo_valid = 1'b0;
+    endtask
+
     task automatic drive_header_sync_injections();
         int unsigned sent;
+        int unsigned frame_interval;
         logic frame_seen;
 
         sent = 0;
+        frame_interval = active_frame_interval_cycles();
         if (active_lane_mask_popcount != 1) begin
             `uvm_warning("PROF_INT_002_INJECT",
                          $sformatf("header_sync validation expects one active ASIC; active_mask=%02h",
                                    active_lane_mask))
+        end
+        if (traffic_uses_rtl_injector()) begin
+            wait_active_frame_start(frame_seen);
+            while (injection_window_active &&
+                   frame_seen &&
+                   (inject_pulse_count == 0 || sent < inject_pulse_count)) begin
+                drive_rtl_injector_headerinfo_pulse(sent);
+                sent++;
+                if (!injection_window_active ||
+                    (inject_pulse_count != 0 && sent >= inject_pulse_count))
+                    break;
+                if (frame_interval > 1)
+                    repeat (frame_interval - 1) @(posedge clk_125);
+                @(negedge clk_125);
+            end
+            force_rtl_injector_headerinfo_idle();
+            `uvm_info("PROF_INT_002_INJECT",
+                      $sformatf("rtl_injector virtual-header driver done headers=%0d requested=%0d interval=%0d",
+                                sent, inject_pulse_count, frame_interval),
+                      UVM_LOW)
+            return;
         end
         while (injection_window_active &&
                (inject_pulse_count == 0 || sent < inject_pulse_count)) begin
@@ -2216,9 +2322,11 @@ module prof_int_002_full_pipeline_top;
         int plus_mutrig_short_mode;
         int plus_inject_phase_cycles;
         int plus_inject_pulse_count;
+        int plus_inject_pulse_high_cycles;
         int plus_runctl_cpp_gap_cycles;
         int plus_runctl_settle_timeout_cycles;
         string plus_traffic_mode;
+        string plus_inject_driver;
         bit legacy_guard_plus_seen;
 
         run_cycles = 12_500_000;
@@ -2233,9 +2341,11 @@ module prof_int_002_full_pipeline_top;
         mutrig_short_mode = 0;
         inject_phase_cycles = 100;
         inject_pulse_count = 0;
+        inject_pulse_high_cycles = 5;
         runctl_cpp_gap_cycles = 125_000;
         runctl_settle_timeout_cycles = 1_250_000;
         traffic_mode = "poisson";
+        inject_driver = "tb_force";
         active_lane_count = 1;
         active_lane_mask = 8'h01;
         active_lane_mask_popcount = 0;
@@ -2263,8 +2373,12 @@ module prof_int_002_full_pipeline_top;
             inject_phase_cycles = plus_inject_phase_cycles;
         if ($value$plusargs("TB_INT_INJECT_PULSE_COUNT=%d", plus_inject_pulse_count))
             inject_pulse_count = plus_inject_pulse_count;
+        if ($value$plusargs("TB_INT_INJECT_PULSE_HIGH_CYCLES=%d", plus_inject_pulse_high_cycles))
+            inject_pulse_high_cycles = plus_inject_pulse_high_cycles;
         if ($value$plusargs("TB_INT_TRAFFIC_MODE=%s", plus_traffic_mode))
             traffic_mode = plus_traffic_mode;
+        if ($value$plusargs("TB_INT_INJECT_DRIVER=%s", plus_inject_driver))
+            inject_driver = plus_inject_driver;
         if ($value$plusargs("TB_INT_RUNCTL_CPP_GAP_CYCLES=%d", plus_runctl_cpp_gap_cycles))
             runctl_cpp_gap_cycles = plus_runctl_cpp_gap_cycles;
         if ($value$plusargs("TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=%d", plus_runctl_settle_timeout_cycles))
@@ -2283,6 +2397,16 @@ module prof_int_002_full_pipeline_top;
                                    traffic_mode))
             traffic_mode = "poisson";
         end
+        if (!((inject_driver == "tb_force") || (inject_driver == "rtl_injector"))) begin
+            `uvm_warning("PROF_INT_002_TOP",
+                         $sformatf("unknown TB_INT_INJECT_DRIVER=%s; falling back to tb_force",
+                                   inject_driver))
+            inject_driver = "tb_force";
+        end
+        if (inject_pulse_high_cycles < 1)
+            inject_pulse_high_cycles = 1;
+        if (inject_pulse_high_cycles > 255)
+            inject_pulse_high_cycles = 255;
         if (hit_channel_low > 31)
             hit_channel_low = 31;
         if (hit_channel_high > 31)
@@ -2337,6 +2461,8 @@ module prof_int_002_full_pipeline_top;
         repeat (64) @(posedge clk_125);
 
         configure_active_emulators();
+        if (traffic_uses_rtl_injector())
+            configure_rtl_injector();
         csr_write_emu0(EMU_CSR_SIGNAL_ADDR, 32'h0000_0000);
         csr_write_emu0(EMU_CSR_RATES_ADDR, {16'h0000, hit_rate_q16[15:0]});
         csr_write_emu0(EMU_CSR_CLUSTER_FIX_ADDR, 32'h0000_4780);
@@ -2345,7 +2471,7 @@ module prof_int_002_full_pipeline_top;
         tb_int_run_window_db::configure_guards(stable_pre_guard_cycles,
                                                stable_post_guard_cycles);
         `uvm_info("PROF_INT_002_TOP",
-                  $sformatf("RUN_CONFIG run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d traffic=%s hit_ch=%0d:%0d short_mode=%0d hit_rate_q16=%0d inject_phase=%0d inject_count=%0d runctl_mode=readyless runctl_cpp_gap=%0d runctl_settle_timeout=%0d",
+                  $sformatf("RUN_CONFIG run_cycles=%0d drain_cycles=%0d stable_window=%0d stable_pre_guard=%0d stable_post_guard=%0d active_lanes=%0d mask=%0h stage_a_lane=%0d traffic=%s inject_driver=%s hit_ch=%0d:%0d short_mode=%0d hit_rate_q16=%0d inject_phase=%0d inject_count=%0d inject_pulse_high=%0d runctl_mode=readyless runctl_cpp_gap=%0d runctl_settle_timeout=%0d",
                             run_cycles,
                             drain_cycles,
                             stable_capture_cycles,
@@ -2355,12 +2481,14 @@ module prof_int_002_full_pipeline_top;
                             active_lane_mask,
                             stage_a_lane_index,
                             traffic_mode,
+                            inject_driver,
                             hit_channel_low,
                             hit_channel_high,
                             mutrig_short_mode,
                             hit_rate_q16,
                             inject_phase_cycles,
                             inject_pulse_count,
+                            inject_pulse_high_cycles,
                             runctl_cpp_gap_cycles,
                             runctl_settle_timeout_cycles),
                   UVM_LOW)
