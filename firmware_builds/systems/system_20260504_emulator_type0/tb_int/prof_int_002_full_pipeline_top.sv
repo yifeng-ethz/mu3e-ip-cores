@@ -2,9 +2,9 @@
 // Standalone PROF-INT-002 full-pipeline real-RTL simulation top.
 //
 // Author: Yifeng Wang <yifenwan@phys.ethz.ch>
-// Version : 26.2.2
+// Version : 26.2.6
 // Date    : 20260506
-// Change  : Export scoreboard counter snapshots and explicit no-debug tap metadata.
+// Change  : Rename the virtual MuTRiG source mode and keep the old string as an alias.
 
 module prof_int_002_full_pipeline_top;
     timeunit 1ps;
@@ -28,6 +28,36 @@ module prof_int_002_full_pipeline_top;
     import prof_int_002_full_pipeline_100khz_per_channel_seq_pkg::*;
     import prof_int_002_full_pipeline_100khz_per_channel_test_pkg::*;
     `include "uvm_macros.svh"
+
+    `define PROF_INT_002_CLEAR_DEBUG(TAP) \
+        TAP.hit_id = 64'd0; \
+        TAP.hit_id_valid = 1'b0; \
+        TAP.root_hit_id = 64'd0; \
+        TAP.root_hit_id_valid = 1'b0; \
+        TAP.debug_level = 2'd0;
+
+    `define PROF_INT_002_BIND_DEBUG(TAP, DATA, VALID) \
+        TAP.hit_id = DATA; \
+        TAP.hit_id_valid = TAP.valid && VALID; \
+        TAP.root_hit_id = DATA; \
+        TAP.root_hit_id_valid = TAP.valid && VALID; \
+        TAP.debug_level = (TAP.valid && VALID) ? 2'd2 : 2'd0;
+
+    `define PROF_INT_002_CLEAR_HIT_TAP(TAP) \
+        TAP.valid = 1'b0; \
+        TAP.ready = 1'b1; \
+        TAP.lane_id = 4'd0; \
+        TAP.payload = 45'd0; \
+        TAP.run_origin = 1'b0; \
+        `PROF_INT_002_CLEAR_DEBUG(TAP)
+
+    `define PROF_INT_002_BIND_DEBUG_SOURCE(TAP, VALID, DATA, LANE, META, META_VALID) \
+        TAP.valid = active_lane_mask[LANE] && VALID; \
+        TAP.ready = 1'b1; \
+        TAP.payload = DATA; \
+        TAP.lane_id = LANE; \
+        TAP.run_origin = 1'b0; \
+        `PROF_INT_002_BIND_DEBUG(TAP, META, META_VALID)
 
     localparam logic [8:0] RUNCTL_IDLE_SYM        = 9'h001;
     localparam logic [8:0] RUNCTL_RUN_PREP_SYM    = 9'h002;
@@ -137,24 +167,24 @@ module prof_int_002_full_pipeline_top;
         logic        injection_window_active;
         logic        enable_post_rbcam_checks;
         logic        enable_feb_egress_checks;
-        logic        virtual_raw0_offer_valid;
-        logic        virtual_raw0_offer_ready;
-        logic [47:0] virtual_raw0_offer_word;
-        logic        virtual_raw0_accept_pulse;
-        logic        virtual_raw0_fifo_rd_en;
-        logic [9:0]  virtual_raw0_event_count;
-        logic        virtual_raw0_fifo_empty;
-        logic        virtual_raw0_fifo_full;
-        logic        virtual_raw0_fifo_almost_full;
-        logic [8:0]  virtual_raw0_tx_data;
-        logic        virtual_raw0_tx_valid;
-        logic [31:0] virtual_raw0_rate_accum;
-        logic [4:0]  virtual_raw0_next_channel;
-        int unsigned virtual_raw0_header_delay_count;
-        int unsigned virtual_raw0_burst_remaining;
-        int unsigned virtual_raw0_burst_spacing_count;
-        int unsigned virtual_raw0_frame_seen_count;
-        int unsigned virtual_raw0_source_hit_count;
+        logic        virtual_mutrig0_offer_valid;
+        logic        virtual_mutrig0_offer_ready;
+        logic [47:0] virtual_mutrig0_offer_word;
+        logic        virtual_mutrig0_accept_pulse;
+        logic        virtual_mutrig0_fifo_rd_en;
+        logic [9:0]  virtual_mutrig0_event_count;
+        logic        virtual_mutrig0_fifo_empty;
+        logic        virtual_mutrig0_fifo_full;
+        logic        virtual_mutrig0_fifo_almost_full;
+        logic [8:0]  virtual_mutrig0_tx_data;
+        logic        virtual_mutrig0_tx_valid;
+        logic [31:0] virtual_mutrig0_rate_accum;
+        logic [4:0]  virtual_mutrig0_next_channel;
+        int unsigned virtual_mutrig0_header_delay_count;
+        int unsigned virtual_mutrig0_burst_remaining;
+        int unsigned virtual_mutrig0_burst_spacing_count;
+        int unsigned virtual_mutrig0_frame_seen_count;
+        int unsigned virtual_mutrig0_source_hit_count;
         logic [3:0]  csr_force_addr;
         logic [31:0] csr_force_wdata;
         logic [3:0]  inj_csr_force_addr;
@@ -204,6 +234,14 @@ module prof_int_002_full_pipeline_top;
     mutrig_l2_commit_if  stage_a_vif5(.clk(clk_125), .rst(rst));
     mutrig_l2_commit_if  stage_a_vif6(.clk(clk_125), .rst(rst));
     mutrig_l2_commit_if  stage_a_vif7(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif0(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif1(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif2(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif3(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif4(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif5(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif6(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif7(.clk(clk_125), .rst(rst));
     hit_tap_if           pre_rbcam_vif0(.clk(clk_125), .rst(rst));
     hit_tap_if           pre_rbcam_vif1(.clk(clk_125), .rst(rst));
     hit_tap_if           pre_rbcam_vif2(.clk(clk_125), .rst(rst));
@@ -247,68 +285,6 @@ module prof_int_002_full_pipeline_top;
         counter_vif.pre_rbcam_count = ctrl_vif.pre_rbcam_count;
         counter_vif.post_rbcam_count = ctrl_vif.post_rbcam_count;
         counter_vif.feb_egress_count = ctrl_vif.feb_egress_count;
-    end
-
-    always_comb begin
-        stage_a_vif0.hit_id = 64'd0;
-        stage_a_vif0.hit_id_valid = 1'b0;
-        stage_a_vif0.root_hit_id = 64'd0;
-        stage_a_vif0.root_hit_id_valid = 1'b0;
-        stage_a_vif0.debug_level = 2'd0;
-        stage_a_vif1.hit_id = 64'd0;
-        stage_a_vif1.hit_id_valid = 1'b0;
-        stage_a_vif1.root_hit_id = 64'd0;
-        stage_a_vif1.root_hit_id_valid = 1'b0;
-        stage_a_vif1.debug_level = 2'd0;
-        stage_a_vif2.hit_id = 64'd0;
-        stage_a_vif2.hit_id_valid = 1'b0;
-        stage_a_vif2.root_hit_id = 64'd0;
-        stage_a_vif2.root_hit_id_valid = 1'b0;
-        stage_a_vif2.debug_level = 2'd0;
-        stage_a_vif3.hit_id = 64'd0;
-        stage_a_vif3.hit_id_valid = 1'b0;
-        stage_a_vif3.root_hit_id = 64'd0;
-        stage_a_vif3.root_hit_id_valid = 1'b0;
-        stage_a_vif3.debug_level = 2'd0;
-        stage_a_vif4.hit_id = 64'd0;
-        stage_a_vif4.hit_id_valid = 1'b0;
-        stage_a_vif4.root_hit_id = 64'd0;
-        stage_a_vif4.root_hit_id_valid = 1'b0;
-        stage_a_vif4.debug_level = 2'd0;
-        stage_a_vif5.hit_id = 64'd0;
-        stage_a_vif5.hit_id_valid = 1'b0;
-        stage_a_vif5.root_hit_id = 64'd0;
-        stage_a_vif5.root_hit_id_valid = 1'b0;
-        stage_a_vif5.debug_level = 2'd0;
-        stage_a_vif6.hit_id = 64'd0;
-        stage_a_vif6.hit_id_valid = 1'b0;
-        stage_a_vif6.root_hit_id = 64'd0;
-        stage_a_vif6.root_hit_id_valid = 1'b0;
-        stage_a_vif6.debug_level = 2'd0;
-        stage_a_vif7.hit_id = 64'd0;
-        stage_a_vif7.hit_id_valid = 1'b0;
-        stage_a_vif7.root_hit_id = 64'd0;
-        stage_a_vif7.root_hit_id_valid = 1'b0;
-        stage_a_vif7.debug_level = 2'd0;
-
-        pre_rbcam_vif0.debug_level = 2'd0;
-        pre_rbcam_vif1.debug_level = 2'd0;
-        pre_rbcam_vif2.debug_level = 2'd0;
-        pre_rbcam_vif3.debug_level = 2'd0;
-        pre_rbcam_vif4.debug_level = 2'd0;
-        pre_rbcam_vif5.debug_level = 2'd0;
-        pre_rbcam_vif6.debug_level = 2'd0;
-        pre_rbcam_vif7.debug_level = 2'd0;
-        post_rbcam_vif0.debug_level = 2'd0;
-        post_rbcam_vif1.debug_level = 2'd0;
-        post_rbcam_vif2.debug_level = 2'd0;
-        post_rbcam_vif3.debug_level = 2'd0;
-        post_rbcam_vif4.debug_level = 2'd0;
-        post_rbcam_vif5.debug_level = 2'd0;
-        post_rbcam_vif6.debug_level = 2'd0;
-        post_rbcam_vif7.debug_level = 2'd0;
-        feb_egress_vif.debug_level = 2'd0;
-        feb_egress_vif1.debug_level = 2'd0;
     end
 
     full8lane_type0_system u_dut (
@@ -394,24 +370,24 @@ module prof_int_002_full_pipeline_top;
         .enable_feb_egress_checks (enable_feb_egress_checks)
     );
 
-    raw_mutrig_frame_top u_virtual_mutrig_raw0 (
+    raw_mutrig_frame_top u_virtual_mutrig0 (
         .i_clk                 (clk_125),
         .i_rst                 (rst),
         .i_start_trans         (u_dut.data_path_subsystem.emulator_mutrig_0
                                     .u_emulator_mutrig.frame_start_req),
         .i_short_mode          (mutrig_short_mode[0]),
         .i_gen_idle            (1'b1),
-        .i_offer_valid         (virtual_raw0_offer_valid),
-        .i_offer_word          (virtual_raw0_offer_word),
-        .o_offer_ready         (virtual_raw0_offer_ready),
-        .o_accept_pulse        (virtual_raw0_accept_pulse),
-        .o_fifo_rd_en          (virtual_raw0_fifo_rd_en),
-        .o_event_count         (virtual_raw0_event_count),
-        .o_fifo_empty          (virtual_raw0_fifo_empty),
-        .o_fifo_full           (virtual_raw0_fifo_full),
-        .o_fifo_almost_full    (virtual_raw0_fifo_almost_full),
-        .o_tx_data             (virtual_raw0_tx_data),
-        .o_tx_valid            (virtual_raw0_tx_valid)
+        .i_offer_valid         (virtual_mutrig0_offer_valid),
+        .i_offer_word          (virtual_mutrig0_offer_word),
+        .o_offer_ready         (virtual_mutrig0_offer_ready),
+        .o_accept_pulse        (virtual_mutrig0_accept_pulse),
+        .o_fifo_rd_en          (virtual_mutrig0_fifo_rd_en),
+        .o_event_count         (virtual_mutrig0_event_count),
+        .o_fifo_empty          (virtual_mutrig0_fifo_empty),
+        .o_fifo_full           (virtual_mutrig0_fifo_full),
+        .o_fifo_almost_full    (virtual_mutrig0_fifo_almost_full),
+        .o_tx_data             (virtual_mutrig0_tx_data),
+        .o_tx_valid            (virtual_mutrig0_tx_valid)
     );
 
     function automatic logic [44:0] raw48_to_hit0(
@@ -422,7 +398,7 @@ module prof_int_002_full_pipeline_top;
                 raw_word[26:22], raw_word[20:6], raw_word[0]};
     endfunction
 
-    function automatic logic [47:0] build_virtual_raw_hit_word(
+    function automatic logic [47:0] build_virtual_mutrig_hit_word(
         input logic [4:0]  channel,
         input logic [14:0] tcc
     );
@@ -506,62 +482,62 @@ module prof_int_002_full_pipeline_top;
         return hit1_word[38:35];
     endfunction
 
-    always_ff @(posedge clk_125) begin : virtual_raw_source_driver
+    always_ff @(posedge clk_125) begin : virtual_mutrig_source_driver
         logic emit_hit_v;
         logic [31:0] rate_acc_next_v;
         logic [4:0] channel_v;
 
         emit_hit_v = 1'b0;
-        rate_acc_next_v = virtual_raw0_rate_accum;
-        channel_v = virtual_raw0_next_channel;
+        rate_acc_next_v = virtual_mutrig0_rate_accum;
+        channel_v = virtual_mutrig0_next_channel;
 
-        if (rst || (source_mode != "virtual_mutrig_raw") || !injection_window_active) begin
-            virtual_raw0_offer_valid <= 1'b0;
-            virtual_raw0_offer_word <= 48'd0;
-            virtual_raw0_rate_accum <= 32'd0;
-            virtual_raw0_next_channel <= hit_channel_low[4:0];
-            virtual_raw0_header_delay_count <= 0;
-            virtual_raw0_burst_remaining <= 0;
-            virtual_raw0_burst_spacing_count <= 0;
-            virtual_raw0_frame_seen_count <= 0;
-            virtual_raw0_source_hit_count <= 0;
+        if (rst || (source_mode != "virtual_mutrig") || !injection_window_active) begin
+            virtual_mutrig0_offer_valid <= 1'b0;
+            virtual_mutrig0_offer_word <= 48'd0;
+            virtual_mutrig0_rate_accum <= 32'd0;
+            virtual_mutrig0_next_channel <= hit_channel_low[4:0];
+            virtual_mutrig0_header_delay_count <= 0;
+            virtual_mutrig0_burst_remaining <= 0;
+            virtual_mutrig0_burst_spacing_count <= 0;
+            virtual_mutrig0_frame_seen_count <= 0;
+            virtual_mutrig0_source_hit_count <= 0;
         end else begin
-            if (virtual_raw0_offer_valid && virtual_raw0_offer_ready) begin
-                virtual_raw0_offer_valid <= 1'b0;
-                virtual_raw0_source_hit_count <= virtual_raw0_source_hit_count + 1;
-                if (virtual_raw0_next_channel >= hit_channel_high[4:0])
-                    virtual_raw0_next_channel <= hit_channel_low[4:0];
+            if (virtual_mutrig0_offer_valid && virtual_mutrig0_offer_ready) begin
+                virtual_mutrig0_offer_valid <= 1'b0;
+                virtual_mutrig0_source_hit_count <= virtual_mutrig0_source_hit_count + 1;
+                if (virtual_mutrig0_next_channel >= hit_channel_high[4:0])
+                    virtual_mutrig0_next_channel <= hit_channel_low[4:0];
                 else
-                    virtual_raw0_next_channel <= virtual_raw0_next_channel + 5'd1;
+                    virtual_mutrig0_next_channel <= virtual_mutrig0_next_channel + 5'd1;
             end
 
-            if (!virtual_raw0_offer_valid) begin
+            if (!virtual_mutrig0_offer_valid) begin
                 if (traffic_is_periodic()) begin
-                    rate_acc_next_v = virtual_raw0_rate_accum + hit_rate_q16[31:0];
+                    rate_acc_next_v = virtual_mutrig0_rate_accum + hit_rate_q16[31:0];
                     if (hit_rate_q16 != 0 && rate_acc_next_v >= 32'd65536) begin
                         emit_hit_v = 1'b1;
-                        virtual_raw0_rate_accum <= rate_acc_next_v - 32'd65536;
+                        virtual_mutrig0_rate_accum <= rate_acc_next_v - 32'd65536;
                     end else begin
-                        virtual_raw0_rate_accum <= rate_acc_next_v;
+                        virtual_mutrig0_rate_accum <= rate_acc_next_v;
                     end
                 end else if (traffic_is_header_sync()) begin
                     if (active_frame_start_seen()) begin
                         if ((inject_frame_count == 0) ||
-                            (virtual_raw0_frame_seen_count < inject_frame_count)) begin
-                            virtual_raw0_header_delay_count <= inject_phase_cycles;
-                            virtual_raw0_burst_remaining <= inject_burst_count;
-                            virtual_raw0_burst_spacing_count <= 0;
-                            virtual_raw0_frame_seen_count <= virtual_raw0_frame_seen_count + 1;
+                            (virtual_mutrig0_frame_seen_count < inject_frame_count)) begin
+                            virtual_mutrig0_header_delay_count <= inject_phase_cycles;
+                            virtual_mutrig0_burst_remaining <= inject_burst_count;
+                            virtual_mutrig0_burst_spacing_count <= 0;
+                            virtual_mutrig0_frame_seen_count <= virtual_mutrig0_frame_seen_count + 1;
                         end
-                    end else if (virtual_raw0_burst_remaining != 0) begin
-                        if (virtual_raw0_header_delay_count != 0) begin
-                            virtual_raw0_header_delay_count <= virtual_raw0_header_delay_count - 1;
-                        end else if (virtual_raw0_burst_spacing_count != 0) begin
-                            virtual_raw0_burst_spacing_count <= virtual_raw0_burst_spacing_count - 1;
+                    end else if (virtual_mutrig0_burst_remaining != 0) begin
+                        if (virtual_mutrig0_header_delay_count != 0) begin
+                            virtual_mutrig0_header_delay_count <= virtual_mutrig0_header_delay_count - 1;
+                        end else if (virtual_mutrig0_burst_spacing_count != 0) begin
+                            virtual_mutrig0_burst_spacing_count <= virtual_mutrig0_burst_spacing_count - 1;
                         end else begin
                             emit_hit_v = 1'b1;
-                            virtual_raw0_burst_remaining <= virtual_raw0_burst_remaining - 1;
-                            virtual_raw0_burst_spacing_count <=
+                            virtual_mutrig0_burst_remaining <= virtual_mutrig0_burst_remaining - 1;
+                            virtual_mutrig0_burst_spacing_count <=
                                 (inject_burst_spacing_cycles > 1) ?
                                     (inject_burst_spacing_cycles - 2) : 0;
                         end
@@ -569,10 +545,10 @@ module prof_int_002_full_pipeline_top;
                 end
 
                 if (emit_hit_v) begin
-                    virtual_raw0_offer_valid <= 1'b1;
-                    virtual_raw0_offer_word <= build_virtual_raw_hit_word(
+                    virtual_mutrig0_offer_valid <= 1'b1;
+                    virtual_mutrig0_offer_word <= build_virtual_mutrig_hit_word(
                         channel_v,
-                        virtual_raw0_source_hit_count[14:0]);
+                        virtual_mutrig0_source_hit_count[14:0]);
                 end
             end
         end
@@ -580,11 +556,47 @@ module prof_int_002_full_pipeline_top;
 
     always_comb begin
         logic [44:0] stage_a_payload;
-        if (source_mode == "virtual_mutrig_raw") begin
-            stage_a_payload = raw48_to_hit0(virtual_raw0_offer_word, 4'd0);
+
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif0)
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif1)
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif2)
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif3)
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif4)
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif5)
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif6)
+        `PROF_INT_002_CLEAR_DEBUG(stage_a_vif7)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif0)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif1)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif2)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif3)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif4)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif5)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif6)
+        `PROF_INT_002_CLEAR_HIT_TAP(debug_source_vif7)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif0)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif1)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif2)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif3)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif4)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif5)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif6)
+        `PROF_INT_002_CLEAR_DEBUG(pre_rbcam_vif7)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif0)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif1)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif2)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif3)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif4)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif5)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif6)
+        `PROF_INT_002_CLEAR_DEBUG(post_rbcam_vif7)
+        `PROF_INT_002_CLEAR_DEBUG(feb_egress_vif)
+        `PROF_INT_002_CLEAR_DEBUG(feb_egress_vif1)
+
+        if (source_mode == "virtual_mutrig") begin
+            stage_a_payload = raw48_to_hit0(virtual_mutrig0_offer_word, 4'd0);
             stage_a_vif0.valid = active_lane_mask[0] &&
-                                 virtual_raw0_offer_valid &&
-                                 virtual_raw0_offer_ready;
+                                 virtual_mutrig0_offer_valid &&
+                                 virtual_mutrig0_offer_ready;
         end else begin
             stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_0
                 .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd0);
@@ -599,6 +611,20 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif0.channel = stage_a_payload[40:36];
         stage_a_vif0.t_coarse = stage_a_payload[35:21];
         stage_a_vif0.t_fine = stage_a_payload[20:16];
+        if (source_mode == "virtual_mutrig") begin
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif0,
+                u_dut.data_path_subsystem.mutrig_frame_deassembly_0_hit_type0_valid,
+                u_dut.data_path_subsystem.mutrig_frame_deassembly_0_hit_type0_data,
+                0,
+                u_dut.data_path_subsystem.mutrig_frame_deassembly_0_debug_hit_metadata_metadata,
+                u_dut.data_path_subsystem.mutrig_frame_deassembly_0_debug_hit_metadata_valid)
+        end else begin
+            `PROF_INT_002_BIND_DEBUG(
+                stage_a_vif0,
+                u_dut.data_path_subsystem.emulator_mutrig_0_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_0_hit_debug_metadata_valid)
+        end
 
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_1
             .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd1);
@@ -612,6 +638,10 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif1.channel = stage_a_payload[40:36];
         stage_a_vif1.t_coarse = stage_a_payload[35:21];
         stage_a_vif1.t_fine = stage_a_payload[20:16];
+        `PROF_INT_002_BIND_DEBUG(
+            stage_a_vif1,
+            u_dut.data_path_subsystem.emulator_mutrig_1_hit_debug_metadata_metadata,
+            u_dut.data_path_subsystem.emulator_mutrig_1_hit_debug_metadata_valid)
 
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_2
             .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd2);
@@ -625,6 +655,10 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif2.channel = stage_a_payload[40:36];
         stage_a_vif2.t_coarse = stage_a_payload[35:21];
         stage_a_vif2.t_fine = stage_a_payload[20:16];
+        `PROF_INT_002_BIND_DEBUG(
+            stage_a_vif2,
+            u_dut.data_path_subsystem.emulator_mutrig_2_hit_debug_metadata_metadata,
+            u_dut.data_path_subsystem.emulator_mutrig_2_hit_debug_metadata_valid)
 
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_3
             .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd3);
@@ -638,6 +672,10 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif3.channel = stage_a_payload[40:36];
         stage_a_vif3.t_coarse = stage_a_payload[35:21];
         stage_a_vif3.t_fine = stage_a_payload[20:16];
+        `PROF_INT_002_BIND_DEBUG(
+            stage_a_vif3,
+            u_dut.data_path_subsystem.emulator_mutrig_3_hit_debug_metadata_metadata,
+            u_dut.data_path_subsystem.emulator_mutrig_3_hit_debug_metadata_valid)
 
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_4
             .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd4);
@@ -651,6 +689,10 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif4.channel = stage_a_payload[40:36];
         stage_a_vif4.t_coarse = stage_a_payload[35:21];
         stage_a_vif4.t_fine = stage_a_payload[20:16];
+        `PROF_INT_002_BIND_DEBUG(
+            stage_a_vif4,
+            u_dut.data_path_subsystem.emulator_mutrig_4_hit_debug_metadata_metadata,
+            u_dut.data_path_subsystem.emulator_mutrig_4_hit_debug_metadata_valid)
 
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_5
             .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd5);
@@ -664,6 +706,10 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif5.channel = stage_a_payload[40:36];
         stage_a_vif5.t_coarse = stage_a_payload[35:21];
         stage_a_vif5.t_fine = stage_a_payload[20:16];
+        `PROF_INT_002_BIND_DEBUG(
+            stage_a_vif5,
+            u_dut.data_path_subsystem.emulator_mutrig_5_hit_debug_metadata_metadata,
+            u_dut.data_path_subsystem.emulator_mutrig_5_hit_debug_metadata_valid)
 
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_6
             .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd6);
@@ -677,6 +723,10 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif6.channel = stage_a_payload[40:36];
         stage_a_vif6.t_coarse = stage_a_payload[35:21];
         stage_a_vif6.t_fine = stage_a_payload[20:16];
+        `PROF_INT_002_BIND_DEBUG(
+            stage_a_vif6,
+            u_dut.data_path_subsystem.emulator_mutrig_6_hit_debug_metadata_metadata,
+            u_dut.data_path_subsystem.emulator_mutrig_6_hit_debug_metadata_valid)
 
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_7
             .u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word, 4'd7);
@@ -690,6 +740,69 @@ module prof_int_002_full_pipeline_top;
         stage_a_vif7.channel = stage_a_payload[40:36];
         stage_a_vif7.t_coarse = stage_a_payload[35:21];
         stage_a_vif7.t_fine = stage_a_payload[20:16];
+        `PROF_INT_002_BIND_DEBUG(
+            stage_a_vif7,
+            u_dut.data_path_subsystem.emulator_mutrig_7_hit_debug_metadata_metadata,
+            u_dut.data_path_subsystem.emulator_mutrig_7_hit_debug_metadata_valid)
+
+        if (source_mode != "virtual_mutrig") begin
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif0,
+                u_dut.data_path_subsystem.emulator_mutrig_0_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_0_hit_type0_data,
+                0,
+                u_dut.data_path_subsystem.emulator_mutrig_0_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_0_hit_debug_metadata_valid)
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif1,
+                u_dut.data_path_subsystem.emulator_mutrig_1_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_1_hit_type0_data,
+                1,
+                u_dut.data_path_subsystem.emulator_mutrig_1_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_1_hit_debug_metadata_valid)
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif2,
+                u_dut.data_path_subsystem.emulator_mutrig_2_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_2_hit_type0_data,
+                2,
+                u_dut.data_path_subsystem.emulator_mutrig_2_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_2_hit_debug_metadata_valid)
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif3,
+                u_dut.data_path_subsystem.emulator_mutrig_3_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_3_hit_type0_data,
+                3,
+                u_dut.data_path_subsystem.emulator_mutrig_3_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_3_hit_debug_metadata_valid)
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif4,
+                u_dut.data_path_subsystem.emulator_mutrig_4_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_4_hit_type0_data,
+                4,
+                u_dut.data_path_subsystem.emulator_mutrig_4_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_4_hit_debug_metadata_valid)
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif5,
+                u_dut.data_path_subsystem.emulator_mutrig_5_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_5_hit_type0_data,
+                5,
+                u_dut.data_path_subsystem.emulator_mutrig_5_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_5_hit_debug_metadata_valid)
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif6,
+                u_dut.data_path_subsystem.emulator_mutrig_6_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_6_hit_type0_data,
+                6,
+                u_dut.data_path_subsystem.emulator_mutrig_6_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_6_hit_debug_metadata_valid)
+            `PROF_INT_002_BIND_DEBUG_SOURCE(
+                debug_source_vif7,
+                u_dut.data_path_subsystem.emulator_mutrig_7_hit_type0_valid,
+                u_dut.data_path_subsystem.emulator_mutrig_7_hit_type0_data,
+                7,
+                u_dut.data_path_subsystem.emulator_mutrig_7_hit_debug_metadata_metadata,
+                u_dut.data_path_subsystem.emulator_mutrig_7_hit_debug_metadata_valid)
+        end
 
         pre_rbcam_vif0.valid = hit1_tap_valid(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_valid,
@@ -702,10 +815,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif0.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_data);
-        pre_rbcam_vif0.hit_id = 64'd0;
-        pre_rbcam_vif0.hit_id_valid = 1'b0;
-        pre_rbcam_vif0.root_hit_id = 64'd0;
-        pre_rbcam_vif0.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif0,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out0_metadata,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out0_valid)
         pre_rbcam_vif0.run_origin = 1'b0;
 
         pre_rbcam_vif1.valid = hit1_tap_valid(
@@ -719,10 +832,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif1.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_data);
-        pre_rbcam_vif1.hit_id = 64'd0;
-        pre_rbcam_vif1.hit_id_valid = 1'b0;
-        pre_rbcam_vif1.root_hit_id = 64'd0;
-        pre_rbcam_vif1.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif1,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out1_metadata,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out1_valid)
         pre_rbcam_vif1.run_origin = 1'b0;
 
         pre_rbcam_vif2.valid = hit1_tap_valid(
@@ -736,10 +849,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif2.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_data);
-        pre_rbcam_vif2.hit_id = 64'd0;
-        pre_rbcam_vif2.hit_id_valid = 1'b0;
-        pre_rbcam_vif2.root_hit_id = 64'd0;
-        pre_rbcam_vif2.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif2,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out2_metadata,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out2_valid)
         pre_rbcam_vif2.run_origin = 1'b0;
 
         pre_rbcam_vif3.valid = hit1_tap_valid(
@@ -753,10 +866,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif3.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_data);
-        pre_rbcam_vif3.hit_id = 64'd0;
-        pre_rbcam_vif3.hit_id_valid = 1'b0;
-        pre_rbcam_vif3.root_hit_id = 64'd0;
-        pre_rbcam_vif3.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif3,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out3_metadata,
+            u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out3_valid)
         pre_rbcam_vif3.run_origin = 1'b0;
 
         pre_rbcam_vif4.valid = hit1_tap_valid(
@@ -770,10 +883,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif4.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out0_data);
-        pre_rbcam_vif4.hit_id = 64'd0;
-        pre_rbcam_vif4.hit_id_valid = 1'b0;
-        pre_rbcam_vif4.root_hit_id = 64'd0;
-        pre_rbcam_vif4.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif4,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out0_metadata,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out0_valid)
         pre_rbcam_vif4.run_origin = 1'b0;
 
         pre_rbcam_vif5.valid = hit1_tap_valid(
@@ -787,10 +900,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif5.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out1_data);
-        pre_rbcam_vif5.hit_id = 64'd0;
-        pre_rbcam_vif5.hit_id_valid = 1'b0;
-        pre_rbcam_vif5.root_hit_id = 64'd0;
-        pre_rbcam_vif5.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif5,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out1_metadata,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out1_valid)
         pre_rbcam_vif5.run_origin = 1'b0;
 
         pre_rbcam_vif6.valid = hit1_tap_valid(
@@ -804,10 +917,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif6.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out2_data);
-        pre_rbcam_vif6.hit_id = 64'd0;
-        pre_rbcam_vif6.hit_id_valid = 1'b0;
-        pre_rbcam_vif6.root_hit_id = 64'd0;
-        pre_rbcam_vif6.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif6,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out2_metadata,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out2_valid)
         pre_rbcam_vif6.run_origin = 1'b0;
 
         pre_rbcam_vif7.valid = hit1_tap_valid(
@@ -821,10 +934,10 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif7.lane_id =
             pre_rbcam_lane_id(
                 u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out3_data);
-        pre_rbcam_vif7.hit_id = 64'd0;
-        pre_rbcam_vif7.hit_id_valid = 1'b0;
-        pre_rbcam_vif7.root_hit_id = 64'd0;
-        pre_rbcam_vif7.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            pre_rbcam_vif7,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out3_metadata,
+            u_dut.data_path_subsystem.mts1_hit_type1_sidecar_fanout_out3_valid)
         pre_rbcam_vif7.run_origin = 1'b0;
 
         post_rbcam_vif0.valid = hit2_tap_valid(
@@ -836,10 +949,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif0.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_data);
         post_rbcam_vif0.lane_id = post_rbcam_vif0.payload[44:41];
-        post_rbcam_vif0.hit_id = 64'd0;
-        post_rbcam_vif0.hit_id_valid = 1'b0;
-        post_rbcam_vif0.root_hit_id = 64'd0;
-        post_rbcam_vif0.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif0,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_metadata_valid)
         post_rbcam_vif0.run_origin = 1'b0;
 
         post_rbcam_vif1.valid = hit2_tap_valid(
@@ -851,10 +964,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif1.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_data);
         post_rbcam_vif1.lane_id = post_rbcam_vif1.payload[44:41];
-        post_rbcam_vif1.hit_id = 64'd0;
-        post_rbcam_vif1.hit_id_valid = 1'b0;
-        post_rbcam_vif1.root_hit_id = 64'd0;
-        post_rbcam_vif1.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif1,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_metadata_valid)
         post_rbcam_vif1.run_origin = 1'b0;
 
         post_rbcam_vif2.valid = hit2_tap_valid(
@@ -866,10 +979,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif2.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_data);
         post_rbcam_vif2.lane_id = post_rbcam_vif2.payload[44:41];
-        post_rbcam_vif2.hit_id = 64'd0;
-        post_rbcam_vif2.hit_id_valid = 1'b0;
-        post_rbcam_vif2.root_hit_id = 64'd0;
-        post_rbcam_vif2.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif2,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_metadata_valid)
         post_rbcam_vif2.run_origin = 1'b0;
 
         post_rbcam_vif3.valid = hit2_tap_valid(
@@ -881,10 +994,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif3.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_data);
         post_rbcam_vif3.lane_id = post_rbcam_vif3.payload[44:41];
-        post_rbcam_vif3.hit_id = 64'd0;
-        post_rbcam_vif3.hit_id_valid = 1'b0;
-        post_rbcam_vif3.root_hit_id = 64'd0;
-        post_rbcam_vif3.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif3,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_metadata_valid)
         post_rbcam_vif3.run_origin = 1'b0;
 
         post_rbcam_vif4.valid = hit2_tap_valid(
@@ -896,10 +1009,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif4.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_data);
         post_rbcam_vif4.lane_id = post_rbcam_vif4.payload[44:41];
-        post_rbcam_vif4.hit_id = 64'd0;
-        post_rbcam_vif4.hit_id_valid = 1'b0;
-        post_rbcam_vif4.root_hit_id = 64'd0;
-        post_rbcam_vif4.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif4,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_metadata_valid)
         post_rbcam_vif4.run_origin = 1'b0;
 
         post_rbcam_vif5.valid = hit2_tap_valid(
@@ -911,10 +1024,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif5.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_data);
         post_rbcam_vif5.lane_id = post_rbcam_vif5.payload[44:41];
-        post_rbcam_vif5.hit_id = 64'd0;
-        post_rbcam_vif5.hit_id_valid = 1'b0;
-        post_rbcam_vif5.root_hit_id = 64'd0;
-        post_rbcam_vif5.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif5,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_metadata_valid)
         post_rbcam_vif5.run_origin = 1'b0;
 
         post_rbcam_vif6.valid = hit2_tap_valid(
@@ -926,10 +1039,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif6.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_data);
         post_rbcam_vif6.lane_id = post_rbcam_vif6.payload[44:41];
-        post_rbcam_vif6.hit_id = 64'd0;
-        post_rbcam_vif6.hit_id_valid = 1'b0;
-        post_rbcam_vif6.root_hit_id = 64'd0;
-        post_rbcam_vif6.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif6,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_metadata_valid)
         post_rbcam_vif6.run_origin = 1'b0;
 
         post_rbcam_vif7.valid = hit2_tap_valid(
@@ -941,10 +1054,10 @@ module prof_int_002_full_pipeline_top;
         post_rbcam_vif7.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_data);
         post_rbcam_vif7.lane_id = post_rbcam_vif7.payload[44:41];
-        post_rbcam_vif7.hit_id = 64'd0;
-        post_rbcam_vif7.hit_id_valid = 1'b0;
-        post_rbcam_vif7.root_hit_id = 64'd0;
-        post_rbcam_vif7.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            post_rbcam_vif7,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_metadata_metadata,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_metadata_valid)
         post_rbcam_vif7.run_origin = 1'b0;
 
         feb_egress_vif.valid = u_dut.data_path_subsystem
@@ -959,10 +1072,10 @@ module prof_int_002_full_pipeline_top;
         feb_egress_vif.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data);
         feb_egress_vif.lane_id = feb_egress_vif.payload[44:41];
-        feb_egress_vif.hit_id = 64'd0;
-        feb_egress_vif.hit_id_valid = 1'b0;
-        feb_egress_vif.root_hit_id = 64'd0;
-        feb_egress_vif.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            feb_egress_vif,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.frame_debug_hit_sidecar_data,
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.frame_debug_hit_sidecar_valid)
         feb_egress_vif.run_origin = 1'b0;
 
         feb_egress_vif1.valid = u_dut.data_path_subsystem.hit_type3_lower_valid &&
@@ -976,10 +1089,10 @@ module prof_int_002_full_pipeline_top;
         feb_egress_vif1.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_type3_lower_data);
         feb_egress_vif1.lane_id = feb_egress_vif1.payload[44:41];
-        feb_egress_vif1.hit_id = 64'd0;
-        feb_egress_vif1.hit_id_valid = 1'b0;
-        feb_egress_vif1.root_hit_id = 64'd0;
-        feb_egress_vif1.root_hit_id_valid = 1'b0;
+        `PROF_INT_002_BIND_DEBUG(
+            feb_egress_vif1,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.frame_debug_hit_sidecar_data,
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.frame_debug_hit_sidecar_valid)
         feb_egress_vif1.run_origin = 1'b0;
     end
 
@@ -1364,8 +1477,8 @@ module prof_int_002_full_pipeline_top;
         return (source_mode == "emu_direct");
     endfunction
 
-    function automatic logic source_is_virtual_raw();
-        return (source_mode == "virtual_mutrig_raw");
+    function automatic logic source_is_virtual_mutrig();
+        return ((source_mode == "virtual_mutrig") || (source_mode == "virtual_mutrig_raw"));
     endfunction
 
     function automatic logic traffic_uses_rtl_injector();
@@ -1574,9 +1687,9 @@ module prof_int_002_full_pipeline_top;
         force u_dut.data_path_subsystem.emulator_mutrig_7.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
     endtask
 
-    task automatic configure_virtual_raw_source();
+    task automatic configure_virtual_mutrig_source();
         force u_dut.data_path_subsystem.lvds_rx_controller_pro_0_decoded0_data =
-            virtual_raw0_tx_data;
+            virtual_mutrig0_tx_data;
         force u_dut.data_path_subsystem.lvds_rx_controller_pro_0_decoded0_error =
             3'b000;
         force u_dut.data_path_subsystem.lvds_rx_controller_pro_0_decoded0_channel =
@@ -1584,9 +1697,9 @@ module prof_int_002_full_pipeline_top;
         `uvm_info("PROF_INT_002_SOURCE",
                   $sformatf("configured source=%s on generated decoded lane0; raw_tx_valid=%0b fifo_empty=%0b fifo_full=%0b",
                             source_mode,
-                            virtual_raw0_tx_valid,
-                            virtual_raw0_fifo_empty,
-                            virtual_raw0_fifo_full),
+                            virtual_mutrig0_tx_valid,
+                            virtual_mutrig0_fifo_empty,
+                            virtual_mutrig0_fifo_full),
                   UVM_LOW)
     endtask
 
@@ -2026,7 +2139,7 @@ module prof_int_002_full_pipeline_top;
         logic [31:0] selected_mode;
 
         programmed = 0;
-        selected_mode = source_is_virtual_raw() ? ARB_MODE_REAL : ARB_MODE_EMU;
+        selected_mode = source_is_virtual_mutrig() ? ARB_MODE_REAL : ARB_MODE_EMU;
         for (int lane_idx = 0; lane_idx < 8; lane_idx++) begin
             if (active_lane_mask[lane_idx]) begin
                 csr_write_arb_lane(lane_idx, ARB_CSR_CONTROL_ADDR, selected_mode);
@@ -2546,6 +2659,14 @@ module prof_int_002_full_pipeline_top;
         uvm_config_db#(virtual mutrig_l2_commit_if)::set(null, "uvm_test_top.env.l2_commit_mon6", "vif", stage_a_vif6);
         uvm_config_db#(virtual mutrig_l2_commit_if)::set(null, "uvm_test_top.env.l2_commit_mon7", "vif", stage_a_vif7);
         uvm_config_db#(virtual mutrig_l2_commit_if)::set(null, "uvm_test_top", "stage_a_vif", stage_a_vif0);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon0", "vif", debug_source_vif0);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon1", "vif", debug_source_vif1);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon2", "vif", debug_source_vif2);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon3", "vif", debug_source_vif3);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon4", "vif", debug_source_vif4);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon5", "vif", debug_source_vif5);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon6", "vif", debug_source_vif6);
+        uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.debug_source_mon7", "vif", debug_source_vif7);
         uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.pre_rbcam_mon0", "vif", pre_rbcam_vif0);
         uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.pre_rbcam_mon1", "vif", pre_rbcam_vif1);
         uvm_config_db#(virtual hit_tap_if)::set(null, "uvm_test_top.env.pre_rbcam_mon2", "vif", pre_rbcam_vif2);
@@ -2690,11 +2811,17 @@ module prof_int_002_full_pipeline_top;
                                    inject_driver))
             inject_driver = "tb_force";
         end
-        if (!(source_is_emu_direct() || source_is_virtual_raw())) begin
+        if (!(source_is_emu_direct() || source_is_virtual_mutrig())) begin
             `uvm_warning("PROF_INT_002_TOP",
                          $sformatf("unknown TB_INT_SOURCE=%s; falling back to emu_direct",
                                    source_mode))
             source_mode = "emu_direct";
+        end
+        if (source_mode == "virtual_mutrig_raw") begin
+            `uvm_info("PROF_INT_002_TOP",
+                      "TB_INT_SOURCE=virtual_mutrig_raw is deprecated; using virtual_mutrig",
+                      UVM_LOW)
+            source_mode = "virtual_mutrig";
         end
         if (!((latency_scope == "full") || (latency_scope == "pre_rbcam"))) begin
             `uvm_warning("PROF_INT_002_TOP",
@@ -2702,15 +2829,15 @@ module prof_int_002_full_pipeline_top;
                                    latency_scope))
             latency_scope = "full";
         end
-        if (source_is_virtual_raw()) begin
+        if (source_is_virtual_mutrig()) begin
             if (traffic_is_poisson()) begin
                 `uvm_warning("PROF_INT_002_TOP",
-                             "virtual_mutrig_raw source supports periodic/header_sync in PROF-INT-002; falling back to periodic")
+                             "virtual_mutrig source supports periodic/header_sync in PROF-INT-002; falling back to periodic")
                 traffic_mode = "periodic";
             end
             if ((active_lane_mask != 8'h01) || (active_lane_count != 1)) begin
                 `uvm_warning("PROF_INT_002_TOP",
-                             $sformatf("virtual_mutrig_raw first bring-up is lane0-only; overriding active_lanes=%0d mask=%02h to 1/01",
+                             $sformatf("virtual_mutrig first bring-up is lane0-only; overriding active_lanes=%0d mask=%02h to 1/01",
                                        active_lane_count,
                                        active_lane_mask))
                 active_lane_count = 1;
@@ -2783,8 +2910,8 @@ module prof_int_002_full_pipeline_top;
         repeat (64) @(posedge clk_125);
 
         configure_active_emulators();
-        if (source_is_virtual_raw())
-            configure_virtual_raw_source();
+        if (source_is_virtual_mutrig())
+            configure_virtual_mutrig_source();
         if (traffic_uses_rtl_injector())
             configure_rtl_injector();
         csr_write_emu0(EMU_CSR_SIGNAL_ADDR, 32'h0000_0000);
@@ -2844,9 +2971,9 @@ module prof_int_002_full_pipeline_top;
             fork
                 drive_header_sync_injections();
             join_none
-        end else if (traffic_is_header_sync() && source_is_virtual_raw()) begin
+        end else if (traffic_is_header_sync() && source_is_virtual_mutrig()) begin
             `uvm_info("PROF_INT_002_INJECT",
-                      $sformatf("virtual_raw header-sync source owns injection scheduling frames=%0d burst=%0d spacing=%0d phase=%0d",
+                      $sformatf("virtual_mutrig header-sync source owns injection scheduling frames=%0d burst=%0d spacing=%0d phase=%0d",
                                 inject_frame_count,
                                 inject_burst_count,
                                 inject_burst_spacing_cycles,

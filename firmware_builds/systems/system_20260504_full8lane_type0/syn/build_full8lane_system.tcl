@@ -67,7 +67,7 @@ set histogram_compat_ip_dir [file join $syn_dir ip histogram_statistics_v2]
 set search_path [join [list $syn_dir $arb_script_dir $debug_sidecar_fanout_script_dir $debug_hit_sidecar_bank_bridge_script_dir $emulator_ip_dir $frame_deassembly_script_dir $mts_processor_ip_dir $ring_buffer_cam_script_dir $feb_frame_assembly_ip_dir $upload_readyless_ip_dir $hit_stack_readyless_ip_dir $full8lane_onewire_ip_dir $full8lane_sc_hub_ip_dir $full8lane_histogram_ip_dir $histogram_compat_ip_dir $ipx_path $components_ipx_path "\$"] ","]
 set lvds_controller_version 26.2.1.0506
 set debug_sidecar_fanout_version 26.0.0.0506
-set debug_hit_sidecar_bank_bridge_version 26.0.0.0506
+set debug_hit_sidecar_bank_bridge_version 26.0.1.0506
 set emulator_mutrig_version 26.3.0.0506
 set frame_deassembly_version 26.1.0.0506
 set mts_preprocessor_version 26.1.0.0506
@@ -583,7 +583,7 @@ proc configure_run_ctrl_splitter {name outputs} {
 }
 
 proc configure_arb_child {name lane mode watchdog} {
-    add_instance $name arb_hit_type0 26.4.0.0506
+    add_instance $name arb_hit_type0 26.4.1.0506
     set_required_param $name MODE_DEFAULT $mode
     set_required_param $name WATCHDOG_DEFAULT $watchdog
     set_required_param $name FIFO_DEPTH 16
@@ -592,7 +592,7 @@ proc configure_arb_child {name lane mode watchdog} {
     set_required_param $name INSTANCE_ID $lane
     set_required_param $name VERSION_MAJOR 26
     set_required_param $name VERSION_MINOR 4
-    set_required_param $name VERSION_PATCH 0
+    set_required_param $name VERSION_PATCH 1
     set_required_param $name BUILD 506
     set_required_param $name VERSION_DATE 20260506
 }
@@ -1160,6 +1160,11 @@ if {$full8lane_debug_level >= 2} {
         set_required_param $bridge FIFO_DEPTH 256
         add_clock_connection lvds_rx_controller_pro_0.outclock $bridge.clock
         add_reset_connection master_datapath.master_reset $bridge.reset
+        add_interface mts${bank}_hit_type0_sidecar_bridge_debug conduit start
+        set_interface_property \
+            mts${bank}_hit_type0_sidecar_bridge_debug \
+            EXPORT_OF \
+            $bridge.debug_status
 
         set fanout mts${bank}_hit_type1_sidecar_fanout
         add_instance $fanout debug_sidecar_fanout $debug_sidecar_fanout_version

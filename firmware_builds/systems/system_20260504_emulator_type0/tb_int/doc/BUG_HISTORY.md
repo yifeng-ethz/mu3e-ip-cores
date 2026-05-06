@@ -45,8 +45,9 @@ Historical formal note:
 | [BUG-008-R](#bug-008-r-unconnected-inject-aux-pulse-poisoned-injector-fanout) | R | hard stuck error | `directed-only (RTL-injector path using generated fanout)` | open Qsys tie-off; harness force validated | PROF-INT-002 RTL-injector smoke on `2026-05-06` | pending | `full8lane_type0_system` left `data_path_subsystem.inject_aux_pulse` unconnected, so `pulse_fanout8` ORed the real injector pulse with `X` and suppressed emulator hits in simulation. |
 | [BUG-009-H](#bug-009-h-full8-full32-header-sync-burst-sweep-has-ambiguous-direct-emulator-identity) | H | hard stuck error | `directed-only (multi-active direct-emulator header-sync burst reference)` | open blocker; plot guard added | PROF-INT-002 full8/full32 burst sweep on `2026-05-06` | pending | Full8/full32 direct-emulator header-sync burst sweeps cannot be accepted as golden pre-rbCAM latency plots because the current monitor identity aliases multi-active direct-emulator hits and the generated path drops most Stage-A offers before pre-rbCAM. |
 | [BUG-010-H](#bug-010-h-direct-emulator-evidence-was-being-treated-like-virtual-mutrig-golden-evidence) | H | soft error | `directed-only (source-model comparison and golden reference reporting)` | partial contract documented; RTL/scoreboard upgrade in progress | PROF-INT-002 source comparison on `2026-05-06` | pending | The direct FPGA emulator, tagged virtual MuTRiG source model, and physical MuTRiG ASIC were not separated in tb_int evidence tags, making rate/header-sync agreement look stronger than the underlying source model justified. |
-| [BUG-011-H](#bug-011-h-tagged-mutrig-frame-generator-bound-to-generated-system-crc) | H | hard stuck error | `directed-only (virtual-raw source simulation)` | fixed in Makefile library isolation; compile passed | PROF-INT-002 virtual-raw smoke on `2026-05-06` | pending | The tagged MuTRiG frame generator component-bound to the generated-system `crc16_8` entity with a different port list, preventing virtual-raw simulation elaboration. |
-| [BUG-012-H](#bug-012-h-pre-rbcam-source-validation-enforced-downstream-sva-scope) | H | soft error | `directed-only (pre-rbCAM-only source-validation runs)` | fixed in assertion scope control; virtual-raw burst sweep passed | PROF-INT-002 virtual-raw smoke on `2026-05-06` | pending | Pre-rbCAM-only source-validation runs still enforced post-rbCAM/FEB SVA windows, so downstream residuals polluted a source-stage latency contract. |
+| [BUG-011-H](#bug-011-h-tagged-mutrig-frame-generator-bound-to-generated-system-crc) | H | hard stuck error | `directed-only (virtual MuTRiG source simulation)` | fixed in Makefile library isolation; compile passed | PROF-INT-002 virtual MuTRiG smoke on `2026-05-06` | pending | The tagged MuTRiG frame generator component-bound to the generated-system `crc16_8` entity with a different port list, preventing virtual MuTRiG simulation elaboration. |
+| [BUG-012-H](#bug-012-h-pre-rbcam-source-validation-enforced-downstream-sva-scope) | H | soft error | `directed-only (pre-rbCAM-only source-validation runs)` | fixed in assertion scope control; virtual MuTRiG burst sweep passed | PROF-INT-002 virtual MuTRiG smoke on `2026-05-06` | pending | Pre-rbCAM-only source-validation runs still enforced post-rbCAM/FEB SVA windows, so downstream residuals polluted a source-stage latency contract. |
+| [BUG-013-H](#bug-013-h-dual-uvm-sidecar-lineage-was-not-bound-for-all-source-modes) | H | hard stuck error | `common (DEBUG_LEVEL=2 sidecar lineage closure)` | partial; dual UVM harness fixed, generated-system refresh pending | PROF-INT-002 DEBUG_LEVEL=2 sidecar smoke on `2026-05-06` | pending | tb_int had a nominal latency path but no fully independent sidecar-source path for every source mode, so OoO sidecar lineage could be inactive or stale while latency plots still exported normally. |
 
 ## 2026-05-06
 
@@ -303,9 +304,9 @@ Historical formal note:
 ### BUG-011-H: tagged MuTRiG frame generator bound to generated-system CRC
 
 - First seen in:
-  - PROF-INT-002 virtual-raw header-sync smoke on `2026-05-06`
+  - PROF-INT-002 virtual MuTRiG header-sync smoke on `2026-05-06`
   - command:
-    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_latency PROF_INT_002_SOURCE=virtual_mutrig_raw PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT=16 PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT=1`
+    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_latency PROF_INT_002_SOURCE=virtual_mutrig PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT=16 PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT=1`
 - Symptom:
   - Questa failed before UVM runtime with `Bad default binding for component instance "u_crc16_8: crc16_8"`
   - the selected entity was `work_tb_int.crc16_8`, which lacks the tagged MuTRiG frame-generator port `o_crc_8`
@@ -316,36 +317,61 @@ Historical formal note:
   - state:
     fixed in Makefile library isolation; PROF-INT-002 compile passed after the change
   - mechanism:
-    the tagged virtual MuTRiG packages, FIFO dependency, frame generator, CRC, and `raw_mutrig_frame_top` now compile into a dedicated `mutrig_raw` library. PROF-INT-002 `vsim` commands add `-L mutrig_raw`, keeping the generated-system work library unchanged while letting the virtual raw source elaborate against its matching CRC entity.
+    the tagged virtual MuTRiG packages, FIFO dependency, frame generator, CRC, and `raw_mutrig_frame_top` now compile into a dedicated `mutrig_raw` library. PROF-INT-002 `vsim` commands add `-L mutrig_raw`, keeping the generated-system work library unchanged while letting the virtual MuTRiG source elaborate against its matching CRC entity.
   - before_fix_outcome:
-    the virtual-raw smoke failed during optimization and produced no Stage-A or pre-rbCAM records
+    the virtual MuTRiG smoke failed during optimization and produced no Stage-A or pre-rbCAM records
   - after_fix_outcome:
-    the next virtual-raw smoke elaborated and ran; it logged `PROF_INT_002_SOURCE source=virtual_mutrig_raw`, programmed the active arb lane to REAL mode, and produced 16 Stage-A hits matched to 16 pre-rbCAM hits
+    the next virtual MuTRiG smoke elaborated and ran; it logged `PROF_INT_002_SOURCE source=virtual_mutrig`, programmed the active arb lane to REAL mode, and produced 16 Stage-A hits matched to 16 pre-rbCAM hits
   - potential_hazard:
     low while the raw source remains isolated in `mutrig_raw`; medium if later code moves golden MuTRiG units back into the generated-system work library
 
 ### BUG-012-H: pre-rbCAM source validation enforced downstream SVA scope
 
 - First seen in:
-  - PROF-INT-002 virtual-raw header-sync smoke on `2026-05-06`
+  - PROF-INT-002 virtual MuTRiG header-sync smoke on `2026-05-06`
   - first functional assertion failure:
     `post_rbcam_drop: Pre-RbCAM hit missed Post-RbCAM 3000-cycle window`
 - Symptom:
-  - the virtual raw source produced clean Stage-A -> pre-rbCAM evidence (`A->PRE matched/missing/ghost=16/0/0`) but the transcript accumulated post-rbCAM SVA `$error` messages
+  - the virtual MuTRiG source produced clean Stage-A -> pre-rbCAM evidence (`A->PRE matched/missing/ghost=16/0/0`) but the transcript accumulated post-rbCAM SVA `$error` messages
   - the run target was a pre-rbCAM source-validation case, so the downstream residuals were useful diagnostics but not part of the contract being measured
 - Root cause:
   - `tb_int_assertions` always enabled the pre-rbCAM -> post-rbCAM and post-rbCAM -> FEB-egress guardrails
   - PROF-INT-002 had no runtime scope tag distinguishing pre-rbCAM source validation from a full pipeline latency run
 - Fix status:
   - state:
-    fixed in assertion scope control; virtual-raw burst sweep passed
+    fixed in assertion scope control; virtual MuTRiG burst sweep passed
   - mechanism:
     `tb_int_assertions` now has explicit `enable_post_rbcam_checks` and `enable_feb_egress_checks` inputs. PROF-INT-002 accepts `TB_INT_LATENCY_SCOPE=full|pre_rbcam`; the pre-rbCAM make target passes `pre_rbcam`, leaving Stage-A -> pre-rbCAM checks active while disabling downstream SVA guardrails. The scoreboard still reports downstream residual counts separately.
   - before_fix_outcome:
     a pre-rbCAM-only source-validation smoke emitted 17 simulator errors while still producing a valid `pre_rbcam_records.csv` and analyzer row count
   - after_fix_outcome:
-    `plot_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100` passed with `TB_INT_LATENCY_SCOPE=pre_rbcam`. Burst counts `1, 2, 5, 7` produced exactly `128, 256, 640, 896` pre-rbCAM rows and Stage-A -> pre-rbCAM matched/missing/ghost counts of `128/0/0`, `256/0/0`, `640/0/0`, and `896/0/0`. The analyzer reported min/p05/p50/p95/max latencies of `837/837/837/837/837`, `830/830/833.5/837/837`, `811/811/824/837/837`, and `798/798/817/837/837` cycles. The post-rbCAM/FEB SVA errors were suppressed for this source-stage scope while the scoreboard continued to report downstream residuals as warnings.
+    `plot_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100` passed with `TB_INT_LATENCY_SCOPE=pre_rbcam`. Burst counts `1, 2, 5, 7` produced exactly `128, 256, 640, 896` pre-rbCAM rows and Stage-A -> pre-rbCAM matched/missing/ghost counts of `128/0/0`, `256/0/0`, `640/0/0`, and `896/0/0`. The analyzer reported min/p05/p50/p95/max latencies of `837/837/837/837/837`, `830/830/833.5/837/837`, `811/811/824/837/837`, and `798/798/817/837/837` cycles. The post-rbCAM/FEB SVA errors were suppressed for this source-stage scope while the scoreboard continued to report downstream residuals as warnings.
   - residual_downstream_counts:
     burst1 reported `PRE->POST=64/64/0` and `POST->FEB=64/0/124`; burst2 reported `123/133/0` and `123/0/160`; burst5 reported `346/294/0` and `346/0/218`; burst7 reported `479/417/0` and `479/0/171`. These are not waived for full-pipeline closure; they are explicitly out of scope for the pre-rbCAM virtual-source contract.
   - potential_hazard:
     low for pre-rbCAM source-validation evidence because downstream residuals remain visible in the scoreboard; high for full-pipeline closure if any run uses `pre_rbcam` scope while claiming post-rbCAM or FEB-egress latency closure
+
+### BUG-013-H: dual UVM sidecar lineage was not bound for all source modes
+
+- First seen in:
+  - PROF-INT-002 DEBUG_LEVEL=2 sidecar smoke on `2026-05-06`
+  - scoreboard summary from `prof_int_002_debug_sidecar_smoke`: `debug_obs A/SRC/PRE/POST/FEB=6/322/322/322/262` with `debug_residuals SRC->PRE=0/322/322`
+- Symptom:
+  - the nominal FIFO-key path exported a valid pre-rbCAM latency CSV and the UVM run passed, but the sidecar ledger did not match source IDs into pre-rbCAM
+  - `virtual_mutrig` left the new `debug_source` analysis path inactive, so the tagged virtual MuTRiG source path did not have the same dual analysis structure as the virtual MuTRiG smoke reference
+  - stale generated full8lane simulation RTL could still use an older `arb_hit_type0` sidecar-valid contract even after the maintained RTL/Qsys Tcl had been fixed
+- Root cause:
+  - the initial tb_int scoreboard upgrade split nominal FIFO-key scoring from DEBUG_LEVEL=2 sidecar-ID scoring, but it only bound `debug_source` to the generated direct-emulator sidecar output
+  - the virtual MuTRiG reference runs a debug-rich primary DUT and a no-debug shadow DUT from the same stimulus; tb_int needs the equivalent at the analysis boundary because it cannot instantiate a second generated Qsys DUT without changing the integration target
+  - `arb_hit_type0` did not preserve a metadata-valid bit through its source FIFOs, so selected sidecar IDs could be asserted from stale or zero payloads when the generated system was not refreshed from the fixed IP source
+- Fix status:
+  - state:
+    partial; dual UVM harness fixed, generated-system refresh pending
+  - mechanism:
+    `per_bucket_ledger_scoreboard` now has a separate `debug_source_imp` and reconciles `debug_source -> pre-rbCAM -> post-rbCAM -> FEB` by DEBUG_LEVEL=2 sidecar ID while keeping latency CSV export on the nominal FIFO-key model. PROF-INT-002 binds `debug_source` to direct-emulator hit metadata in `emu_direct` mode and to `mutrig_frame_deassembly_0` hit metadata in `virtual_mutrig` mode. `arb_hit_type0` v26.4.1 stores metadata-valid beside metadata payload in each source FIFO, and Qsys Tcl pins the fixed arb/sidecar bridge versions.
+  - before_fix_outcome:
+    a run could produce sensible pre-rbCAM plots while the sidecar path was inactive or reported complete `SRC->PRE` mismatch; this blocked using the scoreboard as an OoO model for multi-source drop localization
+  - after_fix_outcome:
+    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_latency PROF_INT_002_SOURCE=virtual_mutrig PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT=16 PROF_INT_002_PRE_RBCAM_INJECT_BURST_COUNT=1 PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_virtual_mutrig_smoke` passed with `UVM_ERROR=0`, `UVM_FATAL=0`, and a 16-row pre-rbCAM delta latency at 837 cycles. The run confirmed the new source label and debug-source tap are active (`debug_obs SRC/PRE=16/16`) but still reported stale generated-system sidecar mismatch (`debug_residuals SRC->PRE=0/16/16`), so full DEBUG_LEVEL=2 OoO closure remains blocked on regenerating the generated full8lane simulation RTL from the fixed Qsys Tcl/IP versions.
+  - potential_hazard:
+    medium until the generated full8lane simulation RTL is regenerated from the fixed Qsys Tcl/IP versions. The source-tree fix is the required durable repair; generated `synthesis/` RTL remains evidence and must not be treated as authored source.

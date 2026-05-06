@@ -265,7 +265,7 @@ set_required_param lvds_rx_controller_pro_0 SYNC_PATTERN_SEL 0xFA
 add_instance mutrig_frame_deassembly_0 focus_mutrig_frame_deassembly 26.0.6.418
 set_required_param mutrig_frame_deassembly_0 CHANNEL_WIDTH 4
 set_required_param mutrig_frame_deassembly_0 CSR_ADDR_WIDTH 2
-set_required_param mutrig_frame_deassembly_0 DEBUG_LV 0
+set_required_param mutrig_frame_deassembly_0 DEBUG_LV 2
 set_required_param mutrig_frame_deassembly_0 MODE_HALT 0
 
 add_instance mutrig_injector_0 mutrig_injector_multiheader 26.0.3.429
@@ -287,22 +287,24 @@ set_required_param emulator_mutrig_qsys_lane ASIC_ID_DEFAULT 8
 set_required_param emulator_mutrig_qsys_lane CLUSTER_LANE_INDEX_DEFAULT 0
 set_required_param emulator_mutrig_qsys_lane CLUSTER_LANE_COUNT_DEFAULT 1
 set_required_param emulator_mutrig_qsys_lane INSTANCE_ID 0
+set_required_param emulator_mutrig_qsys_lane DEBUG_LEVEL 2
 set_required_param emulator_mutrig_qsys_lane GIT_STAMP_OVERRIDE true
 set_required_param emulator_mutrig_qsys_lane VERSION_GIT 1498700671
 # emulator_mutrig_qsys_lane hardwires one lane and BYTE_STREAM_ENABLE=0 in RTL.
 # The exposed software channel base is ASIC_ID_DEFAULT=8 for the emulator bank.
 
-add_instance arb_hit_type0_0 focus_arb_hit_type0 26.2.0.504
+add_instance arb_hit_type0_0 focus_arb_hit_type0 26.4.1.0506
 set_required_param arb_hit_type0_0 MODE_DEFAULT 0
 set_required_param arb_hit_type0_0 WATCHDOG_DEFAULT 500
 set_required_param arb_hit_type0_0 FIFO_DEPTH 16
+set_required_param arb_hit_type0_0 DEBUG_LEVEL 2
 set_required_param arb_hit_type0_0 IP_UID 1095263280
 set_required_param arb_hit_type0_0 INSTANCE_ID 0
 set_required_param arb_hit_type0_0 VERSION_MAJOR 26
-set_required_param arb_hit_type0_0 VERSION_MINOR 2
-set_required_param arb_hit_type0_0 VERSION_PATCH 0
-set_required_param arb_hit_type0_0 BUILD 504
-set_required_param arb_hit_type0_0 VERSION_DATE 20260504
+set_required_param arb_hit_type0_0 VERSION_MINOR 4
+set_required_param arb_hit_type0_0 VERSION_PATCH 1
+set_required_param arb_hit_type0_0 BUILD 506
+set_required_param arb_hit_type0_0 VERSION_DATE 20260506
 
 add_instance backpressure_fifo altera_avalon_sc_fifo 18.1
 set_required_param backpressure_fifo BITS_PER_SYMBOL 45
@@ -544,10 +546,12 @@ add_connection lvds_rx_controller_pro_0.ctrl lvds_rx_28nm_0.ctrl
 add_connection lvds_rx_28nm_0.parallel lvds_rx_controller_pro_0.parallel
 add_connection lvds_rx_controller_pro_0.decoded mutrig_frame_deassembly_0.rx8b1k
 add_connection mutrig_frame_deassembly_0.hit_type0 arb_hit_type0_0.real_in
+add_connection mutrig_frame_deassembly_0.debug_hit_metadata arb_hit_type0_0.real_hit_debug
 add_connection mutrig_frame_deassembly_0.headerinfo mutrig_injector_0.headerinfo0
 add_connection mutrig_injector_0.inject emulator_inject_fanout.inject_in
 add_connection emulator_inject_fanout.out0 emulator_mutrig_qsys_lane.inject
 add_connection emulator_mutrig_qsys_lane.hit_type0 arb_hit_type0_0.emu_in
+add_connection emulator_mutrig_qsys_lane.hit_debug_metadata arb_hit_type0_0.emu_hit_debug
 add_connection arb_hit_type0_0.selected_out backpressure_fifo.in
 add_connection backpressure_fifo.out hit_type0_hist_pre_adapter_0.hit_in
 add_connection hit_type0_hist_pre_adapter_0.pre_out histogram_ingress_bridge_0.pre_in

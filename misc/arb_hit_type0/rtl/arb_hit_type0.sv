@@ -3,9 +3,9 @@
 // between the real MuTRiG hit_type0 stream and the emulator hit_type0
 // stream with 16-deep ingress FIFOs per source.
 //
-// Version : 26.4.0
+// Version : 26.4.1
 // Date    : 20260506
-// Change  : Add DEBUG_LEVEL FIFO observability and per-hit metadata sidebands.
+// Change  : Preserve per-hit metadata valid through the selected DEBUG sideband.
 
 module arb_hit_type0 #(
     parameter integer MODE_DEFAULT      = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
@@ -15,7 +15,7 @@ module arb_hit_type0 #(
     parameter integer IP_UID            = 32'h41485430, // ASCII "AHT0"
     parameter integer VERSION_MAJOR     = 26,
     parameter integer VERSION_MINOR     = 4,
-    parameter integer VERSION_PATCH     = 0,
+    parameter integer VERSION_PATCH     = 1,
     parameter integer BUILD             = 506,
     parameter integer VERSION_DATE      = 20260506,
     parameter integer VERSION_GIT       = 32'h0000_0000,
@@ -103,6 +103,7 @@ module arb_hit_type0 #(
     logic        real_head_endofpacket;
     logic        real_head_endofrun;
     logic [63:0] real_head_debug_metadata;
+    logic        real_head_debug_metadata_valid;
 
     logic        emu_fifo_empty;
     logic        emu_fifo_full;
@@ -121,6 +122,7 @@ module arb_hit_type0 #(
     logic        emu_head_endofpacket;
     logic        emu_head_endofrun;
     logic [63:0] emu_head_debug_metadata;
+    logic        emu_head_debug_metadata_valid;
 
     logic        arbiter_real_open;
     logic        arbiter_emu_open;
@@ -150,12 +152,18 @@ module arb_hit_type0 #(
     logic        watchdog_fire_real;
     logic        watchdog_fire_emu;
     logic [63:0] debug_selected_hit_metadata;
+    logic        debug_selected_hit_metadata_valid;
 
     assign stream_active = ~(runctl_reset_active | runctl_reset_start);
     assign debug_selected_hit_metadata =
         (arbiter_egress_valid & ~arbiter_egress_synthesized) ?
             (arbiter_egress_source_emu ? emu_head_debug_metadata : real_head_debug_metadata) :
             64'd0;
+    assign debug_selected_hit_metadata_valid =
+        (arbiter_egress_valid & ~arbiter_egress_synthesized) ?
+            (arbiter_egress_source_emu ?
+                emu_head_debug_metadata_valid : real_head_debug_metadata_valid) :
+            1'b0;
 
     generate
         if (DEBUG_LEVEL >= 1) begin : debug_fifo_observability
@@ -216,6 +224,7 @@ module arb_hit_type0 #(
         .head_endofpacket      (real_head_endofpacket),
         .head_endofrun         (real_head_endofrun),
         .head_debug_metadata   (real_head_debug_metadata),
+        .head_debug_metadata_valid (real_head_debug_metadata_valid),
         .empty                 (real_fifo_empty),
         .full                  (real_fifo_full),
         .depth                 (real_fifo_depth),
@@ -252,6 +261,7 @@ module arb_hit_type0 #(
         .head_endofpacket      (emu_head_endofpacket),
         .head_endofrun         (emu_head_endofrun),
         .head_debug_metadata   (emu_head_debug_metadata),
+        .head_debug_metadata_valid (emu_head_debug_metadata_valid),
         .empty                 (emu_fifo_empty),
         .full                  (emu_fifo_full),
         .depth                 (emu_fifo_depth),
@@ -433,7 +443,7 @@ module arb_hit_type0 #(
                 end else begin
                     coe_debug_selected_hit_metadata          <= debug_selected_hit_metadata;
                     coe_debug_selected_hit_metadata_valid    <=
-                        arbiter_egress_valid & ~arbiter_egress_synthesized;
+                        debug_selected_hit_metadata_valid;
                 end
             end
         end else begin : no_debug_hit_metadata_export

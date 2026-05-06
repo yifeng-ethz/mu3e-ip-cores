@@ -1,9 +1,9 @@
 // arb_hit_type0_fifo.sv
 // Per-source 16-deep ingress FIFO and ingress-side packet/drop tracking.
 //
-// Version : 26.4.0
+// Version : 26.4.1
 // Date    : 20260506
-// Change  : Add DEBUG_LEVEL=2 per-hit debug metadata sidecar FIFO.
+// Change  : Preserve DEBUG_LEVEL=2 metadata valid beside the sidecar payload.
 
 module arb_hit_type0_fifo #(
     parameter integer FIFO_DEPTH  = 16,
@@ -33,6 +33,7 @@ module arb_hit_type0_fifo #(
     output logic        head_endofpacket,
     output logic        head_endofrun,
     output logic [63:0] head_debug_metadata,
+    output logic        head_debug_metadata_valid,
 
     output logic        empty,
     output logic        full,
@@ -68,16 +69,20 @@ module arb_hit_type0_fifo #(
     generate
         if (DEBUG_LEVEL >= 2) begin : debug_metadata_fifo
             (* ramstyle = "logic" *) logic [63:0] metadata_mem [0:FIFO_DEPTH_CONST-1];
+            (* ramstyle = "logic" *) logic        metadata_valid_mem [0:FIFO_DEPTH_CONST-1];
 
-            assign head_debug_metadata = metadata_mem[read_ptr];
+            assign head_debug_metadata       = metadata_mem[read_ptr];
+            assign head_debug_metadata_valid = metadata_valid_mem[read_ptr];
 
             always_ff @(posedge clk) begin : metadata_ram_writer
                 if (push_accept) begin
-                    metadata_mem[write_ptr] <= asi_debug_metadata_valid ? asi_debug_metadata : 64'd0;
+                    metadata_mem[write_ptr]          <= asi_debug_metadata_valid ? asi_debug_metadata : 64'd0;
+                    metadata_valid_mem[write_ptr]    <= asi_debug_metadata_valid;
                 end
             end
         end else begin : no_debug_metadata_fifo
-            assign head_debug_metadata = 64'd0;
+            assign head_debug_metadata       = 64'd0;
+            assign head_debug_metadata_valid = 1'b0;
         end
     endgenerate
 

@@ -1,9 +1,9 @@
 // per_bucket_ledger_scoreboard.sv
 // Per-lane, per-key FIFO-ledger scoreboard for focus-build tb_int.
 // Author: Yifeng Wang
-// Version : 26.2.2
+// Version : 26.2.3
 // Date    : 20260506
-// Change  : Add debug-ID ledger and optional counter-agreement export.
+// Change  : Split nominal FIFO-key scoring from DEBUG_LEVEL=2 sidecar scoring.
 
 package tb_int_scoreboard_pkg;
 
@@ -14,6 +14,7 @@ package tb_int_scoreboard_pkg;
     `include "uvm_macros.svh"
 
     `uvm_analysis_imp_decl(_stage_a)
+    `uvm_analysis_imp_decl(_debug_source)
     `uvm_analysis_imp_decl(_pre_rbcam)
     `uvm_analysis_imp_decl(_post_rbcam)
     `uvm_analysis_imp_decl(_feb_egress)
@@ -27,6 +28,7 @@ package tb_int_scoreboard_pkg;
         `uvm_component_utils(per_bucket_ledger_scoreboard)
 
         uvm_analysis_imp_stage_a#(hit_record, per_bucket_ledger_scoreboard) stage_a_imp;
+        uvm_analysis_imp_debug_source#(hit_record, per_bucket_ledger_scoreboard) debug_source_imp;
         uvm_analysis_imp_pre_rbcam#(hit_record, per_bucket_ledger_scoreboard) pre_rbcam_imp;
         uvm_analysis_imp_post_rbcam#(hit_record, per_bucket_ledger_scoreboard) post_rbcam_imp;
         uvm_analysis_imp_feb_egress#(hit_record, per_bucket_ledger_scoreboard) feb_egress_imp;
@@ -38,6 +40,7 @@ package tb_int_scoreboard_pkg;
         obs_q_t stage_feb_egress_ledger[NUM_LANES][bit [9:0]];
 
         hit_record stage_a_debug_ledger[bit [63:0]];
+        hit_record stage_debug_source_ledger[bit [63:0]];
         hit_record stage_pre_rbcam_debug_ledger[bit [63:0]];
         hit_record stage_post_rbcam_debug_ledger[bit [63:0]];
         hit_record stage_feb_egress_debug_ledger[bit [63:0]];
@@ -65,6 +68,7 @@ package tb_int_scoreboard_pkg;
         int unsigned stable_missing_post;
         int unsigned stable_missing_feb;
         int unsigned total_debug_stage_a;
+        int unsigned total_debug_source;
         int unsigned total_debug_pre_rbcam;
         int unsigned total_debug_post_rbcam;
         int unsigned total_debug_feb_egress;
@@ -102,6 +106,7 @@ package tb_int_scoreboard_pkg;
 
             super.build_phase(phase);
             stage_a_imp    = new("stage_a_imp", this);
+            debug_source_imp = new("debug_source_imp", this);
             pre_rbcam_imp  = new("pre_rbcam_imp", this);
             post_rbcam_imp = new("post_rbcam_imp", this);
             feb_egress_imp = new("feb_egress_imp", this);
@@ -252,6 +257,21 @@ package tb_int_scoreboard_pkg;
                           UVM_LOW)
                 dbg_stage_a_logged++;
             end
+        endfunction
+
+        virtual function void write_debug_source(hit_record item);
+            int unsigned lane_idx;
+
+            if (item == null)
+                return;
+            lane_idx = item.lane_id;
+            if (lane_idx >= NUM_LANES)
+                return;
+            item.observation_point = OBS_DEBUG_SOURCE;
+            apply_supplied_debug_root(item);
+            push_debug_obs(stage_debug_source_ledger, item, "debug_source");
+            if (item.monitor_debug_valid)
+                total_debug_source++;
         endfunction
 
         virtual function void write_pre_rbcam(hit_record item);
@@ -460,7 +480,7 @@ package tb_int_scoreboard_pkg;
         endfunction
 
         function automatic bit debug_path_active();
-            return (total_debug_stage_a != 0) &&
+            return (total_debug_source != 0) &&
                    ((total_debug_pre_rbcam != 0) ||
                     (total_debug_post_rbcam != 0) ||
                     (total_debug_feb_egress != 0));
@@ -561,7 +581,7 @@ package tb_int_scoreboard_pkg;
             bit [63:0] debug_id;
             bit        ok;
 
-            if (stage_a_debug_ledger.first(debug_id)) begin
+            if (stage_debug_source_ledger.first(debug_id)) begin
                 ok = 1'b1;
                 while (ok) begin
                     hit_record stage_a;
@@ -569,7 +589,7 @@ package tb_int_scoreboard_pkg;
                     hit_record post_rbcam;
                     hit_record feb_egress;
 
-                    stage_a = stage_a_debug_ledger[debug_id];
+                    stage_a = stage_debug_source_ledger[debug_id];
                     pre_rbcam = stage_pre_rbcam_debug_ledger.exists(debug_id)
                                 ? stage_pre_rbcam_debug_ledger[debug_id] : null;
                     post_rbcam = stage_post_rbcam_debug_ledger.exists(debug_id)
@@ -613,7 +633,7 @@ package tb_int_scoreboard_pkg;
                                                 "unknown");
                         end
                     end
-                    ok = stage_a_debug_ledger.next(debug_id);
+                    ok = stage_debug_source_ledger.next(debug_id);
                 end
             end
         endfunction
@@ -678,7 +698,7 @@ package tb_int_scoreboard_pkg;
                                                                stage_feb_egress_ledger[lane_idx]);
             end
 
-            reconcile_debug_boundary(stage_a_debug_ledger,
+            reconcile_debug_boundary(stage_debug_source_ledger,
                                      stage_pre_rbcam_debug_ledger,
                                      total_debug_matched_a_pre,
                                      total_debug_missing_pre,
@@ -695,16 +715,13 @@ package tb_int_scoreboard_pkg;
                                      total_debug_ghost_feb);
 
             export_now = !exported_records;
-            if (debug_path_active())
-                export_debug_closed_and_drops(export_now);
-            else
-                export_closed_and_drops(export_now);
+            export_closed_and_drops(export_now);
             if (export_now)
                 exported_records = 1'b1;
             `uvm_info("TB_INT_SB",
-                      $sformatf("reconcile[%s] export_model=%s A=%0d stable_A=%0d PRE=%0d pre_fanout_dupe=%0d POST=%0d FEB=%0d closed=%0d stable_closed=%0d residuals fifo A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d stable_missing A->PRE/PRE->POST/POST->FEB=%0d/%0d/%0d debug_obs A/PRE/POST/FEB=%0d/%0d/%0d/%0d debug_residuals A->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d debug_duplicate_ids=%0d",
+                      $sformatf("reconcile[%s] export_model=fifo_key sidecar_model=%s A=%0d stable_A=%0d PRE=%0d pre_fanout_dupe=%0d POST=%0d FEB=%0d closed=%0d stable_closed=%0d residuals fifo A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d stable_missing A->PRE/PRE->POST/POST->FEB=%0d/%0d/%0d debug_obs A/SRC/PRE/POST/FEB=%0d/%0d/%0d/%0d/%0d debug_residuals SRC->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d debug_duplicate_ids=%0d",
                                 phase_name,
-                                debug_path_active() ? "debug_id" : "fifo_key",
+                                debug_path_active() ? "debug_id" : "inactive",
                                 total_stage_a,
                                 total_stage_a_stable,
                                 total_pre_rbcam,
@@ -726,6 +743,7 @@ package tb_int_scoreboard_pkg;
                                 stable_missing_post,
                                 stable_missing_feb,
                                 total_debug_stage_a,
+                                total_debug_source,
                                 total_debug_pre_rbcam,
                                 total_debug_post_rbcam,
                                 total_debug_feb_egress,
@@ -751,7 +769,7 @@ package tb_int_scoreboard_pkg;
                  total_missing_feb != total_debug_missing_feb ||
                  total_ghost_feb != total_debug_ghost_feb)) begin
                 `uvm_warning("TB_INT_SB_DUAL",
-                             $sformatf("debug/no-debug cross-check mismatch fifo A->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d debug A->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d",
+                             $sformatf("debug/no-debug cross-check mismatch fifo A->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d debug SRC->PRE=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d",
                                        total_matched_a_pre,
                                        total_missing_pre,
                                        total_ghost_pre,
