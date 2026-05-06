@@ -42,6 +42,8 @@ module prof_int_002_full_pipeline_top;
     localparam logic [2:0] EMU_TX_MODE_SHORT        = 3'b100;
     localparam logic [4:0] ARB_CSR_CONTROL_ADDR     = 5'h02;
     localparam logic [31:0] ARB_MODE_EMU            = 32'h0000_0001;
+    localparam int unsigned MUTRIG_FRAME_CYCLES_SHORT = 910;
+    localparam int unsigned MUTRIG_FRAME_CYCLES_LONG  = 1550;
 
     logic clk_125;
     logic cclk156;
@@ -356,6 +358,16 @@ module prof_int_002_full_pipeline_top;
         return {63'd0, condition};
     endfunction
 
+    function automatic logic [3:0] pre_rbcam_lane_id(input logic [38:0] hit1_word);
+        // Single-active header_sync runs validate a physical source lane at a
+        // time.  Use that source lane for the scoreboard because the direct
+        // generated emulator path can project a logical hit_type1 ASIC field
+        // that does not identify which qsys lane emitted the pulse.
+        if ((traffic_mode == "header_sync") && (active_lane_mask_popcount == 1))
+            return {1'b0, stage_a_lane_index};
+        return hit1_word[38:35];
+    endfunction
+
     always_comb begin
         logic [44:0] stage_a_payload;
         stage_a_payload = raw48_to_hit0(u_dut.data_path_subsystem.emulator_mutrig_0
@@ -471,7 +483,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif0.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_data);
         pre_rbcam_vif0.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_data);
         pre_rbcam_vif0.hit_id = 64'd0;
         pre_rbcam_vif0.hit_id_valid = 1'b0;
         pre_rbcam_vif0.root_hit_id = 64'd0;
@@ -487,7 +500,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif1.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_data);
         pre_rbcam_vif1.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_data);
         pre_rbcam_vif1.hit_id = 64'd0;
         pre_rbcam_vif1.hit_id_valid = 1'b0;
         pre_rbcam_vif1.root_hit_id = 64'd0;
@@ -503,7 +517,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif2.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_data);
         pre_rbcam_vif2.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_data);
         pre_rbcam_vif2.hit_id = 64'd0;
         pre_rbcam_vif2.hit_id_valid = 1'b0;
         pre_rbcam_vif2.root_hit_id = 64'd0;
@@ -519,7 +534,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif3.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_data);
         pre_rbcam_vif3.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_data);
         pre_rbcam_vif3.hit_id = 64'd0;
         pre_rbcam_vif3.hit_id_valid = 1'b0;
         pre_rbcam_vif3.root_hit_id = 64'd0;
@@ -535,7 +551,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif4.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out0_data);
         pre_rbcam_vif4.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out0_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out0_data);
         pre_rbcam_vif4.hit_id = 64'd0;
         pre_rbcam_vif4.hit_id_valid = 1'b0;
         pre_rbcam_vif4.root_hit_id = 64'd0;
@@ -551,7 +568,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif5.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out1_data);
         pre_rbcam_vif5.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out1_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out1_data);
         pre_rbcam_vif5.hit_id = 64'd0;
         pre_rbcam_vif5.hit_id_valid = 1'b0;
         pre_rbcam_vif5.root_hit_id = 64'd0;
@@ -567,7 +585,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif6.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out2_data);
         pre_rbcam_vif6.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out2_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out2_data);
         pre_rbcam_vif6.hit_id = 64'd0;
         pre_rbcam_vif6.hit_id_valid = 1'b0;
         pre_rbcam_vif6.root_hit_id = 64'd0;
@@ -583,7 +602,8 @@ module prof_int_002_full_pipeline_top;
         pre_rbcam_vif7.payload = hit1_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out3_data);
         pre_rbcam_vif7.lane_id =
-            u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out3_data[38:35];
+            pre_rbcam_lane_id(
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.data_splitter_0_out3_data);
         pre_rbcam_vif7.hit_id = 64'd0;
         pre_rbcam_vif7.hit_id_valid = 1'b0;
         pre_rbcam_vif7.root_hit_id = 64'd0;
@@ -1106,7 +1126,8 @@ module prof_int_002_full_pipeline_top;
     endfunction
 
     task automatic configure_active_emulators();
-        force u_dut.data_path_subsystem.emulator_mutrig_0.u_emulator_mutrig.cfg_global_enable = active_lane_mask[0];
+        force u_dut.data_path_subsystem.emulator_mutrig_0.u_emulator_mutrig.cfg_global_enable =
+            active_lane_mask[0] || traffic_is_header_sync();
         force u_dut.data_path_subsystem.emulator_mutrig_1.u_emulator_mutrig.cfg_global_enable = active_lane_mask[1];
         force u_dut.data_path_subsystem.emulator_mutrig_2.u_emulator_mutrig.cfg_global_enable = active_lane_mask[2];
         force u_dut.data_path_subsystem.emulator_mutrig_3.u_emulator_mutrig.cfg_global_enable = active_lane_mask[3];
@@ -1241,6 +1262,15 @@ module prof_int_002_full_pipeline_top;
         force u_dut.data_path_subsystem.emulator_mutrig_6.u_emulator_mutrig.cfg_lane_enable_mask = 8'h01;
         force u_dut.data_path_subsystem.emulator_mutrig_7.u_emulator_mutrig.cfg_lane_enable_mask = 8'h01;
 
+        force u_dut.data_path_subsystem.emulator_mutrig_0.u_emulator_mutrig.cfg_asic_id_base = 4'd0;
+        force u_dut.data_path_subsystem.emulator_mutrig_1.u_emulator_mutrig.cfg_asic_id_base = 4'd1;
+        force u_dut.data_path_subsystem.emulator_mutrig_2.u_emulator_mutrig.cfg_asic_id_base = 4'd2;
+        force u_dut.data_path_subsystem.emulator_mutrig_3.u_emulator_mutrig.cfg_asic_id_base = 4'd3;
+        force u_dut.data_path_subsystem.emulator_mutrig_4.u_emulator_mutrig.cfg_asic_id_base = 4'd4;
+        force u_dut.data_path_subsystem.emulator_mutrig_5.u_emulator_mutrig.cfg_asic_id_base = 4'd5;
+        force u_dut.data_path_subsystem.emulator_mutrig_6.u_emulator_mutrig.cfg_asic_id_base = 4'd6;
+        force u_dut.data_path_subsystem.emulator_mutrig_7.u_emulator_mutrig.cfg_asic_id_base = 4'd7;
+
         force u_dut.data_path_subsystem.emulator_mutrig_0.coe_inject_pulse = 1'b0;
         force u_dut.data_path_subsystem.emulator_mutrig_1.coe_inject_pulse = 1'b0;
         force u_dut.data_path_subsystem.emulator_mutrig_2.coe_inject_pulse = 1'b0;
@@ -1267,10 +1297,49 @@ module prof_int_002_full_pipeline_top;
         force u_dut.data_path_subsystem.emulator_mutrig_7.u_emulator_mutrig.fire_inject_pulse_csr = 1'b0;
     endtask
 
-    function automatic logic emu0_frame_start_seen();
+    function automatic logic active_frame_start_seen();
+        // The type0 Qsys lane wrappers use BYTE_STREAM_ENABLE=0, so there is
+        // no serialized 8b/10b header pulse.  frame_start_req is the common
+        // MuTRiG frame-pack boundary; the selected active ASIC still receives
+        // the injection pulse through active_lane_mask.
         return u_dut.data_path_subsystem.emulator_mutrig_0
-            .u_emulator_mutrig.lane_frame_start[0];
+            .u_emulator_mutrig.frame_start_req;
     endfunction
+
+    function automatic int unsigned active_frame_interval_cycles();
+        return mutrig_short_mode ? MUTRIG_FRAME_CYCLES_SHORT :
+                                   MUTRIG_FRAME_CYCLES_LONG;
+    endfunction
+
+    task automatic wait_active_frame_start(output logic seen);
+        int unsigned wait_cycles;
+        int unsigned warn_cycles;
+
+        seen = 1'b0;
+        wait_cycles = 0;
+        warn_cycles = active_frame_interval_cycles() * 2;
+        while (injection_window_active && !seen) begin
+            @(negedge clk_125);
+            if (!rst && active_frame_start_seen()) begin
+                seen = 1'b1;
+            end else begin
+                wait_cycles++;
+                if (wait_cycles == warn_cycles) begin
+                    `uvm_warning("PROF_INT_002_INJECT",
+                                 $sformatf("no MuTRiG frame boundary seen after %0d cycles; frame_rst0=%0b run_drain0=%0b frame_cnt0=%0d frame_req0=%0b",
+                                           wait_cycles,
+                                           u_dut.data_path_subsystem.emulator_mutrig_0
+                                               .u_emulator_mutrig.frame_rst,
+                                           u_dut.data_path_subsystem.emulator_mutrig_0
+                                               .u_emulator_mutrig.run_draining,
+                                           u_dut.data_path_subsystem.emulator_mutrig_0
+                                               .u_emulator_mutrig.frame_interval_cnt,
+                                           u_dut.data_path_subsystem.emulator_mutrig_0
+                                               .u_emulator_mutrig.frame_start_req))
+                end
+            end
+        end
+    endtask
 
     task automatic force_emulator_inject_pulse_high(input int unsigned lane_idx);
         case (lane_idx)
@@ -1349,19 +1418,18 @@ module prof_int_002_full_pipeline_top;
 
     task automatic drive_header_sync_injections();
         int unsigned sent;
+        logic frame_seen;
 
         sent = 0;
-        if (active_lane_mask != 8'h01) begin
+        if (active_lane_mask_popcount != 1) begin
             `uvm_warning("PROF_INT_002_INJECT",
-                         $sformatf("header_sync validation is calibrated for ASIC0 only; active_mask=%02h",
+                         $sformatf("header_sync validation expects one active ASIC; active_mask=%02h",
                                    active_lane_mask))
         end
         while (injection_window_active &&
                (inject_pulse_count == 0 || sent < inject_pulse_count)) begin
-            wait (!injection_window_active ||
-                  (!rst && u_dut.data_path_subsystem.emulator_mutrig_0
-                      .u_emulator_mutrig.lane_frame_start[0]));
-            if (!injection_window_active)
+            wait_active_frame_start(frame_seen);
+            if (!injection_window_active || !frame_seen)
                 break;
             repeat (inject_phase_cycles) @(posedge clk_125);
             if (!injection_window_active)
@@ -1416,6 +1484,32 @@ module prof_int_002_full_pipeline_top;
         };
     endfunction
 
+    function automatic logic [15:0] arb_csr_mode_vec();
+        arb_csr_mode_vec = {
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_7.csr_mode,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_6.csr_mode,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_5.csr_mode,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_4.csr_mode,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_3.csr_mode,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_2.csr_mode,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_1.csr_mode,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_0.csr_mode
+        };
+    endfunction
+
+    function automatic logic [23:0] arb_runctl_state_vec();
+        arb_runctl_state_vec = {
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_7.runctl_state,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_6.runctl_state,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_5.runctl_state,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_4.runctl_state,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_3.runctl_state,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_2.runctl_state,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_1.runctl_state,
+            u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_0.runctl_state
+        };
+    endfunction
+
     task automatic report_hit_stack_runctl_broadcast(input string tag);
         `uvm_info("PROF_INT_002_TOP",
                   $sformatf("%s readyless run-control broadcast valid={%06b,%06b}; acceptance is checked by MTS/rbCAM CSR state",
@@ -1435,21 +1529,149 @@ module prof_int_002_full_pipeline_top;
                   UVM_LOW)
     endtask
 
-    task automatic csr_write_arb0(input logic [4:0] addr, input logic [31:0] data);
+    task automatic csr_write_arb_lane(input int unsigned lane_idx,
+                                      input logic [4:0] addr,
+                                      input logic [31:0] data);
         arb_csr_force_addr = addr;
         arb_csr_force_wdata = data;
         @(negedge clk_125);
-        force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_address = arb_csr_force_addr;
-        force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_writedata = arb_csr_force_wdata;
-        force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_read = 1'b0;
-        force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_write = 1'b1;
+        case (lane_idx)
+            0: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_write = 1'b1;
+            end
+            1: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_write = 1'b1;
+            end
+            2: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_write = 1'b1;
+            end
+            3: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_write = 1'b1;
+            end
+            4: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_write = 1'b1;
+            end
+            5: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_write = 1'b1;
+            end
+            6: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_write = 1'b1;
+            end
+            7: begin
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_address = arb_csr_force_addr;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_writedata = arb_csr_force_wdata;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_read = 1'b0;
+                force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_write = 1'b1;
+            end
+            default: begin
+                `uvm_error("PROF_INT_002_ARB_CSR",
+                           $sformatf("invalid arb CSR lane index %0d", lane_idx))
+                return;
+            end
+        endcase
         @(negedge clk_125);
-        force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_write = 1'b0;
+        case (lane_idx)
+            0: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_write = 1'b0;
+            1: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_write = 1'b0;
+            2: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_write = 1'b0;
+            3: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_write = 1'b0;
+            4: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_write = 1'b0;
+            5: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_write = 1'b0;
+            6: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_write = 1'b0;
+            7: force u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_write = 1'b0;
+            default: begin end
+        endcase
         repeat (2) @(posedge clk_125);
-        release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_write;
-        release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_read;
-        release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_writedata;
-        release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_address;
+        case (lane_idx)
+            0: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_0_address;
+            end
+            1: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_1_address;
+            end
+            2: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_2_address;
+            end
+            3: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_3_address;
+            end
+            4: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_4_address;
+            end
+            5: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_5_address;
+            end
+            6: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_6_address;
+            end
+            7: begin
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_write;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_read;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_writedata;
+                release u_dut.data_path_subsystem.mm_interconnect_0_arb_hit_type0_supercore_0_csr_7_address;
+            end
+            default: begin end
+        endcase
+    endtask
+
+    task automatic configure_active_arb_lanes();
+        int unsigned programmed;
+
+        programmed = 0;
+        for (int lane_idx = 0; lane_idx < 8; lane_idx++) begin
+            if (active_lane_mask[lane_idx]) begin
+                csr_write_arb_lane(lane_idx, ARB_CSR_CONTROL_ADDR, ARB_MODE_EMU);
+                programmed++;
+            end
+        end
+        `uvm_info("PROF_INT_002_ARB_CSR",
+                  $sformatf("programmed active arb lanes to EMU mode mask=%02h count=%0d mode_vec=%04h",
+                            active_lane_mask,
+                            programmed,
+                            arb_csr_mode_vec()),
+                  UVM_LOW)
     endtask
 
 `define PROF_INT_002_CSR_READ(ADDR_SIG, READ_SIG, WRITE_SIG, ADDR_VALUE, RDATA_SIG, DATA_VAR) \
@@ -1812,7 +2034,7 @@ module prof_int_002_full_pipeline_top;
 
     task automatic report_datapath_state(input string tag);
         `uvm_info("PROF_INT_002_TOP",
-                  $sformatf("%s rst_top=%0b rst_dp=%0b emu_ctrl=%03h emu_ctrl_valid=%0b type0_ctrl=%03h type0_ctrl_valid=%0b ctrl_state=%03h run_gen=%0b cfg_global=%0b cfg_rate=%0d l2_level=%0d lane_hits=%0d arb_mode=%0d arb_run=%0d emu_h0_v=%0b emu_h0_ch=%0d emu_accept=%0b emu_drop=%0b emu_depth=%0d emu_empty=%0b arb_aso_v=%0b bp0_in_v=%0b bp0_out_v=%0b mux_v=%02b mts_v=%02b hisb_pre_v=%0b hs_in_rdy=%0b rc_v0=%06b rc_v1=%06b rb_v0=%04b rb_v1=%04b rb_rdy0=%04b rb_rdy1=%04b hit3_v=%02b hit3_rdy=%02b",
+                  $sformatf("%s rst_top=%0b rst_dp=%0b emu_ctrl=%03h emu_ctrl_valid=%0b type0_ctrl=%03h type0_ctrl_valid=%0b ctrl_state=%03h run_gen=%0b cfg_global=%0b cfg_rate=%0d l2_level=%0d lane_hits=%0d arb_mode=%0d arb_run=%0d arb_mode_vec=%04h arb_run_vec=%06h emu_h0_v=%0b emu_h0_ch=%0d emu_accept=%0b emu_drop=%0b emu_depth=%0d emu_empty=%0b arb_aso_v=%0b bp0_in_v=%0b bp0_out_v=%0b mux_v=%02b mts_v=%02b hisb_pre_v=%0b hs_in_rdy=%0b rc_v0=%06b rc_v1=%06b rb_v0=%04b rb_v1=%04b rb_rdy0=%04b rb_rdy1=%04b hit3_v=%02b hit3_rdy=%02b",
                             tag,
                             u_dut.rst_controller_reset_out_reset,
                                 u_dut.data_path_subsystem.rst_controller_reset_out_reset,
@@ -1830,6 +2052,8 @@ module prof_int_002_full_pipeline_top;
                                     .lane_hit_count[0],
                                 u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_0.csr_mode,
                                 u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_0.runctl_state,
+                                arb_csr_mode_vec(),
+                                arb_runctl_state_vec(),
                                 u_dut.data_path_subsystem.emulator_mutrig_0_hit_type0_valid,
                                 u_dut.data_path_subsystem.emulator_mutrig_0_hit_type0_channel,
                                 u_dut.data_path_subsystem.arb_hit_type0_supercore_0.lane_0.emu_push_accept,
@@ -2146,7 +2370,7 @@ module prof_int_002_full_pipeline_top;
         observe_runctl_cpp_gap("RUN_PREPARE_to_SYNC");
         report_hit_stack_runctl_broadcast("after RUN_PREPARE software gap");
         repeat (4) @(posedge clk_125);
-        csr_write_arb0(ARB_CSR_CONTROL_ADDR, ARB_MODE_EMU);
+        configure_active_arb_lanes();
         drive_runctl(RUNCTL_SYNC_SYM, 2);
         observe_runctl_cpp_gap("SYNC_to_RUNNING");
         report_hit_stack_runctl_broadcast("after SYNC software gap");

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Contact-sheet latency histogram (DISLIN aesthetic) for tb_int closed_records.
+"""Contact-sheet latency histogram (DISLIN aesthetic) for tb_int CSV records.
 
 Differences from plot_tb_int_latency_contact_sheet.py (the baseline renderer):
 
@@ -20,8 +20,9 @@ Differences from plot_tb_int_latency_contact_sheet.py (the baseline renderer):
 
 4. X-axis window -- each panel uses the stage budget from DV_PLAN.md:
    pre-rbCAM [0, 2000], post-rbCAM [2000, 3000], and FEB-egress [4048, 7096]
-   cycles.  Green lines mark the stage budget edges, with padded display limits
-   around each range.
+   cycles.  Green lines mark the stage budget edges, with fixed display limits
+   around each range.  The pre-rbCAM panel range is exactly [-1000, 3096]
+   cycles.
 
 Metric definitions
 ------------------
@@ -30,6 +31,9 @@ Metric definitions
   FEB-egress latency = abs_ts_feb_egress - abs_ts_a   [cycles]
 
 CSV timestamps are in ps; the renderer converts them to 125 MHz clock cycles.
+By default this script reads closed_records.csv and renders all three stages.
+With --stage pre-rbcam it prefers pre_rbcam_records.csv when present and
+renders only the pre-rbCAM panel.
 """
 
 from __future__ import annotations
@@ -62,7 +66,8 @@ STAGES: list[dict[str, object]] = [
         "win_left": 0.0,
         "win_right": 2000.0,
         "window_label": "Stage A->pre-rbCAM budget",
-        "xlim": (-1024.0, 3072.0),
+        "xlim": (-1000.0, 3096.0),
+        "xticks": [-1000, -488, 24, 536, 1048, 1560, 2072, 2584, 3096],
         "xtick_step": 512,
     },
     {
@@ -87,9 +92,8 @@ STAGES: list[dict[str, object]] = [
     },
 ]
 
-N_STAGES = len(STAGES)
 CLOCK_PERIOD_PS = 8000.0
-REQUIRED_FIELDS = {"hit_id", "abs_ts_a", "abs_ts_pre_rbcam", "abs_ts_post_rbcam", "abs_ts_feb_egress", "run_origin"}
+REQUIRED_BASE_FIELDS = {"hit_id", "abs_ts_a", "run_origin"}
 REQUIRED_STABLE_FIELD = "run_origin"
 
 
@@ -199,15 +203,32 @@ def build_integer_histogram(latencies: list[float], xlim: tuple[float, float]) -
 # Histogram loading
 # ---------------------------------------------------------------------------
 
-def load_case(case_dir: Path, stable_only: bool = False) -> list[Hist] | None:
-    csv_path = case_dir / "closed_records.csv"
+def csv_path_for_case(case_dir: Path, stages: list[dict[str, object]]) -> Path:
+    if (len(stages) == 1 and str(stages[0]["key"]) == "pre_rbcam" and
+            (case_dir / "pre_rbcam_records.csv").is_file()):
+        return case_dir / "pre_rbcam_records.csv"
+    return case_dir / "closed_records.csv"
+
+
+def required_fields_for_stages(stages: list[dict[str, object]]) -> set[str]:
+    fields = set(REQUIRED_BASE_FIELDS)
+    for stage in stages:
+        col_after, col_before = stage["col_diff"]  # type: ignore[misc]
+        fields.add(str(col_after))
+        fields.add(str(col_before))
+    return fields
+
+
+def load_case(case_dir: Path, stages: list[dict[str, object]], stable_only: bool = False) -> list[Hist] | None:
+    csv_path = csv_path_for_case(case_dir, stages)
+    required_fields = required_fields_for_stages(stages)
     if not csv_path.is_file():
-        warnings.warn(f"[skip] {case_dir.name}: closed_records.csv not found")
+        warnings.warn(f"[skip] {case_dir.name}: {csv_path.name} not found")
         return None
     with csv_path.open(newline="", encoding="utf-8") as fh:
         reader = csv.DictReader(fh)
-        if reader.fieldnames is None or not REQUIRED_FIELDS.issubset(set(reader.fieldnames)):
-            warnings.warn(f"[skip] {case_dir.name}: missing required columns")
+        if reader.fieldnames is None or not required_fields.issubset(set(reader.fieldnames)):
+            warnings.warn(f"[skip] {case_dir.name}: missing required columns in {csv_path.name}")
             return None
         rows = list(reader)
     if len(rows) < 2:
@@ -224,7 +245,7 @@ def load_case(case_dir: Path, stable_only: bool = False) -> list[Hist] | None:
             return None
 
     hists: list[Hist] = []
-    for stage in STAGES:
+    for stage in stages:
         col_after, col_before = stage["col_diff"]  # type: ignore[misc]
         try:
             latencies = [
@@ -325,10 +346,13 @@ def render_panel(
     ax.set_ylim(0.0, y_top)
 
     # X-ticks: derive from xtick_step aligned to integer cycle grid
-    xtick_step = int(stage.get("xtick_step", 2))  # type: ignore[call-overload]
-    lo_tick = math.ceil(xlim[0] / xtick_step) * xtick_step
-    hi_tick = math.floor(xlim[1] / xtick_step) * xtick_step
-    xtick_vals = list(range(int(lo_tick), int(hi_tick) + 1, xtick_step))
+    if "xticks" in stage:
+        xtick_vals = [int(v) for v in stage["xticks"]]  # type: ignore[index]
+    else:
+        xtick_step = int(stage.get("xtick_step", 2))  # type: ignore[call-overload]
+        lo_tick = math.ceil(xlim[0] / xtick_step) * xtick_step
+        hi_tick = math.floor(xlim[1] / xtick_step) * xtick_step
+        xtick_vals = list(range(int(lo_tick), int(hi_tick) + 1, xtick_step))
     ax.set_xticks([float(v) for v in xtick_vals])
 
     # Y-ticks: sparse when all data is in one bin
@@ -377,11 +401,13 @@ def render_page(
     page_cases: list[tuple[str, list[Hist]]],
     output: Path,
     title_tag: str,
+    stages: list[dict[str, object]],
     panel_height: float = 3.0,
 ) -> None:
     n_rows = len(page_cases)
     if n_rows == 0:
         return
+    n_stages = len(stages)
     row_label_width = 0.08
     fig_width = 22.0
     fig_height = max(4.5, n_rows * panel_height + 0.6)
@@ -391,7 +417,7 @@ def render_page(
              ha="center", va="top", fontsize=11, family="monospace", weight="bold")
 
     col_gap = 0.008
-    col_width = (1.0 - row_label_width - col_gap * (N_STAGES + 1)) / N_STAGES
+    col_width = (1.0 - row_label_width - col_gap * (n_stages + 1)) / n_stages
     row_gap = 0.012
     top_margin, bottom_margin = 0.035, 0.01
     row_height = (1.0 - top_margin - bottom_margin - row_gap * (n_rows + 1)) / n_rows
@@ -404,7 +430,7 @@ def render_page(
                  ha="center", va="center",
                  fontsize=max(4.5, min(6.5, row_height * fig_height * 2.2)),
                  family="monospace", rotation=90)
-        for col_idx, (stage, hist) in enumerate(zip(STAGES, hists)):
+        for col_idx, (stage, hist) in enumerate(zip(stages, hists)):
             col_left = row_label_width + col_gap * (col_idx + 1) + col_idx * col_width
             wl = float(stage["win_left"])  # type: ignore[arg-type]
             wr = float(stage["win_right"])  # type: ignore[arg-type]
@@ -429,7 +455,8 @@ def render_page(
 # ---------------------------------------------------------------------------
 
 def paginate(all_cases: list[tuple[str, list[Hist]]], out_dir: Path,
-             rows_per_page: int, title_tag: str) -> list[Path]:
+             rows_per_page: int, title_tag: str,
+             stages: list[dict[str, object]]) -> list[Path]:
     outputs: list[Path] = []
     n_pages = max(1, math.ceil(len(all_cases) / rows_per_page))
     pad = len(str(n_pages))
@@ -439,7 +466,7 @@ def paginate(all_cases: list[tuple[str, list[Hist]]], out_dir: Path,
             continue
         stem = "contact_sheet_dislin" if n_pages == 1 else f"contact_sheet_dislin_p{page_idx + 1:0{pad}d}"
         out_path = out_dir / f"{stem}.png"
-        render_page(chunk, out_path, title_tag)
+        render_page(chunk, out_path, title_tag, stages=stages)
         outputs.append(out_path)
     return outputs
 
@@ -498,9 +525,12 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, required=True, metavar="DIR")
     parser.add_argument("--rows-per-page", type=int, default=4, metavar="N")
     parser.add_argument("--title-tag", default="", metavar="TEXT")
+    parser.add_argument("--stage", choices=("all", "pre-rbcam"), default="all",
+                        help="Render all stages from closed_records.csv, or only pre-rbCAM from pre_rbcam_records.csv when present.")
     parser.add_argument("--stable-only", action="store_true", default=False,
                         help="Only include rows where run_origin == 1")
     args = parser.parse_args()
+    stages = STAGES if args.stage == "all" else [STAGES[0]]
 
     case_dirs = discover_cases(args.sim_root, args.cases)
     if not case_dirs:
@@ -511,7 +541,7 @@ def main() -> int:
     all_cases: list[tuple[str, list[Hist]]] = []
     skipped = 0
     for case_dir in case_dirs:
-        hists = load_case(case_dir, stable_only=args.stable_only)
+        hists = load_case(case_dir, stages=stages, stable_only=args.stable_only)
         if hists is None:
             skipped += 1
         else:
@@ -524,7 +554,8 @@ def main() -> int:
 
     print(f"Rendering {len(all_cases)} case(s), {args.rows_per_page} rows/page.", file=sys.stderr)
     png_paths = paginate(all_cases, out_dir=args.out_dir,
-                         rows_per_page=args.rows_per_page, title_tag=args.title_tag)
+                         rows_per_page=args.rows_per_page, title_tag=args.title_tag,
+                         stages=stages)
     csv_path = write_summary_csv(all_cases, args.out_dir)
     print(f"  wrote {csv_path}", file=sys.stderr)
 

@@ -59,6 +59,8 @@ package tb_int_scoreboard_pkg;
         int unsigned stable_missing_feb;
         int unsigned expected_closed_records;
         int unsigned min_closed_pct;
+        int unsigned dbg_stage_a_logged;
+        int unsigned dbg_pre_rbcam_logged;
         bit          stable_only_export;
         bit          require_zero_residual;
         bit          exported_records;
@@ -85,6 +87,8 @@ package tb_int_scoreboard_pkg;
             reporter       = latency_reporter::type_id::create("reporter");
             require_zero_residual = 1'b1;
             min_closed_pct        = 0;
+            dbg_stage_a_logged    = 0;
+            dbg_pre_rbcam_logged  = 0;
             exported_records      = 1'b0;
             output_dir = "sim/tb_int";
             if ($value$plusargs("TB_INT_SIM_DIR=%s", plusarg_dir))
@@ -173,6 +177,14 @@ package tb_int_scoreboard_pkg;
             total_stage_a++;
             if (item.run_origin)
                 total_stage_a_stable++;
+            if (dbg_stage_a_logged < 16) begin
+                `uvm_info("TB_INT_OBS",
+                          $sformatf("stage_a[%0d] %s",
+                                    dbg_stage_a_logged,
+                                    item.describe()),
+                          UVM_LOW)
+                dbg_stage_a_logged++;
+            end
         endfunction
 
         virtual function void write_pre_rbcam(hit_record item);
@@ -198,6 +210,17 @@ package tb_int_scoreboard_pkg;
                 copy_root_hit_id(item, stage_a_ledger[lane_idx][key_bits][match_seq]);
             push_obs(stage_pre_rbcam_ledger[lane_idx], item);
             total_pre_rbcam++;
+            if (dbg_pre_rbcam_logged < 16) begin
+                `uvm_info("TB_INT_OBS",
+                          $sformatf("pre_rbcam[%0d] match_seq=%0d stage_a_bucket=%0d %s",
+                                    dbg_pre_rbcam_logged,
+                                    match_seq,
+                                    stage_a_ledger[lane_idx].exists(key_bits)
+                                        ? stage_a_ledger[lane_idx][key_bits].size() : 0,
+                                    item.describe()),
+                          UVM_LOW)
+                dbg_pre_rbcam_logged++;
+            end
         endfunction
 
         virtual function void write_post_rbcam(hit_record item);

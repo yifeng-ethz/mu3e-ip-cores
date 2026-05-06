@@ -15,12 +15,17 @@ PROF_INT_002_PRE_RBCAM_RUN_CYCLES ?= 200000
 PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES ?= 4096
 PROF_INT_002_PRE_RBCAM_CHANNEL_LOW ?= 0
 PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH ?= 1
+PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT ?= 1
+PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK ?= 1
 PROF_INT_002_PRE_RBCAM_PHASE_SWEEP ?= 100 200 300 400 500 600 700 800 900
 PROF_INT_002_PRE_RBCAM_CASE ?= prof_int_002_pre_rbcam_$(PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE)_phase$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES)
 PROF_INT_002_PRE_RBCAM_DIR := $(SIM_ROOT)/$(PROF_INT_002_PRE_RBCAM_CASE)
 PROF_INT_002_PRE_RBCAM_HIST_DIR := $(PROF_INT_002_PRE_RBCAM_DIR)/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_phase_sweep/pre_rbcam_hist
+PROF_INT_002_PRE_RBCAM_ASIC_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100/pre_rbcam_hist
 PROF_INT_002_REPORT_DIR := $(TB_INT_ROOT)/reports
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_1L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
 PROF_INT_002_REPORT_DIR_8L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s
 PROF_INT_002_REPORT_DIR_EMU_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s
@@ -50,6 +55,8 @@ PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh 
 \trun_prof_int_002_pre_rbcam_header_sync_phase_500 \
 \trun_prof_int_002_pre_rbcam_header_sync_phase_900 \
 \trun_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
+\trun_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
+\tplot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
 \trun_prof_int_002_pre_rbcam_periodic_2ch \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
@@ -220,8 +227,8 @@ run_prof_int_002_pre_rbcam_latency: comp_prof_int_002 prepare_prof_int_002_mem_i
 		    +TB_INT_INJECT_PHASE_CYCLES=$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES) \
 		    +TB_INT_INJECT_PULSE_COUNT=$(PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT) \
 	    +TB_INT_STABLE_ONLY_EXPORT=0 \
-	    +TB_INT_ACTIVE_LANE_COUNT=1 \
-	    +TB_INT_ACTIVE_LANE_MASK=1 \
+	    +TB_INT_ACTIVE_LANE_COUNT=$(PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT) \
+	    +TB_INT_ACTIVE_LANE_MASK=$(PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK) \
 	    -l $(PROF_INT_002_PRE_RBCAM_DIR)/transcript \
 	    -do "run -all; quit -f"
 	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
@@ -261,6 +268,43 @@ run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900:
 	    --hist-dir $(PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR) \
 	    --hist-formats csv,png \
 	    --aggregate
+
+run_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100:
+	@set -e; for asic in 1 2 3 4 5 6 7; do \
+	    mask=$$(printf "%x" $$((1 << $$asic))); \
+	    $(MAKE) run_prof_int_002_pre_rbcam_latency \
+	        PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
+	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK=$$mask \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=100 \
+	        PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_header_sync_asic$${asic}_phase100; \
+	done
+	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_asic[1-7]_phase100' \
+	    --hist-dir $(PROF_INT_002_PRE_RBCAM_ASIC_SWEEP_HIST_DIR) \
+	    --hist-formats csv,png \
+	    --aggregate
+
+plot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100: run_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_latency_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_asic[1-7]_phase100' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP) \
+	    --rows-per-page 4 \
+	    --stage pre-rbcam \
+	    --title-tag "ASIC1-7 phase100 pre-rbCAM, x=[-1000,3096]"
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_asic[1-7]_phase100' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL) \
+	    --rows-per-page 4 \
+	    --title-tag "ASIC1-7 phase100 pre-rbCAM" \
+	    --record-csv pre_rbcam_records.csv \
+	    --channel-mode lane-local
+	@echo "=== PROF-INT-002 ASIC1-7 pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP)/contact_sheet_dislin_p1.png ==="
+	@echo "=== PROF-INT-002 ASIC1-7 pre-rbCAM channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
 
 run_prof_int_002_pre_rbcam_periodic_2ch:
 	$(MAKE) run_prof_int_002_pre_rbcam_latency \
@@ -352,7 +396,17 @@ plot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: run_prof_int_002_fu
 	    --rows-per-page 1 \
 	    --title-tag "1-lane virtual MuTRiG 100kHz/ch, 5 s run, 1 s stable window" \
 	    --stable-only
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_1L_5S) \
+	    --rows-per-page 1 \
+	    --title-tag "1-lane virtual MuTRiG 100kHz/ch, 5 s run, 1 s stable window" \
+	    --record-csv closed_records.csv \
+	    --expected-rate-hz 100000 \
+	    --stable-only
 	@echo "=== PROF-INT-002 1-lane 5s contact-sheet: $(PROF_INT_002_REPORT_DIR_1L_5S)/contact_sheet_dislin.png ==="
+	@echo "=== PROF-INT-002 1-lane 5s channel-rate: $(PROF_INT_002_REPORT_DIR_1L_5S)/channel_rate_dislin.png ==="
 
 plot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s
 	@mkdir -p $(PROF_INT_002_REPORT_DIR_8L_5S)
@@ -363,7 +417,17 @@ plot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s: run_prof_int_002_fu
 	    --rows-per-page 1 \
 	    --title-tag "8-lane virtual MuTRiG 100kHz/ch, 5 s run, 1 s stable window" \
 	    --stable-only
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_8L_5S) \
+	    --rows-per-page 1 \
+	    --title-tag "8-lane virtual MuTRiG 100kHz/ch, 5 s run, 1 s stable window" \
+	    --record-csv closed_records.csv \
+	    --expected-rate-hz 100000 \
+	    --stable-only
 	@echo "=== PROF-INT-002 8-lane 5s contact-sheet: $(PROF_INT_002_REPORT_DIR_8L_5S)/contact_sheet_dislin.png ==="
+	@echo "=== PROF-INT-002 8-lane 5s channel-rate: $(PROF_INT_002_REPORT_DIR_8L_5S)/channel_rate_dislin.png ==="
 
 plot_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s: run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s
 	@mkdir -p $(PROF_INT_002_REPORT_DIR_EMU_5S)
@@ -374,7 +438,17 @@ plot_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s: run_pr
 	    --rows-per-page 1 \
 	    --title-tag "emulator/full 8-lane 100kHz/ch, 5 s run, 1 s stable window" \
 	    --stable-only
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_EMU_5S) \
+	    --rows-per-page 1 \
+	    --title-tag "emulator/full 8-lane 100kHz/ch, 5 s run, 1 s stable window" \
+	    --record-csv closed_records.csv \
+	    --expected-rate-hz 100000 \
+	    --stable-only
 	@echo "=== PROF-INT-002 emulator/full 5s contact-sheet: $(PROF_INT_002_REPORT_DIR_EMU_5S)/contact_sheet_dislin.png ==="
+	@echo "=== PROF-INT-002 emulator/full 5s channel-rate: $(PROF_INT_002_REPORT_DIR_EMU_5S)/channel_rate_dislin.png ==="
 
 plot_prof_int_002_full_pipeline_100khz_per_channel_5s: \
 	plot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
