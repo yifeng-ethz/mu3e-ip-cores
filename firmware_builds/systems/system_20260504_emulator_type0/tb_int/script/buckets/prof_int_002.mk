@@ -35,7 +35,7 @@ PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_head
 PROF_INT_002_PRE_RBCAM_RTL_INJ_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_ASIC_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_FULL8_BURST_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100/pre_rbcam_hist
-PROF_INT_002_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100/pre_rbcam_hist
+PROF_INT_002_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_PERIODIC_RATE_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep/pre_rbcam_hist
 PROF_INT_002_REPORT_DIR := $(TB_INT_ROOT)/reports
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_phase_sweep_dislin
@@ -46,8 +46,8 @@ PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_channel_rate_dislin
-PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100_dislin
-PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100_channel_rate_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_1L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
@@ -94,8 +94,8 @@ PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh 
 \tplot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
 \trun_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
 \tplot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
-\trun_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100 \
-\tplot_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100 \
+\trun_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100 \
+\tplot_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100 \
 \trun_prof_int_002_pre_rbcam_periodic_2ch \
 \trun_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
 \tplot_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
@@ -485,10 +485,10 @@ plot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100: run_prof_i
 	@echo "=== PROF-INT-002 full8/full32 header-sync burst sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP)/contact_sheet_dislin_p1.png ==="
 	@echo "=== PROF-INT-002 full8/full32 header-sync burst sweep channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
 
-run_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100:
+run_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100:
 	@set -e; for burst in 1 2 5 7; do \
 	    $(MAKE) run_prof_int_002_pre_rbcam_latency \
-	        PROF_INT_002_SOURCE=virtual_mutrig_raw \
+	        PROF_INT_002_SOURCE=virtual_mutrig \
 	        PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
 	        PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=100 \
 	        PROF_INT_002_PRE_RBCAM_INJECT_FRAME_COUNT=128 \
@@ -503,8 +503,8 @@ run_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100:
 	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK=1 \
 	        PROF_INT_002_PRE_RBCAM_CHANNEL_LOW=0 \
 	        PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH=0 \
-	        PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst$${burst}; \
-	    csv="$(SIM_ROOT)/prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst$${burst}/pre_rbcam_records.csv"; \
+	        PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_virtual_mutrig_header_sync_phase100_burst$${burst}; \
+	    csv="$(SIM_ROOT)/prof_int_002_pre_rbcam_virtual_mutrig_header_sync_phase100_burst$${burst}/pre_rbcam_records.csv"; \
 	    expected=$$((128 * burst)); \
 	    if [ ! -s "$$csv" ]; then \
 	        echo "ERROR: $$csv missing or empty"; \
@@ -512,37 +512,37 @@ run_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100:
 	    fi; \
 	    actual=$$(awk 'NR > 1 {n++} END {print n + 0}' "$$csv"); \
 	    if [ "$$actual" -ne "$$expected" ]; then \
-	        echo "ERROR: virtual_raw burst$${burst} expected $$expected pre-rbCAM rows, got $$actual"; \
+	        echo "ERROR: virtual_mutrig burst$${burst} expected $$expected pre-rbCAM rows, got $$actual"; \
 	        exit 1; \
 	    fi; \
 	done
 	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
 	    --sim-root $(SIM_ROOT) \
-	    --cases 'prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst[1257]' \
-	    --hist-dir $(PROF_INT_002_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_HIST_DIR) \
+	    --cases 'prof_int_002_pre_rbcam_virtual_mutrig_header_sync_phase100_burst[1257]' \
+	    --hist-dir $(PROF_INT_002_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP_HIST_DIR) \
 	    --hist-formats csv,png \
 	    --aggregate
 
-plot_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100: run_prof_int_002_pre_rbcam_virtual_raw_header_sync_burst_sweep_phase100
-	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP)
+plot_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100: run_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP)
 	python3 $(TB_INT_ROOT)/script/plot_tb_int_latency_dislin.py \
 	    --sim-root $(SIM_ROOT) \
-	    --cases 'prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst[1257]' \
-	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP) \
+	    --cases 'prof_int_002_pre_rbcam_virtual_mutrig_header_sync_phase100_burst[1257]' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP) \
 	    --rows-per-page 4 \
 	    --stage pre-rbcam \
-	    --title-tag "ASIC0 virtual-raw MuTRiG header-sync phase100 burst sweep pre-rbCAM, x=[-1000,3096]"
-	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL)
+	    --title-tag "ASIC0 virtual MuTRiG header-sync phase100 burst sweep pre-rbCAM, x=[-1000,3096]"
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP_CHANNEL)
 	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
 	    --sim-root $(SIM_ROOT) \
-	    --cases 'prof_int_002_pre_rbcam_virtual_raw_header_sync_phase100_burst[1257]' \
-	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL) \
+	    --cases 'prof_int_002_pre_rbcam_virtual_mutrig_header_sync_phase100_burst[1257]' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP_CHANNEL) \
 	    --rows-per-page 4 \
-	    --title-tag "ASIC0 virtual-raw MuTRiG header-sync phase100 burst sweep" \
+	    --title-tag "ASIC0 virtual MuTRiG header-sync phase100 burst sweep" \
 	    --record-csv pre_rbcam_records.csv \
 	    --channel-mode lane-local
-	@echo "=== PROF-INT-002 virtual-raw header-sync burst sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP)/contact_sheet_dislin.png ==="
-	@echo "=== PROF-INT-002 virtual-raw header-sync burst sweep channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_RAW_BURST_SWEEP_CHANNEL)/channel_rate_dislin.png ==="
+	@echo "=== PROF-INT-002 virtual MuTRiG header-sync burst sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP)/contact_sheet_dislin.png ==="
+	@echo "=== PROF-INT-002 virtual MuTRiG header-sync burst sweep channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_VIRTUAL_MUTRIG_BURST_SWEEP_CHANNEL)/channel_rate_dislin.png ==="
 
 run_prof_int_002_pre_rbcam_periodic_2ch:
 	$(MAKE) run_prof_int_002_pre_rbcam_latency \

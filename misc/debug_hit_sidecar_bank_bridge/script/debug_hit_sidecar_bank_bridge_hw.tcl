@@ -6,7 +6,7 @@
 package require -exact qsys 16.1
 
 set_module_property NAME debug_hit_sidecar_bank_bridge
-set_module_property VERSION 26.0.0.0506
+set_module_property VERSION 26.0.1.0506
 set_module_property DISPLAY_NAME "DEBUG Hit Sidecar Bank Bridge"
 set_module_property GROUP "Mu3e Data Plane/Utility"
 set_module_property DESCRIPTION "Queues four lane-local 64-bit DEBUG metadata conduits and emits the metadata aligned with a 4-input hit_type0 mux output."
@@ -121,6 +121,17 @@ proc add_sidecar_output {name} {
     add_interface_port $name coe_hit_type0_sidecar_valid    valid    Output 1
 }
 
+proc add_debug_status_output {name} {
+    add_interface $name conduit start
+    set_interface_property $name associatedClock clock
+    set_interface_property $name associatedReset reset
+    set_interface_property $name ENABLED true
+    add_interface_port $name coe_debug_fifo_levels   fifo_levels   Output 40
+    add_interface_port $name coe_debug_fifo_empty    fifo_empty    Output 4
+    add_interface_port $name coe_debug_fifo_full     fifo_full     Output 4
+    add_interface_port $name coe_debug_fifo_overflow fifo_overflow Output 4
+}
+
 add_hit_type0_sink hit_type0_in
 add_hit_type0_source hit_type0_out
 
@@ -153,3 +164,4 @@ add_interface_port lane3 coe_lane3_metadata metadata Input 64
 add_interface_port lane3 coe_lane3_valid valid Input 1
 
 add_sidecar_output hit_type0_sidecar
+add_debug_status_output debug_status

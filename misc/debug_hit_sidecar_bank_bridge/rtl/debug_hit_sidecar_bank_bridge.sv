@@ -1,9 +1,9 @@
 // debug_hit_sidecar_bank_bridge.sv
 // Aligns four lane-local DEBUG metadata conduits with a 4-input hit_type0 mux.
 //
-// Version : 26.0.0
+// Version : 26.0.1
 // Date    : 20260506
-// Change  : Initial bridge for arb-selected metadata into MTS hit_type0 sidecar.
+// Change  : Export per-lane sidecar FIFO fill levels and sticky overflow flags.
 
 module debug_hit_sidecar_bank_bridge #(
     parameter int DATA_WIDTH = 45,
@@ -43,7 +43,12 @@ module debug_hit_sidecar_bank_bridge #(
     input  logic                      coe_lane3_valid,
 
     output logic [METADATA_WIDTH-1:0] coe_hit_type0_sidecar_metadata,
-    output logic                      coe_hit_type0_sidecar_valid
+    output logic                      coe_hit_type0_sidecar_valid,
+
+    output logic [39:0]               coe_debug_fifo_levels,
+    output logic [3:0]                coe_debug_fifo_empty,
+    output logic [3:0]                coe_debug_fifo_full,
+    output logic [3:0]                coe_debug_fifo_overflow
 );
 
     localparam int LANE_COUNT_CONST = 4;
@@ -61,6 +66,8 @@ module debug_hit_sidecar_bank_bridge #(
     logic selected_metadata_present;
     logic [LANE_COUNT_CONST-1:0] sidecar_read_accept;
     logic [LANE_COUNT_CONST-1:0] sidecar_write_accept;
+    logic [LANE_COUNT_CONST-1:0] sidecar_overflow_pulse;
+    logic [LANE_COUNT_CONST-1:0][9:0] debug_fifo_level;
 
     assign lane_metadata[0] = coe_lane0_metadata;
     assign lane_metadata[1] = coe_lane1_metadata;
@@ -110,11 +117,32 @@ module debug_hit_sidecar_bank_bridge #(
 
     assign coe_hit_type0_sidecar_valid =
         transfer && !asi_hit_type0_endofrun && selected_metadata_present;
+    assign coe_debug_fifo_levels = {
+        debug_fifo_level[3],
+        debug_fifo_level[2],
+        debug_fifo_level[1],
+        debug_fifo_level[0]
+    };
+    assign coe_debug_fifo_empty = {
+        fifo_count[3] == '0,
+        fifo_count[2] == '0,
+        fifo_count[1] == '0,
+        fifo_count[0] == '0
+    };
+    assign coe_debug_fifo_full = {
+        fifo_count[3] == FIFO_DEPTH_COUNT_CONST,
+        fifo_count[2] == FIFO_DEPTH_COUNT_CONST,
+        fifo_count[1] == FIFO_DEPTH_COUNT_CONST,
+        fifo_count[0] == FIFO_DEPTH_COUNT_CONST
+    };
 
     always_comb begin : select_queue_ops
         sidecar_read_accept = '0;
         sidecar_write_accept = '0;
+        sidecar_overflow_pulse = '0;
+        debug_fifo_level = '0;
         for (int lane_idx = 0; lane_idx < LANE_COUNT_CONST; lane_idx++) begin
+            debug_fifo_level[lane_idx][FIFO_ADDR_WIDTH_CONST:0] = fifo_count[lane_idx];
             sidecar_read_accept[lane_idx] =
                 transfer
                 && !asi_hit_type0_endofrun
@@ -124,19 +152,22 @@ module debug_hit_sidecar_bank_bridge #(
                 lane_valid[lane_idx]
                 && ((fifo_count[lane_idx] != FIFO_DEPTH_COUNT_CONST)
                     || sidecar_read_accept[lane_idx]);
+            sidecar_overflow_pulse[lane_idx] =
+                lane_valid[lane_idx] && !sidecar_write_accept[lane_idx];
         end
     end
 
     always_ff @(posedge i_clk or posedge i_rst) begin : metadata_queues
         if (i_rst) begin
-            fifo_wr_ptr <= '0;
-            fifo_rd_ptr <= '0;
-            fifo_count <= '0;
+            fifo_wr_ptr                <= '0;
+            fifo_rd_ptr                <= '0;
+            fifo_count                 <= '0;
+            coe_debug_fifo_overflow    <= '0;
         end else begin
             for (int lane_idx = 0; lane_idx < LANE_COUNT_CONST; lane_idx++) begin
                 if (sidecar_write_accept[lane_idx]) begin
-                    fifo_mem[lane_idx][fifo_wr_ptr[lane_idx]] <= lane_metadata[lane_idx];
-                    fifo_wr_ptr[lane_idx] <= fifo_wr_ptr[lane_idx] + 1'b1;
+                    fifo_mem[lane_idx][fifo_wr_ptr[lane_idx]]    <= lane_metadata[lane_idx];
+                    fifo_wr_ptr[lane_idx]                        <= fifo_wr_ptr[lane_idx] + 1'b1;
                 end
 
                 if (sidecar_read_accept[lane_idx]) begin
@@ -144,10 +175,14 @@ module debug_hit_sidecar_bank_bridge #(
                 end
 
                 unique case ({sidecar_write_accept[lane_idx], sidecar_read_accept[lane_idx]})
-                    2'b10: fifo_count[lane_idx] <= fifo_count[lane_idx] + 1'b1;
-                    2'b01: fifo_count[lane_idx] <= fifo_count[lane_idx] - 1'b1;
-                    default: fifo_count[lane_idx] <= fifo_count[lane_idx];
+                    2'b10:   fifo_count[lane_idx]    <= fifo_count[lane_idx] + 1'b1;
+                    2'b01:   fifo_count[lane_idx]    <= fifo_count[lane_idx] - 1'b1;
+                    default: fifo_count[lane_idx]    <= fifo_count[lane_idx];
                 endcase
+
+                if (sidecar_overflow_pulse[lane_idx]) begin
+                    coe_debug_fifo_overflow[lane_idx] <= 1'b1;
+                end
             end
         end
     end

@@ -1,9 +1,9 @@
 // hit_record.sv
 // Canonical hit observation transaction for tb_int integration stages.
 // Author: Yifeng Wang
-// Version : 26.2.1
+// Version : 26.2.2
 // Date    : 20260504
-// Change  : Track source-supplied debug lineage independently from inferred IDs.
+// Change  : Add a sidecar-source observation point for dual-model scoring.
 
 package tb_int_record_pkg;
 
@@ -13,6 +13,7 @@ package tb_int_record_pkg;
 
     typedef enum int unsigned {
         OBS_STAGE_A,
+        OBS_DEBUG_SOURCE,
         OBS_STAGE_PRE_RBCAM,
         OBS_STAGE_POST_RBCAM,
         OBS_STAGE_FEB_EGRESS,
@@ -22,6 +23,7 @@ package tb_int_record_pkg;
     function automatic string observation_point_name(observation_point_e point);
         case (point)
             OBS_STAGE_A:           return "stage_a";
+            OBS_DEBUG_SOURCE:      return "debug_source";
             OBS_STAGE_PRE_RBCAM:   return "pre_rbcam";
             OBS_STAGE_POST_RBCAM:  return "post_rbcam";
             OBS_STAGE_FEB_EGRESS:  return "feb_egress";

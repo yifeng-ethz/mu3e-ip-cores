@@ -1,9 +1,9 @@
 // tb_int_top.sv
 // Top-level simulator shell for system_20260504_emulator_type0/tb_int.
 // Author: Yifeng Wang
-// Version : 26.2.1
+// Version : 26.2.2
 // Date    : 20260506
-// Change  : Bind the single smoke taps into aggregate monitor slot zero.
+// Change  : Bind a sidecar-source tap beside the nominal smoke tap.
 
 module tb_int_top;
     timeunit 1ps;
@@ -49,6 +49,7 @@ module tb_int_top;
     runctl_phy_if        runctl_phy_vif(.clk(clk_125), .rst(rst));
     sc_avmm_if           sc_phy_vif(.clk(clk_125), .rst(rst));
     mutrig_l2_commit_if  stage_a_vif(.clk(clk_125), .rst(rst));
+    hit_tap_if           debug_source_vif(.clk(clk_125), .rst(rst));
     hit_tap_if           pre_rbcam_vif(.clk(clk_125), .rst(rst));
     hit_tap_if           post_rbcam_vif(.clk(clk_125), .rst(rst));
     hit_tap_if           feb_egress_vif(.clk(clk_125), .rst(rst));
@@ -79,6 +80,7 @@ module tb_int_top;
     initial begin
         rst = 1'b1;
         stage_a_vif.clear();
+        debug_source_vif.clear();
         pre_rbcam_vif.clear();
         post_rbcam_vif.clear();
         feb_egress_vif.clear();
@@ -123,6 +125,10 @@ module tb_int_top;
                                                          "uvm_test_top.env.l2_commit_mon0",
                                                          "vif",
                                                          stage_a_vif);
+        uvm_config_db#(virtual hit_tap_if)::set(null,
+                                                "uvm_test_top.env.debug_source_mon0",
+                                                "vif",
+                                                debug_source_vif);
         uvm_config_db#(virtual hit_tap_if)::set(null,
                                                 "uvm_test_top.env.pre_rbcam_mon0",
                                                 "vif",

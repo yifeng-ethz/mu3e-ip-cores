@@ -1,9 +1,9 @@
 // tb_int_env.sv
 // Focus-build integration UVM environment.
 // Author: Yifeng Wang
-// Version : 26.2.1
+// Version : 26.2.2
 // Date    : 20260506
-// Change  : Aggregate 8 rbCAM taps and 2 FEB-egress taps.
+// Change  : Add DEBUG_LEVEL=2 sidecar-source monitors beside nominal taps.
 
 package tb_int_env_pkg;
 
@@ -30,6 +30,7 @@ package tb_int_env_pkg;
         runctl_phy_agent              runctl_phy;
         sc_phy_agent                  sc_phy;
         l2_fifo_commit_monitor        l2_commit_mon[TB_INT_STAGE_A_TAPS];
+        lvds_decoded_monitor          debug_source_mon[TB_INT_STAGE_A_TAPS];
         lvds_decoded_monitor          pre_rbcam_mon[TB_INT_RBCAM_TAPS];
         rbcam_egress_monitor          post_rbcam_mon[TB_INT_RBCAM_TAPS];
         feb_egress_monitor            feb_egress_mon[TB_INT_FEB_EGRESS_TAPS];
@@ -48,6 +49,9 @@ package tb_int_env_pkg;
             foreach (l2_commit_mon[tap_idx])
                 l2_commit_mon[tap_idx] = l2_fifo_commit_monitor::type_id::create(
                     $sformatf("l2_commit_mon%0d", tap_idx), this);
+            foreach (debug_source_mon[tap_idx])
+                debug_source_mon[tap_idx] = lvds_decoded_monitor::type_id::create(
+                    $sformatf("debug_source_mon%0d", tap_idx), this);
             foreach (pre_rbcam_mon[tap_idx])
                 pre_rbcam_mon[tap_idx] = lvds_decoded_monitor::type_id::create(
                     $sformatf("pre_rbcam_mon%0d", tap_idx), this);
@@ -65,6 +69,8 @@ package tb_int_env_pkg;
             super.connect_phase(phase);
             foreach (l2_commit_mon[tap_idx])
                 l2_commit_mon[tap_idx].ap.connect(scoreboard.stage_a_imp);
+            foreach (debug_source_mon[tap_idx])
+                debug_source_mon[tap_idx].ap.connect(scoreboard.debug_source_imp);
             foreach (pre_rbcam_mon[tap_idx])
                 pre_rbcam_mon[tap_idx].ap.connect(scoreboard.pre_rbcam_imp);
             foreach (post_rbcam_mon[tap_idx])

@@ -18,12 +18,12 @@ Add the tagged virtual MuTRiG as a second tb_int source mode beside the existing
 
 This wrapper accepts golden MuTRiG 48-bit L2 words and emits decoded MuTRiG frame bytes as `{isk, byte}` on a 9-bit stream. It is the minimal useful boundary for tb_int because it feeds the real `mutrig_frame_deassembly_0.rx8b1k` input while avoiding Altera LVDS bit-serial/DPA lock behavior in a system integration test.
 
-The source is selected with `+TB_INT_SOURCE=emu_direct|virtual_mutrig_raw`, surfaced by the Makefile as `PROF_INT_002_SOURCE`. Keep both source paths:
+The source is selected with `+TB_INT_SOURCE=emu_direct|virtual_mutrig`, surfaced by the Makefile as `PROF_INT_002_SOURCE`. Keep both source paths:
 
 - Existing emulator path: `emulator_mutrig_qsys_lane` with `BYTE_STREAM_ENABLE=0`, direct `aso_hit_type0` into `arb_hit_type0_0`.
-- New virtual raw path: `raw_mutrig_frame_top` emits decoded frame bytes into generated decoded-lane 0 wiring, through the existing Avalon-ST adapter and `mutrig_frame_deassembly_0.rx8b1k`; `mutrig_frame_deassembly_0.aso_hit_type0` then feeds `arb_hit_type0_0`.
+- New virtual MuTRiG path: `raw_mutrig_frame_top` emits decoded frame bytes into generated decoded-lane 0 wiring, through the existing Avalon-ST adapter and `mutrig_frame_deassembly_0.rx8b1k`; `mutrig_frame_deassembly_0.aso_hit_type0` then feeds `arb_hit_type0_0`.
 
-The virtual raw mode configures the active arb lane to REAL mode. The existing emulator smoke path keeps EMU selection. Add `mixed` only after both source streams have independent monitors and deterministic source IDs.
+The virtual MuTRiG mode configures the active arb lane to REAL mode. The existing emulator smoke path keeps EMU selection. Add `mixed` only after both source streams have independent monitors and deterministic source IDs.
 
 ## Source files to reuse
 
@@ -138,7 +138,7 @@ The generated focus system connects LVDS decode to frame deassembly through:
 - `avalon_st_adapter_out_0_error[2:0]`
 - `mutrig_frame_deassembly_0.asi_rx8b1k_*`
 
-For virtual raw mode, PROF-INT-002 drives the generated decoded-lane 0 input to the Avalon-ST adapter in simulation:
+For virtual MuTRiG mode, PROF-INT-002 drives the generated decoded-lane 0 input to the Avalon-ST adapter in simulation:
 
 - `lvds_rx_controller_pro_0_decoded0_data <= o_tx_data`
 - `lvds_rx_controller_pro_0_decoded0_channel <= lane_id[3:0]`
@@ -201,13 +201,13 @@ Only copy a file if it must be adapted for tb_int. The expected minimum later co
 
 ## Later implementation steps
 
-1. Add a tb_int make target, for example `comp_virtual_mutrig_raw`, that compiles the decoded-9b source files before the existing tb_int SV filelist.
-2. Add a tb_int source-mode plusarg and UVM config field: `emu_direct`, `virtual_mutrig_raw`, and later `mixed`.
-3. Instantiate or bind a testbench-only `raw_mutrig_frame_top` source in virtual raw mode.
+1. Add a tb_int make target, for example `comp_virtual_mutrig`, that compiles the decoded-9b source files before the existing tb_int SV filelist.
+2. Add a tb_int source-mode plusarg and UVM config field: `emu_direct`, `virtual_mutrig`, and later `mixed`.
+3. Instantiate or bind a testbench-only `raw_mutrig_frame_top` source in virtual MuTRiG mode.
 4. Use the existing deterministic hit scheduler to produce `i_offer_word[47:0]` streams.
 5. On `o_accept_pulse`, publish a source-stage hit record after `raw48_to_hit0`.
 6. Hierarchically drive the generated deassembly input adapter wires listed above, or use an equivalent test-only wrapper around `focus_emulator_type0_system`.
-7. Configure `arb_hit_type0_0` source selection for the real/deassembly path in virtual raw mode and keep the existing emulator selection for `emu_direct`.
+7. Configure `arb_hit_type0_0` source selection for the real/deassembly path in virtual MuTRiG mode and keep the existing emulator selection for `emu_direct`.
 8. Reuse existing pre-rbCAM, post-rbCAM, FEB egress, histogram, and per-bucket ledger monitors.
 9. Add one smoke test that compares accepted source hits to downstream post-rbCAM/FEB observations at low occupancy before enabling mixed-source arbitration stress.
 
