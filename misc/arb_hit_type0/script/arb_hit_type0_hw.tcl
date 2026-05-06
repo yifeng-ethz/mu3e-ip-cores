@@ -3,8 +3,8 @@ package require -exact qsys 16.1
 set VERSION_MAJOR_DEFAULT_CONST 26
 set VERSION_MINOR_DEFAULT_CONST 4
 set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         505
-set VERSION_DATE_DEFAULT_CONST  20260505
+set BUILD_DEFAULT_CONST         506
+set VERSION_DATE_DEFAULT_CONST  20260506
 set VERSION_GIT_DEFAULT_CONST   0x00000000
 set IP_UID_DEFAULT_CONST        0x41485430 ;# ASCII "AHT0"
 set INSTANCE_ID_DEFAULT_CONST   0
@@ -29,12 +29,22 @@ set_module_property VALIDATION_CALLBACK          validate
 
 proc validate {} {
     set mode [get_parameter_value MODE_DEFAULT]
+    set debug_level [get_parameter_value DEBUG_LEVEL]
     if {$mode == 2} {
         send_message warning "MODE_DEFAULT = MIX_RR. Merge-packet FSM collapses two source frames into one merged Avalon-ST packet (single-packet boundary, channel varies per beat). Per-beat channel demux at the downstream consumer is the audit gate before MIX_RR is promoted into a production datapath. See misc/arb_hit_type0/doc/RTL_PLAN.md sections 1 and 2.2."
+    }
+    if {$debug_level < 0 || $debug_level > 2} {
+        send_message error "DEBUG_LEVEL must be 0 (off), 1 (FIFO levels), or 2 (FIFO levels plus per-hit metadata)."
     }
 }
 
 proc elaborate {} {
+    set debug_level [get_parameter_value DEBUG_LEVEL]
+    catch {set_interface_property debug_fifo ENABLED [expr {$debug_level >= 1}]}
+    catch {set_interface_property real_hit_debug ENABLED [expr {$debug_level >= 2}]}
+    catch {set_interface_property emu_hit_debug ENABLED [expr {$debug_level >= 2}]}
+    catch {set_interface_property selected_hit_debug ENABLED [expr {$debug_level >= 2}]}
+
     catch {
         set_display_item_property mix_rr_warning_html TEXT "<html><b>MIX_RR mode warning</b><br/>In MIX_RR a merge-packet FSM combines the two source frames into <b>one merged Avalon-ST packet per merged_open window</b>. Single-packet boundary tracking is sufficient at the consumer (no per-channel SOP/EOP tracking required). However, per-beat <b>channel</b> still varies across the merged packet, so any consumer that separates the two sources' contributions (e.g. for per-source golden-reference plots) must read <b>channel</b> per beat. The Avalon-ST <b>channel</b> sideband and <b>maxChannel &gt; 0</b> declared at <b>mts_processor.hit_type0_in</b> and <b>ring_buffer_cam.hit_type1</b> is the contract; the per-beat channel use inside those IPs must be independently verified before MIX_RR is promoted to a production datapath. Treat MIX_RR as debug/test-only until the downstream chain is verified.</html>"
     }
@@ -84,17 +94,31 @@ set_parameter_property WATCHDOG_DEFAULT ALLOWED_RANGES 0:65535
 set_parameter_property WATCHDOG_DEFAULT HDL_PARAMETER true
 set_parameter_property WATCHDOG_DEFAULT DESCRIPTION "Reset value for WATCHDOG_CYCLES CSR. After this many idle cycles on a stranded source while the peer has EORed or also gone silent, the watchdog synthesizes the missing EOP (and EOR if applicable) so the merged packet closes deterministically. 0 disables the watchdog (one-sided run-end then leaves the merged packet open until reset)."
 
+add_parameter DEBUG_LEVEL NATURAL 0
+set_parameter_property DEBUG_LEVEL DISPLAY_NAME "Debug Level"
+set_parameter_property DEBUG_LEVEL ALLOWED_RANGES 0:2
+set_parameter_property DEBUG_LEVEL HDL_PARAMETER true
+set_parameter_property DEBUG_LEVEL AFFECTS_ELABORATION true
+set_parameter_property DEBUG_LEVEL DESCRIPTION "0 disables optional debug conduits and keeps nominal synthesis behavior. 1 exposes FIFO fill-level observability. 2 also stores and propagates 64-bit per-hit debug metadata from real_hit_debug/emu_hit_debug to selected_hit_debug."
+
 # Identity / Interfaces / Register Map tabs and the MIX_RR warning panel.
+set TAB_CONFIGURATION "Configuration"
 set TAB_IDENTITY    "Identity"
 set TAB_INTERFACES  "Interfaces"
 set TAB_REGMAP      "Register Map"
+
+add_display_item "" $TAB_CONFIGURATION GROUP tab
+add_display_item $TAB_CONFIGURATION "Datapath" GROUP
+add_display_item $TAB_CONFIGURATION "Debug" GROUP
+add_display_item "Datapath" MODE_DEFAULT parameter
+add_display_item "Datapath" WATCHDOG_DEFAULT parameter
+add_display_item "Debug" DEBUG_LEVEL parameter
 
 add_display_item "" $TAB_IDENTITY GROUP tab
 add_display_item $TAB_IDENTITY "MIX_RR Warning" GROUP
 add_display_item "MIX_RR Warning" mix_rr_warning_html TEXT ""
 set_display_item_property mix_rr_warning_html DISPLAY_HINT html
 set_display_item_property mix_rr_warning_html TEXT "<html><b>MIX_RR mode warning</b><br/>In MIX_RR a merge-packet FSM combines the two source frames into <b>one merged Avalon-ST packet per merged_open window</b>. Single-packet boundary tracking is sufficient at the consumer (no per-channel SOP/EOP tracking required). However, per-beat <b>channel</b> still varies across the merged packet, so any consumer that separates the two sources' contributions (e.g. for per-source golden-reference plots) must read <b>channel</b> per beat. The Avalon-ST <b>channel</b> sideband and <b>maxChannel &gt; 0</b> declared at <b>mts_processor.hit_type0_in</b> and <b>ring_buffer_cam.hit_type1</b> is the contract; the per-beat channel use inside those IPs must be independently verified before MIX_RR is promoted to a production datapath. Treat MIX_RR as debug/test-only until the downstream chain is verified.</html>"
-add_display_item $TAB_IDENTITY MODE_DEFAULT parameter
 add_display_item $TAB_IDENTITY IP_UID parameter
 add_display_item $TAB_IDENTITY INSTANCE_ID parameter
 
@@ -102,6 +126,7 @@ add_parameter FIFO_DEPTH NATURAL 16
 set_parameter_property FIFO_DEPTH DISPLAY_NAME "Per-source ingress FIFO depth"
 set_parameter_property FIFO_DEPTH ALLOWED_RANGES {16}
 set_parameter_property FIFO_DEPTH HDL_PARAMETER true
+add_display_item "Datapath" FIFO_DEPTH parameter
 
 add_parameter IP_UID STD_LOGIC_VECTOR $IP_UID_DEFAULT_CONST
 set_parameter_property IP_UID DISPLAY_NAME "UID"
@@ -245,3 +270,32 @@ add_interface_port selected_out aso_channel       channel       Output 4
 add_interface_port selected_out aso_startofpacket startofpacket Output 1
 add_interface_port selected_out aso_endofpacket   endofpacket   Output 1
 add_interface_port selected_out aso_endofrun      endofrun      Output 1
+
+add_interface debug_fifo conduit start
+set_interface_property debug_fifo associatedClock clk
+set_interface_property debug_fifo associatedReset rst
+set_interface_property debug_fifo ENABLED false
+add_interface_port debug_fifo coe_debug_real_fifo_level real_fifo_level Output 5
+add_interface_port debug_fifo coe_debug_emu_fifo_level  emu_fifo_level  Output 5
+add_interface_port debug_fifo coe_debug_fifo_flags      fifo_flags      Output 8
+
+add_interface real_hit_debug conduit end
+set_interface_property real_hit_debug associatedClock clk
+set_interface_property real_hit_debug associatedReset rst
+set_interface_property real_hit_debug ENABLED false
+add_interface_port real_hit_debug coe_debug_real_hit_metadata       metadata Input 64
+add_interface_port real_hit_debug coe_debug_real_hit_metadata_valid valid    Input 1
+
+add_interface emu_hit_debug conduit end
+set_interface_property emu_hit_debug associatedClock clk
+set_interface_property emu_hit_debug associatedReset rst
+set_interface_property emu_hit_debug ENABLED false
+add_interface_port emu_hit_debug coe_debug_emu_hit_metadata       metadata Input 64
+add_interface_port emu_hit_debug coe_debug_emu_hit_metadata_valid valid    Input 1
+
+add_interface selected_hit_debug conduit start
+set_interface_property selected_hit_debug associatedClock clk
+set_interface_property selected_hit_debug associatedReset rst
+set_interface_property selected_hit_debug ENABLED false
+add_interface_port selected_hit_debug coe_debug_selected_hit_metadata       metadata Output 64
+add_interface_port selected_hit_debug coe_debug_selected_hit_metadata_valid valid    Output 1

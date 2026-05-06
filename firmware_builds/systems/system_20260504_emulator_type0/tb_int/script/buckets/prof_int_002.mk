@@ -24,6 +24,7 @@ PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT ?= 1
 PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK ?= 1
 PROF_INT_002_PRE_RBCAM_PHASE_SWEEP ?= 100 200 300 400 500 600 700 800 900
 PROF_INT_002_PRE_RBCAM_BURST_SWEEP ?= 1 2 3 4 5 6 7
+PROF_INT_002_PRE_RBCAM_PERIODIC_RATE_SWEEP ?= 010k:5 025k:13 050k:26 100k:52 200k:105 500k:262 1000k:524
 PROF_INT_002_PRE_RBCAM_CASE ?= prof_int_002_pre_rbcam_$(PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE)_phase$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES)
 PROF_INT_002_PRE_RBCAM_DIR := $(SIM_ROOT)/$(PROF_INT_002_PRE_RBCAM_CASE)
 PROF_INT_002_PRE_RBCAM_HIST_DIR := $(PROF_INT_002_PRE_RBCAM_DIR)/pre_rbcam_hist
@@ -31,12 +32,18 @@ PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_head
 PROF_INT_002_PRE_RBCAM_RTL_INJ_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_ASIC_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100/pre_rbcam_hist
 PROF_INT_002_PRE_RBCAM_FULL8_BURST_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100/pre_rbcam_hist
+PROF_INT_002_PRE_RBCAM_PERIODIC_RATE_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep/pre_rbcam_hist
 PROF_INT_002_REPORT_DIR := $(TB_INT_ROOT)/reports
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_phase_sweep_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_phase_sweep_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_RTL_INJ_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_RTL_INJ_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_rtlinj_phase_sweep_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_ASIC_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_asic1_7_phase100_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_dislin
 PROF_INT_002_REPORT_DIR_PRE_RBCAM_FULL8_BURST_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100_channel_rate_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep_dislin
+PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP_CHANNEL := $(PROF_INT_002_REPORT_DIR)/prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep_channel_rate_dislin
 PROF_INT_002_REPORT_DIR_1L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
 PROF_INT_002_REPORT_DIR_8L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s
 PROF_INT_002_REPORT_DIR_EMU_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s
@@ -66,6 +73,7 @@ PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh 
 \trun_prof_int_002_pre_rbcam_header_sync_phase_500 \
 \trun_prof_int_002_pre_rbcam_header_sync_phase_900 \
 \trun_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
+\tplot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
 \trun_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector \
 \tplot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector \
 \trun_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
@@ -73,6 +81,8 @@ PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh 
 \trun_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
 \tplot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
 \trun_prof_int_002_pre_rbcam_periodic_2ch \
+\trun_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
+\tplot_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
@@ -289,6 +299,27 @@ run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900:
 	    --hist-formats csv,png \
 	    --aggregate
 
+plot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900: run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_latency_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_phase[1-9]00' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP) \
+	    --rows-per-page 4 \
+	    --stage pre-rbcam \
+	    --title-tag "ASIC0 direct-emulator header-sync phase sweep pre-rbCAM, x=[-1000,3096]"
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP_CHANNEL)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_phase[1-9]00' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP_CHANNEL) \
+	    --rows-per-page 4 \
+	    --title-tag "ASIC0 direct-emulator header-sync phase sweep pre-rbCAM" \
+	    --record-csv pre_rbcam_records.csv \
+	    --channel-mode lane-local
+	@echo "=== PROF-INT-002 direct-emulator ASIC0 phase sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP)/contact_sheet_dislin_p1.png ==="
+	@echo "=== PROF-INT-002 direct-emulator ASIC0 phase sweep pre-rbCAM channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
+
 run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector:
 	@set -e; for phase in $(PROF_INT_002_PRE_RBCAM_PHASE_SWEEP); do \
 	    $(MAKE) run_prof_int_002_pre_rbcam_latency \
@@ -317,7 +348,17 @@ plot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector: run_pr
 	    --rows-per-page 4 \
 	    --stage pre-rbcam \
 	    --title-tag "ASIC0 RTL-injector header-sync phase sweep pre-rbCAM, x=[-1000,3096]"
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_RTL_INJ_SWEEP_CHANNEL)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_rtlinj_phase[1-9]00' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_RTL_INJ_SWEEP_CHANNEL) \
+	    --rows-per-page 4 \
+	    --title-tag "ASIC0 RTL-injector header-sync phase sweep pre-rbCAM" \
+	    --record-csv pre_rbcam_records.csv \
+	    --channel-mode lane-local
 	@echo "=== PROF-INT-002 RTL-injector ASIC0 phase sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_RTL_INJ_SWEEP)/contact_sheet_dislin_p1.png ==="
+	@echo "=== PROF-INT-002 RTL-injector ASIC0 phase sweep pre-rbCAM channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_RTL_INJ_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
 
 run_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100:
 	@set -e; for asic in 1 2 3 4 5 6 7; do \
@@ -419,6 +460,54 @@ run_prof_int_002_pre_rbcam_periodic_2ch:
 	    PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=periodic \
 	    PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT=0 \
 	    PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=0
+
+run_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep:
+	@set -e; for spec in $(PROF_INT_002_PRE_RBCAM_PERIODIC_RATE_SWEEP); do \
+	    label=$${spec%:*}; \
+	    q16=$${spec#*:}; \
+	    $(MAKE) run_prof_int_002_pre_rbcam_latency \
+	        PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=periodic \
+	        PROF_INT_002_PRE_RBCAM_INJECT_DRIVER=tb_force \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=0 \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT=0 \
+	        PROF_INT_002_PRE_RBCAM_RUN_CYCLES=625000 \
+	        PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES=65536 \
+	        PROF_INT_002_RUNCTL_CPP_GAP_CYCLES=1000 \
+	        PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES=20000 \
+	        PROF_INT_002_HIT_RATE_Q16=$$q16 \
+	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT=1 \
+	        PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK=1 \
+	        PROF_INT_002_PRE_RBCAM_CHANNEL_LOW=0 \
+	        PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH=31 \
+	        PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_periodic_asic0_full32_$${label}; \
+	done
+	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_periodic_asic0_full32_*k' \
+	    --hist-dir $(PROF_INT_002_PRE_RBCAM_PERIODIC_RATE_SWEEP_HIST_DIR) \
+	    --hist-formats csv,png \
+	    --aggregate
+
+plot_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep: run_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_latency_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_periodic_asic0_full32_*k' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP) \
+	    --rows-per-page 4 \
+	    --stage pre-rbcam \
+	    --title-tag "ASIC0 full32 periodic rate sweep pre-rbCAM, x=[-1000,3096]"
+	@mkdir -p $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP_CHANNEL)
+	python3 $(TB_INT_ROOT)/script/plot_tb_int_channel_rates_dislin.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_periodic_asic0_full32_*k' \
+	    --out-dir $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP_CHANNEL) \
+	    --rows-per-page 4 \
+	    --title-tag "ASIC0 full32 periodic rate sweep pre-rbCAM" \
+	    --record-csv pre_rbcam_records.csv \
+	    --channel-mode lane-local
+	@echo "=== PROF-INT-002 ASIC0 full32 periodic rate sweep pre-rbCAM latency: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP)/contact_sheet_dislin_p1.png ==="
+	@echo "=== PROF-INT-002 ASIC0 full32 periodic rate sweep pre-rbCAM channel-rate: $(PROF_INT_002_REPORT_DIR_PRE_RBCAM_PERIODIC_RATE_SWEEP_CHANNEL)/channel_rate_dislin_p1.png ==="
 
 run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_1L_5S)

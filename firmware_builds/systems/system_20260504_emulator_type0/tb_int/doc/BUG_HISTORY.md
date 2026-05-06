@@ -44,6 +44,7 @@ Historical formal note:
 | [BUG-007-R](#bug-007-r-direct-emulator-source-does-not-produce-mutrig-injector-headerinfo) | R | hard stuck error | `directed-only (RTL-injector header-sync validation with direct emulator source)` | open RTL patch; simulation shim validated | PROF-INT-002 RTL-injector phase-sweep setup on `2026-05-06` | pending | The direct emulator source does not drive the FDA/headerinfo valid stream that `mutrig_injector_0` uses for CSR-controlled header-sync delay, so emulator-only RTL-injector scans need a temporary harness shim until the RTL/integration path is repaired. |
 | [BUG-008-R](#bug-008-r-unconnected-inject-aux-pulse-poisoned-injector-fanout) | R | hard stuck error | `directed-only (RTL-injector path using generated fanout)` | open Qsys tie-off; harness force validated | PROF-INT-002 RTL-injector smoke on `2026-05-06` | pending | `full8lane_type0_system` left `data_path_subsystem.inject_aux_pulse` unconnected, so `pulse_fanout8` ORed the real injector pulse with `X` and suppressed emulator hits in simulation. |
 | [BUG-009-H](#bug-009-h-full8-full32-header-sync-burst-sweep-has-ambiguous-direct-emulator-identity) | H | hard stuck error | `directed-only (multi-active direct-emulator header-sync burst reference)` | open blocker; plot guard added | PROF-INT-002 full8/full32 burst sweep on `2026-05-06` | pending | Full8/full32 direct-emulator header-sync burst sweeps cannot be accepted as golden pre-rbCAM latency plots because the current monitor identity aliases multi-active direct-emulator hits and the generated path drops most Stage-A offers before pre-rbCAM. |
+| [BUG-010-H](#bug-010-h-direct-emulator-evidence-was-being-treated-like-virtual-mutrig-golden-evidence) | H | soft error | `directed-only (source-model comparison and golden reference reporting)` | partial contract documented; RTL/scoreboard upgrade in progress | PROF-INT-002 source comparison on `2026-05-06` | pending | The direct FPGA emulator, tagged virtual MuTRiG source model, and physical MuTRiG ASIC were not separated in tb_int evidence tags, making rate/header-sync agreement look stronger than the underlying source model justified. |
 
 ## 2026-05-06
 
@@ -272,3 +273,27 @@ Historical formal note:
     the sweep is blocked before histogram analysis or DISLIN rendering whenever the observed pre-rbCAM row count is not exact; no full8/full32 header-sync burst plot is accepted as golden evidence yet
   - potential_hazard:
     high until a durable identity source is selected. Acceptable fixes include probing the actual generated hit_type0 source boundary with preserved ASIC identity, repairing the direct-emulator generated path so downstream payload identity matches the active source, or moving the golden reference to the real MuTRiG/LVDS/FDA path where headerinfo and source identity are naturally present.
+
+### BUG-010-H: direct emulator evidence was being treated like virtual MuTRiG golden evidence
+
+- First seen in:
+  - PROF-INT-002 source comparison discussion on `2026-05-06`
+  - rate-mode comparison between direct emulator, tagged virtual MuTRiG source model, and physical MuTRiG measurements
+- Symptom:
+  - direct-emulator rate-mode latency shapes matched the tagged virtual MuTRiG and real ASIC evidence well enough to be useful, but the reporting did not clearly distinguish the three source classes
+  - all-active header-sync work then exposed that the direct emulator lacks a trustworthy per-hit source identity in the current generated-system observation path
+- Root cause:
+  - tb_int treated generated `emulator_mutrig` evidence and virtual MuTRiG source-code evidence as the same kind of MuTRiG reference
+  - the direct emulator is an FPGA/on-board-test compromise, while the tagged virtual MuTRiG repository is the simulation golden source model and the real MuTRiG is the physical ASIC
+  - DEBUG_LEVEL metadata was not yet a formal datapath/testbench contract, so the scoreboard had no authoritative OoO lineage channel for multi-source debug
+- Fix status:
+  - state:
+    partial; source-model contract documented and IP DEBUG_LEVEL upgrade in progress
+  - mechanism:
+    `DV_PLAN.md` now records the three source evidence classes and the cumulative DEBUG_LEVEL contract: 0 is nominal synthesizable payload, 1 adds FIFO fill-level observability, and 2 adds per-hit debug metadata for simulation lineage while retaining the no-debug monitor path as a payload cross-check
+  - before_fix_outcome:
+    a generated-emulator plot could be interpreted as virtual-MuTRiG golden evidence even when the test path bypassed the real LVDS/FDA source boundary and did not preserve source identity under multi-active traffic
+  - after_fix_outcome:
+    pending regenerated DEBUG_LEVEL=2 tb_int runs using the tagged virtual MuTRiG and direct emulator as separately tagged sources, with rate-mode and header-sync four-panel contact sheets at pre-rbCAM
+  - potential_hazard:
+    medium until the DEBUG_LEVEL=2 metadata path and dual monitor scoreboard are compiled and rerun; low afterward if reports explicitly label source class and reject plots whose debug/no-debug counts disagree

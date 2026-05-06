@@ -24,7 +24,8 @@ full8lane_onewire_ip_dir="${syn_dir}/ip/full8lane_onewire_master"
 full8lane_sc_hub_ip_dir="${syn_dir}/ip/full8lane_sc_hub_v2"
 full8lane_histogram_ip_dir="${syn_dir}/ip/full8lane_histogram_statistics_v2"
 histogram_compat_ip_dir="${syn_dir}/ip/histogram_statistics_v2"
-search_path="${syn_dir},${repo_root}/misc/arb_hit_type0/script,${upload_readyless_ip_dir},${hit_stack_readyless_ip_dir},${full8lane_onewire_ip_dir},${full8lane_sc_hub_ip_dir},${full8lane_histogram_ip_dir},${histogram_compat_ip_dir},${ipx_path},${components_ipx_path},\$"
+search_path="${syn_dir},${repo_root}/misc/arb_hit_type0/script,${repo_root}/misc/debug_sidecar_fanout/script,${repo_root}/misc/debug_hit_sidecar_bank_bridge/script,${repo_root}/emulator_mutrig,${repo_root}/mutrig_frame_deassembly/script,${repo_root}/mutrig_timestamp_processor,${repo_root}/ring-buffer_cam/script,${repo_root}/feb_frame_assembly,${upload_readyless_ip_dir},${hit_stack_readyless_ip_dir},${full8lane_onewire_ip_dir},${full8lane_sc_hub_ip_dir},${full8lane_histogram_ip_dir},${histogram_compat_ip_dir},${ipx_path},${components_ipx_path},\$"
+debug_level="${FULL8LANE_DEBUG_LEVEL:-${DEBUG_LEVEL:-0}}"
 
 for name in "${control_name}" "${supercore_name}" "${inner_name}" "${outer_name}"; do
     for path in \
@@ -54,9 +55,10 @@ done
         --thorough-descent \
         --relative-vars=PWD
 
-    FULL8LANE_SYSTEM_DIR="${system_dir}" \
-    FULL8LANE_SYN_DIR="${syn_dir}" \
-    qsys-script --search-path="${search_path}" --script="build_full8lane_system.tcl"
+    qsys-script \
+        --search-path="${search_path}" \
+        --cmd="set full8lane_syn_dir {${syn_dir}}; set full8lane_system_dir {${system_dir}}; set full8lane_debug_level ${debug_level}" \
+        --script="build_full8lane_system.tcl"
 )
 
 for name in "${control_name}" "${supercore_name}" "${inner_name}" "${outer_name}"; do

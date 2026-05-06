@@ -1,12 +1,13 @@
 // arb_hit_type0_fifo.sv
 // Per-source 16-deep ingress FIFO and ingress-side packet/drop tracking.
 //
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Add offered-EOP ingress frame pulse for CSR counters.
+// Version : 26.4.0
+// Date    : 20260506
+// Change  : Add DEBUG_LEVEL=2 per-hit debug metadata sidecar FIFO.
 
 module arb_hit_type0_fifo #(
-    parameter integer FIFO_DEPTH = 16
+    parameter integer FIFO_DEPTH  = 16,
+    parameter integer DEBUG_LEVEL = 0
 ) (
     input  logic        clk,
     input  logic        rst,
@@ -20,6 +21,8 @@ module arb_hit_type0_fifo #(
     input  logic        asi_startofpacket,
     input  logic        asi_endofpacket,
     input  logic        asi_endofrun,
+    input  logic [63:0] asi_debug_metadata,
+    input  logic        asi_debug_metadata_valid,
 
     input  logic        pop,
 
@@ -29,6 +32,7 @@ module arb_hit_type0_fifo #(
     output logic        head_startofpacket,
     output logic        head_endofpacket,
     output logic        head_endofrun,
+    output logic [63:0] head_debug_metadata,
 
     output logic        empty,
     output logic        full,
@@ -60,6 +64,22 @@ module arb_hit_type0_fifo #(
     logic [3:0] read_ptr;
     logic [3:0] write_ptr;
     logic [4:0] count;
+
+    generate
+        if (DEBUG_LEVEL >= 2) begin : debug_metadata_fifo
+            (* ramstyle = "logic" *) logic [63:0] metadata_mem [0:FIFO_DEPTH_CONST-1];
+
+            assign head_debug_metadata = metadata_mem[read_ptr];
+
+            always_ff @(posedge clk) begin : metadata_ram_writer
+                if (push_accept) begin
+                    metadata_mem[write_ptr] <= asi_debug_metadata_valid ? asi_debug_metadata : 64'd0;
+                end
+            end
+        end else begin : no_debug_metadata_fifo
+            assign head_debug_metadata = 64'd0;
+        end
+    endgenerate
 
     assign input_beat = '{
         data:    asi_data,
@@ -140,6 +160,9 @@ module arb_hit_type0_fifo #(
     initial begin : parameter_guard
         if (FIFO_DEPTH != FIFO_DEPTH_CONST) begin
             $error("arb_hit_type0_fifo supports FIFO_DEPTH=16 only");
+        end
+        if ((DEBUG_LEVEL < 0) || (DEBUG_LEVEL > 2)) begin
+            $error("arb_hit_type0_fifo supports DEBUG_LEVEL in the range 0..2");
         end
     end
     // synthesis translate_on

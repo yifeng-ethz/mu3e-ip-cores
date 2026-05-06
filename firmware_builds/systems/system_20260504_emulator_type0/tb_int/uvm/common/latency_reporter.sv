@@ -1,9 +1,9 @@
 // latency_reporter.sv
 // CSV writer for Python-side latency/CDF post-processing.
 // Author: Yifeng Wang
-// Version : 26.2.0
+// Version : 26.2.1
 // Date    : 20260504
-// Change  : Add closed-record and drop CSV writer for integration UVM.
+// Change  : Record optional counter-agreement snapshots.
 
 package tb_int_latency_pkg;
 
@@ -17,6 +17,7 @@ package tb_int_latency_pkg;
         int closed_fd;
         int pre_rbcam_fd;
         int drops_fd;
+        int counter_fd;
         string output_dir;
         bit stable_only_export;
 
@@ -25,6 +26,7 @@ package tb_int_latency_pkg;
             closed_fd = 0;
             pre_rbcam_fd = 0;
             drops_fd  = 0;
+            counter_fd = 0;
             stable_only_export = 1'b0;
         endfunction
 
@@ -35,18 +37,23 @@ package tb_int_latency_pkg;
             closed_fd = $fopen({output_dir, "/closed_records.csv"}, "w");
             pre_rbcam_fd = $fopen({output_dir, "/pre_rbcam_records.csv"}, "w");
             drops_fd  = $fopen({output_dir, "/drops.csv"}, "w");
+            counter_fd = $fopen({output_dir, "/counter_agreement.csv"}, "w");
             if (closed_fd == 0)
                 `uvm_fatal("LAT_RPT", $sformatf("failed to open %s/closed_records.csv", output_dir))
             if (pre_rbcam_fd == 0)
                 `uvm_fatal("LAT_RPT", $sformatf("failed to open %s/pre_rbcam_records.csv", output_dir))
             if (drops_fd == 0)
                 `uvm_fatal("LAT_RPT", $sformatf("failed to open %s/drops.csv", output_dir))
+            if (counter_fd == 0)
+                `uvm_fatal("LAT_RPT", $sformatf("failed to open %s/counter_agreement.csv", output_dir))
             $fdisplay(closed_fd,
                       "hit_id,lane,channel,t_fine,t_coarse,root_hit_id,abs_ts_a,abs_ts_pre_rbcam,abs_ts_post_rbcam,abs_ts_feb_egress,run_origin");
             $fdisplay(pre_rbcam_fd,
                       "hit_id,lane,channel,t_fine,t_coarse,root_hit_id,abs_ts_a,abs_ts_pre_rbcam,run_origin");
             $fdisplay(drops_fd,
                       "hit_id,lane,key.channel,key.t_fine,t_coarse,last_seen_stage,last_seen_abs_ts,run_state_at_drop,run_origin");
+            $fdisplay(counter_fd,
+                      "phase,counter,scoreboard_count,counter_count,available,agree");
         endfunction
 
         function void close();
@@ -56,9 +63,12 @@ package tb_int_latency_pkg;
                 $fclose(pre_rbcam_fd);
             if (drops_fd != 0)
                 $fclose(drops_fd);
+            if (counter_fd != 0)
+                $fclose(counter_fd);
             closed_fd = 0;
             pre_rbcam_fd = 0;
             drops_fd  = 0;
+            counter_fd = 0;
         endfunction
 
         function void write_pre_rbcam_pair(
@@ -134,6 +144,26 @@ package tb_int_latency_pkg;
                       last_seen_abs_ts,
                       run_state_at_drop,
                       source.run_origin);
+        endfunction
+
+        function void write_counter_agreement(
+            string phase_name,
+            string counter_name,
+            longint unsigned scoreboard_count,
+            longint unsigned counter_count,
+            bit available,
+            bit agree
+        );
+            if (counter_fd == 0)
+                return;
+            $fdisplay(counter_fd,
+                      "%s,%s,%0d,%0d,%0d,%0d",
+                      phase_name,
+                      counter_name,
+                      scoreboard_count,
+                      counter_count,
+                      available,
+                      agree);
         endfunction
     endclass
 
