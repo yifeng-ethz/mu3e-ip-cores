@@ -3,7 +3,7 @@
 **DUT:** `top_nostp_emulator_type0` (full FEB SciFi single-lane focus build).
 **Companion docs:** [`../../doc/SYSTEM_PLAN.md`](../../doc/SYSTEM_PLAN.md), [`DV_HARNESS.md`](DV_HARNESS.md), [`BUG_HISTORY.md`](BUG_HISTORY.md).
 **Author:** Mu3e IP team
-**Date:** 2026-05-04
+**Date:** 2026-05-06
 **Status:** Draft. Awaits approval before harness construction.
 
 ---
@@ -19,13 +19,15 @@ The testbench drives traffic at the **upstream LVDS PHY boundary** with a virtua
 1. **Run-control verification (RC):** `runctl_mgmt_host` ↔ `run_control_splitter` ↔ every IP. Verify `IDLE → RUN_PREP → SYNC → RUNNING → TERMINATING → IDLE` is broadcast correctly and every IP reacts per its own contract.
 2. **Slow-control verification (SC):** `sc_hub_v2` ↔ `mm_bridge` ↔ every CSR slave on the focus build. Verify CSR addressing, address-aperture bounds, and read/write atomicity.
 3. **Datapath verification (DT):** end-to-end hit tracking from virtual-MuTRiG-emitted hits to histogram-statistics bin counts. Per-bucket FIFO-ledger scoreboard catches dropped, reordered, mis-attributed, and corrupted hits.
-4. **Latency measurement at three observation points:** pre-rbCAM (immediately at `ring_buffer_cam` input / aggregate `data_splitter_0_out[0:3]` boundary), post-rbCAM (after all four `ring_buffer_cam` hit_type2 outputs), FEB-egress (packet scheduler egress). Latency CDFs, percentiles, and per-source breakdowns computed Python-side from exported CSV.
+4. **Latency measurement at three observation points:** pre-rbCAM (immediately at `ring_buffer_cam` input / aggregate `data_splitter_0_out[0:3]` boundary for both hit-stack subsystems), post-rbCAM (after all eight `ring_buffer_cam` hit_type2 outputs), FEB-egress (both packet scheduler egresses in the 8-lane full-system harness). Latency CDFs, percentiles, and per-source breakdowns computed Python-side from exported CSV.
 5. **Histogram cross-check:** compare the scoreboard's reconstructed delay distribution against `histogram_statistics_0`'s bin counts at the same tap point. Mismatch beyond the per-bucket-reconciliation threshold (set per case in `DV_COV.md`) is a fail.
 6. **Reusable UVM infra:** every agent, scoreboard, and coverage collector is built so the same harness can be reused for future Mu3e integration testbenches by swapping the DUT-binding interface.
 
 The virtual MuTRiG model in `mutrig_phy_agent` emits directly into per-lane L2 FIFOs (matching the 26.2.x `emulator_mutrig` architecture, which removed L1 staging per `emulator_mutrig/doc/RTL_PLAN.md` §2.1). The real-ASIC 32-channel → 4 L1 FIFO → 1 L2 FIFO RR-arbitration reordering is therefore NOT exercised by this harness; it is deferred to a future harness that uses the real LVDS / `mutrig_frame_deassembly` path with the bring-up SOF on the FEB.
 
-**Basic run-control timing assumption.** In the deployed FEB flow, run-control state changes are driven by C++ software and are normally separated by software-scale time, i.e. orders of milliseconds rather than adjacent FPGA cycles. The integration TB therefore must not qualify a full-pipeline latency run by issuing `RUN_PREPARE` / `SYNC` / `RUNNING` or `TERMINATING` / `IDLE` back-to-back. PROF-INT-002 models this with `TB_INT_RUNCTL_CPP_GAP_CYCLES` (default 125000 cycles = 1 ms at 125 MHz) and must log the observed gap before the next state is driven. PROF-INT-002 also samples the local legacy rbCAM/FEB readyful sinks around slow states: `RUN_PREPARE` readiness before `SYNC` is a qualification condition, while post-`TERMINATING` readiness is diagnostic because the command source is intentionally readyless and `IDLE` is driven through the same software-paced path.
+**Basic run-control timing assumption.** In the deployed FEB flow, run-control state changes are driven by C++ software and are normally separated by software-scale time, i.e. orders of milliseconds rather than adjacent FPGA cycles. The integration TB therefore must not qualify a full-pipeline latency run by issuing `RUN_PREPARE` / `SYNC` / `RUNNING` or `TERMINATING` / `IDLE` back-to-back. PROF-INT-002 models this with `TB_INT_RUNCTL_CPP_GAP_CYCLES` (default 125000 cycles = 1 ms at 125 MHz) and must log the observed gap before the next state is driven. Run-control ready is not a command-acceptance contract in this build: commands are broadcast readyless, no slave may backpressure a state transition, and legacy local ready signals are sampled only as diagnostics until a future packet-based ACK path is defined.
+
+**Pre-rbCAM latency sanity assumption.** PROF-INT-002 must first prove the source-to-pre-rbCAM path with ASIC0 only and two fixed channels (`TB_INT_HIT_CHANNEL_LOW=0`, `TB_INT_HIT_CHANNEL_HIGH=1`) before interpreting post-rbCAM or FEB-egress residuals. In `header_sync` mode, a single injected pulse creates exactly two Stage-A hits and two pre-rbCAM records; four pulses must therefore produce eight pre-rbCAM rows. Short-mode MuTRiG frames are 910 cycles, so the effective pulse phase is `TB_INT_INJECT_PHASE_CYCLES % 910`, interpreted as the injection delay after the MuTRiG header seen by the pulse driver. The expected wait-to-pack latency is approximately `910 - effective_phase + fixed_pipeline`: a 100-cycle offset should be near the maximum delay, and increasing the offset toward 800 cycles should reduce the peak nearly linearly toward the minimum delay. Around a 900-cycle offset the pulse is at the next-frame edge; the correct result may be a two-peak distribution with one group captured quickly in the next frame and another group delayed almost a full frame. Offsets greater than 910 cycles fold back modulo 910 and must follow the same effective-phase model. The acceptable debug-stage tolerance is +/-200 cycles, but away from the frame edge the expected shape is a narrow delta-like distribution around each phase point; if the count is not `2 * inject_pulse_count` or if the phase sweep does not follow this modulo-frame model, the run is a source/monitor bug and later rbCAM/FEB conclusions are blocked. In `periodic` mode, when the pulse period is not commensurate with the 910-cycle frame period, the injection phase walks relative to the MuTRiG header and the pre-rbCAM latency should become a plateau over roughly 100-900 cycles at low two-channel rate, widening toward at most two frames only as the typical rate increases.
 
 ### Out of scope
 
@@ -47,9 +49,9 @@ All components under `tb_int/uvm/` follow the standard Mu3e UVM agent pattern (d
 | `mutrig_phy_agent` | active source on the LVDS PHY pin pair | Virtual MuTRiG ASIC. Generates **byte-stream-encoded** MuTRiG frames at the LVDS data-clock boundary, including 8b/10b encoding, frame headers, hit payloads, frame trailers, and idle K-codes. Emits hits with the canonical 45-bit `hit_type0` layout (`asic[3:0]`, `channel[4:0]`, `T_CC[14:0]`, `T_Fine[4:0]`, `E_CC[14:0]`, `E_Flag[0]`) per `frame_rcv_ip.vhd:580-585`. |
 | `runctl_phy_agent` | active source on the synclink AVST 9-bit boundary | Drives `runctl_mgmt_host`'s synclink input with run-state command bytes. |
 | `sc_phy_agent` | active master on the SC-bridge AVMM pin boundary | Drives the SC bridge's PCIe-mapped AVMM master. Mirrors what `sc_tool` does in software but at the simulated bus level. |
-| `lvds_decoded_monitor` | passive | Used for PROF-INT-002 pre-rbCAM ingress. Four monitor instances fan into the scoreboard from `data_splitter_0_out0_*` through `data_splitter_0_out3_*`. |
-| `rbcam_egress_monitor` | passive | Snoops the post-`ring_buffer_cam` `aso_hit_type2` boundary (the **post-rbCAM tap**). |
-| `feb_egress_monitor` | passive | Snoops the FEB-egress framed boundary at `feb_frame_assembly` output (the **FEB egress tap**). |
+| `lvds_decoded_monitor` | passive | Used for PROF-INT-002 pre-rbCAM ingress. Eight monitor instances fan into the scoreboard from both hit-stack subsystems' `data_splitter_0_out0_*` through `data_splitter_0_out3_*`. |
+| `rbcam_egress_monitor` | passive | Snoops all eight post-`ring_buffer_cam` `aso_hit_type2` boundaries (the **post-rbCAM tap**) across both hit-stack subsystems. |
+| `feb_egress_monitor` | passive | Snoops both FEB-egress framed boundaries at the two `feb_frame_assembly` outputs (the **FEB egress tap**). |
 | `histogram_csr_monitor` | passive | Periodically polls `histogram_statistics_0`'s bin counters via the SC bridge for cross-check against scoreboard. |
 | `l2_fifo_commit_monitor` | passive | Interface-bind monitor. Samples the actual emulator L2 FIFO commit strobe via a `mutrig_l2_commit_if` interface declared in the focus-build wrapper. Assigns the canonical 64-bit `hit_id` at the commit cycle and publishes a `hit_record` to the scoreboard. See §2.3. |
 
@@ -193,6 +195,10 @@ A single case = one (rate × multiplicity × spatial × temporal × phasing × s
 - **Frame-boundary phasing**: hits aligned to frame start, hits at frame end, hits straddling frame boundary, frames with zero hits.
 - **Latency target**: every case asserts the four-stage latency budgets (§2.2) are not exceeded; histogram cross-check at every tap. Mismatch beyond the per-bucket-reconciliation threshold (set per case in `DV_COV.md`) is a fail.
 
+PROF-INT-002 bring-up gates the wider DT scope with the ASIC0/two-channel pre-rbCAM phase ladder above. The first accepted directed checks are `run_prof_int_002_pre_rbcam_latency` and `run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900`, which generate `pre_rbcam_records.csv` plus per-case histogram CSV/PNG under `tb_int/sim/<case>/pre_rbcam_hist/`.
+
+Current pre-rbCAM evidence, 2026-05-06: after fixing the emulator signal-offer replay bug, the focused four-pulse check produced 8 rows for channels 0 and 1. The 128-pulse phase sweep passed phases 100 through 900 with 256 rows per phase. Phases 100..800 measured median latencies of `821.5, 721.5, 621.5, 521.5, 421.5, 321.5, 221.5, 121.5` cycles, i.e. `910 - phase + 11.5` cycles. Phase 900 showed the expected next-frame edge split with populated bins at 21, 25, and 929 cycles.
+
 Bucket-specific DT scope:
 
 | Bucket | DT focus |
@@ -241,7 +247,7 @@ Per-test reports under `tb_int/reports/<test>/`:
   - `TB_INT_STABLE_WINDOW_CYCLES=125000000` (1 s stable-origin interval)
   - `TB_INT_STABLE_ONLY_EXPORT=1`
   - `TB_INT_RUNCTL_CPP_GAP_CYCLES=125000` (1 ms software-scale command gap, must be observed in the transcript before the next state)
-  - `TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=1250000` (10 ms bounded observation for local legacy rbCAM/FEB run-control sink readiness)
+  - `TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=1250000` (legacy diagnostic budget only; run-control commands do not wait on slave ready)
 - 1-lane virtual MuTRiG, 100 kHz/channel, 5s with 1s stable window:
   - Target: `make run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s`
   - Sim dir: `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s/`
@@ -252,7 +258,7 @@ Per-test reports under `tb_int/reports/<test>/`:
   - Sim dir: `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s/`
   - Plot dir: `tb_int/reports/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s/`
   - Contact sheet: `contact_sheet_dislin.png`
-  - Monitor scope: eight Stage-A taps, four pre-rbCAM taps, and four post-rbCAM taps feed the same scoreboard.
+  - Monitor scope: eight Stage-A taps, eight pre-rbCAM taps, eight post-rbCAM taps, and two FEB-egress taps feed the same scoreboard.
 - Emulator/full RTL path, 100 kHz/channel, 8-lane equivalent, 5s with 1s stable window:
   - Target: `make run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s`
   - Sim dir: `tb_int/sim/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s/`
@@ -263,9 +269,9 @@ Per-test reports under `tb_int/reports/<test>/`:
   - `make run_prof_int_002_full_pipeline_100khz_per_channel_5s`
   - Executes all three runs above and corresponding plots via `plot_prof_int_002_full_pipeline_100khz_per_channel_5s` dependency chain.
 
-Current validation note, 2026-05-05: `make comp_prof_int_002` passes after the fanout patch, and the bounded short runtime
+Current validation note, 2026-05-06: the previous bounded short runtime
 `make run_prof_int_002_full_pipeline_100khz_per_channel_test PROF_INT_002_RUN_CYCLES=20000 PROF_INT_002_DRAIN_CYCLES=1024 SEED=2`
-elaborates and exports 52 closed records. It is not closure evidence for the 5s targets: the scoreboard reports `A=352 PRE=256 POST=64 FEB=52`, `stable_closed=52/352` (14 percent, below the 95 percent gate), run-control `010` misses ready bits `0x01080`, and the generated post-rbCAM/FEB-egress latencies sit outside the rbCAM reference aperture.
+was not closure evidence for the 5s targets: the scoreboard reported `A=352 PRE=256 POST=64 FEB=52`, `stable_closed=52/352` (14 percent, below the 95 percent gate), run-control was still being interpreted through ready diagnostics, and the generated post-rbCAM/FEB-egress latencies sat outside the rbCAM reference aperture. The root causes are tracked as monitor/run-control integration bugs: PROF-INT-002 was binding only one four-rbCAM hit-stack and one FEB egress, and the full8lane Qsys Tcl had displaced `mts_preprocessor_1.run_ctrl` by reusing the reference out12 slot for `mutrig_frame_deassembly_0.ctrl`. A second short diagnostic after those fixes showed `MTS out=0` with MTS RUNNING and rbCAM GO asserted; that is tracked as a histogram ingress bridge bug where the diagnostic histogram sink could backpressure the primary pre-rbCAM stream. A third short diagnostic after the histogram bridge fix showed `MTS out=30` / `hisb_pre=30` / `PRE=120`, but all rbCAM direct state codes were `9` and `POST=0`; that is tracked as a Qsys generation bug where readyless hit-stack run-control had been materialized through `run_control_cmd_fifo_0..5`, incorrectly allowing local ready to gate forward state commands. The repaired harness must bind eight pre-rbCAM taps, eight post-rbCAM taps, and two FEB-egress taps, while the repaired Qsys Tcl keeps the main run-control splitter at its 16-output limit, cascades out12 through a two-output readyless splitter for `mts_preprocessor_1.run_ctrl` plus `mutrig_frame_deassembly_0.ctrl`, and keeps each hit-stack run-control fanout as a direct readyless broadcast to rbCAM/FEB consumers. During RUNNING, PROF-INT-002 must log `PROF_INT_002_MON_BIND` with Stage-A/pre/post/FEB activity bits, MTS0/1 in/out ready/valid/error bits, hit-stack run-control valid vectors, and MTS/rbCAM CSR state; readiness is not a command-acceptance gate in this build.
 
 ### Latency reporter/metric conventions for these runs
 
@@ -281,7 +287,8 @@ elaborates and exports 52 closed records. It is not closure evidence for the 5s 
   - x-axis: `signed hit latency bin center [cycles]`
   - y-axis: `hits / bin [% of captured interval]`
 - Reporter output requirement:
-  - Pre-rbCAM panel must represent the aggregate rbCAM-ingress boundary at `hit_stack_subsystem_0.data_splitter_0_out0_*` through `out3_*` (or equivalent `hit_stack_subsystem_0.hit_type_1_*` fanout).
+  - Pre-rbCAM panel must represent the aggregate rbCAM-ingress boundary at both hit-stack subsystems' `data_splitter_0_out0_*` through `out3_*` fanouts.
+  - Post-rbCAM and FEB-egress panels must use the corrected expected latency apertures above. Under the 100 kHz/channel typical workload the FIFOs should be empty or near-empty, so post-rbCAM should be near the fixed rbCAM latency and FEB-egress should add only the deterministic frame-store interval; a broad distribution is a datapath or monitor-binding failure, not an accepted workload artifact.
   - Each panel must include total/hits, nonzero bins, peak bin/fraction, black-peak note, green DV-budget note, in-window/out-window counts, and compact two-line title text.
 
 ### CSV column reference

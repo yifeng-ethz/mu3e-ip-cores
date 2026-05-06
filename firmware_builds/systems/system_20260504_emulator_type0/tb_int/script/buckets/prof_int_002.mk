@@ -8,6 +8,18 @@ PROF_INT_002_DIR  := $(SIM_ROOT)/$(PROF_INT_002_TEST)
 PROF_INT_002_DIR_1L_5S := $(SIM_ROOT)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
 PROF_INT_002_DIR_8L_5S := $(SIM_ROOT)/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s
 PROF_INT_002_DIR_EMU_5S := $(SIM_ROOT)/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s
+PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE ?= periodic
+PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES ?= 100
+PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT ?= 128
+PROF_INT_002_PRE_RBCAM_RUN_CYCLES ?= 200000
+PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES ?= 4096
+PROF_INT_002_PRE_RBCAM_CHANNEL_LOW ?= 0
+PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH ?= 1
+PROF_INT_002_PRE_RBCAM_PHASE_SWEEP ?= 100 200 300 400 500 600 700 800 900
+PROF_INT_002_PRE_RBCAM_CASE ?= prof_int_002_pre_rbcam_$(PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE)_phase$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES)
+PROF_INT_002_PRE_RBCAM_DIR := $(SIM_ROOT)/$(PROF_INT_002_PRE_RBCAM_CASE)
+PROF_INT_002_PRE_RBCAM_HIST_DIR := $(PROF_INT_002_PRE_RBCAM_DIR)/pre_rbcam_hist
+PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR := $(SIM_ROOT)/prof_int_002_pre_rbcam_header_sync_phase_sweep/pre_rbcam_hist
 PROF_INT_002_REPORT_DIR := $(TB_INT_ROOT)/reports
 PROF_INT_002_REPORT_DIR_1L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
 PROF_INT_002_REPORT_DIR_8L_5S := $(PROF_INT_002_REPORT_DIR)/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s
@@ -33,6 +45,12 @@ PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh 
 \trun_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
 \trun_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
 \trun_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
+\trun_prof_int_002_pre_rbcam_latency \
+\trun_prof_int_002_pre_rbcam_header_sync_phase_100 \
+\trun_prof_int_002_pre_rbcam_header_sync_phase_500 \
+\trun_prof_int_002_pre_rbcam_header_sync_phase_900 \
+\trun_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
+\trun_prof_int_002_pre_rbcam_periodic_2ch \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
 \tplot_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
@@ -180,6 +198,75 @@ run_prof_int_002_full_pipeline_100khz_per_channel_test: comp_prof_int_002 prepar
 	@tail -n 80 $(PROF_INT_002_DIR)/transcript
 	@grep -q "\*\*\* TEST PASSED \*\*\*" $(PROF_INT_002_DIR)/transcript
 	@if grep -E "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(PROF_INT_002_DIR)/transcript; then exit 1; fi
+
+run_prof_int_002_pre_rbcam_latency: comp_prof_int_002 prepare_prof_int_002_mem_init
+	@mkdir -p $(PROF_INT_002_PRE_RBCAM_DIR)
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(PROF_INT_002_TOP) \
+	    +UVM_TESTNAME=$(PROF_INT_002_TEST) \
+	    +ARB_SEED=$(SEED) \
+	    +TB_INT_SIM_DIR=$(PROF_INT_002_PRE_RBCAM_DIR) \
+	    +TB_INT_REQUIRE_ZERO_RESIDUAL=0 \
+	    +TB_INT_MIN_CLOSED_PCT=0 \
+		    +TB_INT_RUN_CYCLES=$(PROF_INT_002_PRE_RBCAM_RUN_CYCLES) \
+		    +TB_INT_DRAIN_CYCLES=$(PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES) \
+		    +TB_INT_STABLE_WINDOW_CYCLES=0 \
+		    +TB_INT_RUNCTL_CPP_GAP_CYCLES=$(PROF_INT_002_RUNCTL_CPP_GAP_CYCLES) \
+		    +TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=$(PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES) \
+		    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
+		    +TB_INT_TRAFFIC_MODE=$(PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE) \
+		    +TB_INT_MUTRIG_SHORT_MODE=1 \
+		    +TB_INT_HIT_CHANNEL_LOW=$(PROF_INT_002_PRE_RBCAM_CHANNEL_LOW) \
+		    +TB_INT_HIT_CHANNEL_HIGH=$(PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH) \
+		    +TB_INT_INJECT_PHASE_CYCLES=$(PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES) \
+		    +TB_INT_INJECT_PULSE_COUNT=$(PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT) \
+	    +TB_INT_STABLE_ONLY_EXPORT=0 \
+	    +TB_INT_ACTIVE_LANE_COUNT=1 \
+	    +TB_INT_ACTIVE_LANE_MASK=1 \
+	    -l $(PROF_INT_002_PRE_RBCAM_DIR)/transcript \
+	    -do "run -all; quit -f"
+	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases $(PROF_INT_002_PRE_RBCAM_CASE) \
+	    --hist-dir $(PROF_INT_002_PRE_RBCAM_HIST_DIR) \
+	    --hist-formats csv,png
+	@tail -n 80 $(PROF_INT_002_PRE_RBCAM_DIR)/transcript
+	@grep -q "\*\*\* TEST PASSED \*\*\*" $(PROF_INT_002_PRE_RBCAM_DIR)/transcript
+	@if grep -E "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(PROF_INT_002_PRE_RBCAM_DIR)/transcript; then exit 1; fi
+
+run_prof_int_002_pre_rbcam_header_sync_phase_100:
+	$(MAKE) run_prof_int_002_pre_rbcam_latency \
+	    PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
+	    PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=100
+
+run_prof_int_002_pre_rbcam_header_sync_phase_500:
+	$(MAKE) run_prof_int_002_pre_rbcam_latency \
+	    PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
+	    PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=500
+
+run_prof_int_002_pre_rbcam_header_sync_phase_900:
+	$(MAKE) run_prof_int_002_pre_rbcam_latency \
+	    PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
+	    PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=900
+
+run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900:
+	@set -e; for phase in $(PROF_INT_002_PRE_RBCAM_PHASE_SWEEP); do \
+	    $(MAKE) run_prof_int_002_pre_rbcam_latency \
+	        PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=header_sync \
+	        PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=$$phase \
+	        PROF_INT_002_PRE_RBCAM_CASE=prof_int_002_pre_rbcam_header_sync_phase$${phase}; \
+	done
+	python3 $(TB_INT_ROOT)/script/analyze_pre_rbcam_latency.py \
+	    --sim-root $(SIM_ROOT) \
+	    --cases 'prof_int_002_pre_rbcam_header_sync_phase[1-9]00' \
+	    --hist-dir $(PROF_INT_002_PRE_RBCAM_SWEEP_HIST_DIR) \
+	    --hist-formats csv,png \
+	    --aggregate
+
+run_prof_int_002_pre_rbcam_periodic_2ch:
+	$(MAKE) run_prof_int_002_pre_rbcam_latency \
+	    PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=periodic \
+	    PROF_INT_002_PRE_RBCAM_INJECT_PULSE_COUNT=0 \
+	    PROF_INT_002_PRE_RBCAM_INJECT_PHASE_CYCLES=0
 
 run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s: comp_prof_int_002 prepare_prof_int_002_mem_init
 	@mkdir -p $(PROF_INT_002_DIR_1L_5S)

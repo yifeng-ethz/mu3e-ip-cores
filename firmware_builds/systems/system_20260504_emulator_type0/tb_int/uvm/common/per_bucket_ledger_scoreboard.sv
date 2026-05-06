@@ -1,9 +1,9 @@
 // per_bucket_ledger_scoreboard.sv
 // Per-lane, per-key FIFO-ledger scoreboard for focus-build tb_int.
 // Author: Yifeng Wang
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Add reusable Stage-A/pre-rbCAM/post-rbCAM/FEB ledger scoreboard.
+// Version : 26.2.1
+// Date    : 20260506
+// Change  : Collapse physical pre-rbCAM broadcast fanout to logical hits.
 
 package tb_int_scoreboard_pkg;
 
@@ -40,6 +40,7 @@ package tb_int_scoreboard_pkg;
         int unsigned total_stage_a;
         int unsigned total_stage_a_stable;
         int unsigned total_pre_rbcam;
+        int unsigned total_pre_rbcam_fanout_duplicates;
         int unsigned total_post_rbcam;
         int unsigned total_feb_egress;
         int unsigned total_matched_a_pre;
@@ -138,6 +139,25 @@ package tb_int_scoreboard_pkg;
             ledger[key_bits].push_back(obs);
         endfunction
 
+        function automatic bit is_same_cycle_duplicate(
+            ref obs_q_t ledger[bit [9:0]],
+            hit_record item
+        );
+            bit [9:0]  key_bits;
+            hit_record last_obs;
+
+            if (item == null)
+                return 1'b0;
+            key_bits = item.key_bits();
+            if (!ledger.exists(key_bits) || ledger[key_bits].size() == 0)
+                return 1'b0;
+            last_obs = ledger[key_bits][ledger[key_bits].size() - 1];
+            return (last_obs != null &&
+                    last_obs.abs_ts == item.abs_ts &&
+                    last_obs.payload == item.payload &&
+                    last_obs.lane_id == item.lane_id);
+        endfunction
+
         virtual function void write_stage_a(hit_record item);
             int unsigned lane_idx;
 
@@ -167,6 +187,10 @@ package tb_int_scoreboard_pkg;
                 return;
             item.observation_point = OBS_STAGE_PRE_RBCAM;
             key_bits = item.key_bits();
+            if (is_same_cycle_duplicate(stage_pre_rbcam_ledger[lane_idx], item)) begin
+                total_pre_rbcam_fanout_duplicates++;
+                return;
+            end
             match_seq = stage_pre_rbcam_ledger[lane_idx].exists(key_bits)
                         ? stage_pre_rbcam_ledger[lane_idx][key_bits].size() : 0;
             if (stage_a_ledger[lane_idx].exists(key_bits) &&
@@ -307,6 +331,7 @@ package tb_int_scoreboard_pkg;
                         int pre_n;
                         int post_n;
                         int feb_n;
+                        int matched_pre;
                         int matched_all;
 
                         a_n = stage_a_ledger[lane_idx][key_bits].size();
@@ -323,6 +348,13 @@ package tb_int_scoreboard_pkg;
                             matched_all = post_n;
                         if (feb_n < matched_all)
                             matched_all = feb_n;
+
+                        matched_pre = (a_n < pre_n) ? a_n : pre_n;
+                        for (int obs_idx = 0; obs_idx < matched_pre; obs_idx++) begin
+                            if (do_export)
+                                reporter.write_pre_rbcam_pair(stage_a_ledger[lane_idx][key_bits][obs_idx],
+                                                              stage_pre_rbcam_ledger[lane_idx][key_bits][obs_idx]);
+                        end
 
                         for (int obs_idx = 0; obs_idx < matched_all; obs_idx++) begin
                             if (do_export &&
@@ -423,11 +455,12 @@ package tb_int_scoreboard_pkg;
             if (export_now)
                 exported_records = 1'b1;
             `uvm_info("TB_INT_SB",
-                      $sformatf("reconcile[%s] A=%0d stable_A=%0d PRE=%0d POST=%0d FEB=%0d closed=%0d stable_closed=%0d residuals A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d stable_missing A->PRE/PRE->POST/POST->FEB=%0d/%0d/%0d",
+                      $sformatf("reconcile[%s] A=%0d stable_A=%0d PRE=%0d pre_fanout_dupe=%0d POST=%0d FEB=%0d closed=%0d stable_closed=%0d residuals A->PRE matched/missing/ghost=%0d/%0d/%0d PRE->POST=%0d/%0d/%0d POST->FEB=%0d/%0d/%0d stable_missing A->PRE/PRE->POST/POST->FEB=%0d/%0d/%0d",
                                 phase_name,
                                 total_stage_a,
                                 total_stage_a_stable,
                                 total_pre_rbcam,
+                                total_pre_rbcam_fanout_duplicates,
                                 total_post_rbcam,
                                 total_feb_egress,
                                 total_closed_records,

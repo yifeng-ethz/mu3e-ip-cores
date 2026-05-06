@@ -4,6 +4,7 @@ incremental_db/
 output_files*/
 sta_debug_*/
 timing_debug/
+.compile_watch/
 *.qws
 *.sof
 *.pof

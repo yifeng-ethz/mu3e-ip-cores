@@ -1,9 +1,9 @@
 // tb_int_env.sv
 // Focus-build integration UVM environment.
 // Author: Yifeng Wang
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Instantiate reusable agents, monitors, and per-bucket scoreboard.
+// Version : 26.2.1
+// Date    : 20260506
+// Change  : Aggregate 8 rbCAM taps and 2 FEB-egress taps.
 
 package tb_int_env_pkg;
 
@@ -20,7 +20,8 @@ package tb_int_env_pkg;
     `include "uvm_macros.svh"
 
     localparam int TB_INT_STAGE_A_TAPS = 8;
-    localparam int TB_INT_RBCAM_TAPS = 4;
+    localparam int TB_INT_RBCAM_TAPS = 8;
+    localparam int TB_INT_FEB_EGRESS_TAPS = 2;
 
     class tb_int_env extends uvm_env;
         `uvm_component_utils(tb_int_env)
@@ -31,7 +32,7 @@ package tb_int_env_pkg;
         l2_fifo_commit_monitor        l2_commit_mon[TB_INT_STAGE_A_TAPS];
         lvds_decoded_monitor          pre_rbcam_mon[TB_INT_RBCAM_TAPS];
         rbcam_egress_monitor          post_rbcam_mon[TB_INT_RBCAM_TAPS];
-        feb_egress_monitor            feb_egress_mon;
+        feb_egress_monitor            feb_egress_mon[TB_INT_FEB_EGRESS_TAPS];
         histogram_csr_monitor         histogram_mon;
         per_bucket_ledger_scoreboard  scoreboard;
 
@@ -53,7 +54,9 @@ package tb_int_env_pkg;
             foreach (post_rbcam_mon[tap_idx])
                 post_rbcam_mon[tap_idx] = rbcam_egress_monitor::type_id::create(
                     $sformatf("post_rbcam_mon%0d", tap_idx), this);
-            feb_egress_mon = feb_egress_monitor::type_id::create("feb_egress_mon", this);
+            foreach (feb_egress_mon[tap_idx])
+                feb_egress_mon[tap_idx] = feb_egress_monitor::type_id::create(
+                    $sformatf("feb_egress_mon%0d", tap_idx), this);
             histogram_mon  = histogram_csr_monitor::type_id::create("histogram_mon", this);
             scoreboard     = per_bucket_ledger_scoreboard::type_id::create("scoreboard", this);
         endfunction
@@ -66,7 +69,8 @@ package tb_int_env_pkg;
                 pre_rbcam_mon[tap_idx].ap.connect(scoreboard.pre_rbcam_imp);
             foreach (post_rbcam_mon[tap_idx])
                 post_rbcam_mon[tap_idx].ap.connect(scoreboard.post_rbcam_imp);
-            feb_egress_mon.ap.connect(scoreboard.feb_egress_imp);
+            foreach (feb_egress_mon[tap_idx])
+                feb_egress_mon[tap_idx].ap.connect(scoreboard.feb_egress_imp);
             histogram_mon.ap.connect(scoreboard.histogram_imp);
         endfunction
     endclass
