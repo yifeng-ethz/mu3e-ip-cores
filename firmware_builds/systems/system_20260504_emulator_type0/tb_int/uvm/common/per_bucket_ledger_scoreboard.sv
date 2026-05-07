@@ -1,9 +1,9 @@
 // per_bucket_ledger_scoreboard.sv
 // Per-lane, per-key FIFO-ledger scoreboard for focus-build tb_int.
 // Author: Yifeng Wang
-// Version : 26.2.3
-// Date    : 20260506
-// Change  : Split nominal FIFO-key scoring from DEBUG_LEVEL=2 sidecar scoring.
+// Version : 26.2.4
+// Date    : 20260507
+// Change  : Add post-rbCAM-only scoring/export scope for rbCAM loss closure.
 
 package tb_int_scoreboard_pkg;
 
@@ -141,7 +141,9 @@ package tb_int_scoreboard_pkg;
                 stable_only_export = (plusarg_stable_only_export != 0);
             if ($value$plusargs("TB_INT_SCOREBOARD_SCOPE=%s", plusarg_scoreboard_scope))
                 scoreboard_scope = plusarg_scoreboard_scope;
-            if (!((scoreboard_scope == "full") || (scoreboard_scope == "pre_rbcam"))) begin
+            if (!((scoreboard_scope == "full") ||
+                  (scoreboard_scope == "pre_rbcam") ||
+                  (scoreboard_scope == "post_rbcam"))) begin
                 `uvm_warning("TB_INT_SB",
                              $sformatf("unknown TB_INT_SCOREBOARD_SCOPE=%s; using full",
                                        scoreboard_scope))
@@ -503,6 +505,10 @@ package tb_int_scoreboard_pkg;
                     return (total_debug_missing_pre != 0 ||
                             total_debug_ghost_pre != 0 ||
                             total_debug_duplicate_ids != 0);
+                if (scoreboard_scope == "post_rbcam")
+                    return (total_debug_missing_pre != 0 || total_debug_ghost_pre != 0 ||
+                            total_debug_missing_post != 0 || total_debug_ghost_post != 0 ||
+                            total_debug_duplicate_ids != 0);
                 return (total_debug_missing_pre != 0 || total_debug_ghost_pre != 0 ||
                         total_debug_missing_post != 0 || total_debug_ghost_post != 0 ||
                         total_debug_missing_feb != 0 || total_debug_ghost_feb != 0 ||
@@ -510,6 +516,9 @@ package tb_int_scoreboard_pkg;
             end
             if (scoreboard_scope == "pre_rbcam")
                 return (total_missing_pre != 0 || total_ghost_pre != 0);
+            if (scoreboard_scope == "post_rbcam")
+                return (total_missing_pre != 0 || total_ghost_pre != 0 ||
+                        total_missing_post != 0 || total_ghost_post != 0);
             return (total_missing_pre != 0 || total_ghost_pre != 0 ||
                     total_missing_post != 0 || total_ghost_post != 0 ||
                     total_missing_feb != 0 || total_ghost_feb != 0);
@@ -528,7 +537,9 @@ package tb_int_scoreboard_pkg;
                         int post_n;
                         int feb_n;
                         int matched_pre;
+                        int matched_post;
                         int matched_all;
+                        int matched_required;
 
                         a_n = stage_a_ledger[lane_idx][key_bits].size();
                         pre_n = stage_pre_rbcam_ledger[lane_idx].exists(key_bits)
@@ -537,19 +548,25 @@ package tb_int_scoreboard_pkg;
                                  ? stage_post_rbcam_ledger[lane_idx][key_bits].size() : 0;
                         feb_n = stage_feb_egress_ledger[lane_idx].exists(key_bits)
                                 ? stage_feb_egress_ledger[lane_idx][key_bits].size() : 0;
-                        matched_all = a_n;
-                        if (pre_n < matched_all)
-                            matched_all = pre_n;
-                        if (post_n < matched_all)
-                            matched_all = post_n;
+                        matched_pre = (a_n < pre_n) ? a_n : pre_n;
+                        matched_post = matched_pre;
+                        if (post_n < matched_post)
+                            matched_post = post_n;
+                        matched_all = matched_post;
                         if (feb_n < matched_all)
                             matched_all = feb_n;
 
-                        matched_pre = (a_n < pre_n) ? a_n : pre_n;
                         for (int obs_idx = 0; obs_idx < matched_pre; obs_idx++) begin
                             if (do_export)
                                 reporter.write_pre_rbcam_pair(stage_a_ledger[lane_idx][key_bits][obs_idx],
                                                               stage_pre_rbcam_ledger[lane_idx][key_bits][obs_idx]);
+                        end
+
+                        for (int obs_idx = 0; obs_idx < matched_post; obs_idx++) begin
+                            if (do_export)
+                                reporter.write_post_rbcam_pair(stage_a_ledger[lane_idx][key_bits][obs_idx],
+                                                               stage_pre_rbcam_ledger[lane_idx][key_bits][obs_idx],
+                                                               stage_post_rbcam_ledger[lane_idx][key_bits][obs_idx]);
                         end
 
                         for (int obs_idx = 0; obs_idx < matched_all; obs_idx++) begin
@@ -560,12 +577,22 @@ package tb_int_scoreboard_pkg;
                                                       stage_post_rbcam_ledger[lane_idx][key_bits][obs_idx],
                                                       stage_feb_egress_ledger[lane_idx][key_bits][obs_idx]);
                             end
+                        end
+
+                        if (scoreboard_scope == "pre_rbcam")
+                            matched_required = matched_pre;
+                        else if (scoreboard_scope == "post_rbcam")
+                            matched_required = matched_post;
+                        else
+                            matched_required = matched_all;
+
+                        for (int obs_idx = 0; obs_idx < matched_required; obs_idx++) begin
                             total_closed_records++;
                             if (stage_a_ledger[lane_idx][key_bits][obs_idx].run_origin)
                                 total_closed_records_stable++;
                         end
 
-                        for (int obs_idx = matched_all; obs_idx < a_n; obs_idx++) begin
+                        for (int obs_idx = matched_required; obs_idx < a_n; obs_idx++) begin
                             string stage_name;
                             time   last_seen_ts;
                             bit is_stable;
@@ -606,6 +633,7 @@ package tb_int_scoreboard_pkg;
                     hit_record pre_rbcam;
                     hit_record post_rbcam;
                     hit_record feb_egress;
+                    bit        selected_complete;
 
                     stage_a = stage_debug_source_ledger[debug_id];
                     pre_rbcam = stage_pre_rbcam_debug_ledger.exists(debug_id)
@@ -618,8 +646,20 @@ package tb_int_scoreboard_pkg;
                     if (pre_rbcam != null && do_export)
                         reporter.write_pre_rbcam_pair(stage_a, pre_rbcam);
 
-                    if (pre_rbcam != null && post_rbcam != null && feb_egress != null) begin
-                        if (do_export &&
+                    if (pre_rbcam != null && post_rbcam != null && do_export)
+                        reporter.write_post_rbcam_pair(stage_a, pre_rbcam, post_rbcam);
+
+                    if (scoreboard_scope == "pre_rbcam")
+                        selected_complete = (pre_rbcam != null);
+                    else if (scoreboard_scope == "post_rbcam")
+                        selected_complete = (pre_rbcam != null && post_rbcam != null);
+                    else
+                        selected_complete = (pre_rbcam != null &&
+                                             post_rbcam != null &&
+                                             feb_egress != null);
+
+                    if (selected_complete) begin
+                        if ((scoreboard_scope == "full") && do_export &&
                             (!stable_only_export || stage_a.run_origin)) begin
                             reporter.write_closed(stage_a,
                                                   pre_rbcam,

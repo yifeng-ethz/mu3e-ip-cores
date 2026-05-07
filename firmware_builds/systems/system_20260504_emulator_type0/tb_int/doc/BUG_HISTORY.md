@@ -50,6 +50,7 @@ Historical formal note:
 | [BUG-013-H](#bug-013-h-dual-uvm-sidecar-lineage-was-not-bound-for-all-source-modes) | H | hard stuck error | `common (DEBUG_LEVEL=2 sidecar lineage closure)` | partial; dual UVM harness fixed, generated-system refresh pending | PROF-INT-002 DEBUG_LEVEL=2 sidecar smoke on `2026-05-06` | pending | tb_int had a nominal latency path but no fully independent sidecar-source path for every source mode, so OoO sidecar lineage could be inactive or stale while latency plots still exported normally. |
 | [BUG-014-R](#bug-014-r-debug-sidecar-bank-bridge-gated-lineage-on-unconnected-endofrun) | R | hard stuck error | `common (DEBUG_LEVEL=2 full8lane generated simulation)` | fixed in IP source and regenerated Qsys sim RTL; full downstream closure pending | PROF-INT-002 virtual MuTRiG sidecar rerun on `2026-05-06` | pending | `debug_hit_sidecar_bank_bridge` gated sidecar-valid/read-accept on an optional `endofrun` input that the generated full8lane system left open, suppressing source IDs at pre-rbCAM. |
 | [BUG-015-H](#bug-015-h-dislin-latency-renderer-dropped-out-of-display-stage-records) | H | soft error | `directed-only (post-rbCAM/FEB latency plotting with outliers)` | fixed in plotting script; regenerated 10/100 kHz all-stage plot exposes blocker | PROF-INT-002 post-rbCAM/FEB plot generation on `2026-05-06` | pending | The DISLIN renderer counted only bins inside the display range, so post-rbCAM/FEB records outside the DV_PLAN aperture could be reported as zero total instead of out-of-window hits. |
+| [BUG-016-H](#bug-016-h-short-run-control-gap-made-rbcam-look-like-it-rejected-in-window-hits) | H | hard stuck error | `directed-only (post-rbCAM debug run-control override)` | fixed in harness guard; post-rbCAM rerun passed | PROF-INT-002 post-rbCAM ASIC0 100 kHz debug on `2026-05-07` | pending | A 1000-cycle debug run-control gap advanced RUNNING while rbCAM was still flushing, so hits accepted at pre-rbCAM were delayed until termination and looked like rbCAM rejection. |
 
 ## 2026-05-06
 
@@ -425,3 +426,32 @@ Historical formal note:
     `reports/prof_int_002_pipeline_periodic_asic0_full32_virtual_mutrig_010k_100k_1ms_dislin/latency_summary.csv` reports, for 10 kHz/channel, post-rbCAM `total=105 display_count=0 above_xlim=105 out_window=105`, and for 100 kHz/channel, post-rbCAM `total=364 display_count=0 above_xlim=364 out_window=364`; FEB-egress has the same all-above-window signature. This is a visible blocker, not a plotting artifact.
   - potential_hazard:
     low after the renderer fix; any future per-stage plot with all hits outside the display aperture now reports raw out-of-window counts instead of silently dropping them
+
+## 2026-05-07
+
+### BUG-016-H: short run-control gap made rbCAM look like it rejected in-window hits
+
+- First seen in:
+  - PROF-INT-002 post-rbCAM ASIC0/channel0 100 kHz emulator debug on `2026-05-07`
+  - command:
+    `make -C firmware_builds/systems/system_20260504_emulator_type0/tb_int run_prof_int_002_pre_rbcam_latency PROF_INT_002_SOURCE=emu_direct PROF_INT_002_PRE_RBCAM_LATENCY_SCOPE=post_rbcam PROF_INT_002_PRE_RBCAM_TRAFFIC_MODE=periodic PROF_INT_002_PRE_RBCAM_RUN_CYCLES=125000 PROF_INT_002_PRE_RBCAM_DRAIN_CYCLES=65536 PROF_INT_002_RUNCTL_CPP_GAP_CYCLES=1000 PROF_INT_002_HIT_RATE_Q16=52 PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT=1 PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK=1 PROF_INT_002_PRE_RBCAM_CHANNEL_LOW=0 PROF_INT_002_PRE_RBCAM_CHANNEL_HIGH=0`
+- Symptom:
+  - the pre-rbCAM latency analyzer reported 98 rows with a fixed 17-cycle Stage-A to pre-rbCAM latency
+  - scoreboard closure was `PRE->POST=47/52/0`, and `rb_hit=47` after drain
+  - rbCAM ingress tracing showed all 99 unique pre hits asserted `split_accept`, `lane_match`, and `deassembly_wrreq`, proving the beats were not rejected at the rbCAM stream input
+  - all `push_write_grant` events occurred during `TERMINATING`; during the entire RUNNING window the rbCAM pop engine trace sat in `FLUSHING`
+- Root cause:
+  - the debug command overrode the DV-plan software-scale run-control gap from 125000 cycles to 1000 cycles
+  - readyless run-control broadcasts cannot be backpressured by rbCAM local ready, so RUNNING can be observed by the state register before the internal flush has completed if the testbench drives adjacent commands too quickly
+  - hits that are within the 0..2000-cycle pre-rbCAM latency window are still blocked from the CAM/side-RAM write path while the rbCAM memory arbiter is granting the flush routine
+- Fix status:
+  - state:
+    fixed in harness guard; post-rbCAM rerun passed
+  - mechanism:
+    recursive PROF-INT-002 sweep targets no longer force 1000-cycle run-control gaps, and the top-level PROF controller raises a UVM error if `full` or `post_rbcam` latency scope is run with `TB_INT_RUNCTL_CPP_GAP_CYCLES < 125000`
+  - before_fix_outcome:
+    the short-gap run reported `PRE->POST=47/52/0`, `stable_missing PRE->POST=51`, `rb_hit=47`, and push-write grant delays from about 4k to 127k cycles after pre-rbCAM acceptance
+  - after_fix_outcome:
+    rerun `prof_int_002_post_rbcam_periodic_asic0_ch0_emulator_100k_1ms_gap1ms_ingress_trace` observed the required 125000-cycle `RUN_PREPARE_to_SYNC`, `SYNC_to_RUNNING`, and `TERMINATING_to_IDLE` gaps. It passed with `UVM_ERROR=0`, `PRE->POST=99/0/0`, `rb_hit=99`, and rbCAM push-write grant delays of 2..39 cycles after pre-rbCAM acceptance.
+  - potential_hazard:
+    low for post-rbCAM/FEB PROF-INT-002 closure after the guard because any future sub-ms command-gap run now fails before being accepted as latency evidence; pre-rbCAM-only source checks may still intentionally use shorter gaps only if they do not claim downstream closure

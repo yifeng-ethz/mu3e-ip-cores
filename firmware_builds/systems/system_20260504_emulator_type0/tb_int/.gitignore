@@ -4,6 +4,8 @@ sim/
 *.wlf
 *.log
 transcript
+rbcam_ingress_trace.csv
+mts_latency_trace.csv
 .questa_static_screen/
 dual_port_rom_init.txt
 !modelsim.ini

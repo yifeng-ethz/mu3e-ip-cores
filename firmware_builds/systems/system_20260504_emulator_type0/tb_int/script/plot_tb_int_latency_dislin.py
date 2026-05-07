@@ -32,8 +32,8 @@ Metric definitions
 
 CSV timestamps are in ps; the renderer converts them to 125 MHz clock cycles.
 By default this script reads closed_records.csv and renders all three stages.
-With --stage pre-rbcam it prefers pre_rbcam_records.csv when present and
-renders only the pre-rbCAM panel.
+With --stage pre-rbcam or --stage post-rbcam it prefers the corresponding
+stage CSV when present and renders only that panel.
 """
 
 from __future__ import annotations
@@ -209,9 +209,12 @@ def build_integer_histogram(latencies: list[float], xlim: tuple[float, float]) -
 # ---------------------------------------------------------------------------
 
 def csv_path_for_case(case_dir: Path, stages: list[dict[str, object]]) -> Path:
-    if (len(stages) == 1 and str(stages[0]["key"]) == "pre_rbcam" and
-            (case_dir / "pre_rbcam_records.csv").is_file()):
-        return case_dir / "pre_rbcam_records.csv"
+    if len(stages) == 1:
+        stage_key = str(stages[0]["key"])
+        if stage_key == "pre_rbcam" and (case_dir / "pre_rbcam_records.csv").is_file():
+            return case_dir / "pre_rbcam_records.csv"
+        if stage_key == "post_rbcam" and (case_dir / "post_rbcam_records.csv").is_file():
+            return case_dir / "post_rbcam_records.csv"
     return case_dir / "closed_records.csv"
 
 
@@ -540,12 +543,16 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, required=True, metavar="DIR")
     parser.add_argument("--rows-per-page", type=int, default=4, metavar="N")
     parser.add_argument("--title-tag", default="", metavar="TEXT")
-    parser.add_argument("--stage", choices=("all", "pre-rbcam"), default="all",
-                        help="Render all stages from closed_records.csv, or only pre-rbCAM from pre_rbcam_records.csv when present.")
+    parser.add_argument("--stage", choices=("all", "pre-rbcam", "post-rbcam", "feb-egress"), default="all",
+                        help="Render all stages from closed_records.csv, or one stage from its dedicated CSV when present.")
     parser.add_argument("--stable-only", action="store_true", default=False,
                         help="Only include rows where run_origin == 1")
     args = parser.parse_args()
-    stages = STAGES if args.stage == "all" else [STAGES[0]]
+    if args.stage == "all":
+        stages = STAGES
+    else:
+        stage_key = args.stage.replace("-", "_")
+        stages = [stage for stage in STAGES if str(stage["key"]) == stage_key]
 
     case_dirs = discover_cases(args.sim_root, args.cases)
     if not case_dirs:
