@@ -162,6 +162,8 @@ module prof_int_002_full_pipeline_top;
     string       inject_driver;
     string       source_mode;
     string       latency_scope;
+    int          rbcam_ingress_trace_fd;
+    int          mts_latency_trace_fd;
     logic [2:0] stage_a_lane_index;
     logic [7:0]  active_lane_mask;
         logic        injection_window_active;
@@ -424,6 +426,126 @@ module prof_int_002_full_pipeline_top;
     function automatic logic hit2_word_is_hit(input logic [35:0] hit2_word);
         return (hit2_word[35:32] == 4'h0);
     endfunction
+
+    function automatic int unsigned rbcam_age_mod8192(
+        input logic [47:0] gts_8n,
+        input logic [12:0] hit_ts8n
+    );
+        logic [12:0] age_v;
+
+        age_v = gts_8n[12:0] - hit_ts8n;
+        return int'(age_v);
+    endfunction
+
+    task automatic write_rbcam_ingress_trace(
+        input int unsigned copy_idx,
+        input logic [38:0] hit1_data,
+        input logic        split_valid,
+        input logic        split_ready,
+        input logic        split_empty,
+        input logic        split_error,
+        input logic        meta_valid,
+        input logic [63:0] meta_data,
+        input logic        deassembly_wrreq,
+        input logic        deassembly_full,
+        input logic        deassembly_empty,
+        input logic        in_payload_valid,
+        input logic        push_write_req,
+        input logic        push_write_grant,
+        input logic [3:0]  run_state_code,
+        input logic [2:0]  pop_state_code,
+        input logic        push_state_code,
+        input logic [47:0] gts_8n,
+        input logic [47:0] read_time_ptr
+    );
+        logic [12:0] hit_ts8n;
+        logic [7:0]  hit_key;
+        logic [1:0]  expected_copy;
+        logic [1:0]  copy_lsb;
+        logic        split_accept;
+        logic        lane_match;
+        logic        would_enter_deassembly;
+        int unsigned age_mod8192;
+
+        if (rbcam_ingress_trace_fd == 0)
+            return;
+        if (!(split_valid || deassembly_wrreq || in_payload_valid ||
+              push_write_req || push_write_grant))
+            return;
+
+        hit_ts8n = hit1_data[29:17];
+        hit_key = hit1_data[28:21];
+        expected_copy = hit1_data[22:21];
+        copy_lsb = copy_idx[1:0];
+        split_accept = split_valid && split_ready && !split_empty && !split_error;
+        lane_match = (expected_copy == copy_lsb);
+        would_enter_deassembly = split_accept && lane_match && !deassembly_full;
+        age_mod8192 = rbcam_age_mod8192(gts_8n, hit_ts8n);
+
+        $fdisplay(rbcam_ingress_trace_fd,
+                  "%0t,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%010h,%0d,0x%016h",
+                  $time,
+                  copy_idx,
+                  split_valid,
+                  split_ready,
+                  split_empty,
+                  split_error,
+                  split_accept,
+                  lane_match,
+                  would_enter_deassembly,
+                  deassembly_wrreq,
+                  deassembly_full,
+                  deassembly_empty,
+                  in_payload_valid,
+                  push_write_req,
+                  push_write_grant,
+                  run_state_code,
+                  pop_state_code,
+                  push_state_code,
+                  gts_8n,
+                  read_time_ptr,
+                  age_mod8192,
+                  hit_ts8n,
+                  hit_key,
+                  expected_copy,
+                  hit1_data[38:35],
+                  hit1_data[34:30],
+                  hit1_data[13:9],
+                  hit1_data[29],
+                  hit1_data,
+                  meta_valid,
+                  meta_data);
+    endtask
+
+    initial begin : rbcam_trace_files
+        string trace_output_dir;
+        string rbcam_ingress_trace_path;
+        string mts_latency_trace_path;
+
+        if (!$value$plusargs("TB_INT_SIM_DIR=%s", trace_output_dir))
+            trace_output_dir = ".";
+        rbcam_ingress_trace_path = {trace_output_dir, "/rbcam_ingress_trace.csv"};
+        mts_latency_trace_path = {trace_output_dir, "/mts_latency_trace.csv"};
+        rbcam_ingress_trace_fd = $fopen(rbcam_ingress_trace_path, "w");
+        mts_latency_trace_fd = $fopen(mts_latency_trace_path, "w");
+        if (rbcam_ingress_trace_fd == 0)
+            `uvm_fatal("PROF_INT_002_TRACE",
+                       $sformatf("failed to open %s", rbcam_ingress_trace_path))
+        if (mts_latency_trace_fd == 0)
+            `uvm_fatal("PROF_INT_002_TRACE",
+                       $sformatf("failed to open %s", mts_latency_trace_path))
+        $fdisplay(rbcam_ingress_trace_fd,
+                  "time_ps,copy,split_valid,split_ready,split_empty,split_error,split_accept,lane_match,would_enter_deassembly,deassembly_wrreq,deassembly_full,deassembly_empty,in_payload_valid,push_write_req,push_write_grant,run_state_code,pop_state_code,push_state_code,gts_8n,read_time_ptr,age_mod8192,hit_ts8n,hit_key,expected_copy,asic,channel,t_fine,ts12,hit1_data_hex,metadata_valid,metadata_hex");
+        $fdisplay(mts_latency_trace_fd,
+                  "time_ps,bank,debug_valid,debug_delay_cycles,hit1_valid,hit1_ready,hit1_empty,hit1_error,hit_ts8n,hit_key,asic,channel,t_fine,metadata_valid,metadata_hex");
+    end
+
+    final begin : rbcam_trace_close
+        if (rbcam_ingress_trace_fd != 0)
+            $fclose(rbcam_ingress_trace_fd);
+        if (mts_latency_trace_fd != 0)
+            $fclose(mts_latency_trace_fd);
+    end
 
     function automatic logic type3_word_is_k(input logic [35:0] data);
         return (data[35:32] == 4'h1);
@@ -1097,6 +1219,132 @@ module prof_int_002_full_pipeline_top;
             u_dut.data_path_subsystem.hit_stack_subsystem_1.frame_debug_hit_sidecar_data,
             u_dut.data_path_subsystem.hit_stack_subsystem_1.frame_debug_hit_sidecar_valid)
         feb_egress_vif1.run_origin = 1'b0;
+    end
+
+    always @(posedge clk_125) begin : rbcam_ingress_trace
+        if (!rst) begin
+            if (mts_latency_trace_fd != 0) begin
+                if (u_dut.data_path_subsystem.mts_preprocessor_0_debug_ts_valid ||
+                    u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_valid) begin
+                    $fdisplay(mts_latency_trace_fd,
+                              "%0t,0,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%016h",
+                              $time,
+                              u_dut.data_path_subsystem.mts_preprocessor_0_debug_ts_valid,
+                              $signed(u_dut.data_path_subsystem.mts_preprocessor_0_debug_ts_data),
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_valid,
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_ready,
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_empty,
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_error,
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_data[29:17],
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_data[28:21],
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_data[38:35],
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_data[34:30],
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_data[13:9],
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_sidecar_valid,
+                              u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_sidecar_metadata);
+                end
+                if (u_dut.data_path_subsystem.mts_preprocessor_1_debug_ts_valid ||
+                    u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_valid) begin
+                    $fdisplay(mts_latency_trace_fd,
+                              "%0t,1,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%016h",
+                              $time,
+                              u_dut.data_path_subsystem.mts_preprocessor_1_debug_ts_valid,
+                              $signed(u_dut.data_path_subsystem.mts_preprocessor_1_debug_ts_data),
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_valid,
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_ready,
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_empty,
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_error,
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_data[29:17],
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_data[28:21],
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_data[38:35],
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_data[34:30],
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_out_data[13:9],
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_sidecar_valid,
+                              u_dut.data_path_subsystem.mts_preprocessor_1_hit_type1_sidecar_metadata);
+                end
+            end
+
+            write_rbcam_ingress_trace(
+                0,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_empty[0],
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out0_error[0],
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out0_valid,
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out0_metadata,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_wrreq,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_full,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_empty,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.in_payload_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.push_write_req,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.push_write_grant,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.dbg_run_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.dbg_pop_engine_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.dbg_push_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.gts_8n,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.read_time_ptr);
+            write_rbcam_ingress_trace(
+                1,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_empty[0],
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out1_error[0],
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out1_valid,
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out1_metadata,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_wrreq,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_full,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_empty,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.in_payload_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.push_write_req,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.push_write_grant,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.dbg_run_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.dbg_pop_engine_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.dbg_push_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.gts_8n,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.read_time_ptr);
+            write_rbcam_ingress_trace(
+                2,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_empty[0],
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out2_error[0],
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out2_valid,
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out2_metadata,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_wrreq,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_full,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_empty,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.in_payload_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.push_write_req,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.push_write_grant,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.dbg_run_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.dbg_pop_engine_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.dbg_push_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.gts_8n,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.read_time_ptr);
+            write_rbcam_ingress_trace(
+                3,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_empty[0],
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.data_splitter_0_out3_error[0],
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out3_valid,
+                u_dut.data_path_subsystem.mts0_hit_type1_sidecar_fanout_out3_metadata,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.deassembly_fifo_wrreq,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.deassembly_fifo_full,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.deassembly_fifo_empty,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.in_payload_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.push_write_req,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.push_write_grant,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.dbg_run_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.dbg_pop_engine_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.dbg_push_state_code,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.gts_8n,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.read_time_ptr);
+        end
     end
 
     always @(posedge clk_125) begin
@@ -2832,11 +3080,19 @@ module prof_int_002_full_pipeline_top;
                       UVM_LOW)
             source_mode = "virtual_mutrig";
         end
-        if (!((latency_scope == "full") || (latency_scope == "pre_rbcam"))) begin
+        if (!((latency_scope == "full") ||
+              (latency_scope == "pre_rbcam") ||
+              (latency_scope == "post_rbcam"))) begin
             `uvm_warning("PROF_INT_002_TOP",
                          $sformatf("unknown TB_INT_LATENCY_SCOPE=%s; falling back to full",
                                    latency_scope))
             latency_scope = "full";
+        end
+        if (((latency_scope == "full") || (latency_scope == "post_rbcam")) &&
+            (runctl_cpp_gap_cycles < 125_000)) begin
+            `uvm_error("PROF_INT_002_TOP",
+                       $sformatf("TB_INT_RUNCTL_CPP_GAP_CYCLES=%0d is below the DV_PLAN 1 ms software-scale gap required for post-rbCAM/FEB latency closure",
+                                 runctl_cpp_gap_cycles))
         end
         if (source_is_virtual_mutrig()) begin
             if (traffic_is_poisson()) begin
@@ -2912,7 +3168,8 @@ module prof_int_002_full_pipeline_top;
 
         ctrl_vif.run_cycles = run_cycles;
         ctrl_vif.drain_cycles = drain_cycles;
-        enable_post_rbcam_checks = (latency_scope == "full");
+        enable_post_rbcam_checks = (latency_scope == "full") ||
+                                    (latency_scope == "post_rbcam");
         enable_feb_egress_checks = (latency_scope == "full");
 
         @(negedge rst);
