@@ -51,6 +51,7 @@ Historical formal note:
 | [BUG-014-R](#bug-014-r-debug-sidecar-bank-bridge-gated-lineage-on-unconnected-endofrun) | R | hard stuck error | `common (DEBUG_LEVEL=2 full8lane generated simulation)` | fixed in IP source and regenerated Qsys sim RTL; full downstream closure pending | PROF-INT-002 virtual MuTRiG sidecar rerun on `2026-05-06` | pending | `debug_hit_sidecar_bank_bridge` gated sidecar-valid/read-accept on an optional `endofrun` input that the generated full8lane system left open, suppressing source IDs at pre-rbCAM. |
 | [BUG-015-H](#bug-015-h-dislin-latency-renderer-dropped-out-of-display-stage-records) | H | soft error | `directed-only (post-rbCAM/FEB latency plotting with outliers)` | fixed in plotting script; regenerated 10/100 kHz all-stage plot exposes blocker | PROF-INT-002 post-rbCAM/FEB plot generation on `2026-05-06` | pending | The DISLIN renderer counted only bins inside the display range, so post-rbCAM/FEB records outside the DV_PLAN aperture could be reported as zero total instead of out-of-window hits. |
 | [BUG-016-H](#bug-016-h-short-run-control-gap-made-rbcam-look-like-it-rejected-in-window-hits) | H | hard stuck error | `directed-only (post-rbCAM debug run-control override)` | fixed in harness guard; post-rbCAM rerun passed | PROF-INT-002 post-rbCAM ASIC0 100 kHz debug on `2026-05-07` | pending | A 1000-cycle debug run-control gap advanced RUNNING while rbCAM was still flushing, so hits accepted at pre-rbCAM were delayed until termination and looked like rbCAM rejection. |
+| [BUG-017-H](#bug-017-h-virtual-mutrig-periodic-hits-used-hit-count-as-timestamp) | H | hard stuck error | `common (virtual MuTRiG post-rbCAM periodic validation)` | fixed in harness; post-rbCAM sweep passed | PROF-INT-002 virtual MuTRiG post-rbCAM 10 kHz on `2026-05-07` | 7b41a1e5 | The virtual MuTRiG periodic source stamped hit T coarse from a local hit counter instead of the generated MuTRiG timebase, creating false rbCAM timestamp-window drops. |
 
 ## 2026-05-06
 
@@ -455,3 +456,29 @@ Historical formal note:
     rerun `prof_int_002_post_rbcam_periodic_asic0_ch0_emulator_100k_1ms_gap1ms_ingress_trace` observed the required 125000-cycle `RUN_PREPARE_to_SYNC`, `SYNC_to_RUNNING`, and `TERMINATING_to_IDLE` gaps. It passed with `UVM_ERROR=0`, `PRE->POST=99/0/0`, `rb_hit=99`, and rbCAM push-write grant delays of 2..39 cycles after pre-rbCAM acceptance.
   - potential_hazard:
     low for post-rbCAM/FEB PROF-INT-002 closure after the guard because any future sub-ms command-gap run now fails before being accepted as latency evidence; pre-rbCAM-only source checks may still intentionally use shorter gaps only if they do not claim downstream closure
+
+### BUG-017-H: virtual MuTRiG periodic hits used hit count as timestamp
+
+- First seen in:
+  - PROF-INT-002 virtual MuTRiG post-rbCAM 10 kHz ASIC0/channel0 rate run on `2026-05-07`
+  - case:
+    `prof_int_002_post_rbcam_periodic_asic0_ch0_virtual_mutrig_010k_1ms_gap1ms_20260507`
+- Symptom:
+  - the Stage-A to pre-rbCAM transport latency was a fixed 17 cycles for all nine hits
+  - the post-rbCAM scoreboard still reported `A=9 PRE=9 POST=7` and `PRE->POST=7/2/0`
+  - `mts_latency_trace.csv` showed the two missing hits with timestamp delays `-2146` and `-3814` cycles, so rbCAM was filtering by timestamp-window interpretation rather than losing accepted stream beats
+- Root cause:
+  - the tb_int virtual MuTRiG periodic source built raw hit words with `virtual_mutrig0_source_hit_count[14:0]` as T coarse
+  - this local count was not phase-locked to the generated MuTRiG timebase used by the rest of the integration system
+  - legal low-rate stimulus could therefore reach pre-rbCAM with an in-window transport delay but an out-of-window hit timestamp
+- Fix status:
+  - state:
+    fixed in harness; emulator and virtual MuTRiG post-rbCAM rate sweep passed
+  - mechanism:
+    `prof_int_002_full_pipeline_top.sv` now stamps virtual raw-hit words from `data_path_subsystem.emulator_mutrig_0.u_emulator_mutrig.tcc_lfsr`, keeping the virtual source timestamp on the same generated MuTRiG timebase as the integration run
+  - before_fix_outcome:
+    the virtual MuTRiG 10 kHz post-rbCAM run failed strict zero residual with `PRE->POST=7/2/0` and `UVM_ERROR=1`
+  - after_fix_outcome:
+    reruns `prof_int_002_post_rbcam_periodic_asic0_ch0_virtual_mutrig_{010k,100k,500k,1000k}_1ms_gap1ms_tccfix_20260507` all passed with `UVM_ERROR=0` and strict `PRE->POST` residuals of `9/0/0`, `99/0/0`, `497/0/0`, and `991/0/0`. The matching emulator runs at 10 kHz, 100 kHz, 500 kHz, and 1 MHz also passed with `PRE->POST=9/0/0`, `99/0/0`, `500/0/0`, and `1000/0/0`.
+  - potential_hazard:
+    low for the current ASIC0/channel0 periodic post-rbCAM validation; medium for future virtual-source upgrades unless the tagged virtual MuTRiG source exposes an authored timestamp anchor instead of relying on a hierarchical generated-emulator timebase tap

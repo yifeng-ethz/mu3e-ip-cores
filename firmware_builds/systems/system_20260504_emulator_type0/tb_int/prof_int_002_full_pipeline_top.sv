@@ -671,9 +671,11 @@ module prof_int_002_full_pipeline_top;
 
                 if (emit_hit_v) begin
                     virtual_mutrig0_offer_valid <= 1'b1;
+                    // Keep virtual raw-hit timestamps on the generated MuTRiG timebase.
                     virtual_mutrig0_offer_word <= build_virtual_mutrig_hit_word(
                         channel_v,
-                        virtual_mutrig0_source_hit_count[14:0]);
+                        u_dut.data_path_subsystem.emulator_mutrig_0
+                            .u_emulator_mutrig.tcc_lfsr);
                 end
             end
         end

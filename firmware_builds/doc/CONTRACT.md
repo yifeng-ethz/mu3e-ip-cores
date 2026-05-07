@@ -101,6 +101,28 @@ Error meaning:
 - `tsglitcherr`: the side-RAM timestamp phase does not match the current header
   timestamp phase. This commonly follows unfiltered bad `tserr` traffic.
 
+## Run-Control Broadcast and Stage Gaps
+
+The Phase-5 run-control command path is a forward readyless broadcast. A slave
+must not rely on Avalon-ST `ready` to backpressure `RUN_PREPARE`, `SYNC`,
+`RUNNING`, `TERMINATING`, or `IDLE`; legacy local ready surfaces are diagnostic
+observations only until a future packet-based acknowledgement path exists.
+
+The deployed FEB sequence is driven by C++ software and uses software-scale
+state spacing. Integration simulation that claims post-rbCAM or FEB-egress
+latency closure must therefore observe at least 125000 125 MHz cycles, i.e.
+1 ms, for each of these state gaps:
+
+- `RUN_PREPARE` to `SYNC`
+- `SYNC` to `RUNNING`
+- `TERMINATING` to `IDLE`
+
+Focused pre-rbCAM source checks may use shorter gaps only when they do not
+claim downstream rbCAM/FEB closure. Runs with sub-1 ms gaps are invalid
+evidence for rbCAM rejection, post-rbCAM latency, or FEB-egress latency because
+rbCAM internal flush can still be in progress while the forward command state
+has already advanced.
+
 ## Phase-5 Operating Policies
 
 Rate/channel alive-dead:
