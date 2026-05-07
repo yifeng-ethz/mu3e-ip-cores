@@ -164,9 +164,14 @@ module prof_int_002_full_pipeline_top;
     string       latency_scope;
     int          rbcam_ingress_trace_fd;
     int          mts_latency_trace_fd;
+    int          rbcam_fill_trace_fd;
+    int unsigned rbcam_fill_trace_stride;
+    bit          export_rbcam_fill_trace;
+    logic [63:0] rbcam_fill_trace_cycle;
     logic [2:0] stage_a_lane_index;
     logic [7:0]  active_lane_mask;
         logic        injection_window_active;
+        logic        stable_capture_active = 1'b0;
         logic        enable_post_rbcam_checks;
         logic        enable_feb_egress_checks;
         logic        virtual_mutrig0_offer_valid;
@@ -521,23 +526,46 @@ module prof_int_002_full_pipeline_top;
         string trace_output_dir;
         string rbcam_ingress_trace_path;
         string mts_latency_trace_path;
+        string rbcam_fill_trace_path;
+        int    plus_export_rbcam_fill_trace;
+        int    plus_rbcam_fill_trace_stride;
 
         if (!$value$plusargs("TB_INT_SIM_DIR=%s", trace_output_dir))
             trace_output_dir = ".";
+        export_rbcam_fill_trace = 1'b0;
+        rbcam_fill_trace_stride = 1;
+        if ($value$plusargs("TB_INT_EXPORT_RBCAM_FILL_TRACE=%d",
+                            plus_export_rbcam_fill_trace))
+            export_rbcam_fill_trace = (plus_export_rbcam_fill_trace != 0);
+        if ($value$plusargs("TB_INT_RBCAM_FILL_TRACE_STRIDE=%d",
+                            plus_rbcam_fill_trace_stride) &&
+            plus_rbcam_fill_trace_stride > 0)
+            rbcam_fill_trace_stride = plus_rbcam_fill_trace_stride;
         rbcam_ingress_trace_path = {trace_output_dir, "/rbcam_ingress_trace.csv"};
         mts_latency_trace_path = {trace_output_dir, "/mts_latency_trace.csv"};
+        rbcam_fill_trace_path = {trace_output_dir, "/rbcam_fill_trace.csv"};
         rbcam_ingress_trace_fd = $fopen(rbcam_ingress_trace_path, "w");
         mts_latency_trace_fd = $fopen(mts_latency_trace_path, "w");
+        rbcam_fill_trace_fd = 0;
+        if (export_rbcam_fill_trace)
+            rbcam_fill_trace_fd = $fopen(rbcam_fill_trace_path, "w");
         if (rbcam_ingress_trace_fd == 0)
             `uvm_fatal("PROF_INT_002_TRACE",
                        $sformatf("failed to open %s", rbcam_ingress_trace_path))
         if (mts_latency_trace_fd == 0)
             `uvm_fatal("PROF_INT_002_TRACE",
                        $sformatf("failed to open %s", mts_latency_trace_path))
+        if (export_rbcam_fill_trace && rbcam_fill_trace_fd == 0)
+            `uvm_fatal("PROF_INT_002_TRACE",
+                       $sformatf("failed to open %s", rbcam_fill_trace_path))
         $fdisplay(rbcam_ingress_trace_fd,
                   "time_ps,copy,split_valid,split_ready,split_empty,split_error,split_accept,lane_match,would_enter_deassembly,deassembly_wrreq,deassembly_full,deassembly_empty,in_payload_valid,push_write_req,push_write_grant,run_state_code,pop_state_code,push_state_code,gts_8n,read_time_ptr,age_mod8192,hit_ts8n,hit_key,expected_copy,asic,channel,t_fine,ts12,hit1_data_hex,metadata_valid,metadata_hex");
         $fdisplay(mts_latency_trace_fd,
                   "time_ps,bank,debug_valid,debug_delay_cycles,hit1_valid,hit1_ready,hit1_empty,hit1_error,hit_ts8n,hit_key,asic,channel,t_fine,metadata_valid,metadata_hex");
+        if (rbcam_fill_trace_fd != 0) begin
+            $fdisplay(rbcam_fill_trace_fd,
+                      "time_ps,cycle,stable_capture_active,all_running,p0_run_state,p1_run_state,p2_run_state,p3_run_state,p0_valid,p1_valid,p2_valid,p3_valid,p0_fill,p1_fill,p2_fill,p3_fill,p0_deasm_usedw,p1_deasm_usedw,p2_deasm_usedw,p3_deasm_usedw,p0_deasm_full,p1_deasm_full,p2_deasm_full,p3_deasm_full,p0_deasm_wrreq,p1_deasm_wrreq,p2_deasm_wrreq,p3_deasm_wrreq,p0_deasm_rdack,p1_deasm_rdack,p2_deasm_rdack,p3_deasm_rdack");
+        end
     end
 
     final begin : rbcam_trace_close
@@ -545,6 +573,8 @@ module prof_int_002_full_pipeline_top;
             $fclose(rbcam_ingress_trace_fd);
         if (mts_latency_trace_fd != 0)
             $fclose(mts_latency_trace_fd);
+        if (rbcam_fill_trace_fd != 0)
+            $fclose(rbcam_fill_trace_fd);
     end
 
     function automatic logic type3_word_is_k(input logic [35:0] data);
@@ -1346,6 +1376,54 @@ module prof_int_002_full_pipeline_top;
                 u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.dbg_push_state_code,
                 u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.gts_8n,
                 u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.read_time_ptr);
+        end
+    end
+
+    always @(posedge clk_125) begin : rbcam_fill_trace
+        if (rst) begin
+            rbcam_fill_trace_cycle <= 64'd0;
+        end else begin
+            rbcam_fill_trace_cycle <= rbcam_fill_trace_cycle + 64'd1;
+            if (rbcam_fill_trace_fd != 0 &&
+                (rbcam_fill_trace_cycle % rbcam_fill_trace_stride) == 0) begin
+                $fdisplay(rbcam_fill_trace_fd,
+                          "%0t,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d",
+                          $time,
+                          rbcam_fill_trace_cycle,
+                          stable_capture_active,
+                          (u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.dbg_run_state_code == 4'd3 &&
+                           u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.dbg_run_state_code == 4'd3 &&
+                           u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.dbg_run_state_code == 4'd3 &&
+                           u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.dbg_run_state_code == 4'd3),
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.dbg_run_state_code,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.dbg_run_state_code,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.dbg_run_state_code,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.dbg_run_state_code,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0_ring_buffer_cam_0_filllevel_valid,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.coe_debug_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.coe_debug_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.coe_debug_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.coe_debug_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_usedw,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_usedw,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_usedw,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.deassembly_fifo_usedw,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_full,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_full,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_full,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.deassembly_fifo_full,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_wrreq,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_wrreq,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_wrreq,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.deassembly_fifo_wrreq,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_rdack,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_rdack,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_rdack,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.deassembly_fifo_rdack);
+            end
         end
     end
 
@@ -2430,11 +2508,24 @@ module prof_int_002_full_pipeline_top;
         release ADDR_SIG; \
     end
 
+`define PROF_INT_002_RBCAM_CSR_READ_ALL(ADDR_VALUE, DATA_ARRAY) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_0_csr_readdata, DATA_ARRAY[0]) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_1_csr_readdata, DATA_ARRAY[1]) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_2_csr_readdata, DATA_ARRAY[2]) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_readdata, DATA_ARRAY[3]) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_0_csr_readdata, DATA_ARRAY[4]) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_1_csr_readdata, DATA_ARRAY[5]) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_2_csr_readdata, DATA_ARRAY[6]) \
+    `PROF_INT_002_CSR_READ(u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_address, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_read, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_write, ADDR_VALUE, u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_readdata, DATA_ARRAY[7])
+
     task automatic report_rbcam_csr_state(input string tag);
         logic [31:0] ctrl [0:7];
         logic [31:0] fill [0:7];
+        logic [31:0] inerr [0:7];
         logic [31:0] push [0:7];
         logic [31:0] pop  [0:7];
+        logic [31:0] overwrite [0:7];
+        logic [31:0] cache_miss [0:7];
         logic [3:0]  state_code [0:7];
         logic [7:0]  go_vec;
         logic [7:0]  running_vec;
@@ -2635,6 +2726,10 @@ module prof_int_002_full_pipeline_top;
                                u_dut.data_path_subsystem.mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_readdata,
                                pop[7])
 
+        `PROF_INT_002_RBCAM_CSR_READ_ALL(5'd5, inerr)
+        `PROF_INT_002_RBCAM_CSR_READ_ALL(5'd8, overwrite)
+        `PROF_INT_002_RBCAM_CSR_READ_ALL(5'd9, cache_miss)
+
         state_code[0] = u_dut.data_path_subsystem.hit_stack_subsystem_0
             .ring_buffer_cam_0.v2_core.dbg_run_state_code;
         state_code[1] = u_dut.data_path_subsystem.hit_stack_subsystem_0
@@ -2658,7 +2753,7 @@ module prof_int_002_full_pipeline_top;
                        (state_code[3] == 4'd3), (state_code[2] == 4'd3),
                        (state_code[1] == 4'd3), (state_code[0] == 4'd3)};
         `uvm_info("PROF_INT_002_RBCAM_CSR",
-                  $sformatf("%s rbcam_csr go=%08b run_state_running=%08b run_state_code_direct={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} ctrl={%08h,%08h,%08h,%08h,%08h,%08h,%08h,%08h} fill={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} push={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} pop={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d}",
+                  $sformatf("%s rbcam_csr go=%08b run_state_running=%08b run_state_code_direct={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} ctrl={%08h,%08h,%08h,%08h,%08h,%08h,%08h,%08h} fill={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} push={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} pop={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} inerr={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} overwrite={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d} cache_miss={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d}",
                             tag,
                             go_vec,
                             running_vec,
@@ -2671,7 +2766,13 @@ module prof_int_002_full_pipeline_top;
                             push[7], push[6], push[5], push[4],
                             push[3], push[2], push[1], push[0],
                             pop[7], pop[6], pop[5], pop[4],
-                            pop[3], pop[2], pop[1], pop[0]),
+                            pop[3], pop[2], pop[1], pop[0],
+                            inerr[7], inerr[6], inerr[5], inerr[4],
+                            inerr[3], inerr[2], inerr[1], inerr[0],
+                            overwrite[7], overwrite[6], overwrite[5], overwrite[4],
+                            overwrite[3], overwrite[2], overwrite[1], overwrite[0],
+                            cache_miss[7], cache_miss[6], cache_miss[5], cache_miss[4],
+                            cache_miss[3], cache_miss[2], cache_miss[1], cache_miss[0]),
                   UVM_LOW)
         if (go_vec !== 8'hff) begin
             `uvm_error("PROF_INT_002_RBCAM_CSR",
@@ -2679,7 +2780,7 @@ module prof_int_002_full_pipeline_top;
                                  tag,
                                  go_vec))
         end
-        if (running_vec !== 8'hff) begin
+        if ((tag != "after drain") && (running_vec !== 8'hff)) begin
             `uvm_error("PROF_INT_002_RBCAM_CSR",
                        $sformatf("%s rbCAM run_state not all RUNNING: running=%08b state_code={%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d}",
                                  tag,
@@ -3250,7 +3351,9 @@ module prof_int_002_full_pipeline_top;
         end
         repeat (stable_pre_guard_cycles) @(posedge clk_125);
         tb_int_run_window_db::note_stable_start($time);
+        stable_capture_active = 1'b1;
         repeat (stable_capture_cycles) @(posedge clk_125);
+        stable_capture_active = 1'b0;
         tb_int_run_window_db::note_stable_end($time);
         repeat (stable_post_guard_cycles) @(posedge clk_125);
         tb_int_run_window_db::note_run_end($time);
@@ -3263,6 +3366,7 @@ module prof_int_002_full_pipeline_top;
         report_hit_stack_runctl_broadcast("after TERMINATING software gap");
         repeat (drain_cycles) @(posedge clk_125);
         report_datapath_state("after drain");
+        report_rbcam_csr_state("after drain");
         drive_runctl(RUNCTL_IDLE_SYM, 4);
         repeat (512) @(posedge clk_125);
         ctrl_vif.sim_done = 1'b1;

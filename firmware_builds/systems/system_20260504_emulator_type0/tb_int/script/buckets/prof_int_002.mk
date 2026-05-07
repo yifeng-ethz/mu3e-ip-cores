@@ -59,6 +59,13 @@ PROF_INT_002_DRAIN_CYCLES_5S := 16384
 PROF_INT_002_SYN  := $(abspath $(TB_INT_ROOT)/../../system_20260504_full8lane_type0/syn/full8lane_type0_system/synthesis)
 PROF_INT_002_COMMON := $(abspath $(TB_INT_ROOT)/../../system_20260504_full8lane_type0/syn/board_projects/fe_scifi_full8lane/src/common)
 PROF_INT_002_REPO_ROOT := $(abspath $(TB_INT_ROOT)/../../../..)
+PROF_INT_002_RBCAM_IMPL ?= sv
+PROF_INT_002_RBCAM_ROOT := $(PROF_INT_002_REPO_ROOT)/ring-buffer_cam
+PROF_INT_002_RBCAM_SV_FILES := \
+    $(PROF_INT_002_RBCAM_ROOT)/rtl/sv_ver/ring_buffer_cam_sv_pkg.sv \
+    $(PROF_INT_002_RBCAM_ROOT)/rtl/sv_ver/ring_buffer_cam_fifo.sv \
+    $(PROF_INT_002_RBCAM_ROOT)/rtl/sv_ver/ring_buffer_cam_core.sv \
+    $(PROF_INT_002_RBCAM_ROOT)/rtl/sv_ver/ring_buffer_cam.sv
 MUTRIG_GOLDEN_ROOT ?= /home/yifeng/kbriggl-mutrig3-c3cce8d41dcb
 PROF_INT_002_RAW_LIB := mutrig_raw
 PROF_INT_002_RAW_WORK ?= work_tb_int_mutrig_raw
@@ -76,6 +83,8 @@ PROF_INT_002_RUNCTL_CPP_GAP_CYCLES ?= 125000
 PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES ?= 1250000
 PROF_INT_002_STABLE_ONLY_EXPORT ?= 1
 PROF_INT_002_REQUIRE_ZERO_RESIDUAL ?= 1
+PROF_INT_002_EXPORT_RBCAM_FILL_TRACE ?= 0
+PROF_INT_002_RBCAM_FILL_TRACE_STRIDE ?= 1
 PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh s -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
 
 .PHONY: comp_prof_int_002_dut comp_prof_int_002 prepare_prof_int_002_mem_init \
@@ -146,7 +155,12 @@ comp_prof_int_002_dut: lib
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/pingpong_sram.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/histogram_statistics_v2_bool_core.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/histogram_statistics_v2.vhd
-	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/ring_buffer_cam_v2_core.vhd
+	@if [ "$(PROF_INT_002_RBCAM_IMPL)" = "sv" ]; then \
+	    $(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(PROF_INT_002_INCDIR) $(PROF_INT_002_RBCAM_SV_FILES); \
+	else \
+	    $(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/ring_buffer_cam_v2_core.vhd; \
+	    $(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/ring_buffer_cam.vhd; \
+	fi
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/search_for_extreme3.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/i2c_master.vhd
 	$(VCOM) -modelsimini modelsim.ini -work $(WORK) -2008 $(PROF_INT_002_SYN)/submodules/pseudo_clock_down_convertor.vhd
@@ -190,6 +204,7 @@ comp_prof_int_002_dut: lib
 	    ! -name pingpong_sram.vhd \
 	    ! -name histogram_statistics_v2_bool_core.vhd \
 	    ! -name histogram_statistics_v2.vhd \
+	    ! -name ring_buffer_cam.vhd \
 	    ! -name ring_buffer_cam_v2_core.vhd \
 	    ! -name search_for_extreme3.vhd \
 	    ! -name i2c_master.vhd \
@@ -289,6 +304,8 @@ run_prof_int_002_pre_rbcam_latency: comp_prof_int_002 prepare_prof_int_002_mem_i
 		    +TB_INT_INJECT_BURST_SPACING_CYCLES=$(PROF_INT_002_PRE_RBCAM_INJECT_BURST_SPACING_CYCLES) \
 		    +TB_INT_INJECT_DRIVER=$(PROF_INT_002_PRE_RBCAM_INJECT_DRIVER) \
 		    +TB_INT_STABLE_ONLY_EXPORT=$(PROF_INT_002_STABLE_ONLY_EXPORT) \
+		    +TB_INT_EXPORT_RBCAM_FILL_TRACE=$(PROF_INT_002_EXPORT_RBCAM_FILL_TRACE) \
+		    +TB_INT_RBCAM_FILL_TRACE_STRIDE=$(PROF_INT_002_RBCAM_FILL_TRACE_STRIDE) \
 	    +TB_INT_ACTIVE_LANE_COUNT=$(PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_COUNT) \
 	    +TB_INT_ACTIVE_LANE_MASK=$(PROF_INT_002_PRE_RBCAM_ACTIVE_LANE_MASK) \
 	    -l $(PROF_INT_002_PRE_RBCAM_DIR)/transcript \
