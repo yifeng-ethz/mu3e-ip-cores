@@ -60,7 +60,7 @@ Historical formal note:
 | [BUG-023-H](#bug-023-h-feb-swb-lifetime-plot-used-local-source-marker-for-rbcam-panels) | H | soft error | `directed-only (FEB/SWB lifetime plotting and review)` | fixed in analyzer/plotter; rerender passed | FEB/SWB lifetime plot review on `2026-05-08` | 7c748870 | The corun lifetime plot treated synthetic pre/post-rbCAM source markers as true rbCAM lifetime evidence and described lifetime as local source-marker time instead of the carried hit GTS/debug timestamp contract. |
 | [BUG-024-H](#bug-024-h-feb-swb-rbcam-plot-imported-lossy-reference-as-no-drop-evidence) | H | hard stuck error | `directed-only (FEB/SWB rbCAM reference plotting and review)` | fixed in analyzer reference guard; rerender passed | FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08` | 8378d7d6 | The rbCAM top-panel plot imported a drop-containing pre-rbCAM reference run and had no health gate, so a stale 84k-cycle peak was shown as if it were no-drop rbCAM evidence. |
 | [BUG-025-R](#bug-025-r-swb-direct-dma-packer-dropped-eop-partial-hit-groups) | R | hard stuck error | `occasional (legal FEB frames whose hit count is not divisible by four)` | fixed in MuSiP direct packer; periodic and Poisson all-ASIC reruns passed | FEB/SWB Poisson all-ASIC 1 ms corun on `2026-05-08` | 9d1c7c5/f478c95a | The SWB direct 64-to-256 DMA packer did not safely flush partial EOP groups, so legal frames with `frame_hits mod 4 = 1` could lose the final hit group before DMA. |
-| [BUG-026-H](#bug-026-h-feb-swb-pre-rbcam-panel-used-post-mutrig-transport-as-golden-lifetime) | H | soft error | `directed-only (FEB/SWB lifetime plotting review)` | fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten | FEB/SWB lifetime plot review on `2026-05-09` | pending | The pre-rbCAM panel used the clean full-FEB 17-cycle post-MuTRiG transport marker as the lifetime shape, so the plot collapsed instead of showing the virtual-MuTRiG short-frame wait and serializer profile. |
+| [BUG-026-H](#bug-026-h-feb-swb-pre-rbcam-panel-used-post-mutrig-transport-as-golden-lifetime) | H | soft error | `directed-only (FEB/SWB lifetime plotting review)` | fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten | FEB/SWB lifetime plot review on `2026-05-09` | e2cca629 | The pre-rbCAM panel used the clean full-FEB 17-cycle post-MuTRiG transport marker as the lifetime shape, so the plot collapsed instead of showing the virtual-MuTRiG short-frame wait and serializer profile. |
 
 ## 2026-05-06
 
@@ -773,4 +773,4 @@ Historical formal note:
   - overwritten periodic plots live under `tb_int/feb_swb_corun/report/`
   - overwritten Poisson plots live under `tb_int/feb_swb_corun/report_poisson/`
 - Commit:
-  - analyzer/model/plot documentation fix: pending
+  - analyzer/model/plot documentation fix: e2cca629
