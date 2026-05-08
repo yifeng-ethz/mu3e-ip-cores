@@ -58,7 +58,7 @@ Historical formal note:
 | [BUG-021-H](#bug-021-h-feb-swb-corun-emitted-future-timestamped-hits-before-hit-timebase) | H | soft error | `directed-only (FEB/SWB lifetime plotting)` | fixed in harness; lifetime rerun passed | FEB/SWB lifetime plot on `2026-05-08` | 90f6c58c | The corun packet writer serialized future timestamped hits at line rate before their MuTRiG hit timestamp, so lifetime plots showed negative FEB-egress and OPQ-ingress delays even though payload matching passed. |
 | [BUG-022-R](#bug-022-r-swb-opq-native-lane-credit-drops-under-feb-all-channel-100khz-corun) | R | hard stuck error | `common (one FEB, lane0 all-channel 100 kHz, lane1 empty legal frames)` | fixed for scoped no-bottleneck corun; 1024-depth overload retained as diagnostic | FEB/SWB all-channel 1 ms corun on `2026-05-08` | 8a353a0/6359a10/90f6c58c | Native OPQ stayed at the 1024-entry lane FIFO default because wrapper depth macros were not passed into the monolithic core; the scoped 8192-depth lossless run now delivers all 3200 hits with zero OPQ drop counters. |
 | [BUG-023-H](#bug-023-h-feb-swb-lifetime-plot-used-local-source-marker-for-rbcam-panels) | H | soft error | `directed-only (FEB/SWB lifetime plotting and review)` | fixed in analyzer/plotter; rerender passed | FEB/SWB lifetime plot review on `2026-05-08` | 7c748870 | The corun lifetime plot treated synthetic pre/post-rbCAM source markers as true rbCAM lifetime evidence and described lifetime as local source-marker time instead of the carried hit GTS/debug timestamp contract. |
-| [BUG-024-H](#bug-024-h-feb-swb-rbcam-plot-imported-lossy-reference-as-no-drop-evidence) | H | hard stuck error | `directed-only (FEB/SWB rbCAM reference plotting and review)` | fixed in analyzer reference guard; rerender passed | FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08` | pending | The rbCAM top-panel plot imported a drop-containing pre-rbCAM reference run and had no health gate, so a stale 84k-cycle peak was shown as if it were no-drop rbCAM evidence. |
+| [BUG-024-H](#bug-024-h-feb-swb-rbcam-plot-imported-lossy-reference-as-no-drop-evidence) | H | hard stuck error | `directed-only (FEB/SWB rbCAM reference plotting and review)` | fixed in analyzer reference guard; rerender passed | FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08` | 8378d7d6 | The rbCAM top-panel plot imported a drop-containing pre-rbCAM reference run and had no health gate, so a stale 84k-cycle peak was shown as if it were no-drop rbCAM evidence. |
 
 ## 2026-05-06
 
@@ -702,4 +702,4 @@ Historical formal note:
   - lane 0 carries ASIC0 channels 0..31 at 100 kHz/channel for 1 ms; lane 1 emits legal empty FEB frames
   - source/pre/post/FEB/OPQ-ingress/OPQ-egress/DMA counts are all 3200 hits in the maintained direct corun
 - Commit:
-  - analyzer/reference guard fix: `pending`
+  - analyzer/reference guard fix: `8378d7d6`
