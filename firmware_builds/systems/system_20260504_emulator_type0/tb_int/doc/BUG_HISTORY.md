@@ -59,6 +59,7 @@ Historical formal note:
 | [BUG-022-R](#bug-022-r-swb-opq-native-lane-credit-drops-under-feb-all-channel-100khz-corun) | R | hard stuck error | `common (one FEB, lane0 all-channel 100 kHz, lane1 empty legal frames)` | fixed for scoped no-bottleneck corun; 1024-depth overload retained as diagnostic | FEB/SWB all-channel 1 ms corun on `2026-05-08` | 8a353a0/6359a10/90f6c58c | Native OPQ stayed at the 1024-entry lane FIFO default because wrapper depth macros were not passed into the monolithic core; the scoped 8192-depth lossless run now delivers all 3200 hits with zero OPQ drop counters. |
 | [BUG-023-H](#bug-023-h-feb-swb-lifetime-plot-used-local-source-marker-for-rbcam-panels) | H | soft error | `directed-only (FEB/SWB lifetime plotting and review)` | fixed in analyzer/plotter; rerender passed | FEB/SWB lifetime plot review on `2026-05-08` | 7c748870 | The corun lifetime plot treated synthetic pre/post-rbCAM source markers as true rbCAM lifetime evidence and described lifetime as local source-marker time instead of the carried hit GTS/debug timestamp contract. |
 | [BUG-024-H](#bug-024-h-feb-swb-rbcam-plot-imported-lossy-reference-as-no-drop-evidence) | H | hard stuck error | `directed-only (FEB/SWB rbCAM reference plotting and review)` | fixed in analyzer reference guard; rerender passed | FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08` | 8378d7d6 | The rbCAM top-panel plot imported a drop-containing pre-rbCAM reference run and had no health gate, so a stale 84k-cycle peak was shown as if it were no-drop rbCAM evidence. |
+| [BUG-025-R](#bug-025-r-swb-direct-dma-packer-dropped-eop-partial-hit-groups) | R | hard stuck error | `occasional (legal FEB frames whose hit count is not divisible by four)` | fixed in MuSiP direct packer; periodic and Poisson all-ASIC reruns passed | FEB/SWB Poisson all-ASIC 1 ms corun on `2026-05-08` | 9d1c7c5/pending | The SWB direct 64-to-256 DMA packer did not safely flush partial EOP groups, so legal frames with `frame_hits mod 4 = 1` could lose the final hit group before DMA. |
 
 ## 2026-05-06
 
@@ -703,3 +704,39 @@ Historical formal note:
   - source/pre/post/FEB/OPQ-ingress/OPQ-egress/DMA counts are all 3200 hits in the maintained direct corun
 - Commit:
   - analyzer/reference guard fix: `8378d7d6`
+
+### BUG-025-R: SWB direct DMA packer dropped EOP partial hit groups
+
+- First seen in:
+  - FEB/SWB Poisson iid all-ASIC corun on `2026-05-08`
+  - command:
+    `make run_swb_corun_poisson QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim OPQ_SOURCE_MODE=native_sv_signoff OPQ_LANE_FIFO_DEPTH=65536 OPQ_TICKET_FIFO_DEPTH=65536 ASIC_COUNT=8 RUN_WINDOW_8NS=125000 HIT_PERIOD_8NS=1250 POISSON_SEED=20260508`
+- Symptom:
+  - Poisson mode generated 25629 legal virtual MuTRiG hits across ASIC0..7 channels 0..31
+  - native OPQ reported `ft_wr_hit=25629`, `ft_rd_hit=25629`, and all OPQ drop counters at zero
+  - before the final MuSiP fix, DMA missed exactly the final partial hit group of frames whose hit count left a one-hit EOP remainder after 4-hit packing
+  - the expected DMA payload word count is per-frame `sum(ceil(frame_hits / 4))`; for the accepted Poisson seed this is 6431 words, not `ceil(total_hits / 4)` as one global packet
+- Root cause:
+  - MuSiP `musip_mux_4_1.vhd` direct mode packs four 64-bit SciFi/TILE hit words into one 256-bit DMA word
+  - the original packer emitted only complete 4-hit groups and did not flush a zero-filled partial 256-bit word at EOP
+  - the first repair flushed the partial group in the same cycle class as a preceding full word for `4N+1` frames
+  - downstream `mux_4_1_256` has a one-entry valid buffer per lane and assumes no back-to-back valid beats from one lane, so the partial EOP beat could be overwritten
+- Fix status:
+  - state:
+    fixed in MuSiP direct packer and validated in the FEB/SWB direct corun; broader SWB regression still pending
+  - mechanism:
+    `musip_mux_4_1.vhd` now records a `flush_256_pending` bit per link, zero-fills unused 64-bit slots at EOP, and emits the partial 256-bit word one cycle later.  The FEB/SWB harness now computes expected DMA words as a sum over frames so partial words are required by the scoreboard instead of hidden by total-hit rounding.
+  - before_fix_outcome:
+    the Poisson all-ASIC run had OPQ conservation but DMA under-counted legal partial frames; the missing groups localized to frames with `frame_hits mod 4 = 1`
+  - after_fix_outcome:
+    periodic rerun passes with `expected_hits=25600`, `expected_dma_words=6400`, `dma_payload_words=6400`, `actual_hits=25600`, `missing_hits=0`, `ghost_hits=0`, and `TRACE_DEBUG_PASS hits=25600 channels=0..31 asics=0..7`. Poisson rerun with seed `20260508` passes with `expected_hits=25629`, `expected_dma_words=6431`, `dma_payload_words=6431`, `actual_hits=25629`, `missing_hits=0`, `ghost_hits=0`, and `TRACE_DEBUG_PASS hits=25629 channels=0..31 asics=0..7`. Both runs report zero OPQ controlled drops and `LIFETIME_DISLIN_PASS`.
+  - potential_hazard:
+    medium until a broader MuSiP regression covers every direct-mode detector contract; low for this FEB/SWB finite-burst corun because periodic and Poisson all-ASIC runs now prove OPQ and DMA conservation with partial frames enabled
+- Runtime / coverage context:
+  - one FEB is modeled with lanes 0 and 1 enabled; lanes 2 and 3 are masked
+  - lane 0 carries ASIC0..7 channels 0..31 at 100 kHz/channel for 1 ms; lane 1 emits legal empty FEB frames
+  - periodic plot lives under `tb_int/feb_swb_corun/report/feb_swb_lifetime_hist.png`
+  - Poisson comparison plot lives under `tb_int/feb_swb_corun/report_poisson/feb_swb_lifetime_hist.png`
+- Commit:
+  - MuSiP direct packer fix: 9d1c7c5
+  - FEB/SWB all-ASIC Poisson harness and docs: pending

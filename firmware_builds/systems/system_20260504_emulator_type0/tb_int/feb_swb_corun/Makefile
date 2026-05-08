@@ -30,6 +30,9 @@ RUN_LOG ?= $(REPORT_DIR)/run_swb_corun.log
 RUN_DO ?= run -all; quit -f
 RUN_WINDOW_8NS ?= 125000
 HIT_PERIOD_8NS ?= 1250
+ASIC_COUNT ?= 8
+SOURCE_MODE ?= periodic
+POISSON_SEED ?= 20260508
 VSIM_PLUSARGS ?=
 VCOM_FLAGS := -2008
 VLOG_FLAGS := -sv
@@ -83,7 +86,7 @@ CORUN_SV_SOURCES := \
 
 CORUN_COMPILE_STAMP := $(CORUN_BUILD_DIR)/.compile-stamp.$(OPQ_SOURCE_MODE).$(OPQ_N_SHD).$(OPQ_LANE_FIFO_DEPTH).$(OPQ_TICKET_FIFO_DEPTH).$(OPQ_HANDLE_FIFO_DEPTH).$(OPQ_PAGE_RAM_DEPTH).$(OPQ_DEBUG_LEVEL)
 
-.PHONY: compile compile_musip_driver smoke compile_swb_corun run_swb_corun clean
+.PHONY: compile compile_musip_driver smoke compile_swb_corun run_swb_corun run_swb_corun_poisson clean
 
 compile: clean
 	$(VLIB) $(WORK)
@@ -143,8 +146,8 @@ $(CORUN_COMPILE_STAMP): Makefile $(CORUN_VHDL_SOURCES) $(OPQ_SIM_QSYS_TOP_VHDL_S
 run_swb_corun: compile_swb_corun
 	mkdir -p $(REPORT_DIR)
 	-cd $(CORUN_BUILD_DIR) && set -o pipefail; \
-	QSIM_INI=$(QUESTA_INI) $(QUESTA_RUNNER) $(VSIM) $(VSIM_FLAGS) $(OPQ_VSIM_LIB_FLAGS) feb_swb_corun_plain_tb -do "$(RUN_DO)" +FEB_SWB_TRACE_DIR=$(abspath $(REPORT_DIR)) +FEB_SWB_RUN_WINDOW_8NS=$(RUN_WINDOW_8NS) +FEB_SWB_HIT_PERIOD_8NS=$(HIT_PERIOD_8NS) $(VSIM_PLUSARGS) | tee "$(RUN_LOG)"
-	-$(PYTHON) $(TRACE_ANALYZER) --trace-dir "$(REPORT_DIR)" --expected-hit-period-8ns "$(HIT_PERIOD_8NS)" --opq-log "$(RUN_LOG)" --assume-opq-lossless
+	QSIM_INI=$(QUESTA_INI) $(QUESTA_RUNNER) $(VSIM) $(VSIM_FLAGS) $(OPQ_VSIM_LIB_FLAGS) feb_swb_corun_plain_tb -do "$(RUN_DO)" +FEB_SWB_TRACE_DIR=$(abspath $(REPORT_DIR)) +FEB_SWB_RUN_WINDOW_8NS=$(RUN_WINDOW_8NS) +FEB_SWB_HIT_PERIOD_8NS=$(HIT_PERIOD_8NS) +FEB_SWB_ASIC_COUNT=$(ASIC_COUNT) +FEB_SWB_SOURCE_MODE=$(SOURCE_MODE) +FEB_SWB_POISSON_SEED=$(POISSON_SEED) $(VSIM_PLUSARGS) | tee "$(RUN_LOG)"
+	-$(PYTHON) $(TRACE_ANALYZER) --trace-dir "$(REPORT_DIR)" --expected-hit-period-8ns "$(HIT_PERIOD_8NS)" --expected-asic-count "$(ASIC_COUNT)" --source-mode "$(SOURCE_MODE)" --opq-log "$(RUN_LOG)" --assume-opq-lossless
 	DISLIN_DIR="$(DISLIN_DIR)" $(LIFETIME_RENDERER) "$(REPORT_DIR)"
 	@if grep -q "FEB_SWB_CORUN_PLAIN_PASS" "$(RUN_LOG)" && \
 	    grep -q "^fail_hits=0$$" "$(REPORT_DIR)/feb_swb_trace_debug_summary.txt" && \
@@ -154,6 +157,9 @@ run_swb_corun: compile_swb_corun
 	    echo "FEB_SWB_CORUN_TRACE_FAIL see $(REPORT_DIR)/feb_swb_trace_debug_summary.txt"; \
 	    false; \
 	fi
+
+run_swb_corun_poisson:
+	$(MAKE) run_swb_corun REPORT_DIR=$(CURDIR)/report_poisson RUN_LOG=$(CURDIR)/report_poisson/run_swb_corun.log SOURCE_MODE=poisson
 
 clean:
 	rm -rf $(WORK) $(BUILD_ROOT) transcript vsim.wlf

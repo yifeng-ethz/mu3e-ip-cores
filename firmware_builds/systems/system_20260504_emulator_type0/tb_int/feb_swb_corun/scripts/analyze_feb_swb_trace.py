@@ -209,6 +209,7 @@ def debug_hit_id(meta: int) -> int:
 def make_mutrig_dma_hit(ts_high: int, ts_low: int, shd_ts: int, hit_word: int) -> int:
     data_word = 0
     data_word |= 1 << 63
+    data_word |= (source_asic(hit_word) & 0x3) << 61
     data_word |= ((hit_word >> 17) & 0x1F) << 56
     data_word |= (hit_word & 0x1FF) << 47
     data_word |= ((hit_word >> 14) & 0x7) << 44
@@ -456,6 +457,7 @@ def write_reference_stats(
                     "checkpoint": label,
                     "count": len(values),
                     "min_cycles": f"{min(values):.3f}",
+                    "p05_cycles": f"{percentile(values, 5):.3f}",
                     "p50_cycles": f"{percentile(values, 50):.3f}",
                     "p95_cycles": f"{percentile(values, 95):.3f}",
                     "max_cycles": f"{max(values):.3f}",
@@ -469,6 +471,7 @@ def write_reference_stats(
                     "checkpoint": label,
                     "count": 0,
                     "min_cycles": "",
+                    "p05_cycles": "",
                     "p50_cycles": "",
                     "p95_cycles": "",
                     "max_cycles": "",
@@ -482,6 +485,7 @@ def write_reference_stats(
             "checkpoint",
             "count",
             "min_cycles",
+            "p05_cycles",
             "p50_cycles",
             "p95_cycles",
             "max_cycles",
@@ -862,6 +866,7 @@ def write_lifetime_stats(path: Path, rows: list[dict[str, object]]) -> None:
                 "checkpoint",
                 "count",
                 "min_cycles",
+                "p05_cycles",
                 "p50_cycles",
                 "p95_cycles",
                 "max_cycles",
@@ -878,6 +883,7 @@ def write_lifetime_stats(path: Path, rows: list[dict[str, object]]) -> None:
                         "checkpoint": label,
                         "count": len(values),
                         "min_cycles": f"{min(values):.3f}",
+                        "p05_cycles": f"{percentile(values, 5):.3f}",
                         "p50_cycles": f"{percentile(values, 50):.3f}",
                         "p95_cycles": f"{percentile(values, 95):.3f}",
                         "max_cycles": f"{max(values):.3f}",
@@ -891,6 +897,7 @@ def write_lifetime_stats(path: Path, rows: list[dict[str, object]]) -> None:
                         "checkpoint": label,
                         "count": 0,
                         "min_cycles": "",
+                        "p05_cycles": "",
                         "p50_cycles": "",
                         "p95_cycles": "",
                         "max_cycles": "",
@@ -1265,10 +1272,16 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--trace-dir", required=True, type=Path)
     parser.add_argument("--expected-lane", default=0, type=int)
-    parser.add_argument("--expected-asic", default=0, type=int)
+    parser.add_argument("--expected-asic", default=-1, type=int)
+    parser.add_argument("--expected-asic-count", default=8, type=int)
     parser.add_argument("--expected-channel", default=-1, type=int)
     parser.add_argument("--expected-channel-count", default=32, type=int)
     parser.add_argument("--expected-hit-period-8ns", default=1250, type=int)
+    parser.add_argument(
+        "--source-mode",
+        default="periodic",
+        choices=["periodic", "periodic_phase_staggered", "poisson", "poisson_iid"],
+    )
     parser.add_argument("--opq-log", type=Path)
     parser.add_argument("--assume-opq-lossless", action="store_true")
     args = parser.parse_args()
@@ -1335,20 +1348,39 @@ def main() -> int:
     lifetime_rows: list[dict[str, object]] = []
     failures: list[str] = []
 
+    def expected_asic_phase_8ns(asic: int) -> int:
+        if args.expected_asic_count <= 0:
+            return 0
+        return (asic * args.expected_hit_period_8ns) // args.expected_asic_count
+
+    def expected_sample_idx(abs_ts_8ns: int, asic: int) -> int:
+        phase = expected_asic_phase_8ns(asic)
+        if args.expected_hit_period_8ns <= 0 or abs_ts_8ns < phase:
+            return -1
+        delta = abs_ts_8ns - phase
+        if delta % args.expected_hit_period_8ns != 0:
+            return -1
+        return delta // args.expected_hit_period_8ns
+
     for expected in feb_hits:
         checks: list[str] = []
         payload_hit_id = source_hit_id(expected.hit_word)
         channel = source_channel(expected.hit_word)
+        asic = source_asic(expected.hit_word)
         abs_ts_8ns = source_abs_ts_8ns(expected)
         base = frame_base_8ns(expected)
         bucket_start = bucket_start_8ns(expected)
         bucket_end = bucket_start + 15
-        sample_idx = (
-            abs_ts_8ns // args.expected_hit_period_8ns
-            if args.expected_hit_period_8ns > 0
-            else -1
-        )
-        expected_full_hit_id = (sample_idx * args.expected_channel_count) + channel
+        sample_idx = expected_sample_idx(abs_ts_8ns, asic)
+        if args.source_mode in ("poisson", "poisson_iid"):
+            expected_full_hit_id = debug_hit_id(expected.debug_meta)
+        else:
+            expected_full_hit_id = (
+                (((sample_idx * args.expected_asic_count) + asic) * args.expected_channel_count)
+                + channel
+                if sample_idx >= 0
+                else -1
+            )
         expected_payload_hit_id = expected_full_hit_id & 0x1FF
         expected_ts = expected.dma_hit & DMA_TS_MASK
         source_generation = pop_match(source_index, expected.dma_hit)
@@ -1369,7 +1401,10 @@ def main() -> int:
 
         require(expected.lane == args.expected_lane, "lane")
         require(expected.header_id == SCIFI_HEADER_ID, "feb_header")
-        require(source_asic(expected.hit_word) == args.expected_asic, "source_asic")
+        if args.expected_asic >= 0:
+            require(asic == args.expected_asic, "source_asic")
+        else:
+            require(0 <= asic < args.expected_asic_count, "source_asic")
         if args.expected_channel >= 0:
             require(channel == args.expected_channel, "source_channel")
         else:
@@ -1379,11 +1414,13 @@ def main() -> int:
         require(expected.frame_id == abs_ts_8ns // FRAME_STRIDE_8NS, "source_frame")
         require((abs_ts_8ns & 0xF) == source_ts_low_nibble(expected.hit_word), "source_ts_nibble")
         require((abs_ts_8ns & 0x7) == source_rem(expected.hit_word), "source_ts_rem")
-        require(
-            args.expected_hit_period_8ns > 0
-            and abs_ts_8ns % args.expected_hit_period_8ns == 0,
-            "source_period",
-        )
+        if args.source_mode in ("poisson", "poisson_iid"):
+            require(abs_ts_8ns >= 0, "source_poisson_time")
+        else:
+            require(
+                sample_idx >= 0,
+                "source_period",
+            )
         require(payload_hit_id == expected_payload_hit_id, "source_hit_id_schedule")
         require(debug_level(expected.debug_meta) == 2, "debug_level")
         require(debug_lane(expected.debug_meta) == expected.lane, "debug_lane")
@@ -1436,7 +1473,7 @@ def main() -> int:
         require(dma is not None, "dma_present")
         if dma is not None:
             require(dma_is_mutrig(dma.hit_word) == 1, "dma_type")
-            require(dma_asic(dma.hit_word) == args.expected_asic, "dma_asic")
+            require(dma_asic(dma.hit_word) == (asic & 0x3), "dma_asic")
             require(dma_channel(dma.hit_word) == channel, "dma_channel")
             require(dma_hit_id(dma.hit_word) == payload_hit_id, "dma_hit_id")
             require(dma_rem(dma.hit_word) == source_rem(expected.hit_word), "dma_rem")
@@ -1456,7 +1493,7 @@ def main() -> int:
                 "hit_id": expected_full_hit_id,
                 "payload_hit_id": payload_hit_id,
                 "lane": expected.lane,
-                "source_asic": source_asic(expected.hit_word),
+                "source_asic": asic,
                 "source_channel": channel,
                 "abs_ts_8ns": abs_ts_8ns,
                 "frame_id": expected.frame_id,
@@ -1779,10 +1816,15 @@ def main() -> int:
         if args.expected_channel >= 0
         else f"0..{args.expected_channel_count - 1}"
     )
+    asic_text = (
+        str(args.expected_asic)
+        if args.expected_asic >= 0
+        else f"0..{args.expected_asic_count - 1}"
+    )
     print(
         "TRACE_DEBUG_PASS "
         f"hits={len(hit_rows)} channels={channel_text} "
-        f"asic={args.expected_asic} csv={hit_trace_path}"
+        f"asics={asic_text} csv={hit_trace_path}"
     )
     return 0
 
