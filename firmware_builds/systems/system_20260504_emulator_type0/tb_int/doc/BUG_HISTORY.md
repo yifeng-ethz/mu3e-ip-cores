@@ -53,6 +53,7 @@ Historical formal note:
 | [BUG-016-H](#bug-016-h-short-run-control-gap-made-rbcam-look-like-it-rejected-in-window-hits) | H | hard stuck error | `directed-only (post-rbCAM debug run-control override)` | fixed in harness guard; post-rbCAM rerun passed | PROF-INT-002 post-rbCAM ASIC0 100 kHz debug on `2026-05-07` | pending | A 1000-cycle debug run-control gap advanced RUNNING while rbCAM was still flushing, so hits accepted at pre-rbCAM were delayed until termination and looked like rbCAM rejection. |
 | [BUG-017-H](#bug-017-h-virtual-mutrig-periodic-hits-used-hit-count-as-timestamp) | H | hard stuck error | `common (virtual MuTRiG post-rbCAM periodic validation)` | fixed in harness; post-rbCAM sweep passed | PROF-INT-002 virtual MuTRiG post-rbCAM 10 kHz on `2026-05-07` | ec5b6ebb | The virtual MuTRiG periodic source stamped hit T coarse from a local hit counter instead of the generated MuTRiG timebase, creating false rbCAM timestamp-window drops. |
 | [BUG-018-R](#bug-018-r-sv-rbcam-deassembly-fifo-depth-did-not-match-vhdl-scfifo_w40d256) | R | hard stuck error | `occasional (1 MHz/channel full32 post-rbCAM stress)` | fixed in SV source; full rate sweep passed | PROF-INT-002 newest-SV 1 MHz post-rbCAM run on `2026-05-08` | pending | SV rbCAM deassembly FIFO depth was 64 while the VHDL reference uses `scfifo_w40d256`, letting generated fanout drop two owning-copy hits when one rbCAM instance backpressured. |
+| [BUG-019-R](#bug-019-r-feb-scifi-hit_type3-contract-mismatch-at-swb-opq-corun) | R | hard stuck error | `common (FEB SciFi hit_type3 through SWB OPQ merge)` | partial; direct corun passed | FEB/SWB corun architecture audit and `run_swb_corun` on `2026-05-08` | 833b204c/e7f29d8 | FEB/SWB corun exposed a protocol assumption on subheader hit-count width and a MuSiP OPQ egress header rewrite that could make SciFi/MuTRiG traffic parse or pack under the wrong detector contract. |
 
 ## 2026-05-06
 
@@ -511,3 +512,33 @@ Historical formal note:
     the refreshed four-rate newest-SV DEBUG2 sweep passed at `010k`, `100k`, `500k`, and `1000k` with zero payload residuals and zero DEBUG residuals. Counts were `A/POST/FEB=288/288/288`, `3168/3168/3168`, `16000/16000/16000`, and `32032/32032/32032`. The total closed hit count was `51,488/51,488`, all four `drops.csv` files had header-only row count, and the 1 MHz deassembly FIFO peak was `66/256` with zero full samples.
   - potential_hazard:
     low for the current tb_int post-rbCAM emulator profile because the stress sweep and 15-hit trace sanity check passed. Resource/timing impact of the deeper SV FIFO must remain visible in the standalone Quartus resource comparison because the FIFO-depth parity change is intentional and may affect memory inference.
+
+### BUG-019-R: FEB SciFi hit_type3 contract mismatch at SWB OPQ corun
+
+- First seen in:
+  - FEB/SWB corun architecture audit on `2026-05-08`
+  - direct corun `make run_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim` from `tb_int/feb_swb_corun`
+- Symptom:
+  - native-SV OPQ decodes the FEB subheader hit count as `[23:8]`, while the FEB SciFi hit_type3 frame contract only owns `[15:8]`
+  - before the MuSiP fix, FEB ingress produced SciFi preambles such as `0xe00000bc`, but OPQ egress returned `0xe80000bc`, causing downstream DMA packing to treat MuTRiG/SciFi hits as MuPix-shaped hits
+- Root cause:
+  - the cross-repo stream contract was not explicit enough at the OPQ boundary: the current corun must keep subheader `[23:16]` zero until FEB and OPQ agree on the hit-count field width
+  - MuSiP `ingress_egress_adaptor.vhd` also forced every OPQ egress K28.5 preamble to `MUPIX_HEADER_ID` instead of preserving the detector id
+- Fix status:
+  - state:
+    partial; the direct low-rate contract corun passes, and the MuSiP header rewrite is fixed, but the subheader hit-count width still needs an explicit protocol alignment or assertion on real FEB egress
+  - mechanism:
+    `feb_swb_corun_plain_tb.sv` drives FEB-style 128-subheader frames on lanes 0 and 1, masks lanes 2 and 3, normalizes subheader `[23:16]` to zero, and scoreboards ASIC0/channel0 100 kHz hits through OPQ/DMA. MuSiP commit `e7f29d8` preserves known detector headers on OPQ egress.
+  - before_fix_outcome:
+    the first direct corun showed SciFi ingress rewritten to MuPix at OPQ egress and reported DMA missing/ghost hits
+  - after_fix_outcome:
+    the direct corun passes with `FEB_SWB_CORUN_PLAIN_PASS expected_hits=12 dma_payload_words=3 opq_beats=66`; summary reports `expected_hits=12`, `actual_hits=12`, `missing_hits=0`, `ghost_hits=0`, `end_of_event_count=1`, `fifo_overflow=0x0`, and `fifo_underflow=0x0`
+  - potential_hazard:
+    medium until a real FEB egress trace or an RTL assertion proves subheader `[23:16]` is always zero, or the FEB/OPQ protocol is updated so both sides document the same hit-count width
+- Runtime / coverage context:
+  - active SWB mask is `0x3`, with lanes 0 and 1 driven and lanes 2 and 3 idle/masked
+  - lane 0 carries virtual MuTRiG ASIC0/channel0 hits at 100 kHz; lane 1 emits legal empty FEB frames
+  - generated reports live under `tb_int/feb_swb_corun/report/` and are intentionally ignored by git
+- Commit:
+  - FEB direct corun: `833b204c`
+  - MuSiP header fix: `e7f29d8`
