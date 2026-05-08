@@ -124,11 +124,15 @@ make compile_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim
 make run_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim
 ```
 
-The current directed contract run uses a virtual MuTRiG ASIC0/channel0 source
-at 100 kHz on lane 0, an empty legal FEB frame on lane 1, and
+The current directed contract run uses virtual MuTRiG ASIC0 channels 0..31 at
+100 kHz/channel on lane 0, an empty legal FEB frame on lane 1, and
 `feb_enable_mask = 4'h3`. The test expects the final log to contain
 `FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
 under `report/`. `run_swb_corun` also runs
 `scripts/analyze_feb_swb_trace.py`, which emits
-`report/feb_swb_hit_trace_debug.csv` and proves each hit reaches OPQ and DMA
-with the expected ASIC, channel, hit id, and frame/subheader timestamp bucket.
+`report/feb_swb_hit_trace_debug.csv` plus `report/feb_swb_delay_trace.csv` and
+proves each hit reaches OPQ and DMA with the expected ASIC, channel, hit id,
+and frame/subheader timestamp bucket. `scripts/plot_feb_swb_delays.py` then
+writes `report/feb_swb_delay_hist.png`, `report/feb_swb_delay_hist.pdf`, and
+`report/feb_swb_delay_hist_stats.csv` for FEB-egress to OPQ-ingress,
+OPQ-ingress to OPQ-egress, and FEB-egress to OPQ-egress transport delays.

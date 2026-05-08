@@ -4,13 +4,17 @@ module feb_swb_corun_plain_tb;
   import feb_swb_corun_pkg::*;
 
   localparam int ACTIVE_LANES = 2;
+  localparam int ASIC0_CHANNELS = 32;
   localparam int N_SHD = 128;
   localparam int N_FRAMES = 7;
-  localparam int HIT_PERIOD_8NS = 1250; // 100 kHz on the MuTRiG 8 ns timebase.
+  localparam int HIT_PERIOD_8NS = 1250; // 100 kHz/channel on the MuTRiG 8 ns timebase.
   localparam int FRAME_STRIDE_8NS = N_SHD << 4;
   localparam int FRAME_PERIOD_FEB_CYCLES = FRAME_STRIDE_8NS;
+  localparam int HIT_WINDOW_8NS = N_FRAMES * FRAME_STRIDE_8NS;
+  localparam int EXPECTED_TIME_SAMPLES =
+      (HIT_WINDOW_8NS + HIT_PERIOD_8NS - 1) / HIT_PERIOD_8NS;
   localparam int EXPECTED_HITS =
-      ((N_FRAMES * FRAME_STRIDE_8NS) + HIT_PERIOD_8NS - 1) / HIT_PERIOD_8NS;
+      EXPECTED_TIME_SAMPLES * ASIC0_CHANNELS;
   localparam int EXPECTED_DMA_WORDS = (EXPECTED_HITS + 3) / 4;
   localparam int TIMEOUT_SWB_CYCLES = 200000;
   localparam int unsigned NO_HIT_ID = 32'hffff_ffff;
@@ -72,6 +76,7 @@ module feb_swb_corun_plain_tb;
   int unsigned missing_count;
   int unsigned ghost_count;
 
+  int feb_egress_trace_fd;
   int ingress_trace_fd;
   int opq_trace_fd;
   int dma_trace_fd;
@@ -161,13 +166,14 @@ module feb_swb_corun_plain_tb;
 
   function automatic logic [31:0] make_mutrig_hit(
       input int unsigned abs_ts_8ns,
+      input int unsigned channel,
       input int unsigned hit_id);
     logic [31:0] word;
     begin
       word = '0;
       word[31:28] = abs_ts_8ns[3:0];
       word[25:22] = 4'd0;      // ASIC 0.
-      word[21:17] = 5'd0;      // Channel 0.
+      word[21:17] = channel[4:0];
       word[16:14] = abs_ts_8ns[2:0];
       word[13:9] = 5'd0;       // Fine time kept at zero for this contract case.
       word[8:0] = hit_id[8:0]; // Per-hit identity survives in the MuTRiG payload.
@@ -244,7 +250,7 @@ module feb_swb_corun_plain_tb;
     end
   endtask
 
-  function automatic int unsigned subheader_hit_id(
+  function automatic int unsigned subheader_sample_idx(
       input int unsigned lane,
       input int unsigned frame_id,
       input int unsigned shd_idx);
@@ -276,8 +282,8 @@ module feb_swb_corun_plain_tb;
       input int unsigned shd_idx);
     int unsigned hit_id_v;
     begin
-      hit_id_v = subheader_hit_id(lane, frame_id, shd_idx);
-      return (hit_id_v == NO_HIT_ID) ? 0 : 1;
+      hit_id_v = subheader_sample_idx(lane, frame_id, shd_idx);
+      return (hit_id_v == NO_HIT_ID) ? 0 : ASIC0_CHANNELS;
     end
   endfunction
 
@@ -285,6 +291,8 @@ module feb_swb_corun_plain_tb;
     longint unsigned frame_base;
     int unsigned shd_idx;
     int unsigned hit_count;
+    int unsigned sample_idx;
+    int unsigned channel;
     int unsigned hit_id;
     int unsigned abs_ts_8ns;
     int unsigned total_hits;
@@ -315,14 +323,17 @@ module feb_swb_corun_plain_tb;
                        1'b0, 1'b0, 1'b0, 64'h0);
 
         if (hit_count != 0) begin
-          hit_id = subheader_hit_id(lane, frame_id, shd_idx);
-          abs_ts_8ns = hit_id * HIT_PERIOD_8NS;
-          hit_word = make_mutrig_hit(abs_ts_8ns, hit_id);
-          expected_hits.push_back(expected_mutrig_dma_hit(
-              ts_high_word, ts_low_word, shd_idx[7:0], hit_word));
-          drive_feb_word(lane, 4'h0, hit_word, 1'b0, 1'b0, 1'b1,
-                         make_debug_meta(lane, abs_ts_8ns, hit_id));
-          feb_hit_count++;
+          sample_idx = subheader_sample_idx(lane, frame_id, shd_idx);
+          abs_ts_8ns = sample_idx * HIT_PERIOD_8NS;
+          for (channel = 0; channel < ASIC0_CHANNELS; channel++) begin
+            hit_id = (sample_idx * ASIC0_CHANNELS) + channel;
+            hit_word = make_mutrig_hit(abs_ts_8ns, channel, hit_id);
+            expected_hits.push_back(expected_mutrig_dma_hit(
+                ts_high_word, ts_low_word, shd_idx[7:0], hit_word));
+            drive_feb_word(lane, 4'h0, hit_word, 1'b0, 1'b0, 1'b1,
+                           make_debug_meta(lane, abs_ts_8ns, hit_id));
+            feb_hit_count++;
+          end
         end
       end
 
@@ -352,20 +363,42 @@ module feb_swb_corun_plain_tb;
       if (!$value$plusargs("FEB_SWB_TRACE_DIR=%s", trace_dir)) begin
         trace_dir = "report";
       end
+      feb_egress_trace_fd = $fopen({trace_dir, "/feb_swb_feb_egress_trace.csv"}, "w");
       ingress_trace_fd = $fopen({trace_dir, "/feb_swb_ingress_trace.csv"}, "w");
       opq_trace_fd = $fopen({trace_dir, "/feb_swb_opq_trace.csv"}, "w");
       dma_trace_fd = $fopen({trace_dir, "/feb_swb_dma_trace.csv"}, "w");
       summary_fd = $fopen({trace_dir, "/feb_swb_corun_summary.txt"}, "w");
-      if (ingress_trace_fd == 0 || opq_trace_fd == 0 ||
-          dma_trace_fd == 0 || summary_fd == 0) begin
+      if (feb_egress_trace_fd == 0 || ingress_trace_fd == 0 ||
+          opq_trace_fd == 0 || dma_trace_fd == 0 || summary_fd == 0) begin
         $fatal(1, "failed to open one or more trace files under %s", trace_dir);
       end
+      $fdisplay(feb_egress_trace_fd,
+                "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
       $fdisplay(ingress_trace_fd,
                 "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
       $fdisplay(opq_trace_fd, "time_ps,valid,datak,data");
       $fdisplay(dma_trace_fd, "time_ps,wren,end_of_event,dma_done,data");
     end
   endtask
+
+  always @(posedge feb_clk) begin : feb_egress_trace_monitor
+    if (!reset) begin
+      for (int lane = 0; lane < ACTIVE_LANES; lane++) begin
+        if (feb_valid[lane] && feb_ready[lane]) begin
+          $fdisplay(feb_egress_trace_fd,
+                    "%0t,%0d,1,0x%1h,0x%08h,%0d,%0d,%0d,0x%016h",
+                    $time,
+                    lane,
+                    feb_data[lane*36 + 32 +: 4],
+                    feb_data[lane*36 +: 32],
+                    feb_startofpacket[lane],
+                    feb_endofpacket[lane],
+                    feb_debug_valid[lane],
+                    feb_debug_meta[lane*64 +: 64]);
+        end
+      end
+    end
+  end
 
   always @(posedge swb_clk) begin : ingress_trace_monitor
     if (!reset) begin
@@ -462,7 +495,9 @@ module feb_swb_corun_plain_tb;
 
       $fdisplay(summary_fd, "frames=%0d", N_FRAMES);
       $fdisplay(summary_fd, "active_mask=0x%0h", swb_enable_mask);
-      $fdisplay(summary_fd, "hit_rate_hz=100000");
+      $fdisplay(summary_fd, "asic0_channels=%0d", ASIC0_CHANNELS);
+      $fdisplay(summary_fd, "hit_rate_hz_per_channel=100000");
+      $fdisplay(summary_fd, "expected_time_samples=%0d", EXPECTED_TIME_SAMPLES);
       $fdisplay(summary_fd, "expected_hits=%0d", expected_hits.size());
       $fdisplay(summary_fd, "feb_hit_count=%0d", feb_hit_count);
       $fdisplay(summary_fd, "opq_beats=%0d", opq_beat_count);
@@ -531,6 +566,7 @@ module feb_swb_corun_plain_tb;
     check_results();
 
     $fclose(ingress_trace_fd);
+    $fclose(feb_egress_trace_fd);
     $fclose(opq_trace_fd);
     $fclose(dma_trace_fd);
     $fclose(summary_fd);
