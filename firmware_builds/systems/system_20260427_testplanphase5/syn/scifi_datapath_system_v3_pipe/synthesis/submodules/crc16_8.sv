@@ -1,5 +1,6 @@
 // crc16_8.sv
 // CRC-16 calculator for 8-bit inputs
+// Post-reorg location: rtl/common/crc16_8.sv
 // CRC-16-ANSI, MSBF/normal polynomial 0x8005
 // Bit-exact match to MuTRiG ASIC crc16_8.vhd
 

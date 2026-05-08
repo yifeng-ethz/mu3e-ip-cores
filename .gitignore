@@ -17,6 +17,7 @@ tmp/
 tr_db.log
 transcript
 firmware_builds/board_test/phase4/work/
+work/
 docs/Archive.zip
 docs/Archive/
 
@@ -42,3 +43,6 @@ docs/Archive/
 **/*.pin
 **/*.qws
 firmware_builds/systems/*/tb_int/reports/
+firmware_builds/systems/*/tb_int/logs/
+firmware_builds/systems/*/tb_int/sim_*/
+firmware_builds/systems/*/syn/firmware_builds/

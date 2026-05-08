@@ -2,9 +2,9 @@
 // Runtime-selectable lane source combiner between real MuTRiG decoded traffic
 // and the local emulator stream.
 //
-// Version : 26.2.0
-// Date    : 20260502
-// Change  : Added mixed real+emulator RR mode with shallow per-input FIFOs.
+// Version : 26.2.1
+// Date    : 20260503
+// Change  : Treat validless real decoded streams as always valid by default.
 //
 // CSR map, word addressed:
 //   0x0 UID              RO     default 0x4D4C534D ("MLSM")
@@ -25,12 +25,13 @@
 module mutrig_lane_source_mux #(
     parameter integer SELECT_EMULATOR = 0,
     parameter integer FIFO_DEPTH      = 4,
+    parameter integer REAL_ALWAYS_VALID = 1,
     parameter integer IP_UID          = 32'h4D4C534D,
     parameter integer VERSION_MAJOR   = 26,
     parameter integer VERSION_MINOR   = 2,
-    parameter integer VERSION_PATCH   = 0,
-    parameter integer BUILD           = 502,
-    parameter integer VERSION_DATE    = 20260502,
+    parameter integer VERSION_PATCH   = 1,
+    parameter integer BUILD           = 503,
+    parameter integer VERSION_DATE    = 20260503,
     parameter integer VERSION_GIT     = 32'h0528DBAD,
     parameter integer INSTANCE_ID     = 0
 ) (
@@ -122,6 +123,7 @@ module mutrig_lane_source_mux #(
     logic [31:0] meta_readdata;
     logic [31:0] status_readdata;
     logic [31:0] fifo_status_readdata;
+    logic        real_valid_effective;
 
     function automatic logic [31:0] saturating_increment(input logic [31:0] value);
         if (value == 32'hFFFF_FFFF) begin
@@ -133,6 +135,7 @@ module mutrig_lane_source_mux #(
 
     assign real_input_beat = {asi_real_error, asi_real_channel, asi_real_data};
     assign emu_input_beat  = {asi_emu_error, asi_emu_channel, asi_emu_data};
+    assign real_valid_effective = (REAL_ALWAYS_VALID != 0) ? 1'b1 : asi_real_valid;
 
     always_comb begin : mixed_rr_arbiter
         real_fifo_has_data          = (real_fifo_count != '0);
@@ -166,9 +169,9 @@ module mutrig_lane_source_mux #(
             end
         end
 
-        real_push_accept = mixed_rr_enable && asi_real_valid && (!real_fifo_full || mixed_pop_real);
+        real_push_accept = mixed_rr_enable && real_valid_effective && (!real_fifo_full || mixed_pop_real);
         emu_push_accept  = mixed_rr_enable && asi_emu_valid && (!emu_fifo_full || mixed_pop_emu);
-        real_push_drop   = mixed_rr_enable && asi_real_valid && !real_push_accept;
+        real_push_drop   = mixed_rr_enable && real_valid_effective && !real_push_accept;
         emu_push_drop    = mixed_rr_enable && asi_emu_valid && !emu_push_accept;
         real_push_index  = real_fifo_count - {{(FIFO_COUNT_WIDTH_CONST-1){1'b0}}, mixed_pop_real};
         emu_push_index   = emu_fifo_count - {{(FIFO_COUNT_WIDTH_CONST-1){1'b0}}, mixed_pop_emu};
@@ -190,7 +193,7 @@ module mutrig_lane_source_mux #(
             aso_channel = asi_emu_channel;
         end else begin
             aso_data    = asi_real_data;
-            aso_valid   = asi_real_valid;
+            aso_valid   = real_valid_effective;
             aso_error   = asi_real_error;
             aso_channel = asi_real_channel;
         end
@@ -198,36 +201,36 @@ module mutrig_lane_source_mux #(
 
     always_ff @(posedge clk or posedge rst) begin : csr_reg
         if (rst) begin
-            select_emulator       <= (SELECT_EMULATOR != 0);
-            mixed_rr_enable       <= 1'b0;
-            meta_select           <= 2'd0;
-            real_beat_count       <= 32'd0;
-            emu_beat_count        <= 32'd0;
-            selected_beat_count   <= 32'd0;
-            source_switch_count   <= 32'd0;
-            real_drop_count       <= 32'd0;
-            emu_drop_count        <= 32'd0;
-            real_selected_count   <= 32'd0;
-            emu_selected_count    <= 32'd0;
-            last_selected_source  <= 1'b0;
-            last_selected_data    <= 9'd0;
-            last_selected_error   <= 3'd0;
-            last_selected_channel <= 4'd0;
-            real_fifo_count       <= '0;
-            emu_fifo_count        <= '0;
-            rr_next_emulator      <= 1'b0;
+            select_emulator          <= (SELECT_EMULATOR != 0);
+            mixed_rr_enable          <= 1'b0;
+            meta_select              <= 2'd0;
+            real_beat_count          <= 32'd0;
+            emu_beat_count           <= 32'd0;
+            selected_beat_count      <= 32'd0;
+            source_switch_count      <= 32'd0;
+            real_drop_count          <= 32'd0;
+            emu_drop_count           <= 32'd0;
+            real_selected_count      <= 32'd0;
+            emu_selected_count       <= 32'd0;
+            last_selected_source     <= 1'b0;
+            last_selected_data       <= 9'd0;
+            last_selected_error      <= 3'd0;
+            last_selected_channel    <= 4'd0;
+            real_fifo_count          <= '0;
+            emu_fifo_count           <= '0;
+            rr_next_emulator         <= 1'b0;
         end else begin
-            if (asi_real_valid) begin
-                real_beat_count <= saturating_increment(real_beat_count);
+            if (real_valid_effective) begin
+                real_beat_count    <= saturating_increment(real_beat_count);
             end
             if (asi_emu_valid) begin
-                emu_beat_count <= saturating_increment(emu_beat_count);
+                emu_beat_count    <= saturating_increment(emu_beat_count);
             end
             if (real_push_drop) begin
-                real_drop_count <= saturating_increment(real_drop_count);
+                real_drop_count    <= saturating_increment(real_drop_count);
             end
             if (emu_push_drop) begin
-                emu_drop_count <= saturating_increment(emu_drop_count);
+                emu_drop_count    <= saturating_increment(emu_drop_count);
             end
 
             if (mixed_rr_enable) begin
@@ -235,13 +238,13 @@ module mutrig_lane_source_mux #(
                     for (int idx = 0; idx < FIFO_DEPTH_CONST - 1; idx++) begin
                         real_fifo[idx] <= real_fifo[idx + 1];
                     end
-                    rr_next_emulator <= 1'b1;
+                    rr_next_emulator    <= 1'b1;
                 end
                 if (mixed_pop_emu) begin
                     for (int idx = 0; idx < FIFO_DEPTH_CONST - 1; idx++) begin
                         emu_fifo[idx] <= emu_fifo[idx + 1];
                     end
-                    rr_next_emulator <= 1'b0;
+                    rr_next_emulator    <= 1'b0;
                 end
 
                 if (real_push_accept) begin
@@ -252,64 +255,64 @@ module mutrig_lane_source_mux #(
                 end
 
                 case ({real_push_accept, mixed_pop_real})
-                    2'b10: real_fifo_count <= real_fifo_count + 1'b1;
-                    2'b01: real_fifo_count <= real_fifo_count - 1'b1;
+                    2'b10: real_fifo_count    <= real_fifo_count + 1'b1;
+                    2'b01: real_fifo_count    <= real_fifo_count - 1'b1;
                     default: begin
                     end
                 endcase
                 case ({emu_push_accept, mixed_pop_emu})
-                    2'b10: emu_fifo_count <= emu_fifo_count + 1'b1;
-                    2'b01: emu_fifo_count <= emu_fifo_count - 1'b1;
+                    2'b10: emu_fifo_count    <= emu_fifo_count + 1'b1;
+                    2'b01: emu_fifo_count    <= emu_fifo_count - 1'b1;
                     default: begin
                     end
                 endcase
             end
 
             if (aso_valid) begin
-                selected_beat_count   <= saturating_increment(selected_beat_count);
-                last_selected_source  <= mixed_rr_enable ? mixed_output_source_emulator : select_emulator;
-                last_selected_data    <= aso_data;
-                last_selected_error   <= aso_error;
-                last_selected_channel <= aso_channel;
+                selected_beat_count      <= saturating_increment(selected_beat_count);
+                last_selected_source     <= mixed_rr_enable ? mixed_output_source_emulator : select_emulator;
+                last_selected_data       <= aso_data;
+                last_selected_error      <= aso_error;
+                last_selected_channel    <= aso_channel;
                 if (mixed_rr_enable ? mixed_output_source_emulator : select_emulator) begin
-                    emu_selected_count <= saturating_increment(emu_selected_count);
+                    emu_selected_count    <= saturating_increment(emu_selected_count);
                 end else begin
-                    real_selected_count <= saturating_increment(real_selected_count);
+                    real_selected_count    <= saturating_increment(real_selected_count);
                 end
             end
 
             if (avs_csr_write) begin
                 case (avs_csr_address)
                     4'h1: begin
-                        meta_select <= avs_csr_writedata[1:0];
+                        meta_select    <= avs_csr_writedata[1:0];
                     end
                     4'h2: begin
                         if (source_mode != requested_source_mode) begin
-                            source_switch_count <= saturating_increment(source_switch_count);
-                            real_fifo_count     <= '0;
-                            emu_fifo_count      <= '0;
-                            rr_next_emulator    <= 1'b0;
+                            source_switch_count    <= saturating_increment(source_switch_count);
+                            real_fifo_count        <= '0;
+                            emu_fifo_count         <= '0;
+                            rr_next_emulator       <= 1'b0;
                         end
 
-                        select_emulator <= avs_csr_writedata[0];
-                        mixed_rr_enable <= avs_csr_writedata[2];
+                        select_emulator    <= avs_csr_writedata[0];
+                        mixed_rr_enable    <= avs_csr_writedata[2];
 
                         if (avs_csr_writedata[1]) begin
-                            real_beat_count       <= 32'd0;
-                            emu_beat_count        <= 32'd0;
-                            selected_beat_count   <= 32'd0;
-                            source_switch_count   <= 32'd0;
-                            real_drop_count       <= 32'd0;
-                            emu_drop_count        <= 32'd0;
-                            real_selected_count   <= 32'd0;
-                            emu_selected_count    <= 32'd0;
-                            last_selected_source  <= avs_csr_writedata[0];
-                            last_selected_data    <= 9'd0;
-                            last_selected_error   <= 3'd0;
-                            last_selected_channel <= 4'd0;
-                            real_fifo_count       <= '0;
-                            emu_fifo_count        <= '0;
-                            rr_next_emulator      <= 1'b0;
+                            real_beat_count          <= 32'd0;
+                            emu_beat_count           <= 32'd0;
+                            selected_beat_count      <= 32'd0;
+                            source_switch_count      <= 32'd0;
+                            real_drop_count          <= 32'd0;
+                            emu_drop_count           <= 32'd0;
+                            real_selected_count      <= 32'd0;
+                            emu_selected_count       <= 32'd0;
+                            last_selected_source     <= avs_csr_writedata[0];
+                            last_selected_data       <= 9'd0;
+                            last_selected_error      <= 3'd0;
+                            last_selected_channel    <= 4'd0;
+                            real_fifo_count          <= '0;
+                            emu_fifo_count           <= '0;
+                            rr_next_emulator         <= 1'b0;
                         end
                     end
                     default: begin
@@ -332,7 +335,7 @@ module mutrig_lane_source_mux #(
 
         status_readdata           = 32'd0;
         status_readdata[0]        = select_emulator;
-        status_readdata[1]        = asi_real_valid;
+        status_readdata[1]        = real_valid_effective;
         status_readdata[2]        = asi_emu_valid;
         status_readdata[3]        = aso_valid;
         status_readdata[7:4]      = aso_channel;
@@ -341,7 +344,7 @@ module mutrig_lane_source_mux #(
         status_readdata[17:15]    = asi_real_error;
         status_readdata[21:18]    = asi_emu_channel;
         status_readdata[24:22]    = asi_emu_error;
-        status_readdata[25]       = asi_real_valid & asi_emu_valid;
+        status_readdata[25]       = real_valid_effective & asi_emu_valid;
         status_readdata[26]       = mixed_rr_enable;
         status_readdata[27]       = real_fifo_full;
         status_readdata[28]       = emu_fifo_full;

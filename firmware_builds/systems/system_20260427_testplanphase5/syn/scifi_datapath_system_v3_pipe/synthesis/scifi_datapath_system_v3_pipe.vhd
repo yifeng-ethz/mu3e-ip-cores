@@ -70,6 +70,50 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 		);
 	end component dbg_mm2runctrl;
 
+	component altera_avalon_sc_fifo is
+		generic (
+			SYMBOLS_PER_BEAT    : integer := 1;
+			BITS_PER_SYMBOL     : integer := 8;
+			FIFO_DEPTH          : integer := 16;
+			CHANNEL_WIDTH       : integer := 0;
+			ERROR_WIDTH         : integer := 0;
+			USE_PACKETS         : integer := 0;
+			USE_FILL_LEVEL      : integer := 0;
+			EMPTY_LATENCY       : integer := 3;
+			USE_MEMORY_BLOCKS   : integer := 1;
+			USE_STORE_FORWARD   : integer := 0;
+			USE_ALMOST_FULL_IF  : integer := 0;
+			USE_ALMOST_EMPTY_IF : integer := 0
+		);
+		port (
+			clk               : in  std_logic                     := 'X';             -- clk
+			reset             : in  std_logic                     := 'X';             -- reset
+			in_data           : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			in_valid          : in  std_logic                     := 'X';             -- valid
+			in_ready          : out std_logic;                                        -- ready
+			in_error          : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			in_channel        : in  std_logic_vector(4 downto 0)  := (others => 'X'); -- channel
+			out_data          : out std_logic_vector(8 downto 0);                     -- data
+			out_valid         : out std_logic;                                        -- valid
+			out_ready         : in  std_logic                     := 'X';             -- ready
+			out_error         : out std_logic_vector(2 downto 0);                     -- error
+			out_channel       : out std_logic_vector(4 downto 0);                     -- channel
+			csr_address       : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- address
+			csr_read          : in  std_logic                     := 'X';             -- read
+			csr_write         : in  std_logic                     := 'X';             -- write
+			csr_readdata      : out std_logic_vector(31 downto 0);                    -- readdata
+			csr_writedata     : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			almost_full_data  : out std_logic;                                        -- data
+			almost_empty_data : out std_logic;                                        -- data
+			in_startofpacket  : in  std_logic                     := 'X';             -- startofpacket
+			in_endofpacket    : in  std_logic                     := 'X';             -- endofpacket
+			out_startofpacket : out std_logic;                                        -- startofpacket
+			out_endofpacket   : out std_logic;                                        -- endofpacket
+			in_empty          : in  std_logic_vector(0 downto 0)  := (others => 'X'); -- empty
+			out_empty         : out std_logic_vector(0 downto 0)                      -- empty
+		);
+	end component altera_avalon_sc_fifo;
+
 	component pulse_fanout8 is
 		port (
 			csi_clk               : in  std_logic := 'X'; -- clk
@@ -97,7 +141,7 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 		);
 	end component pulse_fanout8;
 
-	component emulator_mutrig is
+	component emulator_mutrig_qsys_lane is
 		generic (
 			FIFO_DEPTH                    : integer := 256;
 			CSR_ADDR_WIDTH                : integer := 4;
@@ -105,28 +149,46 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			CLUSTER_CROSS_ASIC_DEFAULT    : natural := 0;
 			CLUSTER_CENTER_GLOBAL_DEFAULT : natural := 16;
 			CLUSTER_LANE_INDEX_DEFAULT    : natural := 0;
-			CLUSTER_LANE_COUNT_DEFAULT    : natural := 1
+			CLUSTER_LANE_COUNT_DEFAULT    : natural := 1;
+			BYTE_STREAM_ENABLE            : boolean := false;
+			DEBUG_LEVEL                   : natural := 0
 		);
 		port (
-			i_clk                   : in  std_logic                     := 'X';             -- clk
-			i_rst                   : in  std_logic                     := 'X';             -- reset
-			aso_tx8b1k_data         : out std_logic_vector(8 downto 0);                     -- data
-			aso_tx8b1k_valid        : out std_logic;                                        -- valid
-			aso_tx8b1k_channel      : out std_logic_vector(3 downto 0);                     -- channel
-			aso_tx8b1k_error        : out std_logic_vector(2 downto 0);                     -- error
-			asi_ctrl_data           : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
-			asi_ctrl_valid          : in  std_logic                     := 'X';             -- valid
-			asi_ctrl_ready          : out std_logic;                                        -- ready
-			coe_inject_pulse        : in  std_logic                     := 'X';             -- pulse
-			coe_inject_masked_pulse : in  std_logic                     := 'X';             -- masked_pulse
-			avs_csr_address         : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- address
-			avs_csr_read            : in  std_logic                     := 'X';             -- read
-			avs_csr_write           : in  std_logic                     := 'X';             -- write
-			avs_csr_writedata       : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			avs_csr_readdata        : out std_logic_vector(31 downto 0);                    -- readdata
-			avs_csr_waitrequest     : out std_logic                                         -- waitrequest
+			i_clk                        : in  std_logic                     := 'X';             -- clk
+			i_rst                        : in  std_logic                     := 'X';             -- reset
+			aso_hit_type0_data           : out std_logic_vector(44 downto 0);                    -- data
+			aso_hit_type0_valid          : out std_logic;                                        -- valid
+			aso_hit_type0_error          : out std_logic_vector(2 downto 0);                     -- error
+			aso_hit_type0_channel        : out std_logic_vector(3 downto 0);                     -- channel
+			aso_hit_type0_startofpacket  : out std_logic;                                        -- startofpacket
+			aso_hit_type0_endofpacket    : out std_logic;                                        -- endofpacket
+			aso_hit_type0_endofrun       : out std_logic;                                        -- endofrun
+			aso_tx8b1k_data              : out std_logic_vector(8 downto 0);                     -- data
+			aso_tx8b1k_valid             : out std_logic;                                        -- valid
+			aso_tx8b1k_channel           : out std_logic_vector(3 downto 0);                     -- channel
+			aso_tx8b1k_error             : out std_logic_vector(2 downto 0);                     -- error
+			asi_ctrl_data                : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_ctrl_valid               : in  std_logic                     := 'X';             -- valid
+			asi_ctrl_ready               : out std_logic;                                        -- ready
+			coe_inject_pulse             : in  std_logic                     := 'X';             -- pulse
+			coe_inject_masked_pulse      : in  std_logic                     := 'X';             -- masked_pulse
+			avs_csr_address              : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- address
+			avs_csr_read                 : in  std_logic                     := 'X';             -- read
+			avs_csr_write                : in  std_logic                     := 'X';             -- write
+			avs_csr_writedata            : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			avs_csr_readdata             : out std_logic_vector(31 downto 0);                    -- readdata
+			avs_csr_waitrequest          : out std_logic;                                        -- waitrequest
+			coe_debug_fifo_fill_level    : out std_logic_vector(15 downto 0);                    -- fill_level
+			coe_debug_hit_metadata       : out std_logic_vector(63 downto 0);                    -- metadata
+			coe_debug_hit_metadata_valid : out std_logic;                                        -- valid
+			aso_hit_debug_data           : out std_logic_vector(63 downto 0);                    -- data
+			aso_hit_debug_valid          : out std_logic;                                        -- valid
+			aso_hit_debug_channel        : out std_logic_vector(3 downto 0);                     -- channel
+			aso_hit_debug_startofpacket  : out std_logic;                                        -- startofpacket
+			aso_hit_debug_endofpacket    : out std_logic;                                        -- endofpacket
+			aso_hit_debug_endofrun       : out std_logic                                         -- endofrun
 		);
-	end component emulator_mutrig;
+	end component emulator_mutrig_qsys_lane;
 
 	component altera_avalon_dc_fifo is
 		generic (
@@ -184,9 +246,9 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			IP_UID                : natural := 1212764994;
 			VERSION_MAJOR         : natural := 26;
 			VERSION_MINOR         : natural := 0;
-			VERSION_PATCH         : natural := 4;
-			BUILD                 : natural := 502;
-			VERSION_DATE          : natural := 20260502;
+			VERSION_PATCH         : natural := 5;
+			BUILD                 : natural := 506;
+			VERSION_DATE          : natural := 20260506;
 			VERSION_GIT           : natural := 481097348;
 			INSTANCE_ID           : natural := 0
 		);
@@ -262,11 +324,11 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			DEBUG                     : natural := 0;
 			VERSION_MAJOR             : natural := 26;
 			VERSION_MINOR             : natural := 1;
-			VERSION_PATCH             : natural := 8;
-			BUILD                     : natural := 502;
+			VERSION_PATCH             : natural := 10;
+			BUILD                     : natural := 503;
 			IP_UID                    : natural := 1212765012;
-			VERSION_DATE              : natural := 20260502;
-			VERSION_GIT               : natural := 375124078;
+			VERSION_DATE              : natural := 20260503;
+			VERSION_GIT               : natural := 2679438;
 			INSTANCE_ID               : natural := 0
 		);
 		port (
@@ -699,7 +761,12 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			aso_debug_burst_valid       : out std_logic;                                        -- valid
 			aso_debug_burst_data        : out std_logic_vector(15 downto 0);                    -- data
 			aso_ts_delta_valid          : out std_logic;                                        -- valid
-			aso_ts_delta_data           : out std_logic_vector(15 downto 0)                     -- data
+			aso_ts_delta_data           : out std_logic_vector(15 downto 0);                    -- data
+			coe_debug_status_data       : out std_logic_vector(31 downto 0);                    -- status
+			coe_hit_type0_sidecar_data  : in  std_logic_vector(63 downto 0) := (others => 'X'); -- metadata
+			coe_hit_type0_sidecar_valid : in  std_logic                     := 'X';             -- valid
+			coe_hit_type1_sidecar_data  : out std_logic_vector(63 downto 0);                    -- metadata
+			coe_hit_type1_sidecar_valid : out std_logic                                         -- valid
 		);
 	end component mts_processor;
 
@@ -1038,16 +1105,17 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 
 	component mutrig_lane_source_mux is
 		generic (
-			SELECT_EMULATOR : natural                       := 0;
-			FIFO_DEPTH      : natural                       := 4;
-			IP_UID          : std_logic_vector(31 downto 0) := "01001101010011000101001101001101";
-			VERSION_MAJOR   : natural                       := 26;
-			VERSION_MINOR   : natural                       := 2;
-			VERSION_PATCH   : natural                       := 0;
-			BUILD           : natural                       := 502;
-			VERSION_DATE    : natural                       := 20260502;
-			VERSION_GIT     : std_logic_vector(31 downto 0) := "00000101001010001101101110101101";
-			INSTANCE_ID     : natural                       := 0
+			SELECT_EMULATOR   : natural                       := 0;
+			FIFO_DEPTH        : natural                       := 4;
+			REAL_ALWAYS_VALID : natural                       := 1;
+			IP_UID            : std_logic_vector(31 downto 0) := "01001101010011000101001101001101";
+			VERSION_MAJOR     : natural                       := 26;
+			VERSION_MINOR     : natural                       := 2;
+			VERSION_PATCH     : natural                       := 1;
+			BUILD             : natural                       := 503;
+			VERSION_DATE      : natural                       := 20260503;
+			VERSION_GIT       : std_logic_vector(31 downto 0) := "00000101001010001101101110101101";
+			INSTANCE_ID       : natural                       := 0
 		);
 		port (
 			clk                 : in  std_logic                     := 'X';             -- clk
@@ -1819,13 +1887,47 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			in_rst_0_reset : in  std_logic                    := 'X';             -- reset
 			in_0_data      : in  std_logic_vector(8 downto 0) := (others => 'X'); -- data
 			in_0_valid     : in  std_logic                    := 'X';             -- valid
+			in_0_ready     : out std_logic;                                       -- ready
+			in_0_error     : in  std_logic_vector(2 downto 0) := (others => 'X'); -- error
+			in_0_channel   : in  std_logic_vector(4 downto 0) := (others => 'X'); -- channel
+			out_0_data     : out std_logic_vector(8 downto 0);                    -- data
+			out_0_valid    : out std_logic;                                       -- valid
+			out_0_error    : out std_logic_vector(2 downto 0);                    -- error
+			out_0_channel  : out std_logic_vector(3 downto 0)                     -- channel
+		);
+	end component scifi_datapath_system_v3_pipe_avalon_st_adapter_009;
+
+	component scifi_datapath_system_v3_pipe_avalon_st_adapter_017 is
+		generic (
+			inBitsPerSymbol : integer := 8;
+			inUsePackets    : integer := 0;
+			inDataWidth     : integer := 8;
+			inChannelWidth  : integer := 3;
+			inErrorWidth    : integer := 2;
+			inUseEmptyPort  : integer := 0;
+			inUseValid      : integer := 1;
+			inUseReady      : integer := 1;
+			inReadyLatency  : integer := 0;
+			outDataWidth    : integer := 32;
+			outChannelWidth : integer := 3;
+			outErrorWidth   : integer := 2;
+			outUseEmptyPort : integer := 0;
+			outUseValid     : integer := 1;
+			outUseReady     : integer := 1;
+			outReadyLatency : integer := 0
+		);
+		port (
+			in_clk_0_clk   : in  std_logic                    := 'X';             -- clk
+			in_rst_0_reset : in  std_logic                    := 'X';             -- reset
+			in_0_data      : in  std_logic_vector(8 downto 0) := (others => 'X'); -- data
+			in_0_valid     : in  std_logic                    := 'X';             -- valid
 			out_0_data     : out std_logic_vector(8 downto 0);                    -- data
 			out_0_valid    : out std_logic;                                       -- valid
 			out_0_ready    : in  std_logic                    := 'X'              -- ready
 		);
-	end component scifi_datapath_system_v3_pipe_avalon_st_adapter_009;
+	end component scifi_datapath_system_v3_pipe_avalon_st_adapter_017;
 
-	component scifi_datapath_system_v3_pipe_avalon_st_adapter_010 is
+	component scifi_datapath_system_v3_pipe_avalon_st_adapter_018 is
 		generic (
 			inBitsPerSymbol : integer := 8;
 			inUsePackets    : integer := 0;
@@ -1859,7 +1961,41 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 			out_0_startofpacket : out std_logic;                                        -- startofpacket
 			out_0_endofpacket   : out std_logic                                         -- endofpacket
 		);
-	end component scifi_datapath_system_v3_pipe_avalon_st_adapter_010;
+	end component scifi_datapath_system_v3_pipe_avalon_st_adapter_018;
+
+	component scifi_datapath_system_v3_pipe_avalon_st_adapter_034 is
+		generic (
+			inBitsPerSymbol : integer := 8;
+			inUsePackets    : integer := 0;
+			inDataWidth     : integer := 8;
+			inChannelWidth  : integer := 3;
+			inErrorWidth    : integer := 2;
+			inUseEmptyPort  : integer := 0;
+			inUseValid      : integer := 1;
+			inUseReady      : integer := 1;
+			inReadyLatency  : integer := 0;
+			outDataWidth    : integer := 32;
+			outChannelWidth : integer := 3;
+			outErrorWidth   : integer := 2;
+			outUseEmptyPort : integer := 0;
+			outUseValid     : integer := 1;
+			outUseReady     : integer := 1;
+			outReadyLatency : integer := 0
+		);
+		port (
+			in_clk_0_clk   : in  std_logic                    := 'X';             -- clk
+			in_rst_0_reset : in  std_logic                    := 'X';             -- reset
+			in_0_data      : in  std_logic_vector(8 downto 0) := (others => 'X'); -- data
+			in_0_valid     : in  std_logic                    := 'X';             -- valid
+			in_0_error     : in  std_logic_vector(2 downto 0) := (others => 'X'); -- error
+			in_0_channel   : in  std_logic_vector(3 downto 0) := (others => 'X'); -- channel
+			out_0_data     : out std_logic_vector(8 downto 0);                    -- data
+			out_0_valid    : out std_logic;                                       -- valid
+			out_0_ready    : in  std_logic                    := 'X';             -- ready
+			out_0_error    : out std_logic_vector(2 downto 0);                    -- error
+			out_0_channel  : out std_logic_vector(4 downto 0)                     -- channel
+		);
+	end component scifi_datapath_system_v3_pipe_avalon_st_adapter_034;
 
 	component scifi_datapath_system_v3_pipe_rst_controller is
 		generic (
@@ -2839,38 +2975,6 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 	signal hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_2_filllevel_data -> histogram_statistics_0:asi_debug_5_data
 	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid                       : std_logic;                     -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_valid -> histogram_statistics_0:asi_debug_6_valid
 	signal hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data                        : std_logic_vector(15 downto 0); -- hit_stack_subsystem_0:ring_buffer_cam_3_filllevel_data -> histogram_statistics_0:asi_debug_6_data
-	signal mutrig_lane_source_mux_0_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_0:aso_valid -> mutrig_datapath_subsystem_0:decoded_din_valid
-	signal mutrig_lane_source_mux_0_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_0:aso_data -> mutrig_datapath_subsystem_0:decoded_din_data
-	signal mutrig_lane_source_mux_0_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_0:aso_channel -> mutrig_datapath_subsystem_0:decoded_din_channel
-	signal mutrig_lane_source_mux_0_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_0:aso_error -> mutrig_datapath_subsystem_0:decoded_din_error
-	signal mutrig_lane_source_mux_1_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_1:aso_valid -> mutrig_datapath_subsystem_1:decoded_din_valid
-	signal mutrig_lane_source_mux_1_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_1:aso_data -> mutrig_datapath_subsystem_1:decoded_din_data
-	signal mutrig_lane_source_mux_1_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_1:aso_channel -> mutrig_datapath_subsystem_1:decoded_din_channel
-	signal mutrig_lane_source_mux_1_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_1:aso_error -> mutrig_datapath_subsystem_1:decoded_din_error
-	signal mutrig_lane_source_mux_2_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_2:aso_valid -> mutrig_datapath_subsystem_2:decoded_din_valid
-	signal mutrig_lane_source_mux_2_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_2:aso_data -> mutrig_datapath_subsystem_2:decoded_din_data
-	signal mutrig_lane_source_mux_2_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_2:aso_channel -> mutrig_datapath_subsystem_2:decoded_din_channel
-	signal mutrig_lane_source_mux_2_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_2:aso_error -> mutrig_datapath_subsystem_2:decoded_din_error
-	signal mutrig_lane_source_mux_3_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_3:aso_valid -> mutrig_datapath_subsystem_3:decoded_din_valid
-	signal mutrig_lane_source_mux_3_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_3:aso_data -> mutrig_datapath_subsystem_3:decoded_din_data
-	signal mutrig_lane_source_mux_3_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_3:aso_channel -> mutrig_datapath_subsystem_3:decoded_din_channel
-	signal mutrig_lane_source_mux_3_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_3:aso_error -> mutrig_datapath_subsystem_3:decoded_din_error
-	signal mutrig_lane_source_mux_4_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_4:aso_valid -> mutrig_datapath_subsystem_4:decoded_din_valid
-	signal mutrig_lane_source_mux_4_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_4:aso_data -> mutrig_datapath_subsystem_4:decoded_din_data
-	signal mutrig_lane_source_mux_4_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_4:aso_channel -> mutrig_datapath_subsystem_4:decoded_din_channel
-	signal mutrig_lane_source_mux_4_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_4:aso_error -> mutrig_datapath_subsystem_4:decoded_din_error
-	signal mutrig_lane_source_mux_5_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_5:aso_valid -> mutrig_datapath_subsystem_5:decoded_din_valid
-	signal mutrig_lane_source_mux_5_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_5:aso_data -> mutrig_datapath_subsystem_5:decoded_din_data
-	signal mutrig_lane_source_mux_5_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_5:aso_channel -> mutrig_datapath_subsystem_5:decoded_din_channel
-	signal mutrig_lane_source_mux_5_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_5:aso_error -> mutrig_datapath_subsystem_5:decoded_din_error
-	signal mutrig_lane_source_mux_6_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_6:aso_valid -> mutrig_datapath_subsystem_6:decoded_din_valid
-	signal mutrig_lane_source_mux_6_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_6:aso_data -> mutrig_datapath_subsystem_6:decoded_din_data
-	signal mutrig_lane_source_mux_6_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_6:aso_channel -> mutrig_datapath_subsystem_6:decoded_din_channel
-	signal mutrig_lane_source_mux_6_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_6:aso_error -> mutrig_datapath_subsystem_6:decoded_din_error
-	signal mutrig_lane_source_mux_7_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_7:aso_valid -> mutrig_datapath_subsystem_7:decoded_din_valid
-	signal mutrig_lane_source_mux_7_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_7:aso_data -> mutrig_datapath_subsystem_7:decoded_din_data
-	signal mutrig_lane_source_mux_7_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_7:aso_channel -> mutrig_datapath_subsystem_7:decoded_din_channel
-	signal mutrig_lane_source_mux_7_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_7:aso_error -> mutrig_datapath_subsystem_7:decoded_din_error
 	signal emulator_mutrig_0_tx8b1k_valid                                                : std_logic;                     -- emulator_mutrig_0:aso_tx8b1k_valid -> mutrig_lane_source_mux_0:asi_emu_valid
 	signal emulator_mutrig_0_tx8b1k_data                                                 : std_logic_vector(8 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_data -> mutrig_lane_source_mux_0:asi_emu_data
 	signal emulator_mutrig_0_tx8b1k_channel                                              : std_logic_vector(3 downto 0);  -- emulator_mutrig_0:aso_tx8b1k_channel -> mutrig_lane_source_mux_0:asi_emu_channel
@@ -2903,7 +3007,7 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 	signal emulator_mutrig_7_tx8b1k_data                                                 : std_logic_vector(8 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_data -> mutrig_lane_source_mux_7:asi_emu_data
 	signal emulator_mutrig_7_tx8b1k_channel                                              : std_logic_vector(3 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_channel -> mutrig_lane_source_mux_7:asi_emu_channel
 	signal emulator_mutrig_7_tx8b1k_error                                                : std_logic_vector(2 downto 0);  -- emulator_mutrig_7:aso_tx8b1k_error -> mutrig_lane_source_mux_7:asi_emu_error
-	signal lvds_rx_28nm_0_outclock_clk                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_outclock -> [lvds_outclock_clk, avalon_st_adapter:in_clk_0_clk, avalon_st_adapter_001:in_clk_0_clk, avalon_st_adapter_002:in_clk_0_clk, avalon_st_adapter_003:in_clk_0_clk, avalon_st_adapter_004:in_clk_0_clk, avalon_st_adapter_005:in_clk_0_clk, avalon_st_adapter_006:in_clk_0_clk, avalon_st_adapter_007:in_clk_0_clk, avalon_st_adapter_009:in_clk_0_clk, avalon_st_adapter_011:in_clk_0_clk, avalon_st_adapter_012:in_clk_0_clk, avalon_st_adapter_013:in_clk_0_clk, avalon_st_adapter_014:in_clk_0_clk, avalon_st_adapter_015:in_clk_0_clk, avalon_st_adapter_016:in_clk_0_clk, avalon_st_adapter_017:in_clk_0_clk, avalon_st_adapter_018:in_clk_0_clk, avalon_st_adapter_019:in_clk_0_clk, avalon_st_adapter_020:in_clk_0_clk, avalon_st_adapter_021:in_clk_0_clk, avalon_st_adapter_022:in_clk_0_clk, avalon_st_adapter_023:in_clk_0_clk, avalon_st_adapter_024:in_clk_0_clk, avalon_st_adapter_025:in_clk_0_clk, dbg_mm2runctrl_0:i_clk, emulator_ctrl_splitter:clk, emulator_inject_fanout:csi_clk, emulator_mutrig_0:i_clk, emulator_mutrig_1:i_clk, emulator_mutrig_2:i_clk, emulator_mutrig_3:i_clk, emulator_mutrig_4:i_clk, emulator_mutrig_5:i_clk, emulator_mutrig_6:i_clk, emulator_mutrig_7:i_clk, hist_post_cdc_0:out_clk, histogram_ingress_bridge_0:csi_clock_clk, histogram_statistics_0:i_clk, hit_stack_subsystem_0:datapath_clock_clk, hit_stack_subsystem_1:datapath_clock_clk, lvds_rx_controller_pro_0:csi_data_clk, mm_clock_crossing_bridge:m0_clk, mm_interconnect_0:lvds_rx_28nm_0_outclock_clk, mm_interconnect_2:lvds_rx_28nm_0_outclock_clk, mm_pipeline_lvds_csr_emu_dbg:clk, mm_pipeline_lvds_csr_hist:clk, mm_pipeline_lvds_csr_hitstack_frame:clk, mm_pipeline_lvds_csr_hitstack_ring:clk, mm_pipeline_lvds_csr_low:clk, mm_pipeline_lvds_csr_mts1:clk, mm_pipeline_lvds_csr_mutrig3:clk, mm_pipeline_lvds_csr_mutrig4_mts0:clk, mm_pipeline_lvds_csr_mutrig5:clk, mm_pipeline_lvds_csr_mutrig6:clk, mm_pipeline_lvds_csr_mutrig7:clk, mts_preprocessor_0:i_clk, mts_preprocessor_1:i_clk, mutrig_datapath_subsystem_0:clk_clk, mutrig_datapath_subsystem_1:clk_clk, mutrig_datapath_subsystem_2:clk_clk, mutrig_datapath_subsystem_3:clk_clk, mutrig_datapath_subsystem_4:clk_clk, mutrig_datapath_subsystem_5:clk_clk, mutrig_datapath_subsystem_6:clk_clk, mutrig_datapath_subsystem_7:clk_clk, mutrig_injector_0:i_clk, mutrig_lane_source_mux_0:clk, mutrig_lane_source_mux_1:clk, mutrig_lane_source_mux_2:clk, mutrig_lane_source_mux_3:clk, mutrig_lane_source_mux_4:clk, mutrig_lane_source_mux_5:clk, mutrig_lane_source_mux_6:clk, mutrig_lane_source_mux_7:clk, mutrig_reset_controller_0:i_lvds_dpa_clk, mux_mutrig2processor:clk, mux_mutrig2processor_0:clk, rst_controller:clk, rst_controller_001:clk, rst_controller_003:clk, rst_controller_004:clk, rst_controller_006:clk, rst_controller_009:clk, run_control_splitter:clk]
+	signal lvds_rx_28nm_0_outclock_clk                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_outclock -> [lvds_outclock_clk, avalon_st_adapter:in_clk_0_clk, avalon_st_adapter_001:in_clk_0_clk, avalon_st_adapter_002:in_clk_0_clk, avalon_st_adapter_003:in_clk_0_clk, avalon_st_adapter_004:in_clk_0_clk, avalon_st_adapter_005:in_clk_0_clk, avalon_st_adapter_006:in_clk_0_clk, avalon_st_adapter_007:in_clk_0_clk, avalon_st_adapter_009:in_clk_0_clk, avalon_st_adapter_010:in_clk_0_clk, avalon_st_adapter_011:in_clk_0_clk, avalon_st_adapter_012:in_clk_0_clk, avalon_st_adapter_013:in_clk_0_clk, avalon_st_adapter_014:in_clk_0_clk, avalon_st_adapter_015:in_clk_0_clk, avalon_st_adapter_016:in_clk_0_clk, avalon_st_adapter_017:in_clk_0_clk, avalon_st_adapter_019:in_clk_0_clk, avalon_st_adapter_020:in_clk_0_clk, avalon_st_adapter_021:in_clk_0_clk, avalon_st_adapter_022:in_clk_0_clk, avalon_st_adapter_023:in_clk_0_clk, avalon_st_adapter_024:in_clk_0_clk, avalon_st_adapter_025:in_clk_0_clk, avalon_st_adapter_026:in_clk_0_clk, avalon_st_adapter_027:in_clk_0_clk, avalon_st_adapter_028:in_clk_0_clk, avalon_st_adapter_029:in_clk_0_clk, avalon_st_adapter_030:in_clk_0_clk, avalon_st_adapter_031:in_clk_0_clk, avalon_st_adapter_032:in_clk_0_clk, avalon_st_adapter_033:in_clk_0_clk, avalon_st_adapter_034:in_clk_0_clk, avalon_st_adapter_035:in_clk_0_clk, avalon_st_adapter_036:in_clk_0_clk, avalon_st_adapter_037:in_clk_0_clk, avalon_st_adapter_038:in_clk_0_clk, avalon_st_adapter_039:in_clk_0_clk, avalon_st_adapter_040:in_clk_0_clk, avalon_st_adapter_041:in_clk_0_clk, dbg_mm2runctrl_0:i_clk, decoded_lane_fifo_0:clk, decoded_lane_fifo_1:clk, decoded_lane_fifo_2:clk, decoded_lane_fifo_3:clk, decoded_lane_fifo_4:clk, decoded_lane_fifo_5:clk, decoded_lane_fifo_6:clk, decoded_lane_fifo_7:clk, emulator_ctrl_splitter:clk, emulator_inject_fanout:csi_clk, emulator_mutrig_0:i_clk, emulator_mutrig_1:i_clk, emulator_mutrig_2:i_clk, emulator_mutrig_3:i_clk, emulator_mutrig_4:i_clk, emulator_mutrig_5:i_clk, emulator_mutrig_6:i_clk, emulator_mutrig_7:i_clk, hist_post_cdc_0:out_clk, histogram_ingress_bridge_0:csi_clock_clk, histogram_statistics_0:i_clk, hit_stack_subsystem_0:datapath_clock_clk, hit_stack_subsystem_1:datapath_clock_clk, lvds_rx_controller_pro_0:csi_data_clk, mm_clock_crossing_bridge:m0_clk, mm_interconnect_0:lvds_rx_28nm_0_outclock_clk, mm_interconnect_2:lvds_rx_28nm_0_outclock_clk, mm_pipeline_lvds_csr_emu_dbg:clk, mm_pipeline_lvds_csr_hist:clk, mm_pipeline_lvds_csr_hitstack_frame:clk, mm_pipeline_lvds_csr_hitstack_ring:clk, mm_pipeline_lvds_csr_low:clk, mm_pipeline_lvds_csr_mts1:clk, mm_pipeline_lvds_csr_mutrig3:clk, mm_pipeline_lvds_csr_mutrig4_mts0:clk, mm_pipeline_lvds_csr_mutrig5:clk, mm_pipeline_lvds_csr_mutrig6:clk, mm_pipeline_lvds_csr_mutrig7:clk, mts_preprocessor_0:i_clk, mts_preprocessor_1:i_clk, mutrig_datapath_subsystem_0:clk_clk, mutrig_datapath_subsystem_1:clk_clk, mutrig_datapath_subsystem_2:clk_clk, mutrig_datapath_subsystem_3:clk_clk, mutrig_datapath_subsystem_4:clk_clk, mutrig_datapath_subsystem_5:clk_clk, mutrig_datapath_subsystem_6:clk_clk, mutrig_datapath_subsystem_7:clk_clk, mutrig_injector_0:i_clk, mutrig_lane_source_mux_0:clk, mutrig_lane_source_mux_1:clk, mutrig_lane_source_mux_2:clk, mutrig_lane_source_mux_3:clk, mutrig_lane_source_mux_4:clk, mutrig_lane_source_mux_5:clk, mutrig_lane_source_mux_6:clk, mutrig_lane_source_mux_7:clk, mutrig_reset_controller_0:i_lvds_dpa_clk, mux_mutrig2processor:clk, mux_mutrig2processor_0:clk, rst_controller:clk, rst_controller_001:clk, rst_controller_003:clk, rst_controller_004:clk, rst_controller_006:clk, rst_controller_009:clk, run_control_splitter:clk]
 	signal lvds_rx_controller_pro_0_ctrl_pllrst                                          : std_logic;                     -- lvds_rx_controller_pro_0:coe_ctrl_pllrst -> lvds_rx_28nm_0:pll_areset
 	signal lvds_rx_controller_pro_0_ctrl_dpahold                                         : std_logic_vector(8 downto 0);  -- lvds_rx_controller_pro_0:coe_ctrl_dpahold -> lvds_rx_28nm_0:rx_dpll_hold
 	signal lvds_rx_28nm_0_ctrl_plllock                                                   : std_logic;                     -- lvds_rx_28nm_0:rx_locked -> lvds_rx_controller_pro_0:coe_ctrl_plllock
@@ -3558,101 +3662,245 @@ architecture rtl of scifi_datapath_system_v3_pipe is
 	signal avalon_st_adapter_008_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_008:out_0_startofpacket -> hist_post_splitter_0:in0_startofpacket
 	signal avalon_st_adapter_008_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_008:out_0_endofpacket -> hist_post_splitter_0:in0_endofpacket
 	signal avalon_st_adapter_008_out_0_empty                                             : std_logic;                     -- avalon_st_adapter_008:out_0_empty -> hist_post_splitter_0:in0_empty
-	signal run_control_splitter_out0_valid                                               : std_logic;                     -- run_control_splitter:out0_valid -> avalon_st_adapter_009:in_0_valid
-	signal run_control_splitter_out0_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out0_data -> avalon_st_adapter_009:in_0_data
-	signal avalon_st_adapter_009_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_009:out_0_valid -> histogram_statistics_0:asi_ctrl_valid
-	signal avalon_st_adapter_009_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_009:out_0_data -> histogram_statistics_0:asi_ctrl_data
-	signal avalon_st_adapter_009_out_0_ready                                             : std_logic;                     -- histogram_statistics_0:asi_ctrl_ready -> avalon_st_adapter_009:out_0_ready
-	signal hist_post_splitter_0_out1_valid                                               : std_logic;                     -- hist_post_splitter_0:out1_valid -> avalon_st_adapter_010:in_0_valid
-	signal hist_post_splitter_0_out1_data                                                : std_logic_vector(35 downto 0); -- hist_post_splitter_0:out1_data -> avalon_st_adapter_010:in_0_data
-	signal hist_post_splitter_0_out1_ready                                               : std_logic;                     -- avalon_st_adapter_010:in_0_ready -> hist_post_splitter_0:out1_ready
-	signal hist_post_splitter_0_out1_startofpacket                                       : std_logic;                     -- hist_post_splitter_0:out1_startofpacket -> avalon_st_adapter_010:in_0_startofpacket
-	signal hist_post_splitter_0_out1_endofpacket                                         : std_logic;                     -- hist_post_splitter_0:out1_endofpacket -> avalon_st_adapter_010:in_0_endofpacket
-	signal hist_post_splitter_0_out1_empty                                               : std_logic_vector(0 downto 0);  -- hist_post_splitter_0:out1_empty -> avalon_st_adapter_010:in_0_empty
-	signal avalon_st_adapter_010_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_010:out_0_valid -> hist_post_cdc_0:in_valid
-	signal avalon_st_adapter_010_out_0_data                                              : std_logic_vector(35 downto 0); -- avalon_st_adapter_010:out_0_data -> hist_post_cdc_0:in_data
-	signal avalon_st_adapter_010_out_0_ready                                             : std_logic;                     -- hist_post_cdc_0:in_ready -> avalon_st_adapter_010:out_0_ready
-	signal avalon_st_adapter_010_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_010:out_0_startofpacket -> hist_post_cdc_0:in_startofpacket
-	signal avalon_st_adapter_010_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_010:out_0_endofpacket -> hist_post_cdc_0:in_endofpacket
-	signal run_control_splitter_out1_valid                                               : std_logic;                     -- run_control_splitter:out1_valid -> avalon_st_adapter_011:in_0_valid
-	signal run_control_splitter_out1_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out1_data -> avalon_st_adapter_011:in_0_data
-	signal avalon_st_adapter_011_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_011:out_0_valid -> mts_preprocessor_0:asi_ctrl_valid
-	signal avalon_st_adapter_011_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_011:out_0_data -> mts_preprocessor_0:asi_ctrl_data
-	signal avalon_st_adapter_011_out_0_ready                                             : std_logic;                     -- mts_preprocessor_0:asi_ctrl_ready -> avalon_st_adapter_011:out_0_ready
-	signal run_control_splitter_out10_valid                                              : std_logic;                     -- run_control_splitter:out10_valid -> avalon_st_adapter_012:in_0_valid
-	signal run_control_splitter_out10_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out10_data -> avalon_st_adapter_012:in_0_data
-	signal avalon_st_adapter_012_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_012:out_0_valid -> mutrig_datapath_subsystem_6:run_ctrl_valid
-	signal avalon_st_adapter_012_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_012:out_0_data -> mutrig_datapath_subsystem_6:run_ctrl_data
-	signal avalon_st_adapter_012_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_6:run_ctrl_ready -> avalon_st_adapter_012:out_0_ready
-	signal run_control_splitter_out11_valid                                              : std_logic;                     -- run_control_splitter:out11_valid -> avalon_st_adapter_013:in_0_valid
-	signal run_control_splitter_out11_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out11_data -> avalon_st_adapter_013:in_0_data
-	signal avalon_st_adapter_013_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_013:out_0_valid -> mutrig_datapath_subsystem_7:run_ctrl_valid
-	signal avalon_st_adapter_013_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_013:out_0_data -> mutrig_datapath_subsystem_7:run_ctrl_data
-	signal avalon_st_adapter_013_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_7:run_ctrl_ready -> avalon_st_adapter_013:out_0_ready
-	signal run_control_splitter_out12_valid                                              : std_logic;                     -- run_control_splitter:out12_valid -> avalon_st_adapter_014:in_0_valid
-	signal run_control_splitter_out12_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out12_data -> avalon_st_adapter_014:in_0_data
-	signal avalon_st_adapter_014_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_014:out_0_valid -> mts_preprocessor_1:asi_ctrl_valid
-	signal avalon_st_adapter_014_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_014:out_0_data -> mts_preprocessor_1:asi_ctrl_data
-	signal avalon_st_adapter_014_out_0_ready                                             : std_logic;                     -- mts_preprocessor_1:asi_ctrl_ready -> avalon_st_adapter_014:out_0_ready
-	signal run_control_splitter_out13_valid                                              : std_logic;                     -- run_control_splitter:out13_valid -> avalon_st_adapter_015:in_0_valid
-	signal run_control_splitter_out13_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out13_data -> avalon_st_adapter_015:in_0_data
-	signal avalon_st_adapter_015_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_015:out_0_valid -> mutrig_injector_0:asi_runctl_valid
-	signal avalon_st_adapter_015_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_015:out_0_data -> mutrig_injector_0:asi_runctl_data
-	signal avalon_st_adapter_015_out_0_ready                                             : std_logic;                     -- mutrig_injector_0:asi_runctl_ready -> avalon_st_adapter_015:out_0_ready
-	signal run_control_splitter_out14_valid                                              : std_logic;                     -- run_control_splitter:out14_valid -> avalon_st_adapter_016:in_0_valid
-	signal run_control_splitter_out14_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out14_data -> avalon_st_adapter_016:in_0_data
-	signal avalon_st_adapter_016_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_016:out_0_valid -> hit_stack_subsystem_1:run_control_signal_valid
-	signal avalon_st_adapter_016_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_016:out_0_data -> hit_stack_subsystem_1:run_control_signal_data
-	signal avalon_st_adapter_016_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_1:run_control_signal_ready -> avalon_st_adapter_016:out_0_ready
-	signal run_control_splitter_out15_valid                                              : std_logic;                     -- run_control_splitter:out15_valid -> avalon_st_adapter_017:in_0_valid
-	signal run_control_splitter_out15_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out15_data -> avalon_st_adapter_017:in_0_data
-	signal avalon_st_adapter_017_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_017:out_0_valid -> emulator_ctrl_splitter:in0_valid
-	signal avalon_st_adapter_017_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_017:out_0_data -> emulator_ctrl_splitter:in0_data
-	signal avalon_st_adapter_017_out_0_ready                                             : std_logic;                     -- emulator_ctrl_splitter:in0_ready -> avalon_st_adapter_017:out_0_ready
-	signal run_control_splitter_out2_valid                                               : std_logic;                     -- run_control_splitter:out2_valid -> avalon_st_adapter_018:in_0_valid
-	signal run_control_splitter_out2_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out2_data -> avalon_st_adapter_018:in_0_data
-	signal avalon_st_adapter_018_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_018:out_0_valid -> mutrig_datapath_subsystem_0:run_ctrl_valid
-	signal avalon_st_adapter_018_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_018:out_0_data -> mutrig_datapath_subsystem_0:run_ctrl_data
-	signal avalon_st_adapter_018_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_0:run_ctrl_ready -> avalon_st_adapter_018:out_0_ready
-	signal run_control_splitter_out3_valid                                               : std_logic;                     -- run_control_splitter:out3_valid -> avalon_st_adapter_019:in_0_valid
-	signal run_control_splitter_out3_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out3_data -> avalon_st_adapter_019:in_0_data
-	signal avalon_st_adapter_019_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_019:out_0_valid -> mutrig_datapath_subsystem_1:run_ctrl_valid
-	signal avalon_st_adapter_019_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_019:out_0_data -> mutrig_datapath_subsystem_1:run_ctrl_data
-	signal avalon_st_adapter_019_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_1:run_ctrl_ready -> avalon_st_adapter_019:out_0_ready
-	signal run_control_splitter_out4_valid                                               : std_logic;                     -- run_control_splitter:out4_valid -> avalon_st_adapter_020:in_0_valid
-	signal run_control_splitter_out4_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out4_data -> avalon_st_adapter_020:in_0_data
-	signal avalon_st_adapter_020_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_020:out_0_valid -> mutrig_datapath_subsystem_2:run_ctrl_valid
-	signal avalon_st_adapter_020_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_020:out_0_data -> mutrig_datapath_subsystem_2:run_ctrl_data
-	signal avalon_st_adapter_020_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_2:run_ctrl_ready -> avalon_st_adapter_020:out_0_ready
-	signal run_control_splitter_out5_valid                                               : std_logic;                     -- run_control_splitter:out5_valid -> avalon_st_adapter_021:in_0_valid
-	signal run_control_splitter_out5_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out5_data -> avalon_st_adapter_021:in_0_data
-	signal avalon_st_adapter_021_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_021:out_0_valid -> mutrig_datapath_subsystem_3:run_ctrl_valid
-	signal avalon_st_adapter_021_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_021:out_0_data -> mutrig_datapath_subsystem_3:run_ctrl_data
-	signal avalon_st_adapter_021_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_3:run_ctrl_ready -> avalon_st_adapter_021:out_0_ready
-	signal run_control_splitter_out6_valid                                               : std_logic;                     -- run_control_splitter:out6_valid -> avalon_st_adapter_022:in_0_valid
-	signal run_control_splitter_out6_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out6_data -> avalon_st_adapter_022:in_0_data
-	signal avalon_st_adapter_022_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_022:out_0_valid -> hit_stack_subsystem_0:run_control_signal_valid
-	signal avalon_st_adapter_022_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_022:out_0_data -> hit_stack_subsystem_0:run_control_signal_data
-	signal avalon_st_adapter_022_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_0:run_control_signal_ready -> avalon_st_adapter_022:out_0_ready
-	signal run_control_splitter_out7_valid                                               : std_logic;                     -- run_control_splitter:out7_valid -> avalon_st_adapter_023:in_0_valid
-	signal run_control_splitter_out7_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out7_data -> avalon_st_adapter_023:in_0_data
-	signal avalon_st_adapter_023_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_023:out_0_valid -> mutrig_reset_controller_0:asi_runcontrol_valid
-	signal avalon_st_adapter_023_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_023:out_0_data -> mutrig_reset_controller_0:asi_runcontrol_data
-	signal avalon_st_adapter_023_out_0_ready                                             : std_logic;                     -- mutrig_reset_controller_0:asi_runcontrol_ready -> avalon_st_adapter_023:out_0_ready
-	signal run_control_splitter_out8_valid                                               : std_logic;                     -- run_control_splitter:out8_valid -> avalon_st_adapter_024:in_0_valid
-	signal run_control_splitter_out8_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out8_data -> avalon_st_adapter_024:in_0_data
-	signal avalon_st_adapter_024_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_024:out_0_valid -> mutrig_datapath_subsystem_4:run_ctrl_valid
-	signal avalon_st_adapter_024_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_024:out_0_data -> mutrig_datapath_subsystem_4:run_ctrl_data
-	signal avalon_st_adapter_024_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_4:run_ctrl_ready -> avalon_st_adapter_024:out_0_ready
-	signal run_control_splitter_out9_valid                                               : std_logic;                     -- run_control_splitter:out9_valid -> avalon_st_adapter_025:in_0_valid
-	signal run_control_splitter_out9_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out9_data -> avalon_st_adapter_025:in_0_data
-	signal avalon_st_adapter_025_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_025:out_0_valid -> mutrig_datapath_subsystem_5:run_ctrl_valid
-	signal avalon_st_adapter_025_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_025:out_0_data -> mutrig_datapath_subsystem_5:run_ctrl_data
-	signal avalon_st_adapter_025_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_5:run_ctrl_ready -> avalon_st_adapter_025:out_0_ready
+	signal decoded_lane_fifo_0_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_0:out_valid -> avalon_st_adapter_009:in_0_valid
+	signal decoded_lane_fifo_0_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_0:out_data -> avalon_st_adapter_009:in_0_data
+	signal decoded_lane_fifo_0_out_ready                                                 : std_logic;                     -- avalon_st_adapter_009:in_0_ready -> decoded_lane_fifo_0:out_ready
+	signal decoded_lane_fifo_0_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_0:out_channel -> avalon_st_adapter_009:in_0_channel
+	signal decoded_lane_fifo_0_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_0:out_error -> avalon_st_adapter_009:in_0_error
+	signal avalon_st_adapter_009_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_009:out_0_valid -> mutrig_datapath_subsystem_0:decoded_din_valid
+	signal avalon_st_adapter_009_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_009:out_0_data -> mutrig_datapath_subsystem_0:decoded_din_data
+	signal avalon_st_adapter_009_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_009:out_0_channel -> mutrig_datapath_subsystem_0:decoded_din_channel
+	signal avalon_st_adapter_009_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_009:out_0_error -> mutrig_datapath_subsystem_0:decoded_din_error
+	signal decoded_lane_fifo_1_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_1:out_valid -> avalon_st_adapter_010:in_0_valid
+	signal decoded_lane_fifo_1_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_1:out_data -> avalon_st_adapter_010:in_0_data
+	signal decoded_lane_fifo_1_out_ready                                                 : std_logic;                     -- avalon_st_adapter_010:in_0_ready -> decoded_lane_fifo_1:out_ready
+	signal decoded_lane_fifo_1_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_1:out_channel -> avalon_st_adapter_010:in_0_channel
+	signal decoded_lane_fifo_1_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_1:out_error -> avalon_st_adapter_010:in_0_error
+	signal avalon_st_adapter_010_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_010:out_0_valid -> mutrig_datapath_subsystem_1:decoded_din_valid
+	signal avalon_st_adapter_010_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_010:out_0_data -> mutrig_datapath_subsystem_1:decoded_din_data
+	signal avalon_st_adapter_010_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_010:out_0_channel -> mutrig_datapath_subsystem_1:decoded_din_channel
+	signal avalon_st_adapter_010_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_010:out_0_error -> mutrig_datapath_subsystem_1:decoded_din_error
+	signal decoded_lane_fifo_2_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_2:out_valid -> avalon_st_adapter_011:in_0_valid
+	signal decoded_lane_fifo_2_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_2:out_data -> avalon_st_adapter_011:in_0_data
+	signal decoded_lane_fifo_2_out_ready                                                 : std_logic;                     -- avalon_st_adapter_011:in_0_ready -> decoded_lane_fifo_2:out_ready
+	signal decoded_lane_fifo_2_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_2:out_channel -> avalon_st_adapter_011:in_0_channel
+	signal decoded_lane_fifo_2_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_2:out_error -> avalon_st_adapter_011:in_0_error
+	signal avalon_st_adapter_011_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_011:out_0_valid -> mutrig_datapath_subsystem_2:decoded_din_valid
+	signal avalon_st_adapter_011_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_011:out_0_data -> mutrig_datapath_subsystem_2:decoded_din_data
+	signal avalon_st_adapter_011_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_011:out_0_channel -> mutrig_datapath_subsystem_2:decoded_din_channel
+	signal avalon_st_adapter_011_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_011:out_0_error -> mutrig_datapath_subsystem_2:decoded_din_error
+	signal decoded_lane_fifo_3_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_3:out_valid -> avalon_st_adapter_012:in_0_valid
+	signal decoded_lane_fifo_3_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_3:out_data -> avalon_st_adapter_012:in_0_data
+	signal decoded_lane_fifo_3_out_ready                                                 : std_logic;                     -- avalon_st_adapter_012:in_0_ready -> decoded_lane_fifo_3:out_ready
+	signal decoded_lane_fifo_3_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_3:out_channel -> avalon_st_adapter_012:in_0_channel
+	signal decoded_lane_fifo_3_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_3:out_error -> avalon_st_adapter_012:in_0_error
+	signal avalon_st_adapter_012_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_012:out_0_valid -> mutrig_datapath_subsystem_3:decoded_din_valid
+	signal avalon_st_adapter_012_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_012:out_0_data -> mutrig_datapath_subsystem_3:decoded_din_data
+	signal avalon_st_adapter_012_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_012:out_0_channel -> mutrig_datapath_subsystem_3:decoded_din_channel
+	signal avalon_st_adapter_012_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_012:out_0_error -> mutrig_datapath_subsystem_3:decoded_din_error
+	signal decoded_lane_fifo_4_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_4:out_valid -> avalon_st_adapter_013:in_0_valid
+	signal decoded_lane_fifo_4_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_4:out_data -> avalon_st_adapter_013:in_0_data
+	signal decoded_lane_fifo_4_out_ready                                                 : std_logic;                     -- avalon_st_adapter_013:in_0_ready -> decoded_lane_fifo_4:out_ready
+	signal decoded_lane_fifo_4_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_4:out_channel -> avalon_st_adapter_013:in_0_channel
+	signal decoded_lane_fifo_4_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_4:out_error -> avalon_st_adapter_013:in_0_error
+	signal avalon_st_adapter_013_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_013:out_0_valid -> mutrig_datapath_subsystem_4:decoded_din_valid
+	signal avalon_st_adapter_013_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_013:out_0_data -> mutrig_datapath_subsystem_4:decoded_din_data
+	signal avalon_st_adapter_013_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_013:out_0_channel -> mutrig_datapath_subsystem_4:decoded_din_channel
+	signal avalon_st_adapter_013_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_013:out_0_error -> mutrig_datapath_subsystem_4:decoded_din_error
+	signal decoded_lane_fifo_5_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_5:out_valid -> avalon_st_adapter_014:in_0_valid
+	signal decoded_lane_fifo_5_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_5:out_data -> avalon_st_adapter_014:in_0_data
+	signal decoded_lane_fifo_5_out_ready                                                 : std_logic;                     -- avalon_st_adapter_014:in_0_ready -> decoded_lane_fifo_5:out_ready
+	signal decoded_lane_fifo_5_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_5:out_channel -> avalon_st_adapter_014:in_0_channel
+	signal decoded_lane_fifo_5_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_5:out_error -> avalon_st_adapter_014:in_0_error
+	signal avalon_st_adapter_014_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_014:out_0_valid -> mutrig_datapath_subsystem_5:decoded_din_valid
+	signal avalon_st_adapter_014_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_014:out_0_data -> mutrig_datapath_subsystem_5:decoded_din_data
+	signal avalon_st_adapter_014_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_014:out_0_channel -> mutrig_datapath_subsystem_5:decoded_din_channel
+	signal avalon_st_adapter_014_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_014:out_0_error -> mutrig_datapath_subsystem_5:decoded_din_error
+	signal decoded_lane_fifo_6_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_6:out_valid -> avalon_st_adapter_015:in_0_valid
+	signal decoded_lane_fifo_6_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_6:out_data -> avalon_st_adapter_015:in_0_data
+	signal decoded_lane_fifo_6_out_ready                                                 : std_logic;                     -- avalon_st_adapter_015:in_0_ready -> decoded_lane_fifo_6:out_ready
+	signal decoded_lane_fifo_6_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_6:out_channel -> avalon_st_adapter_015:in_0_channel
+	signal decoded_lane_fifo_6_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_6:out_error -> avalon_st_adapter_015:in_0_error
+	signal avalon_st_adapter_015_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_015:out_0_valid -> mutrig_datapath_subsystem_6:decoded_din_valid
+	signal avalon_st_adapter_015_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_015:out_0_data -> mutrig_datapath_subsystem_6:decoded_din_data
+	signal avalon_st_adapter_015_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_015:out_0_channel -> mutrig_datapath_subsystem_6:decoded_din_channel
+	signal avalon_st_adapter_015_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_015:out_0_error -> mutrig_datapath_subsystem_6:decoded_din_error
+	signal decoded_lane_fifo_7_out_valid                                                 : std_logic;                     -- decoded_lane_fifo_7:out_valid -> avalon_st_adapter_016:in_0_valid
+	signal decoded_lane_fifo_7_out_data                                                  : std_logic_vector(8 downto 0);  -- decoded_lane_fifo_7:out_data -> avalon_st_adapter_016:in_0_data
+	signal decoded_lane_fifo_7_out_ready                                                 : std_logic;                     -- avalon_st_adapter_016:in_0_ready -> decoded_lane_fifo_7:out_ready
+	signal decoded_lane_fifo_7_out_channel                                               : std_logic_vector(4 downto 0);  -- decoded_lane_fifo_7:out_channel -> avalon_st_adapter_016:in_0_channel
+	signal decoded_lane_fifo_7_out_error                                                 : std_logic_vector(2 downto 0);  -- decoded_lane_fifo_7:out_error -> avalon_st_adapter_016:in_0_error
+	signal avalon_st_adapter_016_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_016:out_0_valid -> mutrig_datapath_subsystem_7:decoded_din_valid
+	signal avalon_st_adapter_016_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_016:out_0_data -> mutrig_datapath_subsystem_7:decoded_din_data
+	signal avalon_st_adapter_016_out_0_channel                                           : std_logic_vector(3 downto 0);  -- avalon_st_adapter_016:out_0_channel -> mutrig_datapath_subsystem_7:decoded_din_channel
+	signal avalon_st_adapter_016_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_016:out_0_error -> mutrig_datapath_subsystem_7:decoded_din_error
+	signal run_control_splitter_out0_valid                                               : std_logic;                     -- run_control_splitter:out0_valid -> avalon_st_adapter_017:in_0_valid
+	signal run_control_splitter_out0_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out0_data -> avalon_st_adapter_017:in_0_data
+	signal avalon_st_adapter_017_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_017:out_0_valid -> histogram_statistics_0:asi_ctrl_valid
+	signal avalon_st_adapter_017_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_017:out_0_data -> histogram_statistics_0:asi_ctrl_data
+	signal avalon_st_adapter_017_out_0_ready                                             : std_logic;                     -- histogram_statistics_0:asi_ctrl_ready -> avalon_st_adapter_017:out_0_ready
+	signal hist_post_splitter_0_out1_valid                                               : std_logic;                     -- hist_post_splitter_0:out1_valid -> avalon_st_adapter_018:in_0_valid
+	signal hist_post_splitter_0_out1_data                                                : std_logic_vector(35 downto 0); -- hist_post_splitter_0:out1_data -> avalon_st_adapter_018:in_0_data
+	signal hist_post_splitter_0_out1_ready                                               : std_logic;                     -- avalon_st_adapter_018:in_0_ready -> hist_post_splitter_0:out1_ready
+	signal hist_post_splitter_0_out1_startofpacket                                       : std_logic;                     -- hist_post_splitter_0:out1_startofpacket -> avalon_st_adapter_018:in_0_startofpacket
+	signal hist_post_splitter_0_out1_endofpacket                                         : std_logic;                     -- hist_post_splitter_0:out1_endofpacket -> avalon_st_adapter_018:in_0_endofpacket
+	signal hist_post_splitter_0_out1_empty                                               : std_logic_vector(0 downto 0);  -- hist_post_splitter_0:out1_empty -> avalon_st_adapter_018:in_0_empty
+	signal avalon_st_adapter_018_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_018:out_0_valid -> hist_post_cdc_0:in_valid
+	signal avalon_st_adapter_018_out_0_data                                              : std_logic_vector(35 downto 0); -- avalon_st_adapter_018:out_0_data -> hist_post_cdc_0:in_data
+	signal avalon_st_adapter_018_out_0_ready                                             : std_logic;                     -- hist_post_cdc_0:in_ready -> avalon_st_adapter_018:out_0_ready
+	signal avalon_st_adapter_018_out_0_startofpacket                                     : std_logic;                     -- avalon_st_adapter_018:out_0_startofpacket -> hist_post_cdc_0:in_startofpacket
+	signal avalon_st_adapter_018_out_0_endofpacket                                       : std_logic;                     -- avalon_st_adapter_018:out_0_endofpacket -> hist_post_cdc_0:in_endofpacket
+	signal run_control_splitter_out1_valid                                               : std_logic;                     -- run_control_splitter:out1_valid -> avalon_st_adapter_019:in_0_valid
+	signal run_control_splitter_out1_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out1_data -> avalon_st_adapter_019:in_0_data
+	signal avalon_st_adapter_019_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_019:out_0_valid -> mts_preprocessor_0:asi_ctrl_valid
+	signal avalon_st_adapter_019_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_019:out_0_data -> mts_preprocessor_0:asi_ctrl_data
+	signal avalon_st_adapter_019_out_0_ready                                             : std_logic;                     -- mts_preprocessor_0:asi_ctrl_ready -> avalon_st_adapter_019:out_0_ready
+	signal run_control_splitter_out10_valid                                              : std_logic;                     -- run_control_splitter:out10_valid -> avalon_st_adapter_020:in_0_valid
+	signal run_control_splitter_out10_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out10_data -> avalon_st_adapter_020:in_0_data
+	signal avalon_st_adapter_020_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_020:out_0_valid -> mutrig_datapath_subsystem_6:run_ctrl_valid
+	signal avalon_st_adapter_020_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_020:out_0_data -> mutrig_datapath_subsystem_6:run_ctrl_data
+	signal avalon_st_adapter_020_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_6:run_ctrl_ready -> avalon_st_adapter_020:out_0_ready
+	signal run_control_splitter_out11_valid                                              : std_logic;                     -- run_control_splitter:out11_valid -> avalon_st_adapter_021:in_0_valid
+	signal run_control_splitter_out11_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out11_data -> avalon_st_adapter_021:in_0_data
+	signal avalon_st_adapter_021_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_021:out_0_valid -> mutrig_datapath_subsystem_7:run_ctrl_valid
+	signal avalon_st_adapter_021_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_021:out_0_data -> mutrig_datapath_subsystem_7:run_ctrl_data
+	signal avalon_st_adapter_021_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_7:run_ctrl_ready -> avalon_st_adapter_021:out_0_ready
+	signal run_control_splitter_out12_valid                                              : std_logic;                     -- run_control_splitter:out12_valid -> avalon_st_adapter_022:in_0_valid
+	signal run_control_splitter_out12_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out12_data -> avalon_st_adapter_022:in_0_data
+	signal avalon_st_adapter_022_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_022:out_0_valid -> mts_preprocessor_1:asi_ctrl_valid
+	signal avalon_st_adapter_022_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_022:out_0_data -> mts_preprocessor_1:asi_ctrl_data
+	signal avalon_st_adapter_022_out_0_ready                                             : std_logic;                     -- mts_preprocessor_1:asi_ctrl_ready -> avalon_st_adapter_022:out_0_ready
+	signal run_control_splitter_out13_valid                                              : std_logic;                     -- run_control_splitter:out13_valid -> avalon_st_adapter_023:in_0_valid
+	signal run_control_splitter_out13_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out13_data -> avalon_st_adapter_023:in_0_data
+	signal avalon_st_adapter_023_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_023:out_0_valid -> mutrig_injector_0:asi_runctl_valid
+	signal avalon_st_adapter_023_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_023:out_0_data -> mutrig_injector_0:asi_runctl_data
+	signal avalon_st_adapter_023_out_0_ready                                             : std_logic;                     -- mutrig_injector_0:asi_runctl_ready -> avalon_st_adapter_023:out_0_ready
+	signal run_control_splitter_out14_valid                                              : std_logic;                     -- run_control_splitter:out14_valid -> avalon_st_adapter_024:in_0_valid
+	signal run_control_splitter_out14_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out14_data -> avalon_st_adapter_024:in_0_data
+	signal avalon_st_adapter_024_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_024:out_0_valid -> hit_stack_subsystem_1:run_control_signal_valid
+	signal avalon_st_adapter_024_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_024:out_0_data -> hit_stack_subsystem_1:run_control_signal_data
+	signal avalon_st_adapter_024_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_1:run_control_signal_ready -> avalon_st_adapter_024:out_0_ready
+	signal run_control_splitter_out15_valid                                              : std_logic;                     -- run_control_splitter:out15_valid -> avalon_st_adapter_025:in_0_valid
+	signal run_control_splitter_out15_data                                               : std_logic_vector(8 downto 0);  -- run_control_splitter:out15_data -> avalon_st_adapter_025:in_0_data
+	signal avalon_st_adapter_025_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_025:out_0_valid -> emulator_ctrl_splitter:in0_valid
+	signal avalon_st_adapter_025_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_025:out_0_data -> emulator_ctrl_splitter:in0_data
+	signal avalon_st_adapter_025_out_0_ready                                             : std_logic;                     -- emulator_ctrl_splitter:in0_ready -> avalon_st_adapter_025:out_0_ready
+	signal run_control_splitter_out2_valid                                               : std_logic;                     -- run_control_splitter:out2_valid -> avalon_st_adapter_026:in_0_valid
+	signal run_control_splitter_out2_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out2_data -> avalon_st_adapter_026:in_0_data
+	signal avalon_st_adapter_026_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_026:out_0_valid -> mutrig_datapath_subsystem_0:run_ctrl_valid
+	signal avalon_st_adapter_026_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_026:out_0_data -> mutrig_datapath_subsystem_0:run_ctrl_data
+	signal avalon_st_adapter_026_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_0:run_ctrl_ready -> avalon_st_adapter_026:out_0_ready
+	signal run_control_splitter_out3_valid                                               : std_logic;                     -- run_control_splitter:out3_valid -> avalon_st_adapter_027:in_0_valid
+	signal run_control_splitter_out3_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out3_data -> avalon_st_adapter_027:in_0_data
+	signal avalon_st_adapter_027_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_027:out_0_valid -> mutrig_datapath_subsystem_1:run_ctrl_valid
+	signal avalon_st_adapter_027_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_027:out_0_data -> mutrig_datapath_subsystem_1:run_ctrl_data
+	signal avalon_st_adapter_027_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_1:run_ctrl_ready -> avalon_st_adapter_027:out_0_ready
+	signal run_control_splitter_out4_valid                                               : std_logic;                     -- run_control_splitter:out4_valid -> avalon_st_adapter_028:in_0_valid
+	signal run_control_splitter_out4_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out4_data -> avalon_st_adapter_028:in_0_data
+	signal avalon_st_adapter_028_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_028:out_0_valid -> mutrig_datapath_subsystem_2:run_ctrl_valid
+	signal avalon_st_adapter_028_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_028:out_0_data -> mutrig_datapath_subsystem_2:run_ctrl_data
+	signal avalon_st_adapter_028_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_2:run_ctrl_ready -> avalon_st_adapter_028:out_0_ready
+	signal run_control_splitter_out5_valid                                               : std_logic;                     -- run_control_splitter:out5_valid -> avalon_st_adapter_029:in_0_valid
+	signal run_control_splitter_out5_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out5_data -> avalon_st_adapter_029:in_0_data
+	signal avalon_st_adapter_029_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_029:out_0_valid -> mutrig_datapath_subsystem_3:run_ctrl_valid
+	signal avalon_st_adapter_029_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_029:out_0_data -> mutrig_datapath_subsystem_3:run_ctrl_data
+	signal avalon_st_adapter_029_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_3:run_ctrl_ready -> avalon_st_adapter_029:out_0_ready
+	signal run_control_splitter_out6_valid                                               : std_logic;                     -- run_control_splitter:out6_valid -> avalon_st_adapter_030:in_0_valid
+	signal run_control_splitter_out6_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out6_data -> avalon_st_adapter_030:in_0_data
+	signal avalon_st_adapter_030_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_030:out_0_valid -> hit_stack_subsystem_0:run_control_signal_valid
+	signal avalon_st_adapter_030_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_030:out_0_data -> hit_stack_subsystem_0:run_control_signal_data
+	signal avalon_st_adapter_030_out_0_ready                                             : std_logic;                     -- hit_stack_subsystem_0:run_control_signal_ready -> avalon_st_adapter_030:out_0_ready
+	signal run_control_splitter_out7_valid                                               : std_logic;                     -- run_control_splitter:out7_valid -> avalon_st_adapter_031:in_0_valid
+	signal run_control_splitter_out7_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out7_data -> avalon_st_adapter_031:in_0_data
+	signal avalon_st_adapter_031_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_031:out_0_valid -> mutrig_reset_controller_0:asi_runcontrol_valid
+	signal avalon_st_adapter_031_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_031:out_0_data -> mutrig_reset_controller_0:asi_runcontrol_data
+	signal avalon_st_adapter_031_out_0_ready                                             : std_logic;                     -- mutrig_reset_controller_0:asi_runcontrol_ready -> avalon_st_adapter_031:out_0_ready
+	signal run_control_splitter_out8_valid                                               : std_logic;                     -- run_control_splitter:out8_valid -> avalon_st_adapter_032:in_0_valid
+	signal run_control_splitter_out8_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out8_data -> avalon_st_adapter_032:in_0_data
+	signal avalon_st_adapter_032_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_032:out_0_valid -> mutrig_datapath_subsystem_4:run_ctrl_valid
+	signal avalon_st_adapter_032_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_032:out_0_data -> mutrig_datapath_subsystem_4:run_ctrl_data
+	signal avalon_st_adapter_032_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_4:run_ctrl_ready -> avalon_st_adapter_032:out_0_ready
+	signal run_control_splitter_out9_valid                                               : std_logic;                     -- run_control_splitter:out9_valid -> avalon_st_adapter_033:in_0_valid
+	signal run_control_splitter_out9_data                                                : std_logic_vector(8 downto 0);  -- run_control_splitter:out9_data -> avalon_st_adapter_033:in_0_data
+	signal avalon_st_adapter_033_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_033:out_0_valid -> mutrig_datapath_subsystem_5:run_ctrl_valid
+	signal avalon_st_adapter_033_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_033:out_0_data -> mutrig_datapath_subsystem_5:run_ctrl_data
+	signal avalon_st_adapter_033_out_0_ready                                             : std_logic;                     -- mutrig_datapath_subsystem_5:run_ctrl_ready -> avalon_st_adapter_033:out_0_ready
+	signal mutrig_lane_source_mux_0_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_0:aso_valid -> avalon_st_adapter_034:in_0_valid
+	signal mutrig_lane_source_mux_0_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_0:aso_data -> avalon_st_adapter_034:in_0_data
+	signal mutrig_lane_source_mux_0_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_0:aso_channel -> avalon_st_adapter_034:in_0_channel
+	signal mutrig_lane_source_mux_0_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_0:aso_error -> avalon_st_adapter_034:in_0_error
+	signal avalon_st_adapter_034_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_034:out_0_valid -> decoded_lane_fifo_0:in_valid
+	signal avalon_st_adapter_034_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_034:out_0_data -> decoded_lane_fifo_0:in_data
+	signal avalon_st_adapter_034_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_0:in_ready -> avalon_st_adapter_034:out_0_ready
+	signal avalon_st_adapter_034_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_034:out_0_channel -> decoded_lane_fifo_0:in_channel
+	signal avalon_st_adapter_034_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_034:out_0_error -> decoded_lane_fifo_0:in_error
+	signal mutrig_lane_source_mux_1_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_1:aso_valid -> avalon_st_adapter_035:in_0_valid
+	signal mutrig_lane_source_mux_1_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_1:aso_data -> avalon_st_adapter_035:in_0_data
+	signal mutrig_lane_source_mux_1_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_1:aso_channel -> avalon_st_adapter_035:in_0_channel
+	signal mutrig_lane_source_mux_1_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_1:aso_error -> avalon_st_adapter_035:in_0_error
+	signal avalon_st_adapter_035_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_035:out_0_valid -> decoded_lane_fifo_1:in_valid
+	signal avalon_st_adapter_035_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_035:out_0_data -> decoded_lane_fifo_1:in_data
+	signal avalon_st_adapter_035_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_1:in_ready -> avalon_st_adapter_035:out_0_ready
+	signal avalon_st_adapter_035_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_035:out_0_channel -> decoded_lane_fifo_1:in_channel
+	signal avalon_st_adapter_035_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_035:out_0_error -> decoded_lane_fifo_1:in_error
+	signal mutrig_lane_source_mux_2_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_2:aso_valid -> avalon_st_adapter_036:in_0_valid
+	signal mutrig_lane_source_mux_2_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_2:aso_data -> avalon_st_adapter_036:in_0_data
+	signal mutrig_lane_source_mux_2_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_2:aso_channel -> avalon_st_adapter_036:in_0_channel
+	signal mutrig_lane_source_mux_2_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_2:aso_error -> avalon_st_adapter_036:in_0_error
+	signal avalon_st_adapter_036_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_036:out_0_valid -> decoded_lane_fifo_2:in_valid
+	signal avalon_st_adapter_036_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_036:out_0_data -> decoded_lane_fifo_2:in_data
+	signal avalon_st_adapter_036_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_2:in_ready -> avalon_st_adapter_036:out_0_ready
+	signal avalon_st_adapter_036_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_036:out_0_channel -> decoded_lane_fifo_2:in_channel
+	signal avalon_st_adapter_036_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_036:out_0_error -> decoded_lane_fifo_2:in_error
+	signal mutrig_lane_source_mux_3_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_3:aso_valid -> avalon_st_adapter_037:in_0_valid
+	signal mutrig_lane_source_mux_3_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_3:aso_data -> avalon_st_adapter_037:in_0_data
+	signal mutrig_lane_source_mux_3_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_3:aso_channel -> avalon_st_adapter_037:in_0_channel
+	signal mutrig_lane_source_mux_3_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_3:aso_error -> avalon_st_adapter_037:in_0_error
+	signal avalon_st_adapter_037_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_037:out_0_valid -> decoded_lane_fifo_3:in_valid
+	signal avalon_st_adapter_037_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_037:out_0_data -> decoded_lane_fifo_3:in_data
+	signal avalon_st_adapter_037_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_3:in_ready -> avalon_st_adapter_037:out_0_ready
+	signal avalon_st_adapter_037_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_037:out_0_channel -> decoded_lane_fifo_3:in_channel
+	signal avalon_st_adapter_037_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_037:out_0_error -> decoded_lane_fifo_3:in_error
+	signal mutrig_lane_source_mux_4_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_4:aso_valid -> avalon_st_adapter_038:in_0_valid
+	signal mutrig_lane_source_mux_4_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_4:aso_data -> avalon_st_adapter_038:in_0_data
+	signal mutrig_lane_source_mux_4_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_4:aso_channel -> avalon_st_adapter_038:in_0_channel
+	signal mutrig_lane_source_mux_4_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_4:aso_error -> avalon_st_adapter_038:in_0_error
+	signal avalon_st_adapter_038_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_038:out_0_valid -> decoded_lane_fifo_4:in_valid
+	signal avalon_st_adapter_038_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_038:out_0_data -> decoded_lane_fifo_4:in_data
+	signal avalon_st_adapter_038_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_4:in_ready -> avalon_st_adapter_038:out_0_ready
+	signal avalon_st_adapter_038_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_038:out_0_channel -> decoded_lane_fifo_4:in_channel
+	signal avalon_st_adapter_038_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_038:out_0_error -> decoded_lane_fifo_4:in_error
+	signal mutrig_lane_source_mux_5_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_5:aso_valid -> avalon_st_adapter_039:in_0_valid
+	signal mutrig_lane_source_mux_5_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_5:aso_data -> avalon_st_adapter_039:in_0_data
+	signal mutrig_lane_source_mux_5_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_5:aso_channel -> avalon_st_adapter_039:in_0_channel
+	signal mutrig_lane_source_mux_5_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_5:aso_error -> avalon_st_adapter_039:in_0_error
+	signal avalon_st_adapter_039_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_039:out_0_valid -> decoded_lane_fifo_5:in_valid
+	signal avalon_st_adapter_039_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_039:out_0_data -> decoded_lane_fifo_5:in_data
+	signal avalon_st_adapter_039_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_5:in_ready -> avalon_st_adapter_039:out_0_ready
+	signal avalon_st_adapter_039_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_039:out_0_channel -> decoded_lane_fifo_5:in_channel
+	signal avalon_st_adapter_039_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_039:out_0_error -> decoded_lane_fifo_5:in_error
+	signal mutrig_lane_source_mux_6_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_6:aso_valid -> avalon_st_adapter_040:in_0_valid
+	signal mutrig_lane_source_mux_6_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_6:aso_data -> avalon_st_adapter_040:in_0_data
+	signal mutrig_lane_source_mux_6_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_6:aso_channel -> avalon_st_adapter_040:in_0_channel
+	signal mutrig_lane_source_mux_6_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_6:aso_error -> avalon_st_adapter_040:in_0_error
+	signal avalon_st_adapter_040_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_040:out_0_valid -> decoded_lane_fifo_6:in_valid
+	signal avalon_st_adapter_040_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_040:out_0_data -> decoded_lane_fifo_6:in_data
+	signal avalon_st_adapter_040_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_6:in_ready -> avalon_st_adapter_040:out_0_ready
+	signal avalon_st_adapter_040_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_040:out_0_channel -> decoded_lane_fifo_6:in_channel
+	signal avalon_st_adapter_040_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_040:out_0_error -> decoded_lane_fifo_6:in_error
+	signal mutrig_lane_source_mux_7_selected_out_valid                                   : std_logic;                     -- mutrig_lane_source_mux_7:aso_valid -> avalon_st_adapter_041:in_0_valid
+	signal mutrig_lane_source_mux_7_selected_out_data                                    : std_logic_vector(8 downto 0);  -- mutrig_lane_source_mux_7:aso_data -> avalon_st_adapter_041:in_0_data
+	signal mutrig_lane_source_mux_7_selected_out_channel                                 : std_logic_vector(3 downto 0);  -- mutrig_lane_source_mux_7:aso_channel -> avalon_st_adapter_041:in_0_channel
+	signal mutrig_lane_source_mux_7_selected_out_error                                   : std_logic_vector(2 downto 0);  -- mutrig_lane_source_mux_7:aso_error -> avalon_st_adapter_041:in_0_error
+	signal avalon_st_adapter_041_out_0_valid                                             : std_logic;                     -- avalon_st_adapter_041:out_0_valid -> decoded_lane_fifo_7:in_valid
+	signal avalon_st_adapter_041_out_0_data                                              : std_logic_vector(8 downto 0);  -- avalon_st_adapter_041:out_0_data -> decoded_lane_fifo_7:in_data
+	signal avalon_st_adapter_041_out_0_ready                                             : std_logic;                     -- decoded_lane_fifo_7:in_ready -> avalon_st_adapter_041:out_0_ready
+	signal avalon_st_adapter_041_out_0_channel                                           : std_logic_vector(4 downto 0);  -- avalon_st_adapter_041:out_0_channel -> decoded_lane_fifo_7:in_channel
+	signal avalon_st_adapter_041_out_0_error                                             : std_logic_vector(2 downto 0);  -- avalon_st_adapter_041:out_0_error -> decoded_lane_fifo_7:in_error
 	signal rst_controller_reset_out_reset                                                : std_logic;                     -- rst_controller:reset_out -> [dbg_mm2runctrl_0:i_rst, emulator_inject_fanout:rsi_reset, mutrig_injector_0:i_rst, rst_controller_reset_out_reset:in]
 	signal master_datapath_master_reset_reset                                            : std_logic;                     -- master_datapath:master_reset_reset -> [rst_controller:reset_in0, rst_controller_001:reset_in0, rst_controller_006:reset_in1, rst_controller_007:reset_in1, rst_controller_008:reset_in1]
-	signal rst_controller_001_reset_out_reset                                            : std_logic;                     -- rst_controller_001:reset_out -> [avalon_st_adapter_009:in_rst_0_reset, avalon_st_adapter_011:in_rst_0_reset, avalon_st_adapter_012:in_rst_0_reset, avalon_st_adapter_013:in_rst_0_reset, avalon_st_adapter_014:in_rst_0_reset, avalon_st_adapter_015:in_rst_0_reset, avalon_st_adapter_016:in_rst_0_reset, avalon_st_adapter_017:in_rst_0_reset, avalon_st_adapter_018:in_rst_0_reset, avalon_st_adapter_019:in_rst_0_reset, avalon_st_adapter_020:in_rst_0_reset, avalon_st_adapter_021:in_rst_0_reset, avalon_st_adapter_022:in_rst_0_reset, avalon_st_adapter_023:in_rst_0_reset, avalon_st_adapter_024:in_rst_0_reset, avalon_st_adapter_025:in_rst_0_reset, emulator_ctrl_splitter:reset, emulator_mutrig_0:i_rst, emulator_mutrig_1:i_rst, emulator_mutrig_2:i_rst, emulator_mutrig_3:i_rst, emulator_mutrig_4:i_rst, emulator_mutrig_5:i_rst, emulator_mutrig_6:i_rst, emulator_mutrig_7:i_rst, histogram_ingress_bridge_0:rsi_reset_reset, histogram_statistics_0:i_rst, mm_interconnect_0:mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mutrig_injector_0_reset_interface_reset_bridge_in_reset_reset, mts_preprocessor_0:i_rst, mts_preprocessor_1:i_rst, mutrig_lane_source_mux_0:rst, mutrig_lane_source_mux_1:rst, mutrig_lane_source_mux_2:rst, mutrig_lane_source_mux_3:rst, mutrig_lane_source_mux_4:rst, mutrig_lane_source_mux_5:rst, mutrig_lane_source_mux_6:rst, mutrig_lane_source_mux_7:rst, rst_controller_001_reset_out_reset:in, run_control_splitter:reset]
-	signal rst_controller_002_reset_out_reset                                            : std_logic;                     -- rst_controller_002:reset_out -> [avalon_st_adapter_008:in_rst_0_reset, avalon_st_adapter_010:in_rst_0_reset, hist_post_splitter_0:reset, rst_controller_002_reset_out_reset:in]
+	signal rst_controller_001_reset_out_reset                                            : std_logic;                     -- rst_controller_001:reset_out -> [avalon_st_adapter_009:in_rst_0_reset, avalon_st_adapter_010:in_rst_0_reset, avalon_st_adapter_011:in_rst_0_reset, avalon_st_adapter_012:in_rst_0_reset, avalon_st_adapter_013:in_rst_0_reset, avalon_st_adapter_014:in_rst_0_reset, avalon_st_adapter_015:in_rst_0_reset, avalon_st_adapter_016:in_rst_0_reset, avalon_st_adapter_017:in_rst_0_reset, avalon_st_adapter_019:in_rst_0_reset, avalon_st_adapter_020:in_rst_0_reset, avalon_st_adapter_021:in_rst_0_reset, avalon_st_adapter_022:in_rst_0_reset, avalon_st_adapter_023:in_rst_0_reset, avalon_st_adapter_024:in_rst_0_reset, avalon_st_adapter_025:in_rst_0_reset, avalon_st_adapter_026:in_rst_0_reset, avalon_st_adapter_027:in_rst_0_reset, avalon_st_adapter_028:in_rst_0_reset, avalon_st_adapter_029:in_rst_0_reset, avalon_st_adapter_030:in_rst_0_reset, avalon_st_adapter_031:in_rst_0_reset, avalon_st_adapter_032:in_rst_0_reset, avalon_st_adapter_033:in_rst_0_reset, avalon_st_adapter_034:in_rst_0_reset, avalon_st_adapter_035:in_rst_0_reset, avalon_st_adapter_036:in_rst_0_reset, avalon_st_adapter_037:in_rst_0_reset, avalon_st_adapter_038:in_rst_0_reset, avalon_st_adapter_039:in_rst_0_reset, avalon_st_adapter_040:in_rst_0_reset, avalon_st_adapter_041:in_rst_0_reset, decoded_lane_fifo_0:reset, decoded_lane_fifo_1:reset, decoded_lane_fifo_2:reset, decoded_lane_fifo_3:reset, decoded_lane_fifo_4:reset, decoded_lane_fifo_5:reset, decoded_lane_fifo_6:reset, decoded_lane_fifo_7:reset, emulator_ctrl_splitter:reset, emulator_mutrig_0:i_rst, emulator_mutrig_1:i_rst, emulator_mutrig_2:i_rst, emulator_mutrig_3:i_rst, emulator_mutrig_4:i_rst, emulator_mutrig_5:i_rst, emulator_mutrig_6:i_rst, emulator_mutrig_7:i_rst, histogram_ingress_bridge_0:rsi_reset_reset, histogram_statistics_0:i_rst, mm_interconnect_0:mutrig_datapath_subsystem_0_reset_reset_bridge_in_reset_reset, mm_interconnect_0:mutrig_injector_0_reset_interface_reset_bridge_in_reset_reset, mts_preprocessor_0:i_rst, mts_preprocessor_1:i_rst, mutrig_lane_source_mux_0:rst, mutrig_lane_source_mux_1:rst, mutrig_lane_source_mux_2:rst, mutrig_lane_source_mux_3:rst, mutrig_lane_source_mux_4:rst, mutrig_lane_source_mux_5:rst, mutrig_lane_source_mux_6:rst, mutrig_lane_source_mux_7:rst, rst_controller_001_reset_out_reset:in, run_control_splitter:reset]
+	signal rst_controller_002_reset_out_reset                                            : std_logic;                     -- rst_controller_002:reset_out -> [avalon_st_adapter_008:in_rst_0_reset, avalon_st_adapter_018:in_rst_0_reset, hist_post_splitter_0:reset, rst_controller_002_reset_out_reset:in]
 	signal rst_controller_003_reset_out_reset                                            : std_logic;                     -- rst_controller_003:reset_out -> histogram_statistics_0:i_interval_reset
 	signal rst_controller_004_reset_out_reset                                            : std_logic;                     -- rst_controller_004:reset_out -> lvds_rx_controller_pro_0:rsi_data_reset
 	signal rst_controller_005_reset_out_reset                                            : std_logic;                     -- rst_controller_005:reset_out -> lvds_rx_controller_pro_0:rsi_control_reset
@@ -3684,6 +3932,350 @@ begin
 			aso_ctrl_ready      => open                                                --                .ready
 		);
 
+	decoded_lane_fifo_0 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_034_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_034_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_034_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_034_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_034_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_0_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_0_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_0_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_0_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_0_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
+	decoded_lane_fifo_1 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_035_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_035_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_035_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_035_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_035_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_1_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_1_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_1_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_1_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_1_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
+	decoded_lane_fifo_2 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_036_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_036_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_036_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_036_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_036_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_2_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_2_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_2_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_2_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_2_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
+	decoded_lane_fifo_3 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_037_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_037_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_037_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_037_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_037_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_3_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_3_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_3_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_3_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_3_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
+	decoded_lane_fifo_4 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_038_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_038_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_038_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_038_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_038_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_4_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_4_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_4_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_4_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_4_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
+	decoded_lane_fifo_5 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_039_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_039_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_039_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_039_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_039_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_5_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_5_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_5_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_5_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_5_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
+	decoded_lane_fifo_6 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_040_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_040_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_040_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_040_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_040_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_6_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_6_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_6_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_6_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_6_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
+	decoded_lane_fifo_7 : component altera_avalon_sc_fifo
+		generic map (
+			SYMBOLS_PER_BEAT    => 1,
+			BITS_PER_SYMBOL     => 9,
+			FIFO_DEPTH          => 8,
+			CHANNEL_WIDTH       => 5,
+			ERROR_WIDTH         => 3,
+			USE_PACKETS         => 0,
+			USE_FILL_LEVEL      => 0,
+			EMPTY_LATENCY       => 3,
+			USE_MEMORY_BLOCKS   => 0,
+			USE_STORE_FORWARD   => 0,
+			USE_ALMOST_FULL_IF  => 0,
+			USE_ALMOST_EMPTY_IF => 0
+		)
+		port map (
+			clk               => lvds_rx_28nm_0_outclock_clk,         --       clk.clk
+			reset             => rst_controller_001_reset_out_reset,  -- clk_reset.reset
+			in_data           => avalon_st_adapter_041_out_0_data,    --        in.data
+			in_valid          => avalon_st_adapter_041_out_0_valid,   --          .valid
+			in_ready          => avalon_st_adapter_041_out_0_ready,   --          .ready
+			in_error          => avalon_st_adapter_041_out_0_error,   --          .error
+			in_channel        => avalon_st_adapter_041_out_0_channel, --          .channel
+			out_data          => decoded_lane_fifo_7_out_data,        --       out.data
+			out_valid         => decoded_lane_fifo_7_out_valid,       --          .valid
+			out_ready         => decoded_lane_fifo_7_out_ready,       --          .ready
+			out_error         => decoded_lane_fifo_7_out_error,       --          .error
+			out_channel       => decoded_lane_fifo_7_out_channel,     --          .channel
+			csr_address       => "00",                                -- (terminated)
+			csr_read          => '0',                                 -- (terminated)
+			csr_write         => '0',                                 -- (terminated)
+			csr_readdata      => open,                                -- (terminated)
+			csr_writedata     => "00000000000000000000000000000000",  -- (terminated)
+			almost_full_data  => open,                                -- (terminated)
+			almost_empty_data => open,                                -- (terminated)
+			in_startofpacket  => '0',                                 -- (terminated)
+			in_endofpacket    => '0',                                 -- (terminated)
+			out_startofpacket => open,                                -- (terminated)
+			out_endofpacket   => open,                                -- (terminated)
+			in_empty          => "0",                                 -- (terminated)
+			out_empty         => open                                 -- (terminated)
+		);
+
 	emulator_ctrl_splitter : component scifi_datapath_system_v3_pipe_emulator_ctrl_splitter
 		generic map (
 			NUMBER_OF_OUTPUTS => 8,
@@ -3698,9 +4290,9 @@ begin
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,        --   clk.clk
 			reset               => rst_controller_001_reset_out_reset, -- reset.reset
-			in0_ready           => avalon_st_adapter_017_out_0_ready,  --    in.ready
-			in0_valid           => avalon_st_adapter_017_out_0_valid,  --      .valid
-			in0_data            => avalon_st_adapter_017_out_0_data,   --      .data
+			in0_ready           => avalon_st_adapter_025_out_0_ready,  --    in.ready
+			in0_valid           => avalon_st_adapter_025_out_0_valid,  --      .valid
+			in0_data            => avalon_st_adapter_025_out_0_data,   --      .data
 			out0_ready          => emulator_ctrl_splitter_out0_ready,  --  out0.ready
 			out0_valid          => emulator_ctrl_splitter_out0_valid,  --      .valid
 			out0_data           => emulator_ctrl_splitter_out0_data,   --      .data
@@ -3862,7 +4454,7 @@ begin
 			coe_out8_masked_pulse => inject_masked_pulse                       --              .masked_pulse
 		);
 
-	emulator_mutrig_0 : component emulator_mutrig
+	emulator_mutrig_0 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -3870,29 +4462,47 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 0,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_0_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_0_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_0_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_0_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out0_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out0_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out0_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out0_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out0_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_0_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_0_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_0_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_0_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_0_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_0_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_0_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_0_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_0_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_0_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out0_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out0_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out0_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out0_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out0_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_0_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_0_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_0_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_0_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_0_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_0_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
-	emulator_mutrig_1 : component emulator_mutrig
+	emulator_mutrig_1 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -3900,29 +4510,47 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 1,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_1_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_1_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_1_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_1_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out1_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out1_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out1_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out1_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out1_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_1_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_1_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_1_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_1_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_1_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_1_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_1_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_1_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_1_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_1_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out1_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out1_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out1_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out1_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out1_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_1_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_1_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_1_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_1_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_1_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_1_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
-	emulator_mutrig_2 : component emulator_mutrig
+	emulator_mutrig_2 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -3930,29 +4558,47 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 2,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_2_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_2_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_2_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_2_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out2_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out2_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out2_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out2_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out2_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_2_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_2_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_2_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_2_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_2_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_2_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_2_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_2_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_2_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_2_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out2_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out2_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out2_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out2_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out2_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_2_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_2_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_2_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_2_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_2_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_2_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
-	emulator_mutrig_3 : component emulator_mutrig
+	emulator_mutrig_3 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -3960,29 +4606,47 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 3,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_3_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_3_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_3_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_3_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out3_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out3_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out3_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out3_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out3_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_3_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_3_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_3_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_3_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_3_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_3_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_3_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_3_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_3_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_3_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out3_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out3_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out3_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out3_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out3_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_3_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_3_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_3_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_3_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_3_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_3_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
-	emulator_mutrig_4 : component emulator_mutrig
+	emulator_mutrig_4 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -3990,29 +4654,47 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 4,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_4_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_4_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_4_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_4_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out4_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out4_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out4_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out4_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out4_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_4_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_4_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_4_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_4_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_4_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_4_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_4_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_4_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_4_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_4_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out4_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out4_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out4_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out4_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out4_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_4_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_4_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_4_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_4_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_4_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_4_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
-	emulator_mutrig_5 : component emulator_mutrig
+	emulator_mutrig_5 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -4020,29 +4702,47 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 5,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_5_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_5_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_5_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_5_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out5_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out5_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out5_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out5_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out5_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_5_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_5_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_5_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_5_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_5_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_5_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_5_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_5_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_5_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_5_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out5_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out5_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out5_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out5_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out5_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_5_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_5_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_5_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_5_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_5_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_5_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
-	emulator_mutrig_6 : component emulator_mutrig
+	emulator_mutrig_6 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -4050,29 +4750,47 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 6,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_6_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_6_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_6_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_6_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out6_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out6_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out6_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out6_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out6_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_6_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_6_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_6_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_6_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_6_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_6_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_6_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_6_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_6_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_6_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out6_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out6_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out6_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out6_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out6_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_6_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_6_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_6_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_6_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_6_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_6_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
-	emulator_mutrig_7 : component emulator_mutrig
+	emulator_mutrig_7 : component emulator_mutrig_qsys_lane
 		generic map (
 			FIFO_DEPTH                    => 64,
 			CSR_ADDR_WIDTH                => 4,
@@ -4080,26 +4798,44 @@ begin
 			CLUSTER_CROSS_ASIC_DEFAULT    => 0,
 			CLUSTER_CENTER_GLOBAL_DEFAULT => 16,
 			CLUSTER_LANE_INDEX_DEFAULT    => 7,
-			CLUSTER_LANE_COUNT_DEFAULT    => 8
+			CLUSTER_LANE_COUNT_DEFAULT    => 8,
+			BYTE_STREAM_ENABLE            => true,
+			DEBUG_LEVEL                   => 0
 		)
 		port map (
-			i_clk                   => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
-			i_rst                   => rst_controller_001_reset_out_reset,                  -- data_reset.reset
-			aso_tx8b1k_data         => emulator_mutrig_7_tx8b1k_data,                       --     tx8b1k.data
-			aso_tx8b1k_valid        => emulator_mutrig_7_tx8b1k_valid,                      --           .valid
-			aso_tx8b1k_channel      => emulator_mutrig_7_tx8b1k_channel,                    --           .channel
-			aso_tx8b1k_error        => emulator_mutrig_7_tx8b1k_error,                      --           .error
-			asi_ctrl_data           => emulator_ctrl_splitter_out7_data,                    --       ctrl.data
-			asi_ctrl_valid          => emulator_ctrl_splitter_out7_valid,                   --           .valid
-			asi_ctrl_ready          => emulator_ctrl_splitter_out7_ready,                   --           .ready
-			coe_inject_pulse        => emulator_inject_fanout_out7_pulse,                   --     inject.pulse
-			coe_inject_masked_pulse => emulator_inject_fanout_out7_masked_pulse,            --           .masked_pulse
-			avs_csr_address         => mm_interconnect_0_emulator_mutrig_7_csr_address,     --        csr.address
-			avs_csr_read            => mm_interconnect_0_emulator_mutrig_7_csr_read,        --           .read
-			avs_csr_write           => mm_interconnect_0_emulator_mutrig_7_csr_write,       --           .write
-			avs_csr_writedata       => mm_interconnect_0_emulator_mutrig_7_csr_writedata,   --           .writedata
-			avs_csr_readdata        => mm_interconnect_0_emulator_mutrig_7_csr_readdata,    --           .readdata
-			avs_csr_waitrequest     => mm_interconnect_0_emulator_mutrig_7_csr_waitrequest  --           .waitrequest
+			i_clk                        => lvds_rx_28nm_0_outclock_clk,                         -- data_clock.clk
+			i_rst                        => rst_controller_001_reset_out_reset,                  -- data_reset.reset
+			aso_hit_type0_data           => open,                                                --  hit_type0.data
+			aso_hit_type0_valid          => open,                                                --           .valid
+			aso_hit_type0_error          => open,                                                --           .error
+			aso_hit_type0_channel        => open,                                                --           .channel
+			aso_hit_type0_startofpacket  => open,                                                --           .startofpacket
+			aso_hit_type0_endofpacket    => open,                                                --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                                --           .endofrun
+			aso_tx8b1k_data              => emulator_mutrig_7_tx8b1k_data,                       --     tx8b1k.data
+			aso_tx8b1k_valid             => emulator_mutrig_7_tx8b1k_valid,                      --           .valid
+			aso_tx8b1k_channel           => emulator_mutrig_7_tx8b1k_channel,                    --           .channel
+			aso_tx8b1k_error             => emulator_mutrig_7_tx8b1k_error,                      --           .error
+			asi_ctrl_data                => emulator_ctrl_splitter_out7_data,                    --       ctrl.data
+			asi_ctrl_valid               => emulator_ctrl_splitter_out7_valid,                   --           .valid
+			asi_ctrl_ready               => emulator_ctrl_splitter_out7_ready,                   --           .ready
+			coe_inject_pulse             => emulator_inject_fanout_out7_pulse,                   --     inject.pulse
+			coe_inject_masked_pulse      => emulator_inject_fanout_out7_masked_pulse,            --           .masked_pulse
+			avs_csr_address              => mm_interconnect_0_emulator_mutrig_7_csr_address,     --        csr.address
+			avs_csr_read                 => mm_interconnect_0_emulator_mutrig_7_csr_read,        --           .read
+			avs_csr_write                => mm_interconnect_0_emulator_mutrig_7_csr_write,       --           .write
+			avs_csr_writedata            => mm_interconnect_0_emulator_mutrig_7_csr_writedata,   --           .writedata
+			avs_csr_readdata             => mm_interconnect_0_emulator_mutrig_7_csr_readdata,    --           .readdata
+			avs_csr_waitrequest          => mm_interconnect_0_emulator_mutrig_7_csr_waitrequest, --           .waitrequest
+			coe_debug_fifo_fill_level    => open,                                                -- (terminated)
+			coe_debug_hit_metadata       => open,                                                -- (terminated)
+			coe_debug_hit_metadata_valid => open,                                                -- (terminated)
+			aso_hit_debug_data           => open,                                                -- (terminated)
+			aso_hit_debug_valid          => open,                                                -- (terminated)
+			aso_hit_debug_channel        => open,                                                -- (terminated)
+			aso_hit_debug_startofpacket  => open,                                                -- (terminated)
+			aso_hit_debug_endofpacket    => open,                                                -- (terminated)
+			aso_hit_debug_endofrun       => open                                                 -- (terminated)
 		);
 
 	hist_post_cdc_0 : component altera_avalon_dc_fifo
@@ -4120,11 +4856,11 @@ begin
 			in_reset_n        => rst_controller_002_reset_out_reset_ports_inv, --  in_clk_reset.reset_n
 			out_clk           => lvds_rx_28nm_0_outclock_clk,                  --       out_clk.clk
 			out_reset_n       => rst_controller_001_reset_out_reset_ports_inv, -- out_clk_reset.reset_n
-			in_data           => avalon_st_adapter_010_out_0_data,             --            in.data
-			in_valid          => avalon_st_adapter_010_out_0_valid,            --              .valid
-			in_ready          => avalon_st_adapter_010_out_0_ready,            --              .ready
-			in_startofpacket  => avalon_st_adapter_010_out_0_startofpacket,    --              .startofpacket
-			in_endofpacket    => avalon_st_adapter_010_out_0_endofpacket,      --              .endofpacket
+			in_data           => avalon_st_adapter_018_out_0_data,             --            in.data
+			in_valid          => avalon_st_adapter_018_out_0_valid,            --              .valid
+			in_ready          => avalon_st_adapter_018_out_0_ready,            --              .ready
+			in_startofpacket  => avalon_st_adapter_018_out_0_startofpacket,    --              .startofpacket
+			in_endofpacket    => avalon_st_adapter_018_out_0_endofpacket,      --              .endofpacket
 			out_data          => hist_post_cdc_0_out_data,                     --           out.data
 			out_valid         => hist_post_cdc_0_out_valid,                    --              .valid
 			out_ready         => hist_post_cdc_0_out_ready,                    --              .ready
@@ -4413,9 +5149,9 @@ begin
 			avs_csr_writedata               => mm_interconnect_0_histogram_statistics_0_csr_writedata,               --               .writedata
 			avs_csr_readdata                => mm_interconnect_0_histogram_statistics_0_csr_readdata,                --               .readdata
 			avs_csr_waitrequest             => mm_interconnect_0_histogram_statistics_0_csr_waitrequest,             --               .waitrequest
-			asi_ctrl_data                   => avalon_st_adapter_009_out_0_data,                                     --           ctrl.data
-			asi_ctrl_valid                  => avalon_st_adapter_009_out_0_valid,                                    --               .valid
-			asi_ctrl_ready                  => avalon_st_adapter_009_out_0_ready,                                    --               .ready
+			asi_ctrl_data                   => avalon_st_adapter_017_out_0_data,                                     --           ctrl.data
+			asi_ctrl_valid                  => avalon_st_adapter_017_out_0_valid,                                    --               .valid
+			asi_ctrl_ready                  => avalon_st_adapter_017_out_0_ready,                                    --               .ready
 			asi_hist_fill_in_valid          => histogram_ingress_bridge_0_hist_out_valid,                            --   hist_fill_in.valid
 			asi_hist_fill_in_ready          => histogram_ingress_bridge_0_hist_out_ready,                            --               .ready
 			asi_hist_fill_in_data           => histogram_ingress_bridge_0_hist_out_data,                             --               .data
@@ -4551,9 +5287,9 @@ begin
 			ring_buffer_cam_3_csr_writedata    => mm_interconnect_0_hit_stack_subsystem_0_ring_buffer_cam_3_csr_writedata,    --                            .writedata
 			ring_buffer_cam_3_filllevel_data   => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_data,                     -- ring_buffer_cam_3_filllevel.data
 			ring_buffer_cam_3_filllevel_valid  => hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,                    --                            .valid
-			run_control_signal_ready           => avalon_st_adapter_022_out_0_ready,                                          --          run_control_signal.ready
-			run_control_signal_valid           => avalon_st_adapter_022_out_0_valid,                                          --                            .valid
-			run_control_signal_data            => avalon_st_adapter_022_out_0_data,                                           --                            .data
+			run_control_signal_ready           => avalon_st_adapter_030_out_0_ready,                                          --          run_control_signal.ready
+			run_control_signal_valid           => avalon_st_adapter_030_out_0_valid,                                          --                            .valid
+			run_control_signal_data            => avalon_st_adapter_030_out_0_data,                                           --                            .data
 			xcvr_clock_clk                     => xcvr_clock_clk,                                                             --                  xcvr_clock.clk
 			xcvr_reset_reset_n                 => xcvr_reset_reset_n                                                          --                  xcvr_reset.reset_n
 		);
@@ -4625,9 +5361,9 @@ begin
 			ring_buffer_cam_3_csr_writedata    => mm_interconnect_0_hit_stack_subsystem_1_ring_buffer_cam_3_csr_writedata,    --                            .writedata
 			ring_buffer_cam_3_filllevel_data   => open,                                                                       -- ring_buffer_cam_3_filllevel.data
 			ring_buffer_cam_3_filllevel_valid  => open,                                                                       --                            .valid
-			run_control_signal_ready           => avalon_st_adapter_016_out_0_ready,                                          --          run_control_signal.ready
-			run_control_signal_valid           => avalon_st_adapter_016_out_0_valid,                                          --                            .valid
-			run_control_signal_data            => avalon_st_adapter_016_out_0_data,                                           --                            .data
+			run_control_signal_ready           => avalon_st_adapter_024_out_0_ready,                                          --          run_control_signal.ready
+			run_control_signal_valid           => avalon_st_adapter_024_out_0_valid,                                          --                            .valid
+			run_control_signal_data            => avalon_st_adapter_024_out_0_data,                                           --                            .data
 			xcvr_clock_clk                     => xcvr_clock_clk,                                                             --                  xcvr_clock.clk
 			xcvr_reset_reset_n                 => xcvr_reset_reset_n                                                          --                  xcvr_reset.reset_n
 		);
@@ -5216,39 +5952,44 @@ begin
 			DEBUG                             => 1
 		)
 		port map (
-			avs_csr_readdata            => mm_interconnect_0_mts_preprocessor_0_csr_readdata,    --             csr.readdata
-			avs_csr_read                => mm_interconnect_0_mts_preprocessor_0_csr_read,        --                .read
-			avs_csr_address             => mm_interconnect_0_mts_preprocessor_0_csr_address,     --                .address
-			avs_csr_waitrequest         => mm_interconnect_0_mts_preprocessor_0_csr_waitrequest, --                .waitrequest
-			avs_csr_write               => mm_interconnect_0_mts_preprocessor_0_csr_write,       --                .write
-			avs_csr_writedata           => mm_interconnect_0_mts_preprocessor_0_csr_writedata,   --                .writedata
-			i_clk                       => lvds_rx_28nm_0_outclock_clk,                          -- clock_interface.clk
-			i_rst                       => rst_controller_001_reset_out_reset,                   -- reset_interface.reset
-			asi_ctrl_data               => avalon_st_adapter_011_out_0_data,                     --        run_ctrl.data
-			asi_ctrl_valid              => avalon_st_adapter_011_out_0_valid,                    --                .valid
-			asi_ctrl_ready              => avalon_st_adapter_011_out_0_ready,                    --                .ready
-			asi_hit_type0_channel       => mux_mutrig2processor_out_channel,                     --    hit_type0_in.channel
-			asi_hit_type0_startofpacket => mux_mutrig2processor_out_startofpacket,               --                .startofpacket
-			asi_hit_type0_endofpacket   => mux_mutrig2processor_out_endofpacket,                 --                .endofpacket
-			asi_hit_type0_endofrun      => open,                                                 --                .endofrun
-			asi_hit_type0_error         => mux_mutrig2processor_out_error,                       --                .error
-			asi_hit_type0_data          => mux_mutrig2processor_out_data,                        --                .data
-			asi_hit_type0_valid         => mux_mutrig2processor_out_valid,                       --                .valid
-			asi_hit_type0_ready         => mux_mutrig2processor_out_ready,                       --                .ready
-			aso_hit_type1_data          => mts_preprocessor_0_hit_type1_out_data,                --   hit_type1_out.data
-			aso_hit_type1_valid         => mts_preprocessor_0_hit_type1_out_valid,               --                .valid
-			aso_hit_type1_ready         => mts_preprocessor_0_hit_type1_out_ready,               --                .ready
-			aso_hit_type1_channel       => mts_preprocessor_0_hit_type1_out_channel,             --                .channel
-			aso_hit_type1_endofpacket   => mts_preprocessor_0_hit_type1_out_endofpacket,         --                .endofpacket
-			aso_hit_type1_startofpacket => mts_preprocessor_0_hit_type1_out_startofpacket,       --                .startofpacket
-			aso_hit_type1_empty         => mts_preprocessor_0_hit_type1_out_empty,               --                .empty
-			aso_hit_type1_error         => mts_preprocessor_0_hit_type1_out_error,               --                .error
-			aso_debug_ts_valid          => mts_preprocessor_0_debug_ts_valid,                    --        debug_ts.valid
-			aso_debug_ts_data           => mts_preprocessor_0_debug_ts_data,                     --                .data
-			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
-			aso_debug_burst_data        => open,                                                 --                .data
-			aso_ts_delta_valid          => open,                                                 --        ts_delta.valid
-			aso_ts_delta_data           => open                                                  --                .data
+			avs_csr_readdata            => mm_interconnect_0_mts_preprocessor_0_csr_readdata,                  --             csr.readdata
+			avs_csr_read                => mm_interconnect_0_mts_preprocessor_0_csr_read,                      --                .read
+			avs_csr_address             => mm_interconnect_0_mts_preprocessor_0_csr_address,                   --                .address
+			avs_csr_waitrequest         => mm_interconnect_0_mts_preprocessor_0_csr_waitrequest,               --                .waitrequest
+			avs_csr_write               => mm_interconnect_0_mts_preprocessor_0_csr_write,                     --                .write
+			avs_csr_writedata           => mm_interconnect_0_mts_preprocessor_0_csr_writedata,                 --                .writedata
+			i_clk                       => lvds_rx_28nm_0_outclock_clk,                                        -- clock_interface.clk
+			i_rst                       => rst_controller_001_reset_out_reset,                                 -- reset_interface.reset
+			asi_ctrl_data               => avalon_st_adapter_019_out_0_data,                                   --        run_ctrl.data
+			asi_ctrl_valid              => avalon_st_adapter_019_out_0_valid,                                  --                .valid
+			asi_ctrl_ready              => avalon_st_adapter_019_out_0_ready,                                  --                .ready
+			asi_hit_type0_channel       => mux_mutrig2processor_out_channel,                                   --    hit_type0_in.channel
+			asi_hit_type0_startofpacket => mux_mutrig2processor_out_startofpacket,                             --                .startofpacket
+			asi_hit_type0_endofpacket   => mux_mutrig2processor_out_endofpacket,                               --                .endofpacket
+			asi_hit_type0_endofrun      => open,                                                               --                .endofrun
+			asi_hit_type0_error         => mux_mutrig2processor_out_error,                                     --                .error
+			asi_hit_type0_data          => mux_mutrig2processor_out_data,                                      --                .data
+			asi_hit_type0_valid         => mux_mutrig2processor_out_valid,                                     --                .valid
+			asi_hit_type0_ready         => mux_mutrig2processor_out_ready,                                     --                .ready
+			aso_hit_type1_data          => mts_preprocessor_0_hit_type1_out_data,                              --   hit_type1_out.data
+			aso_hit_type1_valid         => mts_preprocessor_0_hit_type1_out_valid,                             --                .valid
+			aso_hit_type1_ready         => mts_preprocessor_0_hit_type1_out_ready,                             --                .ready
+			aso_hit_type1_channel       => mts_preprocessor_0_hit_type1_out_channel,                           --                .channel
+			aso_hit_type1_endofpacket   => mts_preprocessor_0_hit_type1_out_endofpacket,                       --                .endofpacket
+			aso_hit_type1_startofpacket => mts_preprocessor_0_hit_type1_out_startofpacket,                     --                .startofpacket
+			aso_hit_type1_empty         => mts_preprocessor_0_hit_type1_out_empty,                             --                .empty
+			aso_hit_type1_error         => mts_preprocessor_0_hit_type1_out_error,                             --                .error
+			aso_debug_ts_valid          => mts_preprocessor_0_debug_ts_valid,                                  --        debug_ts.valid
+			aso_debug_ts_data           => mts_preprocessor_0_debug_ts_data,                                   --                .data
+			aso_debug_burst_valid       => open,                                                               --     debug_burst.valid
+			aso_debug_burst_data        => open,                                                               --                .data
+			aso_ts_delta_valid          => open,                                                               --        ts_delta.valid
+			aso_ts_delta_data           => open,                                                               --                .data
+			coe_debug_status_data       => open,                                                               --    debug_status.status
+			coe_hit_type0_sidecar_data  => "0000000000000000000000000000000000000000000000000000000000000000", --     (terminated)
+			coe_hit_type0_sidecar_valid => '0',                                                                --     (terminated)
+			coe_hit_type1_sidecar_data  => open,                                                               --     (terminated)
+			coe_hit_type1_sidecar_valid => open                                                                --     (terminated)
 		);
 
 	mts_preprocessor_1 : component mts_processor
@@ -5266,39 +6007,44 @@ begin
 			DEBUG                             => 1
 		)
 		port map (
-			avs_csr_readdata            => mm_interconnect_0_mts_preprocessor_1_csr_readdata,    --             csr.readdata
-			avs_csr_read                => mm_interconnect_0_mts_preprocessor_1_csr_read,        --                .read
-			avs_csr_address             => mm_interconnect_0_mts_preprocessor_1_csr_address,     --                .address
-			avs_csr_waitrequest         => mm_interconnect_0_mts_preprocessor_1_csr_waitrequest, --                .waitrequest
-			avs_csr_write               => mm_interconnect_0_mts_preprocessor_1_csr_write,       --                .write
-			avs_csr_writedata           => mm_interconnect_0_mts_preprocessor_1_csr_writedata,   --                .writedata
-			i_clk                       => lvds_rx_28nm_0_outclock_clk,                          -- clock_interface.clk
-			i_rst                       => rst_controller_001_reset_out_reset,                   -- reset_interface.reset
-			asi_ctrl_data               => avalon_st_adapter_014_out_0_data,                     --        run_ctrl.data
-			asi_ctrl_valid              => avalon_st_adapter_014_out_0_valid,                    --                .valid
-			asi_ctrl_ready              => avalon_st_adapter_014_out_0_ready,                    --                .ready
-			asi_hit_type0_channel       => mux_mutrig2processor_0_out_channel,                   --    hit_type0_in.channel
-			asi_hit_type0_startofpacket => mux_mutrig2processor_0_out_startofpacket,             --                .startofpacket
-			asi_hit_type0_endofpacket   => mux_mutrig2processor_0_out_endofpacket,               --                .endofpacket
-			asi_hit_type0_endofrun      => open,                                                 --                .endofrun
-			asi_hit_type0_error         => mux_mutrig2processor_0_out_error,                     --                .error
-			asi_hit_type0_data          => mux_mutrig2processor_0_out_data,                      --                .data
-			asi_hit_type0_valid         => mux_mutrig2processor_0_out_valid,                     --                .valid
-			asi_hit_type0_ready         => mux_mutrig2processor_0_out_ready,                     --                .ready
-			aso_hit_type1_data          => mts_preprocessor_1_hit_type1_out_data,                --   hit_type1_out.data
-			aso_hit_type1_valid         => mts_preprocessor_1_hit_type1_out_valid,               --                .valid
-			aso_hit_type1_ready         => mts_preprocessor_1_hit_type1_out_ready,               --                .ready
-			aso_hit_type1_channel       => mts_preprocessor_1_hit_type1_out_channel,             --                .channel
-			aso_hit_type1_endofpacket   => mts_preprocessor_1_hit_type1_out_endofpacket,         --                .endofpacket
-			aso_hit_type1_startofpacket => mts_preprocessor_1_hit_type1_out_startofpacket,       --                .startofpacket
-			aso_hit_type1_empty         => mts_preprocessor_1_hit_type1_out_empty,               --                .empty
-			aso_hit_type1_error         => mts_preprocessor_1_hit_type1_out_error,               --                .error
-			aso_debug_ts_valid          => mts_preprocessor_1_debug_ts_valid,                    --        debug_ts.valid
-			aso_debug_ts_data           => mts_preprocessor_1_debug_ts_data,                     --                .data
-			aso_debug_burst_valid       => open,                                                 --     debug_burst.valid
-			aso_debug_burst_data        => open,                                                 --                .data
-			aso_ts_delta_valid          => open,                                                 --        ts_delta.valid
-			aso_ts_delta_data           => open                                                  --                .data
+			avs_csr_readdata            => mm_interconnect_0_mts_preprocessor_1_csr_readdata,                  --             csr.readdata
+			avs_csr_read                => mm_interconnect_0_mts_preprocessor_1_csr_read,                      --                .read
+			avs_csr_address             => mm_interconnect_0_mts_preprocessor_1_csr_address,                   --                .address
+			avs_csr_waitrequest         => mm_interconnect_0_mts_preprocessor_1_csr_waitrequest,               --                .waitrequest
+			avs_csr_write               => mm_interconnect_0_mts_preprocessor_1_csr_write,                     --                .write
+			avs_csr_writedata           => mm_interconnect_0_mts_preprocessor_1_csr_writedata,                 --                .writedata
+			i_clk                       => lvds_rx_28nm_0_outclock_clk,                                        -- clock_interface.clk
+			i_rst                       => rst_controller_001_reset_out_reset,                                 -- reset_interface.reset
+			asi_ctrl_data               => avalon_st_adapter_022_out_0_data,                                   --        run_ctrl.data
+			asi_ctrl_valid              => avalon_st_adapter_022_out_0_valid,                                  --                .valid
+			asi_ctrl_ready              => avalon_st_adapter_022_out_0_ready,                                  --                .ready
+			asi_hit_type0_channel       => mux_mutrig2processor_0_out_channel,                                 --    hit_type0_in.channel
+			asi_hit_type0_startofpacket => mux_mutrig2processor_0_out_startofpacket,                           --                .startofpacket
+			asi_hit_type0_endofpacket   => mux_mutrig2processor_0_out_endofpacket,                             --                .endofpacket
+			asi_hit_type0_endofrun      => open,                                                               --                .endofrun
+			asi_hit_type0_error         => mux_mutrig2processor_0_out_error,                                   --                .error
+			asi_hit_type0_data          => mux_mutrig2processor_0_out_data,                                    --                .data
+			asi_hit_type0_valid         => mux_mutrig2processor_0_out_valid,                                   --                .valid
+			asi_hit_type0_ready         => mux_mutrig2processor_0_out_ready,                                   --                .ready
+			aso_hit_type1_data          => mts_preprocessor_1_hit_type1_out_data,                              --   hit_type1_out.data
+			aso_hit_type1_valid         => mts_preprocessor_1_hit_type1_out_valid,                             --                .valid
+			aso_hit_type1_ready         => mts_preprocessor_1_hit_type1_out_ready,                             --                .ready
+			aso_hit_type1_channel       => mts_preprocessor_1_hit_type1_out_channel,                           --                .channel
+			aso_hit_type1_endofpacket   => mts_preprocessor_1_hit_type1_out_endofpacket,                       --                .endofpacket
+			aso_hit_type1_startofpacket => mts_preprocessor_1_hit_type1_out_startofpacket,                     --                .startofpacket
+			aso_hit_type1_empty         => mts_preprocessor_1_hit_type1_out_empty,                             --                .empty
+			aso_hit_type1_error         => mts_preprocessor_1_hit_type1_out_error,                             --                .error
+			aso_debug_ts_valid          => mts_preprocessor_1_debug_ts_valid,                                  --        debug_ts.valid
+			aso_debug_ts_data           => mts_preprocessor_1_debug_ts_data,                                   --                .data
+			aso_debug_burst_valid       => open,                                                               --     debug_burst.valid
+			aso_debug_burst_data        => open,                                                               --                .data
+			aso_ts_delta_valid          => open,                                                               --        ts_delta.valid
+			aso_ts_delta_data           => open,                                                               --                .data
+			coe_debug_status_data       => open,                                                               --    debug_status.status
+			coe_hit_type0_sidecar_data  => "0000000000000000000000000000000000000000000000000000000000000000", --     (terminated)
+			coe_hit_type0_sidecar_valid => '0',                                                                --     (terminated)
+			coe_hit_type1_sidecar_data  => open,                                                               --     (terminated)
+			coe_hit_type1_sidecar_valid => open                                                                --     (terminated)
 		);
 
 	mutrig_datapath_subsystem_0 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_0
@@ -5315,10 +6061,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_0_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_0_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_0_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_0_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_0_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_0_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_0_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_009_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_009_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_009_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_009_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_0_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_0_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_0_headerinfo_channel,                                --                      .channel
@@ -5330,9 +6076,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_0_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_0_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_018_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_018_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_018_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_026_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_026_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_026_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_1 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_1
@@ -5349,10 +6095,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_1_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_1_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_1_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_1_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_1_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_1_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_1_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_010_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_010_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_010_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_010_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_1_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_1_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_1_headerinfo_channel,                                --                      .channel
@@ -5364,9 +6110,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_1_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_1_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_019_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_019_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_019_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_027_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_027_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_027_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_2 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_2
@@ -5383,10 +6129,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_2_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_2_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_2_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_2_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_2_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_2_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_2_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_011_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_011_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_011_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_011_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_2_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_2_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_2_headerinfo_channel,                                --                      .channel
@@ -5398,9 +6144,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_2_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_2_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_020_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_020_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_020_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_028_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_028_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_028_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_3 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_3
@@ -5417,10 +6163,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_3_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_3_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_3_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_3_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_3_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_3_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_3_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_012_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_012_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_012_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_012_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_3_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_3_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_3_headerinfo_channel,                                --                      .channel
@@ -5432,9 +6178,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_3_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_3_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_021_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_021_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_021_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_029_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_029_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_029_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_4 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_4
@@ -5451,10 +6197,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_4_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_4_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_4_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_4_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_4_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_4_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_4_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_013_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_013_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_013_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_013_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_4_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_4_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_4_headerinfo_channel,                                --                      .channel
@@ -5466,9 +6212,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_4_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_4_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_024_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_024_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_024_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_032_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_032_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_032_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_5 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_5
@@ -5485,10 +6231,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_5_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_5_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_5_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_5_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_5_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_5_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_5_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_014_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_014_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_014_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_014_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_5_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_5_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_5_headerinfo_channel,                                --                      .channel
@@ -5500,9 +6246,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_5_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_5_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_025_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_025_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_025_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_033_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_033_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_033_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_6 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_6
@@ -5519,10 +6265,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_6_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_6_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_6_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_6_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_6_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_6_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_6_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_015_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_015_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_015_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_015_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_6_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_6_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_6_headerinfo_channel,                                --                      .channel
@@ -5534,9 +6280,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_6_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_6_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_012_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_012_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_012_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_020_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_020_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_020_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_datapath_subsystem_7 : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_7
@@ -5553,10 +6299,10 @@ begin
 			csr_write                       => mm_interconnect_0_mutrig_datapath_subsystem_7_csr_write,                       --                      .write
 			csr_writedata                   => mm_interconnect_0_mutrig_datapath_subsystem_7_csr_writedata,                   --                      .writedata
 			csr_address                     => mm_interconnect_0_mutrig_datapath_subsystem_7_csr_address,                     --                      .address
-			decoded_din_data                => mutrig_lane_source_mux_7_selected_out_data,                                    --           decoded_din.data
-			decoded_din_valid               => mutrig_lane_source_mux_7_selected_out_valid,                                   --                      .valid
-			decoded_din_error               => mutrig_lane_source_mux_7_selected_out_error,                                   --                      .error
-			decoded_din_channel             => mutrig_lane_source_mux_7_selected_out_channel,                                 --                      .channel
+			decoded_din_data                => avalon_st_adapter_016_out_0_data,                                              --           decoded_din.data
+			decoded_din_valid               => avalon_st_adapter_016_out_0_valid,                                             --                      .valid
+			decoded_din_error               => avalon_st_adapter_016_out_0_error,                                             --                      .error
+			decoded_din_channel             => avalon_st_adapter_016_out_0_channel,                                           --                      .channel
 			headerinfo_data                 => mutrig_datapath_subsystem_7_headerinfo_data,                                   --            headerinfo.data
 			headerinfo_valid                => mutrig_datapath_subsystem_7_headerinfo_valid,                                  --                      .valid
 			headerinfo_channel              => mutrig_datapath_subsystem_7_headerinfo_channel,                                --                      .channel
@@ -5568,9 +6314,9 @@ begin
 			hit_type0_out_error             => mutrig_datapath_subsystem_7_hit_type0_out_error,                               --                      .error
 			hit_type0_out_channel           => mutrig_datapath_subsystem_7_hit_type0_out_channel,                             --                      .channel
 			reset_reset_n                   => rst_controller_001_reset_out_reset_ports_inv,                                  --                 reset.reset_n
-			run_ctrl_data                   => avalon_st_adapter_013_out_0_data,                                              --              run_ctrl.data
-			run_ctrl_valid                  => avalon_st_adapter_013_out_0_valid,                                             --                      .valid
-			run_ctrl_ready                  => avalon_st_adapter_013_out_0_ready                                              --                      .ready
+			run_ctrl_data                   => avalon_st_adapter_021_out_0_data,                                              --              run_ctrl.data
+			run_ctrl_valid                  => avalon_st_adapter_021_out_0_valid,                                             --                      .valid
+			run_ctrl_ready                  => avalon_st_adapter_021_out_0_ready                                              --                      .ready
 		);
 
 	mutrig_injector_0 : component mutrig_injector_multiheader
@@ -5595,9 +6341,9 @@ begin
 			avs_csr_read            => mm_interconnect_0_mutrig_injector_0_csr_read,        --                    .read
 			avs_csr_readdata        => mm_interconnect_0_mutrig_injector_0_csr_readdata,    --                    .readdata
 			avs_csr_address         => mm_interconnect_0_mutrig_injector_0_csr_address,     --                    .address
-			asi_runctl_data         => avalon_st_adapter_015_out_0_data,                    --              runctl.data
-			asi_runctl_valid        => avalon_st_adapter_015_out_0_valid,                   --                    .valid
-			asi_runctl_ready        => avalon_st_adapter_015_out_0_ready,                   --                    .ready
+			asi_runctl_data         => avalon_st_adapter_023_out_0_data,                    --              runctl.data
+			asi_runctl_valid        => avalon_st_adapter_023_out_0_valid,                   --                    .valid
+			asi_runctl_ready        => avalon_st_adapter_023_out_0_ready,                   --                    .ready
 			asi_headerinfo0_data    => mutrig_datapath_subsystem_0_headerinfo_data,         --         headerinfo0.data
 			asi_headerinfo0_valid   => mutrig_datapath_subsystem_0_headerinfo_valid,        --                    .valid
 			asi_headerinfo0_channel => mutrig_datapath_subsystem_0_headerinfo_channel,      --                    .channel
@@ -5627,16 +6373,17 @@ begin
 
 	mutrig_lane_source_mux_0 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 0
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 0
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5663,16 +6410,17 @@ begin
 
 	mutrig_lane_source_mux_1 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 1
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 1
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5699,16 +6447,17 @@ begin
 
 	mutrig_lane_source_mux_2 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 2
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 2
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5735,16 +6484,17 @@ begin
 
 	mutrig_lane_source_mux_3 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 3
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 3
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5771,16 +6521,17 @@ begin
 
 	mutrig_lane_source_mux_4 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 4
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 4
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5807,16 +6558,17 @@ begin
 
 	mutrig_lane_source_mux_5 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 5
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 5
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5843,16 +6595,17 @@ begin
 
 	mutrig_lane_source_mux_6 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 6
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 6
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5879,16 +6632,17 @@ begin
 
 	mutrig_lane_source_mux_7 : component mutrig_lane_source_mux
 		generic map (
-			SELECT_EMULATOR => 0,
-			FIFO_DEPTH      => 4,
-			IP_UID          => "01001101010011000101001101001101",
-			VERSION_MAJOR   => 26,
-			VERSION_MINOR   => 2,
-			VERSION_PATCH   => 0,
-			BUILD           => 502,
-			VERSION_DATE    => 20260502,
-			VERSION_GIT     => "00000101001010001101101110101101",
-			INSTANCE_ID     => 7
+			SELECT_EMULATOR   => 0,
+			FIFO_DEPTH        => 4,
+			REAL_ALWAYS_VALID => 1,
+			IP_UID            => "01001101010011000101001101001101",
+			VERSION_MAJOR     => 26,
+			VERSION_MINOR     => 2,
+			VERSION_PATCH     => 1,
+			BUILD             => 503,
+			VERSION_DATE      => 20260503,
+			VERSION_GIT       => "00000101001010001101101110101101",
+			INSTANCE_ID       => 7
 		)
 		port map (
 			clk                 => lvds_rx_28nm_0_outclock_clk,                                --          clk.clk
@@ -5919,9 +6673,9 @@ begin
 			DEBUG      => 1
 		)
 		port map (
-			asi_runcontrol_data           => avalon_st_adapter_023_out_0_data,                                      --                    runcontrol.data
-			asi_runcontrol_valid          => avalon_st_adapter_023_out_0_valid,                                     --                              .valid
-			asi_runcontrol_ready          => avalon_st_adapter_023_out_0_ready,                                     --                              .ready
+			asi_runcontrol_data           => avalon_st_adapter_031_out_0_data,                                      --                    runcontrol.data
+			asi_runcontrol_valid          => avalon_st_adapter_031_out_0_valid,                                     --                              .valid
+			asi_runcontrol_ready          => avalon_st_adapter_031_out_0_ready,                                     --                              .ready
 			avs_reconfig_mgmt_address     => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_address,     --                 reconfig_mgmt.address
 			avs_reconfig_mgmt_read        => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_read,        --                              .read
 			avs_reconfig_mgmt_readdata    => mm_interconnect_1_mutrig_reset_controller_0_reconfig_mgmt_readdata,    --                              .readdata
@@ -7043,6 +7797,270 @@ begin
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
 			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_0_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_0_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_0_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_0_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_0_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_009_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_009_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_009_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_009_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_010 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_1_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_1_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_1_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_1_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_1_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_010_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_010_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_010_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_010_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_011 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_2_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_2_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_2_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_2_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_2_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_011_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_011_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_011_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_011_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_012 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_3_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_3_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_3_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_3_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_3_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_012_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_012_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_012_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_012_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_013 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_4_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_4_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_4_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_4_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_4_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_013_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_013_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_013_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_013_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_014 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_5_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_5_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_5_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_5_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_5_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_014_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_014_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_014_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_014_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_015 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_6_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_6_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_6_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_6_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_6_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_015_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_015_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_015_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_015_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_016 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 5,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 1,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 4,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 0,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,         -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,  -- in_rst_0.reset
+			in_0_data      => decoded_lane_fifo_7_out_data,        --     in_0.data
+			in_0_valid     => decoded_lane_fifo_7_out_valid,       --         .valid
+			in_0_ready     => decoded_lane_fifo_7_out_ready,       --         .ready
+			in_0_error     => decoded_lane_fifo_7_out_error,       --         .error
+			in_0_channel   => decoded_lane_fifo_7_out_channel,     --         .channel
+			out_0_data     => avalon_st_adapter_016_out_0_data,    --    out_0.data
+			out_0_valid    => avalon_st_adapter_016_out_0_valid,   --         .valid
+			out_0_error    => avalon_st_adapter_016_out_0_error,   --         .error
+			out_0_channel  => avalon_st_adapter_016_out_0_channel  --         .channel
+		);
+
+	avalon_st_adapter_017 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
 			inChannelWidth  => 0,
 			inErrorWidth    => 0,
 			inUseEmptyPort  => 0,
@@ -7062,12 +8080,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out0_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out0_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_009_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_009_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_009_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_017_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_017_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_017_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_010 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_010
+	avalon_st_adapter_018 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_018
 		generic map (
 			inBitsPerSymbol => 36,
 			inUsePackets    => 1,
@@ -7095,14 +8113,14 @@ begin
 			in_0_startofpacket  => hist_post_splitter_0_out1_startofpacket,   --         .startofpacket
 			in_0_endofpacket    => hist_post_splitter_0_out1_endofpacket,     --         .endofpacket
 			in_0_empty          => hist_post_splitter_0_out1_empty(0),        --         .empty
-			out_0_data          => avalon_st_adapter_010_out_0_data,          --    out_0.data
-			out_0_valid         => avalon_st_adapter_010_out_0_valid,         --         .valid
-			out_0_ready         => avalon_st_adapter_010_out_0_ready,         --         .ready
-			out_0_startofpacket => avalon_st_adapter_010_out_0_startofpacket, --         .startofpacket
-			out_0_endofpacket   => avalon_st_adapter_010_out_0_endofpacket    --         .endofpacket
+			out_0_data          => avalon_st_adapter_018_out_0_data,          --    out_0.data
+			out_0_valid         => avalon_st_adapter_018_out_0_valid,         --         .valid
+			out_0_ready         => avalon_st_adapter_018_out_0_ready,         --         .ready
+			out_0_startofpacket => avalon_st_adapter_018_out_0_startofpacket, --         .startofpacket
+			out_0_endofpacket   => avalon_st_adapter_018_out_0_endofpacket    --         .endofpacket
 		);
 
-	avalon_st_adapter_011 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_019 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7126,12 +8144,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out1_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out1_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_011_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_011_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_011_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_019_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_019_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_019_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_012 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_020 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7155,12 +8173,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out10_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out10_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_012_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_012_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_012_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_020_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_020_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_020_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_013 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_021 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7184,12 +8202,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out11_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out11_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_013_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_013_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_013_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_021_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_021_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_021_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_014 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_022 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7213,12 +8231,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out12_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out12_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_014_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_014_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_014_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_022_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_022_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_022_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_015 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_023 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7242,12 +8260,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out13_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out13_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_015_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_015_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_015_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_023_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_023_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_023_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_016 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_024 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7271,12 +8289,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out14_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out14_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_016_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_016_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_016_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_024_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_024_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_024_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_017 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_025 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7300,12 +8318,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out15_data,    --     in_0.data
 			in_0_valid     => run_control_splitter_out15_valid,   --         .valid
-			out_0_data     => avalon_st_adapter_017_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_017_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_017_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_025_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_025_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_025_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_018 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_026 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7329,12 +8347,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out2_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out2_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_018_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_018_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_018_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_026_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_026_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_026_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_019 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_027 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7358,12 +8376,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out3_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out3_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_019_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_019_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_019_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_027_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_027_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_027_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_020 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_028 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7387,12 +8405,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out4_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out4_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_020_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_020_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_020_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_028_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_028_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_028_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_021 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_029 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7416,12 +8434,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out5_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out5_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_021_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_021_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_021_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_029_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_029_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_029_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_022 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_030 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7445,12 +8463,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out6_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out6_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_022_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_022_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_022_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_030_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_030_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_030_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_023 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_031 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7474,12 +8492,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out7_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out7_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_023_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_023_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_023_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_031_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_031_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_031_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_024 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_032 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7503,12 +8521,12 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out8_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out8_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_024_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_024_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_024_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_032_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_032_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_032_out_0_ready   --         .ready
 		);
 
-	avalon_st_adapter_025 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_009
+	avalon_st_adapter_033 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_017
 		generic map (
 			inBitsPerSymbol => 9,
 			inUsePackets    => 0,
@@ -7532,9 +8550,273 @@ begin
 			in_rst_0_reset => rst_controller_001_reset_out_reset, -- in_rst_0.reset
 			in_0_data      => run_control_splitter_out9_data,     --     in_0.data
 			in_0_valid     => run_control_splitter_out9_valid,    --         .valid
-			out_0_data     => avalon_st_adapter_025_out_0_data,   --    out_0.data
-			out_0_valid    => avalon_st_adapter_025_out_0_valid,  --         .valid
-			out_0_ready    => avalon_st_adapter_025_out_0_ready   --         .ready
+			out_0_data     => avalon_st_adapter_033_out_0_data,   --    out_0.data
+			out_0_valid    => avalon_st_adapter_033_out_0_valid,  --         .valid
+			out_0_ready    => avalon_st_adapter_033_out_0_ready   --         .ready
+		);
+
+	avalon_st_adapter_034 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_0_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_0_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_0_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_0_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_034_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_034_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_034_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_034_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_034_out_0_channel            --         .channel
+		);
+
+	avalon_st_adapter_035 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_1_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_1_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_1_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_1_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_035_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_035_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_035_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_035_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_035_out_0_channel            --         .channel
+		);
+
+	avalon_st_adapter_036 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_2_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_2_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_2_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_2_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_036_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_036_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_036_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_036_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_036_out_0_channel            --         .channel
+		);
+
+	avalon_st_adapter_037 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_3_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_3_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_3_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_3_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_037_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_037_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_037_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_037_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_037_out_0_channel            --         .channel
+		);
+
+	avalon_st_adapter_038 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_4_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_4_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_4_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_4_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_038_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_038_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_038_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_038_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_038_out_0_channel            --         .channel
+		);
+
+	avalon_st_adapter_039 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_5_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_5_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_5_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_5_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_039_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_039_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_039_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_039_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_039_out_0_channel            --         .channel
+		);
+
+	avalon_st_adapter_040 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_6_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_6_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_6_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_6_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_040_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_040_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_040_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_040_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_040_out_0_channel            --         .channel
+		);
+
+	avalon_st_adapter_041 : component scifi_datapath_system_v3_pipe_avalon_st_adapter_034
+		generic map (
+			inBitsPerSymbol => 9,
+			inUsePackets    => 0,
+			inDataWidth     => 9,
+			inChannelWidth  => 4,
+			inErrorWidth    => 3,
+			inUseEmptyPort  => 0,
+			inUseValid      => 1,
+			inUseReady      => 0,
+			inReadyLatency  => 0,
+			outDataWidth    => 9,
+			outChannelWidth => 5,
+			outErrorWidth   => 3,
+			outUseEmptyPort => 0,
+			outUseValid     => 1,
+			outUseReady     => 1,
+			outReadyLatency => 0
+		)
+		port map (
+			in_clk_0_clk   => lvds_rx_28nm_0_outclock_clk,                   -- in_clk_0.clk
+			in_rst_0_reset => rst_controller_001_reset_out_reset,            -- in_rst_0.reset
+			in_0_data      => mutrig_lane_source_mux_7_selected_out_data,    --     in_0.data
+			in_0_valid     => mutrig_lane_source_mux_7_selected_out_valid,   --         .valid
+			in_0_error     => mutrig_lane_source_mux_7_selected_out_error,   --         .error
+			in_0_channel   => mutrig_lane_source_mux_7_selected_out_channel, --         .channel
+			out_0_data     => avalon_st_adapter_041_out_0_data,              --    out_0.data
+			out_0_valid    => avalon_st_adapter_041_out_0_valid,             --         .valid
+			out_0_ready    => avalon_st_adapter_041_out_0_ready,             --         .ready
+			out_0_error    => avalon_st_adapter_041_out_0_error,             --         .error
+			out_0_channel  => avalon_st_adapter_041_out_0_channel            --         .channel
 		);
 
 	rst_controller : component scifi_datapath_system_v3_pipe_rst_controller

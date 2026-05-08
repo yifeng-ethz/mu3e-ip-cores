@@ -2,9 +2,9 @@
 // Standalone PROF-INT-002 full-pipeline real-RTL simulation top.
 //
 // Author: Yifeng Wang <yifenwan@phys.ethz.ch>
-// Version : 26.2.6
-// Date    : 20260506
-// Change  : Rename the virtual MuTRiG source mode and keep the old string as an alias.
+// Version : 26.2.7
+// Date    : 20260508
+// Change  : Align passive tap counters with the delayed UVM monitor sample.
 
 module prof_int_002_full_pipeline_top;
     timeunit 1ps;
@@ -165,6 +165,8 @@ module prof_int_002_full_pipeline_top;
     int          rbcam_ingress_trace_fd;
     int          mts_latency_trace_fd;
     int          rbcam_fill_trace_fd;
+    int          feb_egress_trace_fd;
+    int          rbcam_to_feb_trace_fd;
     int unsigned rbcam_fill_trace_stride;
     bit          export_rbcam_fill_trace;
     logic [63:0] rbcam_fill_trace_cycle;
@@ -265,8 +267,8 @@ module prof_int_002_full_pipeline_top;
     hit_tap_if           post_rbcam_vif5(.clk(clk_125), .rst(rst));
     hit_tap_if           post_rbcam_vif6(.clk(clk_125), .rst(rst));
     hit_tap_if           post_rbcam_vif7(.clk(clk_125), .rst(rst));
-    hit_tap_if           feb_egress_vif(.clk(clk_125), .rst(rst));
-    hit_tap_if           feb_egress_vif1(.clk(clk_125), .rst(rst));
+    hit_tap_if           feb_egress_vif(.clk(cclk156), .rst(rst));
+    hit_tap_if           feb_egress_vif1(.clk(cclk156), .rst(rst));
     prof_int_002_ctrl_if ctrl_vif(.clk(clk_125), .rst(rst));
     tb_int_counter_if    counter_vif(.clk(clk_125), .rst(rst));
     logic                stage_a_any_valid;
@@ -522,11 +524,47 @@ module prof_int_002_full_pipeline_top;
                   meta_data);
     endtask
 
+    task automatic write_rbcam_to_feb_trace(
+        input int unsigned  tap_idx,
+        input logic         valid,
+        input logic         ready,
+        input logic         startofpacket,
+        input logic         endofpacket,
+        input logic         error,
+        input logic [35:0]  data,
+        input logic         meta_valid,
+        input logic [63:0]  meta_data
+    );
+        if (rbcam_to_feb_trace_fd == 0)
+            return;
+        if (!(valid && ready))
+            return;
+
+        $fdisplay(rbcam_to_feb_trace_fd,
+                  "%0t,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%09h,%0d,%0d,%0d,%0d,0x%016h",
+                  $time,
+                  tap_idx,
+                  valid,
+                  ready,
+                  startofpacket,
+                  endofpacket,
+                  error,
+                  data[35:32] == 4'h0,
+                  data,
+                  data[25:22],
+                  data[21:17],
+                  data[13:9],
+                  meta_valid,
+                  meta_data);
+    endtask
+
     initial begin : rbcam_trace_files
         string trace_output_dir;
         string rbcam_ingress_trace_path;
         string mts_latency_trace_path;
         string rbcam_fill_trace_path;
+        string feb_egress_trace_path;
+        string rbcam_to_feb_trace_path;
         int    plus_export_rbcam_fill_trace;
         int    plus_rbcam_fill_trace_stride;
 
@@ -544,8 +582,12 @@ module prof_int_002_full_pipeline_top;
         rbcam_ingress_trace_path = {trace_output_dir, "/rbcam_ingress_trace.csv"};
         mts_latency_trace_path = {trace_output_dir, "/mts_latency_trace.csv"};
         rbcam_fill_trace_path = {trace_output_dir, "/rbcam_fill_trace.csv"};
+        feb_egress_trace_path = {trace_output_dir, "/feb_egress_trace.csv"};
+        rbcam_to_feb_trace_path = {trace_output_dir, "/rbcam_to_feb_trace.csv"};
         rbcam_ingress_trace_fd = $fopen(rbcam_ingress_trace_path, "w");
         mts_latency_trace_fd = $fopen(mts_latency_trace_path, "w");
+        feb_egress_trace_fd = $fopen(feb_egress_trace_path, "w");
+        rbcam_to_feb_trace_fd = $fopen(rbcam_to_feb_trace_path, "w");
         rbcam_fill_trace_fd = 0;
         if (export_rbcam_fill_trace)
             rbcam_fill_trace_fd = $fopen(rbcam_fill_trace_path, "w");
@@ -555,6 +597,12 @@ module prof_int_002_full_pipeline_top;
         if (mts_latency_trace_fd == 0)
             `uvm_fatal("PROF_INT_002_TRACE",
                        $sformatf("failed to open %s", mts_latency_trace_path))
+        if (feb_egress_trace_fd == 0)
+            `uvm_fatal("PROF_INT_002_TRACE",
+                       $sformatf("failed to open %s", feb_egress_trace_path))
+        if (rbcam_to_feb_trace_fd == 0)
+            `uvm_fatal("PROF_INT_002_TRACE",
+                       $sformatf("failed to open %s", rbcam_to_feb_trace_path))
         if (export_rbcam_fill_trace && rbcam_fill_trace_fd == 0)
             `uvm_fatal("PROF_INT_002_TRACE",
                        $sformatf("failed to open %s", rbcam_fill_trace_path))
@@ -562,6 +610,10 @@ module prof_int_002_full_pipeline_top;
                   "time_ps,copy,split_valid,split_ready,split_empty,split_error,split_accept,lane_match,would_enter_deassembly,deassembly_wrreq,deassembly_full,deassembly_empty,in_payload_valid,push_write_req,push_write_grant,run_state_code,pop_state_code,push_state_code,gts_8n,read_time_ptr,age_mod8192,hit_ts8n,hit_key,expected_copy,asic,channel,t_fine,ts12,hit1_data_hex,metadata_valid,metadata_hex");
         $fdisplay(mts_latency_trace_fd,
                   "time_ps,bank,debug_valid,debug_delay_cycles,hit1_valid,hit1_ready,hit1_empty,hit1_error,hit_ts8n,hit_key,asic,channel,t_fine,metadata_valid,metadata_hex");
+        $fdisplay(feb_egress_trace_fd,
+                  "time_ps,tap,valid,ready,sop,eop,k_word,frame_header,subheader,frame_trailer,payload_region,tb_feb_valid,sidecar_valid,sidecar_hex,data_hex,decoded_asic,decoded_channel,decoded_t_fine");
+        $fdisplay(rbcam_to_feb_trace_fd,
+                  "time_ps,tap,valid,ready,sop,eop,error,is_hit,data_hex,decoded_asic,decoded_channel,decoded_t_fine,metadata_valid,metadata_hex");
         if (rbcam_fill_trace_fd != 0) begin
             $fdisplay(rbcam_fill_trace_fd,
                       "time_ps,cycle,stable_capture_active,all_running,p0_run_state,p1_run_state,p2_run_state,p3_run_state,p0_valid,p1_valid,p2_valid,p3_valid,p0_fill,p1_fill,p2_fill,p3_fill,p0_deasm_usedw,p1_deasm_usedw,p2_deasm_usedw,p3_deasm_usedw,p0_deasm_full,p1_deasm_full,p2_deasm_full,p3_deasm_full,p0_deasm_wrreq,p1_deasm_wrreq,p2_deasm_wrreq,p3_deasm_wrreq,p0_deasm_rdack,p1_deasm_rdack,p2_deasm_rdack,p3_deasm_rdack");
@@ -575,6 +627,10 @@ module prof_int_002_full_pipeline_top;
             $fclose(mts_latency_trace_fd);
         if (rbcam_fill_trace_fd != 0)
             $fclose(rbcam_fill_trace_fd);
+        if (feb_egress_trace_fd != 0)
+            $fclose(feb_egress_trace_fd);
+        if (rbcam_to_feb_trace_fd != 0)
+            $fclose(rbcam_to_feb_trace_fd);
     end
 
     function automatic logic type3_word_is_k(input logic [35:0] data);
@@ -1220,11 +1276,7 @@ module prof_int_002_full_pipeline_top;
         feb_egress_vif.valid = u_dut.data_path_subsystem
             .hit_stack_subsystem_0_hit_type3_valid &&
             u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_ready &&
-            type3_tap_valid(
-                u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_valid,
-                u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_ready,
-                feb_payload_hit_region,
-                u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data);
+            u_dut.data_path_subsystem.hit_stack_subsystem_0.frame_debug_hit_sidecar_valid;
         feb_egress_vif.ready = 1'b1;
         feb_egress_vif.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data);
@@ -1237,11 +1289,7 @@ module prof_int_002_full_pipeline_top;
 
         feb_egress_vif1.valid = u_dut.data_path_subsystem.hit_type3_lower_valid &&
             u_dut.data_path_subsystem.hit_type3_lower_ready &&
-            type3_tap_valid(
-                u_dut.data_path_subsystem.hit_type3_lower_valid,
-                u_dut.data_path_subsystem.hit_type3_lower_ready,
-                feb1_payload_hit_region,
-                u_dut.data_path_subsystem.hit_type3_lower_data);
+            u_dut.data_path_subsystem.hit_stack_subsystem_1.frame_debug_hit_sidecar_valid;
         feb_egress_vif1.ready = 1'b1;
         feb_egress_vif1.payload = hit2_to_hit0(
             u_dut.data_path_subsystem.hit_type3_lower_data);
@@ -1253,8 +1301,137 @@ module prof_int_002_full_pipeline_top;
         feb_egress_vif1.run_origin = 1'b0;
     end
 
-    always @(posedge clk_125) begin : rbcam_ingress_trace
+    always @(posedge cclk156) begin : feb_egress_trace
+        if (!rst && feb_egress_trace_fd != 0) begin
+                if (u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_valid &&
+                    u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_ready) begin
+                    $fdisplay(feb_egress_trace_fd,
+                              "%0t,0,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%016h,0x%09h,%0d,%0d,%0d",
+                              $time,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_valid,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_ready,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_startofpacket,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_endofpacket,
+                              type3_word_is_k(u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data),
+                              type3_word_is_frame_header(u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data),
+                              type3_word_is_subheader(u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data),
+                              type3_word_is_frame_trailer(u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data),
+                              feb_payload_hit_region,
+                              feb_egress_vif.valid,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0.frame_debug_hit_sidecar_valid,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0.frame_debug_hit_sidecar_data,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data[25:22],
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data[21:17],
+                              u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_data[13:9]);
+                end
+                if (u_dut.data_path_subsystem.hit_type3_lower_valid &&
+                    u_dut.data_path_subsystem.hit_type3_lower_ready) begin
+                    $fdisplay(feb_egress_trace_fd,
+                              "%0t,1,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%016h,0x%09h,%0d,%0d,%0d",
+                              $time,
+                              u_dut.data_path_subsystem.hit_type3_lower_valid,
+                              u_dut.data_path_subsystem.hit_type3_lower_ready,
+                              u_dut.data_path_subsystem.hit_type3_lower_startofpacket,
+                              u_dut.data_path_subsystem.hit_type3_lower_endofpacket,
+                              type3_word_is_k(u_dut.data_path_subsystem.hit_type3_lower_data),
+                              type3_word_is_frame_header(u_dut.data_path_subsystem.hit_type3_lower_data),
+                              type3_word_is_subheader(u_dut.data_path_subsystem.hit_type3_lower_data),
+                              type3_word_is_frame_trailer(u_dut.data_path_subsystem.hit_type3_lower_data),
+                              feb1_payload_hit_region,
+                              feb_egress_vif1.valid,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_1.frame_debug_hit_sidecar_valid,
+                              u_dut.data_path_subsystem.hit_stack_subsystem_1.frame_debug_hit_sidecar_data,
+                              u_dut.data_path_subsystem.hit_type3_lower_data,
+                              u_dut.data_path_subsystem.hit_type3_lower_data[25:22],
+                              u_dut.data_path_subsystem.hit_type3_lower_data[21:17],
+                              u_dut.data_path_subsystem.hit_type3_lower_data[13:9]);
+                end
+        end
+    end
+
+    always @(posedge clk_125) begin : rbcam_to_feb_trace
         if (!rst) begin
+            write_rbcam_to_feb_trace(
+                0,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0_hit_type2_metadata_metadata);
+            write_rbcam_to_feb_trace(
+                1,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1_hit_type2_metadata_metadata);
+            write_rbcam_to_feb_trace(
+                2,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2_hit_type2_metadata_metadata);
+            write_rbcam_to_feb_trace(
+                3,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3_hit_type2_metadata_metadata);
+            write_rbcam_to_feb_trace(
+                4,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_hit_type2_metadata_metadata);
+            write_rbcam_to_feb_trace(
+                5,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_hit_type2_metadata_metadata);
+            write_rbcam_to_feb_trace(
+                6,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_hit_type2_metadata_metadata);
+            write_rbcam_to_feb_trace(
+                7,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_ready,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_startofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_endofpacket,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_error,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_data,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_metadata_valid,
+                u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_metadata_metadata);
             if (mts_latency_trace_fd != 0) begin
                 if (u_dut.data_path_subsystem.mts_preprocessor_0_debug_ts_valid ||
                     u_dut.data_path_subsystem.mts_preprocessor_0_hit_type1_out_valid) begin
@@ -1403,10 +1580,10 @@ module prof_int_002_full_pipeline_top;
                           u_dut.data_path_subsystem.hit_stack_subsystem_0_ring_buffer_cam_1_filllevel_valid,
                           u_dut.data_path_subsystem.hit_stack_subsystem_0_ring_buffer_cam_2_filllevel_valid,
                           u_dut.data_path_subsystem.hit_stack_subsystem_0_ring_buffer_cam_3_filllevel_valid,
-                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.coe_debug_fill_level,
-                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.coe_debug_fill_level,
-                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.coe_debug_fill_level,
-                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.coe_debug_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.resident_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.resident_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.resident_fill_level,
+                          u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3.v2_core.resident_fill_level,
                           u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0.v2_core.deassembly_fifo_usedw,
                           u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1.v2_core.deassembly_fifo_usedw,
                           u_dut.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2.v2_core.deassembly_fifo_usedw,
@@ -1428,11 +1605,11 @@ module prof_int_002_full_pipeline_top;
     end
 
     always @(posedge clk_125) begin
+        #1ps;
         if (rst) begin
             ctrl_vif.stage_a_count <= 64'd0;
             ctrl_vif.pre_rbcam_count <= 64'd0;
             ctrl_vif.post_rbcam_count <= 64'd0;
-            ctrl_vif.feb_egress_count <= 64'd0;
             dbg_arb_bp_accept <= 64'd0;
             dbg_bp_mux_accept <= 64'd0;
             dbg_mux_mts_accept <= 64'd0;
@@ -1451,18 +1628,10 @@ module prof_int_002_full_pipeline_top;
             dbg_ds_error <= 64'd0;
             dbg_rb_any_accept <= 64'd0;
             dbg_rb_hit_accept <= 64'd0;
-            dbg_feb_any_accept <= 64'd0;
-            dbg_feb_hit_accept <= 64'd0;
             dbg_dp_hs_runctl_accept <= 64'd0;
             dbg_hs_rbcam_runctl_accept <= 64'd0;
             dbg_hs_feb_runctl_accept <= 64'd0;
             dbg_last_hs_runctl_symbol <= RUNCTL_IDLE_SYM;
-            feb_frame_active <= 1'b0;
-            feb_frame_word_index <= 0;
-            feb_payload_hit_region <= 1'b0;
-            feb1_frame_active <= 1'b0;
-            feb1_frame_word_index <= 0;
-            feb1_payload_hit_region <= 1'b0;
         end else begin
             ctrl_vif.stage_a_count <= ctrl_vif.stage_a_count +
                 {63'd0, stage_a_vif0.valid} + {63'd0, stage_a_vif1.valid} +
@@ -1479,8 +1648,6 @@ module prof_int_002_full_pipeline_top;
                 {63'd0, post_rbcam_vif2.valid} + {63'd0, post_rbcam_vif3.valid} +
                 {63'd0, post_rbcam_vif4.valid} + {63'd0, post_rbcam_vif5.valid} +
                 {63'd0, post_rbcam_vif6.valid} + {63'd0, post_rbcam_vif7.valid};
-            ctrl_vif.feb_egress_count <= ctrl_vif.feb_egress_count +
-                {63'd0, feb_egress_vif.valid} + {63'd0, feb_egress_vif1.valid};
             if (u_dut.data_path_subsystem.avalon_st_adapter_026_out_0_valid &&
                 u_dut.data_path_subsystem.avalon_st_adapter_026_out_0_ready)
                 dbg_arb_bp_accept <= dbg_arb_bp_accept + 64'd1;
@@ -1617,6 +1784,40 @@ module prof_int_002_full_pipeline_top;
                                         u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_ready,
                                         u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_error,
                                         u_dut.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_hit_type2_data));
+            if (u_dut.data_path_subsystem.run_control_splitter_out6_valid) begin
+                dbg_dp_hs_runctl_accept <= dbg_dp_hs_runctl_accept + 64'd1;
+                dbg_last_hs_runctl_symbol <=
+                    u_dut.data_path_subsystem.run_control_splitter_out6_data;
+            end
+            dbg_hs_rbcam_runctl_accept <= dbg_hs_rbcam_runctl_accept +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out0_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out1_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out2_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out3_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out0_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out1_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out2_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out3_valid);
+            dbg_hs_feb_runctl_accept <= dbg_hs_feb_runctl_accept +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out4_valid) +
+                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out4_valid);
+        end
+    end
+
+    always @(posedge cclk156) begin
+        if (rst) begin
+            ctrl_vif.feb_egress_count <= 64'd0;
+            dbg_feb_any_accept <= 64'd0;
+            dbg_feb_hit_accept <= 64'd0;
+            feb_frame_active <= 1'b0;
+            feb_frame_word_index <= 0;
+            feb_payload_hit_region <= 1'b0;
+            feb1_frame_active <= 1'b0;
+            feb1_frame_word_index <= 0;
+            feb1_payload_hit_region <= 1'b0;
+        end else begin
+            ctrl_vif.feb_egress_count <= ctrl_vif.feb_egress_count +
+                {63'd0, feb_egress_vif.valid} + {63'd0, feb_egress_vif1.valid};
             dbg_feb_any_accept <= dbg_feb_any_accept +
                 count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_valid &&
                          u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_ready) +
@@ -1624,6 +1825,7 @@ module prof_int_002_full_pipeline_top;
                          u_dut.data_path_subsystem.hit_type3_lower_ready);
             dbg_feb_hit_accept <= dbg_feb_hit_accept +
                 count_if(feb_egress_vif.valid) + count_if(feb_egress_vif1.valid);
+
             if (u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_valid &&
                 u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_ready) begin
                 if (u_dut.data_path_subsystem.hit_stack_subsystem_0_hit_type3_startofpacket) begin
@@ -1654,6 +1856,7 @@ module prof_int_002_full_pipeline_top;
                     feb_frame_word_index <= feb_frame_word_index + 1;
                 end
             end
+
             if (u_dut.data_path_subsystem.hit_type3_lower_valid &&
                 u_dut.data_path_subsystem.hit_type3_lower_ready) begin
                 if (u_dut.data_path_subsystem.hit_type3_lower_startofpacket) begin
@@ -1684,23 +1887,6 @@ module prof_int_002_full_pipeline_top;
                     feb1_frame_word_index <= feb1_frame_word_index + 1;
                 end
             end
-            if (u_dut.data_path_subsystem.run_control_splitter_out6_valid) begin
-                dbg_dp_hs_runctl_accept <= dbg_dp_hs_runctl_accept + 64'd1;
-                dbg_last_hs_runctl_symbol <=
-                    u_dut.data_path_subsystem.run_control_splitter_out6_data;
-            end
-            dbg_hs_rbcam_runctl_accept <= dbg_hs_rbcam_runctl_accept +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out0_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out1_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out2_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out3_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out0_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out1_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out2_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out3_valid);
-            dbg_hs_feb_runctl_accept <= dbg_hs_feb_runctl_accept +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_0.run_control_splitter_0_out4_valid) +
-                count_if(u_dut.data_path_subsystem.hit_stack_subsystem_1.run_control_splitter_0_out4_valid);
         end
     end
 

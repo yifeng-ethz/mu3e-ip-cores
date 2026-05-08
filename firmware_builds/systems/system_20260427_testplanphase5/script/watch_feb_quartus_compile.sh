@@ -72,7 +72,16 @@ fi
 qsf_file="${project}.qsf"
 output_dir="output_files"
 if [ -f "${qsf_file}" ]; then
-    output_dir_parsed="$(awk -F '\"' '/PROJECT_OUTPUT_DIRECTORY/ {print $2; exit}' "${qsf_file}" || true)"
+    output_dir_parsed="$(awk '
+        /PROJECT_OUTPUT_DIRECTORY/ {
+            for (i = 1; i <= NF; i++) {
+                if ($i == "PROJECT_OUTPUT_DIRECTORY") {
+                    gsub(/"/, "", $(i + 1))
+                    print $(i + 1)
+                    exit
+                }
+            }
+        }' "${qsf_file}" || true)"
     if [ -n "${output_dir_parsed}" ]; then
         output_dir="${output_dir_parsed}"
     fi

@@ -92,6 +92,34 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
+ <component name="arb_hit_type0" file="../../../../misc/arb_hit_type0/script/arb_hit_type0_hw.tcl" displayName="Arbiter hit_type0 (real / emu / mix RR)" version="26.4.1.506" description="Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source. Modes: REAL (real-only), EMU (emulator-only), MIX_RR (beat-level round-robin, multi-channel packetized egress). MIX_RR requires multi-channel packet support in every downstream consumer (hit processor / rbCAM); see Identity tab warning." tags="AUTHORSHIP=Mu3e IP team /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="true" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="arb_hit_type0_supercore" file="../../../../misc/arb_hit_type0/script/arb_hit_type0_supercore_hw.tcl" displayName="Arbiter hit_type0 supercore (26.4.1.506)" version="26.4.1.506" description="Qsys-composed multi-lane wrapper around arb_hit_type0. One run-control sink is split to all lanes; each lane keeps an independent CSR aperture and independent real/emu/selected hit_type0 streams." tags="AUTHORSHIP=Mu3e IP team /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="COMPOSITION_CALLBACK" value="compose" />
+  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="arb_hit_type0_supercore" file="../../system_20260504_full8lane_type0/syn/arb_hit_type0_supercore.qsys" displayName="arb_hit_type0_supercore (1.0)" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
  <component name="avalon_proxy" file="board_projects/fe_scifi_feb_v3/src/common/util/avalon_proxy_hw.tcl" displayName="avalon_proxy" version="1.1" description="" tags="AUTHORSHIP=Alexandr Kozlinskiy" categories="mu3e" factory="TclModuleFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -117,31 +145,19 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="avst_errcnt_system" file="../../../../run-control_mgmt/reference/feb_system_v2_snapshot_20260415/avst_errcnt_system.qsys" displayName="avst_errcnt_system" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+ <component name="avst_39_ready_sink" file="../../system_20260504_emulator_type0/ip/avst_39_ready_sink/avst_39_ready_sink_hw.tcl" displayName="AVST 39-bit ready sink" version="26.2.0.504" description="Focus-build ready sink for an unused 39-bit packetized AVST source." tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Adapters" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
- </component>
- <component name="avsthit0ch2cntr_ctrl" file="../../../../mutrig_channel_counter_fabric/avsthit0ch2cntr_ctrl_hw.tcl" displayName="Avalon-ST Data to Counter Interconnect (channel_id)" version="1.0.12" description="See top level file" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
-  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="true" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ICON_PATH" value="../../../../drawings/20121123203030!Logo_drawing100.png" />
-  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
-  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
-  <tag2 key="REPORT_HIERARCHY" value="false" />
-  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
-  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
- </component>
- <component name="cam_arria5" file="../../../../CAM/cam_arria5_hw.tcl" displayName="Content Addressable Memory for Fast Searching (Arria V)" version="17.0.2" description="Output the address, with input of data, which is ideal for searching the data. Functionally inverserd as RAM." tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Algorithms" factory="TclModuleFactory">
-  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="true" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ICON_PATH" value="../../../../ip_mu3e/drawings/20121123203030!Logo_drawing100.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+ </component>
+ <component name="avst_errcnt_system" file="../../../../run-control_mgmt/reference/feb_system_v2_snapshot_20260415/avst_errcnt_system.qsys" displayName="avst_errcnt_system" version="1.0" description="" tags="INTERNAL_COMPONENT=true" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
  <component name="charge_injection_pulser" file="../../../../charge_injection/legacy/analog_pulser_hw.tcl" displayName="Charge Injection Pulser" version="4.0.5" description="Generate arbitary pulse for a set width and frequency" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
@@ -158,17 +174,6 @@
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="true" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
-  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
-  <tag2 key="REPORT_HIERARCHY" value="false" />
-  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
-  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
- </component>
- <component name="counter_avmm" file="../../../../high_performance_counter_array/counter_avmm_hw.tcl" displayName="Counter with Avalon Memory-Mapped Inerface" version="1.4.1" description="Counter with sclr to monitor a given time window. Use avmm-read to retrieve the last value before the current sclr. Upper bit is the overflow flag, which is only reset upon reset. The sclr can be issued from outside as 1) reset_req or 2) internal generated based on settings or 3) avalon master write value '0'. " tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
-  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="false" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
@@ -205,6 +210,14 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
+ <component name="debug_hit_sidecar_bank_bridge" file="../../../../misc/debug_hit_sidecar_bank_bridge/script/debug_hit_sidecar_bank_bridge_hw.tcl" displayName="DEBUG Hit Sidecar Bank Bridge" version="26.0.2.506" description="Queues four lane-local 64-bit DEBUG metadata conduits and emits the metadata aligned with a 4-input hit_type0 mux output." tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Utility" factory="TclModuleFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="false" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
  <component name="debug_sc_system_v2" file="../../../../run-control_mgmt/current/debug_sc_system_v2.qsys" displayName="debug_sc_system_v2" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -221,7 +234,15 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
- <component name="emulator_mutrig" file="../../../../emulator_mutrig/emulator_mutrig_hw.tcl" displayName="MuTRiG Emulator Mu3e IP" version="26.1.13.425" description="MuTRiG Emulator Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
+ <component name="debug_sidecar_fanout" file="../../../../misc/debug_sidecar_fanout/script/debug_sidecar_fanout_hw.tcl" displayName="DEBUG Sidecar Fanout" version="26.0.0.506" description="Four-way combinational fanout for 64-bit DEBUG hit metadata conduits." tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Utility" factory="TclModuleFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="false" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="emulator_mutrig" file="../../../../emulator_mutrig/emulator_mutrig_hw.tcl" displayName="MuTRiG Emulator Mu3e IP" version="26.3.0.506" description="MuTRiG Emulator Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -238,15 +259,17 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
- <component name="feb_frame_assembly" file="../../../../feb_frame_assembly/feb_frame_assembly_hw.tcl" displayName="FEB (Front-end Board) Frame Assembly" version="26.0.328" description="Generates the Mu3e standard data frame given input of sub-frames of multiple ring-CAM(s)" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="feb_frame_assembly" file="../../../../feb_frame_assembly/feb_frame_assembly_hw.tcl" displayName="FEB (Front-end Board) Frame Assembly" version="26.1.0.506" description="Generates the Mu3e standard data frame given input of sub-frames of multiple ring-CAM(s)" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="true" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
  <component name="feb_max10_comm" file="../../../../feb_max10_comm/feb_max10_comm_hw.tcl" displayName="FEB MAX10 Communication Bridge" version="0.1.0" description="Arria-side AVMM CSR bridge for FEB to MAX10 flash programming. Stages one 256-byte page, crosses into the MAX10 link domain through a dual-clock FIFO, and preserves the existing downstream FEBSPI programming contract." tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
@@ -298,7 +321,135 @@
   <tag2 key="COMPOSITION_CALLBACK" value="compose" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="histogram_ingress_bridge" file="../../../../histogram_statistics/histogram_ingress_bridge_hw.tcl" displayName="Histogram Ingress Bridge" version="26.0.4.502" description="Histogram Ingress Bridge Mu3e IP Core" tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="focus_arb_hit_type0" file="../../system_20260504_emulator_type0/ip/focus_arb_hit_type0/focus_arb_hit_type0_hw.tcl" displayName="Focus arb_hit_type0" version="26.4.1.506" description="Focus-build packaging wrapper for the arb_hit_type0 RTL." tags="AUTHORSHIP=Mu3e IP team /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+ </component>
+ <component name="focus_emulator_type0_system" file="../../system_20260504_emulator_type0/syn/focus_emulator_type0_system.qsys" displayName="focus_emulator_type0_system" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="focus_histogram_statistics_v2" file="../../system_20260504_emulator_type0/ip/focus_histogram_statistics_v2/focus_histogram_statistics_v2_hw.tcl" displayName="Focus Histogram Statistics" version="26.1.6.429" description="Focus-build wrapper for histogram_statistics_v2 with Qsys-18.1-safe boolean generics." tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
+  <tag2 key="ICON_PATH" value="../../system_20260504_emulator_type0/ip/firmware_builds/misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="focus_lvds_rx_controller_pro" file="../../system_20260504_emulator_type0/ip/focus_lvds_rx_controller_pro/focus_lvds_rx_controller_pro_hw.tcl" displayName="Focus LVDS RX Controller Pro" version="25.1.631" description="" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
+  <tag2 key="ICON_PATH" value="../../system_20260504_emulator_type0/ip/firmware_builds/misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+ </component>
+ <component name="focus_mutrig_frame_deassembly" file="../../system_20260504_emulator_type0/ip/focus_mutrig_frame_deassembly/focus_mutrig_frame_deassembly_hw.tcl" displayName="Focus MuTRiG Frame Deassembly" version="26.0.6.418" description="Focus-build packaging wrapper for the MuTRiG frame deassembly RTL." tags="AUTHORSHIP=Mu3e IP team /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VHDL" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+ </component>
+ <component name="focus_onewire_master" file="../../system_20260504_emulator_type0/ip/focus_onewire_master/focus_onewire_master_hw.tcl" displayName="Focus OneWire Master" version="26.2.1.428" description="&lt;html&gt; Handles link layer transaction in &lt;b&gt;1-Wire&lt;/b&gt; protocol. &lt;br&gt; &lt;br&gt; Usage: &lt;ul&gt;   &lt;li&gt;&lt;b&gt;TX Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;send data through &lt;b&gt;tx&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;   &lt;li&gt;issue command through &lt;b&gt;ctrl&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;  &lt;/ol&gt;  &lt;li&gt;&lt;b&gt;RX Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;issue command through &lt;b&gt;ctrl&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;   &lt;li&gt;retrieve data from &lt;b&gt;rx&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;  &lt;/ol&gt; &lt;/ul&gt; &lt;/html&gt;" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,interrupt,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
+  <tag2 key="ICON_PATH" value="/home/yifeng/packages/mu3e_ip_dev/.worktrees/firmware_builds/misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+ </component>
+ <component name="focus_sc_hub_v2" file="../../system_20260504_emulator_type0/ip/focus_sc_hub_v2/focus_sc_hub_v2_hw.tcl" displayName="Focus Slow Control Hub Mu3E IP" version="26.6.10.423" description="Slow Control Hub Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="sc_hub_v2_elaborate" />
+  <tag2 key="ICON_PATH" value="../../system_20260504_emulator_type0/ip/firmware_builds/misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="sc_hub_v2_validate" />
+ </component>
+ <component name="full8lane_control_path_subsystem" file="../../system_20260504_full8lane_type0/syn/full8lane_control_path_subsystem.qsys" displayName="full8lane_control_path_subsystem" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="full8lane_histogram_statistics_v2" file="../../system_20260504_full8lane_type0/syn/ip/full8lane_histogram_statistics_v2/full8lane_histogram_statistics_v2_hw.tcl" displayName="Full8lane Histogram Statistics" version="26.1.8.502" description="Full8lane-build wrapper for histogram_statistics_v2 with Qsys-18.1-safe boolean generics." tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Full8Lane Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
+  <tag2 key="ICON_PATH" value="../../../misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="full8lane_onewire_master" file="../../system_20260504_full8lane_type0/syn/ip/full8lane_onewire_master/full8lane_onewire_master_hw.tcl" displayName="Full 8-Lane OneWire Master" version="26.2.1.428" description="&lt;html&gt; Handles link layer transaction in &lt;b&gt;1-Wire&lt;/b&gt; protocol. &lt;br&gt; &lt;br&gt; Usage: &lt;ul&gt;   &lt;li&gt;&lt;b&gt;TX Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;send data through &lt;b&gt;tx&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;   &lt;li&gt;issue command through &lt;b&gt;ctrl&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;  &lt;/ol&gt;  &lt;li&gt;&lt;b&gt;RX Flow&lt;/b&gt;:&lt;/li&gt;   &lt;ol&gt;   &lt;li&gt;issue command through &lt;b&gt;ctrl&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;   &lt;li&gt;retrieve data from &lt;b&gt;rx&lt;/b&gt; port. &lt;br&gt; &lt;/li&gt;  &lt;/ol&gt; &lt;/ul&gt; &lt;/html&gt;" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,interrupt,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
+  <tag2 key="ICON_PATH" value="../../../misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+ </component>
+ <component name="full8lane_sc_hub_v2" file="../../system_20260504_full8lane_type0/syn/ip/full8lane_sc_hub_v2/full8lane_sc_hub_v2_hw.tcl" displayName="Full8lane Slow Control Hub Mu3E IP" version="26.6.10.423" description="Slow Control Hub Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// INTERNAL_COMPONENT=false" categories="Mu3e Full8Lane Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="sc_hub_v2_elaborate" />
+  <tag2 key="ICON_PATH" value="../../system_20260504_full8lane_type0/syn/ip/firmware_builds/misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="sc_hub_v2_validate" />
+ </component>
+ <component name="full8lane_type0_datapath" file="../../system_20260504_full8lane_type0/syn/full8lane_type0_datapath.qsys" displayName="full8lane_type0_datapath (2.0)" version="2.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="full8lane_type0_datapath" file="../../system_20260504_full8lane_type0/syn/firmware_builds/systems/system_20260504_full8lane_type0/syn/full8lane_type0_datapath.qsys" displayName="full8lane_type0_datapath (1.0)" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="full8lane_type0_system" file="../../system_20260504_full8lane_type0/syn/full8lane_type0_system.qsys" displayName="full8lane_type0_system" version="2.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+ </component>
+ <component name="histogram_ingress_bridge" file="../../../../histogram_statistics/histogram_ingress_bridge_hw.tcl" displayName="Histogram Ingress Bridge" version="26.0.5.506" description="Histogram Ingress Bridge Mu3e IP Core" tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -321,7 +472,20 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="histogram_statistics_v2" file="../../../../histogram_statistics/histogram_statistics_v2_hw.tcl" displayName="Histogram Statistics" version="26.1.8.502" description="Histogram Statistics Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="histogram_statistics_v2" file="../../system_20260504_full8lane_type0/syn/ip/histogram_statistics_v2/histogram_statistics_v2_hw.tcl" displayName="Full8lane Histogram Statistics Compatibility (26.1.8.502)" version="26.1.8.502" description="Full8lane-build compatibility wrapper for histogram_statistics_v2 with Qsys-18.1-safe boolean generics." tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Full8Lane Build/Wrappers" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
+  <tag2 key="ICON_PATH" value="../../../misc/logo/mu3e_logo.png" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="histogram_statistics_v2" file="../../../../histogram_statistics/histogram_statistics_v2_hw.tcl" displayName="Histogram Statistics (26.1.6.429)" version="26.1.6.429" description="Histogram Statistics Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -338,7 +502,7 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
- <component name="inactive_reset_source" file="../../../../misc/inactive_reset_source/inactive_reset_source_hw.tcl" displayName="Inactive Reset Source" version="26.0.0.425" description="Constant inactive reset source for Platform Designer reset sink tie-off." tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Utility/Modules" factory="TclModuleFactory">
+ <component name="hit_type0_hist_pre_adapter" file="../../system_20260504_emulator_type0/ip/hit_type0_hist_pre_adapter/hit_type0_hist_pre_adapter_hw.tcl" displayName="hit_type0 to histogram pre adapter" version="26.2.0.504" description="Focus-build adapter from 45-bit hit_type0 AVST to the 39-bit histogram pre stream." tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Focus Build/Adapters" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -348,16 +512,14 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
- <component name="intf_adapter" file="../../../../packet_scheduler/script/intf_adapter_hw.tcl" displayName="Interface Adapter" version="25.0.723" description="" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="inactive_reset_source" file="../../../../misc/inactive_reset_source/inactive_reset_source_hw.tcl" displayName="Inactive Reset Source" version="26.0.0.425" description="Constant inactive reset source for Platform Designer reset sink tie-off." tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Utility/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
-  <tag2 key="ICON_PATH" value="../../../misc/logo/mu3e_logo.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
-  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
  <component name="ip_8b10b_decoder" file="../../../../ip_8b10b_decoder/ip_8b10b_decoder_hw.tcl" displayName="8b/10b Decoder (ip_mu3e)" version="1.3.1" description="" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
@@ -395,7 +557,7 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="mts_preprocessor" file="../../../../mutrig_timestamp_processor/mts_processor_hw.tcl" displayName="MuTRiG Timestamp Processor" version="26.0.9.430" description="MuTRiG Timestamp Processor Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="mts_preprocessor" file="../../../../mutrig_timestamp_processor/mts_processor_hw.tcl" displayName="MuTRiG Timestamp Processor" version="26.1.0.506" description="MuTRiG Timestamp Processor Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -404,6 +566,29 @@
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VHDL" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="mu3e_lvds_controller" file="../../../../mu3e_lvds_controller/script/mu3e_lvds_controller_hw.tcl" displayName="Mu3e LVDS Controller with Arria V PHY" version="26.2.1.506" description="Mu3e LVDS controller with embedded Arria V LVDS RX PHY" tags="AUTHORSHIP=Yifeng Wang /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="COMPOSITION_CALLBACK" value="compose" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
+  <tag2 key="VALIDATION_CALLBACK" value="validate" />
+ </component>
+ <component name="mu3e_lvds_controller_phy_adapter" file="../../../../mu3e_lvds_controller/script/mu3e_lvds_controller_phy_adapter_hw.tcl" displayName="Mu3e LVDS Controller PHY Adapter" version="26.2.1.506" description="Mu3e LVDS controller internal PHY-width adapter" tags="AUTHORSHIP=Yifeng Wang /// INTERNAL_COMPONENT=true" categories="Mu3e Data Plane/Internal" factory="TclModuleFactory">
+  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
+  <tag2 key="COMPONENT_EDITABLE" value="false" />
+  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
+  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
+  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
+  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
+  <tag2 key="REPORT_HIERARCHY" value="false" />
+  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
@@ -427,7 +612,7 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
  </component>
- <component name="mutrig_frame_deassembly" file="../../../../mutrig_frame_deassembly/script/mutrig_frame_deassembly_hw.tcl" displayName="MuTRiG Frame Deassembly" version="26.0.6.418" description="MuTRiG Frame Deassembly Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="mutrig_frame_deassembly" file="../../../../mutrig_frame_deassembly/script/mutrig_frame_deassembly_hw.tcl" displayName="MuTRiG Frame Deassembly" version="26.1.0.506" description="MuTRiG Frame Deassembly Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -465,7 +650,7 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="mutrig_lane_source_mux" file="../../../../misc/mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl" displayName="MuTRiG Lane Source Mux" version="26.2.0.502" description="MuTRiG Lane Source Mux Mu3e IP Core" tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
+ <component name="mutrig_lane_source_mux" file="../../../../misc/mutrig_lane_source_mux/mutrig_lane_source_mux_hw.tcl" displayName="MuTRiG Lane Source Mux" version="26.2.1.503" description="MuTRiG Lane Source Mux Mu3e IP Core" tags="AUTHORSHIP=OpenAI Codex /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -476,16 +661,6 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
- </component>
- <component name="arb_hit_type0" file="../../../../misc/arb_hit_type0/script/arb_hit_type0_hw.tcl" displayName="Arbiter hit_type0 (real / emu / mix RR)" version="26.2.0.504" description="Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source and packet-boundary round-robin." tags="CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Emulators/Modules" factory="TclModuleFactory">
-  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="true" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
-  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
-  <tag2 key="REPORT_HIERARCHY" value="false" />
-  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
-  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
  </component>
  <component name="mutrig_reset_controller" file="../../../../mutrig_reset_controller/mutrig_reset_controller_hw.tcl" displayName="MuTRiG Reset Controller" version="1.0.8" description="Issue reset to MuTRiG during run sync. Allows fine phase shift w.r.t a reference clock." tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
@@ -502,7 +677,7 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
   <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
-  <tag2 key="ICON_PATH" value="/home/firmware_builds/misc/logo/mu3e_logo.png" />
+  <tag2 key="ICON_PATH" value="/home/yifeng/firmware_builds/misc/logo/mu3e_logo.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
@@ -514,7 +689,7 @@
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
   <tag2 key="ELABORATION_CALLBACK" value="myelaborate" />
-  <tag2 key="ICON_PATH" value="/home/firmware_builds/misc/logo/mu3e_logo.png" />
+  <tag2 key="ICON_PATH" value="/home/yifeng/firmware_builds/misc/logo/mu3e_logo.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
@@ -526,36 +701,7 @@
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="true" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ICON_PATH" value="/home/firmware_builds/misc/logo/mu3e_logo.png" />
-  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
-  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
-  <tag2 key="REPORT_HIERARCHY" value="false" />
-  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
-  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
- </component>
- <component name="opq_monolithic_4lane_merge" file="../../../../packet_scheduler/syn/quartus/opq_monolithic_4lane_merge/opq_monolithic_4lane_merge.qsys" displayName="opq_monolithic_4lane_merge" version="1.0" description="" tags="INTERNAL_COMPONENT=false" categories="System" factory="QsysFactory">
-  <tag2 key="COMPONENT_EDITABLE" value="false" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
- </component>
- <component name="ordered_priority_queue" file="../../../../packet_scheduler/script/ordered_priority_queue_hw.tcl" displayName="Ordered Priority Queue" version="26.5.0.430" description="Ordered Priority Queue Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang (yifenwan@phys.ethz.ch) /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
-  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="false" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ELABORATION_CALLBACK" value="elaborate" />
-  <tag2 key="ICON_PATH" value="../../../misc/logo/mu3e_logo.png" />
-  <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
-  <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
-  <tag2 key="REPORT_HIERARCHY" value="false" />
-  <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH" />
-  <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
-  <tag2 key="VALIDATION_CALLBACK" value="validate" />
- </component>
- <component name="ordered_priority_queue_v2" file="../../../../packet_scheduler/script/ordered_priority_queue_v2_hw.tcl" displayName="Ordered Priority Queue (v2 split)" version="26.1.201" description="" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
-  <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
-  <tag2 key="COMPONENT_EDITABLE" value="false" />
-  <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
-  <tag2 key="ELABORATION_CALLBACK" value="my_elaborate" />
-  <tag2 key="ICON_PATH" value="../../../misc/logo/mu3e_logo.png" />
+  <tag2 key="ICON_PATH" value="/home/yifeng/firmware_builds/misc/logo/mu3e_logo.png" />
   <tag2 key="INSTANTIATE_IN_SYSTEM_MODULE" value="true" />
   <tag2 key="OPAQUE_ADDRESS_MAP" value="true" />
   <tag2 key="REPORT_HIERARCHY" value="false" />
@@ -583,7 +729,7 @@
   <tag2 key="SUPPORTED_FILE_SETS" value="QUARTUS_SYNTH,SIM_VERILOG" />
   <tag2 key="TCL_PACKAGE_VERSION" value="15.0" />
  </component>
- <component name="ring_buffer_cam" file="../../../../ring-buffer_cam/script/ring_buffer_cam_hw.tcl" displayName="Ring-buffer CAM" version="26.2.6.422" description="Ring-buffer CAM Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
+ <component name="ring_buffer_cam" file="../../../../ring-buffer_cam/script/ring_buffer_cam_hw.tcl" displayName="Ring-buffer CAM" version="26.2.10.507" description="Ring-buffer CAM Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,conduit,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Data Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />
@@ -595,7 +741,7 @@
   <tag2 key="TCL_PACKAGE_VERSION" value="16.1" />
   <tag2 key="VALIDATION_CALLBACK" value="validate" />
  </component>
- <component name="runctl_mgmt_host" file="../../../../run-control_mgmt/runctl_mgmt_host_hw.tcl" displayName="Run-Control Management Host" version="26.2.6.425" description="Run-Control Management Host Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
+ <component name="runctl_mgmt_host" file="../../../../run-control_mgmt/runctl_mgmt_host_hw.tcl" displayName="Run-Control Management Host" version="26.3.0.505" description="Run-Control Management Host Mu3e IP Core" tags="AUTHORSHIP=Yifeng Wang /// CONNECTION_TYPES=avalon,avalon_streaming,clock,reset /// INTERNAL_COMPONENT=false" categories="Mu3e Control Plane/Modules" factory="TclModuleFactory">
   <tag2 key="ALLOW_GREYBOX_GENERATION" value="false" />
   <tag2 key="COMPONENT_EDITABLE" value="false" />
   <tag2 key="COMPONENT_HIDE_FROM_SOPC" value="true" />

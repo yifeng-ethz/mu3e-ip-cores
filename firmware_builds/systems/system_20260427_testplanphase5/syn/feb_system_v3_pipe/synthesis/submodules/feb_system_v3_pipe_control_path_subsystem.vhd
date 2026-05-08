@@ -349,7 +349,15 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 			AVST_CHANNEL_WIDTH : natural := 3;
 			N_DQ_LINES         : natural := 6;
 			SENSOR_TYPE        : string  := "DS18B20";
-			DEBUG_LV           : natural := 0
+			DEBUG_LV           : natural := 0;
+			IP_UID             : natural := 1331121475;
+			VERSION_MAJOR      : natural := 26;
+			VERSION_MINOR      : natural := 2;
+			VERSION_PATCH      : natural := 1;
+			BUILD              : natural := 428;
+			VERSION_DATE       : natural := 20260428;
+			VERSION_GIT        : natural := 0;
+			INSTANCE_ID        : natural := 0
 		);
 		port (
 			avm_ctrl_read        : out std_logic;                                        -- read
@@ -395,7 +403,7 @@ architecture rtl of feb_system_v3_pipe_control_path_subsystem is
 			VERSION_PATCH              : natural := 10;
 			BUILD                      : natural := 423;
 			VERSION_DATE               : natural := 20260423;
-			VERSION_GIT                : natural := 33457150;
+			VERSION_GIT                : natural := 12647261;
 			INSTANCE_ID                : natural := 0;
 			BACKPRESSURE               : boolean := true;
 			SCHEDULER_USE_PKT_TRANSFER : boolean := true;
@@ -1541,7 +1549,15 @@ begin
 			AVST_CHANNEL_WIDTH => 3,
 			N_DQ_LINES         => 6,
 			SENSOR_TYPE        => "DS18B20",
-			DEBUG_LV           => 0
+			DEBUG_LV           => 0,
+			IP_UID             => 1331121475,
+			VERSION_MAJOR      => 26,
+			VERSION_MINOR      => 2,
+			VERSION_PATCH      => 1,
+			BUILD              => 428,
+			VERSION_DATE       => 20260428,
+			VERSION_GIT        => 0,
+			INSTANCE_ID        => 0
 		)
 		port map (
 			avm_ctrl_read        => onewire_master_controller_0_ctrl_read,                         --     ctrl.read

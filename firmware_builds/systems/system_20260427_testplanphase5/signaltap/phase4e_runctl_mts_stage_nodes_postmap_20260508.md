@@ -1,0 +1,41 @@
+# SignalTap Node Finder Report
+
+- Generated: 2026-05-08 04:27:02 UTC
+- Project dir: `/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3`
+- STP file: `/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage.stp`
+- Observable type: `stp_pre_synthesis`
+- Probes: `354`
+- Found: `324`
+- Missing: `30`
+
+## Missing Probes
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_valid`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[4]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[5]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[6]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[7]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_data[8]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|asi_ctrl_ready`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|ctrl_state_q[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|ctrl_state_q[4]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_valid`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[3]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[4]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[5]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[6]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[7]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_data[8]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_error[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_error[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_error[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_channel[0]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_channel[1]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_channel[2]`
+- `feb_system:u_feb_system|feb_system_v3_pipe:u_qsys|feb_system_v3_pipe_data_path_subsystem:data_path_subsystem|emulator_mutrig:emulator_mutrig_0|aso_tx8b1k_channel[3]`

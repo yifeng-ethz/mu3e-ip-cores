@@ -29,7 +29,7 @@
 // Generation parameters:
 //   output_name:         scifi_datapath_system_v3_pipe_mm_interconnect_0_cmd_demux_011
 //   ST_DATA_W:           120
-//   ST_CHANNEL_W:        43
+//   ST_CHANNEL_W:        51
 //   NUM_OUTPUTS:         1
 //   VALID_WIDTH:         1
 // ------------------------------------------
@@ -47,7 +47,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_cmd_demux_011
     // -------------------
     input  [1-1      : 0]   sink_valid,
     input  [120-1    : 0]   sink_data, // ST_DATA_W=120
-    input  [43-1 : 0]   sink_channel, // ST_CHANNEL_W=43
+    input  [51-1 : 0]   sink_channel, // ST_CHANNEL_W=51
     input                         sink_startofpacket,
     input                         sink_endofpacket,
     output                        sink_ready,
@@ -57,7 +57,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_cmd_demux_011
     // -------------------
     output reg                      src0_valid,
     output reg [120-1    : 0] src0_data, // ST_DATA_W=120
-    output reg [43-1 : 0] src0_channel, // ST_CHANNEL_W=43
+    output reg [51-1 : 0] src0_channel, // ST_CHANNEL_W=51
     output reg                      src0_startofpacket,
     output reg                      src0_endofpacket,
     input                           src0_ready,
@@ -94,7 +94,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_cmd_demux_011
     // -------------------
     assign ready_vector[0] = src0_ready;
 
-    assign sink_ready = |(sink_channel & {{42{1'b0}},{ready_vector[NUM_OUTPUTS - 1 : 0]}});
+    assign sink_ready = |(sink_channel & {{50{1'b0}},{ready_vector[NUM_OUTPUTS - 1 : 0]}});
 
 endmodule
 

@@ -4,12 +4,30 @@
 -- Revision: 1.0 (file created)
 --		Date: Mar 20, 2026
 -- =========
+-- Revision: 1.1
+--		Date: Apr 27, 2026
+--		Change: Register the FIFO head word and add write-bypass for
+--		        first/replacement entries. This removes the asynchronous
+--		        MLAB read path from the round-robin arbiter timing cone.
+-- Revision: 1.2
+--		Date: Apr 27, 2026
+--		Change: Keep the head register stable when the FIFO becomes empty.
+--		        The valid contract is carried by o_empty, so clearing stale
+--		        data only created a long read-pop to synchronous-clear path.
+-- Revision: 1.3
+--		Date: Apr 29, 2026
+--		Change: Update the diagnostic peak-level register from the already
+--		        registered FIFO level instead of the same-cycle next-level
+--		        variable. This keeps the arbiter pop/read cone out of the
+--		        max-level comparator while preserving exact peak tracking
+--		        with one-cycle reporting latency.
+-- =========
 -- Description:	[Small single-clock FIFO for serialized hit keys]
 --
 --			MLAB-based FIFO with parameterised depth (2**FIFO_ADDR_WIDTH).
---			Tracks current fill level and peak level for diagnostics.
---			One instance per ingress port buffers extracted keys before the
---			round-robin arbiter.
+--			Tracks current fill level and peak level for diagnostics. One
+--			instance per ingress port buffers extracted keys before the
+--			round-robin arbiter. The output is the registered current head.
 --
 
 -- ================ synthsizer configuration ===================
@@ -59,13 +77,18 @@ architecture rtl of hit_fifo is
     signal max_reg   : fifo_level_t := (others => '0');
     signal empty_q   : std_logic    := '1';
     signal full_q    : std_logic    := '0';
+    signal read_data_q : std_logic_vector(DATA_WIDTH - 1 downto 0) := (others => '0');
 
     attribute ramstyle : string;
     attribute ramstyle of mem : signal is "MLAB,no_rw_check";
+    attribute preserve : boolean;
+    attribute preserve of read_data_q : signal is true;
+    attribute dont_retime : boolean;
+    attribute dont_retime of read_data_q : signal is true;
 
 begin
 
-    o_read_data <= mem(to_integer(rd_ptr));
+    o_read_data <= read_data_q;
     o_empty     <= empty_q;
     o_full      <= full_q;
     o_level     <= level_reg;
@@ -74,6 +97,7 @@ begin
     fifo_reg : process (i_clk)
         variable rd_ptr_v : fifo_ptr_t;
         variable wr_ptr_v : fifo_ptr_t;
+        variable wr_addr_v : fifo_ptr_t;
         variable level_v  : fifo_level_t;
         variable read_v   : boolean;
         variable write_v  : boolean;
@@ -86,9 +110,11 @@ begin
                 max_reg   <= (others => '0');
                 empty_q   <= '1';
                 full_q    <= '0';
+                read_data_q <= (others => '0');
             else
                 rd_ptr_v := rd_ptr;
                 wr_ptr_v := wr_ptr;
+                wr_addr_v := wr_ptr;
                 level_v  := level_reg;
 
                 read_v  := (i_read = '1') and (level_reg /= 0);
@@ -100,7 +126,8 @@ begin
                 end if;
 
                 if write_v then
-                    mem(to_integer(wr_ptr_v)) <= i_write_data;
+                    wr_addr_v := wr_ptr_v;
+                    mem(to_integer(wr_addr_v)) <= i_write_data;
                     wr_ptr_v := wr_ptr_v + 1;
                     level_v  := level_v + 1;
                 end if;
@@ -110,8 +137,14 @@ begin
                 level_reg <= level_v;
                 empty_q   <= bool_to_sl(level_v = 0);
                 full_q    <= bool_to_sl(to_integer(level_v) = FIFO_DEPTH_CONST);
-                if level_v > max_reg then
-                    max_reg <= level_v;
+                if level_reg > max_reg then
+                    max_reg <= level_reg;
+                end if;
+
+                if write_v and (wr_addr_v = rd_ptr_v) then
+                    read_data_q <= i_write_data;
+                elsif read_v and (level_reg > 1) then
+                    read_data_q <= mem(to_integer(rd_ptr_v));
                 end if;
             end if;
         end if;

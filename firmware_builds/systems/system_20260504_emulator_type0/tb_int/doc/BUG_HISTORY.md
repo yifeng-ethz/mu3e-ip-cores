@@ -52,6 +52,7 @@ Historical formal note:
 | [BUG-015-H](#bug-015-h-dislin-latency-renderer-dropped-out-of-display-stage-records) | H | soft error | `directed-only (post-rbCAM/FEB latency plotting with outliers)` | fixed in plotting script; regenerated 10/100 kHz all-stage plot exposes blocker | PROF-INT-002 post-rbCAM/FEB plot generation on `2026-05-06` | pending | The DISLIN renderer counted only bins inside the display range, so post-rbCAM/FEB records outside the DV_PLAN aperture could be reported as zero total instead of out-of-window hits. |
 | [BUG-016-H](#bug-016-h-short-run-control-gap-made-rbcam-look-like-it-rejected-in-window-hits) | H | hard stuck error | `directed-only (post-rbCAM debug run-control override)` | fixed in harness guard; post-rbCAM rerun passed | PROF-INT-002 post-rbCAM ASIC0 100 kHz debug on `2026-05-07` | pending | A 1000-cycle debug run-control gap advanced RUNNING while rbCAM was still flushing, so hits accepted at pre-rbCAM were delayed until termination and looked like rbCAM rejection. |
 | [BUG-017-H](#bug-017-h-virtual-mutrig-periodic-hits-used-hit-count-as-timestamp) | H | hard stuck error | `common (virtual MuTRiG post-rbCAM periodic validation)` | fixed in harness; post-rbCAM sweep passed | PROF-INT-002 virtual MuTRiG post-rbCAM 10 kHz on `2026-05-07` | ec5b6ebb | The virtual MuTRiG periodic source stamped hit T coarse from a local hit counter instead of the generated MuTRiG timebase, creating false rbCAM timestamp-window drops. |
+| [BUG-018-R](#bug-018-r-sv-rbcam-deassembly-fifo-depth-did-not-match-vhdl-scfifo_w40d256) | R | hard stuck error | `occasional (1 MHz/channel full32 post-rbCAM stress)` | fixed in SV source; full rate sweep passed | PROF-INT-002 newest-SV 1 MHz post-rbCAM run on `2026-05-08` | pending | SV rbCAM deassembly FIFO depth was 64 while the VHDL reference uses `scfifo_w40d256`, letting generated fanout drop two owning-copy hits when one rbCAM instance backpressured. |
 
 ## 2026-05-06
 
@@ -482,3 +483,31 @@ Historical formal note:
     reruns `prof_int_002_post_rbcam_periodic_asic0_ch0_virtual_mutrig_{010k,100k,500k,1000k}_1ms_gap1ms_tccfix_20260507` all passed with `UVM_ERROR=0` and strict `PRE->POST` residuals of `9/0/0`, `99/0/0`, `497/0/0`, and `991/0/0`. The matching emulator runs at 10 kHz, 100 kHz, 500 kHz, and 1 MHz also passed with `PRE->POST=9/0/0`, `99/0/0`, `500/0/0`, and `1000/0/0`.
   - potential_hazard:
     low for the current ASIC0/channel0 periodic post-rbCAM validation; medium for future virtual-source upgrades unless the tagged virtual MuTRiG source exposes an authored timestamp anchor instead of relying on a hierarchical generated-emulator timebase tap
+
+## 2026-05-08
+
+### BUG-018-R: SV rbCAM deassembly FIFO depth did not match VHDL `scfifo_w40d256`
+
+- First seen in:
+  - PROF-INT-002 newest-SV post-rbCAM ASIC0/full32 1 MHz/channel run on `2026-05-08`
+  - case:
+    `prof_int_002_post_rbcam_periodic_asic0_full32_emu_direct_1000k_1ms_gap1ms_20260507`
+- Symptom:
+  - the fixed DEBUG-rich monitors showed `A=32032`, `PRE=128126`, `POST=32030`, and `FEB=32030`
+  - payload residuals and DEBUG residuals both localized the loss to `PRE->POST=32030/2/0`
+  - the two missing hits were channels 30 and 31 at the same T-coarse key; non-owning fanout copies observed them, but the owning rbCAM copy had `split_ready=0`, `deassembly_full=1`, and no `deassembly_wrreq`
+- Root cause:
+  - the SV rbCAM core used `DEASM_DEPTH_CONST=64`
+  - the VHDL reference path instantiates `scfifo_w40d256`, and the generated Qsys fanout cannot make all rbCAM branch accepts atomic when one owning copy deasserts ready
+  - at the 1 MHz/channel full32 stress point, the 64-word SV deassembly FIFO could become full while the VHDL-depth reference still has enough elasticity
+- Fix status:
+  - state:
+    fixed in SV source and validated in tb_int; standalone synthesis/resource closure still tracked separately
+  - mechanism:
+    `ring_buffer_cam_core.sv` now sets `DEASM_DEPTH_CONST=256`, matching the VHDL `scfifo_w40d256` ingress buffer depth. The tb_int fill trace now samples `resident_fill_level` directly, and the deassembly FIFO plot metadata records the 256-word depth.
+  - before_fix_outcome:
+    the 1 MHz/channel run reported `PRE->POST=32030/2/0`, `debug_residuals PRE->POST=32030/2/0`, and one UVM warning from post-termination residual reporting
+  - after_fix_outcome:
+    the refreshed four-rate newest-SV DEBUG2 sweep passed at `010k`, `100k`, `500k`, and `1000k` with zero payload residuals and zero DEBUG residuals. Counts were `A/POST/FEB=288/288/288`, `3168/3168/3168`, `16000/16000/16000`, and `32032/32032/32032`. The total closed hit count was `51,488/51,488`, all four `drops.csv` files had header-only row count, and the 1 MHz deassembly FIFO peak was `66/256` with zero full samples.
+  - potential_hazard:
+    low for the current tb_int post-rbCAM emulator profile because the stress sweep and 15-hit trace sanity check passed. Resource/timing impact of the deeper SV FIFO must remain visible in the standalone Quartus resource comparison because the FIFO-depth parity change is intentional and may affect memory inference.

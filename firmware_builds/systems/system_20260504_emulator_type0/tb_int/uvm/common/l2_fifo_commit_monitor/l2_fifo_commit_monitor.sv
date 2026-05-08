@@ -1,9 +1,9 @@
 // l2_fifo_commit_monitor.sv
 // Passive Stage-A monitor for the emulator MuTRiG L2 FIFO commit point.
 // Author: Yifeng Wang
-// Version : 26.2.2
-// Date    : 20260506
-// Change  : Preserve source-supplied debug lineage when DEBUG_LEVEL=2 is bound.
+// Version : 26.2.3
+// Date    : 20260508
+// Change  : Sample combinational taps after generated-RTL ready/data settle.
 
 package tb_int_l2_fifo_commit_monitor_pkg;
 
@@ -40,7 +40,11 @@ package tb_int_l2_fifo_commit_monitor_pkg;
             if (vif == null)
                 return;
             forever begin
+                time sample_time;
+
                 @(posedge vif.clk);
+                sample_time = $time;
+                #1ps;
                 if (vif.rst === 1'b1)
                     continue;
                 if (vif.valid === 1'b1) begin
@@ -50,7 +54,7 @@ package tb_int_l2_fifo_commit_monitor_pkg;
                     rec.set_from_hit0(vif.hit_id_valid ? vif.hit_id : next_hit_id,
                                       vif.lane_id,
                                       vif.payload,
-                                      $time,
+                                      sample_time,
                                       OBS_STAGE_A);
                     rec.root_hit_id_valid = 1'b1;
                     if (vif.root_hit_id_valid)
