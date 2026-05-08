@@ -130,9 +130,13 @@ The current directed contract run uses virtual MuTRiG ASIC0 channels 0..31 at
 `FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
 under `report/`. `run_swb_corun` also runs
 `scripts/analyze_feb_swb_trace.py`, which emits
-`report/feb_swb_hit_trace_debug.csv` plus `report/feb_swb_delay_trace.csv` and
+`report/feb_swb_hit_trace_debug.csv` plus `report/feb_swb_lifetime_trace.csv` and
 proves each hit reaches OPQ and DMA with the expected ASIC, channel, hit id,
-and frame/subheader timestamp bucket. `scripts/plot_feb_swb_delays.py` then
-writes `report/feb_swb_delay_hist.png`, `report/feb_swb_delay_hist.pdf`, and
-`report/feb_swb_delay_hist_stats.csv` for FEB-egress to OPQ-ingress,
-OPQ-ingress to OPQ-egress, and FEB-egress to OPQ-egress transport delays.
+and frame/subheader timestamp bucket. The lifetime trace uses
+`checkpoint_time_ps / 8000 - hit_ts_8ns`, so the histogram axis is in 8 ns
+cycles and is derived from the source hit timestamp, not from inter-checkpoint
+deltas. `scripts/render_feb_swb_lifetime_dislin.sh` then writes
+`report/feb_swb_lifetime_hist.png`, `report/feb_swb_lifetime_hist.pdf`,
+`report/feb_swb_lifetime_hist_stats.csv`, and
+`report/feb_swb_lifetime_dislin.log` for FEB egress, OPQ ingress, and OPQ
+egress hit lifetimes.
