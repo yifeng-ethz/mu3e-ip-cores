@@ -2,8 +2,8 @@
 """Trace-level FEB/SWB corun checker.
 
 The simulator scoreboard compares exact 64-bit DMA hits. This script leaves a
-human-readable hit lineage table by decoding the FEB ingress, OPQ egress, and
-DMA traces emitted by feb_swb_corun_plain_tb.
+human-readable hit lineage table by decoding the FEB egress, OPQ ingress, OPQ
+egress, and DMA traces emitted by feb_swb_corun_plain_tb.
 """
 
 from __future__ import annotations
@@ -57,11 +57,6 @@ class HitRecord:
     dma_hit: int
     time_ps: int
     debug_meta: int = 0
-    opq_time_ps: int = -1
-    dma_time_ps: int = -1
-    dma_word_idx: int = -1
-    dma_slot: int = -1
-    actual_dma_hit: int = 0
 
 
 @dataclass
@@ -83,6 +78,10 @@ def frame_base_8ns(hit: HitRecord) -> int:
 
 def bucket_start_8ns(hit: HitRecord) -> int:
     return frame_base_8ns(hit) + (hit.shd_ts << 4)
+
+
+def source_abs_ts_8ns(hit: HitRecord) -> int:
+    return bucket_start_8ns(hit) + source_ts_low_nibble(hit.hit_word)
 
 
 def source_asic(hit_word: int) -> int:
@@ -322,31 +321,13 @@ def build_index(items, key_fn):
     return index
 
 
-def write_hit_csv(path: Path, rows: list[dict[str, object]]) -> None:
-    fieldnames = [
-        "status",
-        "hit_id",
-        "lane",
-        "source_asic",
-        "source_channel",
-        "abs_ts_8ns",
-        "frame_id",
-        "frame_base_8ns",
-        "shd_ts",
-        "bucket_start_8ns",
-        "bucket_end_8ns",
-        "ingress_time_ps",
-        "opq_time_ps",
-        "dma_time_ps",
-        "dma_word_idx",
-        "dma_slot",
-        "source_hit",
-        "expected_dma_hit",
-        "actual_dma_hit",
-        "dma_ts_8ns",
-        "debug_meta",
-        "checks",
-    ]
+def ns(delta_ps: int | None) -> str:
+    if delta_ps is None:
+        return ""
+    return f"{delta_ps / 1000.0:.3f}"
+
+
+def write_rows(path: Path, fieldnames: list[str], rows: list[dict[str, object]]) -> None:
     with path.open("w", encoding="ascii", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
@@ -358,38 +339,54 @@ def main() -> int:
     parser.add_argument("--trace-dir", required=True, type=Path)
     parser.add_argument("--expected-lane", default=0, type=int)
     parser.add_argument("--expected-asic", default=0, type=int)
-    parser.add_argument("--expected-channel", default=0, type=int)
+    parser.add_argument("--expected-channel", default=-1, type=int)
+    parser.add_argument("--expected-channel-count", default=32, type=int)
     parser.add_argument("--expected-hit-period-8ns", default=1250, type=int)
     args = parser.parse_args()
 
     trace_dir = args.trace_dir
-    ingress_hits, ingress_issues = parse_stream_hits(
-        trace_dir / "feb_swb_ingress_trace.csv",
-        "ingress",
+    feb_hits, feb_issues = parse_stream_hits(
+        trace_dir / "feb_swb_feb_egress_trace.csv",
+        "feb_egress",
         has_lane=True,
     )
-    opq_hits, opq_issues = parse_stream_hits(
+    opq_ingress_hits, ingress_issues = parse_stream_hits(
+        trace_dir / "feb_swb_ingress_trace.csv",
+        "opq_ingress",
+        has_lane=True,
+    )
+    opq_egress_hits, opq_issues = parse_stream_hits(
         trace_dir / "feb_swb_opq_trace.csv",
-        "opq",
+        "opq_egress",
         has_lane=False,
     )
     dma_hits, padding_words = parse_dma_hits(trace_dir / "feb_swb_dma_trace.csv")
 
-    opq_index = build_index(opq_hits, lambda item: item.dma_hit)
+    opq_ingress_index = build_index(opq_ingress_hits, lambda item: item.dma_hit)
+    opq_egress_index = build_index(opq_egress_hits, lambda item: item.dma_hit)
     dma_index = build_index(dma_hits, lambda item: item.hit_word)
 
-    rows: list[dict[str, object]] = []
+    hit_rows: list[dict[str, object]] = []
+    delay_rows: list[dict[str, object]] = []
     failures: list[str] = []
 
-    for expected in ingress_hits:
+    for expected in feb_hits:
         checks: list[str] = []
         hit_id = source_hit_id(expected.hit_word)
-        abs_ts_8ns = hit_id * args.expected_hit_period_8ns
+        channel = source_channel(expected.hit_word)
+        abs_ts_8ns = source_abs_ts_8ns(expected)
         base = frame_base_8ns(expected)
         bucket_start = bucket_start_8ns(expected)
         bucket_end = bucket_start + 15
+        sample_idx = (
+            abs_ts_8ns // args.expected_hit_period_8ns
+            if args.expected_hit_period_8ns > 0
+            else -1
+        )
+        expected_sched_hit_id = (sample_idx * args.expected_channel_count) + channel
         expected_ts = expected.dma_hit & DMA_TS_MASK
-        opq = pop_match(opq_index, expected.dma_hit)
+        opq_ingress = pop_match(opq_ingress_index, expected.dma_hit)
+        opq_egress = pop_match(opq_egress_index, expected.dma_hit)
         dma = pop_match(dma_index, expected.dma_hit)
         status = "PASS"
 
@@ -402,29 +399,39 @@ def main() -> int:
                 status = "FAIL"
 
         require(expected.lane == args.expected_lane, "lane")
-        require(expected.header_id == SCIFI_HEADER_ID, "ingress_header")
+        require(expected.header_id == SCIFI_HEADER_ID, "feb_header")
         require(source_asic(expected.hit_word) == args.expected_asic, "source_asic")
-        require(source_channel(expected.hit_word) == args.expected_channel, "source_channel")
+        if args.expected_channel >= 0:
+            require(channel == args.expected_channel, "source_channel")
+        else:
+            require(0 <= channel < args.expected_channel_count, "source_channel")
         require(source_fine(expected.hit_word) == 0, "source_fine")
         require(bucket_start <= abs_ts_8ns <= bucket_end, "source_bucket")
         require(expected.frame_id == abs_ts_8ns // FRAME_STRIDE_8NS, "source_frame")
         require((abs_ts_8ns & 0xF) == source_ts_low_nibble(expected.hit_word), "source_ts_nibble")
+        require(abs_ts_8ns % args.expected_hit_period_8ns == 0, "source_period")
+        require(hit_id == expected_sched_hit_id, "source_hit_id_schedule")
         require(debug_level(expected.debug_meta) == 2, "debug_level")
         require(debug_lane(expected.debug_meta) == expected.lane, "debug_lane")
         require(debug_source(expected.debug_meta) == SOURCE_MUTRIG_EMU, "debug_source")
         require(debug_hit_id(expected.debug_meta) == hit_id, "debug_hit_id")
         require(debug_ps(expected.debug_meta) == (abs_ts_8ns & 0xFF), "debug_ps")
         require(debug_ts(expected.debug_meta) == (abs_ts_8ns & 0xFFFF), "debug_ts")
-        require(opq is not None, "opq_present")
-        if opq is not None:
-            require(opq.header_id == SCIFI_HEADER_ID, "opq_header")
-            require(opq.frame_id == expected.frame_id, "opq_frame")
-            require(bucket_start_8ns(opq) == bucket_start, "opq_bucket")
+        require(opq_ingress is not None, "opq_ingress_present")
+        if opq_ingress is not None:
+            require(opq_ingress.header_id == SCIFI_HEADER_ID, "opq_ingress_header")
+            require(opq_ingress.frame_id == expected.frame_id, "opq_ingress_frame")
+            require(bucket_start_8ns(opq_ingress) == bucket_start, "opq_ingress_bucket")
+        require(opq_egress is not None, "opq_egress_present")
+        if opq_egress is not None:
+            require(opq_egress.header_id == SCIFI_HEADER_ID, "opq_egress_header")
+            require(opq_egress.frame_id == expected.frame_id, "opq_egress_frame")
+            require(bucket_start_8ns(opq_egress) == bucket_start, "opq_egress_bucket")
         require(dma is not None, "dma_present")
         if dma is not None:
             require(dma_is_mutrig(dma.hit_word) == 1, "dma_type")
             require(dma_asic(dma.hit_word) == args.expected_asic, "dma_asic")
-            require(dma_channel(dma.hit_word) == args.expected_channel, "dma_channel")
+            require(dma_channel(dma.hit_word) == channel, "dma_channel")
             require(dma_hit_id(dma.hit_word) == hit_id, "dma_hit_id")
             require(dma_rem(dma.hit_word) == source_rem(expected.hit_word), "dma_rem")
             require(dma_fine(dma.hit_word) == source_fine(expected.hit_word), "dma_fine")
@@ -432,23 +439,40 @@ def main() -> int:
             require(dma_ts_8ns(dma.hit_word) == abs_ts_8ns, "dma_abs_ts")
 
         if status != "PASS":
-            failures.append(f"hit_id={hit_id} checks={';'.join(checks)}")
+            failures.append(f"hit_id={hit_id} channel={channel} checks={';'.join(checks)}")
 
-        rows.append(
+        feb_to_opq_ingress = (
+            opq_ingress.time_ps - expected.time_ps if opq_ingress is not None else None
+        )
+        opq_ingress_to_opq_egress = (
+            opq_egress.time_ps - opq_ingress.time_ps
+            if opq_ingress is not None and opq_egress is not None
+            else None
+        )
+        feb_to_opq_egress = (
+            opq_egress.time_ps - expected.time_ps if opq_egress is not None else None
+        )
+        opq_egress_to_dma = (
+            dma.time_ps - opq_egress.time_ps if opq_egress is not None and dma is not None else None
+        )
+        feb_to_dma = dma.time_ps - expected.time_ps if dma is not None else None
+
+        hit_rows.append(
             {
                 "status": status,
                 "hit_id": hit_id,
                 "lane": expected.lane,
                 "source_asic": source_asic(expected.hit_word),
-                "source_channel": source_channel(expected.hit_word),
+                "source_channel": channel,
                 "abs_ts_8ns": abs_ts_8ns,
                 "frame_id": expected.frame_id,
                 "frame_base_8ns": base,
                 "shd_ts": expected.shd_ts,
                 "bucket_start_8ns": bucket_start,
                 "bucket_end_8ns": bucket_end,
-                "ingress_time_ps": expected.time_ps,
-                "opq_time_ps": opq.time_ps if opq is not None else -1,
+                "feb_egress_time_ps": expected.time_ps,
+                "opq_ingress_time_ps": opq_ingress.time_ps if opq_ingress is not None else -1,
+                "opq_egress_time_ps": opq_egress.time_ps if opq_egress is not None else -1,
                 "dma_time_ps": dma.time_ps if dma is not None else -1,
                 "dma_word_idx": dma.word_idx if dma is not None else -1,
                 "dma_slot": dma.slot if dma is not None else -1,
@@ -460,29 +484,104 @@ def main() -> int:
                 "checks": ";".join(checks),
             }
         )
+        delay_rows.append(
+            {
+                "status": status,
+                "hit_id": hit_id,
+                "channel": channel,
+                "abs_ts_8ns": abs_ts_8ns,
+                "frame_id": expected.frame_id,
+                "shd_ts": expected.shd_ts,
+                "feb_egress_time_ps": expected.time_ps,
+                "opq_ingress_time_ps": opq_ingress.time_ps if opq_ingress is not None else "",
+                "opq_egress_time_ps": opq_egress.time_ps if opq_egress is not None else "",
+                "dma_time_ps": dma.time_ps if dma is not None else "",
+                "feb_to_opq_ingress_ns": ns(feb_to_opq_ingress),
+                "opq_ingress_to_opq_egress_ns": ns(opq_ingress_to_opq_egress),
+                "feb_to_opq_egress_ns": ns(feb_to_opq_egress),
+                "opq_egress_to_dma_ns": ns(opq_egress_to_dma),
+                "feb_to_dma_ns": ns(feb_to_dma),
+            }
+        )
 
-    ghost_opq = sum(len(items) for items in opq_index.values())
+    ghost_opq_ingress = sum(len(items) for items in opq_ingress_index.values())
+    ghost_opq_egress = sum(len(items) for items in opq_egress_index.values())
     ghost_dma = sum(len(items) for items in dma_index.values())
-    if ghost_opq:
-        failures.append(f"ghost_opq_hits={ghost_opq}")
+    if ghost_opq_ingress:
+        failures.append(f"ghost_opq_ingress_hits={ghost_opq_ingress}")
+    if ghost_opq_egress:
+        failures.append(f"ghost_opq_egress_hits={ghost_opq_egress}")
     if ghost_dma:
         failures.append(f"ghost_dma_hits={ghost_dma}")
+    failures.extend(feb_issues)
     failures.extend(ingress_issues)
     failures.extend(opq_issues)
 
     hit_trace_path = trace_dir / "feb_swb_hit_trace_debug.csv"
+    delay_trace_path = trace_dir / "feb_swb_delay_trace.csv"
     summary_path = trace_dir / "feb_swb_trace_debug_summary.txt"
-    write_hit_csv(hit_trace_path, rows)
+    write_rows(
+        hit_trace_path,
+        [
+            "status",
+            "hit_id",
+            "lane",
+            "source_asic",
+            "source_channel",
+            "abs_ts_8ns",
+            "frame_id",
+            "frame_base_8ns",
+            "shd_ts",
+            "bucket_start_8ns",
+            "bucket_end_8ns",
+            "feb_egress_time_ps",
+            "opq_ingress_time_ps",
+            "opq_egress_time_ps",
+            "dma_time_ps",
+            "dma_word_idx",
+            "dma_slot",
+            "source_hit",
+            "expected_dma_hit",
+            "actual_dma_hit",
+            "dma_ts_8ns",
+            "debug_meta",
+            "checks",
+        ],
+        hit_rows,
+    )
+    write_rows(
+        delay_trace_path,
+        [
+            "status",
+            "hit_id",
+            "channel",
+            "abs_ts_8ns",
+            "frame_id",
+            "shd_ts",
+            "feb_egress_time_ps",
+            "opq_ingress_time_ps",
+            "opq_egress_time_ps",
+            "dma_time_ps",
+            "feb_to_opq_ingress_ns",
+            "opq_ingress_to_opq_egress_ns",
+            "feb_to_opq_egress_ns",
+            "opq_egress_to_dma_ns",
+            "feb_to_dma_ns",
+        ],
+        delay_rows,
+    )
 
-    pass_rows = sum(1 for row in rows if row["status"] == "PASS")
+    pass_rows = sum(1 for row in hit_rows if row["status"] == "PASS")
     with summary_path.open("w", encoding="ascii") as handle:
-        handle.write(f"expected_ingress_hits={len(ingress_hits)}\n")
-        handle.write(f"opq_hits={len(opq_hits)}\n")
+        handle.write(f"expected_feb_hits={len(feb_hits)}\n")
+        handle.write(f"opq_ingress_hits={len(opq_ingress_hits)}\n")
+        handle.write(f"opq_egress_hits={len(opq_egress_hits)}\n")
         handle.write(f"dma_hits={len(dma_hits)}\n")
         handle.write(f"padding_words={padding_words}\n")
         handle.write(f"pass_hits={pass_rows}\n")
-        handle.write(f"fail_hits={len(rows) - pass_rows}\n")
-        handle.write(f"ghost_opq_hits={ghost_opq}\n")
+        handle.write(f"fail_hits={len(hit_rows) - pass_rows}\n")
+        handle.write(f"ghost_opq_ingress_hits={ghost_opq_ingress}\n")
+        handle.write(f"ghost_opq_egress_hits={ghost_opq_egress}\n")
         handle.write(f"ghost_dma_hits={ghost_dma}\n")
         handle.write(f"issue_count={len(failures)}\n")
         for failure in failures:
@@ -491,16 +590,21 @@ def main() -> int:
     if failures:
         print(
             "TRACE_DEBUG_FAIL "
-            f"hits={len(rows)} pass_hits={pass_rows} issues={len(failures)} "
+            f"hits={len(hit_rows)} pass_hits={pass_rows} issues={len(failures)} "
             f"csv={hit_trace_path}"
         )
         for failure in failures[:16]:
             print(f"trace_debug: {failure}")
         return 1
 
+    channel_text = (
+        str(args.expected_channel)
+        if args.expected_channel >= 0
+        else f"0..{args.expected_channel_count - 1}"
+    )
     print(
         "TRACE_DEBUG_PASS "
-        f"hits={len(rows)} channel={args.expected_channel} "
+        f"hits={len(hit_rows)} channels={channel_text} "
         f"asic={args.expected_asic} csv={hit_trace_path}"
     )
     return 0
