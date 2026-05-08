@@ -54,6 +54,7 @@ Historical formal note:
 | [BUG-017-H](#bug-017-h-virtual-mutrig-periodic-hits-used-hit-count-as-timestamp) | H | hard stuck error | `common (virtual MuTRiG post-rbCAM periodic validation)` | fixed in harness; post-rbCAM sweep passed | PROF-INT-002 virtual MuTRiG post-rbCAM 10 kHz on `2026-05-07` | ec5b6ebb | The virtual MuTRiG periodic source stamped hit T coarse from a local hit counter instead of the generated MuTRiG timebase, creating false rbCAM timestamp-window drops. |
 | [BUG-018-R](#bug-018-r-sv-rbcam-deassembly-fifo-depth-did-not-match-vhdl-scfifo_w40d256) | R | hard stuck error | `occasional (1 MHz/channel full32 post-rbCAM stress)` | fixed in SV source; full rate sweep passed | PROF-INT-002 newest-SV 1 MHz post-rbCAM run on `2026-05-08` | pending | SV rbCAM deassembly FIFO depth was 64 while the VHDL reference uses `scfifo_w40d256`, letting generated fanout drop two owning-copy hits when one rbCAM instance backpressured. |
 | [BUG-019-R](#bug-019-r-feb-scifi-hit_type3-contract-mismatch-at-swb-opq-corun) | R | hard stuck error | `common (FEB SciFi hit_type3 through SWB OPQ merge)` | partial; direct corun passed | FEB/SWB corun architecture audit and `run_swb_corun` on `2026-05-08` | 833b204c/e7f29d8 | FEB/SWB corun exposed a protocol assumption on subheader hit-count width and a MuSiP OPQ egress header rewrite that could make SciFi/MuTRiG traffic parse or pack under the wrong detector contract. |
+| [BUG-020-R](#bug-020-r-swb-scifi-dma-timestamp-packing-dropped-the-odd-frame-bit) | R | hard stuck error | `common (FEB SciFi hits in odd 2048-tick frame buckets)` | fixed in MuSiP; trace checker committed | FEB/SWB trace debug on `2026-05-08` | f1344f2b/39947ff | Trace-level FEB/SWB corun showed hits reached DMA in the right count but several odd-frame hits carried the wrong absolute timestamp because MuSiP packed SciFi time using the old 256-subheader layout. |
 
 ## 2026-05-06
 
@@ -542,3 +543,34 @@ Historical formal note:
 - Commit:
   - FEB direct corun: `833b204c`
   - MuSiP header fix: `e7f29d8`
+
+### BUG-020-R: SWB SciFi DMA timestamp packing dropped the odd-frame bit
+
+- First seen in:
+  - FEB/SWB trace-level corun `make run_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim` from `tb_int/feb_swb_corun` on `2026-05-08`
+  - first analyzer result before the MuSiP fix: `TRACE_DEBUG_FAIL hits=12 pass_hits=7 issues=5`
+- Symptom:
+  - the direct corun could drive the correct number of virtual MuTRiG ASIC0/channel0 hits through OPQ and DMA, but DMA timestamps for hit ids `2`, `3`, `5`, `6`, and `9` landed in the wrong absolute frame bucket
+  - the failure was specifically visible on odd 2048-tick FEB frame bases; hit id `2` belonged to frame `1`, subheader `28`, bucket `2496..2511`, and absolute timestamp `2500`
+- Root cause:
+  - MuSiP `musip_mux_4_1.vhd` still packed SciFi/TILE DMA time as `ts_high[22:0]`, `ts_low[15:12]`, `subheader[7:0]`, and the hit timestamp nibble
+  - the promoted FEB/SWB OPQ contract uses `N_SHD=128`, so the correct split is `ts_low[15:11]` plus `subheader[6:0]`; the old split dropped `ts_low[11]` and aliased odd 2048-tick frame bases
+- Fix status:
+  - state:
+    fixed in MuSiP commit `39947ff`; FEB trace checker committed in `f1344f2b`
+  - mechanism:
+    MuSiP now packs and models SciFi/TILE DMA timestamps with the 128-subheader split, and the FEB corun now runs `scripts/analyze_feb_swb_trace.py` after the pass banner to verify per-hit lane, ASIC, channel, hit id, debug metadata, OPQ frame bucket, and DMA absolute timestamp
+  - before_fix_outcome:
+    trace-level analyzer reported five DMA absolute timestamp failures while hit count reached the expected 12
+  - after_fix_outcome:
+    `TRACE_DEBUG_PASS hits=12 channel=0 asic=0`; summary reports `expected_ingress_hits=12`, `opq_hits=12`, `dma_hits=12`, `pass_hits=12`, `fail_hits=0`, `ghost_opq_hits=0`, `ghost_dma_hits=0`, and `issue_count=0`
+  - potential_hazard:
+    low for the promoted `N_SHD=128` FEB/SWB profile; any future 256-subheader OPQ variant must be verified as a separate frame-format profile instead of sharing this packer expectation
+- Runtime / coverage context:
+  - active SWB mask is `0x3`, with lanes 0 and 1 driven and lanes 2 and 3 idle/masked
+  - lane 0 carries virtual MuTRiG ASIC0/channel0 hits at 100 kHz; lane 1 emits legal empty FEB frames
+  - reports live under `tb_int/feb_swb_corun/report/` and are intentionally ignored by git; the persistent evidence is the analyzer script plus the committed run command and summaries above
+  - MuSiP bypass discriminator `make -C tb_int/cases/basic/plain run-smoke QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim USE_MERGE=0` passes, while the plain `USE_MERGE=1` smoke still observes zero payload words; the focused FEB/SWB OPQ corun remains the passing contract test for this bug
+- Commit:
+  - FEB trace checker: `f1344f2b`
+  - MuSiP timestamp fix: `39947ff`
