@@ -1,9 +1,9 @@
 // lvds_decoded_monitor.sv
 // Passive pre-rbCAM hit_type0 observation monitor.
 // Author: Yifeng Wang
-// Version : 26.2.2
-// Date    : 20260506
-// Change  : Preserve source-supplied debug lineage when available.
+// Version : 26.2.3
+// Date    : 20260508
+// Change  : Sample combinational taps after generated-RTL ready/data settle.
 
 package tb_int_lvds_decoded_monitor_pkg;
 
@@ -33,7 +33,11 @@ package tb_int_lvds_decoded_monitor_pkg;
             if (vif == null)
                 return;
             forever begin
+                time sample_time;
+
                 @(posedge vif.clk);
+                sample_time = $time;
+                #1ps;
                 if (vif.rst === 1'b1)
                     continue;
                 if (vif.valid === 1'b1) begin
@@ -43,7 +47,7 @@ package tb_int_lvds_decoded_monitor_pkg;
                     rec.set_from_hit0(vif.hit_id_valid ? vif.hit_id : 64'd0,
                                       vif.lane_id,
                                       vif.payload,
-                                      $time,
+                                      sample_time,
                                       OBS_STAGE_PRE_RBCAM);
                     rec.root_hit_id_valid = vif.root_hit_id_valid;
                     rec.root_hit_id       = vif.root_hit_id;

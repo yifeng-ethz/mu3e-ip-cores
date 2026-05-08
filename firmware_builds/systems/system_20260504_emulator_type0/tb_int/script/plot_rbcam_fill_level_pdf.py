@@ -116,7 +116,7 @@ def plot_case(rate: str, case_name: str, values_by_partition: list[list[int]], o
     fig.text(
         0.5,
         0.925,
-        "ring_buffer_cam v26.2.10 SV; active path = hit_stack_subsystem_0 ring_buffer_cam_0..3; "
+        "ring_buffer_cam v26.2.12 SV; active path = hit_stack_subsystem_0 ring_buffer_cam_0..3; "
         "N_PARTITIONS=4 inside each rbCAM; RING_BUFFER_N_ENTRY=512",
         ha="center",
         fontsize=10,

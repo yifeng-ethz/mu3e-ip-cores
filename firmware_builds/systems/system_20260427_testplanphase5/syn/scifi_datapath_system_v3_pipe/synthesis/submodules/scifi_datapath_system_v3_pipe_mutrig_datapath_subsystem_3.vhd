@@ -94,31 +94,34 @@ architecture rtl of scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_3 is
 			DEBUG_LV       : natural := 0
 		);
 		port (
-			asi_rx8b1k_data             : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
-			asi_rx8b1k_valid            : in  std_logic                     := 'X';             -- valid
-			asi_rx8b1k_error            : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
-			asi_rx8b1k_channel          : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
-			aso_hit_type0_startofpacket : out std_logic;                                        -- startofpacket
-			aso_hit_type0_endofpacket   : out std_logic;                                        -- endofpacket
-			aso_hit_type0_endofrun      : out std_logic;                                        -- endofrun
-			aso_hit_type0_error         : out std_logic_vector(2 downto 0);                     -- error
-			aso_hit_type0_data          : out std_logic_vector(44 downto 0);                    -- data
-			aso_hit_type0_valid         : out std_logic;                                        -- valid
-			aso_hit_type0_channel       : out std_logic_vector(3 downto 0);                     -- channel
-			aso_headerinfo_data         : out std_logic_vector(41 downto 0);                    -- data
-			aso_headerinfo_valid        : out std_logic;                                        -- valid
-			aso_headerinfo_channel      : out std_logic_vector(3 downto 0);                     -- channel
-			avs_csr_read                : in  std_logic                     := 'X';             -- read
-			avs_csr_readdata            : out std_logic_vector(31 downto 0);                    -- readdata
-			avs_csr_waitrequest         : out std_logic;                                        -- waitrequest
-			avs_csr_write               : in  std_logic                     := 'X';             -- write
-			avs_csr_writedata           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			avs_csr_address             : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- address
-			asi_ctrl_data               : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
-			asi_ctrl_valid              : in  std_logic                     := 'X';             -- valid
-			asi_ctrl_ready              : out std_logic;                                        -- ready
-			i_clk                       : in  std_logic                     := 'X';             -- clk
-			i_rst                       : in  std_logic                     := 'X'              -- reset
+			asi_rx8b1k_data              : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_rx8b1k_valid             : in  std_logic                     := 'X';             -- valid
+			asi_rx8b1k_error             : in  std_logic_vector(2 downto 0)  := (others => 'X'); -- error
+			asi_rx8b1k_channel           : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			aso_hit_type0_startofpacket  : out std_logic;                                        -- startofpacket
+			aso_hit_type0_endofpacket    : out std_logic;                                        -- endofpacket
+			aso_hit_type0_endofrun       : out std_logic;                                        -- endofrun
+			aso_hit_type0_error          : out std_logic_vector(2 downto 0);                     -- error
+			aso_hit_type0_data           : out std_logic_vector(44 downto 0);                    -- data
+			aso_hit_type0_valid          : out std_logic;                                        -- valid
+			aso_hit_type0_channel        : out std_logic_vector(3 downto 0);                     -- channel
+			aso_headerinfo_data          : out std_logic_vector(41 downto 0);                    -- data
+			aso_headerinfo_valid         : out std_logic;                                        -- valid
+			aso_headerinfo_channel       : out std_logic_vector(3 downto 0);                     -- channel
+			avs_csr_read                 : in  std_logic                     := 'X';             -- read
+			avs_csr_readdata             : out std_logic_vector(31 downto 0);                    -- readdata
+			avs_csr_waitrequest          : out std_logic;                                        -- waitrequest
+			avs_csr_write                : in  std_logic                     := 'X';             -- write
+			avs_csr_writedata            : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			avs_csr_address              : in  std_logic_vector(1 downto 0)  := (others => 'X'); -- address
+			asi_ctrl_data                : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_ctrl_valid               : in  std_logic                     := 'X';             -- valid
+			asi_ctrl_ready               : out std_logic;                                        -- ready
+			i_clk                        : in  std_logic                     := 'X';             -- clk
+			i_rst                        : in  std_logic                     := 'X';             -- reset
+			coe_debug_fifo_fill_levels   : out std_logic_vector(31 downto 0);                    -- fill_levels
+			coe_debug_hit_metadata       : out std_logic_vector(63 downto 0);                    -- metadata
+			coe_debug_hit_metadata_valid : out std_logic                                         -- valid
 		);
 	end component frame_rcv_ip;
 
@@ -295,31 +298,34 @@ begin
 			DEBUG_LV       => 0
 		)
 		port map (
-			asi_rx8b1k_data             => decoded_din_data,                                  --     rx8b1k.data
-			asi_rx8b1k_valid            => decoded_din_valid,                                 --           .valid
-			asi_rx8b1k_error            => decoded_din_error,                                 --           .error
-			asi_rx8b1k_channel          => decoded_din_channel,                               --           .channel
-			aso_hit_type0_startofpacket => mutrig_frame_deassembly_0_hit_type0_startofpacket, --  hit_type0.startofpacket
-			aso_hit_type0_endofpacket   => mutrig_frame_deassembly_0_hit_type0_endofpacket,   --           .endofpacket
-			aso_hit_type0_endofrun      => open,                                              --           .endofrun
-			aso_hit_type0_error         => mutrig_frame_deassembly_0_hit_type0_error,         --           .error
-			aso_hit_type0_data          => mutrig_frame_deassembly_0_hit_type0_data,          --           .data
-			aso_hit_type0_valid         => mutrig_frame_deassembly_0_hit_type0_valid,         --           .valid
-			aso_hit_type0_channel       => mutrig_frame_deassembly_0_hit_type0_channel,       --           .channel
-			aso_headerinfo_data         => headerinfo_data,                                   -- headerinfo.data
-			aso_headerinfo_valid        => headerinfo_valid,                                  --           .valid
-			aso_headerinfo_channel      => headerinfo_channel,                                --           .channel
-			avs_csr_read                => csr_read,                                          --        csr.read
-			avs_csr_readdata            => csr_readdata,                                      --           .readdata
-			avs_csr_waitrequest         => csr_waitrequest,                                   --           .waitrequest
-			avs_csr_write               => csr_write,                                         --           .write
-			avs_csr_writedata           => csr_writedata,                                     --           .writedata
-			avs_csr_address             => csr_address,                                       --           .address
-			asi_ctrl_data               => run_ctrl_data,                                     --       ctrl.data
-			asi_ctrl_valid              => run_ctrl_valid,                                    --           .valid
-			asi_ctrl_ready              => run_ctrl_ready,                                    --           .ready
-			i_clk                       => clk_clk,                                           -- clock_sink.clk
-			i_rst                       => rst_controller_reset_out_reset                     -- reset_sink.reset
+			asi_rx8b1k_data              => decoded_din_data,                                  --     rx8b1k.data
+			asi_rx8b1k_valid             => decoded_din_valid,                                 --           .valid
+			asi_rx8b1k_error             => decoded_din_error,                                 --           .error
+			asi_rx8b1k_channel           => decoded_din_channel,                               --           .channel
+			aso_hit_type0_startofpacket  => mutrig_frame_deassembly_0_hit_type0_startofpacket, --  hit_type0.startofpacket
+			aso_hit_type0_endofpacket    => mutrig_frame_deassembly_0_hit_type0_endofpacket,   --           .endofpacket
+			aso_hit_type0_endofrun       => open,                                              --           .endofrun
+			aso_hit_type0_error          => mutrig_frame_deassembly_0_hit_type0_error,         --           .error
+			aso_hit_type0_data           => mutrig_frame_deassembly_0_hit_type0_data,          --           .data
+			aso_hit_type0_valid          => mutrig_frame_deassembly_0_hit_type0_valid,         --           .valid
+			aso_hit_type0_channel        => mutrig_frame_deassembly_0_hit_type0_channel,       --           .channel
+			aso_headerinfo_data          => headerinfo_data,                                   -- headerinfo.data
+			aso_headerinfo_valid         => headerinfo_valid,                                  --           .valid
+			aso_headerinfo_channel       => headerinfo_channel,                                --           .channel
+			avs_csr_read                 => csr_read,                                          --        csr.read
+			avs_csr_readdata             => csr_readdata,                                      --           .readdata
+			avs_csr_waitrequest          => csr_waitrequest,                                   --           .waitrequest
+			avs_csr_write                => csr_write,                                         --           .write
+			avs_csr_writedata            => csr_writedata,                                     --           .writedata
+			avs_csr_address              => csr_address,                                       --           .address
+			asi_ctrl_data                => run_ctrl_data,                                     --       ctrl.data
+			asi_ctrl_valid               => run_ctrl_valid,                                    --           .valid
+			asi_ctrl_ready               => run_ctrl_ready,                                    --           .ready
+			i_clk                        => clk_clk,                                           -- clock_sink.clk
+			i_rst                        => rst_controller_reset_out_reset,                    -- reset_sink.reset
+			coe_debug_fifo_fill_levels   => open,                                              -- (terminated)
+			coe_debug_hit_metadata       => open,                                              -- (terminated)
+			coe_debug_hit_metadata_valid => open                                               -- (terminated)
 		);
 
 	avalon_st_adapter : component scifi_datapath_system_v3_pipe_mutrig_datapath_subsystem_0_avalon_st_adapter

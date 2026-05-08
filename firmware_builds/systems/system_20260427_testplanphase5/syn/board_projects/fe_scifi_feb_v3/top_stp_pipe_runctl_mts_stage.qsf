@@ -11,7 +11,7 @@ set_global_assignment -name SOURCE_TCL_SCRIPT_FILE util/quartus/settings.tcl
 set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_a5_base.tcl
 set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_v2_scifi_pins.tcl
 
-set_global_assignment -name USE_SIGNALTAP_FILE "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage.stp"
+set_global_assignment -name USE_SIGNALTAP_FILE "/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase4e_runctl_mts_stage.stp"
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name ENABLE_LOGIC_ANALYZER_INTERFACE ON
 

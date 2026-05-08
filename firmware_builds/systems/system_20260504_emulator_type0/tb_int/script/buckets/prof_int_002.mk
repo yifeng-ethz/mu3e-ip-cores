@@ -4,7 +4,8 @@
 
 PROF_INT_002_TEST := prof_int_002_full_pipeline_100khz_per_channel_test
 PROF_INT_002_TOP  := prof_int_002_full_pipeline_top
-PROF_INT_002_DIR  := $(SIM_ROOT)/$(PROF_INT_002_TEST)
+PROF_INT_002_CASE ?= $(PROF_INT_002_TEST)
+PROF_INT_002_DIR  := $(SIM_ROOT)/$(PROF_INT_002_CASE)
 PROF_INT_002_DIR_1L_5S := $(SIM_ROOT)/prof_int_002_full_pipeline_100khz_per_channel_1lane_5s
 PROF_INT_002_DIR_8L_5S := $(SIM_ROOT)/prof_int_002_full_pipeline_100khz_per_channel_8lane_5s
 PROF_INT_002_DIR_EMU_5S := $(SIM_ROOT)/prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s
@@ -79,6 +80,19 @@ PROF_INT_002_INCDIR := +incdir+$(PROF_INT_002_SYN) +incdir+$(PROF_INT_002_SYN)/s
 PROF_INT_002_RUN_CYCLES ?= 12500000
 PROF_INT_002_DRAIN_CYCLES ?= 16384
 PROF_INT_002_HIT_RATE_Q16 ?= 52
+PROF_INT_002_TRAFFIC_MODE ?= poisson
+PROF_INT_002_MUTRIG_SHORT_MODE ?= 0
+PROF_INT_002_HIT_CHANNEL_LOW ?= 0
+PROF_INT_002_HIT_CHANNEL_HIGH ?= 15
+PROF_INT_002_INJECT_PHASE_CYCLES ?= 100
+PROF_INT_002_INJECT_PULSE_COUNT ?= 0
+PROF_INT_002_INJECT_PULSE_HIGH_CYCLES ?= 5
+PROF_INT_002_INJECT_FRAME_COUNT ?= 0
+PROF_INT_002_INJECT_BURST_COUNT ?= 1
+PROF_INT_002_INJECT_BURST_SPACING_CYCLES ?= 10
+PROF_INT_002_INJECT_DRIVER ?= tb_force
+PROF_INT_002_ACTIVE_LANE_COUNT ?= 1
+PROF_INT_002_ACTIVE_LANE_MASK ?= 1
 PROF_INT_002_RUNCTL_CPP_GAP_CYCLES ?= 125000
 PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES ?= 1250000
 PROF_INT_002_STABLE_ONLY_EXPORT ?= 1
@@ -88,32 +102,34 @@ PROF_INT_002_RBCAM_FILL_TRACE_STRIDE ?= 1
 PROF_INT_002_VLOG_V_OPTS := -sv -ignoresvkeywords=do -mixedansiports -mixedsvvh s -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
 
 .PHONY: comp_prof_int_002_dut comp_prof_int_002 prepare_prof_int_002_mem_init \
-\trun_prof_int_002_full_pipeline_100khz_per_channel_test \
-\trun_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
-\trun_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
-\trun_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
-\trun_prof_int_002_pre_rbcam_latency \
-\trun_prof_int_002_pre_rbcam_header_sync_phase_100 \
-\trun_prof_int_002_pre_rbcam_header_sync_phase_500 \
-\trun_prof_int_002_pre_rbcam_header_sync_phase_900 \
-\trun_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
-\tplot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
-\trun_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector \
-\tplot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector \
-\trun_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
-\tplot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
-\trun_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
-\tplot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
-\trun_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100 \
-\tplot_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100 \
-\trun_prof_int_002_pre_rbcam_periodic_2ch \
-\trun_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
-\tplot_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
-\tplot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
-\tplot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
-\tplot_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
-\tplot_prof_int_002_full_pipeline_100khz_per_channel_5s \
-\trun_prof_int_002_full_pipeline_100khz_per_channel_5s
+    run_prof_int_002_full_pipeline_100khz_per_channel_test \
+    run_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
+    run_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
+    run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
+    run_prof_int_002_pre_rbcam_latency \
+    run_prof_int_002_pre_rbcam_header_sync_phase_100 \
+    run_prof_int_002_pre_rbcam_header_sync_phase_500 \
+    run_prof_int_002_pre_rbcam_header_sync_phase_900 \
+    run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
+    plot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900 \
+    run_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector \
+    plot_prof_int_002_pre_rbcam_header_sync_phase_sweep_100_900_rtl_injector \
+    run_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
+    plot_prof_int_002_pre_rbcam_header_sync_asic1_7_phase100 \
+    run_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
+    plot_prof_int_002_pre_rbcam_header_sync_full8ch_burst_sweep_phase100 \
+    run_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100 \
+    plot_prof_int_002_pre_rbcam_virtual_mutrig_header_sync_burst_sweep_phase100 \
+    run_prof_int_002_pre_rbcam_periodic_2ch \
+    run_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
+    plot_prof_int_002_pre_rbcam_periodic_asic0_full32_rate_sweep \
+    plot_prof_int_002_full_pipeline_100khz_per_channel_1lane_5s \
+    plot_prof_int_002_full_pipeline_100khz_per_channel_8lane_5s \
+    plot_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s \
+    plot_prof_int_002_full_pipeline_100khz_per_channel_5s \
+    run_prof_int_002_full_pipeline_100khz_per_channel_5s \
+    run_prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep \
+    plot_prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep
 
 comp_prof_int_002_dut: lib
 	$(VMAP) -modelsimini modelsim.ini std $(QUESTA_HOME)/std
@@ -267,8 +283,22 @@ run_prof_int_002_full_pipeline_100khz_per_channel_test: comp_prof_int_002 prepar
 		    +TB_INT_RUNCTL_CPP_GAP_CYCLES=$(PROF_INT_002_RUNCTL_CPP_GAP_CYCLES) \
 		    +TB_INT_RUNCTL_SETTLE_TIMEOUT_CYCLES=$(PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES) \
 		    +PROF_INT_002_HIT_RATE_Q16=$(PROF_INT_002_HIT_RATE_Q16) \
-	    +TB_INT_ACTIVE_LANE_COUNT=1 \
-	    +TB_INT_ACTIVE_LANE_MASK=1 \
+		    +TB_INT_TRAFFIC_MODE=$(PROF_INT_002_TRAFFIC_MODE) \
+		    +TB_INT_MUTRIG_SHORT_MODE=$(PROF_INT_002_MUTRIG_SHORT_MODE) \
+		    +TB_INT_HIT_CHANNEL_LOW=$(PROF_INT_002_HIT_CHANNEL_LOW) \
+		    +TB_INT_HIT_CHANNEL_HIGH=$(PROF_INT_002_HIT_CHANNEL_HIGH) \
+		    +TB_INT_INJECT_PHASE_CYCLES=$(PROF_INT_002_INJECT_PHASE_CYCLES) \
+		    +TB_INT_INJECT_PULSE_COUNT=$(PROF_INT_002_INJECT_PULSE_COUNT) \
+		    +TB_INT_INJECT_PULSE_HIGH_CYCLES=$(PROF_INT_002_INJECT_PULSE_HIGH_CYCLES) \
+		    +TB_INT_INJECT_FRAME_COUNT=$(PROF_INT_002_INJECT_FRAME_COUNT) \
+		    +TB_INT_INJECT_BURST_COUNT=$(PROF_INT_002_INJECT_BURST_COUNT) \
+		    +TB_INT_INJECT_BURST_SPACING_CYCLES=$(PROF_INT_002_INJECT_BURST_SPACING_CYCLES) \
+		    +TB_INT_INJECT_DRIVER=$(PROF_INT_002_INJECT_DRIVER) \
+		    +TB_INT_STABLE_ONLY_EXPORT=$(PROF_INT_002_STABLE_ONLY_EXPORT) \
+		    +TB_INT_EXPORT_RBCAM_FILL_TRACE=$(PROF_INT_002_EXPORT_RBCAM_FILL_TRACE) \
+		    +TB_INT_RBCAM_FILL_TRACE_STRIDE=$(PROF_INT_002_RBCAM_FILL_TRACE_STRIDE) \
+	    +TB_INT_ACTIVE_LANE_COUNT=$(PROF_INT_002_ACTIVE_LANE_COUNT) \
+	    +TB_INT_ACTIVE_LANE_MASK=$(PROF_INT_002_ACTIVE_LANE_MASK) \
 	    -l $(PROF_INT_002_DIR)/transcript \
 	    -do "run -all; quit -f"
 	@tail -n 80 $(PROF_INT_002_DIR)/transcript
@@ -768,3 +798,38 @@ run_prof_int_002_full_pipeline_100khz_per_channel_5s: \
 	run_prof_int_002_full_pipeline_100khz_per_channel_emulator_full8lane_5s
 
 run_prof_int_002_full_pipeline: run_prof_int_002_full_pipeline_100khz_per_channel_5s
+
+run_prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep:
+	@set -e; for spec in 010k:5 100k:52 500k:262 1000k:524; do \
+	    label=$${spec%:*}; \
+	    q16=$${spec#*:}; \
+	    $(MAKE) run_prof_int_002_full_pipeline_100khz_per_channel_test \
+	        PROF_INT_002_CASE=prof_int_002_feb_egress_periodic_asic0_full32_emu_direct_$${label}_1ms_gap1ms_20260508 \
+	        PROF_INT_002_LATENCY_SCOPE=full \
+	        PROF_INT_002_RUN_CYCLES=125000 \
+	        PROF_INT_002_DRAIN_CYCLES=65536 \
+	        PROF_INT_002_STABLE_WINDOW_CYCLES=125000 \
+	        PROF_INT_002_RUNCTL_CPP_GAP_CYCLES=125000 \
+	        PROF_INT_002_RUNCTL_SETTLE_TIMEOUT_CYCLES=1250000 \
+	        PROF_INT_002_HIT_RATE_Q16=$$q16 \
+	        PROF_INT_002_TRAFFIC_MODE=periodic \
+	        PROF_INT_002_MUTRIG_SHORT_MODE=1 \
+	        PROF_INT_002_HIT_CHANNEL_LOW=0 \
+	        PROF_INT_002_HIT_CHANNEL_HIGH=31 \
+	        PROF_INT_002_INJECT_PHASE_CYCLES=0 \
+	        PROF_INT_002_INJECT_PULSE_COUNT=0 \
+	        PROF_INT_002_INJECT_DRIVER=tb_force \
+	        PROF_INT_002_STABLE_ONLY_EXPORT=1 \
+	        PROF_INT_002_ACTIVE_LANE_COUNT=1 \
+	        PROF_INT_002_ACTIVE_LANE_MASK=1; \
+	done
+
+plot_prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep: run_prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep
+	@mkdir -p $(PROF_INT_002_REPORT_DIR)/prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep
+	python3 $(TB_INT_ROOT)/script/plot_feb_egress_queueing_comparison.py \
+	    --sim-root $(SIM_ROOT) \
+	    --output $(PROF_INT_002_REPORT_DIR)/prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep/feb_egress_debug_age.png \
+	    --summary $(PROF_INT_002_REPORT_DIR)/prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep/feb_egress_debug_age_summary.csv \
+	    --case-set asic0_full32_emu_20260508 \
+	    --strict
+	@echo "=== PROF-INT-002 FEB-egress DEBUG-age plot: $(PROF_INT_002_REPORT_DIR)/prof_int_002_feb_egress_periodic_asic0_full32_rate_sweep/feb_egress_debug_age.png ==="

@@ -79,6 +79,7 @@ architecture rtl of pingpong_sram is
     signal bank_b_q_b    : count_slv_t;
 
     signal active_bank        : std_logic := '0';
+    signal pingpong_active    : std_logic := '0';
     signal clear_active       : std_logic := '1';
     signal clear_bank         : std_logic := '0';
     signal clear_both         : std_logic := '1';
@@ -135,8 +136,10 @@ begin
     o_flush_addr         <= clear_addr;
     o_interval_pulse     <= interval_pulse;
 
+    pingpong_active <= '1' when (i_enable_pingpong = '1') and (i_interval_clocks /= 0) else '0';
     upd_ready_int <= '1' when (clear_active = '0')
-                           and not ((i_enable_pingpong = '0') and (burst_active = '1'))
+                           and not ((pingpong_active = '0') and
+                                    ((burst_active = '1') or (i_hist_read = '1') or (hist_read_pending = '1')))
                      else '0';
     upd_read_data   <= unsigned(bank_a_q_a) when upd_read_bank = '0' else unsigned(bank_b_q_a);
 
@@ -326,7 +329,7 @@ begin
                     hist_readdatavalid <= '1';
                 end if;
 
-                if (i_enable_pingpong = '1') and (i_interval_clocks /= 0) then
+                if pingpong_active = '1' then
                     if timer_count = (i_interval_clocks - 1) then
                         ram_v_switch_fire := true;
                         ram_v_next_bank   := not active_bank;
@@ -366,23 +369,22 @@ begin
                         ram_v_burst_count := to_unsigned(1, ram_v_burst_count'length);
                     end if;
 
-                    if ((i_enable_pingpong = '1')
+                    if ((pingpong_active = '1')
                         and (upd_issue_valid = '0')
                         and (upd_read_valid = '0')
                         and (upd_add_valid = '0')
                         and (upd_sum_valid = '0')
                         and (upd_write_valid = '0'))
-                       or ((i_enable_pingpong = '0')
+                       or ((pingpong_active = '0')
                         and (upd_issue_valid = '0')
                         and (upd_read_valid = '0')
                         and (upd_add_valid = '0')
                         and (upd_sum_valid = '0')
-                        and (upd_write_valid = '0')
-                        and (i_upd_valid = '0')) then
+                        and (upd_write_valid = '0')) then
                         burst_active    <= '1';
                         burst_addr      <= i_hist_address;
                         burst_remaining <= ram_v_burst_count;
-                        if i_enable_pingpong = '1' then
+                        if pingpong_active = '1' then
                             read_bank_latched <= not ram_v_next_bank;
                         else
                             read_bank_latched <= ram_v_next_bank;
@@ -397,12 +399,15 @@ begin
                    and (upd_read_valid = '0')
                    and (upd_add_valid = '0')
                    and (upd_sum_valid = '0')
-                   and (upd_write_valid = '0')
-                   and (i_upd_valid = '0') then
+                   and (upd_write_valid = '0') then
                     burst_active      <= '1';
                     burst_addr        <= hist_pending_addr;
                     burst_remaining   <= hist_pending_count;
-                    read_bank_latched <= ram_v_next_bank;
+                    if pingpong_active = '1' then
+                        read_bank_latched <= not ram_v_next_bank;
+                    else
+                        read_bank_latched <= ram_v_next_bank;
+                    end if;
                     hist_read_pending <= '0';
                 elsif burst_active = '1' then
                     ram_v_hist_issue := '1';

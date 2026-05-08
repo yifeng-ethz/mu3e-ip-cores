@@ -80,8 +80,20 @@ proc has_instance {name} {
     return [expr {[lsearch -exact [get_instances] $name] >= 0}]
 }
 
+proc connection_exists {path} {
+    return [expr {[lsearch -exact [get_connections] $path] >= 0}]
+}
+
 proc remove_connection_if_present {path} {
-    catch {remove_connection $path}
+    if {[connection_exists $path]} {
+        remove_connection $path
+    }
+}
+
+proc add_connection_if_absent {path} {
+    if {![connection_exists $path]} {
+        add_connection $path
+    }
 }
 
 proc reroute_histogram_debug_inputs {} {
@@ -107,12 +119,12 @@ proc reroute_histogram_debug_inputs {} {
         remove_connection_if_present $connection
     }
 
-    add_connection mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1
-    add_connection mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2
-    add_connection hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_3
-    add_connection hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_4
-    add_connection hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5
-    add_connection hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_6
+    add_connection_if_absent mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1
+    add_connection_if_absent mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2
+    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_3
+    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_4
+    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5
+    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_6
 }
 
 proc replace_decoded_lane_mux_with_source_mux {lane} {
@@ -125,29 +137,26 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
     remove_connection_if_present lvds_rx_controller_pro_0.decoded${lane}/$old_mux.in0
     remove_connection_if_present $emu.tx8b1k/$old_mux.in1
     remove_connection_if_present $old_mux.out/$fifo.in
-    remove_connection_if_present $fifo.out/$lane_dp.decoded_din
-    remove_connection_if_present lvds_rx_28nm_0.outclock/$fifo.clk
-    remove_connection_if_present master_datapath.master_reset/$fifo.clk_reset
     remove_connection_if_present lvds_rx_28nm_0.outclock/$old_mux.clk
     remove_connection_if_present master_datapath.master_reset/$old_mux.reset
 
     if {[has_instance $old_mux]} {
         remove_instance $old_mux
     }
-    if {[has_instance $fifo]} {
-        remove_instance $fifo
-    }
     if {[has_instance $new_mux]} {
         remove_instance $new_mux
     }
 
-    add_instance $new_mux mutrig_lane_source_mux 26.2.0.0502
+    add_instance $new_mux mutrig_lane_source_mux 26.2.1.503
     set_instance_parameter_value $new_mux SELECT_EMULATOR 0
     set_instance_parameter_value $new_mux FIFO_DEPTH 4
     set_instance_parameter_value $new_mux INSTANCE_ID $lane
 
     if {[has_instance $emu]} {
         set_emulator_mutrig_crcfix_version $emu
+        # The full FEB pipe path consumes the legacy decoded-byte stream.
+        # Keep direct hit_type0 disabled as the FIFO owner for this topology.
+        set_instance_parameter_value $emu BYTE_STREAM_ENABLE true
         set_instance_parameter_value $emu ASIC_ID_DEFAULT $lane
         set_instance_parameter_value $emu CLUSTER_LANE_INDEX_DEFAULT $lane
         set_instance_parameter_value $emu CLUSTER_LANE_COUNT_DEFAULT 8
@@ -157,7 +166,7 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
     add_connection master_datapath.master_reset/$new_mux.rst
     add_connection lvds_rx_controller_pro_0.decoded${lane}/$new_mux.real_in
     add_connection $emu.tx8b1k/$new_mux.emu_in
-    add_connection $new_mux.selected_out/$lane_dp.decoded_din
+    add_connection $new_mux.selected_out/$fifo.in
 
     set mux_csr_base [expr {0x2240 + (0x40 * $lane)}]
     add_connection mm_clock_crossing_bridge.m0/$new_mux.csr
@@ -275,13 +284,14 @@ foreach group $lvds_csr_groups {
 
 set reroute_connections [list]
 foreach connection [get_connections] {
-    if {[string equal [get_connection_property $connection START] "mm_clock_crossing_bridge.m0"]} {
-        lappend reroute_connections $connection
+    if {[regexp {^mm_clock_crossing_bridge\.m0/(.+)$} $connection _ end_point]} {
+        lappend reroute_connections [list $connection $end_point]
     }
 }
 
-foreach connection $reroute_connections {
-    set end_point [get_connection_property $connection END]
+foreach reroute $reroute_connections {
+    set connection [lindex $reroute 0]
+    set end_point [lindex $reroute 1]
     set base_addr [expr {[get_connection_parameter_value $connection baseAddress]}]
     set arb_prio [get_connection_parameter_value $connection arbitrationPriority]
     set default_conn [get_connection_parameter_value $connection defaultConnection]

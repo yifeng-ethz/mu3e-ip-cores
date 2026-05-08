@@ -23,7 +23,7 @@ CASE_SET = [
     ("1000k", "1 MHz/ch", "prof_int_002_post_rbcam_periodic_asic0_full32_emu_direct_1000k_1ms_gap1ms_20260507"),
 ]
 
-FIFO_DEPTH_WORDS = 64
+FIFO_DEPTH_WORDS = 256
 PARTITION_COUNT = 4
 
 
@@ -165,7 +165,7 @@ def plot_case(
         0.5,
         0.925,
         "active path = hit_stack_subsystem_0 ring_buffer_cam_0..3; plotted FIFO = v2_core.deassembly_fifo "
-        "(SV depth 64); one sample per 8 ns core cycle",
+        "(SV depth 256, VHDL scfifo_w40d256 parity); one sample per 8 ns core cycle",
         ha="center",
         fontsize=10,
     )

@@ -167,41 +167,48 @@ architecture rtl of feb_system_v3_pipe_data_path_subsystem_hit_stack_subsystem_0
 			IP_UID              : natural := 1380074317;
 			VERSION_MAJOR       : natural := 26;
 			VERSION_MINOR       : natural := 2;
-			VERSION_PATCH       : natural := 6;
-			BUILD               : natural := 422;
-			VERSION_DATE        : natural := 20260422;
-			VERSION_GIT         : natural := 267039347;
+			VERSION_PATCH       : natural := 10;
+			BUILD               : natural := 507;
+			VERSION_DATE        : natural := 20260507;
+			VERSION_GIT         : natural := 963063649;
 			INSTANCE_ID         : natural := 0
 		);
 		port (
-			avs_csr_readdata            : out std_logic_vector(31 downto 0);                    -- readdata
-			avs_csr_read                : in  std_logic                     := 'X';             -- read
-			avs_csr_address             : in  std_logic_vector(4 downto 0)  := (others => 'X'); -- address
-			avs_csr_waitrequest         : out std_logic;                                        -- waitrequest
-			avs_csr_write               : in  std_logic                     := 'X';             -- write
-			avs_csr_writedata           : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
-			asi_hit_type1_channel       : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
-			asi_hit_type1_startofpacket : in  std_logic                     := 'X';             -- startofpacket
-			asi_hit_type1_endofpacket   : in  std_logic                     := 'X';             -- endofpacket
-			asi_hit_type1_empty         : in  std_logic                     := 'X';             -- empty
-			asi_hit_type1_data          : in  std_logic_vector(38 downto 0) := (others => 'X'); -- data
-			asi_hit_type1_valid         : in  std_logic                     := 'X';             -- valid
-			asi_hit_type1_ready         : out std_logic;                                        -- ready
-			asi_hit_type1_error         : in  std_logic                     := 'X';             -- error
-			aso_hit_type2_channel       : out std_logic_vector(3 downto 0);                     -- channel
-			aso_hit_type2_startofpacket : out std_logic;                                        -- startofpacket
-			aso_hit_type2_endofpacket   : out std_logic;                                        -- endofpacket
-			aso_hit_type2_data          : out std_logic_vector(35 downto 0);                    -- data
-			aso_hit_type2_valid         : out std_logic;                                        -- valid
-			aso_hit_type2_ready         : in  std_logic                     := 'X';             -- ready
-			aso_hit_type2_error         : out std_logic;                                        -- error
-			i_clk                       : in  std_logic                     := 'X';             -- clk
-			i_rst                       : in  std_logic                     := 'X';             -- reset
-			asi_ctrl_data               : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
-			asi_ctrl_valid              : in  std_logic                     := 'X';             -- valid
-			asi_ctrl_ready              : out std_logic;                                        -- ready
-			aso_filllevel_data          : out std_logic_vector(15 downto 0);                    -- data
-			aso_filllevel_valid         : out std_logic                                         -- valid
+			avs_csr_readdata             : out std_logic_vector(31 downto 0);                    -- readdata
+			avs_csr_read                 : in  std_logic                     := 'X';             -- read
+			avs_csr_address              : in  std_logic_vector(4 downto 0)  := (others => 'X'); -- address
+			avs_csr_waitrequest          : out std_logic;                                        -- waitrequest
+			avs_csr_write                : in  std_logic                     := 'X';             -- write
+			avs_csr_writedata            : in  std_logic_vector(31 downto 0) := (others => 'X'); -- writedata
+			asi_hit_type1_channel        : in  std_logic_vector(3 downto 0)  := (others => 'X'); -- channel
+			asi_hit_type1_startofpacket  : in  std_logic                     := 'X';             -- startofpacket
+			asi_hit_type1_endofpacket    : in  std_logic                     := 'X';             -- endofpacket
+			asi_hit_type1_empty          : in  std_logic                     := 'X';             -- empty
+			asi_hit_type1_data           : in  std_logic_vector(38 downto 0) := (others => 'X'); -- data
+			asi_hit_type1_valid          : in  std_logic                     := 'X';             -- valid
+			asi_hit_type1_ready          : out std_logic;                                        -- ready
+			asi_hit_type1_error          : in  std_logic                     := 'X';             -- error
+			aso_hit_type2_channel        : out std_logic_vector(3 downto 0);                     -- channel
+			aso_hit_type2_startofpacket  : out std_logic;                                        -- startofpacket
+			aso_hit_type2_endofpacket    : out std_logic;                                        -- endofpacket
+			aso_hit_type2_data           : out std_logic_vector(35 downto 0);                    -- data
+			aso_hit_type2_valid          : out std_logic;                                        -- valid
+			aso_hit_type2_ready          : in  std_logic                     := 'X';             -- ready
+			aso_hit_type2_error          : out std_logic;                                        -- error
+			i_clk                        : in  std_logic                     := 'X';             -- clk
+			i_rst                        : in  std_logic                     := 'X';             -- reset
+			asi_ctrl_data                : in  std_logic_vector(8 downto 0)  := (others => 'X'); -- data
+			asi_ctrl_valid               : in  std_logic                     := 'X';             -- valid
+			asi_ctrl_ready               : out std_logic;                                        -- ready
+			aso_filllevel_data           : out std_logic_vector(15 downto 0);                    -- data
+			aso_filllevel_valid          : out std_logic;                                        -- valid
+			coe_debug_fill_level         : out std_logic_vector(31 downto 0);                    -- fill_level
+			coe_debug_fifo_level         : out std_logic_vector(31 downto 0);                    -- fifo_level
+			coe_debug_queue_state        : out std_logic_vector(31 downto 0);                    -- queue_state
+			asi_hit_type1_metadata       : in  std_logic_vector(63 downto 0) := (others => 'X'); -- metadata
+			asi_hit_type1_metadata_valid : in  std_logic                     := 'X';             -- valid
+			aso_hit_type2_metadata       : out std_logic_vector(63 downto 0);                    -- metadata
+			aso_hit_type2_metadata_valid : out std_logic                                         -- valid
 		);
 	end component ring_buffer_cam;
 
@@ -951,41 +958,48 @@ begin
 			IP_UID              => 1380074317,
 			VERSION_MAJOR       => 26,
 			VERSION_MINOR       => 2,
-			VERSION_PATCH       => 6,
-			BUILD               => 422,
-			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_PATCH       => 10,
+			BUILD               => 507,
+			VERSION_DATE        => 20260507,
+			VERSION_GIT         => 963063649,
 			INSTANCE_ID         => 0
 		)
 		port map (
-			avs_csr_readdata            => ring_buffer_cam_0_csr_readdata,            --             csr.readdata
-			avs_csr_read                => ring_buffer_cam_0_csr_read,                --                .read
-			avs_csr_address             => ring_buffer_cam_0_csr_address,             --                .address
-			avs_csr_waitrequest         => ring_buffer_cam_0_csr_waitrequest,         --                .waitrequest
-			avs_csr_write               => ring_buffer_cam_0_csr_write,               --                .write
-			avs_csr_writedata           => ring_buffer_cam_0_csr_writedata,           --                .writedata
-			asi_hit_type1_channel       => data_splitter_0_out0_channel,              --       hit_type1.channel
-			asi_hit_type1_startofpacket => data_splitter_0_out0_startofpacket,        --                .startofpacket
-			asi_hit_type1_endofpacket   => data_splitter_0_out0_endofpacket,          --                .endofpacket
-			asi_hit_type1_empty         => data_splitter_0_out0_empty(0),             --                .empty
-			asi_hit_type1_data          => data_splitter_0_out0_data,                 --                .data
-			asi_hit_type1_valid         => data_splitter_0_out0_valid,                --                .valid
-			asi_hit_type1_ready         => data_splitter_0_out0_ready,                --                .ready
-			asi_hit_type1_error         => data_splitter_0_out0_error(0),             --                .error
-			aso_hit_type2_channel       => ring_buffer_cam_0_hit_type2_channel,       --       hit_type2.channel
-			aso_hit_type2_startofpacket => ring_buffer_cam_0_hit_type2_startofpacket, --                .startofpacket
-			aso_hit_type2_endofpacket   => ring_buffer_cam_0_hit_type2_endofpacket,   --                .endofpacket
-			aso_hit_type2_data          => ring_buffer_cam_0_hit_type2_data,          --                .data
-			aso_hit_type2_valid         => ring_buffer_cam_0_hit_type2_valid,         --                .valid
-			aso_hit_type2_ready         => ring_buffer_cam_0_hit_type2_ready,         --                .ready
-			aso_hit_type2_error         => ring_buffer_cam_0_hit_type2_error,         --                .error
-			i_clk                       => datapath_clock_clk,                        -- clock_interface.clk
-			i_rst                       => rst_controller_reset_out_reset,            -- reset_interface.reset
-			asi_ctrl_data               => run_control_splitter_0_out0_data,          --     run_control.data
-			asi_ctrl_valid              => run_control_splitter_0_out0_valid,         --                .valid
-			asi_ctrl_ready              => run_control_splitter_0_out0_ready,         --                .ready
-			aso_filllevel_data          => ring_buffer_cam_0_filllevel_data,          --       filllevel.data
-			aso_filllevel_valid         => ring_buffer_cam_0_filllevel_valid          --                .valid
+			avs_csr_readdata             => ring_buffer_cam_0_csr_readdata,                                     --                 csr.readdata
+			avs_csr_read                 => ring_buffer_cam_0_csr_read,                                         --                    .read
+			avs_csr_address              => ring_buffer_cam_0_csr_address,                                      --                    .address
+			avs_csr_waitrequest          => ring_buffer_cam_0_csr_waitrequest,                                  --                    .waitrequest
+			avs_csr_write                => ring_buffer_cam_0_csr_write,                                        --                    .write
+			avs_csr_writedata            => ring_buffer_cam_0_csr_writedata,                                    --                    .writedata
+			asi_hit_type1_channel        => data_splitter_0_out0_channel,                                       --           hit_type1.channel
+			asi_hit_type1_startofpacket  => data_splitter_0_out0_startofpacket,                                 --                    .startofpacket
+			asi_hit_type1_endofpacket    => data_splitter_0_out0_endofpacket,                                   --                    .endofpacket
+			asi_hit_type1_empty          => data_splitter_0_out0_empty(0),                                      --                    .empty
+			asi_hit_type1_data           => data_splitter_0_out0_data,                                          --                    .data
+			asi_hit_type1_valid          => data_splitter_0_out0_valid,                                         --                    .valid
+			asi_hit_type1_ready          => data_splitter_0_out0_ready,                                         --                    .ready
+			asi_hit_type1_error          => data_splitter_0_out0_error(0),                                      --                    .error
+			aso_hit_type2_channel        => ring_buffer_cam_0_hit_type2_channel,                                --           hit_type2.channel
+			aso_hit_type2_startofpacket  => ring_buffer_cam_0_hit_type2_startofpacket,                          --                    .startofpacket
+			aso_hit_type2_endofpacket    => ring_buffer_cam_0_hit_type2_endofpacket,                            --                    .endofpacket
+			aso_hit_type2_data           => ring_buffer_cam_0_hit_type2_data,                                   --                    .data
+			aso_hit_type2_valid          => ring_buffer_cam_0_hit_type2_valid,                                  --                    .valid
+			aso_hit_type2_ready          => ring_buffer_cam_0_hit_type2_ready,                                  --                    .ready
+			aso_hit_type2_error          => ring_buffer_cam_0_hit_type2_error,                                  --                    .error
+			i_clk                        => datapath_clock_clk,                                                 --     clock_interface.clk
+			i_rst                        => rst_controller_reset_out_reset,                                     --     reset_interface.reset
+			asi_ctrl_data                => run_control_splitter_0_out0_data,                                   --         run_control.data
+			asi_ctrl_valid               => run_control_splitter_0_out0_valid,                                  --                    .valid
+			asi_ctrl_ready               => run_control_splitter_0_out0_ready,                                  --                    .ready
+			aso_filllevel_data           => ring_buffer_cam_0_filllevel_data,                                   --           filllevel.data
+			aso_filllevel_valid          => ring_buffer_cam_0_filllevel_valid,                                  --                    .valid
+			coe_debug_fill_level         => open,                                                               -- debug_observability.fill_level
+			coe_debug_fifo_level         => open,                                                               --                    .fifo_level
+			coe_debug_queue_state        => open,                                                               --                    .queue_state
+			asi_hit_type1_metadata       => "0000000000000000000000000000000000000000000000000000000000000000", --         (terminated)
+			asi_hit_type1_metadata_valid => '0',                                                                --         (terminated)
+			aso_hit_type2_metadata       => open,                                                               --         (terminated)
+			aso_hit_type2_metadata_valid => open                                                                --         (terminated)
 		);
 
 	ring_buffer_cam_1 : component ring_buffer_cam
@@ -1002,41 +1016,48 @@ begin
 			IP_UID              => 1380074317,
 			VERSION_MAJOR       => 26,
 			VERSION_MINOR       => 2,
-			VERSION_PATCH       => 6,
-			BUILD               => 422,
-			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_PATCH       => 10,
+			BUILD               => 507,
+			VERSION_DATE        => 20260507,
+			VERSION_GIT         => 963063649,
 			INSTANCE_ID         => 0
 		)
 		port map (
-			avs_csr_readdata            => ring_buffer_cam_1_csr_readdata,            --             csr.readdata
-			avs_csr_read                => ring_buffer_cam_1_csr_read,                --                .read
-			avs_csr_address             => ring_buffer_cam_1_csr_address,             --                .address
-			avs_csr_waitrequest         => ring_buffer_cam_1_csr_waitrequest,         --                .waitrequest
-			avs_csr_write               => ring_buffer_cam_1_csr_write,               --                .write
-			avs_csr_writedata           => ring_buffer_cam_1_csr_writedata,           --                .writedata
-			asi_hit_type1_channel       => data_splitter_0_out1_channel,              --       hit_type1.channel
-			asi_hit_type1_startofpacket => data_splitter_0_out1_startofpacket,        --                .startofpacket
-			asi_hit_type1_endofpacket   => data_splitter_0_out1_endofpacket,          --                .endofpacket
-			asi_hit_type1_empty         => data_splitter_0_out1_empty(0),             --                .empty
-			asi_hit_type1_data          => data_splitter_0_out1_data,                 --                .data
-			asi_hit_type1_valid         => data_splitter_0_out1_valid,                --                .valid
-			asi_hit_type1_ready         => data_splitter_0_out1_ready,                --                .ready
-			asi_hit_type1_error         => data_splitter_0_out1_error(0),             --                .error
-			aso_hit_type2_channel       => ring_buffer_cam_1_hit_type2_channel,       --       hit_type2.channel
-			aso_hit_type2_startofpacket => ring_buffer_cam_1_hit_type2_startofpacket, --                .startofpacket
-			aso_hit_type2_endofpacket   => ring_buffer_cam_1_hit_type2_endofpacket,   --                .endofpacket
-			aso_hit_type2_data          => ring_buffer_cam_1_hit_type2_data,          --                .data
-			aso_hit_type2_valid         => ring_buffer_cam_1_hit_type2_valid,         --                .valid
-			aso_hit_type2_ready         => ring_buffer_cam_1_hit_type2_ready,         --                .ready
-			aso_hit_type2_error         => ring_buffer_cam_1_hit_type2_error,         --                .error
-			i_clk                       => datapath_clock_clk,                        -- clock_interface.clk
-			i_rst                       => rst_controller_reset_out_reset,            -- reset_interface.reset
-			asi_ctrl_data               => run_control_splitter_0_out1_data,          --     run_control.data
-			asi_ctrl_valid              => run_control_splitter_0_out1_valid,         --                .valid
-			asi_ctrl_ready              => run_control_splitter_0_out1_ready,         --                .ready
-			aso_filllevel_data          => ring_buffer_cam_1_filllevel_data,          --       filllevel.data
-			aso_filllevel_valid         => ring_buffer_cam_1_filllevel_valid          --                .valid
+			avs_csr_readdata             => ring_buffer_cam_1_csr_readdata,                                     --                 csr.readdata
+			avs_csr_read                 => ring_buffer_cam_1_csr_read,                                         --                    .read
+			avs_csr_address              => ring_buffer_cam_1_csr_address,                                      --                    .address
+			avs_csr_waitrequest          => ring_buffer_cam_1_csr_waitrequest,                                  --                    .waitrequest
+			avs_csr_write                => ring_buffer_cam_1_csr_write,                                        --                    .write
+			avs_csr_writedata            => ring_buffer_cam_1_csr_writedata,                                    --                    .writedata
+			asi_hit_type1_channel        => data_splitter_0_out1_channel,                                       --           hit_type1.channel
+			asi_hit_type1_startofpacket  => data_splitter_0_out1_startofpacket,                                 --                    .startofpacket
+			asi_hit_type1_endofpacket    => data_splitter_0_out1_endofpacket,                                   --                    .endofpacket
+			asi_hit_type1_empty          => data_splitter_0_out1_empty(0),                                      --                    .empty
+			asi_hit_type1_data           => data_splitter_0_out1_data,                                          --                    .data
+			asi_hit_type1_valid          => data_splitter_0_out1_valid,                                         --                    .valid
+			asi_hit_type1_ready          => data_splitter_0_out1_ready,                                         --                    .ready
+			asi_hit_type1_error          => data_splitter_0_out1_error(0),                                      --                    .error
+			aso_hit_type2_channel        => ring_buffer_cam_1_hit_type2_channel,                                --           hit_type2.channel
+			aso_hit_type2_startofpacket  => ring_buffer_cam_1_hit_type2_startofpacket,                          --                    .startofpacket
+			aso_hit_type2_endofpacket    => ring_buffer_cam_1_hit_type2_endofpacket,                            --                    .endofpacket
+			aso_hit_type2_data           => ring_buffer_cam_1_hit_type2_data,                                   --                    .data
+			aso_hit_type2_valid          => ring_buffer_cam_1_hit_type2_valid,                                  --                    .valid
+			aso_hit_type2_ready          => ring_buffer_cam_1_hit_type2_ready,                                  --                    .ready
+			aso_hit_type2_error          => ring_buffer_cam_1_hit_type2_error,                                  --                    .error
+			i_clk                        => datapath_clock_clk,                                                 --     clock_interface.clk
+			i_rst                        => rst_controller_reset_out_reset,                                     --     reset_interface.reset
+			asi_ctrl_data                => run_control_splitter_0_out1_data,                                   --         run_control.data
+			asi_ctrl_valid               => run_control_splitter_0_out1_valid,                                  --                    .valid
+			asi_ctrl_ready               => run_control_splitter_0_out1_ready,                                  --                    .ready
+			aso_filllevel_data           => ring_buffer_cam_1_filllevel_data,                                   --           filllevel.data
+			aso_filllevel_valid          => ring_buffer_cam_1_filllevel_valid,                                  --                    .valid
+			coe_debug_fill_level         => open,                                                               -- debug_observability.fill_level
+			coe_debug_fifo_level         => open,                                                               --                    .fifo_level
+			coe_debug_queue_state        => open,                                                               --                    .queue_state
+			asi_hit_type1_metadata       => "0000000000000000000000000000000000000000000000000000000000000000", --         (terminated)
+			asi_hit_type1_metadata_valid => '0',                                                                --         (terminated)
+			aso_hit_type2_metadata       => open,                                                               --         (terminated)
+			aso_hit_type2_metadata_valid => open                                                                --         (terminated)
 		);
 
 	ring_buffer_cam_2 : component ring_buffer_cam
@@ -1053,41 +1074,48 @@ begin
 			IP_UID              => 1380074317,
 			VERSION_MAJOR       => 26,
 			VERSION_MINOR       => 2,
-			VERSION_PATCH       => 6,
-			BUILD               => 422,
-			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_PATCH       => 10,
+			BUILD               => 507,
+			VERSION_DATE        => 20260507,
+			VERSION_GIT         => 963063649,
 			INSTANCE_ID         => 0
 		)
 		port map (
-			avs_csr_readdata            => ring_buffer_cam_2_csr_readdata,            --             csr.readdata
-			avs_csr_read                => ring_buffer_cam_2_csr_read,                --                .read
-			avs_csr_address             => ring_buffer_cam_2_csr_address,             --                .address
-			avs_csr_waitrequest         => ring_buffer_cam_2_csr_waitrequest,         --                .waitrequest
-			avs_csr_write               => ring_buffer_cam_2_csr_write,               --                .write
-			avs_csr_writedata           => ring_buffer_cam_2_csr_writedata,           --                .writedata
-			asi_hit_type1_channel       => data_splitter_0_out2_channel,              --       hit_type1.channel
-			asi_hit_type1_startofpacket => data_splitter_0_out2_startofpacket,        --                .startofpacket
-			asi_hit_type1_endofpacket   => data_splitter_0_out2_endofpacket,          --                .endofpacket
-			asi_hit_type1_empty         => data_splitter_0_out2_empty(0),             --                .empty
-			asi_hit_type1_data          => data_splitter_0_out2_data,                 --                .data
-			asi_hit_type1_valid         => data_splitter_0_out2_valid,                --                .valid
-			asi_hit_type1_ready         => data_splitter_0_out2_ready,                --                .ready
-			asi_hit_type1_error         => data_splitter_0_out2_error(0),             --                .error
-			aso_hit_type2_channel       => ring_buffer_cam_2_hit_type2_channel,       --       hit_type2.channel
-			aso_hit_type2_startofpacket => ring_buffer_cam_2_hit_type2_startofpacket, --                .startofpacket
-			aso_hit_type2_endofpacket   => ring_buffer_cam_2_hit_type2_endofpacket,   --                .endofpacket
-			aso_hit_type2_data          => ring_buffer_cam_2_hit_type2_data,          --                .data
-			aso_hit_type2_valid         => ring_buffer_cam_2_hit_type2_valid,         --                .valid
-			aso_hit_type2_ready         => ring_buffer_cam_2_hit_type2_ready,         --                .ready
-			aso_hit_type2_error         => ring_buffer_cam_2_hit_type2_error,         --                .error
-			i_clk                       => datapath_clock_clk,                        -- clock_interface.clk
-			i_rst                       => rst_controller_reset_out_reset,            -- reset_interface.reset
-			asi_ctrl_data               => run_control_splitter_0_out2_data,          --     run_control.data
-			asi_ctrl_valid              => run_control_splitter_0_out2_valid,         --                .valid
-			asi_ctrl_ready              => run_control_splitter_0_out2_ready,         --                .ready
-			aso_filllevel_data          => ring_buffer_cam_2_filllevel_data,          --       filllevel.data
-			aso_filllevel_valid         => ring_buffer_cam_2_filllevel_valid          --                .valid
+			avs_csr_readdata             => ring_buffer_cam_2_csr_readdata,                                     --                 csr.readdata
+			avs_csr_read                 => ring_buffer_cam_2_csr_read,                                         --                    .read
+			avs_csr_address              => ring_buffer_cam_2_csr_address,                                      --                    .address
+			avs_csr_waitrequest          => ring_buffer_cam_2_csr_waitrequest,                                  --                    .waitrequest
+			avs_csr_write                => ring_buffer_cam_2_csr_write,                                        --                    .write
+			avs_csr_writedata            => ring_buffer_cam_2_csr_writedata,                                    --                    .writedata
+			asi_hit_type1_channel        => data_splitter_0_out2_channel,                                       --           hit_type1.channel
+			asi_hit_type1_startofpacket  => data_splitter_0_out2_startofpacket,                                 --                    .startofpacket
+			asi_hit_type1_endofpacket    => data_splitter_0_out2_endofpacket,                                   --                    .endofpacket
+			asi_hit_type1_empty          => data_splitter_0_out2_empty(0),                                      --                    .empty
+			asi_hit_type1_data           => data_splitter_0_out2_data,                                          --                    .data
+			asi_hit_type1_valid          => data_splitter_0_out2_valid,                                         --                    .valid
+			asi_hit_type1_ready          => data_splitter_0_out2_ready,                                         --                    .ready
+			asi_hit_type1_error          => data_splitter_0_out2_error(0),                                      --                    .error
+			aso_hit_type2_channel        => ring_buffer_cam_2_hit_type2_channel,                                --           hit_type2.channel
+			aso_hit_type2_startofpacket  => ring_buffer_cam_2_hit_type2_startofpacket,                          --                    .startofpacket
+			aso_hit_type2_endofpacket    => ring_buffer_cam_2_hit_type2_endofpacket,                            --                    .endofpacket
+			aso_hit_type2_data           => ring_buffer_cam_2_hit_type2_data,                                   --                    .data
+			aso_hit_type2_valid          => ring_buffer_cam_2_hit_type2_valid,                                  --                    .valid
+			aso_hit_type2_ready          => ring_buffer_cam_2_hit_type2_ready,                                  --                    .ready
+			aso_hit_type2_error          => ring_buffer_cam_2_hit_type2_error,                                  --                    .error
+			i_clk                        => datapath_clock_clk,                                                 --     clock_interface.clk
+			i_rst                        => rst_controller_reset_out_reset,                                     --     reset_interface.reset
+			asi_ctrl_data                => run_control_splitter_0_out2_data,                                   --         run_control.data
+			asi_ctrl_valid               => run_control_splitter_0_out2_valid,                                  --                    .valid
+			asi_ctrl_ready               => run_control_splitter_0_out2_ready,                                  --                    .ready
+			aso_filllevel_data           => ring_buffer_cam_2_filllevel_data,                                   --           filllevel.data
+			aso_filllevel_valid          => ring_buffer_cam_2_filllevel_valid,                                  --                    .valid
+			coe_debug_fill_level         => open,                                                               -- debug_observability.fill_level
+			coe_debug_fifo_level         => open,                                                               --                    .fifo_level
+			coe_debug_queue_state        => open,                                                               --                    .queue_state
+			asi_hit_type1_metadata       => "0000000000000000000000000000000000000000000000000000000000000000", --         (terminated)
+			asi_hit_type1_metadata_valid => '0',                                                                --         (terminated)
+			aso_hit_type2_metadata       => open,                                                               --         (terminated)
+			aso_hit_type2_metadata_valid => open                                                                --         (terminated)
 		);
 
 	ring_buffer_cam_3 : component ring_buffer_cam
@@ -1104,41 +1132,48 @@ begin
 			IP_UID              => 1380074317,
 			VERSION_MAJOR       => 26,
 			VERSION_MINOR       => 2,
-			VERSION_PATCH       => 6,
-			BUILD               => 422,
-			VERSION_DATE        => 20260422,
-			VERSION_GIT         => 267039347,
+			VERSION_PATCH       => 10,
+			BUILD               => 507,
+			VERSION_DATE        => 20260507,
+			VERSION_GIT         => 963063649,
 			INSTANCE_ID         => 0
 		)
 		port map (
-			avs_csr_readdata            => ring_buffer_cam_3_csr_readdata,            --             csr.readdata
-			avs_csr_read                => ring_buffer_cam_3_csr_read,                --                .read
-			avs_csr_address             => ring_buffer_cam_3_csr_address,             --                .address
-			avs_csr_waitrequest         => ring_buffer_cam_3_csr_waitrequest,         --                .waitrequest
-			avs_csr_write               => ring_buffer_cam_3_csr_write,               --                .write
-			avs_csr_writedata           => ring_buffer_cam_3_csr_writedata,           --                .writedata
-			asi_hit_type1_channel       => data_splitter_0_out3_channel,              --       hit_type1.channel
-			asi_hit_type1_startofpacket => data_splitter_0_out3_startofpacket,        --                .startofpacket
-			asi_hit_type1_endofpacket   => data_splitter_0_out3_endofpacket,          --                .endofpacket
-			asi_hit_type1_empty         => data_splitter_0_out3_empty(0),             --                .empty
-			asi_hit_type1_data          => data_splitter_0_out3_data,                 --                .data
-			asi_hit_type1_valid         => data_splitter_0_out3_valid,                --                .valid
-			asi_hit_type1_ready         => data_splitter_0_out3_ready,                --                .ready
-			asi_hit_type1_error         => data_splitter_0_out3_error(0),             --                .error
-			aso_hit_type2_channel       => ring_buffer_cam_3_hit_type2_channel,       --       hit_type2.channel
-			aso_hit_type2_startofpacket => ring_buffer_cam_3_hit_type2_startofpacket, --                .startofpacket
-			aso_hit_type2_endofpacket   => ring_buffer_cam_3_hit_type2_endofpacket,   --                .endofpacket
-			aso_hit_type2_data          => ring_buffer_cam_3_hit_type2_data,          --                .data
-			aso_hit_type2_valid         => ring_buffer_cam_3_hit_type2_valid,         --                .valid
-			aso_hit_type2_ready         => ring_buffer_cam_3_hit_type2_ready,         --                .ready
-			aso_hit_type2_error         => ring_buffer_cam_3_hit_type2_error,         --                .error
-			i_clk                       => datapath_clock_clk,                        -- clock_interface.clk
-			i_rst                       => rst_controller_reset_out_reset,            -- reset_interface.reset
-			asi_ctrl_data               => run_control_splitter_0_out3_data,          --     run_control.data
-			asi_ctrl_valid              => run_control_splitter_0_out3_valid,         --                .valid
-			asi_ctrl_ready              => run_control_splitter_0_out3_ready,         --                .ready
-			aso_filllevel_data          => ring_buffer_cam_3_filllevel_data,          --       filllevel.data
-			aso_filllevel_valid         => ring_buffer_cam_3_filllevel_valid          --                .valid
+			avs_csr_readdata             => ring_buffer_cam_3_csr_readdata,                                     --                 csr.readdata
+			avs_csr_read                 => ring_buffer_cam_3_csr_read,                                         --                    .read
+			avs_csr_address              => ring_buffer_cam_3_csr_address,                                      --                    .address
+			avs_csr_waitrequest          => ring_buffer_cam_3_csr_waitrequest,                                  --                    .waitrequest
+			avs_csr_write                => ring_buffer_cam_3_csr_write,                                        --                    .write
+			avs_csr_writedata            => ring_buffer_cam_3_csr_writedata,                                    --                    .writedata
+			asi_hit_type1_channel        => data_splitter_0_out3_channel,                                       --           hit_type1.channel
+			asi_hit_type1_startofpacket  => data_splitter_0_out3_startofpacket,                                 --                    .startofpacket
+			asi_hit_type1_endofpacket    => data_splitter_0_out3_endofpacket,                                   --                    .endofpacket
+			asi_hit_type1_empty          => data_splitter_0_out3_empty(0),                                      --                    .empty
+			asi_hit_type1_data           => data_splitter_0_out3_data,                                          --                    .data
+			asi_hit_type1_valid          => data_splitter_0_out3_valid,                                         --                    .valid
+			asi_hit_type1_ready          => data_splitter_0_out3_ready,                                         --                    .ready
+			asi_hit_type1_error          => data_splitter_0_out3_error(0),                                      --                    .error
+			aso_hit_type2_channel        => ring_buffer_cam_3_hit_type2_channel,                                --           hit_type2.channel
+			aso_hit_type2_startofpacket  => ring_buffer_cam_3_hit_type2_startofpacket,                          --                    .startofpacket
+			aso_hit_type2_endofpacket    => ring_buffer_cam_3_hit_type2_endofpacket,                            --                    .endofpacket
+			aso_hit_type2_data           => ring_buffer_cam_3_hit_type2_data,                                   --                    .data
+			aso_hit_type2_valid          => ring_buffer_cam_3_hit_type2_valid,                                  --                    .valid
+			aso_hit_type2_ready          => ring_buffer_cam_3_hit_type2_ready,                                  --                    .ready
+			aso_hit_type2_error          => ring_buffer_cam_3_hit_type2_error,                                  --                    .error
+			i_clk                        => datapath_clock_clk,                                                 --     clock_interface.clk
+			i_rst                        => rst_controller_reset_out_reset,                                     --     reset_interface.reset
+			asi_ctrl_data                => run_control_splitter_0_out3_data,                                   --         run_control.data
+			asi_ctrl_valid               => run_control_splitter_0_out3_valid,                                  --                    .valid
+			asi_ctrl_ready               => run_control_splitter_0_out3_ready,                                  --                    .ready
+			aso_filllevel_data           => ring_buffer_cam_3_filllevel_data,                                   --           filllevel.data
+			aso_filllevel_valid          => ring_buffer_cam_3_filllevel_valid,                                  --                    .valid
+			coe_debug_fill_level         => open,                                                               -- debug_observability.fill_level
+			coe_debug_fifo_level         => open,                                                               --                    .fifo_level
+			coe_debug_queue_state        => open,                                                               --                    .queue_state
+			asi_hit_type1_metadata       => "0000000000000000000000000000000000000000000000000000000000000000", --         (terminated)
+			asi_hit_type1_metadata_valid => '0',                                                                --         (terminated)
+			aso_hit_type2_metadata       => open,                                                               --         (terminated)
+			aso_hit_type2_metadata_valid => open                                                                --         (terminated)
 		);
 
 	run_control_splitter_0 : component feb_system_v3_pipe_data_path_subsystem_hit_stack_subsystem_0_run_control_splitter_0

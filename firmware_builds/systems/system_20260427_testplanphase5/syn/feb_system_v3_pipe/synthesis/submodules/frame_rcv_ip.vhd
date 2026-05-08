@@ -28,9 +28,10 @@
 -- Revision 1.35 - YW: Guard TERMINATING idle-close until the upstream byte lane stays quiet long enough for a delayed final frame.
 -- Revision 1.36 - YW: Close TERMINATING on the first empty frame and keep the idle guard only as a fallback.
 -- Revision 1.37 - YW: Keep the dedicated CRC_CHECK cycle alive on idle-BC return so bad-CRC frames retire the sideband pulse and counter coherently.
--- Version : 26.0.6
--- Date    : 20260418
--- Change  : Keep CRC_CHECK alive on idle-BC return for bad-CRC accounting, then refresh the packaging/formal metadata around the verified fix batch.
+-- Revision 1.38 - YW: Add DEBUG_LV-gated exported observability for parser fill levels and per-hit metadata.
+-- Version : 26.1.0
+-- Date    : 20260506
+-- Change  : Add DEBUG_LV-gated debug conduits for parser/source FIFO observability and type0 hit metadata without changing DEBUG_LV=0 datapath behavior.
 
 -- Additional Comments:
 --      IP wrapper layer: 
@@ -64,7 +65,7 @@ generic (
 	-- +--------------------+
     -- | Generation setting |
     -- +--------------------+
-    DEBUG_LV			    : natural := 0  -- debug level; 0: no debug. 1: syn and sim. 2: sim-only
+    DEBUG_LV			    : natural := 0  -- debug level; 0: no debug. 1: synthesizable observability. 2: level 1 plus metadata
 );
 port(
 	-- AVST sink [rx8b1k]
@@ -119,6 +120,12 @@ port(
 	asi_ctrl_data			: in  std_logic_vector(8 downto 0); 
 	asi_ctrl_valid			: in  std_logic;
 	asi_ctrl_ready			: out std_logic;
+
+    -- Debug conduit exports. The Qsys package disables these interfaces for
+    -- DEBUG_LV=0, but the ports remain driven to deterministic zeroes.
+    coe_debug_fifo_fill_levels : out std_logic_vector(31 downto 0);
+    coe_debug_hit_metadata     : out std_logic_vector(63 downto 0);
+    coe_debug_hit_metadata_valid : out std_logic;
 	
     -- clock and reset interface 
     -- [data_reset] (data plane reset)
@@ -210,6 +217,7 @@ architecture rtl of frame_rcv_ip is
 	-- data from lvds receiver
 	signal i_data                  		: std_logic_vector(7 downto 0);
 	signal i_byteisk               		: std_logic;
+	signal i_symbol_valid          		: std_logic;
 	
 	-- header information
 	signal o_hits						: t_hit_presort;
@@ -262,6 +270,10 @@ architecture rtl of frame_rcv_ip is
         crc_err_counter : std_logic_vector(31 downto 0);
 	end record;
 	signal csr 		: csr_t;
+
+    signal debug_fifo_fill_levels_int  : std_logic_vector(31 downto 0);
+    signal debug_hit_metadata_int      : std_logic_vector(63 downto 0);
+    signal debug_hit_metadata_valid_int : std_logic;
 	 
 begin
 
@@ -286,6 +298,69 @@ begin
 	                      and terminating_pending = '0'
 	                  ) else
 	                  '0';
+
+    proc_debug_pack_comb : process(all)
+        variable debug_frame_remaining_v : unsigned(9 downto 0);
+    begin
+        debug_frame_remaining_v       := (others => '0');
+        debug_fifo_fill_levels_int    <= (others => '0');
+        debug_hit_metadata_int        <= (others => '0');
+        debug_hit_metadata_valid_int  <= '0';
+
+        if (i_rst = '0') then
+            if (unsigned(p_frame_len) > p_word_cnt) then
+                debug_frame_remaining_v := unsigned(p_frame_len) - p_word_cnt;
+            end if;
+
+            -- DEBUG_LV=1 exports frame/parser occupancy plus the MuTRiG
+            -- source FIFO flag decoded from frame_flags[1]. The top has no
+            -- internal FIFO usedw counters, so this is the closest local
+            -- fill-level observability point.
+            debug_fifo_fill_levels_int(9 downto 0)   <= std_logic_vector(p_word_cnt);
+            debug_fifo_fill_levels_int(19 downto 10) <= p_frame_len;
+            debug_fifo_fill_levels_int(29 downto 20) <= std_logic_vector(debug_frame_remaining_v);
+            debug_fifo_fill_levels_int(30)           <= p_frame_flags(1);
+            debug_fifo_fill_levels_int(31)           <= o_busy;
+
+            -- DEBUG_LV=2 adds one metadata beat aligned with each type0 hit beat.
+            -- Field map:
+            -- [15:0] frame number, [25:16] hit index, [35:26] frame length,
+            -- [41:36] frame flags, [45:42] ASIC/channel low bits,
+            -- [48:46] error, [49] SOP, [50] EOP, [51] short-mode,
+            -- [52] T_BadHit, [53] E_BadHit, [58:54] E_fine, [63:59] reserved.
+            debug_hit_metadata_int(15 downto 0)  <= p_frame_number;
+            debug_hit_metadata_int(25 downto 16) <= std_logic_vector(p_word_cnt);
+            debug_hit_metadata_int(35 downto 26) <= p_frame_len;
+            debug_hit_metadata_int(41 downto 36) <= p_frame_flags;
+            debug_hit_metadata_int(45 downto 42) <= o_hits.asic;
+            debug_hit_metadata_int(48 downto 46) <= aso_hit_type0_error;
+            debug_hit_metadata_int(49)           <= aso_hit_type0_startofpacket;
+            debug_hit_metadata_int(50)           <= aso_hit_type0_endofpacket;
+            debug_hit_metadata_int(51)           <= p_txflag_isShort;
+            debug_hit_metadata_int(52)           <= o_hits.T_BadHit;
+            debug_hit_metadata_int(53)           <= o_hits.E_BadHit;
+            debug_hit_metadata_int(58 downto 54) <= o_hits.E_fine;
+            debug_hit_metadata_valid_int         <= p_new_word;
+        end if;
+    end process proc_debug_pack_comb;
+
+    gen_debug_disabled : if DEBUG_LV = 0 generate
+        coe_debug_fifo_fill_levels   <= (others => '0');
+        coe_debug_hit_metadata       <= (others => '0');
+        coe_debug_hit_metadata_valid <= '0';
+    end generate gen_debug_disabled;
+
+    gen_debug_level1 : if DEBUG_LV = 1 generate
+        coe_debug_fifo_fill_levels   <= debug_fifo_fill_levels_int;
+        coe_debug_hit_metadata       <= (others => '0');
+        coe_debug_hit_metadata_valid <= '0';
+    end generate gen_debug_level1;
+
+    gen_debug_level2 : if DEBUG_LV >= 2 generate
+        coe_debug_fifo_fill_levels   <= debug_fifo_fill_levels_int;
+        coe_debug_hit_metadata       <= debug_hit_metadata_int;
+        coe_debug_hit_metadata_valid <= debug_hit_metadata_valid_int;
+    end generate gen_debug_level2;
 
     -- ====================================================================================================
     -- @commentName     Recovery of bad frame for the downstream 
@@ -332,9 +407,15 @@ begin
 		if (asi_rx8b1k_error(2) = '0' and asi_rx8b1k_valid = '1') then
 			i_data				<= asi_rx8b1k_data(7 downto 0);
 			i_byteisk			<= asi_rx8b1k_data(8);
-		else -- halt on invalid input or mask if "loss_sync_pattern" error is present
+			i_symbol_valid		<= '1';
+		elsif (asi_rx8b1k_error(2) = '1') then
 			i_data				<= x"BC";
 			i_byteisk			<= '1';
+			i_symbol_valid		<= '1';
+		else -- Avalon-ST valid gaps are stalls, not MuTRiG idle symbols.
+			i_data				<= x"BC";
+			i_byteisk			<= '1';
+			i_symbol_valid		<= '0';
 		end if;
 	end process proc_input_wrapper_comb;
 	
@@ -749,7 +830,9 @@ begin
 		sop_comb			<= '0';
 		eop_comb			<= '0';
 
-        if ( i_byteisk = '1' and i_data = x"BC" and p_state /= FS_CRC_CHECK ) then
+        if ( i_symbol_valid = '0' ) then
+            n_crc_din_valid <= '0';
+        elsif ( i_byteisk = '1' and i_data = x"BC" and p_state /= FS_CRC_CHECK ) then
             -- ---------------------------------------
             -- YW: restore to idle in the next cycle
             -- ---------------------------------------
