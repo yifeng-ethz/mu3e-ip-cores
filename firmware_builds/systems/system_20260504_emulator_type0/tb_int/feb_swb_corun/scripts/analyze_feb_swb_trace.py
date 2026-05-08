@@ -25,6 +25,11 @@ DMA_PADDING_WORD = (1 << 256) - 1
 HIT_WORD_MASK = (1 << 64) - 1
 DMA_TS_MASK = (1 << 39) - 1
 FRAME_STRIDE_8NS = 128 << 4
+REFERENCE_PRE_RBCAM_CASE = "prof_int_002_pre_rbcam_periodic_asic0_full32_100k"
+REFERENCE_POST_RBCAM_CASE = (
+    "prof_int_002_post_rbcam_periodic_asic0_full32_emu_direct_100k_"
+    "1ms_gap1ms_20260507"
+)
 
 
 @dataclass
@@ -215,6 +220,159 @@ def make_mutrig_dma_hit(ts_high: int, ts_low: int, shd_ts: int, hit_word: int) -
 def read_csv(path: Path) -> list[dict[str, str]]:
     with path.open("r", encoding="ascii", newline="") as handle:
         return list(csv.DictReader(handle))
+
+
+def parse_debug_id(value: str) -> int:
+    text = value.strip().lower()
+    if text.startswith("0x"):
+        text = text[2:]
+        text = "".join("0" if char in "xz" else char for char in text)
+        return int(text, 16)
+    return int(text)
+
+
+def load_pre_rbcam_reference(tb_int_root: Path) -> tuple[list[float], list[str]]:
+    path = tb_int_root / "sim" / REFERENCE_PRE_RBCAM_CASE / "pre_rbcam_records.csv"
+    values: list[float] = []
+    issues: list[str] = []
+    if not path.is_file():
+        return values, [f"pre_rbcam_reference: missing {path}"]
+    for row in read_csv(path):
+        if row.get("run_origin", "1").strip() and int(row.get("run_origin", "1")) == 0:
+            continue
+        try:
+            values.append(
+                (int(row["abs_ts_pre_rbcam"]) - int(row["abs_ts_a"])) / 8000.0
+            )
+        except (KeyError, ValueError) as exc:
+            issues.append(f"pre_rbcam_reference: malformed row in {path}: {exc}")
+    return values, issues
+
+
+def load_post_rbcam_reference(tb_int_root: Path) -> tuple[list[float], list[str]]:
+    case_dir = tb_int_root / "sim" / REFERENCE_POST_RBCAM_CASE
+    ingress_path = case_dir / "rbcam_ingress_trace.csv"
+    post_path = case_dir / "post_rbcam_records.csv"
+    values: list[float] = []
+    issues: list[str] = []
+    ingress: dict[int, tuple[int, int, int]] = {}
+    if not ingress_path.is_file() or not post_path.is_file():
+        return values, [f"post_rbcam_reference: missing {case_dir} trace CSVs"]
+
+    for row in read_csv(ingress_path):
+        if row.get("would_enter_deassembly") != "1":
+            continue
+        if row.get("metadata_valid") != "1":
+            continue
+        try:
+            ingress[parse_debug_id(row["metadata_hex"])] = (
+                int(row["time_ps"]),
+                int(row["gts_8n"]),
+                int(row["hit_ts8n"]),
+            )
+        except (KeyError, ValueError) as exc:
+            issues.append(f"post_rbcam_reference: malformed ingress row: {exc}")
+
+    for row in read_csv(post_path):
+        if row.get("run_origin", "1").strip() and int(row.get("run_origin", "1")) == 0:
+            continue
+        try:
+            metadata_id = parse_debug_id(row["root_hit_id"])
+            anchor = ingress.get(metadata_id)
+            if anchor is None:
+                issues.append(f"post_rbcam_reference: missing DEBUG id {metadata_id}")
+                continue
+            ingress_time_ps, ingress_gts_8n, hit_ts8n = anchor
+            elapsed_cycles = (int(row["abs_ts_post_rbcam"]) - ingress_time_ps) // 8000
+            values.append(float((ingress_gts_8n + elapsed_cycles - hit_ts8n) % 8192))
+        except (KeyError, ValueError) as exc:
+            issues.append(f"post_rbcam_reference: malformed post row: {exc}")
+    return values, issues
+
+
+def write_rbcam_reference_trace(
+    path: Path,
+    pre_values: list[float],
+    post_values: list[float],
+) -> None:
+    rows: list[dict[str, object]] = []
+    for idx, value in enumerate(pre_values):
+        rows.append(
+            {
+                "metric": "pre_rbcam_lifetime_cycles",
+                "checkpoint": "pre-rbCAM full-FEB reference",
+                "sample_index": idx,
+                "lifetime_cycles": f"{value:.3f}",
+                "source_case": REFERENCE_PRE_RBCAM_CASE,
+            }
+        )
+    for idx, value in enumerate(post_values):
+        rows.append(
+            {
+                "metric": "post_rbcam_lifetime_cycles",
+                "checkpoint": "post-rbCAM DEBUG age reference",
+                "sample_index": idx,
+                "lifetime_cycles": f"{value:.3f}",
+                "source_case": REFERENCE_POST_RBCAM_CASE,
+            }
+        )
+    write_rows(
+        path,
+        ["metric", "checkpoint", "sample_index", "lifetime_cycles", "source_case"],
+        rows,
+    )
+
+
+def write_reference_stats(
+    path: Path,
+    pre_values: list[float],
+    post_values: list[float],
+) -> None:
+    rows: list[dict[str, object]] = []
+    for metric, label, values in (
+        ("pre_rbcam_lifetime_cycles", "pre-rbCAM full-FEB reference", pre_values),
+        ("post_rbcam_lifetime_cycles", "post-rbCAM DEBUG age reference", post_values),
+    ):
+        if values:
+            rows.append(
+                {
+                    "metric": metric,
+                    "checkpoint": label,
+                    "count": len(values),
+                    "min_cycles": f"{min(values):.3f}",
+                    "p50_cycles": f"{percentile(values, 50):.3f}",
+                    "p95_cycles": f"{percentile(values, 95):.3f}",
+                    "max_cycles": f"{max(values):.3f}",
+                    "mean_cycles": f"{sum(values) / len(values):.3f}",
+                }
+            )
+        else:
+            rows.append(
+                {
+                    "metric": metric,
+                    "checkpoint": label,
+                    "count": 0,
+                    "min_cycles": "",
+                    "p50_cycles": "",
+                    "p95_cycles": "",
+                    "max_cycles": "",
+                    "mean_cycles": "",
+                }
+            )
+    write_rows(
+        path,
+        [
+            "metric",
+            "checkpoint",
+            "count",
+            "min_cycles",
+            "p50_cycles",
+            "p95_cycles",
+            "max_cycles",
+            "mean_cycles",
+        ],
+        rows,
+    )
 
 
 def parse_stream_hits(path: Path, stage: str, has_lane: bool) -> tuple[list[HitRecord], list[str]]:
@@ -809,7 +967,7 @@ def write_range_validation(
             "feb_egress_lifetime_cycles",
             2049.0,
             6143.0,
-            "profile-specific FEB store-and-forward lifetime from source generation",
+            "profile-specific FEB store-and-forward lifetime from carried hit GTS",
         ),
         (
             "opq_ingress",
@@ -1035,6 +1193,13 @@ def main() -> int:
     )
     dma_hits, padding_words = parse_dma_hits(trace_dir / "feb_swb_dma_trace.csv")
     opq_log = parse_opq_native_log(args.opq_log)
+    tb_int_root = Path(__file__).resolve().parents[2]
+    pre_rbcam_reference, pre_rbcam_reference_issues = load_pre_rbcam_reference(
+        tb_int_root
+    )
+    post_rbcam_reference, post_rbcam_reference_issues = load_post_rbcam_reference(
+        tb_int_root
+    )
 
     source_index = build_index(source_hits, lambda item: item.dma_hit)
     pre_rbcam_index = build_index(pre_rbcam_hits, lambda item: item.dma_hit)
@@ -1090,6 +1255,7 @@ def main() -> int:
         require(bucket_start <= abs_ts_8ns <= bucket_end, "source_bucket")
         require(expected.frame_id == abs_ts_8ns // FRAME_STRIDE_8NS, "source_frame")
         require((abs_ts_8ns & 0xF) == source_ts_low_nibble(expected.hit_word), "source_ts_nibble")
+        require((abs_ts_8ns & 0x7) == source_rem(expected.hit_word), "source_ts_rem")
         require(
             args.expected_hit_period_8ns > 0
             and abs_ts_8ns % args.expected_hit_period_8ns == 0,
@@ -1102,6 +1268,10 @@ def main() -> int:
         require(debug_hit_id(expected.debug_meta) == expected_full_hit_id, "debug_hit_id")
         require(debug_ps(expected.debug_meta) == (abs_ts_8ns & 0xFF), "debug_ps")
         require(debug_ts(expected.debug_meta) == (abs_ts_8ns & 0xFFFF), "debug_ts")
+        require(
+            debug_ts(expected.debug_meta) == (expected_ts & 0xFFFF),
+            "debug_ts_matches_dma",
+        )
         require(source_generation is not None, "source_generation_present")
         if source_generation is not None:
             require(source_generation.lane == expected.lane, "source_generation_lane")
@@ -1156,9 +1326,7 @@ def main() -> int:
                 f"hit_id={expected_full_hit_id} channel={channel} checks={';'.join(checks)}"
             )
 
-        source_time_ps = (
-            source_generation.time_ps if source_generation is not None else None
-        )
+        lifetime_origin_time_ps = abs_ts_8ns * 8000
         hit_rows.append(
             {
                 "status": status,
@@ -1189,6 +1357,10 @@ def main() -> int:
                 "actual_dma_hit": f"0x{dma.hit_word:016x}" if dma is not None else "missing",
                 "dma_ts_8ns": dma_ts_8ns(dma.hit_word) if dma is not None else -1,
                 "debug_meta": f"0x{expected.debug_meta:016x}",
+                "debug_ps_tag": debug_ps(expected.debug_meta),
+                "debug_ts_tag": debug_ts(expected.debug_meta),
+                "debug_hit_id": debug_hit_id(expected.debug_meta),
+                "lifetime_origin_time_ps": lifetime_origin_time_ps,
                 "checks": ";".join(checks),
             }
         )
@@ -1211,28 +1383,33 @@ def main() -> int:
                 "dma_time_ps": dma.time_ps if dma is not None else "",
                 "pre_rbcam_lifetime_cycles": cycles_from_source_time(
                     pre_rbcam.time_ps if pre_rbcam is not None else None,
-                    source_time_ps,
+                    lifetime_origin_time_ps,
                 ),
                 "post_rbcam_lifetime_cycles": cycles_from_source_time(
                     post_rbcam.time_ps if post_rbcam is not None else None,
-                    source_time_ps,
+                    lifetime_origin_time_ps,
                 ),
                 "feb_egress_lifetime_cycles": cycles_from_source_time(
                     expected.time_ps,
-                    source_time_ps,
+                    lifetime_origin_time_ps,
                 ),
                 "opq_ingress_lifetime_cycles": cycles_from_source_time(
                     opq_ingress.time_ps if opq_ingress is not None else None,
-                    source_time_ps,
+                    lifetime_origin_time_ps,
                 ),
                 "opq_egress_lifetime_cycles": cycles_from_source_time(
                     opq_egress.time_ps if opq_egress is not None else None,
-                    source_time_ps,
+                    lifetime_origin_time_ps,
                 ),
                 "dma_lifetime_cycles": cycles_from_source_time(
                     dma.time_ps if dma is not None else None,
-                    source_time_ps,
+                    lifetime_origin_time_ps,
                 ),
+                "lifetime_origin_time_ps": lifetime_origin_time_ps,
+                "lifetime_origin_abs_ts_8ns": abs_ts_8ns,
+                "debug_ps_tag": debug_ps(expected.debug_meta),
+                "debug_ts_tag": debug_ts(expected.debug_meta),
+                "debug_hit_id": debug_hit_id(expected.debug_meta),
             }
         )
 
@@ -1281,6 +1458,8 @@ def main() -> int:
     tunnel_scoreboard_path = trace_dir / "feb_swb_tunnel_scoreboard.csv"
     factual_scoreboard_path = trace_dir / "feb_swb_factual_scoreboard.csv"
     opq_native_summary_path = trace_dir / "feb_swb_opq_native_summary.csv"
+    rbcam_reference_trace_path = trace_dir / "feb_swb_rbcam_reference_trace.csv"
+    rbcam_reference_stats_path = trace_dir / "feb_swb_rbcam_reference_stats.csv"
     summary_path = trace_dir / "feb_swb_trace_debug_summary.txt"
     write_rows(
         hit_trace_path,
@@ -1311,6 +1490,10 @@ def main() -> int:
             "actual_dma_hit",
             "dma_ts_8ns",
             "debug_meta",
+            "debug_ps_tag",
+            "debug_ts_tag",
+            "debug_hit_id",
+            "lifetime_origin_time_ps",
             "checks",
         ],
         hit_rows,
@@ -1337,10 +1520,25 @@ def main() -> int:
             "opq_ingress_lifetime_cycles",
             "opq_egress_lifetime_cycles",
             "dma_lifetime_cycles",
+            "lifetime_origin_time_ps",
+            "lifetime_origin_abs_ts_8ns",
+            "debug_ps_tag",
+            "debug_ts_tag",
+            "debug_hit_id",
         ],
         lifetime_rows,
     )
     write_lifetime_stats(lifetime_stats_path, lifetime_rows)
+    write_rbcam_reference_trace(
+        rbcam_reference_trace_path,
+        pre_rbcam_reference,
+        post_rbcam_reference,
+    )
+    write_reference_stats(
+        rbcam_reference_stats_path,
+        pre_rbcam_reference,
+        post_rbcam_reference,
+    )
     opq_queue_rows, opq_queue_stats = build_opq_queue_model(
         ingress_frames,
         opq_frames,
@@ -1389,6 +1587,11 @@ def main() -> int:
         handle.write(f"source_generation_hits={len(source_hits)}\n")
         handle.write(f"pre_rbcam_hits={len(pre_rbcam_hits)}\n")
         handle.write(f"post_rbcam_hits={len(post_rbcam_hits)}\n")
+        handle.write(f"pre_rbcam_reference_hits={len(pre_rbcam_reference)}\n")
+        handle.write(f"post_rbcam_reference_hits={len(post_rbcam_reference)}\n")
+        handle.write(
+            f"rbcam_reference_issue_count={len(pre_rbcam_reference_issues) + len(post_rbcam_reference_issues)}\n"
+        )
         handle.write(f"expected_feb_hits={len(feb_hits)}\n")
         handle.write(f"opq_ingress_hits={len(opq_ingress_hits)}\n")
         handle.write(f"opq_egress_hits={len(opq_egress_hits)}\n")
@@ -1427,6 +1630,10 @@ def main() -> int:
         handle.write(f"issue_count={len(failures)}\n")
         for failure in failures:
             handle.write(f"issue={failure}\n")
+        for issue in pre_rbcam_reference_issues[:32]:
+            handle.write(f"reference_issue={issue}\n")
+        for issue in post_rbcam_reference_issues[:32]:
+            handle.write(f"reference_issue={issue}\n")
 
     if failures:
         print(
