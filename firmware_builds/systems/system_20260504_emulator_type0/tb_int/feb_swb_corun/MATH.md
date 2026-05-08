@@ -258,27 +258,58 @@ post-rbCAM DEBUG reference:
   validation aperture = [2000, 2200) cycles
 ```
 
-The current 100 kHz/channel full32 reference summaries are:
+The accepted 100 kHz/channel full32 rbCAM/FEB reference case is:
+
+```text
+tb_int/sim/feb_egress_queueing_20260508/
+  prof_int_002_feb_egress_periodic_asic0_full32_emu_direct_100k_1ms_gap1ms_20260508
+```
+
+The reference is accepted only if the trace health checks pass:
+
+```text
+drops.csv                         = header only
+counter_agreement.csv             = available=1 and agree=1 for all counters
+transcript UVM_ERROR              = 0
+transcript missing/ghost residual = 0 at every reported tunnel
+```
+
+The current accepted summaries are:
 
 ```text
 pre-rbCAM:
-  count = 13728
-  min/p50/p95/max = 73 / 84930 / 85373 / 85415 cycles
-  in [0,2000] = 1088 hits; out = 12640 hits
+  count = 3136
+  min/p50/p95/max = 17 / 17 / 17 / 17 cycles
 
 post-rbCAM:
   count = 3136
-  min/p50/max = 2001 / 2070 / 2139 cycles
+  min/p50/p95/max = 2001 / 2070 / 2128 / 2139 cycles
   in [2000,2200) = 3136 hits
 ```
 
-This split is intentional.  The pre-rbCAM direct latency can show most hits
-outside `[0,2000]` because it is measured before the rbCAM resequencing point
-against the upstream source timestamp and therefore includes source/FEB
-alignment and queueing phase.  The post-rbCAM DEBUG age is measured after the
-DEBUG-matched rbCAM ingress point against the carried hit timestamp modulo the
-8192-cycle rbCAM epoch, so it must concentrate inside the programmed
-`[2000,2200)` acceptance aperture.
+The pre-rbCAM reference point is before the programmed rbCAM retention delay,
+so the clean full-FEB reference shows the fixed 17-cycle transport marker.  The
+post-rbCAM DEBUG age is measured after the DEBUG-matched rbCAM ingress point
+against the carried hit timestamp modulo the 8192-cycle rbCAM epoch, so it must
+concentrate inside the programmed `[2000,2200)` acceptance aperture.
+
+The earlier reference
+`prof_int_002_pre_rbcam_periodic_asic0_full32_100k` is rejected for this plot.
+Its pre-rbCAM distribution had `p50=84930` cycles and only 1088 hits inside
+`[0,2000]`, but its transcript also reported residual loss:
+
+```text
+A=15872 PRE=13728 POST=13041 FEB=10921
+A->PRE missing      = 2144
+PRE->POST missing   = 687
+POST->FEB missing   = 2134
+drops.csv rows      = 4965
+```
+
+That far pre-rbCAM peak is therefore not accepted no-drop evidence for this
+contract.  Any future rbCAM reference with nonempty `drops.csv`, failed counter
+agreement, nonzero UVM errors, or nonzero missing/ghost residuals is an analyzer
+failure before plotting.
 
 ## FEB Frame Assembly and Store-Forward Bound
 

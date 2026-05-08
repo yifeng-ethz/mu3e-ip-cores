@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import collections
 import csv
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -25,11 +26,13 @@ DMA_PADDING_WORD = (1 << 256) - 1
 HIT_WORD_MASK = (1 << 64) - 1
 DMA_TS_MASK = (1 << 39) - 1
 FRAME_STRIDE_8NS = 128 << 4
-REFERENCE_PRE_RBCAM_CASE = "prof_int_002_pre_rbcam_periodic_asic0_full32_100k"
-REFERENCE_POST_RBCAM_CASE = (
-    "prof_int_002_post_rbcam_periodic_asic0_full32_emu_direct_100k_"
-    "1ms_gap1ms_20260507"
+REFERENCE_RBCAM_CASE = (
+    "feb_egress_queueing_20260508/"
+    "prof_int_002_feb_egress_periodic_asic0_full32_emu_direct_100k_"
+    "1ms_gap1ms_20260508"
 )
+REFERENCE_PRE_RBCAM_CASE = REFERENCE_RBCAM_CASE
+REFERENCE_POST_RBCAM_CASE = REFERENCE_RBCAM_CASE
 
 
 @dataclass
@@ -290,6 +293,119 @@ def load_post_rbcam_reference(tb_int_root: Path) -> tuple[list[float], list[str]
     return values, issues
 
 
+def validate_rbcam_reference(tb_int_root: Path) -> tuple[list[dict[str, object]], list[str]]:
+    case_dir = tb_int_root / "sim" / REFERENCE_RBCAM_CASE
+    rows: list[dict[str, object]] = []
+    issues: list[str] = []
+
+    def add(check: str, status: str, detail: str) -> None:
+        rows.append(
+            {
+                "source_case": REFERENCE_RBCAM_CASE,
+                "check": check,
+                "status": status,
+                "detail": detail,
+            }
+        )
+        if status != "PASS":
+            issues.append(f"rbcam_reference_{check}: {detail}")
+
+    if not case_dir.is_dir():
+        add("case_dir", "FAIL", f"missing {case_dir}")
+        return rows, issues
+    add("case_dir", "PASS", str(case_dir))
+
+    drops_path = case_dir / "drops.csv"
+    if not drops_path.is_file():
+        add("drops_empty", "FAIL", f"missing {drops_path}")
+    else:
+        drop_rows = read_csv(drops_path)
+        if drop_rows:
+            last_seen = collections.Counter(
+                row.get("last_seen_stage", "unknown") for row in drop_rows
+            )
+            detail = (
+                f"{len(drop_rows)} drop rows; "
+                + ";".join(f"{key}={value}" for key, value in sorted(last_seen.items()))
+            )
+            add("drops_empty", "FAIL", detail)
+        else:
+            add("drops_empty", "PASS", "no residual drop rows")
+
+    counter_path = case_dir / "counter_agreement.csv"
+    if not counter_path.is_file():
+        add("counter_agreement", "FAIL", f"missing {counter_path}")
+    else:
+        counter_rows = read_csv(counter_path)
+        bad_counters: list[str] = []
+        for row in counter_rows:
+            try:
+                available = int(row.get("available", "0"))
+                agree = int(row.get("agree", "0"))
+            except ValueError:
+                bad_counters.append(f"{row.get('counter', 'unknown')}: malformed")
+                continue
+            if available != 1 or agree != 1:
+                bad_counters.append(
+                    f"{row.get('counter', 'unknown')}: available={available} agree={agree}"
+                )
+        if bad_counters:
+            add("counter_agreement", "FAIL", ";".join(bad_counters))
+        else:
+            add("counter_agreement", "PASS", f"{len(counter_rows)} counters agree")
+
+    transcript_path = case_dir / "transcript"
+    if not transcript_path.is_file():
+        add("transcript", "FAIL", f"missing {transcript_path}")
+    else:
+        transcript = transcript_path.read_text(encoding="ascii", errors="ignore")
+        if re.search(r"UVM_ERROR\s*:\s*0\b", transcript):
+            add("transcript_uvm_error", "PASS", "UVM_ERROR=0")
+        else:
+            add("transcript_uvm_error", "FAIL", "missing clean UVM_ERROR=0 line")
+
+        residual_lines = [
+            line.strip()
+            for line in transcript.splitlines()
+            if ("residuals" in line or "stable_missing" in line) and "=" in line
+        ]
+        residual_bad: list[str] = []
+        for line in residual_lines:
+            spans: list[tuple[str, bool]] = []
+            for start_token, end_tokens, expect_all_zero in (
+                ("residuals fifo ", (" stable_missing ", " debug_obs "), False),
+                ("debug_residuals ", (" debug_duplicate_ids=",), False),
+                ("stable_missing ", (" debug_obs ", " debug_residuals "), True),
+            ):
+                if start_token not in line:
+                    continue
+                span = line.split(start_token, 1)[1]
+                for end_token in end_tokens:
+                    if end_token in span:
+                        span = span.split(end_token, 1)[0]
+                spans.append((span, expect_all_zero))
+            for span, expect_all_zero in spans:
+                for label, matched, missing, ghost in re.findall(
+                    r"([A-Za-z0-9_>/\-]+)=([0-9]+)/([0-9]+)/([0-9]+)",
+                    span,
+                ):
+                    if expect_all_zero:
+                        if int(matched) != 0 or int(missing) != 0 or int(ghost) != 0:
+                            residual_bad.append(f"{label}: values={matched}/{missing}/{ghost}")
+                    elif int(missing) != 0 or int(ghost) != 0:
+                        residual_bad.append(
+                            f"{label}: matched={matched} missing={missing} ghost={ghost}"
+                        )
+        if residual_bad:
+            add("transcript_residuals", "FAIL", ";".join(residual_bad))
+        elif residual_lines:
+            add("transcript_residuals", "PASS", "all reported missing/ghost residuals zero")
+        else:
+            add("transcript_residuals", "FAIL", "no residual summary lines found")
+
+    return rows, issues
+
+
 def write_rbcam_reference_trace(
     path: Path,
     pre_values: list[float],
@@ -373,6 +489,10 @@ def write_reference_stats(
         ],
         rows,
     )
+
+
+def write_reference_health(path: Path, rows: list[dict[str, object]]) -> None:
+    write_rows(path, ["source_case", "check", "status", "detail"], rows)
 
 
 def parse_stream_hits(path: Path, stage: str, has_lane: bool) -> tuple[list[HitRecord], list[str]]:
@@ -1200,6 +1320,9 @@ def main() -> int:
     post_rbcam_reference, post_rbcam_reference_issues = load_post_rbcam_reference(
         tb_int_root
     )
+    rbcam_reference_health, rbcam_reference_health_issues = validate_rbcam_reference(
+        tb_int_root
+    )
 
     source_index = build_index(source_hits, lambda item: item.dma_hit)
     pre_rbcam_index = build_index(pre_rbcam_hits, lambda item: item.dma_hit)
@@ -1439,6 +1562,9 @@ def main() -> int:
     failures.extend(opq_issues)
     failures.extend(ingress_frame_issues)
     failures.extend(opq_frame_issues)
+    failures.extend(pre_rbcam_reference_issues)
+    failures.extend(post_rbcam_reference_issues)
+    failures.extend(rbcam_reference_health_issues)
     if args.assume_opq_lossless:
         failures.extend(opq_log.issues)
         nonzero_drop_counters = {
@@ -1460,6 +1586,7 @@ def main() -> int:
     opq_native_summary_path = trace_dir / "feb_swb_opq_native_summary.csv"
     rbcam_reference_trace_path = trace_dir / "feb_swb_rbcam_reference_trace.csv"
     rbcam_reference_stats_path = trace_dir / "feb_swb_rbcam_reference_stats.csv"
+    rbcam_reference_health_path = trace_dir / "feb_swb_rbcam_reference_health.csv"
     summary_path = trace_dir / "feb_swb_trace_debug_summary.txt"
     write_rows(
         hit_trace_path,
@@ -1539,6 +1666,7 @@ def main() -> int:
         pre_rbcam_reference,
         post_rbcam_reference,
     )
+    write_reference_health(rbcam_reference_health_path, rbcam_reference_health)
     opq_queue_rows, opq_queue_stats = build_opq_queue_model(
         ingress_frames,
         opq_frames,
@@ -1592,6 +1720,7 @@ def main() -> int:
         handle.write(
             f"rbcam_reference_issue_count={len(pre_rbcam_reference_issues) + len(post_rbcam_reference_issues)}\n"
         )
+        handle.write(f"rbcam_reference_health_issue_count={len(rbcam_reference_health_issues)}\n")
         handle.write(f"expected_feb_hits={len(feb_hits)}\n")
         handle.write(f"opq_ingress_hits={len(opq_ingress_hits)}\n")
         handle.write(f"opq_egress_hits={len(opq_egress_hits)}\n")
