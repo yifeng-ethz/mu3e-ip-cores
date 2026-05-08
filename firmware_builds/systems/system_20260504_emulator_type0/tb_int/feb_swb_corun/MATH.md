@@ -277,15 +277,66 @@ Real rbCAM hit egress adds a bounded search/count/drain term:
 D_rb_hit(m,c) = D_cmd(m) + D_search + D_drain(m,c).
 ```
 
-The direct FEB/SWB corun does not instantiate the true rbCAM.  Its pre/post
-CSV rows are lineage identity markers used to prove hit conservation before the
-FEB frame writer.  The lifetime plot therefore imports the full-FEB rbCAM
-reference traces for the top two panels:
+The direct FEB/SWB corun does not instantiate the true rbCAM.  Its local
+pre/post CSV rows are lineage identity markers used to prove hit conservation
+before the FEB frame writer.  The plotted pre-rbCAM lifetime must therefore use
+the virtual MuTRiG source model, not the clean full-FEB 17-cycle local transport
+marker that begins after MuTRiG frame generation/deassembly has already
+occurred.
 
 ```text
-pre-rbCAM reference:
-  D_pre = (abs_ts_pre_rbcam - abs_ts_a) / 8000
-  validation aperture = [0, 2000] cycles
+virtual MuTRiG short-frame period:
+  I = 910 cycles
+
+short-frame serializer slot offset:
+  s(q) = 9 + 7*floor(q/2) + 3*(q mod 2)
+
+frame marker:
+  M_h = first short-frame marker at or after hit timestamp t_h
+
+pre-rbCAM virtual MuTRiG reference:
+  D_pre(h) = M_h - t_h + s(q_h) + L_pre + eps_clk
+  L_pre = 18 cycles from the phase-100 virtual-MuTRiG calibration
+  validation aperture = [0, 2000] cycles, expected no-drop 100 kHz max < 1100
+```
+
+For deterministic 100 kHz/channel traffic each MuTRiG ASIC sees 32 hits every
+1250 cycles:
+
+```text
+rho_link = (32/1250) / (1/3.5) = 0.0896.
+```
+
+No persistent queue can build before pre-rbCAM.  The expected shape is a
+one-frame comb/box convolved with the 32-hit serializer tail, not a delta at
+17 cycles.  For the current all-ASIC phase-staggered ledger the regenerated
+periodic panel reports:
+
+```text
+pre-rbCAM virtual MuTRiG model:
+  count = 25600
+  min/p05/p50/p95/max = 27 / 125 / 536 / 946 / 1044 cycles
+```
+
+For Poisson iid 100 kHz/channel:
+
+```text
+N_frame ~ Poisson(32*910/1250), E[N_frame] = 23.296 hits.
+P(N_frame > 256) is negligible for this seed and must still be checked by
+the realized source ledger.
+```
+
+The accepted Poisson seed `20260508` reports:
+
+```text
+pre-rbCAM virtual MuTRiG model:
+  count = 25629
+  min/p05/p50/p95/max = 67 / 148 / 524 / 892 / 938 cycles
+```
+
+The post-rbCAM panel still imports the clean full-FEB rbCAM DEBUG-age reference:
+
+```text
 
 post-rbCAM DEBUG reference:
   D_post = (post_monitor_GTS - hit_ts8n_from_DEBUG_matched_ingress) mod 8192
@@ -308,24 +359,18 @@ transcript UVM_ERROR              = 0
 transcript missing/ghost residual = 0 at every reported tunnel
 ```
 
-The current accepted summaries are:
+The current accepted post-rbCAM reference summary is:
 
 ```text
-pre-rbCAM:
-  count = 3136
-  min/p50/p95/max = 17 / 17 / 17 / 17 cycles
-
 post-rbCAM:
   count = 3136
   min/p50/p95/max = 2001 / 2070 / 2128 / 2139 cycles
   in [2000,2200) = 3136 hits
 ```
 
-The pre-rbCAM reference point is before the programmed rbCAM retention delay,
-so the clean full-FEB reference shows the fixed 17-cycle transport marker.  The
-post-rbCAM DEBUG age is measured after the DEBUG-matched rbCAM ingress point
-against the carried hit timestamp modulo the 8192-cycle rbCAM epoch, so it must
-concentrate inside the programmed `[2000,2200)` acceptance aperture.
+The post-rbCAM DEBUG age is measured after the DEBUG-matched rbCAM ingress
+point against the carried hit timestamp modulo the 8192-cycle rbCAM epoch, so it
+must concentrate inside the programmed `[2000,2200)` acceptance aperture.
 
 The earlier reference
 `prof_int_002_pre_rbcam_periodic_asic0_full32_100k` is rejected for this plot.
@@ -710,8 +755,9 @@ opq_ingress_hits                = source_generation_hits
 opq_egress_hits                 = source_generation_hits
 dma_hits                        = source_generation_hits
 
-pre_rbcam_lifetime_cycles    = 0 exactly
-post_rbcam_lifetime_cycles   = 0 exactly
+synthetic pre/post CSV delay = 0 exactly in the direct corun
+plotted pre_rbcam_lifetime_cycles = virtual MuTRiG model, max < 1100 for the maintained 100 kHz runs
+post_rbcam_lifetime_cycles   in [2000, 2200)
 feb_egress_lifetime_cycles   in [2049, 6143]
 opq_ingress_lifetime_cycles  in [2049, 6159]
 opq_queue_residual_cycles    = 0 when using the busy recurrence

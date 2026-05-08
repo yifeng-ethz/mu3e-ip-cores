@@ -636,7 +636,7 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
       {"pre_rbcam_lifetime_cycles",
        "pre-rbCAM",
        "blue",
-       "D_pre = T_pre - GTS_hit, reference window [0,2000]",
+       "D_pre = wait_910(hit_ts) + s(q) + 18, virtual MuTRiG",
        13,
        0.0f,
        2000.0f,
