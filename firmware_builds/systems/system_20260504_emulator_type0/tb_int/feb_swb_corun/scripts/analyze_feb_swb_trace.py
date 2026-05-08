@@ -26,12 +26,14 @@ DMA_PADDING_WORD = (1 << 256) - 1
 HIT_WORD_MASK = (1 << 64) - 1
 DMA_TS_MASK = (1 << 39) - 1
 FRAME_STRIDE_8NS = 128 << 4
+VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES = 910
+VIRTUAL_MUTRIG_PRE_RBCAM_FIXED_CYCLES = 18.0
+REFERENCE_PRE_RBCAM_CASE = "virtual_mutrig_short_frame_model"
 REFERENCE_RBCAM_CASE = (
     "feb_egress_queueing_20260508/"
     "prof_int_002_feb_egress_periodic_asic0_full32_emu_direct_100k_"
     "1ms_gap1ms_20260508"
 )
-REFERENCE_PRE_RBCAM_CASE = REFERENCE_RBCAM_CASE
 REFERENCE_POST_RBCAM_CASE = REFERENCE_RBCAM_CASE
 
 
@@ -235,21 +237,57 @@ def parse_debug_id(value: str) -> int:
     return int(text)
 
 
-def load_pre_rbcam_reference(tb_int_root: Path) -> tuple[list[float], list[str]]:
-    path = tb_int_root / "sim" / REFERENCE_PRE_RBCAM_CASE / "pre_rbcam_records.csv"
-    values: list[float] = []
-    issues: list[str] = []
-    if not path.is_file():
-        return values, [f"pre_rbcam_reference: missing {path}"]
-    for row in read_csv(path):
-        if row.get("run_origin", "1").strip() and int(row.get("run_origin", "1")) == 0:
-            continue
-        try:
-            values.append(
-                (int(row["abs_ts_pre_rbcam"]) - int(row["abs_ts_a"])) / 8000.0
+def virtual_mutrig_short_frame_marker(abs_ts_8ns: int) -> int:
+    phase = abs_ts_8ns % VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES
+    wait_cycles = (VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES - phase) % VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES
+    return abs_ts_8ns + wait_cycles
+
+
+def virtual_mutrig_short_frame_slot_offset(slot: int) -> float:
+    return float(9 + (7 * (slot // 2)) + (3 * (slot % 2)))
+
+
+def virtual_mutrig_pre_rbcam_latency(abs_ts_8ns: int, slot: int) -> float:
+    """Golden source-to-pre-rbCAM latency for short-frame virtual MuTRiG hits.
+
+    The direct FEB/SWB corun starts from already parallel FEB hit words, so its
+    local pre-rbCAM trace is an identity marker.  The top plot panel instead
+    uses the virtual MuTRiG model: a hit waits until the next short-frame
+    on-wire emission point, pays the short-mode serializer slot offset, then
+    pays the fixed decoded-ingress to pre-rbCAM transport.  Header-sync phase-100
+    virtual-MuTRiG evidence calibrates the first-slot total as about 837 cycles:
+    810 frame-wait + 9 first-slot offset + 18 fixed transport.
+    """
+    marker = virtual_mutrig_short_frame_marker(abs_ts_8ns)
+    return (
+        float(marker - abs_ts_8ns)
+        + virtual_mutrig_short_frame_slot_offset(slot)
+        + VIRTUAL_MUTRIG_PRE_RBCAM_FIXED_CYCLES
+    )
+
+
+def build_virtual_mutrig_pre_rbcam_reference(feb_hits: list[HitRecord]) -> tuple[list[float], list[str]]:
+    groups: dict[tuple[int, int], list[tuple[int, int, int, int]]] = collections.defaultdict(list)
+    values = [0.0 for _ in feb_hits]
+
+    for idx, hit in enumerate(feb_hits):
+        abs_ts_8ns = source_abs_ts_8ns(hit)
+        asic = source_asic(hit.hit_word)
+        marker = virtual_mutrig_short_frame_marker(abs_ts_8ns)
+        groups[(asic, marker)].append(
+            (abs_ts_8ns, source_channel(hit.hit_word), source_hit_id(hit.hit_word), idx)
+        )
+
+    for entries in groups.values():
+        for slot, (_, _, _, idx) in enumerate(sorted(entries)):
+            values[idx] = virtual_mutrig_pre_rbcam_latency(
+                source_abs_ts_8ns(feb_hits[idx]),
+                slot,
             )
-        except (KeyError, ValueError) as exc:
-            issues.append(f"pre_rbcam_reference: malformed row in {path}: {exc}")
+
+    issues: list[str] = []
+    if not values:
+        issues.append("pre_rbcam_reference: no FEB hits for virtual MuTRiG model")
     return values, issues
 
 
@@ -417,7 +455,7 @@ def write_rbcam_reference_trace(
         rows.append(
             {
                 "metric": "pre_rbcam_lifetime_cycles",
-                "checkpoint": "pre-rbCAM full-FEB reference",
+                "checkpoint": "pre-rbCAM virtual MuTRiG model",
                 "sample_index": idx,
                 "lifetime_cycles": f"{value:.3f}",
                 "source_case": REFERENCE_PRE_RBCAM_CASE,
@@ -447,7 +485,7 @@ def write_reference_stats(
 ) -> None:
     rows: list[dict[str, object]] = []
     for metric, label, values in (
-        ("pre_rbcam_lifetime_cycles", "pre-rbCAM full-FEB reference", pre_values),
+        ("pre_rbcam_lifetime_cycles", "pre-rbCAM virtual MuTRiG model", pre_values),
         ("post_rbcam_lifetime_cycles", "post-rbCAM DEBUG age reference", post_values),
     ):
         if values:
@@ -1327,8 +1365,8 @@ def main() -> int:
     dma_hits, padding_words = parse_dma_hits(trace_dir / "feb_swb_dma_trace.csv")
     opq_log = parse_opq_native_log(args.opq_log)
     tb_int_root = Path(__file__).resolve().parents[2]
-    pre_rbcam_reference, pre_rbcam_reference_issues = load_pre_rbcam_reference(
-        tb_int_root
+    pre_rbcam_reference, pre_rbcam_reference_issues = (
+        build_virtual_mutrig_pre_rbcam_reference(feb_hits)
     )
     post_rbcam_reference, post_rbcam_reference_issues = load_post_rbcam_reference(
         tb_int_root

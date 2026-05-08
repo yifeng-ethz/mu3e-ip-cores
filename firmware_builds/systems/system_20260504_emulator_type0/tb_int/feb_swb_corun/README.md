@@ -170,8 +170,10 @@ hit reaches OPQ and DMA with the expected ASIC, channel, hit id, and
 frame/subheader timestamp bucket. The direct-continuation harness also emits
 virtual MuTRiG generation, pre-rbCAM, and post-rbCAM checkpoint traces. In this
 special FEB-to-SWB corun those pre/post-rbCAM checkpoints are pass-through
-lineage markers, not a real rbCAM instance; the DISLIN top panels import the
-clean full-FEB rbCAM reference from the `prof_int_002` tb_int flow.
+lineage markers, not a real rbCAM instance. The DISLIN pre-rbCAM top panel uses
+the virtual MuTRiG short-frame source model as the golden source-to-pre-rbCAM
+profile; the post-rbCAM top panel imports the clean full-FEB rbCAM DEBUG-age
+reference from the `prof_int_002` tb_int flow.
 
 The lifetime trace uses the carried hit global timestamp/debug contract as the
 origin, so the histogram axis is in 8 ns cycles and measures each hit's
@@ -184,10 +186,10 @@ plot uses one shared x-axis across all checkpoint panels and annotates p05,
 p50, and p95 directly; p05 is orange dashed, p50 is black, and p95 is black
 dashed. The analyzer also writes `feb_swb_range_validation.csv`, which validates
 the direct corun ranges: synthetic pre/post-rbCAM `0` cycles in the trace,
-full-FEB rbCAM reference apertures `[0,2000]` and `[2000,2200)`, two-frame
-store-forward FEB egress `[2049,6143]` cycles, OPQ ingress `[2049,6159]`
-cycles, and OPQ/DMA against the measured finite-burst OPQ queue envelope. It
-also emits `feb_swb_tunnel_scoreboard.csv`,
+virtual-MuTRiG pre-rbCAM source model under the `[0,2000]` aperture, post-rbCAM
+DEBUG-age reference `[2000,2200)`, two-frame store-forward FEB egress
+`[2049,6143]` cycles, OPQ ingress `[2049,6159]` cycles, and OPQ/DMA against the
+measured finite-burst OPQ queue envelope. It also emits `feb_swb_tunnel_scoreboard.csv`,
 `feb_swb_factual_scoreboard.csv`, and `feb_swb_opq_native_summary.csv`.
 
 Current accepted all-ASIC 1 ms summaries:
@@ -197,12 +199,14 @@ periodic:
   expected_hits=25600, expected_dma_words=6400
   feb_hit_count=25600, actual_hits=25600
   missing_hits=0, ghost_hits=0, opq_drop_counter_total=0
+  pre_rbcam_virtual_model min/p05/p50/p95/max=27/125/536/946/1044 cycles
   plot=report/feb_swb_lifetime_hist.png
 
 poisson_iid seed 20260508:
   expected_hits=25629, expected_dma_words=6431
   feb_hit_count=25629, actual_hits=25629
   missing_hits=0, ghost_hits=0, opq_drop_counter_total=0
+  pre_rbcam_virtual_model min/p05/p50/p95/max=67/148/524/892/938 cycles
   plot=report_poisson/feb_swb_lifetime_hist.png
 ```
 

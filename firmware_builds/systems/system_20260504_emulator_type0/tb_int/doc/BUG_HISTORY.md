@@ -60,6 +60,7 @@ Historical formal note:
 | [BUG-023-H](#bug-023-h-feb-swb-lifetime-plot-used-local-source-marker-for-rbcam-panels) | H | soft error | `directed-only (FEB/SWB lifetime plotting and review)` | fixed in analyzer/plotter; rerender passed | FEB/SWB lifetime plot review on `2026-05-08` | 7c748870 | The corun lifetime plot treated synthetic pre/post-rbCAM source markers as true rbCAM lifetime evidence and described lifetime as local source-marker time instead of the carried hit GTS/debug timestamp contract. |
 | [BUG-024-H](#bug-024-h-feb-swb-rbcam-plot-imported-lossy-reference-as-no-drop-evidence) | H | hard stuck error | `directed-only (FEB/SWB rbCAM reference plotting and review)` | fixed in analyzer reference guard; rerender passed | FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08` | 8378d7d6 | The rbCAM top-panel plot imported a drop-containing pre-rbCAM reference run and had no health gate, so a stale 84k-cycle peak was shown as if it were no-drop rbCAM evidence. |
 | [BUG-025-R](#bug-025-r-swb-direct-dma-packer-dropped-eop-partial-hit-groups) | R | hard stuck error | `occasional (legal FEB frames whose hit count is not divisible by four)` | fixed in MuSiP direct packer; periodic and Poisson all-ASIC reruns passed | FEB/SWB Poisson all-ASIC 1 ms corun on `2026-05-08` | 9d1c7c5/f478c95a | The SWB direct 64-to-256 DMA packer did not safely flush partial EOP groups, so legal frames with `frame_hits mod 4 = 1` could lose the final hit group before DMA. |
+| [BUG-026-H](#bug-026-h-feb-swb-pre-rbcam-panel-used-post-mutrig-transport-as-golden-lifetime) | H | soft error | `directed-only (FEB/SWB lifetime plotting review)` | fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten | FEB/SWB lifetime plot review on `2026-05-09` | pending | The pre-rbCAM panel used the clean full-FEB 17-cycle post-MuTRiG transport marker as the lifetime shape, so the plot collapsed instead of showing the virtual-MuTRiG short-frame wait and serializer profile. |
 
 ## 2026-05-06
 
@@ -740,3 +741,36 @@ Historical formal note:
 - Commit:
   - MuSiP direct packer fix: 9d1c7c5
   - FEB/SWB all-ASIC Poisson harness and docs: f478c95a
+
+## 2026-05-09
+
+### BUG-026-H: FEB/SWB pre-rbCAM panel used post-MuTRiG transport as golden lifetime
+
+- First seen in:
+  - FEB/SWB lifetime plot review on `2026-05-09`
+  - user comparison against the MuTRiG Digital RTL LVDS latency contact sheet
+- Symptom:
+  - the maintained periodic and Poisson FEB/SWB coruns both conserved all hits through DMA, but the pre-rbCAM lifetime panel was a delta-like 17-cycle spike
+  - the panel therefore disagreed with the virtual MuTRiG golden model, where source-to-pre-rbCAM lifetime includes short-frame wait plus the per-frame serializer slot before the fixed pre-rbCAM transport
+- Root cause:
+  - `scripts/analyze_feb_swb_trace.py` reused the clean full-FEB rbCAM pre-rbCAM reference for the top panel
+  - that reference measures only the local decoded-ingress to pre-rbCAM transport after MuTRiG frame generation/deassembly has already occurred
+  - the plot consequently dropped the virtual MuTRiG lifetime terms `M_h - t_h` and `s(q)`
+- Fix status:
+  - state:
+    fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten
+  - mechanism:
+    the analyzer now builds the plotted pre-rbCAM reference from the direct corun source ledger using `I=910` cycles, `s(q)=9+7*floor(q/2)+3*(q mod 2)`, and a calibrated `L_pre=18` cycle fixed transport.  The post-rbCAM top panel still imports the clean full-FEB DEBUG-age reference.
+  - before_fix_outcome:
+    periodic and Poisson pre-rbCAM plotted `min/p05/p50/p95/max=17/17/17/17/17` cycles, hiding the virtual MuTRiG source lifetime profile
+  - after_fix_outcome:
+    rerun analyzer and DISLIN renderer pass for both maintained reports.  Periodic all-ASIC 1 ms reports pre-rbCAM virtual-MuTRiG `min/p05/p50/p95/max=27/125/536/946/1044` cycles; Poisson seed `20260508` reports `67/148/524/892/938` cycles.  Both runs remain `TRACE_DEBUG_PASS`, zero OPQ drops, zero missing hits, and zero ghost hits.
+  - potential_hazard:
+    low for datapath behavior because this is reporting-only; medium for review evidence if future plots mix local transport markers and source-to-checkpoint lifetime without naming the origin
+- Runtime / coverage context:
+  - one FEB is modeled with lanes 0 and 1 enabled; lanes 2 and 3 are masked
+  - lane 0 carries ASIC0..7 channels 0..31 at 100 kHz/channel for 1 ms
+  - overwritten periodic plots live under `tb_int/feb_swb_corun/report/`
+  - overwritten Poisson plots live under `tb_int/feb_swb_corun/report_poisson/`
+- Commit:
+  - analyzer/model/plot documentation fix: pending
