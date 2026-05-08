@@ -39,22 +39,24 @@ F = N_SHD * H = 128 * 16 = 2048 cycles.
 T_run = 1 ms = 125000 cycles.
 ```
 
-- Lane 0 carries ASIC0 channels `0..31` at 100 kHz/channel.
+- Lane 0 carries ASIC0..7 channels `0..31` at 100 kHz/channel.
 - Lane 1 emits legal empty FEB frames.
 - Lanes 2 and 3 are masked and must not contribute accepted hits.
+- Two source modes are maintained:
+  - periodic phase-staggered full32 bursts per ASIC
+  - independent Poisson streams per ASIC/channel with seed-controlled replay
 - The direct corun pre-rbCAM and post-rbCAM checkpoints are synthetic lineage
   markers.  They are not the true rbCAM instance from the full FEB integration
   path.
 
 ## Notation
 
-Let `m` index a simultaneous 32-channel ASIC0 sample and let `c` index the
-channel inside the sample:
+Let `m` index a source sample, `a` index the ASIC, and `c` index the channel
+inside the ASIC:
 
 ```text
-m = 0..99
+a = 0..7
 c = 0..31
-hit_id(m,c) = 32*m + c
 ```
 
 The per-channel hit period is
@@ -63,22 +65,33 @@ The per-channel hit period is
 P_hit = 10 us = 1250 cycles.
 ```
 
-The source generation time of sample `m` is
+For the periodic phase-staggered source, the nominal ASIC phase is
 
 ```text
-t_m = P_hit * m = 1250*m.
+Delta_asic = P_hit / 8 = 156.25 cycles.
 ```
 
-The frame, phase, subheader bucket, and bucket residue are
+The implemented integer source ledger carries the exact hit time and hit id.
+For documentation, the nominal generation time and identity are:
 
 ```text
-f_m = floor(t_m / F)
-p_m = t_m - F*f_m
-b_m = floor(p_m / H)
-r_m = p_m - H*b_m.
+t(m,a)       ~= P_hit*m + Delta_asic*a
+hit_id(m,a,c) = 256*m + 32*a + c
 ```
 
-For this profile, `r_m = (2*m) mod 16`, so only even residues occur.
+For the Poisson iid source, each `(a,c)` has an independent exponential
+interarrival process with mean `P_hit`; the source ledger assigns the actual
+generation time and the DEBUG hit id used by the trace checker.
+
+For any ledger hit `h`, the frame, phase, subheader bucket, and bucket residue
+are:
+
+```text
+f_h = floor(t_h / F)
+p_h = t_h - F*f_h
+b_h = floor(p_h / H)
+r_h = p_h - H*b_h.
+```
 
 ## Master Equation
 
@@ -97,7 +110,7 @@ DEBUG.ts_tag            = GTS_hit mod 2^16
 DEBUG.ps_tag            = GTS_hit mod 2^8
 MuTRiG hit ts_low[3:0]  = GTS_hit mod 16
 MuTRiG hit rem[2:0]     = GTS_hit mod 8
-DEBUG.hit_id            = 32*m + c.
+DEBUG.hit_id            = source-ledger hit id.
 ```
 
 The local time at which the testbench writes a source trace row is not the
@@ -105,11 +118,12 @@ definition of lifetime.  It is only an observation.  If a plot changes shape
 when the local source marker is moved but the carried hit timestamp is
 unchanged, the lifetime definition is wrong.
 
-For a window of length `t`, the full32 periodic arrival curve is bounded by:
+For a window of length `t`, the all-ASIC periodic phase-staggered arrival
+curve used in the plot subtitle is bounded by:
 
 ```text
-alpha_hit(t) = 32 * ceil(t / P_hit)
-             = 32 * ceil(t / 1250).
+alpha_periodic(t) = 32 * (floor(t / Delta_asic) + 1)
+                  ~= 32 * (floor(t / 156.25) + 1).
 ```
 
 A looser affine envelope useful for rate-latency algebra is:
@@ -117,8 +131,19 @@ A looser affine envelope useful for rate-latency algebra is:
 ```text
 alpha_hit(t) <= sigma + rho*t
 sigma = 32 hits
-rho   = 32 / 1250 = 0.0256 hits/cycle.
+rho   = 8*32 / 1250 = 0.2048 hits/cycle.
 ```
+
+For the Poisson iid source, the expected aggregate arrival count is:
+
+```text
+N_chan          = 8*32 = 256
+lambda_total    = N_chan / P_hit = 256/1250 = 0.2048 hits/cycle
+E[alpha_iid(t)] = lambda_total * t = 256*t/1250 hits.
+```
+
+The Poisson equation is an expectation, not a hard deterministic bound. The
+hard check for Poisson mode is ledger conservation from generation through DMA.
 
 For a deterministic stage with latency `L_i`, rate `R_i`, and finite burst
 term `B_i`, a latency-rate service curve gives:
@@ -154,16 +179,25 @@ programmed-aperture bound on that common axis.
 
 ## Traffic Profile
 
-The number of simultaneous source samples per channel is
+The number of periodic source samples per ASIC/channel is
 
 ```text
 N_sample = T_run / P_hit = 125000 / 1250 = 100.
 ```
 
-The total offered hit count on lane 0 is
+The total periodic offered hit count on lane 0 is
 
 ```text
-N_hit = N_sample * 32 = 3200.
+N_hit = N_sample * 8 ASICs * 32 channels = 25600.
+```
+
+For the accepted Poisson replay:
+
+```text
+seed              = 20260508
+E[N_hit]          = 25600
+realized N_hit    = 25629
+realized DMA words = sum_frame ceil(frame_hits / 4) = 6431.
 ```
 
 The number of emitted frame periods is
@@ -172,13 +206,12 @@ The number of emitted frame periods is
 N_frame = ceil(T_run / F) = ceil(125000 / 2048) = 62.
 ```
 
-Lane 0 has nonempty hit frames `0..60` and an empty terminal frame `61`.
-Across the nonempty lane-0 frames:
+The periodic lane-0 frames `0..60` are nonempty and frame `61` is an empty
+terminal frame. Across the nonempty periodic lane-0 frames:
 
 ```text
-39 frames carry 2 source samples = 39 * 64 hits
-22 frames carry 1 source sample  = 22 * 32 hits
-total                            = 3200 hits.
+frame hit counts vary with ASIC phase staggering
+total = 25600 hits.
 ```
 
 Lane 1 emits 62 legal empty frames.  In the lane-0 OPQ queue model there are
@@ -190,14 +223,15 @@ traffic contains 124 FEB frame packets, of which lane 1 is empty by contract.
 The source-side scoreboard has hard, profile-specific checks:
 
 ```text
-source hit count       = 3200
-source sample count    = 100
-per-channel hit count  = 100
-hit_id sequence        = 0..3199
-source time            = 1250*floor(hit_id/32)
-source channel         = hit_id mod 32
-source frame           = floor(source time / 2048)
-source bucket          = floor((source time mod 2048) / 16)
+periodic source hit count       = 25600
+periodic per-channel hit count  = 100
+periodic hit_id sequence        = 0..25599
+source asic                     = floor((hit_id mod 256) / 32)
+source channel                  = hit_id mod 32
+source frame                    = floor(source time / 2048)
+source bucket                   = floor((source time mod 2048) / 16)
+Poisson source hit count        = source ledger row count
+Poisson hit identity            = DEBUG/source-ledger identity
 ```
 
 Lane 1 must contribute zero real hits.  Lanes 2 and 3 must contribute zero
@@ -314,70 +348,77 @@ failure before plotting.
 ## FEB Frame Assembly and Store-Forward Bound
 
 The maintained direct corun now models FEB frame store-forward explicitly.  A
-source hit is born at `t_m`, but the FEB stream for frame `f_m` begins after
+source hit is born at `t_h`, but the FEB stream for frame `f_h` begins after
 two 2048-cycle frame periods:
 
 ```text
-T_feb_sop(m) = F*f_m + 2*F.
+T_feb_sop(h) = F*f_h + 2*F.
 ```
 
-Let `q_m` be the number of earlier source samples in the same frame whose
-buckets are lower than `b_m`.  In this profile `q_m` is either 0 or 1.  With
-five frame header words, all 128 subheaders emitted, and 32 hit words per
-source sample, the logical hit word offset from the frame SOP is
+With five frame header words, all 128 subheaders emitted, and all hits in the
+same frame serialized in bucket order, the logical hit word offset from the
+frame SOP is
 
 ```text
-O(m,c) = 5 + b_m + 1 + 32*q_m + c.
+O(h) = 5 + b_h + 1 + earlier_hits_in_frame_before_h.
 ```
 
 The testbench drives one FEB word every two 125 MHz clock edges, so the
-observed hit-word offset is approximately `2*O(m,c)` plus the simulator
+observed hit-word offset is approximately `2*O(h)` plus the simulator
 sampling phase.  The store-forward hit lifetime is therefore modeled as
 
 ```text
-D_feb(m,c) ~= 2*F - p_m + 2*O(m,c) + epsilon_clk
-            = 4096 - p_m + 2*(6 + b_m + 32*q_m + c) + epsilon_clk.
+D_feb(h) ~= 2*F - p_h + 2*O(h) + epsilon_clk.
 ```
 
-The latest 8192-depth OPQ, DEBUG_LEVEL=2 corun measured:
+The latest periodic all-ASIC, DEBUG_LEVEL=2 corun measured:
 
 ```text
-2386.5 <= T_feb_egress(m,c) - t_m <= 4172.5 cycles.
+3099.5 <= T_feb_egress(h) - t_h <= 4172.5 cycles.
+```
+
+The accepted Poisson all-ASIC replay measured:
+
+```text
+3081.5 <= T_feb_egress(h) - t_h <= 4118.5 cycles.
 ```
 
 The maintained hard validation range keeps frame-start and word-offset margin:
 
 ```text
-2049 <= T_feb_egress(m,c) - t_m <= 6143 cycles.
+2049 <= T_feb_egress(h) - t_h <= 6143 cycles.
 ```
 
 This is profile-specific to `N_SHD=128`, two-frame dispatch, all-subheader
-emission, and 32 simultaneous channels/sample.
+emission, and the all-ASIC source ledger used by the corun.
 
 ## OPQ Ingress Adapter
 
 The parallel 125 MHz FEB to 250 MHz SWB ingress adapter is finite and
 source-synchronous in this corun.  It follows the FEB egress hit by a small
-clock-domain adapter delay.  The latest run measured:
+clock-domain adapter delay.  The latest runs measured:
 
 ```text
-2387.75 <= T_opq_ingress(m,c) - t_m <= 4173.75 cycles
-T_opq_ingress(m,c) - T_feb_egress(m,c) = 1.25 cycles.
+periodic:
+  3100.75 <= T_opq_ingress(h) - t_h <= 4173.75 cycles
+Poisson:
+  3082.75 <= T_opq_ingress(h) - t_h <= 4119.75 cycles
+T_opq_ingress(h) - T_feb_egress(h) = 1.25 cycles.
 ```
 
 The maintained source-lifetime range is:
 
 ```text
-2049 <= T_opq_ingress(m,c) - t_m <= 6159 cycles.
+2049 <= T_opq_ingress(h) - t_h <= 6159 cycles.
 ```
 
 The scoreboard must require:
 
 ```text
-OPQ ingress hit count  = 3200
+OPQ ingress hit count  = source ledger hit count
 OPQ ingress identity   = source identity exactly
-OPQ ingress frame      = f_m
-OPQ ingress bucket     = b_m
+OPQ ingress frame      = f_h
+OPQ ingress bucket     = b_h
 masked-lane hits       = 0
 ```
 
@@ -415,8 +456,8 @@ only.  It does not explain loss.  The OPQ must instead satisfy conservation:
 OPQ controlled pre-drop count     = 0
 OPQ controlled post-drop count    = 0
 OPQ frame-table drop count        = 0
-OPQ ingress hit count             = 3200
-OPQ egress hit count              = 3200
+OPQ ingress hit count             = source ledger hit count
+OPQ egress hit count              = source ledger hit count
 unexplained OPQ hit delta         = 0
 ```
 
@@ -438,19 +479,30 @@ with drain allowed after the 1 ms source window.  The delay envelope is then a
 measured finite property of the provisioned run:
 
 ```text
-D_opq_hit(m,c) = T_opq_egress(m,c) - t_m
-D_opq_min <= D_opq_hit(m,c) <= D_opq_max.
+D_opq_hit(h) = T_opq_egress(h) - t_h
+D_opq_min <= D_opq_hit(h) <= D_opq_max.
 ```
 
 The measured values `D_opq_min` and `D_opq_max` must come from a run with zero
-OPQ drop counters and full hit conservation.  In the latest scoped run:
+OPQ drop counters and full hit conservation.  In the latest scoped periodic
+run:
 
 ```text
-OPQ ingress hits        = 3200
-OPQ egress hits         = 3200
+OPQ ingress hits        = 25600
+OPQ egress hits         = 25600
 OPQ drop counter total  = 0
 OPQ recurrence residual = 0 cycles
-5596.75 <= D_opq_hit <= 95154.75 cycles.
+5019.75 <= D_opq_hit <= 96286.75 cycles.
+```
+
+In the latest scoped Poisson run:
+
+```text
+OPQ ingress hits        = 25629
+OPQ egress hits         = 25629
+OPQ drop counter total  = 0
+OPQ recurrence residual = 0 cycles
+5108.25 <= D_opq_hit <= 102014.25 cycles.
 ```
 
 These OPQ lifetime bounds are measured-envelope thresholds, not infinite
@@ -481,14 +533,24 @@ segment is not automatically a loss claim if OPQ buffering covers the finite
 backlog and the run drains.  Under the scoped contract, the decisive conditions
 are zero OPQ drops, full conservation, and a finite measured drain envelope.
 
-The latest scoped lossless run measured:
+The latest scoped periodic lossless run measured:
 
 ```text
 E[A_n] = 2048.000 cycles
-E[S_n] = 3534.317 cycles
-rho    = 3534.317 / 2048.000 = 1.726
-W_min  = 2727.5 cycles
-W_max  = 91906.5 cycles
+E[S_n] = 3540.050 cycles
+rho    = 3540.050 / 2048.000 = 1.729
+W_min  = 2733.5 cycles
+W_max  = 92256.5 cycles
+```
+
+The latest scoped Poisson lossless run measured:
+
+```text
+E[A_n] = 2048.000 cycles
+E[S_n] = 3607.639 cycles
+rho    = 3607.639 / 2048.000 = 1.762
+W_min  = 2789.5 cycles
+W_max  = 97927.5 cycles
 ```
 
 This is a finite-burst queue-drain result.  It is not a claim that the same
@@ -616,12 +678,18 @@ DMA hits                        = OPQ egress accepted hits
 DMA hit identity                = OPQ hit identity
 ```
 
-For the scoped no-bottleneck run:
+For the scoped no-bottleneck runs:
 
 ```text
-OPQ ingress hits = 3200
-OPQ egress hits  = 3200
-DMA hits         = 3200
+periodic:
+  OPQ ingress hits = 25600
+  OPQ egress hits  = 25600
+  DMA hits         = 25600
+
+Poisson seed 20260508:
+  OPQ ingress hits = 25629
+  OPQ egress hits  = 25629
+  DMA hits         = 25629
 ```
 
 If OPQ is accepted as the upstream reference, then every DMA miss with matching
@@ -633,13 +701,14 @@ drop, the run fails first at the OPQ contract boundary.
 Recommended maintained thresholds for this corun:
 
 ```text
-source_generation_hits       = 3200
-pre_rbcam_hits               = 3200
-post_rbcam_hits              = 3200
-feb_egress_hits              = 3200
-opq_ingress_hits             = 3200
-opq_egress_hits              = 3200
-dma_hits                     = 3200
+periodic source_generation_hits = 25600
+Poisson source_generation_hits  = source ledger row count
+pre_rbcam_hits                  = source_generation_hits
+post_rbcam_hits                 = source_generation_hits
+feb_egress_hits                 = source_generation_hits
+opq_ingress_hits                = source_generation_hits
+opq_egress_hits                 = source_generation_hits
+dma_hits                        = source_generation_hits
 
 pre_rbcam_lifetime_cycles    = 0 exactly
 post_rbcam_lifetime_cycles   = 0 exactly
@@ -665,7 +734,8 @@ Profile-specific:
 
 Measured-envelope:
   OPQ egress hit lifetime and DMA lifetime after OPQ is provisioned lossless:
-  latest OPQ egress [5596.75,95154.75] and DMA [5601.75,95158.25].
+  periodic OPQ egress [5019.75,96286.75] and DMA [5024.75,96290.25].
+  Poisson OPQ egress [5108.25,102014.25] and DMA [5112.75,102019.75].
   These bounds must be regenerated from a zero-drop, fully conserved run.
 
 Excluded diagnostic:

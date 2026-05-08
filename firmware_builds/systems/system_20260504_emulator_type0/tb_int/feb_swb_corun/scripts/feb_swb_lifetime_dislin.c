@@ -27,6 +27,7 @@ typedef struct {
 typedef struct {
   int n;
   float min;
+  float p05;
   float p50;
   float p95;
   float max;
@@ -219,6 +220,39 @@ static void read_bounds_csv(const char *path, metric_t *metrics, int nmetrics) {
   fclose(fp);
 }
 
+static int read_summary_value(const char *csv_path,
+                              const char *key,
+                              char *out,
+                              size_t out_size) {
+  char summary_path[4096];
+  char line[4096];
+  FILE *fp;
+
+  make_sibling_path(csv_path, "feb_swb_corun_summary.txt", summary_path, sizeof(summary_path));
+  fp = fopen(summary_path, "r");
+  if (fp == NULL) {
+    return 0;
+  }
+
+  while (fgets(line, sizeof(line), fp) != NULL) {
+    char *eq = strchr(line, '=');
+    if (eq == NULL) {
+      continue;
+    }
+    *eq = '\0';
+    trim(line);
+    trim(eq + 1);
+    if (strcmp(line, key) == 0) {
+      snprintf(out, out_size, "%s", eq + 1);
+      fclose(fp);
+      return 1;
+    }
+  }
+
+  fclose(fp);
+  return 0;
+}
+
 static int read_queue_model_csv(const char *path, queue_model_t *model) {
   FILE *fp = fopen(path, "r");
   char line[4096];
@@ -321,6 +355,7 @@ static stats_t compute_stats(const metric_t *metric) {
   }
 
   stats.min = sorted[0];
+  stats.p05 = percentile_sorted(sorted, metric->n, 5.0f);
   stats.p50 = percentile_sorted(sorted, metric->n, 50.0f);
   stats.p95 = percentile_sorted(sorted, metric->n, 95.0f);
   stats.max = sorted[metric->n - 1];
@@ -352,6 +387,7 @@ static stats_t compute_array_stats(const float *values, int n) {
   }
 
   stats.min = sorted[0];
+  stats.p05 = percentile_sorted(sorted, n, 5.0f);
   stats.p50 = percentile_sorted(sorted, n, 50.0f);
   stats.p95 = percentile_sorted(sorted, n, 95.0f);
   stats.max = sorted[n - 1];
@@ -496,6 +532,7 @@ static void draw_panel(metric_t *metric,
   float ycount[MAX_BINS];
   char title_buf[160];
   char equation_buf[220];
+  char stats_buf[220];
   int counts[MAX_BINS] = {0};
 
   snprintf(title_buf,
@@ -565,18 +602,29 @@ static void draw_panel(metric_t *metric,
 
   draw_vertical("green", metric->bound_low, ymax, 0);
   draw_vertical("green", metric->bound_high, ymax, 0);
+  draw_vertical("orange", stats.p05, ymax, 1);
   draw_vertical("black", stats.p50, ymax, 0);
   draw_vertical("black", stats.p95, ymax, 1);
+  snprintf(stats_buf,
+           sizeof(stats_buf),
+           "p05=%.1f, p50=%.1f, p95=%.1f cycles",
+           stats.p05,
+           stats.p50,
+           stats.p95);
+  color("fore");
+  height(22);
+  rlmess(stats_buf, xmin + 0.02f * xrange, ymax * 0.92f);
   color("fore");
   solid();
   linwid(1);
   endgrf();
 
   printf(
-      "%s n=%d min=%.3f p50=%.3f p95=%.3f max=%.3f mean=%.3f cycles\n",
+      "%s n=%d min=%.3f p05=%.3f p50=%.3f p95=%.3f max=%.3f mean=%.3f cycles\n",
       metric->key,
       stats.n,
       stats.min,
+      stats.p05,
       stats.p50,
       stats.p95,
       stats.max,
@@ -634,8 +682,15 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
   const int nmetrics = (int)(sizeof(metrics) / sizeof(metrics[0]));
   char reference_path[4096];
   char bounds_path[4096];
+  char source_mode[128] = "periodic_phase_staggered";
+  char active_asics_text[64] = "8";
+  char hit_period_text[64] = "1250";
+  char title[256];
+  char alpha_line[256];
   float common_xmin;
   float common_xmax;
+  int active_asics;
+  int hit_period;
 
   if (!read_lifetime_csv(csv_path, metrics, nmetrics)) {
     exit(1);
@@ -644,12 +699,40 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
   make_sibling_path(csv_path, "feb_swb_range_validation.csv", bounds_path, sizeof(bounds_path));
   read_reference_csv(reference_path, metrics, nmetrics);
   read_bounds_csv(bounds_path, metrics, nmetrics);
+  read_summary_value(csv_path, "source_mode", source_mode, sizeof(source_mode));
+  read_summary_value(csv_path, "active_asics", active_asics_text, sizeof(active_asics_text));
+  read_summary_value(csv_path, "hit_period_8ns", hit_period_text, sizeof(hit_period_text));
+  active_asics = atoi(active_asics_text);
+  hit_period = atoi(hit_period_text);
+  if (active_asics <= 0) {
+    active_asics = 8;
+  }
+  if (hit_period <= 0) {
+    hit_period = 1250;
+  }
   compute_common_x_range(metrics, nmetrics, &common_xmin, &common_xmax);
 
   start_page(out_path);
-  page_message_centered("FEB/SWB ASIC0 all-channel hit lifetime", 95, 46);
-  page_message_centered("master equation: D_i = (T_i - GTS_hit) / 8 ns; alpha(t)=32*ceil(t/1250 cycles)", 152, 30);
-  page_message_centered("all panels share one x-axis; green = derived bound, p50 = solid black, p95 = dashed black", 196, 26);
+  snprintf(title,
+           sizeof(title),
+           "FEB/SWB ASIC0..%d all-channel hit lifetime (%s)",
+           active_asics - 1,
+           source_mode);
+  if (strcmp(source_mode, "poisson_iid") == 0 || strcmp(source_mode, "poisson") == 0) {
+    snprintf(alpha_line,
+             sizeof(alpha_line),
+             "master equation: D_i=(T_i-GTS_hit)/8 ns; E[alpha_iid(t)]=%d*t/%d hits",
+             active_asics * 32,
+             hit_period);
+  } else {
+    snprintf(alpha_line,
+             sizeof(alpha_line),
+             "master equation: D_i=(T_i-GTS_hit)/8 ns; alpha_periodic(t)=32*(floor(t/%.1f)+1)",
+             (float)hit_period / (float)active_asics);
+  }
+  page_message_centered(title, 95, 46);
+  page_message_centered(alpha_line, 152, 30);
+  page_message_centered("common x-axis; green = bound, p05 = orange dashed, p50 = black, p95 = black dashed", 196, 26);
 
   for (int i = 0; i < nmetrics; i++) {
     draw_panel(&metrics[i], i, common_xmin, common_xmax);

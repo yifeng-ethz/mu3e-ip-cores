@@ -4,10 +4,15 @@ module feb_swb_corun_plain_tb;
   import feb_swb_corun_pkg::*;
 
   localparam int ACTIVE_LANES = 2;
-  localparam int ASIC0_CHANNELS = 32;
+  localparam int CHANNELS_PER_ASIC = 32;
+  localparam int DEFAULT_ASIC_COUNT = 8;
+  localparam int MAX_ASIC_COUNT = 8;
   localparam int N_SHD = 128;
   localparam int DEFAULT_RUN_WINDOW_8NS = 125000; // 1 ms on the MuTRiG 8 ns timebase.
   localparam int DEFAULT_HIT_PERIOD_8NS = 1250;   // 100 kHz/channel.
+  localparam int DEFAULT_POISSON_SEED = 20260508;
+  localparam int SOURCE_MODE_PERIODIC = 0;
+  localparam int SOURCE_MODE_POISSON = 1;
   localparam int FRAME_STRIDE_8NS = N_SHD << 4;
   localparam int FRAME_PERIOD_FEB_CYCLES = FRAME_STRIDE_8NS;
   localparam int FEB_FRAME_EGRESS_DELAY_FRAMES = 2;
@@ -21,6 +26,14 @@ module feb_swb_corun_plain_tb;
   localparam logic [7:0] SWB_K284 = 8'h9C;
   localparam logic [7:0] SWB_K237 = 8'hF7;
   localparam logic [255:0] DMA_PADDING_WORD = {256{1'b1}};
+
+  typedef struct {
+    int unsigned abs_ts_8ns;
+    int unsigned asic;
+    int unsigned channel;
+    int unsigned hit_id;
+    int unsigned bucket_idx;
+  } source_hit_event_t;
 
   logic feb_clk = 1'b0;
   logic swb_clk = 1'b0;
@@ -74,10 +87,19 @@ module feb_swb_corun_plain_tb;
   int unsigned ghost_count;
   int unsigned run_window_8ns;
   int unsigned hit_period_8ns;
+  int unsigned active_asic_count;
+  int unsigned source_mode;
+  int unsigned poisson_seed;
   int unsigned n_frames_runtime;
+  int unsigned total_source_buckets;
   int unsigned expected_time_samples_runtime;
   int unsigned expected_hits_runtime;
   int unsigned expected_dma_words_runtime;
+
+  source_hit_event_t source_hits_unsorted[$];
+  source_hit_event_t source_hits[];
+  int unsigned bucket_hit_count[];
+  int unsigned bucket_first_idx[];
 
   int source_trace_fd;
   int pre_rbcam_trace_fd;
@@ -94,7 +116,6 @@ module feb_swb_corun_plain_tb;
   assign use_merge = 1'b1;
   assign enable_dma = !reset;
   assign get_n_words = expected_dma_words_runtime[31:0];
-  assign lookup_ctrl = 32'h0000_0000;
   assign dma_half_full = 1'b0;
 
   always #4.0 feb_clk = ~feb_clk;
@@ -172,13 +193,14 @@ module feb_swb_corun_plain_tb;
 
   function automatic logic [31:0] make_mutrig_hit(
       input int unsigned abs_ts_8ns,
+      input int unsigned asic,
       input int unsigned channel,
       input int unsigned hit_id);
     logic [31:0] word;
     begin
       word = '0;
       word[31:28] = abs_ts_8ns[3:0];
-      word[25:22] = 4'd0;      // ASIC 0.
+      word[25:22] = asic[3:0];
       word[21:17] = channel[4:0];
       word[16:14] = abs_ts_8ns[2:0];
       word[13:9] = 5'd0;       // Fine time kept at zero for this contract case.
@@ -191,12 +213,13 @@ module feb_swb_corun_plain_tb;
       input logic [31:0] ts_high_word,
       input logic [15:0] ts_low_word,
       input logic [7:0]  shd_ts,
-      input logic [31:0] hit_word);
+      input logic [31:0] hit_word,
+      input int unsigned asic);
     longint unsigned data_word;
     begin
       data_word = 64'h0;
       data_word[63] = 1'b1;
-      data_word[62:61] = 2'b00;
+      data_word[62:61] = asic[1:0];
       data_word[60:56] = hit_word[21:17];
       data_word[55:47] = hit_word[8:0];
       data_word[46:44] = hit_word[16:14];
@@ -224,6 +247,34 @@ module feb_swb_corun_plain_tb;
       meta.ts_tag = abs_ts_8ns[15:0];
       meta.hit_id = hit_id[31:0];
       return feb_swb_pack_debug_meta(meta);
+    end
+  endfunction
+
+  function automatic int unsigned asic_phase_8ns(input int unsigned asic);
+    begin
+      return (asic * hit_period_8ns) / active_asic_count;
+    end
+  endfunction
+
+  function automatic string source_mode_name(input int unsigned mode);
+    begin
+      if (mode == SOURCE_MODE_POISSON) begin
+        return "poisson_iid";
+      end
+      return "periodic_phase_staggered";
+    end
+  endfunction
+
+  function automatic logic [31:0] make_lookup_ctrl_word(
+      input int unsigned addr,
+      input int unsigned value);
+    logic [31:0] word;
+    begin
+      word = 32'h0;
+      word[6:0] = addr[6:0];
+      word[8:7] = 2'b01;
+      word[22:9] = value[13:0];
+      return word;
     end
   endfunction
 
@@ -264,46 +315,176 @@ module feb_swb_corun_plain_tb;
     end
   endtask
 
-  function automatic int unsigned subheader_sample_idx(
-      input int unsigned lane,
-      input int unsigned frame_id,
-      input int unsigned shd_idx);
-    longint unsigned frame_base;
-    longint unsigned shd_base;
-    longint unsigned shd_end;
-    int unsigned hit_idx;
-    begin
-      if (lane != 0) begin
-        return NO_HIT_ID;
-      end
-      frame_base = longint'(frame_id) * FRAME_STRIDE_8NS;
-      shd_base = frame_base + (longint'(shd_idx) << 4);
-      shd_end = shd_base + 16;
-      if (hit_period_8ns == 0) begin
-        return NO_HIT_ID;
-      end
-      hit_idx = shd_base / hit_period_8ns;
-      if ((longint'(hit_idx) * hit_period_8ns) < shd_base) begin
-        hit_idx++;
-      end
-      if (((longint'(hit_idx) * hit_period_8ns) < shd_end) &&
-          ((longint'(hit_idx) * hit_period_8ns) < run_window_8ns)) begin
-        return hit_idx;
-      end
-      return NO_HIT_ID;
-    end
-  endfunction
-
   function automatic int unsigned subheader_hit_count(
       input int unsigned lane,
       input int unsigned frame_id,
       input int unsigned shd_idx);
-    int unsigned hit_id_v;
+    int unsigned bucket_idx;
     begin
-      hit_id_v = subheader_sample_idx(lane, frame_id, shd_idx);
-      return (hit_id_v == NO_HIT_ID) ? 0 : ASIC0_CHANNELS;
+      if (lane != 0) begin
+        return 0;
+      end
+      bucket_idx = (frame_id * N_SHD) + shd_idx;
+      if (bucket_idx >= total_source_buckets) begin
+        return 0;
+      end
+      return bucket_hit_count[bucket_idx];
     end
   endfunction
+
+  task automatic push_source_hit(
+      input int unsigned abs_ts_8ns,
+      input int unsigned asic,
+      input int unsigned channel,
+      input int unsigned hit_id);
+    source_hit_event_t hit;
+    int unsigned bucket_idx;
+    begin
+      if (abs_ts_8ns >= run_window_8ns) begin
+        return;
+      end
+      bucket_idx = abs_ts_8ns >> 4;
+      if (bucket_idx >= total_source_buckets) begin
+        $fatal(1, "source hit bucket outside runtime abs_ts=%0d bucket=%0d total=%0d",
+               abs_ts_8ns, bucket_idx, total_source_buckets);
+      end
+      if (bucket_hit_count[bucket_idx] >= 255) begin
+        $fatal(1, "source bucket %0d exceeds FEB subheader hit-count field", bucket_idx);
+      end
+      hit.abs_ts_8ns = abs_ts_8ns;
+      hit.asic = asic;
+      hit.channel = channel;
+      hit.hit_id = hit_id;
+      hit.bucket_idx = bucket_idx;
+      source_hits_unsorted.push_back(hit);
+      bucket_hit_count[bucket_idx]++;
+    end
+  endtask
+
+  task automatic generate_periodic_source_model();
+    int unsigned hit_id;
+    int unsigned sample_idx;
+    int unsigned abs_ts_8ns;
+    begin
+      for (int unsigned asic = 0; asic < active_asic_count; asic++) begin
+        sample_idx = 0;
+        abs_ts_8ns = asic_phase_8ns(asic);
+        while (abs_ts_8ns < run_window_8ns) begin
+          for (int unsigned channel = 0; channel < CHANNELS_PER_ASIC; channel++) begin
+            hit_id = (((sample_idx * active_asic_count) + asic) *
+                      CHANNELS_PER_ASIC) + channel;
+            push_source_hit(abs_ts_8ns, asic, channel, hit_id);
+          end
+          sample_idx++;
+          abs_ts_8ns = asic_phase_8ns(asic) + (sample_idx * hit_period_8ns);
+        end
+      end
+      expected_time_samples_runtime = source_hits_unsorted.size() / CHANNELS_PER_ASIC;
+    end
+  endtask
+
+  function automatic int unsigned poisson_gap_8ns(ref int seed);
+    int gap;
+    begin
+      gap = $dist_exponential(seed, hit_period_8ns);
+      if (gap < 1) begin
+        gap = 1;
+      end
+      return gap;
+    end
+  endfunction
+
+  task automatic generate_poisson_source_model();
+    int unsigned hit_id;
+    int unsigned abs_ts_8ns;
+    int seed;
+    begin
+      hit_id = 0;
+      for (int unsigned asic = 0; asic < active_asic_count; asic++) begin
+        for (int unsigned channel = 0; channel < CHANNELS_PER_ASIC; channel++) begin
+          seed = int'((poisson_seed + (asic * 32'h0001_0001) +
+                       (channel * 32'h0000_1009)) & 32'h7fff_ffff);
+          if (seed == 0) begin
+            seed = 1;
+          end
+          abs_ts_8ns = poisson_gap_8ns(seed);
+          while (abs_ts_8ns < run_window_8ns) begin
+            push_source_hit(abs_ts_8ns, asic, channel, hit_id);
+            hit_id++;
+            abs_ts_8ns += poisson_gap_8ns(seed);
+          end
+        end
+      end
+      expected_time_samples_runtime = 0;
+    end
+  endtask
+
+  task automatic build_source_model();
+    int unsigned bucket_next[];
+    int unsigned running;
+    int unsigned dst;
+    begin
+      source_hits_unsorted.delete();
+      bucket_hit_count = new[total_source_buckets];
+      bucket_first_idx = new[total_source_buckets];
+
+      if (source_mode == SOURCE_MODE_POISSON) begin
+        generate_poisson_source_model();
+      end else begin
+        generate_periodic_source_model();
+      end
+
+      source_hits = new[source_hits_unsorted.size()];
+      bucket_next = new[total_source_buckets];
+      running = 0;
+      for (int unsigned bucket = 0; bucket < total_source_buckets; bucket++) begin
+        bucket_first_idx[bucket] = running;
+        bucket_next[bucket] = running;
+        running += bucket_hit_count[bucket];
+      end
+
+      foreach (source_hits_unsorted[idx]) begin
+        dst = bucket_next[source_hits_unsorted[idx].bucket_idx];
+        source_hits[dst] = source_hits_unsorted[idx];
+        bucket_next[source_hits_unsorted[idx].bucket_idx]++;
+      end
+    end
+  endtask
+
+  function automatic int unsigned compute_expected_dma_words();
+    int unsigned total_words;
+    int unsigned frame_hits;
+    int unsigned bucket_idx;
+    begin
+      total_words = 0;
+      for (int unsigned frame = 0; frame < n_frames_runtime; frame++) begin
+        frame_hits = 0;
+        for (int unsigned shd = 0; shd < N_SHD; shd++) begin
+          bucket_idx = (frame * N_SHD) + shd;
+          frame_hits += bucket_hit_count[bucket_idx];
+        end
+        total_words += (frame_hits + 3) / 4;
+      end
+      return total_words;
+    end
+  endfunction
+
+  task automatic program_lookup_table();
+    int unsigned addr;
+    begin
+      lookup_ctrl <= 32'h0;
+      repeat (4) @(posedge swb_clk);
+      for (int unsigned lane = 0; lane < ACTIVE_LANES; lane++) begin
+        for (int unsigned asic = 0; asic < active_asic_count; asic++) begin
+          addr = ((lane & 3'h7) << 4) | (asic & 4'hf);
+          lookup_ctrl <= make_lookup_ctrl_word(addr, asic);
+          @(posedge swb_clk);
+        end
+      end
+      lookup_ctrl <= 32'h0;
+      repeat (4) @(posedge swb_clk);
+    end
+  endtask
 
   task automatic write_hit_checkpoint(
       input int fd,
@@ -331,12 +512,15 @@ module feb_swb_corun_plain_tb;
   task automatic drive_frame(input int lane, input int unsigned frame_id);
     longint unsigned frame_base;
     int unsigned shd_idx;
+    int unsigned bucket_idx;
+    int unsigned event_idx;
+    int unsigned asic;
     int unsigned hit_count;
-    int unsigned sample_idx;
     int unsigned channel;
     int unsigned hit_id;
     int unsigned abs_ts_8ns;
     int unsigned total_hits;
+    source_hit_event_t hit_event;
     logic [31:0] hit_word;
     logic [31:0] ts_high_word;
     logic [15:0] ts_low_word;
@@ -371,14 +555,20 @@ module feb_swb_corun_plain_tb;
                        1'b0, 1'b0, 1'b0, 64'h0);
 
         if (hit_count != 0) begin
-          sample_idx = subheader_sample_idx(lane, frame_id, shd_idx);
-          abs_ts_8ns = sample_idx * hit_period_8ns;
-          source_time_ps = longint'(abs_ts_8ns) * 8000;
-          for (channel = 0; channel < ASIC0_CHANNELS; channel++) begin
-            hit_id = (sample_idx * ASIC0_CHANNELS) + channel;
-            hit_word = make_mutrig_hit(abs_ts_8ns, channel, hit_id);
+          bucket_idx = (frame_id * N_SHD) + shd_idx;
+          for (event_idx = bucket_first_idx[bucket_idx];
+               event_idx < (bucket_first_idx[bucket_idx] + hit_count);
+               event_idx++) begin
+            hit_event = source_hits[event_idx];
+            asic = hit_event.asic;
+            channel = hit_event.channel;
+            hit_id = hit_event.hit_id;
+            abs_ts_8ns = hit_event.abs_ts_8ns;
+            source_time_ps = longint'(abs_ts_8ns) * 8000;
+            hit_word = make_mutrig_hit(abs_ts_8ns, asic, channel, hit_id);
             expected_dma_hit =
-                expected_mutrig_dma_hit(ts_high_word, ts_low_word, shd_idx[7:0], hit_word);
+                expected_mutrig_dma_hit(ts_high_word, ts_low_word, shd_idx[7:0],
+                                        hit_word, asic);
             debug_meta = make_debug_meta(lane, abs_ts_8ns, hit_id);
             expected_hits.push_back(expected_dma_hit);
             write_hit_checkpoint(source_trace_fd,
@@ -572,7 +762,10 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "frames=%0d", n_frames_runtime);
       $fdisplay(summary_fd, "run_window_8ns=%0d", run_window_8ns);
       $fdisplay(summary_fd, "active_mask=0x%0h", swb_enable_mask);
-      $fdisplay(summary_fd, "asic0_channels=%0d", ASIC0_CHANNELS);
+      $fdisplay(summary_fd, "active_asics=%0d", active_asic_count);
+      $fdisplay(summary_fd, "channels_per_asic=%0d", CHANNELS_PER_ASIC);
+      $fdisplay(summary_fd, "source_mode=%s", source_mode_name(source_mode));
+      $fdisplay(summary_fd, "poisson_seed=%0d", poisson_seed);
       $fdisplay(summary_fd, "hit_period_8ns=%0d", hit_period_8ns);
       $fdisplay(summary_fd, "hit_rate_hz_per_channel=%0d",
                 (hit_period_8ns == 0) ? 0 : (125000000 / hit_period_8ns));
@@ -584,6 +777,7 @@ module feb_swb_corun_plain_tb;
                 SYNTHETIC_POST_RBCAM_DELAY_CYCLES);
       $fdisplay(summary_fd, "expected_time_samples=%0d", expected_time_samples_runtime);
       $fdisplay(summary_fd, "expected_hits=%0d", expected_hits.size());
+      $fdisplay(summary_fd, "expected_dma_words=%0d", expected_dma_words_runtime);
       $fdisplay(summary_fd, "feb_hit_count=%0d", feb_hit_count);
       $fdisplay(summary_fd, "opq_beats=%0d", opq_beat_count);
       $fdisplay(summary_fd, "dma_payload_words=%0d", dma_payload_word_count);
@@ -623,6 +817,7 @@ module feb_swb_corun_plain_tb;
     feb_endofpacket = '0;
     feb_debug_valid = '0;
     feb_debug_meta = '0;
+    lookup_ctrl = 32'h0;
     feb_hit_count = 0;
     opq_beat_count = 0;
     dma_payload_word_count = 0;
@@ -631,26 +826,52 @@ module feb_swb_corun_plain_tb;
     dma_done_count = 0;
     run_window_8ns = DEFAULT_RUN_WINDOW_8NS;
     hit_period_8ns = DEFAULT_HIT_PERIOD_8NS;
+    active_asic_count = DEFAULT_ASIC_COUNT;
+    source_mode = SOURCE_MODE_PERIODIC;
+    poisson_seed = DEFAULT_POISSON_SEED;
     if (!$value$plusargs("FEB_SWB_RUN_WINDOW_8NS=%d", run_window_8ns)) begin
       run_window_8ns = DEFAULT_RUN_WINDOW_8NS;
     end
     if (!$value$plusargs("FEB_SWB_HIT_PERIOD_8NS=%d", hit_period_8ns)) begin
       hit_period_8ns = DEFAULT_HIT_PERIOD_8NS;
     end
-    if (hit_period_8ns == 0 || run_window_8ns == 0) begin
-      $fatal(1, "invalid FEB_SWB runtime config run_window_8ns=%0d hit_period_8ns=%0d",
-             run_window_8ns, hit_period_8ns);
+    if (!$value$plusargs("FEB_SWB_ASIC_COUNT=%d", active_asic_count)) begin
+      active_asic_count = DEFAULT_ASIC_COUNT;
+    end
+    begin
+      string source_mode_arg;
+      if ($value$plusargs("FEB_SWB_SOURCE_MODE=%s", source_mode_arg)) begin
+        if (source_mode_arg == "poisson" || source_mode_arg == "poisson_iid") begin
+          source_mode = SOURCE_MODE_POISSON;
+        end else if (source_mode_arg == "periodic" ||
+                     source_mode_arg == "periodic_phase_staggered") begin
+          source_mode = SOURCE_MODE_PERIODIC;
+        end else begin
+          $fatal(1, "unknown FEB_SWB_SOURCE_MODE=%s", source_mode_arg);
+        end
+      end
+    end
+    if (!$value$plusargs("FEB_SWB_POISSON_SEED=%d", poisson_seed)) begin
+      poisson_seed = DEFAULT_POISSON_SEED;
+    end
+    if (hit_period_8ns == 0 || run_window_8ns == 0 ||
+        active_asic_count == 0 || active_asic_count > MAX_ASIC_COUNT) begin
+      $fatal(1,
+             "invalid FEB_SWB runtime config run_window_8ns=%0d hit_period_8ns=%0d asic_count=%0d",
+             run_window_8ns, hit_period_8ns, active_asic_count);
     end
     n_frames_runtime = (run_window_8ns + FRAME_STRIDE_8NS - 1) / FRAME_STRIDE_8NS;
-    expected_time_samples_runtime =
-        (run_window_8ns + hit_period_8ns - 1) / hit_period_8ns;
-    expected_hits_runtime = expected_time_samples_runtime * ASIC0_CHANNELS;
-    expected_dma_words_runtime = (expected_hits_runtime + 3) / 4;
+    total_source_buckets = n_frames_runtime * N_SHD;
+    expected_time_samples_runtime = 0;
+    build_source_model();
+    expected_hits_runtime = source_hits.size();
+    expected_dma_words_runtime = compute_expected_dma_words();
 
     open_traces();
 
     repeat (16) @(posedge swb_clk);
     reset = 1'b0;
+    program_lookup_table();
 
     fork
       drive_lane(0);

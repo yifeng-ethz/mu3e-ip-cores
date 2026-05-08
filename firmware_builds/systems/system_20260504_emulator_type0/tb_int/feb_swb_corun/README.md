@@ -124,54 +124,99 @@ make compile_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim
 make run_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim
 ```
 
-The current directed contract run uses virtual MuTRiG ASIC0 channels 0..31 at
-100 kHz/channel for 1 ms on lane 0, an empty legal FEB frame on lane 1, and
-`feb_enable_mask = 4'h3`. The default make variables are
-`RUN_WINDOW_8NS=125000` and `HIT_PERIOD_8NS=1250`, giving 100 time samples
-per channel and 3200 expected DMA hits. The MuSiP OPQ source defaults used by
-this corun provision `OPQ_LANE_FIFO_DEPTH=8192`,
-`OPQ_TICKET_FIFO_DEPTH=8192`, and `OPQ_DEBUG_LEVEL=2`; under the scoped
-no-bottleneck assumption every native OPQ drop counter must remain zero. The
-test expects the final log to contain
-`FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
-under `report/`. `run_swb_corun` also runs
-`scripts/analyze_feb_swb_trace.py`, which emits
-`report/feb_swb_hit_trace_debug.csv` plus `report/feb_swb_lifetime_trace.csv` and
-proves each hit reaches OPQ and DMA with the expected ASIC, channel, hit id,
-and frame/subheader timestamp bucket. The direct-continuation harness also
-emits virtual MuTRiG generation, pre-rbCAM, and post-rbCAM checkpoint traces.
-In this special FEB-to-SWB corun those pre/post-rbCAM checkpoints are
-pass-through lineage markers, not a real rbCAM instance; the true rbCAM path
-remains covered by the full `prof_int_002` tb_int flow. The lifetime trace uses
-`(checkpoint_time_ps - virtual_mutrig_generation_time_ps) / 8000`, so the
-histogram axis is in 8 ns cycles and measures each hit's lifetime from its
-actual virtual MuTRiG generation event, not from inter-checkpoint deltas or
-from the decoded timestamp bucket. `scripts/render_feb_swb_lifetime_dislin.sh`
-then writes
-`report/feb_swb_lifetime_hist.png`, `report/feb_swb_lifetime_hist.pdf`,
-`report/feb_swb_lifetime_hist_stats.csv`, and
-`report/feb_swb_lifetime_dislin.log` for pre-rbCAM, post-rbCAM, FEB egress,
-OPQ ingress, and OPQ egress hit lifetimes. The analyzer also writes
-`report/feb_swb_range_validation.csv`, which validates the direct corun ranges:
-synthetic pre/post-rbCAM `0` cycles, two-frame store-forward FEB egress
-`[2049,6143]` cycles, OPQ ingress `[2049,6159]` cycles, and OPQ/DMA against the
-measured finite-burst OPQ queue envelope. It also emits
-`report/feb_swb_tunnel_scoreboard.csv`, `report/feb_swb_factual_scoreboard.csv`,
-and `report/feb_swb_opq_native_summary.csv`.
+The maintained directed contract run uses virtual MuTRiG ASIC0..7 channels
+0..31 at 100 kHz/channel for 1 ms on lane 0, an empty legal FEB frame on lane 1,
+and `feb_enable_mask = 4'h3`. Lanes 2 and 3 are masked. The default make
+variables are `RUN_WINDOW_8NS=125000`, `HIT_PERIOD_8NS=1250`,
+`ASIC_COUNT=8`, and `SOURCE_MODE=periodic`; this gives 100 time samples per
+ASIC/channel and 25600 expected DMA hits. The scoped no-bottleneck run should
+use:
 
-The OPQ queue report is `report/feb_swb_opq_queue_model.csv` plus the DISLIN
-plots `report/feb_swb_opq_queue_model.png` and `.pdf`. It aligns each lane-0
-FEB frame SOP with the OPQ output frame SOP and applies the deterministic
-recurrence
-`wait[n] = wait[n-1] + service_iat[n] - ingress_iat[n]`. In the current
-100 kHz/channel, 1 ms, two-lane corun this model has zero residual and the
-finite-burst lossless run reports `rho = mean(service_iat) / mean(ingress_iat)
-= 1.726`, `wait_min=2727.5`, and `wait_max=91906.5` cycles. Because this is a
-finite burst with provisioned buffering and post-run drain, `rho>1` is reported
-as queue residency, not as an allowed loss condition. The latest native OPQ
-summary in `run_swb_corun.log` reports zero frame-table, mask, credit, and
-handle drops and the analyzer reports `pass_hits=3200`, `fail_hits=0`,
-`debug_pass=3200`, and `factual_pass=3200`.
+```sh
+make run_swb_corun \
+  QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim \
+  OPQ_SOURCE_MODE=native_sv_signoff \
+  OPQ_LANE_FIFO_DEPTH=65536 \
+  OPQ_TICKET_FIFO_DEPTH=65536 \
+  ASIC_COUNT=8 \
+  RUN_WINDOW_8NS=125000 \
+  HIT_PERIOD_8NS=1250 \
+  SOURCE_MODE=periodic
+```
+
+The stochastic comparison uses independent Poisson streams per ASIC/channel:
+
+```sh
+make run_swb_corun_poisson \
+  QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim \
+  OPQ_SOURCE_MODE=native_sv_signoff \
+  OPQ_LANE_FIFO_DEPTH=65536 \
+  OPQ_TICKET_FIFO_DEPTH=65536 \
+  ASIC_COUNT=8 \
+  RUN_WINDOW_8NS=125000 \
+  HIT_PERIOD_8NS=1250 \
+  POISSON_SEED=20260508
+```
+
+The MuSiP OPQ source defaults used by this corun provision
+`OPQ_DEBUG_LEVEL=2`; under the scoped no-bottleneck assumption every native OPQ
+drop counter must remain zero. The test expects the final log to contain
+`FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
+under `report/` for periodic mode and `report_poisson/` for Poisson mode.
+`run_swb_corun` and `run_swb_corun_poisson` also run
+`scripts/analyze_feb_swb_trace.py`, which emits
+`feb_swb_hit_trace_debug.csv` plus `feb_swb_lifetime_trace.csv` and proves each
+hit reaches OPQ and DMA with the expected ASIC, channel, hit id, and
+frame/subheader timestamp bucket. The direct-continuation harness also emits
+virtual MuTRiG generation, pre-rbCAM, and post-rbCAM checkpoint traces. In this
+special FEB-to-SWB corun those pre/post-rbCAM checkpoints are pass-through
+lineage markers, not a real rbCAM instance; the DISLIN top panels import the
+clean full-FEB rbCAM reference from the `prof_int_002` tb_int flow.
+
+The lifetime trace uses the carried hit global timestamp/debug contract as the
+origin, so the histogram axis is in 8 ns cycles and measures each hit's
+lifetime from its actual virtual MuTRiG generation event, not from
+inter-checkpoint deltas. `scripts/render_feb_swb_lifetime_dislin.sh` writes
+`feb_swb_lifetime_hist.png`, `feb_swb_lifetime_hist.pdf`,
+`feb_swb_lifetime_hist_stats.csv`, and `feb_swb_lifetime_dislin.log` for the
+rbCAM reference, FEB egress, OPQ ingress, and OPQ egress hit lifetimes. The
+plot uses one shared x-axis across all checkpoint panels and annotates p05,
+p50, and p95 directly; p05 is orange dashed, p50 is black, and p95 is black
+dashed. The analyzer also writes `feb_swb_range_validation.csv`, which validates
+the direct corun ranges: synthetic pre/post-rbCAM `0` cycles in the trace,
+full-FEB rbCAM reference apertures `[0,2000]` and `[2000,2200)`, two-frame
+store-forward FEB egress `[2049,6143]` cycles, OPQ ingress `[2049,6159]`
+cycles, and OPQ/DMA against the measured finite-burst OPQ queue envelope. It
+also emits `feb_swb_tunnel_scoreboard.csv`,
+`feb_swb_factual_scoreboard.csv`, and `feb_swb_opq_native_summary.csv`.
+
+Current accepted all-ASIC 1 ms summaries:
+
+```text
+periodic:
+  expected_hits=25600, expected_dma_words=6400
+  feb_hit_count=25600, actual_hits=25600
+  missing_hits=0, ghost_hits=0, opq_drop_counter_total=0
+  plot=report/feb_swb_lifetime_hist.png
+
+poisson_iid seed 20260508:
+  expected_hits=25629, expected_dma_words=6431
+  feb_hit_count=25629, actual_hits=25629
+  missing_hits=0, ghost_hits=0, opq_drop_counter_total=0
+  plot=report_poisson/feb_swb_lifetime_hist.png
+```
+
+The OPQ queue report is `feb_swb_opq_queue_model.csv` plus the DISLIN plots
+`feb_swb_opq_queue_model.png` and `.pdf`. It aligns each lane-0 FEB frame SOP
+with the OPQ output frame SOP and applies the deterministic recurrence
+`wait[n] = wait[n-1] + service_iat[n] - ingress_iat[n]`. In the accepted
+periodic run this model has zero residual and reports
+`rho = mean(service_iat) / mean(ingress_iat) = 1.729`, `wait_min=2733.5`, and
+`wait_max=92256.5` cycles. In the accepted Poisson run the zero-residual queue
+model reports `mean(service_iat)=3607.639`, `rho=1.762`, `wait_min=2789.5`,
+and `wait_max=97927.5` cycles. Because these are finite bursts with
+provisioned buffering and post-run drain,
+`rho>1` is reported as queue residency, not as an allowed loss condition.
 
 The excluded 1024-entry lane-FIFO diagnostic profile is recorded in
 `../doc/BUG_HISTORY.md` as BUG-022-R. It remains useful as an overload
