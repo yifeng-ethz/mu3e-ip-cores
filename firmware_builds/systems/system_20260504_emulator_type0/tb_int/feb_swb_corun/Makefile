@@ -16,13 +16,14 @@ VSIM ?= $(QUESTA_HOME)/linux_x86_64/vsim
 QUESTA_INI_PREP := $(ROOT)/tools/ip/prepare_questa_ini.sh
 QUESTA_RUNNER := $(ROOT)/tools/ip/run_questa.sh
 PYTHON ?= python3
+DISLIN_DIR ?= /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/.vendor/dislin
 
 WORK ?= work
 MUSIP_UVM_ROOT ?= /home/yifeng/packages/musip_2604/tb_int/cases/basic/uvm
 BUILD_ROOT ?= $(CURDIR)/build
 REPORT_DIR ?= $(CURDIR)/report
 TRACE_ANALYZER := $(CURDIR)/scripts/analyze_feb_swb_trace.py
-DELAY_PLOTTER := $(CURDIR)/scripts/plot_feb_swb_delays.py
+LIFETIME_RENDERER := $(CURDIR)/scripts/render_feb_swb_lifetime_dislin.sh
 CORUN_BUILD_DIR := $(BUILD_ROOT)/swb_corun
 QUESTA_INI := $(CORUN_BUILD_DIR)/modelsim.ini
 RUN_LOG ?= $(REPORT_DIR)/run_swb_corun.log
@@ -141,7 +142,7 @@ run_swb_corun: compile_swb_corun
 	QSIM_INI=$(QUESTA_INI) $(QUESTA_RUNNER) $(VSIM) $(VSIM_FLAGS) $(OPQ_VSIM_LIB_FLAGS) feb_swb_corun_plain_tb -do "$(RUN_DO)" +FEB_SWB_TRACE_DIR=$(abspath $(REPORT_DIR)) | tee "$(RUN_LOG)"
 	grep -q "FEB_SWB_CORUN_PLAIN_PASS" "$(RUN_LOG)"
 	$(PYTHON) $(TRACE_ANALYZER) --trace-dir "$(REPORT_DIR)"
-	$(PYTHON) $(DELAY_PLOTTER) --trace-dir "$(REPORT_DIR)"
+	DISLIN_DIR="$(DISLIN_DIR)" $(LIFETIME_RENDERER) "$(REPORT_DIR)"
 
 clean:
 	rm -rf $(WORK) $(BUILD_ROOT) transcript vsim.wlf

@@ -321,10 +321,42 @@ def build_index(items, key_fn):
     return index
 
 
-def ns(delta_ps: int | None) -> str:
-    if delta_ps is None:
+LIFETIME_METRICS = [
+    ("feb_egress_lifetime_cycles", "FEB egress"),
+    ("opq_ingress_lifetime_cycles", "OPQ ingress"),
+    ("opq_egress_lifetime_cycles", "OPQ egress"),
+]
+
+
+def cycles_from_hit_ts(time_ps: int | None, hit_ts_8ns: int) -> str:
+    if time_ps is None:
         return ""
-    return f"{delta_ps / 1000.0:.3f}"
+    return f"{(time_ps / 8000.0) - hit_ts_8ns:.3f}"
+
+
+def percentile(values: list[float], pct: float) -> float:
+    if not values:
+        return 0.0
+    if len(values) == 1:
+        return values[0]
+    values_sorted = sorted(values)
+    rank = (pct / 100.0) * (len(values_sorted) - 1)
+    low = int(rank)
+    high = min(low + 1, len(values_sorted) - 1)
+    frac = rank - low
+    return values_sorted[low] * (1.0 - frac) + values_sorted[high] * frac
+
+
+def metric_values(rows: list[dict[str, object]], metric: str) -> list[float]:
+    values: list[float] = []
+    for row in rows:
+        if row.get("status") != "PASS":
+            continue
+        value = row.get(metric, "")
+        if value == "":
+            continue
+        values.append(float(value))
+    return values
 
 
 def write_rows(path: Path, fieldnames: list[str], rows: list[dict[str, object]]) -> None:
@@ -332,6 +364,52 @@ def write_rows(path: Path, fieldnames: list[str], rows: list[dict[str, object]])
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def write_lifetime_stats(path: Path, rows: list[dict[str, object]]) -> None:
+    with path.open("w", encoding="ascii", newline="") as handle:
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=[
+                "metric",
+                "checkpoint",
+                "count",
+                "min_cycles",
+                "p50_cycles",
+                "p95_cycles",
+                "max_cycles",
+                "mean_cycles",
+            ],
+        )
+        writer.writeheader()
+        for metric, label in LIFETIME_METRICS:
+            values = metric_values(rows, metric)
+            if values:
+                writer.writerow(
+                    {
+                        "metric": metric,
+                        "checkpoint": label,
+                        "count": len(values),
+                        "min_cycles": f"{min(values):.3f}",
+                        "p50_cycles": f"{percentile(values, 50):.3f}",
+                        "p95_cycles": f"{percentile(values, 95):.3f}",
+                        "max_cycles": f"{max(values):.3f}",
+                        "mean_cycles": f"{sum(values) / len(values):.3f}",
+                    }
+                )
+            else:
+                writer.writerow(
+                    {
+                        "metric": metric,
+                        "checkpoint": label,
+                        "count": 0,
+                        "min_cycles": "",
+                        "p50_cycles": "",
+                        "p95_cycles": "",
+                        "max_cycles": "",
+                        "mean_cycles": "",
+                    }
+                )
 
 
 def main() -> int:
@@ -367,7 +445,7 @@ def main() -> int:
     dma_index = build_index(dma_hits, lambda item: item.hit_word)
 
     hit_rows: list[dict[str, object]] = []
-    delay_rows: list[dict[str, object]] = []
+    lifetime_rows: list[dict[str, object]] = []
     failures: list[str] = []
 
     for expected in feb_hits:
@@ -441,22 +519,6 @@ def main() -> int:
         if status != "PASS":
             failures.append(f"hit_id={hit_id} channel={channel} checks={';'.join(checks)}")
 
-        feb_to_opq_ingress = (
-            opq_ingress.time_ps - expected.time_ps if opq_ingress is not None else None
-        )
-        opq_ingress_to_opq_egress = (
-            opq_egress.time_ps - opq_ingress.time_ps
-            if opq_ingress is not None and opq_egress is not None
-            else None
-        )
-        feb_to_opq_egress = (
-            opq_egress.time_ps - expected.time_ps if opq_egress is not None else None
-        )
-        opq_egress_to_dma = (
-            dma.time_ps - opq_egress.time_ps if opq_egress is not None and dma is not None else None
-        )
-        feb_to_dma = dma.time_ps - expected.time_ps if dma is not None else None
-
         hit_rows.append(
             {
                 "status": status,
@@ -484,7 +546,7 @@ def main() -> int:
                 "checks": ";".join(checks),
             }
         )
-        delay_rows.append(
+        lifetime_rows.append(
             {
                 "status": status,
                 "hit_id": hit_id,
@@ -496,11 +558,19 @@ def main() -> int:
                 "opq_ingress_time_ps": opq_ingress.time_ps if opq_ingress is not None else "",
                 "opq_egress_time_ps": opq_egress.time_ps if opq_egress is not None else "",
                 "dma_time_ps": dma.time_ps if dma is not None else "",
-                "feb_to_opq_ingress_ns": ns(feb_to_opq_ingress),
-                "opq_ingress_to_opq_egress_ns": ns(opq_ingress_to_opq_egress),
-                "feb_to_opq_egress_ns": ns(feb_to_opq_egress),
-                "opq_egress_to_dma_ns": ns(opq_egress_to_dma),
-                "feb_to_dma_ns": ns(feb_to_dma),
+                "feb_egress_lifetime_cycles": cycles_from_hit_ts(expected.time_ps, abs_ts_8ns),
+                "opq_ingress_lifetime_cycles": cycles_from_hit_ts(
+                    opq_ingress.time_ps if opq_ingress is not None else None,
+                    abs_ts_8ns,
+                ),
+                "opq_egress_lifetime_cycles": cycles_from_hit_ts(
+                    opq_egress.time_ps if opq_egress is not None else None,
+                    abs_ts_8ns,
+                ),
+                "dma_lifetime_cycles": cycles_from_hit_ts(
+                    dma.time_ps if dma is not None else None,
+                    abs_ts_8ns,
+                ),
             }
         )
 
@@ -518,7 +588,8 @@ def main() -> int:
     failures.extend(opq_issues)
 
     hit_trace_path = trace_dir / "feb_swb_hit_trace_debug.csv"
-    delay_trace_path = trace_dir / "feb_swb_delay_trace.csv"
+    lifetime_trace_path = trace_dir / "feb_swb_lifetime_trace.csv"
+    lifetime_stats_path = trace_dir / "feb_swb_lifetime_hist_stats.csv"
     summary_path = trace_dir / "feb_swb_trace_debug_summary.txt"
     write_rows(
         hit_trace_path,
@@ -550,7 +621,7 @@ def main() -> int:
         hit_rows,
     )
     write_rows(
-        delay_trace_path,
+        lifetime_trace_path,
         [
             "status",
             "hit_id",
@@ -562,14 +633,14 @@ def main() -> int:
             "opq_ingress_time_ps",
             "opq_egress_time_ps",
             "dma_time_ps",
-            "feb_to_opq_ingress_ns",
-            "opq_ingress_to_opq_egress_ns",
-            "feb_to_opq_egress_ns",
-            "opq_egress_to_dma_ns",
-            "feb_to_dma_ns",
+            "feb_egress_lifetime_cycles",
+            "opq_ingress_lifetime_cycles",
+            "opq_egress_lifetime_cycles",
+            "dma_lifetime_cycles",
         ],
-        delay_rows,
+        lifetime_rows,
     )
+    write_lifetime_stats(lifetime_stats_path, lifetime_rows)
 
     pass_rows = sum(1 for row in hit_rows if row["status"] == "PASS")
     with summary_path.open("w", encoding="ascii") as handle:

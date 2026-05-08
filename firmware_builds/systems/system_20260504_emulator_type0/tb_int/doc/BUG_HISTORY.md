@@ -55,6 +55,7 @@ Historical formal note:
 | [BUG-018-R](#bug-018-r-sv-rbcam-deassembly-fifo-depth-did-not-match-vhdl-scfifo_w40d256) | R | hard stuck error | `occasional (1 MHz/channel full32 post-rbCAM stress)` | fixed in SV source; full rate sweep passed | PROF-INT-002 newest-SV 1 MHz post-rbCAM run on `2026-05-08` | pending | SV rbCAM deassembly FIFO depth was 64 while the VHDL reference uses `scfifo_w40d256`, letting generated fanout drop two owning-copy hits when one rbCAM instance backpressured. |
 | [BUG-019-R](#bug-019-r-feb-scifi-hit_type3-contract-mismatch-at-swb-opq-corun) | R | hard stuck error | `common (FEB SciFi hit_type3 through SWB OPQ merge)` | partial; direct corun passed | FEB/SWB corun architecture audit and `run_swb_corun` on `2026-05-08` | 833b204c/e7f29d8 | FEB/SWB corun exposed a protocol assumption on subheader hit-count width and a MuSiP OPQ egress header rewrite that could make SciFi/MuTRiG traffic parse or pack under the wrong detector contract. |
 | [BUG-020-R](#bug-020-r-swb-scifi-dma-timestamp-packing-dropped-the-odd-frame-bit) | R | hard stuck error | `common (FEB SciFi hits in odd 2048-tick frame buckets)` | fixed in MuSiP; trace checker committed | FEB/SWB trace debug on `2026-05-08` | f1344f2b/39947ff | Trace-level FEB/SWB corun showed hits reached DMA in the right count but several odd-frame hits carried the wrong absolute timestamp because MuSiP packed SciFi time using the old 256-subheader layout. |
+| [BUG-021-H](#bug-021-h-feb-swb-corun-emitted-future-timestamped-hits-before-hit-timebase) | H | soft error | `directed-only (FEB/SWB lifetime plotting)` | fixed in harness; lifetime rerun passed | FEB/SWB lifetime plot on `2026-05-08` | pending | The corun packet writer serialized future timestamped hits at line rate before their MuTRiG hit timestamp, so lifetime plots showed negative FEB-egress and OPQ-ingress delays even though payload matching passed. |
 
 ## 2026-05-06
 
@@ -574,3 +575,29 @@ Historical formal note:
 - Commit:
   - FEB trace checker: `f1344f2b`
   - MuSiP timestamp fix: `39947ff`
+
+### BUG-021-H: FEB/SWB corun emitted future timestamped hits before hit timebase
+
+- First seen in:
+  - FEB/SWB lifetime plot rerun on `2026-05-08`
+  - command:
+    `make run_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim` from `tb_int/feb_swb_corun`
+- Symptom:
+  - payload and DEBUG trace matching still passed with `TRACE_DEBUG_PASS hits=384 channels=0..31 asic=0`
+  - lifetime-at-checkpoint plotting reported negative FEB-egress and OPQ-ingress lifetimes, with FEB egress spanning `-1503.500..83.500` 8 ns cycles before the fix
+  - the first sample at `hit_ts=0` was positive, but the next 100 kHz sample at `hit_ts=1250` cycles egressed around simulation cycle 241, proving the TB emitted a future timestamped hit before its source bucket time
+- Root cause:
+  - `feb_swb_corun_plain_tb.sv` serialized each FEB frame at line rate and then waited for the next frame boundary
+  - this kept frame start spacing legal but allowed sparse non-empty subheaders inside a frame to be transmitted before the corresponding MuTRiG hit timestamp
+  - the old transport-delay plot hid this because it only measured differences between downstream checkpoints
+- Fix status:
+  - state:
+    fixed in harness; post-fix lifetime rerun passed
+  - mechanism:
+    the FEB lane driver now waits until `abs_ts_8ns * 8 ns` before serializing a non-empty hit group, preserving the source hit timestamp as the generation-time reference used by the lifetime analyzer
+  - before_fix_outcome:
+    `feb_swb_lifetime_hist_stats.csv` showed negative source-relative lifetimes for FEB egress and OPQ ingress while the payload scoreboard still passed
+  - after_fix_outcome:
+    rerun `make run_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim` passed with `FEB_SWB_CORUN_PLAIN_PASS expected_hits=384 dma_payload_words=96 opq_beats=438`, `TRACE_DEBUG_PASS hits=384 channels=0..31 asic=0`, and `LIFETIME_DISLIN_PASS`. The lifetime stats are non-negative at FEB egress (`min=2.500`, `p50=34.500`, `p95=64.500`, `max=83.500` cycles) and OPQ ingress (`min=3.750`, `p50=35.750`, `p95=65.750`, `max=84.750` cycles); OPQ egress remains the long queued lifetime checkpoint (`min=1507.750`, `p50=6801.750`, `p95=11444.675`, `max=11454.250` cycles).
+  - potential_hazard:
+    low after rerun because the fix only inserts legal idle cycles in the stimulus stream; it does not relax the OPQ/DMA payload, bucket, or DEBUG metadata checks

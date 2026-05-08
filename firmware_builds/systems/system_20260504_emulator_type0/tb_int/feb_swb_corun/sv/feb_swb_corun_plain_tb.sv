@@ -250,6 +250,14 @@ module feb_swb_corun_plain_tb;
     end
   endtask
 
+  task automatic wait_until_hit_timebase(input longint unsigned abs_ts_8ns);
+    begin
+      while ($time < (abs_ts_8ns * 8ns)) begin
+        @(posedge feb_clk);
+      end
+    end
+  endtask
+
   function automatic int unsigned subheader_sample_idx(
       input int unsigned lane,
       input int unsigned frame_id,
@@ -325,6 +333,7 @@ module feb_swb_corun_plain_tb;
         if (hit_count != 0) begin
           sample_idx = subheader_sample_idx(lane, frame_id, shd_idx);
           abs_ts_8ns = sample_idx * HIT_PERIOD_8NS;
+          wait_until_hit_timebase(abs_ts_8ns);
           for (channel = 0; channel < ASIC0_CHANNELS; channel++) begin
             hit_id = (sample_idx * ASIC0_CHANNELS) + channel;
             hit_word = make_mutrig_hit(abs_ts_8ns, channel, hit_id);
