@@ -7,6 +7,7 @@
 #include "dislin.h"
 
 #define MAX_VALUES 65536
+#define MAX_BINS 256
 #define MAX_TOKENS 40
 #define PAGE_WIDTH 2970
 #define PAGE_HEIGHT 4200
@@ -15,7 +16,10 @@ typedef struct {
   const char *key;
   const char *label;
   const char *color;
+  const char *equation;
   int col;
+  float bound_low;
+  float bound_high;
   int n;
   float values[MAX_VALUES];
 } metric_t;
@@ -123,6 +127,96 @@ static int read_lifetime_csv(const char *path, metric_t *metrics, int nmetrics) 
 
   fclose(fp);
   return 1;
+}
+
+static void make_sibling_path(const char *path,
+                              const char *name,
+                              char *out,
+                              size_t out_size) {
+  const char *slash = strrchr(path, '/');
+  if (slash == NULL) {
+    snprintf(out, out_size, "%s", name);
+    return;
+  }
+  snprintf(out, out_size, "%.*s/%s", (int)(slash - path), path, name);
+}
+
+static void read_reference_csv(const char *path, metric_t *metrics, int nmetrics) {
+  FILE *fp = fopen(path, "r");
+  char line[4096];
+  int first = 1;
+
+  if (fp == NULL) {
+    fprintf(stderr, "reference rbCAM CSV not found, using corun markers: %s\n", path);
+    return;
+  }
+
+  for (int i = 0; i < nmetrics && i < 2; i++) {
+    metrics[i].n = 0;
+  }
+
+  while (fgets(line, sizeof(line), fp) != NULL) {
+    char *tokens[MAX_TOKENS] = {0};
+    int ntok;
+
+    if (first) {
+      first = 0;
+      continue;
+    }
+    ntok = split_csv_preserve_empty(line, tokens, MAX_TOKENS);
+    if (ntok <= 3) {
+      continue;
+    }
+    for (int i = 0; i < nmetrics; i++) {
+      if (strcmp(tokens[0], metrics[i].key) != 0 || metrics[i].n >= MAX_VALUES) {
+        continue;
+      }
+      metrics[i].values[metrics[i].n++] = (float)atof(tokens[3]);
+    }
+  }
+
+  fclose(fp);
+}
+
+static void read_bounds_csv(const char *path, metric_t *metrics, int nmetrics) {
+  FILE *fp = fopen(path, "r");
+  char line[4096];
+  int first = 1;
+
+  if (fp == NULL) {
+    fprintf(stderr, "range validation CSV not found, using default bounds: %s\n", path);
+    return;
+  }
+
+  while (fgets(line, sizeof(line), fp) != NULL) {
+    char *tokens[MAX_TOKENS] = {0};
+    int ntok;
+    float low;
+    float high;
+
+    if (first) {
+      first = 0;
+      continue;
+    }
+    ntok = split_csv_preserve_empty(line, tokens, MAX_TOKENS);
+    if (ntok <= 4) {
+      continue;
+    }
+    low = (float)atof(tokens[3]);
+    high = (float)atof(tokens[4]);
+    for (int i = 0; i < nmetrics; i++) {
+      if (strcmp(tokens[1], metrics[i].key) != 0) {
+        continue;
+      }
+      if ((i == 0 || i == 1) && fabsf(high - low) < 0.001f) {
+        continue;
+      }
+      metrics[i].bound_low = low;
+      metrics[i].bound_high = high;
+    }
+  }
+
+  fclose(fp);
 }
 
 static int read_queue_model_csv(const char *path, queue_model_t *model) {
@@ -289,13 +383,13 @@ static float nice_step(float raw) {
   return 10.0f * base;
 }
 
-static int histogram_bin_count(int n) {
-  int bins = (int)sqrt((double)n);
-  if (bins < 8) {
-    bins = 8;
+static int common_histogram_bin_count(float xmin, float xmax) {
+  int bins = (int)ceilf((xmax - xmin) / 512.0f);
+  if (bins < 32) {
+    bins = 32;
   }
-  if (bins > 48) {
-    bins = 48;
+  if (bins > MAX_BINS) {
+    bins = MAX_BINS;
   }
   return bins;
 }
@@ -322,11 +416,11 @@ static void page_message_centered(const char *text, int y, int h) {
   messag(text, (PAGE_WIDTH - width) / 2, y);
 }
 
-static void draw_reference(float x, float ymax, int dashed) {
+static void draw_vertical(const char *line_color, float x, float ymax, int dashed) {
   float xs[2] = {x, x};
   float ys[2] = {0.0f, ymax};
 
-  color("black");
+  color(line_color);
   if (dashed) {
     dash();
   } else {
@@ -338,53 +432,94 @@ static void draw_reference(float x, float ymax, int dashed) {
   linwid(1);
 }
 
-static void draw_panel(metric_t *metric, int panel_index) {
+static void compute_common_x_range(metric_t *metrics,
+                                   int nmetrics,
+                                   float *xmin_out,
+                                   float *xmax_out) {
+  float xmin = 0.0f;
+  float xmax = 1.0f;
+  int seen = 0;
+
+  for (int i = 0; i < nmetrics; i++) {
+    stats_t stats = compute_stats(&metrics[i]);
+    if (stats.n > 0) {
+      if (!seen || stats.min < xmin) {
+        xmin = stats.min;
+      }
+      if (!seen || stats.max > xmax) {
+        xmax = stats.max;
+      }
+      seen = 1;
+    }
+    if (!seen || metrics[i].bound_low < xmin) {
+      xmin = metrics[i].bound_low;
+    }
+    if (!seen || metrics[i].bound_high > xmax) {
+      xmax = metrics[i].bound_high;
+    }
+  }
+
+  if (xmin > 0.0f) {
+    xmin = 0.0f;
+  }
+  if (fabsf(xmax - xmin) < 1.0f) {
+    xmax = xmin + 1.0f;
+  }
+  xmax = ceilf((xmax + 1000.0f) / 5000.0f) * 5000.0f;
+  if (xmin < 0.0f) {
+    xmin = floorf((xmin - 1000.0f) / 5000.0f) * 5000.0f;
+  }
+  *xmin_out = xmin;
+  *xmax_out = xmax;
+}
+
+static void draw_panel(metric_t *metric,
+                       int panel_index,
+                       float common_xmin,
+                       float common_xmax) {
   static const int y_positions[5] = {780, 1500, 2220, 2940, 3660};
   const int axis_x = 430;
   const int axis_y = y_positions[panel_index];
   const int axis_w = 2200;
   const int axis_h = 380;
-  const int bins = histogram_bin_count(metric->n);
+  const int bins = common_histogram_bin_count(common_xmin, common_xmax);
   stats_t stats = compute_stats(metric);
-  float xmin;
-  float xmax;
+  float xmin = common_xmin;
+  float xmax = common_xmax;
   float xrange;
-  float pad;
   float bin_width;
   float xstep;
   float ymax = 1.0f;
   float ystep;
-  float xbins[48];
-  float yzero[48];
-  float ycount[48];
+  float xbins[MAX_BINS];
+  float yzero[MAX_BINS];
+  float ycount[MAX_BINS];
   char title_buf[160];
-  int counts[48] = {0};
+  char equation_buf[220];
+  int counts[MAX_BINS] = {0};
 
-  snprintf(title_buf, sizeof(title_buf), "%s checkpoint lifetime", metric->label);
+  snprintf(title_buf,
+           sizeof(title_buf),
+           "%s checkpoint lifetime, bound [%.1f, %.1f] cycles",
+           metric->label,
+           metric->bound_low,
+           metric->bound_high);
   page_message_centered(title_buf, axis_y - axis_h - 70, 34);
+  snprintf(equation_buf, sizeof(equation_buf), "%s", metric->equation);
+  page_message_centered(equation_buf, axis_y - axis_h - 32, 20);
 
   if (metric->n <= 0) {
     axspos(axis_x, axis_y);
     axslen(axis_w, axis_h);
     name("hit lifetime [8 ns cycles]", "x");
-    name("hits", "y");
-    graf(0.0f, 1.0f, 0.0f, 0.2f, 0.0f, 1.0f, 0.0f, 0.2f);
+    name("hits / bin [%]", "y");
+    graf(xmin, xmax, xmin, 1.0f, 0.0f, 1.0f, 0.0f, 0.2f);
     height(30);
     rlmess("no checkpoint samples", 0.35f, 0.55f);
     endgrf();
     return;
   }
 
-  xmin = stats.min;
-  xmax = stats.max;
-  if (fabsf(xmax - xmin) < 0.001f) {
-    xmin -= 0.5f;
-    xmax += 0.5f;
-  }
-  xrange = xmax - xmin;
-  pad = 0.08f * xrange;
-  xmin -= pad;
-  xmax += pad;
   xrange = xmax - xmin;
   bin_width = xrange / (float)bins;
 
@@ -402,7 +537,7 @@ static void draw_panel(metric_t *metric, int panel_index) {
   for (int i = 0; i < bins; i++) {
     xbins[i] = xmin + ((float)i + 0.5f) * bin_width;
     yzero[i] = 0.0f;
-    ycount[i] = (float)counts[i];
+    ycount[i] = 100.0f * (float)counts[i] / (float)metric->n;
     if (ycount[i] > ymax) {
       ymax = ycount[i];
     }
@@ -416,8 +551,8 @@ static void draw_panel(metric_t *metric, int panel_index) {
   axspos(axis_x, axis_y);
   axslen(axis_w, axis_h);
   name("hit lifetime [8 ns cycles]", "x");
-  name("hits", "y");
-  labdig(1, "x");
+  name("hits / bin [%]", "y");
+  labdig(0, "x");
   labdig(0, "y");
   ticks(2, "x");
   graf(xmin, xmax, ceilf(xmin / xstep) * xstep, xstep, 0.0f, ymax, 0.0f, ystep);
@@ -428,8 +563,10 @@ static void draw_panel(metric_t *metric, int panel_index) {
   shdpat(16L);
   bars(xbins, yzero, ycount, bins);
 
-  draw_reference(stats.p50, ymax, 0);
-  draw_reference(stats.p95, ymax, 1);
+  draw_vertical("green", metric->bound_low, ymax, 0);
+  draw_vertical("green", metric->bound_high, ymax, 0);
+  draw_vertical("black", stats.p50, ymax, 0);
+  draw_vertical("black", stats.p95, ymax, 1);
   color("fore");
   solid();
   linwid(1);
@@ -448,25 +585,74 @@ static void draw_panel(metric_t *metric, int panel_index) {
 
 static void render_lifetime_plot(const char *csv_path, const char *out_path) {
   metric_t metrics[] = {
-      {"pre_rbcam_lifetime_cycles", "pre-rbCAM", "blue", 13, 0, {0.0f}},
-      {"post_rbcam_lifetime_cycles", "post-rbCAM", "green", 14, 0, {0.0f}},
-      {"feb_egress_lifetime_cycles", "FEB egress", "cyan", 15, 0, {0.0f}},
-      {"opq_ingress_lifetime_cycles", "OPQ ingress", "magenta", 16, 0, {0.0f}},
-      {"opq_egress_lifetime_cycles", "OPQ egress", "red", 17, 0, {0.0f}},
+      {"pre_rbcam_lifetime_cycles",
+       "pre-rbCAM",
+       "blue",
+       "D_pre = T_pre - GTS_hit, reference window [0,2000]",
+       13,
+       0.0f,
+       2000.0f,
+       0,
+       {0.0f}},
+      {"post_rbcam_lifetime_cycles",
+       "post-rbCAM",
+       "green",
+       "D_post = (GTS_post - ts_hit) mod 8192, window [2000,2200)",
+       14,
+       2000.0f,
+       2200.0f,
+       0,
+       {0.0f}},
+      {"feb_egress_lifetime_cycles",
+       "FEB egress",
+       "cyan",
+       "D_feb <= 2F - p + 2O + eps_clk",
+       15,
+       2049.0f,
+       6143.0f,
+       0,
+       {0.0f}},
+      {"opq_ingress_lifetime_cycles",
+       "OPQ ingress",
+       "magenta",
+       "D_ing = D_feb + adapter_sync",
+       16,
+       2049.0f,
+       6159.0f,
+       0,
+       {0.0f}},
+      {"opq_egress_lifetime_cycles",
+       "OPQ egress",
+       "red",
+       "D_opq = D_ing + W_n, W_n=max(0,W_{n-1}+S_n-A_n)",
+       17,
+       0.0f,
+       100000.0f,
+       0,
+       {0.0f}},
   };
   const int nmetrics = (int)(sizeof(metrics) / sizeof(metrics[0]));
+  char reference_path[4096];
+  char bounds_path[4096];
+  float common_xmin;
+  float common_xmax;
 
   if (!read_lifetime_csv(csv_path, metrics, nmetrics)) {
     exit(1);
   }
+  make_sibling_path(csv_path, "feb_swb_rbcam_reference_trace.csv", reference_path, sizeof(reference_path));
+  make_sibling_path(csv_path, "feb_swb_range_validation.csv", bounds_path, sizeof(bounds_path));
+  read_reference_csv(reference_path, metrics, nmetrics);
+  read_bounds_csv(bounds_path, metrics, nmetrics);
+  compute_common_x_range(metrics, nmetrics, &common_xmin, &common_xmax);
 
   start_page(out_path);
   page_message_centered("FEB/SWB ASIC0 all-channel hit lifetime", 95, 46);
-  page_message_centered("lifetime = (checkpoint_time - virtual_mutrig_generation_time) / 8 ns", 152, 30);
-  page_message_centered("p50: solid black, p95: dashed black", 196, 26);
+  page_message_centered("master equation: D_i = (T_i - GTS_hit) / 8 ns; alpha(t)=32*ceil(t/1250 cycles)", 152, 30);
+  page_message_centered("all panels share one x-axis; green = derived bound, p50 = solid black, p95 = dashed black", 196, 26);
 
   for (int i = 0; i < nmetrics; i++) {
-    draw_panel(&metrics[i], i);
+    draw_panel(&metrics[i], i, common_xmin, common_xmax);
   }
 
   disfin();

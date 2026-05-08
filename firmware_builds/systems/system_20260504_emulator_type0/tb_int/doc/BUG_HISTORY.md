@@ -57,6 +57,7 @@ Historical formal note:
 | [BUG-020-R](#bug-020-r-swb-scifi-dma-timestamp-packing-dropped-the-odd-frame-bit) | R | hard stuck error | `common (FEB SciFi hits in odd 2048-tick frame buckets)` | fixed in MuSiP; trace checker committed | FEB/SWB trace debug on `2026-05-08` | f1344f2b/39947ff | Trace-level FEB/SWB corun showed hits reached DMA in the right count but several odd-frame hits carried the wrong absolute timestamp because MuSiP packed SciFi time using the old 256-subheader layout. |
 | [BUG-021-H](#bug-021-h-feb-swb-corun-emitted-future-timestamped-hits-before-hit-timebase) | H | soft error | `directed-only (FEB/SWB lifetime plotting)` | fixed in harness; lifetime rerun passed | FEB/SWB lifetime plot on `2026-05-08` | 90f6c58c | The corun packet writer serialized future timestamped hits at line rate before their MuTRiG hit timestamp, so lifetime plots showed negative FEB-egress and OPQ-ingress delays even though payload matching passed. |
 | [BUG-022-R](#bug-022-r-swb-opq-native-lane-credit-drops-under-feb-all-channel-100khz-corun) | R | hard stuck error | `common (one FEB, lane0 all-channel 100 kHz, lane1 empty legal frames)` | fixed for scoped no-bottleneck corun; 1024-depth overload retained as diagnostic | FEB/SWB all-channel 1 ms corun on `2026-05-08` | 8a353a0/6359a10/90f6c58c | Native OPQ stayed at the 1024-entry lane FIFO default because wrapper depth macros were not passed into the monolithic core; the scoped 8192-depth lossless run now delivers all 3200 hits with zero OPQ drop counters. |
+| [BUG-023-H](#bug-023-h-feb-swb-lifetime-plot-used-local-source-marker-for-rbcam-panels) | H | soft error | `directed-only (FEB/SWB lifetime plotting and review)` | fixed in analyzer/plotter; rerender passed | FEB/SWB lifetime plot review on `2026-05-08` | 70ce4818 | The corun lifetime plot treated synthetic pre/post-rbCAM source markers as true rbCAM lifetime evidence and described lifetime as local source-marker time instead of the carried hit GTS/debug timestamp contract. |
 
 ## 2026-05-06
 
@@ -641,3 +642,31 @@ Historical formal note:
   - parent `mu3e-ip-cores` submodule bump: `25f51b2`
   - MuSiP OPQ corun configuration: `6359a10`
   - FEB corun harness/analyzer: `90f6c58c`
+
+### BUG-023-H: FEB/SWB lifetime plot used local source marker for rbCAM panels
+
+- First seen in:
+  - FEB/SWB lifetime plot review on `2026-05-08`
+  - user comparison against the full-FEB pre-rbCAM direct and post-rbCAM DEBUG timestamp-age plots
+- Symptom:
+  - the top two panels in `feb_swb_lifetime_hist.png` collapsed at zero cycles, unlike the full-FEB pre/post rbCAM reference distributions
+  - the plot subtitle defined lifetime as `checkpoint_time - virtual_mutrig_generation_time`, which is weaker than the actual hit contract because the source marker is a local TB observation
+- Root cause:
+  - `scripts/analyze_feb_swb_trace.py` subtracted the source trace row time when calculating lifetime columns
+  - `feb_swb_corun_plain_tb.sv` writes pre/post rbCAM rows as synthetic lineage markers because the direct corun bypasses the real rbCAM; treating those rows as true rbCAM latency evidence made the plot look valid while proving the wrong thing
+- Fix status:
+  - state:
+    fixed in analyzer/plotter; rerender passed
+  - mechanism:
+    the analyzer now defines lifetime origin as the carried hit GTS reconstructed from the FEB frame bucket, DMA timestamp, MuTRiG lower timestamp bits, and DEBUG `ps/ts/hit_id` tags.  The DISLIN lifetime renderer imports the full-FEB 100 kHz/channel ASIC0 full32 pre/post rbCAM reference traces for the top two panels, keeps every panel on one shared x-axis, and marks per-checkpoint bounds with green lines.
+  - before_fix_outcome:
+    pre/post rbCAM appeared as exact zero-lifetime populations even though the reference pre-rbCAM distribution is mostly outside `[0,2000]` cycles and the post-rbCAM DEBUG age is tightly inside `[2000,2200)` cycles
+  - after_fix_outcome:
+    rerun analyzer reports `TRACE_DEBUG_PASS hits=3200 channels=0..31 asic=0`, `rbcam_reference_issue_count=0`, pre-rbCAM reference `count=13728`, `min/p50/p95/max=73/84930/85373/85415` cycles, and post-rbCAM reference `count=3136`, `min/p50/max=2001/2070/2139` cycles.  DISLIN rerender reports zero warnings for `report/feb_swb_lifetime_hist.png` and `report/feb_swb_lifetime_hist.pdf`.
+  - potential_hazard:
+    low for datapath behavior because the bug is reporting-only; medium for review evidence because an incorrect lifetime origin can hide a missing DEBUG timestamp propagation contract
+- Runtime / coverage context:
+  - the corun still uses lane0 ASIC0 channels 0..31 at 100 kHz/channel for 1 ms and lane1 legal empty FEB frames
+  - source, FEB egress, OPQ ingress, OPQ egress, and DMA factual scoreboards remain the datapath conservation proof; the imported rbCAM panels are reference evidence for the full FEB path that the direct corun does not instantiate
+- Commit:
+  - analyzer/plotter/reporting fix: `70ce4818`

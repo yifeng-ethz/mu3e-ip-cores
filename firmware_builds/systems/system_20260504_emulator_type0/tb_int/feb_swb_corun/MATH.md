@@ -80,6 +80,78 @@ r_m = p_m - H*b_m.
 
 For this profile, `r_m = (2*m) mod 16`, so only even residues occur.
 
+## Master Equation
+
+All lifetime plots use one origin:
+
+```text
+GTS_hit(m,c) = t_m
+D_i(m,c)    = T_i(m,c) - GTS_hit(m,c).
+```
+
+`GTS_hit` is reconstructed from the carried MuTRiG timestamp contract:
+
+```text
+DMA_ts_8ns              = GTS_hit
+DEBUG.ts_tag            = GTS_hit mod 2^16
+DEBUG.ps_tag            = GTS_hit mod 2^8
+MuTRiG hit ts_low[3:0]  = GTS_hit mod 16
+MuTRiG hit rem[2:0]     = GTS_hit mod 8
+DEBUG.hit_id            = 32*m + c.
+```
+
+The local time at which the testbench writes a source trace row is not the
+definition of lifetime.  It is only an observation.  If a plot changes shape
+when the local source marker is moved but the carried hit timestamp is
+unchanged, the lifetime definition is wrong.
+
+For a window of length `t`, the full32 periodic arrival curve is bounded by:
+
+```text
+alpha_hit(t) = 32 * ceil(t / P_hit)
+             = 32 * ceil(t / 1250).
+```
+
+A looser affine envelope useful for rate-latency algebra is:
+
+```text
+alpha_hit(t) <= sigma + rho*t
+sigma = 32 hits
+rho   = 32 / 1250 = 0.0256 hits/cycle.
+```
+
+For a deterministic stage with latency `L_i`, rate `R_i`, and finite burst
+term `B_i`, a latency-rate service curve gives:
+
+```text
+beta_i(t) = R_i * [t - L_i]^+
+D_i <= L_i + B_i / R_i.
+```
+
+For the OPQ frame queue, the measured deterministic recurrence is:
+
+```text
+A_n = a_n - a_(n-1)
+S_n = d_n - d_(n-1)
+W_n = max(0, W_(n-1) + S_n - A_n)
+D_opq_egress(m,c) = D_opq_ingress(m,c) + W_frame(f_m) + O_merge(m,c).
+```
+
+Under the scoped lossless assumption, this is a finite-burst drain equation,
+not an infinite-run stability proof.  Conservation and zero OPQ drop counters
+remain the hard pass/fail checks.
+
+The DISLIN lifetime plot uses the same x-axis range for every checkpoint.  For
+the current run, the range is driven by the OPQ finite-burst drain envelope and
+rounds to:
+
+```text
+0 <= D_i <= 100000 cycles.
+```
+
+Green vertical lines mark the checkpoint-specific network-calculus or
+programmed-aperture bound on that common axis.
+
 ## Traffic Profile
 
 The number of simultaneous source samples per channel is
@@ -131,33 +203,7 @@ source bucket          = floor((source time mod 2048) / 16)
 Lane 1 must contribute zero real hits.  Lanes 2 and 3 must contribute zero
 accepted hits under the lane mask.
 
-## Synthetic Pre/Post rbCAM
-
-In this direct corun, pre-rbCAM and post-rbCAM are pass-through lineage
-checkpoints written at source generation time.  Therefore the maintained
-contract is hard and exact:
-
-```text
-T_pre(m,c)  = t_m
-T_post(m,c) = t_m
-D_pre       = T_pre  - t_m = 0
-D_post      = T_post - t_m = 0
-```
-
-Recommended thresholds:
-
-```text
-pre-rbCAM count        = 3200
-post-rbCAM count       = 3200
-pre-rbCAM lifetime     = 0 cycles exactly
-post-rbCAM lifetime    = 0 cycles exactly
-pre/post identity      = source identity exactly
-```
-
-These are hard for this corun, but they are not claims about the true rbCAM
-latency in the full FEB path.
-
-## True rbCAM Reference Bound
+## rbCAM Reference Bound
 
 For the full FEB path, the rbCAM is a finite resequencing service element.  Let
 `L_rb` be the programmed expected latency, with the default value
@@ -197,9 +243,42 @@ Real rbCAM hit egress adds a bounded search/count/drain term:
 D_rb_hit(m,c) = D_cmd(m) + D_search + D_drain(m,c).
 ```
 
-This corun does not instantiate that true rbCAM path, so the true rbCAM bound is
-a reference derivation only.  The direct-corun enforced pre/post-rbCAM bound is
-the exact zero-lifetime lineage marker above.
+The direct FEB/SWB corun does not instantiate the true rbCAM.  Its pre/post
+CSV rows are lineage identity markers used to prove hit conservation before the
+FEB frame writer.  The lifetime plot therefore imports the full-FEB rbCAM
+reference traces for the top two panels:
+
+```text
+pre-rbCAM reference:
+  D_pre = (abs_ts_pre_rbcam - abs_ts_a) / 8000
+  validation aperture = [0, 2000] cycles
+
+post-rbCAM DEBUG reference:
+  D_post = (post_monitor_GTS - hit_ts8n_from_DEBUG_matched_ingress) mod 8192
+  validation aperture = [2000, 2200) cycles
+```
+
+The current 100 kHz/channel full32 reference summaries are:
+
+```text
+pre-rbCAM:
+  count = 13728
+  min/p50/p95/max = 73 / 84930 / 85373 / 85415 cycles
+  in [0,2000] = 1088 hits; out = 12640 hits
+
+post-rbCAM:
+  count = 3136
+  min/p50/max = 2001 / 2070 / 2139 cycles
+  in [2000,2200) = 3136 hits
+```
+
+This split is intentional.  The pre-rbCAM direct latency can show most hits
+outside `[0,2000]` because it is measured before the rbCAM resequencing point
+against the upstream source timestamp and therefore includes source/FEB
+alignment and queueing phase.  The post-rbCAM DEBUG age is measured after the
+DEBUG-matched rbCAM ingress point against the carried hit timestamp modulo the
+8192-cycle rbCAM epoch, so it must concentrate inside the programmed
+`[2000,2200)` acceptance aperture.
 
 ## FEB Frame Assembly and Store-Forward Bound
 
