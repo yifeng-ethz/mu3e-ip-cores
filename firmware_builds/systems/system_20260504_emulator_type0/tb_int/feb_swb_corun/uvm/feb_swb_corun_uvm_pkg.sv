@@ -79,6 +79,8 @@ package feb_swb_corun_uvm_pkg;
         bit          drop_idle_dma_slots;
         bit          csr_config_done;
         bit          run_control_synced;
+        int unsigned max_observations;
+        int unsigned max_tunnel_latency_cycles;
 
         function new(string name = "feb_swb_corun_cfg");
             super.new(name);
@@ -94,6 +96,8 @@ package feb_swb_corun_uvm_pkg;
             drop_idle_dma_slots   = 1'b1;
             csr_config_done       = 1'b0;
             run_control_synced    = 1'b0;
+            max_observations      = 100000;
+            max_tunnel_latency_cycles = 200000;
         endfunction
 
         function bit lane_active(input int unsigned lane_id);
@@ -114,6 +118,14 @@ package feb_swb_corun_uvm_pkg;
                 virtual_mutrig_rate_hz = plusarg_value;
             if ($value$plusargs("FEB_SWB_DEBUG_LEVEL=%d", plusarg_value))
                 debug_level = plusarg_value;
+            if (debug_level < 1 || debug_level > 2)
+                `uvm_fatal("FEB_SWB_CFG",
+                           $sformatf("FEB_SWB_DEBUG_LEVEL must be 1 or 2, got %0d",
+                                     debug_level))
+            if ($value$plusargs("FEB_SWB_MAX_OBSERVATIONS=%d", plusarg_value))
+                max_observations = plusarg_value;
+            if ($value$plusargs("FEB_SWB_MAX_TUNNEL_LATENCY_CYCLES=%d", plusarg_value))
+                max_tunnel_latency_cycles = plusarg_value;
             if ($value$plusargs("FEB_SWB_REQUIRE_DMA=%d", plusarg_value))
                 require_dma_match = (plusarg_value != 0);
             require_observations = require_observations ||
@@ -122,7 +134,7 @@ package feb_swb_corun_uvm_pkg;
 
         function string convert2string();
             return $sformatf(
-                "{active_mask=0x%0h mutrig=asic%0d/ch%0d rate_hz=%0d debug=%0d feb_clk=%0d swb_clk=%0d require_dma=%0b csr_done=%0b run_sync=%0b}",
+                "{active_mask=0x%0h mutrig=asic%0d/ch%0d rate_hz=%0d debug=%0d feb_clk=%0d swb_clk=%0d require_dma=%0b csr_done=%0b run_sync=%0b max_obs=%0d max_latency_cycles=%0d}",
                 active_lane_mask,
                 virtual_mutrig_asic,
                 virtual_mutrig_channel,
@@ -132,7 +144,9 @@ package feb_swb_corun_uvm_pkg;
                 swb_clk_hz,
                 require_dma_match,
                 csr_config_done,
-                run_control_synced
+                run_control_synced,
+                max_observations,
+                max_tunnel_latency_cycles
             );
         endfunction
     endclass
@@ -163,6 +177,11 @@ package feb_swb_corun_uvm_pkg;
             if (!debug_valid)
                 return $sformatf("payload_%08h_lane%0d", data32, lane_id);
             return feb_swb_meta_key(meta);
+        endfunction
+
+        function string payload_key();
+            return $sformatf("feb_lane%0d_datak%0h_data%08h",
+                             lane_id, datak, data32);
         endfunction
 
         function string convert2string();
@@ -202,6 +221,11 @@ package feb_swb_corun_uvm_pkg;
             return feb_swb_meta_key(meta);
         endfunction
 
+        function string payload_key();
+            return $sformatf("opq_lane%0d_datak%0h_data%08h",
+                             lane_id, datak, data32);
+        endfunction
+
         function string convert2string();
             return $sformatf(
                 "{lane=%0d word=%0d data=0x%08h datak=0x%0h sop=%0b eop=%0b dbg=%0b key=%s frame_ts_valid=%0b frame_ts=0x%012h bucket_ts=0x%04h t=%0t}",
@@ -232,6 +256,10 @@ package feb_swb_corun_uvm_pkg;
             if (!debug_valid)
                 return $sformatf("hit_%016h", normalized_hit64);
             return feb_swb_meta_key(meta);
+        endfunction
+
+        function string payload_key();
+            return $sformatf("dma_hit%016h", normalized_hit64);
         endfunction
 
         function string convert2string();
@@ -487,14 +515,22 @@ package feb_swb_corun_uvm_pkg;
 
         feb_swb_corun_cfg cfg;
         feb_q_t feb_by_key[string];
+        feb_q_t feb_by_payload[string];
         opq_q_t opq_by_key[string];
+        opq_q_t opq_by_payload[string];
         dma_q_t dma_by_key[string];
+        dma_q_t dma_by_payload[string];
+        time feb_time_by_key[string];
 
         int unsigned total_feb;
         int unsigned total_opq_debug;
+        int unsigned total_opq_payload;
         int unsigned total_dma;
+        int unsigned total_dma_payload;
         int unsigned inactive_lane_observations;
         int unsigned frame_ts_mismatches;
+        int unsigned tunnel_latency_violations;
+        int unsigned max_seen_tunnel_latency_cycles;
 
         function new(string name, uvm_component parent);
             super.new(name, parent);
@@ -507,6 +543,43 @@ package feb_swb_corun_uvm_pkg;
             dma_imp = new("dma_imp", this);
             if (!uvm_config_db#(feb_swb_corun_cfg)::get(this, "", "cfg", cfg))
                 cfg = feb_swb_corun_cfg::type_id::create("cfg");
+        endfunction
+
+        function void check_observation_limit(input string stage_name,
+                                              input int unsigned count_value);
+            if (cfg.max_observations != 0 &&
+                count_value > cfg.max_observations) begin
+                `uvm_fatal("FEB_SWB_LIMIT",
+                           $sformatf("%s observations exceeded hard limit: %0d > %0d",
+                                     stage_name, count_value,
+                                     cfg.max_observations))
+            end
+        endfunction
+
+        function void check_tunnel_latency(input string tunnel_name,
+                                           input string key,
+                                           input time start_time,
+                                           input time end_time);
+            int unsigned latency_cycles;
+
+            if (end_time < start_time) begin
+                tunnel_latency_violations++;
+                `uvm_error("FEB_SWB_LATENCY",
+                           $sformatf("%s negative latency key=%s start=%0t end=%0t",
+                                     tunnel_name, key, start_time, end_time))
+                return;
+            end
+            latency_cycles = int'((end_time - start_time) / 8000);
+            if (latency_cycles > max_seen_tunnel_latency_cycles)
+                max_seen_tunnel_latency_cycles = latency_cycles;
+            if (cfg.max_tunnel_latency_cycles != 0 &&
+                latency_cycles > cfg.max_tunnel_latency_cycles) begin
+                tunnel_latency_violations++;
+                `uvm_error("FEB_SWB_LATENCY",
+                           $sformatf("%s latency exceeded hard limit key=%s latency=%0d cycles limit=%0d",
+                                     tunnel_name, key, latency_cycles,
+                                     cfg.max_tunnel_latency_cycles))
+            end
         endfunction
 
         function void write_feb(feb_swb_feb_frame_beat item);
@@ -532,7 +605,11 @@ package feb_swb_corun_uvm_pkg;
             end
             key = item.key();
             feb_by_key[key].push_back(item);
+            feb_by_payload[item.payload_key()].push_back(item);
+            if (!feb_time_by_key.exists(key))
+                feb_time_by_key[key] = item.sample_time;
             total_feb++;
+            check_observation_limit("FEB", total_feb);
         endfunction
 
         function void write_opq(feb_swb_opq_beat item);
@@ -546,11 +623,18 @@ package feb_swb_corun_uvm_pkg;
                            $sformatf("OPQ lane%0d observed debug payload while masked: %s",
                                      item.lane_id, item.convert2string()))
             end
+            opq_by_payload[item.payload_key()].push_back(item);
+            total_opq_payload++;
+            check_observation_limit("OPQ payload", total_opq_payload);
             if (!item.debug_valid)
                 return;
             key = item.key();
             opq_by_key[key].push_back(item);
             total_opq_debug++;
+            check_observation_limit("OPQ debug", total_opq_debug);
+            if (feb_time_by_key.exists(key))
+                check_tunnel_latency("FEB->OPQ", key, feb_time_by_key[key],
+                                     item.sample_time);
             if (item.frame_ts_valid && item.bucket_ts != item.meta.ts_tag) begin
                 frame_ts_mismatches++;
                 `uvm_error("FEB_SWB_TS",
@@ -567,7 +651,13 @@ package feb_swb_corun_uvm_pkg;
                 return;
             key = item.key();
             dma_by_key[key].push_back(item);
+            dma_by_payload[item.payload_key()].push_back(item);
             total_dma++;
+            total_dma_payload++;
+            check_observation_limit("DMA", total_dma);
+            if (item.debug_valid && feb_time_by_key.exists(key))
+                check_tunnel_latency("FEB->DMA", key, feb_time_by_key[key],
+                                     item.sample_time);
         endfunction
 
         virtual function void check_phase(uvm_phase phase);
@@ -617,11 +707,14 @@ package feb_swb_corun_uvm_pkg;
             if (cfg.require_observations && total_feb == 0)
                 `uvm_error("FEB_SWB_SB", "no FEB observations captured")
             `uvm_info("FEB_SWB_SB",
-                      $sformatf("summary feb=%0d opq_debug=%0d dma=%0d missing_opq=%0d missing_dma=%0d ghost_opq=%0d ghost_dma=%0d inactive_lane=%0d ts_mismatch=%0d",
-                                total_feb, total_opq_debug, total_dma,
+                      $sformatf("summary feb=%0d opq_debug=%0d opq_payload=%0d dma=%0d dma_payload=%0d missing_opq=%0d missing_dma=%0d ghost_opq=%0d ghost_dma=%0d inactive_lane=%0d ts_mismatch=%0d latency_violations=%0d max_latency_cycles=%0d",
+                                total_feb, total_opq_debug, total_opq_payload,
+                                total_dma, total_dma_payload,
                                 missing_opq, missing_dma, ghost_opq, ghost_dma,
                                 inactive_lane_observations,
-                                frame_ts_mismatches),
+                                frame_ts_mismatches,
+                                tunnel_latency_violations,
+                                max_seen_tunnel_latency_cycles),
                       UVM_LOW)
         endfunction
     endclass

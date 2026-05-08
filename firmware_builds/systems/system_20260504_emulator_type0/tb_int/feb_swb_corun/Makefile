@@ -28,6 +28,9 @@ CORUN_BUILD_DIR := $(BUILD_ROOT)/swb_corun
 QUESTA_INI := $(CORUN_BUILD_DIR)/modelsim.ini
 RUN_LOG ?= $(REPORT_DIR)/run_swb_corun.log
 RUN_DO ?= run -all; quit -f
+RUN_WINDOW_8NS ?= 125000
+HIT_PERIOD_8NS ?= 1250
+VSIM_PLUSARGS ?=
 VCOM_FLAGS := -2008
 VLOG_FLAGS := -sv
 VSIM_FLAGS := -c -t ps -voptargs=+acc
@@ -78,7 +81,7 @@ CORUN_SV_SOURCES := \
 	$(CURDIR)/sv/feb_swb_parallel_cdc_adapter.sv \
 	$(CURDIR)/sv/feb_swb_corun_plain_tb.sv
 
-CORUN_COMPILE_STAMP := $(CORUN_BUILD_DIR)/.compile-stamp.$(OPQ_SOURCE_MODE).$(OPQ_N_SHD).$(OPQ_LANE_FIFO_DEPTH).$(OPQ_TICKET_FIFO_DEPTH).$(OPQ_HANDLE_FIFO_DEPTH).$(OPQ_PAGE_RAM_DEPTH)
+CORUN_COMPILE_STAMP := $(CORUN_BUILD_DIR)/.compile-stamp.$(OPQ_SOURCE_MODE).$(OPQ_N_SHD).$(OPQ_LANE_FIFO_DEPTH).$(OPQ_TICKET_FIFO_DEPTH).$(OPQ_HANDLE_FIFO_DEPTH).$(OPQ_PAGE_RAM_DEPTH).$(OPQ_DEBUG_LEVEL)
 
 .PHONY: compile compile_musip_driver smoke compile_swb_corun run_swb_corun clean
 
@@ -97,7 +100,7 @@ smoke: compile
 
 compile_swb_corun: $(CORUN_COMPILE_STAMP)
 
-$(CORUN_COMPILE_STAMP): $(CORUN_VHDL_SOURCES) $(OPQ_SIM_QSYS_TOP_VHDL_SOURCES) $(OPQ_SIM_QSYS_VHDL_SOURCES) $(OPQ_SIM_QSYS_VERILOG_SOURCES) $(CORUN_SV_SOURCES) $(QUESTA_INI_PREP)
+$(CORUN_COMPILE_STAMP): Makefile $(CORUN_VHDL_SOURCES) $(OPQ_SIM_QSYS_TOP_VHDL_SOURCES) $(OPQ_SIM_QSYS_VHDL_SOURCES) $(OPQ_SIM_QSYS_VERILOG_SOURCES) $(OPQ_VERILOG_DUT_SOURCES) $(OPQ_SV_DUT_SOURCES) $(CORUN_SV_SOURCES) $(QUESTA_INI_PREP)
 	rm -rf $(CORUN_BUILD_DIR)
 	mkdir -p $(CORUN_BUILD_DIR)
 	$(QUESTA_INI_PREP) $(QUESTA_HOME) $(QUESTA_INI)
@@ -132,17 +135,25 @@ $(CORUN_COMPILE_STAMP): $(CORUN_VHDL_SOURCES) $(OPQ_SIM_QSYS_TOP_VHDL_SOURCES) $
 	    if [ -n "$(strip $(OPQ_SIM_QSYS_VERILOG_SOURCES))" ]; then QSIM_INI=$(QUESTA_INI) $(VLOG) $(VLOG_FLAGS) -work $(OPQ_SIM_QSYS_LIB) $(OPQ_DUT_DEFINES) $(OPQ_SIM_QSYS_VERILOG_SOURCES); fi; \
 	fi
 	cd $(CORUN_BUILD_DIR) && if [ -n "$(strip $(OPQ_SIM_QSYS_TOP_VHDL_SOURCES))" ]; then set -e; for file in $(OPQ_SIM_QSYS_TOP_VHDL_SOURCES); do QSIM_INI=$(QUESTA_INI) $(VCOM) $(VCOM_FLAGS) -work $(OPQ_SIM_QSYS_TOP_LIB) $$file; done; fi
+	cd $(CORUN_BUILD_DIR) && if [ -n "$(strip $(OPQ_VERILOG_DUT_SOURCES) $(OPQ_SV_DUT_SOURCES))" ]; then QSIM_INI=$(QUESTA_INI) $(VLOG) $(VLOG_FLAGS) $(OPQ_DUT_DEFINES) $(OPQ_VERILOG_DUT_SOURCES) $(OPQ_SV_DUT_SOURCES); fi
 	cd $(CORUN_BUILD_DIR) && set -e; for file in $(CORUN_VHDL_SOURCES); do QSIM_INI=$(QUESTA_INI) $(VCOM) $(VCOM_FLAGS) $$file; done
 	cd $(CORUN_BUILD_DIR) && QSIM_INI=$(QUESTA_INI) $(VLOG) $(VLOG_FLAGS) $(OPQ_DUT_DEFINES) $(CORUN_SV_SOURCES)
 	touch $@
 
 run_swb_corun: compile_swb_corun
 	mkdir -p $(REPORT_DIR)
-	cd $(CORUN_BUILD_DIR) && set -o pipefail; \
-	QSIM_INI=$(QUESTA_INI) $(QUESTA_RUNNER) $(VSIM) $(VSIM_FLAGS) $(OPQ_VSIM_LIB_FLAGS) feb_swb_corun_plain_tb -do "$(RUN_DO)" +FEB_SWB_TRACE_DIR=$(abspath $(REPORT_DIR)) | tee "$(RUN_LOG)"
-	grep -q "FEB_SWB_CORUN_PLAIN_PASS" "$(RUN_LOG)"
-	$(PYTHON) $(TRACE_ANALYZER) --trace-dir "$(REPORT_DIR)"
+	-cd $(CORUN_BUILD_DIR) && set -o pipefail; \
+	QSIM_INI=$(QUESTA_INI) $(QUESTA_RUNNER) $(VSIM) $(VSIM_FLAGS) $(OPQ_VSIM_LIB_FLAGS) feb_swb_corun_plain_tb -do "$(RUN_DO)" +FEB_SWB_TRACE_DIR=$(abspath $(REPORT_DIR)) +FEB_SWB_RUN_WINDOW_8NS=$(RUN_WINDOW_8NS) +FEB_SWB_HIT_PERIOD_8NS=$(HIT_PERIOD_8NS) $(VSIM_PLUSARGS) | tee "$(RUN_LOG)"
+	-$(PYTHON) $(TRACE_ANALYZER) --trace-dir "$(REPORT_DIR)" --expected-hit-period-8ns "$(HIT_PERIOD_8NS)" --opq-log "$(RUN_LOG)" --assume-opq-lossless
 	DISLIN_DIR="$(DISLIN_DIR)" $(LIFETIME_RENDERER) "$(REPORT_DIR)"
+	@if grep -q "FEB_SWB_CORUN_PLAIN_PASS" "$(RUN_LOG)" && \
+	    grep -q "^fail_hits=0$$" "$(REPORT_DIR)/feb_swb_trace_debug_summary.txt" && \
+	    grep -q "^issue_count=0$$" "$(REPORT_DIR)/feb_swb_trace_debug_summary.txt"; then \
+	    echo "FEB_SWB_CORUN_TRACE_PASS"; \
+	else \
+	    echo "FEB_SWB_CORUN_TRACE_FAIL see $(REPORT_DIR)/feb_swb_trace_debug_summary.txt"; \
+	    false; \
+	fi
 
 clean:
 	rm -rf $(WORK) $(BUILD_ROOT) transcript vsim.wlf

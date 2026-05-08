@@ -7,9 +7,9 @@
 #include "dislin.h"
 
 #define MAX_VALUES 65536
-#define MAX_TOKENS 32
+#define MAX_TOKENS 40
 #define PAGE_WIDTH 2970
-#define PAGE_HEIGHT 2600
+#define PAGE_HEIGHT 4200
 
 typedef struct {
   const char *key;
@@ -28,6 +28,20 @@ typedef struct {
   float max;
   float mean;
 } stats_t;
+
+typedef struct {
+  int n;
+  float frame_seq[MAX_VALUES];
+  float wait_cycles[MAX_VALUES];
+  float model_wait_cycles[MAX_VALUES];
+  float input_hits[MAX_VALUES];
+  float output_hits[MAX_VALUES];
+  float missing_hits[MAX_VALUES];
+  float ingress_iat_cycles[MAX_VALUES];
+  float service_iat_cycles[MAX_VALUES];
+  int n_ingress_iat;
+  int n_service_iat;
+} queue_model_t;
 
 static const char *output_format_from_path(const char *path) {
   const char *dot = strrchr(path, '.');
@@ -94,7 +108,7 @@ static int read_lifetime_csv(const char *path, metric_t *metrics, int nmetrics) 
     }
 
     ntok = split_csv_preserve_empty(line, tokens, MAX_TOKENS);
-    if (ntok <= 12 || strcmp(tokens[0], "PASS") != 0) {
+    if (ntok <= 17) {
       continue;
     }
 
@@ -104,6 +118,56 @@ static int read_lifetime_csv(const char *path, metric_t *metrics, int nmetrics) 
         continue;
       }
       metrics[i].values[metrics[i].n++] = (float)atof(tokens[col]);
+    }
+  }
+
+  fclose(fp);
+  return 1;
+}
+
+static int read_queue_model_csv(const char *path, queue_model_t *model) {
+  FILE *fp = fopen(path, "r");
+  char line[4096];
+  int first = 1;
+
+  if (fp == NULL) {
+    fprintf(stderr, "could not open OPQ queue CSV: %s\n", path);
+    return 0;
+  }
+
+  memset(model, 0, sizeof(*model));
+  while (fgets(line, sizeof(line), fp) != NULL) {
+    char *tokens[MAX_TOKENS] = {0};
+    int ntok;
+    int idx;
+
+    if (first) {
+      first = 0;
+      continue;
+    }
+    if (model->n >= MAX_VALUES) {
+      break;
+    }
+
+    ntok = split_csv_preserve_empty(line, tokens, MAX_TOKENS);
+    if (ntok <= 11) {
+      continue;
+    }
+
+    idx = model->n++;
+    model->frame_seq[idx] = (float)atof(tokens[0]);
+    model->ingress_iat_cycles[idx] = (tokens[4][0] == '\0') ? 0.0f : (float)atof(tokens[4]);
+    model->service_iat_cycles[idx] = (tokens[5][0] == '\0') ? 0.0f : (float)atof(tokens[5]);
+    model->wait_cycles[idx] = (float)atof(tokens[6]);
+    model->model_wait_cycles[idx] = (float)atof(tokens[7]);
+    model->input_hits[idx] = (float)atof(tokens[9]);
+    model->output_hits[idx] = (float)atof(tokens[10]);
+    model->missing_hits[idx] = (float)atof(tokens[11]);
+    if (tokens[4][0] != '\0' && model->n_ingress_iat < MAX_VALUES) {
+      model->ingress_iat_cycles[model->n_ingress_iat++] = (float)atof(tokens[4]);
+    }
+    if (tokens[5][0] != '\0' && model->n_service_iat < MAX_VALUES) {
+      model->service_iat_cycles[model->n_service_iat++] = (float)atof(tokens[5]);
     }
   }
 
@@ -171,6 +235,37 @@ static stats_t compute_stats(const metric_t *metric) {
   return stats;
 }
 
+static stats_t compute_array_stats(const float *values, int n) {
+  stats_t stats = {0};
+  float *sorted;
+  double sum = 0.0;
+
+  stats.n = n;
+  if (n <= 0) {
+    return stats;
+  }
+
+  sorted = (float *)malloc((size_t)n * sizeof(float));
+  if (sorted == NULL) {
+    fprintf(stderr, "could not allocate stats buffer\n");
+    exit(1);
+  }
+  memcpy(sorted, values, (size_t)n * sizeof(float));
+  qsort(sorted, (size_t)n, sizeof(float), cmp_float);
+
+  for (int i = 0; i < n; i++) {
+    sum += values[i];
+  }
+
+  stats.min = sorted[0];
+  stats.p50 = percentile_sorted(sorted, n, 50.0f);
+  stats.p95 = percentile_sorted(sorted, n, 95.0f);
+  stats.max = sorted[n - 1];
+  stats.mean = (float)(sum / (double)n);
+  free(sorted);
+  return stats;
+}
+
 static float nice_step(float raw) {
   float exponent;
   float base;
@@ -211,7 +306,7 @@ static void start_page(const char *out_path) {
   setfil(out_path);
   filmod("delete");
   if (strcasecmp(fmt, "PNG") == 0) {
-    winsiz(1800, 1575);
+    winsiz(1800, 2545);
   }
   page(PAGE_WIDTH, PAGE_HEIGHT);
   scrmod("reverse");
@@ -244,11 +339,11 @@ static void draw_reference(float x, float ymax, int dashed) {
 }
 
 static void draw_panel(metric_t *metric, int panel_index) {
-  static const int y_positions[3] = {850, 1550, 2250};
+  static const int y_positions[5] = {780, 1500, 2220, 2940, 3660};
   const int axis_x = 430;
   const int axis_y = y_positions[panel_index];
   const int axis_w = 2200;
-  const int axis_h = 430;
+  const int axis_h = 380;
   const int bins = histogram_bin_count(metric->n);
   stats_t stats = compute_stats(metric);
   float xmin;
@@ -275,7 +370,7 @@ static void draw_panel(metric_t *metric, int panel_index) {
     name("hits", "y");
     graf(0.0f, 1.0f, 0.0f, 0.2f, 0.0f, 1.0f, 0.0f, 0.2f);
     height(30);
-    rlmess("no passing samples", 0.35f, 0.55f);
+    rlmess("no checkpoint samples", 0.35f, 0.55f);
     endgrf();
     return;
   }
@@ -353,9 +448,11 @@ static void draw_panel(metric_t *metric, int panel_index) {
 
 static void render_lifetime_plot(const char *csv_path, const char *out_path) {
   metric_t metrics[] = {
-      {"feb_egress_lifetime_cycles", "FEB egress", "blue", 10, 0, {0.0f}},
-      {"opq_ingress_lifetime_cycles", "OPQ ingress", "green", 11, 0, {0.0f}},
-      {"opq_egress_lifetime_cycles", "OPQ egress", "red", 12, 0, {0.0f}},
+      {"pre_rbcam_lifetime_cycles", "pre-rbCAM", "blue", 13, 0, {0.0f}},
+      {"post_rbcam_lifetime_cycles", "post-rbCAM", "green", 14, 0, {0.0f}},
+      {"feb_egress_lifetime_cycles", "FEB egress", "cyan", 15, 0, {0.0f}},
+      {"opq_ingress_lifetime_cycles", "OPQ ingress", "magenta", 16, 0, {0.0f}},
+      {"opq_egress_lifetime_cycles", "OPQ egress", "red", 17, 0, {0.0f}},
   };
   const int nmetrics = (int)(sizeof(metrics) / sizeof(metrics[0]));
 
@@ -365,7 +462,7 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
 
   start_page(out_path);
   page_message_centered("FEB/SWB ASIC0 all-channel hit lifetime", 95, 46);
-  page_message_centered("lifetime = checkpoint_time / 8 ns - hit_ts_8ns", 152, 30);
+  page_message_centered("lifetime = (checkpoint_time - virtual_mutrig_generation_time) / 8 ns", 152, 30);
   page_message_centered("p50: solid black, p95: dashed black", 196, 26);
 
   for (int i = 0; i < nmetrics; i++) {
@@ -375,12 +472,164 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
   disfin();
 }
 
+static void draw_queue_wait_panel(queue_model_t *model) {
+  const int axis_x = 430;
+  const int axis_y = 1680;
+  const int axis_w = 2200;
+  const int axis_h = 820;
+  stats_t wait_stats = compute_array_stats(model->wait_cycles, model->n);
+  float xmin = -1.0f;
+  float xmax = (model->n > 0) ? model->frame_seq[model->n - 1] + 1.0f : 1.0f;
+  float xstep = nice_step((xmax - xmin) / 8.0f);
+  float ymax = (wait_stats.max <= 0.0f) ? 1.0f : wait_stats.max * 1.10f;
+  float ystep = nice_step(ymax / 5.0f);
+
+  ymax = ceilf(ymax / ystep) * ystep;
+  page_message_centered("OPQ frame wait: measured vs deterministic queue recurrence", 720, 34);
+
+  axspos(axis_x, axis_y);
+  axslen(axis_w, axis_h);
+  name("OPQ frame sequence", "x");
+  name("frame wait [8 ns cycles]", "y");
+  labdig(0, "x");
+  labdig(0, "y");
+  ticks(2, "x");
+  graf(xmin, xmax, 0.0f, xstep, 0.0f, ymax, 0.0f, ystep);
+  grid(1, 1);
+
+  color("blue");
+  solid();
+  linwid(6);
+  curve(model->frame_seq, model->wait_cycles, model->n);
+
+  color("black");
+  dash();
+  linwid(4);
+  curve(model->frame_seq, model->model_wait_cycles, model->n);
+
+  color("fore");
+  solid();
+  linwid(1);
+  endgrf();
+}
+
+static void draw_queue_count_panel(queue_model_t *model) {
+  const int axis_x = 430;
+  const int axis_y = 3300;
+  const int axis_w = 2200;
+  const int axis_h = 820;
+  float xmin = -1.0f;
+  float xmax = (model->n > 0) ? model->frame_seq[model->n - 1] + 1.0f : 1.0f;
+  float xstep = nice_step((xmax - xmin) / 8.0f);
+  float ymax = 1.0f;
+  float ystep;
+
+  for (int i = 0; i < model->n; i++) {
+    if (model->input_hits[i] > ymax) {
+      ymax = model->input_hits[i];
+    }
+    if (model->output_hits[i] > ymax) {
+      ymax = model->output_hits[i];
+    }
+    if (model->missing_hits[i] > ymax) {
+      ymax = model->missing_hits[i];
+    }
+  }
+  ymax = ceilf(ymax * 1.20f);
+  ystep = nice_step(ymax / 5.0f);
+  ymax = ceilf(ymax / ystep) * ystep;
+  page_message_centered("OPQ frame hit counts: offered, delivered, missing", 2340, 34);
+
+  axspos(axis_x, axis_y);
+  axslen(axis_w, axis_h);
+  name("OPQ frame sequence", "x");
+  name("hits/frame", "y");
+  labdig(0, "x");
+  labdig(0, "y");
+  ticks(2, "x");
+  graf(xmin, xmax, 0.0f, xstep, 0.0f, ymax, 0.0f, ystep);
+  grid(1, 1);
+
+  color("black");
+  solid();
+  linwid(4);
+  curve(model->frame_seq, model->input_hits, model->n);
+
+  color("green");
+  solid();
+  linwid(6);
+  curve(model->frame_seq, model->output_hits, model->n);
+
+  color("red");
+  dash();
+  linwid(5);
+  curve(model->frame_seq, model->missing_hits, model->n);
+
+  color("fore");
+  solid();
+  linwid(1);
+  endgrf();
+}
+
+static void render_queue_model_plot(const char *csv_path, const char *out_path) {
+  queue_model_t model;
+  stats_t ingress_iat_stats;
+  stats_t service_iat_stats;
+  stats_t wait_stats;
+  float rho = 0.0f;
+  char subtitle[240];
+
+  if (!read_queue_model_csv(csv_path, &model)) {
+    exit(1);
+  }
+  ingress_iat_stats = compute_array_stats(model.ingress_iat_cycles, model.n_ingress_iat);
+  service_iat_stats = compute_array_stats(model.service_iat_cycles, model.n_service_iat);
+  wait_stats = compute_array_stats(model.wait_cycles, model.n);
+  if (ingress_iat_stats.mean > 0.0f) {
+    rho = service_iat_stats.mean / ingress_iat_stats.mean;
+  }
+
+  start_page(out_path);
+  page_message_centered("FEB/SWB OPQ queue model", 95, 46);
+  snprintf(
+      subtitle,
+      sizeof(subtitle),
+      "rho = mean service / mean ingress = %.3f / %.3f = %.3f; wait max %.1f cycles",
+      service_iat_stats.mean,
+      ingress_iat_stats.mean,
+      rho,
+      wait_stats.max);
+  page_message_centered(subtitle, 152, 30);
+  page_message_centered("wait: blue measured, black dashed model; counts: black input, green output, red dashed missing", 196, 26);
+
+  draw_queue_wait_panel(&model);
+  draw_queue_count_panel(&model);
+
+  disfin();
+
+  printf(
+      "opq_queue_model frames=%d ingress_iat_mean=%.3f service_iat_mean=%.3f rho=%.3f wait_min=%.3f wait_max=%.3f cycles\n",
+      model.n,
+      ingress_iat_stats.mean,
+      service_iat_stats.mean,
+      rho,
+      wait_stats.min,
+      wait_stats.max);
+}
+
 int main(int argc, char **argv) {
-  if (argc != 3) {
-    fprintf(stderr, "usage: %s lifetime_trace_csv output_plot\n", argv[0]);
+  if (argc != 4) {
+    fprintf(stderr, "usage: %s lifetime|queue input_csv output_plot\n", argv[0]);
     return 2;
   }
 
-  render_lifetime_plot(argv[1], argv[2]);
+  if (strcmp(argv[1], "lifetime") == 0) {
+    render_lifetime_plot(argv[2], argv[3]);
+  } else if (strcmp(argv[1], "queue") == 0) {
+    render_queue_model_plot(argv[2], argv[3]);
+  } else {
+    fprintf(stderr, "unknown render mode: %s\n", argv[1]);
+    return 2;
+  }
   return 0;
 }

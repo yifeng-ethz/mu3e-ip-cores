@@ -6,17 +6,14 @@ module feb_swb_corun_plain_tb;
   localparam int ACTIVE_LANES = 2;
   localparam int ASIC0_CHANNELS = 32;
   localparam int N_SHD = 128;
-  localparam int N_FRAMES = 7;
-  localparam int HIT_PERIOD_8NS = 1250; // 100 kHz/channel on the MuTRiG 8 ns timebase.
+  localparam int DEFAULT_RUN_WINDOW_8NS = 125000; // 1 ms on the MuTRiG 8 ns timebase.
+  localparam int DEFAULT_HIT_PERIOD_8NS = 1250;   // 100 kHz/channel.
   localparam int FRAME_STRIDE_8NS = N_SHD << 4;
   localparam int FRAME_PERIOD_FEB_CYCLES = FRAME_STRIDE_8NS;
-  localparam int HIT_WINDOW_8NS = N_FRAMES * FRAME_STRIDE_8NS;
-  localparam int EXPECTED_TIME_SAMPLES =
-      (HIT_WINDOW_8NS + HIT_PERIOD_8NS - 1) / HIT_PERIOD_8NS;
-  localparam int EXPECTED_HITS =
-      EXPECTED_TIME_SAMPLES * ASIC0_CHANNELS;
-  localparam int EXPECTED_DMA_WORDS = (EXPECTED_HITS + 3) / 4;
-  localparam int TIMEOUT_SWB_CYCLES = 200000;
+  localparam int FEB_FRAME_EGRESS_DELAY_FRAMES = 2;
+  localparam int SYNTHETIC_PRE_RBCAM_DELAY_CYCLES = 0;
+  localparam int SYNTHETIC_POST_RBCAM_DELAY_CYCLES = 0;
+  localparam int TIMEOUT_SWB_CYCLES = 500000;
   localparam int unsigned NO_HIT_ID = 32'hffff_ffff;
 
   localparam logic [5:0] SWB_SCIFI_HEADER_ID = 6'b111000;
@@ -75,7 +72,16 @@ module feb_swb_corun_plain_tb;
   int unsigned dma_done_count;
   int unsigned missing_count;
   int unsigned ghost_count;
+  int unsigned run_window_8ns;
+  int unsigned hit_period_8ns;
+  int unsigned n_frames_runtime;
+  int unsigned expected_time_samples_runtime;
+  int unsigned expected_hits_runtime;
+  int unsigned expected_dma_words_runtime;
 
+  int source_trace_fd;
+  int pre_rbcam_trace_fd;
+  int post_rbcam_trace_fd;
   int feb_egress_trace_fd;
   int ingress_trace_fd;
   int opq_trace_fd;
@@ -87,7 +93,7 @@ module feb_swb_corun_plain_tb;
   assign swb_err_desc = '0;
   assign use_merge = 1'b1;
   assign enable_dma = !reset;
-  assign get_n_words = EXPECTED_DMA_WORDS[31:0];
+  assign get_n_words = expected_dma_words_runtime[31:0];
   assign lookup_ctrl = 32'h0000_0000;
   assign dma_half_full = 1'b0;
 
@@ -273,11 +279,15 @@ module feb_swb_corun_plain_tb;
       frame_base = longint'(frame_id) * FRAME_STRIDE_8NS;
       shd_base = frame_base + (longint'(shd_idx) << 4);
       shd_end = shd_base + 16;
-      hit_idx = shd_base / HIT_PERIOD_8NS;
-      if ((longint'(hit_idx) * HIT_PERIOD_8NS) < shd_base) begin
+      if (hit_period_8ns == 0) begin
+        return NO_HIT_ID;
+      end
+      hit_idx = shd_base / hit_period_8ns;
+      if ((longint'(hit_idx) * hit_period_8ns) < shd_base) begin
         hit_idx++;
       end
-      if ((longint'(hit_idx) * HIT_PERIOD_8NS) < shd_end) begin
+      if (((longint'(hit_idx) * hit_period_8ns) < shd_end) &&
+          ((longint'(hit_idx) * hit_period_8ns) < run_window_8ns)) begin
         return hit_idx;
       end
       return NO_HIT_ID;
@@ -295,6 +305,29 @@ module feb_swb_corun_plain_tb;
     end
   endfunction
 
+  task automatic write_hit_checkpoint(
+      input int fd,
+      input longint unsigned time_ps,
+      input int lane,
+      input int unsigned hit_id,
+      input int unsigned channel,
+      input int unsigned abs_ts_8ns,
+      input logic [31:0] hit_word,
+      input longint unsigned dma_hit,
+      input logic [63:0] debug_meta);
+    begin
+      $fdisplay(fd, "%0d,%0d,%0d,%0d,%0d,0x%08h,0x%016h,0x%016h",
+                time_ps,
+                lane,
+                hit_id,
+                channel,
+                abs_ts_8ns,
+                hit_word,
+                dma_hit,
+                debug_meta);
+    end
+  endtask
+
   task automatic drive_frame(input int lane, input int unsigned frame_id);
     longint unsigned frame_base;
     int unsigned shd_idx;
@@ -308,17 +341,24 @@ module feb_swb_corun_plain_tb;
     logic [31:0] ts_high_word;
     logic [15:0] ts_low_word;
     logic [31:0] debug1_word;
+    longint unsigned dispatch_time_8ns;
+    longint unsigned source_time_ps;
+    longint unsigned expected_dma_hit;
+    logic [63:0] debug_meta;
     begin
       frame_base = frame_id * FRAME_STRIDE_8NS;
       ts_high_word = frame_base[47:16];
       ts_low_word = frame_base[15:0];
       debug1_word = (frame_base + FRAME_STRIDE_8NS) & 32'h7fff_ffff;
+      dispatch_time_8ns =
+          frame_base + (FEB_FRAME_EGRESS_DELAY_FRAMES * FRAME_STRIDE_8NS);
       total_hits = 0;
 
       for (int idx = 0; idx < N_SHD; idx++) begin
         total_hits += subheader_hit_count(lane, frame_id, idx);
       end
 
+      wait_until_hit_timebase(dispatch_time_8ns);
       drive_feb_word(lane, 4'h1, make_sop(lane), 1'b1, 1'b0, 1'b0, 64'h0);
       drive_feb_word(lane, 4'h0, ts_high_word, 1'b0, 1'b0, 1'b0, 64'h0);
       drive_feb_word(lane, 4'h0, {ts_low_word, frame_id[15:0]}, 1'b0, 1'b0, 1'b0, 64'h0);
@@ -332,15 +372,31 @@ module feb_swb_corun_plain_tb;
 
         if (hit_count != 0) begin
           sample_idx = subheader_sample_idx(lane, frame_id, shd_idx);
-          abs_ts_8ns = sample_idx * HIT_PERIOD_8NS;
-          wait_until_hit_timebase(abs_ts_8ns);
+          abs_ts_8ns = sample_idx * hit_period_8ns;
+          source_time_ps = longint'(abs_ts_8ns) * 8000;
           for (channel = 0; channel < ASIC0_CHANNELS; channel++) begin
             hit_id = (sample_idx * ASIC0_CHANNELS) + channel;
             hit_word = make_mutrig_hit(abs_ts_8ns, channel, hit_id);
-            expected_hits.push_back(expected_mutrig_dma_hit(
-                ts_high_word, ts_low_word, shd_idx[7:0], hit_word));
+            expected_dma_hit =
+                expected_mutrig_dma_hit(ts_high_word, ts_low_word, shd_idx[7:0], hit_word);
+            debug_meta = make_debug_meta(lane, abs_ts_8ns, hit_id);
+            expected_hits.push_back(expected_dma_hit);
+            write_hit_checkpoint(source_trace_fd,
+                                 source_time_ps,
+                                 lane, hit_id, channel, abs_ts_8ns,
+                                 hit_word, expected_dma_hit, debug_meta);
+            write_hit_checkpoint(pre_rbcam_trace_fd,
+                                 source_time_ps +
+                                     (SYNTHETIC_PRE_RBCAM_DELAY_CYCLES * 8000),
+                                 lane, hit_id, channel, abs_ts_8ns,
+                                 hit_word, expected_dma_hit, debug_meta);
+            write_hit_checkpoint(post_rbcam_trace_fd,
+                                 source_time_ps +
+                                     (SYNTHETIC_POST_RBCAM_DELAY_CYCLES * 8000),
+                                 lane, hit_id, channel, abs_ts_8ns,
+                                 hit_word, expected_dma_hit, debug_meta);
             drive_feb_word(lane, 4'h0, hit_word, 1'b0, 1'b0, 1'b1,
-                           make_debug_meta(lane, abs_ts_8ns, hit_id));
+                           debug_meta);
             feb_hit_count++;
           end
         end
@@ -356,7 +412,7 @@ module feb_swb_corun_plain_tb;
     begin
       wait (!reset);
       frame_start_cycle = 0;
-      for (int frame_id = 0; frame_id < N_FRAMES; frame_id++) begin
+      for (int frame_id = 0; frame_id < n_frames_runtime; frame_id++) begin
         drive_frame(lane, frame_id);
         next_frame_cycle = frame_start_cycle + FRAME_PERIOD_FEB_CYCLES;
         while ($time < (next_frame_cycle * 8ns)) begin
@@ -372,15 +428,26 @@ module feb_swb_corun_plain_tb;
       if (!$value$plusargs("FEB_SWB_TRACE_DIR=%s", trace_dir)) begin
         trace_dir = "report";
       end
+      source_trace_fd = $fopen({trace_dir, "/feb_swb_source_trace.csv"}, "w");
+      pre_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_pre_rbcam_trace.csv"}, "w");
+      post_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_post_rbcam_trace.csv"}, "w");
       feb_egress_trace_fd = $fopen({trace_dir, "/feb_swb_feb_egress_trace.csv"}, "w");
       ingress_trace_fd = $fopen({trace_dir, "/feb_swb_ingress_trace.csv"}, "w");
       opq_trace_fd = $fopen({trace_dir, "/feb_swb_opq_trace.csv"}, "w");
       dma_trace_fd = $fopen({trace_dir, "/feb_swb_dma_trace.csv"}, "w");
       summary_fd = $fopen({trace_dir, "/feb_swb_corun_summary.txt"}, "w");
-      if (feb_egress_trace_fd == 0 || ingress_trace_fd == 0 ||
-          opq_trace_fd == 0 || dma_trace_fd == 0 || summary_fd == 0) begin
+      if (source_trace_fd == 0 || pre_rbcam_trace_fd == 0 ||
+          post_rbcam_trace_fd == 0 || feb_egress_trace_fd == 0 ||
+          ingress_trace_fd == 0 || opq_trace_fd == 0 ||
+          dma_trace_fd == 0 || summary_fd == 0) begin
         $fatal(1, "failed to open one or more trace files under %s", trace_dir);
       end
+      $fdisplay(source_trace_fd,
+                "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
+      $fdisplay(pre_rbcam_trace_fd,
+                "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
+      $fdisplay(post_rbcam_trace_fd,
+                "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
       $fdisplay(feb_egress_trace_fd,
                 "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
       $fdisplay(ingress_trace_fd,
@@ -502,11 +569,20 @@ module feb_swb_corun_plain_tb;
         end
       end
 
-      $fdisplay(summary_fd, "frames=%0d", N_FRAMES);
+      $fdisplay(summary_fd, "frames=%0d", n_frames_runtime);
+      $fdisplay(summary_fd, "run_window_8ns=%0d", run_window_8ns);
       $fdisplay(summary_fd, "active_mask=0x%0h", swb_enable_mask);
       $fdisplay(summary_fd, "asic0_channels=%0d", ASIC0_CHANNELS);
-      $fdisplay(summary_fd, "hit_rate_hz_per_channel=100000");
-      $fdisplay(summary_fd, "expected_time_samples=%0d", EXPECTED_TIME_SAMPLES);
+      $fdisplay(summary_fd, "hit_period_8ns=%0d", hit_period_8ns);
+      $fdisplay(summary_fd, "hit_rate_hz_per_channel=%0d",
+                (hit_period_8ns == 0) ? 0 : (125000000 / hit_period_8ns));
+      $fdisplay(summary_fd, "feb_frame_egress_delay_frames=%0d",
+                FEB_FRAME_EGRESS_DELAY_FRAMES);
+      $fdisplay(summary_fd, "synthetic_pre_rbcam_delay_cycles=%0d",
+                SYNTHETIC_PRE_RBCAM_DELAY_CYCLES);
+      $fdisplay(summary_fd, "synthetic_post_rbcam_delay_cycles=%0d",
+                SYNTHETIC_POST_RBCAM_DELAY_CYCLES);
+      $fdisplay(summary_fd, "expected_time_samples=%0d", expected_time_samples_runtime);
       $fdisplay(summary_fd, "expected_hits=%0d", expected_hits.size());
       $fdisplay(summary_fd, "feb_hit_count=%0d", feb_hit_count);
       $fdisplay(summary_fd, "opq_beats=%0d", opq_beat_count);
@@ -523,15 +599,15 @@ module feb_swb_corun_plain_tb;
       assert(swb_enable_mask == 4'h3) else $fatal(1, "SWB lane mask mismatch");
       assert(fifo_overflow == '0) else $fatal(1, "adapter FIFO overflow");
       assert(fifo_underflow == '0) else $fatal(1, "adapter FIFO underflow");
-      assert(expected_hits.size() == EXPECTED_HITS)
+      assert(expected_hits.size() == expected_hits_runtime)
         else $fatal(1, "expected hit model mismatch: got %0d expected %0d",
-                    expected_hits.size(), EXPECTED_HITS);
+                    expected_hits.size(), expected_hits_runtime);
       assert(feb_hit_count == expected_hits.size())
         else $fatal(1, "FEB hit count and expected ledger differ");
       assert(opq_beat_count != 0) else $fatal(1, "OPQ produced no egress beats");
-      assert(dma_payload_word_count == EXPECTED_DMA_WORDS)
+      assert(dma_payload_word_count == expected_dma_words_runtime)
         else $fatal(1, "DMA payload words got %0d expected %0d",
-                    dma_payload_word_count, EXPECTED_DMA_WORDS);
+                    dma_payload_word_count, expected_dma_words_runtime);
       assert(end_of_event_count != 0) else $fatal(1, "no DMA end_of_event observed");
       assert(missing_count == 0) else $fatal(1, "missing DMA hits: %0d", missing_count);
       assert(ghost_count == 0) else $fatal(1, "ghost DMA hits: %0d", ghost_count);
@@ -553,6 +629,23 @@ module feb_swb_corun_plain_tb;
     dma_padding_word_count = 0;
     end_of_event_count = 0;
     dma_done_count = 0;
+    run_window_8ns = DEFAULT_RUN_WINDOW_8NS;
+    hit_period_8ns = DEFAULT_HIT_PERIOD_8NS;
+    if (!$value$plusargs("FEB_SWB_RUN_WINDOW_8NS=%d", run_window_8ns)) begin
+      run_window_8ns = DEFAULT_RUN_WINDOW_8NS;
+    end
+    if (!$value$plusargs("FEB_SWB_HIT_PERIOD_8NS=%d", hit_period_8ns)) begin
+      hit_period_8ns = DEFAULT_HIT_PERIOD_8NS;
+    end
+    if (hit_period_8ns == 0 || run_window_8ns == 0) begin
+      $fatal(1, "invalid FEB_SWB runtime config run_window_8ns=%0d hit_period_8ns=%0d",
+             run_window_8ns, hit_period_8ns);
+    end
+    n_frames_runtime = (run_window_8ns + FRAME_STRIDE_8NS - 1) / FRAME_STRIDE_8NS;
+    expected_time_samples_runtime =
+        (run_window_8ns + hit_period_8ns - 1) / hit_period_8ns;
+    expected_hits_runtime = expected_time_samples_runtime * ASIC0_CHANNELS;
+    expected_dma_words_runtime = (expected_hits_runtime + 3) / 4;
 
     open_traces();
 
@@ -566,7 +659,7 @@ module feb_swb_corun_plain_tb;
 
     for (int cyc = 0; cyc < TIMEOUT_SWB_CYCLES; cyc++) begin
       @(posedge swb_clk);
-      if (end_of_event_count != 0 && actual_hits.size() >= EXPECTED_HITS) begin
+      if (end_of_event_count != 0 && actual_hits.size() >= expected_hits_runtime) begin
         break;
       end
     end
@@ -576,6 +669,9 @@ module feb_swb_corun_plain_tb;
 
     $fclose(ingress_trace_fd);
     $fclose(feb_egress_trace_fd);
+    $fclose(source_trace_fd);
+    $fclose(pre_rbcam_trace_fd);
+    $fclose(post_rbcam_trace_fd);
     $fclose(opq_trace_fd);
     $fclose(dma_trace_fd);
     $fclose(summary_fd);
