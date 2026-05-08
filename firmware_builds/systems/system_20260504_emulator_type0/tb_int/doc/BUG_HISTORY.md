@@ -58,6 +58,7 @@ Historical formal note:
 | [BUG-021-H](#bug-021-h-feb-swb-corun-emitted-future-timestamped-hits-before-hit-timebase) | H | soft error | `directed-only (FEB/SWB lifetime plotting)` | fixed in harness; lifetime rerun passed | FEB/SWB lifetime plot on `2026-05-08` | 90f6c58c | The corun packet writer serialized future timestamped hits at line rate before their MuTRiG hit timestamp, so lifetime plots showed negative FEB-egress and OPQ-ingress delays even though payload matching passed. |
 | [BUG-022-R](#bug-022-r-swb-opq-native-lane-credit-drops-under-feb-all-channel-100khz-corun) | R | hard stuck error | `common (one FEB, lane0 all-channel 100 kHz, lane1 empty legal frames)` | fixed for scoped no-bottleneck corun; 1024-depth overload retained as diagnostic | FEB/SWB all-channel 1 ms corun on `2026-05-08` | 8a353a0/6359a10/90f6c58c | Native OPQ stayed at the 1024-entry lane FIFO default because wrapper depth macros were not passed into the monolithic core; the scoped 8192-depth lossless run now delivers all 3200 hits with zero OPQ drop counters. |
 | [BUG-023-H](#bug-023-h-feb-swb-lifetime-plot-used-local-source-marker-for-rbcam-panels) | H | soft error | `directed-only (FEB/SWB lifetime plotting and review)` | fixed in analyzer/plotter; rerender passed | FEB/SWB lifetime plot review on `2026-05-08` | 7c748870 | The corun lifetime plot treated synthetic pre/post-rbCAM source markers as true rbCAM lifetime evidence and described lifetime as local source-marker time instead of the carried hit GTS/debug timestamp contract. |
+| [BUG-024-H](#bug-024-h-feb-swb-rbcam-plot-imported-lossy-reference-as-no-drop-evidence) | H | hard stuck error | `directed-only (FEB/SWB rbCAM reference plotting and review)` | fixed in analyzer reference guard; rerender passed | FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08` | pending | The rbCAM top-panel plot imported a drop-containing pre-rbCAM reference run and had no health gate, so a stale 84k-cycle peak was shown as if it were no-drop rbCAM evidence. |
 
 ## 2026-05-06
 
@@ -670,3 +671,35 @@ Historical formal note:
   - source, FEB egress, OPQ ingress, OPQ egress, and DMA factual scoreboards remain the datapath conservation proof; the imported rbCAM panels are reference evidence for the full FEB path that the direct corun does not instantiate
 - Commit:
   - analyzer/plotter/reporting fix: `7c748870`
+
+### BUG-024-H: FEB/SWB rbCAM plot imported lossy reference as no-drop evidence
+
+- First seen in:
+  - FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08`
+  - user review of `tb_int/feb_swb_corun/report/feb_swb_lifetime_hist.png`
+- Symptom:
+  - the direct FEB/SWB corun itself was lossless with `source_generation_hits=3200`, `expected_feb_hits=3200`, `opq_ingress_hits=3200`, `opq_egress_hits=3200`, `dma_hits=3200`, `opq_drop_counter_total=0`, and `issue_count=0`
+  - the imported pre-rbCAM reference panel still showed a far peak around 84k cycles, with `count=13728`, `min/p50/p95/max=73/84930/85373/85415` cycles, and only 1088 hits inside `[0,2000]`
+  - the old reference transcript showed actual residual loss: `A=15872 PRE=13728 POST=13041 FEB=10921`, with `A->PRE missing=2144`, `PRE->POST missing=687`, and `POST->FEB missing=2134`
+  - the old reference `drops.csv` had 4965 rows, so the plotted tail was not valid no-drop evidence
+- Root cause:
+  - `scripts/analyze_feb_swb_trace.py` imported `prof_int_002_pre_rbcam_periodic_asic0_full32_100k` as the pre-rbCAM reference without checking whether that run conserved hits
+  - the analyzer also used a separate post-rbCAM reference case, so the two top panels did not necessarily share one clean full-FEB run-control and drain contract
+  - there was no hard gate on reference `drops.csv`, `counter_agreement.csv`, transcript `UVM_ERROR`, or missing/ghost residuals before emitting `feb_swb_rbcam_reference_trace.csv`
+- Fix status:
+  - state:
+    fixed in analyzer reference guard; rerender passed
+  - mechanism:
+    the analyzer now imports both top panels from the clean `feb_egress_queueing_20260508/prof_int_002_feb_egress_periodic_asic0_full32_emu_direct_100k_1ms_gap1ms_20260508` case.  It validates that `drops.csv` is empty, all counter-agreement rows have `available=1` and `agree=1`, the transcript reports `UVM_ERROR=0`, and every reported missing/ghost residual is zero.  These reference-health issues now extend the analyzer failure list and are written to `feb_swb_rbcam_reference_health.csv`.
+  - before_fix_outcome:
+    a lossy reference with thousands of missing hits could be plotted with `rbcam_reference_issue_count=0`, making the pre-rbCAM tail look like a mathematical latency result instead of a stale run-control/drop artifact
+  - after_fix_outcome:
+    rerun `python3 scripts/analyze_feb_swb_trace.py --trace-dir report --expected-hit-period-8ns 1250 --opq-log report/run_swb_corun.log --assume-opq-lossless` passes with `TRACE_DEBUG_PASS hits=3200 channels=0..31 asic=0`, `rbcam_reference_issue_count=0`, and `rbcam_reference_health_issue_count=0`.  The accepted rbCAM reference reports pre-rbCAM `count=3136`, `min/p50/p95/max=17/17/17/17` cycles and post-rbCAM `count=3136`, `min/p50/p95/max=2001/2070/2128/2139` cycles.  DISLIN rerender passes with zero warnings for the PNG/PDF lifetime and OPQ queue plots.
+  - potential_hazard:
+    low after this guard because a future stale or lossy rbCAM reference will fail the analyzer instead of silently producing review evidence; the direct corun still uses synthetic pre/post markers and must not be treated as a real rbCAM implementation
+- Runtime / coverage context:
+  - one FEB is modeled with lanes 0 and 1 enabled; lanes 2 and 3 are masked
+  - lane 0 carries ASIC0 channels 0..31 at 100 kHz/channel for 1 ms; lane 1 emits legal empty FEB frames
+  - source/pre/post/FEB/OPQ-ingress/OPQ-egress/DMA counts are all 3200 hits in the maintained direct corun
+- Commit:
+  - analyzer/reference guard fix: `pending`
