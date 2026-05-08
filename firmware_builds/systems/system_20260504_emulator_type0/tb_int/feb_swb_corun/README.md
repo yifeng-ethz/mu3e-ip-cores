@@ -128,4 +128,7 @@ The current directed contract run uses a virtual MuTRiG ASIC0/channel0 source
 at 100 kHz on lane 0, an empty legal FEB frame on lane 1, and
 `feb_enable_mask = 4'h3`. The test expects the final log to contain
 `FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
-under `report/`.
+under `report/`. `run_swb_corun` also runs
+`scripts/analyze_feb_swb_trace.py`, which emits
+`report/feb_swb_hit_trace_debug.csv` and proves each hit reaches OPQ and DMA
+with the expected ASIC, channel, hit id, and frame/subheader timestamp bucket.
