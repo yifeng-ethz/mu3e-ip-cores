@@ -95,6 +95,10 @@ arbiter, and FEB frame assembly, but the canonical mapping for `ps`, `ts`, and
 ## Files
 
 - `sv/feb_swb_parallel_cdc_adapter.sv` is the active parallel fallback.
+- `sv/feb_swb_corun_plain_tb.sv` is the direct mixed FEB/MuSiP RTL
+  continuation bench. It instantiates the parallel adapter and the MuSiP
+  `swb_block_uvm_wrapper`, drives lanes 0 and 1 with FEB-style hit_type3
+  frames, masks lanes 2 and 3, and checks OPQ/DMA hit identity.
 - `sv/feb_swb_musip_uvm_driver.sv` drives MuSiP `feb_ingress_if`
   instances from the packed adapter outputs.
 - `sv/feb_swb_async_fifo.sv` is a simulation FIFO for the 125 MHz FEB to
@@ -112,3 +116,16 @@ make compile
 make compile_musip_driver
 make smoke
 ```
+
+For the direct SWB RTL continuation corun:
+
+```sh
+make compile_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim
+make run_swb_corun QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim
+```
+
+The current directed contract run uses a virtual MuTRiG ASIC0/channel0 source
+at 100 kHz on lane 0, an empty legal FEB frame on lane 1, and
+`feb_enable_mask = 4'h3`. The test expects the final log to contain
+`FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
+under `report/`.
