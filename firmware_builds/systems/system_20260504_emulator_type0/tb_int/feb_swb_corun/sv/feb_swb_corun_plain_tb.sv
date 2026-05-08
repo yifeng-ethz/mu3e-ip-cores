@@ -191,8 +191,8 @@ module feb_swb_corun_plain_tb;
       data_word[43:39] = hit_word[13:9];
       data_word[38:0] = {
         ts_high_word[22:0],
-        ts_low_word[15:12],
-        shd_ts[7:0],
+        ts_low_word[15:11],
+        shd_ts[6:0],
         hit_word[31:28]
       };
       return data_word;
