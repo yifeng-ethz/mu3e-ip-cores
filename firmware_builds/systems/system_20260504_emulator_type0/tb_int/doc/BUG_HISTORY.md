@@ -62,8 +62,8 @@ Historical formal note:
 | [BUG-025-R](#bug-025-r-swb-direct-dma-packer-dropped-eop-partial-hit-groups) | R | hard stuck error | `occasional (legal FEB frames whose hit count is not divisible by four)` | fixed in MuSiP direct packer; periodic and Poisson all-ASIC reruns passed | FEB/SWB Poisson all-ASIC 1 ms corun on `2026-05-08` | 9d1c7c5/f478c95a | The SWB direct 64-to-256 DMA packer did not safely flush partial EOP groups, so legal frames with `frame_hits mod 4 = 1` could lose the final hit group before DMA. |
 | [BUG-026-H](#bug-026-h-feb-swb-pre-rbcam-panel-used-post-mutrig-transport-as-golden-lifetime) | H | soft error | `directed-only (FEB/SWB lifetime plotting review)` | fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten | FEB/SWB lifetime plot review on `2026-05-09` | e2cca629 | The pre-rbCAM panel used the clean full-FEB 17-cycle post-MuTRiG transport marker as the lifetime shape, so the plot collapsed instead of showing the virtual-MuTRiG short-frame wait and serializer profile. |
 | [BUG-027-H](#bug-027-h-feb-swb-rate-scan-collapsed-all-asic-traffic-onto-lane0) | H | hard stuck error | `directed-only (FEB/SWB all-ASIC rate scan)` | fixed in harness; two-lane scan rerun | FEB/SWB Poisson rate scan on `2026-05-09` | pending | The all-ASIC FEB/SWB rate scan routed every generated hit through lane0 and left lane1 empty, producing the wrong overload model for the user's requested two-lane FEB contract. |
-| [BUG-028-R](#bug-028-r-opq-page-allocator-used-n_hit-as-global-frame-hit-room) | R | hard stuck error | `common (two-lane all-ASIC OPQ stress with DEBUG_LEVEL=1)` | fixed in MuSiP OPQ source; packet_scheduler lint passed | FEB/SWB 1 MHz/channel all-ASIC scan on `2026-05-09` | pending | The OPQ page allocator reused `N_HIT` as global frame hit room even though `N_HIT` is a per-subheader/subframe parser limit, causing false handle drops before the allocator fix. |
-| [BUG-029-R](#bug-029-r-swb-frame-table-egress-leaves-written-subheaders-unread-near-service-knee) | R | hard stuck error | `occasional (near two-lane zero-backlog service marker)` | open; frame-presenter architecture fix proposed | FEB/SWB 976.562 kHz/channel rate scan on `2026-05-09` | pending | Near the two-lane zero-backlog service marker, OPQ lane counters consume all hits with zero controlled drops but the frame-table/DMA read side can leave written subheaders unread. |
+| [BUG-028-R](#bug-028-r-opq-subframe-hit-room-limit-reached-by-all-asic-debug-stress) | R | contract limit | `common (two-lane all-ASIC over-limit OPQ stress)` | closed as non-bug; intentional OPQ subframe limit | FEB/SWB 1 MHz/channel all-ASIC scan on `2026-05-09` | pending | The all-ASIC stress point exceeded the intentional OPQ `N_HIT` subframe hit-room hard limit; this is contract enforcement, not an RTL bug. |
+| [BUG-029-R](#bug-029-r-opq-per-lane-handle-fifo-silently-overwrites-unread-handles-under-debug-bypass) | R | hard stuck error | `directed-only (requires BUG-028 limit bypass near service knee)` | open; cycle-level root cause localized | FEB/SWB 976.562 kHz/channel rate scan on `2026-05-09` | pending | With the intentional `N_HIT` hard limit bypassed for debug, a per-lane OPQ handle FIFO can wrap onto an unread handle; the block mover then writes the wrong page range and the presenter emits holes/ghost hits with no controlled counter. |
 
 ## 2026-05-06
 
@@ -817,74 +817,71 @@ Historical formal note:
 - Commit:
   - harness lane-mapping fix: pending
 
-### BUG-028-R: OPQ page allocator used N_HIT as global frame hit room
+### BUG-028-R: OPQ subframe hit-room limit reached by all-ASIC debug stress
 
 - First seen in:
   - FEB/SWB all-ASIC 1 MHz/channel Poisson rate scan on `2026-05-09`
-  - corrected two-lane source routing still produced OPQ `handle_drop_hit`
-    before the allocator fix
+  - corrected two-lane source routing produced OPQ `handle_drop_hit` when the
+    aggregate hit count exceeded the configured OPQ subframe hit-room contract
 - Symptom:
-  - the OPQ page allocator rejected hits once the frame-level total approached
+  - the OPQ page allocator rejected hits once the subframe total approached
     `N_HIT=2047`
-  - this made the scan look like a frame-level `N_HIT` cap even though `N_HIT`
-    is only the per-subheader/subframe parser limit
+  - the earlier BUG-028 writeup incorrectly treated this as a false frame cap
+    and proposed removing it from the allocator path
 - Root cause:
-  - `ordered_priority_queue_monolithic_page_allocator.sv` initialized
-    `frame_hit_room` from `N_HIT`
-  - the allocator therefore applied the parser's subheader hit-count parameter
-    as a global admission budget for the whole OPQ frame
+  - not an RTL bug
+  - `N_HIT` is the intentional OPQ hard limit for the maximum number of hits in
+    one subframe/readout frame accepted by the page allocator
+  - traffic above that contract must be controlled by OPQ drop accounting or by
+    a deliberate debug-only bypass used only to isolate later downstream loss
 - Detailed RTL architecture analysis:
-  - `N_HIT` is a parser-local legality parameter for one subheader/subframe
-    hit count, not a capacity contract for the merged OPQ frame
-  - the allocator ticket path may use the `N_HIT`-derived field widths to carry
-    per-ticket counts, but the frame-level admission budget must be owned by
-    the page-residency/frame-accounting domain
-  - the bad coupling made the false cap depend on a protocol constant instead
-    of actual page RAM residency, frame hit counter width, or an explicit frame
-    budget parameter
-- Proposed permanent RTL architecture:
-  - keep `N_HIT` in the ingress parser, subheader decoder, and protocol SVA
-    only; rename the frame budget to a separate concept such as
-    `FRAME_HIT_ROOM_LIMIT` or derive it from `MAX_HIT_CNT_BITS`
-  - use a saturated/all-ones reset value for frame room unless an explicit
-    product-level frame budget is configured
-  - add compile-time assertions proving the configured frame room is not below
-    the maximum legal test frame for the selected `N_SHD`, `N_HIT`, lane count,
-    and page RAM depth
-  - if frame room ever rejects hits, report it through a dedicated controlled
-    `frame_room_drop_hit` counter instead of folding it into lane handle drops
+  - the allocator owns the finite subframe hit-room resource and should reset
+    `frame_hit_room` from `N_HIT` in production builds
+  - the parser and ticket fields carry the subheader and block counts needed to
+    charge this room; the allocator is the correct place to reject an
+    over-limit subframe before page RAM residency becomes ambiguous
+  - the prior all-ones `FRAME_HIT_ROOM_RESET` change is useful only as a debug
+    experiment to bypass the contract while localizing BUG-029 downstream of
+    ingress admission
+- Correct RTL architecture:
+  - default production RTL must keep `frame_hit_room = N_HIT`
+  - any over-limit isolation must be guarded by a clearly named debug macro,
+    such as `OPQ_DEBUG_BYPASS_SUBFRAME_HIT_LIMIT`, and must not be enabled for
+    signoff or production equivalence
+  - controlled counters should report rejected over-limit hits as intentional
+    OPQ admission drops, not as unexplained end-to-end loss
 - Fix status:
   - state:
-    fixed in MuSiP OPQ source; focused scan rerun
+    reclassified as intended behavior; MuSiP source corrected to make the
+    over-limit bypass debug-only
   - mechanism:
-    reset and new-frame assignment now use an all-ones frame hit room
-    (`FRAME_HIT_ROOM_RESET`) instead of `N_HIT`
+    reset and new-frame assignment use `N_HIT` by default; the all-ones room is
+    available only under `OPQ_DEBUG_BYPASS_SUBFRAME_HIT_LIMIT`
   - before_fix_outcome:
-    two-lane 1 MHz/channel generated `255856` hits but delivered about
-    `124906`, with nonzero lane handle-drop counters
+    two-lane 1 MHz/channel generated `255856` hits and reached the intentional
+    OPQ subframe hit-room limit, with controlled handle/drop accounting
   - after_fix_outcome:
-    two-lane 1 MHz/channel generates `255856` hits, OPQ accepts both lanes with
-    `handle_drop_hit=0` and `ft_drop_hit=0`, and DMA decodes `255338` hits
+    BUG-029 debug runs may enable the bypass to expose downstream loss, but
+    the production contract remains the `N_HIT` subframe limit
   - lint outcome:
-    `tb/scripts/run_lint.sh` passed after making generated scratch directories
-    writable; Questa reported warnings only
+    `tb/scripts/run_lint.sh` passed after the debug-bypass correction; Questa
+    reported warnings only
   - potential_hazard:
-    medium until a broader OPQ regression is run over the changed MuSiP source;
-    low for the semantic conclusion that `N_HIT` must not be treated as a
-    frame cap
+    high if a debug bypass is accidentally used as signoff evidence; low for
+    normal OPQ behavior when `frame_hit_room` is reset from `N_HIT`
 - Runtime / coverage context:
-  - the semantic `N_HIT` subheader knee for two active hit lanes is
-    `124.94 MHz/channel`, outside the current 1 MHz/channel scan
-  - the zero-backlog two-lane service marker is `976.09 kHz/channel`, which is
-    a backlog marker under finite-burst drain, not a hard drop model
-  - regression guard should include a directed two-lane frame whose total hit
-    count is greater than `N_HIT` while every subheader remains legal; expected
-    outcome is zero `handle_drop_hit`, zero `ft_drop_hit`, and exact DMA hit
-    count
+  - the semantic `N_HIT` readout-subframe knee for two active hit lanes is
+    `976.09 kHz/channel`; points above that can intentionally produce OPQ
+    admission drops in production builds
+  - the debug bypass removes this admission guard only to localize downstream
+    handle/page/readout ownership hazards
+  - regression guards should include an over-limit subframe case whose expected
+    outcome is controlled OPQ admission drop accounting, plus a separate
+    debug-only bypass case for BUG-029 first-loss localization
 - Commit:
-  - MuSiP OPQ allocator fix: pending
+  - MuSiP OPQ debug-bypass correction: pending
 
-### BUG-029-R: SWB frame-table egress leaves written subheaders unread near service knee
+### BUG-029-R: OPQ per-lane handle FIFO silently overwrites unread handles under debug bypass
 
 - First seen in:
   - FEB/SWB all-ASIC Poisson rate scan at `976.562 kHz/channel` on
@@ -894,14 +891,23 @@ Historical formal note:
     but DMA-visible hits are short
   - the measured shortfall is non-monotonic across nearby rates, so it does
     not match a simple mathematical admission or bandwidth cap
+  - this symptom is meaningful only in runs where the BUG-028 `N_HIT`
+    subframe hit-room limit is intentionally bypassed to isolate the downstream
+    handle/page/readout path
 - Root cause:
-  - open
-  - current trace points to frame-table or downstream readout retirement rather
-    than FEB ingress, lane FIFO credit, ticket credit, mask, or handle drops
-  - the active OPQ top-level still instantiates
-    `ordered_priority_queue_monolithic_basic_presenter`; the translated
-    frame-table tracker/presenter blocks exist in the MuSiP source tree but are
-    not yet the regression-backed top-level path
+  - localized to silent per-lane handle FIFO overwrite in the OPQ native path
+  - the allocator accepted a lane1 handle for frame `1`, subheader timestamp
+    `0x12d0` at `94.754 us`:
+    `src=0xaf4 dst=0x162d len=13 handle_wptr=0x2e`
+  - before the block mover consumed that handle, the 64-entry handle FIFO
+    wrapped; at `102.178 us` the block mover read `handle_rptr=0x2d` but saw a
+    later handle:
+    `src=0xefa dst=0x1e65 len=13`
+  - the expected page RAM range `0x162d..0x1639` was never written, so the
+    presenter later emitted the declared subheader with three lane0 hits
+    followed by zero-valued holes
+  - this is not evidence that BUG-028 is wrong: BUG-029 appears only in the
+    artificial debug run that bypasses the intentional `N_HIT` admission limit
 - Detailed RTL architecture analysis:
   - the failing point generated `249896` hits, the native OPQ wrote all
     `249896` hits into the frame-table side, and both active lanes reported
@@ -911,56 +917,55 @@ Historical formal note:
     `385` written subheaders without DMA-visible retirement
   - extending the SWB drain window to `2000000` cycles reproduced the same
     `13017` missing DMA hits, so this is not a short drain tail
-  - the rate-scan shortfall is non-monotonic near the service marker, which
-    rules out a simple persistent OPQ-to-DMA bandwidth cap as the root cause
-  - `ft_rd_hdr` was observed one count above `ft_wr_hdr` at the failing point;
-    because the current read counters are derived by parsing the egress stream,
-    this may be either a malformed/restarted frame symptom or a counter
-    artifact, but it is not enough evidence to claim a controlled drop
-  - the likely failure class is therefore an ownership/accounting gap in the
-    basic presenter path: accepted frame metadata or page RAM words can be
-    skipped, stranded, or mis-retired without advancing a dedicated controlled
-    frame-table drop counter
+  - in a shorter `100 us` reproducer, total DMA count still matched generation
+    (`25025/25025`), but exact debug identity had `2044` missing expected hits
+    and `2044` ghost hits; this separates count preservation from hit identity
+    preservation
+  - the first failing hit reached FEB egress and OPQ ingress, then disappeared
+    before OPQ egress; its expected page range was not written because the
+    handle descriptor was overwritten before block-mover consumption
+  - `ft_rd_hdr` can be observed one count above `ft_wr_hdr` in the long failing
+    point; that is a downstream symptom of malformed/holey page contents and
+    egress parsing, not the first corruption boundary
+  - the active OPQ top-level still instantiates
+    `ordered_priority_queue_monolithic_basic_presenter`; the translated
+    frame-table tracker/presenter blocks exist in the MuSiP source tree but are
+    not yet the regression-backed top-level path
 - Proposed RTL architecture fix:
-  - replace the current signoff path for SWB/FEB with a descriptor-owned
-    frame-table readout, or refactor the basic presenter into the same
-    ownership structure
-  - add an `opq_frame_meta_fifo` written only by `packet_complete_pulse`; each
-    descriptor carries frame start address, frame length, frame timestamp,
-    subheader count, hit count, per-lane counts, and a monotonically increasing
-    debug sequence
-  - add a `opq_residency_guard` that owns page overwrite and stale-residency
-    decisions before readout; if it drops a descriptor, it increments explicit
-    `ft_meta_drop_hdr/shd/hit` counters and emits a trace record
-  - add a single-owner `opq_stream_presenter` that pops one descriptor, emits
-    exactly the descriptor length on `valid && ready`, asserts SOP/EOP only from
-    descriptor word position, and retires the descriptor only on the final
-    accepted output beat
-  - separate framing validation from control: K-code/header/trailer parsing can
-    raise `ft_bad_kcode`, `ft_len_mismatch`, or `ft_unexpected_sop` counters,
-    but it must not decide descriptor retirement by itself
-  - source the OPQ CSR/debug accounting from descriptor lifecycle events:
-    `ft_meta_wr_*`, `ft_present_start_*`, `ft_present_retire_*`,
-    `ft_meta_drop_*`, `ft_desc_backlog`, and `ft_desc_backlog_max`
-  - preserve the 36-bit native egress contract (`data[31:0]` plus four K bits)
-    and let the downstream link32-to-DMA path be the only modeled service cap;
-    any hit missing from DMA must then be explained by one of the controlled
-    OPQ counters
+  - make the per-lane handle FIFO an owned, flow-controlled resource rather
+    than a blind ring buffer
+  - promote handle write/read pointers to `(ADDR_WIDTH+1)` pointer state with a
+    wrap bit, or add an equivalent occupancy counter, so full and empty are not
+    aliased when low address bits match
+  - feed handle occupancy or explicit `handle_room` back into the page
+    allocator before it writes a handle; on no room, either stall admission
+    losslessly or perform a controlled overrun drop that increments
+    `handle_fifo_full_drop_{shd,hit}` and returns all associated credits
+  - add an assertion that no handle write can target the next unread handle
+    without a controlled drop event
+  - add debug counters for `handle_fifo_occupancy_max`,
+    `handle_full_stall_cycles`, and any controlled `handle_full_drop_*`
+    events; the dual UVM scoreboard must explain every missing DMA hit through
+    one of those counters
+  - keep the descriptor-owned frame-table presenter refactor as a secondary
+    cleanup path, but the first RTL fix is handle-FIFO overrun protection
 - Tactical debug hooks before the refactor lands:
-  - assert that `ft_wr_shd - ft_present_retire_shd - ft_meta_drop_shd` equals
-    live descriptor backlog plus the active descriptor's remaining subheaders
-  - assert that every accepted descriptor eventually produces exactly its
-    declared word count when `aso_egress_ready` is held high
-  - trace `meta_wptr`, `meta_rptr`, descriptor length, active word index,
-    page RAM read request/response valid, SOP/EOP, and final-retire handshake
-    at the `976.562 kHz/channel` seed
+  - assert handle FIFO occupancy locally in the OPQ monolithic top using the
+    same allocator write and block-mover read events used for the physical FIFO
+  - trace `handle_wptr`, `handle_rptr`, handle `src/dst/len`, page RAM write
+    address/data, and page RAM egress address/data for the first failing
+    subheader
+  - assert that every accepted handle eventually causes exactly `len` page RAM
+    writes to `dst..dst+len-1`, unless a controlled handle-drop event fires
+  - retain the frame-table descriptor assertions because they catch secondary
+    presenter bugs after the handle FIFO boundary is protected
   - fail the FEB/SWB scoreboard if a generated hit reaches OPQ frame-table
     write accounting but is absent at DMA without a matching controlled
-    `ft_meta_drop_hit` or `ft_present_drop_hit`
+    OPQ drop or asserted handle-FIFO overwrite event
 - Fix status:
   - state:
-    open; nonfatal for continuing the rate-scan evidence because the counters
-    classify it separately from controlled OPQ drop
+    open; root cause localized by cycle-level trace; RTL guard/backpressure
+    patch pending
   - before_fix_outcome:
     `976.562 kHz/channel` generated `249896` hits and DMA decoded `236879`,
     with `missing_hits=13017`
@@ -968,14 +973,21 @@ Historical formal note:
     rerunning the same point with `DRAIN_SWB_CYCLES=2000000` reproduced the
     same `13017` missing hits; OPQ lane0 read all `124638` lane hits, lane1
     read all `125258` lane hits, and all OPQ drop counters stayed zero
+  - mitigation outcome:
+    raising `OPQ_HANDLE_FIFO_DEPTH` from `64` to `1024` for the same 1 ms
+    debug-bypass traffic produced exact identity conservation:
+    `source_generation_hits=249896`, `opq_ingress_hits=249896`,
+    `opq_egress_hits=249896`, `dma_hits=249896`, `fail_hits=0`,
+    `ghost_hits=0`
   - localized evidence:
-    the OPQ summary at the failing point reports `ft_wr_shd=7813` and
-    `ft_rd_shd=7428`, a gap of `385` subheaders, approximately three
-    128-subheader frames
+    short trace `report_bug029_trace_short` shows the lane1 handle
+    `src=0xaf4 dst=0x162d len=13` accepted at `94.754 us`, then a different
+    handle read from the same low pointer at `102.178 us`; OPQ egress later
+    reads zeros from `0x162f..0x163c`
   - potential_hazard:
-    high for accepting a no-loss claim near the service marker; low for the
-    corrected `N_HIT` interpretation because the controlled drop counters are
-    zero
+    high if debug-bypass runs are treated as production no-loss evidence; low
+    for normal production OPQ behavior where BUG-028's `N_HIT` limit is
+    enforced and the over-limit traffic is intentionally rejected
 - Runtime / coverage context:
   - current measured scan remains exact through `500 kHz/channel`
   - `1 MHz/channel` is near full rate with `255338/255856` hits delivered and
