@@ -263,8 +263,9 @@ The latest 1 ms scan writes `report_rate_scan/feb_swb_rate_scan.csv` and
 `report_rate_scan/feb_swb_rate_scan.png`. After the OPQ allocator fix,
 `N_HIT` is treated as a per-subheader/subframe limit whose semantic knee is
 124.9 MHz/channel, far outside this scan. The model line is therefore ideal
-lossless delivery after post-window drain, while the green vertical marker is
-only the zero-backlog service point.
+lossless delivery after post-window drain. The blue horizontal line marks the
+aggregate OPQ-to-DMA 32-bit egress cap at about 249.9 Mhit/s, and the green
+vertical marker is the corresponding zero-backlog per-channel service point.
 
 Current measured delivery is exact through 500 kHz/channel. The 1 MHz/channel
 point is near full rate, with `255338/255856` hits delivered and no OPQ

@@ -800,14 +800,18 @@ cadence, not a hard delivered-rate cap when the run is allowed to drain:
 ```text
 F             = 2048 cycles/frame
 C_lane        = 2047 hits/frame/lane
+R_cap,agg     = 2 * C_lane / (F * T_c)
+              = 249.88 Mhit/s
 R_backlog     = L * C_lane / (N_ch * F * T_c)
               = 2 * 2047 / (256 * 2048 * 8 ns)
               = 976.09 kHz/channel.
 ```
 
-Above `R_backlog`, backlog can grow during the 1 ms injection interval, but
-it should still drain without loss if the OPQ/SWB queues are deep enough and
-the frame-retirement sequence remains live.
+The rate-scan plot draws `R_cap,agg` as a horizontal OPQ-to-DMA aggregate
+service line and `R_backlog` as the matching vertical per-channel knee. Above
+`R_backlog`, backlog can grow during the 1 ms injection interval, but it should
+still drain without loss if the OPQ/SWB queues are deep enough and the
+frame-retirement sequence remains live.
 
 Latest corrected RTL scan, seed `20260508`, 1 ms source window:
 
