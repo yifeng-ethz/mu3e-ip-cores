@@ -202,8 +202,10 @@ inter-checkpoint deltas. `scripts/render_feb_swb_lifetime_dislin.sh` writes
 rbCAM reference, FEB egress, OPQ ingress, and OPQ egress hit lifetimes. The
 plot uses one shared x-axis across all checkpoint panels and annotates p05,
 p50, and p95 directly; p05 is orange dashed, p50 is black, and p95 is black
-dashed. The analyzer also writes `feb_swb_range_validation.csv`, which validates
-the direct corun ranges: synthetic pre/post-rbCAM `0` cycles in the trace,
+dashed. The pre-rbCAM panel also labels the virtual-MuTRiG expected envelope as
+PASS when the observed source-model lifetime stays below 1100 cycles. The
+analyzer also writes `feb_swb_range_validation.csv`, which validates the direct
+corun ranges: synthetic pre/post-rbCAM `0` cycles in the trace,
 virtual-MuTRiG pre-rbCAM source model under the `[0,2000]` aperture, post-rbCAM
 DEBUG-age reference `[2000,2200)`, two-frame store-forward FEB egress
 `[2049,6143]` cycles, OPQ ingress `[2049,6159]` cycles, and OPQ/DMA against the

@@ -533,6 +533,7 @@ static void draw_panel(metric_t *metric,
   char title_buf[160];
   char equation_buf[220];
   char stats_buf[220];
+  char expected_buf[220];
   int counts[MAX_BINS] = {0};
 
   snprintf(title_buf,
@@ -614,6 +615,18 @@ static void draw_panel(metric_t *metric,
   color("fore");
   height(22);
   rlmess(stats_buf, xmin + 0.02f * xrange, ymax * 0.92f);
+  if (strcmp(metric->key, "pre_rbcam_lifetime_cycles") == 0) {
+    const int expected_pass = stats.min >= -0.001f && stats.max <= 1100.0f;
+    snprintf(expected_buf,
+             sizeof(expected_buf),
+             "expected pre-rbCAM %s: observed %.0f..%.0f cycles, model max<1100",
+             expected_pass ? "PASS" : "FAIL",
+             stats.min,
+             stats.max);
+    color(expected_pass ? "green" : "red");
+    height(20);
+    rlmess(expected_buf, xmin + 0.02f * xrange, ymax * 0.80f);
+  }
   color("fore");
   solid();
   linwid(1);
