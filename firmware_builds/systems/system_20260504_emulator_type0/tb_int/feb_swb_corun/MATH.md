@@ -7,18 +7,21 @@ not modify RTL, UVM, scripts, or generated reports.
 ## Scope
 
 The maintained contract run assumes the OPQ is provisioned as a lossless,
-non-bottleneck stage for this finite 1 ms burst.  In this scope:
+non-bottleneck stage for finite 1 ms bursts that stay inside the configured
+OPQ readout-subframe hit contract.  In this scope:
 
 - OPQ buffering and service are sufficient for the complete finite burst and
   subsequent drain.
 - All OPQ controlled drop counters must remain zero.
 - OPQ delay is a finite measured queue/drain metric, not a loss explanation.
 - DMA must conserve every hit accepted and emitted by OPQ.
+- `N_HIT` is the intentional maximum hit count accepted in one OPQ
+  readout-subframe/frame.  Traffic above that contract is expected to produce
+  controlled OPQ admission drops unless a debug-only bypass is enabled.
 
-An earlier 1024-depth diagnostic profile observed `rho > 1` at the OPQ frame
-service level and produced controlled lane-credit loss.  That profile is useful
-for overload diagnosis and first-loss calibration, but it is excluded from the
-lossless contract derived here.
+Debug runs with `OPQ_DEBUG_BYPASS_SUBFRAME_HIT_LIMIT=1` deliberately remove the
+`N_HIT` hard limit to localize downstream bugs.  Those runs are not production
+signoff evidence for legal OPQ traffic.
 
 ## Assumptions
 
@@ -645,9 +648,9 @@ W_max  = 97927.5 cycles
 This is a finite-burst queue-drain result.  It is not a claim that the same
 traffic is stable for an infinite run.
 
-## Excluded 1024-Depth Diagnostic Profile
+## Excluded Lane-FIFO 1024-Depth Diagnostic Profile
 
-The earlier diagnostic run measured:
+The earlier under-provisioned lane-FIFO diagnostic run measured:
 
 ```text
 E[A_n] = 2047.885 cycles
@@ -694,9 +697,10 @@ Using `W_0 = 2727.5` and `N = 61`:
 38931.0 <= W_61 <= 147816.0 cycles.
 ```
 
-This diagnostic profile is overloaded at the OPQ frame-service level and is
-not the scoped no-bottleneck contract.  Its value is to prove the queue model
-and expose the drop boundary.
+This diagnostic profile used a small lane FIFO and is overloaded at the OPQ
+frame-service level.  It is not the scoped no-bottleneck contract, and it is
+separate from the BUG-029 handle FIFO residency A/B test.  Its value is to
+prove the queue model and expose that old lane-credit drop boundary.
 
 ## First-Loss Interpretation
 
@@ -704,7 +708,7 @@ Under the maintained no-bottleneck contract there must be no first lost frame,
 sample, or hit.  The first-loss boundary is therefore a failure signature, not
 an allowed result.
 
-In the excluded diagnostic profile, first loss occurred at:
+In the excluded lane-FIFO diagnostic profile, first loss occurred at:
 
 ```text
 frame_seq = 43
@@ -724,7 +728,7 @@ lossless run.
 
 ## Grouped 384-Hit Loss
 
-The excluded diagnostic profile lost:
+The excluded lane-FIFO diagnostic profile lost:
 
 ```text
 384 hits = 12 complete samples * 32 channels/sample.
@@ -752,7 +756,7 @@ Any nonzero OPQ controlled drop counter is a contract failure even if the
 missing-hit count is explained by that counter.  A controlled counter can
 explain the failure mode; it cannot make the run pass under this scope.
 
-## Poisson Rate-Scan Lossless-Drain Model
+## Poisson Rate-Scan Admission Model
 
 The all-ASIC iid Poisson rate scan now drives both FEB/SWB hit lanes:
 
@@ -762,27 +766,29 @@ lane 1: ASIC0..3, channels 0..31
 lanes 2/3: masked
 ```
 
-`N_HIT` is a subheader/subframe format limit, not a global frame admission
-limit.  With two active hit lanes, the semantic subheader knee is:
+`N_HIT` is the configured hard maximum number of hits admitted into one OPQ
+readout-subframe/frame.  For this corun, the readout-subframe period is the
+128-subheader FEB/SWB frame:
 
 ```text
 N_ch   = 8 * 32 = 256 channels
 L      = 2 active hit lanes
-H      = 16 cycles/subheader
+F      = 2048 cycles/readout-subframe
 T_c    = 8 ns/cycle
-N_HIT  = 2047 hits/subheader/lane
+N_HIT  = 2047 hits/readout-subframe/lane
 
-R_sub,knee = L * N_HIT / (N_ch * H * T_c)
-           = 2 * 2047 / (256 * 16 * 8 ns)
-           = 124.94 MHz/channel.
+R_NHIT,knee = L * N_HIT / (N_ch * F * T_c)
+             = 2 * 2047 / (256 * 2048 * 8 ns)
+             = 976.09 kHz/channel.
 ```
 
-That limit is far outside the 50 kHz/channel to 1 MHz/channel scan.  Under the
-current finite-burst contract, OPQ buffering plus post-window drain should
-therefore conserve all generated hits unless a separate queue, frame-table, or
-DMA readout bug appears.
+That knee is intentionally inside the 50 kHz/channel to 1 MHz/channel scan.
+Below it, a lossless-drain run should conserve all generated hits.  Above it,
+the production build may intentionally reject over-limit hits through OPQ
+controlled admission/drop accounting.  A debug-bypass run above this knee is
+only valid for localizing downstream queue and residency hazards.
 
-The expected lossless delivery equation is:
+For legal lossless points:
 
 ```text
 T_run = 125000 cycles = 1 ms
@@ -794,24 +800,27 @@ E[delivered]= E[A]
 E[missing]  = 0
 ```
 
-The useful service marker is the zero-backlog knee for the two-lane frame
-cadence, not a hard delivered-rate cap when the run is allowed to drain:
+For over-limit production points, expected controlled admission is:
 
 ```text
-F             = 2048 cycles/frame
-C_lane        = 2047 hits/frame/lane
-R_cap,agg     = 2 * C_lane / (F * T_c)
-              = 249.88 Mhit/s
-R_backlog     = L * C_lane / (N_ch * F * T_c)
-              = 2 * 2047 / (256 * 2048 * 8 ns)
-              = 976.09 kHz/channel.
+A_frame        = generated hits assigned to one OPQ readout-subframe
+C_frame        = L * N_HIT = 4094 hits/readout-subframe
+controlled_drop= max(0, A_frame - C_frame)
 ```
 
-The rate-scan plot draws `R_cap,agg` as a horizontal OPQ-to-DMA aggregate
-service line and `R_backlog` as the matching vertical per-channel knee. Above
-`R_backlog`, backlog can grow during the 1 ms injection interval, but it should
-still drain without loss if the OPQ/SWB queues are deep enough and the
-frame-retirement sequence remains live.
+The rate-scan plot should draw the aggregate admission cap as a horizontal
+service/contract line:
+
+```text
+R_cap,agg = C_frame / (F * T_c)
+          = 4094 / (2048 * 8 ns)
+          = 249.88 Mhit/s.
+```
+
+The matching vertical per-channel knee is `R_NHIT,knee`.  Above that knee,
+lossless delivery is not a production requirement unless the debug bypass is
+explicitly enabled and enough downstream buffering is provisioned for the
+finite burst.
 
 Latest corrected RTL scan, seed `20260508`, 1 ms source window:
 
@@ -830,9 +839,10 @@ rate kHz/ch  expected  DMA hits  missing  delivered Mhit/s  missing %
 1000.000     255856    255338    518      255.338           0.2025
 ```
 
-The 1 MHz/channel point is now near full rate and contradicts the old
-one-lane frame-cap model.  Both active lanes accept and read all hits, and
-controlled OPQ drop counters remain zero:
+The 1 MHz/channel debug-bypass point is near full rate and contradicts the old
+one-lane routing model.  Both active lanes accept and read all hits, and
+controlled OPQ drop counters remain zero only because the debug bypass removes
+the production `N_HIT` hard limit:
 
 ```text
 1 MHz/channel observed:
@@ -846,13 +856,75 @@ controlled OPQ drop counters remain zero:
   DMA hits            = 255338 / 255856
 ```
 
-The remaining high-rate shortfall is not explained by OPQ controlled drops.
-At 976.562 kHz/channel, a focused rerun with `DRAIN_SWB_CYCLES=2000000`
-reproduced the same `13017` missing hits.  The OPQ lane counters consumed all
-lane hits, but the frame-table read side reported `ft_wr_shd=7813` and
-`ft_rd_shd=7428`, a gap of `385` subheaders, approximately three 128-subheader
-frames.  This is tracked as an open frame-retirement/readout issue rather than
-as a mathematical OPQ admission limit.
+The remaining high-rate shortfall in the 64-handle debug-bypass run is not
+explained by OPQ controlled drops.  At `976.562 kHz/channel`, a focused rerun
+with `DRAIN_SWB_CYCLES=2000000` reproduced `13017` missing hits even though
+both active lanes consumed all hits and all controlled drop counters stayed
+zero.  Cycle-level tracing localized this as BUG-029: a per-lane handle FIFO
+slot was overwritten before the block mover consumed it.
+
+## Debug-Bypass Handle FIFO Residency
+
+For each lane `l`, define cumulative handle writes and reads:
+
+```text
+A_h,l(t) = accepted handle descriptors written by the page allocator
+R_h,l(t) = descriptors consumed by the block mover
+Q_h,l(t) = A_h,l(t) - R_h,l(t)
+```
+
+A lossless ring FIFO requires:
+
+```text
+Q_h,l(t) < D_h  for all t
+```
+
+where `D_h` is the true handle FIFO depth.  With only low address bits used for
+writer/reader ownership, `Q_h,l(t) >= D_h` aliases full and empty and can
+silently overwrite an unread handle.
+
+At `HIT_PERIOD_8NS=128`, `ASIC_COUNT=8`, two active hit lanes, and iid Poisson
+traffic, the expected per-lane hit occupancy per 2048-cycle readout-subframe is
+near the `N_HIT` contract knee.  Under debug bypass, the allocator can continue
+admitting handles while the block mover is still draining earlier page copies.
+The observed first corruption in `report_bug029_trace_short` was:
+
+```text
+accepted handle:
+  t = 94.754 us, lane1, ts=0x12d0, src=0xaf4, dst=0x162d, len=13,
+  handle_wptr=0x2e
+
+later read from same low pointer:
+  t = 102.178 us, lane1, handle_rptr=0x2d,
+  src=0xefa, dst=0x1e65, len=13
+```
+
+The page RAM range `0x162d..0x1639` was never written, and the presenter later
+emitted zero-valued holes from that range.  This is a finite metadata-buffer
+ownership failure, not a pure OPQ-to-DMA service-rate loss.
+
+The same 1 ms debug-bypass traffic with `OPQ_HANDLE_FIFO_DEPTH=1024` preserves
+identity end to end:
+
+```text
+source_generation_hits = 249896
+opq_ingress_hits       = 249896
+opq_egress_hits        = 249896
+dma_hits               = 249896
+debug/factual passes   = 249896
+missing/ghost hits     = 0/0
+opq drop counter total = 0
+```
+
+This A/B result confirms handle FIFO residency as the active BUG-029 boundary.
+The architectural fix is to make handle occupancy controlled or asserted:
+
+```text
+assert Q_h,l(t) < D_h
+```
+
+and to backpressure or issue controlled `handle_fifo_full_drop_*` accounting
+before an unread handle can be overwritten.
 
 ## DMA Conservation and Limits
 
@@ -931,6 +1003,6 @@ Measured-envelope:
   These bounds must be regenerated from a zero-drop, fully conserved run.
 
 Excluded diagnostic:
-  1024-depth OPQ overload with rho=1.732, first loss at frame 43, and grouped
-  384-hit controlled loss.
+  lane-FIFO 1024-depth OPQ overload with rho=1.732, first loss at frame 43,
+  and grouped 384-hit controlled loss.
 ```

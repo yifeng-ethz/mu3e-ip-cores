@@ -92,7 +92,7 @@ CORUN_SV_SOURCES := \
 	$(CURDIR)/sv/feb_swb_parallel_cdc_adapter.sv \
 	$(CURDIR)/sv/feb_swb_corun_plain_tb.sv
 
-CORUN_COMPILE_STAMP := $(CORUN_BUILD_DIR)/.compile-stamp.$(OPQ_SOURCE_MODE).$(OPQ_N_SHD).$(OPQ_LANE_FIFO_DEPTH).$(OPQ_TICKET_FIFO_DEPTH).$(OPQ_HANDLE_FIFO_DEPTH).$(OPQ_PAGE_RAM_DEPTH).$(OPQ_DEBUG_LEVEL)
+CORUN_COMPILE_STAMP := $(CORUN_BUILD_DIR)/.compile-stamp.$(OPQ_SOURCE_MODE).$(OPQ_N_SHD).$(OPQ_N_HIT).$(OPQ_LANE_FIFO_DEPTH).$(OPQ_TICKET_FIFO_DEPTH).$(OPQ_HANDLE_FIFO_DEPTH).$(OPQ_PAGE_RAM_DEPTH).$(OPQ_DEBUG_LEVEL).$(OPQ_DEBUG_BYPASS_SUBFRAME_HIT_LIMIT)
 
 .PHONY: compile compile_musip_driver smoke compile_swb_corun run_swb_corun run_swb_corun_scan_point run_swb_corun_poisson run_swb_corun_header_sync clean
 
