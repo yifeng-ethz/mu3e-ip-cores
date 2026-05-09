@@ -751,6 +751,104 @@ Any nonzero OPQ controlled drop counter is a contract failure even if the
 missing-hit count is explained by that counter.  A controlled counter can
 explain the failure mode; it cannot make the run pass under this scope.
 
+## Poisson Rate-Scan Admission Cap
+
+The all-ASIC iid Poisson rate scan intentionally leaves the scoped no-drop
+contract and measures the OPQ admission knee.  For this corun all generated
+hits enter one OPQ lane, while lane 1 emits legal empty frames and lanes 2/3
+are masked.  Therefore a four-lane fair-share `25%` survival estimate is not
+the right model for this scan.
+
+Let:
+
+```text
+N_ch = 8 * 32 = 256 sources
+F    = 2048 cycles/frame
+T_c  = 8 ns/cycle
+C    = N_HIT = 2047 hits/frame
+R    = per-channel hit rate in hits/s.
+```
+
+For one full OPQ frame:
+
+```text
+mu_F(R) = N_ch * R * F * T_c
+X_F     ~ Poisson(mu_F)
+A_F(R) = E[min(X_F, C)]
+D_F(R) = E[(X_F - C)^+] = mu_F - A_F.
+```
+
+For the 1 ms scan window:
+
+```text
+T_run = 125000 cycles
+N_frame = ceil(T_run / F) = 62
+
+E[A] = sum_f E[min(Poisson(N_ch * R * dt_f * T_c), C)]
+E[D] = sum_f N_ch * R * dt_f * T_c - E[A].
+```
+
+The full-frame knee is:
+
+```text
+R_knee = C / (N_ch * F * T_c)
+       = 2047 / (256 * 2048 * 8 ns)
+       = 488.0 kHz/channel.
+```
+
+The finite-window capacity line is slightly higher because the 1 ms run has
+61 full frames plus a 72-cycle tail but still emits 62 frame periods:
+
+```text
+R_window = C * 62 / (N_ch * T_run * 8 ns)
+         = 495.758 kHz/channel.
+```
+
+This explains why 500 kHz/channel is only marginally overloaded.  The scan
+selected a sparse context below the knee, dense points at 450, 475, 500, 525,
+and 550 kHz/channel, and tail points at 650, 800, and 1000 kHz/channel.
+
+Latest measured and modeled points:
+
+```text
+rate kHz/ch  measured delivered Mhit/s  measured drop %  model delivered Mhit/s  model drop %
+50.000       12.795                      0.0000           12.800                 0.0000
+100.000      25.629                      0.0000           25.600                 0.0000
+200.000      51.250                      0.0000           51.200                 0.0000
+299.760      76.650                      0.0000           76.739                 0.0000
+400.641      102.528                     0.0000           102.564                0.0000
+449.640      115.245                     0.0000           115.108                0.0001
+475.285      121.635                     0.1207           121.520                0.1260
+500.000      124.377                     2.9215           124.747                2.5412
+525.210      124.705                     7.3776           124.944                7.0728
+550.661      124.650                     11.6728          124.948                11.3649
+651.042      124.698                     25.2320          124.964                25.0181
+801.282      124.631                     39.3166          124.986                39.0681
+1000.000     124.662                     51.2765          125.014                51.1669
+```
+
+The counters classify the overload: accepted frame-table hits are conserved,
+while rejected hits appear at lane-0 `handle_drop_hit`.
+
+```text
+500 kHz/channel observed:
+  lane0_wr_hit       = 128120
+  handle_drop_hit    = 3743
+  ft_wr_hit          = 124377
+  ft_rd_hit          = 124377
+  ft_drop_hit        = 0
+
+1 MHz/channel observed:
+  lane0_wr_hit       = 255856
+  handle_drop_hit    = 131194
+  ft_wr_hit          = 124662
+  ft_rd_hit          = 124662
+  ft_drop_hit        = 0
+```
+
+Thus the rate-scan loss is the expected frame-admission excess above
+`C = 2047`, not a DMA loss.  Accepted OPQ hits still satisfy conservation.
+
 ## DMA Conservation and Limits
 
 DMA has no independent hard latency bound derivable from the source schedule,
