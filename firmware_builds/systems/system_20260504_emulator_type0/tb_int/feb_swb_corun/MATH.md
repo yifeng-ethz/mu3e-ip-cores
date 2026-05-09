@@ -15,9 +15,9 @@ OPQ readout-subframe hit contract.  In this scope:
 - All OPQ controlled drop counters must remain zero.
 - OPQ delay is a finite measured queue/drain metric, not a loss explanation.
 - DMA must conserve every hit accepted and emitted by OPQ.
-- `N_HIT` is the intentional maximum hit count accepted in one OPQ
-  readout-subframe/frame.  Traffic above that contract is expected to produce
-  controlled OPQ admission drops unless a debug-only bypass is enabled.
+- `N_HIT` is the intentional maximum hit count accepted per active lane in one
+  OPQ readout-subframe/frame.  Traffic above that contract is expected to
+  produce controlled OPQ admission drops unless a debug-only bypass is enabled.
 
 Debug runs with `OPQ_DEBUG_BYPASS_SUBFRAME_HIT_LIMIT=1` deliberately remove the
 `N_HIT` hard limit to localize downstream bugs.  Those runs are not production
@@ -766,9 +766,9 @@ lane 1: ASIC0..3, channels 0..31
 lanes 2/3: masked
 ```
 
-`N_HIT` is the configured hard maximum number of hits admitted into one OPQ
-readout-subframe/frame.  For this corun, the readout-subframe period is the
-128-subheader FEB/SWB frame:
+`N_HIT` is the configured hard maximum number of hits admitted per active lane
+into one OPQ readout-subframe/frame.  For this corun, the readout-subframe
+period is the 128-subheader FEB/SWB frame:
 
 ```text
 N_ch   = 8 * 32 = 256 channels
@@ -873,10 +873,11 @@ R_h,l(t) = descriptors consumed by the block mover
 Q_h,l(t) = A_h,l(t) - R_h,l(t)
 ```
 
-A lossless ring FIFO requires:
+A lossless ring FIFO requires the implementation-visible occupancy to stay
+strictly below the true FIFO depth:
 
 ```text
-Q_h,l(t) < D_h  for all t
+Q_h,l(t) <= D_h - 1  for all t
 ```
 
 where `D_h` is the true handle FIFO depth.  With only low address bits used for
@@ -917,14 +918,32 @@ opq drop counter total = 0
 ```
 
 This A/B result confirms handle FIFO residency as the active BUG-029 boundary.
-The architectural fix is to make handle occupancy controlled or asserted:
+The architecture decision for this boundary is to make handle occupancy
+CSR-visible as a provisioning/configuration error:
 
 ```text
-assert Q_h,l(t) < D_h
+assert Q_h,l(t) <= D_h - 1
 ```
 
-and to backpressure or issue controlled `handle_fifo_full_drop_*` accounting
-before an unread handle can be overwritten.
+The current RTL cannot recover cleanly after this condition occurs because the
+frame table may already have allocated space for that lane/subframe.  Therefore
+the run-control contract is:
+
+```text
+if any HANDLE_OVF_STATUS bit is set:
+  run result is invalid
+  stop the run
+  increase HANDLE_FIFO_DEPTH or reduce the admitted traffic envelope
+```
+
+The OPQ CSR surface now records the condition through sticky
+`HANDLE_OVF_STATUS`, per-lane `HANDLE_OVF_CNT`, and per-lane
+`HANDLE_OCC_MAX`.  The integrator must configure `D_h`, `N_HIT`, `N_SHD`
+(hence `F = N_SHD * H`), the readout-subframe period, active lanes, DRR
+allowance, and the source arrival envelope so `Q_h,l(t) <= D_h - 1` holds for
+every lane across the full acquisition window.  Future pre-allocation hardening
+can add explicit `handle_room` backpressure, but post-allocation repair/drop is
+not part of the current OPQ contract.
 
 ## DMA Conservation and Limits
 

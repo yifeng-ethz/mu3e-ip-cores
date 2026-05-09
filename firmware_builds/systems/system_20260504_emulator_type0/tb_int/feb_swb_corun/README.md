@@ -177,7 +177,10 @@ make run_swb_corun_header_sync \
 
 The MuSiP OPQ source defaults used by this corun provision
 `OPQ_DEBUG_LEVEL=2`; under the scoped no-bottleneck assumption every native OPQ
-drop counter must remain zero. The test expects the final log to contain
+drop counter must remain zero and every handle FIFO overflow CSR bit must stay
+clear. A nonzero handle overflow is an OPQ geometry/configuration error, not a
+runtime-recoverable drop, because the frame table may already have allocated
+space for that lane/subframe. The test expects the final log to contain
 `FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
 under `report/` for periodic mode, `report_poisson/` for Poisson mode, and
 `report_header_sync/` for header-sync mode. `run_swb_corun`,
