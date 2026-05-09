@@ -86,8 +86,9 @@ interarrival process with mean `P_hit`; the source ledger assigns the actual
 generation time and the DEBUG hit id used by the trace checker.
 
 For the header-sync source, one pulse is generated for every virtual MuTRiG
-short frame.  The direct one-lane FEB stream staggers ASIC phases by 16 cycles
-so no 16-cycle FEB subheader bucket contains all eight ASICs at once:
+short frame.  The direct two-lane FEB stream staggers ASIC phases by 16 cycles
+so no 16-cycle FEB subheader bucket contains every active ASIC assigned to the
+same lane at once:
 
 ```text
 I_short = 910 cycles
@@ -751,103 +752,103 @@ Any nonzero OPQ controlled drop counter is a contract failure even if the
 missing-hit count is explained by that counter.  A controlled counter can
 explain the failure mode; it cannot make the run pass under this scope.
 
-## Poisson Rate-Scan Admission Cap
+## Poisson Rate-Scan Lossless-Drain Model
 
-The all-ASIC iid Poisson rate scan intentionally leaves the scoped no-drop
-contract and measures the OPQ admission knee.  For this corun all generated
-hits enter one OPQ lane, while lane 1 emits legal empty frames and lanes 2/3
-are masked.  Therefore a four-lane fair-share `25%` survival estimate is not
-the right model for this scan.
-
-Let:
+The all-ASIC iid Poisson rate scan now drives both FEB/SWB hit lanes:
 
 ```text
-N_ch = 8 * 32 = 256 sources
-F    = 2048 cycles/frame
-T_c  = 8 ns/cycle
-C    = N_HIT = 2047 hits/frame
-R    = per-channel hit rate in hits/s.
+lane 0: ASIC4..7, channels 0..31
+lane 1: ASIC0..3, channels 0..31
+lanes 2/3: masked
 ```
 
-For one full OPQ frame:
+`N_HIT` is a subheader/subframe format limit, not a global frame admission
+limit.  With two active hit lanes, the semantic subheader knee is:
 
 ```text
-mu_F(R) = N_ch * R * F * T_c
-X_F     ~ Poisson(mu_F)
-A_F(R) = E[min(X_F, C)]
-D_F(R) = E[(X_F - C)^+] = mu_F - A_F.
+N_ch   = 8 * 32 = 256 channels
+L      = 2 active hit lanes
+H      = 16 cycles/subheader
+T_c    = 8 ns/cycle
+N_HIT  = 2047 hits/subheader/lane
+
+R_sub,knee = L * N_HIT / (N_ch * H * T_c)
+           = 2 * 2047 / (256 * 16 * 8 ns)
+           = 124.94 MHz/channel.
 ```
 
-For the 1 ms scan window:
+That limit is far outside the 50 kHz/channel to 1 MHz/channel scan.  Under the
+current finite-burst contract, OPQ buffering plus post-window drain should
+therefore conserve all generated hits unless a separate queue, frame-table, or
+DMA readout bug appears.
+
+The expected lossless delivery equation is:
 
 ```text
-T_run = 125000 cycles
-N_frame = ceil(T_run / F) = 62
+T_run = 125000 cycles = 1 ms
+R     = per-channel hit rate
+A     = generated hits in the 1 ms source window
 
-E[A] = sum_f E[min(Poisson(N_ch * R * dt_f * T_c), C)]
-E[D] = sum_f N_ch * R * dt_f * T_c - E[A].
+E[A]        = N_ch * R * T_run * T_c
+E[delivered]= E[A]
+E[missing]  = 0
 ```
 
-The full-frame knee is:
+The useful service marker is the zero-backlog knee for the two-lane frame
+cadence, not a hard delivered-rate cap when the run is allowed to drain:
 
 ```text
-R_knee = C / (N_ch * F * T_c)
-       = 2047 / (256 * 2048 * 8 ns)
-       = 488.0 kHz/channel.
+F             = 2048 cycles/frame
+C_lane        = 2047 hits/frame/lane
+R_backlog     = L * C_lane / (N_ch * F * T_c)
+              = 2 * 2047 / (256 * 2048 * 8 ns)
+              = 976.09 kHz/channel.
 ```
 
-The finite-window capacity line is slightly higher because the 1 ms run has
-61 full frames plus a 72-cycle tail but still emits 62 frame periods:
+Above `R_backlog`, backlog can grow during the 1 ms injection interval, but
+it should still drain without loss if the OPQ/SWB queues are deep enough and
+the frame-retirement sequence remains live.
+
+Latest corrected RTL scan, seed `20260508`, 1 ms source window:
 
 ```text
-R_window = C * 62 / (N_ch * T_run * 8 ns)
-         = 495.758 kHz/channel.
+rate kHz/ch  expected  DMA hits  missing  delivered Mhit/s  missing %
+50.000       12795     12795     0        12.795            0.0000
+100.000      25629     25629     0        25.629            0.0000
+200.000      51250     51250     0        51.250            0.0000
+400.641      102528    102528    0        102.528           0.0000
+500.000      128120    128120    0        128.120           0.0000
+651.042      166780    165609    1171     165.609           0.7021
+801.282      205379    199194    6185     199.194           3.0115
+899.281      230049    227951    2098     227.951           0.9120
+946.970      242332    241035    1297     241.035           0.5352
+976.562      249896    236879    13017    236.879           5.2090
+1000.000     255856    255338    518      255.338           0.2025
 ```
 
-This explains why 500 kHz/channel is only marginally overloaded.  The scan
-selected a sparse context below the knee, dense points at 450, 475, 500, 525,
-and 550 kHz/channel, and tail points at 650, 800, and 1000 kHz/channel.
-
-Latest measured and modeled points:
+The 1 MHz/channel point is now near full rate and contradicts the old
+one-lane frame-cap model.  Both active lanes accept and read all hits, and
+controlled OPQ drop counters remain zero:
 
 ```text
-rate kHz/ch  measured delivered Mhit/s  measured drop %  model delivered Mhit/s  model drop %
-50.000       12.795                      0.0000           12.800                 0.0000
-100.000      25.629                      0.0000           25.600                 0.0000
-200.000      51.250                      0.0000           51.200                 0.0000
-299.760      76.650                      0.0000           76.739                 0.0000
-400.641      102.528                     0.0000           102.564                0.0000
-449.640      115.245                     0.0000           115.108                0.0001
-475.285      121.635                     0.1207           121.520                0.1260
-500.000      124.377                     2.9215           124.747                2.5412
-525.210      124.705                     7.3776           124.944                7.0728
-550.661      124.650                     11.6728          124.948                11.3649
-651.042      124.698                     25.2320          124.964                25.0181
-801.282      124.631                     39.3166          124.986                39.0681
-1000.000     124.662                     51.2765          125.014                51.1669
-```
-
-The counters classify the overload: accepted frame-table hits are conserved,
-while rejected hits appear at lane-0 `handle_drop_hit`.
-
-```text
-500 kHz/channel observed:
-  lane0_wr_hit       = 128120
-  handle_drop_hit    = 3743
-  ft_wr_hit          = 124377
-  ft_rd_hit          = 124377
-  ft_drop_hit        = 0
-
 1 MHz/channel observed:
-  lane0_wr_hit       = 255856
-  handle_drop_hit    = 131194
-  ft_wr_hit          = 124662
-  ft_rd_hit          = 124662
-  ft_drop_hit        = 0
+  lane0_wr_hit        = 127567
+  lane0_rd_hit        = 127567
+  lane1_wr_hit        = 128289
+  lane1_rd_hit        = 128289
+  lane0_handle_drop   = 0
+  lane1_handle_drop   = 0
+  ft_drop_hit         = 0
+  DMA hits            = 255338 / 255856
 ```
 
-Thus the rate-scan loss is the expected frame-admission excess above
-`C = 2047`, not a DMA loss.  Accepted OPQ hits still satisfy conservation.
+The remaining high-rate shortfall is not explained by OPQ controlled drops.
+At 976.562 kHz/channel, a focused rerun with `DRAIN_SWB_CYCLES=2000000`
+reproduced the same `13017` missing hits.  The OPQ lane counters consumed all
+lane hits, but the frame-table read side reported `ft_wr_shd=7813` and
+`ft_rd_shd=7428`, a gap of `385` subheaders, approximately three 128-subheader
+frames.  This is tracked as an open frame-retirement/readout issue rather than
+as a mathematical OPQ admission limit.
 
 ## DMA Conservation and Limits
 

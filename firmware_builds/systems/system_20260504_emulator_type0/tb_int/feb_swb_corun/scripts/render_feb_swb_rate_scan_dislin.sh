@@ -14,7 +14,7 @@ PDF="$TRACE_DIR/feb_swb_rate_scan.pdf"
 
 mkdir -p "$BUILD_DIR"
 if [ ! -f "$MEASURED_CSV" ]; then
-  printf 'rate_hz_per_channel,actual_rate_hz_per_channel,hit_period_8ns,run_window_8ns,active_channels,frames,measured_valid,expected_hits,actual_hits,missing_hits,ghost_hits,dma_payload_words,opq_beats,ft_wr_hit,ft_rd_hit,lane0_wr_hit,lane0_drop_hit,lane0_handle_drop_hit,measured_delivered_mhits_s,measured_drop_mhits_s,measured_delivery_fraction,measured_drop_fraction,model_expected_hits,model_delivered_hits,model_dropped_hits,model_delivered_mhits_s,model_drop_mhits_s,model_delivery_fraction,model_drop_fraction\n' > "$MEASURED_CSV"
+  printf 'rate_hz_per_channel,actual_rate_hz_per_channel,hit_period_8ns,run_window_8ns,active_channels,frames,measured_valid,expected_hits,actual_hits,missing_hits,ghost_hits,dma_payload_words,opq_beats,ft_wr_hit,ft_rd_hit,lane0_wr_hit,lane0_drop_hit,lane0_handle_drop_hit,measured_delivered_mhits_s,measured_drop_mhits_s,measured_delivery_fraction,measured_drop_fraction,model_expected_hits,model_delivered_hits,model_dropped_hits,model_delivered_mhits_s,model_drop_mhits_s,model_delivery_fraction,model_drop_fraction,format_model_expected_hits,format_model_delivered_hits,format_model_dropped_hits,format_model_delivered_mhits_s,format_model_drop_mhits_s,format_model_delivery_fraction,format_model_drop_fraction,model_active_hit_lanes,model_dma_hit_capacity_per_frame,lane1_wr_hit,lane1_drop_hit,lane1_handle_drop_hit\n' > "$MEASURED_CSV"
 fi
 
 gcc -std=c99 -Wall -Wextra -I"$DISLIN_DIR" "$SCRIPT_DIR/feb_swb_rate_scan_dislin.c" \

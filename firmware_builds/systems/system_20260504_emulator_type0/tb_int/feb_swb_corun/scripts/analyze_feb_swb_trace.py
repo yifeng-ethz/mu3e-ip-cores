@@ -1309,7 +1309,7 @@ def write_factual_scoreboard(path: Path, hit_rows: list[dict[str, object]]) -> d
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--trace-dir", required=True, type=Path)
-    parser.add_argument("--expected-lane", default=0, type=int)
+    parser.add_argument("--expected-lane", default=-1, type=int)
     parser.add_argument("--expected-asic", default=-1, type=int)
     parser.add_argument("--expected-asic-count", default=8, type=int)
     parser.add_argument("--expected-channel", default=-1, type=int)
@@ -1402,6 +1402,13 @@ def main() -> int:
             return 0
         return (asic * args.expected_hit_period_8ns) // args.expected_asic_count
 
+    def expected_lane_for_asic(asic: int) -> int:
+        if args.expected_lane >= 0:
+            return args.expected_lane
+        if args.expected_asic_count == 8:
+            return 0 if asic >= 4 else 1
+        return 0
+
     def expected_sample_idx(abs_ts_8ns: int, asic: int) -> int:
         phase = expected_asic_phase_8ns(asic)
         if args.expected_hit_period_8ns <= 0 or abs_ts_8ns < phase:
@@ -1464,7 +1471,7 @@ def main() -> int:
                 checks.append(f"{label}=FAIL")
                 status = "FAIL"
 
-        require(expected.lane == args.expected_lane, "lane")
+        require(expected.lane == expected_lane_for_asic(asic), "lane")
         require(expected.header_id == SCIFI_HEADER_ID, "feb_header")
         if args.expected_asic >= 0:
             require(asic == args.expected_asic, "source_asic")
@@ -1778,7 +1785,7 @@ def main() -> int:
         ingress_frames,
         opq_frames,
         lifetime_rows,
-        args.expected_lane,
+        args.expected_lane if args.expected_lane >= 0 else 0,
         args.expected_channel_count,
     )
     write_rows(
