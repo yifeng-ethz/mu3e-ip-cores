@@ -11,9 +11,15 @@ module feb_swb_corun_plain_tb;
   localparam int DEFAULT_RUN_WINDOW_8NS = 125000; // 1 ms on the MuTRiG 8 ns timebase.
   localparam int DEFAULT_HIT_PERIOD_8NS = 1250;   // 100 kHz/channel.
   localparam int DEFAULT_POISSON_SEED = 20260508;
+  localparam int DEFAULT_HEADER_SYNC_PHASE_8NS = 100;
+  localparam int DEFAULT_HEADER_SYNC_BURST_COUNT = 1;
+  localparam int DEFAULT_HEADER_SYNC_BURST_SPACING_8NS = 10;
+  localparam int DEFAULT_HEADER_SYNC_ASIC_STAGGER_8NS = 16;
   localparam int SOURCE_MODE_PERIODIC = 0;
   localparam int SOURCE_MODE_POISSON = 1;
+  localparam int SOURCE_MODE_HEADER_SYNC = 2;
   localparam int FRAME_STRIDE_8NS = N_SHD << 4;
+  localparam int VIRTUAL_MUTRIG_SHORT_FRAME_8NS = 910;
   localparam int FRAME_PERIOD_FEB_CYCLES = FRAME_STRIDE_8NS;
   localparam int FEB_FRAME_EGRESS_DELAY_FRAMES = 2;
   localparam int SYNTHETIC_PRE_RBCAM_DELAY_CYCLES = 0;
@@ -90,6 +96,10 @@ module feb_swb_corun_plain_tb;
   int unsigned active_asic_count;
   int unsigned source_mode;
   int unsigned poisson_seed;
+  int unsigned header_sync_phase_8ns;
+  int unsigned header_sync_burst_count;
+  int unsigned header_sync_burst_spacing_8ns;
+  int unsigned header_sync_asic_stagger_8ns;
   int unsigned n_frames_runtime;
   int unsigned total_source_buckets;
   int unsigned expected_time_samples_runtime;
@@ -258,6 +268,9 @@ module feb_swb_corun_plain_tb;
 
   function automatic string source_mode_name(input int unsigned mode);
     begin
+      if (mode == SOURCE_MODE_HEADER_SYNC) begin
+        return "header_sync";
+      end
       if (mode == SOURCE_MODE_POISSON) begin
         return "poisson_iid";
       end
@@ -419,6 +432,38 @@ module feb_swb_corun_plain_tb;
     end
   endtask
 
+  task automatic generate_header_sync_source_model();
+    int unsigned hit_id;
+    int unsigned abs_ts_8ns;
+    int unsigned header_base_8ns;
+    int unsigned phase_8ns;
+    int unsigned burst_count;
+    begin
+      hit_id = 0;
+      burst_count = (header_sync_burst_count == 0) ? 1 : header_sync_burst_count;
+      header_base_8ns = 0;
+      while ((header_base_8ns + header_sync_phase_8ns) < run_window_8ns) begin
+        for (int unsigned burst_idx = 0; burst_idx < burst_count; burst_idx++) begin
+          for (int unsigned asic = 0; asic < active_asic_count; asic++) begin
+            phase_8ns = header_sync_phase_8ns +
+                        (burst_idx * header_sync_burst_spacing_8ns) +
+                        (asic * header_sync_asic_stagger_8ns);
+            abs_ts_8ns = header_base_8ns + phase_8ns;
+            if (abs_ts_8ns >= run_window_8ns) begin
+              continue;
+            end
+            for (int unsigned channel = 0; channel < CHANNELS_PER_ASIC; channel++) begin
+              push_source_hit(abs_ts_8ns, asic, channel, hit_id);
+              hit_id++;
+            end
+          end
+        end
+        header_base_8ns += VIRTUAL_MUTRIG_SHORT_FRAME_8NS;
+      end
+      expected_time_samples_runtime = source_hits_unsorted.size() / CHANNELS_PER_ASIC;
+    end
+  endtask
+
   task automatic build_source_model();
     int unsigned bucket_next[];
     int unsigned running;
@@ -428,7 +473,9 @@ module feb_swb_corun_plain_tb;
       bucket_hit_count = new[total_source_buckets];
       bucket_first_idx = new[total_source_buckets];
 
-      if (source_mode == SOURCE_MODE_POISSON) begin
+      if (source_mode == SOURCE_MODE_HEADER_SYNC) begin
+        generate_header_sync_source_model();
+      end else if (source_mode == SOURCE_MODE_POISSON) begin
         generate_poisson_source_model();
       end else begin
         generate_periodic_source_model();
@@ -766,6 +813,12 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "channels_per_asic=%0d", CHANNELS_PER_ASIC);
       $fdisplay(summary_fd, "source_mode=%s", source_mode_name(source_mode));
       $fdisplay(summary_fd, "poisson_seed=%0d", poisson_seed);
+      $fdisplay(summary_fd, "header_sync_phase_8ns=%0d", header_sync_phase_8ns);
+      $fdisplay(summary_fd, "header_sync_burst_count=%0d", header_sync_burst_count);
+      $fdisplay(summary_fd, "header_sync_burst_spacing_8ns=%0d",
+                header_sync_burst_spacing_8ns);
+      $fdisplay(summary_fd, "header_sync_asic_stagger_8ns=%0d",
+                header_sync_asic_stagger_8ns);
       $fdisplay(summary_fd, "hit_period_8ns=%0d", hit_period_8ns);
       $fdisplay(summary_fd, "hit_rate_hz_per_channel=%0d",
                 (hit_period_8ns == 0) ? 0 : (125000000 / hit_period_8ns));
@@ -829,6 +882,10 @@ module feb_swb_corun_plain_tb;
     active_asic_count = DEFAULT_ASIC_COUNT;
     source_mode = SOURCE_MODE_PERIODIC;
     poisson_seed = DEFAULT_POISSON_SEED;
+    header_sync_phase_8ns = DEFAULT_HEADER_SYNC_PHASE_8NS;
+    header_sync_burst_count = DEFAULT_HEADER_SYNC_BURST_COUNT;
+    header_sync_burst_spacing_8ns = DEFAULT_HEADER_SYNC_BURST_SPACING_8NS;
+    header_sync_asic_stagger_8ns = DEFAULT_HEADER_SYNC_ASIC_STAGGER_8NS;
     if (!$value$plusargs("FEB_SWB_RUN_WINDOW_8NS=%d", run_window_8ns)) begin
       run_window_8ns = DEFAULT_RUN_WINDOW_8NS;
     end
@@ -843,6 +900,9 @@ module feb_swb_corun_plain_tb;
       if ($value$plusargs("FEB_SWB_SOURCE_MODE=%s", source_mode_arg)) begin
         if (source_mode_arg == "poisson" || source_mode_arg == "poisson_iid") begin
           source_mode = SOURCE_MODE_POISSON;
+        end else if (source_mode_arg == "header_sync" ||
+                     source_mode_arg == "header_sync_phase_staggered") begin
+          source_mode = SOURCE_MODE_HEADER_SYNC;
         end else if (source_mode_arg == "periodic" ||
                      source_mode_arg == "periodic_phase_staggered") begin
           source_mode = SOURCE_MODE_PERIODIC;
@@ -854,11 +914,35 @@ module feb_swb_corun_plain_tb;
     if (!$value$plusargs("FEB_SWB_POISSON_SEED=%d", poisson_seed)) begin
       poisson_seed = DEFAULT_POISSON_SEED;
     end
+    if (!$value$plusargs("FEB_SWB_HEADER_SYNC_PHASE_8NS=%d", header_sync_phase_8ns)) begin
+      header_sync_phase_8ns = DEFAULT_HEADER_SYNC_PHASE_8NS;
+    end
+    if (!$value$plusargs("FEB_SWB_HEADER_SYNC_BURST_COUNT=%d", header_sync_burst_count)) begin
+      header_sync_burst_count = DEFAULT_HEADER_SYNC_BURST_COUNT;
+    end
+    if (!$value$plusargs("FEB_SWB_HEADER_SYNC_BURST_SPACING_8NS=%d",
+                         header_sync_burst_spacing_8ns)) begin
+      header_sync_burst_spacing_8ns = DEFAULT_HEADER_SYNC_BURST_SPACING_8NS;
+    end
+    if (!$value$plusargs("FEB_SWB_HEADER_SYNC_ASIC_STAGGER_8NS=%d",
+                         header_sync_asic_stagger_8ns)) begin
+      header_sync_asic_stagger_8ns = DEFAULT_HEADER_SYNC_ASIC_STAGGER_8NS;
+    end
     if (hit_period_8ns == 0 || run_window_8ns == 0 ||
         active_asic_count == 0 || active_asic_count > MAX_ASIC_COUNT) begin
       $fatal(1,
              "invalid FEB_SWB runtime config run_window_8ns=%0d hit_period_8ns=%0d asic_count=%0d",
              run_window_8ns, hit_period_8ns, active_asic_count);
+    end
+    if (source_mode == SOURCE_MODE_HEADER_SYNC &&
+        (header_sync_phase_8ns >= VIRTUAL_MUTRIG_SHORT_FRAME_8NS ||
+         header_sync_burst_spacing_8ns == 0 ||
+         header_sync_asic_stagger_8ns == 0)) begin
+      $fatal(1,
+             "invalid header-sync config phase=%0d burst_spacing=%0d asic_stagger=%0d",
+             header_sync_phase_8ns,
+             header_sync_burst_spacing_8ns,
+             header_sync_asic_stagger_8ns);
     end
     n_frames_runtime = (run_window_8ns + FRAME_STRIDE_8NS - 1) / FRAME_STRIDE_8NS;
     total_source_buckets = n_frames_runtime * N_SHD;

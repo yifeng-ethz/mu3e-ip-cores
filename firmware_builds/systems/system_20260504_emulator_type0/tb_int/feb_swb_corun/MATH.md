@@ -42,9 +42,11 @@ T_run = 1 ms = 125000 cycles.
 - Lane 0 carries ASIC0..7 channels `0..31` at 100 kHz/channel.
 - Lane 1 emits legal empty FEB frames.
 - Lanes 2 and 3 are masked and must not contribute accepted hits.
-- Two source modes are maintained:
+- Three source modes are maintained:
   - periodic phase-staggered full32 bursts per ASIC
   - independent Poisson streams per ASIC/channel with seed-controlled replay
+  - deterministic header-sync full32 bursts per ASIC, phase 100 on the
+    910-cycle virtual MuTRiG short-frame grid
 - The direct corun pre-rbCAM and post-rbCAM checkpoints are synthetic lineage
   markers.  They are not the true rbCAM instance from the full FEB integration
   path.
@@ -82,6 +84,18 @@ hit_id(m,a,c) = 256*m + 32*a + c
 For the Poisson iid source, each `(a,c)` has an independent exponential
 interarrival process with mean `P_hit`; the source ledger assigns the actual
 generation time and the DEBUG hit id used by the trace checker.
+
+For the header-sync source, one pulse is generated for every virtual MuTRiG
+short frame.  The direct one-lane FEB stream staggers ASIC phases by 16 cycles
+so no 16-cycle FEB subheader bucket contains all eight ASICs at once:
+
+```text
+I_short = 910 cycles
+phi_header = 100 cycles
+S_asic = 16 cycles
+t(k,a) = I_short*k + phi_header + S_asic*a
+hit_id(k,a,c) = DEBUG/source-ledger identity
+```
 
 For any ledger hit `h`, the frame, phase, subheader bucket, and bucket residue
 are:
@@ -200,6 +214,17 @@ realized N_hit    = 25629
 realized DMA words = sum_frame ceil(frame_hits / 4) = 6431.
 ```
 
+For the accepted header-sync replay:
+
+```text
+I_short                    = 910 cycles
+phase                      = 100 cycles
+burst_count                = 1
+ASIC phase stagger         = 16 cycles
+realized source hit count  = 35328
+realized DMA words         = 8832
+```
+
 The number of emitted frame periods is
 
 ```text
@@ -232,6 +257,8 @@ source frame                    = floor(source time / 2048)
 source bucket                   = floor((source time mod 2048) / 16)
 Poisson source hit count        = source ledger row count
 Poisson hit identity            = DEBUG/source-ledger identity
+header-sync phase              = (100 + 16*asic) mod 910
+header-sync hit identity       = DEBUG/source-ledger identity
 ```
 
 Lane 1 must contribute zero real hits.  Lanes 2 and 3 must contribute zero
@@ -334,6 +361,14 @@ pre-rbCAM virtual MuTRiG model:
   min/p05/p50/p95/max = 67 / 148 / 524 / 892 / 938 cycles
 ```
 
+The accepted header-sync phase-100, burst-1, stagger-16 replay reports:
+
+```text
+pre-rbCAM virtual MuTRiG model:
+  count = 35328
+  min/p05/p50/p95/max = 725 / 753 / 835 / 917 / 945 cycles
+```
+
 The post-rbCAM panel still imports the clean full-FEB rbCAM DEBUG-age reference:
 
 ```text
@@ -428,6 +463,12 @@ The accepted Poisson all-ASIC replay measured:
 3081.5 <= T_feb_egress(h) - t_h <= 4118.5 cycles.
 ```
 
+The accepted header-sync all-ASIC replay measured:
+
+```text
+3140.5 <= T_feb_egress(h) - t_h <= 4460.5 cycles.
+```
+
 The maintained hard validation range keeps frame-start and word-offset margin:
 
 ```text
@@ -448,6 +489,8 @@ periodic:
   3100.75 <= T_opq_ingress(h) - t_h <= 4173.75 cycles
 Poisson:
   3082.75 <= T_opq_ingress(h) - t_h <= 4119.75 cycles
+header-sync:
+  3141.75 <= T_opq_ingress(h) - t_h <= 4461.75 cycles
 T_opq_ingress(h) - T_feb_egress(h) = 1.25 cycles.
 ```
 
