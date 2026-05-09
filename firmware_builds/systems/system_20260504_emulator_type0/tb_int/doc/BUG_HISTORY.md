@@ -63,7 +63,7 @@ Historical formal note:
 | [BUG-026-H](#bug-026-h-feb-swb-pre-rbcam-panel-used-post-mutrig-transport-as-golden-lifetime) | H | soft error | `directed-only (FEB/SWB lifetime plotting review)` | fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten | FEB/SWB lifetime plot review on `2026-05-09` | e2cca629 | The pre-rbCAM panel used the clean full-FEB 17-cycle post-MuTRiG transport marker as the lifetime shape, so the plot collapsed instead of showing the virtual-MuTRiG short-frame wait and serializer profile. |
 | [BUG-027-H](#bug-027-h-feb-swb-rate-scan-collapsed-all-asic-traffic-onto-lane0) | H | hard stuck error | `directed-only (FEB/SWB all-ASIC rate scan)` | fixed in harness; two-lane scan rerun | FEB/SWB Poisson rate scan on `2026-05-09` | pending | The all-ASIC FEB/SWB rate scan routed every generated hit through lane0 and left lane1 empty, producing the wrong overload model for the user's requested two-lane FEB contract. |
 | [BUG-028-R](#bug-028-r-opq-page-allocator-used-n_hit-as-global-frame-hit-room) | R | hard stuck error | `common (two-lane all-ASIC OPQ stress with DEBUG_LEVEL=1)` | fixed in MuSiP OPQ source; packet_scheduler lint passed | FEB/SWB 1 MHz/channel all-ASIC scan on `2026-05-09` | pending | The OPQ page allocator reused `N_HIT` as global frame hit room even though `N_HIT` is a per-subheader/subframe parser limit, causing false handle drops before the allocator fix. |
-| [BUG-029-R](#bug-029-r-swb-frame-table-egress-leaves-written-subheaders-unread-near-service-knee) | R | hard stuck error | `occasional (near two-lane zero-backlog service marker)` | open; trace localized to frame-table readout | FEB/SWB 976.562 kHz/channel rate scan on `2026-05-09` | pending | Near the two-lane zero-backlog service marker, OPQ lane counters consume all hits with zero controlled drops but the frame-table/DMA read side can leave written subheaders unread. |
+| [BUG-029-R](#bug-029-r-swb-frame-table-egress-leaves-written-subheaders-unread-near-service-knee) | R | hard stuck error | `occasional (near two-lane zero-backlog service marker)` | open; frame-presenter architecture fix proposed | FEB/SWB 976.562 kHz/channel rate scan on `2026-05-09` | pending | Near the two-lane zero-backlog service marker, OPQ lane counters consume all hits with zero controlled drops but the frame-table/DMA read side can leave written subheaders unread. |
 
 ## 2026-05-06
 
@@ -833,6 +833,26 @@ Historical formal note:
     `frame_hit_room` from `N_HIT`
   - the allocator therefore applied the parser's subheader hit-count parameter
     as a global admission budget for the whole OPQ frame
+- Detailed RTL architecture analysis:
+  - `N_HIT` is a parser-local legality parameter for one subheader/subframe
+    hit count, not a capacity contract for the merged OPQ frame
+  - the allocator ticket path may use the `N_HIT`-derived field widths to carry
+    per-ticket counts, but the frame-level admission budget must be owned by
+    the page-residency/frame-accounting domain
+  - the bad coupling made the false cap depend on a protocol constant instead
+    of actual page RAM residency, frame hit counter width, or an explicit frame
+    budget parameter
+- Proposed permanent RTL architecture:
+  - keep `N_HIT` in the ingress parser, subheader decoder, and protocol SVA
+    only; rename the frame budget to a separate concept such as
+    `FRAME_HIT_ROOM_LIMIT` or derive it from `MAX_HIT_CNT_BITS`
+  - use a saturated/all-ones reset value for frame room unless an explicit
+    product-level frame budget is configured
+  - add compile-time assertions proving the configured frame room is not below
+    the maximum legal test frame for the selected `N_SHD`, `N_HIT`, lane count,
+    and page RAM depth
+  - if frame room ever rejects hits, report it through a dedicated controlled
+    `frame_room_drop_hit` counter instead of folding it into lane handle drops
 - Fix status:
   - state:
     fixed in MuSiP OPQ source; focused scan rerun
@@ -857,6 +877,10 @@ Historical formal note:
     `124.94 MHz/channel`, outside the current 1 MHz/channel scan
   - the zero-backlog two-lane service marker is `976.09 kHz/channel`, which is
     a backlog marker under finite-burst drain, not a hard drop model
+  - regression guard should include a directed two-lane frame whose total hit
+    count is greater than `N_HIT` while every subheader remains legal; expected
+    outcome is zero `handle_drop_hit`, zero `ft_drop_hit`, and exact DMA hit
+    count
 - Commit:
   - MuSiP OPQ allocator fix: pending
 
@@ -874,6 +898,65 @@ Historical formal note:
   - open
   - current trace points to frame-table or downstream readout retirement rather
     than FEB ingress, lane FIFO credit, ticket credit, mask, or handle drops
+  - the active OPQ top-level still instantiates
+    `ordered_priority_queue_monolithic_basic_presenter`; the translated
+    frame-table tracker/presenter blocks exist in the MuSiP source tree but are
+    not yet the regression-backed top-level path
+- Detailed RTL architecture analysis:
+  - the failing point generated `249896` hits, the native OPQ wrote all
+    `249896` hits into the frame-table side, and both active lanes reported
+    exact lane readout with zero controlled drop counters
+  - the same point read only `236878` frame-table hits and `7428` subheaders
+    from the OPQ egress side while `7813` subheaders were written, leaving
+    `385` written subheaders without DMA-visible retirement
+  - extending the SWB drain window to `2000000` cycles reproduced the same
+    `13017` missing DMA hits, so this is not a short drain tail
+  - the rate-scan shortfall is non-monotonic near the service marker, which
+    rules out a simple persistent OPQ-to-DMA bandwidth cap as the root cause
+  - `ft_rd_hdr` was observed one count above `ft_wr_hdr` at the failing point;
+    because the current read counters are derived by parsing the egress stream,
+    this may be either a malformed/restarted frame symptom or a counter
+    artifact, but it is not enough evidence to claim a controlled drop
+  - the likely failure class is therefore an ownership/accounting gap in the
+    basic presenter path: accepted frame metadata or page RAM words can be
+    skipped, stranded, or mis-retired without advancing a dedicated controlled
+    frame-table drop counter
+- Proposed RTL architecture fix:
+  - replace the current signoff path for SWB/FEB with a descriptor-owned
+    frame-table readout, or refactor the basic presenter into the same
+    ownership structure
+  - add an `opq_frame_meta_fifo` written only by `packet_complete_pulse`; each
+    descriptor carries frame start address, frame length, frame timestamp,
+    subheader count, hit count, per-lane counts, and a monotonically increasing
+    debug sequence
+  - add a `opq_residency_guard` that owns page overwrite and stale-residency
+    decisions before readout; if it drops a descriptor, it increments explicit
+    `ft_meta_drop_hdr/shd/hit` counters and emits a trace record
+  - add a single-owner `opq_stream_presenter` that pops one descriptor, emits
+    exactly the descriptor length on `valid && ready`, asserts SOP/EOP only from
+    descriptor word position, and retires the descriptor only on the final
+    accepted output beat
+  - separate framing validation from control: K-code/header/trailer parsing can
+    raise `ft_bad_kcode`, `ft_len_mismatch`, or `ft_unexpected_sop` counters,
+    but it must not decide descriptor retirement by itself
+  - source the OPQ CSR/debug accounting from descriptor lifecycle events:
+    `ft_meta_wr_*`, `ft_present_start_*`, `ft_present_retire_*`,
+    `ft_meta_drop_*`, `ft_desc_backlog`, and `ft_desc_backlog_max`
+  - preserve the 36-bit native egress contract (`data[31:0]` plus four K bits)
+    and let the downstream link32-to-DMA path be the only modeled service cap;
+    any hit missing from DMA must then be explained by one of the controlled
+    OPQ counters
+- Tactical debug hooks before the refactor lands:
+  - assert that `ft_wr_shd - ft_present_retire_shd - ft_meta_drop_shd` equals
+    live descriptor backlog plus the active descriptor's remaining subheaders
+  - assert that every accepted descriptor eventually produces exactly its
+    declared word count when `aso_egress_ready` is held high
+  - trace `meta_wptr`, `meta_rptr`, descriptor length, active word index,
+    page RAM read request/response valid, SOP/EOP, and final-retire handshake
+    at the `976.562 kHz/channel` seed
+  - fail the FEB/SWB scoreboard if a generated hit reaches OPQ frame-table
+    write accounting but is absent at DMA without a matching controlled
+    `ft_meta_drop_hit` or `ft_present_drop_hit`
 - Fix status:
   - state:
     open; nonfatal for continuing the rate-scan evidence because the counters
