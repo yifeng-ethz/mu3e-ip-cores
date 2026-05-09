@@ -61,6 +61,9 @@ Historical formal note:
 | [BUG-024-H](#bug-024-h-feb-swb-rbcam-plot-imported-lossy-reference-as-no-drop-evidence) | H | hard stuck error | `directed-only (FEB/SWB rbCAM reference plotting and review)` | fixed in analyzer reference guard; rerender passed | FEB/SWB far pre-rbCAM peak trace debug on `2026-05-08` | 8378d7d6 | The rbCAM top-panel plot imported a drop-containing pre-rbCAM reference run and had no health gate, so a stale 84k-cycle peak was shown as if it were no-drop rbCAM evidence. |
 | [BUG-025-R](#bug-025-r-swb-direct-dma-packer-dropped-eop-partial-hit-groups) | R | hard stuck error | `occasional (legal FEB frames whose hit count is not divisible by four)` | fixed in MuSiP direct packer; periodic and Poisson all-ASIC reruns passed | FEB/SWB Poisson all-ASIC 1 ms corun on `2026-05-08` | 9d1c7c5/f478c95a | The SWB direct 64-to-256 DMA packer did not safely flush partial EOP groups, so legal frames with `frame_hits mod 4 = 1` could lose the final hit group before DMA. |
 | [BUG-026-H](#bug-026-h-feb-swb-pre-rbcam-panel-used-post-mutrig-transport-as-golden-lifetime) | H | soft error | `directed-only (FEB/SWB lifetime plotting review)` | fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten | FEB/SWB lifetime plot review on `2026-05-09` | e2cca629 | The pre-rbCAM panel used the clean full-FEB 17-cycle post-MuTRiG transport marker as the lifetime shape, so the plot collapsed instead of showing the virtual-MuTRiG short-frame wait and serializer profile. |
+| [BUG-027-H](#bug-027-h-feb-swb-rate-scan-collapsed-all-asic-traffic-onto-lane0) | H | hard stuck error | `directed-only (FEB/SWB all-ASIC rate scan)` | fixed in harness; two-lane scan rerun | FEB/SWB Poisson rate scan on `2026-05-09` | pending | The all-ASIC FEB/SWB rate scan routed every generated hit through lane0 and left lane1 empty, producing the wrong overload model for the user's requested two-lane FEB contract. |
+| [BUG-028-R](#bug-028-r-opq-page-allocator-used-n_hit-as-global-frame-hit-room) | R | hard stuck error | `common (two-lane all-ASIC OPQ stress with DEBUG_LEVEL=1)` | fixed in MuSiP OPQ source; packet_scheduler lint passed | FEB/SWB 1 MHz/channel all-ASIC scan on `2026-05-09` | pending | The OPQ page allocator reused `N_HIT` as global frame hit room even though `N_HIT` is a per-subheader/subframe parser limit, causing false handle drops before the allocator fix. |
+| [BUG-029-R](#bug-029-r-swb-frame-table-egress-leaves-written-subheaders-unread-near-service-knee) | R | hard stuck error | `occasional (near two-lane zero-backlog service marker)` | open; trace localized to frame-table readout | FEB/SWB 976.562 kHz/channel rate scan on `2026-05-09` | pending | Near the two-lane zero-backlog service marker, OPQ lane counters consume all hits with zero controlled drops but the frame-table/DMA read side can leave written subheaders unread. |
 
 ## 2026-05-06
 
@@ -774,3 +777,127 @@ Historical formal note:
   - overwritten Poisson plots live under `tb_int/feb_swb_corun/report_poisson/`
 - Commit:
   - analyzer/model/plot documentation fix: e2cca629
+
+### BUG-027-H: FEB/SWB rate scan collapsed all ASIC traffic onto lane0
+
+- First seen in:
+  - FEB/SWB all-ASIC Poisson rate-scan review on `2026-05-09`
+  - user requirement that ASIC4..7 drive lane0 and ASIC0..3 drive lane1
+- Symptom:
+  - the rate-scan evidence looked like a one-active-lane OPQ overload
+  - lane1 counters stayed empty while the scan was being interpreted as a
+    two-lane FEB/SWB ingress contract
+- Root cause:
+  - the source model had per-ASIC hit generation but no lane field in the
+    sorted source ledger
+  - subheader hit accounting and expected DMA words were lane0-only for the
+    all-ASIC case
+- Fix status:
+  - state:
+    fixed in `feb_swb_corun_plain_tb.sv`; full rate scan rerun
+  - mechanism:
+    source hits now carry `lane`, per-lane bucket counts and first indices are
+    built before frame drive, and `source_lane_for_asic()` maps ASIC4..7 to
+    lane0 and ASIC0..3 to lane1 when all eight ASICs are active
+  - before_fix_outcome:
+    1 MHz/channel scans showed all generated hits on lane0 with lane1 emitting
+    only legal empty frames, so the mathematical review used the wrong
+    one-lane capacity model
+  - after_fix_outcome:
+    the corrected 1 MHz/channel scan reports lane0 `wr_hit/rd_hit=127567` and
+    lane1 `wr_hit/rd_hit=128289`, with lane2/3 masked and zero lane drop
+    counters
+  - potential_hazard:
+    low for the current all-ASIC scan after the explicit lane mapping; medium
+    for future partial-ASIC scans if their intended physical lane mapping is
+    not stated in the testcase name and summary
+- Runtime / coverage context:
+  - `report_rate_scan/` uses 1 ms Poisson iid traffic with all 256 channels
+  - scan plot is `tb_int/feb_swb_corun/report_rate_scan/feb_swb_rate_scan.png`
+- Commit:
+  - harness lane-mapping fix: pending
+
+### BUG-028-R: OPQ page allocator used N_HIT as global frame hit room
+
+- First seen in:
+  - FEB/SWB all-ASIC 1 MHz/channel Poisson rate scan on `2026-05-09`
+  - corrected two-lane source routing still produced OPQ `handle_drop_hit`
+    before the allocator fix
+- Symptom:
+  - the OPQ page allocator rejected hits once the frame-level total approached
+    `N_HIT=2047`
+  - this made the scan look like a frame-level `N_HIT` cap even though `N_HIT`
+    is only the per-subheader/subframe parser limit
+- Root cause:
+  - `ordered_priority_queue_monolithic_page_allocator.sv` initialized
+    `frame_hit_room` from `N_HIT`
+  - the allocator therefore applied the parser's subheader hit-count parameter
+    as a global admission budget for the whole OPQ frame
+- Fix status:
+  - state:
+    fixed in MuSiP OPQ source; focused scan rerun
+  - mechanism:
+    reset and new-frame assignment now use an all-ones frame hit room
+    (`FRAME_HIT_ROOM_RESET`) instead of `N_HIT`
+  - before_fix_outcome:
+    two-lane 1 MHz/channel generated `255856` hits but delivered about
+    `124906`, with nonzero lane handle-drop counters
+  - after_fix_outcome:
+    two-lane 1 MHz/channel generates `255856` hits, OPQ accepts both lanes with
+    `handle_drop_hit=0` and `ft_drop_hit=0`, and DMA decodes `255338` hits
+  - lint outcome:
+    `tb/scripts/run_lint.sh` passed after making generated scratch directories
+    writable; Questa reported warnings only
+  - potential_hazard:
+    medium until a broader OPQ regression is run over the changed MuSiP source;
+    low for the semantic conclusion that `N_HIT` must not be treated as a
+    frame cap
+- Runtime / coverage context:
+  - the semantic `N_HIT` subheader knee for two active hit lanes is
+    `124.94 MHz/channel`, outside the current 1 MHz/channel scan
+  - the zero-backlog two-lane service marker is `976.09 kHz/channel`, which is
+    a backlog marker under finite-burst drain, not a hard drop model
+- Commit:
+  - MuSiP OPQ allocator fix: pending
+
+### BUG-029-R: SWB frame-table egress leaves written subheaders unread near service knee
+
+- First seen in:
+  - FEB/SWB all-ASIC Poisson rate scan at `976.562 kHz/channel` on
+    `2026-05-09`
+- Symptom:
+  - OPQ lane counters consume all lane hits and report zero controlled drops,
+    but DMA-visible hits are short
+  - the measured shortfall is non-monotonic across nearby rates, so it does
+    not match a simple mathematical admission or bandwidth cap
+- Root cause:
+  - open
+  - current trace points to frame-table or downstream readout retirement rather
+    than FEB ingress, lane FIFO credit, ticket credit, mask, or handle drops
+- Fix status:
+  - state:
+    open; nonfatal for continuing the rate-scan evidence because the counters
+    classify it separately from controlled OPQ drop
+  - before_fix_outcome:
+    `976.562 kHz/channel` generated `249896` hits and DMA decoded `236879`,
+    with `missing_hits=13017`
+  - debug outcome:
+    rerunning the same point with `DRAIN_SWB_CYCLES=2000000` reproduced the
+    same `13017` missing hits; OPQ lane0 read all `124638` lane hits, lane1
+    read all `125258` lane hits, and all OPQ drop counters stayed zero
+  - localized evidence:
+    the OPQ summary at the failing point reports `ft_wr_shd=7813` and
+    `ft_rd_shd=7428`, a gap of `385` subheaders, approximately three
+    128-subheader frames
+  - potential_hazard:
+    high for accepting a no-loss claim near the service marker; low for the
+    corrected `N_HIT` interpretation because the controlled drop counters are
+    zero
+- Runtime / coverage context:
+  - current measured scan remains exact through `500 kHz/channel`
+  - `1 MHz/channel` is near full rate with `255338/255856` hits delivered and
+    only `518` DMA-visible missing hits
+  - `report_rate_scan/feb_swb_rate_scan.png` plots the measured missing/tail
+    gap in red against the ideal lossless-drain model
+- Commit:
+  - bug ledger and rate-scan plot update: pending

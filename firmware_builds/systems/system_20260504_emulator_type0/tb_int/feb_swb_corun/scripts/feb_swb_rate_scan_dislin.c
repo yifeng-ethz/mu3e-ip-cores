@@ -159,7 +159,9 @@ static void render_plot(const char *model_csv, const char *measured_csv, const c
   float y_max = 280.0f;
   float x_min = 0.0f;
   float x_max = 1050.0f;
-  float knee_khz;
+  float dma_knee_khz;
+  float format_knee_khz;
+  float zero_backlog_service_mhits;
   char subtitle[256];
   const char *fmt = output_format_from_path(out_path);
 
@@ -175,7 +177,9 @@ static void render_plot(const char *model_csv, const char *measured_csv, const c
       y_max = ceilf(model.offered[i] / 20.0f) * 20.0f;
     }
   }
-  knee_khz = 2047.0f / (256.0f * 2048.0f * 8.0e-9f) / 1000.0f;
+  dma_knee_khz = (2.0f * 2047.0f) / (256.0f * 2048.0f * 8.0e-9f) / 1000.0f;
+  format_knee_khz = (2.0f * 2047.0f) / (256.0f * 16.0f * 8.0e-9f) / 1000.0f;
+  zero_backlog_service_mhits = (2.0f * 2047.0f) / (2048.0f * 8.0e-9f) / 1.0e6f;
 
   metafl(fmt);
   setfil(out_path);
@@ -189,12 +193,13 @@ static void render_plot(const char *model_csv, const char *measured_csv, const c
   pagera();
   complx();
 
-  page_message_centered("FEB/SWB OPQ Poisson iid throughput pre-scan and rate scan", 80, 44);
+  page_message_centered("FEB/SWB OPQ Poisson iid all-ASIC delivery scan", 310, 44);
   snprintf(subtitle,
            sizeof(subtitle),
-           "model: E[D]=sum_f E[min(Poisson(256*r*dt_f),2047)]/T; one active OPQ lane; knee %.0f kHz/ch",
-           knee_khz);
-  page_message_centered(subtitle, 138, 28);
+           "lossless-drain model; two-lane zero-backlog service ~=%.1f Mhit/s; N_HIT subheader knee %.1f MHz/ch",
+           zero_backlog_service_mhits,
+           format_knee_khz / 1000.0f);
+  page_message_centered(subtitle, 366, 28);
 
   axspos(420, 1300);
   axslen(2180, 760);
@@ -207,32 +212,26 @@ static void render_plot(const char *model_csv, const char *measured_csv, const c
   graf(x_min, x_max, 0.0f, 200.0f, 0.0f, y_max, 0.0f, 50.0f);
   grid(1, 1);
 
-  draw_line("gray", "dot", model.x_khz, model.offered, model.n, 3);
-  draw_line("orange", "dash", model.x_khz, model.model_dropped, model.n, 5);
   if (measured.n > 0) {
     draw_line("green", "solid", measured.x_khz, measured.measured_delivered, measured.n, 7);
     draw_line("red", "solid", measured.x_khz, measured.measured_dropped, measured.n, 7);
   }
   draw_line("black", "dash", model.x_khz, model.model_delivered, model.n, 4);
-  draw_vertical(knee_khz, y_max);
+  draw_vertical(dma_knee_khz, y_max);
   color("fore");
   solid();
   linwid(1);
   endgrf();
 
   height(28);
-  color("gray");
-  messag("gray dotted: offered aggregate", 430, 1540);
   color("fore");
-  messag("black dashed: model delivered cap", 430, 1592);
-  color("orange");
-  messag("orange dashed: model dropped", 430, 1644);
+  messag("black dashed: ideal lossless delivered", 430, 1540);
   color("green");
   messag("green: measured DMA delivered", 1580, 1540);
   color("red");
-  messag("red: measured drop", 1580, 1592);
+  messag("red: measured missing/tail gap", 430, 1592);
   color("green");
-  messag("green dashed: full-frame knee", 1580, 1644);
+  messag("green dashed: zero-backlog service knee", 1580, 1592);
   color("fore");
 
   disfin();

@@ -25,6 +25,7 @@ module feb_swb_corun_plain_tb;
   localparam int SYNTHETIC_PRE_RBCAM_DELAY_CYCLES = 0;
   localparam int SYNTHETIC_POST_RBCAM_DELAY_CYCLES = 0;
   localparam int DEFAULT_DRAIN_SWB_CYCLES = 500000;
+  localparam int DEFAULT_FLUSH_FRAMES = 4;
   localparam int unsigned NO_HIT_ID = 32'hffff_ffff;
 
   localparam logic [5:0] SWB_SCIFI_HEADER_ID = 6'b111000;
@@ -35,6 +36,7 @@ module feb_swb_corun_plain_tb;
 
   typedef struct {
     int unsigned abs_ts_8ns;
+    int unsigned lane;
     int unsigned asic;
     int unsigned channel;
     int unsigned hit_id;
@@ -95,6 +97,7 @@ module feb_swb_corun_plain_tb;
   int unsigned allow_drops;
   int unsigned scan_only;
   int unsigned drain_swb_cycles;
+  int unsigned flush_frames;
   int unsigned run_window_8ns;
   int unsigned hit_period_8ns;
   int unsigned active_asic_count;
@@ -112,8 +115,8 @@ module feb_swb_corun_plain_tb;
 
   source_hit_event_t source_hits_unsorted[$];
   source_hit_event_t source_hits[];
-  int unsigned bucket_hit_count[];
-  int unsigned bucket_first_idx[];
+  int unsigned bucket_hit_count[ACTIVE_LANES][];
+  int unsigned bucket_first_idx[ACTIVE_LANES][];
 
   int source_trace_fd;
   int pre_rbcam_trace_fd;
@@ -270,6 +273,15 @@ module feb_swb_corun_plain_tb;
     end
   endfunction
 
+  function automatic int unsigned source_lane_for_asic(input int unsigned asic);
+    begin
+      if (ACTIVE_LANES < 2 || active_asic_count != MAX_ASIC_COUNT) begin
+        return 0;
+      end
+      return (asic >= 4) ? 0 : 1;
+    end
+  endfunction
+
   function automatic string source_mode_name(input int unsigned mode);
     begin
       if (mode == SOURCE_MODE_HEADER_SYNC) begin
@@ -338,14 +350,14 @@ module feb_swb_corun_plain_tb;
       input int unsigned shd_idx);
     int unsigned bucket_idx;
     begin
-      if (lane != 0) begin
+      if (lane >= ACTIVE_LANES) begin
         return 0;
       end
       bucket_idx = (frame_id * N_SHD) + shd_idx;
       if (bucket_idx >= total_source_buckets) begin
         return 0;
       end
-      return bucket_hit_count[bucket_idx];
+      return bucket_hit_count[lane][bucket_idx];
     end
   endfunction
 
@@ -356,25 +368,29 @@ module feb_swb_corun_plain_tb;
       input int unsigned hit_id);
     source_hit_event_t hit;
     int unsigned bucket_idx;
+    int unsigned lane;
     begin
       if (abs_ts_8ns >= run_window_8ns) begin
         return;
       end
+      lane = source_lane_for_asic(asic);
       bucket_idx = abs_ts_8ns >> 4;
       if (bucket_idx >= total_source_buckets) begin
         $fatal(1, "source hit bucket outside runtime abs_ts=%0d bucket=%0d total=%0d",
                abs_ts_8ns, bucket_idx, total_source_buckets);
       end
-      if (bucket_hit_count[bucket_idx] >= 255) begin
-        $fatal(1, "source bucket %0d exceeds FEB subheader hit-count field", bucket_idx);
+      if (bucket_hit_count[lane][bucket_idx] >= 255) begin
+        $fatal(1, "source lane %0d bucket %0d exceeds FEB subheader hit-count field",
+               lane, bucket_idx);
       end
       hit.abs_ts_8ns = abs_ts_8ns;
+      hit.lane = lane;
       hit.asic = asic;
       hit.channel = channel;
       hit.hit_id = hit_id;
       hit.bucket_idx = bucket_idx;
       source_hits_unsorted.push_back(hit);
-      bucket_hit_count[bucket_idx]++;
+      bucket_hit_count[lane][bucket_idx]++;
     end
   endtask
 
@@ -469,13 +485,16 @@ module feb_swb_corun_plain_tb;
   endtask
 
   task automatic build_source_model();
-    int unsigned bucket_next[];
+    int unsigned bucket_next[ACTIVE_LANES][];
     int unsigned running;
     int unsigned dst;
     begin
       source_hits_unsorted.delete();
-      bucket_hit_count = new[total_source_buckets];
-      bucket_first_idx = new[total_source_buckets];
+      for (int lane = 0; lane < ACTIVE_LANES; lane++) begin
+        bucket_hit_count[lane] = new[total_source_buckets];
+        bucket_first_idx[lane] = new[total_source_buckets];
+        bucket_next[lane] = new[total_source_buckets];
+      end
 
       if (source_mode == SOURCE_MODE_HEADER_SYNC) begin
         generate_header_sync_source_model();
@@ -486,18 +505,19 @@ module feb_swb_corun_plain_tb;
       end
 
       source_hits = new[source_hits_unsorted.size()];
-      bucket_next = new[total_source_buckets];
       running = 0;
-      for (int unsigned bucket = 0; bucket < total_source_buckets; bucket++) begin
-        bucket_first_idx[bucket] = running;
-        bucket_next[bucket] = running;
-        running += bucket_hit_count[bucket];
+      for (int lane = 0; lane < ACTIVE_LANES; lane++) begin
+        for (int unsigned bucket = 0; bucket < total_source_buckets; bucket++) begin
+          bucket_first_idx[lane][bucket] = running;
+          bucket_next[lane][bucket] = running;
+          running += bucket_hit_count[lane][bucket];
+        end
       end
 
       foreach (source_hits_unsorted[idx]) begin
-        dst = bucket_next[source_hits_unsorted[idx].bucket_idx];
+        dst = bucket_next[source_hits_unsorted[idx].lane][source_hits_unsorted[idx].bucket_idx];
         source_hits[dst] = source_hits_unsorted[idx];
-        bucket_next[source_hits_unsorted[idx].bucket_idx]++;
+        bucket_next[source_hits_unsorted[idx].lane][source_hits_unsorted[idx].bucket_idx]++;
       end
     end
   endtask
@@ -512,7 +532,9 @@ module feb_swb_corun_plain_tb;
         frame_hits = 0;
         for (int unsigned shd = 0; shd < N_SHD; shd++) begin
           bucket_idx = (frame * N_SHD) + shd;
-          frame_hits += bucket_hit_count[bucket_idx];
+          for (int lane = 0; lane < ACTIVE_LANES; lane++) begin
+            frame_hits += bucket_hit_count[lane][bucket_idx];
+          end
         end
         total_words += (frame_hits + 3) / 4;
       end
@@ -609,8 +631,8 @@ module feb_swb_corun_plain_tb;
 
         if (hit_count != 0) begin
           bucket_idx = (frame_id * N_SHD) + shd_idx;
-          for (event_idx = bucket_first_idx[bucket_idx];
-               event_idx < (bucket_first_idx[bucket_idx] + hit_count);
+          for (event_idx = bucket_first_idx[lane][bucket_idx];
+               event_idx < (bucket_first_idx[lane][bucket_idx] + hit_count);
                event_idx++) begin
             hit_event = source_hits[event_idx];
             asic = hit_event.asic;
@@ -652,10 +674,12 @@ module feb_swb_corun_plain_tb;
   task automatic drive_lane(input int lane);
     int unsigned frame_start_cycle;
     int unsigned next_frame_cycle;
+    int unsigned driven_frames;
     begin
       wait (!reset);
       frame_start_cycle = 0;
-      for (int frame_id = 0; frame_id < n_frames_runtime; frame_id++) begin
+      driven_frames = n_frames_runtime + flush_frames;
+      for (int frame_id = 0; frame_id < driven_frames; frame_id++) begin
         drive_frame(lane, frame_id);
         next_frame_cycle = frame_start_cycle + FRAME_PERIOD_FEB_CYCLES;
         while ($time < (next_frame_cycle * 8ns)) begin
@@ -847,6 +871,7 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "allow_drops=%0d", allow_drops);
       $fdisplay(summary_fd, "scan_only=%0d", scan_only);
       $fdisplay(summary_fd, "drain_swb_cycles=%0d", drain_swb_cycles);
+      $fdisplay(summary_fd, "flush_frames=%0d", flush_frames);
       $fdisplay(summary_fd, "source_mode=%s", source_mode_name(source_mode));
       $fdisplay(summary_fd, "poisson_seed=%0d", poisson_seed);
       $fdisplay(summary_fd, "header_sync_phase_8ns=%0d", header_sync_phase_8ns);
@@ -928,6 +953,7 @@ module feb_swb_corun_plain_tb;
     allow_drops = 0;
     scan_only = 0;
     drain_swb_cycles = DEFAULT_DRAIN_SWB_CYCLES;
+    flush_frames = DEFAULT_FLUSH_FRAMES;
     run_window_8ns = DEFAULT_RUN_WINDOW_8NS;
     hit_period_8ns = DEFAULT_HIT_PERIOD_8NS;
     active_asic_count = DEFAULT_ASIC_COUNT;
@@ -954,6 +980,9 @@ module feb_swb_corun_plain_tb;
     end
     if (!$value$plusargs("FEB_SWB_DRAIN_SWB_CYCLES=%d", drain_swb_cycles)) begin
       drain_swb_cycles = DEFAULT_DRAIN_SWB_CYCLES;
+    end
+    if (!$value$plusargs("FEB_SWB_FLUSH_FRAMES=%d", flush_frames)) begin
+      flush_frames = DEFAULT_FLUSH_FRAMES;
     end
     if (scan_only) begin
       allow_drops = 1;

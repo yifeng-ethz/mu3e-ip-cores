@@ -14,22 +14,23 @@ from pathlib import Path
 CHANNELS_PER_ASIC = 32
 DEFAULT_ASICS = 8
 FRAME_STRIDE_8NS = 2048
+SUBHEADER_STRIDE_8NS = 16
 DEFAULT_RUN_WINDOW_8NS = 125000
 DEFAULT_N_HIT = 2047
+DEFAULT_DMA_HIT_CAPACITY_PER_FRAME = FRAME_STRIDE_8NS - 1
+DEFAULT_ACTIVE_HIT_LANES = 2
 
 SELECTED_RATES_KHZ = [
     50.0,
     100.0,
     200.0,
-    300.0,
     400.0,
-    450.0,
-    475.0,
     500.0,
-    525.0,
-    550.0,
     650.0,
     800.0,
+    900.0,
+    950.0,
+    975.0,
     1000.0,
 ]
 
@@ -63,6 +64,18 @@ SCAN_COLUMNS = [
     "model_drop_mhits_s",
     "model_delivery_fraction",
     "model_drop_fraction",
+    "format_model_expected_hits",
+    "format_model_delivered_hits",
+    "format_model_dropped_hits",
+    "format_model_delivered_mhits_s",
+    "format_model_drop_mhits_s",
+    "format_model_delivery_fraction",
+    "format_model_drop_fraction",
+    "model_active_hit_lanes",
+    "model_dma_hit_capacity_per_frame",
+    "lane1_wr_hit",
+    "lane1_drop_hit",
+    "lane1_handle_drop_hit",
 ]
 
 
@@ -72,6 +85,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-window-8ns", type=int, default=DEFAULT_RUN_WINDOW_8NS)
     parser.add_argument("--asic-count", type=int, default=DEFAULT_ASICS)
     parser.add_argument("--n-hit", type=int, default=DEFAULT_N_HIT)
+    parser.add_argument("--dma-hit-capacity-per-frame", type=int, default=DEFAULT_DMA_HIT_CAPACITY_PER_FRAME)
+    parser.add_argument("--active-hit-lanes", type=int, default=DEFAULT_ACTIVE_HIT_LANES)
     parser.add_argument("--seed", type=int, default=20260508)
     parser.add_argument("--rates-khz", default=",".join(str(x) for x in SELECTED_RATES_KHZ))
     parser.add_argument("--prescan-only", action="store_true")
@@ -107,6 +122,16 @@ def frame_durations_8ns(run_window_8ns: int) -> list[int]:
     return durations
 
 
+def subheader_durations_8ns(run_window_8ns: int) -> list[int]:
+    buckets = int(math.ceil(run_window_8ns / SUBHEADER_STRIDE_8NS))
+    durations: list[int] = []
+    for bucket in range(buckets):
+        start = bucket * SUBHEADER_STRIDE_8NS
+        remaining = max(0, run_window_8ns - start)
+        durations.append(min(SUBHEADER_STRIDE_8NS, remaining))
+    return durations
+
+
 def normal_pdf(x: float) -> float:
     return math.exp(-0.5 * x * x) / math.sqrt(2.0 * math.pi)
 
@@ -118,6 +143,9 @@ def normal_cdf(x: float) -> float:
 def expected_min_poisson(lam: float, cap: int) -> float:
     if lam <= 0.0:
         return 0.0
+    sigma = math.sqrt(lam)
+    if float(cap) >= lam + 12.0 * sigma + 16.0:
+        return lam
     if lam < 700.0:
         p = math.exp(-lam)
         cdf = p
@@ -127,24 +155,89 @@ def expected_min_poisson(lam: float, cap: int) -> float:
             cdf += p
             partial_mean += float(k) * p
         return partial_mean + float(cap) * max(0.0, 1.0 - cdf)
-    sigma = math.sqrt(lam)
     z = (float(cap) + 0.5 - lam) / sigma
     phi = normal_pdf(z)
     cdf = normal_cdf(z)
     return lam * cdf - sigma * phi + float(cap) * (1.0 - cdf)
 
 
-def model_row(rate_hz: float, run_window_8ns: int, asics: int, n_hit: int) -> dict[str, float | int | str]:
+def capped_poisson_sum(
+    actual_rate: float,
+    active_channels: int,
+    durations_8ns: list[int],
+    cap: int,
+) -> tuple[float, float, float]:
+    expected_hits = 0.0
+    delivered_hits = 0.0
+    for duration_8ns in durations_8ns:
+        lam = active_channels * actual_rate * duration_8ns * 8.0e-9
+        expected_hits += lam
+        delivered_hits += expected_min_poisson(lam, cap)
+    dropped_hits = max(0.0, expected_hits - delivered_hits)
+    return expected_hits, delivered_hits, dropped_hits
+
+
+def capped_poisson_sum_per_lane(
+    actual_rate: float,
+    active_channels: int,
+    active_lanes: int,
+    durations_8ns: list[int],
+    cap_per_lane: int,
+) -> tuple[float, float, float]:
+    lanes = max(1, active_lanes)
+    lane_channels = active_channels / float(lanes)
+    expected_hits = 0.0
+    delivered_hits = 0.0
+    dropped_hits = 0.0
+    for _lane in range(lanes):
+        lane_expected, lane_delivered, lane_dropped = capped_poisson_sum(
+            actual_rate,
+            int(round(lane_channels)),
+            durations_8ns,
+            cap_per_lane,
+        )
+        expected_hits += lane_expected
+        delivered_hits += lane_delivered
+        dropped_hits += lane_dropped
+    return expected_hits, delivered_hits, dropped_hits
+
+
+def expected_arrivals(
+    actual_rate: float,
+    active_channels: int,
+    durations_8ns: list[int],
+) -> float:
+    expected_hits = 0.0
+    for duration_8ns in durations_8ns:
+        expected_hits += active_channels * actual_rate * duration_8ns * 8.0e-9
+    return expected_hits
+
+
+def model_row(
+    rate_hz: float,
+    run_window_8ns: int,
+    asics: int,
+    n_hit: int,
+    dma_hit_capacity_per_frame: int,
+    active_hit_lanes: int,
+) -> dict[str, float | int | str]:
     period = period_for_rate(rate_hz)
     actual_rate = actual_rate_from_period(period)
     active_channels = asics * CHANNELS_PER_ASIC
-    expected_hits = 0.0
-    delivered_hits = 0.0
-    for duration_8ns in frame_durations_8ns(run_window_8ns):
-        lam = active_channels * actual_rate * duration_8ns * 8.0e-9
-        expected_hits += lam
-        delivered_hits += expected_min_poisson(lam, n_hit)
-    dropped_hits = max(0.0, expected_hits - delivered_hits)
+    expected_hits = expected_arrivals(
+        actual_rate,
+        active_channels,
+        frame_durations_8ns(run_window_8ns),
+    )
+    delivered_hits = expected_hits
+    dropped_hits = 0.0
+    format_expected_hits, format_delivered_hits, format_dropped_hits = capped_poisson_sum_per_lane(
+        actual_rate,
+        active_channels,
+        active_hit_lanes,
+        subheader_durations_8ns(run_window_8ns),
+        n_hit,
+    )
     seconds = run_window_8ns * 8.0e-9
     return {
         "rate_hz_per_channel": rate_hz,
@@ -165,6 +258,9 @@ def model_row(rate_hz: float, run_window_8ns: int, asics: int, n_hit: int) -> di
         "lane0_wr_hit": "",
         "lane0_drop_hit": "",
         "lane0_handle_drop_hit": "",
+        "lane1_wr_hit": "",
+        "lane1_drop_hit": "",
+        "lane1_handle_drop_hit": "",
         "measured_delivered_mhits_s": "",
         "measured_drop_mhits_s": "",
         "measured_delivery_fraction": "",
@@ -176,6 +272,17 @@ def model_row(rate_hz: float, run_window_8ns: int, asics: int, n_hit: int) -> di
         "model_drop_mhits_s": dropped_hits / seconds / 1.0e6,
         "model_delivery_fraction": delivered_hits / expected_hits if expected_hits else 0.0,
         "model_drop_fraction": dropped_hits / expected_hits if expected_hits else 0.0,
+        "format_model_expected_hits": format_expected_hits,
+        "format_model_delivered_hits": format_delivered_hits,
+        "format_model_dropped_hits": format_dropped_hits,
+        "format_model_delivered_mhits_s": format_delivered_hits / seconds / 1.0e6,
+        "format_model_drop_mhits_s": format_dropped_hits / seconds / 1.0e6,
+        "format_model_delivery_fraction": (
+            format_delivered_hits / format_expected_hits if format_expected_hits else 0.0
+        ),
+        "format_model_drop_fraction": format_dropped_hits / format_expected_hits if format_expected_hits else 0.0,
+        "model_active_hit_lanes": active_hit_lanes,
+        "model_dma_hit_capacity_per_frame": dma_hit_capacity_per_frame,
     }
 
 
@@ -205,13 +312,31 @@ def parse_opq_summary(log_path: Path) -> dict[str, int]:
     for line in log_path.read_text(errors="replace").splitlines():
         if "OPQ_NATIVE_SUMMARY" in line:
             out.update({f"ft_{k}": v for k, v in parse_key_value_tokens(line).items()})
-        elif "OPQ_NATIVE_LANE_SUMMARY lane=0" in line:
-            out.update({f"lane0_{k}": v for k, v in parse_key_value_tokens(line).items()})
+        elif "OPQ_NATIVE_LANE_SUMMARY" in line:
+            fields = parse_key_value_tokens(line)
+            lane = fields.get("lane")
+            if lane is not None:
+                out.update({f"lane{lane}_{k}": v for k, v in fields.items()})
     return out
 
 
-def measured_row(report: Path, requested_rate_hz: float, run_window_8ns: int, asics: int, n_hit: int) -> dict[str, float | int | str]:
-    model = model_row(requested_rate_hz, run_window_8ns, asics, n_hit)
+def measured_row(
+    report: Path,
+    requested_rate_hz: float,
+    run_window_8ns: int,
+    asics: int,
+    n_hit: int,
+    dma_hit_capacity_per_frame: int,
+    active_hit_lanes: int,
+) -> dict[str, float | int | str]:
+    model = model_row(
+        requested_rate_hz,
+        run_window_8ns,
+        asics,
+        n_hit,
+        dma_hit_capacity_per_frame,
+        active_hit_lanes,
+    )
     summary = read_key_values(report / "feb_swb_corun_summary.txt")
     opq = parse_opq_summary(report / "run_swb_corun.log")
     seconds = run_window_8ns * 8.0e-9
@@ -236,6 +361,9 @@ def measured_row(report: Path, requested_rate_hz: float, run_window_8ns: int, as
             "lane0_wr_hit": opq.get("lane0_wr_hit", ""),
             "lane0_drop_hit": opq.get("lane0_drop_hit", ""),
             "lane0_handle_drop_hit": opq.get("lane0_handle_drop_hit", ""),
+            "lane1_wr_hit": opq.get("lane1_wr_hit", ""),
+            "lane1_drop_hit": opq.get("lane1_drop_hit", ""),
+            "lane1_handle_drop_hit": opq.get("lane1_handle_drop_hit", ""),
             "measured_delivered_mhits_s": delivered_mhits_s,
             "measured_drop_mhits_s": drop_mhits_s,
             "measured_delivery_fraction": actual_hits / expected_hits if expected_hits else 0.0,
@@ -288,16 +416,30 @@ def write_prescan(args: argparse.Namespace, report_root: Path, rates_hz: list[fl
     dense_rates_hz = [float(khz) * 1000.0 for khz in range(50, 1001, 10)]
     write_csv(
         report_root / "feb_swb_rate_prescan.csv",
-        [model_row(rate, args.run_window_8ns, args.asic_count, args.n_hit) for rate in dense_rates_hz],
+        [
+            model_row(
+                rate,
+                args.run_window_8ns,
+                args.asic_count,
+                args.n_hit,
+                args.dma_hit_capacity_per_frame,
+                args.active_hit_lanes,
+            )
+            for rate in dense_rates_hz
+        ],
     )
     points_path = report_root / "feb_swb_rate_scan_points.txt"
     points_path.write_text(
         "\n".join(
             [
                 "# selected Poisson iid rates for RTL scan",
-                "# denser around the modeled OPQ frame-cap knee",
-                f"# full_frame_knee_hz_per_channel={args.n_hit * 125_000_000.0 / (args.asic_count * CHANNELS_PER_ASIC * FRAME_STRIDE_8NS):.3f}",
-                f"# finite_window_capacity_hz_per_channel={(args.n_hit * len(frame_durations_8ns(args.run_window_8ns))) / (args.asic_count * CHANNELS_PER_ASIC * args.run_window_8ns * 8.0e-9):.3f}",
+                "# denser around the two-hit-lane zero-backlog service-rate knee",
+                "# OPQ N_HIT is the semantic per-subheader/subframe cap; that knee is outside this scan",
+                "# model delivery is lossless after post-window drain; measured missing is reported separately",
+                f"# format_subheader_knee_hz_per_channel={args.n_hit * args.active_hit_lanes * 125_000_000.0 / (args.asic_count * CHANNELS_PER_ASIC * SUBHEADER_STRIDE_8NS):.3f}",
+                f"# active_hit_lanes={args.active_hit_lanes}",
+                f"# zero_backlog_full_frame_knee_hz_per_channel={(args.dma_hit_capacity_per_frame * args.active_hit_lanes) * 125_000_000.0 / (args.asic_count * CHANNELS_PER_ASIC * FRAME_STRIDE_8NS):.3f}",
+                f"# zero_backlog_finite_window_capacity_hz_per_channel={(args.dma_hit_capacity_per_frame * args.active_hit_lanes * len(frame_durations_8ns(args.run_window_8ns))) / (args.asic_count * CHANNELS_PER_ASIC * args.run_window_8ns * 8.0e-9):.3f}",
                 *[f"{rate/1000.0:.3f} kHz/ch" for rate in rates_hz],
                 "",
             ]
@@ -322,7 +464,17 @@ def main() -> int:
         point_report = report_root / f"rate_{label}"
         if args.force or not (point_report / "feb_swb_corun_summary.txt").exists():
             run_point(args, point_report, rate_hz)
-        measured_rows.append(measured_row(point_report, rate_hz, args.run_window_8ns, args.asic_count, args.n_hit))
+        measured_rows.append(
+            measured_row(
+                point_report,
+                rate_hz,
+                args.run_window_8ns,
+                args.asic_count,
+                args.n_hit,
+                args.dma_hit_capacity_per_frame,
+                args.active_hit_lanes,
+            )
+        )
         write_csv(report_root / "feb_swb_rate_scan.csv", measured_rows)
         print(
             "RATE_SCAN_POINT "

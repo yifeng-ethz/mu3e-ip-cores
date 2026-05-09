@@ -160,7 +160,7 @@ make run_swb_corun_poisson \
 
 The deterministic header-sync comparison uses a virtual MuTRiG short-frame
 period of 910 cycles, phase 100, one pulse per short frame, and a 16-cycle
-per-ASIC phase stagger so the one-lane FEB subheader count never overflows:
+per-ASIC phase stagger so neither active FEB lane's subheader count overflows:
 
 ```sh
 make run_swb_corun_header_sync \
@@ -239,19 +239,19 @@ header_sync phase100 burst1 stagger16:
 
 ## Poisson Rate Scan
 
-The rate-scan flow is a controlled overload diagnostic for the one-active-lane
-OPQ admission cap. It is not the maintained no-drop contract. First run the
-model pre-scan to select and record the test points:
+The rate-scan flow is a two-hit-lane all-ASIC Poisson iid delivery diagnostic.
+ASIC4..7 drive SWB lane 0, ASIC0..3 drive SWB lane 1, and lanes 2/3 remain
+masked. First run the model pre-scan to select and record the test points:
 
 ```sh
 ./scripts/feb_swb_rate_scan.py --report-dir report_rate_scan --prescan-only
 ```
 
-The selected all-ASIC iid Poisson points are 50, 100, 200, 300, 400, 450,
-475, 500, 525, 550, 650, 800, and 1000 kHz/channel. This keeps the one-column
-plot readable while putting five points around the full-frame OPQ knee at
-488 kHz/channel and three points in the overload tail. Run the RTL scan and
-render the golden-ratio DISLIN figure with:
+The selected all-ASIC iid Poisson points are 50, 100, 200, 400, 500, 650, 800,
+900, 950, 975, and 1000 kHz/channel. This keeps the one-column plot readable
+while concentrating points around the two-lane zero-backlog service marker at
+976 kHz/channel. Run the RTL scan and render the golden-ratio DISLIN figure
+with:
 
 ```sh
 ./scripts/feb_swb_rate_scan.py --report-dir report_rate_scan --force
@@ -260,12 +260,20 @@ DISLIN_DIR=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/.ven
 ```
 
 The latest 1 ms scan writes `report_rate_scan/feb_swb_rate_scan.csv` and
-`report_rate_scan/feb_swb_rate_scan.png`. It measures zero drop through
-449.640 kHz/channel, 0.1207% drop at 475.285 kHz/channel, 2.9215% drop at
-500 kHz/channel, 25.2320% drop at 651.042 kHz/channel, and 51.2765% drop at
-1 MHz/channel. All accepted OPQ frame-table hits are read out; the overload
-loss appears as lane-0 `handle_drop_hit`, so this scan validates the expected
-OPQ frame-admission cap rather than a DMA loss mechanism.
+`report_rate_scan/feb_swb_rate_scan.png`. After the OPQ allocator fix,
+`N_HIT` is treated as a per-subheader/subframe limit whose semantic knee is
+124.9 MHz/channel, far outside this scan. The model line is therefore ideal
+lossless delivery after post-window drain, while the green vertical marker is
+only the zero-backlog service point.
+
+Current measured delivery is exact through 500 kHz/channel. The 1 MHz/channel
+point is near full rate, with `255338/255856` hits delivered and no OPQ
+controlled drop counters. Intermediate near-knee points still show a
+non-monotonic DMA-visible shortfall with zero OPQ drop counters; the focused
+976.562 kHz/channel rerun with longer drain reproduced `13017` missing hits
+and localized the gap to frame-table readout of roughly three 128-subheader
+frames. That mismatch is tracked in `../doc/BUG_HISTORY.md` and must not be
+explained as a frame-level `N_HIT` cap.
 
 The OPQ queue report is `feb_swb_opq_queue_model.csv` plus the DISLIN plots
 `feb_swb_opq_queue_model.png` and `.pdf`. It aligns each lane-0 FEB frame SOP
