@@ -6,7 +6,7 @@
 
 #include "dislin.h"
 
-#define MAX_VALUES 65536
+#define MAX_VALUES 524288
 #define MAX_BINS 256
 #define MAX_TOKENS 40
 #define PAGE_WIDTH 2970
@@ -645,7 +645,7 @@ static void draw_panel(metric_t *metric,
 }
 
 static void render_lifetime_plot(const char *csv_path, const char *out_path) {
-  metric_t metrics[] = {
+  static metric_t metrics[] = {
       {"pre_rbcam_lifetime_cycles",
        "pre-rbCAM",
        "blue",
@@ -888,7 +888,7 @@ static void draw_queue_count_panel(queue_model_t *model) {
 }
 
 static void render_queue_model_plot(const char *csv_path, const char *out_path) {
-  queue_model_t model;
+  static queue_model_t model;
   stats_t ingress_iat_stats;
   stats_t service_iat_stats;
   stats_t wait_stats;

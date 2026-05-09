@@ -24,7 +24,7 @@ module feb_swb_corun_plain_tb;
   localparam int FEB_FRAME_EGRESS_DELAY_FRAMES = 2;
   localparam int SYNTHETIC_PRE_RBCAM_DELAY_CYCLES = 0;
   localparam int SYNTHETIC_POST_RBCAM_DELAY_CYCLES = 0;
-  localparam int TIMEOUT_SWB_CYCLES = 500000;
+  localparam int DEFAULT_DRAIN_SWB_CYCLES = 500000;
   localparam int unsigned NO_HIT_ID = 32'hffff_ffff;
 
   localparam logic [5:0] SWB_SCIFI_HEADER_ID = 6'b111000;
@@ -87,10 +87,14 @@ module feb_swb_corun_plain_tb;
   int unsigned opq_beat_count;
   int unsigned dma_payload_word_count;
   int unsigned dma_padding_word_count;
+  int unsigned actual_hit_count;
   int unsigned end_of_event_count;
   int unsigned dma_done_count;
   int unsigned missing_count;
   int unsigned ghost_count;
+  int unsigned allow_drops;
+  int unsigned scan_only;
+  int unsigned drain_swb_cycles;
   int unsigned run_window_8ns;
   int unsigned hit_period_8ns;
   int unsigned active_asic_count;
@@ -544,15 +548,17 @@ module feb_swb_corun_plain_tb;
       input longint unsigned dma_hit,
       input logic [63:0] debug_meta);
     begin
-      $fdisplay(fd, "%0d,%0d,%0d,%0d,%0d,0x%08h,0x%016h,0x%016h",
-                time_ps,
-                lane,
-                hit_id,
-                channel,
-                abs_ts_8ns,
-                hit_word,
-                dma_hit,
-                debug_meta);
+      if (fd != 0) begin
+        $fdisplay(fd, "%0d,%0d,%0d,%0d,%0d,0x%08h,0x%016h,0x%016h",
+                  time_ps,
+                  lane,
+                  hit_id,
+                  channel,
+                  abs_ts_8ns,
+                  hit_word,
+                  dma_hit,
+                  debug_meta);
+      end
     end
   endtask
 
@@ -665,37 +671,49 @@ module feb_swb_corun_plain_tb;
       if (!$value$plusargs("FEB_SWB_TRACE_DIR=%s", trace_dir)) begin
         trace_dir = "report";
       end
-      source_trace_fd = $fopen({trace_dir, "/feb_swb_source_trace.csv"}, "w");
-      pre_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_pre_rbcam_trace.csv"}, "w");
-      post_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_post_rbcam_trace.csv"}, "w");
-      feb_egress_trace_fd = $fopen({trace_dir, "/feb_swb_feb_egress_trace.csv"}, "w");
-      ingress_trace_fd = $fopen({trace_dir, "/feb_swb_ingress_trace.csv"}, "w");
-      opq_trace_fd = $fopen({trace_dir, "/feb_swb_opq_trace.csv"}, "w");
-      dma_trace_fd = $fopen({trace_dir, "/feb_swb_dma_trace.csv"}, "w");
+      source_trace_fd = 0;
+      pre_rbcam_trace_fd = 0;
+      post_rbcam_trace_fd = 0;
+      feb_egress_trace_fd = 0;
+      ingress_trace_fd = 0;
+      opq_trace_fd = 0;
+      dma_trace_fd = 0;
+      if (!scan_only) begin
+        source_trace_fd = $fopen({trace_dir, "/feb_swb_source_trace.csv"}, "w");
+        pre_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_pre_rbcam_trace.csv"}, "w");
+        post_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_post_rbcam_trace.csv"}, "w");
+        feb_egress_trace_fd = $fopen({trace_dir, "/feb_swb_feb_egress_trace.csv"}, "w");
+        ingress_trace_fd = $fopen({trace_dir, "/feb_swb_ingress_trace.csv"}, "w");
+        opq_trace_fd = $fopen({trace_dir, "/feb_swb_opq_trace.csv"}, "w");
+        dma_trace_fd = $fopen({trace_dir, "/feb_swb_dma_trace.csv"}, "w");
+      end
       summary_fd = $fopen({trace_dir, "/feb_swb_corun_summary.txt"}, "w");
-      if (source_trace_fd == 0 || pre_rbcam_trace_fd == 0 ||
-          post_rbcam_trace_fd == 0 || feb_egress_trace_fd == 0 ||
-          ingress_trace_fd == 0 || opq_trace_fd == 0 ||
-          dma_trace_fd == 0 || summary_fd == 0) begin
+      if ((!scan_only && (source_trace_fd == 0 || pre_rbcam_trace_fd == 0 ||
+                          post_rbcam_trace_fd == 0 || feb_egress_trace_fd == 0 ||
+                          ingress_trace_fd == 0 || opq_trace_fd == 0 ||
+                          dma_trace_fd == 0)) ||
+          summary_fd == 0) begin
         $fatal(1, "failed to open one or more trace files under %s", trace_dir);
       end
-      $fdisplay(source_trace_fd,
-                "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
-      $fdisplay(pre_rbcam_trace_fd,
-                "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
-      $fdisplay(post_rbcam_trace_fd,
-                "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
-      $fdisplay(feb_egress_trace_fd,
-                "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
-      $fdisplay(ingress_trace_fd,
-                "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
-      $fdisplay(opq_trace_fd, "time_ps,valid,datak,data");
-      $fdisplay(dma_trace_fd, "time_ps,wren,end_of_event,dma_done,data");
+      if (!scan_only) begin
+        $fdisplay(source_trace_fd,
+                  "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
+        $fdisplay(pre_rbcam_trace_fd,
+                  "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
+        $fdisplay(post_rbcam_trace_fd,
+                  "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
+        $fdisplay(feb_egress_trace_fd,
+                  "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
+        $fdisplay(ingress_trace_fd,
+                  "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
+        $fdisplay(opq_trace_fd, "time_ps,valid,datak,data");
+        $fdisplay(dma_trace_fd, "time_ps,wren,end_of_event,dma_done,data");
+      end
     end
   endtask
 
   always @(posedge feb_clk) begin : feb_egress_trace_monitor
-    if (!reset) begin
+    if (!reset && !scan_only) begin
       for (int lane = 0; lane < ACTIVE_LANES; lane++) begin
         if (feb_valid[lane] && feb_ready[lane]) begin
           $fdisplay(feb_egress_trace_fd,
@@ -714,7 +732,7 @@ module feb_swb_corun_plain_tb;
   end
 
   always @(posedge swb_clk) begin : ingress_trace_monitor
-    if (!reset) begin
+    if (!reset && !scan_only) begin
       for (int lane = 0; lane < 4; lane++) begin
         if (swb_valid[lane]) begin
           $fdisplay(ingress_trace_fd,
@@ -735,11 +753,13 @@ module feb_swb_corun_plain_tb;
   always @(posedge swb_clk) begin : opq_trace_monitor
     if (!reset && opq_valid) begin
       opq_beat_count++;
-      $fdisplay(opq_trace_fd,
-                "%0t,1,0x%1h,0x%08h",
-                $time,
-                opq_datak,
-                opq_data);
+      if (!scan_only) begin
+        $fdisplay(opq_trace_fd,
+                  "%0t,1,0x%1h,0x%08h",
+                  $time,
+                  opq_datak,
+                  opq_data);
+      end
     end
   end
 
@@ -747,12 +767,14 @@ module feb_swb_corun_plain_tb;
     longint unsigned hit_word;
     if (!reset) begin
       if (dma_wren) begin
-        $fdisplay(dma_trace_fd,
-                  "%0t,1,%0d,%0d,0x%064h",
-                  $time,
-                  end_of_event,
-                  dma_done,
-                  dma_data);
+        if (!scan_only) begin
+          $fdisplay(dma_trace_fd,
+                    "%0t,1,%0d,%0d,0x%064h",
+                    $time,
+                    end_of_event,
+                    dma_done,
+                    dma_data);
+        end
         if (dma_data == DMA_PADDING_WORD) begin
           dma_padding_word_count++;
         end else begin
@@ -760,7 +782,10 @@ module feb_swb_corun_plain_tb;
           for (int slot = 0; slot < 4; slot++) begin
             hit_word = dma_data[slot*64 +: 64];
             if (hit_word != 64'h0) begin
-              actual_hits.push_back(hit_word);
+              actual_hit_count++;
+              if (!allow_drops) begin
+                actual_hits.push_back(hit_word);
+              end
             end
           end
         end
@@ -777,32 +802,40 @@ module feb_swb_corun_plain_tb;
   task automatic check_results();
     bit found;
     begin
-      actual_hit_matched = new[actual_hits.size()];
       missing_count = 0;
       ghost_count = 0;
 
-      foreach (expected_hits[exp_idx]) begin
-        found = 1'b0;
-        foreach (actual_hits[act_idx]) begin
-          if (!actual_hit_matched[act_idx] &&
-              (actual_hits[act_idx] == expected_hits[exp_idx])) begin
-            actual_hit_matched[act_idx] = 1'b1;
-            found = 1'b1;
-            break;
+      if (allow_drops) begin
+        if (expected_hits.size() >= actual_hit_count) begin
+          missing_count = expected_hits.size() - actual_hit_count;
+        end else begin
+          ghost_count = actual_hit_count - expected_hits.size();
+        end
+      end else begin
+        actual_hit_matched = new[actual_hits.size()];
+        foreach (expected_hits[exp_idx]) begin
+          found = 1'b0;
+          foreach (actual_hits[act_idx]) begin
+            if (!actual_hit_matched[act_idx] &&
+                (actual_hits[act_idx] == expected_hits[exp_idx])) begin
+              actual_hit_matched[act_idx] = 1'b1;
+              found = 1'b1;
+              break;
+            end
+          end
+          if (!found) begin
+            missing_count++;
+            $error("missing DMA hit exp_idx=%0d hit=0x%016h",
+                   exp_idx, expected_hits[exp_idx]);
           end
         end
-        if (!found) begin
-          missing_count++;
-          $error("missing DMA hit exp_idx=%0d hit=0x%016h",
-                 exp_idx, expected_hits[exp_idx]);
-        end
-      end
 
-      foreach (actual_hits[act_idx]) begin
-        if (!actual_hit_matched[act_idx]) begin
-          ghost_count++;
-          $error("ghost DMA hit act_idx=%0d hit=0x%016h",
-                 act_idx, actual_hits[act_idx]);
+        foreach (actual_hits[act_idx]) begin
+          if (!actual_hit_matched[act_idx]) begin
+            ghost_count++;
+            $error("ghost DMA hit act_idx=%0d hit=0x%016h",
+                   act_idx, actual_hits[act_idx]);
+          end
         end
       end
 
@@ -811,6 +844,9 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "active_mask=0x%0h", swb_enable_mask);
       $fdisplay(summary_fd, "active_asics=%0d", active_asic_count);
       $fdisplay(summary_fd, "channels_per_asic=%0d", CHANNELS_PER_ASIC);
+      $fdisplay(summary_fd, "allow_drops=%0d", allow_drops);
+      $fdisplay(summary_fd, "scan_only=%0d", scan_only);
+      $fdisplay(summary_fd, "drain_swb_cycles=%0d", drain_swb_cycles);
       $fdisplay(summary_fd, "source_mode=%s", source_mode_name(source_mode));
       $fdisplay(summary_fd, "poisson_seed=%0d", poisson_seed);
       $fdisplay(summary_fd, "header_sync_phase_8ns=%0d", header_sync_phase_8ns);
@@ -835,7 +871,7 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "opq_beats=%0d", opq_beat_count);
       $fdisplay(summary_fd, "dma_payload_words=%0d", dma_payload_word_count);
       $fdisplay(summary_fd, "dma_padding_words=%0d", dma_padding_word_count);
-      $fdisplay(summary_fd, "actual_hits=%0d", actual_hits.size());
+      $fdisplay(summary_fd, "actual_hits=%0d", actual_hit_count);
       $fdisplay(summary_fd, "end_of_event_count=%0d", end_of_event_count);
       $fdisplay(summary_fd, "dma_done_count=%0d", dma_done_count);
       $fdisplay(summary_fd, "missing_hits=%0d", missing_count);
@@ -852,14 +888,25 @@ module feb_swb_corun_plain_tb;
       assert(feb_hit_count == expected_hits.size())
         else $fatal(1, "FEB hit count and expected ledger differ");
       assert(opq_beat_count != 0) else $fatal(1, "OPQ produced no egress beats");
-      assert(dma_payload_word_count == expected_dma_words_runtime)
-        else $fatal(1, "DMA payload words got %0d expected %0d",
-                    dma_payload_word_count, expected_dma_words_runtime);
-      assert(end_of_event_count != 0) else $fatal(1, "no DMA end_of_event observed");
-      assert(missing_count == 0) else $fatal(1, "missing DMA hits: %0d", missing_count);
-      assert(ghost_count == 0) else $fatal(1, "ghost DMA hits: %0d", ghost_count);
-      $display("FEB_SWB_CORUN_PLAIN_PASS expected_hits=%0d dma_payload_words=%0d opq_beats=%0d",
-               expected_hits.size(), dma_payload_word_count, opq_beat_count);
+      if (allow_drops) begin
+        assert(actual_hit_count != 0) else $fatal(1, "scan delivered no DMA hits");
+        $display("FEB_SWB_CORUN_SCAN_PASS expected_hits=%0d actual_hits=%0d missing_hits=%0d ghost_hits=%0d dma_payload_words=%0d opq_beats=%0d",
+                 expected_hits.size(),
+                 actual_hit_count,
+                 missing_count,
+                 ghost_count,
+                 dma_payload_word_count,
+                 opq_beat_count);
+      end else begin
+        assert(dma_payload_word_count == expected_dma_words_runtime)
+          else $fatal(1, "DMA payload words got %0d expected %0d",
+                      dma_payload_word_count, expected_dma_words_runtime);
+        assert(end_of_event_count != 0) else $fatal(1, "no DMA end_of_event observed");
+        assert(missing_count == 0) else $fatal(1, "missing DMA hits: %0d", missing_count);
+        assert(ghost_count == 0) else $fatal(1, "ghost DMA hits: %0d", ghost_count);
+        $display("FEB_SWB_CORUN_PLAIN_PASS expected_hits=%0d dma_payload_words=%0d opq_beats=%0d",
+                 expected_hits.size(), dma_payload_word_count, opq_beat_count);
+      end
     end
   endtask
 
@@ -875,8 +922,12 @@ module feb_swb_corun_plain_tb;
     opq_beat_count = 0;
     dma_payload_word_count = 0;
     dma_padding_word_count = 0;
+    actual_hit_count = 0;
     end_of_event_count = 0;
     dma_done_count = 0;
+    allow_drops = 0;
+    scan_only = 0;
+    drain_swb_cycles = DEFAULT_DRAIN_SWB_CYCLES;
     run_window_8ns = DEFAULT_RUN_WINDOW_8NS;
     hit_period_8ns = DEFAULT_HIT_PERIOD_8NS;
     active_asic_count = DEFAULT_ASIC_COUNT;
@@ -894,6 +945,18 @@ module feb_swb_corun_plain_tb;
     end
     if (!$value$plusargs("FEB_SWB_ASIC_COUNT=%d", active_asic_count)) begin
       active_asic_count = DEFAULT_ASIC_COUNT;
+    end
+    if (!$value$plusargs("FEB_SWB_ALLOW_DROPS=%d", allow_drops)) begin
+      allow_drops = 0;
+    end
+    if (!$value$plusargs("FEB_SWB_SCAN_ONLY=%d", scan_only)) begin
+      scan_only = 0;
+    end
+    if (!$value$plusargs("FEB_SWB_DRAIN_SWB_CYCLES=%d", drain_swb_cycles)) begin
+      drain_swb_cycles = DEFAULT_DRAIN_SWB_CYCLES;
+    end
+    if (scan_only) begin
+      allow_drops = 1;
     end
     begin
       string source_mode_arg;
@@ -962,9 +1025,9 @@ module feb_swb_corun_plain_tb;
       drive_lane(1);
     join
 
-    for (int cyc = 0; cyc < TIMEOUT_SWB_CYCLES; cyc++) begin
+    for (int cyc = 0; cyc < drain_swb_cycles; cyc++) begin
       @(posedge swb_clk);
-      if (end_of_event_count != 0 && actual_hits.size() >= expected_hits_runtime) begin
+      if (end_of_event_count != 0 && actual_hit_count >= expected_hits_runtime) begin
         break;
       end
     end
@@ -972,13 +1035,13 @@ module feb_swb_corun_plain_tb;
     repeat (64) @(posedge swb_clk);
     check_results();
 
-    $fclose(ingress_trace_fd);
-    $fclose(feb_egress_trace_fd);
-    $fclose(source_trace_fd);
-    $fclose(pre_rbcam_trace_fd);
-    $fclose(post_rbcam_trace_fd);
-    $fclose(opq_trace_fd);
-    $fclose(dma_trace_fd);
+    if (ingress_trace_fd != 0) $fclose(ingress_trace_fd);
+    if (feb_egress_trace_fd != 0) $fclose(feb_egress_trace_fd);
+    if (source_trace_fd != 0) $fclose(source_trace_fd);
+    if (pre_rbcam_trace_fd != 0) $fclose(pre_rbcam_trace_fd);
+    if (post_rbcam_trace_fd != 0) $fclose(post_rbcam_trace_fd);
+    if (opq_trace_fd != 0) $fclose(opq_trace_fd);
+    if (dma_trace_fd != 0) $fclose(dma_trace_fd);
     $fclose(summary_fd);
     $finish;
   end
