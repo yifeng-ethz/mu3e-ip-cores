@@ -133,6 +133,17 @@ static void draw_vertical(float x, float ymax) {
   linwid(1);
 }
 
+static void draw_horizontal(float y, float xmax) {
+  float xs[2] = {0.0f, xmax};
+  float ys[2] = {y, y};
+  color("blue");
+  dash();
+  linwid(5);
+  curve(xs, ys, 2);
+  solid();
+  linwid(1);
+}
+
 static void draw_line(const char *line_color,
                       const char *style,
                       const float *x,
@@ -196,7 +207,7 @@ static void render_plot(const char *model_csv, const char *measured_csv, const c
   page_message_centered("FEB/SWB OPQ Poisson iid all-ASIC delivery scan", 310, 44);
   snprintf(subtitle,
            sizeof(subtitle),
-           "lossless-drain model; two-lane zero-backlog service ~=%.1f Mhit/s; N_HIT subheader knee %.1f MHz/ch",
+           "lossless-drain model; blue hline = OPQ-to-DMA 32b@250MHz ~=%.1f Mhit/s; N_HIT knee %.1f MHz/ch",
            zero_backlog_service_mhits,
            format_knee_khz / 1000.0f);
   page_message_centered(subtitle, 366, 28);
@@ -217,6 +228,7 @@ static void render_plot(const char *model_csv, const char *measured_csv, const c
     draw_line("red", "solid", measured.x_khz, measured.measured_dropped, measured.n, 7);
   }
   draw_line("black", "dash", model.x_khz, model.model_delivered, model.n, 4);
+  draw_horizontal(zero_backlog_service_mhits, x_max);
   draw_vertical(dma_knee_khz, y_max);
   color("fore");
   solid();
@@ -230,6 +242,8 @@ static void render_plot(const char *model_csv, const char *measured_csv, const c
   messag("green: measured DMA delivered", 1580, 1540);
   color("red");
   messag("red: measured missing/tail gap", 430, 1592);
+  color("blue");
+  messag("blue dashed: OPQ-to-DMA aggregate cap", 430, 1644);
   color("green");
   messag("green dashed: zero-backlog service knee", 1580, 1592);
   color("fore");
