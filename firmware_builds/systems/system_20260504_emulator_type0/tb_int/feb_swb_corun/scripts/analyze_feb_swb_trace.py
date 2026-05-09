@@ -1318,8 +1318,19 @@ def main() -> int:
     parser.add_argument(
         "--source-mode",
         default="periodic",
-        choices=["periodic", "periodic_phase_staggered", "poisson", "poisson_iid"],
+        choices=[
+            "periodic",
+            "periodic_phase_staggered",
+            "poisson",
+            "poisson_iid",
+            "header_sync",
+            "header_sync_phase_staggered",
+        ],
     )
+    parser.add_argument("--header-sync-phase-8ns", default=100, type=int)
+    parser.add_argument("--header-sync-burst-count", default=1, type=int)
+    parser.add_argument("--header-sync-burst-spacing-8ns", default=10, type=int)
+    parser.add_argument("--header-sync-asic-stagger-8ns", default=16, type=int)
     parser.add_argument("--opq-log", type=Path)
     parser.add_argument("--assume-opq-lossless", action="store_true")
     args = parser.parse_args()
@@ -1400,6 +1411,22 @@ def main() -> int:
             return -1
         return delta // args.expected_hit_period_8ns
 
+    def is_header_sync_mode() -> bool:
+        return args.source_mode in ("header_sync", "header_sync_phase_staggered")
+
+    def header_sync_expected_phase(abs_ts_8ns: int, asic: int) -> bool:
+        burst_count = max(args.header_sync_burst_count, 1)
+        actual_phase = abs_ts_8ns % VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES
+        for burst_idx in range(burst_count):
+            expected_phase = (
+                args.header_sync_phase_8ns
+                + (burst_idx * args.header_sync_burst_spacing_8ns)
+                + (asic * args.header_sync_asic_stagger_8ns)
+            ) % VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES
+            if actual_phase == expected_phase:
+                return True
+        return False
+
     for expected in feb_hits:
         checks: list[str] = []
         payload_hit_id = source_hit_id(expected.hit_word)
@@ -1410,7 +1437,7 @@ def main() -> int:
         bucket_start = bucket_start_8ns(expected)
         bucket_end = bucket_start + 15
         sample_idx = expected_sample_idx(abs_ts_8ns, asic)
-        if args.source_mode in ("poisson", "poisson_iid"):
+        if args.source_mode in ("poisson", "poisson_iid") or is_header_sync_mode():
             expected_full_hit_id = debug_hit_id(expected.debug_meta)
         else:
             expected_full_hit_id = (
@@ -1454,6 +1481,11 @@ def main() -> int:
         require((abs_ts_8ns & 0x7) == source_rem(expected.hit_word), "source_ts_rem")
         if args.source_mode in ("poisson", "poisson_iid"):
             require(abs_ts_8ns >= 0, "source_poisson_time")
+        elif is_header_sync_mode():
+            require(
+                header_sync_expected_phase(abs_ts_8ns, asic),
+                "source_header_sync_phase",
+            )
         else:
             require(
                 sample_idx >= 0,

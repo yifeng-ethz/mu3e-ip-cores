@@ -1,4 +1,5 @@
 build/
 report/
+report*/
 transcript
 vsim.wlf

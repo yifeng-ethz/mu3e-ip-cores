@@ -158,12 +158,30 @@ make run_swb_corun_poisson \
   POISSON_SEED=20260508
 ```
 
+The deterministic header-sync comparison uses a virtual MuTRiG short-frame
+period of 910 cycles, phase 100, one pulse per short frame, and a 16-cycle
+per-ASIC phase stagger so the one-lane FEB subheader count never overflows:
+
+```sh
+make run_swb_corun_header_sync \
+  QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim \
+  OPQ_SOURCE_MODE=native_sv_signoff \
+  OPQ_LANE_FIFO_DEPTH=65536 \
+  OPQ_TICKET_FIFO_DEPTH=65536 \
+  ASIC_COUNT=8 \
+  RUN_WINDOW_8NS=125000 \
+  HEADER_SYNC_PHASE_8NS=100 \
+  HEADER_SYNC_BURST_COUNT=1 \
+  HEADER_SYNC_ASIC_STAGGER_8NS=16
+```
+
 The MuSiP OPQ source defaults used by this corun provision
 `OPQ_DEBUG_LEVEL=2`; under the scoped no-bottleneck assumption every native OPQ
 drop counter must remain zero. The test expects the final log to contain
 `FEB_SWB_CORUN_PLAIN_PASS` and writes ingress, OPQ, DMA, and summary traces
-under `report/` for periodic mode and `report_poisson/` for Poisson mode.
-`run_swb_corun` and `run_swb_corun_poisson` also run
+under `report/` for periodic mode, `report_poisson/` for Poisson mode, and
+`report_header_sync/` for header-sync mode. `run_swb_corun`,
+`run_swb_corun_poisson`, and `run_swb_corun_header_sync` also run
 `scripts/analyze_feb_swb_trace.py`, which emits
 `feb_swb_hit_trace_debug.csv` plus `feb_swb_lifetime_trace.csv` and proves each
 hit reaches OPQ and DMA with the expected ASIC, channel, hit id, and
@@ -208,6 +226,13 @@ poisson_iid seed 20260508:
   missing_hits=0, ghost_hits=0, opq_drop_counter_total=0
   pre_rbcam_virtual_model min/p05/p50/p95/max=67/148/524/892/938 cycles
   plot=report_poisson/feb_swb_lifetime_hist.png
+
+header_sync phase100 burst1 stagger16:
+  expected_hits=35328, expected_dma_words=8832
+  feb_hit_count=35328, actual_hits=35328
+  missing_hits=0, ghost_hits=0, opq_drop_counter_total=0
+  pre_rbcam_virtual_model min/p05/p50/p95/max=725/753/835/917/945 cycles
+  plot=report_header_sync/feb_swb_lifetime_hist.png
 ```
 
 The OPQ queue report is `feb_swb_opq_queue_model.csv` plus the DISLIN plots
@@ -218,8 +243,10 @@ periodic run this model has zero residual and reports
 `rho = mean(service_iat) / mean(ingress_iat) = 1.729`, `wait_min=2733.5`, and
 `wait_max=92256.5` cycles. In the accepted Poisson run the zero-residual queue
 model reports `mean(service_iat)=3607.639`, `rho=1.762`, `wait_min=2789.5`,
-and `wait_max=97927.5` cycles. Because these are finite bursts with
-provisioned buffering and post-run drain,
+and `wait_max=97927.5` cycles. In the accepted header-sync run it reports
+`mean(service_iat)=3542.058`, `rho=1.730`, `wait_min=2819.0`, and
+`wait_max=92462.5` cycles. Because these are finite bursts with provisioned
+buffering and post-run drain,
 `rho>1` is reported as queue residency, not as an allowed loss condition.
 
 The excluded 1024-entry lane-FIFO diagnostic profile is recorded in

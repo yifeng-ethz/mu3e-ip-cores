@@ -683,14 +683,21 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
   char reference_path[4096];
   char bounds_path[4096];
   char source_mode[128] = "periodic_phase_staggered";
+  char title_mode[160] = "periodic_phase_staggered";
   char active_asics_text[64] = "8";
   char hit_period_text[64] = "1250";
+  char header_sync_phase_text[64] = "100";
+  char header_sync_burst_text[64] = "1";
+  char header_sync_stagger_text[64] = "16";
   char title[256];
   char alpha_line[256];
   float common_xmin;
   float common_xmax;
   int active_asics;
   int hit_period;
+  int header_sync_phase;
+  int header_sync_burst;
+  int header_sync_stagger;
 
   if (!read_lifetime_csv(csv_path, metrics, nmetrics)) {
     exit(1);
@@ -702,13 +709,32 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
   read_summary_value(csv_path, "source_mode", source_mode, sizeof(source_mode));
   read_summary_value(csv_path, "active_asics", active_asics_text, sizeof(active_asics_text));
   read_summary_value(csv_path, "hit_period_8ns", hit_period_text, sizeof(hit_period_text));
+  read_summary_value(csv_path, "header_sync_phase_8ns", header_sync_phase_text, sizeof(header_sync_phase_text));
+  read_summary_value(csv_path, "header_sync_burst_count", header_sync_burst_text, sizeof(header_sync_burst_text));
+  read_summary_value(csv_path, "header_sync_asic_stagger_8ns", header_sync_stagger_text, sizeof(header_sync_stagger_text));
   active_asics = atoi(active_asics_text);
   hit_period = atoi(hit_period_text);
+  header_sync_phase = atoi(header_sync_phase_text);
+  header_sync_burst = atoi(header_sync_burst_text);
+  header_sync_stagger = atoi(header_sync_stagger_text);
   if (active_asics <= 0) {
     active_asics = 8;
   }
   if (hit_period <= 0) {
     hit_period = 1250;
+  }
+  if (header_sync_burst <= 0) {
+    header_sync_burst = 1;
+  }
+  if (header_sync_stagger <= 0) {
+    header_sync_stagger = 16;
+  }
+  snprintf(title_mode, sizeof(title_mode), "%s", source_mode);
+  if (strcmp(source_mode, "header_sync") == 0 ||
+      strcmp(source_mode, "header_sync_phase_staggered") == 0) {
+    snprintf(title_mode,
+             sizeof(title_mode),
+             "header_sync");
   }
   compute_common_x_range(metrics, nmetrics, &common_xmin, &common_xmax);
 
@@ -717,8 +743,16 @@ static void render_lifetime_plot(const char *csv_path, const char *out_path) {
            sizeof(title),
            "FEB/SWB ASIC0..%d all-channel hit lifetime (%s)",
            active_asics - 1,
-           source_mode);
-  if (strcmp(source_mode, "poisson_iid") == 0 || strcmp(source_mode, "poisson") == 0) {
+           title_mode);
+  if (strcmp(source_mode, "header_sync") == 0 ||
+      strcmp(source_mode, "header_sync_phase_staggered") == 0) {
+    snprintf(alpha_line,
+             sizeof(alpha_line),
+             "D_i=(T_i-GTS_hit)/8 ns; alpha_h(t)=%d*(floor(t/910)+1), phase=%d, stagger=%d",
+             32 * active_asics * header_sync_burst,
+             header_sync_phase,
+             header_sync_stagger);
+  } else if (strcmp(source_mode, "poisson_iid") == 0 || strcmp(source_mode, "poisson") == 0) {
     snprintf(alpha_line,
              sizeof(alpha_line),
              "master equation: D_i=(T_i-GTS_hit)/8 ns; E[alpha_iid(t)]=%d*t/%d hits",
