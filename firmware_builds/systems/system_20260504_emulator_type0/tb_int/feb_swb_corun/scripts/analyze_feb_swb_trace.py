@@ -812,6 +812,19 @@ def opq_drop_counters(opq_log: OpqNativeLog) -> dict[str, int]:
     return counters
 
 
+def opq_handle_overflow_counters(opq_log: OpqNativeLog) -> dict[str, int]:
+    counters: dict[str, int] = {}
+    for key, value in opq_log.summary.items():
+        if "handle_fifo_overflow" in key:
+            counters[f"summary.{key}"] = value
+    for lane_info in opq_log.lanes:
+        lane = lane_info.get("lane", len(counters))
+        for key, value in lane_info.items():
+            if key in ("handle_fifo_overflow_seen", "handle_fifo_overflow_cnt"):
+                counters[f"lane{lane}.{key}"] = value
+    return counters
+
+
 def write_opq_native_summary(path: Path, opq_log: OpqNativeLog) -> None:
     rows: list[dict[str, object]] = []
     for key, value in sorted(opq_log.summary.items()):
@@ -1688,6 +1701,13 @@ def main() -> int:
         }
         for key, value in sorted(nonzero_drop_counters.items()):
             failures.append(f"opq_lossless_drop_counter {key}={value}")
+        nonzero_handle_overflow_counters = {
+            key: value
+            for key, value in opq_handle_overflow_counters(opq_log).items()
+            if value != 0
+        }
+        for key, value in sorted(nonzero_handle_overflow_counters.items()):
+            failures.append(f"opq_config_error_handle_fifo_overflow {key}={value}")
 
     hit_trace_path = trace_dir / "feb_swb_hit_trace_debug.csv"
     lifetime_trace_path = trace_dir / "feb_swb_lifetime_trace.csv"
@@ -1825,6 +1845,11 @@ def main() -> int:
 
     pass_rows = sum(1 for row in hit_rows if row["status"] == "PASS")
     opq_drop_counter_total = sum(opq_drop_counters(opq_log).values())
+    opq_handle_overflow_total = sum(
+        value
+        for key, value in opq_handle_overflow_counters(opq_log).items()
+        if key.endswith("_cnt")
+    )
     with summary_path.open("w", encoding="ascii") as handle:
         handle.write(f"source_generation_hits={len(source_hits)}\n")
         handle.write(f"pre_rbcam_hits={len(pre_rbcam_hits)}\n")
@@ -1844,6 +1869,7 @@ def main() -> int:
         handle.write(f"padding_words={padding_words}\n")
         handle.write(f"assume_opq_lossless={1 if args.assume_opq_lossless else 0}\n")
         handle.write(f"opq_drop_counter_total={opq_drop_counter_total}\n")
+        handle.write(f"opq_handle_fifo_overflow_total={opq_handle_overflow_total}\n")
         handle.write(f"pass_hits={pass_rows}\n")
         handle.write(f"fail_hits={len(hit_rows) - pass_rows}\n")
         handle.write(f"ghost_source_generation_hits={ghost_source}\n")

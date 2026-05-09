@@ -63,7 +63,7 @@ Historical formal note:
 | [BUG-026-H](#bug-026-h-feb-swb-pre-rbcam-panel-used-post-mutrig-transport-as-golden-lifetime) | H | soft error | `directed-only (FEB/SWB lifetime plotting review)` | fixed in analyzer virtual-MuTRiG model; periodic and Poisson plots overwritten | FEB/SWB lifetime plot review on `2026-05-09` | e2cca629 | The pre-rbCAM panel used the clean full-FEB 17-cycle post-MuTRiG transport marker as the lifetime shape, so the plot collapsed instead of showing the virtual-MuTRiG short-frame wait and serializer profile. |
 | [BUG-027-H](#bug-027-h-feb-swb-rate-scan-collapsed-all-asic-traffic-onto-lane0) | H | hard stuck error | `directed-only (FEB/SWB all-ASIC rate scan)` | fixed in harness; two-lane scan rerun | FEB/SWB Poisson rate scan on `2026-05-09` | pending | The all-ASIC FEB/SWB rate scan routed every generated hit through lane0 and left lane1 empty, producing the wrong overload model for the user's requested two-lane FEB contract. |
 | [BUG-028-R](#bug-028-r-opq-subframe-hit-room-limit-reached-by-all-asic-debug-stress) | R | contract limit | `common (two-lane all-ASIC over-limit OPQ stress)` | closed as non-bug; intentional OPQ subframe limit | FEB/SWB 1 MHz/channel all-ASIC scan on `2026-05-09` | pending | The all-ASIC stress point exceeded the intentional OPQ `N_HIT` subframe hit-room hard limit; this is contract enforcement, not an RTL bug. |
-| [BUG-029-R](#bug-029-r-opq-per-lane-handle-fifo-silently-overwrites-unread-handles-under-debug-bypass) | R | hard stuck error | `directed-only (requires BUG-028 limit bypass near service knee)` | open; cycle-level root cause localized | FEB/SWB 976.562 kHz/channel rate scan on `2026-05-09` | pending | With the intentional `N_HIT` hard limit bypassed for debug, a per-lane OPQ handle FIFO can wrap onto an unread handle; the block mover then writes the wrong page range and the presenter emits holes/ghost hits with no controlled counter. |
+| [BUG-029-R](#bug-029-r-opq-per-lane-handle-fifo-silently-overwrites-unread-handles-under-debug-bypass) | R | hard stuck error | `directed-only (requires BUG-028 limit bypass near service knee)` | partially fixed; CSR config-error observability added | FEB/SWB 976.562 kHz/channel rate scan on `2026-05-09` | pending | With the intentional `N_HIT` hard limit bypassed for debug, a shallow per-lane OPQ handle FIFO can wrap onto an unread handle; the block mover then writes the wrong page range and the presenter emits holes/ghost hits. The condition is now treated as OPQ geometry/configuration error and must be CSR-visible. |
 
 ## 2026-05-06
 
@@ -931,27 +931,29 @@ Historical formal note:
     `ordered_priority_queue_monolithic_basic_presenter`; the translated
     frame-table tracker/presenter blocks exist in the MuSiP source tree but are
     not yet the regression-backed top-level path
-- Proposed RTL architecture fix:
-  - make the per-lane handle FIFO an owned, flow-controlled resource rather
-    than a blind ring buffer
-  - promote handle write/read pointers to `(ADDR_WIDTH+1)` pointer state with a
-    wrap bit, or add an equivalent occupancy counter, so full and empty are not
-    aliased when low address bits match
-  - feed handle occupancy or explicit `handle_room` back into the page
-    allocator before it writes a handle; on no room, either stall admission
-    losslessly or perform a controlled overrun drop that increments
-    `handle_fifo_full_drop_{shd,hit}` and returns all associated credits
-  - add an assertion that no handle write can target the next unread handle
-    without a controlled drop event
-  - add debug counters for `handle_fifo_occupancy_max`,
-    `handle_full_stall_cycles`, and any controlled `handle_full_drop_*`
-    events; the dual UVM scoreboard must explain every missing DMA hit through
-    one of those counters
-  - keep the descriptor-owned frame-table presenter refactor as a secondary
-    cleanup path, but the first RTL fix is handle-FIFO overrun protection
+- RTL architecture decision:
+  - a handle FIFO overflow is a provisioning/configuration error, not a
+    recoverable runtime packet-drop mode
+  - once the frame table has allocated space for this lane/subframe, the OPQ
+    cannot cleanly undo the partially-owned metadata path or fabricate a
+    well-formed controlled drop without broader architecture changes
+  - the user/integrator must configure per-lane `HANDLE_FIFO_DEPTH`, `N_HIT`,
+    `N_SHD` (hence the readout-subframe period), active lanes, DRR allowance,
+    and the traffic envelope so the per-lane handle residency never reaches the
+    FIFO depth
+  - the RTL should therefore expose a sticky CSR config-error bit and
+    per-lane saturating counters rather than silently aliasing full and empty
+  - the implemented OPQ debug CSR surface adds `HANDLE_OVF_STATUS`,
+    `HANDLE_OVF_CNT[lane]`, and `HANDLE_OCC_MAX[lane]`; any nonzero overflow
+    status invalidates the run and requires stopping/reconfiguring the OPQ
+    geometry
+  - future production hardening can add a pre-allocation `handle_room` guard
+    or `(ADDR_WIDTH+1)` handle pointers, but that must happen before frame-table
+    ownership is created; it is not a post-allocation recovery mechanism
 - Tactical debug hooks before the refactor lands:
-  - assert handle FIFO occupancy locally in the OPQ monolithic top using the
-    same allocator write and block-mover read events used for the physical FIFO
+  - assert/record handle FIFO occupancy locally in the OPQ monolithic top using
+    the same allocator write and block-mover read events used for the physical
+    FIFO
   - trace `handle_wptr`, `handle_rptr`, handle `src/dst/len`, page RAM write
     address/data, and page RAM egress address/data for the first failing
     subheader
@@ -961,11 +963,12 @@ Historical formal note:
     presenter bugs after the handle FIFO boundary is protected
   - fail the FEB/SWB scoreboard if a generated hit reaches OPQ frame-table
     write accounting but is absent at DMA without a matching controlled
-    OPQ drop or asserted handle-FIFO overwrite event
+    OPQ drop or CSR/asserted handle-FIFO overflow event
 - Fix status:
   - state:
-    open; root cause localized by cycle-level trace; RTL guard/backpressure
-    patch pending
+    partial; root cause localized by cycle-level trace; CSR-visible
+    config-error observability has been added in packet_scheduler, while
+    lossless pre-allocation guard/backpressure remains future architecture work
   - before_fix_outcome:
     `976.562 kHz/channel` generated `249896` hits and DMA decoded `236879`,
     with `missing_hits=13017`
