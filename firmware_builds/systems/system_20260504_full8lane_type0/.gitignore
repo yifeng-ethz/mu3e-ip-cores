@@ -1,0 +1,51 @@
+# Qsys-generated output for the full 8-lane Type0 build.
+# Only the Qsys-Tcl recipe under syn/ is tracked as the source of truth.
+# Generated Qsys XML, SOPC info, and synthesis trees must not be hand-edited.
+
+syn/*.qsys
+syn/*.sopcinfo
+syn/*.ipx
+syn/*_system/
+syn/full8lane_control_path_subsystem/
+syn/arb_hit_type0_supercore/
+syn/full8lane_type0_datapath/
+syn/scifi_datapath_system_v3_pipe/
+
+# Quartus output and intermediate trees
+syn/board_projects/*/db/
+syn/board_projects/*/incremental_db/
+syn/board_projects/*/output_files/
+syn/board_projects/*/output_files*/
+syn/board_projects/*/qdb/
+syn/board_projects/*/.qsys_edit/
+syn/board_projects/*/PLLJ_PLLSPE_INFO.txt
+syn/board_projects/*/*.qws
+syn/board_projects/*/*.cmp
+syn/board_projects/*/*.summary
+syn/board_projects/*/*.smsg
+syn/board_projects/*/*.sld
+syn/board_projects/*/*.jdi
+syn/board_projects/*/*.pin
+syn/board_projects/*/*.sof
+syn/board_projects/*/*.rbf
+syn/board_projects/*/*.rpt
+syn/board_projects/*/*.txt
+
+# IP cache from Platform Designer
+ip/
+
+# Local source IP shims used by the Qsys recipe
+!syn/ip/
+!syn/ip/full8lane_onewire_master/
+!syn/ip/full8lane_onewire_master/full8lane_onewire_master.vhd
+!syn/ip/full8lane_onewire_master/full8lane_onewire_master_hw.tcl
+!syn/ip/full8lane_sc_hub_v2/
+!syn/ip/full8lane_sc_hub_v2/full8lane_sc_hub_v2.vhd
+!syn/ip/full8lane_sc_hub_v2/full8lane_sc_hub_v2_hw.tcl
+!syn/ip/full8lane_histogram_statistics_v2/
+!syn/ip/full8lane_histogram_statistics_v2/full8lane_histogram_statistics_v2.vhd
+!syn/ip/full8lane_histogram_statistics_v2/full8lane_histogram_statistics_v2_hw.tcl
+
+# Materialized by syn/build_full8lane_system.tcl from the run-control snapshot.
+syn/ip/upload_system_v3_readyless/
+syn/ip/hit_stack_system_readyless/

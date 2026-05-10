@@ -1,0 +1,212 @@
+SHELL := /bin/bash
+
+QUESTA_HOME     ?= /data1/questaone_sim-2026.1_1/questasim
+ETH_LIC_SERVER  := 8161@lic-mentor.ethz.ch
+
+export LM_LICENSE_FILE     := $(ETH_LIC_SERVER)
+export MGLS_LICENSE_FILE   := $(LM_LICENSE_FILE)
+export SALT_LICENSE_SERVER := $(LM_LICENSE_FILE)
+export QSIM_INI            := $(QUESTA_HOME)/modelsim.ini
+
+VLIB   := $(QUESTA_HOME)/linux_x86_64/vlib
+VMAP   := $(QUESTA_HOME)/linux_x86_64/vmap
+VLOG   := $(QUESTA_HOME)/linux_x86_64/vlog
+VSIM   := $(QUESTA_HOME)/linux_x86_64/vsim
+VCOVER := $(QUESTA_HOME)/linux_x86_64/vcover
+
+IP_ROOT      := $(abspath ..)
+TB_ROOT      := $(abspath .)
+UVM_DIR      := $(TB_ROOT)/uvm
+SIM_DIR      := $(TB_ROOT)/sim
+WORK_LIB     := $(SIM_DIR)/work
+MODELSIM_INI := $(SIM_DIR)/modelsim.ini
+HW_TCL       := $(IP_ROOT)/script/arb_hit_type0_hw.tcl
+STATIC_FILELIST := $(SIM_DIR)/arb_hit_type0_static.f
+STATIC_PRE_DO   := $(SIM_DIR)/questa_static_pre.do
+
+UVM_HOME     ?= $(QUESTA_HOME)/verilog_src/uvm-1.2
+UVM_SRC      := $(UVM_HOME)/src
+UVM_PKG      := $(UVM_SRC)/uvm_pkg.sv
+UVM_DPI_LIB  := $(QUESTA_HOME)/uvm-1.2/linux_x86_64/uvm_dpi
+DPI_CPP      ?= /usr/bin/gcc
+
+SEED         ?= 1
+PLUSARGS     ?=
+TB_TOP       := tb_top
+
+DUT_SRCS := $(patsubst ../rtl/%,$(IP_ROOT)/rtl/%,$(shell awk '/add_fileset_file/ { for (idx = 1; idx < NF; idx++) if ($$idx == "PATH") print $$(idx + 1) }' $(HW_TCL) | awk '!seen[$$0]++'))
+TB_SRCS  := $(shell find $(UVM_DIR) -name '*.sv' -print | sort)
+
+LIB_STAMP := $(SIM_DIR)/.lib.stamp
+UVM_STAMP := $(SIM_DIR)/.uvm.stamp
+DUT_STAMP := $(SIM_DIR)/.dut.stamp
+
+BASIC_TESTS ?=
+EDGE_TESTS  ?=
+PROF_TESTS  ?=
+ERROR_TESTS ?=
+CROSS_TESTS ?=
+
+# Per-bucket test lists are appended by fragments under script/buckets/<bucket>.mk
+# (one fragment per parallel codex2 session; each is `<BUCKET>_TESTS += ...`).
+-include $(IP_ROOT)/script/buckets/*.mk
+
+.PHONY: lib comp_uvm comp_dut static_screen run_% run_b002_% regress_basic regress_edge regress_prof regress_error regress_cross all_buckets_frame clean
+
+lib: $(LIB_STAMP)
+
+$(LIB_STAMP):
+	@mkdir -p $(SIM_DIR)
+	@if [ ! -f "$(MODELSIM_INI)" ]; then cp "$(QSIM_INI)" "$(MODELSIM_INI)"; chmod u+w "$(MODELSIM_INI)"; fi
+	@if [ ! -d "$(WORK_LIB)" ]; then $(VLIB) "$(WORK_LIB)" >/dev/null; fi
+	@$(VMAP) -modelsimini "$(MODELSIM_INI)" work "$(WORK_LIB)" >/dev/null
+	@touch "$@"
+
+comp_uvm: $(UVM_STAMP)
+
+$(UVM_STAMP): $(UVM_PKG) | $(LIB_STAMP)
+	@echo "=== Compiling UVM 1.2 ==="
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" "$(UVM_PKG)"
+	@touch "$@"
+
+comp_dut: $(DUT_STAMP)
+
+$(DUT_STAMP): $(DUT_SRCS) $(TB_SRCS) | $(UVM_STAMP)
+	@echo "=== Compiling arb_hit_type0 DUT from $(HW_TCL) ==="
+	@for src in $(DUT_SRCS); do \
+	  echo "vlog $$src"; \
+	  $(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work "$$src" || exit $$?; \
+	done
+	@echo "=== Compiling arb_hit_type0 UVM scaffold ==="
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/lcg_prng.sv"
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/reg_pkg.sv"
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/arb_hit_type0_pkg.sv"
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -mfcu -cuname arb_hit_type0_assertions_cu -work work "$(UVM_DIR)/arb_hit_type0_assertions.sv"
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/tb_top.sv"
+	@echo "=== Compiling B002 repro support (splitter model + b002 top) ==="
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work "$(UVM_DIR)/altera_avalon_st_splitter_model.sv"
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$(UVM_DIR)/tb_top_b002.sv"
+	@echo "=== Compiling BASIC bucket packages ==="
+	@for src in $$(find $(UVM_DIR)/sequence/basic $(UVM_DIR)/test/basic -maxdepth 1 -name '*.sv' 2>/dev/null | sort); do \
+	  echo "vlog $$src"; \
+	  $(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$$src" || exit $$?; \
+	done
+	@echo "=== Compiling EDGE/PROF/ERROR bucket compilation units ==="
+	@for bucket in edge prof error; do \
+	  files=$$(find "$(UVM_DIR)/sequence/$$bucket" "$(UVM_DIR)/test/$$bucket" -maxdepth 1 -name '*.sv' 2>/dev/null | sort); \
+	  if [ -n "$$files" ]; then \
+	    prelude="$(SIM_DIR)/bucket_$${bucket}_prelude.sv"; \
+	    printf '%s\n' \
+	      'import uvm_pkg::*;' \
+	      'import lcg_prng_pkg::*;' \
+	      'import arb_hit_type0_reg_pkg::*;' \
+	      'import arb_hit_type0_pkg::*;' \
+	      '`include "uvm_macros.svh"' \
+	      > "$$prelude"; \
+	    echo "vlog $$bucket bucket"; \
+	    $(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -mfcu -cuname arb_hit_type0_$${bucket}_bucket_cu -work work +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" "$$prelude" $$files || exit $$?; \
+	  fi; \
+	done
+	@touch "$@"
+
+run_%: comp_dut
+	@echo "=== Running UVM_TESTNAME=$* SEED=$(SEED) ==="
+	@set -o pipefail; cd "$(SIM_DIR)" && \
+	  "$(VSIM)" -modelsimini "$(MODELSIM_INI)" -c -work work -t ps \
+	    -dpicpppath "$(DPI_CPP)" -sv_lib "$(UVM_DPI_LIB)" \
+	    -suppress 19 -suppress 3009 \
+	    -voptargs=+acc \
+	    +UVM_TESTNAME=$* +ARB_SEED=$(SEED) $(PLUSARGS) \
+	    "$(TB_TOP)" \
+	    -do "quietly set NumericStdNoWarnings 1; quietly set StdArithNoWarnings 1; run -all; quit -f" \
+	    | tee "$*.log"
+	@if grep -qE '(^# )?UVM_(ERROR|FATAL) [^:]|\\*\\* (Fatal|Error):' "$(SIM_DIR)/$*.log"; then \
+	  echo "FAIL: $*"; exit 1; \
+	elif ! grep -q '\*\*\* TEST PASSED \*\*\*' "$(SIM_DIR)/$*.log"; then \
+	  echo "FAIL: $* did not report TEST PASSED"; exit 1; \
+	else \
+	  echo "PASS: $*"; \
+	fi
+
+# B002 repro target: uses tb_top_b002 as elaboration top.
+# The R016 seq + test are compiled together with tb_top_b002 in a single
+# compilation unit (b002_top_cu) so that the UVM factory registers the
+# R016 test class at elaboration time.  This step always recompiles the CU
+# so that any edit to R016_*.sv is picked up immediately.
+# REPRO_HIT outcome: the test emits UVM_ERROR and the run target exits 1.
+# NO_REPRO outcome:  the test passes cleanly (exit 0).
+run_b002_%: comp_dut
+	@echo "=== B002 Repro: compiling b002_top_cu ==="
+	@$(VLOG) -modelsimini "$(MODELSIM_INI)" -sv -work work \
+	  +incdir+"$(UVM_SRC)" +incdir+"$(UVM_DIR)" \
+	  -mfcu -cuname b002_top_cu \
+	  "$(UVM_DIR)/sequence/error/R016_nested_splitter_runctl_propagation_seq.sv" \
+	  "$(UVM_DIR)/test/error/R016_nested_splitter_runctl_propagation_test.sv" \
+	  "$(UVM_DIR)/tb_top_b002.sv"
+	@echo "=== B002 Repro: vopt tb_top_b002 ==="
+	@cd "$(SIM_DIR)" && $(QUESTA_HOME)/linux_x86_64/vopt \
+	  -modelsimini "$(MODELSIM_INI)" -work work +acc tb_top_b002 -o tb_top_b002_opt \
+	  2>&1 | grep -v 'vopt-222\|vopt-10587'
+	@echo "=== B002 Repro: UVM_TESTNAME=$* (top=tb_top_b002) SEED=$(SEED) ==="
+	@set -o pipefail; cd "$(SIM_DIR)" && \
+	  "$(VSIM)" -modelsimini "$(MODELSIM_INI)" -c -work work -t ps \
+	    -dpicpppath "$(DPI_CPP)" -sv_lib "$(UVM_DPI_LIB)" \
+	    -suppress 19 -suppress 3009 \
+	    +UVM_TESTNAME=$* +ARB_SEED=$(SEED) $(PLUSARGS) \
+	    tb_top_b002_opt \
+	    -do "quietly set NumericStdNoWarnings 1; quietly set StdArithNoWarnings 1; run -all; quit -f" \
+	    | tee "b002_$*.log"
+	@if grep -q 'VERDICT: REPRO_HIT' "$(SIM_DIR)/b002_$*.log"; then \
+	  echo "B002-REPRO: $* -> REPRO_HIT (structural-depth root cause confirmed)"; exit 1; \
+	elif grep -q 'VERDICT: NO_REPRO' "$(SIM_DIR)/b002_$*.log"; then \
+	  echo "B002-NOREPRO: $* -> NO_REPRO (root cause is not structural depth alone)"; \
+	elif grep -qE '(^# )?UVM_(ERROR|FATAL) [^:]|\\*\\* (Fatal|Error):' "$(SIM_DIR)/b002_$*.log"; then \
+	  echo "FAIL: $* (UVM error or fatal)"; exit 1; \
+	else \
+	  echo "B002-UNKNOWN: $* did not emit verdict"; exit 1; \
+	fi
+
+regress_basic: comp_dut
+	@tests="$(BASIC_TESTS)"; if [ -z "$$tests" ]; then echo "No BASIC_TESTS defined yet"; else for test in $$tests; do $(MAKE) run_$$test SEED=$(SEED); done; fi
+
+regress_edge: comp_dut
+	@tests="$(EDGE_TESTS)"; if [ -z "$$tests" ]; then echo "No EDGE_TESTS defined yet"; else for test in $$tests; do $(MAKE) run_$$test SEED=$(SEED); done; fi
+
+regress_prof: comp_dut
+	@tests="$(PROF_TESTS)"; if [ -z "$$tests" ]; then echo "No PROF_TESTS defined yet"; else for test in $$tests; do $(MAKE) run_$$test SEED=$(SEED); done; fi
+
+regress_error: comp_dut
+	@tests="$(ERROR_TESTS)"; if [ -z "$$tests" ]; then echo "No ERROR_TESTS defined yet"; else for test in $$tests; do $(MAKE) run_$$test SEED=$(SEED); done; fi
+
+regress_cross: comp_dut
+	@tests="$(CROSS_TESTS)"; if [ -z "$$tests" ]; then echo "No CROSS_TESTS defined yet"; else for test in $$tests; do $(MAKE) run_$$test SEED=$(SEED); done; fi
+
+all_buckets_frame: comp_dut
+	@tests="$(BASIC_TESTS) $(EDGE_TESTS) $(PROF_TESTS) $(ERROR_TESTS) $(CROSS_TESTS)"; \
+	if [ -z "$$(echo $$tests)" ]; then \
+	  echo "No bucket-frame tests defined yet"; \
+	else \
+	  for test in $$tests; do $(MAKE) run_$$test SEED=$(SEED) PLUSARGS="$(PLUSARGS) +ARB_FRAME_MODE=all_buckets_frame"; done; \
+	fi
+
+$(STATIC_FILELIST): $(HW_TCL)
+	@mkdir -p "$(SIM_DIR)"
+	@printf '%s\n' $(DUT_SRCS) > "$@"
+	@printf '%s\n' "$(UVM_DIR)/arb_hit_type0_assertions.sv" >> "$@"
+
+$(STATIC_PRE_DO):
+	@mkdir -p "$(SIM_DIR)"
+	@printf '%s\n' \
+	  'vmap std /data3/siemens/questa_OneSpin_StaticFormal-2024.1_2/questa_static_formal/linux_x86_64/share/modeltech/std' \
+	  'vmap sv_std /data3/siemens/questa_OneSpin_StaticFormal-2024.1_2/questa_static_formal/linux_x86_64/share/modeltech/sv_std' \
+	  > "$@"
+
+static_screen: $(STATIC_FILELIST) $(STATIC_PRE_DO)
+	@python3 /home/yifeng/.codex/skills/rtl-linter-and-checker/scripts/questa_static_screen.py \
+	  --top arb_hit_type0 \
+	  --filelist "$(STATIC_FILELIST)" \
+	  --pre-do "$(STATIC_PRE_DO)" \
+	  $(DUT_SRCS) "$(UVM_DIR)/arb_hit_type0_assertions.sv"
+
+clean:
+	@python3 -c 'import os, shutil; p = os.path.abspath("sim"); shutil.rmtree(p) if os.path.isdir(p) else None'

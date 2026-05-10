@@ -2,6 +2,9 @@
 -- IP Name:             onewire_master
 -- Author:              Yifeng Wang (yifenwan@phys.ethz.ch)
 -- Revision:            1.0
+-- Version :            26.2.1
+-- Date    :            20260428
+-- Change  :            Update common divider port map for the 125 MHz odd-divider repair.
 -- Date:                Aug 29, 2024 (file created)
 -- Description:         Perform 1-Wire data rx/tx transmission in link and physical layer. 
 -- Usage:                
@@ -414,12 +417,12 @@ begin
 	)
 	port map ( 
 		-- input fast clock and reset interface
-		i_clk 			=> csi_clock_clk, -- input clock
-		i_reset_n 		=> not rsi_reset_reset,	-- input reset
+		clk 			=> csi_clock_clk, -- input clock
+		reset_n 		=> not rsi_reset_reset,	-- input reset
 		-- pseudo slow clock
-		o_clk		 	=> pseudo_clk_slow, -- so far not used, can be slow down the overall state machine to release more timing slack
+		pseudo_clk	 	=> pseudo_clk_slow, -- so far not used, can be slow down the overall state machine to release more timing slack
 		-- slow tick (active for one fast cycle at the rising edge of the slow clock)
-		o_tick			=> slow_tick
+		tick			=> slow_tick
 	);
 	
 	-- ------------------------------------
@@ -1267,7 +1270,6 @@ begin
 
 
 end architecture rtl;
-
 
 
 

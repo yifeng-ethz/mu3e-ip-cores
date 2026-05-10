@@ -1,0 +1,1 @@
+set_global_assignment -library "feb_system_v3" -name VHDL_FILE [file join $::quartus(qip_path) "feb_system_lat4.vhd"]

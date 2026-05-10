@@ -42,6 +42,16 @@
 --		Change: Extend mode 1 timestamp handling across narrow-slice wraps by
 --		        reconstructing the selected MTS field into the local GTS epoch
 --		        before subtracting.
+-- Revision: 1.12
+--		Date: May 3, 2026
+--		Change: Split ingress key construction into sample, slice-prepare,
+--		        and final-key stages. This removes the runtime key-slice CSR
+--		        and delay arithmetic from one 125 MHz timing cone.
+-- Revision: 1.13
+--		Date: May 3, 2026
+--		Change: Add a dedicated mode-1 latency calc stage so narrow-MTS epoch
+--		        reconstruction and GTS-minus-MTS subtraction are not forced
+--		        into one pll_sclk setup path.
 -- Revision: 1.3
 --		Date: Apr 25, 2026
 --		Change: Parameterize the ingress FIFO depth for bursty post-stack
@@ -114,11 +124,11 @@ entity histogram_statistics_v2 is
         N_DEBUG_INTERFACE        : natural := 6;
         VERSION_MAJOR            : natural := 26;
         VERSION_MINOR            : natural := 1;
-        VERSION_PATCH            : natural := 8;
-        BUILD                    : natural := 502;
+        VERSION_PATCH            : natural := 10;
+        BUILD                    : natural := 503;
         IP_UID                   : natural := 1212765012;  -- ASCII "HIST" = 0x48495354
-        VERSION_DATE             : natural := 20260502;
-        VERSION_GIT              : natural := 375124078;
+        VERSION_DATE             : natural := 20260503;
+        VERSION_GIT              : natural := 2679438;
         INSTANCE_ID              : natural := 0;
         SNOOP_EN                 : boolean := true;
         ENABLE_PACKET            : boolean := true;
@@ -266,7 +276,26 @@ architecture rtl of histogram_statistics_v2 is
     signal port_ready     : std_logic_vector(MAX_PORTS_CONST - 1 downto 0);
     signal ingress_accept : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
     signal ingress_write_req : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
-    signal ingress_key_next : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(SAR_TICK_WIDTH - 1 downto 0);
+    signal ingress_sample_data_next : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(AVST_DATA_WIDTH - 1 downto 0);
+    signal ingress_sample_valid : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_sample_write_req : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_sample_data : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(AVST_DATA_WIDTH - 1 downto 0);
+    signal ingress_sample_mode : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(3 downto 0);
+    signal ingress_sample_arrival : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(47 downto 0);
+    signal ingress_prep_valid : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_prep_write_req : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_prep_mode : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(3 downto 0);
+    signal ingress_prep_key_unsigned : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_prep_raw_unsigned : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(AVST_DATA_WIDTH - 1 downto 0);
+    signal ingress_prep_raw_signed : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(AVST_DATA_WIDTH - 1 downto 0);
+    signal ingress_prep_key_width : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(7 downto 0);
+    signal ingress_prep_arrival : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(47 downto 0);
+    signal ingress_calc_valid : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_calc_write_req : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_calc_latency : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
+    signal ingress_calc_key : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(SAR_TICK_WIDTH - 1 downto 0);
+    signal ingress_calc_hit_ts : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(47 downto 0);
+    signal ingress_calc_arrival : hs_unsigned_array_t(0 to MAX_PORTS_CONST - 1)(47 downto 0);
     signal ingress_stage_valid : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
     signal ingress_stage_write_req : std_logic_vector(MAX_PORTS_CONST - 1 downto 0) := (others => '0');
     signal ingress_stage_key : hs_slv_array_t(0 to MAX_PORTS_CONST - 1)(SAR_TICK_WIDTH - 1 downto 0);
@@ -499,6 +528,88 @@ architecture rtl of histogram_statistics_v2 is
         return std_logic_vector(result_v);
     end function build_latency_key;
 
+    function build_key_prepared(
+        raw_unsigned : unsigned;
+        raw_signed   : signed;
+        key_unsigned : std_logic
+    ) return std_logic_vector is
+        variable result_v : tick_t := (others => '0');
+        variable raw_u_v  : unsigned(SAR_KEY_WIDTH - 1 downto 0);
+        variable raw_s_v  : signed(SAR_KEY_WIDTH - 1 downto 0);
+    begin
+        if key_unsigned = '1' then
+            raw_u_v  := resize(raw_unsigned, SAR_KEY_WIDTH);
+            result_v := signed(resize(raw_u_v, SAR_TICK_WIDTH));
+        else
+            raw_s_v  := resize(raw_signed, SAR_KEY_WIDTH);
+            result_v := resize(raw_s_v, SAR_TICK_WIDTH);
+        end if;
+        return std_logic_vector(result_v);
+    end function build_key_prepared;
+
+    function build_latency_hit_ts_prepared(
+        raw_ts      : unsigned;
+        key_width   : unsigned(7 downto 0);
+        arrival_8n  : unsigned
+    ) return unsigned is
+        variable key_width_v  : natural;
+        variable hit_ts_8n_v  : unsigned(arrival_8n'range);
+        variable epoch_step_v : unsigned(arrival_8n'range) := (others => '0');
+    begin
+        key_width_v := to_integer(key_width);
+        hit_ts_8n_v := resize(raw_ts, hit_ts_8n_v'length);
+
+        if key_width_v > 0 and key_width_v < arrival_8n'length then
+            hit_ts_8n_v := arrival_8n;
+            for bit_idx in hit_ts_8n_v'range loop
+                if bit_idx < key_width_v and bit_idx <= raw_ts'high then
+                    hit_ts_8n_v(bit_idx) := raw_ts(bit_idx);
+                end if;
+            end loop;
+
+            epoch_step_v := shift_left(to_unsigned(1, epoch_step_v'length), key_width_v);
+            if hit_ts_8n_v > arrival_8n and arrival_8n >= epoch_step_v then
+                hit_ts_8n_v := hit_ts_8n_v - epoch_step_v;
+            end if;
+        end if;
+
+        return hit_ts_8n_v;
+    end function build_latency_hit_ts_prepared;
+
+    function build_latency_delta_key_prepared(
+        hit_ts_8n  : unsigned;
+        arrival_8n : unsigned
+    ) return std_logic_vector is
+        variable result_v     : tick_t := (others => '0');
+        variable hit_ts_r_v   : unsigned(arrival_8n'range);
+        variable arrival_v    : signed(arrival_8n'length downto 0);
+        variable hit_ts_v     : signed(arrival_8n'length downto 0);
+        variable delta_v      : signed(arrival_8n'length downto 0);
+    begin
+        hit_ts_r_v := resize(hit_ts_8n, hit_ts_r_v'length);
+        arrival_v := signed('0' & std_logic_vector(arrival_8n));
+        hit_ts_v  := signed('0' & std_logic_vector(hit_ts_r_v));
+        delta_v   := arrival_v - hit_ts_v;
+        result_v  := resize(delta_v, SAR_TICK_WIDTH);
+        return std_logic_vector(result_v);
+    end function build_latency_delta_key_prepared;
+
+    function build_latency_key_prepared(
+        raw_ts      : unsigned;
+        key_width   : unsigned(7 downto 0);
+        arrival_8n  : unsigned
+    ) return std_logic_vector is
+    begin
+        return build_latency_delta_key_prepared(
+            hit_ts_8n  => build_latency_hit_ts_prepared(
+                raw_ts     => raw_ts,
+                key_width  => key_width,
+                arrival_8n => arrival_8n
+            ),
+            arrival_8n => arrival_8n
+        );
+    end function build_latency_key_prepared;
+
     function build_debug_key(
         debug_mode : integer;
         data_word  : std_logic_vector(15 downto 0)
@@ -506,7 +617,7 @@ architecture rtl of histogram_statistics_v2 is
         variable result_v : tick_t := (others => '0');
     begin
         case debug_mode is
-            when -1 | -7 =>
+            when -1 | -2 | -3 | -4 | -5 | -6 | -7 =>
                 result_v := resize(signed(data_word), SAR_TICK_WIDTH);
             when others =>
                 result_v := signed(resize(unsigned(data_word), SAR_TICK_WIDTH));
@@ -692,7 +803,7 @@ begin
         port_ready        <= (others => '0');
         ingress_accept    <= (others => '0');
         ingress_write_req <= (others => '0');
-        ingress_key_next  <= (others => (others => '0'));
+        ingress_sample_data_next <= (others => (others => '0'));
         debug_mode_v     := to_integer(signed(cfg_mode));
         debug_dual_mts_v := debug_mode_v = -7;
         debug_valid_v    := '0';
@@ -780,13 +891,14 @@ begin
 
                 accept_pulse(idx)   <= sampled_v;
                 ingress_accept(idx) <= sampled_v;
+                if debug_mode_v < 0 then
+                    ingress_sample_data_next(idx)(15 downto 0) <= debug_data_v;
+                else
+                    ingress_sample_data_next(idx) <= port_data(idx);
+                end if;
 
                 if sampled_v = '1' then
                     if debug_mode_v < 0 then
-                        ingress_key_next(idx) <= build_debug_key(
-                            debug_mode => debug_mode_v,
-                            data_word  => debug_data_v
-                        );
                         debug_filter_v := build_debug_filter_word(
                             debug_source => debug_source_v,
                             debug_mode   => debug_mode_v,
@@ -805,13 +917,6 @@ begin
                             ingress_write_req(idx) <= '1';
                         end if;
                     elsif debug_mode_v = 1 then
-                        ingress_key_next(idx) <= build_latency_key(
-                            data_word   => port_data(idx),
-                            key_hi      => cfg_update_key_high,
-                            key_lo      => cfg_update_key_low,
-                            arrival_8n  => gts_8n
-                        );
-
                         filter_pass_v := match_filter(
                             data_word      => port_data(idx),
                             filter_enable  => cfg_filter_enable_port(idx),
@@ -824,16 +929,6 @@ begin
                             ingress_write_req(idx) <= '1';
                         end if;
                     else
-                        -- Compute key unconditionally (don't gate by filter_pass)
-                        -- to break timing from cfg_filter_key_low → ingress_stage_key.
-                        -- Key value is don't-care when write_req = '0'.
-                        ingress_key_next(idx) <= build_key(
-                            data_word    => port_data(idx),
-                            key_hi       => cfg_update_key_high,
-                            key_lo       => cfg_update_key_low,
-                            key_unsigned => cfg_key_unsigned
-                        );
-
                         filter_pass_v := match_filter(
                             data_word      => port_data(idx),
                             filter_enable  => cfg_filter_enable_port(idx),
@@ -862,30 +957,121 @@ begin
         end loop;
     end process ingress_comb;
 
-    ingress_stage_reg : process (i_clk)
+    ingress_pipe_reg : process (i_clk)
+        variable mode_v         : integer;
+        variable prep_mode_v    : integer;
+        variable raw_unsigned_v : unsigned(AVST_DATA_WIDTH - 1 downto 0);
+        variable raw_signed_v   : signed(AVST_DATA_WIDTH - 1 downto 0);
+        variable key_width_v    : natural;
     begin
         if rising_edge(i_clk) then
             if i_rst = '1' or measure_clear_pulse = '1' then
+                ingress_sample_valid     <= (others => '0');
+                ingress_sample_write_req <= (others => '0');
+                ingress_sample_data      <= (others => (others => '0'));
+                ingress_sample_mode      <= (others => (others => '0'));
+                ingress_sample_arrival   <= (others => (others => '0'));
+                ingress_prep_valid       <= (others => '0');
+                ingress_prep_write_req   <= (others => '0');
+                ingress_prep_mode        <= (others => (others => '0'));
+                ingress_prep_key_unsigned <= (others => '0');
+                ingress_prep_raw_unsigned <= (others => (others => '0'));
+                ingress_prep_raw_signed  <= (others => (others => '0'));
+                ingress_prep_key_width   <= (others => (others => '0'));
+                ingress_prep_arrival     <= (others => (others => '0'));
+                ingress_calc_valid       <= (others => '0');
+                ingress_calc_write_req   <= (others => '0');
+                ingress_calc_latency     <= (others => '0');
+                ingress_calc_key         <= (others => (others => '0'));
+                ingress_calc_hit_ts      <= (others => (others => '0'));
+                ingress_calc_arrival     <= (others => (others => '0'));
                 ingress_stage_valid     <= (others => '0');
                 ingress_stage_write_req <= (others => '0');
                 ingress_stage_key       <= (others => (others => '0'));
             else
                 for idx in 0 to MAX_PORTS_CONST - 1 loop
-                    if ingress_stage_valid(idx) = '1' then
-                        ingress_stage_valid(idx)     <= '0';
-                        ingress_stage_write_req(idx) <= '0';
-                        ingress_stage_key(idx)       <= (others => '0');
+                    mode_v         := to_integer(signed(ingress_sample_mode(idx)));
+                    prep_mode_v    := to_integer(signed(ingress_prep_mode(idx)));
+                    raw_unsigned_v := (others => '0');
+                    raw_signed_v   := (others => '0');
+                    key_width_v    := 0;
+
+                    if mode_v < 0 then
+                        raw_unsigned_v := resize(unsigned(ingress_sample_data(idx)(15 downto 0)), AVST_DATA_WIDTH);
+                        raw_signed_v   := resize(signed(ingress_sample_data(idx)(15 downto 0)), AVST_DATA_WIDTH);
+                        key_width_v    := 16;
+                    else
+                        raw_unsigned_v := extract_unsigned(
+                            ingress_sample_data(idx),
+                            to_integer(cfg_update_key_high),
+                            to_integer(cfg_update_key_low)
+                        );
+                        raw_signed_v := extract_signed(
+                            ingress_sample_data(idx),
+                            to_integer(cfg_update_key_high),
+                            to_integer(cfg_update_key_low)
+                        );
+
+                        if to_integer(cfg_update_key_high) >= to_integer(cfg_update_key_low) then
+                            key_width_v := to_integer(cfg_update_key_high) - to_integer(cfg_update_key_low) + 1;
+                        end if;
                     end if;
 
-                    if (idx < N_PORTS) and (ingress_accept(idx) = '1') then
-                        ingress_stage_valid(idx)     <= '1';
-                        ingress_stage_write_req(idx) <= ingress_write_req(idx);
-                        ingress_stage_key(idx)       <= ingress_key_next(idx);
+                    ingress_stage_valid(idx)     <= ingress_calc_valid(idx);
+                    ingress_stage_write_req(idx) <= ingress_calc_write_req(idx);
+                    if ingress_calc_latency(idx) = '1' then
+                        ingress_stage_key(idx) <= build_latency_delta_key_prepared(
+                            hit_ts_8n  => ingress_calc_hit_ts(idx),
+                            arrival_8n => ingress_calc_arrival(idx)
+                        );
+                    else
+                        ingress_stage_key(idx) <= ingress_calc_key(idx);
                     end if;
+
+                    ingress_calc_valid(idx)     <= ingress_prep_valid(idx);
+                    ingress_calc_write_req(idx) <= ingress_prep_write_req(idx);
+                    ingress_calc_latency(idx)   <= '0';
+                    ingress_calc_key(idx)       <= (others => '0');
+                    ingress_calc_hit_ts(idx)    <= (others => '0');
+                    ingress_calc_arrival(idx)   <= ingress_prep_arrival(idx);
+                    if prep_mode_v < 0 then
+                        ingress_calc_key(idx) <= build_debug_key(
+                            debug_mode => prep_mode_v,
+                            data_word  => std_logic_vector(ingress_prep_raw_unsigned(idx)(15 downto 0))
+                        );
+                    elsif prep_mode_v = 1 then
+                        ingress_calc_latency(idx) <= '1';
+                        ingress_calc_hit_ts(idx)  <= build_latency_hit_ts_prepared(
+                            raw_ts     => ingress_prep_raw_unsigned(idx),
+                            key_width  => ingress_prep_key_width(idx),
+                            arrival_8n => ingress_prep_arrival(idx)
+                        );
+                    else
+                        ingress_calc_key(idx) <= build_key_prepared(
+                            raw_unsigned => ingress_prep_raw_unsigned(idx),
+                            raw_signed   => signed(ingress_prep_raw_signed(idx)),
+                            key_unsigned => ingress_prep_key_unsigned(idx)
+                        );
+                    end if;
+
+                    ingress_prep_valid(idx)        <= ingress_sample_valid(idx);
+                    ingress_prep_write_req(idx)    <= ingress_sample_write_req(idx);
+                    ingress_prep_mode(idx)         <= ingress_sample_mode(idx);
+                    ingress_prep_key_unsigned(idx) <= cfg_key_unsigned;
+                    ingress_prep_raw_unsigned(idx) <= raw_unsigned_v;
+                    ingress_prep_raw_signed(idx)   <= std_logic_vector(raw_signed_v);
+                    ingress_prep_key_width(idx)    <= to_unsigned(key_width_v, 8);
+                    ingress_prep_arrival(idx)      <= ingress_sample_arrival(idx);
+
+                    ingress_sample_valid(idx)     <= ingress_accept(idx);
+                    ingress_sample_write_req(idx) <= ingress_write_req(idx);
+                    ingress_sample_data(idx)      <= ingress_sample_data_next(idx);
+                    ingress_sample_mode(idx)      <= cfg_mode;
+                    ingress_sample_arrival(idx)   <= gts_8n;
                 end loop;
             end if;
         end if;
-    end process ingress_stage_reg;
+    end process ingress_pipe_reg;
 
     fifo_gen : for idx in 0 to MAX_PORTS_CONST - 1 generate
         fifo_inst : entity work.hit_fifo
@@ -1277,7 +1463,10 @@ begin
             else
                 ingress_empty_v := true;
                 for idx in 0 to MAX_PORTS_CONST - 1 loop
-                    if ingress_stage_valid(idx) = '1' then
+                    if ingress_sample_valid(idx) = '1'
+                       or ingress_prep_valid(idx) = '1'
+                       or ingress_calc_valid(idx) = '1'
+                       or ingress_stage_valid(idx) = '1' then
                         ingress_empty_v := false;
                     end if;
                 end loop;

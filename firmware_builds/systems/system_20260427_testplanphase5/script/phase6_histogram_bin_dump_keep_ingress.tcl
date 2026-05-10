@@ -39,6 +39,7 @@ proc usage {} {
     puts "  system-console -cli --jdi <top.jdi> --script=phase5_histogram_bin_dump.tcl --"
     puts "      --profile <rate|delay|header|delay-hit-t|delay-debug1|delay-debug2> --out <bins.csv>"
     puts "      optional: --wait-ms <preset interval + guard> --lane-filter <0..7> --csr-base 0x00020400 --bin-base 0x00020000"
+    puts "      optional: --left-bound <signed> --bin-width <n> --right-bound <signed> --control <hex> --key-loc <hex> --key-value <hex> --interval-clocks <n>"
     puts "      optional: --read-chunk-words <1..256> --read-delay-ms <delay between chunks> --unsafe-bulk-read"
     puts "      optional: --rate-ingress-base-list 0x00020C00,0x00020C10"
 }
@@ -388,9 +389,7 @@ proc select_rate_ingress_pre {svc ingress_bases} {
     return $rows
 }
 
-proc configure_histogram {svc csr_base profile lane_filter} {
-    set preset_id [preset_id_for_profile $profile $lane_filter]
-    set config [config_from_preset $preset_id]
+proc apply_histogram_config {svc csr_base config} {
     set left [dict get $config left]
     set right [dict get $config right]
     set bin_width [dict get $config bin_width]
@@ -398,15 +397,6 @@ proc configure_histogram {svc csr_base profile lane_filter} {
     set key_value [parse_i [dict get $config key_value]]
     set interval_clocks [dict get $config interval_clocks]
     set control [parse_i [dict get $config control]]
-
-    if {[profile_supports_asic_filter $profile] && $lane_filter ne ""} {
-        if {$lane_filter < 0 || $lane_filter > 7} {
-            error "--lane-filter must be 0..7"
-        }
-        set key_value [expr {($lane_filter & 0xf) << 16}]
-        set control [expr {$control | 0x00001000}]
-        set config [dict replace $config key_value [hex32 $key_value] control [hex32 $control]]
-    }
 
     write_csr_word $svc $csr_base 3 $left
     write_csr_word $svc $csr_base 4 $right
@@ -420,10 +410,28 @@ proc configure_histogram {svc csr_base profile lane_filter} {
     return $config
 }
 
+proc configure_histogram {svc csr_base profile lane_filter} {
+    set preset_id [preset_id_for_profile $profile $lane_filter]
+    set config [config_from_preset $preset_id]
+    set key_value [parse_i [dict get $config key_value]]
+    set control [parse_i [dict get $config control]]
+
+    if {[profile_supports_asic_filter $profile] && $lane_filter ne ""} {
+        if {$lane_filter < 0 || $lane_filter > 7} {
+            error "--lane-filter must be 0..7"
+        }
+        set key_value [expr {($lane_filter & 0xf) << 16}]
+        set control [expr {$control | 0x00001000}]
+        set config [dict replace $config key_value [hex32 $key_value] control [hex32 $control]]
+    }
+
+    return [apply_histogram_config $svc $csr_base $config]
+}
+
 if {[catch {
     lassign [::board_test::jtag::parse_args \
         $argv \
-        {profile out wait-ms lane-filter csr-base bin-base read-chunk-words read-delay-ms rate-ingress-base-list master-pattern fallback-pattern service-tag} \
+        {profile out wait-ms lane-filter csr-base bin-base left-bound right-bound bin-width key-loc key-value control interval-clocks read-chunk-words read-delay-ms rate-ingress-base-list master-pattern fallback-pattern service-tag} \
         {unsafe-bulk-read}] opt_kvs positional
     array set opts $opt_kvs
 
@@ -509,6 +517,33 @@ if {[catch {
         lappend ingress_status [concat [list base [hex32 $base] present 1 uid [hex32 $uid]] [decode_ingress_status $status]]
     }
     set config [configure_histogram $svc $csr_base $profile $lane_filter]
+    set override_requested 0
+    foreach {opt_name config_key} {
+        left-bound left
+        right-bound right
+        bin-width bin_width
+        key-loc key_loc
+        key-value key_value
+        control control
+        interval-clocks interval_clocks
+    } {
+        if {$opts($opt_name) ne ""} {
+            set raw_value [parse_i $opts($opt_name)]
+            if {$config_key eq "key_loc" || $config_key eq "key_value" || $config_key eq "control"} {
+                set config [dict replace $config $config_key [hex32 $raw_value]]
+            } else {
+                set config [dict replace $config $config_key $raw_value]
+            }
+            set override_requested 1
+        }
+    }
+    if {$override_requested} {
+        set bin_width [dict get $config bin_width]
+        if {$bin_width != 0 && $opts(right-bound) eq ""} {
+            set config [dict replace $config right [expr {[dict get $config left] + 256 * $bin_width}]]
+        }
+        set config [apply_histogram_config $svc $csr_base $config]
+    }
     if {$wait_ms eq ""} {
         set wait_ms [expr {[dict get $config sample_interval_ms] + [dict get $config sample_guard_ms]}]
     }

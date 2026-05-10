@@ -1,5 +1,6 @@
 // prbs15_lfsr.sv
 // PRBS-15 LFSR coarse counter matching MuTRiG 3 ASIC TDC
+// Author: Yifeng Wang
 //
 // Integrated FEB/MTS-compatible dark coarse-code sequence
 // Feedback:   new_bit = ~(sreg[14] XOR sreg[13])
@@ -11,7 +12,8 @@
 // on each byte-clock tick, representing the coarse time reference.
 
 module prbs15_lfsr #(
-    parameter int STEP_COUNT = 1
+    parameter int STEP_COUNT = 1,
+    parameter logic [14:0] INIT = 15'h0001
 ) (
     input  logic        clk,
     input  logic        rst,
@@ -34,7 +36,7 @@ module prbs15_lfsr #(
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            sreg <= 15'h0001;
+            sreg <= INIT;
         end else if (en) begin
             sreg <= advance_steps(sreg);
         end

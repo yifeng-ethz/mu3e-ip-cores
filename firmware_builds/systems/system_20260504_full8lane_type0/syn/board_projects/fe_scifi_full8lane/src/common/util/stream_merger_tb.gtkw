@@ -1,0 +1,14 @@
+[*]
+@28
+top.stream_merger_tb.clk
+top.stream_merger_tb.reset
+@22
+#{top.stream_merger_tb.e_stream_merger.o_wdata[15:0]} top.stream_merger_tb.e_stream_merger.o_wdata[15] top.stream_merger_tb.e_stream_merger.o_wdata[14] top.stream_merger_tb.e_stream_merger.o_wdata[13] top.stream_merger_tb.e_stream_merger.o_wdata[12] top.stream_merger_tb.e_stream_merger.o_wdata[11] top.stream_merger_tb.e_stream_merger.o_wdata[10] top.stream_merger_tb.e_stream_merger.o_wdata[9] top.stream_merger_tb.e_stream_merger.o_wdata[8] top.stream_merger_tb.e_stream_merger.o_wdata[7] top.stream_merger_tb.e_stream_merger.o_wdata[6] top.stream_merger_tb.e_stream_merger.o_wdata[5] top.stream_merger_tb.e_stream_merger.o_wdata[4] top.stream_merger_tb.e_stream_merger.o_wdata[3] top.stream_merger_tb.e_stream_merger.o_wdata[2] top.stream_merger_tb.e_stream_merger.o_wdata[1] top.stream_merger_tb.e_stream_merger.o_wdata[0]
+@28
+top.stream_merger_tb.e_stream_merger.o_we
+@23
+#{top.stream_merger_tb.e_stream_merger.o_index[3:0]} top.stream_merger_tb.e_stream_merger.o_index[3] top.stream_merger_tb.e_stream_merger.o_index[2] top.stream_merger_tb.e_stream_merger.o_index[1] top.stream_merger_tb.e_stream_merger.o_index[0]
+@28
+top.stream_merger_tb.e_stream_merger.o_wsop
+top.stream_merger_tb.e_stream_merger.o_weop
+top.stream_merger_tb.e_stream_merger.o_busy

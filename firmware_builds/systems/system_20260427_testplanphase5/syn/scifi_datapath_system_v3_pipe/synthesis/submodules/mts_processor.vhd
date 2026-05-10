@@ -41,11 +41,17 @@
 --      Date: Apr 25, 2026
 -- Revision: 5.14 (Add timestamp-delay error forward/drop policy for MuTRiG bring-up)
 --      Date: Apr 27, 2026
--- Revision: 5.15 (Align timestamp-delay error classification with the output hit beat)
---      Date: Apr 30, 2026
--- Version : 26.0.9
--- Date    : 20260430
--- Change  : Register the corrected divider numerators in hit_prediv, then split divider launch and
+-- Revision: 5.15 (Add DEBUG status conduit and 64-bit hit metadata sidecar)
+--      Date: May 6, 2026
+-- Version : 26.1.0
+-- Date    : 20260506
+-- Change  : Add DEBUG-controlled synthesizable sideband observability. DEBUG >= 1 exposes a
+--           packed debug status conduit with ready/accept/busy/state/occupancy information.
+--           DEBUG >= 2 carries a 64-bit metadata sidecar from accepted hit_type0 payload beats
+--           to delivered hit_type1 payload beats with the same one-to-one alignment as the
+--           normal datapath. DEBUG-disabled sidecar/status outputs are deterministically tied to
+--           zero and existing nominal payload behavior remains unchanged.
+--           Register the corrected divider numerators in hit_prediv, then split divider launch and
 --           ToT subtraction into separate cycles. A one-cycle delayed copy of the divider outputs keeps
 --           the quotient/remainder aligned with the metadata shift pipeline. External RESET / OUT_OF_DAQ
 --           words now collapse to IDLE in the local control agent because this IP has no dedicated
@@ -62,8 +68,6 @@
 --           CONTROL_STATUS bit 5 now optionally drops hits whose timestamp-delay error sideband is
 --           asserted. The default behavior still forwards those hits with error asserted so downstream
 --           consumers can decide whether to trim or observe them.
---           The timestamp-delay error sideband is now derived in the same registered pipeline stage that
---           assembles hit_out, so mixed clean/error traffic cannot tag the neighboring output beat.
 -- =========
 -- Description:	[MuTRiG Timestamp Processor] 
     -- Processes the Timestamp TCC (15 bit)(1.6 ns) into TCC_8n (13 bit) and TCC_1n6 (3 bit).:
@@ -144,7 +148,8 @@ generic (
     LPM_DIV_PIPELINE		: natural := 4;
     MUTRIG_BUFFER_EXPECTED_LATENCY_8N		: natural := 2000; -- affects the error signal on <hit_type1>
     MUTRIG_OVERFLOW_LOOKBACK_8N               : natural := 2000; -- controls post-wrap epoch disambiguation only
-    DEBUG					: natural := 1
+    DEBUG					: natural := 1;
+    DEBUG_TRACE_REPORTS     : boolean := false
 );
 port (
 
@@ -170,6 +175,8 @@ port (
     asi_hit_type0_data				: in  std_logic_vector(44 downto 0); -- valid is a seperate signal below
     asi_hit_type0_valid 			: in  std_logic;
     asi_hit_type0_ready				: out std_logic;
+    coe_hit_type0_sidecar_data      : in  std_logic_vector(63 downto 0) := (others => '0');
+    coe_hit_type0_sidecar_valid    : in  std_logic := '0';
     
     -- ============ OUTPUT ==============
     -- output stream of processed hits (TODO: add back-pressure)
@@ -242,6 +249,11 @@ port (
     aso_ts_delta_valid          : out std_logic;
     aso_ts_delta_data           : out std_logic_vector(15 downto 0);
 
+    -- Optional DEBUG conduits.
+    coe_debug_status_data       : out std_logic_vector(31 downto 0) := (others => '0');
+    coe_hit_type1_sidecar_data  : out std_logic_vector(63 downto 0) := (others => '0');
+    coe_hit_type1_sidecar_valid : out std_logic := '0';
+
     -- clock and reset interface
     i_rst                   : in std_logic; -- async reset assertion, sync reset release
     i_clk                   : in std_logic -- clock should match the lvds parallel clock (125MHz)
@@ -251,6 +263,8 @@ end entity mts_processor;
 architecture rtl of mts_processor is
     
     -- constants
+    constant DEBUG_STATUS_WIDTH_CONST   : natural := 32;
+    constant DEBUG_SIDECAR_WIDTH_CONST  : natural := 64;
     constant OP_MODE_HI             : natural := 30;
     constant OP_MODE_LO             : natural := 28;
     constant I_ASIC_HI				: natural := 44;
@@ -350,6 +364,22 @@ architecture rtl of mts_processor is
     signal run_state_cmd	: run_state_t;
     signal terminating_done : std_logic;
     signal ctrl_ready_comb  : std_logic;
+
+    function natural_to_slv_sat(
+        value       : natural;
+        result_size : positive
+    ) return std_logic_vector is
+        variable result_v    : unsigned(result_size - 1 downto 0);
+        variable max_value_v : natural;
+    begin
+        max_value_v := (2 ** result_size) - 1;
+        if (value > max_value_v) then
+            result_v := (others => '1');
+        else
+            result_v := to_unsigned(value, result_size);
+        end if;
+        return std_logic_vector(result_v);
+    end function natural_to_slv_sat;
     
     -- processor
     constant ROUTE_LANE_COUNT_CONST      : natural := 4;
@@ -493,6 +523,8 @@ architecture rtl of mts_processor is
     signal tcc_div_remain_d   : std_logic_vector(2 downto 0);
     signal ecc_div_remain_d   : std_logic_vector(2 downto 0);
     signal hit_out_delay_error : std_logic := '0';
+    signal debug_sidecar_hit_out : std_logic_vector(DEBUG_SIDECAR_WIDTH_CONST - 1 downto 0);
+    signal debug_sidecar_hit_out_valid : std_logic;
 
     type prediv_stage_t is record
         asic            : std_logic_vector(3 downto 0);
@@ -571,20 +603,6 @@ architecture rtl of mts_processor is
         end if;
         return result_v;
     end function signmag_to_twos_comp16;
-
-    function debug_delay_delta16(
-        arrival_8n : unsigned;
-        hit_ts_8n  : unsigned
-    ) return std_logic_vector is
-        variable arrival_v : signed(LPM_DIV_WIDTHN downto 0);
-        variable hit_ts_v  : signed(LPM_DIV_WIDTHN downto 0);
-        variable delta_v   : signed(LPM_DIV_WIDTHN downto 0);
-    begin
-        arrival_v := signed('0' & resize(arrival_8n, LPM_DIV_WIDTHN));
-        hit_ts_v  := signed('0' & resize(hit_ts_8n, LPM_DIV_WIDTHN));
-        delta_v   := arrival_v - hit_ts_v;
-        return std_logic_vector(resize(delta_v, 16));
-    end function debug_delay_delta16;
     
     
     
@@ -603,6 +621,165 @@ architecture rtl of mts_processor is
     
 
 begin
+
+    debug_status_enabled_gen : if DEBUG >= 1 generate
+        proc_debug_status_comb : process (all)
+            variable occupancy_v : unsigned(4 downto 0);
+            variable status_v    : std_logic_vector(DEBUG_STATUS_WIDTH_CONST - 1 downto 0);
+        begin
+            occupancy_v := (others => '0');
+            status_v    := (others => '0');
+
+            if (i_rst = '0') then
+                if (hit_in.valid = '1') then
+                    occupancy_v := occupancy_v + 1;
+                end if;
+                if (hit_padding.valid = '1') then
+                    occupancy_v := occupancy_v + 1;
+                end if;
+                if (hit_prediv.valid = '1') then
+                    occupancy_v := occupancy_v + 1;
+                end if;
+                if (hit_totcalc.valid = '1') then
+                    occupancy_v := occupancy_v + 1;
+                end if;
+                for i in 0 to LPM_DIV_PIPELINE loop
+                    if (hit_div(i).valid = '1') then
+                        occupancy_v := occupancy_v + 1;
+                    end if;
+                end loop;
+                if (hit_out.valid = '1') then
+                    occupancy_v := occupancy_v + 1;
+                end if;
+
+                status_v(0)            := asi_hit_type0_ready_i;
+                status_v(1)            := asi_hit_type0_accept;
+                status_v(2)            := asi_hit_type0_valid and hit_in_ok;
+                status_v(3)            := hit_in_ok;
+                status_v(4)            := processor_allow_input;
+                status_v(5)            := input_pipeline_busy;
+                status_v(6)            := hit_div_busy;
+                status_v(7)            := hit_out.valid;
+                status_v(8)            := hit_out_delay_error;
+                status_v(9)            := upstream_endofrun_seen;
+                status_v(10)           := terminating_marker_valid;
+                status_v(11)           := ctrl_ready_comb;
+                status_v(15 downto 12) := natural_to_slv_sat(processor_state_t'pos(processor_state), 4);
+                status_v(19 downto 16) := natural_to_slv_sat(run_state_t'pos(run_state_cmd), 4);
+                status_v(24 downto 20) := std_logic_vector(occupancy_v);
+                status_v(28 downto 25) := route_terminate_sent;
+                status_v(31 downto 29) := natural_to_slv_sat(DEBUG, 3);
+            end if;
+
+            coe_debug_status_data <= status_v;
+        end process;
+    end generate debug_status_enabled_gen;
+
+    debug_status_disabled_gen : if DEBUG < 1 generate
+        coe_debug_status_data <= (others => '0');
+    end generate debug_status_disabled_gen;
+
+    debug_sidecar_enabled_gen : if DEBUG >= 2 generate
+        type debug_sidecar_pipe_t is array (0 to LPM_DIV_PIPELINE) of std_logic_vector(DEBUG_SIDECAR_WIDTH_CONST - 1 downto 0);
+        type debug_sidecar_valid_pipe_t is array (0 to LPM_DIV_PIPELINE) of std_logic;
+        signal debug_sidecar_hit_in      : std_logic_vector(DEBUG_SIDECAR_WIDTH_CONST - 1 downto 0);
+        signal debug_sidecar_hit_padding : std_logic_vector(DEBUG_SIDECAR_WIDTH_CONST - 1 downto 0);
+        signal debug_sidecar_hit_prediv  : std_logic_vector(DEBUG_SIDECAR_WIDTH_CONST - 1 downto 0);
+        signal debug_sidecar_hit_totcalc : std_logic_vector(DEBUG_SIDECAR_WIDTH_CONST - 1 downto 0);
+        signal debug_sidecar_hit_div     : debug_sidecar_pipe_t;
+        signal debug_sidecar_hit_in_valid      : std_logic;
+        signal debug_sidecar_hit_padding_valid : std_logic;
+        signal debug_sidecar_hit_prediv_valid  : std_logic;
+        signal debug_sidecar_hit_totcalc_valid : std_logic;
+        signal debug_sidecar_hit_div_valid     : debug_sidecar_valid_pipe_t;
+        signal debug_sidecar_local_seq         : unsigned(18 downto 0);
+        signal debug_sidecar_local_metadata    : std_logic_vector(DEBUG_SIDECAR_WIDTH_CONST - 1 downto 0);
+    begin
+        debug_sidecar_local_metadata <=
+            std_logic_vector(counter_gts_8n(31 downto 0)) &
+            std_logic_vector(to_unsigned(2, 4)) &
+            asi_hit_type0_data(I_ASIC_HI downto I_ASIC_LO) &
+            asi_hit_type0_data(I_CHANNEL_HI downto I_CHANNEL_LO) &
+            std_logic_vector(debug_sidecar_local_seq);
+
+        proc_debug_sidecar_pipeline : process (i_rst, i_clk)
+        begin
+            if (i_rst = '1') then
+                debug_sidecar_hit_in      <= (others => '0');
+                debug_sidecar_hit_padding <= (others => '0');
+                debug_sidecar_hit_prediv  <= (others => '0');
+                debug_sidecar_hit_totcalc <= (others => '0');
+                debug_sidecar_hit_out     <= (others => '0');
+                debug_sidecar_hit_in_valid      <= '0';
+                debug_sidecar_hit_padding_valid <= '0';
+                debug_sidecar_hit_prediv_valid  <= '0';
+                debug_sidecar_hit_totcalc_valid <= '0';
+                debug_sidecar_hit_out_valid     <= '0';
+                debug_sidecar_local_seq         <= (others => '0');
+                for i in 0 to LPM_DIV_PIPELINE loop
+                    debug_sidecar_hit_div(i) <= (others => '0');
+                    debug_sidecar_hit_div_valid(i) <= '0';
+                end loop;
+            elsif (rising_edge(i_clk)) then
+                debug_sidecar_hit_in      <= (others => '0');
+                debug_sidecar_hit_padding <= (others => '0');
+                debug_sidecar_hit_prediv  <= (others => '0');
+                debug_sidecar_hit_totcalc <= (others => '0');
+                debug_sidecar_hit_out     <= (others => '0');
+                debug_sidecar_hit_div(0)  <= (others => '0');
+                debug_sidecar_hit_in_valid      <= '0';
+                debug_sidecar_hit_padding_valid <= '0';
+                debug_sidecar_hit_prediv_valid  <= '0';
+                debug_sidecar_hit_totcalc_valid <= '0';
+                debug_sidecar_hit_out_valid     <= '0';
+                debug_sidecar_hit_div_valid(0)  <= '0';
+                for i in 1 to LPM_DIV_PIPELINE loop
+                    debug_sidecar_hit_div(i) <= debug_sidecar_hit_div(i - 1);
+                    debug_sidecar_hit_div_valid(i) <= debug_sidecar_hit_div_valid(i - 1);
+                end loop;
+
+                if (asi_hit_type0_valid = '1' and hit_in_ok = '1') then
+                    if (coe_hit_type0_sidecar_valid = '1') then
+                        debug_sidecar_hit_in <= coe_hit_type0_sidecar_data;
+                    else
+                        debug_sidecar_hit_in <= debug_sidecar_local_metadata;
+                    end if;
+                    debug_sidecar_hit_in_valid <= '1';
+                    debug_sidecar_local_seq <= debug_sidecar_local_seq + 1;
+                end if;
+
+                if (hit_in.valid = '1') then
+                    debug_sidecar_hit_padding <= debug_sidecar_hit_in;
+                    debug_sidecar_hit_padding_valid <= debug_sidecar_hit_in_valid;
+                end if;
+
+                if (hit_padding.valid = '1') then
+                    debug_sidecar_hit_prediv <= debug_sidecar_hit_padding;
+                    debug_sidecar_hit_prediv_valid <= debug_sidecar_hit_padding_valid;
+                end if;
+
+                if (hit_prediv.valid = '1') then
+                    debug_sidecar_hit_totcalc <= debug_sidecar_hit_prediv;
+                    debug_sidecar_hit_totcalc_valid <= debug_sidecar_hit_prediv_valid;
+                end if;
+
+                if (hit_totcalc.valid = '1') then
+                    debug_sidecar_hit_div(0) <= debug_sidecar_hit_totcalc;
+                    debug_sidecar_hit_div_valid(0) <= debug_sidecar_hit_totcalc_valid;
+                end if;
+
+                if (hit_div(LPM_DIV_PIPELINE).valid = '1') then
+                    debug_sidecar_hit_out <= debug_sidecar_hit_div(LPM_DIV_PIPELINE);
+                    debug_sidecar_hit_out_valid <= debug_sidecar_hit_div_valid(LPM_DIV_PIPELINE);
+                end if;
+            end if;
+        end process;
+    end generate debug_sidecar_enabled_gen;
+
+    debug_sidecar_disabled_gen : if DEBUG < 2 generate
+        debug_sidecar_hit_out <= (others => '0');
+        debug_sidecar_hit_out_valid <= '0';
+    end generate debug_sidecar_disabled_gen;
 
     overflow_lookback_1n6 <= to_unsigned(OVERFLOW_LOOKBACK_1N6_CONST, overflow_lookback_1n6'length);
     padding_upper         <= to_unsigned(OVERFLOW_PADDING_UPPER_CONST, padding_upper'length);
@@ -1189,11 +1366,7 @@ begin
     
     proc_datapath : process (i_rst, i_clk) 
     --	
-        variable et_delta_v                  : unsigned(49 downto 0);
-        variable hit_delay_arrival_v         : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
-        variable hit_delay_selected_ts_v     : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
-        variable hit_delay_delta_v           : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
-        variable hit_delay_expected_latency_v : unsigned(LPM_DIV_WIDTHN - 1 downto 0);
+        variable et_delta_v : unsigned(49 downto 0);
     begin
         if (i_rst = '1') then 
             hit_in.asic     <= (others => '0');
@@ -1260,7 +1433,6 @@ begin
             hit_out.et_1n6  <= (others => '0');
             hit_out.valid   <= '0';
             hit_out.hiterr  <= '0';
-            hit_out_delay_error <= '0';
         
         elsif (rising_edge(i_clk)) then
             -- default 
@@ -1332,7 +1504,6 @@ begin
             hit_out.et_1n6		<= (others => '0');
             hit_out.valid		<= '0';
             hit_out.hiterr		<= '0';
-            hit_out_delay_error <= '0';
 
             -- input stage
             if (asi_hit_type0_valid = '1' and hit_in_ok = '1') then 
@@ -1375,7 +1546,7 @@ begin
             end if;
 
             if (hit_prediv.valid = '1') then
-                if (DEBUG /= 0) then
+                if (DEBUG_TRACE_REPORTS and DEBUG /= 0) then
                     report "MTS_STAGE[" & BANK & "] div_launch ch="
                         & integer'image(to_integer(unsigned(hit_prediv.channel)))
                         severity note;
@@ -1427,25 +1598,6 @@ begin
                 hit_out.et_1n6		<= hit_div(LPM_DIV_PIPELINE).et_1n6;
                 hit_out.valid		<= '1';
                 hit_out.hiterr		<= hit_div(LPM_DIV_PIPELINE).hiterr;
-
-                hit_delay_arrival_v          := resize(counter_gts_8n, hit_delay_arrival_v'length);
-                hit_delay_expected_latency_v := resize(unsigned(csr.expected_latency), hit_delay_expected_latency_v'length);
-                if (csr.delay_ts_field_use_t = '1') then
-                    hit_delay_selected_ts_v := unsigned(tcc_div_quotient_d);
-                else
-                    hit_delay_selected_ts_v := unsigned(ecc_div_quotient_d);
-                end if;
-
-                if (hit_delay_arrival_v > hit_delay_selected_ts_v) then
-                    hit_delay_delta_v := hit_delay_arrival_v - hit_delay_selected_ts_v;
-                    if (hit_delay_delta_v < hit_delay_expected_latency_v) then
-                        hit_out_delay_error <= '0';
-                    else
-                        hit_out_delay_error <= '1';
-                    end if;
-                else
-                    hit_out_delay_error <= '1';
-                end if;
             end if;
 
         end if;
@@ -1455,7 +1607,7 @@ begin
     proc_debug_stage_trace : process (i_clk)
     begin
         if (rising_edge(i_clk)) then
-            if (DEBUG /= 0 and i_rst = '0') then
+            if (DEBUG_TRACE_REPORTS and DEBUG /= 0 and i_rst = '0') then
                 if (hit_in.valid = '1') then
                     report "MTS_STAGE[" & BANK & "] hit_in ch="
                         & integer'image(to_integer(unsigned(hit_in.channel)))
@@ -1517,6 +1669,8 @@ begin
             aso_hit_type1_endofpacket     <= '0';
             aso_hit_type1_empty           <= '0';
             aso_hit_type1_error           <= '0';
+            coe_hit_type1_sidecar_data    <= (others => '0');
+            coe_hit_type1_sidecar_valid   <= '0';
         
         elsif (rising_edge(i_clk)) then
             aso_hit_type1_data            <= (others => '0');
@@ -1526,6 +1680,8 @@ begin
             aso_hit_type1_endofpacket     <= '0';
             aso_hit_type1_empty           <= '0';
             aso_hit_type1_error           <= '0';
+            coe_hit_type1_sidecar_data    <= (others => '0');
+            coe_hit_type1_sidecar_valid   <= '0';
 
             if (processor_state = RESET or processor_state = IDLE) then
                 route_startofrun_sent     <= (others => '0');
@@ -1556,6 +1712,10 @@ begin
                     aso_hit_type1_valid                                          <= '1';
                     aso_hit_type1_channel                                        <= "00" & hit_out.tcc_8n(5 downto 4);
                     aso_hit_type1_error                                          <= hit_out_delay_error;
+                    if (DEBUG >= 2) then
+                        coe_hit_type1_sidecar_data                               <= debug_sidecar_hit_out;
+                        coe_hit_type1_sidecar_valid                              <= debug_sidecar_hit_out_valid;
+                    end if;
                     if (route_startofrun_sent(route_lane_v) = '0') then
                         route_startofrun_sent(route_lane_v)                      <= '1';
                         aso_hit_type1_startofpacket                             <= '1';
@@ -1603,13 +1763,28 @@ begin
         if (rising_edge(i_clk)) then
             if (hit_div(LPM_DIV_PIPELINE).valid = '1') then -- 48 bit - 48 bit (no of/df)
                 if (csr.delay_ts_field_use_t = '1') then  
-                    int_aso_debug_ts_data <= debug_delay_delta16(counter_gts_8n, unsigned(tcc_div_quotient_d));
+                    int_aso_debug_ts_data	<= std_logic_vector(to_signed(to_integer(counter_gts_8n) - to_integer(unsigned(tcc_div_quotient_d)),aso_debug_ts_data'length));
                 else 
-                    int_aso_debug_ts_data <= debug_delay_delta16(counter_gts_8n, unsigned(ecc_div_quotient_d));
+                    int_aso_debug_ts_data	<= std_logic_vector(to_signed(to_integer(counter_gts_8n) - to_integer(unsigned(ecc_div_quotient_d)),aso_debug_ts_data'length));
                 end if;
                 int_aso_debug_ts_valid  <= '1';
             else 
                 int_aso_debug_ts_valid  <= '0';
+            end if;
+            
+            -- --------------------------------------------
+            -- derive the error signals of the datapath
+            -- --------------------------------------------
+            -- default 
+            hit_out_delay_error              <= '0'; -- timing aligned with <hit_type1> output stage
+            if (int_aso_debug_ts_valid = '1') then 
+                -- ok: ts within range of (0,2000)
+                if (signed(int_aso_debug_ts_data) > to_signed(0, int_aso_debug_ts_data'length) and unsigned(int_aso_debug_ts_data) < unsigned(csr.expected_latency)) then -- refactor : use csr and better lint 
+                    hit_out_delay_error         <= '0';
+                -- error: ts out of range of (0,2000). possible pll unlocked or cml logic recv side is too low (generate a bit of side noise)
+                else 
+                    hit_out_delay_error         <= '1';
+                end if;
             end if;
         end if;
     end process;

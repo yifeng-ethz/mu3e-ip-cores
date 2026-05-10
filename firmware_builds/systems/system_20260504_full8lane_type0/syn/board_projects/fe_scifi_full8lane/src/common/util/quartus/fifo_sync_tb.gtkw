@@ -1,0 +1,24 @@
+[*]
+[timestart] 0
+[size] 1600 1200
+[pos] 0 0
+[treeopen] top.
+[treeopen] top.fifo_sync_tb.
+[treeopen] top.fifo_sync_tb.e_fifo.
+[treeopen] top.fifo_sync_tb.e_fifo.e_fifo.
+[sst_width] 300
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 600
+@28
+top.fifo_sync_tb.clk
+top.fifo_sync_tb.reset_n
+@420
+top.fifo_sync_tb.cycle
+@22
+#{top.fifo_sync_tb.wdata[15:0]} top.fifo_sync_tb.wdata[15] top.fifo_sync_tb.wdata[14] top.fifo_sync_tb.wdata[13] top.fifo_sync_tb.wdata[12] top.fifo_sync_tb.wdata[11] top.fifo_sync_tb.wdata[10] top.fifo_sync_tb.wdata[9] top.fifo_sync_tb.wdata[8] top.fifo_sync_tb.wdata[7] top.fifo_sync_tb.wdata[6] top.fifo_sync_tb.wdata[5] top.fifo_sync_tb.wdata[4] top.fifo_sync_tb.wdata[3] top.fifo_sync_tb.wdata[2] top.fifo_sync_tb.wdata[1] top.fifo_sync_tb.wdata[0]
+#{top.fifo_sync_tb.rdata[15:0]} top.fifo_sync_tb.rdata[15] top.fifo_sync_tb.rdata[14] top.fifo_sync_tb.rdata[13] top.fifo_sync_tb.rdata[12] top.fifo_sync_tb.rdata[11] top.fifo_sync_tb.rdata[10] top.fifo_sync_tb.rdata[9] top.fifo_sync_tb.rdata[8] top.fifo_sync_tb.rdata[7] top.fifo_sync_tb.rdata[6] top.fifo_sync_tb.rdata[5] top.fifo_sync_tb.rdata[4] top.fifo_sync_tb.rdata[3] top.fifo_sync_tb.rdata[2] top.fifo_sync_tb.rdata[1] top.fifo_sync_tb.rdata[0]
+@29
+top.fifo_sync_tb.e_fifo.e_fifo.o_wfull
+[pattern_trace] 1
+[pattern_trace] 0

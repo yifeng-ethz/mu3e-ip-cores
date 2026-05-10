@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euf
+set -eu
 export LC_ALL=C
 
 TCL=$1
@@ -10,7 +10,7 @@ mkdir -p -- "$QSYS_DIR"
 SEARCH_PATH=""
 USER_COMPONENT_PATHS=""
 MU3E_IP_CORES_ROOT="${MU3E_IP_CORES_ROOT:-/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
-QSYS_ISOLATE_CATALOG="${QSYS_ISOLATE_CATALOG:-1}"
+QSYS_ISOLATE_CATALOG="${QSYS_ISOLATE_CATALOG:-0}"
 
 append_search_path() {
     local candidate="$1"
@@ -30,19 +30,35 @@ append_component_dir() {
     [ -d "${candidate}" ] || return 0
     if [ -e "${candidate}/components.ipx" ] || find "${candidate}" -maxdepth 1 \( -name '*_hw.tcl' -o -name '*.qsys' \) | grep -q .; then
         append_search_path "${candidate}"
+    elif [ -d "${candidate}/script" ] && find "${candidate}/script" -maxdepth 1 -name '*_hw.tcl' | grep -q .; then
+        append_search_path "${candidate}/script"
     fi
 }
 
-append_search_path "$(realpath -- "$QSYS_DIR")"
+append_generated_qsys_dir() {
+    local candidate="$1"
+    [ -d "${candidate}" ] || return 0
+    if ! find "${candidate}" -maxdepth 1 -name '*.qsys' | grep -q .; then
+        return 0
+    fi
+    local generated_search_dir
+    generated_search_dir="$(mktemp -d "${TMPDIR:-/tmp}/qsys_generated_components.XXXXXX")"
+    find "${candidate}" -maxdepth 1 -name '*.qsys' -exec ln -s {} "${generated_search_dir}/" \;
+    append_search_path "${generated_search_dir}"
+}
 
 if [ -d "${MU3E_IP_CORES_ROOT}" ]; then
-    for candidate in "${MU3E_IP_CORES_ROOT}" "${MU3E_IP_CORES_ROOT}"/* "${MU3E_IP_CORES_ROOT}"/*/legacy/*; do
+    for candidate in "${MU3E_IP_CORES_ROOT}" "${MU3E_IP_CORES_ROOT}"/* "${MU3E_IP_CORES_ROOT}"/*/legacy/* "${MU3E_IP_CORES_ROOT}"/*/reference/* "${MU3E_IP_CORES_ROOT}"/misc/*; do
         [ -d "${candidate}" ] || continue
         append_component_dir "${candidate}"
     done
 
     append_search_path "${MU3E_IP_CORES_ROOT}/histogram_statistics"
 fi
+
+# Keep generated-system Qsys files available without importing the generated
+# IPX catalog metadata from this directory.
+append_generated_qsys_dir "$(realpath -- "$QSYS_DIR")"
 
 if [ -n "${QSYS_EXTRA_SEARCH_PATHS:-}" ]; then
     IFS=':' read -r -a extra_paths <<< "${QSYS_EXTRA_SEARCH_PATHS}"

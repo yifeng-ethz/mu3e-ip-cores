@@ -66,9 +66,9 @@
 --      Date: Apr 22, 2026
 -- Revision: 2.30 (re-open settled SEARCH-tail overlap with a conservative overwrite-slot guard so standalone timing stays closed)
 --      Date: Apr 22, 2026
--- Version : 26.2.6
--- Date    : 20260422
--- Change  : keep settled SEARCH-tail overlap safe without re-opening the standalone timing failure in 26.2.6.0422
+-- Version : 26.2.7
+-- Date    : 20260506
+-- Change  : add DEBUG-gated FIFO/queue observability and 64-bit hit metadata sidecar
 --
 -- =========
 -- Description:	[Ring-buffer Shaped Content-Addressable-Memory (CAM)] 
@@ -111,9 +111,9 @@ generic(
 	IP_UID				: natural := 1380074317;
 	VERSION_MAJOR		: natural := 26;
 	VERSION_MINOR		: natural := 2;
-	VERSION_PATCH       : natural := 6;
-	BUILD				: natural := 422;
-	VERSION_DATE		: natural := 20260422;
+	VERSION_PATCH       : natural := 7;
+	BUILD				: natural := 506;
+	VERSION_DATE		: natural := 20260506;
 	VERSION_GIT			: natural := 0;
 	INSTANCE_ID			: natural := 0;
 	DEBUG				: natural := 1
@@ -143,6 +143,8 @@ port(
 	asi_hit_type1_ready				: out std_logic; -- itself has fifo, so no backpressure is required for upstream, just check for fifo full. 
 	asi_hit_type1_error             : in  std_logic_vector(0 downto 0); -- {"tserr"}
                                                                         -- timestamp error : this hit has timestamp out of range (0,2000) delay, so it is probably wrong
+	asi_hit_type1_metadata			: in  std_logic_vector(63 downto 0) := (others => '0');
+	asi_hit_type1_metadata_valid		: in  std_logic := '0';
     
 	-- ============ EGRESS ==============
 	-- output stream of framed hits (aligned to word) (ts[3:0])
@@ -161,10 +163,15 @@ port(
                                                                         --                          this usually happens when you have tserr at the input and did not filter these hits away.
                                                                         --                          as the wrong hits are in, they occupy cam spaces for no good reason. they will be overwrote by push engine, if fill-level is high.
                                                                         --                          So, you need to check this is never asserted before dignosing the overwrite count of cam.
+	aso_hit_type2_metadata			: out std_logic_vector(63 downto 0);
+	aso_hit_type2_metadata_valid		: out std_logic;
 	
 	
 	aso_filllevel_valid             : out std_logic;
     aso_filllevel_data              : out std_logic_vector(15 downto 0);
+	coe_debug_fill_level			: out std_logic_vector(31 downto 0);
+	coe_debug_fifo_level			: out std_logic_vector(31 downto 0);
+	coe_debug_queue_state			: out std_logic_vector(31 downto 0);
     
     -- clock and reset interface
 	i_rst							: in  std_logic;
@@ -441,6 +448,18 @@ architecture rtl of ring_buffer_cam_v2_core is
 		usedw		: OUT STD_LOGIC_VECTOR (7 DOWNTO 0)
 	);
 	end component;
+
+	constant SIDECAR_METADATA_WIDTH_CONST	: natural := 64;
+	constant SIDECAR_FIFO_DEPTH_CONST		: natural := 2**DEASSEMBLY_FIFO_LPM_WIDTHU;
+	subtype sidecar_metadata_t is std_logic_vector(SIDECAR_METADATA_WIDTH_CONST-1 downto 0);
+	signal sidecar_fifo_dout			: sidecar_metadata_t;
+	signal sidecar_ram_din				: sidecar_metadata_t;
+	signal sidecar_ram_dout				: sidecar_metadata_t;
+	signal sidecar_fifo_usedw_dbg		: std_logic_vector(DEASSEMBLY_FIFO_LPM_WIDTHU-1 downto 0);
+	signal sidecar_fifo_empty_dbg		: std_logic;
+	signal sidecar_fifo_full_dbg			: std_logic;
+	signal sidecar_fifo_overflow_dbg		: std_logic;
+	signal sidecar_fifo_underflow_dbg	: std_logic;
 	
 	-- gts counter
 	signal gts_8n					: unsigned(47 downto 0);
@@ -561,6 +580,7 @@ architecture rtl of ring_buffer_cam_v2_core is
 	signal addr_occupied					: std_logic;
 	signal cam_erase_data					: std_logic_vector(SK_BITS-1 downto 0);
 	signal hit_pop_data_comb				: std_logic_vector(HIT_TYPE1_DATA_WIDTH-1 downto 0);
+	signal hit_pop_metadata_comb			: sidecar_metadata_t;
 	signal side_ram_dout_valid_comb			: std_logic;
 	signal side_ram_dout_valid				: std_logic;
 	
@@ -617,6 +637,39 @@ begin
 	dbg_pop_partition_has_more <= std_logic_vector(resize(unsigned(pop_partition_has_more), dbg_pop_partition_has_more'length));
 	dbg_pop_partition_eval_stage0_valid <= std_logic_vector(
 		resize(unsigned(pop_partition_eval_stage0_valid), dbg_pop_partition_eval_stage0_valid'length));
+
+	gen_debug_observability : if DEBUG >= 1 generate
+	begin
+		coe_debug_fill_level <= csr.fill_level;
+		coe_debug_fifo_level(7 downto 0) <= deassembly_fifo_usedw;
+		coe_debug_fifo_level(15 downto 8) <= sidecar_fifo_usedw_dbg;
+		coe_debug_fifo_level(19 downto 16) <= pop_cmd_fifo_usedw;
+		coe_debug_fifo_level(20) <= deassembly_fifo_empty;
+		coe_debug_fifo_level(21) <= deassembly_fifo_full;
+		coe_debug_fifo_level(22) <= pop_cmd_fifo_empty;
+		coe_debug_fifo_level(23) <= pop_cmd_fifo_full;
+		coe_debug_fifo_level(24) <= sidecar_fifo_empty_dbg;
+		coe_debug_fifo_level(25) <= sidecar_fifo_full_dbg;
+		coe_debug_fifo_level(26) <= sidecar_fifo_overflow_dbg;
+		coe_debug_fifo_level(27) <= sidecar_fifo_underflow_dbg;
+		coe_debug_fifo_level(31 downto 28) <= (others => '0');
+		coe_debug_queue_state(3 downto 0) <= std_logic_vector(dbg_run_state_code);
+		coe_debug_queue_state(6 downto 4) <= std_logic_vector(dbg_pop_engine_state_code);
+		coe_debug_queue_state(7) <= dbg_push_state_code;
+		coe_debug_queue_state(11 downto 8) <= std_logic_vector(to_unsigned(decision_reg, 4));
+		coe_debug_queue_state(15 downto 12) <= dbg_pop_partition_pending;
+		coe_debug_queue_state(19 downto 16) <= dbg_pop_partition_load;
+		coe_debug_queue_state(23 downto 20) <= dbg_pop_partition_advance;
+		coe_debug_queue_state(27 downto 24) <= dbg_pop_partition_result_valid;
+		coe_debug_queue_state(31 downto 28) <= dbg_pop_partition_flag;
+	end generate gen_debug_observability;
+
+	gen_debug_observability_off : if DEBUG < 1 generate
+	begin
+		coe_debug_fill_level  <= (others => '0');
+		coe_debug_fifo_level  <= (others => '0');
+		coe_debug_queue_state <= (others => '0');
+	end generate gen_debug_observability_off;
 
 	main_cam : entity work.cam_mem_a5 -- TODO: 1) improve timing of output <lut> address 2) add true-dp variant
 	-- primitive cam construction
@@ -697,6 +750,102 @@ begin
 		sclr	=> deassembly_fifo_sclr,
 		clock	=> i_clk
 	);
+
+	gen_sidecar_metadata : if DEBUG >= 2 generate
+		subtype sidecar_fifo_addr_t is unsigned(DEASSEMBLY_FIFO_LPM_WIDTHU-1 downto 0);
+		subtype sidecar_fifo_count_t is unsigned(DEASSEMBLY_FIFO_LPM_WIDTHU downto 0);
+		type sidecar_fifo_mem_t is array (0 to SIDECAR_FIFO_DEPTH_CONST-1) of sidecar_metadata_t;
+		signal sidecar_fifo_mem			: sidecar_fifo_mem_t;
+		signal sidecar_fifo_wr_ptr		: sidecar_fifo_addr_t := (others => '0');
+		signal sidecar_fifo_rd_ptr		: sidecar_fifo_addr_t := (others => '0');
+		signal sidecar_fifo_usedw		: sidecar_fifo_count_t := (others => '0');
+		signal sidecar_fifo_empty		: std_logic;
+		signal sidecar_fifo_full			: std_logic;
+	begin
+		sidecar_fifo_empty <= '1' when sidecar_fifo_usedw = to_unsigned(0, sidecar_fifo_usedw'length) else '0';
+		sidecar_fifo_full  <= '1' when sidecar_fifo_usedw = to_unsigned(SIDECAR_FIFO_DEPTH_CONST, sidecar_fifo_usedw'length) else '0';
+		sidecar_fifo_dout  <= sidecar_fifo_mem(to_integer(sidecar_fifo_rd_ptr));
+		sidecar_ram_din    <= sidecar_fifo_dout when decision = 0 else (others => '0');
+
+		sidecar_fifo_usedw_dbg     <= std_logic_vector(sidecar_fifo_usedw(DEASSEMBLY_FIFO_LPM_WIDTHU-1 downto 0));
+		sidecar_fifo_empty_dbg     <= sidecar_fifo_empty;
+		sidecar_fifo_full_dbg      <= sidecar_fifo_full;
+
+		sidecar_fifo : process (i_clk, i_rst)
+			variable write_accept_v : boolean;
+			variable read_accept_v  : boolean;
+		begin
+			if (i_rst = '1') then
+				sidecar_fifo_wr_ptr       <= (others => '0');
+				sidecar_fifo_rd_ptr       <= (others => '0');
+				sidecar_fifo_usedw        <= (others => '0');
+				sidecar_fifo_overflow_dbg <= '0';
+				sidecar_fifo_underflow_dbg <= '0';
+			elsif rising_edge(i_clk) then
+				write_accept_v := (deassembly_fifo_wrreq = '1' and sidecar_fifo_full = '0');
+				read_accept_v  := (deassembly_fifo_rdack = '1' and sidecar_fifo_empty = '0');
+
+				if (csr.soft_reset = '1' or deassembly_fifo_sclr = '1') then
+					sidecar_fifo_wr_ptr       <= (others => '0');
+					sidecar_fifo_rd_ptr       <= (others => '0');
+					sidecar_fifo_usedw        <= (others => '0');
+					sidecar_fifo_overflow_dbg <= '0';
+					sidecar_fifo_underflow_dbg <= '0';
+				else
+					if (deassembly_fifo_wrreq = '1' and sidecar_fifo_full = '1' and not read_accept_v) then
+						sidecar_fifo_overflow_dbg <= '1';
+					end if;
+					if (deassembly_fifo_rdack = '1' and sidecar_fifo_empty = '1') then
+						sidecar_fifo_underflow_dbg <= '1';
+					end if;
+					if (write_accept_v) then
+						if (asi_hit_type1_metadata_valid = '1') then
+							sidecar_fifo_mem(to_integer(sidecar_fifo_wr_ptr)) <= asi_hit_type1_metadata;
+						else
+							sidecar_fifo_mem(to_integer(sidecar_fifo_wr_ptr)) <= (others => '0');
+						end if;
+						sidecar_fifo_wr_ptr <= sidecar_fifo_wr_ptr + 1;
+					end if;
+					if (read_accept_v) then
+						sidecar_fifo_rd_ptr <= sidecar_fifo_rd_ptr + 1;
+					end if;
+					if (write_accept_v and not read_accept_v) then
+						sidecar_fifo_usedw <= sidecar_fifo_usedw + 1;
+					elsif (read_accept_v and not write_accept_v) then
+						sidecar_fifo_usedw <= sidecar_fifo_usedw - 1;
+					end if;
+				end if;
+			end if;
+		end process sidecar_fifo;
+
+		sidecar_ram : entity work.alt_simple_dpram
+		generic map(
+			DATA_WIDTH	=> SIDECAR_METADATA_WIDTH_CONST,
+			ADDR_WIDTH	=> SRAM_ADDR_WIDTH)
+		port map(
+			raddr	        => side_ram_raddr_nat,
+			dbg_patch_addr  => 0,
+			q		        => sidecar_ram_dout,
+			we		        => side_ram_we,
+			waddr	        => side_ram_waddr_nat,
+			dbg_patch_data  => (others => '0'),
+			dbg_patch_we    => '0',
+			data	        => sidecar_ram_din,
+			clk		        => i_clk
+		);
+	end generate gen_sidecar_metadata;
+
+	gen_sidecar_metadata_off : if DEBUG < 2 generate
+	begin
+		sidecar_fifo_dout          <= (others => '0');
+		sidecar_ram_din            <= (others => '0');
+		sidecar_ram_dout           <= (others => '0');
+		sidecar_fifo_usedw_dbg     <= (others => '0');
+		sidecar_fifo_empty_dbg     <= '1';
+		sidecar_fifo_full_dbg      <= '0';
+		sidecar_fifo_overflow_dbg  <= '0';
+		sidecar_fifo_underflow_dbg <= '0';
+	end generate gen_sidecar_metadata_off;
 
 	proc_gts_counter : process (i_clk)
 	-- counter of the global timestamp on the FPGA
@@ -1692,6 +1841,7 @@ begin
 		cam_erase_data		<= side_ram_dout(TCC8N_LO + SK_RANGE_HI downto TCC8N_LO + SK_RANGE_LO);
 		-- assemble output hit
 		hit_pop_data_comb	<= side_ram_dout(side_ram_dout'high-1 downto 0); -- simply strip the msb to get the hit type 1
+		hit_pop_metadata_comb <= sidecar_ram_dout;
 	end process;
 	
 	proc_memory_out_cleanup : process (i_clk, i_rst)
@@ -1720,6 +1870,8 @@ begin
 			aso_hit_type2_valid			<= '0';
 			aso_hit_type2_data			<= (others => '0');
 			aso_hit_type2_error(0)		<= '0';
+			aso_hit_type2_metadata		<= (others => '0');
+			aso_hit_type2_metadata_valid	<= '0';
 			aso_hit_type2_startofpacket	<= '0';
 			aso_hit_type2_endofpacket	<= '0';
 			pop_cache_miss_pulse		<= '0';
@@ -1730,6 +1882,8 @@ begin
 	            aso_hit_type2_error(0)      <= '0';
 	            aso_hit_type2_valid			<= '0';
 	            aso_hit_type2_data			<= (others => '0');
+	            aso_hit_type2_metadata		<= (others => '0');
+	            aso_hit_type2_metadata_valid	<= '0';
 	            aso_hit_type2_startofpacket	<= '0';
 				aso_hit_type2_endofpacket	<= '0';
 				pop_cache_miss_pulse		<= '0';
@@ -1740,6 +1894,8 @@ begin
 	            aso_hit_type2_error(0)              <= '0';
 	            aso_hit_type2_valid			        <= '0';
 	            aso_hit_type2_data			        <= (others => '0');
+	            aso_hit_type2_metadata		        <= (others => '0');
+	            aso_hit_type2_metadata_valid		<= '0';
 	            aso_hit_type2_startofpacket	        <= '0';
 				aso_hit_type2_endofpacket	        <= '0';
 				pop_cache_miss_pulse		        <= '0';
@@ -1775,6 +1931,10 @@ begin
 						aso_hit_type2_data(21 downto 17)	<= hit_pop_data_comb(CHANNEL_HI downto CHANNEL_LO);
 						aso_hit_type2_data(16 downto 9)		<= hit_pop_data_comb(TCC1n6_HI downto TFINE_LO); -- tcc1.6(1.6ns) & tfine(50ps) = ts50p
 						aso_hit_type2_data(8 downto 0)		<= hit_pop_data_comb(ET1n6_HI downto ET1n6_LO);
+						if (DEBUG >= 2) then
+							aso_hit_type2_metadata			<= hit_pop_metadata_comb;
+							aso_hit_type2_metadata_valid	<= '1';
+						end if;
 						-- channel
 						aso_hit_type2_channel				<= std_logic_vector(to_unsigned(INTERLEAVING_INDEX,aso_hit_type2_channel'length)); -- re-assemble the channel
 							-- equivalent alternative: hit_pop_data_comb(ASIC_HI downto ASIC_LO); 

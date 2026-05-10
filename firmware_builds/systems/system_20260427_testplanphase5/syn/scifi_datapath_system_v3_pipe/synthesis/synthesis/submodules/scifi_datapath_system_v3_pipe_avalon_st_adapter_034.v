@@ -17,7 +17,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_034 #(
 		parameter inUseReady      = 0,
 		parameter inReadyLatency  = 0,
 		parameter outDataWidth    = 9,
-		parameter outChannelWidth = 4,
+		parameter outChannelWidth = 5,
 		parameter outErrorWidth   = 3,
 		parameter outUseEmptyPort = 0,
 		parameter outUseValid     = 1,
@@ -34,8 +34,13 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_034 #(
 		output wire       out_0_valid,    //         .valid
 		input  wire       out_0_ready,    //         .ready
 		output wire [2:0] out_0_error,    //         .error
-		output wire [3:0] out_0_channel   //         .channel
+		output wire [4:0] out_0_channel   //         .channel
 	);
+
+	wire        channel_adapter_0_out_valid;   // channel_adapter_0:out_valid -> timing_adapter_0:in_valid
+	wire  [8:0] channel_adapter_0_out_data;    // channel_adapter_0:out_data -> timing_adapter_0:in_data
+	wire  [4:0] channel_adapter_0_out_channel; // channel_adapter_0:out_channel -> timing_adapter_0:in_channel
+	wire  [2:0] channel_adapter_0_out_error;   // channel_adapter_0:out_error -> timing_adapter_0:in_error
 
 	generate
 		// If any of the display statements (or deliberately broken
@@ -133,7 +138,7 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_034 #(
 			instantiated_with_wrong_parameters_error_see_comment_above
 					outdatawidth_check ( .error(1'b1) );
 		end
-		if (outChannelWidth != 4)
+		if (outChannelWidth != 5)
 		begin
 			initial begin
 				$display("Generated module instantiated with wrong parameters");
@@ -189,18 +194,31 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_034 #(
 		end
 	endgenerate
 
-	scifi_datapath_system_v3_pipe_avalon_st_adapter_timing_adapter_1 timing_adapter_0 (
-		.clk         (in_clk_0_clk),    //   clk.clk
-		.reset_n     (~in_rst_0_reset), // reset.reset_n
-		.in_data     (in_0_data),       //    in.data
-		.in_valid    (in_0_valid),      //      .valid
-		.in_error    (in_0_error),      //      .error
-		.in_channel  (in_0_channel),    //      .channel
-		.out_data    (out_0_data),      //   out.data
-		.out_valid   (out_0_valid),     //      .valid
-		.out_ready   (out_0_ready),     //      .ready
-		.out_error   (out_0_error),     //      .error
-		.out_channel (out_0_channel)    //      .channel
+	scifi_datapath_system_v3_pipe_avalon_st_adapter_034_channel_adapter_0 channel_adapter_0 (
+		.clk         (in_clk_0_clk),                  //   clk.clk
+		.reset_n     (~in_rst_0_reset),               // reset.reset_n
+		.in_data     (in_0_data),                     //    in.data
+		.in_valid    (in_0_valid),                    //      .valid
+		.in_error    (in_0_error),                    //      .error
+		.in_channel  (in_0_channel),                  //      .channel
+		.out_data    (channel_adapter_0_out_data),    //   out.data
+		.out_valid   (channel_adapter_0_out_valid),   //      .valid
+		.out_error   (channel_adapter_0_out_error),   //      .error
+		.out_channel (channel_adapter_0_out_channel)  //      .channel
+	);
+
+	scifi_datapath_system_v3_pipe_avalon_st_adapter_034_timing_adapter_0 timing_adapter_0 (
+		.clk         (in_clk_0_clk),                  //   clk.clk
+		.reset_n     (~in_rst_0_reset),               // reset.reset_n
+		.in_data     (channel_adapter_0_out_data),    //    in.data
+		.in_valid    (channel_adapter_0_out_valid),   //      .valid
+		.in_error    (channel_adapter_0_out_error),   //      .error
+		.in_channel  (channel_adapter_0_out_channel), //      .channel
+		.out_data    (out_0_data),                    //   out.data
+		.out_valid   (out_0_valid),                   //      .valid
+		.out_ready   (out_0_ready),                   //      .ready
+		.out_error   (out_0_error),                   //      .error
+		.out_channel (out_0_channel)                  //      .channel
 	);
 
 endmodule

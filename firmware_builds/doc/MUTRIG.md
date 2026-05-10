@@ -2,6 +2,23 @@
 
 Date: 2026-04-30
 
+## Source Of Truth
+
+The online Mu3e wiki is the source of truth for MuTRiG clocking, reset, DMON
+injection semantics, and LVDS hit format. This note is an FEB/firmware-facing
+operational summary and must be checked against the wiki before it is used to
+settle a format or clocking disagreement.
+
+Relevant wiki pages:
+
+- `online/wiki/mutrig_clock_reset.md`: 625 MHz serializer/root digital clock,
+  125 MHz derived core clock, and 625 MHz TDC PLL/coarse counter reset behavior.
+- `online/wiki/mutrig_dmon.md`: DMON0 maps to the TDC Q input and DMON1 maps to
+  the flag input that determines timestamp type.
+- `online/wiki/mutrig_hitTx.md` and `online/wiki/mutrig_hitTxData.md`: LVDS
+  frame and short/long hit formats. The short-hit coarse field is the
+  PRBS-encoded 15-bit TDC coarse state in 1.6 ns units.
+
 ## Physical Mapping
 
 - SMB3 is the upper side and maps to lanes 0..3.

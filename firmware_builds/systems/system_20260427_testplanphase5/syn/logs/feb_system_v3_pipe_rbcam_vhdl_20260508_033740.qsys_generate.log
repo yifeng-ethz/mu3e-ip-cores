@@ -1,0 +1,238 @@
+2026.05.08.03:37:49 Info: Saving generation log to /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe/feb_system_v3_pipe_generation.rpt
+2026.05.08.03:37:49 Info: Starting: <b>Create HDL design files for synthesis</b>
+2026.05.08.03:37:49 Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/syn/feb_system_v3_pipe/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+2026.05.08.03:37:49 Info: Loading syn/feb_system_v3_pipe.qsys
+2026.05.08.03:37:49 Info: Reading input file
+2026.05.08.03:37:49 Info: Adding bringup_subsystem [feb_bringup_system 1.0]
+2026.05.08.03:37:49 Info: Parameterizing module bringup_subsystem
+2026.05.08.03:37:49 Info: Adding cclk156_bridge [altera_clock_bridge 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module cclk156_bridge
+2026.05.08.03:37:49 Info: Adding cclk156_source [clock_source 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module cclk156_source
+2026.05.08.03:37:49 Info: Adding control_path_subsystem [debug_sc_system_v3 1.0]
+2026.05.08.03:37:49 Info: Parameterizing module control_path_subsystem
+2026.05.08.03:37:49 Info: Adding control_reset_sync_125 [altera_reset_controller 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module control_reset_sync_125
+2026.05.08.03:37:49 Info: Adding data_path_subsystem [scifi_datapath_system_v3_pipe 1.0]
+2026.05.08.03:37:49 Info: Parameterizing module data_path_subsystem
+2026.05.08.03:37:49 Info: Adding ext_reset_merge_cclk156 [altera_reset_controller 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module ext_reset_merge_cclk156
+2026.05.08.03:37:49 Info: Adding ext_reset_pipe1_cclk156 [altera_reset_bridge 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module ext_reset_pipe1_cclk156
+2026.05.08.03:37:49 Info: Adding ext_reset_pipe2_cclk156 [altera_reset_bridge 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module ext_reset_pipe2_cclk156
+2026.05.08.03:37:49 Info: Adding mclk125_souce [clock_source 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module mclk125_souce
+2026.05.08.03:37:49 Info: Adding osc50_reset_bridge [altera_reset_bridge 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module osc50_reset_bridge
+2026.05.08.03:37:49 Info: Adding osc50_source [altera_clock_bridge 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module osc50_source
+2026.05.08.03:37:49 Info: Adding upload_lvds_reset_bridge [altera_reset_bridge 18.1]
+2026.05.08.03:37:49 Info: Parameterizing module upload_lvds_reset_bridge
+2026.05.08.03:37:49 Info: Adding upload_subsystem [upload_system_v3 1.0]
+2026.05.08.03:37:49 Info: Parameterizing module upload_subsystem
+2026.05.08.03:37:49 Info: Building connections
+2026.05.08.03:37:49 Info: Parameterizing connections
+2026.05.08.03:37:49 Info: Validating
+2026.05.08.03:37:50 Info: Done reading input file
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.bringup_subsystem.jtag_uart: JTAG UART IP input clock need to be at least double (2x) the operating frequency of JTAG TCK on board
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.bringup_subsystem.si_in: PIO inputs are not hardwired in test bench. Undefined values will be read from PIO inputs during simulation.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.bringup_subsystem.sysid: System ID is not assigned automatically. Edit the System ID parameter to provide a unique ID
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.bringup_subsystem.sysid: Time stamp will be automatically updated when this component is generated.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.bringup_subsystem.dbg0: <b>dbg0.external_connection</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.bringup_subsystem.dbg1: <b>dbg1.external_connection</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.bringup_subsystem.pio: <b>pio.external_connection</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.bringup_subsystem.timer_ts: Interrupt sender <b>timer_ts.irq</b> is not connected to an interrupt receiver
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.control_path_subsystem.mutrig_cfg_ctrl_0.sclr_counter_req: Associated reset sinks not declared
+2026.05.08.03:37:51 Error: feb_system_v3_pipe.control_path_subsystem.on_die_temp_sense_ctrl: Component <b>altera_temp_sense_ctrl 1.1</b> not found or could not be instantiated
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.control_path_subsystem.pll_156t40: The legal reference clock frequency is 5.0 MHz..750.0 MHz
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.control_path_subsystem.pll_156t40: Able to implement PLL with user settings
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.control_path_subsystem.sc_hub: EXT_UP_PLD_DEPTH (512) < EFFECTIVE_EXT_OUTSTANDING x MAX_BURST  (6 x 256 = 1536). Credit manager will limit effective  read outstanding to ~2 for max-burst reads. This is  normal and validated by TLM CRED-03.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.control_path_subsystem.pll_156t40: <b>pll_156t40.locked</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Error: feb_system_v3_pipe.control_path_subsystem.on_die_temp_sense_ctrl.csr: Data width must be of power of two and between 8 and 4096  
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_1.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_2.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_3.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_4.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_5.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_6.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_7.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.feb_frame_assembly_0.debug_queue_status: <b>feb_frame_assembly_0.debug_queue_status</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_0: <b>ring_buffer_cam_0.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_1: <b>ring_buffer_cam_1.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_2: <b>ring_buffer_cam_2.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.ring_buffer_cam_3: <b>ring_buffer_cam_3.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.feb_frame_assembly_0.debug_queue_status: <b>feb_frame_assembly_0.debug_queue_status</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0: <b>ring_buffer_cam_0.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1: <b>ring_buffer_cam_1.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2: <b>ring_buffer_cam_2.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3: <b>ring_buffer_cam_3.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0: lvds_rx_controller_pro: file generation successful!
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_0.hit_type0_in: Signal <b>asi_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1.hit_type0_in: Signal <b>asi_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_0.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_1.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_2.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_3.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_4.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_5.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_6.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mutrig_datapath_subsystem_7.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded0/mutrig_lane_source_mux_0.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded0/mutrig_lane_source_mux_0.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded1/mutrig_lane_source_mux_1.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded1/mutrig_lane_source_mux_1.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded2/mutrig_lane_source_mux_2.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded2/mutrig_lane_source_mux_2.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded3/mutrig_lane_source_mux_3.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded3/mutrig_lane_source_mux_3.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded4/mutrig_lane_source_mux_4.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded4/mutrig_lane_source_mux_4.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded5/mutrig_lane_source_mux_5.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded5/mutrig_lane_source_mux_5.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded6/mutrig_lane_source_mux_6.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded6/mutrig_lane_source_mux_6.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded7/mutrig_lane_source_mux_7.real_in: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.lvds_rx_controller_pro_0.decoded7/mutrig_lane_source_mux_7.real_in: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.hit_type3/hist_post_splitter_0.in: The sink has a empty signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_1.out/mutrig_datapath_subsystem_1.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_2.out/mutrig_datapath_subsystem_2.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_3.out/mutrig_datapath_subsystem_3.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_4.out/mutrig_datapath_subsystem_4.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_5.out/mutrig_datapath_subsystem_5.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_6.out/mutrig_datapath_subsystem_6.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: Max channel is 31 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.decoded_lane_fifo_7.out/mutrig_datapath_subsystem_7.decoded_din: The source channel signal is 5 bits, but the sink is 4 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out0/histogram_statistics_0.ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.hist_post_splitter_0.out1/hist_post_cdc_0.in: The source has a empty signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out1/mts_preprocessor_0.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out10/mutrig_datapath_subsystem_6.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out11/mutrig_datapath_subsystem_7.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out12/mts_preprocessor_1.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out13/mutrig_injector_0.runctl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out14/hit_stack_subsystem_1.run_control_signal: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out15/emulator_ctrl_splitter.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out2/mutrig_datapath_subsystem_0.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out3/mutrig_datapath_subsystem_1.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out4/mutrig_datapath_subsystem_2.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out5/mutrig_datapath_subsystem_3.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out6/hit_stack_subsystem_0.run_control_signal: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out7/mutrig_reset_controller_0.runcontrol: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out8/mutrig_datapath_subsystem_4.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.run_control_splitter.out9/mutrig_datapath_subsystem_5.run_ctrl: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_0.selected_out/decoded_lane_fifo_0.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_0.selected_out/decoded_lane_fifo_0.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_0.selected_out/decoded_lane_fifo_0.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_1.selected_out/decoded_lane_fifo_1.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_1.selected_out/decoded_lane_fifo_1.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_1.selected_out/decoded_lane_fifo_1.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_2.selected_out/decoded_lane_fifo_2.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_2.selected_out/decoded_lane_fifo_2.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_2.selected_out/decoded_lane_fifo_2.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_3.selected_out/decoded_lane_fifo_3.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_3.selected_out/decoded_lane_fifo_3.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_3.selected_out/decoded_lane_fifo_3.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_4.selected_out/decoded_lane_fifo_4.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_4.selected_out/decoded_lane_fifo_4.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_4.selected_out/decoded_lane_fifo_4.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_5.selected_out/decoded_lane_fifo_5.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_5.selected_out/decoded_lane_fifo_5.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_5.selected_out/decoded_lane_fifo_5.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_6.selected_out/decoded_lane_fifo_6.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_6.selected_out/decoded_lane_fifo_6.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_6.selected_out/decoded_lane_fifo_6.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_7.selected_out/decoded_lane_fifo_7.in: Max channel is 15 for source and 31 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_7.selected_out/decoded_lane_fifo_7.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.mutrig_lane_source_mux_7.selected_out/decoded_lane_fifo_7.in: The source channel signal is 4 bits, but the sink is 5 bits. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.dbg_mm2runctrl_0.ctrl: <b>dbg_mm2runctrl_0.ctrl</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_0.hit_type0: <b>emulator_mutrig_0.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_1.hit_type0: <b>emulator_mutrig_1.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_2.hit_type0: <b>emulator_mutrig_2.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_3.hit_type0: <b>emulator_mutrig_3.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_4.hit_type0: <b>emulator_mutrig_4.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_5.hit_type0: <b>emulator_mutrig_5.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_6.hit_type0: <b>emulator_mutrig_6.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.emulator_mutrig_7.hit_type0: <b>emulator_mutrig_7.hit_type0</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.histogram_ingress_bridge_0.post_out: <b>histogram_ingress_bridge_0.post_out</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.histogram_statistics_0.fill_out: <b>histogram_statistics_0.fill_out</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_burst: <b>hit_stack_subsystem_0.frame_debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_delay8loss: <b>hit_stack_subsystem_0.frame_debug_delay8loss</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_filllevel: <b>hit_stack_subsystem_0.frame_debug_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_loss8fill: <b>hit_stack_subsystem_0.frame_debug_loss8fill</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_debug_ts: <b>hit_stack_subsystem_0.frame_debug_ts</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_0.frame_ts_delta: <b>hit_stack_subsystem_0.frame_ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_burst: <b>hit_stack_subsystem_1.frame_debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_delay8loss: <b>hit_stack_subsystem_1.frame_debug_delay8loss</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_filllevel: <b>hit_stack_subsystem_1.frame_debug_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_loss8fill: <b>hit_stack_subsystem_1.frame_debug_loss8fill</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_debug_ts: <b>hit_stack_subsystem_1.frame_debug_ts</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.frame_ts_delta: <b>hit_stack_subsystem_1.frame_ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_0_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_0_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_1_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_1_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_2_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_2_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.hit_stack_subsystem_1.ring_buffer_cam_3_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_3_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_0.debug_burst: <b>mts_preprocessor_0.debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_0.ts_delta: <b>mts_preprocessor_0.ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1.debug_burst: <b>mts_preprocessor_1.debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1.ts_delta: <b>mts_preprocessor_1.ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_0: <b>mts_preprocessor_0.debug_status</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.mts_preprocessor_1: <b>mts_preprocessor_1.debug_status</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.: You have exported the interface run_control_splitter.in but not its associated reset interface.  Export the driver(s) of run_control_splitter.reset
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.runctl_mgmt_host: Interface must have an associated reset
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.upload_subsystem.runctl_mgmt_host_0.dp_hard_reset: No synchronous edges, but has associated clock
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.upload_subsystem.runctl_mgmt_host_0.ct_hard_reset: No synchronous edges, but has associated clock
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.upload_subsystem.runctl_mgmt_host_0.ext_hard_reset: No synchronous edges, but has associated clock
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.upload_subsystem.control_plane_hard_reset: No synchronous edges, but has associated clock
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.upload_subsystem.data_path_hard_reset: No synchronous edges, but has associated clock
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.upload_subsystem.ext_hard_reset: No synchronous edges, but has associated clock
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.hit_type3_upper/upload_subsystem.upload_data: The source has a empty signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.rstlink/upload_subsystem.synclink: Max channel is 9 for source and 0 for sink. Avalon-ST Adapter will be inserted..
+2026.05.08.03:37:51 Info: feb_system_v3_pipe.data_path_subsystem.rstlink/upload_subsystem.synclink: The source has a channel signal of 4 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.mclk125_souce: <b>mclk125_souce.clk</b> cannot be both connected and exported
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem: <b>data_path_subsystem.inject_aux</b> must be exported, or connected to a matching conduit.
+2026.05.08.03:37:51 Warning: feb_system_v3_pipe.data_path_subsystem.runctl_mgmt_host: <b>data_path_subsystem.runctl_mgmt_host</b> does not have an associated reset
+2026.05.08.03:37:52 Info: feb_system_v3_pipe: Generating <b>feb_system_v3_pipe</b> "<b>feb_system_v3_pipe</b>" for QUARTUS_SYNTH
+2026.05.08.03:37:53 Info: Interconnect is inserted between master control_path_subsystem.avmm_port and slave data_path_subsystem.avmm_port because the master has response signal 2 bit wide, but the slave is 0 bit wide.
+2026.05.08.03:37:53 Info: Interconnect is inserted between master control_path_subsystem.avmm_port and slave data_path_subsystem.avmm_port because the master has burstcount signal 1 bit wide, but the slave is 9 bit wide.
+2026.05.08.03:37:53 Info: Interconnect is inserted between master control_path_subsystem.upload_avmm_port and slave upload_subsystem.csr because they have different clock source.
+2026.05.08.03:37:53 Info: Inserting clock-crossing logic between cmd_demux.src0 and cmd_mux.sink0
+2026.05.08.03:37:53 Info: Inserting clock-crossing logic between rsp_demux.src0 and rsp_mux.sink0
+2026.05.08.03:37:53 Info: avalon_st_adapter: Inserting data_format_adapter: data_format_adapter_0
+2026.05.08.03:37:54 Info: avalon_st_adapter_001: Inserting channel_adapter: channel_adapter_0
+2026.05.08.03:37:54 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_0
+2026.05.08.03:37:54 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_1
+2026.05.08.03:37:56 Info: bringup_subsystem: "<b>feb_system_v3_pipe</b>" instantiated <b>feb_bringup_system</b> "<b>bringup_subsystem</b>"
+2026.05.08.03:37:56 Error: null
