@@ -1,0 +1,37 @@
+BASIC_TESTS += B001_uid_read_test
+BASIC_TESTS += B002_uid_write_ignored_test
+BASIC_TESTS += B003_meta_versioning_test
+BASIC_TESTS += B004_default_mode_real_test
+BASIC_TESTS += B005_set_mode_emu_test
+BASIC_TESTS += B006_set_mode_mix_rr_test
+BASIC_TESTS += B007_real_only_drain_test
+BASIC_TESTS += B008_emu_only_drain_test
+BASIC_TESTS += B009_mix_rr_merged_packet_alternation_test
+BASIC_TESTS += B010_mix_rr_single_beat_absorbed_test
+BASIC_TESTS += B011_mix_rr_single_beat_both_idle_test
+BASIC_TESTS += B012_switch_at_idle_test
+BASIC_TESTS += B013_switch_during_packet_defers_test
+BASIC_TESTS += B014_switch_back_to_back_test
+BASIC_TESTS += B015_switch_mix_rr_to_real_drains_outstanding_emu_test
+BASIC_TESTS += B016_real_fifo_fill_drain_test
+BASIC_TESTS += B017_emu_fifo_fill_drain_test
+BASIC_TESTS += B018_idle_does_not_consume_test
+BASIC_TESTS += B019_ingress_real_hit_counter_test
+BASIC_TESTS += B020_ingress_emu_hit_counter_test
+BASIC_TESTS += B021_drop_real_counter_test
+BASIC_TESTS += B022_drop_emu_counter_test
+BASIC_TESTS += B023_egress_real_counter_test
+BASIC_TESTS += B024_egress_emu_counter_test
+BASIC_TESTS += B025_low_high_pair_atomicity_test
+BASIC_TESTS += B026_w1p_clear_counters_test
+BASIC_TESTS += B027_csr_back_to_back_writes_test
+BASIC_TESTS += B028_channel_convention_test
+BASIC_TESTS += B029_watchdog_threshold_default_test
+BASIC_TESTS += B030_run_control_run_prep_resets_state_test
+BASIC_TESTS += B031_run_control_reset_clears_counters_test
+BASIC_TESTS += B032_frame_counters_native_eop_test
+
+BASIC_RUNS := $(addprefix run_,$(BASIC_TESTS))
+
+$(BASIC_RUNS): TB_TOP := tb_top" "B999_basic_factory_anchor
+regress_basic: TB_TOP := tb_top" "B999_basic_factory_anchor

@@ -1,8 +1,8 @@
 -- File name: ring_buffer_cam.vhd
 -- Author  : Yifeng Wang (yifenwan@phys.ethz.ch)
--- Version : 26.2.6
--- Date    : 20260422
--- Change  : package the settled SEARCH-tail timing-safe overlap guard as release 26.2.6.0422
+-- Version : 26.2.7
+-- Date    : 20260506
+-- Change  : add DEBUG-gated observability conduits and 64-bit per-hit metadata sidecar
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -20,9 +20,9 @@ entity ring_buffer_cam is
         IP_UID              : natural := 1380074317;
         VERSION_MAJOR       : natural := 26;
         VERSION_MINOR       : natural := 2;
-        VERSION_PATCH       : natural := 6;
-        BUILD               : natural := 422;
-        VERSION_DATE        : natural := 20260422;
+        VERSION_PATCH       : natural := 7;
+        BUILD               : natural := 506;
+        VERSION_DATE        : natural := 20260506;
         VERSION_GIT         : natural := 0;
         INSTANCE_ID         : natural := 0;
         DEBUG               : natural := 1
@@ -42,6 +42,8 @@ entity ring_buffer_cam is
         asi_hit_type1_valid         : in  std_logic;
         asi_hit_type1_ready         : out std_logic;
         asi_hit_type1_error         : in  std_logic;
+        asi_hit_type1_metadata          : in  std_logic_vector(63 downto 0) := (others => '0');
+        asi_hit_type1_metadata_valid    : in  std_logic := '0';
         aso_hit_type2_channel       : out std_logic_vector(3 downto 0);
         aso_hit_type2_startofpacket : out std_logic;
         aso_hit_type2_endofpacket   : out std_logic;
@@ -49,13 +51,18 @@ entity ring_buffer_cam is
         aso_hit_type2_valid         : out std_logic;
         aso_hit_type2_ready         : in  std_logic;
         aso_hit_type2_error         : out std_logic;
+        aso_hit_type2_metadata          : out std_logic_vector(63 downto 0);
+        aso_hit_type2_metadata_valid    : out std_logic;
         i_clk                       : in  std_logic;
         i_rst                       : in  std_logic;
         asi_ctrl_data               : in  std_logic_vector(8 downto 0);
         asi_ctrl_valid              : in  std_logic;
         asi_ctrl_ready              : out std_logic;
         aso_filllevel_data          : out std_logic_vector(15 downto 0);
-        aso_filllevel_valid         : out std_logic
+        aso_filllevel_valid         : out std_logic;
+        coe_debug_fill_level        : out std_logic_vector(31 downto 0);
+        coe_debug_fifo_level        : out std_logic_vector(31 downto 0);
+        coe_debug_queue_state       : out std_logic_vector(31 downto 0)
     );
 end entity ring_buffer_cam;
 
@@ -104,6 +111,8 @@ begin
             asi_hit_type1_valid         => asi_hit_type1_valid,
             asi_hit_type1_ready         => asi_hit_type1_ready,
             asi_hit_type1_error         => asi_hit_type1_error_vec,
+            asi_hit_type1_metadata      => asi_hit_type1_metadata,
+            asi_hit_type1_metadata_valid => asi_hit_type1_metadata_valid,
             aso_hit_type2_channel       => aso_hit_type2_channel,
             aso_hit_type2_startofpacket => aso_hit_type2_startofpacket,
             aso_hit_type2_endofpacket   => aso_hit_type2_endofpacket,
@@ -111,8 +120,13 @@ begin
             aso_hit_type2_valid         => aso_hit_type2_valid,
             aso_hit_type2_ready         => aso_hit_type2_ready,
             aso_hit_type2_error         => aso_hit_type2_error_vec,
+            aso_hit_type2_metadata      => aso_hit_type2_metadata,
+            aso_hit_type2_metadata_valid => aso_hit_type2_metadata_valid,
             aso_filllevel_valid         => aso_filllevel_valid,
             aso_filllevel_data          => aso_filllevel_data,
+            coe_debug_fill_level        => coe_debug_fill_level,
+            coe_debug_fifo_level        => coe_debug_fifo_level,
+            coe_debug_queue_state       => coe_debug_queue_state,
             i_rst                       => i_rst,
             i_clk                       => i_clk
         );

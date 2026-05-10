@@ -37,34 +37,38 @@
 // ------------------------------------------
 // Generation parameters:
 //   output_name:        scifi_datapath_system_v3_pipe_avalon_st_adapter_009_timing_adapter_0
-//   in_use_ready:       false
-//   out_use_ready:      true
+//   in_use_ready:       true
+//   out_use_ready:      false
 //   in_use_valid:       true
 //   out_use_valid:      true
 //   use_packets:        false
 //   use_empty:          0
 //   empty_width:        0
 //   data_width:         9
-//   channel_width:      0
-//   error_width:        0
+//   channel_width:      4
+//   error_width:        3
 //   in_ready_latency:   0
 //   out_ready_latency:  0
-//   in_payload_width:   9
-//   out_payload_width:  9
-//   in_payload_map:     in_data
-//   out_payload_map:    out_data
+//   in_payload_width:   16
+//   out_payload_width:  16
+//   in_payload_map:     in_data,in_error,in_channel
+//   out_payload_map:    out_data,out_error,out_channel
 // ------------------------------------------
 
 
 
 module scifi_datapath_system_v3_pipe_avalon_st_adapter_009_timing_adapter_0
 (  
+ output reg         in_ready,
  input               in_valid,
  input     [9-1: 0]  in_data,
+ input     [4-1: 0]  in_channel,
+ input     [3-1: 0] in_error,
  // Interface: out
- input               out_ready,
  output reg          out_valid,
  output reg [9-1: 0] out_data,
+ output reg [4-1: 0] out_channel,
+ output reg [3-1: 0] out_error,
   // Interface: clk
  input              clk,
  // Interface: reset
@@ -76,29 +80,23 @@ module scifi_datapath_system_v3_pipe_avalon_st_adapter_009_timing_adapter_0
    //| Signal Declarations
    // ---------------------------------------------------------------------
    
-   reg [9-1:0]   in_payload;
-   reg [9-1:0]   out_payload;
+   reg [16-1:0]   in_payload;
+   reg [16-1:0]   out_payload;
    reg [1-1:0]   ready;   
-   reg           in_ready;
-   // synthesis translate_off
-   always @(negedge in_ready) begin
-      $display("%m: The downstream component is backpressuring by deasserting ready, but the upstream component can't be backpressured.");
-   end
-   // synthesis translate_on   
 
    // ---------------------------------------------------------------------
    //| Payload Mapping
    // ---------------------------------------------------------------------
    always @* begin
-     in_payload = {in_data};
-     {out_data} = out_payload;
+     in_payload = {in_data,in_error,in_channel};
+     {out_data,out_error,out_channel} = out_payload;
    end
 
    // ---------------------------------------------------------------------
    //| Ready & valid signals.
    // ---------------------------------------------------------------------
    always_comb begin
-     ready[0]    = out_ready;
+     ready[0] = 1;
      out_valid = in_valid;
      out_payload = in_payload;
      in_ready    = ready[0];

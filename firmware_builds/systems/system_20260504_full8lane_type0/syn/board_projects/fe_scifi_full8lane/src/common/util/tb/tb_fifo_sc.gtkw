@@ -1,0 +1,28 @@
+[*]
+[timestart] 0
+[size] 1600 1200
+[pos] -1 -1
+[treeopen] top.
+[treeopen] top.tb_fifo_sc.
+[sst_width] 300
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 600
+@28
+top.tb_fifo_sc.clk
+top.tb_fifo_sc.reset_n
+@420
+top.tb_fifo_sc.cycle
+@28
+top.tb_fifo_sc.we
+@22
+#{top.tb_fifo_sc.wdata[5:0]} top.tb_fifo_sc.wdata[5] top.tb_fifo_sc.wdata[4] top.tb_fifo_sc.wdata[3] top.tb_fifo_sc.wdata[2] top.tb_fifo_sc.wdata[1] top.tb_fifo_sc.wdata[0]
+@28
+top.tb_fifo_sc.wfull
+top.tb_fifo_sc.rack
+@22
+#{top.tb_fifo_sc.rdata[5:0]} top.tb_fifo_sc.rdata[5] top.tb_fifo_sc.rdata[4] top.tb_fifo_sc.rdata[3] top.tb_fifo_sc.rdata[2] top.tb_fifo_sc.rdata[1] top.tb_fifo_sc.rdata[0]
+@29
+top.tb_fifo_sc.rempty
+[pattern_trace] 1
+[pattern_trace] 0

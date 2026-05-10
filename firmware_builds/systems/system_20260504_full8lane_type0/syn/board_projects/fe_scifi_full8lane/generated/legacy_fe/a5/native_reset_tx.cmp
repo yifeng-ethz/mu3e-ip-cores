@@ -1,0 +1,14 @@
+	component native_reset_tx is
+		port (
+			clock           : in  std_logic                    := 'X';             -- clk
+			reset           : in  std_logic                    := 'X';             -- reset
+			pll_powerdown   : out std_logic_vector(3 downto 0);                    -- pll_powerdown
+			tx_analogreset  : out std_logic_vector(3 downto 0);                    -- tx_analogreset
+			tx_digitalreset : out std_logic_vector(3 downto 0);                    -- tx_digitalreset
+			tx_ready        : out std_logic_vector(3 downto 0);                    -- tx_ready
+			pll_locked      : in  std_logic_vector(3 downto 0) := (others => 'X'); -- pll_locked
+			pll_select      : in  std_logic_vector(7 downto 0) := (others => 'X'); -- pll_select
+			tx_cal_busy     : in  std_logic_vector(3 downto 0) := (others => 'X')  -- tx_cal_busy
+		);
+	end component native_reset_tx;
+

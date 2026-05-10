@@ -50,9 +50,9 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_default_decode
                DEFAULT_DESTID = 23 
    )
   (output [106 - 101 : 0] default_destination_id,
-   output [43-1 : 0] default_wr_channel,
-   output [43-1 : 0] default_rd_channel,
-   output [43-1 : 0] default_src_channel
+   output [51-1 : 0] default_wr_channel,
+   output [51-1 : 0] default_rd_channel,
+   output [51-1 : 0] default_src_channel
   );
 
   assign default_destination_id = 
@@ -63,7 +63,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_default_decode
       assign default_src_channel = '0;
     end
     else begin : default_channel_assignment
-      assign default_src_channel = 43'b1 << DEFAULT_CHANNEL;
+      assign default_src_channel = 51'b1 << DEFAULT_CHANNEL;
     end
   endgenerate
 
@@ -73,8 +73,8 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router_default_decode
       assign default_rd_channel = '0;
     end
     else begin : default_rw_channel_assignment
-      assign default_wr_channel = 43'b1 << DEFAULT_WR_CHANNEL;
-      assign default_rd_channel = 43'b1 << DEFAULT_RD_CHANNEL;
+      assign default_wr_channel = 51'b1 << DEFAULT_WR_CHANNEL;
+      assign default_rd_channel = 51'b1 << DEFAULT_RD_CHANNEL;
     end
   endgenerate
 
@@ -103,7 +103,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router
     // -------------------
     output                          src_valid,
     output reg [120-1    : 0] src_data,
-    output reg [43-1 : 0] src_channel,
+    output reg [51-1 : 0] src_channel,
     output                          src_startofpacket,
     output                          src_endofpacket,
     input                           src_ready
@@ -119,7 +119,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router
     localparam PKT_PROTECTION_H = 110;
     localparam PKT_PROTECTION_L = 108;
     localparam ST_DATA_W = 120;
-    localparam ST_CHANNEL_W = 43;
+    localparam ST_CHANNEL_W = 51;
     localparam DECODER_TYPE = 0;
 
     localparam PKT_TRANS_WRITE = 70;
@@ -169,7 +169,7 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router
     assign src_startofpacket = sink_startofpacket;
     assign src_endofpacket   = sink_endofpacket;
     wire [PKT_DEST_ID_W-1:0] default_destid;
-    wire [43-1 : 0] default_src_channel;
+    wire [51-1 : 0] default_src_channel;
 
 
 
@@ -195,37 +195,37 @@ module scifi_datapath_system_v3_pipe_mm_interconnect_0_router
 
     // ( 0x0 .. 0x40 )
     if ( {address[RG:PAD0],{PAD0{1'b0}}} == 13'h0   ) begin
-            src_channel = 43'b000100;
+            src_channel = 51'b000100;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 22;
     end
 
     // ( 0x200 .. 0x300 )
     if ( {address[RG:PAD1],{PAD1{1'b0}}} == 13'h200   ) begin
-            src_channel = 43'b100000;
+            src_channel = 51'b100000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 23;
     end
 
     // ( 0x860 .. 0x870 )
     if ( {address[RG:PAD2],{PAD2{1'b0}}} == 13'h860   ) begin
-            src_channel = 43'b000001;
+            src_channel = 51'b000001;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 26;
     end
 
     // ( 0x900 .. 0x910 )
     if ( {address[RG:PAD3],{PAD3{1'b0}}} == 13'h900   ) begin
-            src_channel = 43'b001000;
+            src_channel = 51'b001000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 27;
     end
 
     // ( 0x1860 .. 0x1870 )
     if ( {address[RG:PAD4],{PAD4{1'b0}}} == 13'h1860   ) begin
-            src_channel = 43'b000010;
+            src_channel = 51'b000010;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 28;
     end
 
     // ( 0x1900 .. 0x1910 )
     if ( {address[RG:PAD5],{PAD5{1'b0}}} == 13'h1900   ) begin
-            src_channel = 43'b010000;
+            src_channel = 51'b010000;
             src_data[PKT_DEST_ID_H:PKT_DEST_ID_L] = 29;
     end
 
