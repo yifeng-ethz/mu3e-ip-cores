@@ -1,0 +1,188 @@
+Flow report for top
+Mon May 11 12:53:25 2026
+Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Flow Summary
+  3. Flow Settings
+  4. Flow Non-Default Global Settings
+  5. Flow Elapsed Time
+  6. Flow OS Summary
+  7. Flow Log
+  8. Flow Messages
+  9. Flow Suppressed Messages
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 2018  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details.
+
+
+
++-----------------------------------------------------------------------------------+
+; Flow Summary                                                                      ;
++---------------------------------+-------------------------------------------------+
+; Flow Status                     ; Flow Failed - Mon May 11 12:53:24 2026          ;
+; Quartus Prime Version           ; 18.1.0 Build 625 09/12/2018 SJ Standard Edition ;
+; Revision Name                   ; top                                             ;
+; Top-level Entity Name           ; top                                             ;
+; Family                          ; Arria V                                         ;
+; Device                          ; 5AGXBA7D4F31C5                                  ;
+; Timing Models                   ; Final                                           ;
+; Logic utilization (in ALMs)     ; 146,608 / 91,680 ( 160 % )                      ;
+; Total registers                 ; 236674                                          ;
+; Total pins                      ; 218 / 426 ( 51 % )                              ;
+; Total virtual pins              ; 0                                               ;
+; Total block memory bits         ; 2,823,882 / 13,987,840 ( 20 % )                 ;
+; Total DSP Blocks                ; 0 / 800 ( 0 % )                                 ;
+; Total HSSI RX PCSs              ; 4 / 9 ( 44 % )                                  ;
+; Total HSSI PMA RX Deserializers ; 4 / 9 ( 44 % )                                  ;
+; Total HSSI TX PCSs              ; 8 / 9 ( 89 % )                                  ;
+; Total HSSI PMA TX Serializers   ; 8 / 9 ( 89 % )                                  ;
+; Total PLLs                      ; 7 / 21 ( 33 % )                                 ;
+; Total DLLs                      ; 0 / 4 ( 0 % )                                   ;
++---------------------------------+-------------------------------------------------+
+
+
++-----------------------------------------+
+; Flow Settings                           ;
++-------------------+---------------------+
+; Option            ; Setting             ;
++-------------------+---------------------+
+; Start date & time ; 05/11/2026 12:01:52 ;
+; Main task         ; Compilation         ;
+; Revision Name     ; top                 ;
++-------------------+---------------------+
+
+
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+; Flow Non-Default Global Settings                                                                                                                                                                                                                               ;
++------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+-----------------+------------+
+; Assignment Name                    ; Value                                                                                                                                                                      ; Default Value ; Entity Name     ; Section Id ;
++------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+-----------------+------------+
+; COMPILER_SIGNATURE_ID              ; 16263631718209.177849371219070                                                                                                                                             ; --            ; --              ; --         ;
+; FITTER_EFFORT                      ; Standard Fit                                                                                                                                                               ; Auto Fit      ; --              ; --         ;
+; MAX_CORE_JUNCTION_TEMP             ; 85                                                                                                                                                                         ; --            ; --              ; --         ;
+; MIN_CORE_JUNCTION_TEMP             ; 0                                                                                                                                                                          ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/ip/clk_ctrl_single/synthesis/../clk_ctrl_single.cmp                                                                                                    ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/ip/clk_ctrl_single/synthesis/../../clk_ctrl_single.qsys                                                                                                ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/a5/trigPLL.cmp                                                                                                                                         ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/a5/native_reset_tx.cmp                                                                                                                                 ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/a5/ip_altera_xcvr_reset_control.cmp                                                                                                                    ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/a5/ip_altera_xcvr_native_av.cmp                                                                                                                        ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/a5/ip_alt_xcvr_reconfig.cmp                                                                                                                            ; --            ; --              ; --         ;
+; MISC_FILE                          ; generated/legacy_fe/a5/fastlink_small.cmp                                                                                                                                  ; --            ; --              ; --         ;
+; MISC_FILE                          ; /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/../feb_system_v3.cmp                                 ; --            ; --              ; --         ;
+; MISC_FILE                          ; /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/../../../../../../quartus_systems/feb_system_v3.qsys ; --            ; --              ; --         ;
+; MISC_FILE                          ; bts/alt_issp_ds/alt_issp_ds/synthesis/../alt_issp_ds.cmp                                                                                                                   ; --            ; --              ; --         ;
+; MISC_FILE                          ; bts/alt_issp_ds/alt_issp_ds/synthesis/../../alt_issp_ds.qsys                                                                                                               ; --            ; --              ; --         ;
+; MISC_FILE                          ; bts/alt_issp_srst/alt_issp_srst/synthesis/../alt_issp_srst.cmp                                                                                                             ; --            ; --              ; --         ;
+; MISC_FILE                          ; bts/alt_issp_srst/alt_issp_srst/synthesis/../../alt_issp_srst.qsys                                                                                                         ; --            ; --              ; --         ;
+; MISC_FILE                          ; ip/alt_clkctrl/unnamed/synthesis/../unnamed.cmp                                                                                                                            ; --            ; --              ; --         ;
+; MISC_FILE                          ; ip/alt_clkctrl/unnamed/synthesis/../../unnamed.qsys                                                                                                                        ; --            ; --              ; --         ;
+; MISC_FILE                          ; ip/ram_sub_det/ram_sub_det_inst.vhd                                                                                                                                        ; --            ; --              ; --         ;
+; MISC_FILE                          ; ip/ram_sub_det/ram_sub_det.cmp                                                                                                                                             ; --            ; --              ; --         ;
+; MISC_FILE                          ; ip/altera_io_bidir/alt_iobuf_onewire_inst.vhd                                                                                                                              ; --            ; --              ; --         ;
+; MISC_FILE                          ; ip/altera_io_bidir/alt_iobuf_onewire.cmp                                                                                                                                   ; --            ; --              ; --         ;
+; OUTPUT_IO_TIMING_FAR_END_VMEAS     ; Half Signal Swing                                                                                                                                                          ; --            ; --              ; --         ;
+; OUTPUT_IO_TIMING_FAR_END_VMEAS     ; Half Signal Swing                                                                                                                                                          ; --            ; --              ; --         ;
+; OUTPUT_IO_TIMING_NEAR_END_VMEAS    ; Half Vccio                                                                                                                                                                 ; --            ; --              ; --         ;
+; OUTPUT_IO_TIMING_NEAR_END_VMEAS    ; Half Vccio                                                                                                                                                                 ; --            ; --              ; --         ;
+; POWER_BOARD_THERMAL_MODEL          ; None (CONSERVATIVE)                                                                                                                                                        ; --            ; --              ; --         ;
+; POWER_DEFAULT_INPUT_IO_TOGGLE_RATE ; 100%                                                                                                                                                                       ; 12.5%         ; --              ; --         ;
+; POWER_DEFAULT_TOGGLE_RATE          ; 100%                                                                                                                                                                       ; 12.5%         ; --              ; --         ;
+; POWER_HSSI_LEFT                    ; Opportunistically power off                                                                                                                                                ; --            ; --              ; --         ;
+; POWER_HSSI_RIGHT                   ; Opportunistically power off                                                                                                                                                ; --            ; --              ; --         ;
+; POWER_HSSI_VCCHIP_LEFT             ; Opportunistically power off                                                                                                                                                ; --            ; --              ; --         ;
+; POWER_HSSI_VCCHIP_RIGHT            ; Opportunistically power off                                                                                                                                                ; --            ; --              ; --         ;
+; POWER_PRESET_COOLING_SOLUTION      ; 15 MM HEAT SINK WITH STILL AIR                                                                                                                                             ; --            ; --              ; --         ;
+; PROJECT_OUTPUT_DIRECTORY           ; output_files                                                                                                                                                               ; --            ; --              ; --         ;
+; SAFE_STATE_MACHINE                 ; On                                                                                                                                                                         ; Off           ; --              ; --         ;
+; SAVE_DISK_SPACE                    ; Off                                                                                                                                                                        ; On            ; --              ; --         ;
+; SEARCH_PATH                        ; generated/software/app/mem_init/                                                                                                                                           ; --            ; --              ; --         ;
+; SLD_FILE                           ; generated/legacy_fe/ip/clk_ctrl_single/synthesis/clk_ctrl_single.debuginfo                                                                                                 ; --            ; --              ; --         ;
+; SLD_FILE                           ; /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/feb_system_v3.regmap                                 ; --            ; --              ; --         ;
+; SLD_FILE                           ; /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/feb_system_v3.debuginfo                              ; --            ; --              ; --         ;
+; SLD_FILE                           ; bts/alt_issp_ds/alt_issp_ds/synthesis/alt_issp_ds.debuginfo                                                                                                                ; --            ; --              ; --         ;
+; SLD_FILE                           ; bts/alt_issp_srst/alt_issp_srst/synthesis/alt_issp_srst.debuginfo                                                                                                          ; --            ; --              ; --         ;
+; SLD_FILE                           ; ip/alt_clkctrl/unnamed/synthesis/unnamed.debuginfo                                                                                                                         ; --            ; --              ; --         ;
+; SLD_INFO                           ; QSYS_NAME alt_issp_ds HAS_SOPCINFO 1 GENERATION_ID 1722605050                                                                                                              ; --            ; alt_issp_ds     ; --         ;
+; SLD_INFO                           ; QSYS_NAME alt_issp_srst HAS_SOPCINFO 1 GENERATION_ID 1722605110                                                                                                            ; --            ; alt_issp_srst   ; --         ;
+; SLD_INFO                           ; QSYS_NAME clk_ctrl_single HAS_SOPCINFO 1 GENERATION_ID 1776085119                                                                                                          ; --            ; clk_ctrl_single ; --         ;
+; SLD_INFO                           ; QSYS_NAME feb_system_v3 HAS_SOPCINFO 1 GENERATION_ID 1778493606                                                                                                            ; --            ; feb_system_v3   ; --         ;
+; SLD_INFO                           ; QSYS_NAME unnamed HAS_SOPCINFO 1 GENERATION_ID 1722605134                                                                                                                  ; --            ; unnamed         ; --         ;
+; SOPCINFO_FILE                      ; generated/legacy_fe/ip/clk_ctrl_single/synthesis/../../clk_ctrl_single.sopcinfo                                                                                            ; --            ; --              ; --         ;
+; SOPCINFO_FILE                      ; /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/../../feb_system_v3.sopcinfo                         ; --            ; --              ; --         ;
+; SOPCINFO_FILE                      ; bts/alt_issp_ds/alt_issp_ds/synthesis/../../alt_issp_ds.sopcinfo                                                                                                           ; --            ; --              ; --         ;
+; SOPCINFO_FILE                      ; bts/alt_issp_srst/alt_issp_srst/synthesis/../../alt_issp_srst.sopcinfo                                                                                                     ; --            ; --              ; --         ;
+; SOPCINFO_FILE                      ; ip/alt_clkctrl/unnamed/synthesis/../../unnamed.sopcinfo                                                                                                                    ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; SYNTHESIS_ONLY_QIP                 ; On                                                                                                                                                                         ; --            ; --              ; --         ;
+; VCCA_L_USER_VOLTAGE                ; 2.5V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VCCA_R_USER_VOLTAGE                ; 2.5V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VCCL_GXBL_USER_VOLTAGE             ; 1.1V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VCCL_GXBR_USER_VOLTAGE             ; 1.1V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VCCR_L_USER_VOLTAGE                ; 1.1V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VCCR_R_USER_VOLTAGE                ; 1.1V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VCCT_L_USER_VOLTAGE                ; 1.1V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VCCT_R_USER_VOLTAGE                ; 1.1V                                                                                                                                                                       ; --            ; --              ; --         ;
+; VHDL_INPUT_VERSION                 ; VHDL_2008                                                                                                                                                                  ; VHDL_1993     ; --              ; --         ;
++------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+-----------------+------------+
+
+
++--------------------------------------------------------------------------------------------------------------------------+
+; Flow Elapsed Time                                                                                                        ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+; Analysis & Synthesis ; 00:14:21     ; 2.5                     ; 5667 MB             ; 00:25:24                           ;
+; Fitter               ; 00:36:05     ; 1.2                     ; 9911 MB             ; 03:08:28                           ;
+; Total                ; 00:50:26     ; --                      ; --                  ; 03:33:52                           ;
++----------------------+--------------+-------------------------+---------------------+------------------------------------+
+
+
++---------------------------------------------------------------------------------+
+; Flow OS Summary                                                                 ;
++----------------------+------------------+---------+------------+----------------+
+; Module Name          ; Machine Hostname ; OS Name ; OS Version ; Processor type ;
++----------------------+------------------+---------+------------+----------------+
+; Analysis & Synthesis ; teferi.ethz.ch   ; \S -    ; \S -       ; x86_64         ;
+; Fitter               ; teferi.ethz.ch   ; \S -    ; \S -       ; x86_64         ;
++----------------------+------------------+---------+------------+----------------+
+
+
+------------
+; Flow Log ;
+------------
+quartus_map --read_settings_files=on --write_settings_files=off top -c top
+quartus_fit --read_settings_files=off --write_settings_files=off top -c top
+
+
+
