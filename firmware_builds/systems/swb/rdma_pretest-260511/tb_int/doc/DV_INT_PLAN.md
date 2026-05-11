@@ -5,7 +5,7 @@
 **Reference:** `firmware_builds/systems/v3_pretest-260511/tb_int/doc/DV_INT_PLAN.md` (FEB v3_pretest-260511 dual-env structural parent)
 **Author:** Mu3e IP team.
 **Date:** 2026-05-11
-**Status:** Draft. SWB BASIC smoke is the first implemented case.
+**Status:** Draft. Selected 22-case structural UVM sweep is implemented.
 
 The staged board project and generated local Qsys synthesis outputs are the
 canonical DUT inputs for this integration TB.
@@ -166,18 +166,20 @@ The DT bucket focuses on:
 
 1. Generate the local Qsys synthesis outputs.
 2. Run BASIC B065 structural smoke against the staged synthesis tree.
-3. Expand BASIC RC and SC cases until the no-restart `bucket_frame` run is
+3. Run the selected 22-case BASIC/EDGE/ERROR/PROF UVM shell sweep.
+4. Expand BASIC RC and SC cases until the no-restart `bucket_frame` run is
    legal.
-4. Add EDGE boundary cases.
-5. Add ERROR recovery cases.
-6. Add PROF sustained-rate cases.
-7. Run `all_buckets_frame` as the final integration signoff mode.
+5. Add the remaining EDGE boundary cases.
+6. Add the remaining ERROR recovery cases.
+7. Add the remaining PROF sustained-rate cases.
+8. Run `all_buckets_frame` as the final integration signoff mode.
 
 ## 5. Outputs
 
 Expected per-run artifacts:
-- `tb_int/sim/logs/basic_bucket_sweep.log`.
-- `tb_int/sim/logs/swb_basic_b065_smoke.log`.
+- `tb_int/sim/<case>/transcript` for each selected case.
+- `tb_int/sim/logs/regress_selected_22.log`.
+- `tb_int/DV_REPORT.md`, `tb_int/DV_COV.md`, and `tb_int/REPORT/`.
 - Per-case result rows with status, evidence path, and ledger residuals.
 - Future UCDB outputs under `tb_int/sim/cov/` once the full Questa harness is
   enabled.
@@ -193,8 +195,12 @@ Reused from `firmware_builds/systems/system_20260504_emulator_type0/tb_int/uvm/c
 SWB-specific layer:
 - `tb_int_top.sv`.
 - `rdma_sqe_ingress_if.sv`.
+- `rdma_cqe_egress_if.sv`.
 - `opq_lane_if.sv`.
-- `pcie_x8_egress_if.sv`.
+- `pcie_dma_egress_if.sv`.
+- `tb_int_swb_case_model.sv`.
+- `tb_int_swb_scoreboard.sv`.
+- `tb_int_dual_env.sv`.
 - `tb_int_base_test.sv`.
 - `tb_int_smoke_test.sv`.
 
@@ -202,9 +208,11 @@ SWB-specific layer:
 
 The first runnable target is BASIC B065. It performs a structural smoke against
 the staged local synthesis tree and then checks the expected `1/0/0` per-stage
-ledger closure for SWB ingress, OPQ, and PCIe-egress observables. Later UVM
-implementation must replace the structural ledger source with live passive
-monitors without changing the case IDs or pass criteria.
+ledger closure for SWB ingress, OPQ, and PCIe-egress observables. The current
+selected sweep implements 22 high-risk cases as a structural UVM shell with
+passive boundary monitors. Later full-DUT simulation must enable
+`TB_INT_BIND_REAL_DUT` and replace structural stimulus with live generated
+hierarchy bindings without changing the selected case IDs or pass criteria.
 
 ## 8. Plan drift
 

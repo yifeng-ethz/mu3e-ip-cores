@@ -1,0 +1,5 @@
+modelsim.ini
+work_tb_int/
+sim/
+script/__pycache__/
+uvm/**/*.bak

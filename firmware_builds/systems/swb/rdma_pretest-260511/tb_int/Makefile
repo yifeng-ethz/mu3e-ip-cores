@@ -1,21 +1,110 @@
-QUESTA_HOME ?= /data1/questaone_sim/questasim
+QUESTA_HOME ?= /data1/questaone_sim-2026.1_1/questasim
 ETH_LIC_SERVER := 8161@lic-mentor.ethz.ch
 
 export LM_LICENSE_FILE := $(ETH_LIC_SERVER)
 export MGLS_LICENSE_FILE := $(LM_LICENSE_FILE)
 export SALT_LICENSE_SERVER := $(LM_LICENSE_FILE)
-export QSIM_INI := $(QUESTA_HOME)/modelsim.ini
+export QSIM_INI := modelsim.ini
 
-.PHONY: docs check smoke basic
+VLOG := $(QUESTA_HOME)/linux_x86_64/vlog
+VCOM := $(QUESTA_HOME)/linux_x86_64/vcom
+VSIM := $(QUESTA_HOME)/linux_x86_64/vsim
+VLIB := $(QUESTA_HOME)/linux_x86_64/vlib
+VMAP := $(QUESTA_HOME)/linux_x86_64/vmap
+
+WORK ?= work_tb_int
+TB_TOP := tb_int_top
+SEED ?= 1
+SIM_ROOT ?= sim
+UVM_HOME := $(QUESTA_HOME)/verilog_src/uvm-1.2/src
+QUESTA_UVM_HOME := $(QUESTA_HOME)/verilog_src/questa_uvm_pkg-1.2/src
+UVM_SRC := $(UVM_HOME)/uvm_pkg.sv
+UVM_INCDIR := +incdir+$(UVM_HOME) +incdir+$(QUESTA_UVM_HOME)
+VLOG_OPTS := -sv -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
+VSIM_OPTS := -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK)
+
+BASIC_CASES := B001 B006 B008 B033 B034 B040 B043 B065 B066 B067 B068 B069
+EDGE_CASES := E001 E033 E043 E065
+ERROR_CASES := X001 X033 X065 X069
+PROF_CASES := P065 P068
+SELECTED_CASES := $(BASIC_CASES) $(EDGE_CASES) $(ERROR_CASES) $(PROF_CASES)
+
+.PHONY: docs check modelsim_ini lib comp_uvm smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001
 
 docs:
-	python3 script/generate_swb_dv_docs.py
+	python3 script/generate_swb_tb_int_assets.py
 
 check: docs
 	python3 ~/.codex/skills/dv-workflow/scripts/dv_bucket_format_check.py doc
 	python3 ~/.codex/skills/dv-workflow/scripts/bug_history_format_check.py doc/BUG_HISTORY.md
+	python3 ~/.codex/skills/dv-workflow/scripts/dv_report_format_check.py doc/DV_REPORT.md
 
-smoke:
+modelsim.ini:
+	cp $(QUESTA_HOME)/modelsim.ini modelsim.ini
+
+lib: modelsim.ini
+	mkdir -p $(SIM_ROOT)
+	test -d $(WORK) || $(VLIB) $(WORK)
+	$(VMAP) -modelsimini modelsim.ini work $(WORK)
+
+comp_uvm: docs lib
+	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) $(UVM_SRC)
+	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) -f script/tb_int.f
+
+define RUN_CASE_template
+run_$(1): comp_uvm
+	mkdir -p $(SIM_ROOT)/$(1)
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_$(2)_test +ARB_SEED=$(SEED) +TB_INT_CASE=$(1) +TB_INT_SIM_DIR=$(SIM_ROOT)/$(1) -l $(SIM_ROOT)/$(1)/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/$(1)/transcript
+	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/$(1)/transcript; then exit 1; fi
+endef
+
+$(eval $(call RUN_CASE_template,B001,b001))
+$(eval $(call RUN_CASE_template,B006,b006))
+$(eval $(call RUN_CASE_template,B008,b008))
+$(eval $(call RUN_CASE_template,B033,b033))
+$(eval $(call RUN_CASE_template,B034,b034))
+$(eval $(call RUN_CASE_template,B040,b040))
+$(eval $(call RUN_CASE_template,B043,b043))
+$(eval $(call RUN_CASE_template,B065,b065))
+$(eval $(call RUN_CASE_template,B066,b066))
+$(eval $(call RUN_CASE_template,B067,b067))
+$(eval $(call RUN_CASE_template,B068,b068))
+$(eval $(call RUN_CASE_template,B069,b069))
+$(eval $(call RUN_CASE_template,E001,e001))
+$(eval $(call RUN_CASE_template,E033,e033))
+$(eval $(call RUN_CASE_template,E043,e043))
+$(eval $(call RUN_CASE_template,E065,e065))
+$(eval $(call RUN_CASE_template,X001,x001))
+$(eval $(call RUN_CASE_template,X033,x033))
+$(eval $(call RUN_CASE_template,X065,x065))
+$(eval $(call RUN_CASE_template,X069,x069))
+$(eval $(call RUN_CASE_template,P065,p065))
+$(eval $(call RUN_CASE_template,P068,p068))
+
+smoke: run_B065
+
+basic: $(addprefix run_,$(BASIC_CASES))
+
+edge: $(addprefix run_,$(EDGE_CASES))
+
+error: $(addprefix run_,$(ERROR_CASES))
+
+prof: $(addprefix run_,$(PROF_CASES))
+
+regress_selected: basic edge error prof
+
+run_B-RC-CSR-001: run_B008
+
+run_B-SC-JTG-001: run_B040
+
+run_E-SC-CONC-001: run_E043
+
+structural_preflight: docs
 	python3 script/run_basic_bucket_sweep.py
 
-basic: smoke
+static_screen:
+	@echo "static_screen: deferred to full TB_INT_BIND_REAL_DUT mixed-language promotion."
+
+clean:
+	@echo "clean: non-destructive by policy. Remove work/ and sim/ manually if a clean tree is required."

@@ -19,6 +19,70 @@ interface opq_lane_if (input logic clk, input logic reset_n);
     logic [31:0] accepted_count;
     logic [31:0] emitted_count;
     logic [31:0] drop_count;
+    logic        drop_pulse;
+
+    task automatic clear();
+        ingress_valid = 1'b0;
+        ingress_ready = 1'b0;
+        ingress_sop = 1'b0;
+        ingress_eop = 1'b0;
+        ingress_data = 32'h0;
+        ingress_datak = 4'h0;
+        egress_valid = 1'b0;
+        egress_ready = 1'b0;
+        egress_sop = 1'b0;
+        egress_eop = 1'b0;
+        egress_data = 32'h0;
+        egress_datak = 4'h0;
+        drop_pulse = 1'b0;
+    endtask
+
+    task automatic drive_packet(input logic [31:0] payload);
+        @(posedge clk);
+        ingress_valid <= 1'b1;
+        ingress_ready <= 1'b1;
+        ingress_sop <= 1'b1;
+        ingress_eop <= 1'b1;
+        ingress_data <= payload;
+        ingress_datak <= 4'h0;
+        egress_valid <= 1'b1;
+        egress_ready <= 1'b1;
+        egress_sop <= 1'b1;
+        egress_eop <= 1'b1;
+        egress_data <= payload;
+        egress_datak <= 4'h0;
+        @(posedge clk);
+        ingress_valid <= 1'b0;
+        ingress_ready <= 1'b0;
+        ingress_sop <= 1'b0;
+        ingress_eop <= 1'b0;
+        egress_valid <= 1'b0;
+        egress_ready <= 1'b0;
+        egress_sop <= 1'b0;
+        egress_eop <= 1'b0;
+    endtask
+
+    task automatic drive_ingress_only(input logic [31:0] payload);
+        @(posedge clk);
+        ingress_valid <= 1'b1;
+        ingress_ready <= 1'b1;
+        ingress_sop <= 1'b1;
+        ingress_eop <= 1'b1;
+        ingress_data <= payload;
+        ingress_datak <= 4'h0;
+        @(posedge clk);
+        ingress_valid <= 1'b0;
+        ingress_ready <= 1'b0;
+        ingress_sop <= 1'b0;
+        ingress_eop <= 1'b0;
+    endtask
+
+    task automatic drive_drop();
+        @(posedge clk);
+        drop_pulse <= 1'b1;
+        @(posedge clk);
+        drop_pulse <= 1'b0;
+    endtask
 
     always_ff @(posedge clk or negedge reset_n) begin
         if (!reset_n) begin
@@ -31,6 +95,9 @@ interface opq_lane_if (input logic clk, input logic reset_n);
             end
             if (egress_valid && egress_ready) begin
                 emitted_count <= emitted_count + 32'd1;
+            end
+            if (drop_pulse) begin
+                drop_count <= drop_count + 32'd1;
             end
         end
     end
@@ -52,7 +119,8 @@ interface opq_lane_if (input logic clk, input logic reset_n);
         input egress_datak,
         input accepted_count,
         input emitted_count,
-        input drop_count
+        input drop_count,
+        input drop_pulse
     );
 endinterface
 

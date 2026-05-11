@@ -1,18 +1,32 @@
 `timescale 1ns/1ps
 
-`include "rdma_sqe_ingress_if.sv"
-`include "opq_lane_if.sv"
-`include "pcie_x8_egress_if.sv"
-
 module tb_int_top;
     timeunit 1ns;
     timeprecision 1ps;
+
+    import uvm_pkg::*;
+    import tb_int_runctl_phy_agent_pkg::*;
+    import tb_int_sc_phy_agent_pkg::*;
+    import tb_int_swb_stage_pkg::*;
+    import tb_int_rdma_sqe_ingress_monitor_pkg::*;
+    import tb_int_rdma_cqe_egress_monitor_pkg::*;
+    import tb_int_opq_lane_fill_monitor_pkg::*;
+    import tb_int_pcie_dma_egress_monitor_pkg::*;
+    import tb_int_swb_case_model_pkg::*;
+    import tb_int_swb_scoreboard_pkg::*;
+    import tb_int_swb_dual_env_pkg::*;
+    import tb_int_swb_case_sequences_pkg::*;
+    import tb_int_swb_base_test_pkg::*;
+    import tb_int_swb_smoke_test_pkg::*;
+    import tb_int_swb_selected_tests_pkg::*;
+`include "uvm_macros.svh"
 
     logic clk_50_b2j;
     logic clkusr_100;
     logic pcie_refclk_p;
     logic cpu_reset_n;
     logic pcie_perst_n;
+    logic rst;
 
     logic [3:0] button;
     logic [1:0] sw;
@@ -74,9 +88,17 @@ module tb_int_top;
     logic       pcie_smbclk;
     logic       pcie_wake_n;
 
+    assign rst = !cpu_reset_n;
+
+    runctl_phy_if       runctl_phy(clk_50_b2j, rst);
+    sc_avmm_if          sc_phy(clk_50_b2j, rst);
     rdma_sqe_ingress_if rdma_sqe_ingress(clk_50_b2j, cpu_reset_n);
+    rdma_cqe_egress_if  rdma_cqe_egress(clk_50_b2j, cpu_reset_n);
     opq_lane_if         opq_lane0(clk_50_b2j, cpu_reset_n);
-    pcie_x8_egress_if   pcie_x8_egress(clk_50_b2j, cpu_reset_n);
+    opq_lane_if         opq_lane1(clk_50_b2j, cpu_reset_n);
+    opq_lane_if         opq_lane2(clk_50_b2j, cpu_reset_n);
+    opq_lane_if         opq_lane3(clk_50_b2j, cpu_reset_n);
+    pcie_dma_egress_if  pcie_dma_egress(clk_50_b2j, cpu_reset_n);
 
     initial begin
         clk_50_b2j    = 1'b0;
@@ -110,11 +132,32 @@ module tb_int_top;
         qsfpd_rx_p   = 4'h0;
         pcie_rx_p    = 8'h00;
         pcie_smbclk  = 1'b0;
+        runctl_phy.clear();
+        sc_phy.clear_master();
+        sc_phy.waitrequest = 1'b0;
+        rdma_sqe_ingress.clear();
+        rdma_cqe_egress.clear();
+        opq_lane0.clear();
+        opq_lane1.clear();
+        opq_lane2.clear();
+        opq_lane3.clear();
+        pcie_dma_egress.clear();
         repeat (16) @(posedge clk_50_b2j);
         cpu_reset_n  = 1'b1;
         pcie_perst_n = 1'b1;
     end
 
+    always_ff @(posedge clk_50_b2j or negedge cpu_reset_n) begin
+        if (!cpu_reset_n) begin
+            sc_phy.readdatavalid <= 1'b0;
+            sc_phy.readdata <= 32'h0000_0000;
+        end else begin
+            sc_phy.readdatavalid <= sc_phy.read;
+            sc_phy.readdata <= 32'h4849_5354;
+        end
+    end
+
+`ifdef TB_INT_BIND_REAL_DUT
     top dut (
         .BUTTON(button),
         .SW(sw),
@@ -177,4 +220,53 @@ module tb_int_top;
         .CPU_RESET_n(cpu_reset_n),
         .CLK_50_B2J(clk_50_b2j)
     );
+`endif
+
+    initial begin
+        uvm_config_db#(virtual runctl_phy_if)::set(null,
+                                                   "uvm_test_top.env.nominal.runctl_phy.drv",
+                                                   "vif",
+                                                   runctl_phy);
+        uvm_config_db#(virtual sc_avmm_if)::set(null,
+                                                "uvm_test_top.env.nominal.sc_phy.drv",
+                                                "vif",
+                                                sc_phy);
+        uvm_config_db#(virtual rdma_sqe_ingress_if)::set(null,
+                                                         "uvm_test_top.env.nominal.rdma_sqe_mon",
+                                                         "vif",
+                                                         rdma_sqe_ingress);
+        uvm_config_db#(virtual rdma_cqe_egress_if)::set(null,
+                                                        "uvm_test_top.env.debug.rdma_cqe_mon",
+                                                        "vif",
+                                                        rdma_cqe_egress);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon0",
+                                                 "vif",
+                                                 opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon1",
+                                                 "vif",
+                                                 opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon2",
+                                                 "vif",
+                                                 opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon3",
+                                                 "vif",
+                                                 opq_lane3);
+        uvm_config_db#(virtual pcie_dma_egress_if)::set(null,
+                                                        "uvm_test_top.env.nominal.pcie_dma_mon",
+                                                        "vif",
+                                                        pcie_dma_egress);
+
+        uvm_config_db#(virtual rdma_sqe_ingress_if)::set(null, "uvm_test_top", "rdma_sqe_vif", rdma_sqe_ingress);
+        uvm_config_db#(virtual rdma_cqe_egress_if)::set(null, "uvm_test_top", "rdma_cqe_vif", rdma_cqe_egress);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane0_vif", opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane1_vif", opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane2_vif", opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane3_vif", opq_lane3);
+        uvm_config_db#(virtual pcie_dma_egress_if)::set(null, "uvm_test_top", "pcie_dma_vif", pcie_dma_egress);
+        run_test();
+    end
 endmodule
