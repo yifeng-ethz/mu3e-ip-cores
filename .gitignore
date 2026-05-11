@@ -42,13 +42,6 @@ qverify_cmds.tcl
 altera_mf/
 work/
 
-# --- Local rdma_* prototype IPs (not yet submoduled) ---
-/rdma_cq_pusher/
-/rdma_dma_engine/
-/rdma_run_manager/
-/rdma_sq_fetcher/
-/rdma_subsystem/
-
 # --- Generated Qsys / Quartus artifacts inside firmware_builds/systems/*/ ---
 firmware_builds/systems/*/syn/*.sopcinfo
 firmware_builds/systems/*/syn/*.cmp
@@ -131,9 +124,3 @@ firmware_builds/systems/*/syn/scifi_datapath_system_v3_pipe/
 firmware_builds/systems/*/syn/syn/
 /scripts/check_ip_lib_update.py
 
-# --- rdma_* prototype IPs (local-only, not yet submoduled) ---
-/rdma_cq_pusher
-/rdma_dma_engine
-/rdma_run_manager
-/rdma_sq_fetcher
-/rdma_subsystem
