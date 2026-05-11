@@ -1063,6 +1063,75 @@ being written over an un-drained read.
 - §4.5.2 rate-doubling ratio holds up to the knee; knee is documented.
 - §4.5.4 ping-pong alternation is regular.
 
+### 4.7 Phase 4 postfix-1 retest 2026-05-11 (phase4-fix SOF)
+
+**SOF**: `firmware_builds/systems/v3_pretest-260511-phase4-fix-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof`
+(sha256 prefix `d747954b36d1745c6`).
+**SOF delta vs prior Phase 4 SOF** (`fix-runctl-reset-260511`):
+- hist-debug-disconnect: removed 6 AVST debug connections feeding
+  `histogram_statistics_0` (was the -1.376 ns LVDS Setup violator).
+- SC-WEDGE fix already inherited.
+- Worst Setup: -0.620 ns (improved from -1.376 ns). 2/4 corners pass.
+- Does NOT include rc-readyless IP changes (commit `17e0cec8`).
+
+**Pre-test sanity** (after `program_feb.sh` 20 s settle + `mudaq_recover_pcie`):
+
+| Probe | Address | Value | Verdict |
+|---|---|---|---|
+| `scratch_pad_ram` | `0x00000` | `0x00000000` | ack=OK, not 0xEEEEEEEE |
+| `sc_hub` UID | `0x0FE80` | `0x53434842` ("SCHB") | ack=OK, magic matches |
+| `runctl_mgmt_host_0.CSR_RX_CMD_COUNT` | `0x0C00F` | `0x00000000` | ack=OK, fresh boot |
+
+**SWB LVDS link status note**: `LINK_LOCKED_LOW_REGISTER_R = 0x00000F00`
+(bits 8..11 locked = other boards). Bit 2 (SciFi FEB link 2) = 0 — LVDS
+transceiver link NOT locked. `rc_tool send` commands do not echo back (STATUS
+stuck at `0x00000042` from prior session). Run-control injected via SC write
+to `LOCAL_CMD` at `0x0C013` (TEST_PLAN §3.3 fallback), which does reach the
+`runctl_mgmt_host_0` FSM (RX_CMD_COUNT increments correctly).
+
+**Run-control opcode sweep (LOCAL_CMD SC write)**:
+
+| Opcode | Write to `0x0C013` | LAST_CMD (`0x0C004`) | RX_CMD_COUNT (`0x0C00F`) |
+|---|---|---|---|
+| `0x10` run-prepare | `0x00000010` | `0x00000010` | `0x00000001` |
+| `0x11` sync | `0x00000011` | `0x00000011` | `0x00000002` |
+| `0x12` start-run | `0x00000012` | `0x00000012` | `0x00000003` |
+| `0x13` end-run | `0x00000013` | `0x00000013` | `0x00000004` |
+
+RX_CMD_COUNT advanced exactly +1 per opcode. SC plane remained clean throughout.
+
+**Pre/post CSR snapshot**:
+
+| Metric | PRE (baseline) | POST start-run +4 s | POST end-run |
+|---|---|---|---|
+| `TOTAL_HITS` `0x0A90D` | `0x00000000` | `0x00000000` | `0x00000000` |
+| `BANK_STATUS` `0x0A90B` | `0x00000001` | `0x00000001` | `0x00000001` |
+| `PORT_STATUS` `0x0A90C` | `0x000000FF` | `0x000000FF` | `0x000000FF` |
+| `RX_CMD_COUNT` `0x0C00F` | `0x00000000` | `0x00000003` | `0x00000004` |
+| `LAST_CMD` `0x0C004` | `0x00000000` | `0x00000012` | `0x00000013` |
+| `fa0 actual` `0x0B405` | `0x00000000` | `0x00000000` | `0x00000000` |
+| `DROPPED_HITS` `0x0A90E` | `0x00000000` | `0x00000000` | `0x00000000` |
+
+Additional probe: `dbg_mm2runctrl` HOST_CMD write of `0x12` (start-run) also
+delivered RC_RUNNING to the run_control_splitter (`SENT_COUNT = 0 -> 1`,
+`LAST_SENT = 0x00004A08` = RC_RUNNING state word). No change in TOTAL_HITS or
+PORT_STATUS after this injection either.
+
+**Verdict**: **PHASE 4 FAIL — rc-readyless rebuild needed**.
+
+Root cause: the hist-debug-disconnect fix (timing improvement) did NOT resolve
+the PORT_STATUS=0xFF symptom. The run_control_splitter RC_RUNNING broadcast
+reaches the splitter (confirmed via both `runctl_mgmt_host_0.LOCAL_CMD` and
+`dbg_mm2runctrl.HOST_CMD` injection paths), but the downstream sinks
+(emulator_mutrig asi_ctrl inputs) do not receive it. The auto-inserted
+`timing_adapter` components on the splitter outputs are the suspected carrier:
+they insert a ready handshake that the USE_READY=0 splitter cannot satisfy,
+blocking the AVST broadcast. The rc-readyless IP rollout (commit `17e0cec8`,
+mutrig_frame_deassembly fix pending) eliminates these adapters by setting
+USE_READY=0 on all sinks.
+
+Log: `reports/phase4_postfix1_20260511_213411.log`.
+
 ---
 
 ## 5. Report deliverables
