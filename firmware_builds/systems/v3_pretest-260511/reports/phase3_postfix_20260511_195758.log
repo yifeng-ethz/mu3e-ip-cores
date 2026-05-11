@@ -1,0 +1,75 @@
+===== Phase 3 Postfix Retest =====
+Date     : Mon 11 May 2026 07:58:27 PM UTC
+FEB SOF  : v3_pretest-260511-fix-runctl-reset-260511 (sha256 prefix 63d5d2fbe608bd88)
+Fix      : runctl_mgmt_host_0 ext_hard_reset SC-plane wedge fix
+Goal     : SC plane must NOT wedge after CMD_RESET 0x30
+
+===== Step 1: Pre-state capture =====
+
+[SNAPSHOT PRE-state (cold boot, no commands yet)]
+  SC scratch_pad_ram@0x00000  = 0x00000000
+  SC sc_hub_UID@0x0FE80       = 0x53434842
+  SC onewire@0x04400          = 0x4F574D43
+  runctl CSR_RX_CMD_COUNT     = 0x00000000
+  runctl CSR_LAST_CMD         = 0x00000000
+  runctl CSR_STATUS           = 0x80000003
+
+===== Step 2: Drive CMD_RESET 0x30 (THE KEY TEST) =====
+info: cmd=0x30 (reset) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000030
+info: before: CTL=0x00000000 STATUS=0x14000000
+info: after : CTL=0x00000000 STATUS=0x30000000
+info: ok: o_state_out echoes 0x30
+
+===== Step 3: Wait 200 ms =====
+
+===== Step 4: Post-0x30 state capture (CRITICAL CHECK) =====
+
+[SNAPSHOT POST-0x30 (must be clean - this is the fix verification)]
+  SC scratch_pad_ram@0x00000  = 0x00000000
+  SC sc_hub_UID@0x0FE80       = 0x53434842
+  SC onewire@0x04400          = 0x4F574D43
+  runctl CSR_RX_CMD_COUNT     = 0x00000001
+  runctl CSR_LAST_CMD         = 0x00000030
+  runctl CSR_STATUS           = 0x00000033
+
+SC-WEDGE-FIX-STEP4: PASS (SC plane survived CMD_RESET 0x30)
+
+===== Step 5: Drive CMD_STOP_RESET 0x31 =====
+info: cmd=0x31 (stop-reset) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000031
+info: before: CTL=0x00000000 STATUS=0x30000000
+info: after : CTL=0x00000000 STATUS=0x31000000
+info: ok: o_state_out echoes 0x31
+
+===== Step 6: Post-0x31 state capture =====
+
+[SNAPSHOT POST-0x31 (stop-reset)]
+  SC scratch_pad_ram@0x00000  = 0x00000000
+  SC sc_hub_UID@0x0FE80       = 0x53434842
+  SC onewire@0x04400          = 0x4F574D43
+  runctl CSR_RX_CMD_COUNT     = 0x00000002
+  runctl CSR_LAST_CMD         = 0x00000031
+  runctl CSR_STATUS           = 0x00000003
+
+SC-WEDGE-FIX-STEP6: PASS
+
+===== Step 7: Drive CMD_RUN_PREPARE 0x10 (verify run-control alive post-reset) =====
+info: cmd=0x10 (run-prepare) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000010
+info: before: CTL=0x00000000 STATUS=0x31000000
+info: writing RESET_LINK_RUN_NUMBER_REGISTER_W = 0x00000042
+info: after : CTL=0x00000000 STATUS=0x00000042
+info: ok: run-prepare FSM advanced (state encodes run number)
+
+===== Step 8: Post-0x10 state capture =====
+
+[SNAPSHOT POST-0x10 (run-prepare verifying run-ctrl plane alive)]
+  SC scratch_pad_ram@0x00000  = 0x00000000
+  SC sc_hub_UID@0x0FE80       = 0x53434842
+  SC onewire@0x04400          = 0x4F574D43
+  runctl CSR_RX_CMD_COUNT     = 0x00000003
+  runctl CSR_LAST_CMD         = 0x00000010
+  runctl CSR_STATUS           = 0x00000003
+
+SC-WEDGE-FIX-STEP8: PASS
+
+===== Phase 3 Postfix Verdict =====
+SC-WEDGE FIX: VERIFIED on board
