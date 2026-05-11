@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""run_tool — run-control + capture orchestrator for the Mu3e SWB/FEB pipeline.
+"""run_tool - run-control + capture orchestrator for the Mu3e SWB/FEB pipeline.
 
-Targets the FEB↔SWB lifetime-histogram debug flow. Performs:
+Targets the FEB<->SWB lifetime-histogram debug flow. Performs:
   1. (optional) Program both SOFs.
-  2. Wait for FEB SC ring (sc_tool 0x08800 → 0x454D5554).
+  2. Wait for FEB SC ring (sc_tool 0x0FE80 -> 0x53434842).
   3. Configure SWB datapath: SWB_LINK_MASK_SCIFI, optional USE_BIT_MERGER.
   4. Configure FEB emulators (existing run_rbcam_feb_hist_latency.py path or
      direct sc writes).
   5. Launch dma_tool in background, wait for it to come up.
-  6. Issue rc_tool reset → stop-reset → run-prepare → sync → start-run.
+  6. Issue rc_tool reset -> stop-reset -> run-prepare -> sync -> start-run.
   7. Wait --duration-s.
   8. Issue rc_tool end-run, stop dma_tool.
   9. Read FEB histogram CSRs + SWB OPQ counters, write conservation summary.
 
 Designed to be a drop-in companion to the existing sc_tool / rc_tool / dma_tool
-binaries — same CLI conventions, same defaults, same exit-code semantics.
+binaries - same CLI conventions, same defaults, same exit-code semantics.
 
 Author: yifeng
 """
@@ -22,25 +22,85 @@ Author: yifeng
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import re
 import signal
+import shutil
 import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-DEFAULT_BIN_DIR = Path("/home/yifeng/packages/online_dpv2/online/build/switching_pc/tools")
-DEFAULT_INSTALL_DIR = Path("/home/yifeng/packages/online_dpv2/online/install/bin")
+SCRIPT_DIR = Path(__file__).resolve().parent
+DEFAULT_BIN_DIR = SCRIPT_DIR / "build"
+DEFAULT_INSTALL_DIR = SCRIPT_DIR / "install" / "bin"
+COMPAT_INSTALL_DIR = Path("/home/yifeng/packages/online_dpv2/online/install/bin")
+SWB_RING_LOCK_FILE = Path("/tmp/swb_ring.lock")
 
 # SWB register indices (a10_pcie_registers.h)
+RESET_REGISTER_W = 0x01
+DATAGENERATOR_DIVIDER_REGISTER_W = 0x03
+SWB_GENERIC_MASK_REGISTER_W = 0x0F
 SWB_LINK_MASK_SCIFI = 0x11
 SWB_READOUT_STATE = 0x13
+SWB_COUNTER_REGISTER_W = 0x15
+FARM_READOUT_STATE = 0x16
+SWB_LOOKUP_CTRL_REGISTER_W = 0x1F
+SWB_LOOKUP_DS_CTRL_REGISTER_W = 0x20
 DMA_REGISTER = 0x38
+GET_N_DMA_WORDS_REGISTER_W = 0x0C
+VERSION_REGISTER_R = 0x01
+PLL_LOCKED_REGISTER_R = 0x12
+BUFFER_STATUS_REGISTER_R = 0x1B
+EVENT_BUILD_STATUS_REGISTER_R = 0x1C
+EVENT_BUILD_IDLE_NOT_HEADER_R = 0x1D
+EVENT_BUILD_SKIP_EVENT_DMA_R = 0x1E
+EVENT_BUILD_CNT_EVENT_DMA_R = 0x1F
+EVENT_BUILD_TAG_FIFO_FULL_R = 0x20
+DMA_CNT_WORDS_REGISTER_R = 0x32
+RESET_LINK_STATUS_REGISTER_R = 0x34
+LINK_LOCKED_LOW_REGISTER_R = 0x35
+LINK_LOCKED_HIGH_REGISTER_R = 0x36
 
+USE_BIT_GEN_LINK = 0x1
+USE_BIT_STREAM = 0x2
 USE_BIT_MERGER = 0x4  # bit 2 of SWB_READOUT_STATE selects OPQ datapath
+USE_BIT_SCIFI = 0x200  # bit 9 selects SciFi readout into the SWB DMA path
+USE_BIT_GENERIC = 0x40000  # bit 18 selects generic/development data
+DEFAULT_DMA_REQUEST_BLOCKS = 0x80000  # half of a 32 MB dmabuf in 256-bit blocks
+DEFAULT_DATAGEN_DIVIDER = 0x10
+DEFAULT_GENERIC_MASK = 0x1
+SWB_DATAPATH_RESET_MASK = (
+    (1 << 1)   # DATAGEN
+    | (1 << 2)   # SWB_STREAM_MERGER
+    | (1 << 3)   # SWB_TIME_MERGER
+    | (1 << 22)  # DATA_PATH
+    | (1 << 24)  # FARM_STREAM_MERGER
+    | (1 << 25)  # FARM_TIME_MERGER
+    | (1 << 26)  # LINK_LOCKED status latch
+    | (1 << 28)  # FARM_BLOCK
+)
+RDMA_CSR_CTRL = 0x08
+
+# FEB SciFi word-addressed CSR windows reachable through the SWB sc_hub.
+EMU_BASE_WORD = 0x08800
+EMU_STRIDE_WORD = 0x10
+MUX_BASE_WORD = 0x08890
+MUX_STRIDE_WORD = 0x10
+LVDS_CSR_BASE_WORD = 0x08000
+LVDS_LANE_GO_WORD = LVDS_CSR_BASE_WORD + 0x04
+LVDS_LANE_GO_MASK = 0x000001FF
+HIST_CSR_BASE_WORD = 0x0A900
+HIST_TOTAL_HITS_WORD = HIST_CSR_BASE_WORD + 0x0D
+HIST_DROPPED_HITS_WORD = HIST_CSR_BASE_WORD + 0x0E
+LEGACY_EMU_TX_SHORT_IDLE = 0x0000000C
+EMU_UID = 0x454D5554
+MUX_UID = 0x4D4C534D
+SC_HUB_UID_WORD = 0x0FE80
+SC_HUB_UID = 0x53434842
 
 
 @dataclass
@@ -50,21 +110,70 @@ class Tools:
     dma_tool: Path
     rw: Path
     swb_ring_lock: Path = Path("/home/yifeng/.local/bin/swb_ring_lock")
+    sources: dict[str, str] = field(default_factory=dict)
 
 
-def find_tools() -> Tools:
-    """Locate sc/rc/dma_tool/rw, preferring online_dpv2/online/build over install."""
-    candidates = [DEFAULT_BIN_DIR, DEFAULT_INSTALL_DIR]
-    found = {}
+def _is_executable(path: Path) -> bool:
+    return path.exists() and os.access(path, os.X_OK)
+
+
+def _find_one(name: str, candidates: list[Path], *, include_compat: bool = False) -> tuple[Path, str] | None:
+    for cdir in candidates:
+        p = cdir / name
+        if _is_executable(p):
+            return p, str(cdir)
+    found = shutil.which(name)
+    if found:
+        return Path(found), "PATH"
+    if include_compat:
+        p = COMPAT_INSTALL_DIR / name
+        if _is_executable(p):
+            return p, str(COMPAT_INSTALL_DIR)
+    return None
+
+
+def find_tools(tool_bin_dir: Path | None = None, tool_install_dir: Path | None = None) -> Tools:
+    """Locate sc/rc/dma_tool/rw, preferring this directory's build output."""
+    candidates = [
+        tool_bin_dir or DEFAULT_BIN_DIR,
+        tool_install_dir or DEFAULT_INSTALL_DIR,
+    ]
+    found: dict[str, Path] = {}
+    sources: dict[str, str] = {}
     for name in ("sc_tool", "rc_tool", "dma_tool", "rw"):
-        for cdir in candidates:
-            p = cdir / name
-            if p.exists() and os.access(p, os.X_OK):
-                found[name] = p
-                break
-        if name not in found:
-            sys.exit(f"run_tool: cannot locate {name} in {candidates}")
-    return Tools(**found)
+        item = _find_one(name, candidates, include_compat=(name == "rw"))
+        if item is None:
+            sys.exit(
+                "run_tool: cannot locate "
+                f"{name}; checked {', '.join(str(p) for p in candidates)} and PATH"
+            )
+        found[name], sources[name] = item
+    return Tools(**found, sources=sources)
+
+
+def have_swb_ring_lock() -> bool:
+    """True when run_tool inherited the outer swb_ring_lock fd."""
+    if os.environ.get("SWB_RING_LOCK_HELD") == "1":
+        return True
+    try:
+        return Path(os.readlink("/proc/self/fd/9")) == SWB_RING_LOCK_FILE
+    except OSError:
+        return False
+
+
+def ensure_swb_ring_lock(tools: Tools) -> None:
+    """Re-exec the whole orchestrator under the SWB ring lock if needed."""
+    if have_swb_ring_lock():
+        return
+    if not _is_executable(tools.swb_ring_lock):
+        sys.exit(f"run_tool: missing required SWB ring lock: {tools.swb_ring_lock}")
+    env = os.environ.copy()
+    env["SWB_RING_LOCK_HELD"] = "1"
+    os.execvpe(
+        str(tools.swb_ring_lock),
+        [str(tools.swb_ring_lock), sys.executable, str(Path(__file__).resolve()), *sys.argv[1:]],
+        env,
+    )
 
 
 def run(cmd: list[str], *, capture: bool = True, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -79,7 +188,6 @@ def run(cmd: list[str], *, capture: bool = True, check: bool = True) -> subproce
 
 def sc_write(tools: Tools, link: int, addr: int, words: list[int]) -> None:
     args = [
-        str(tools.swb_ring_lock),
         str(tools.sc_tool),
         str(link),
         "write",
@@ -92,7 +200,6 @@ def sc_write(tools: Tools, link: int, addr: int, words: list[int]) -> None:
 
 def sc_read(tools: Tools, link: int, addr: int, count: int = 1) -> list[int]:
     args = [
-        str(tools.swb_ring_lock),
         str(tools.sc_tool),
         str(link),
         "read",
@@ -117,6 +224,12 @@ def rw_read(tools: Tools, idx: int) -> int:
     return int(line, 16)
 
 
+def rw_read_write_reg(tools: Tools, idx: int) -> int:
+    res = run([str(tools.rw), "wr", f"0x{idx:02X}"])
+    line = res.stdout.strip().splitlines()[0]
+    return int(line, 16)
+
+
 def rc_send(tools: Tools, cmd: str, *, run_no: int | None = None, feb: int = 7) -> None:
     args = [str(tools.rc_tool), "send", cmd, "--device", "/dev/mudaq0", "--feb", str(feb)]
     if run_no is not None:
@@ -124,11 +237,35 @@ def rc_send(tools: Tools, cmd: str, *, run_no: int | None = None, feb: int = 7) 
     run(args, capture=False, check=False)  # rc_tool prints to stderr
 
 
-def wait_for_feb(tools: Tools, link: int, *, timeout_s: float = 30.0, expected_uid: int = 0x454D5554) -> None:
+def sc_write_stable(tools: Tools, link: int, addr: int, words: list[int]) -> None:
+    # The live SC bridge can occasionally echo the previous write on the first
+    # transaction after an address change.  Repeating the same write is the
+    # established board-test pattern for deterministic CSR programming.
+    sc_write(tools, link, addr, words)
+    sc_write(tools, link, addr, words)
+
+
+def try_sc_read(tools: Tools, link: int, addr: int, count: int = 1) -> tuple[list[int] | None, str | None]:
+    try:
+        return sc_read(tools, link, addr, count), None
+    except SystemExit as exc:
+        return None, f"read failed rc={exc.code}"
+
+
+def try_rw_read(tools: Tools, idx: int, *, write_reg: bool = False) -> tuple[int | None, str | None]:
+    try:
+        if write_reg:
+            return rw_read_write_reg(tools, idx), None
+        return rw_read(tools, idx), None
+    except SystemExit as exc:
+        return None, f"read failed rc={exc.code}"
+
+
+def wait_for_feb(tools: Tools, link: int, *, timeout_s: float = 30.0, expected_uid: int = SC_HUB_UID) -> None:
     deadline = time.time() + timeout_s
     while time.time() < deadline:
         try:
-            uid = sc_read(tools, link, 0x08800)[0]
+            uid = sc_read(tools, link, SC_HUB_UID_WORD)[0]
             if uid == expected_uid:
                 return
         except SystemExit:
@@ -137,40 +274,275 @@ def wait_for_feb(tools: Tools, link: int, *, timeout_s: float = 30.0, expected_u
     sys.exit(f"run_tool: FEB SC ring did not stabilize (UID {expected_uid:#x}) after {timeout_s}s")
 
 
-def configure_swb(tools: Tools, *, link_mask_scifi: int, use_opq: bool) -> dict:
+def rdma_csr_write(tools: Tools, addr: int, value: int) -> None:
+    """Write the SWB-local rdma_subsystem CSR shim."""
+    rw_write(tools, SWB_LOOKUP_CTRL_REGISTER_W, addr & 0xFF)
+    rw_write(tools, SWB_LOOKUP_DS_CTRL_REGISTER_W, value & 0xFFFFFFFF)
+
+
+def rdma_observability(tools: Tools) -> dict[str, int]:
+    """Read rdma_pretest bridge counters exposed on legacy SWB RO registers."""
+    return {
+        "STATUS": rw_read(tools, EVENT_BUILD_STATUS_REGISTER_R),
+        "CNT_OPQ_INPUT_W": rw_read(tools, EVENT_BUILD_IDLE_NOT_HEADER_R),
+        "CNT_BYTES_WRITTEN": rw_read(tools, EVENT_BUILD_SKIP_EVENT_DMA_R),
+        "CNT_RQE_CONSUMED": rw_read(tools, EVENT_BUILD_CNT_EVENT_DMA_R),
+        "CNT_CQE_POSTED": rw_read(tools, EVENT_BUILD_TAG_FIFO_FULL_R),
+        "CNT_HALT": rw_read(tools, BUFFER_STATUS_REGISTER_R),
+        "CNT_EOE_OBSERVED": rw_read(tools, DMA_CNT_WORDS_REGISTER_R),
+    }
+
+
+def configure_swb(tools: Tools, *, link_mask_scifi: int, use_opq: bool, gen_link: bool = False) -> dict:
     """Set SWB datapath. Returns the resulting register snapshot."""
+    rw_write(tools, RESET_REGISTER_W, SWB_DATAPATH_RESET_MASK)
     rw_write(tools, SWB_LINK_MASK_SCIFI, link_mask_scifi)
-    state = USE_BIT_MERGER if use_opq else 0x2  # 0x2 = stream merger; 0x4 = OPQ merger
+    if gen_link:
+        rw_write(tools, SWB_GENERIC_MASK_REGISTER_W, DEFAULT_GENERIC_MASK)
+        state = USE_BIT_GENERIC | USE_BIT_MERGER | USE_BIT_GEN_LINK
+        rw_write(tools, DATAGENERATOR_DIVIDER_REGISTER_W, DEFAULT_DATAGEN_DIVIDER)
+    else:
+        rw_write(tools, SWB_GENERIC_MASK_REGISTER_W, 0x0)
+        state = USE_BIT_SCIFI | (USE_BIT_MERGER if use_opq else USE_BIT_STREAM)
     rw_write(tools, SWB_READOUT_STATE, state)
+    rw_write(tools, FARM_READOUT_STATE, state)
+    rw_write(tools, GET_N_DMA_WORDS_REGISTER_W, DEFAULT_DMA_REQUEST_BLOCKS)
+    time.sleep(0.01)
+    rw_write(tools, RESET_REGISTER_W, 0x0)
+    if gen_link:
+        rdma_csr_write(tools, RDMA_CSR_CTRL, 0x00000002)
+        rdma_csr_write(tools, RDMA_CSR_CTRL, 0x00000001)
     rw_write(tools, DMA_REGISTER, 0x1)
     time.sleep(0.1)
     return {
-        "SWB_LINK_MASK_SCIFI": rw_read(tools, SWB_LINK_MASK_SCIFI),
-        "SWB_READOUT_STATE": rw_read(tools, SWB_READOUT_STATE),
-        "DMA_REGISTER": rw_read(tools, DMA_REGISTER),
+        "RESET_REGISTER_W": rw_read_write_reg(tools, RESET_REGISTER_W),
+        "DATAGENERATOR_DIVIDER_REGISTER_W": rw_read_write_reg(tools, DATAGENERATOR_DIVIDER_REGISTER_W),
+        "SWB_GENERIC_MASK_REGISTER_W": rw_read_write_reg(tools, SWB_GENERIC_MASK_REGISTER_W),
+        "SWB_LINK_MASK_SCIFI": rw_read_write_reg(tools, SWB_LINK_MASK_SCIFI),
+        "SWB_READOUT_STATE": rw_read_write_reg(tools, SWB_READOUT_STATE),
+        "FARM_READOUT_STATE": rw_read_write_reg(tools, FARM_READOUT_STATE),
+        "RDMA": rdma_observability(tools),
+        "GET_N_DMA_WORDS_REGISTER_W": rw_read_write_reg(tools, GET_N_DMA_WORDS_REGISTER_W),
+        "DMA_REGISTER": rw_read_write_reg(tools, DMA_REGISTER),
+    }
+
+
+def configure_empty_frame_sources(tools: Tools, link: int) -> dict:
+    """Select FEB emulator sources but configure them for zero generated hits."""
+    record: dict = {"lvds_lane_go": {}, "mux": [], "emulators": []}
+
+    sc_write_stable(tools, link, LVDS_LANE_GO_WORD, [LVDS_LANE_GO_MASK])
+    lane_go = sc_read(tools, link, LVDS_LANE_GO_WORD)[0]
+    record["lvds_lane_go"] = {
+        "addr": f"0x{LVDS_LANE_GO_WORD:05X}",
+        "requested": f"0x{LVDS_LANE_GO_MASK:08X}",
+        "observed": f"0x{lane_go:08X}",
+    }
+
+    for lane in range(8):
+        base = MUX_BASE_WORD + lane * MUX_STRIDE_WORD
+        words, err = try_sc_read(tools, link, base, 1)
+        if err is not None or not words or words[0] != MUX_UID:
+            record["mux"].append({
+                "lane": lane,
+                "base": f"0x{base:05X}",
+                "status": "skipped",
+                "uid": None if not words else f"0x{words[0]:08X}",
+                "error": err,
+            })
+            continue
+        sc_write_stable(tools, link, base + 0x02, [0x00000003])
+        sc_write_stable(tools, link, base + 0x02, [0x00000001])
+        status = sc_read(tools, link, base + 0x03)[0]
+        record["mux"].append({
+            "lane": lane,
+            "base": f"0x{base:05X}",
+            "status": "selected_emulator",
+            "uid": f"0x{words[0]:08X}",
+            "mux_status": f"0x{status:08X}",
+        })
+
+    first = sc_read(tools, link, EMU_BASE_WORD, 1)[0]
+    second, _ = try_sc_read(tools, link, EMU_BASE_WORD + EMU_STRIDE_WORD, 1)
+    bank_map = first == EMU_UID and (not second or second[0] != EMU_UID)
+
+    if bank_map:
+        sc_write_stable(tools, link, EMU_BASE_WORD + 0x07, [0x00000001])
+        sc_write_stable(tools, link, EMU_BASE_WORD + 0x08, [0x00000000])
+        sc_write_stable(tools, link, EMU_BASE_WORD + 0x09, [0x00000000])
+        sc_write_stable(tools, link, EMU_BASE_WORD + 0x0A, [0x00000023])
+        sc_write_stable(tools, link, EMU_BASE_WORD + 0x0B, [0x00000000])
+        sc_write_stable(tools, link, EMU_BASE_WORD + 0x12, [0x000000FF])
+        record["emulators"].append({
+            "layout": "bank",
+            "base": f"0x{EMU_BASE_WORD:05X}",
+            "uid": f"0x{first:08X}",
+            "central": f"0x{sc_read(tools, link, EMU_BASE_WORD + 0x07)[0]:08X}",
+            "rates": f"0x{sc_read(tools, link, EMU_BASE_WORD + 0x0B)[0]:08X}",
+            "lane_enable": f"0x{sc_read(tools, link, EMU_BASE_WORD + 0x12)[0]:08X}",
+        })
+        return record
+
+    for lane in range(8):
+        base = EMU_BASE_WORD + lane * EMU_STRIDE_WORD
+        uid_or_control = sc_read(tools, link, base, 1)[0]
+        if uid_or_control == EMU_UID:
+            sc_write_stable(tools, link, base + 0x07, [0x00000001])
+            sc_write_stable(tools, link, base + 0x08, [0x00000000])
+            sc_write_stable(tools, link, base + 0x09, [0x00000000])
+            sc_write_stable(tools, link, base + 0x0A, [0x00000023])
+            sc_write_stable(tools, link, base + 0x0B, [0x00000000])
+            record["emulators"].append({
+                "layout": "per_lane_uid",
+                "lane": lane,
+                "base": f"0x{base:05X}",
+                "uid": f"0x{uid_or_control:08X}",
+                "central": f"0x{sc_read(tools, link, base + 0x07)[0]:08X}",
+                "rates": f"0x{sc_read(tools, link, base + 0x0B)[0]:08X}",
+            })
+        else:
+            sc_write_stable(tools, link, base + 0x00, [0x00000009])
+            sc_write_stable(tools, link, base + 0x01, [0x00000000])
+            sc_write_stable(tools, link, base + 0x04, [LEGACY_EMU_TX_SHORT_IDLE | (lane << 4)])
+            record["emulators"].append({
+                "layout": "legacy",
+                "lane": lane,
+                "base": f"0x{base:05X}",
+                "control": f"0x{sc_read(tools, link, base + 0x00)[0]:08X}",
+                "rates": f"0x{sc_read(tools, link, base + 0x01)[0]:08X}",
+                "tx_mode": f"0x{sc_read(tools, link, base + 0x04)[0]:08X}",
+            })
+    return record
+
+
+def _fmt_words(words: list[int]) -> str:
+    return " ".join(f"0x{word & 0xFFFFFFFF:08X}" for word in words)
+
+
+def dump_csrs(tools: Tools, link: int, out_dir: Path) -> Path:
+    stamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
+    path = out_dir / f"run_tool_csr_dump_{stamp}.md"
+
+    swb_regs = [
+        ("VERSION_REGISTER_R", VERSION_REGISTER_R, False),
+        ("PLL_LOCKED_REGISTER_R", PLL_LOCKED_REGISTER_R, False),
+        ("SWB_LINK_MASK_SCIFI", SWB_LINK_MASK_SCIFI, True),
+        ("SWB_READOUT_STATE", SWB_READOUT_STATE, True),
+        ("DMA_REGISTER", DMA_REGISTER, True),
+        ("DMA_CNT_WORDS_REGISTER_R", DMA_CNT_WORDS_REGISTER_R, False),
+        ("RESET_LINK_STATUS_REGISTER_R", RESET_LINK_STATUS_REGISTER_R, False),
+        ("LINK_LOCKED_LOW_REGISTER_R", LINK_LOCKED_LOW_REGISTER_R, False),
+        ("LINK_LOCKED_HIGH_REGISTER_R", LINK_LOCKED_HIGH_REGISTER_R, False),
+    ]
+    feb_ranges = [
+        *[(f"emulator_mutrig_{idx}.csr", EMU_BASE_WORD + idx * EMU_STRIDE_WORD, 16) for idx in range(8)],
+        ("histogram_statistics_0.csr", HIST_CSR_BASE_WORD, 17),
+    ]
+
+    lines = [
+        "# run_tool CSR Dump",
+        "",
+        f"- Created: {dt.datetime.now().isoformat(timespec='seconds')}",
+        f"- sc_tool: `{tools.sc_tool}`",
+        f"- rw: `{tools.rw}`",
+        f"- FEB link: `{link}`",
+        "",
+        "## SWB BAR0 Registers",
+        "",
+        "| Name | Space | Index | Value | Status |",
+        "|---|---|---:|---:|---|",
+    ]
+    for name, idx, write_reg in swb_regs:
+        value, err = try_rw_read(tools, idx, write_reg=write_reg)
+        lines.append(
+            f"| `{name}` | `{'wr' if write_reg else 'rr'}` | `0x{idx:02X}` | "
+            f"`{'n/a' if value is None else f'0x{value & 0xFFFFFFFF:08X}'}` | "
+            f"{'OK' if err is None else err} |"
+        )
+
+    lines.extend([
+        "",
+        "## FEB SC CSR Ranges",
+        "",
+        "| Name | Word Base | Words | Values | Status |",
+        "|---|---:|---:|---|---|",
+    ])
+    for name, base, count in feb_ranges:
+        words, err = try_sc_read(tools, link, base, count)
+        values = "n/a" if words is None else _fmt_words(words)
+        lines.append(f"| `{name}` | `0x{base:05X}` | {count} | `{values}` | {'OK' if err is None else err} |")
+
+    path.write_text("\n".join(lines) + "\n", encoding="ascii")
+    return path
+
+
+def parse_dma_summary(dma_log: Path) -> dict[str, int | str]:
+    if not dma_log.exists():
+        return {}
+    text = dma_log.read_text(errors="replace")
+    match = re.search(
+        r"summary: read_words=(\d+)\s+written_words=(\d+)\s+bytes_written=(\d+)\s+"
+        r"DMA_CNT_WORDS_REGISTER_R=(\d+)\s+output=(\S+)",
+        text,
+    )
+    if not match:
+        return {}
+    return {
+        "read_words": int(match.group(1)),
+        "written_words": int(match.group(2)),
+        "bytes_written": int(match.group(3)),
+        "dma_cnt_words_register": int(match.group(4)),
+        "output": match.group(5),
     }
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--duration-s", type=int, default=5, help="run duration after start-run (default 5)")
-    ap.add_argument("--rate-q16", type=int, default=52, help="emulator hit_rate q16 (default 52 = ~100k preset)")
-    ap.add_argument("--output-dir", type=Path, default=Path("/tmp/run_tool"))
-    ap.add_argument("--feb-link", type=int, default=2)
-    ap.add_argument("--feb-target", type=int, default=7)
-    ap.add_argument("--feb-sof", type=Path, default=None, help="program FEB before run (optional)")
-    ap.add_argument("--swb-sof", type=Path, default=None, help="program SWB before run (optional)")
-    ap.add_argument("--skip-program", action="store_true")
-    ap.add_argument("--skip-feb-config", action="store_true", help="don't run rbcam latency-style FEB config")
-    ap.add_argument("--use-opq", action="store_true", help="enable USE_BIT_MERGER (OPQ datapath); default off")
-    ap.add_argument("--swb-link-mask-scifi", type=lambda s: int(s, 0), default=0x4)
-    ap.add_argument("--staging-mb", type=int, default=64)
-    ap.add_argument("--af-pct", type=int, default=80)
+    run_group = ap.add_argument_group("Run controls")
+    run_group.add_argument("--duration-s", type=int, default=5, help="run duration after start-run (default 5)")
+    run_group.add_argument("--rate-q16", type=int, default=52, help="emulator hit_rate q16 (default 52 = ~100k preset)")
+    run_group.add_argument("--output-dir", type=Path, default=Path("/tmp/run_tool"))
+    run_group.add_argument("--feb-link", type=int, default=2)
+    run_group.add_argument("--feb-target", type=int, default=7)
+    run_group.add_argument("--feb-sof", type=Path, default=None, help="program FEB before run (optional)")
+    run_group.add_argument("--swb-sof", type=Path, default=None, help="program SWB before run (optional)")
+    run_group.add_argument("--skip-program", "--no-program", dest="skip_program", action="store_true",
+                           help="skip SOF programming and assume hardware is already configured")
+    run_group.add_argument("--skip-feb-config", action="store_true", help="don't run rbcam latency-style FEB config")
+    run_group.add_argument("--use-opq", action="store_true", help="enable USE_BIT_MERGER (OPQ datapath); default off")
+    run_group.add_argument("--swb-link-mask-scifi", type=lambda s: int(s, 0), default=0x4)
+    run_group.add_argument("--staging-mb", type=int, default=64)
+    run_group.add_argument("--af-pct", type=int, default=80)
+
+    debug_group = ap.add_argument_group("Debug smoke modes")
+    debug_group.add_argument("--empty-frame", action="store_true",
+                             help="configure FEB emulator sources for header/empty frames with zero generated hits")
+    debug_group.add_argument("--skip-mutrig-config", action="store_true",
+                             help="skip any real-MuTRiG XML/JTAG configure step; emulator traffic is still allowed")
+    debug_group.add_argument("--no-data-ingress", action="store_true",
+                             help="force SWB_LINK_MASK_SCIFI=0 and run SWB generated generic data through OPQ/RDMA")
+    debug_group.add_argument("--dump-csrs", action="store_true",
+                             help="write run_tool_csr_dump_<timestamp>.md with 9 SWB BAR0 registers and 9 FEB CSR ranges")
+
+    tool_group = ap.add_argument_group("Tool discovery")
+    tool_group.add_argument("--tool-bin-dir", type=Path, default=None,
+                            help=f"directory containing sc_tool/rc_tool/dma_tool (default {DEFAULT_BIN_DIR})")
+    tool_group.add_argument("--tool-install-dir", type=Path, default=None,
+                            help=f"secondary tool directory (default {DEFAULT_INSTALL_DIR})")
+    tool_group.add_argument("--refresh-tool-paths", action="store_true",
+                            help="refresh tool lookup from the local build/install dirs and PATH")
     args = ap.parse_args()
 
-    tools = find_tools()
+    tools = find_tools(args.tool_bin_dir, args.tool_install_dir)
+    ensure_swb_ring_lock(tools)
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    summary: dict = {"started_at": time.time(), "args": {k: str(v) for k, v in vars(args).items()}}
+    summary: dict = {
+        "started_at": time.time(),
+        "args": {k: str(v) for k, v in vars(args).items()},
+        "tools": {name: str(path) for name, path in tools.__dict__.items() if isinstance(path, Path)},
+        "tool_sources": tools.sources,
+        "swb_ring_lock": str(tools.swb_ring_lock),
+    }
 
     # 1. Program (optional)
     if not args.skip_program:
@@ -187,21 +559,38 @@ def main() -> int:
     # 2. Wait for FEB SC ring
     wait_for_feb(tools, args.feb_link)
     print("run_tool: FEB SC ring up")
+    if args.skip_mutrig_config or args.empty_frame:
+        print("run_tool: MuTRiG XML/JTAG configure step skipped")
+        summary["mutrig_config"] = "skipped"
 
     # 3. SWB config
-    swb_state = configure_swb(tools, link_mask_scifi=args.swb_link_mask_scifi, use_opq=args.use_opq)
+    link_mask_scifi = 0 if args.no_data_ingress else args.swb_link_mask_scifi
+    if args.no_data_ingress:
+        print(
+            "run_tool: --no-data-ingress active; forcing SWB_LINK_MASK_SCIFI=0x00000000 "
+            "and enabling the SWB generated generic lane through OPQ/RDMA"
+        )
+    swb_state = configure_swb(
+        tools,
+        link_mask_scifi=link_mask_scifi,
+        use_opq=args.use_opq,
+        gen_link=args.no_data_ingress,
+    )
     print(f"run_tool: SWB state {swb_state}")
     summary["swb_state"] = swb_state
 
     # 4. FEB config (delegate to existing rbcam latency script for compatibility)
-    if not args.skip_feb_config:
+    if args.empty_frame:
+        print("run_tool: configuring empty-frame FEB source mode (no MuTRiG config, no emulator hits)")
+        summary["empty_frame_config"] = configure_empty_frame_sources(tools, args.feb_link)
+    elif not args.skip_feb_config:
         rbcam = Path("/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/script/run_rbcam_feb_hist_latency.py")
         if rbcam.exists():
             cfg_dir = args.output_dir / "feb_config_warmup"
             cfg_dir.mkdir(exist_ok=True, parents=True)
             print(f"run_tool: FEB config via {rbcam}")
             run([
-                str(tools.swb_ring_lock), "python3", str(rbcam),
+                "python3", str(rbcam),
                 "--link", str(args.feb_link),
                 "--sc-tool", str(tools.sc_tool),
                 "--rc-tool", str(tools.rc_tool),
@@ -215,7 +604,7 @@ def main() -> int:
     # 5. Launch dma_tool
     dma_log = args.output_dir / "dma_tool.log"
     dma_out = args.output_dir / "capture.bin"
-    print(f"run_tool: launching dma_tool → {dma_out}")
+    print(f"run_tool: launching dma_tool -> {dma_out}")
     dma_proc = subprocess.Popen(
         [
             str(tools.dma_tool),
@@ -259,30 +648,44 @@ def main() -> int:
 
     # 9. Read counters / hist
     final_state = {
-        "SWB_LINK_MASK_SCIFI": rw_read(tools, SWB_LINK_MASK_SCIFI),
-        "SWB_READOUT_STATE": rw_read(tools, SWB_READOUT_STATE),
-        "DMA_REGISTER": rw_read(tools, DMA_REGISTER),
+        "RESET_REGISTER_W": rw_read_write_reg(tools, RESET_REGISTER_W),
+        "DATAGENERATOR_DIVIDER_REGISTER_W": rw_read_write_reg(tools, DATAGENERATOR_DIVIDER_REGISTER_W),
+        "SWB_GENERIC_MASK_REGISTER_W": rw_read_write_reg(tools, SWB_GENERIC_MASK_REGISTER_W),
+        "SWB_LINK_MASK_SCIFI": rw_read_write_reg(tools, SWB_LINK_MASK_SCIFI),
+        "SWB_READOUT_STATE": rw_read_write_reg(tools, SWB_READOUT_STATE),
+        "FARM_READOUT_STATE": rw_read_write_reg(tools, FARM_READOUT_STATE),
+        "RDMA": rdma_observability(tools),
+        "GET_N_DMA_WORDS_REGISTER_W": rw_read_write_reg(tools, GET_N_DMA_WORDS_REGISTER_W),
+        "DMA_REGISTER": rw_read_write_reg(tools, DMA_REGISTER),
     }
     summary["final_swb_state"] = final_state
     summary["dma_capture_bytes"] = dma_out.stat().st_size if dma_out.exists() else 0
     summary["dma_log"] = str(dma_log)
     if dma_log.exists():
         summary["dma_summary"] = dma_log.read_text().splitlines()[-3:]
+        summary["dma_counters"] = parse_dma_summary(dma_log)
 
-    # FEB hist_0 totals + drops
+    # FEB histogram total/drop counters in the current histogram_statistics CSR layout.
     try:
-        hist0 = sc_read(tools, args.feb_link, 0x0A908)[0]  # offset 8 = TOTAL_HITS
-        hist0_drops = sc_read(tools, args.feb_link, 0x0A906)[0]  # offset 6 = DROPPED_HITS (per phase4 layout)
+        hist0 = sc_read(tools, args.feb_link, HIST_TOTAL_HITS_WORD)[0]
+        hist0_drops = sc_read(tools, args.feb_link, HIST_DROPPED_HITS_WORD)[0]
         summary["hist_0_total_hits"] = hist0
         summary["hist_0_dropped_hits"] = hist0_drops
     except SystemExit:
         summary["hist_0_total_hits"] = "<read failed>"
+
+    if args.dump_csrs:
+        csr_dump_path = dump_csrs(tools, args.feb_link, args.output_dir)
+        summary["csr_dump"] = str(csr_dump_path)
+        print(f"run_tool: CSR dump at {csr_dump_path}")
 
     summary["finished_at"] = time.time()
     summary_path = args.output_dir / "debug_daq_summary.json"
     summary_path.write_text(json.dumps(summary, indent=2))
     print(f"run_tool: summary at {summary_path}")
     print(f"  capture file:    {dma_out} ({summary['dma_capture_bytes']} bytes)")
+    if summary.get("dma_counters"):
+        print(f"  dma counters:    {summary['dma_counters']}")
     print(f"  hist_0 total:    {summary.get('hist_0_total_hits')}")
     print(f"  hist_0 drops:    {summary.get('hist_0_dropped_hits')}")
     return 0

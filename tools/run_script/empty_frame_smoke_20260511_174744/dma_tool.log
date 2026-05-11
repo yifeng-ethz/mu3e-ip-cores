@@ -1,0 +1,11 @@
+dma_tool: mlock failed on fallback staging ring; continuing unlocked
+dma_tool: staging ring: 64 MB (anonymous fallback)
+dma_tool: BAR0 64KB mmap rejected; using exact RW register page size
+dma_tool: DMA metadata ctrl page mapped at device page index 4
+dma_tool: dmabuf size from lseek: 33554432 bytes
+dma_tool: DMA ring mapped read-only: 33554432 bytes
+dma_tool: AF headroom: 12 MB; PCIe RTT/inflight allowance is <= 8 KB plus <= 2 us RTT
+dma_tool: SG detection: data_type=0x0 get_n_dma_words=0x80000 dma_num_addresses=16; multi-address DMA is configured, exported dmabuf is still read as one contiguous mmap ring
+dma_tool: drop counters: no OPQ_DROP register is defined; CNT_SKIP_EVENT_DMA_RAM_R=0 CNT_SKIP_EVENT_LINK_FIFO_R=0
+dma_tool: starting reader/writer threads
+dma_tool: summary: read_words=0 written_words=0 bytes_written=0 DMA_CNT_WORDS_REGISTER_R=0 output=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/empty_frame_smoke_20260511_174744/capture.bin
