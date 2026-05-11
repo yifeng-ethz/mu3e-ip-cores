@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <system name="$${FILENAME}">
- <component name="$${FILENAME}" displayName="$${FILENAME}" version="3.0.0.0511" description="" tags="" categories="System" />
+ <component name="$${FILENAME}" displayName="$${FILENAME}" version="3.0.1.0511" description="Bump mutrig_frame_deassembly_0 instance to 26.2.0.0511 (rc-readyless: ctrl sink declares USE_READY=0, run-control fan-out from feb_system_v3 run_control_splitter no longer needs auto-inserted timing_adapter on this path)." tags="" categories="System" />
  <parameter name="bonusData">bonusData 
 {
    element backpressure_fifo
@@ -247,7 +247,7 @@ proc compose {} {
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_UNIQUE_ID">mutrig_datapath_system_lvdserr_count_subsystem</parameter>
  </module>
- <module name="mutrig_frame_deassembly_0" kind="mutrig_frame_deassembly" version="26.1.0.0506" enabled="1">
+ <module name="mutrig_frame_deassembly_0" kind="mutrig_frame_deassembly" version="26.2.0.0511" enabled="1">
  <parameter name="CHANNEL_WIDTH" value="4" />
   <parameter name="CSR_ADDR_WIDTH" value="2" />
   <parameter name="DEBUG_LV" value="0" />

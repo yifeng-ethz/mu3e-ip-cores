@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="3.0.2.0511"
-   description="rc-readyless rollout: rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2) now declare USE_READY=0 sinks so Qsys no longer inserts altera_avalon_st_timing_adapter on rc fan-out. Carries the prior 3.0.1.0511 hist-debug-disconnect content (6 debug AVST inputs disconnected to break the -1.376 ns Setup path from debug_msg2.push_cnt -&gt; ingress_stage_write_req)."
+   version="3.0.3.0511"
+   description="rc-readyless rollout: rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2) now declare USE_READY=0 sinks so Qsys no longer inserts altera_avalon_st_timing_adapter on rc fan-out. Carries the prior 3.0.1.0511 hist-debug-disconnect content (6 debug AVST inputs disconnected to break the -1.376 ns Setup path from debug_msg2.push_cnt -&gt; ingress_stage_write_req). All 6 rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2, mutrig_frame_deassembly) now declare USE_READY=0 sinks. Run-control fan-out should be free of auto-inserted timing_adapter."
    tags=""
    categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
