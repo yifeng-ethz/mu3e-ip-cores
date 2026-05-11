@@ -6,6 +6,8 @@ package tb_int_swb_base_test_pkg;
     import uvm_pkg::*;
     import tb_int_swb_dual_env_pkg::*;
     import tb_int_swb_case_sequences_pkg::*;
+    import tb_int_host_memory_model_pkg::*;
+    import tb_int_host_polling_core_pkg::*;
     `include "uvm_macros.svh"
 
     typedef enum int unsigned {
@@ -78,7 +80,9 @@ package tb_int_swb_base_test_pkg;
                           opq_lane1_vif,
                           opq_lane2_vif,
                           opq_lane3_vif,
-                          pcie_dma_vif);
+                          pcie_dma_vif,
+                          env.host_mem,
+                          env.host_core);
             seq.drive_case(case_id);
             repeat (4) @(posedge rdma_rqe_vif.clk);
             env.scoreboard.check_case(case_id);

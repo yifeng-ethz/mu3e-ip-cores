@@ -14,8 +14,8 @@ PASS pass / closed &middot; PARTIAL partial / below target / known limitation &m
 |:---:|---|---|
 | PASS | failed_cases | `0` |
 | PASS | signoff_runs_with_failures | `0` |
-| PARTIAL | catalog_backlog_cases | `746` |
-| PARTIAL | unimplemented_cases | `746` |
+| PARTIAL | catalog_backlog_cases | `728` |
+| PARTIAL | unimplemented_cases | `728` |
 | PASS | stale_artifacts | `0` |
 
 ## Signoff Scope
@@ -38,10 +38,10 @@ PASS pass / closed &middot; PARTIAL partial / below target / known limitation &m
 
 | status | bucket | catalog_planned | promoted | evidenced | backlog | merged | promoted functional |
 |:---:|---|---:|---:|---:|---:|---|---|
-| PASS | [`BASIC`](REPORT/buckets/BASIC.md) | 192 | 12 | 12 | 180 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 6.2% (12/192) |
-| PASS | [`EDGE`](REPORT/buckets/EDGE.md) | 192 | 4 | 4 | 188 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 2.1% (4/192) |
-| PASS | [`ERROR`](REPORT/buckets/ERROR.md) | 192 | 4 | 4 | 188 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 2.1% (4/192) |
-| PASS | [`PROF`](REPORT/buckets/PROF.md) | 192 | 2 | 2 | 190 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 1.0% (2/192) |
+| PASS | [`BASIC`](REPORT/buckets/BASIC.md) | 192 | 17 | 17 | 175 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 8.9% (17/192) |
+| PASS | [`EDGE`](REPORT/buckets/EDGE.md) | 192 | 9 | 9 | 183 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 4.7% (9/192) |
+| PASS | [`ERROR`](REPORT/buckets/ERROR.md) | 192 | 8 | 8 | 184 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 4.2% (8/192) |
+| PASS | [`PROF`](REPORT/buckets/PROF.md) | 192 | 6 | 6 | 186 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 3.1% (6/192) |
 
 ## Totals
 
@@ -56,16 +56,16 @@ PASS pass / closed &middot; PARTIAL partial / below target / known limitation &m
 | INFO | toggle | n/a | 80.0 |
 
 - catalog_planned_cases: `768`
-- promoted_signoff_cases: `22`
-- evidenced_promoted_cases: `22`
-- promoted functional coverage: `2.86% (22/768)`
+- promoted_signoff_cases: `40`
+- evidenced_promoted_cases: `40`
+- promoted functional coverage: `5.21% (40/768)`
 
 ## Signoff Runs
 
 | status | run_id | kind | build | seq | txns | cross_pct |
 |:---:|---|---|---|---|---:|---:|
 | PASS | [`swb_b065_smoke`](REPORT/B065/REPORT.md) | isolated | rdma_pretest-260511 | tb_int_b065_test | 1 | n/a |
-| PASS | [`swb_selected_22_case_sweep`](REPORT/README.md) | isolated_sweep | rdma_pretest-260511 | selected BASIC/EDGE/ERROR/PROF cases | 22 | n/a |
+| PASS | [`swb_selected_40_case_sweep`](REPORT/README.md) | isolated_sweep | rdma_pretest-260511 | selected BASIC/EDGE/ERROR/PROF cases | 40 | n/a |
 
 ## Index
 

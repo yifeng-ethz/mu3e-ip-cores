@@ -23,10 +23,10 @@ UVM_INCDIR := +incdir+$(UVM_HOME) +incdir+$(QUESTA_UVM_HOME)
 VLOG_OPTS := -sv -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
 VSIM_OPTS := -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK)
 
-BASIC_CASES := B001 B006 B008 B033 B034 B040 B043 B065 B066 B067 B068 B069
-EDGE_CASES := E001 E033 E043 E065
-ERROR_CASES := X001 X033 X065 X069
-PROF_CASES := P065 P068
+BASIC_CASES := B001 B002 B003 B004 B005 B006 B007 B008 B033 B034 B040 B043 B065 B066 B067 B068 B069
+EDGE_CASES := E001 E002 E003 E033 E043 E065 E066 E067 E068
+ERROR_CASES := X001 X002 X003 X004 X005 X033 X065 X069
+PROF_CASES := P001 P002 P003 P065 P066 P068
 SELECTED_CASES := $(BASIC_CASES) $(EDGE_CASES) $(ERROR_CASES) $(PROF_CASES)
 
 .PHONY: docs check modelsim_ini lib comp_uvm smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001
@@ -60,7 +60,12 @@ run_$(1): comp_uvm
 endef
 
 $(eval $(call RUN_CASE_template,B001,b001))
+$(eval $(call RUN_CASE_template,B002,b002))
+$(eval $(call RUN_CASE_template,B003,b003))
+$(eval $(call RUN_CASE_template,B004,b004))
+$(eval $(call RUN_CASE_template,B005,b005))
 $(eval $(call RUN_CASE_template,B006,b006))
+$(eval $(call RUN_CASE_template,B007,b007))
 $(eval $(call RUN_CASE_template,B008,b008))
 $(eval $(call RUN_CASE_template,B033,b033))
 $(eval $(call RUN_CASE_template,B034,b034))
@@ -72,14 +77,27 @@ $(eval $(call RUN_CASE_template,B067,b067))
 $(eval $(call RUN_CASE_template,B068,b068))
 $(eval $(call RUN_CASE_template,B069,b069))
 $(eval $(call RUN_CASE_template,E001,e001))
+$(eval $(call RUN_CASE_template,E002,e002))
+$(eval $(call RUN_CASE_template,E003,e003))
 $(eval $(call RUN_CASE_template,E033,e033))
 $(eval $(call RUN_CASE_template,E043,e043))
 $(eval $(call RUN_CASE_template,E065,e065))
+$(eval $(call RUN_CASE_template,E066,e066))
+$(eval $(call RUN_CASE_template,E067,e067))
+$(eval $(call RUN_CASE_template,E068,e068))
 $(eval $(call RUN_CASE_template,X001,x001))
+$(eval $(call RUN_CASE_template,X002,x002))
+$(eval $(call RUN_CASE_template,X003,x003))
+$(eval $(call RUN_CASE_template,X004,x004))
+$(eval $(call RUN_CASE_template,X005,x005))
 $(eval $(call RUN_CASE_template,X033,x033))
 $(eval $(call RUN_CASE_template,X065,x065))
 $(eval $(call RUN_CASE_template,X069,x069))
+$(eval $(call RUN_CASE_template,P001,p001))
+$(eval $(call RUN_CASE_template,P002,p002))
+$(eval $(call RUN_CASE_template,P003,p003))
 $(eval $(call RUN_CASE_template,P065,p065))
+$(eval $(call RUN_CASE_template,P066,p066))
 $(eval $(call RUN_CASE_template,P068,p068))
 
 smoke: run_B065

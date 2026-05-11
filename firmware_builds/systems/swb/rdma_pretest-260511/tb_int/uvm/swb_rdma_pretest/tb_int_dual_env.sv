@@ -10,6 +10,8 @@ package tb_int_swb_dual_env_pkg;
     import tb_int_rdma_cqe_egress_monitor_pkg::*;
     import tb_int_opq_lane_fill_monitor_pkg::*;
     import tb_int_pcie_dma_egress_monitor_pkg::*;
+    import tb_int_host_memory_model_pkg::*;
+    import tb_int_host_polling_core_pkg::*;
     import tb_int_swb_scoreboard_pkg::*;
     `include "uvm_macros.svh"
 
@@ -59,6 +61,8 @@ package tb_int_swb_dual_env_pkg;
 
         tb_int_swb_nominal_env       nominal;
         tb_int_swb_debug_env         debug;
+        host_memory_model            host_mem;
+        host_polling_core            host_core;
         tb_int_swb_ledger_scoreboard scoreboard;
 
         function new(string name, uvm_component parent);
@@ -69,6 +73,8 @@ package tb_int_swb_dual_env_pkg;
             super.build_phase(phase);
             nominal = tb_int_swb_nominal_env::type_id::create("nominal", this);
             debug = tb_int_swb_debug_env::type_id::create("debug", this);
+            host_mem = host_memory_model::type_id::create("host_mem", this);
+            host_core = host_polling_core::type_id::create("host_core", this);
             scoreboard = tb_int_swb_ledger_scoreboard::type_id::create("scoreboard", this);
         endfunction
 
@@ -79,6 +85,8 @@ package tb_int_swb_dual_env_pkg;
                 nominal.opq_lane_mon[i].ap.connect(scoreboard.stage_imp);
             nominal.pcie_dma_mon.ap.connect(scoreboard.stage_imp);
             debug.rdma_cqe_mon.ap.connect(scoreboard.stage_imp);
+            host_mem.stage_ap.connect(scoreboard.stage_imp);
+            host_core.set_host_model(host_mem);
         endfunction
     endclass
 

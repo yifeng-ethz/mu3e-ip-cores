@@ -12,6 +12,10 @@ module tb_int_top;
     import tb_int_rdma_cqe_egress_monitor_pkg::*;
     import tb_int_opq_lane_fill_monitor_pkg::*;
     import tb_int_pcie_dma_egress_monitor_pkg::*;
+    import tb_int_host_memory_pkg::*;
+    import tb_int_host_axi_responder_pkg::*;
+    import tb_int_host_memory_model_pkg::*;
+    import tb_int_host_polling_core_pkg::*;
     import tb_int_swb_case_model_pkg::*;
     import tb_int_swb_scoreboard_pkg::*;
     import tb_int_swb_dual_env_pkg::*;
@@ -88,6 +92,8 @@ module tb_int_top;
     logic       pcie_smbclk;
     logic       pcie_wake_n;
 
+    host_memory_config_t host_cfg;
+
     assign rst = !cpu_reset_n;
 
     runctl_phy_if       runctl_phy(clk_50_b2j, rst);
@@ -99,6 +105,7 @@ module tb_int_top;
     opq_lane_if         opq_lane2(clk_50_b2j, cpu_reset_n);
     opq_lane_if         opq_lane3(clk_50_b2j, cpu_reset_n);
     pcie_dma_egress_if  pcie_dma_egress(clk_50_b2j, cpu_reset_n);
+    host_axi_if         host_axi(clk_50_b2j, cpu_reset_n);
 
     initial begin
         clk_50_b2j    = 1'b0;
@@ -132,6 +139,24 @@ module tb_int_top;
         qsfpd_rx_p   = 4'h0;
         pcie_rx_p    = 8'h00;
         pcie_smbclk  = 1'b0;
+        host_axi.awid = '0;
+        host_axi.awaddr = '0;
+        host_axi.awlen = '0;
+        host_axi.awsize = 3'd5;
+        host_axi.awburst = 2'b01;
+        host_axi.awvalid = 1'b0;
+        host_axi.wdata = '0;
+        host_axi.wstrb = '0;
+        host_axi.wlast = 1'b0;
+        host_axi.wvalid = 1'b0;
+        host_axi.bready = 1'b1;
+        host_axi.arid = '0;
+        host_axi.araddr = '0;
+        host_axi.arlen = '0;
+        host_axi.arsize = 3'd5;
+        host_axi.arburst = 2'b01;
+        host_axi.arvalid = 1'b0;
+        host_axi.rready = 1'b1;
         runctl_phy.clear();
         sc_phy.clear_master();
         sc_phy.waitrequest = 1'b0;
@@ -259,6 +284,29 @@ module tb_int_top;
                                                         "uvm_test_top.env.nominal.pcie_dma_mon",
                                                         "vif",
                                                         pcie_dma_egress);
+
+        host_cfg = host_memory_default_config();
+        host_cfg.RQ_DEPTH = 256;
+        host_cfg.CQ_DEPTH = 256;
+        host_cfg.N_SEGMENTS = 64;
+        host_cfg.SEG_BYTES = 4096;
+        host_cfg.poll_cadence = 100ns;
+        host_cfg.record_write_latency = 0ns;
+        uvm_config_db#(host_memory_config_t)::set(null,
+                                                  "uvm_test_top.env.host_mem",
+                                                  "cfg",
+                                                  host_cfg);
+        uvm_config_db#(host_memory_config_t)::set(null,
+                                                  "uvm_test_top.env.host_core",
+                                                  "cfg",
+                                                  host_cfg);
+        // The current structural shell has no exposed rdma_subsystem host AXI
+        // conduit. This local interface keeps the agent live as a standalone
+        // responder until TB_INT_BIND_REAL_DUT promotes the real connection.
+        uvm_config_db#(virtual host_axi_if)::set(null,
+                                                 "uvm_test_top.env.host_mem.axi",
+                                                 "vif",
+                                                 host_axi);
 
         uvm_config_db#(virtual rdma_rqe_ingress_if)::set(null, "uvm_test_top", "rdma_rqe_vif", rdma_rqe_ingress);
         uvm_config_db#(virtual rdma_cqe_egress_if)::set(null, "uvm_test_top", "rdma_cqe_vif", rdma_cqe_egress);

@@ -3,7 +3,7 @@
 **Companion docs:** [DV_INT_PLAN.md](DV_INT_PLAN.md), [DV_BASIC.md](DV_BASIC.md), [DV_EDGE.md](DV_EDGE.md), [DV_ERROR.md](DV_ERROR.md), [DV_PROF.md](DV_PROF.md), [BUG_HISTORY.md](BUG_HISTORY.md)
 **Parent:** DV_INT_PLAN.md
 **ID Range:** E001-E192
-**Total:** 192 cases (4 implemented / 0 waived)
+**Total:** 192 cases (9 implemented / 0 waived)
 
 **Methodology key:**
 - **D** directed - single deterministic stimulus with a golden expectation.
@@ -15,17 +15,17 @@ This file is the EDGE bucket for SWB rdma_pretest-260511 integration verificatio
 
 | Section | Cases | ID Range | What it Proves | Current Case |
 |---|---:|---|---|---|
-| RC | 32 | E001-E032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 1/32 |
+| RC | 32 | E001-E032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 3/32 |
 | SC | 32 | E033-E064 | PCIe and JTAG slow-control reaches SWB-local CSR and debug fallback paths | 2/32 |
-| DT | 128 | E065-E192 | FEB-to-SWB RDMA RQE traffic is reconciled by the per-stage ledger scoreboard | 1/128 |
+| DT | 128 | E065-E192 | FEB-to-SWB RDMA RQE traffic is reconciled by the per-stage ledger scoreboard | 4/128 |
 
 ## 2. RC
 
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---:|---|---|---|
 | E001 | D | back-to-back zero-gap RC | 1 | issue adjacent legal run-control transitions with zero idle gap | transition order is preserved and no illegal intermediate state is observed | uvm/swb_rdma_pretest/tests/tb_int_e001_test.sv |
-| E002 | D | EDGE RC reserved legal state-pair seed 2 | 1 | runctl sequence covers legal state holds and transitions for seed 2 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| E003 | D | EDGE RC reserved legal state-pair seed 3 | 1 | runctl sequence covers legal state holds and transitions for seed 3 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
+| E002 | D | state CSR co-write during RUN_PREP edge | 1 | co-write the state CSR while the reset-link edge is sampled | the structural state shadow resolves to one legal value with no duplicate transition | uvm/swb_rdma_pretest/tests/tb_int_e002_test.sv |
+| E003 | D | frame boundary RUNNING open with one packet per lane | 1 | open RUNNING at a frame boundary while each lane has one packet | all four lane packets emit and the DMA event closes once | uvm/swb_rdma_pretest/tests/tb_int_e003_test.sv |
 | E004 | D | EDGE RC reserved legal state-pair seed 4 | 1 | runctl sequence covers legal state holds and transitions for seed 4 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
 | E005 | D | EDGE RC reserved legal state-pair seed 5 | 1 | runctl sequence covers legal state holds and transitions for seed 5 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
 | E006 | D | EDGE RC reserved legal state-pair seed 6 | 1 | runctl sequence covers legal state holds and transitions for seed 6 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
@@ -98,9 +98,9 @@ This file is the EDGE bucket for SWB rdma_pretest-260511 integration verificatio
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---:|---|---|---|
 | E065 | D | PCIe DMA burst-boundary | 1 | drive a DMA event ending exactly at the selected burst boundary | DMA asserts end-of-event on the expected beat only | uvm/swb_rdma_pretest/tests/tb_int_e065_test.sv |
-| E066 | R | EDGE DT reserved RQE/OPQ/DMA sweep seed 2 | 1 | sequence randomizes legal SWB datapath pressure for seed 2 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |
-| E067 | D/R | EDGE DT reserved RQE/OPQ/DMA sweep seed 3 | 1 | sequence randomizes legal SWB datapath pressure for seed 3 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |
-| E068 | R | EDGE DT reserved RQE/OPQ/DMA sweep seed 4 | 1 | sequence randomizes legal SWB datapath pressure for seed 4 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |
+| E066 | D | maximum legal RQE packet at host segment boundary | 1 | drive one maximum-size legal RQE and matching completion | RQE and CQE lineage closes while the DMA burst stays segment-local | uvm/swb_rdma_pretest/tests/tb_int_e066_test.sv |
+| E067 | D | lane-3 frame-boundary cluster | 1 | drive a lane-3 cluster at the selected frame boundary | OPQ preserves lane-3 ordering and the DMA event closes once | uvm/swb_rdma_pretest/tests/tb_int_e067_test.sv |
+| E068 | D | all-lane cluster burst at CQ turnaround boundary | 1 | drive equal cluster pressure on all four lanes | OPQ emits all packets and the DMA scoreboard observes two closed events | uvm/swb_rdma_pretest/tests/tb_int_e068_test.sv |
 | E069 | R | EDGE DT reserved RQE/OPQ/DMA sweep seed 5 | 1 | sequence randomizes legal SWB datapath pressure for seed 5 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |
 | E070 | D/R | EDGE DT reserved RQE/OPQ/DMA sweep seed 6 | 1 | sequence randomizes legal SWB datapath pressure for seed 6 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |
 | E071 | R | EDGE DT reserved RQE/OPQ/DMA sweep seed 7 | 1 | sequence randomizes legal SWB datapath pressure for seed 7 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |

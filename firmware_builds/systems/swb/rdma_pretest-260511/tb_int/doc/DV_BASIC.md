@@ -3,7 +3,7 @@
 **Companion docs:** [DV_INT_PLAN.md](DV_INT_PLAN.md), [DV_BASIC.md](DV_BASIC.md), [DV_EDGE.md](DV_EDGE.md), [DV_ERROR.md](DV_ERROR.md), [DV_PROF.md](DV_PROF.md), [BUG_HISTORY.md](BUG_HISTORY.md)
 **Parent:** DV_INT_PLAN.md
 **ID Range:** B001-B192
-**Total:** 192 cases (12 implemented / 0 waived)
+**Total:** 192 cases (17 implemented / 0 waived)
 
 **Methodology key:**
 - **D** directed - single deterministic stimulus with a golden expectation.
@@ -15,7 +15,7 @@ This file is the BASIC bucket for SWB rdma_pretest-260511 integration verificati
 
 | Section | Cases | ID Range | What it Proves | Current Case |
 |---|---:|---|---|---|
-| RC | 32 | B001-B032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 3/32 |
+| RC | 32 | B001-B032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 8/32 |
 | SC | 32 | B033-B064 | PCIe and JTAG slow-control reaches SWB-local CSR and debug fallback paths | 4/32 |
 | DT | 128 | B065-B192 | FEB-to-SWB RDMA RQE traffic is reconciled by the per-stage ledger scoreboard | 5/128 |
 
@@ -24,12 +24,12 @@ This file is the BASIC bucket for SWB rdma_pretest-260511 integration verificati
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---:|---|---|---|
 | B001 | D | SWB RC firefly reset-link broadcast IDLE to RUN_PREP | 1 | drive IDLE then RUN_PREP after the software-scale gap | run_window_db records one legal transition and no local consumer backpressures | uvm/swb_rdma_pretest/tests/tb_int_b001_test.sv |
-| B002 | D | BASIC RC reserved legal state-pair seed 2 | 1 | runctl sequence covers legal state holds and transitions for seed 2 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| B003 | D | BASIC RC reserved legal state-pair seed 3 | 1 | runctl sequence covers legal state holds and transitions for seed 3 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| B004 | D | BASIC RC reserved legal state-pair seed 4 | 1 | runctl sequence covers legal state holds and transitions for seed 4 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| B005 | D | BASIC RC reserved legal state-pair seed 5 | 1 | runctl sequence covers legal state holds and transitions for seed 5 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
+| B002 | D | SWB RC RUN_PREP to SYNC broadcast | 1 | drive RUN_PREP then SYNC after the software-scale gap | run_window_db records the ordered transition and no local consumer backpressures | uvm/swb_rdma_pretest/tests/tb_int_b002_test.sv |
+| B003 | D | SWB RC SYNC to RUNNING stable-window open | 1 | drive SYNC then RUNNING and open the stable window | stable-window state opens once and no datapath consumer sees a premature RUNNING | uvm/swb_rdma_pretest/tests/tb_int_b003_test.sv |
+| B004 | D | SWB RC RUNNING to TERMINATING with one in-flight packet | 1 | drive one in-flight packet while moving RUNNING to TERMINATING | the in-flight packet is accounted as dropped and no DMA event is emitted | uvm/swb_rdma_pretest/tests/tb_int_b004_test.sv |
+| B005 | D | SWB RC TERMINATING to IDLE after bounded drain | 1 | drive one drainable packet then move TERMINATING to IDLE | the packet drains and the final IDLE shadow is coherent | uvm/swb_rdma_pretest/tests/tb_int_b005_test.sv |
 | B006 | D | SWB RC full IDLE to RUNNING to IDLE walk with 1 ms gap | 1 | drive the five-state run-control sequence with 1 ms-equivalent gaps | every state transition is observed once and the stable window opens only in RUNNING | uvm/swb_rdma_pretest/tests/tb_int_b006_test.sv |
-| B007 | D | BASIC RC reserved legal state-pair seed 7 | 1 | runctl sequence covers legal state holds and transitions for seed 7 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
+| B007 | D | SWB RC RUN_NUMBER increment before RUN_PREP | 1 | increment RUN_NUMBER before entering RUN_PREP | all SWB-local state shadows observe the new run number once | uvm/swb_rdma_pretest/tests/tb_int_b007_test.sv |
 | B008 | D | CSR-toggle RC fallback (alias B-RC-CSR-001) | 1 | toggle the SWB-local CSR run-control fallback once | local run-state shadow changes without replacing the reset-link nominal path | uvm/swb_rdma_pretest/tests/tb_int_b008_test.sv |
 | B009 | R | BASIC RC reserved legal state-pair seed 9 | 1 | runctl sequence covers legal state holds and transitions for seed 9 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
 | B010 | R | BASIC RC reserved legal state-pair seed 10 | 1 | runctl sequence covers legal state holds and transitions for seed 10 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
