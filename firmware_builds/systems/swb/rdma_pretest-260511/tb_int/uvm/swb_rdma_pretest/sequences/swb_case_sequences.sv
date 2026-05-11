@@ -70,6 +70,14 @@ package tb_int_swb_case_sequences_pkg;
             endcase
         endtask
 
+        function logic [63:0] make_wqe_sidecar_id(int unsigned idx);
+            // Shared RQE/CQE sidecar_id schema so end-to-end lineage closes
+            // at the SWB scoreboard. Indices 0..min(rqe,cqe)-1 form matched
+            // WQE pairs; indices beyond either side stay one-sided (missing
+            // CQE or ghost CQE), matching the case expectation tables.
+            return {32'h5A5A_0000, idx[31:0]};
+        endfunction
+
         task automatic drive_case(string case_id);
             swb_case_expectation_t exp;
             int unsigned packet_idx;
@@ -88,13 +96,13 @@ package tb_int_swb_case_sequences_pkg;
 
             for (packet_idx = 0; packet_idx < exp.rqe_ingress; packet_idx++) begin
                 rdma_rqe_vif.drive_rqe({192'h0, 32'h5351_4500, packet_idx[31:0]},
-                                       {32'h5A00_0000, packet_idx[31:0]});
+                                       make_wqe_sidecar_id(packet_idx));
             end
 
             for (packet_idx = 0; packet_idx < exp.cqe_egress; packet_idx++) begin
                 rdma_cqe_vif.drive_cqe({96'h0, 16'hC0DE, packet_idx[15:0]},
                                        packet_idx[15:0],
-                                       {32'hC0E0_0000, packet_idx[31:0]});
+                                       make_wqe_sidecar_id(packet_idx));
             end
 
             for (lane = 0; lane < 4; lane++) begin
