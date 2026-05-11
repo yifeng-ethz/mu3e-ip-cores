@@ -1,0 +1,227 @@
+{
+  "started_at": 1778514470.1862223,
+  "args": {
+    "duration_s": "5",
+    "rate_q16": "52",
+    "output_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/empty_frame_smoke_20260511_174744",
+    "feb_link": "2",
+    "feb_target": "7",
+    "feb_sof": "None",
+    "swb_sof": "None",
+    "skip_program": "True",
+    "skip_feb_config": "False",
+    "use_opq": "False",
+    "swb_link_mask_scifi": "4",
+    "staging_mb": "64",
+    "af_pct": "80",
+    "empty_frame": "True",
+    "skip_mutrig_config": "False",
+    "no_data_ingress": "True",
+    "dump_csrs": "True",
+    "tool_bin_dir": "None",
+    "tool_install_dir": "None",
+    "refresh_tool_paths": "False"
+  },
+  "tools": {
+    "sc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
+    "rc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/rc_tool",
+    "dma_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/dma_tool",
+    "rw": "/home/yifeng/packages/online_dpv2/online/install/bin/rw",
+    "swb_ring_lock": "/home/yifeng/.local/bin/swb_ring_lock"
+  },
+  "tool_sources": {
+    "sc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build",
+    "rc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build",
+    "dma_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build",
+    "rw": "PATH"
+  },
+  "swb_ring_lock": "/home/yifeng/.local/bin/swb_ring_lock",
+  "mutrig_config": "skipped",
+  "swb_state": {
+    "RESET_REGISTER_W": 0,
+    "DATAGENERATOR_DIVIDER_REGISTER_W": 16,
+    "SWB_GENERIC_MASK_REGISTER_W": 1,
+    "SWB_LINK_MASK_SCIFI": 0,
+    "SWB_READOUT_STATE": 262149,
+    "FARM_READOUT_STATE": 262149,
+    "RDMA": {
+      "STATUS": 0,
+      "CNT_OPQ_INPUT_W": 0,
+      "CNT_BYTES_WRITTEN": 0,
+      "CNT_RQE_CONSUMED": 0,
+      "CNT_CQE_POSTED": 0,
+      "CNT_HALT": 0,
+      "CNT_EOE_OBSERVED": 0
+    },
+    "GET_N_DMA_WORDS_REGISTER_W": 524288,
+    "DMA_REGISTER": 0
+  },
+  "empty_frame_config": {
+    "lvds_lane_go": {
+      "addr": "0x08004",
+      "requested": "0x000001FF",
+      "observed": "0x000001FF"
+    },
+    "mux": [
+      {
+        "lane": 0,
+        "base": "0x08890",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      },
+      {
+        "lane": 1,
+        "base": "0x088A0",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      },
+      {
+        "lane": 2,
+        "base": "0x088B0",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      },
+      {
+        "lane": 3,
+        "base": "0x088C0",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      },
+      {
+        "lane": 4,
+        "base": "0x088D0",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      },
+      {
+        "lane": 5,
+        "base": "0x088E0",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      },
+      {
+        "lane": 6,
+        "base": "0x088F0",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      },
+      {
+        "lane": 7,
+        "base": "0x08900",
+        "status": "skipped",
+        "uid": "0x00000000",
+        "error": null
+      }
+    ],
+    "emulators": [
+      {
+        "layout": "legacy",
+        "lane": 0,
+        "base": "0x08800",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000000C"
+      },
+      {
+        "layout": "legacy",
+        "lane": 1,
+        "base": "0x08810",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000001C"
+      },
+      {
+        "layout": "legacy",
+        "lane": 2,
+        "base": "0x08820",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000002C"
+      },
+      {
+        "layout": "legacy",
+        "lane": 3,
+        "base": "0x08830",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000003C"
+      },
+      {
+        "layout": "legacy",
+        "lane": 4,
+        "base": "0x08840",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000004C"
+      },
+      {
+        "layout": "legacy",
+        "lane": 5,
+        "base": "0x08850",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000005C"
+      },
+      {
+        "layout": "legacy",
+        "lane": 6,
+        "base": "0x08860",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000006C"
+      },
+      {
+        "layout": "legacy",
+        "lane": 7,
+        "base": "0x08870",
+        "control": "0x00000009",
+        "rates": "0x00000000",
+        "tx_mode": "0x0000007C"
+      }
+    ]
+  },
+  "final_swb_state": {
+    "RESET_REGISTER_W": 0,
+    "DATAGENERATOR_DIVIDER_REGISTER_W": 16,
+    "SWB_GENERIC_MASK_REGISTER_W": 1,
+    "SWB_LINK_MASK_SCIFI": 0,
+    "SWB_READOUT_STATE": 0,
+    "FARM_READOUT_STATE": 262149,
+    "RDMA": {
+      "STATUS": 0,
+      "CNT_OPQ_INPUT_W": 0,
+      "CNT_BYTES_WRITTEN": 0,
+      "CNT_RQE_CONSUMED": 0,
+      "CNT_CQE_POSTED": 0,
+      "CNT_HALT": 0,
+      "CNT_EOE_OBSERVED": 0
+    },
+    "GET_N_DMA_WORDS_REGISTER_W": 524288,
+    "DMA_REGISTER": 0
+  },
+  "dma_capture_bytes": 0,
+  "dma_log": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/empty_frame_smoke_20260511_174744/dma_tool.log",
+  "dma_summary": [
+    "dma_tool: drop counters: no OPQ_DROP register is defined; CNT_SKIP_EVENT_DMA_RAM_R=0 CNT_SKIP_EVENT_LINK_FIFO_R=0",
+    "dma_tool: starting reader/writer threads",
+    "dma_tool: summary: read_words=0 written_words=0 bytes_written=0 DMA_CNT_WORDS_REGISTER_R=0 output=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/empty_frame_smoke_20260511_174744/capture.bin"
+  ],
+  "dma_counters": {
+    "read_words": 0,
+    "written_words": 0,
+    "bytes_written": 0,
+    "dma_cnt_words_register": 0,
+    "output": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/empty_frame_smoke_20260511_174744/capture.bin"
+  },
+  "hist_0_total_hits": 0,
+  "hist_0_dropped_hits": 0,
+  "csr_dump": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/empty_frame_smoke_20260511_174744/run_tool_csr_dump_20260511_174759.md",
+  "finished_at": 1778514480.4160933
+}

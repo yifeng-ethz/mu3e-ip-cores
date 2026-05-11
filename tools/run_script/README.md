@@ -1,4 +1,4 @@
-# tools/run_script — FEB+SWB on-board debug + bring-up tools
+# tools/run_script - FEB+SWB on-board debug + bring-up tools
 
 Canonical home for the SWB-host debug + bring-up tools. Previously these
 lived under `online_dpv2/online/switching_pc/tools/` and
@@ -57,6 +57,49 @@ launch via the ring-lock orchestrator:
 This is documented in the auto-memory under
 `memory/feedback_swb_ring_lock.md`.
 
+`run_tool` also self-reexecs under `~/.local/bin/swb_ring_lock` when it
+is launched directly. Wrapping it explicitly is still the preferred board
+smoke pattern because the full SC/RC/DMA run then holds one serialized
+hardware-access lease.
+
+## run_tool debug flags
+
+`run_tool` defaults to the local build output in
+`tools/run_script/build/` for `sc_tool`, `rc_tool`, and `dma_tool`.
+It then checks `tools/run_script/install/bin/` and finally `PATH`.
+Use these flags when the binaries live somewhere else:
+
+```
+--tool-bin-dir <dir>       Override the primary tool directory.
+--tool-install-dir <dir>   Override the secondary tool directory.
+--refresh-tool-paths       Force fresh local/PATH discovery.
+```
+
+Board-smoke and inspection flags:
+
+```
+--empty-frame          Configure FEB emulator sources for empty/header frames:
+                       no MuTRiG XML/JTAG configure and zero emulator hits.
+--skip-mutrig-config   Skip real-MuTRiG XML/JTAG configuration while still
+                       allowing emulator traffic.
+--no-data-ingress      Force SWB_LINK_MASK_SCIFI=0 so FEB payload is rejected
+                       at the SWB ingress, and route the SWB generated generic
+                       lane through OPQ/RDMA for host-path smoke traffic.
+--dump-csrs            Write run_tool_csr_dump_<timestamp>.md with 9 SWB BAR0
+                       registers and 9 FEB SC CSR ranges.
+--no-program           Skip SOF programming; assumes SWB/FEB images are loaded.
+```
+
+Example empty-frame smoke after programming both boards:
+
+```
+~/.local/bin/swb_ring_lock python3 \
+  /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/run_tool \
+  --empty-frame --no-data-ingress --dump-csrs \
+  --duration-s 5 \
+  --no-program
+```
+
 ## sc_tool address rules
 
 The SWB `sc_hub` is **word-addressed** (NOT byte-addressed). To read a
@@ -72,11 +115,11 @@ Qsys byte address `0xN`, pass `0xN / 4` to `sc_tool`. See
 
 ## Cross-references
 
-- `firmware_builds/systems/v3_pretest-260511/doc/TEST_PLAN.md` — the
+- `firmware_builds/systems/v3_pretest-260511/doc/TEST_PLAN.md` - the
   on-board test plan that USES these tools (Phase 1..4).
-- `firmware_builds/systems/swb/rdma_pretest-260511/` — the SWB build.
-- `firmware_builds/systems/v3_pretest-260511/` — the FEB SciFi build.
-- `~/.local/bin/swb_ring_lock` — ring-lock orchestrator (auto-memory
+- `firmware_builds/systems/swb/rdma_pretest-260511/` - the SWB build.
+- `firmware_builds/systems/v3_pretest-260511/` - the FEB SciFi build.
+- `~/.local/bin/swb_ring_lock` - ring-lock orchestrator (auto-memory
   `feedback_swb_ring_lock.md`).
-- `~/.local/sbin/mudaq_recover_pcie` — PCIe recovery helper (auto-memory
+- `~/.local/sbin/mudaq_recover_pcie` - PCIe recovery helper (auto-memory
   `feedback_swb_pll_diag.md`).
