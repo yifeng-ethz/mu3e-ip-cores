@@ -503,6 +503,9 @@ def emit_selected_tests_pkg() -> str:
     # bug-repro tests with no associated Case row).
     lines.append("    // Directed run-control opcode sweep (BUG-RC-RESET-SCWEDGE Phase 3 repro)")
     lines.append("    import tb_int_run_sequence_directed_test_pkg::*;")
+    lines.append("    // BUG-RC-RESET-SCWEDGE behavioural topology repro: pre-fix and post-fix")
+    lines.append("    import tb_int_run_sequence_directed_wedge_test_pkg::*;")
+    lines.append("    import tb_int_run_sequence_directed_wedge_fixed_test_pkg::*;")
     lines.extend([
         "",
         "endpackage",
@@ -544,6 +547,11 @@ def emit_filelist() -> str:
         "uvm/common/rdma_cqe_egress_monitor/rdma_cqe_egress_monitor.sv",
         "uvm/common/opq_lane_fill_monitor/opq_lane_fill_monitor.sv",
         "uvm/common/pcie_dma_egress_monitor/pcie_dma_egress_monitor.sv",
+        # tb_int_topology_models.sv is `included from tb_int_top.sv so its
+        # module + macros land in the tb_int_top compilation unit. Adding it
+        # again to the filelist would re-compile mock_sc_plane_reset_model in
+        # a separate compilation unit and emit (vlog-2275). Leave the file
+        # out of this list -- it is referenced via `include only.
         "uvm/swb_rdma_pretest/tb_int_swb_case_model.sv",
         "uvm/swb_rdma_pretest/tb_int_swb_scoreboard.sv",
         "uvm/swb_rdma_pretest/tb_int_dual_env.sv",
@@ -556,6 +564,9 @@ def emit_filelist() -> str:
     lines.extend(f"uvm/swb_rdma_pretest/tests/tb_int_{case.class_suffix}_test.sv" for case in IMPLEMENTED_CASES)
     # Hand-authored auxiliary test (BUG-RC-RESET-SCWEDGE Phase 3 repro).
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_test.sv")
+    # BUG-RC-RESET-SCWEDGE behavioural topology repro tests
+    lines.append("uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_test.sv")
+    lines.append("uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_fixed_test.sv")
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv")
     lines.extend([
         "uvm/swb_rdma_pretest/tb_int_smoke_test.sv",

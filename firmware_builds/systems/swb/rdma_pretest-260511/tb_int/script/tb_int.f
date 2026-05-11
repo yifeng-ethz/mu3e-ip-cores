@@ -116,6 +116,8 @@ uvm/swb_rdma_pretest/tests/tb_int_p065_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_p066_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_p068_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_test.sv
+uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_test.sv
+uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_fixed_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv
 uvm/swb_rdma_pretest/tb_int_smoke_test.sv
 uvm/swb_rdma_pretest/tb_int_top.sv

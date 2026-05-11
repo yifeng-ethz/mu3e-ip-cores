@@ -1,5 +1,14 @@
 `timescale 1ns/1ps
 
+// Behavioural topology stubs (BUG-RC-RESET-SCWEDGE Phase 3 repro). The
+// module mock_sc_plane_reset_model and the macros TB_INT_HARD_RESET_CYCLES /
+// TB_INT_SC_WEDGE_PAYLOAD are defined in tb_int_topology_models.sv. The
+// SV macro scope is per-compilation-unit, so we `include here to bring the
+// macros into tb_int_top's compilation unit. The header guard
+// TB_INT_SWB_TOPOLOGY_MODELS_SV inside the file prevents duplicate module
+// definition when the file is also compiled in via script/tb_int.f.
+`include "tb_int_topology_models.sv"
+
 module tb_int_top;
     timeunit 1ns;
     timeprecision 1ps;
@@ -172,10 +181,40 @@ module tb_int_top;
         pcie_perst_n = 1'b1;
     end
 
+    // BUG-RC-RESET-SCWEDGE behavioural topology model. Detects opcode 0x30
+    // on the runctl_phy 9-bit AVST and broadcasts a bounded ext_hard_reset
+    // pulse through a 2-flop pipeline to mock_sc_plane_reset. The SC AVMM
+    // responder below gates on mock_sc_plane_reset; while the SC plane is
+    // wedged it returns 0xEEEE_EEEE and suppresses readdatavalid. With the
+    // BUG_RC_RESET_SCWEDGE_FIXED guard defined the pipeline connection is
+    // broken (mirrors the Qsys fix at feb_system_v3.qsys:586..590).
+    logic mock_ext_hard_reset;
+    logic mock_sc_plane_reset;
+
+    mock_sc_plane_reset_model #(
+        .HARD_RESET_CYCLES(`TB_INT_HARD_RESET_CYCLES)
+    ) u_mock_sc_plane_reset (
+        .clk                 (clk_50_b2j),
+        .rst                 (rst),
+        .runctl_data         (runctl_phy.data),
+        .runctl_valid        (runctl_phy.valid),
+        .mock_ext_hard_reset (mock_ext_hard_reset),
+        .mock_sc_plane_reset (mock_sc_plane_reset)
+    );
+
     always_ff @(posedge clk_50_b2j or negedge cpu_reset_n) begin
         if (!cpu_reset_n) begin
             sc_phy.readdatavalid <= 1'b0;
             sc_phy.readdata <= 32'h0000_0000;
+        end else if (mock_sc_plane_reset) begin
+            // SC plane is opaque. Mirror silicon-side BUG-RC-RESET-SCWEDGE:
+            // every read returns rsp=RSP3 payload 0xEEEE_EEEE and the
+            // readdatavalid handshake is still produced (so the master
+            // doesn't time out on waitrequest, matching the on-board
+            // observation that the bus completes the cycle but the
+            // payload is junk).
+            sc_phy.readdatavalid <= sc_phy.read;
+            sc_phy.readdata <= `TB_INT_SC_WEDGE_PAYLOAD;
         end else begin
             sc_phy.readdatavalid <= sc_phy.read;
             sc_phy.readdata <= 32'h4849_5354;
