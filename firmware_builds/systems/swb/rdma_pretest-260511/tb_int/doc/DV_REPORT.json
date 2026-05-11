@@ -63,7 +63,7 @@
       "alias": "",
       "bucket": "BASIC",
       "case_id": "B065",
-      "scenario": "SWB DT one SQE ingress through OPQ to PCIe DMA egress",
+      "scenario": "SWB DT one RQE ingress through OPQ to PCIe DMA egress",
       "status": "PASS",
       "test": "uvm/swb_rdma_pretest/tests/tb_int_b065_test.sv"
     },
@@ -79,7 +79,7 @@
       "alias": "",
       "bucket": "BASIC",
       "case_id": "B067",
-      "scenario": "SWB DT sidecar lineage at FEB-side rdma SQE ingress",
+      "scenario": "SWB DT sidecar lineage at FEB-side rdma RQE ingress",
       "status": "PASS",
       "test": "uvm/swb_rdma_pretest/tests/tb_int_b067_test.sv"
     },
@@ -135,7 +135,7 @@
       "alias": "",
       "bucket": "ERROR",
       "case_id": "X001",
-      "scenario": "mid-flight RESET while OPQ has SQEs in flight",
+      "scenario": "mid-flight RESET while OPQ has RQEs in flight",
       "status": "PASS",
       "test": "uvm/swb_rdma_pretest/tests/tb_int_x001_test.sv"
     },
@@ -175,7 +175,7 @@
       "alias": "",
       "bucket": "PROF",
       "case_id": "P068",
-      "scenario": "sustained SQE ingress at line-rate structural scale",
+      "scenario": "sustained RQE ingress at line-rate structural scale",
       "status": "PASS",
       "test": "uvm/swb_rdma_pretest/tests/tb_int_p068_test.sv"
     }

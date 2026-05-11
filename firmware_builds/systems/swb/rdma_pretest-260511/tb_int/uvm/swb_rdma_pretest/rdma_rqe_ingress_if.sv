@@ -1,7 +1,7 @@
-`ifndef SWB_RDMA_SQE_INGRESS_IF_SV
-`define SWB_RDMA_SQE_INGRESS_IF_SV
+`ifndef SWB_RDMA_RQE_INGRESS_IF_SV
+`define SWB_RDMA_RQE_INGRESS_IF_SV
 
-interface rdma_sqe_ingress_if (input logic clk, input logic reset_n);
+interface rdma_rqe_ingress_if (input logic clk, input logic reset_n);
     logic        valid;
     logic        ready;
     logic        sop;
@@ -20,7 +20,7 @@ interface rdma_sqe_ingress_if (input logic clk, input logic reset_n);
         sidecar_id = 64'h0;
     endtask
 
-    task automatic drive_sqe(input logic [255:0] payload, input logic [63:0] id);
+    task automatic drive_rqe(input logic [255:0] payload, input logic [63:0] id);
         @(posedge clk);
         valid <= 1'b1;
         ready <= 1'b1;

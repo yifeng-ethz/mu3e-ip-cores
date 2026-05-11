@@ -30,7 +30,7 @@ In scope:
   run-state intent and into SWB-local run-control consumers.
 - Host slow-control over `/dev/mudaq0` through the SWB AVMM master and
   `sc_hub_v2` path, with local JTAG as a limited debug fallback.
-- SWB datapath tracking from FEB-to-SWB RDMA SQE ingress through OPQ,
+- SWB datapath tracking from FEB-to-SWB RDMA RQE ingress through OPQ,
   `musip_event_builder`, `swb_data_demerger`, `hit_compactor`, and host DMA.
 - Per-stage queue and sidecar observability at the DEBUG_LEVEL values in
   section 2.3.
@@ -63,8 +63,8 @@ SWB-specific bind interfaces live under `tb_int/uvm/swb_rdma_pretest/`.
 |---|---|---|
 | `swb_runctl_agent` | active | Drives the SWB-local run-state model and records propagated state at local consumers. |
 | `swb_sc_agent` | active | Models host PCIe `sc_tool` transactions over `/dev/mudaq0` into the SWB AVMM master. |
-| **`host_memory_model`** | active behavioral | **Behavioral model of the PCIe host memory the rdma_subsystem talks to. Implements three address-mapped regions: (a) the Submission Queue ring, (b) the Completion Queue ring, (c) the segmented data buffer (one DMA segment per host slot). The model is an active responder on the rdma_subsystem AXI4 host master, mirroring how the real Linux mudaq driver presents host memory pages.** |
-| `rdma_sqe_ingress_monitor` | passive | Samples FEB-to-SWB SQE ingress at the SWB-side `rdma_subsystem` boundary (the SUPERCORE, NOT the inner `rdma_dma_engine` IP). |
+| **`host_memory_model`** | active behavioral | **Behavioral model of the PCIe host memory the rdma_subsystem talks to. Implements three address-mapped regions: (a) the Receive Queue ring, (b) the Completion Queue ring, (c) the segmented data buffer (one DMA segment per host slot). The model is an active responder on the rdma_subsystem AXI4 host master, mirroring how the real Linux mudaq driver presents host memory pages.** |
+| `rdma_rqe_ingress_monitor` | passive | Samples FEB-to-SWB RQE ingress at the SWB-side `rdma_subsystem` boundary (the SUPERCORE, NOT the inner `rdma_dma_engine` IP). |
 | `rdma_cqe_egress_monitor` | passive | Samples rdma_subsystem CQE pushes into the host CQ region of the host_memory_model. |
 | `opq_lane_monitor[4]` | passive | Samples one or more OPQ four-lane native_sv ingress/egress fill points. |
 | `event_builder_monitor` | passive | Tracks `musip_event_builder` host-packet packing and close events. |
@@ -76,7 +76,7 @@ SWB-specific bind interfaces live under `tb_int/uvm/swb_rdma_pretest/`.
 
 The SWB tb_int DUT integration boundary is the **`rdma_subsystem` supercore**
 at `mu3e-ip-cores/rdma_subsystem/`. This supercore wraps four sibling IPs
-into one Qsys/AXI4 subsystem: `rdma_dma_engine`, `rdma_sq_fetcher`,
+into one Qsys/AXI4 subsystem: `rdma_dma_engine`, `rdma_rq_fetcher`,
 `rdma_cq_pusher`, `rdma_run_manager`. The harness MUST bind at the
 supercore top-level ports listed in `rdma_subsystem/RTL_PLAN_INT.md`
 section 3 (Top-level interface) — NOT at any individual sub-IP boundary,
@@ -84,11 +84,11 @@ and NOT at the legacy `dma_engine` / `dma_streaming` paths that the
 Apr 27 reference build used.
 
 Concretely:
-- The SUPERCORE ingress = AVST sink for FEB-to-SWB hit_type1 SQEs
+- The SUPERCORE ingress = AVST sink for FEB-to-SWB hit_type1 RQEs
   (the same boundary that `swb_rdma_subsystem_bridge.sv` adapts).
 - The SUPERCORE host master = AXI4 master that the `host_memory_model`
   must respond on. The supercore arbitrates the three internal masters
-  (`sq_fetcher` reads, `dma_engine` writes, `cq_pusher` writes) onto a
+  (`rq_fetcher` reads, `dma_engine` writes, `cq_pusher` writes) onto a
   SINGLE AXI4 port to the host.
 - The SUPERCORE CSR slave = BAR1 routing decoded by `rdma_subsystem_csr_decoder`,
   with the `rdma_run_manager` register file as the addressable target.
@@ -107,21 +107,21 @@ responder on the supercore's AXI4 host master:
 
 | Region | Base addr (TBD per supercore CSR) | Layout | Owned by | Purpose |
 |---|---|---|---|---|
-| **SQ (Submission Queue)** | `HOST_SQ_BASE` | Ring of 64-byte SQE entries (slot count `SQ_DEPTH`, default 256). Head/tail pointers shadowed in the rdma_run_manager CSR. | host_memory_model produces; rdma_sq_fetcher consumes | The host posts WQEs here; the SWB pulls SQEs and acts. |
+| **RQ (Receive Queue)** | `HOST_RQ_BASE` | Ring of 64-byte RQE entries (slot count `RQ_DEPTH`, default 256). Head/tail pointers shadowed in the rdma_run_manager CSR. | host_memory_model produces; rdma_rq_fetcher consumes | The host posts WQEs here; the SWB pulls RQEs and acts. |
 | **CQ (Completion Queue)** | `HOST_CQ_BASE` | Ring of 16-byte CQE entries (slot count `CQ_DEPTH`, default 256). Head/tail pointers shadowed in the rdma_run_manager CSR. | rdma_cq_pusher produces; host_memory_model consumes/observes | The SWB posts completions back; host reads to know what landed. |
 | **Data buffer (segmented)** | `HOST_DATA_BASE` | A pool of `N_SEGMENTS` segments (default 64), each `SEG_BYTES` (default 8 KB). Each segment is addressed by a base+stride scheme; the rdma_run_manager decides the destination segment per CQE. | rdma_dma_engine writes; host_memory_model captures | Per-event payload bytes go here. Segmented so OPQ-ordered events can spread across segments without wrap-around. |
 
 Behavioral contract:
 
-1. **SQ region**: `host_memory_model` exposes an injection API
-   `host_post_sqe(slot_idx, sqe_bytes[63:0])` that writes a 64-byte SQE
-   into the SQ ring at `HOST_SQ_BASE + slot_idx * 64`. The agent advances
-   the doorbell so `rdma_sq_fetcher` notices a new WQE. Test sequences
-   call `host_post_sqe` to drive a stimulus.
+1. **RQ region**: `host_memory_model` exposes an injection API
+   `host_post_rqe(slot_idx, rqe_bytes[63:0])` that writes a 64-byte RQE
+   into the RQ ring at `HOST_RQ_BASE + slot_idx * 64`. The agent advances
+   the doorbell so `rdma_rq_fetcher` notices a new WQE. Test sequences
+   call `host_post_rqe` to drive a stimulus.
 2. **CQ region**: the agent serves AXI4 writes from `rdma_cq_pusher` into
    `HOST_CQ_BASE + slot_idx * 16`. The agent emits an analysis port event
-   on every write so the scoreboard can match against the SQE that
-   produced it. The scoreboard reconciles SQE-to-CQE by sequence id.
+   on every write so the scoreboard can match against the RQE that
+   produced it. The scoreboard reconciles RQE-to-CQE by sequence id.
 3. **Data buffer**: the agent serves AXI4 writes from `rdma_dma_engine`
    into one of the `N_SEGMENTS` regions. The agent stores the written
    bytes per-segment and exposes a `host_segment_check(seg_idx, expected_bytes[])`
@@ -132,7 +132,7 @@ Behavioral contract:
    (4 KB-bounded bursts, no narrow transfers below 32 byte). The model
    inserts random small back-pressure to exercise the supercore's
    buffer + retry paths.
-5. **Read-during-write**: the model supports SQE-read-then-CQE-write
+5. **Read-during-write**: the model supports RQE-read-then-CQE-write
    for the same logical event with overlapping AXI bursts, simulating
    the deployed PCIe behavior. The supercore must keep its three
    internal masters non-blocking.
@@ -163,10 +163,10 @@ forever begin
             prev_cq_head = (prev_cq_head + 1) % CQ_DEPTH;
         end
     end
-    // SUBMIT: post next SQE if test sequence has more work pending
+    // SUBMIT: post next RQE if test sequence has more work pending
     if (test_seq_has_pending_wqe) begin
-        host_post_sqe(sq_tail, test_seq.next_wqe);
-        sq_tail = (sq_tail + 1) % SQ_DEPTH;
+        host_post_rqe(rq_tail, test_seq.next_wqe);
+        rq_tail = (rq_tail + 1) % RQ_DEPTH;
     end
     // backoff: simulate a single core's poll cadence (modelled as 1-10 cycles)
     @(posedge clk);
@@ -177,7 +177,7 @@ This shape — "submit RQ, poll CQ, write log, no IRQ" — matches the
 production host's CPU pinned to this work. The behavioral model
 deliberately:
 
-- Does NOT model multi-core contention; one core does all the SQ post +
+- Does NOT model multi-core contention; one core does all the RQ post +
   CQ poll work.
 - Does NOT model IRQ latency; CQ events are detected by next-cycle
   polling, not by deferred interrupt handler.
@@ -194,7 +194,7 @@ software performance.
 ### 2.2 Scoreboard
 
 The SWB scoreboard is a per-stage ledger:
-- FEB-to-SWB SQE ingress accepted count.
+- FEB-to-SWB RQE ingress accepted count.
 - OPQ accepted, dropped, and emitted count by lane.
 - Event-builder host-packet close count and byte count.
 - DMA beat count, end-of-event count, and PCIe egress event count.
@@ -207,11 +207,11 @@ DEBUG_LEVEL 2 sidecar lineage is a closure blocker.
 
 | IP | DEBUG_LEVEL | Observable |
 |---|:-:|---|
-| `rdma_subsystem` (supercore) | 2 | SUPERCORE BOUNDARY: SQ/CQ ring per-WQE sidecar at the AVST ingress + AXI4 host-master lineage. The sub-IPs (`rdma_dma_engine`, `rdma_sq_fetcher`, `rdma_cq_pusher`, `rdma_run_manager`) are NOT separately monitored; only the supercore. |
+| `rdma_subsystem` (supercore) | 2 | SUPERCORE BOUNDARY: RQ/CQ ring per-WQE sidecar at the AVST ingress + AXI4 host-master lineage. The sub-IPs (`rdma_dma_engine`, `rdma_rq_fetcher`, `rdma_cq_pusher`, `rdma_run_manager`) are NOT separately monitored; only the supercore. |
 | `ordered_priority_queue_native_sv_fixed4` | 1 | frame-level fill through page RAM occupancy and ticket FIFO |
 | `musip_event_builder` | 1 | per-host packet fill |
 | `swb_data_demerger` | 1 | demerger fill |
-| `swb_rdma_subsystem_bridge` | 2 | per-SQE sidecar lineage at the FEB-to-SWB ingress (the adapter that feeds the supercore) |
+| `swb_rdma_subsystem_bridge` | 2 | per-RQE sidecar lineage at the FEB-to-SWB ingress (the adapter that feeds the supercore) |
 | `hit_compactor` | 1 | compactor stage fill |
 | `pcie_x8_256` | 0 | DMA endpoint; observed indirectly via `host_memory_model` AXI4 transactions |
 | `a10_block` | 0 | board glue verified through neighboring observables |
@@ -226,7 +226,7 @@ Rules:
 Coverage is tracked by counters and case reports:
 - Run-state pair coverage and stable-window markers.
 - Host slow-control read/write completion by SWB-local slave.
-- SQE ingress, OPQ lane, event-builder packet, and PCIe DMA event ledgers.
+- RQE ingress, OPQ lane, event-builder packet, and PCIe DMA event ledgers.
 - DEBUG_LEVEL 2 sidecar presence and identity match where exposed.
 - Isolated, `bucket_frame`, and `all_buckets_frame` execution modes.
 
@@ -275,7 +275,7 @@ PCIe path is unavailable.
 ### 3.3 DT (datapath)
 
 The DT bucket focuses on:
-- SWB ingress from FEB-to-SWB RDMA SQEs.
+- SWB ingress from FEB-to-SWB RDMA RQEs.
 - OPQ four-lane native_sv ordering and fill.
 - Event-builder host-packet packing.
 - RDMA host DMA push into the PCIe x8 endpoint path.
@@ -314,7 +314,7 @@ Reused from `firmware_builds/systems/system_20260504_emulator_type0/tb_int/uvm/c
 
 SWB-specific layer:
 - `tb_int_top.sv`.
-- `rdma_sqe_ingress_if.sv`.
+- `rdma_rqe_ingress_if.sv`.
 - `rdma_cqe_egress_if.sv`.
 - `opq_lane_if.sv`.
 - `pcie_dma_egress_if.sv`.

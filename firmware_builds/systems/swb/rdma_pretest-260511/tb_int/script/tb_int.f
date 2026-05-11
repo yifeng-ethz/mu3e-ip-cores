@@ -3,7 +3,7 @@
 +incdir+uvm/common
 +incdir+uvm/common/runctl_phy_agent
 +incdir+uvm/common/sc_phy_agent
-+incdir+uvm/common/rdma_sqe_ingress_monitor
++incdir+uvm/common/rdma_rqe_ingress_monitor
 +incdir+uvm/common/rdma_cqe_egress_monitor
 +incdir+uvm/common/opq_lane_fill_monitor
 +incdir+uvm/common/pcie_dma_egress_monitor
@@ -13,14 +13,14 @@
 uvm/common/runctl_phy_if.sv
 uvm/common/sc_avmm_if.sv
 uvm/common/run_window_db.sv
-uvm/swb_rdma_pretest/rdma_sqe_ingress_if.sv
+uvm/swb_rdma_pretest/rdma_rqe_ingress_if.sv
 uvm/swb_rdma_pretest/rdma_cqe_egress_if.sv
 uvm/swb_rdma_pretest/opq_lane_if.sv
 uvm/swb_rdma_pretest/pcie_dma_egress_if.sv
 uvm/common/swb_stage_record.sv
 uvm/common/runctl_phy_agent/runctl_phy_agent.sv
 uvm/common/sc_phy_agent/sc_phy_agent.sv
-uvm/common/rdma_sqe_ingress_monitor/rdma_sqe_ingress_monitor.sv
+uvm/common/rdma_rqe_ingress_monitor/rdma_rqe_ingress_monitor.sv
 uvm/common/rdma_cqe_egress_monitor/rdma_cqe_egress_monitor.sv
 uvm/common/opq_lane_fill_monitor/opq_lane_fill_monitor.sv
 uvm/common/pcie_dma_egress_monitor/pcie_dma_egress_monitor.sv

@@ -133,9 +133,9 @@
 	url = https://github.com/yifeng-ethz/rdma_run_manager.git
 	branch = main
 	ignore = untracked
-[submodule "rdma_sq_fetcher"]
-	path = rdma_sq_fetcher
-	url = https://github.com/yifeng-ethz/rdma_sq_fetcher.git
+[submodule "rdma_rq_fetcher"]
+	path = rdma_rq_fetcher
+	url = https://github.com/yifeng-ethz/rdma_rq_fetcher.git
 	branch = main
 	ignore = untracked
 [submodule "rdma_subsystem"]

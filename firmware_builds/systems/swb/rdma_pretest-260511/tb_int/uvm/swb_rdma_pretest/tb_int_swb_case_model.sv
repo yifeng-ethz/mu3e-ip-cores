@@ -6,7 +6,7 @@ package tb_int_swb_case_model_pkg;
     typedef struct {
         string       bucket;
         string       title;
-        int unsigned sqe_ingress;
+        int unsigned rqe_ingress;
         int unsigned cqe_egress;
         int unsigned opq_accept;
         int unsigned opq_emit;
@@ -24,7 +24,7 @@ package tb_int_swb_case_model_pkg;
 
         e.bucket = case_id.substr(0, 0);
         e.title = "selected SWB structural UVM case";
-        e.sqe_ingress = 0;
+        e.rqe_ingress = 0;
         e.cqe_egress = 0;
         e.opq_accept = 0;
         e.opq_emit = 0;
@@ -58,20 +58,20 @@ package tb_int_swb_case_model_pkg;
         end else if (case_id == "B043") begin
             e.title = "SWB SC single-word scratch-pad RW round-trip";
         end else if (case_id == "B065") begin
-            e.title = "one SQE ingress through OPQ to PCIe DMA egress";
-            e.sqe_ingress = 1;
+            e.title = "one RQE ingress through OPQ to PCIe DMA egress";
+            e.rqe_ingress = 1;
             e.opq_accept = 1;
             e.opq_emit = 1;
             e.dma_beats = 1;
             e.dma_events = 1;
             e.lane0_packets = 1;
         end else if (case_id == "B066") begin
-            e.title = "rdma_subsystem CQE round-trip for one SQE";
-            e.sqe_ingress = 1;
+            e.title = "rdma_subsystem CQE round-trip for one RQE";
+            e.rqe_ingress = 1;
             e.cqe_egress = 1;
         end else if (case_id == "B067") begin
-            e.title = "FEB-side RDMA SQE sidecar lineage";
-            e.sqe_ingress = 1;
+            e.title = "FEB-side RDMA RQE sidecar lineage";
+            e.rqe_ingress = 1;
             e.cqe_egress = 1;
             e.opq_accept = 1;
             e.opq_emit = 1;
@@ -106,8 +106,8 @@ package tb_int_swb_case_model_pkg;
             e.dma_beats = 4;
             e.dma_events = 1;
         end else if (case_id == "X001") begin
-            e.title = "mid-flight RESET while OPQ has SQEs in flight";
-            e.sqe_ingress = 1;
+            e.title = "mid-flight RESET while OPQ has RQEs in flight";
+            e.rqe_ingress = 1;
             e.opq_accept = 1;
             e.opq_drop = 1;
             e.lane0_packets = 1;
@@ -115,7 +115,7 @@ package tb_int_swb_case_model_pkg;
             e.title = "illegal PCIe BAR write to RO field";
         end else if (case_id == "X065") begin
             e.title = "rdma CQE timeout with suppressed CQE writeback";
-            e.sqe_ingress = 1;
+            e.rqe_ingress = 1;
         end else if (case_id == "X069") begin
             e.title = "RUN_PREP issued while OPQ is mid-drain";
             e.opq_accept = 2;
@@ -126,7 +126,7 @@ package tb_int_swb_case_model_pkg;
             e.lane0_packets = 2;
         end else if (case_id == "P065") begin
             e.title = "scaled 100 kHz/channel x 4 lanes PROF smoke";
-            e.sqe_ingress = 64;
+            e.rqe_ingress = 64;
             e.opq_accept = 64;
             e.opq_emit = 64;
             e.dma_beats = 16;
@@ -136,8 +136,8 @@ package tb_int_swb_case_model_pkg;
             e.lane2_packets = 16;
             e.lane3_packets = 16;
         end else if (case_id == "P068") begin
-            e.title = "sustained SQE ingress at line-rate structural scale";
-            e.sqe_ingress = 128;
+            e.title = "sustained RQE ingress at line-rate structural scale";
+            e.rqe_ingress = 128;
             e.opq_accept = 128;
             e.opq_emit = 128;
             e.dma_beats = 128;

@@ -25,7 +25,7 @@ PASS pass / closed &middot; PARTIAL partial / below target / known limitation &m
 | DUT_IMPL | `swb_a10_top_structural_uvm_shell` |
 | SWB_BUILD | `rdma_pretest-260511` |
 | OPQ_N_LANE | `4` |
-| RDMA_PATH | `FEB SQE ingress -> OPQ -> rdma_subsystem -> PCIe DMA0` |
+| RDMA_PATH | `FEB RQE ingress -> OPQ -> rdma_subsystem -> PCIe DMA0` |
 | smoke_target | `make smoke` (`B065`) |
 | probe_only_exclusions | full bound real-DUT sim requires `TB_INT_BIND_REAL_DUT` and generated mixed-language promotion |
 

@@ -8,7 +8,7 @@ module tb_int_top;
     import tb_int_runctl_phy_agent_pkg::*;
     import tb_int_sc_phy_agent_pkg::*;
     import tb_int_swb_stage_pkg::*;
-    import tb_int_rdma_sqe_ingress_monitor_pkg::*;
+    import tb_int_rdma_rqe_ingress_monitor_pkg::*;
     import tb_int_rdma_cqe_egress_monitor_pkg::*;
     import tb_int_opq_lane_fill_monitor_pkg::*;
     import tb_int_pcie_dma_egress_monitor_pkg::*;
@@ -92,7 +92,7 @@ module tb_int_top;
 
     runctl_phy_if       runctl_phy(clk_50_b2j, rst);
     sc_avmm_if          sc_phy(clk_50_b2j, rst);
-    rdma_sqe_ingress_if rdma_sqe_ingress(clk_50_b2j, cpu_reset_n);
+    rdma_rqe_ingress_if rdma_rqe_ingress(clk_50_b2j, cpu_reset_n);
     rdma_cqe_egress_if  rdma_cqe_egress(clk_50_b2j, cpu_reset_n);
     opq_lane_if         opq_lane0(clk_50_b2j, cpu_reset_n);
     opq_lane_if         opq_lane1(clk_50_b2j, cpu_reset_n);
@@ -135,7 +135,7 @@ module tb_int_top;
         runctl_phy.clear();
         sc_phy.clear_master();
         sc_phy.waitrequest = 1'b0;
-        rdma_sqe_ingress.clear();
+        rdma_rqe_ingress.clear();
         rdma_cqe_egress.clear();
         opq_lane0.clear();
         opq_lane1.clear();
@@ -231,10 +231,10 @@ module tb_int_top;
                                                 "uvm_test_top.env.nominal.sc_phy.drv",
                                                 "vif",
                                                 sc_phy);
-        uvm_config_db#(virtual rdma_sqe_ingress_if)::set(null,
-                                                         "uvm_test_top.env.nominal.rdma_sqe_mon",
+        uvm_config_db#(virtual rdma_rqe_ingress_if)::set(null,
+                                                         "uvm_test_top.env.nominal.rdma_rqe_mon",
                                                          "vif",
-                                                         rdma_sqe_ingress);
+                                                         rdma_rqe_ingress);
         uvm_config_db#(virtual rdma_cqe_egress_if)::set(null,
                                                         "uvm_test_top.env.debug.rdma_cqe_mon",
                                                         "vif",
@@ -260,7 +260,7 @@ module tb_int_top;
                                                         "vif",
                                                         pcie_dma_egress);
 
-        uvm_config_db#(virtual rdma_sqe_ingress_if)::set(null, "uvm_test_top", "rdma_sqe_vif", rdma_sqe_ingress);
+        uvm_config_db#(virtual rdma_rqe_ingress_if)::set(null, "uvm_test_top", "rdma_rqe_vif", rdma_rqe_ingress);
         uvm_config_db#(virtual rdma_cqe_egress_if)::set(null, "uvm_test_top", "rdma_cqe_vif", rdma_cqe_egress);
         uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane0_vif", opq_lane0);
         uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane1_vif", opq_lane1);

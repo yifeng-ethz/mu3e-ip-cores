@@ -9,11 +9,11 @@
 
 ## Scenario
 
-mid-flight RESET while OPQ has SQEs in flight
+mid-flight RESET while OPQ has RQEs in flight
 
 ## Stimulus
 
-accept one SQE/OPQ packet then force the reset-drain model
+accept one RQE/OPQ packet then force the reset-drain model
 
 ## Pass Criteria
 

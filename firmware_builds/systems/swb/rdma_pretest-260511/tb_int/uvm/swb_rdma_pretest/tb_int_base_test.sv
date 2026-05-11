@@ -20,7 +20,7 @@ package tb_int_swb_base_test_pkg;
         tb_int_swb_dual_env env;
         tb_int_exec_mode_e exec_mode;
 
-        virtual rdma_sqe_ingress_if rdma_sqe_vif;
+        virtual rdma_rqe_ingress_if rdma_rqe_vif;
         virtual rdma_cqe_egress_if  rdma_cqe_vif;
         virtual opq_lane_if         opq_lane0_vif;
         virtual opq_lane_if         opq_lane1_vif;
@@ -50,8 +50,8 @@ package tb_int_swb_base_test_pkg;
         endfunction
 
         virtual function void get_required_vifs();
-            if (!uvm_config_db#(virtual rdma_sqe_ingress_if)::get(this, "", "rdma_sqe_vif", rdma_sqe_vif))
-                `uvm_fatal("SWB_BASE", "rdma_sqe_vif not configured")
+            if (!uvm_config_db#(virtual rdma_rqe_ingress_if)::get(this, "", "rdma_rqe_vif", rdma_rqe_vif))
+                `uvm_fatal("SWB_BASE", "rdma_rqe_vif not configured")
             if (!uvm_config_db#(virtual rdma_cqe_egress_if)::get(this, "", "rdma_cqe_vif", rdma_cqe_vif))
                 `uvm_fatal("SWB_BASE", "rdma_cqe_vif not configured")
             if (!uvm_config_db#(virtual opq_lane_if)::get(this, "", "opq_lane0_vif", opq_lane0_vif))
@@ -67,12 +67,12 @@ package tb_int_swb_base_test_pkg;
         endfunction
 
         virtual task run_configured_sequence(string case_id, swb_case_sequence seq);
-            wait (rdma_sqe_vif.reset_n === 1'b1);
-            repeat (4) @(posedge rdma_sqe_vif.clk);
+            wait (rdma_rqe_vif.reset_n === 1'b1);
+            repeat (4) @(posedge rdma_rqe_vif.clk);
             env.scoreboard.start_case(case_id);
             if (seq == null)
                 seq = swb_case_sequence::type_id::create($sformatf("%s_seq", case_id));
-            seq.configure(rdma_sqe_vif,
+            seq.configure(rdma_rqe_vif,
                           rdma_cqe_vif,
                           opq_lane0_vif,
                           opq_lane1_vif,
@@ -80,7 +80,7 @@ package tb_int_swb_base_test_pkg;
                           opq_lane3_vif,
                           pcie_dma_vif);
             seq.drive_case(case_id);
-            repeat (4) @(posedge rdma_sqe_vif.clk);
+            repeat (4) @(posedge rdma_rqe_vif.clk);
             env.scoreboard.check_case(case_id);
         endtask
 

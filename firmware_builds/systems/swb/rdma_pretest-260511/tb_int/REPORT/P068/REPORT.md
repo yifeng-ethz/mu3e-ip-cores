@@ -9,15 +9,15 @@
 
 ## Scenario
 
-sustained SQE ingress at line-rate structural scale
+sustained RQE ingress at line-rate structural scale
 
 ## Stimulus
 
-drive a 128-SQE structural line-rate burst
+drive a 128-RQE structural line-rate burst
 
 ## Pass Criteria
 
-SQE, OPQ, and DMA ledgers reconcile without halt
+RQE, OPQ, and DMA ledgers reconcile without halt
 
 ## Evidence
 

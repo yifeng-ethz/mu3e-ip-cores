@@ -7,7 +7,7 @@ package tb_int_swb_stage_pkg;
     `include "uvm_macros.svh"
 
     typedef enum int unsigned {
-        SWB_STAGE_RDMA_SQE_INGRESS,
+        SWB_STAGE_RDMA_RQE_INGRESS,
         SWB_STAGE_RDMA_CQE_EGRESS,
         SWB_STAGE_OPQ_LANE_ACCEPT,
         SWB_STAGE_OPQ_LANE_EMIT,
@@ -30,7 +30,7 @@ package tb_int_swb_stage_pkg;
 
         function new(string name = "swb_stage_record");
             super.new(name);
-            stage = SWB_STAGE_RDMA_SQE_INGRESS;
+            stage = SWB_STAGE_RDMA_RQE_INGRESS;
             lane = 0;
             data = '0;
             sidecar_id = '0;

@@ -9,11 +9,11 @@
 
 ## Scenario
 
-SWB DT one SQE ingress through OPQ to PCIe DMA egress
+SWB DT one RQE ingress through OPQ to PCIe DMA egress
 
 ## Stimulus
 
-inject one FEB-to-SWB RDMA SQE, one OPQ packet, and one host-DMA beat
+inject one FEB-to-SWB RDMA RQE, one OPQ packet, and one host-DMA beat
 
 ## Pass Criteria
 

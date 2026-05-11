@@ -1,16 +1,16 @@
-// rdma_sqe_ingress_monitor.sv
-// Passive FEB-to-SWB RDMA SQE ingress monitor.
+// rdma_rqe_ingress_monitor.sv
+// Passive FEB-to-SWB RDMA RQE ingress monitor.
 
-package tb_int_rdma_sqe_ingress_monitor_pkg;
+package tb_int_rdma_rqe_ingress_monitor_pkg;
 
     import uvm_pkg::*;
     import tb_int_swb_stage_pkg::*;
     `include "uvm_macros.svh"
 
-    class rdma_sqe_ingress_monitor extends uvm_component;
-        `uvm_component_utils(rdma_sqe_ingress_monitor)
+    class rdma_rqe_ingress_monitor extends uvm_component;
+        `uvm_component_utils(rdma_rqe_ingress_monitor)
 
-        virtual rdma_sqe_ingress_if vif;
+        virtual rdma_rqe_ingress_if vif;
         uvm_analysis_port#(swb_stage_record) ap;
         int unsigned total_accepted;
 
@@ -22,8 +22,8 @@ package tb_int_rdma_sqe_ingress_monitor_pkg;
         virtual function void build_phase(uvm_phase phase);
             super.build_phase(phase);
             ap = new("ap", this);
-            if (!uvm_config_db#(virtual rdma_sqe_ingress_if)::get(this, "", "vif", vif))
-                `uvm_info("RDMA_SQE_MON", "rdma_sqe_ingress_if not configured; monitor disabled", UVM_LOW)
+            if (!uvm_config_db#(virtual rdma_rqe_ingress_if)::get(this, "", "vif", vif))
+                `uvm_info("RDMA_RQE_MON", "rdma_rqe_ingress_if not configured; monitor disabled", UVM_LOW)
         endfunction
 
         virtual task run_phase(uvm_phase phase);
@@ -37,8 +37,8 @@ package tb_int_rdma_sqe_ingress_monitor_pkg;
                 if (vif.valid === 1'b1 && vif.ready === 1'b1) begin
                     swb_stage_record rec;
 
-                    rec = swb_stage_record::type_id::create("rdma_sqe_record");
-                    rec.stage = SWB_STAGE_RDMA_SQE_INGRESS;
+                    rec = swb_stage_record::type_id::create("rdma_rqe_record");
+                    rec.stage = SWB_STAGE_RDMA_RQE_INGRESS;
                     rec.data = vif.data;
                     rec.sidecar_id = vif.sidecar_id;
                     rec.sidecar_valid = 1'b1;
@@ -47,7 +47,7 @@ package tb_int_rdma_sqe_ingress_monitor_pkg;
                     rec.sample_time = $time;
                     total_accepted++;
                     ap.write(rec);
-                    `uvm_info("RDMA_SQE_MON", rec.describe(), UVM_HIGH)
+                    `uvm_info("RDMA_RQE_MON", rec.describe(), UVM_HIGH)
                 end
             end
         endtask

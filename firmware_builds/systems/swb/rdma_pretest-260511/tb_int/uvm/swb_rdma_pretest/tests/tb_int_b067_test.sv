@@ -1,5 +1,5 @@
 // tb_int_b067_test.sv
-// BASIC B067: SWB DT sidecar lineage at FEB-side rdma SQE ingress.
+// BASIC B067: SWB DT sidecar lineage at FEB-side rdma RQE ingress.
 
 package tb_int_b067_test_pkg;
 
