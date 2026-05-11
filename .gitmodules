@@ -1,72 +1,96 @@
 [submodule "slow-control_hub"]
 	path = slow-control_hub
 	url = git@github.com:yifeng-ethz/slow-control_hub.git
+	branch = master
 [submodule "CAM"]
 	path = CAM
 	url = git@github.com:yifeng-ethz/CAM.git
+	branch = master
 [submodule "mutrig_timestamp_processor"]
 	path = mutrig_timestamp_processor
 	url = git@github.com:yifeng-ethz/mutrig_timestamp_processor.git
+	branch = master
 [submodule "mutrig_frame_deassembly"]
 	path = mutrig_frame_deassembly
 	url = git@github.com:yifeng-ethz/mutrig_frame_deassembly.git
+	branch = master
 [submodule "histogram_statistics"]
 	path = histogram_statistics
 	url = git@github.com:yifeng-ethz/histogram_statistics.git
+	branch = master
 [submodule "mutrig_controller"]
 	path = mutrig_controller
 	url = git@github.com:yifeng-ethz/mutrig_controller.git
+	branch = master
 [submodule "charge_injection"]
 	path = charge_injection
 	url = git@github.com:yifeng-ethz/charge_injection.git
+	branch = master
 [submodule "alt_temp_sense_controller"]
 	path = alt_temp_sense_controller
 	url = git@github.com:yifeng-ethz/alt_temp_sense_controller.git
+	branch = master
 [submodule "high_performance_counter_array"]
 	path = high_performance_counter_array
 	url = git@github.com:yifeng-ethz/high_performance_counter_array.git
+	branch = master
 [submodule "mutrig_channel_counter_fabric"]
 	path = mutrig_channel_counter_fabric
 	url = git@github.com:yifeng-ethz/mutrig_channel_counter_fabric.git
+	branch = master
 [submodule "firefly_xcvr_i2c_master"]
 	path = firefly_xcvr_i2c_master
 	url = git@github.com:yifeng-ethz/firefly_xcvr_i2c_master.git
+	branch = master
 [submodule "ip_8b10b_decoder"]
 	path = ip_8b10b_decoder
 	url = git@github.com:yifeng-ethz/ip_8b10b_decoder.git
+	branch = master
 [submodule "lvds_error_counter_fabric"]
 	path = lvds_error_counter_fabric
 	url = git@github.com:yifeng-ethz/lvds_error_counter_fabric.git
+	branch = master
 [submodule "mutrig_reset_controller"]
 	path = mutrig_reset_controller
 	url = git@github.com:yifeng-ethz/mutrig_reset_controller.git
+	branch = master
 [submodule "ring-buffer_cam"]
 	path = ring-buffer_cam
 	url = git@github.com:yifeng-ethz/ring-buffer_cam.git
+	branch = master
 [submodule "mu3e_lvds_controller"]
 	path = mu3e_lvds_controller
 	url = git@github.com:yifeng-ethz/mu3e_lvds_controller.git
+	branch = master
 [submodule "run-control_mgmt"]
 	path = run-control_mgmt
 	url = git@github.com:yifeng-ethz/run-control_mgmt.git
+	branch = master
 [submodule "onewire_temp_sense"]
 	path = onewire_temp_sense
 	url = https://github.com/yifeng-ethz/onewire_temp_sense.git
+	branch = master
 [submodule "feb_frame_assembly"]
 	path = feb_frame_assembly
 	url = https://github.com/yifeng-ethz/feb_frame_assembly.git
+	branch = master
 [submodule "mupix_inbound"]
 	path = mupix_inbound
 	url = https://github.com/yifeng-ethz/mupix_inbound.git
+	branch = master
 [submodule "packet_scheduler"]
 	path = packet_scheduler
 	url = https://github.com/yifeng-ethz/packet_scheduler.git
+	branch = master
 [submodule "board_test_system"]
 	path = board_test_system
 	url = https://github.com/yifeng-ethz/board_test_system.git
+	branch = master
 [submodule "feb_max10_comm"]
 	path = feb_max10_comm
 	url = git@github.com:yifeng-ethz/feb_max10_comm.git
+	branch = main
 [submodule "emulator_mutrig"]
 	path = emulator_mutrig
 	url = git@github.com:yifeng-ethz/emulator_mutrig.git
+	branch = main
