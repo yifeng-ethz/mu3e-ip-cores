@@ -73,6 +73,7 @@ uvm/swb_rdma_pretest/sequences/P003.sv
 uvm/swb_rdma_pretest/sequences/P065.sv
 uvm/swb_rdma_pretest/sequences/P066.sv
 uvm/swb_rdma_pretest/sequences/P068.sv
+uvm/swb_rdma_pretest/sequences/run_sequence_directed.sv
 uvm/swb_rdma_pretest/tb_int_base_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_b001_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_b002_test.sv
@@ -114,6 +115,7 @@ uvm/swb_rdma_pretest/tests/tb_int_p003_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_p065_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_p066_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_p068_test.sv
+uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv
 uvm/swb_rdma_pretest/tb_int_smoke_test.sv
 uvm/swb_rdma_pretest/tb_int_top.sv

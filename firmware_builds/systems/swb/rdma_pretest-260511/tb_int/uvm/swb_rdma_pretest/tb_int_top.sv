@@ -315,6 +315,12 @@ module tb_int_top;
         uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane2_vif", opq_lane2);
         uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane3_vif", opq_lane3);
         uvm_config_db#(virtual pcie_dma_egress_if)::set(null, "uvm_test_top", "pcie_dma_vif", pcie_dma_egress);
+        // Test-level vifs for the directed run-control sweep
+        // (run_sequence_directed bypasses the runctl_phy_agent + sc_phy_agent
+        // sequencer chains and drives runctl_phy / sc_phy directly to mirror
+        // the case-sequence pattern used elsewhere in this tb).
+        uvm_config_db#(virtual runctl_phy_if)::set(null, "uvm_test_top", "runctl_phy_vif", runctl_phy);
+        uvm_config_db#(virtual sc_avmm_if)::set(null,    "uvm_test_top", "sc_phy_vif",     sc_phy);
         run_test();
     end
 endmodule
