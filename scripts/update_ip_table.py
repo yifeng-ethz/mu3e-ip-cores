@@ -43,6 +43,27 @@ README_PATH = REPO_ROOT / "README.md"
 BEGIN_MARK = "<!-- IP-TABLE:BEGIN -->"
 END_MARK = "<!-- IP-TABLE:END -->"
 
+# Known integration projects scanned for `kind="..."` instantiations of each
+# IP. The friendly name on the left is what appears in the Used-In column.
+# Each project lists every directory tree whose .qsys files should be parsed.
+#
+# Caveat: this matches against any .qsys file in the project tree, including
+# legacy variants that are no longer in the active build DAG. For example, an
+# IP referenced only in scifi_lvds_receiver_system.qsys still counts as
+# FEB-SciFi-used here even if feb_system_v3 (the active build target) does
+# not transitively include it. Tracing the active build DAG via .qip
+# inclusion graphs would be a future refinement.
+PROJECTS: dict[str, list[Path]] = {
+    "FEB-SciFi": [
+        Path("/home/yifeng/packages/online_dpv2/online/fe_board/fe_scifi"),
+    ],
+    "SWB": [
+        Path("/home/yifeng/packages/online_sc/online/switching_pc/a10_board"),
+        Path("/home/yifeng/packages/online_sc/online/switching_pc/a10_board_dt"),
+        Path("/home/yifeng/packages/online_sc/online/common/firmware/a10"),
+    ],
+}
+
 # Per-IP display-name and description overrides keyed by submodule path.
 # When an IP has no override, the script falls back to autodetect.
 IP_OVERRIDES: dict[str, dict[str, str]] = {
@@ -235,6 +256,8 @@ class IpRow:
     head_sha: str = ""
     branch: str = ""
     tracked_branch: str = ""
+    used_in: list[str] = field(default_factory=list)
+    kinds: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
 
 
@@ -376,6 +399,61 @@ SIGNOFF_RE = re.compile(
     r"(?:\[(?:DV|Syn|Standalone|Signoff)[^\]]*\]\([^)]+\)(?:\s*/\s*\[(?:DV|Syn|Standalone|Signoff)[^\]]*\]\([^)]+\))*)"
 )
 
+QSYS_KIND_RE = re.compile(r'kind="([^"]+)"')
+QSYS_SUBSYS_KIND_RE = re.compile(
+    r'set_module_property\s+NAME\s+([A-Za-z0-9_]+)', re.MULTILINE
+)
+
+
+def gather_project_kinds(project_roots: list[Path]) -> set[str]:
+    """Walk every project tree and return the union of `kind="..."` values
+    from any .qsys file. Skips mirrors/backups that shadow real designs."""
+    kinds: set[str] = set()
+    for project_root in project_roots:
+        if not project_root.is_dir():
+            continue
+        for qsys in project_root.rglob("*.qsys"):
+            if any(
+                part in {"qsys2_backup", "_gen"}
+                or part.startswith("fe_scifi_prev_")
+                for part in qsys.parts
+            ):
+                continue
+            try:
+                text = qsys.read_text(errors="replace")
+            except OSError:
+                continue
+            for m in QSYS_KIND_RE.finditer(text):
+                kinds.add(m.group(1))
+    return kinds
+
+
+def detect_ip_kinds(ip_root: Path, fallback: str) -> list[str]:
+    """Return the Qsys 'kind' names this IP can be instantiated under. Walks
+    every *_hw.tcl in the IP tree (including legacy/ and script/) for
+    `set_module_property NAME <kind>`. Also returns underscore + hyphen
+    variants of the IP path basename so submodules whose folder name differs
+    from the registered kind by a single separator still match."""
+    kinds: list[str] = []
+    for tcl in ip_root.rglob("*_hw.tcl"):
+        # Skip tb harnesses that may register synthetic kinds
+        if "tb" in tcl.parts:
+            continue
+        try:
+            text = tcl.read_text(errors="replace")
+        except OSError:
+            continue
+        for m in QSYS_SUBSYS_KIND_RE.finditer(text):
+            name = m.group(1)
+            if name not in kinds:
+                kinds.append(name)
+    # Always consider folder-name aliases (e.g. ring-buffer_cam vs ring_buffer_cam)
+    base = fallback
+    for alias in (base, base.replace("-", "_"), base.replace("_", "-")):
+        if alias not in kinds:
+            kinds.append(alias)
+    return kinds
+
 
 def parse_existing_signoff(readme_text: str, ip_path: str) -> str:
     """Best-effort: pull the curated signoff cell from the existing README row
@@ -399,7 +477,11 @@ def parse_existing_signoff(readme_text: str, ip_path: str) -> str:
 
 
 def build_row(
-    path: str, url: str, tracked_branch: str, readme_text: str
+    path: str,
+    url: str,
+    tracked_branch: str,
+    readme_text: str,
+    project_kinds: dict[str, set[str]],
 ) -> IpRow:
     ip_root = REPO_ROOT / path
     if not ip_root.is_dir():
@@ -436,6 +518,28 @@ def build_row(
     head_sha = submodule_head_sha(ip_root)
     branch = submodule_branch(ip_root)
     signoff = parse_existing_signoff(readme_text, path)
+    kinds = detect_ip_kinds(ip_root, fallback=Path(path).name)
+
+    def kind_matches(ip_kind: str, project_kind_set: set[str]) -> bool:
+        # Exact match
+        if ip_kind in project_kind_set:
+            return True
+        # Prefix match: project may register a customized variant of an IP
+        # base kind (e.g. ordered_priority_queue_native_sv_fixed4 derived from
+        # ordered_priority_queue, or ring_buffer_cam_v1_legacy derived from
+        # ring_buffer_cam). Require the suffix separator to avoid spurious
+        # prefix collisions like sc_hub matching sc_hub_foreign_thing.
+        if len(ip_kind) < 4:
+            # Too short - exact match only (avoid CAM matching cam_*)
+            return False
+        prefix = ip_kind + "_"
+        return any(pk.startswith(prefix) for pk in project_kind_set)
+
+    used_in = [
+        proj
+        for proj, pkinds in project_kinds.items()
+        if any(kind_matches(k, pkinds) for k in kinds)
+    ]
     return IpRow(
         path=path,
         name=name,
@@ -447,6 +551,8 @@ def build_row(
         head_sha=head_sha,
         branch=branch,
         tracked_branch=tracked_branch,
+        used_in=used_in,
+        kinds=kinds,
     )
 
 
@@ -456,8 +562,8 @@ def render_table(rows: list[IpRow]) -> str:
         " Do not edit by hand. -->",
         "",
         "| IP | Description | Version | Last Updated | Tracked Branch | "
-        "Current Branch | Signoff | HEAD |",
-        "|---|---|:---:|:---:|:---:|:---:|:---:|:---:|",
+        "Current Branch | Used In | Signoff | HEAD |",
+        "|---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|",
     ]
     for r in rows:
         desc = r.description.replace("|", "\\|").replace("\n", " ")
@@ -473,10 +579,11 @@ def render_table(rows: list[IpRow]) -> str:
             current_cell = f"**`{r.branch}`** ⚠"
         else:
             current_cell = f"`{r.branch}`" if r.branch else "—"
+        used_in_cell = ", ".join(r.used_in) if r.used_in else "—"
         lines.append(
             f"| {name_cell} | {desc} | `{r.version}` | "
             f"{r.last_updated} | {tracked_cell} | {current_cell} | "
-            f"{r.signoff} | `{r.head_sha}` |"
+            f"{used_in_cell} | {r.signoff} | `{r.head_sha}` |"
         )
     lines.append("")
     return "\n".join(lines)
@@ -510,9 +617,12 @@ def main(argv: list[str]) -> int:
     args = parser.parse_args(argv)
     submods = list_submodules()
     readme_text = README_PATH.read_text() if README_PATH.exists() else ""
+    project_kinds: dict[str, set[str]] = {
+        name: gather_project_kinds(roots) for name, roots in PROJECTS.items()
+    }
     rows: list[IpRow] = []
     for path, url, tracked in submods:
-        rows.append(build_row(path, url, tracked, readme_text))
+        rows.append(build_row(path, url, tracked, readme_text, project_kinds))
     rows.sort(key=lambda r: r.name.lower())
     if args.print_json:
         json.dump(
@@ -530,6 +640,8 @@ def main(argv: list[str]) -> int:
                         and bool(r.tracked_branch)
                         and r.branch != r.tracked_branch
                     ),
+                    "used_in": r.used_in,
+                    "kinds": r.kinds,
                     "url": r.url,
                 }
                 for r in rows
