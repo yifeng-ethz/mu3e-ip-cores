@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="3.0.2.0511"
-   description="rc-readyless rollout: rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2) now declare USE_READY=0 sinks. Carries the prior 3.0.1.0511 SC-WEDGE fix: control_path_subsystem.clk156_in_rst now sourced from cclk156_source.clk_reset (true POR only), no longer fanned out from ext_reset_pipe2_cclk156.out_reset."
+   version="3.0.3.0511"
+   description="rc-readyless rollout: rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2) now declare USE_READY=0 sinks. Carries the prior 3.0.1.0511 SC-WEDGE fix: control_path_subsystem.clk156_in_rst now sourced from cclk156_source.clk_reset (true POR only), no longer fanned out from ext_reset_pipe2_cclk156.out_reset. All 6 rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2, mutrig_frame_deassembly) now declare USE_READY=0 sinks. Run-control fan-out should be free of auto-inserted timing_adapter."
    tags="INTERNAL_COMPONENT=false"
    categories="" />
  <parameter name="bonusData"><![CDATA[bonusData 
