@@ -1830,7 +1830,7 @@
   <parameter name="BANK" value="UP" />
   <parameter name="BUILD" value="416" />
   <parameter name="CRCERR_BIT_LOC" value="1" />
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="ENABLED_CHANNEL_HI" value="3" />
   <parameter name="ENABLED_CHANNEL_LO" value="0" />
   <parameter name="FRAME_CORRPT_BIT_LOC" value="2" />
@@ -1856,7 +1856,7 @@
   <parameter name="BANK" value="DW" />
   <parameter name="BUILD" value="416" />
   <parameter name="CRCERR_BIT_LOC" value="1" />
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="ENABLED_CHANNEL_HI" value="3" />
   <parameter name="ENABLED_CHANNEL_LO" value="0" />
   <parameter name="FRAME_CORRPT_BIT_LOC" value="2" />
