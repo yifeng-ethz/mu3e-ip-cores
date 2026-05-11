@@ -1,0 +1,8 @@
+# Version 2024.1_2 5779543 linux_x86_64 03-Apr-2024
+# log created Thu Apr 30 16:13:23 2026 by yifeng on teferi.ethz.ch
+# timestamp-diff mem-used-diff mem-total-diff msg-level event-label annotation
+2088232923024 0 223621120 1 > log-init | thread: vish/main:0
+54 0 0 1 + rtld-main | 
+3 0 0 1 + rtld-init | 
+5360 0 9117696 1 - rtld-init | 
+218375 0 19005440 1 - rtld-main | 

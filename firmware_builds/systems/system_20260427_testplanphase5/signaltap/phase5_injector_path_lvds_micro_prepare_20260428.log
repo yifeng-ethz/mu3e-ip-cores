@@ -1,0 +1,34 @@
+PREPARE_PHASE5_INJECTOR_STP_PROJECT_DIR  : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/board_projects/fe_scifi_feb_v3
+PREPARE_PHASE5_INJECTOR_STP_FILE         : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_injector_path_lvds.stp
+PREPARE_PHASE5_INJECTOR_STP_REPORT       : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_injector_path_lvds.nodes.md
+PREPARE_PHASE5_INJECTOR_STP_TRIGGER_MODE : rising_edge
+PREPARE_PHASE5_INJECTOR_STP_SAMPLE_DEPTH : 512
+PREPARE_PHASE5_INJECTOR_STP_PROFILE      : micro
+wrote /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_injector_path_lvds.stp
+profile=micro probes=31
+INFO: probes total=31 found=31 missing=0 errors=0
+INFO: wrote report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_injector_path_lvds.nodes.md
+Info: *******************************************************************
+Info: Running Quartus Prime Signal Tap
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Tue Apr 28 22:51:19 2026
+Info: Command: quartus_stp top -c top_stp_pipe_phase5_injector --enable --stp_file=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/signaltap/phase5_injector_path_lvds.stp
+Info: Quartus Prime Signal Tap was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 947 megabytes
+    Info: Processing ended: Tue Apr 28 22:51:21 2026
+    Info: Elapsed time: 00:00:02
+    Info: Total CPU time (on all processors): 00:00:02
+PREPARE_PHASE5_INJECTOR_STP_DONE

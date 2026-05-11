@@ -1,0 +1,10 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.05.03.23:11:56 Info: Doing: <b>qsys-script --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,$ --cmd=package require -exact qsys 18.1; load_system syn/scifi_datapath_system_v3.qsys; add_instance tmp_bridge altera_avalon_mm_bridge 18.1; puts "IFACES=[get_instance_interfaces mutrig_datapath_subsystem_0]"; puts "PROP=[get_connection_property decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din START]"; puts "CSRPROP=[get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr START]"</b>
+2026.05.03.23:12:01 Info: load_system syn/scifi_datapath_system_v3.qsys
+2026.05.03.23:12:04 Info: add_instance tmp_bridge altera_avalon_mm_bridge 18.1
+2026.05.03.23:12:04 Info: get_instance_interfaces mutrig_datapath_subsystem_0
+IFACES=backpressure_fifo_csr clk csr decoded_din headerinfo hit_type0_out reset run_ctrl
+2026.05.03.23:12:04 Info: get_connection_property decoded_lane_fifo_0.out/mutrig_datapath_subsystem_0.decoded_din START
+PROP=decoded_lane_fifo_0.out
+2026.05.03.23:12:04 Info: get_connection_property mm_clock_crossing_bridge.m0/mutrig_datapath_subsystem_0.csr START
+CSRPROP=mm_clock_crossing_bridge.m0

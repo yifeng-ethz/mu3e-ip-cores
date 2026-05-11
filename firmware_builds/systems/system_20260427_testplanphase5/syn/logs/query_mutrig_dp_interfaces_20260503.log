@@ -1,0 +1,7 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.05.03.23:11:27 Info: Doing: <b>qsys-script --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,$ --cmd=package require -exact qsys 18.1; load_system syn/scifi_datapath_system_v3.qsys; puts "HAS=[expr {[lsearch -exact [get_instances] mutrig_datapath_subsystem_0] >= 0}]"; puts "INTERFACES=[get_instance_interfaces mutrig_datapath_subsystem_0]"</b>
+2026.05.03.23:11:32 Info: load_system syn/scifi_datapath_system_v3.qsys
+2026.05.03.23:11:35 Info: get_instances 
+HAS=1
+2026.05.03.23:11:35 Info: get_instance_interfaces mutrig_datapath_subsystem_0
+INTERFACES=backpressure_fifo_csr clk csr decoded_din headerinfo hit_type0_out reset run_ctrl

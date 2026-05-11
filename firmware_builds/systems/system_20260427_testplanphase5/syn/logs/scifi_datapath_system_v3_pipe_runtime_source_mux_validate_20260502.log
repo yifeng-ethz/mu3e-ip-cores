@@ -1,0 +1,4 @@
+Picked up _JAVA_OPTIONS: -Dsun.java2d.xrender=false -Dsun.java2d.opengl=true
+2026.05.02.11:13:50 Info: Doing: <b>qsys-script --package-version=18.1 --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/hit_type3_stream_merge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/pulse_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,$ --cmd=load_system firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe.qsys; validate_system</b>
+2026.05.02.11:13:56 Info: load_system firmware_builds/systems/system_20260427_testplanphase5/syn/scifi_datapath_system_v3_pipe.qsys
+2026.05.02.11:13:58 Info: validate_system 
