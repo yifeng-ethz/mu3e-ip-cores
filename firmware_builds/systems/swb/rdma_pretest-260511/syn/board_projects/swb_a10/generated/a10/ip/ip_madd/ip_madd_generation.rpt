@@ -1,0 +1,24 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd --family="Arria 10" --part=10AX115N2F45E1SG
+Progress: Loading ip/ip_madd.qsys
+Progress: Reading input file
+Progress: Adding fpdsp_block_0 [altera_fpdsp_block 18.1]
+Progress: Parameterizing module fpdsp_block_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: ip_madd: "Transforming system: ip_madd"
+Info: ip_madd: Running transform generation_view_transform
+Info: ip_madd: Running transform generation_view_transform took 0.000s
+Info: fpdsp_block_0: Running transform generation_view_transform
+Info: fpdsp_block_0: Running transform generation_view_transform took 0.000s
+Info: ip_madd: Running transform merlin_avalon_transform
+Info: ip_madd: Running transform merlin_avalon_transform took 0.023s
+Info: ip_madd: "Naming system components in system: ip_madd"
+Info: ip_madd: "Processing generation queue"
+Info: ip_madd: "Generating: ip_madd"
+Info: ip_madd: "Generating: ip_madd_altera_fpdsp_block_181_bs3fhgi"
+Info: ip_madd: Done "ip_madd" with 2 modules, 3 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

@@ -1,0 +1,96 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256 --family="Arria 10" --part=10AX115N2F45E1SG
+Progress: Loading pcieapp/ip_pcie_x8_256.qsys
+Progress: Reading input file
+Progress: Adding pcie_a10_hip_0 [altera_pcie_a10_hip 18.1]
+Progress: Parameterizing module pcie_a10_hip_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: ip_pcie_x8_256.pcie_a10_hip_0: device_family is Arria 10
+Info: ip_pcie_x8_256.pcie_a10_hip_0: base_device is NIGHTFURY5
+Info: ip_pcie_x8_256.pcie_a10_hip_0: part_trait_device is 10AX115N2F45E1SG
+Info: ip_pcie_x8_256.pcie_a10_hip_0: Gen3 (8.0 Gbps) x8 256-bit
+Warning: ip_pcie_x8_256.pcie_a10_hip_0.tx_st: The empty signal width should be 1 bits.  
+Warning: ip_pcie_x8_256.pcie_a10_hip_0.rx_st: The empty signal width should be 1 bits.  
+Warning: pcie_a10_hip_0.phy_g3x8: The value of parameter hssi_rx_pld_pcs_interface_hd_chnl_hrdrstctl_en cannot be automatically resolved. Valid values are: enable disable.
+Info: pcie_a10_hip_0.fpll_g3: The output frequencies are not exact when the PLL is in fractional mode. You must be cautious with applications that require frequencies to be exact to within less than 0.5 Hz.
+Info: pcie_a10_hip_0.fpll_g3: For the selected device(Unknown), PLL speed grade is 2.
+Info: pcie_a10_hip_0.lcpll_g3xn: For the selected device(Unknown), PLL speed grade is 2.
+Info: ip_pcie_x8_256: "Transforming system: ip_pcie_x8_256"
+Info: ip_pcie_x8_256: Running transform generation_view_transform
+Info: ip_pcie_x8_256: Running transform generation_view_transform took 0.000s
+Info: phy_g3x8: Running transform generation_view_transform
+Info: phy_g3x8: Running transform generation_view_transform took 0.000s
+Info: fpll_g3: Running transform generation_view_transform
+Info: fpll_g3: Running transform generation_view_transform took 0.000s
+Info: lcpll_g3xn: Running transform generation_view_transform
+Info: lcpll_g3xn: Running transform generation_view_transform took 0.000s
+Info: ip_pcie_x8_256: Running transform merlin_avalon_transform
+Info: ip_pcie_x8_256: Running transform merlin_avalon_transform took 0.020s
+Info: ip_pcie_x8_256: "Naming system components in system: ip_pcie_x8_256"
+Info: ip_pcie_x8_256: "Processing generation queue"
+Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256"
+Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256_altera_pcie_a10_hip_181_x6l2heq"
+Info: phy_g3x8: "Generating: phy_g3x8"
+Info: fpll_g3: "Generating: fpll_g3"
+Info: lcpll_g3xn: "Generating: lcpll_g3xn"
+Info: ip_pcie_x8_256: "Generating: phy_g3x8"
+Info: ip_pcie_x8_256: "Generating: fpll_g3"
+Info: ip_pcie_x8_256: "Generating: lcpll_g3xn"
+Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256_altera_xcvr_native_a10_181_n4nfovy"
+Info: phy_g3x8: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Info: phy_g3x8: add_fileset_file ./alt_xcvr_arbiter.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_arbiter.sv
+Info: phy_g3x8: add_fileset_file ./twentynm_pcs.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_pcs.sv
+Info: phy_g3x8: add_fileset_file ./twentynm_pma.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_pma.sv
+Info: phy_g3x8: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Info: phy_g3x8: add_fileset_file ./twentynm_xcvr_native.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_native.sv
+Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_a10_functions_h.sv SYSTEM_VERILOG PATH ..//altera_xcvr_native_a10_functions_h.sv
+Info: phy_g3x8: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ..//a10_avmm_h.sv
+Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_pipe_retry.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_pipe_retry.sv
+Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_avmm_csr.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_avmm_csr.sv
+Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_prbs_accum.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_prbs_accum.sv
+Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_odi_accel.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_odi_accel.sv
+Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_rcfg_arb.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_rcfg_arb.sv
+Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_a10_false_paths.sdc SDC PATH ..//altera_xcvr_native_a10_false_paths.sdc
+Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_pcie_dfe_params_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/altera_xcvr_native_pcie_dfe_params_h.sv
+Info: phy_g3x8: add_fileset_file ./pcie_mgmt_commands_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_commands_h.sv
+Info: phy_g3x8: add_fileset_file ./pcie_mgmt_functions_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_functions_h.sv
+Info: phy_g3x8: add_fileset_file ./pcie_mgmt_program.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_program.sv
+Info: phy_g3x8: add_fileset_file ./pcie_mgmt_cpu.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_cpu.sv
+Info: phy_g3x8: add_fileset_file ./pcie_mgmt_master.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_master.sv
+Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_pcie_dfe_ip.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/altera_xcvr_native_pcie_dfe_ip.sv
+Info: phy_g3x8: Building configuration data for reconfiguration profile 0
+Info: phy_g3x8: Validating reconfiguration profile 0
+Info: phy_g3x8: When "Transceiver configuration rules" is set to "Gen 3 PIPE", the "Data rate" for the Standard PCS should be set for the power-on configuration of Gen1 PIPE. Under the hood, the "Data rate" for the Gen 3 PCS is set as 8000Mbps which is not reflected in the GUI.
+Info: phy_g3x8: Note - When dynamic reconfiguration is enabled, users are recommended to enable multiple reconfiguration profiles for Quartus to perform robust timing closure
+Info: phy_g3x8: Current IP configuration matches reconfiguration profile 0
+Info: phy_g3x8: For the selected device(Unknown), transceiver speed grade is 2 and core speed grade is 1.
+Warning: phy_g3x8: The value of parameter hssi_rx_pld_pcs_interface_hd_chnl_hrdrstctl_en cannot be automatically resolved. Valid values are: enable disable.
+Info: phy_g3x8: Building configuration data for reconfiguration profile 1
+Info: phy_g3x8: Validating reconfiguration profile 1
+Info: phy_g3x8: Note - When dynamic reconfiguration is enabled, users are recommended to enable multiple reconfiguration profiles for Quartus to perform robust timing closure
+Info: phy_g3x8: Current IP configuration matches reconfiguration profile 1
+Info: phy_g3x8: For the selected device(Unknown), transceiver speed grade is 2 and core speed grade is 1.
+Info: ip_pcie_x8_256: "Generating: altera_xcvr_fpll_a10"
+Info: fpll_g3: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Info: fpll_g3: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Info: fpll_g3: add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv
+Info: fpll_g3: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv
+Info: fpll_g3: add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv
+Info: fpll_g3: add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv
+Info: fpll_g3: add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv
+Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256_altera_xcvr_atx_pll_a10_181_6kz3oaa"
+Info: lcpll_g3xn: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_arbiter.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_arbiter.sv
+Info: lcpll_g3xn: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv
+Info: lcpll_g3xn: add_fileset_file ./altera_xcvr_native_a10_functions_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/altera_xcvr_native_a10_functions_h.sv
+Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_atx_pll_rcfg_arb.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_atx_pll_rcfg_arb.sv
+Info: lcpll_g3xn: add_fileset_file ./a10_xcvr_atx_pll.sv SYSTEM_VERILOG PATH ../source/a10_xcvr_atx_pll.sv
+Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_embedded_debug.sv
+Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_avmm_csr.sv
+Info: ip_pcie_x8_256: Done "ip_pcie_x8_256" with 8 modules, 84 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

@@ -1,0 +1,10 @@
+#
+
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE [file join $::quartus(qip_path) "a10_lhcb/device.tcl"]
+
+#set_global_assignment -name SOURCE_TCL_SCRIPT_FILE [file join $::quartus(qip_path) "a10_lhcb/set_PCIe_Assignments_bus1.tcl"]
+#set_global_assignment -name SOURCE_TCL_SCRIPT_FILE [file join $::quartus(qip_path) "a10_lhcb/set_PCIe_Assignments_bus2.tcl"]
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE [file join $::quartus(qip_path) "a10_lhcb/pcie0.tcl"]
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE [file join $::quartus(qip_path) "a10_lhcb/pcie1.tcl"]
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE [file join $::quartus(qip_path) "a10_lhcb/set_PROD_pins.tcl"]
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE [file join $::quartus(qip_path) "a10_lhcb/set_GBT_pins.tcl"]

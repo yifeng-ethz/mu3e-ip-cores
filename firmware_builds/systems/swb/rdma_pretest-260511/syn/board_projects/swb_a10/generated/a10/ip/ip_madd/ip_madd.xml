@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy
+ date="2026.05.11.12:42:55"
+ outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/">
+ <perimeter>
+  <parameter
+     name="AUTO_GENERATION_ID"
+     type="Integer"
+     defaultValue="0"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_UNIQUE_ID"
+     type="String"
+     defaultValue=""
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_FAMILY"
+     type="String"
+     defaultValue="Arria 10"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE"
+     type="String"
+     defaultValue="10AX115N2F45E1SG"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_SPEEDGRADE"
+     type="String"
+     defaultValue="1"
+     onHdl="0"
+     affectsHdl="1" />
+  <interface name="aclr" kind="conduit" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="" />
+   <port name="aclr" direction="input" role="aclr" width="2" />
+  </interface>
+  <interface name="ax" kind="conduit" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="" />
+   <port name="ax" direction="input" role="ax" width="32" />
+  </interface>
+  <interface name="ay" kind="conduit" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="" />
+   <port name="ay" direction="input" role="ay" width="32" />
+  </interface>
+  <interface name="az" kind="conduit" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="" />
+   <port name="az" direction="input" role="az" width="32" />
+  </interface>
+  <interface name="clk" kind="conduit" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="" />
+   <port name="clk" direction="input" role="clk" width="1" />
+  </interface>
+  <interface name="ena" kind="conduit" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="" />
+   <port name="ena" direction="input" role="ena" width="1" />
+  </interface>
+  <interface name="result" kind="conduit" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="" />
+   <port name="result" direction="output" role="result" width="32" />
+  </interface>
+ </perimeter>
+ <entity kind="ip_madd" version="1.0" name="ip_madd">
+  <parameter name="AUTO_GENERATION_ID" value="1778496175" />
+  <parameter name="AUTO_DEVICE" value="10AX115N2F45E1SG" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
+  <parameter name="AUTO_UNIQUE_ID" value="" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="1" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/altera_fpdsp_block_181/synth/ip_madd_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/synth/ip_madd.vhd"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/altera_fpdsp_block_181/synth/ip_madd_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/synth/ip_madd.vhd"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd.qsys" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/dsp/altera_fpdsp_block/A10/FPDSP_hw.tcl" />
+  </childSourceFiles>
+  <messages>
+   <message level="Info" culprit="ip_madd">"Generating: ip_madd"</message>
+   <message level="Info" culprit="ip_madd">"Generating: ip_madd_altera_fpdsp_block_181_bs3fhgi"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_fpdsp_block"
+   version="18.1"
+   name="ip_madd_altera_fpdsp_block_181_bs3fhgi">
+  <parameter name="az_clock" value="0" />
+  <parameter name="clk0_used" value="true" />
+  <parameter name="ay_clock_derived" value="0" />
+  <parameter name="ax_clock" value="0" />
+  <parameter name="ax_chainin_pl_clock" value="0" />
+  <parameter name="adder_subtract" value="false" />
+  <parameter name="chain_mux" value="0" />
+  <parameter name="accumulate_clock" value="0" />
+  <parameter name="mult_pipeline_clock_derived" value="0" />
+  <parameter name="use_chainout" value="false" />
+  <parameter name="VIEW" value="Register Enables" />
+  <parameter name="adder_input_clock_derived" value="0" />
+  <parameter name="total_clks_used" value="1" />
+  <parameter name="output_clock" value="0" />
+  <parameter name="accum_adder_clock" value="0" />
+  <parameter name="clk1_used" value="false" />
+  <parameter name="output_clock_derived" value="0" />
+  <parameter name="az_clock_derived" value="0" />
+  <parameter name="single_clear" value="false" />
+  <parameter name="ax_clock_derived" value="0" />
+  <parameter name="ay_clock" value="0" />
+  <parameter name="mult_pipeline_clock" value="0" />
+  <parameter name="accum_adder_clock_derived" value="NONE" />
+  <parameter name="adder_input_2_clock" value="0" />
+  <parameter name="accum_pipeline_clock_derived" value="NONE" />
+  <parameter
+     name="possible_registers"
+     value="ax_clock,ay_clock,az_clock,output_clock,ax_chainin_pl_clock,mult_pipeline_clock,adder_input_clock,adder_input_2_clock" />
+  <parameter name="accumulate_clock_derived" value="NONE" />
+  <parameter name="design_env" value="QSYS" />
+  <parameter name="ax_chainin_pl_clock_derived" value="0" />
+  <parameter name="use_chainin" value="false" />
+  <parameter name="OPERATION" value="sp_mult_add" />
+  <parameter name="adder_input_clock" value="0" />
+  <parameter name="clk2_used" value="false" />
+  <parameter name="accum_pipeline_clock" value="0" />
+  <parameter name="chain_out_mux" value="0" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/altera_fpdsp_block_181/synth/ip_madd_altera_fpdsp_block_181_bs3fhgi.sv"
+       attributes="TOP_LEVEL_FILE" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/altera_fpdsp_block_181/synth/ip_madd_altera_fpdsp_block_181_bs3fhgi.sv"
+       attributes="TOP_LEVEL_FILE" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/dsp/altera_fpdsp_block/A10/FPDSP_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator instantiator="ip_madd" as="fpdsp_block_0" />
+  <messages>
+   <message level="Info" culprit="ip_madd">"Generating: ip_madd_altera_fpdsp_block_181_bs3fhgi"</message>
+  </messages>
+ </entity>
+</deploy>

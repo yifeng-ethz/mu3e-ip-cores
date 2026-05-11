@@ -1,0 +1,33 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_5000.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_5000 --family="Arria 10" --part=10AX115N2F45E1SG
+Progress: Loading ip/ip_xcvr_fpll_125_5000.qsys
+Progress: Reading input file
+Progress: Adding xcvr_fpll_a10_0 [altera_xcvr_fpll_a10 18.1]
+Progress: Parameterizing module xcvr_fpll_a10_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: ip_xcvr_fpll_125_5000.xcvr_fpll_a10_0: The output frequencies are not exact when the PLL is in fractional mode. You must be cautious with applications that require frequencies to be exact to within less than 0.5 Hz.
+Info: ip_xcvr_fpll_125_5000.xcvr_fpll_a10_0: For the selected device(10AX115N2F45E1SG), PLL speed grade is 2.
+Info: ip_xcvr_fpll_125_5000: "Transforming system: ip_xcvr_fpll_125_5000"
+Info: ip_xcvr_fpll_125_5000: Running transform generation_view_transform
+Info: ip_xcvr_fpll_125_5000: Running transform generation_view_transform took 0.000s
+Info: xcvr_fpll_a10_0: Running transform generation_view_transform
+Info: xcvr_fpll_a10_0: Running transform generation_view_transform took 0.000s
+Info: ip_xcvr_fpll_125_5000: Running transform merlin_avalon_transform
+Info: ip_xcvr_fpll_125_5000: Running transform merlin_avalon_transform took 0.022s
+Info: ip_xcvr_fpll_125_5000: "Naming system components in system: ip_xcvr_fpll_125_5000"
+Info: ip_xcvr_fpll_125_5000: "Processing generation queue"
+Info: ip_xcvr_fpll_125_5000: "Generating: ip_xcvr_fpll_125_5000"
+Info: ip_xcvr_fpll_125_5000: "Generating: altera_xcvr_fpll_a10"
+Info: xcvr_fpll_a10_0: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Info: xcvr_fpll_a10_0: add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv
+Info: xcvr_fpll_a10_0: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv
+Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv
+Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv
+Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv
+Info: ip_xcvr_fpll_125_5000: Done "ip_xcvr_fpll_125_5000" with 2 modules, 10 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

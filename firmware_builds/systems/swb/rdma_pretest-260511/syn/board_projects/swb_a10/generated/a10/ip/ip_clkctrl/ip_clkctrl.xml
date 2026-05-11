@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy
+ date="2026.05.11.12:43:08"
+ outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/">
+ <perimeter>
+  <parameter
+     name="AUTO_GENERATION_ID"
+     type="Integer"
+     defaultValue="0"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_UNIQUE_ID"
+     type="String"
+     defaultValue=""
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_FAMILY"
+     type="String"
+     defaultValue="Arria 10"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE"
+     type="String"
+     defaultValue="10AX115N2F45E1SG"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_SPEEDGRADE"
+     type="String"
+     defaultValue="1"
+     onHdl="0"
+     affectsHdl="1" />
+  <interface name="altclkctrl_input" kind="conduit" start="0">
+   <property name="associatedClock" value="" />
+   <property name="associatedReset" value="" />
+   <port name="inclk" direction="input" role="inclk" width="1" />
+  </interface>
+  <interface name="altclkctrl_output" kind="conduit" start="0">
+   <property name="associatedClock" value="" />
+   <property name="associatedReset" value="" />
+   <port name="outclk" direction="output" role="outclk" width="1" />
+  </interface>
+ </perimeter>
+ <entity kind="ip_clkctrl" version="1.0" name="ip_clkctrl">
+  <parameter name="AUTO_GENERATION_ID" value="1778496188" />
+  <parameter name="AUTO_DEVICE" value="10AX115N2F45E1SG" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
+  <parameter name="AUTO_UNIQUE_ID" value="" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="1" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/synth/ip_clkctrl.vhd"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/synth/ip_clkctrl.vhd"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl.qsys" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/megafunctions/altclkctrl/altclkctrl_hw.tcl" />
+  </childSourceFiles>
+  <messages>
+   <message level="Info" culprit="ip_clkctrl">"Generating: ip_clkctrl"</message>
+   <message level="Info" culprit="ip_clkctrl">"Generating: ip_clkctrl_altclkctrl_181_4ev4gqi"</message>
+   <message level="Info" culprit="altclkctrl_0">Generating top-level entity ip_clkctrl_altclkctrl_181_4ev4gqi.</message>
+   <message level="Debug" culprit="altclkctrl_0">Current quartus bindir: /data1/intelFPGA/18.1/quartus/linux64/.</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altclkctrl"
+   version="18.1"
+   name="ip_clkctrl_altclkctrl_181_4ev4gqi">
+  <parameter name="NUMBER_OF_CLOCKS" value="1" />
+  <parameter name="USE_GLITCH_FREE_SWITCH_OVER_IMPLEMENTATION" value="false" />
+  <parameter name="GUI_USE_ENA" value="false" />
+  <parameter name="DEVICE_FAMILY" value="Arria 10" />
+  <parameter name="ENA_REGISTER_MODE" value="1" />
+  <parameter name="CLOCK_TYPE" value="0" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_altclkctrl_181_4ev4gqi.v"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_altclkctrl_181_4ev4gqi.v"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/megafunctions/altclkctrl/altclkctrl_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator instantiator="ip_clkctrl" as="altclkctrl_0" />
+  <messages>
+   <message level="Info" culprit="ip_clkctrl">"Generating: ip_clkctrl_altclkctrl_181_4ev4gqi"</message>
+   <message level="Info" culprit="altclkctrl_0">Generating top-level entity ip_clkctrl_altclkctrl_181_4ev4gqi.</message>
+   <message level="Debug" culprit="altclkctrl_0">Current quartus bindir: /data1/intelFPGA/18.1/quartus/linux64/.</message>
+  </messages>
+ </entity>
+</deploy>
