@@ -3,7 +3,7 @@ package require -exact qsys 16.1
 set_module_property DESCRIPTION "CSR-driven local run-control AVST source"
 set_module_property NAME dbg_mm2runctrl
 set_module_property VERSION 1.0.0
-set_module_property STATUS_DEPRECATED true
+set_module_property HIDE_FROM_QUARTUS true
 set_module_property INTERNAL false
 set_module_property OPAQUE_ADDRESS_MAP true
 set_module_property GROUP "Mu3e Data Plane/Debug"
