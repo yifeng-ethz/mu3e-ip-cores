@@ -1,27 +1,25 @@
-`ifndef SWB_TB_INT_SMOKE_TEST_SV
-`define SWB_TB_INT_SMOKE_TEST_SV
+// tb_int_smoke_test.sv
+// Default smoke wrapper for BASIC B065.
 
-`include "tb_int_base_test.sv"
+package tb_int_swb_smoke_test_pkg;
 
-class tb_int_smoke_test extends tb_int_base_test;
-    `uvm_component_utils(tb_int_smoke_test)
+    import uvm_pkg::*;
+    import tb_int_swb_base_test_pkg::*;
+    `include "uvm_macros.svh"
 
-    function new(string name = "tb_int_smoke_test", uvm_component parent = null);
-        super.new(name, parent);
-    endfunction
+    class tb_int_smoke_test extends tb_int_base_test;
+        `uvm_component_utils(tb_int_smoke_test)
 
-    task run_phase(uvm_phase phase);
-        phase.raise_objection(this);
+        function new(string name = "tb_int_smoke_test", uvm_component parent = null);
+            super.new(name, parent);
+        endfunction
 
-        ingress_count = 1;
-        drop_count = 0;
-        egress_count = 1;
+        virtual task run_phase(uvm_phase phase);
+            phase.raise_objection(this);
+            run_selected_case("B065");
+            $display("*** TEST PASSED ***");
+            phase.drop_objection(this);
+        endtask
+    endclass
 
-        check_swb_ledger(1, 0, 1);
-        `uvm_info("SWB_SMOKE", "B065 structural smoke ledger reconciled 1/0/0 at each observed stage", UVM_LOW)
-
-        phase.drop_objection(this);
-    endtask
-endclass
-
-`endif
+endpackage
