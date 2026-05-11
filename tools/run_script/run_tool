@@ -37,34 +37,9 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_BIN_DIR = SCRIPT_DIR / "build"
 DEFAULT_INSTALL_DIR = SCRIPT_DIR / "install" / "bin"
-COMPAT_INSTALL_DIR = Path("/home/yifeng/packages/online_dpv2/online/install/bin")
 SWB_RING_LOCK_FILE = Path("/tmp/swb_ring.lock")
 
-# SWB register indices (a10_pcie_registers.h)
-RESET_REGISTER_W = 0x01
-DATAGENERATOR_DIVIDER_REGISTER_W = 0x03
-SWB_GENERIC_MASK_REGISTER_W = 0x0F
-SWB_LINK_MASK_SCIFI = 0x11
-SWB_READOUT_STATE = 0x13
-SWB_COUNTER_REGISTER_W = 0x15
-FARM_READOUT_STATE = 0x16
-SWB_LOOKUP_CTRL_REGISTER_W = 0x1F
-SWB_LOOKUP_DS_CTRL_REGISTER_W = 0x20
-DMA_REGISTER = 0x38
-GET_N_DMA_WORDS_REGISTER_W = 0x0C
-VERSION_REGISTER_R = 0x01
-PLL_LOCKED_REGISTER_R = 0x12
-BUFFER_STATUS_REGISTER_R = 0x1B
-EVENT_BUILD_STATUS_REGISTER_R = 0x1C
-EVENT_BUILD_IDLE_NOT_HEADER_R = 0x1D
-EVENT_BUILD_SKIP_EVENT_DMA_R = 0x1E
-EVENT_BUILD_CNT_EVENT_DMA_R = 0x1F
-EVENT_BUILD_TAG_FIFO_FULL_R = 0x20
-DMA_CNT_WORDS_REGISTER_R = 0x32
-RESET_LINK_STATUS_REGISTER_R = 0x34
-LINK_LOCKED_LOW_REGISTER_R = 0x35
-LINK_LOCKED_HIGH_REGISTER_R = 0x36
-
+# SWB BAR registers are addressed through sc_tool --swb by firmware-true names.
 USE_BIT_GEN_LINK = 0x1
 USE_BIT_STREAM = 0x2
 USE_BIT_MERGER = 0x4  # bit 2 of SWB_READOUT_STATE selects OPQ datapath
@@ -108,7 +83,6 @@ class Tools:
     sc_tool: Path
     rc_tool: Path
     dma_tool: Path
-    rw: Path
     swb_ring_lock: Path = Path("/home/yifeng/.local/bin/swb_ring_lock")
     sources: dict[str, str] = field(default_factory=dict)
 
@@ -117,7 +91,7 @@ def _is_executable(path: Path) -> bool:
     return path.exists() and os.access(path, os.X_OK)
 
 
-def _find_one(name: str, candidates: list[Path], *, include_compat: bool = False) -> tuple[Path, str] | None:
+def _find_one(name: str, candidates: list[Path]) -> tuple[Path, str] | None:
     for cdir in candidates:
         p = cdir / name
         if _is_executable(p):
@@ -125,23 +99,19 @@ def _find_one(name: str, candidates: list[Path], *, include_compat: bool = False
     found = shutil.which(name)
     if found:
         return Path(found), "PATH"
-    if include_compat:
-        p = COMPAT_INSTALL_DIR / name
-        if _is_executable(p):
-            return p, str(COMPAT_INSTALL_DIR)
     return None
 
 
 def find_tools(tool_bin_dir: Path | None = None, tool_install_dir: Path | None = None) -> Tools:
-    """Locate sc/rc/dma_tool/rw, preferring this directory's build output."""
+    """Locate sc/rc/dma_tool, preferring this directory's build output."""
     candidates = [
         tool_bin_dir or DEFAULT_BIN_DIR,
         tool_install_dir or DEFAULT_INSTALL_DIR,
     ]
     found: dict[str, Path] = {}
     sources: dict[str, str] = {}
-    for name in ("sc_tool", "rc_tool", "dma_tool", "rw"):
-        item = _find_one(name, candidates, include_compat=(name == "rw"))
+    for name in ("sc_tool", "rc_tool", "dma_tool"):
+        item = _find_one(name, candidates)
         if item is None:
             sys.exit(
                 "run_tool: cannot locate "
@@ -214,20 +184,26 @@ def sc_read(tools: Tools, link: int, addr: int, count: int = 1) -> list[int]:
     return [int(v, 16) for _, v in payloads]
 
 
-def rw_write(tools: Tools, idx: int, val: int) -> None:
-    run([str(tools.rw), "wwr", f"0x{idx:02X}", f"0x{val & 0xFFFFFFFF:08X}"], capture=False, check=True)
+def swb_write(tools: Tools, name: str, val: int) -> None:
+    run([
+        str(tools.sc_tool),
+        "--swb",
+        "write",
+        name,
+        f"0x{val & 0xFFFFFFFF:08X}",
+    ], capture=False, check=True)
 
 
-def rw_read(tools: Tools, idx: int) -> int:
-    res = run([str(tools.rw), "rr", f"0x{idx:02X}"])
-    line = res.stdout.strip().splitlines()[0]
-    return int(line, 16)
+def swb_read(tools: Tools, name: str) -> int:
+    res = run([str(tools.sc_tool), "--swb", "read", name])
+    match = re.search(r"^[A-Za-z0-9_+xX]+=(0x[0-9A-Fa-f]+)", res.stdout, re.MULTILINE)
+    if not match:
+        sys.exit(f"run_tool: sc_tool --swb read {name} returned no value")
+    return int(match.group(1), 16)
 
 
-def rw_read_write_reg(tools: Tools, idx: int) -> int:
-    res = run([str(tools.rw), "wr", f"0x{idx:02X}"])
-    line = res.stdout.strip().splitlines()[0]
-    return int(line, 16)
+def swb_dump_all(tools: Tools) -> str:
+    return run([str(tools.sc_tool), "--swb", "dump-all"]).stdout.rstrip()
 
 
 def rc_send(tools: Tools, cmd: str, *, run_no: int | None = None, feb: int = 7) -> None:
@@ -252,15 +228,6 @@ def try_sc_read(tools: Tools, link: int, addr: int, count: int = 1) -> tuple[lis
         return None, f"read failed rc={exc.code}"
 
 
-def try_rw_read(tools: Tools, idx: int, *, write_reg: bool = False) -> tuple[int | None, str | None]:
-    try:
-        if write_reg:
-            return rw_read_write_reg(tools, idx), None
-        return rw_read(tools, idx), None
-    except SystemExit as exc:
-        return None, f"read failed rc={exc.code}"
-
-
 def wait_for_feb(tools: Tools, link: int, *, timeout_s: float = 30.0, expected_uid: int = SC_HUB_UID) -> None:
     deadline = time.time() + timeout_s
     while time.time() < deadline:
@@ -276,54 +243,54 @@ def wait_for_feb(tools: Tools, link: int, *, timeout_s: float = 30.0, expected_u
 
 def rdma_csr_write(tools: Tools, addr: int, value: int) -> None:
     """Write the SWB-local rdma_subsystem CSR shim."""
-    rw_write(tools, SWB_LOOKUP_CTRL_REGISTER_W, addr & 0xFF)
-    rw_write(tools, SWB_LOOKUP_DS_CTRL_REGISTER_W, value & 0xFFFFFFFF)
+    swb_write(tools, "SWB_LOOKUP_CTRL_REGISTER_W", addr & 0xFF)
+    swb_write(tools, "SWB_LOOKUP_DS_CTRL_REGISTER_W", value & 0xFFFFFFFF)
 
 
 def rdma_observability(tools: Tools) -> dict[str, int]:
     """Read rdma_pretest bridge counters exposed on legacy SWB RO registers."""
     return {
-        "STATUS": rw_read(tools, EVENT_BUILD_STATUS_REGISTER_R),
-        "CNT_OPQ_INPUT_W": rw_read(tools, EVENT_BUILD_IDLE_NOT_HEADER_R),
-        "CNT_BYTES_WRITTEN": rw_read(tools, EVENT_BUILD_SKIP_EVENT_DMA_R),
-        "CNT_RQE_CONSUMED": rw_read(tools, EVENT_BUILD_CNT_EVENT_DMA_R),
-        "CNT_CQE_POSTED": rw_read(tools, EVENT_BUILD_TAG_FIFO_FULL_R),
-        "CNT_HALT": rw_read(tools, BUFFER_STATUS_REGISTER_R),
-        "CNT_EOE_OBSERVED": rw_read(tools, DMA_CNT_WORDS_REGISTER_R),
+        "STATUS": swb_read(tools, "EVENT_BUILD_STATUS_REGISTER_R"),
+        "CNT_OPQ_INPUT_W": swb_read(tools, "EVENT_BUILD_IDLE_NOT_HEADER_R"),
+        "CNT_BYTES_WRITTEN": swb_read(tools, "EVENT_BUILD_SKIP_EVENT_DMA_R"),
+        "CNT_RQE_CONSUMED": swb_read(tools, "EVENT_BUILD_CNT_EVENT_DMA_R"),
+        "CNT_CQE_POSTED": swb_read(tools, "EVENT_BUILD_TAG_FIFO_FULL_R"),
+        "CNT_HALT": swb_read(tools, "BUFFER_STATUS_REGISTER_R"),
+        "CNT_EOE_OBSERVED": swb_read(tools, "DMA_CNT_WORDS_REGISTER_R"),
     }
 
 
 def configure_swb(tools: Tools, *, link_mask_scifi: int, use_opq: bool, gen_link: bool = False) -> dict:
     """Set SWB datapath. Returns the resulting register snapshot."""
-    rw_write(tools, RESET_REGISTER_W, SWB_DATAPATH_RESET_MASK)
-    rw_write(tools, SWB_LINK_MASK_SCIFI, link_mask_scifi)
+    swb_write(tools, "RESET_REGISTER_W", SWB_DATAPATH_RESET_MASK)
+    swb_write(tools, "SWB_LINK_MASK_SCIFI", link_mask_scifi)
     if gen_link:
-        rw_write(tools, SWB_GENERIC_MASK_REGISTER_W, DEFAULT_GENERIC_MASK)
+        swb_write(tools, "SWB_GENERIC_MASK_REGISTER_W", DEFAULT_GENERIC_MASK)
         state = USE_BIT_GENERIC | USE_BIT_MERGER | USE_BIT_GEN_LINK
-        rw_write(tools, DATAGENERATOR_DIVIDER_REGISTER_W, DEFAULT_DATAGEN_DIVIDER)
+        swb_write(tools, "DATAGENERATOR_DIVIDER_REGISTER_W", DEFAULT_DATAGEN_DIVIDER)
     else:
-        rw_write(tools, SWB_GENERIC_MASK_REGISTER_W, 0x0)
+        swb_write(tools, "SWB_GENERIC_MASK_REGISTER_W", 0x0)
         state = USE_BIT_SCIFI | (USE_BIT_MERGER if use_opq else USE_BIT_STREAM)
-    rw_write(tools, SWB_READOUT_STATE, state)
-    rw_write(tools, FARM_READOUT_STATE, state)
-    rw_write(tools, GET_N_DMA_WORDS_REGISTER_W, DEFAULT_DMA_REQUEST_BLOCKS)
+    swb_write(tools, "SWB_READOUT_STATE", state)
+    swb_write(tools, "FARM_READOUT_STATE", state)
+    swb_write(tools, "GET_N_DMA_WORDS_REGISTER_W", DEFAULT_DMA_REQUEST_BLOCKS)
     time.sleep(0.01)
-    rw_write(tools, RESET_REGISTER_W, 0x0)
+    swb_write(tools, "RESET_REGISTER_W", 0x0)
     if gen_link:
         rdma_csr_write(tools, RDMA_CSR_CTRL, 0x00000002)
         rdma_csr_write(tools, RDMA_CSR_CTRL, 0x00000001)
-    rw_write(tools, DMA_REGISTER, 0x1)
+    swb_write(tools, "DMA_REGISTER", 0x1)
     time.sleep(0.1)
     return {
-        "RESET_REGISTER_W": rw_read_write_reg(tools, RESET_REGISTER_W),
-        "DATAGENERATOR_DIVIDER_REGISTER_W": rw_read_write_reg(tools, DATAGENERATOR_DIVIDER_REGISTER_W),
-        "SWB_GENERIC_MASK_REGISTER_W": rw_read_write_reg(tools, SWB_GENERIC_MASK_REGISTER_W),
-        "SWB_LINK_MASK_SCIFI": rw_read_write_reg(tools, SWB_LINK_MASK_SCIFI),
-        "SWB_READOUT_STATE": rw_read_write_reg(tools, SWB_READOUT_STATE),
-        "FARM_READOUT_STATE": rw_read_write_reg(tools, FARM_READOUT_STATE),
+        "RESET_REGISTER_W": swb_read(tools, "RESET_REGISTER_W"),
+        "DATAGENERATOR_DIVIDER_REGISTER_W": swb_read(tools, "DATAGENERATOR_DIVIDER_REGISTER_W"),
+        "SWB_GENERIC_MASK_REGISTER_W": swb_read(tools, "SWB_GENERIC_MASK_REGISTER_W"),
+        "SWB_LINK_MASK_SCIFI": swb_read(tools, "SWB_LINK_MASK_SCIFI"),
+        "SWB_READOUT_STATE": swb_read(tools, "SWB_READOUT_STATE"),
+        "FARM_READOUT_STATE": swb_read(tools, "FARM_READOUT_STATE"),
         "RDMA": rdma_observability(tools),
-        "GET_N_DMA_WORDS_REGISTER_W": rw_read_write_reg(tools, GET_N_DMA_WORDS_REGISTER_W),
-        "DMA_REGISTER": rw_read_write_reg(tools, DMA_REGISTER),
+        "GET_N_DMA_WORDS_REGISTER_W": swb_read(tools, "GET_N_DMA_WORDS_REGISTER_W"),
+        "DMA_REGISTER": swb_read(tools, "DMA_REGISTER"),
     }
 
 
@@ -423,17 +390,7 @@ def dump_csrs(tools: Tools, link: int, out_dir: Path) -> Path:
     stamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
     path = out_dir / f"run_tool_csr_dump_{stamp}.md"
 
-    swb_regs = [
-        ("VERSION_REGISTER_R", VERSION_REGISTER_R, False),
-        ("PLL_LOCKED_REGISTER_R", PLL_LOCKED_REGISTER_R, False),
-        ("SWB_LINK_MASK_SCIFI", SWB_LINK_MASK_SCIFI, True),
-        ("SWB_READOUT_STATE", SWB_READOUT_STATE, True),
-        ("DMA_REGISTER", DMA_REGISTER, True),
-        ("DMA_CNT_WORDS_REGISTER_R", DMA_CNT_WORDS_REGISTER_R, False),
-        ("RESET_LINK_STATUS_REGISTER_R", RESET_LINK_STATUS_REGISTER_R, False),
-        ("LINK_LOCKED_LOW_REGISTER_R", LINK_LOCKED_LOW_REGISTER_R, False),
-        ("LINK_LOCKED_HIGH_REGISTER_R", LINK_LOCKED_HIGH_REGISTER_R, False),
-    ]
+    swb_dump = swb_dump_all(tools)
     feb_ranges = [
         *[(f"emulator_mutrig_{idx}.csr", EMU_BASE_WORD + idx * EMU_STRIDE_WORD, 16) for idx in range(8)],
         ("histogram_statistics_0.csr", HIST_CSR_BASE_WORD, 17),
@@ -444,21 +401,14 @@ def dump_csrs(tools: Tools, link: int, out_dir: Path) -> Path:
         "",
         f"- Created: {dt.datetime.now().isoformat(timespec='seconds')}",
         f"- sc_tool: `{tools.sc_tool}`",
-        f"- rw: `{tools.rw}`",
         f"- FEB link: `{link}`",
         "",
         "## SWB BAR0 Registers",
         "",
-        "| Name | Space | Index | Value | Status |",
-        "|---|---|---:|---:|---|",
+        "Generated by `sc_tool --swb dump-all`.",
+        "",
+        swb_dump,
     ]
-    for name, idx, write_reg in swb_regs:
-        value, err = try_rw_read(tools, idx, write_reg=write_reg)
-        lines.append(
-            f"| `{name}` | `{'wr' if write_reg else 'rr'}` | `0x{idx:02X}` | "
-            f"`{'n/a' if value is None else f'0x{value & 0xFFFFFFFF:08X}'}` | "
-            f"{'OK' if err is None else err} |"
-        )
 
     lines.extend([
         "",
@@ -648,15 +598,15 @@ def main() -> int:
 
     # 9. Read counters / hist
     final_state = {
-        "RESET_REGISTER_W": rw_read_write_reg(tools, RESET_REGISTER_W),
-        "DATAGENERATOR_DIVIDER_REGISTER_W": rw_read_write_reg(tools, DATAGENERATOR_DIVIDER_REGISTER_W),
-        "SWB_GENERIC_MASK_REGISTER_W": rw_read_write_reg(tools, SWB_GENERIC_MASK_REGISTER_W),
-        "SWB_LINK_MASK_SCIFI": rw_read_write_reg(tools, SWB_LINK_MASK_SCIFI),
-        "SWB_READOUT_STATE": rw_read_write_reg(tools, SWB_READOUT_STATE),
-        "FARM_READOUT_STATE": rw_read_write_reg(tools, FARM_READOUT_STATE),
+        "RESET_REGISTER_W": swb_read(tools, "RESET_REGISTER_W"),
+        "DATAGENERATOR_DIVIDER_REGISTER_W": swb_read(tools, "DATAGENERATOR_DIVIDER_REGISTER_W"),
+        "SWB_GENERIC_MASK_REGISTER_W": swb_read(tools, "SWB_GENERIC_MASK_REGISTER_W"),
+        "SWB_LINK_MASK_SCIFI": swb_read(tools, "SWB_LINK_MASK_SCIFI"),
+        "SWB_READOUT_STATE": swb_read(tools, "SWB_READOUT_STATE"),
+        "FARM_READOUT_STATE": swb_read(tools, "FARM_READOUT_STATE"),
         "RDMA": rdma_observability(tools),
-        "GET_N_DMA_WORDS_REGISTER_W": rw_read_write_reg(tools, GET_N_DMA_WORDS_REGISTER_W),
-        "DMA_REGISTER": rw_read_write_reg(tools, DMA_REGISTER),
+        "GET_N_DMA_WORDS_REGISTER_W": swb_read(tools, "GET_N_DMA_WORDS_REGISTER_W"),
+        "DMA_REGISTER": swb_read(tools, "DMA_REGISTER"),
     }
     summary["final_swb_state"] = final_state
     summary["dma_capture_bytes"] = dma_out.stat().st_size if dma_out.exists() else 0

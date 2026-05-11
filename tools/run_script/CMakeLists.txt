@@ -4,6 +4,7 @@ project(mu3e_run_script_tools LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 find_package(Threads REQUIRED)
 
 set(ONLINE_DPV2_ROOT "/home/yifeng/packages/online_dpv2/online" CACHE PATH "online_dpv2 checkout root")
@@ -31,11 +32,31 @@ set(RUN_SCRIPT_COMMON_INCLUDES
     ${MUDAQ_COMMON_DIR}/firmware/include
 )
 
+set(SWB_A10_REGISTERS_VHD
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd"
+    CACHE FILEPATH "Firmware-authoritative SWB PCIe register package"
+)
+get_filename_component(SWB_A10_REGISTERS_VHD "${SWB_A10_REGISTERS_VHD}" ABSOLUTE)
+set(SWB_PCIE_REGISTERS_HEADER "${CMAKE_CURRENT_BINARY_DIR}/swb_pcie_registers_generated.h")
+add_custom_command(
+    OUTPUT "${SWB_PCIE_REGISTERS_HEADER}"
+    COMMAND "${Python3_EXECUTABLE}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/gen_swb_pcie_registers.py"
+        --input "${SWB_A10_REGISTERS_VHD}"
+        --output "${SWB_PCIE_REGISTERS_HEADER}"
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/gen_swb_pcie_registers.py"
+        "${SWB_A10_REGISTERS_VHD}"
+    VERBATIM
+)
+add_custom_target(generate_swb_pcie_registers DEPENDS "${SWB_PCIE_REGISTERS_HEADER}")
+
 add_executable(sc_tool sc_tool.cpp)
 add_executable(rc_tool rc_tool.cpp)
 add_executable(dma_tool dma_tool.cpp)
 
-target_include_directories(sc_tool PRIVATE ${RUN_SCRIPT_COMMON_INCLUDES})
+add_dependencies(sc_tool generate_swb_pcie_registers)
+target_include_directories(sc_tool PRIVATE ${RUN_SCRIPT_COMMON_INCLUDES} "${CMAKE_CURRENT_BINARY_DIR}")
 target_include_directories(rc_tool PRIVATE ${RUN_SCRIPT_COMMON_INCLUDES})
 target_include_directories(dma_tool PRIVATE
     ${RUN_SCRIPT_COMMON_INCLUDES}
