@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cerrno>
+#include <cctype>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -26,6 +28,7 @@
 #include "feb_sc_registers.h"
 #include "mudaq_device.h"
 #include "mudaq_device_constants.h"
+#include "swb_pcie_registers_generated.h"
 
 using std::string;
 using std::vector;
@@ -51,6 +54,15 @@ enum class sc_cmd {
 	diag,
 };
 
+enum class swb_cmd {
+	invalid = 0,
+	read,
+	write,
+	burst,
+	dump_all,
+	list_regs,
+};
+
 struct sc_opts {
 	string device = "/dev/mudaq0";
 	sc_cmd cmd = sc_cmd::invalid;
@@ -65,6 +77,23 @@ struct sc_opts {
 	unsigned main_timeout_ms = 1000;
 	unsigned reply_timeout_ms = 1000;
 	unsigned poll_us = 1000;
+};
+
+struct swb_opts {
+	string device = "/dev/mudaq0";
+	swb_cmd cmd = swb_cmd::invalid;
+	string target;
+	uint32_t value = 0;
+	uint32_t count = 1;
+};
+
+struct swb_reg_ref {
+	const swb_pcie_registers_generated::reg_desc *reg = nullptr;
+	uint32_t offset = 0;
+	swb_pcie_registers_generated::reg_space space =
+		swb_pcie_registers_generated::reg_space::ro;
+	string name;
+	bool named = false;
 };
 
 struct sc_request {
@@ -183,6 +212,8 @@ static void print_usage()
 		<< "  sc_tool <link> read <addr> [len] [options]\n"
 		<< "  sc_tool <link> write <addr> <word> [word ...] [options]\n"
 		<< "  sc_tool <link> diag [options]\n"
+		<< "  sc_tool --swb read|write|burst|dump-all ...\n"
+		<< "  sc_tool --swb-list-regs\n"
 		<< "\n"
 		<< "Options:\n"
 		<< "  --device <path>            MuDAQ device node (default /dev/mudaq0)\n"
@@ -198,7 +229,8 @@ static void print_usage()
 		<< "Examples:\n"
 		<< "  sc_tool 2 write 0x0000 0x12345678\n"
 		<< "  sc_tool 2 read 0xFE8F 9\n"
-		<< "  sc_tool 2 diag\n";
+		<< "  sc_tool 2 diag\n"
+		<< "  sc_tool --swb read LINK_LOCKED_LOW\n";
 }
 
 static bool parse_u32(const string& text, uint32_t *out)
@@ -218,6 +250,402 @@ static bool parse_u32(const string& text, uint32_t *out)
 
 	*out = static_cast<uint32_t>(value);
 	return true;
+}
+
+static string uppercase(string text)
+{
+	for (auto& ch : text)
+		ch = static_cast<char>(std::toupper(static_cast<unsigned char>(ch)));
+	return text;
+}
+
+static bool ends_with(const string& text, const string& suffix)
+{
+	if (suffix.size() > text.size())
+		return false;
+	return text.compare(text.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+static void add_unique(vector<string> *items, const string& value)
+{
+	if (!items || value.empty())
+		return;
+	if (std::find(items->begin(), items->end(), value) == items->end())
+		items->push_back(value);
+}
+
+static vector<string> swb_aliases_for(const string& name)
+{
+	vector<string> aliases;
+	string upper = uppercase(name);
+
+	add_unique(&aliases, upper);
+	if (ends_with(upper, "_REGISTER_R") || ends_with(upper, "_REGISTER_W")) {
+		add_unique(&aliases, upper.substr(0, upper.size() - 2));
+		add_unique(&aliases, upper.substr(0, upper.size() - 11));
+	} else if (ends_with(upper, "_R") || ends_with(upper, "_W")) {
+		add_unique(&aliases, upper.substr(0, upper.size() - 2));
+	}
+	return aliases;
+}
+
+static bool swb_name_matches(const string& reg_name, const string& key)
+{
+	for (const auto& alias : swb_aliases_for(reg_name)) {
+		if (alias == key)
+			return true;
+	}
+	return false;
+}
+
+static const char *swb_space_name(swb_pcie_registers_generated::reg_space space)
+{
+	return space == swb_pcie_registers_generated::reg_space::ro ? "rr" : "wr";
+}
+
+static bool swb_space_compatible(swb_pcie_registers_generated::reg_space space,
+				 swb_cmd cmd)
+{
+	if (cmd == swb_cmd::write)
+		return space == swb_pcie_registers_generated::reg_space::rw;
+	return true;
+}
+
+static string swb_offset_text(uint32_t offset)
+{
+	std::ostringstream os;
+	os << "0x" << std::hex << std::uppercase << std::setw(2)
+	   << std::setfill('0') << offset;
+	return os.str();
+}
+
+static void swb_print_source_banner()
+{
+	std::cout
+		<< "swb-register-source: "
+		<< swb_pcie_registers_generated::truth_source
+		<< " sha256="
+		<< swb_pcie_registers_generated::truth_sha256
+		<< '\n';
+}
+
+static bool swb_resolve_reg(const string& token, swb_cmd cmd, swb_reg_ref *out)
+{
+	using swb_pcie_registers_generated::reg_space;
+	const auto *regs = swb_pcie_registers_generated::registers;
+	const size_t count = swb_pcie_registers_generated::register_count;
+	vector<const swb_pcie_registers_generated::reg_desc *> matches;
+	bool found_incompatible = false;
+	uint32_t offset;
+	string key;
+
+	if (!out)
+		return false;
+
+	if (parse_u32(token, &offset)) {
+		out->reg = nullptr;
+		out->offset = offset;
+		out->space = (cmd == swb_cmd::write) ? reg_space::rw : reg_space::ro;
+		out->name = swb_offset_text(offset);
+		out->named = false;
+		return true;
+	}
+
+	key = uppercase(token);
+
+	for (size_t i = 0; i < count; ++i) {
+		if (uppercase(regs[i].name) != key)
+			continue;
+		if (!swb_space_compatible(regs[i].space, cmd)) {
+			found_incompatible = true;
+			continue;
+		}
+		matches.push_back(&regs[i]);
+	}
+
+	if (matches.empty()) {
+		for (size_t i = 0; i < count; ++i) {
+			if (!swb_name_matches(regs[i].name, key))
+				continue;
+			if (!swb_space_compatible(regs[i].space, cmd)) {
+				found_incompatible = true;
+				continue;
+			}
+			matches.push_back(&regs[i]);
+		}
+	}
+
+	if (matches.empty()) {
+		if (found_incompatible)
+			pr_err("register is read-only for write: " + token);
+		else
+			pr_err("register not found: " + token);
+		return false;
+	}
+
+	if (cmd == swb_cmd::read || cmd == swb_cmd::burst) {
+		for (const auto *reg : matches) {
+			if (reg->space == reg_space::ro) {
+				out->reg = reg;
+				out->offset = reg->offset;
+				out->space = reg->space;
+				out->name = reg->name;
+				out->named = true;
+				return true;
+			}
+		}
+	}
+
+	if (matches.size() > 1) {
+		pr_err("ambiguous register name: " + token);
+		for (const auto *reg : matches) {
+			std::cerr << "  " << reg->name
+				  << " " << swb_space_name(reg->space)
+				  << " " << swb_offset_text(reg->offset) << '\n';
+		}
+		return false;
+	}
+
+	out->reg = matches[0];
+	out->offset = matches[0]->offset;
+	out->space = matches[0]->space;
+	out->name = matches[0]->name;
+	out->named = true;
+	return true;
+}
+
+static uint32_t swb_read_reg(mudaq::MudaqDevice& dev, const swb_reg_ref& reg)
+{
+	if (reg.space == swb_pcie_registers_generated::reg_space::rw)
+		return dev.read_register_rw(reg.offset);
+	return dev.read_register_ro(reg.offset);
+}
+
+static bool swb_read_named_ro(mudaq::MudaqDevice& dev, const string& name,
+			      uint32_t *value)
+{
+	swb_reg_ref reg;
+
+	if (!value)
+		return false;
+	if (!swb_resolve_reg(name, swb_cmd::read, &reg))
+		return false;
+	*value = swb_read_reg(dev, reg);
+	return true;
+}
+
+static void swb_print_value(const swb_reg_ref& reg, uint32_t value)
+{
+	std::cout
+		<< reg.name
+		<< "=" << hex_u32(value)
+		<< " (" << value << ")"
+		<< " space=" << swb_space_name(reg.space)
+		<< " offset=" << swb_offset_text(reg.offset)
+		<< '\n';
+}
+
+static void swb_print_usage()
+{
+	std::cout
+		<< "Usage:\n"
+		<< "  sc_tool --swb read <REG_NAME|hex_offset>\n"
+		<< "  sc_tool --swb write <REG_NAME|hex_offset> <hex_value>\n"
+		<< "  sc_tool --swb burst <REG_NAME|hex_offset> <count>\n"
+		<< "  sc_tool --swb dump-all\n"
+		<< "  sc_tool --swb-list-regs\n"
+		<< "\n"
+		<< "Options:\n"
+		<< "  --device <path>            MuDAQ device node (default /dev/mudaq0)\n"
+		<< "  -h, --help                 Show this help\n";
+}
+
+static bool parse_swb_opts(int argc, char **argv, swb_opts *opts)
+{
+	vector<string> pos;
+	bool saw_swb = false;
+	bool saw_list = false;
+
+	if (!opts)
+		return false;
+
+	for (int i = 1; i < argc; ++i) {
+		string arg(argv[i]);
+
+		if (arg == "-h" || arg == "--help") {
+			swb_print_usage();
+			std::exit(0);
+		}
+		if (arg == "--swb") {
+			saw_swb = true;
+			continue;
+		}
+		if (arg == "--swb-list-regs") {
+			saw_list = true;
+			continue;
+		}
+		if (arg == "--feb-link") {
+			pr_err("use either --swb (direct BAR) or default (SC ring) mode, not both");
+			return false;
+		}
+		if (arg == "--device") {
+			if (i + 1 >= argc) {
+				pr_err("missing argument for --device");
+				return false;
+			}
+			opts->device = argv[++i];
+			continue;
+		}
+		if (!arg.empty() && arg[0] == '-') {
+			pr_err("unknown --swb option: " + arg);
+			return false;
+		}
+		pos.push_back(arg);
+	}
+
+	if (saw_list) {
+		if (!pos.empty()) {
+			pr_err("--swb-list-regs takes no positional arguments");
+			return false;
+		}
+		opts->cmd = swb_cmd::list_regs;
+		return true;
+	}
+
+	if (!saw_swb) {
+		pr_err("missing --swb");
+		return false;
+	}
+	if (pos.empty()) {
+		swb_print_usage();
+		return false;
+	}
+
+	if (pos[0] == "read") {
+		if (pos.size() != 2) {
+			pr_err("read requires <REG_NAME|hex_offset>");
+			return false;
+		}
+		opts->cmd = swb_cmd::read;
+		opts->target = pos[1];
+		return true;
+	}
+
+	if (pos[0] == "write") {
+		if (pos.size() != 3 || !parse_u32(pos[2], &opts->value)) {
+			pr_err("write requires <REG_NAME|hex_offset> <hex_value>");
+			return false;
+		}
+		opts->cmd = swb_cmd::write;
+		opts->target = pos[1];
+		return true;
+	}
+
+	if (pos[0] == "burst") {
+		if (pos.size() != 3 || !parse_u32(pos[2], &opts->count) ||
+		    opts->count == 0 || opts->count > 65536u) {
+			pr_err("burst requires <REG_NAME|hex_offset> <count> with count in 1..65536");
+			return false;
+		}
+		opts->cmd = swb_cmd::burst;
+		opts->target = pos[1];
+		return true;
+	}
+
+	if (pos[0] == "dump-all") {
+		if (pos.size() != 1) {
+			pr_err("dump-all takes no positional arguments");
+			return false;
+		}
+		opts->cmd = swb_cmd::dump_all;
+		return true;
+	}
+
+	pr_err("unknown --swb command: " + pos[0]);
+	return false;
+}
+
+static int swb_run(const swb_opts& opts)
+{
+	swb_reg_ref reg;
+
+	swb_print_source_banner();
+
+	if (opts.cmd == swb_cmd::list_regs) {
+		std::cout
+			<< "| Name | Space | Index | Short aliases |\n"
+			<< "|---|---|---:|---|\n";
+		for (const auto& entry : swb_pcie_registers_generated::registers) {
+			vector<string> aliases = swb_aliases_for(entry.name);
+			std::cout
+				<< "| `" << entry.name << "` | `" << swb_space_name(entry.space)
+				<< "` | `" << swb_offset_text(entry.offset) << "` | `";
+			for (size_t i = 1; i < aliases.size(); ++i) {
+				if (i > 1)
+					std::cout << ", ";
+				std::cout << aliases[i];
+			}
+			std::cout << "` |\n";
+		}
+		return 0;
+	}
+
+	mudaq::DmaMudaqDevice dev(opts.device);
+	if (!dev.open()) {
+		pr_err("failed to open device " + opts.device);
+		return 2;
+	}
+	if (!dev.is_ok()) {
+		pr_err("device is not ready after open");
+		return 2;
+	}
+
+	switch (opts.cmd) {
+	case swb_cmd::read:
+		if (!swb_resolve_reg(opts.target, opts.cmd, &reg))
+			return 1;
+		swb_print_value(reg, swb_read_reg(dev, reg));
+		return 0;
+	case swb_cmd::write:
+		if (!swb_resolve_reg(opts.target, opts.cmd, &reg))
+			return 1;
+		dev.write_register(reg.offset, opts.value);
+		swb_print_value(reg, dev.read_register_rw(reg.offset));
+		return 0;
+	case swb_cmd::burst:
+		if (!swb_resolve_reg(opts.target, opts.cmd, &reg))
+			return 1;
+		for (uint32_t i = 0; i < opts.count; ++i) {
+			swb_reg_ref item = reg;
+			item.offset = reg.offset + i;
+			item.name = reg.name + "+" + swb_offset_text(i);
+			swb_print_value(item, swb_read_reg(dev, item));
+		}
+		return 0;
+	case swb_cmd::dump_all:
+		std::cout
+			<< "| Name | Space | Index | Value | Decimal |\n"
+			<< "|---|---|---:|---:|---:|\n";
+		for (const auto& entry : swb_pcie_registers_generated::registers) {
+			swb_reg_ref item;
+			uint32_t value;
+
+			item.reg = &entry;
+			item.offset = entry.offset;
+			item.space = entry.space;
+			item.name = entry.name;
+			item.named = true;
+			value = swb_read_reg(dev, item);
+			std::cout
+				<< "| `" << item.name << "` | `" << swb_space_name(item.space)
+				<< "` | `" << swb_offset_text(item.offset)
+				<< "` | `" << hex_u32(value) << "` | " << value << " |\n";
+		}
+		return 0;
+	default:
+		pr_err("invalid --swb command");
+		return 1;
+	}
 }
 
 static bool parse_opts(int argc, char **argv, sc_opts *opts)
@@ -868,11 +1296,19 @@ static int sc_run_diag(mudaq::MudaqDevice& dev, const sc_opts& opts)
 
 static void sc_print_board_status(mudaq::MudaqDevice& dev)
 {
+	uint32_t pll_locked = 0;
+	uint32_t link_locked_high = 0;
+	uint32_t reset_link_status = 0;
+
+	(void)swb_read_named_ro(dev, "PLL_LOCKED_REGISTER_R", &pll_locked);
+	(void)swb_read_named_ro(dev, "LINK_LOCKED_HIGH_REGISTER_R", &link_locked_high);
+	(void)swb_read_named_ro(dev, "RESET_LINK_STATUS_REGISTER_R", &reset_link_status);
+
 	std::cout
 		<< "board:\n"
-		<< "  PLL_LOCKED_REGISTER_R      = " << hex_u32(dev.read_register_ro(PLL_LOCKED_REGISTER_R)) << '\n'
-		<< "  LINK_LOCKED_HIGH_REGISTER_R= " << hex_u32(dev.read_register_ro(LINK_LOCKED_HIGH_REGISTER_R)) << '\n'
-		<< "  RESET_LINK_STATUS_REGISTER_R = " << hex_u32(dev.read_register_ro(RESET_LINK_STATUS_REGISTER_R)) << '\n';
+		<< "  PLL_LOCKED_REGISTER_R      = " << hex_u32(pll_locked) << '\n'
+		<< "  LINK_LOCKED_HIGH_REGISTER_R= " << hex_u32(link_locked_high) << '\n'
+		<< "  RESET_LINK_STATUS_REGISTER_R = " << hex_u32(reset_link_status) << '\n';
 }
 
 } /* namespace */
@@ -880,8 +1316,18 @@ static void sc_print_board_status(mudaq::MudaqDevice& dev)
 int main(int argc, char **argv)
 {
 	sc_opts opts;
+	swb_opts swb;
 	sc_request req;
 	int rc = 0;
+
+	for (int i = 1; i < argc; ++i) {
+		string arg(argv[i]);
+		if (arg == "--swb" || arg == "--swb-list-regs") {
+			if (!parse_swb_opts(argc, argv, &swb))
+				return 1;
+			return swb_run(swb);
+		}
+	}
 
 	if (!parse_opts(argc, argv, &opts))
 		return 1;

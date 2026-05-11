@@ -13,7 +13,7 @@ build location going forward), reaching the FEB SciFi at SWB link 2 over
 
 | File | Purpose |
 |---|---|
-| `sc_tool.cpp` | Slow-control CLI. Word-addressed (18-bit) into `sc_hub_v2`. Reads/writes any CSR slave reachable via the SWB sc_hub. Supersedes the legacy `test_slowcontrol.cpp`. |
+| `sc_tool.cpp` | Slow-control CLI. Default mode is word-addressed (18-bit) into `sc_hub_v2`; `--swb` mode bypasses the SC ring and reads/writes SWB PCIe BAR registers by firmware-true names. Supersedes the legacy `test_slowcontrol.cpp`. |
 | `rc_tool.cpp` | Run-control CLI. Drives the SWB reset-link transmitter to broadcast `IDLE / RUN_PREP / SYNC / RUNNING / TERMINATING` to FEB consumers. |
 | `dma_tool.cpp` | DMA test CLI. Configures the rdma_subsystem SQ/CQ rings on SWB and exercises host-side DMA capture. |
 | `run_tool` | Python orchestrator that calls `rc_tool` / `dma_tool` / `sc_tool` in the right order for an end-to-end run. Required pattern when more than one of {SC, RC, DMA} is touched in the same run. |
@@ -23,6 +23,7 @@ build location going forward), reaching the FEB SciFi at SWB link 2 over
 | `sc_scratchpad_sweep.py` | Scratchpad sweep harness (python). |
 | `sc_speed_sweep.py` | SC bridge speed sweep (python). |
 | `stp_datalog_extract.py` | SignalTap datalog post-processing (python). |
+| `gen_swb_pcie_registers.py` | Build-time parser for the SWB firmware `a10_pcie_registers.vhd`; emits the generated C++ register table into the CMake build directory. |
 | `feb_scifi_sc_quickref.md` | One-page SC address quickref (FEB SciFi slave map). |
 | `feb_scifi_datapath_test_report.md` | Historical bring-up report (Apr 16 2026); kept for context. |
 | `CMakeLists.txt` | Native C++ build (sc_tool / rc_tool / dma_tool / test_slowcontrol). |
@@ -85,8 +86,9 @@ Board-smoke and inspection flags:
 --no-data-ingress      Force SWB_LINK_MASK_SCIFI=0 so FEB payload is rejected
                        at the SWB ingress, and route the SWB generated generic
                        lane through OPQ/RDMA for host-path smoke traffic.
---dump-csrs            Write run_tool_csr_dump_<timestamp>.md with 9 SWB BAR0
-                       registers and 9 FEB SC CSR ranges.
+--dump-csrs            Write run_tool_csr_dump_<timestamp>.md with the full
+                       `sc_tool --swb dump-all` BAR0 table and 9 FEB SC CSR
+                       ranges.
 --no-program           Skip SOF programming; assumes SWB/FEB images are loaded.
 ```
 
@@ -101,6 +103,35 @@ Example empty-frame smoke after programming both boards:
 ```
 
 ## sc_tool address rules
+
+### SWB BAR mode
+
+Use `--swb` for SWB-local PCIe BAR registers. This path opens
+`/dev/mudaq0` directly and does not touch the FEB slow-control ring. Register
+names are generated at build time from:
+
+```
+firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd
+```
+
+Every `--swb` command prints the truth-source path and sha256 before the
+readback. Long firmware names and short aliases are both accepted:
+
+```
+./sc_tool --swb read VERSION_REGISTER_R
+./sc_tool --swb read LINK_LOCKED_LOW
+./sc_tool --swb read RESET_LINK_STATUS
+./sc_tool --swb write DMA_REGISTER 0x00000001
+./sc_tool --swb burst RESET_LINK_STATUS_REGISTER_R 3
+./sc_tool --swb dump-all
+./sc_tool --swb-list-regs
+```
+
+`--swb` register offsets are BAR word indices, matching the firmware package
+constants. For example, `LINK_LOCKED_LOW_REGISTER_R` is offset `0x36`, which
+maps to BAR0 byte address `0xD8`.
+
+### FEB SC-ring mode
 
 The SWB `sc_hub` is **word-addressed** (NOT byte-addressed). To read a
 Qsys byte address `0xN`, pass `0xN / 4` to `sc_tool`. See
