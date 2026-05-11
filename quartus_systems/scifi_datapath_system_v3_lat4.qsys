@@ -1209,7 +1209,7 @@
  <module
    name="emulator_inject_fanout"
    kind="pulse_fanout8"
-   version="1.0"
+   version="1.2"
    enabled="1" />
  <module
    name="emulator_mutrig_0"
