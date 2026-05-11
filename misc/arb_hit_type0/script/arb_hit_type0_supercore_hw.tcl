@@ -1,10 +1,10 @@
 package require -exact qsys 16.1
 
 set VERSION_MAJOR_DEFAULT_CONST 26
-set VERSION_MINOR_DEFAULT_CONST 4
-set VERSION_PATCH_DEFAULT_CONST 1
-set BUILD_DEFAULT_CONST         506
-set VERSION_DATE_DEFAULT_CONST  20260506
+set VERSION_MINOR_DEFAULT_CONST 5
+set VERSION_PATCH_DEFAULT_CONST 0
+set BUILD_DEFAULT_CONST         511
+set VERSION_DATE_DEFAULT_CONST  20260511
 set VERSION_GIT_DEFAULT_CONST   0x00000000
 set IP_UID_DEFAULT_CONST        0x41485430 ;# ASCII "AHT0"
 
@@ -278,7 +278,7 @@ proc compose {} {
 
     for {set lane 0} {$lane < $lane_count} {incr lane} {
         set inst lane_$lane
-        add_instance $inst arb_hit_type0 26.4.1.0506
+        add_instance $inst arb_hit_type0 26.5.0.0511
         set_instance_parameter_value $inst MODE_DEFAULT $mode_default
         set_instance_parameter_value $inst WATCHDOG_DEFAULT $watchdog_default
         set_instance_parameter_value $inst FIFO_DEPTH $fifo_depth

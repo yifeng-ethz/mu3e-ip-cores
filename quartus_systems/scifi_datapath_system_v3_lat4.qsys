@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="3.0.0.0511"
-   description=""
+   version="3.0.2.0511"
+   description="rc-readyless rollout: rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2) now declare USE_READY=0 sinks so Qsys no longer inserts altera_avalon_st_timing_adapter on rc fan-out. Carries the prior 3.0.1.0511 hist-debug-disconnect (mts_preprocessor ts_delta + debug_burst + ring_buffer_cam_*_filllevel x4 disconnected to break the -1.376 ns Setup path from debug_msg2.push_cnt -&gt; ingress_stage_write_req)."
    tags=""
    categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
@@ -2638,11 +2638,6 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="mts_preprocessor_0.debug_burst"
-   end="histogram_statistics_0.debug_6" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
    start="lvds_rx_controller_pro_0.decoded0"
    end="decoded_lane_mux_0.in0" />
  <connection
@@ -3005,31 +3000,6 @@
    version="18.1"
    start="histogram_ingress_bridge_0.pre_out"
    end="hit_stack_subsystem_0.hit_type_1" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_0_filllevel"
-   end="histogram_statistics_0.debug_2" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_1_filllevel"
-   end="histogram_statistics_0.debug_3" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_2_filllevel"
-   end="histogram_statistics_0.debug_4" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_3_filllevel"
-   end="histogram_statistics_0.debug_5" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mts_preprocessor_0.ts_delta"
-   end="histogram_statistics_0.debug_1" />
  <connection
    kind="avalon_streaming"
    version="18.1"

@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="3.0.0.0511"
-   description=""
+   version="3.0.2.0511"
+   description="rc-readyless rollout: rc-sink IPs (mts_preprocessor, mutrig_injector_multiheader, mutrig_reset_controller, arb_hit_type0, histogram_statistics_v2) now declare USE_READY=0 sinks. Carries the prior 3.0.1.0511 SC-WEDGE fix: control_path_subsystem.clk156_in_rst now sourced from cclk156_source.clk_reset (true POR only), no longer fanned out from ext_reset_pipe2_cclk156.out_reset."
    tags="INTERNAL_COMPONENT=false"
    categories="" />
  <parameter name="bonusData"><![CDATA[bonusData 
@@ -586,7 +586,7 @@
  <connection
    kind="reset"
    version="18.1"
-   start="ext_reset_pipe2_cclk156.out_reset"
+   start="cclk156_source.clk_reset"
    end="control_path_subsystem.clk156_in_rst" />
  <connection
    kind="reset"

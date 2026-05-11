@@ -3,9 +3,14 @@
 // between the real MuTRiG hit_type0 stream and the emulator hit_type0
 // stream with 16-deep ingress FIFOs per source.
 //
-// Version : 26.4.1
-// Date    : 20260506
-// Change  : Preserve per-hit metadata valid through the selected DEBUG sideband.
+// Version : 26.5.0
+// Date    : 20260511
+// Change  : 26.4.1 (20260506) Preserve per-hit metadata valid through the
+//                              selected DEBUG sideband.
+//           26.5.0 (20260511) Drop run_ctrl ready output to match rc-network
+//                              readyless contract. The original constant '1'
+//                              driver inside arb_hit_type0_runctl.sv is no
+//                              longer routed onto the entity boundary.
 
 module arb_hit_type0 #(
     parameter integer MODE_DEFAULT      = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
@@ -14,10 +19,10 @@ module arb_hit_type0 #(
     parameter integer WATCHDOG_DEFAULT  = 500,          // FAW threshold cycles, 0 disables
     parameter integer IP_UID            = 32'h41485430, // ASCII "AHT0"
     parameter integer VERSION_MAJOR     = 26,
-    parameter integer VERSION_MINOR     = 4,
-    parameter integer VERSION_PATCH     = 1,
-    parameter integer BUILD             = 506,
-    parameter integer VERSION_DATE      = 20260506,
+    parameter integer VERSION_MINOR     = 5,
+    parameter integer VERSION_PATCH     = 0,
+    parameter integer BUILD             = 511,
+    parameter integer VERSION_DATE      = 20260511,
     parameter integer VERSION_GIT       = 32'h0000_0000,
     parameter integer INSTANCE_ID       = 0
 ) (
@@ -32,10 +37,9 @@ module arb_hit_type0 #(
     output logic [31:0] avs_csr_readdata,
     output logic        avs_csr_waitrequest,
 
-    // Run-control sink (9-bit Avalon-ST, sync-reset on RUN_PREP / RESET)
+    // Run-control sink (9-bit Avalon-ST, readyless broadcast: USE_READY=0)
     input  logic [8:0]  asi_ctrl_data,
     input  logic        asi_ctrl_valid,
-    output logic        asi_ctrl_ready,
 
     // Real MuTRiG hit_type0 (post-deassembly); convention channel in [0..7]
     input  logic [44:0] asi_real_data,
@@ -191,7 +195,6 @@ module arb_hit_type0 #(
         .rst                   (rst),
         .asi_ctrl_data         (asi_ctrl_data),
         .asi_ctrl_valid        (asi_ctrl_valid),
-        .asi_ctrl_ready        (asi_ctrl_ready),
         .reset_start           (runctl_reset_start),
         .stream_clear          (runctl_stream_clear),
         .counter_clear         (runctl_counter_clear),

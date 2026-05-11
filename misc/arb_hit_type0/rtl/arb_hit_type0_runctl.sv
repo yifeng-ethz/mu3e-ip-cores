@@ -1,9 +1,10 @@
 // arb_hit_type0_runctl.sv
 // 9-bit Avalon-ST run-control sink and staged reset orchestrator.
 //
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Register counter clear from the staged reset controller.
+// Version : 26.3.0
+// Date    : 20260511
+// Change  : 26.2.0 (20260504) Register counter clear from staged reset.
+//           26.3.0 (20260511) Drop asi_ctrl_ready; rc-network is readyless.
 
 module arb_hit_type0_runctl (
     input  logic       clk,
@@ -11,7 +12,6 @@ module arb_hit_type0_runctl (
 
     input  logic [8:0] asi_ctrl_data,
     input  logic       asi_ctrl_valid,
-    output logic       asi_ctrl_ready,
 
     output logic       reset_start,
     output logic       stream_clear,
@@ -56,7 +56,7 @@ module arb_hit_type0_runctl (
         end
     endfunction
 
-    assign asi_ctrl_ready = 1'b1;
+    // rc-network is readyless (USE_READY=0 broadcast); no ready output here.
     assign reset_start    = asi_ctrl_valid & (asi_ctrl_data[1] | asi_ctrl_data[7]) & ~reset_active;
     assign stream_clear   = reset_start;
     always_ff @(posedge clk or posedge rst) begin : runctl_state
