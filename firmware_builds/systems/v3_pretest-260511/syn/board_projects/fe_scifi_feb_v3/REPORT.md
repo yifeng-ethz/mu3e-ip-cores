@@ -4,7 +4,9 @@
 
 The self-contained FEB SciFi v3 board project was minted under this directory with a clean single-revision `top.qpf` / `top.qsf`, no SignalTap assignments, and a local `top.qip` that resolves the generated `feb_system_v3` QIP under `firmware_builds/systems/v3_pretest-260511/syn/`.
 
-`qsys-generate` completed successfully after the `histogram_statistics_v2` BOOLEAN package rollback, and Quartus Analysis & Synthesis now passes the previous generic-type failure point. The Quartus full compile still fails in Fitter because the regenerated design exceeds the selected Arria V device capacity.
+`qsys-generate` completed successfully after the rbCAM submodule bump to the M10K-inferred SystemVerilog implementation. The previous Fitter capacity failure is resolved: the post-fix full Quartus compile reaches Fitter, Assembler, and Timing Analyzer successfully and produces `output_files/top.sof`.
+
+The build is fit-clean at 61,385 / 91,680 ALMs (67%). TimeQuest still reports negative slow-corner setup and recovery slack on pre-existing integration clocks, so the capacity closure is PASS and the timing signoff remains PARTIAL.
 
 ## Build Inputs
 
@@ -21,62 +23,68 @@ The self-contained FEB SciFi v3 board project was minted under this directory wi
 
 - Exit code: 0
 - Error count: 0
-- Runtime: 41 s
-- Console log: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_115955.console.log`
-- Status file: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_115955.status`
+- Runtime: approximately 41 s
+- Console log: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_162955.console.log`
+- Status file: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_162955.status`
 - Report: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/feb_system_v3_generation.rpt`
-- Result: PASS. The report contains `Info: qsys-generate succeeded.` and no `Error:` lines.
+- Result: PASS. The report contains `Info: qsys-generate succeeded.` and no `Error:` lines. The generated synthesis submodules include `cam_primitive_m10k_sv.sv`, confirming that Qsys resolved the post-fix rbCAM package.
 
 ## Phase 4 - Quartus Compile
 
 - Command: `quartus_sh --flow compile top`
-- Exit code: 3
-- Total runtime: Quartus flow report lists 00:47:17 total elapsed time.
-- Console log: attached terminal run in Codex; persisted evidence is in the Quartus reports below.
+- Exit code: 0
+- Total runtime: 2245 s; Quartus shell reported 00:37:25 elapsed.
+- Console log: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260511_164654_postm10k.console.log`
+- Status file: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260511_164654_postm10k.status`
 - Flow report: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.flow.rpt`
 - Map summary: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.map.summary`
 - Fit report: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.fit.rpt`
 - Fit summary: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.fit.summary`
-- STA summary: not generated because Fitter failed before the assembler/STA stages.
+- STA summary: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sta.summary`
+- SOF: `firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof` (12,679,822 bytes)
 
 Quartus reported:
 
 ```text
-Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 1544 warnings
-Error (170012): Fitter requires 14867 LABs to implement the design, but the device contains only 9168 LABs
-Error (11802): Can't fit design in device.
-Error: Quartus Prime Fitter was unsuccessful. 2 errors, 31 warnings
-Error (293001): Quartus Prime Full Compilation was unsuccessful. 4 errors, 1575 warnings
+Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 1524 warnings
+Fitter Status : Successful - Mon May 11 17:21:23 2026
+Info: Quartus Prime Assembler was successful.
+Info: Quartus Prime Timing Analyzer was successful. 0 errors, 24 warnings
+Info (293000): Quartus Prime Full Compilation was successful. 0 errors, 1579 warnings
 ```
 
 ## Resource Summary
 
 | Metric | Result | Gate |
 | --- | ---: | ---: |
-| Logic utilization | 146,935 / 91,680 ALMs (160%) | < 90% |
-| Total LABs | 14,867 / 9,168 LABs needed (162%) | <= 100% |
-| Registers | 236,672 | Informational |
+| Logic utilization | 61,385 / 91,680 ALMs (67%) | < 80% |
+| Registers | 91,888 | Informational |
 | Pins | 218 / 426 (51%) | Informational |
-| Block memory bits | 2,823,882 / 13,987,840 (20%) | Informational |
+| Block memory bits | 4,032,202 / 13,987,840 (29%) | Informational |
+| RAM blocks | 540 / 1,366 (40%) | Informational |
 | HSSI RX PCS | 4 / 9 (44%) | Informational |
 | HSSI TX PCS | 8 / 9 (89%) | Informational |
 | PLLs | 7 / 21 (33%) | Informational |
 
-The design fails the ALM utilization gate and cannot proceed to STA.
+The design passes the FEB capacity gate after rbCAM slot storage moved back into block RAM.
 
 ## Timing Summary
 
-| Clock | Setup slack |
-| --- | ---: |
-| Not available | STA did not run because Fitter failed. |
+| Model | Worst setup slack | Setup TNS | Worst hold slack | Recovery slack |
+| --- | ---: | ---: | ---: | ---: |
+| Slow 1100mV 85C | -1.080 ns | -162.611 ns | +0.244 ns | -1.307 ns |
+| Slow 1100mV 0C | -0.877 ns | -50.006 ns | +0.200 ns | -1.213 ns |
+| Fast 1100mV 85C | +0.613 ns | 0.000 ns | +0.128 ns | +1.201 ns |
+| Fast 1100mV 0C | +0.786 ns | 0.000 ns | +0.107 ns | +1.308 ns |
 
-- Worst setup slack: not available.
-- Negative setup slack clocks: not available.
-- Bring-up timing verdict: FAIL. The build did not reach STA, so the FEB bring-up tolerance of slack >= -0.4 ns on this Slow 85C build cannot be evaluated.
+- Worst setup path: `u_feb_system|u_qsys|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk`.
+- Worst recovery path: `lvds_firefly_clk`.
+- Timing Analyzer status: PASS as a tool phase, 0 errors and 24 warnings.
+- Timing signoff verdict: PARTIAL. Fit and SOF generation are clean, but the slow-corner setup and recovery violations remain open integration timing work.
 
 ## Blocker
 
-The over-capacity condition is localized in the regenerated data path. The current hierarchy shows:
+The previous over-capacity condition was localized in the regenerated data path. Before the rbCAM M10K fix, the failed fit hierarchy showed:
 
 | Hierarchy | ALMs needed |
 | --- | ---: |
@@ -94,8 +102,17 @@ For comparison, the read-only Apr 27 reference fit report at `firmware_builds/sy
 | `feb_system_v3_data_path_subsystem:data_path_subsystem` | 50,447.5 |
 | `ring_buffer_cam_0..3` under each hit stack | about 2,300 to 2,359 each |
 
-The current qsys generation resolves `ring_buffer_cam` from `ring-buffer_cam/script/ring_buffer_cam_hw.tcl`, whose package is version `26.2.10.0507` and emits the SystemVerilog files `ring_buffer_cam_sv_pkg.sv`, `ring_buffer_cam_fifo.sv`, `ring_buffer_cam_core.sv`, and `ring_buffer_cam.sv`. The Apr 27 fit hierarchy used the VHDL implementation `ring_buffer_cam_v2_core`. Switching that implementation or changing the Qsys/IP package selection is a functional packaging decision, so it was not silently worked around in this board-project mint.
+The failed capacity run resolved `ring_buffer_cam` from the pre-fix SystemVerilog package, whose slot arrays were implemented as registers. The Apr 27 fit hierarchy used the VHDL implementation `ring_buffer_cam_v2_core`, which kept the slot storage in M10K-backed CAM memory.
+
+The post-fix qsys generation resolves `ring_buffer_cam` from the bumped submodule revision that includes package version `26.2.11.0511` and `cam_primitive_m10k_sv.sv`. Fitter now reports 67% ALM utilization and 40% RAM block utilization, matching the expected return to block-RAM-backed slot storage.
 
 ## Verdict
 
-FAIL for FEB bring-up gate. The `histogram_statistics_v2` BOOLEAN-vs-NATURAL mismatch and stale missing-component path are resolved far enough for A&S to pass, but the compile cannot produce a `.sof`, fit summary with passing utilization, or STA summary until the `ring_buffer_cam` implementation/version selection is resolved.
+PARTIAL PASS for FEB bring-up gate.
+
+- PASS: Qsys generation.
+- PASS: Analysis & Synthesis.
+- PASS: Fitter capacity, 61,385 / 91,680 ALMs (67%).
+- PASS: Assembler and `top.sof` generation.
+- PASS: TimeQuest execution.
+- OPEN: Slow-corner setup and recovery timing closure.
