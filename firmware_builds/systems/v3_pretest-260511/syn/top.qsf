@@ -1,0 +1,7 @@
+set_global_assignment -name QIP_FILE top.qip
+set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE util/quartus/settings.tcl
+set_global_assignment -name QIP_FILE generated/include.qip
+set_global_assignment -name PRE_FLOW_SCRIPT_FILE "quartus_sh:util/quartus/pre_flow.tcl"
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
