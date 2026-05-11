@@ -1,0 +1,9 @@
+#
+
+set_global_assignment -name SDC_FILE [ file join $::quartus(qip_path) xcvr.sdc ]
+
+set_global_assignment -name VHDL_FILE [ file join $::quartus(qip_path) xcvr_block.vhd ]
+set_global_assignment -name VHDL_FILE [ file join $::quartus(qip_path) xcvr_fifo.vhd ]
+
+set_global_assignment -name VHDL_FILE [ file join $::quartus(qip_path) xcvr_base.vhd ]
+set_global_assignment -name VHDL_FILE [ file join $::quartus(qip_path) xcvr_enh.vhd ]

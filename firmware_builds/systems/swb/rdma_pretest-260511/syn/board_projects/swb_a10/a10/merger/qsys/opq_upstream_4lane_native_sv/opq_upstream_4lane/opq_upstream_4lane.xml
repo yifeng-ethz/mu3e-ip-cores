@@ -1,0 +1,952 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy
+ date="2026.05.11.12:45:24"
+ outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/">
+ <perimeter>
+  <parameter
+     name="AUTO_GENERATION_ID"
+     type="Integer"
+     defaultValue="0"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_UNIQUE_ID"
+     type="String"
+     defaultValue=""
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_FAMILY"
+     type="String"
+     defaultValue="Arria 10"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE"
+     type="String"
+     defaultValue="10AS066H1F34E1SG"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_DEVICE_SPEEDGRADE"
+     type="String"
+     defaultValue="1"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_CLOCK_RATE"
+     type="Long"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_CLOCK_DOMAIN"
+     type="Integer"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <parameter
+     name="AUTO_CLK_RESET_DOMAIN"
+     type="Integer"
+     defaultValue="-1"
+     onHdl="0"
+     affectsHdl="1" />
+  <interface name="clk" kind="clock" start="0">
+   <property name="clockRate" value="0" />
+   <property name="externallyDriven" value="false" />
+   <property name="ptfSchematicName" value="" />
+   <port name="clk_clk" direction="input" role="clk" width="1" />
+  </interface>
+  <interface name="egress" kind="avalon_streaming" start="1">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="36" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="hit_err,shd_err,hdr_err" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="0" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port
+       name="egress_startofpacket"
+       direction="output"
+       role="startofpacket"
+       width="1" />
+   <port
+       name="egress_endofpacket"
+       direction="output"
+       role="endofpacket"
+       width="1" />
+   <port name="egress_valid" direction="output" role="valid" width="1" />
+   <port name="egress_ready" direction="input" role="ready" width="1" />
+   <port name="egress_error" direction="output" role="error" width="3" />
+   <port name="egress_data" direction="output" role="data" width="36" />
+  </interface>
+  <interface name="ingress_0" kind="avalon_streaming" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="36" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="hit_err,shd_err,hdr_err" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="3" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="ingress_0_channel" direction="input" role="channel" width="2" />
+   <port
+       name="ingress_0_startofpacket"
+       direction="input"
+       role="startofpacket"
+       width="1" />
+   <port
+       name="ingress_0_endofpacket"
+       direction="input"
+       role="endofpacket"
+       width="1" />
+   <port name="ingress_0_data" direction="input" role="data" width="36" />
+   <port name="ingress_0_valid" direction="input" role="valid" width="1" />
+   <port name="ingress_0_error" direction="input" role="error" width="3" />
+  </interface>
+  <interface name="ingress_1" kind="avalon_streaming" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="36" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="hit_err,shd_err,hdr_err" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="3" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="ingress_1_channel" direction="input" role="channel" width="2" />
+   <port
+       name="ingress_1_startofpacket"
+       direction="input"
+       role="startofpacket"
+       width="1" />
+   <port
+       name="ingress_1_endofpacket"
+       direction="input"
+       role="endofpacket"
+       width="1" />
+   <port name="ingress_1_data" direction="input" role="data" width="36" />
+   <port name="ingress_1_valid" direction="input" role="valid" width="1" />
+   <port name="ingress_1_error" direction="input" role="error" width="3" />
+  </interface>
+  <interface name="ingress_2" kind="avalon_streaming" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="36" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="hit_err,shd_err,hdr_err" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="3" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="ingress_2_channel" direction="input" role="channel" width="2" />
+   <port
+       name="ingress_2_startofpacket"
+       direction="input"
+       role="startofpacket"
+       width="1" />
+   <port
+       name="ingress_2_endofpacket"
+       direction="input"
+       role="endofpacket"
+       width="1" />
+   <port name="ingress_2_data" direction="input" role="data" width="36" />
+   <port name="ingress_2_valid" direction="input" role="valid" width="1" />
+   <port name="ingress_2_error" direction="input" role="error" width="3" />
+  </interface>
+  <interface name="ingress_3" kind="avalon_streaming" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="associatedReset" value="reset" />
+   <property name="beatsPerCycle" value="1" />
+   <property name="dataBitsPerSymbol" value="36" />
+   <property name="emptyWithinPacket" value="false" />
+   <property name="errorDescriptor" value="hit_err,shd_err,hdr_err" />
+   <property name="firstSymbolInHighOrderBits" value="true" />
+   <property name="highOrderSymbolAtMSB" value="false" />
+   <property name="maxChannel" value="3" />
+   <property name="packetDescription" value="" />
+   <property name="readyLatency" value="0" />
+   <property name="symbolsPerBeat" value="1" />
+   <port name="ingress_3_channel" direction="input" role="channel" width="2" />
+   <port
+       name="ingress_3_startofpacket"
+       direction="input"
+       role="startofpacket"
+       width="1" />
+   <port
+       name="ingress_3_endofpacket"
+       direction="input"
+       role="endofpacket"
+       width="1" />
+   <port name="ingress_3_data" direction="input" role="data" width="36" />
+   <port name="ingress_3_valid" direction="input" role="valid" width="1" />
+   <port name="ingress_3_error" direction="input" role="error" width="3" />
+  </interface>
+  <interface name="reset" kind="reset" start="0">
+   <property name="associatedClock" value="clk" />
+   <property name="synchronousEdges" value="DEASSERT" />
+   <port name="reset_reset" direction="input" role="reset" width="1" />
+  </interface>
+ </perimeter>
+ <entity kind="opq_upstream_4lane" version="1.0" name="opq_upstream_4lane">
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_GENERATION_ID" value="1778496324" />
+  <parameter name="AUTO_DEVICE" value="10AS066H1F34E1SG" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_UNIQUE_ID" value="" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="1" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_mm_interconnect_181/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_avalon_master_181/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/synth/opq_upstream_4lane.vhd"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_mm_interconnect_181/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_avalon_master_181/synth/opq_upstream_4lane_pkg.vhd"
+       attributes="IS_CONFIGURATION_PACKAGE" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/synth/opq_upstream_4lane.vhd"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane.qsys" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_jtag_avalon_master/altera_jtag_avalon_master_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/ordered_priority_queue_native_sv_fixed4_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_mm_interconnect/altera_mm_interconnect_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_translator/altera_merlin_master_translator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+  </childSourceFiles>
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_bytes_to_packets"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_packets_to_master"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_packets_to_bytes"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_jtag_interface"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_xiycpqq"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: ordered_priority_queue_dut_sv"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_slave_translator"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_master_translator"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_jtag_avalon_master"
+   version="18.1"
+   name="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy">
+  <parameter name="FAST_VER" value="1" />
+  <parameter name="AUTO_DEVICE" value="10AS066H1F34E1SG" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
+  <parameter name="USE_PLI" value="0" />
+  <parameter name="PLI_PORT" value="50000" />
+  <parameter name="COMPONENT_CLOCK" value="0" />
+  <parameter name="FIFO_DEPTHS" value="2" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="1" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_avalon_master_181/synth/opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_avalon_master_181/synth/opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy_cfg.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_avalon_master_181/synth/opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_avalon_master_181/synth/opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy_cfg.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_jtag_avalon_master/altera_jtag_avalon_master_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+  </childSourceFiles>
+  <instantiator instantiator="opq_upstream_4lane" as="csr_jtag_master" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_bytes_to_packets"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_packets_to_master"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_packets_to_bytes"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_jtag_interface"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_xiycpqq"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="ordered_priority_queue_native_sv_fixed4"
+   version="26.5.0.430"
+   name="ordered_priority_queue_dut_sv">
+  <parameter name="VERSION_GIT" value="1332117425" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="BUILD" value="430" />
+  <parameter name="VERSION_DATE" value="20260430" />
+  <parameter name="IP_UID" value="1330663757" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_dut_sv.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_block_path.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_frame_table_presenter.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_basic_presenter.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_frame_table_tracker.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_ingress_parser.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_page_allocator.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/handle_fifo.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/lane_fifo.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/page_ram.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ticket_fifo.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/vendor/alt_ram/frame_table.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/vendor/alt_ram/tile_fifo.v"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_dut_sv.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_block_path.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_frame_table_presenter.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_basic_presenter.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_frame_table_tracker.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_ingress_parser.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_page_allocator.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/handle_fifo.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/lane_fifo.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/page_ram.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ticket_fifo.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/vendor/alt_ram/frame_table.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/ordered_priority_queue_native_sv_fixed4_2650430/synth/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/rtl/sv_ver/vendor/alt_ram/tile_fifo.v"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/ordered_priority_queue_native_sv_fixed4_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator instantiator="opq_upstream_4lane" as="opq_0" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: ordered_priority_queue_dut_sv"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_mm_interconnect"
+   version="18.1"
+   name="opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq">
+  <parameter name="AUTO_DEVICE" value="10AS066H1F34E1SG" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="" />
+  <parameter
+     name="COMPOSE_CONTENTS"
+     value="add_instance {csr_jtag_master_master_translator} {altera_merlin_master_translator};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_ADDRESS_W} {32};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_DATA_W} {32};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_BURSTCOUNT_W} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_BYTEENABLE_W} {4};set_instance_parameter_value {csr_jtag_master_master_translator} {UAV_ADDRESS_W} {32};set_instance_parameter_value {csr_jtag_master_master_translator} {UAV_BURSTCOUNT_W} {3};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_READLATENCY} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_WRITE_WAIT} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_READ_WAIT} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_DATA_HOLD} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_SETUP_WAIT} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_READDATA} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_WRITEDATA} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_READ} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_WRITE} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_BEGINBURSTTRANSFER} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_BEGINTRANSFER} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_BYTEENABLE} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_CHIPSELECT} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_ADDRESS} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_BURSTCOUNT} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_DEBUGACCESS} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_CLKEN} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_READDATAVALID} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_WAITREQUEST} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_LOCK} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_READRESPONSE} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {USE_WRITERESPONSE} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_SYMBOLS_PER_WORD} {4};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_ADDRESS_SYMBOLS} {1};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_BURSTCOUNT_SYMBOLS} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_CONSTANT_BURST_BEHAVIOR} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {UAV_CONSTANT_BURST_BEHAVIOR} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_LINEWRAPBURSTS} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_MAX_PENDING_READ_TRANSACTIONS} {64};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_BURSTBOUNDARIES} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_INTERLEAVEBURSTS} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_BITS_PER_SYMBOL} {8};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_ISBIGENDIAN} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_ADDRESSGROUP} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {UAV_ADDRESSGROUP} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_REGISTEROUTGOINGSIGNALS} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_REGISTERINCOMINGSIGNALS} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {AV_ALWAYSBURSTMAXBURST} {0};set_instance_parameter_value {csr_jtag_master_master_translator} {SYNC_RESET} {0};add_instance {opq_0_csr_translator} {altera_merlin_slave_translator};set_instance_parameter_value {opq_0_csr_translator} {AV_ADDRESS_W} {9};set_instance_parameter_value {opq_0_csr_translator} {AV_DATA_W} {32};set_instance_parameter_value {opq_0_csr_translator} {UAV_DATA_W} {32};set_instance_parameter_value {opq_0_csr_translator} {AV_BURSTCOUNT_W} {1};set_instance_parameter_value {opq_0_csr_translator} {AV_BYTEENABLE_W} {4};set_instance_parameter_value {opq_0_csr_translator} {UAV_BYTEENABLE_W} {4};set_instance_parameter_value {opq_0_csr_translator} {UAV_ADDRESS_W} {32};set_instance_parameter_value {opq_0_csr_translator} {UAV_BURSTCOUNT_W} {3};set_instance_parameter_value {opq_0_csr_translator} {AV_READLATENCY} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_SETUP_WAIT} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_WRITE_WAIT} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_READ_WAIT} {1};set_instance_parameter_value {opq_0_csr_translator} {AV_DATA_HOLD} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_TIMING_UNITS} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_READDATA} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_WRITEDATA} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_READ} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_WRITE} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_BEGINBURSTTRANSFER} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_BEGINTRANSFER} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_BYTEENABLE} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_CHIPSELECT} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_ADDRESS} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_BURSTCOUNT} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_READDATAVALID} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_WAITREQUEST} {1};set_instance_parameter_value {opq_0_csr_translator} {USE_WRITEBYTEENABLE} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_LOCK} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_AV_CLKEN} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_UAV_CLKEN} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_OUTPUTENABLE} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_DEBUGACCESS} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_READRESPONSE} {0};set_instance_parameter_value {opq_0_csr_translator} {USE_WRITERESPONSE} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_SYMBOLS_PER_WORD} {4};set_instance_parameter_value {opq_0_csr_translator} {AV_ADDRESS_SYMBOLS} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_BURSTCOUNT_SYMBOLS} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_CONSTANT_BURST_BEHAVIOR} {0};set_instance_parameter_value {opq_0_csr_translator} {UAV_CONSTANT_BURST_BEHAVIOR} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_REQUIRE_UNALIGNED_ADDRESSES} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_LINEWRAPBURSTS} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_MAX_PENDING_READ_TRANSACTIONS} {1};set_instance_parameter_value {opq_0_csr_translator} {AV_MAX_PENDING_WRITE_TRANSACTIONS} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_BURSTBOUNDARIES} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_INTERLEAVEBURSTS} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_BITS_PER_SYMBOL} {8};set_instance_parameter_value {opq_0_csr_translator} {AV_ISBIGENDIAN} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_ADDRESSGROUP} {0};set_instance_parameter_value {opq_0_csr_translator} {UAV_ADDRESSGROUP} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_REGISTEROUTGOINGSIGNALS} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_REGISTERINCOMINGSIGNALS} {0};set_instance_parameter_value {opq_0_csr_translator} {AV_ALWAYSBURSTMAXBURST} {0};set_instance_parameter_value {opq_0_csr_translator} {CHIPSELECT_THROUGH_READLATENCY} {0};add_instance {csr_jtag_master_clk_reset_reset_bridge} {altera_reset_bridge};set_instance_parameter_value {csr_jtag_master_clk_reset_reset_bridge} {ACTIVE_LOW_RESET} {0};set_instance_parameter_value {csr_jtag_master_clk_reset_reset_bridge} {SYNCHRONOUS_EDGES} {deassert};set_instance_parameter_value {csr_jtag_master_clk_reset_reset_bridge} {NUM_RESET_OUTPUTS} {1};set_instance_parameter_value {csr_jtag_master_clk_reset_reset_bridge} {USE_RESET_REQUEST} {0};add_instance {opq_0_rst_interface_reset_bridge} {altera_reset_bridge};set_instance_parameter_value {opq_0_rst_interface_reset_bridge} {ACTIVE_LOW_RESET} {0};set_instance_parameter_value {opq_0_rst_interface_reset_bridge} {SYNCHRONOUS_EDGES} {deassert};set_instance_parameter_value {opq_0_rst_interface_reset_bridge} {NUM_RESET_OUTPUTS} {1};set_instance_parameter_value {opq_0_rst_interface_reset_bridge} {USE_RESET_REQUEST} {0};add_instance {csr_jtag_master_master_translator_reset_reset_bridge} {altera_reset_bridge};set_instance_parameter_value {csr_jtag_master_master_translator_reset_reset_bridge} {ACTIVE_LOW_RESET} {0};set_instance_parameter_value {csr_jtag_master_master_translator_reset_reset_bridge} {SYNCHRONOUS_EDGES} {deassert};set_instance_parameter_value {csr_jtag_master_master_translator_reset_reset_bridge} {NUM_RESET_OUTPUTS} {1};set_instance_parameter_value {csr_jtag_master_master_translator_reset_reset_bridge} {USE_RESET_REQUEST} {0};add_instance {clk_bridge_out_clk_clock_bridge} {altera_clock_bridge};set_instance_parameter_value {clk_bridge_out_clk_clock_bridge} {EXPLICIT_CLOCK_RATE} {0};set_instance_parameter_value {clk_bridge_out_clk_clock_bridge} {NUM_CLOCK_OUTPUTS} {1};add_connection {csr_jtag_master_master_translator.avalon_universal_master_0} {opq_0_csr_translator.avalon_universal_slave_0} {avalon};set_connection_parameter_value {csr_jtag_master_master_translator.avalon_universal_master_0/opq_0_csr_translator.avalon_universal_slave_0} {arbitrationPriority} {1};set_connection_parameter_value {csr_jtag_master_master_translator.avalon_universal_master_0/opq_0_csr_translator.avalon_universal_slave_0} {baseAddress} {0x0000};set_connection_parameter_value {csr_jtag_master_master_translator.avalon_universal_master_0/opq_0_csr_translator.avalon_universal_slave_0} {defaultConnection} {false};add_connection {csr_jtag_master_master_translator_reset_reset_bridge.out_reset} {csr_jtag_master_master_translator.reset} {reset};add_connection {csr_jtag_master_master_translator_reset_reset_bridge.out_reset} {opq_0_csr_translator.reset} {reset};add_connection {clk_bridge_out_clk_clock_bridge.out_clk} {csr_jtag_master_master_translator.clk} {clock};add_connection {clk_bridge_out_clk_clock_bridge.out_clk} {opq_0_csr_translator.clk} {clock};add_connection {clk_bridge_out_clk_clock_bridge.out_clk} {csr_jtag_master_clk_reset_reset_bridge.clk} {clock};add_connection {clk_bridge_out_clk_clock_bridge.out_clk} {opq_0_rst_interface_reset_bridge.clk} {clock};add_connection {clk_bridge_out_clk_clock_bridge.out_clk} {csr_jtag_master_master_translator_reset_reset_bridge.clk} {clock};add_interface {clk_bridge_out_clk} {clock} {slave};set_interface_property {clk_bridge_out_clk} {EXPORT_OF} {clk_bridge_out_clk_clock_bridge.in_clk};add_interface {csr_jtag_master_clk_reset_reset_bridge_in_reset} {reset} {slave};set_interface_property {csr_jtag_master_clk_reset_reset_bridge_in_reset} {EXPORT_OF} {csr_jtag_master_clk_reset_reset_bridge.in_reset};add_interface {csr_jtag_master_master_translator_reset_reset_bridge_in_reset} {reset} {slave};set_interface_property {csr_jtag_master_master_translator_reset_reset_bridge_in_reset} {EXPORT_OF} {csr_jtag_master_master_translator_reset_reset_bridge.in_reset};add_interface {opq_0_rst_interface_reset_bridge_in_reset} {reset} {slave};set_interface_property {opq_0_rst_interface_reset_bridge_in_reset} {EXPORT_OF} {opq_0_rst_interface_reset_bridge.in_reset};add_interface {csr_jtag_master_master} {avalon} {slave};set_interface_property {csr_jtag_master_master} {EXPORT_OF} {csr_jtag_master_master_translator.avalon_anti_master_0};add_interface {opq_0_csr} {avalon} {master};set_interface_property {opq_0_csr} {EXPORT_OF} {opq_0_csr_translator.avalon_anti_slave_0};set_module_assignment {interconnect_id.csr_jtag_master.master} {0};set_module_assignment {interconnect_id.opq_0.csr} {0};" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_mm_interconnect_181/synth/opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_mm_interconnect_181/synth/opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq_cfg.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_mm_interconnect_181/synth/opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_mm_interconnect_181/synth/opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq_cfg.v"
+       attributes="CONTAINS_INLINE_CONFIGURATION" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_mm_interconnect/altera_mm_interconnect_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_translator/altera_merlin_master_translator_hw.tcl" />
+  </childSourceFiles>
+  <instantiator instantiator="opq_upstream_4lane" as="mm_interconnect_0" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_slave_translator"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_master_translator"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_reset_controller"
+   version="18.1"
+   name="altera_reset_controller">
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/altera_reset_controller.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/altera_reset_synchronizer.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/altera_reset_controller.sdc"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/altera_reset_controller.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/altera_reset_synchronizer.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_reset_controller_181/synth/altera_reset_controller.sdc"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="rst_controller" />
+  <instantiator instantiator="opq_upstream_4lane" as="rst_controller" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_jtag_dc_streaming"
+   version="18.1"
+   name="altera_avalon_st_jtag_interface">
+  <parameter name="UPSTREAM_FIFO_SIZE" value="0" />
+  <parameter name="USE_DOWNSTREAM_READY" value="0" />
+  <parameter name="FABRIC" value="2.0" />
+  <parameter name="DOWNSTREAM_FIFO_SIZE" value="64" />
+  <parameter name="MGMT_CHANNEL_WIDTH" value="-1" />
+  <parameter name="PURPOSE" value="1" />
+  <parameter name="USE_PLI" value="0" />
+  <parameter name="PLI_PORT" value="50000" />
+  <parameter name="COMPONENT_CLOCK" value="0" />
+  <parameter name="EXPORT_JTAG" value="0" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_jtag_interface.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_jtag_dc_streaming.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_jtag_sld_node.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_jtag_streaming.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_clock_crosser.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_std_synchronizer_nocut.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_pipeline_base.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_idle_remover.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_idle_inserter.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_pipeline_stage.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_jtag_interface.sdc"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_jtag_interface.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_jtag_dc_streaming.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_jtag_sld_node.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_jtag_streaming.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_clock_crosser.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_std_synchronizer_nocut.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_pipeline_base.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_idle_remover.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_idle_inserter.v"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_pipeline_stage.sv"
+       attributes="" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_jtag_dc_streaming_181/synth/altera_avalon_st_jtag_interface.sdc"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="jtag_phy_embedded_in_jtag_master" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_jtag_interface"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="timing_adapter"
+   version="18.1"
+   name="opq_upstream_4lane_timing_adapter_181_v2af63i">
+  <parameter name="inErrorWidth" value="0" />
+  <parameter name="inUseValid" value="true" />
+  <parameter name="inUseReady" value="false" />
+  <parameter name="inBitsPerSymbol" value="8" />
+  <parameter name="outReadyLatency" value="0" />
+  <parameter name="inChannelWidth" value="0" />
+  <parameter name="inSymbolsPerBeat" value="1" />
+  <parameter name="inUseEmptyPort" value="NO" />
+  <parameter name="inMaxChannel" value="0" />
+  <parameter name="outUseReady" value="true" />
+  <parameter name="outUseValid" value="true" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="inUseEmpty" value="false" />
+  <parameter name="inErrorDescriptor" value="" />
+  <parameter name="inUsePackets" value="false" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/timing_adapter_181/synth/opq_upstream_4lane_timing_adapter_181_v2af63i.sv"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/timing_adapter_181/synth/opq_upstream_4lane_timing_adapter_181_v2af63i.sv"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="timing_adt" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_avalon_sc_fifo"
+   version="18.1"
+   name="altera_avalon_sc_fifo">
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_sc_fifo_181/synth/altera_avalon_sc_fifo.v"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_sc_fifo_181/synth/altera_avalon_sc_fifo.v"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="fifo" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_sc_fifo"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_avalon_st_bytes_to_packets"
+   version="18.1"
+   name="altera_avalon_st_bytes_to_packets">
+  <parameter name="CHANNEL_WIDTH_DERIVED" value="8" />
+  <parameter name="ENCODING" value="0" />
+  <parameter name="CHANNEL_WIDTH" value="8" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_st_bytes_to_packets_181/synth/altera_avalon_st_bytes_to_packets.v"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_st_bytes_to_packets_181/synth/altera_avalon_st_bytes_to_packets.v"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="b2p" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_bytes_to_packets"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_avalon_st_packets_to_bytes"
+   version="18.1"
+   name="altera_avalon_st_packets_to_bytes">
+  <parameter name="CHANNEL_WIDTH_DERIVED" value="8" />
+  <parameter name="ENCODING" value="0" />
+  <parameter name="CHANNEL_WIDTH" value="8" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_st_packets_to_bytes_181/synth/altera_avalon_st_packets_to_bytes.v"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_st_packets_to_bytes_181/synth/altera_avalon_st_packets_to_bytes.v"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="p2b" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_packets_to_bytes"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_avalon_packets_to_master"
+   version="18.1"
+   name="altera_avalon_packets_to_master">
+  <parameter name="EXPORT_MASTER_SIGNALS" value="0" />
+  <parameter name="FAST_VER" value="1" />
+  <parameter name="FIFO_WIDTHU" value="1" />
+  <parameter name="FIFO_DEPTHS" value="2" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_packets_to_master_181/synth/altera_avalon_packets_to_master.v"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_avalon_packets_to_master_181/synth/altera_avalon_packets_to_master.v"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="transacto" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_packets_to_master"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="channel_adapter"
+   version="18.1"
+   name="opq_upstream_4lane_channel_adapter_181_arrjpdi">
+  <parameter name="inErrorWidth" value="0" />
+  <parameter name="inUseReady" value="true" />
+  <parameter name="inBitsPerSymbol" value="8" />
+  <parameter name="inChannelWidth" value="8" />
+  <parameter name="inSymbolsPerBeat" value="1" />
+  <parameter name="outChannelWidth" value="0" />
+  <parameter name="inUseEmptyPort" value="AUTO" />
+  <parameter name="inMaxChannel" value="255" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="outMaxChannel" value="0" />
+  <parameter name="inUseEmpty" value="false" />
+  <parameter name="inErrorDescriptor" value="" />
+  <parameter name="inUsePackets" value="true" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/channel_adapter_181/synth/opq_upstream_4lane_channel_adapter_181_arrjpdi.sv"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/channel_adapter_181/synth/opq_upstream_4lane_channel_adapter_181_arrjpdi.sv"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="b2p_adapter" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="channel_adapter"
+   version="18.1"
+   name="opq_upstream_4lane_channel_adapter_181_xiycpqq">
+  <parameter name="inErrorWidth" value="0" />
+  <parameter name="inUseReady" value="true" />
+  <parameter name="inBitsPerSymbol" value="8" />
+  <parameter name="inChannelWidth" value="0" />
+  <parameter name="inSymbolsPerBeat" value="1" />
+  <parameter name="outChannelWidth" value="8" />
+  <parameter name="inUseEmptyPort" value="AUTO" />
+  <parameter name="inMaxChannel" value="0" />
+  <parameter name="inReadyLatency" value="0" />
+  <parameter name="outMaxChannel" value="255" />
+  <parameter name="inUseEmpty" value="false" />
+  <parameter name="inErrorDescriptor" value="" />
+  <parameter name="inUsePackets" value="true" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/channel_adapter_181/synth/opq_upstream_4lane_channel_adapter_181_xiycpqq.sv"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/channel_adapter_181/synth/opq_upstream_4lane_channel_adapter_181_xiycpqq.sv"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+     as="p2b_adapter" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_xiycpqq"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_merlin_master_translator"
+   version="18.1"
+   name="altera_merlin_master_translator">
+  <parameter name="SYNC_RESET" value="0" />
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_merlin_master_translator_181/synth/altera_merlin_master_translator.sv"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_merlin_master_translator_181/synth/altera_merlin_master_translator.sv"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_translator/altera_merlin_master_translator_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq"
+     as="csr_jtag_master_master_translator" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_master_translator"</message>
+  </messages>
+ </entity>
+ <entity
+   kind="altera_merlin_slave_translator"
+   version="18.1"
+   name="altera_merlin_slave_translator">
+  <generatedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_merlin_slave_translator_181/synth/altera_merlin_slave_translator.sv"
+       attributes="" />
+  </generatedFiles>
+  <childGeneratedFiles>
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane/altera_merlin_slave_translator_181/synth/altera_merlin_slave_translator.sv"
+       attributes="" />
+  </childGeneratedFiles>
+  <sourceFiles>
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+  </sourceFiles>
+  <childSourceFiles/>
+  <instantiator
+     instantiator="opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq"
+     as="opq_0_csr_translator" />
+  <messages>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_slave_translator"</message>
+  </messages>
+ </entity>
+</deploy>

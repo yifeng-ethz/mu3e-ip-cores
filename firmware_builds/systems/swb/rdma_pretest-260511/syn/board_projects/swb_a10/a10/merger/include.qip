@@ -1,0 +1,13 @@
+#
+
+set opq_qsys_qip [ file join $::quartus(qip_path) "qsys/opq_upstream_4lane_native_sv/generated/opq_upstream_4lane.qip" ]
+if { [ file exists $opq_qsys_qip ] } {
+    set_global_assignment -name QIP_FILE $opq_qsys_qip
+}
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain \
+    "*.vhd" \
+] ] {
+    if { [ string match "*_tb.vhd" $f ] } { continue }
+    set_global_assignment -name VHDL_FILE "$f"
+}

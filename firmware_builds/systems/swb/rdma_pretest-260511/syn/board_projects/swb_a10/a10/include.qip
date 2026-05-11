@@ -1,0 +1,14 @@
+#
+
+foreach path [ lsort [ glob -directory $::quartus(qip_path) -nocomplain {*}"
+    ./*.vhd
+    ./*.sdc
+    link/include.qip
+    pcieapp/include.qip
+    xcvr/include.qip
+    merger/include.qip
+" ] ] {
+    set_global_assignment -name [ dict get {
+        .qip QIP_FILE .sdc SDC_FILE .tcl SOURCE_TCL_SCRIPT_FILE .vhd VHDL_FILE
+    } [ file extension $path ] ] $path
+}

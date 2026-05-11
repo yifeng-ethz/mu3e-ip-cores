@@ -1,0 +1,75 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane --family="Arria 10" --part=10AS066H1F34E1SG
+Progress: Loading opq_upstream_4lane_native_sv/opq_upstream_4lane.qsys
+Progress: Reading input file
+Progress: Adding clk_bridge [altera_clock_bridge 18.1]
+Progress: Parameterizing module clk_bridge
+Progress: Adding csr_jtag_master [altera_jtag_avalon_master 18.1]
+Progress: Parameterizing module csr_jtag_master
+Progress: Adding opq_0 [ordered_priority_queue_native_sv_fixed4 26.5.0.430]
+Progress: Parameterizing module opq_0
+Progress: Adding reset_bridge [altera_reset_bridge 18.1]
+Progress: Parameterizing module reset_bridge
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Info: opq_upstream_4lane: "Transforming system: opq_upstream_4lane"
+Info: opq_upstream_4lane: Running transform generation_view_transform
+Info: opq_upstream_4lane: Running transform generation_view_transform took 0.000s
+Info: clk_bridge: Running transform generation_view_transform
+Info: clk_bridge: Running transform generation_view_transform took 0.000s
+Info: csr_jtag_master: Running transform generation_view_transform
+Info: csr_jtag_master: Running transform generation_view_transform took 0.000s
+Info: opq_0: Running transform generation_view_transform
+Info: opq_0: Running transform generation_view_transform took 0.000s
+Info: reset_bridge: Running transform generation_view_transform
+Info: reset_bridge: Running transform generation_view_transform took 0.000s
+Info: clk_src: Running transform generation_view_transform
+Info: clk_src: Running transform generation_view_transform took 0.000s
+Info: clk_rst: Running transform generation_view_transform
+Info: clk_rst: Running transform generation_view_transform took 0.000s
+Info: jtag_phy_embedded_in_jtag_master: Running transform generation_view_transform
+Info: jtag_phy_embedded_in_jtag_master: Running transform generation_view_transform took 0.000s
+Info: timing_adt: Running transform generation_view_transform
+Info: timing_adt: Running transform generation_view_transform took 0.000s
+Info: fifo: Running transform generation_view_transform
+Info: fifo: Running transform generation_view_transform took 0.000s
+Info: b2p: Running transform generation_view_transform
+Info: b2p: Running transform generation_view_transform took 0.000s
+Info: p2b: Running transform generation_view_transform
+Info: p2b: Running transform generation_view_transform took 0.000s
+Info: transacto: Running transform generation_view_transform
+Info: transacto: Running transform generation_view_transform took 0.000s
+Info: b2p_adapter: Running transform generation_view_transform
+Info: b2p_adapter: Running transform generation_view_transform took 0.000s
+Info: p2b_adapter: Running transform generation_view_transform
+Info: p2b_adapter: Running transform generation_view_transform took 0.000s
+Info: opq_upstream_4lane: Running transform merlin_avalon_transform
+Info: Interconnect is inserted between master csr_jtag_master.master and slave opq_0.csr because the master has address signal 32 bit wide, but the slave is 9 bit wide.
+Info: Interconnect is inserted between master csr_jtag_master.master and slave opq_0.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: opq_upstream_4lane: Running transform merlin_avalon_transform took 0.214s
+Info: csr_jtag_master: Running transform merlin_avalon_transform
+Info: csr_jtag_master: Running transform merlin_avalon_transform took 0.010s
+Info: mm_interconnect_0: Running transform merlin_avalon_transform
+Info: mm_interconnect_0: Running transform merlin_avalon_transform took 0.033s
+Info: opq_upstream_4lane: "Naming system components in system: opq_upstream_4lane"
+Info: opq_upstream_4lane: "Processing generation queue"
+Info: opq_upstream_4lane: "Generating: opq_upstream_4lane"
+Info: opq_upstream_4lane: "Generating: opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"
+Info: opq_upstream_4lane: "Generating: ordered_priority_queue_dut_sv"
+Info: opq_upstream_4lane: "Generating: opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq"
+Info: opq_upstream_4lane: "Generating: altera_reset_controller"
+Info: opq_upstream_4lane: "Generating: altera_avalon_st_jtag_interface"
+Info: opq_upstream_4lane: "Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"
+Info: opq_upstream_4lane: "Generating: altera_avalon_sc_fifo"
+Info: opq_upstream_4lane: "Generating: altera_avalon_st_bytes_to_packets"
+Info: opq_upstream_4lane: "Generating: altera_avalon_st_packets_to_bytes"
+Info: opq_upstream_4lane: "Generating: altera_avalon_packets_to_master"
+Info: opq_upstream_4lane: "Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"
+Info: opq_upstream_4lane: "Generating: opq_upstream_4lane_channel_adapter_181_xiycpqq"
+Info: opq_upstream_4lane: "Generating: altera_merlin_master_translator"
+Info: opq_upstream_4lane: "Generating: altera_merlin_slave_translator"
+Info: opq_upstream_4lane: Done "opq_upstream_4lane" with 15 modules, 46 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

@@ -1,0 +1,6 @@
+config nios_flash1616_10_skpx6xq_cfg;
+		design nios_flash1616_10_skpx6xq;
+		instance nios_flash1616_10_skpx6xq.flash use nios_altera_generic_tristate_controller_181.nios_altera_generic_tristate_controller_181_mhllmlq;
+		instance nios_flash1616_10_skpx6xq.flash_bridge use nios_altera_tristate_conduit_bridge_181.nios_altera_tristate_conduit_bridge_181_opfpgwa;
+endconfig
+

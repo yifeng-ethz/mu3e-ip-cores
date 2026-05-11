@@ -1,0 +1,28 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl --family="Arria 10" --part=10AX115N2F45E1SG
+Progress: Loading ip/ip_clkctrl.qsys
+Progress: Reading input file
+Progress: Adding altclkctrl_0 [altclkctrl 18.1]
+Progress: Parameterizing module altclkctrl_0
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+: ip_clkctrl.altclkctrl_0: Targeting device family: Arria 10.
+: ip_clkctrl.altclkctrl_0: Selecting AUTO allows the compiler to pick the best clock buffer to use, while other values restrict usage to only the given clock buffer.
+: ip_clkctrl.altclkctrl_0: The register mode of port 'ena' is unavailable while 'ena' port not added. 
+Info: ip_clkctrl: "Transforming system: ip_clkctrl"
+Info: ip_clkctrl: Running transform generation_view_transform
+Info: ip_clkctrl: Running transform generation_view_transform took 0.000s
+Info: altclkctrl_0: Running transform generation_view_transform
+Info: altclkctrl_0: Running transform generation_view_transform took 0.000s
+Info: ip_clkctrl: Running transform merlin_avalon_transform
+Info: ip_clkctrl: Running transform merlin_avalon_transform took 0.024s
+Info: ip_clkctrl: "Naming system components in system: ip_clkctrl"
+Info: ip_clkctrl: "Processing generation queue"
+Info: ip_clkctrl: "Generating: ip_clkctrl"
+Info: ip_clkctrl: "Generating: ip_clkctrl_altclkctrl_181_4ev4gqi"
+Info: altclkctrl_0: Generating top-level entity ip_clkctrl_altclkctrl_181_4ev4gqi.
+Info: ip_clkctrl: Done "ip_clkctrl" with 2 modules, 3 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

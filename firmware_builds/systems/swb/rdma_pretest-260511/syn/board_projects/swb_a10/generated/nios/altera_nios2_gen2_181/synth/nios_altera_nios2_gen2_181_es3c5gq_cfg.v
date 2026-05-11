@@ -1,0 +1,5 @@
+config nios_altera_nios2_gen2_181_es3c5gq_cfg;
+		design nios_altera_nios2_gen2_181_es3c5gq;
+		instance nios_altera_nios2_gen2_181_es3c5gq.cpu use nios_altera_nios2_gen2_unit_181.nios_altera_nios2_gen2_unit_181_u3vataq;
+endconfig
+

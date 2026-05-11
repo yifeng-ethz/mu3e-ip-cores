@@ -1,0 +1,58 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Wed Jun 18 01:03:16 2025
+[*]
+[dumpfile] "/home/debian/mu3e/online/common/firmware/a10/tb/.cache/tb_tree.ghw"
+[dumpfile_mtime] "Wed Jun 18 01:01:19 2025"
+[dumpfile_size] 91945593
+[savefile] "/home/debian/mu3e/online/common/firmware/a10/tb/tb_tree.gtkw"
+[timestart] 840583000
+[size] 1920 993
+[pos] 441 390
+*-20.900000 849300000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.tb_tree.
+[treeopen] top.tb_tree.data.
+[treeopen] top.tb_tree.e_fifo_out.
+[treeopen] top.tb_tree.gen_input[0].e_fifo.i_wdata.
+[treeopen] top.tb_tree.rx_q.[0].
+[sst_width] 452
+[signals_width] 398
+[sst_expanded] 1
+[sst_vpaned_height] 294
+@28
+top.tb_tree.clk
+@22
+#{top.tb_tree.gen_input[0].e_fifo.i_wdata.data[63:0]} top.tb_tree.gen_input[0].e_fifo.i_wdata.data[63] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[62] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[61] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[60] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[59] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[58] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[57] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[56] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[55] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[54] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[53] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[52] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[51] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[50] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[49] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[48] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[47] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[46] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[45] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[44] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[43] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[42] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[41] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[40] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[39] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[38] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[37] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[36] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[35] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[34] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[33] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[32] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[31] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[30] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[29] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[28] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[27] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[26] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[25] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[24] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[23] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[22] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[21] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[20] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[19] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[18] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[17] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[16] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[15] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[14] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[13] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[12] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[11] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[10] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[9] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[8] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[7] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[6] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[5] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[4] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[3] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[2] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[1] top.tb_tree.gen_input[0].e_fifo.i_wdata.data[0]
+#{top.tb_tree.o_farm_data.data[31:0]} top.tb_tree.o_farm_data.data[31] top.tb_tree.o_farm_data.data[30] top.tb_tree.o_farm_data.data[29] top.tb_tree.o_farm_data.data[28] top.tb_tree.o_farm_data.data[27] top.tb_tree.o_farm_data.data[26] top.tb_tree.o_farm_data.data[25] top.tb_tree.o_farm_data.data[24] top.tb_tree.o_farm_data.data[23] top.tb_tree.o_farm_data.data[22] top.tb_tree.o_farm_data.data[21] top.tb_tree.o_farm_data.data[20] top.tb_tree.o_farm_data.data[19] top.tb_tree.o_farm_data.data[18] top.tb_tree.o_farm_data.data[17] top.tb_tree.o_farm_data.data[16] top.tb_tree.o_farm_data.data[15] top.tb_tree.o_farm_data.data[14] top.tb_tree.o_farm_data.data[13] top.tb_tree.o_farm_data.data[12] top.tb_tree.o_farm_data.data[11] top.tb_tree.o_farm_data.data[10] top.tb_tree.o_farm_data.data[9] top.tb_tree.o_farm_data.data[8] top.tb_tree.o_farm_data.data[7] top.tb_tree.o_farm_data.data[6] top.tb_tree.o_farm_data.data[5] top.tb_tree.o_farm_data.data[4] top.tb_tree.o_farm_data.data[3] top.tb_tree.o_farm_data.data[2] top.tb_tree.o_farm_data.data[1] top.tb_tree.o_farm_data.data[0]
+#{top.tb_tree.farm_data.data[63:0]} top.tb_tree.farm_data.data[63] top.tb_tree.farm_data.data[62] top.tb_tree.farm_data.data[61] top.tb_tree.farm_data.data[60] top.tb_tree.farm_data.data[59] top.tb_tree.farm_data.data[58] top.tb_tree.farm_data.data[57] top.tb_tree.farm_data.data[56] top.tb_tree.farm_data.data[55] top.tb_tree.farm_data.data[54] top.tb_tree.farm_data.data[53] top.tb_tree.farm_data.data[52] top.tb_tree.farm_data.data[51] top.tb_tree.farm_data.data[50] top.tb_tree.farm_data.data[49] top.tb_tree.farm_data.data[48] top.tb_tree.farm_data.data[47] top.tb_tree.farm_data.data[46] top.tb_tree.farm_data.data[45] top.tb_tree.farm_data.data[44] top.tb_tree.farm_data.data[43] top.tb_tree.farm_data.data[42] top.tb_tree.farm_data.data[41] top.tb_tree.farm_data.data[40] top.tb_tree.farm_data.data[39] top.tb_tree.farm_data.data[38] top.tb_tree.farm_data.data[37] top.tb_tree.farm_data.data[36] top.tb_tree.farm_data.data[35] top.tb_tree.farm_data.data[34] top.tb_tree.farm_data.data[33] top.tb_tree.farm_data.data[32] top.tb_tree.farm_data.data[31] top.tb_tree.farm_data.data[30] top.tb_tree.farm_data.data[29] top.tb_tree.farm_data.data[28] top.tb_tree.farm_data.data[27] top.tb_tree.farm_data.data[26] top.tb_tree.farm_data.data[25] top.tb_tree.farm_data.data[24] top.tb_tree.farm_data.data[23] top.tb_tree.farm_data.data[22] top.tb_tree.farm_data.data[21] top.tb_tree.farm_data.data[20] top.tb_tree.farm_data.data[19] top.tb_tree.farm_data.data[18] top.tb_tree.farm_data.data[17] top.tb_tree.farm_data.data[16] top.tb_tree.farm_data.data[15] top.tb_tree.farm_data.data[14] top.tb_tree.farm_data.data[13] top.tb_tree.farm_data.data[12] top.tb_tree.farm_data.data[11] top.tb_tree.farm_data.data[10] top.tb_tree.farm_data.data[9] top.tb_tree.farm_data.data[8] top.tb_tree.farm_data.data[7] top.tb_tree.farm_data.data[6] top.tb_tree.farm_data.data[5] top.tb_tree.farm_data.data[4] top.tb_tree.farm_data.data[3] top.tb_tree.farm_data.data[2] top.tb_tree.farm_data.data[1] top.tb_tree.farm_data.data[0]
+@420
+top.tb_tree.priority
+top.tb_tree.merger_state
+top.tb_tree.last_state
+@28
+top.tb_tree.farm_data.eop
+top.tb_tree.farm_data.sop
+top.tb_tree.farm_data.t0
+top.tb_tree.farm_data.t1
+top.tb_tree.farm_data.d0
+top.tb_tree.farm_data.d1
+top.tb_tree.farm_data.sbhdr
+top.tb_tree.farm_data.dthdr
+@22
+#{top.tb_tree.eop[4:0]} top.tb_tree.eop[4] top.tb_tree.eop[3] top.tb_tree.eop[2] top.tb_tree.eop[1] top.tb_tree.eop[0]
+#{top.tb_tree.merger_rack[4:0]} top.tb_tree.merger_rack[4] top.tb_tree.merger_rack[3] top.tb_tree.merger_rack[2] top.tb_tree.merger_rack[1] top.tb_tree.merger_rack[0]
+#{top.tb_tree.sbhdr[4:0]} top.tb_tree.sbhdr[4] top.tb_tree.sbhdr[3] top.tb_tree.sbhdr[2] top.tb_tree.sbhdr[1] top.tb_tree.sbhdr[0]
+#{top.tb_tree.dthdr[4:0]} top.tb_tree.dthdr[4] top.tb_tree.dthdr[3] top.tb_tree.dthdr[2] top.tb_tree.dthdr[1] top.tb_tree.dthdr[0]
+#{top.tb_tree.merger_rack[4:0]} top.tb_tree.merger_rack[4] top.tb_tree.merger_rack[3] top.tb_tree.merger_rack[2] top.tb_tree.merger_rack[1] top.tb_tree.merger_rack[0]
+#{top.tb_tree.data.data[63:0]} top.tb_tree.data.data[63] top.tb_tree.data.data[62] top.tb_tree.data.data[61] top.tb_tree.data.data[60] top.tb_tree.data.data[59] top.tb_tree.data.data[58] top.tb_tree.data.data[57] top.tb_tree.data.data[56] top.tb_tree.data.data[55] top.tb_tree.data.data[54] top.tb_tree.data.data[53] top.tb_tree.data.data[52] top.tb_tree.data.data[51] top.tb_tree.data.data[50] top.tb_tree.data.data[49] top.tb_tree.data.data[48] top.tb_tree.data.data[47] top.tb_tree.data.data[46] top.tb_tree.data.data[45] top.tb_tree.data.data[44] top.tb_tree.data.data[43] top.tb_tree.data.data[42] top.tb_tree.data.data[41] top.tb_tree.data.data[40] top.tb_tree.data.data[39] top.tb_tree.data.data[38] top.tb_tree.data.data[37] top.tb_tree.data.data[36] top.tb_tree.data.data[35] top.tb_tree.data.data[34] top.tb_tree.data.data[33] top.tb_tree.data.data[32] top.tb_tree.data.data[31] top.tb_tree.data.data[30] top.tb_tree.data.data[29] top.tb_tree.data.data[28] top.tb_tree.data.data[27] top.tb_tree.data.data[26] top.tb_tree.data.data[25] top.tb_tree.data.data[24] top.tb_tree.data.data[23] top.tb_tree.data.data[22] top.tb_tree.data.data[21] top.tb_tree.data.data[20] top.tb_tree.data.data[19] top.tb_tree.data.data[18] top.tb_tree.data.data[17] top.tb_tree.data.data[16] top.tb_tree.data.data[15] top.tb_tree.data.data[14] top.tb_tree.data.data[13] top.tb_tree.data.data[12] top.tb_tree.data.data[11] top.tb_tree.data.data[10] top.tb_tree.data.data[9] top.tb_tree.data.data[8] top.tb_tree.data.data[7] top.tb_tree.data.data[6] top.tb_tree.data.data[5] top.tb_tree.data.data[4] top.tb_tree.data.data[3] top.tb_tree.data.data[2] top.tb_tree.data.data[1] top.tb_tree.data.data[0]
+@28
+top.tb_tree.we
+@22
+#{top.tb_tree.eop[4:0]} top.tb_tree.eop[4] top.tb_tree.eop[3] top.tb_tree.eop[2] top.tb_tree.eop[1] top.tb_tree.eop[0]
+@28
+top.tb_tree.e_fifo_out.o_almost_full
+@23
+#{top.tb_tree.e_fifo_out.o_usedw[11:0]} top.tb_tree.e_fifo_out.o_usedw[11] top.tb_tree.e_fifo_out.o_usedw[10] top.tb_tree.e_fifo_out.o_usedw[9] top.tb_tree.e_fifo_out.o_usedw[8] top.tb_tree.e_fifo_out.o_usedw[7] top.tb_tree.e_fifo_out.o_usedw[6] top.tb_tree.e_fifo_out.o_usedw[5] top.tb_tree.e_fifo_out.o_usedw[4] top.tb_tree.e_fifo_out.o_usedw[3] top.tb_tree.e_fifo_out.o_usedw[2] top.tb_tree.e_fifo_out.o_usedw[1] top.tb_tree.e_fifo_out.o_usedw[0]
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,14 @@
+#
+
+foreach path [ glob -directory $::quartus(qip_path) {*}"
+    assignments/DE5a_Net.tcl
+    top.vhd top.sdc
+    util/include.qip
+    a10/include.qip
+    a10/swb/include.qip
+    registers/include.qip
+" ] {
+    set_global_assignment -name [ dict get {
+        .qip QIP_FILE .sdc SDC_FILE .tcl SOURCE_TCL_SCRIPT_FILE .vhd VHDL_FILE
+    } [ file extension $path ] ] $path
+}

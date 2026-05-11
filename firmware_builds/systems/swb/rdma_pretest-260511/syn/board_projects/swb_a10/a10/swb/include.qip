@@ -1,0 +1,16 @@
+#
+
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "rdma_subsystem_include.qip"]
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain \
+    "*.vhd" \
+] ] {
+    if { [ string match "*_tb.vhd" $f ] } { continue }
+    set_global_assignment -name VHDL_FILE "$f"
+}
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain \
+    "*.sv" \
+] ] {
+    set_global_assignment -name SYSTEMVERILOG_FILE "$f"
+}

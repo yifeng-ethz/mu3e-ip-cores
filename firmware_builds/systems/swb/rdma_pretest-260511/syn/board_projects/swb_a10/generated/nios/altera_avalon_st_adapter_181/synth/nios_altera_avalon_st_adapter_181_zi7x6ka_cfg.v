@@ -1,0 +1,5 @@
+config nios_altera_avalon_st_adapter_181_zi7x6ka_cfg;
+		design nios_altera_avalon_st_adapter_181_zi7x6ka;
+		instance nios_altera_avalon_st_adapter_181_zi7x6ka.error_adapter_0 use nios_error_adapter_181.nios_error_adapter_181_6bjmpii;
+endconfig
+
