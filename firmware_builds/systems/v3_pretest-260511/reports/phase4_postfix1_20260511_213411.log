@@ -1,0 +1,150 @@
+===== Phase 4 Postfix-1 Retest (phase4-fix SOF) =====
+Date     : Mon 11 May 2026 09:34:11 PM UTC
+FEB SOF  : v3_pretest-260511-phase4-fix-260511
+           path: firmware_builds/systems/v3_pretest-260511-phase4-fix-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof
+           sha256: d747954b36d1745c6867887ecdab2fea77f3658c164652c7e10349a327f2b2d1
+SOF delta vs prior Phase 4 (fix-runctl-reset-260511):
+  - hist-debug-disconnect: 6 AVST debug taps to histogram_statistics removed
+    (was the -1.376 ns LVDS Setup violator)
+  - SC-WEDGE fix (runctl_mgmt_host_0 ext_hard_reset no longer resets SC plane)
+    was already in the prior Phase 4 SOF
+  Worst Setup: -0.620 ns (improved from -1.376 ns). 2/4 corners pass.
+  Does NOT include rc-readyless IP changes (commit 17e0cec8).
+SWB SOF  : rdma_pretest-260511 (ALREADY LOADED, not reflashed)
+Driver   : swb_ring_lock + sc_tool (LOCAL_CMD SC writes for run-control)
+Note     : SWB LINK_LOCKED_LOW bit 2 = 0 (FEB LVDS link not locked) ->
+           rc_tool send commands NOT reaching FEB; used LOCAL_CMD SC write as
+           fallback per TEST_PLAN section 3.3.
+
+===== Task A: Flash FEB =====
+program_feb.sh exit: 0 (success, 20s settle enforced)
+mudaq_recover_pcie exit: 0
+/dev/mudaq0: alive (mudaq module loaded, crw-rw-rw- confirmed)
+
+===== Task B: 3-probe SC sanity =====
+
+  scratch_pad_ram @ 0x00000  = 0x00000000  [rsp=OK, not 0xEEEEEEEE]
+  sc_hub_UID @ 0x0FE80       = 0x53434842  [rsp=OK, magic "SCHB" matches]
+  runctl CSR_RX_CMD_COUNT @ 0x0C00F = 0x00000000  [rsp=OK, fresh boot]
+
+SANITY: PASS (FEB alive on SC ring)
+
+===== Task C: Phase 4 Retest =====
+
+----- C.0 Pre-flight (baseline CSRs) -----
+
+  runctl STATUS @ 0x0C003    = 0x80000003  [quiescent: log_fifo_empty, host_idle, recv_idle]
+  runctl LAST_CMD @ 0x0C004  = 0x00000000  [fresh boot]
+  runctl RX_CMD_COUNT @ 0x0C00F = 0x00000000
+  histogram UID @ 0x0A900    = 0x48495354  [HIST ok]
+  histogram TOTAL_HITS @ 0x0A90D = 0x00000000
+  histogram BANK_STATUS @ 0x0A90B = 0x00000001  [active_bank=A, no flush]
+  histogram PORT_STATUS @ 0x0A90C = 0x000000FF  [all 8 FIFOs empty, expected]
+  emulator_mutrig_0 UID @ 0x08800 = 0x454D5554  [EMUT ok]
+  feb_frame_assembly_HSS0 @ 0x0B400 = 0x00000038  [feb_type=0x38 ok]
+  feb_frame_assembly_HSS0 actual @ 0x0B405 = 0x00000000
+
+----- C.1 Reset-link status (rc_tool) -----
+
+  SWB LINK_LOCKED_LOW_REGISTER_R = 0x00000F00 (bits 8..11 set = links 8..11 only)
+  Bit 2 (SciFi FEB link 2) = 0 -> LVDS link NOT locked
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042 (stale from prior Phase 3 run-prepare)
+  rc_tool commands do NOT echo back -> fallback to LOCAL_CMD SC write path
+
+----- C.2 Run-control sequence via LOCAL_CMD (SC write at 0x0C013) -----
+
+Step 1: run-prepare (0x10)
+  sc_tool write 0x0C013 = 0x00000010 -> ack=OK
+  LAST_CMD @ 0x0C004     = 0x00000010  [PASS +1]
+  RX_CMD_COUNT @ 0x0C00F = 0x00000001  [PASS 0->1]
+  STATUS @ 0x0C003       = 0x00000003
+
+Step 2: sync (0x11)
+  sc_tool write 0x0C013 = 0x00000011 -> ack=OK
+  LAST_CMD @ 0x0C004     = 0x00000011  [PASS +1]
+  RX_CMD_COUNT @ 0x0C00F = 0x00000002  [PASS 1->2]
+  STATUS @ 0x0C003       = 0x00000003
+
+Step 3: start-run (0x12)
+  sc_tool write 0x0C013 = 0x00000012 -> ack=OK
+  LAST_CMD @ 0x0C004     = 0x00000012  [PASS +1]
+  RX_CMD_COUNT @ 0x0C00F = 0x00000003  [PASS 2->3]
+  STATUS @ 0x0C003       = 0x00000003
+
+----- C.3 Immediate post-start-run reads -----
+
+  TOTAL_HITS @ 0x0A90D   = 0x00000000
+  BANK_STATUS @ 0x0A90B  = 0x00000000  [changed from 0x00000001 - initial toggle!]
+  PORT_STATUS @ 0x0A90C  = 0x000000FF  [all FIFOs still empty]
+
+----- C.4 Wait 4 seconds, re-read -----
+
+  TOTAL_HITS @ 0x0A90D   = 0x00000000  [NO HITS - FAIL]
+  BANK_STATUS @ 0x0A90B  = 0x00000001  [reset back, no further toggle]
+  PORT_STATUS @ 0x0A90C  = 0x000000FF  [unchanged]
+  LAST_INT_HITS @ 0x0A911 = 0x00000000
+  fa0 actual @ 0x0B405   = 0x00000000
+  RX_CMD_COUNT @ 0x0C00F = 0x00000003  [no spurious commands]
+  STATUS @ 0x0C003        = 0x00000003
+
+----- C.5 Additional diagnostic: dbg_mm2runctrl start-run injection -----
+
+  m2rc SENT_COUNT @ 0x08887 before = 0x00000000
+  Write dbg_mm2runctrl HOST_CMD (0x08883) = 0x00000012 (start-run) -> ack=OK
+  m2rc SENT_COUNT @ 0x08887 after  = 0x00000001
+  m2rc LAST_SENT @ 0x08888         = 0x00004A08  [RC_RUNNING state = 9'b000001000, host_cmd=0x12]
+  m2rc STATUS @ 0x08881             = 0x00000821  [local_enable=1, sticky_bad_cmd=1 pre-existing]
+
+  After 2s from m2rc start-run:
+  TOTAL_HITS @ 0x0A90D   = 0x00000000  [still 0]
+  BANK_STATUS @ 0x0A90B  = 0x00000001  [no toggle]
+  PORT_STATUS @ 0x0A90C  = 0x000000FF  [unchanged]
+
+  After ~7s total:
+  TOTAL_HITS @ 0x0A90D   = 0x00000000  [still 0 - confirmed FAIL]
+  BANK_STATUS @ 0x0A90B  = 0x00000001  [no toggle]
+  PORT_STATUS @ 0x0A90C  = 0x000000FF  [unchanged]
+  DROPPED_HITS @ 0x0A90E = 0x00000000
+
+----- C.6 End-run cleanup -----
+
+  Write LOCAL_CMD = 0x13 (end-run) -> ack=OK
+  LAST_CMD @ 0x0C004     = 0x00000013  [PASS +1]
+  RX_CMD_COUNT @ 0x0C00F = 0x00000004  [PASS 3->4]
+  STATUS @ 0x0C003       = 0x00000003
+  scratch_pad_ram @ 0x00000 = 0x00000000  [SC plane alive post-run]
+
+----- C.7 Pre/Post CSR Summary Table -----
+
+  Metric          | PRE (baseline)   | POST start-run +4s | POST end-run
+  ----------------+------------------+--------------------+----------------
+  TOTAL_HITS      | 0x00000000       | 0x00000000 (FAIL)  | 0x00000000
+  BANK_STATUS     | 0x00000001       | 0x00000001         | 0x00000001
+  PORT_STATUS     | 0x000000FF       | 0x000000FF         | 0x000000FF
+  RX_CMD_COUNT    | 0x00000000       | 0x00000003         | 0x00000004
+  LAST_CMD        | 0x00000000       | 0x00000012         | 0x00000013
+
+===== VERDICT: PHASE 4 FAIL =====
+
+TOTAL_HITS = 0, BANK_STATUS did not toggle, PORT_STATUS = 0xFF throughout.
+Same symptom as prior Phase 4 test with fix-runctl-reset-260511 SOF.
+
+Root cause analysis:
+  - hist-debug-disconnect (removing 6 AVST taps) did NOT fix PORT_STATUS=0xFF.
+  - Both runctl_mgmt_host_0 LOCAL_CMD and dbg_mm2runctrl HOST_CMD injections
+    confirmed the RUNNING state reached the run_control_splitter AVST input.
+  - Yet PORT_STATUS stayed 0xFF (all 8 ingress FIFOs empty on histogram).
+  - This confirms the rc-readyless rollout (commit 17e0cec8) is needed:
+    the auto-inserted timing_adapters on run_control_splitter outputs are
+    blocking the RC_RUNNING broadcast to the emulators.
+  - rc-readyless fix: sink USE_READY=0 eliminates auto-inserted adapters,
+    allows the splitter broadcast to reach emulator asi_ctrl unconditionally.
+
+Next action: rc-readyless bundled recompile (pending mutrig_frame_deassembly
+IP fix by parallel Sonnet subagent) -> Phase 4 retest as phase4_postfix2.
+
+Note on LVDS link: LINK_LOCKED_LOW bit 2 = 0 (FEB LVDS link not locked on SWB).
+This is a separate issue from the PORT_STATUS=0xFF symptom. The rc_tool reset-link
+path did not work in this session. LOCAL_CMD SC write was used as the fallback
+run-control injection path. The LVDS lock issue may resolve after the rc-readyless
+compile (different timing on xcvr signals) or may require separate investigation.
