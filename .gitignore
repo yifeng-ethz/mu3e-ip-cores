@@ -130,3 +130,10 @@ firmware_builds/systems/*/syn/hit_stack_system_rbcam_snoop.qsys
 firmware_builds/systems/*/syn/scifi_datapath_system_v3_pipe/
 firmware_builds/systems/*/syn/syn/
 /scripts/check_ip_lib_update.py
+
+# --- rdma_* prototype IPs (local-only, not yet submoduled) ---
+/rdma_cq_pusher
+/rdma_dma_engine
+/rdma_run_manager
+/rdma_sq_fetcher
+/rdma_subsystem

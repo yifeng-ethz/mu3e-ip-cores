@@ -118,3 +118,28 @@
 	url = git@github.com:yifeng-ethz/emulator_mutrig.git
 	branch = main
 	ignore = untracked
+[submodule "rdma_cq_pusher"]
+	path = rdma_cq_pusher
+	url = https://github.com/yifeng-ethz/rdma_cq_pusher.git
+	branch = master
+	ignore = untracked
+[submodule "rdma_dma_engine"]
+	path = rdma_dma_engine
+	url = https://github.com/yifeng-ethz/rdma_dma_engine.git
+	branch = master
+	ignore = untracked
+[submodule "rdma_run_manager"]
+	path = rdma_run_manager
+	url = https://github.com/yifeng-ethz/rdma_run_manager.git
+	branch = master
+	ignore = untracked
+[submodule "rdma_sq_fetcher"]
+	path = rdma_sq_fetcher
+	url = https://github.com/yifeng-ethz/rdma_sq_fetcher.git
+	branch = master
+	ignore = untracked
+[submodule "rdma_subsystem"]
+	path = rdma_subsystem
+	url = https://github.com/yifeng-ethz/rdma_subsystem.git
+	branch = master
+	ignore = untracked
