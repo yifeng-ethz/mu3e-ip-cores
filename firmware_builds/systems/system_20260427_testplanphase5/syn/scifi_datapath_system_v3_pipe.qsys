@@ -94,6 +94,70 @@
          type = "int";
       }
    }
+   element decoded_lane_mux_0
+   {
+      datum _sortIndex
+      {
+         value = "22";
+         type = "int";
+      }
+   }
+   element decoded_lane_mux_1
+   {
+      datum _sortIndex
+      {
+         value = "25";
+         type = "int";
+      }
+   }
+   element decoded_lane_mux_2
+   {
+      datum _sortIndex
+      {
+         value = "28";
+         type = "int";
+      }
+   }
+   element decoded_lane_mux_3
+   {
+      datum _sortIndex
+      {
+         value = "31";
+         type = "int";
+      }
+   }
+   element decoded_lane_mux_4
+   {
+      datum _sortIndex
+      {
+         value = "34";
+         type = "int";
+      }
+   }
+   element decoded_lane_mux_5
+   {
+      datum _sortIndex
+      {
+         value = "37";
+         type = "int";
+      }
+   }
+   element decoded_lane_mux_6
+   {
+      datum _sortIndex
+      {
+         value = "40";
+         type = "int";
+      }
+   }
+   element decoded_lane_mux_7
+   {
+      datum _sortIndex
+      {
+         value = "43";
+         type = "int";
+      }
+   }
    element emulator_ctrl_splitter
    {
       datum _sortIndex
@@ -352,7 +416,7 @@
    {
       datum _sortIndex
       {
-         value = "66";
+         value = "58";
          type = "int";
       }
    }
@@ -360,7 +424,7 @@
    {
       datum _sortIndex
       {
-         value = "73";
+         value = "65";
          type = "int";
       }
    }
@@ -368,7 +432,7 @@
    {
       datum _sortIndex
       {
-         value = "75";
+         value = "67";
          type = "int";
       }
    }
@@ -376,7 +440,7 @@
    {
       datum _sortIndex
       {
-         value = "74";
+         value = "66";
          type = "int";
       }
    }
@@ -384,7 +448,7 @@
    {
       datum _sortIndex
       {
-         value = "65";
+         value = "57";
          type = "int";
       }
    }
@@ -392,7 +456,7 @@
    {
       datum _sortIndex
       {
-         value = "72";
+         value = "64";
          type = "int";
       }
    }
@@ -400,7 +464,7 @@
    {
       datum _sortIndex
       {
-         value = "67";
+         value = "59";
          type = "int";
       }
    }
@@ -408,7 +472,7 @@
    {
       datum _sortIndex
       {
-         value = "68";
+         value = "60";
          type = "int";
       }
    }
@@ -416,7 +480,7 @@
    {
       datum _sortIndex
       {
-         value = "69";
+         value = "61";
          type = "int";
       }
    }
@@ -424,7 +488,7 @@
    {
       datum _sortIndex
       {
-         value = "70";
+         value = "62";
          type = "int";
       }
    }
@@ -432,7 +496,7 @@
    {
       datum _sortIndex
       {
-         value = "71";
+         value = "63";
          type = "int";
       }
    }
@@ -507,14 +571,6 @@
          type = "String";
       }
    }
-   element mutrig_datapath_subsystem_0.csr
-   {
-      datum baseAddress
-      {
-         value = "67840";
-         type = "String";
-      }
-   }
    element mutrig_datapath_subsystem_1
    {
       datum _sortIndex
@@ -533,14 +589,6 @@
       datum baseAddress
       {
          value = "6240";
-         type = "String";
-      }
-   }
-   element mutrig_datapath_subsystem_1.csr
-   {
-      datum baseAddress
-      {
-         value = "71936";
          type = "String";
       }
    }
@@ -565,14 +613,6 @@
          type = "String";
       }
    }
-   element mutrig_datapath_subsystem_2.csr
-   {
-      datum baseAddress
-      {
-         value = "76032";
-         type = "String";
-      }
-   }
    element mutrig_datapath_subsystem_3
    {
       datum _sortIndex
@@ -594,14 +634,6 @@
          type = "String";
       }
    }
-   element mutrig_datapath_subsystem_3.csr
-   {
-      datum baseAddress
-      {
-         value = "80128";
-         type = "String";
-      }
-   }
    element mutrig_datapath_subsystem_4
    {
       datum _sortIndex
@@ -615,14 +647,6 @@
       datum baseAddress
       {
          value = "296448";
-         type = "String";
-      }
-   }
-   element mutrig_datapath_subsystem_4.csr
-   {
-      datum baseAddress
-      {
-         value = "84224";
          type = "String";
       }
    }
@@ -642,14 +666,6 @@
          type = "String";
       }
    }
-   element mutrig_datapath_subsystem_5.csr
-   {
-      datum baseAddress
-      {
-         value = "88320";
-         type = "String";
-      }
-   }
    element mutrig_datapath_subsystem_6
    {
       datum _sortIndex
@@ -663,14 +679,6 @@
       datum baseAddress
       {
          value = "427520";
-         type = "String";
-      }
-   }
-   element mutrig_datapath_subsystem_6.csr
-   {
-      datum baseAddress
-      {
-         value = "92416";
          type = "String";
       }
    }
@@ -690,14 +698,6 @@
          type = "String";
       }
    }
-   element mutrig_datapath_subsystem_7.csr
-   {
-      datum baseAddress
-      {
-         value = "96512";
-         type = "String";
-      }
-   }
    element mutrig_injector_0
    {
       datum _sortIndex
@@ -712,70 +712,6 @@
       {
          value = "139264";
          type = "String";
-      }
-   }
-   element mutrig_lane_source_mux_0
-   {
-      datum _sortIndex
-      {
-         value = "57";
-         type = "int";
-      }
-   }
-   element mutrig_lane_source_mux_1
-   {
-      datum _sortIndex
-      {
-         value = "58";
-         type = "int";
-      }
-   }
-   element mutrig_lane_source_mux_2
-   {
-      datum _sortIndex
-      {
-         value = "59";
-         type = "int";
-      }
-   }
-   element mutrig_lane_source_mux_3
-   {
-      datum _sortIndex
-      {
-         value = "60";
-         type = "int";
-      }
-   }
-   element mutrig_lane_source_mux_4
-   {
-      datum _sortIndex
-      {
-         value = "61";
-         type = "int";
-      }
-   }
-   element mutrig_lane_source_mux_5
-   {
-      datum _sortIndex
-      {
-         value = "62";
-         type = "int";
-      }
-   }
-   element mutrig_lane_source_mux_6
-   {
-      datum _sortIndex
-      {
-         value = "63";
-         type = "int";
-      }
-   }
-   element mutrig_lane_source_mux_7
-   {
-      datum _sortIndex
-      {
-         value = "64";
-         type = "int";
       }
    }
    element mutrig_reset_controller_0
@@ -970,7 +906,7 @@
    dir="start" />
  <interface
    name="runctl_mgmt_host"
-   internal="run_control_splitter.in"
+   internal="run_control_mux.in0"
    type="avalon_streaming"
    dir="end" />
  <interface
@@ -1154,6 +1090,126 @@
   <parameter name="USE_STORE_FORWARD" value="0" />
  </module>
  <module
+   name="decoded_lane_mux_0"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
+   name="decoded_lane_mux_1"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
+   name="decoded_lane_mux_2"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
+   name="decoded_lane_mux_3"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
+   name="decoded_lane_mux_4"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
+   name="decoded_lane_mux_5"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
+   name="decoded_lane_mux_6"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
+   name="decoded_lane_mux_7"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="3" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="5" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
+ <module
    name="emulator_ctrl_splitter"
    kind="altera_avalon_st_splitter"
    version="18.1"
@@ -1182,14 +1238,13 @@
  <module
    name="emulator_mutrig_0"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
   <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
@@ -1197,179 +1252,172 @@
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="emulator_mutrig_1"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
-  <parameter name="ASIC_ID_DEFAULT" value="1" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
-  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="emulator_mutrig_2"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
-  <parameter name="ASIC_ID_DEFAULT" value="2" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
-  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="2" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="emulator_mutrig_3"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
-  <parameter name="ASIC_ID_DEFAULT" value="3" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
-  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="3" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="emulator_mutrig_4"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
-  <parameter name="ASIC_ID_DEFAULT" value="4" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
-  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="4" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="emulator_mutrig_5"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
-  <parameter name="ASIC_ID_DEFAULT" value="5" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
-  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="5" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="emulator_mutrig_6"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
-  <parameter name="ASIC_ID_DEFAULT" value="6" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
-  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="6" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="emulator_mutrig_7"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.2.0.502"
    enabled="1">
-  <parameter name="ASIC_ID_DEFAULT" value="7" />
-  <parameter name="BUILD" value="425" />
-  <parameter name="BYTE_STREAM_ENABLE" value="true" />
+  <parameter name="ASIC_ID_DEFAULT" value="0" />
+  <parameter name="BUILD" value="418" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
-  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
-  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="7" />
+  <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="1" />
+  <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
   <parameter name="CSR_ADDR_WIDTH" value="4" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260425" />
-  <parameter name="VERSION_GIT" value="179563176" />
+  <parameter name="VERSION_DATE" value="20260418" />
+  <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_PATCH" value="9" />
  </module>
  <module
    name="hist_post_cdc_0"
@@ -1407,25 +1455,25 @@
   <parameter name="USE_DATA" value="1" />
   <parameter name="USE_ERROR" value="0" />
   <parameter name="USE_PACKETS" value="1" />
-  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_READY" value="0" />
   <parameter name="USE_VALID" value="1" />
  </module>
  <module
    name="histogram_ingress_bridge_0"
    kind="histogram_ingress_bridge"
-   version="26.0.5.506"
+   version="26.0.5.503"
    enabled="1">
-  <parameter name="BUILD" value="502" />
+  <parameter name="BUILD" value="503" />
   <parameter name="DEFAULT_SELECT_POST" value="1" />
   <parameter name="ENABLE_POST_FORWARD" value="0" />
   <parameter name="FILTER_POST_HIT_WORDS" value="1" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1212764994" />
-  <parameter name="VERSION_DATE" value="20260502" />
+  <parameter name="VERSION_DATE" value="20260503" />
   <parameter name="VERSION_GIT" value="481097348" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="0" />
-  <parameter name="VERSION_PATCH" value="4" />
+  <parameter name="VERSION_PATCH" value="5" />
  </module>
  <module
    name="histogram_statistics_0"
@@ -1435,7 +1483,7 @@
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
   <parameter name="AVST_DATA_WIDTH" value="39" />
   <parameter name="AVS_ADDR_WIDTH" value="8" />
-  <parameter name="BUILD" value="502" />
+  <parameter name="BUILD" value="503" />
   <parameter name="CHANNELS_PER_PORT" value="32" />
   <parameter name="COAL_QUEUE_DEPTH" value="256" />
   <parameter name="DEBUG" value="0" />
@@ -1460,11 +1508,11 @@
   <parameter name="UPDATE_KEY_BIT_HI" value="34" />
   <parameter name="UPDATE_KEY_BIT_LO" value="30" />
   <parameter name="UPDATE_KEY_REPRESENTATION" value="SIGNED" />
-  <parameter name="VERSION_DATE" value="20260502" />
+  <parameter name="VERSION_DATE" value="20260503" />
   <parameter name="VERSION_GIT" value="72231161" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="8" />
+  <parameter name="VERSION_PATCH" value="10" />
  </module>
  <module
    name="hit_stack_subsystem_0"
@@ -1954,142 +2002,6 @@
   <parameter name="VERSION_PATCH" value="3" />
  </module>
  <module
-   name="mutrig_lane_source_mux_0"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="0" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
-   name="mutrig_lane_source_mux_1"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="1" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
-   name="mutrig_lane_source_mux_2"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="2" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
-   name="mutrig_lane_source_mux_3"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="3" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
-   name="mutrig_lane_source_mux_4"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="4" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
-   name="mutrig_lane_source_mux_5"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="5" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
-   name="mutrig_lane_source_mux_6"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="6" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
-   name="mutrig_lane_source_mux_7"
-   kind="mutrig_lane_source_mux"
-   version="26.2.1.503"
-   enabled="1">
-  <parameter name="BUILD" value="503" />
-  <parameter name="FIFO_DEPTH" value="4" />
-  <parameter name="INSTANCE_ID" value="7" />
-  <parameter name="IP_UID" value="1296847693" />
-  <parameter name="REAL_ALWAYS_VALID" value="1" />
-  <parameter name="SELECT_EMULATOR" value="0" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="86563757" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
- <module
    name="mutrig_reset_controller_0"
    kind="mutrig_reset_controller"
    version="1.0.8"
@@ -2167,6 +2079,21 @@
   <parameter name="USE_PACKETS" value="0" />
   <parameter name="USE_READY" value="0" />
   <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
+   name="run_control_mux"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="0" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="1" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
  </module>
  <module name="xcvr156_clock" kind="clock_source" version="18.1" enabled="1">
   <parameter name="clockFrequency" value="156250000" />
@@ -2375,154 +2302,10 @@
  <connection
    kind="avalon"
    version="18.1"
-   start="mm_pipeline_lvds_csr_low.m0"
-   end="mutrig_datapath_subsystem_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_low.m0"
-   end="mutrig_datapath_subsystem_1.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x1900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_datapath_subsystem_2.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_mutrig3.m0"
-   end="mutrig_datapath_subsystem_3.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_mutrig4_mts0.m0"
-   end="mutrig_datapath_subsystem_4.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_mutrig5.m0"
-   end="mutrig_datapath_subsystem_5.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_mutrig6.m0"
-   end="mutrig_datapath_subsystem_6.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_mutrig7.m0"
-   end="mutrig_datapath_subsystem_7.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
    start="mm_pipeline_lvds_csr_hitstack_ring.m0"
    end="mutrig_injector_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0200" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0240" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_1.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0280" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_2.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x02c0" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_3.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0300" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_4.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0340" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_5.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0380" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_6.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x03c0" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="mutrig_lane_source_mux_7.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0400" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -3024,78 +2807,6 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
-   end="mutrig_lane_source_mux_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2240" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="mutrig_lane_source_mux_1.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2280" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="mutrig_lane_source_mux_2.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x22c0" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="mutrig_lane_source_mux_3.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2300" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="mutrig_lane_source_mux_4.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2340" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="mutrig_lane_source_mux_5.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2380" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="mutrig_lane_source_mux_6.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x23c0" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="mutrig_lane_source_mux_7.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2400" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
    end="hit_stack_subsystem_0.feb_frame_assembly_csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00025000" />
@@ -3214,42 +2925,42 @@
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded0"
-   end="mutrig_lane_source_mux_0.real_in" />
+   end="decoded_lane_mux_0.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded1"
-   end="mutrig_lane_source_mux_1.real_in" />
+   end="decoded_lane_mux_1.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded2"
-   end="mutrig_lane_source_mux_2.real_in" />
+   end="decoded_lane_mux_2.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded3"
-   end="mutrig_lane_source_mux_3.real_in" />
+   end="decoded_lane_mux_3.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded4"
-   end="mutrig_lane_source_mux_4.real_in" />
+   end="decoded_lane_mux_4.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded5"
-   end="mutrig_lane_source_mux_5.real_in" />
+   end="decoded_lane_mux_5.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded6"
-   end="mutrig_lane_source_mux_6.real_in" />
+   end="decoded_lane_mux_6.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="lvds_rx_controller_pro_0.decoded7"
-   end="mutrig_lane_source_mux_7.real_in" />
+   end="decoded_lane_mux_7.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3403,8 +3114,58 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="decoded_lane_mux_0.out"
+   end="decoded_lane_fifo_0.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="decoded_lane_mux_1.out"
+   end="decoded_lane_fifo_1.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="decoded_lane_mux_2.out"
+   end="decoded_lane_fifo_2.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="decoded_lane_mux_3.out"
+   end="decoded_lane_fifo_3.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="decoded_lane_mux_4.out"
+   end="decoded_lane_fifo_4.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="decoded_lane_mux_5.out"
+   end="decoded_lane_fifo_5.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="decoded_lane_mux_6.out"
+   end="decoded_lane_fifo_6.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="decoded_lane_mux_7.out"
+   end="decoded_lane_fifo_7.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="hist_post_cdc_0.out"
    end="histogram_ingress_bridge_0.post_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="dbg_mm2runctrl_0.ctrl"
+   end="run_control_mux.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_mux.out"
+   end="run_control_splitter.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3538,103 +3299,63 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_0_filllevel"
+   start="hit_stack_subsystem_0.ring_buffer_cam_0_hit_delay"
    end="histogram_statistics_0.debug_3" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_1_filllevel"
+   start="hit_stack_subsystem_0.ring_buffer_cam_1_hit_delay"
    end="histogram_statistics_0.debug_4" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_2_filllevel"
+   start="hit_stack_subsystem_0.ring_buffer_cam_2_hit_delay"
    end="histogram_statistics_0.debug_5" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hit_stack_subsystem_0.ring_buffer_cam_3_filllevel"
+   start="hit_stack_subsystem_0.ring_buffer_cam_3_hit_delay"
    end="histogram_statistics_0.debug_6" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="mutrig_lane_source_mux_0.selected_out"
-   end="decoded_lane_fifo_0.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mutrig_lane_source_mux_1.selected_out"
-   end="decoded_lane_fifo_1.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mutrig_lane_source_mux_2.selected_out"
-   end="decoded_lane_fifo_2.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mutrig_lane_source_mux_3.selected_out"
-   end="decoded_lane_fifo_3.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mutrig_lane_source_mux_4.selected_out"
-   end="decoded_lane_fifo_4.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mutrig_lane_source_mux_5.selected_out"
-   end="decoded_lane_fifo_5.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mutrig_lane_source_mux_6.selected_out"
-   end="decoded_lane_fifo_6.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="mutrig_lane_source_mux_7.selected_out"
-   end="decoded_lane_fifo_7.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
    start="emulator_mutrig_0.tx8b1k"
-   end="mutrig_lane_source_mux_0.emu_in" />
+   end="decoded_lane_mux_0.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="emulator_mutrig_1.tx8b1k"
-   end="mutrig_lane_source_mux_1.emu_in" />
+   end="decoded_lane_mux_1.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="emulator_mutrig_2.tx8b1k"
-   end="mutrig_lane_source_mux_2.emu_in" />
+   end="decoded_lane_mux_2.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="emulator_mutrig_3.tx8b1k"
-   end="mutrig_lane_source_mux_3.emu_in" />
+   end="decoded_lane_mux_3.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="emulator_mutrig_4.tx8b1k"
-   end="mutrig_lane_source_mux_4.emu_in" />
+   end="decoded_lane_mux_4.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="emulator_mutrig_5.tx8b1k"
-   end="mutrig_lane_source_mux_5.emu_in" />
+   end="decoded_lane_mux_5.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="emulator_mutrig_6.tx8b1k"
-   end="mutrig_lane_source_mux_6.emu_in" />
+   end="decoded_lane_mux_6.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="emulator_mutrig_7.tx8b1k"
-   end="mutrig_lane_source_mux_7.emu_in" />
+   end="decoded_lane_mux_7.in1" />
  <connection
    kind="clock"
    version="18.1"
@@ -3709,6 +3430,11 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="run_control_mux.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="mux_mutrig2processor.clk" />
  <connection
    kind="clock"
@@ -3744,7 +3470,17 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="decoded_lane_fifo_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_1.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -3754,7 +3490,17 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_2.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="decoded_lane_fifo_2.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_3.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -3764,7 +3510,17 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_4.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="decoded_lane_fifo_4.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_5.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -3774,52 +3530,22 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_6.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="decoded_lane_fifo_6.clk" />
  <connection
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="decoded_lane_mux_7.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="decoded_lane_fifo_7.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_0.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_1.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_2.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_3.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_4.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_5.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_6.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="mutrig_lane_source_mux_7.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -4345,6 +4071,11 @@
    kind="reset"
    version="18.1"
    start="master_datapath.master_reset"
+   end="run_control_mux.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
    end="mux_mutrig2processor.reset" />
  <connection
    kind="reset"
@@ -4381,6 +4112,46 @@
    version="18.1"
    start="master_datapath.master_reset"
    end="emulator_inject_fanout.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_2.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_4.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="decoded_lane_mux_7.reset" />
  <connection
    kind="reset"
    version="18.1"
@@ -4461,46 +4232,6 @@
    version="18.1"
    start="master_datapath.master_reset"
    end="mts_preprocessor_0.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_0.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_1.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_2.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_3.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_4.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_5.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_6.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_lane_source_mux_7.rst" />
  <connection
    kind="reset"
    version="18.1"

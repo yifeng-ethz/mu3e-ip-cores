@@ -3,6 +3,7 @@ package require -exact qsys 16.1
 set_module_property DESCRIPTION "CSR-driven local run-control AVST source"
 set_module_property NAME dbg_mm2runctrl
 set_module_property VERSION 1.0.0
+set_module_property STATUS_DEPRECATED true
 set_module_property INTERNAL false
 set_module_property OPAQUE_ADDRESS_MAP true
 set_module_property GROUP "Mu3e Data Plane/Debug"
@@ -13,6 +14,10 @@ set_module_property EDITABLE true
 set_module_property REPORT_TO_TALKBACK false
 set_module_property ALLOW_GREYBOX_GENERATION false
 set_module_property REPORT_HIERARCHY false
+
+# Deprecated for FEB SciFi run-control injection. Use runctl_mgmt_host v26+
+# CSR_LOCAL_CMD instead; that path is shared by local JTAG and the SWB sc_hub
+# bridge and emits readyless aso_runctl_valid/data fanout.
 
 add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
 set_fileset_property QUARTUS_SYNTH TOP_LEVEL dbg_mm2runctrl

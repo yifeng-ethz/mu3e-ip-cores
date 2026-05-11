@@ -57,6 +57,16 @@ module tb_scifi_dp_v3_emu_smoke;
     localparam logic [3:0]  FA_FS_PACK      = 4'd4;
     localparam time        TB_WATCHDOG      = 2s;
 
+    localparam logic [3:0] EMU_CSR_CENTRAL        = 4'h7;
+    localparam logic [3:0] EMU_CSR_SIGNAL         = 4'h8;
+    localparam logic [3:0] EMU_CSR_BACKGROUND     = 4'h9;
+    localparam logic [3:0] EMU_CSR_MUTRIG_FORMAT  = 4'ha;
+    localparam logic [3:0] EMU_CSR_RATES          = 4'hb;
+    localparam logic [3:0] EMU_CSR_CLUSTER_FIX    = 4'hc;
+    localparam logic [3:0] EMU_CSR_CLUSTER_RANDOM = 4'hd;
+    localparam logic [3:0] EMU_CSR_PRNG_SEED      = 4'he;
+    localparam logic [38:0] HIST_BRIDGE_SAMPLE_WORD = {4'h3, 5'd17, 13'h0123, 17'h15555};
+
     localparam logic [13:0] INJECTOR_CSR_MODE         = INJECTOR_CSR_BASE + 14'd0;
     localparam logic [13:0] INJECTOR_CSR_PULSE_PERIOD = INJECTOR_CSR_BASE + 14'd5;
     localparam logic [13:0] INJECTOR_CSR_PULSE_HIGH   = INJECTOR_CSR_BASE + 14'd6;
@@ -263,6 +273,7 @@ module tb_scifi_dp_v3_emu_smoke;
     bit                trace_gen_mod_offset_seen;
     bit                lfsr_step_valid [0:32767];
     int unsigned       lfsr_step_lut [0:32767];
+    bit                hist_bridge_direct_en;
 
     typedef struct {
         longint unsigned hit_id;
@@ -287,24 +298,32 @@ module tb_scifi_dp_v3_emu_smoke;
     trace_hit_t mts_trace_q [8][$];
 
     wire [7:0] emu_hit_wr_en = {
-        dut_wrap.dut.emulator_mutrig_7.u_hit_gen.hit_wr_en,
-        dut_wrap.dut.emulator_mutrig_6.u_hit_gen.hit_wr_en,
-        dut_wrap.dut.emulator_mutrig_5.u_hit_gen.hit_wr_en,
-        dut_wrap.dut.emulator_mutrig_4.u_hit_gen.hit_wr_en,
-        dut_wrap.dut.emulator_mutrig_3.u_hit_gen.hit_wr_en,
-        dut_wrap.dut.emulator_mutrig_2.u_hit_gen.hit_wr_en,
-        dut_wrap.dut.emulator_mutrig_1.u_hit_gen.hit_wr_en,
-        dut_wrap.dut.emulator_mutrig_0.u_hit_gen.hit_wr_en
+        dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready,
+        dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready,
+        dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready,
+        dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready,
+        dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready,
+        dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready,
+        dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready,
+        dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_valid
+            && dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.lane_gen[0].u_lane_emitter.l2_wr_ready
     };
     wire [7:0] emu_frame_start = {
-        dut_wrap.dut.emulator_mutrig_7.frame_start,
-        dut_wrap.dut.emulator_mutrig_6.frame_start,
-        dut_wrap.dut.emulator_mutrig_5.frame_start,
-        dut_wrap.dut.emulator_mutrig_4.frame_start,
-        dut_wrap.dut.emulator_mutrig_3.frame_start,
-        dut_wrap.dut.emulator_mutrig_2.frame_start,
-        dut_wrap.dut.emulator_mutrig_1.frame_start,
-        dut_wrap.dut.emulator_mutrig_0.frame_start
+        dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.lane_frame_start[0],
+        dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.lane_frame_start[0],
+        dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.lane_frame_start[0],
+        dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.lane_frame_start[0],
+        dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.lane_frame_start[0],
+        dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.lane_frame_start[0],
+        dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.lane_frame_start[0],
+        dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.lane_frame_start[0]
     };
     wire [7:0] emu_hit_dispatch = {
         lane_type0_fire(7),
@@ -329,100 +348,90 @@ module tb_scifi_dp_v3_emu_smoke;
 
     function automatic logic [3:0] lane_asic_id(input int unsigned lane);
         case (lane)
-            0: return dut_wrap.dut.emulator_mutrig_0.csr_asic_id;
-            1: return dut_wrap.dut.emulator_mutrig_1.csr_asic_id;
-            2: return dut_wrap.dut.emulator_mutrig_2.csr_asic_id;
-            3: return dut_wrap.dut.emulator_mutrig_3.csr_asic_id;
-            4: return dut_wrap.dut.emulator_mutrig_4.csr_asic_id;
-            5: return dut_wrap.dut.emulator_mutrig_5.csr_asic_id;
-            6: return dut_wrap.dut.emulator_mutrig_6.csr_asic_id;
-            7: return dut_wrap.dut.emulator_mutrig_7.csr_asic_id;
+            0: return dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.cfg_asic_id_base;
+            1: return dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.cfg_asic_id_base;
+            2: return dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.cfg_asic_id_base;
+            3: return dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.cfg_asic_id_base;
+            4: return dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.cfg_asic_id_base;
+            5: return dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.cfg_asic_id_base;
+            6: return dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.cfg_asic_id_base;
+            7: return dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.cfg_asic_id_base;
             default: return '0;
         endcase
     endfunction
 
     function automatic logic [2:0] lane_tx_mode(input int unsigned lane);
         case (lane)
-            0: return dut_wrap.dut.emulator_mutrig_0.csr_tx_mode;
-            1: return dut_wrap.dut.emulator_mutrig_1.csr_tx_mode;
-            2: return dut_wrap.dut.emulator_mutrig_2.csr_tx_mode;
-            3: return dut_wrap.dut.emulator_mutrig_3.csr_tx_mode;
-            4: return dut_wrap.dut.emulator_mutrig_4.csr_tx_mode;
-            5: return dut_wrap.dut.emulator_mutrig_5.csr_tx_mode;
-            6: return dut_wrap.dut.emulator_mutrig_6.csr_tx_mode;
-            7: return dut_wrap.dut.emulator_mutrig_7.csr_tx_mode;
+            0: return dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.cfg_tx_mode;
+            1: return dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.cfg_tx_mode;
+            2: return dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.cfg_tx_mode;
+            3: return dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.cfg_tx_mode;
+            4: return dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.cfg_tx_mode;
+            5: return dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.cfg_tx_mode;
+            6: return dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.cfg_tx_mode;
+            7: return dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.cfg_tx_mode;
             default: return '0;
         endcase
     endfunction
 
     function automatic int unsigned lane_status_frame_count(input int unsigned lane);
         case (lane)
-            0: return dut_wrap.dut.emulator_mutrig_0.status_frame_count;
-            1: return dut_wrap.dut.emulator_mutrig_1.status_frame_count;
-            2: return dut_wrap.dut.emulator_mutrig_2.status_frame_count;
-            3: return dut_wrap.dut.emulator_mutrig_3.status_frame_count;
-            4: return dut_wrap.dut.emulator_mutrig_4.status_frame_count;
-            5: return dut_wrap.dut.emulator_mutrig_5.status_frame_count;
-            6: return dut_wrap.dut.emulator_mutrig_6.status_frame_count;
-            7: return dut_wrap.dut.emulator_mutrig_7.status_frame_count;
+            0: return int'(dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.lane_frame_count[0][31:0]);
+            1: return int'(dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.lane_frame_count[0][31:0]);
+            2: return int'(dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.lane_frame_count[0][31:0]);
+            3: return int'(dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.lane_frame_count[0][31:0]);
+            4: return int'(dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.lane_frame_count[0][31:0]);
+            5: return int'(dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.lane_frame_count[0][31:0]);
+            6: return int'(dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.lane_frame_count[0][31:0]);
+            7: return int'(dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.lane_frame_count[0][31:0]);
             default: return 0;
         endcase
     endfunction
 
     function automatic int unsigned lane_status_event_count(input int unsigned lane);
         case (lane)
-            0: return dut_wrap.dut.emulator_mutrig_0.status_event_count;
-            1: return dut_wrap.dut.emulator_mutrig_1.status_event_count;
-            2: return dut_wrap.dut.emulator_mutrig_2.status_event_count;
-            3: return dut_wrap.dut.emulator_mutrig_3.status_event_count;
-            4: return dut_wrap.dut.emulator_mutrig_4.status_event_count;
-            5: return dut_wrap.dut.emulator_mutrig_5.status_event_count;
-            6: return dut_wrap.dut.emulator_mutrig_6.status_event_count;
-            7: return dut_wrap.dut.emulator_mutrig_7.status_event_count;
+            0: return int'(dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.lane_l2_event_count[0]);
+            1: return int'(dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.lane_l2_event_count[0]);
+            2: return int'(dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.lane_l2_event_count[0]);
+            3: return int'(dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.lane_l2_event_count[0]);
+            4: return int'(dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.lane_l2_event_count[0]);
+            5: return int'(dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.lane_l2_event_count[0]);
+            6: return int'(dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.lane_l2_event_count[0]);
+            7: return int'(dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.lane_l2_event_count[0]);
             default: return 0;
         endcase
     endfunction
 
     function automatic int unsigned lane_visible_event_count(input int unsigned lane);
         case (lane)
-            0: return dut_wrap.dut.emulator_mutrig_0.event_count;
-            1: return dut_wrap.dut.emulator_mutrig_1.event_count;
-            2: return dut_wrap.dut.emulator_mutrig_2.event_count;
-            3: return dut_wrap.dut.emulator_mutrig_3.event_count;
-            4: return dut_wrap.dut.emulator_mutrig_4.event_count;
-            5: return dut_wrap.dut.emulator_mutrig_5.event_count;
-            6: return dut_wrap.dut.emulator_mutrig_6.event_count;
-            7: return dut_wrap.dut.emulator_mutrig_7.event_count;
+            0: return int'(dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.lane_l2_event_count[0]);
+            1: return int'(dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.lane_l2_event_count[0]);
+            2: return int'(dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.lane_l2_event_count[0]);
+            3: return int'(dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.lane_l2_event_count[0]);
+            4: return int'(dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.lane_l2_event_count[0]);
+            5: return int'(dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.lane_l2_event_count[0]);
+            6: return int'(dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.lane_l2_event_count[0]);
+            7: return int'(dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.lane_l2_event_count[0]);
             default: return 0;
         endcase
     endfunction
 
     function automatic logic [47:0] lane_hit_wr_data(input int unsigned lane);
         case (lane)
-            0: return dut_wrap.dut.emulator_mutrig_0.u_hit_gen.hit_wr_data;
-            1: return dut_wrap.dut.emulator_mutrig_1.u_hit_gen.hit_wr_data;
-            2: return dut_wrap.dut.emulator_mutrig_2.u_hit_gen.hit_wr_data;
-            3: return dut_wrap.dut.emulator_mutrig_3.u_hit_gen.hit_wr_data;
-            4: return dut_wrap.dut.emulator_mutrig_4.u_hit_gen.hit_wr_data;
-            5: return dut_wrap.dut.emulator_mutrig_5.u_hit_gen.hit_wr_data;
-            6: return dut_wrap.dut.emulator_mutrig_6.u_hit_gen.hit_wr_data;
-            7: return dut_wrap.dut.emulator_mutrig_7.u_hit_gen.hit_wr_data;
+            0: return dut_wrap.dut.emulator_mutrig_0.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
+            1: return dut_wrap.dut.emulator_mutrig_1.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
+            2: return dut_wrap.dut.emulator_mutrig_2.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
+            3: return dut_wrap.dut.emulator_mutrig_3.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
+            4: return dut_wrap.dut.emulator_mutrig_4.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
+            5: return dut_wrap.dut.emulator_mutrig_5.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
+            6: return dut_wrap.dut.emulator_mutrig_6.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
+            7: return dut_wrap.dut.emulator_mutrig_7.u_emulator_mutrig.lane_gen[0].u_lane_emitter.pending_word;
             default: return '0;
         endcase
     endfunction
 
     function automatic longint unsigned lane_true_gts8n(input int unsigned lane);
-        case (lane)
-            0: return dut_wrap.dut.emulator_mutrig_0.u_hit_gen.debug_hit_gen_gts_8n;
-            1: return dut_wrap.dut.emulator_mutrig_1.u_hit_gen.debug_hit_gen_gts_8n;
-            2: return dut_wrap.dut.emulator_mutrig_2.u_hit_gen.debug_hit_gen_gts_8n;
-            3: return dut_wrap.dut.emulator_mutrig_3.u_hit_gen.debug_hit_gen_gts_8n;
-            4: return dut_wrap.dut.emulator_mutrig_4.u_hit_gen.debug_hit_gen_gts_8n;
-            5: return dut_wrap.dut.emulator_mutrig_5.u_hit_gen.debug_hit_gen_gts_8n;
-            6: return dut_wrap.dut.emulator_mutrig_6.u_hit_gen.debug_hit_gen_gts_8n;
-            7: return dut_wrap.dut.emulator_mutrig_7.u_hit_gen.debug_hit_gen_gts_8n;
-            default: return 64'd0;
-        endcase
+        return 64'(lane_hit_wr_data(lane)[41:27]);
     endfunction
 
     function automatic bit lane_type0_fire(input int unsigned lane);
@@ -1355,18 +1364,33 @@ module tb_scifi_dp_v3_emu_smoke;
         input logic [4:0]  burst_center
     );
         logic [31:0] control_word;
-        logic [31:0] tx_word;
-        logic [31:0] burst_word;
+        logic [31:0] signal_word;
+        logic [31:0] format_word;
+        logic [31:0] cluster_fix_word;
+        logic [31:0] cluster_random_word;
+        int unsigned cluster_high;
+        logic [6:0]  cluster_high_7;
         begin
-            control_word = {28'h0, short_mode, hit_mode, 1'b1};
-            burst_word   = {19'h0, burst_center, 3'h0, burst_size};
-            tx_word      = {24'h0, index[3:0], 1'b0, 3'b000};
+            control_word = {31'h0, 1'b1};
+            signal_word  = {29'h0, 1'b0, hit_mode[1], hit_mode[0]};
+            format_word  = {26'h0, 1'b1, 3'b000, 1'b1, short_mode};
+            cluster_high = (burst_size == 0) ? 0 : burst_size - 1;
+            if (cluster_high > 127)
+                cluster_high = 127;
+            cluster_high_7 = cluster_high[6:0];
+            cluster_fix_word = {1'b0, 1'b0, 7'd0, 7'd0,
+                                1'b0, 1'b1, cluster_high_7, 7'd0};
+            cluster_random_word = {5'h0, 8'(burst_center), 8'h00,
+                                   1'b0, 2'b00, 8'(burst_size)};
 
-            emu_write32_local(index, 4'd0, control_word);
-            emu_write32_local(index, 4'd1, {noise_rate, hit_rate});
-            emu_write32_local(index, 4'd2, burst_word);
-            emu_write32_local(index, 4'd3, 32'h1bad_f00d ^ index);
-            emu_write32_local(index, 4'd4, tx_word);
+            emu_write32_local(index, EMU_CSR_CENTRAL,        control_word);
+            emu_write32_local(index, EMU_CSR_SIGNAL,         signal_word);
+            emu_write32_local(index, EMU_CSR_BACKGROUND,     32'h0000_0000);
+            emu_write32_local(index, EMU_CSR_MUTRIG_FORMAT,  format_word);
+            emu_write32_local(index, EMU_CSR_RATES,          {noise_rate, hit_rate});
+            emu_write32_local(index, EMU_CSR_CLUSTER_FIX,    cluster_fix_word);
+            emu_write32_local(index, EMU_CSR_CLUSTER_RANDOM, cluster_random_word);
+            emu_write32_local(index, EMU_CSR_PRNG_SEED,      32'h1bad_f00d ^ index);
         end
     endtask
 
@@ -1408,6 +1432,78 @@ module tb_scifi_dp_v3_emu_smoke;
             avmm_write32(INJECTOR_CSR_PULSE_PERIOD, pulse_interval_cycles);
             avmm_write32(INJECTOR_CSR_PULSE_HIGH,   pulse_high_cycles);
             avmm_write32(INJECTOR_CSR_MODE,         mode_word);
+        end
+    endtask
+
+    task automatic run_hist_bridge_direct_check;
+        begin
+            $display("TB_HIST_BRIDGE_DIRECT start");
+
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_data          = HIST_BRIDGE_SAMPLE_WORD;
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_valid         = 1'b1;
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_startofpacket = 1'b1;
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_endofpacket   = 1'b0;
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_channel       = 4'h0;
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_empty         = 1'b0;
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_error         = 1'b0;
+            force dut_wrap.dut.histogram_ingress_bridge_0_pre_out_ready       = 1'b1;
+            force dut_wrap.dut.histogram_ingress_bridge_0_hist_out_ready      = 1'b0;
+            force dut_wrap.dut.histogram_ingress_bridge_0.csr_select_post_req  = 1'b0;
+            force dut_wrap.dut.histogram_ingress_bridge_0.csr_select_post_live = 1'b0;
+
+            @(posedge clk_125);
+            #1;
+            check(
+                "Histogram bridge pre ready ignores histogram backpressure",
+                dut_wrap.dut.mts_preprocessor_0_hit_type1_out_ready === 1'b1
+            );
+            check(
+                "Histogram bridge forwards pre valid during histogram backpressure",
+                dut_wrap.dut.histogram_ingress_bridge_0_pre_out_valid === 1'b1
+            );
+            check(
+                "Histogram bridge preserves pre data during histogram backpressure",
+                dut_wrap.dut.histogram_ingress_bridge_0_pre_out_data === HIST_BRIDGE_SAMPLE_WORD
+            );
+            check(
+                "Histogram bridge drops hist valid when histogram is not ready",
+                dut_wrap.dut.histogram_ingress_bridge_0_hist_out_valid === 1'b0
+            );
+
+            force dut_wrap.dut.histogram_ingress_bridge_0_hist_out_ready = 1'b1;
+            @(posedge clk_125);
+            #1;
+            check(
+                "Histogram bridge asserts hist valid when histogram is ready",
+                dut_wrap.dut.histogram_ingress_bridge_0_hist_out_valid === 1'b1
+            );
+            check(
+                "Histogram bridge preserves hist data when histogram is ready",
+                dut_wrap.dut.histogram_ingress_bridge_0_hist_out_data === HIST_BRIDGE_SAMPLE_WORD
+            );
+
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_valid         = 1'b0;
+            force dut_wrap.dut.mts_preprocessor_0_hit_type1_out_startofpacket = 1'b0;
+            @(posedge clk_125);
+            #1;
+            check(
+                "Histogram bridge pre valid clears after direct stimulus",
+                dut_wrap.dut.histogram_ingress_bridge_0_pre_out_valid === 1'b0
+            );
+
+            release dut_wrap.dut.mts_preprocessor_0_hit_type1_out_data;
+            release dut_wrap.dut.mts_preprocessor_0_hit_type1_out_valid;
+            release dut_wrap.dut.mts_preprocessor_0_hit_type1_out_startofpacket;
+            release dut_wrap.dut.mts_preprocessor_0_hit_type1_out_endofpacket;
+            release dut_wrap.dut.mts_preprocessor_0_hit_type1_out_channel;
+            release dut_wrap.dut.mts_preprocessor_0_hit_type1_out_empty;
+            release dut_wrap.dut.mts_preprocessor_0_hit_type1_out_error;
+            release dut_wrap.dut.histogram_ingress_bridge_0_pre_out_ready;
+            release dut_wrap.dut.histogram_ingress_bridge_0_hist_out_ready;
+            release dut_wrap.dut.histogram_ingress_bridge_0.csr_select_post_req;
+            release dut_wrap.dut.histogram_ingress_bridge_0.csr_select_post_live;
+
+            $display("TB_HIST_BRIDGE_DIRECT done");
         end
     endtask
 
@@ -2866,44 +2962,44 @@ module tb_scifi_dp_v3_emu_smoke;
         end
     end
 
-    // Keep the mux-selected decoded-din ingress refreshed from the embedded
+    // Keep the decoded-lane mux emulator inputs refreshed from the embedded
     // emulators for legacy force-mode tests. This mixed-language image does
     // not retrigger SV combinational logic on the VHDL source nets reliably,
     // so refresh the force every half cycle.
     always @(negedge clk_125) begin
         if (force_decoded_din_from_emu) begin
-        force dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_valid   = dut_wrap.dut.emulator_mutrig_0_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_data    = dut_wrap.dut.emulator_mutrig_0_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_channel = dut_wrap.dut.emulator_mutrig_0_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_error   = dut_wrap.dut.emulator_mutrig_0_tx8b1k_error;
-        force dut_wrap.dut.mutrig_lane_source_mux_1_selected_out_valid   = dut_wrap.dut.emulator_mutrig_1_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_1_selected_out_data    = dut_wrap.dut.emulator_mutrig_1_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_1_selected_out_channel = dut_wrap.dut.emulator_mutrig_1_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_1_selected_out_error   = dut_wrap.dut.emulator_mutrig_1_tx8b1k_error;
-        force dut_wrap.dut.mutrig_lane_source_mux_2_selected_out_valid   = dut_wrap.dut.emulator_mutrig_2_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_2_selected_out_data    = dut_wrap.dut.emulator_mutrig_2_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_2_selected_out_channel = dut_wrap.dut.emulator_mutrig_2_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_2_selected_out_error   = dut_wrap.dut.emulator_mutrig_2_tx8b1k_error;
-        force dut_wrap.dut.mutrig_lane_source_mux_3_selected_out_valid   = dut_wrap.dut.emulator_mutrig_3_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_3_selected_out_data    = dut_wrap.dut.emulator_mutrig_3_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_3_selected_out_channel = dut_wrap.dut.emulator_mutrig_3_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_3_selected_out_error   = dut_wrap.dut.emulator_mutrig_3_tx8b1k_error;
-        force dut_wrap.dut.mutrig_lane_source_mux_4_selected_out_valid   = dut_wrap.dut.emulator_mutrig_4_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_4_selected_out_data    = dut_wrap.dut.emulator_mutrig_4_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_4_selected_out_channel = dut_wrap.dut.emulator_mutrig_4_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_4_selected_out_error   = dut_wrap.dut.emulator_mutrig_4_tx8b1k_error;
-        force dut_wrap.dut.mutrig_lane_source_mux_5_selected_out_valid   = dut_wrap.dut.emulator_mutrig_5_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_5_selected_out_data    = dut_wrap.dut.emulator_mutrig_5_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_5_selected_out_channel = dut_wrap.dut.emulator_mutrig_5_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_5_selected_out_error   = dut_wrap.dut.emulator_mutrig_5_tx8b1k_error;
-        force dut_wrap.dut.mutrig_lane_source_mux_6_selected_out_valid   = dut_wrap.dut.emulator_mutrig_6_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_6_selected_out_data    = dut_wrap.dut.emulator_mutrig_6_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_6_selected_out_channel = dut_wrap.dut.emulator_mutrig_6_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_6_selected_out_error   = dut_wrap.dut.emulator_mutrig_6_tx8b1k_error;
-        force dut_wrap.dut.mutrig_lane_source_mux_7_selected_out_valid   = dut_wrap.dut.emulator_mutrig_7_tx8b1k_valid;
-        force dut_wrap.dut.mutrig_lane_source_mux_7_selected_out_data    = dut_wrap.dut.emulator_mutrig_7_tx8b1k_data;
-        force dut_wrap.dut.mutrig_lane_source_mux_7_selected_out_channel = dut_wrap.dut.emulator_mutrig_7_tx8b1k_channel;
-        force dut_wrap.dut.mutrig_lane_source_mux_7_selected_out_error   = dut_wrap.dut.emulator_mutrig_7_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_034_out_0_valid   = dut_wrap.dut.emulator_mutrig_0_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_034_out_0_data    = dut_wrap.dut.emulator_mutrig_0_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_034_out_0_channel = dut_wrap.dut.emulator_mutrig_0_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_034_out_0_error   = dut_wrap.dut.emulator_mutrig_0_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_035_out_0_valid   = dut_wrap.dut.emulator_mutrig_1_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_035_out_0_data    = dut_wrap.dut.emulator_mutrig_1_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_035_out_0_channel = dut_wrap.dut.emulator_mutrig_1_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_035_out_0_error   = dut_wrap.dut.emulator_mutrig_1_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_036_out_0_valid   = dut_wrap.dut.emulator_mutrig_2_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_036_out_0_data    = dut_wrap.dut.emulator_mutrig_2_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_036_out_0_channel = dut_wrap.dut.emulator_mutrig_2_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_036_out_0_error   = dut_wrap.dut.emulator_mutrig_2_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_037_out_0_valid   = dut_wrap.dut.emulator_mutrig_3_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_037_out_0_data    = dut_wrap.dut.emulator_mutrig_3_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_037_out_0_channel = dut_wrap.dut.emulator_mutrig_3_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_037_out_0_error   = dut_wrap.dut.emulator_mutrig_3_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_038_out_0_valid   = dut_wrap.dut.emulator_mutrig_4_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_038_out_0_data    = dut_wrap.dut.emulator_mutrig_4_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_038_out_0_channel = dut_wrap.dut.emulator_mutrig_4_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_038_out_0_error   = dut_wrap.dut.emulator_mutrig_4_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_039_out_0_valid   = dut_wrap.dut.emulator_mutrig_5_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_039_out_0_data    = dut_wrap.dut.emulator_mutrig_5_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_039_out_0_channel = dut_wrap.dut.emulator_mutrig_5_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_039_out_0_error   = dut_wrap.dut.emulator_mutrig_5_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_040_out_0_valid   = dut_wrap.dut.emulator_mutrig_6_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_040_out_0_data    = dut_wrap.dut.emulator_mutrig_6_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_040_out_0_channel = dut_wrap.dut.emulator_mutrig_6_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_040_out_0_error   = dut_wrap.dut.emulator_mutrig_6_tx8b1k_error;
+        force dut_wrap.dut.avalon_st_adapter_041_out_0_valid   = dut_wrap.dut.emulator_mutrig_7_tx8b1k_valid;
+        force dut_wrap.dut.avalon_st_adapter_041_out_0_data    = dut_wrap.dut.emulator_mutrig_7_tx8b1k_data;
+        force dut_wrap.dut.avalon_st_adapter_041_out_0_channel = dut_wrap.dut.emulator_mutrig_7_tx8b1k_channel;
+        force dut_wrap.dut.avalon_st_adapter_041_out_0_error   = dut_wrap.dut.emulator_mutrig_7_tx8b1k_error;
         end
     end
 
@@ -2928,13 +3024,13 @@ module tb_scifi_dp_v3_emu_smoke;
                             + (dut_wrap.dut.emulator_mutrig_6_tx8b1k_valid ? 1 : 0)
                             + (dut_wrap.dut.emulator_mutrig_7_tx8b1k_valid ? 1 : 0);
         lane0_mux_word_count <= lane0_mux_word_count
-                              + (dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_valid ? 1 : 0);
+                              + (dut_wrap.dut.decoded_lane_mux_0_out_valid ? 1 : 0);
         lane0_mux_k28_0_count <= lane0_mux_k28_0_count
-                               + ((dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_valid
-                                   && (dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_data == 9'h11c)) ? 1 : 0);
+                               + ((dut_wrap.dut.decoded_lane_mux_0_out_valid
+                                   && (dut_wrap.dut.decoded_lane_mux_0_out_data == 9'h11c)) ? 1 : 0);
         lane0_mux_payload_word_count <= lane0_mux_payload_word_count
-                                      + ((dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_valid
-                                          && !dut_wrap.dut.mutrig_lane_source_mux_0_selected_out_data[8]) ? 1 : 0);
+                                      + ((dut_wrap.dut.decoded_lane_mux_0_out_valid
+                                          && !dut_wrap.dut.decoded_lane_mux_0_out_data[8]) ? 1 : 0);
         dp_hit0_word_count <= dp_hit0_word_count
                             + (dut_wrap.dut.mutrig_datapath_subsystem_0_hit_type0_out_valid ? 1 : 0)
                             + (dut_wrap.dut.mutrig_datapath_subsystem_1_hit_type0_out_valid ? 1 : 0)
@@ -3002,6 +3098,7 @@ module tb_scifi_dp_v3_emu_smoke;
         runctl_valid  = 1'b0;
         pass_count    = 0;
         fail_count    = 0;
+        hist_bridge_direct_en = $test$plusargs("TB_DP_HIST_BRIDGE_DIRECT");
         pre_rbcam_measure_en = $test$plusargs("TB_DP_PRE_RBCAM_MEAS");
         terminal_tail_check_en = $test$plusargs("TB_DP_TERM_TAIL_CHECK");
         use_generated_runctl_fanout = $test$plusargs("TB_DP_USE_GENERATED_RUNCTL_FANOUT");
@@ -3097,9 +3194,9 @@ module tb_scifi_dp_v3_emu_smoke;
             $display("TB_RUNCTL using forced run-control fanout bypass");
         end
         if (force_decoded_din_from_emu)
-            $display("TB_DECODED_DIN using forced emulator-to-deassembly bypass");
+            $display("TB_DECODED_DIN using forced emulator-to-decoded-mux input refresh");
         else
-            $display("TB_DECODED_DIN using generated lane_source_mux direct path");
+            $display("TB_DECODED_DIN using generated emulator adapter path");
         force_histogram_ready_paths();
         force_avmm_idle_seams();
         bind_emulator_local_csr_forces();
@@ -3117,7 +3214,9 @@ module tb_scifi_dp_v3_emu_smoke;
         repeat (64) @(posedge clk_125);
         #(STARTUP_SETTLE);
 
-        if (terminal_tail_check_en) begin
+        if (hist_bridge_direct_en) begin
+            run_hist_bridge_direct_check();
+        end else if (terminal_tail_check_en) begin
             run_terminal_tail_check();
         end else if (pre_rbcam_measure_en) begin
             configure_all_emulators_profile();

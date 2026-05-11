@@ -247,11 +247,13 @@ proc compose {} {
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_UNIQUE_ID">mutrig_datapath_system_lvdserr_count_subsystem</parameter>
  </module>
- <module name="mutrig_frame_deassembly_0" kind="mutrig_frame_deassembly" version="26.1.0.506" enabled="1">
-  <parameter name="CHANNEL_WIDTH" value="4" />
+ <module name="mutrig_frame_deassembly_0" kind="mutrig_frame_deassembly" version="26.0.6.0418" enabled="1">
+ <parameter name="CHANNEL_WIDTH" value="4" />
   <parameter name="CSR_ADDR_WIDTH" value="2" />
   <parameter name="DEBUG_LV" value="0" />
+  <parameter name="GIT_STAMP_OVERRIDE" value="true" />
   <parameter name="MODE_HALT" value="0" />
+  <parameter name="VERSION_GIT" value="30068584" />
  </module>
  <module name="system_clock_reset_interface" kind="clock_source" version="18.1" enabled="1">
   <parameter name="clockFrequency" value="125000000" />

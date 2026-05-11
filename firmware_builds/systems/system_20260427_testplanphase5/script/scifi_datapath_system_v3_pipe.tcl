@@ -34,6 +34,17 @@ set script_dir [file join $system_root script]
 set syn_dir [file join $system_root syn]
 load_system [file join $syn_dir scifi_datapath_system_v3.qsys]
 
+proc env_flag_enabled {name default_value} {
+    if {![info exists ::env($name)]} {
+        return $default_value
+    }
+    if {$::env($name) eq ""} {
+        return $default_value
+    }
+    set value [string tolower $::env($name)]
+    return [expr {$value in {1 true yes on enable enabled}}]
+}
+
 # The FEB top-level run-control fanout is a broadcast path. It must not
 # depend on every downstream branch asserting ready, otherwise one blocked
 # datapath consumer can stall the run-control command globally.
@@ -48,18 +59,23 @@ set_instance_parameter_value histogram_ingress_bridge_0 DEFAULT_SELECT_POST 1
 set_instance_parameter_value histogram_ingress_bridge_0 FILTER_POST_HIT_WORDS 1
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MAJOR 26
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MINOR 0
-set_instance_parameter_value histogram_ingress_bridge_0 VERSION_PATCH 4
-set_instance_parameter_value histogram_ingress_bridge_0 BUILD 502
-set_instance_parameter_value histogram_ingress_bridge_0 VERSION_DATE 20260502
+set_instance_parameter_value histogram_ingress_bridge_0 VERSION_PATCH 5
+set_instance_parameter_value histogram_ingress_bridge_0 BUILD 503
+set_instance_parameter_value histogram_ingress_bridge_0 VERSION_DATE 20260503
 set_instance_parameter_value histogram_ingress_bridge_0 VERSION_GIT 481097348
+if {[lsearch -exact [get_instances] hist_post_splitter_0] >= 0} {
+    # The post-rbCAM histogram tap is diagnostic only.  It must not
+    # backpressure the primary hit-stack/frame-assembly stream.
+    set_instance_parameter_value hist_post_splitter_0 USE_READY 0
+}
 set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_HI 34
 set_instance_parameter_value histogram_statistics_0 UPDATE_KEY_BIT_LO 30
 set_instance_parameter_value histogram_statistics_0 N_DEBUG_INTERFACE 6
 set_instance_parameter_value histogram_statistics_0 VERSION_MAJOR 26
 set_instance_parameter_value histogram_statistics_0 VERSION_MINOR 1
-set_instance_parameter_value histogram_statistics_0 VERSION_PATCH 8
-set_instance_parameter_value histogram_statistics_0 BUILD 502
-set_instance_parameter_value histogram_statistics_0 VERSION_DATE 20260502
+set_instance_parameter_value histogram_statistics_0 VERSION_PATCH 10
+set_instance_parameter_value histogram_statistics_0 BUILD 503
+set_instance_parameter_value histogram_statistics_0 VERSION_DATE 20260503
 
 # The emulator source was fixed to remove the obsolete pre-CRC delay byte.
 # Keep the pipe integration metadata explicit so Qsys does not preserve stale
@@ -85,14 +101,8 @@ proc connection_exists {path} {
 }
 
 proc remove_connection_if_present {path} {
-    if {[connection_exists $path]} {
+    if {[lsearch -exact [get_connections] $path] >= 0} {
         remove_connection $path
-    }
-}
-
-proc add_connection_if_absent {path} {
-    if {![connection_exists $path]} {
-        add_connection $path
     }
 }
 
@@ -112,6 +122,10 @@ proc reroute_histogram_debug_inputs {} {
         hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5 \
         hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_5 \
         hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_6 \
+        hit_stack_subsystem_0.ring_buffer_cam_0_hit_delay/histogram_statistics_0.debug_3 \
+        hit_stack_subsystem_0.ring_buffer_cam_1_hit_delay/histogram_statistics_0.debug_4 \
+        hit_stack_subsystem_0.ring_buffer_cam_2_hit_delay/histogram_statistics_0.debug_5 \
+        hit_stack_subsystem_0.ring_buffer_cam_3_hit_delay/histogram_statistics_0.debug_6 \
         mts_preprocessor_0.debug_burst/histogram_statistics_0.debug_6 \
     ]
 
@@ -119,12 +133,12 @@ proc reroute_histogram_debug_inputs {} {
         remove_connection_if_present $connection
     }
 
-    add_connection_if_absent mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1
-    add_connection_if_absent mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2
-    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_0_filllevel/histogram_statistics_0.debug_3
-    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_1_filllevel/histogram_statistics_0.debug_4
-    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_2_filllevel/histogram_statistics_0.debug_5
-    add_connection_if_absent hit_stack_subsystem_0.ring_buffer_cam_3_filllevel/histogram_statistics_0.debug_6
+    add_connection mts_preprocessor_0.debug_ts/histogram_statistics_0.debug_1
+    add_connection mts_preprocessor_1.debug_ts/histogram_statistics_0.debug_2
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_0_hit_delay/histogram_statistics_0.debug_3
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_1_hit_delay/histogram_statistics_0.debug_4
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_2_hit_delay/histogram_statistics_0.debug_5
+    add_connection hit_stack_subsystem_0.ring_buffer_cam_3_hit_delay/histogram_statistics_0.debug_6
 }
 
 proc replace_decoded_lane_mux_with_source_mux {lane} {
@@ -147,9 +161,10 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
         remove_instance $new_mux
     }
 
-    add_instance $new_mux mutrig_lane_source_mux 26.2.1.503
+    add_instance $new_mux mutrig_lane_source_mux 26.2.1.0503
     set_instance_parameter_value $new_mux SELECT_EMULATOR 0
     set_instance_parameter_value $new_mux FIFO_DEPTH 4
+    set_instance_parameter_value $new_mux REAL_ALWAYS_VALID 1
     set_instance_parameter_value $new_mux INSTANCE_ID $lane
 
     if {[has_instance $emu]} {
@@ -180,8 +195,12 @@ proc replace_decoded_lane_mux_with_source_mux {lane} {
     set_connection_parameter_value master_datapath.master/$new_mux.csr defaultConnection false
 }
 
-for {set lane 0} {$lane < 8} {incr lane} {
-    replace_decoded_lane_mux_with_source_mux $lane
+if {[env_flag_enabled ENABLE_MUTRIG_BYTE_SOURCE_MUX 0]} {
+    for {set lane 0} {$lane < 8} {incr lane} {
+        replace_decoded_lane_mux_with_source_mux $lane
+    }
+} else {
+    puts "INFO: leaving decoded_lane_mux/fifo path intact; ENABLE_MUTRIG_BYTE_SOURCE_MUX=1 enables byte-stream source mux integration."
 }
 
 # Split the LVDS-side CSR fanout into smaller Avalon-MM bridge islands.
@@ -305,6 +324,36 @@ foreach reroute $reroute_connections {
     set_connection_parameter_value $bridge_name.m0/$end_point arbitrationPriority $arb_prio
     set_connection_parameter_value $bridge_name.m0/$end_point defaultConnection $default_conn
     set lvds_csr_group_used($group) 1
+}
+
+proc force_reroute_lvds_csr_connection {end_point base_addr} {
+    set direct_path mm_clock_crossing_bridge.m0/$end_point
+    if {[lsearch -exact [get_connections] $direct_path] < 0} {
+        return
+    }
+
+    set group [lvds_csr_group_for_base $base_addr]
+    set bridge_name mm_pipeline_lvds_csr_$group
+    set bridge_path $bridge_name.m0/$end_point
+    set local_base_addr [expr {$base_addr - $::lvds_csr_group_base($group)}]
+
+    remove_connection_if_present $direct_path
+    remove_connection_if_present $bridge_path
+
+    add_connection $bridge_path
+    set_connection_parameter_value $bridge_path baseAddress [format "0x%04x" $local_base_addr]
+    set_connection_parameter_value $bridge_path arbitrationPriority 1
+    set_connection_parameter_value $bridge_path defaultConnection false
+    set ::lvds_csr_group_used($group) 1
+}
+
+# Qsys can report these direct frame-deassembly CSR paths as invalid during
+# get_connection_property while still preserving them in the saved system. Move
+# them explicitly so they cannot overlap the coarse bridge apertures.
+for {set lane 0} {$lane < 8} {incr lane} {
+    force_reroute_lvds_csr_connection \
+        mutrig_datapath_subsystem_${lane}.csr \
+        [expr {0x0900 + (0x1000 * $lane)}]
 }
 
 foreach group $lvds_csr_groups {

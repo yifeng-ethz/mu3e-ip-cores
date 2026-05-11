@@ -882,7 +882,7 @@
    dir="start" />
  <interface
    name="runctl_mgmt_host"
-   internal="run_control_splitter.in"
+   internal="run_control_mux.in0"
    type="avalon_streaming"
    dir="end" />
  <interface
@@ -1846,6 +1846,21 @@
   <parameter name="USE_READY" value="1" />
   <parameter name="USE_VALID" value="1" />
  </module>
+ <module
+   name="run_control_mux"
+   kind="multiplexer"
+   version="18.1"
+   enabled="1">
+  <parameter name="bitsPerSymbol" value="9" />
+  <parameter name="errorWidth" value="0" />
+  <parameter name="numInputInterfaces" value="2" />
+  <parameter name="outChannelWidth" value="1" />
+  <parameter name="packetScheduling" value="false" />
+  <parameter name="schedulingSize" value="1" />
+  <parameter name="symbolsPerBeat" value="1" />
+  <parameter name="useHighBitsOfChannel" value="true" />
+  <parameter name="usePackets" value="false" />
+ </module>
  <module name="xcvr156_clock" kind="clock_source" version="18.1" enabled="1">
   <parameter name="clockFrequency" value="156250000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -2030,78 +2045,6 @@
    end="mts_preprocessor_1.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x8000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_1.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x1900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_2.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_3.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x3900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_4.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x4900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_5.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x5900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_6.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x6900" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mutrig_datapath_subsystem_7.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x7900" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2878,6 +2821,16 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="dbg_mm2runctrl_0.ctrl"
+   end="run_control_mux.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_mux.out"
+   end="run_control_splitter.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="run_control_splitter.out0"
    end="histogram_statistics_0.ctrl" />
  <connection
@@ -3140,6 +3093,11 @@
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
    end="run_control_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="run_control_mux.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -3666,6 +3624,11 @@
    version="18.1"
    start="master_datapath.master_reset"
    end="run_control_splitter.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="master_datapath.master_reset"
+   end="run_control_mux.reset" />
  <connection
    kind="reset"
    version="18.1"

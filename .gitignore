@@ -21,28 +21,112 @@ work/
 docs/Archive.zip
 docs/Archive/
 
-# Generated FPGA/tool output. Keep Tcl/RTL/test sources tracked; regenerate
-# Platform Designer, Quartus, simulation, and report artifacts locally.
-**/synthesis/
-**/generated/
-**/db/
-**/incremental_db/
-**/output_files/
-**/output_files*/
-**/sim/
-**/work_*/
-**/*.sof
-**/*.rbf
-**/*.pof
-**/*.jic
-**/*.qdb
-**/*.rpt
-**/*.summary
-**/*.smsg
-**/*.jdi
-**/*.pin
-**/*.qws
-firmware_builds/systems/*/tb_int/reports/
-firmware_builds/systems/*/tb_int/logs/
-firmware_builds/systems/*/tb_int/sim_*/
+# --- Build artifacts (generated; never commit) ---
+firmware_builds/systems/*/syn/*/synthesis/
+firmware_builds/systems/*/syn/*/_sw.cmd
+firmware_builds/systems/*/syn/logs/
+firmware_builds/systems/*/syn/db/
+firmware_builds/systems/*/syn/incremental_db/
+firmware_builds/systems/*/syn/output_files/
+firmware_builds/systems/*/syn/qdb/
+firmware_builds/systems/*/syn/c5_pin_model_dump.txt
+firmware_builds/systems/*/captures/*.vcd
+firmware_builds/systems/*/captures/*.stp
+firmware_builds/systems/*/captures/*.stp.bak.*
+firmware_builds/systems/*/model/phase4/inputs/
+firmware_builds/systems/*/reports/*.log
+firmware_builds/systems/*/script/__pycache__/
+.qverify/
+qverify.log
+qverify_cmds.tcl
+altera_mf/
+work/
+
+# --- Local rdma_* prototype IPs (not yet submoduled) ---
+/rdma_cq_pusher/
+/rdma_dma_engine/
+/rdma_run_manager/
+/rdma_sq_fetcher/
+/rdma_subsystem/
+
+# --- Generated Qsys / Quartus artifacts inside firmware_builds/systems/*/ ---
+firmware_builds/systems/*/syn/*.sopcinfo
+firmware_builds/systems/*/syn/*.cmp
+firmware_builds/systems/*/syn/*/feb_system_v3.html
+firmware_builds/systems/*/syn/*/feb_system_v3.xml
+firmware_builds/systems/*/syn/*/feb_system_v3_generation.rpt
+firmware_builds/systems/*/syn/*/feb_system_v3_generation_previous.rpt
+firmware_builds/systems/*/syn/*/feb_system_v3_pipe.html
+firmware_builds/systems/*/syn/*/feb_system_v3_pipe.xml
+firmware_builds/systems/*/syn/*/feb_system_v3_pipe_generation.rpt
+firmware_builds/systems/*/syn/*/feb_system_v3_pipe_generation_previous.rpt
+firmware_builds/systems/*/syn/*/scifi_datapath_system_v3_pipe.html
+firmware_builds/systems/*/syn/*/scifi_datapath_system_v3_pipe.xml
+firmware_builds/systems/*/syn/*/scifi_datapath_system_v3_pipe_generation.rpt
+firmware_builds/systems/*/syn/*/scifi_datapath_system_v3_pipe_generation_previous.rpt
+firmware_builds/systems/*/syn/board_projects/*/db/
+firmware_builds/systems/*/syn/board_projects/*/incremental_db/
+firmware_builds/systems/*/syn/board_projects/*/output_files/
+firmware_builds/systems/*/syn/board_projects/*/qdb/
+
+# --- Old phase5 captures + run reports (not git-tracked artifacts) ---
+firmware_builds/systems/*/reports/
+firmware_builds/systems/*/captures/
+firmware_builds/systems/*/model/
+
+# --- Stray top-level work directories that shouldn't be tracked ---
+.qverify/
+/qverify.log
+/qverify_cmds.tcl
+/work/
+/altera_mf/
+
+# --- Submodule-marker stray entries ---
+/scripts/check_ip_lib_update.py/
+
+# --- Quartus board project artifacts ---
+firmware_builds/systems/*/syn/board_projects/*/db/
+firmware_builds/systems/*/syn/board_projects/*/bts/
+firmware_builds/systems/*/syn/board_projects/*/generated/
+firmware_builds/systems/*/syn/board_projects/*/qdb/
+firmware_builds/systems/*/syn/board_projects/*/incremental_db/
+firmware_builds/systems/*/syn/board_projects/*/output_files/
+firmware_builds/systems/*/syn/board_projects/*/*.cmp
+firmware_builds/systems/*/syn/board_projects/*/c5_pin_model_dump.txt
+firmware_builds/systems/*/script/qdb/
+firmware_builds/systems/*/script/DNI/
+firmware_builds/systems/*/signaltap/*.log
+
+# --- More build cache artifacts ---
+**/*.map.guard
+**/*.qmsg
+**/c5_pin_model_dump.txt
+firmware_builds/systems/*/syn/board_projects/*/ip/
+
+# --- Top-level user keepers (don't accidentally untrack) ---
+!quartus_systems/
+!firmware_builds/README.md
+!firmware_builds/doc/
+!firmware_builds/misc/
+
+# --- Broader catch-all for build cache dirs anywhere ---
+**/db
+**/incremental_db
+**/qdb
+**/output_files
+**/*.cmp
+
+# --- Qsys generate logs and orphan generated subtrees ---
+firmware_builds/systems/*/syn/*.log
+firmware_builds/systems/*/syn/qsys_generate_*.log
+firmware_builds/systems/*/syn/program_*.log
+firmware_builds/systems/*/syn/feb_system_v3_pipe/
 firmware_builds/systems/*/syn/firmware_builds/
+firmware_builds/systems/*/syn/ip/
+firmware_builds/systems/*/syn/hit_stack_system_rbcam_snoop.qsys
+
+# --- Final stragglers ---
+**/*.qsys.legacy
+firmware_builds/systems/*/syn/scifi_datapath_system_v3_pipe/
+firmware_builds/systems/*/syn/syn/
+/scripts/check_ip_lib_update.py
