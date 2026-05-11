@@ -59,7 +59,9 @@ enum class swb_cmd {
 	read,
 	write,
 	burst,
+	stat,
 	dump_all,
+	dump_stats,
 	list_regs,
 };
 
@@ -85,6 +87,10 @@ struct swb_opts {
 	string target;
 	uint32_t value = 0;
 	uint32_t count = 1;
+	uint32_t samples = 1;
+	bool samples_seen = false;
+	bool bit_stats = false;
+	uint32_t samples_min_elapsed_us = 0;
 };
 
 struct swb_reg_ref {
@@ -383,7 +389,7 @@ static bool swb_resolve_reg(const string& token, swb_cmd cmd, swb_reg_ref *out)
 		return false;
 	}
 
-	if (cmd == swb_cmd::read || cmd == swb_cmd::burst) {
+	if (cmd == swb_cmd::read || cmd == swb_cmd::burst || cmd == swb_cmd::stat) {
 		for (const auto *reg : matches) {
 			if (reg->space == reg_space::ro) {
 				out->reg = reg;
@@ -445,18 +451,151 @@ static void swb_print_value(const swb_reg_ref& reg, uint32_t value)
 		<< '\n';
 }
 
+static vector<uint32_t> swb_read_samples(mudaq::MudaqDevice& dev,
+					 const swb_reg_ref& reg,
+					 uint32_t samples,
+					 uint32_t min_elapsed_us)
+{
+	vector<uint32_t> values;
+	auto start = std::chrono::steady_clock::now();
+
+	values.reserve(samples);
+	for (uint32_t i = 0; i < samples; ++i) {
+		values.push_back(swb_read_reg(dev, reg));
+
+		if (min_elapsed_us == 0 || i + 1u >= samples || samples <= 1u)
+			continue;
+
+		const uint64_t target_us =
+			(static_cast<uint64_t>(min_elapsed_us) * static_cast<uint64_t>(i + 1u)) /
+			static_cast<uint64_t>(samples - 1u);
+		const auto target = start + std::chrono::microseconds(target_us);
+		const auto now = std::chrono::steady_clock::now();
+		if (now < target)
+			std::this_thread::sleep_until(target);
+	}
+
+	return values;
+}
+
+static string swb_bit_list(const vector<unsigned>& bits)
+{
+	std::ostringstream os;
+
+	if (bits.empty())
+		return "(none)";
+
+	for (size_t i = 0; i < bits.size(); ++i) {
+		if (i)
+			os << ", ";
+		os << "b" << bits[i];
+	}
+	return os.str();
+}
+
+static void swb_print_bit_stats(const swb_reg_ref& reg,
+				const vector<uint32_t>& values)
+{
+	std::array<uint64_t, 32> ones{};
+	vector<unsigned> stable_ones;
+	vector<unsigned> stable_zeroes;
+	vector<string> unstable;
+	uint32_t min_value;
+	uint32_t max_value;
+	uint32_t majority = 0;
+	unsigned entropy_bits = 0;
+	const uint64_t samples = values.size();
+
+	if (values.empty())
+		return;
+
+	min_value = values[0];
+	max_value = values[0];
+	for (uint32_t value : values) {
+		min_value = std::min(min_value, value);
+		max_value = std::max(max_value, value);
+		for (unsigned bit = 0; bit < 32; ++bit) {
+			if ((value & (1u << bit)) != 0)
+				++ones[bit];
+		}
+	}
+
+	for (int bit = 31; bit >= 0; --bit) {
+		const double freq = static_cast<double>(ones[bit]) /
+				    static_cast<double>(samples);
+
+		if (ones[bit] * 2u >= samples)
+			majority |= (1u << bit);
+
+		if (freq >= 0.95) {
+			stable_ones.push_back(static_cast<unsigned>(bit));
+		} else if (freq <= 0.05) {
+			stable_zeroes.push_back(static_cast<unsigned>(bit));
+		} else {
+			std::ostringstream item;
+			item << "b" << bit << "=" << std::fixed << std::setprecision(3) << freq;
+			unstable.push_back(item.str());
+			++entropy_bits;
+		}
+	}
+
+	std::cout
+		<< reg.name << " @ " << swb_offset_text(reg.offset)
+		<< ", samples=" << samples << '\n'
+		<< "  ones_count_per_bit (b31..b0):\n";
+
+	for (int hi = 31; hi >= 0; hi -= 8) {
+		const int lo = hi - 7;
+		std::cout
+			<< "    b" << std::setw(2) << std::setfill('0') << hi
+			<< "..b" << std::setw(2) << std::setfill('0') << lo
+			<< std::setfill(' ') << " =";
+		for (int bit = hi; bit >= lo; --bit)
+			std::cout << " " << ones[bit];
+		std::cout << '\n';
+	}
+
+	std::cout
+		<< "  bit-stability:\n"
+		<< "    stable@1 bits: " << swb_bit_list(stable_ones) << '\n'
+		<< "    stable@0 bits: " << swb_bit_list(stable_zeroes) << '\n'
+		<< "    unstable bits: ";
+	if (unstable.empty()) {
+		std::cout << "(none)\n";
+	} else {
+		for (size_t i = 0; i < unstable.size(); ++i) {
+			if (i)
+				std::cout << ", ";
+			std::cout << unstable[i];
+		}
+		std::cout << '\n';
+	}
+	std::cout
+		<< "  median (32 bits): " << hex_u32(majority)
+		<< "  (per-bit majority vote)\n"
+		<< "  min: " << hex_u32(min_value) << '\n'
+		<< "  max: " << hex_u32(max_value) << '\n'
+		<< "  entropy_bits: " << entropy_bits << '\n';
+}
+
 static void swb_print_usage()
 {
 	std::cout
 		<< "Usage:\n"
-		<< "  sc_tool --swb read <REG_NAME|hex_offset>\n"
+		<< "  sc_tool --swb read <REG_NAME|hex_offset> [--samples N] [--bit-stats]\n"
 		<< "  sc_tool --swb write <REG_NAME|hex_offset> <hex_value>\n"
 		<< "  sc_tool --swb burst <REG_NAME|hex_offset> <count>\n"
+		<< "  sc_tool --swb stat <REG_NAME|hex_offset> --samples N\n"
 		<< "  sc_tool --swb dump-all\n"
+		<< "  sc_tool --swb dump-stats --samples N\n"
 		<< "  sc_tool --swb-list-regs\n"
 		<< "\n"
 		<< "Options:\n"
 		<< "  --device <path>            MuDAQ device node (default /dev/mudaq0)\n"
+		<< "  --samples <N>              Repeat SWB BAR reads N times\n"
+		<< "  --bit-stats                Print per-bit stability statistics for samples\n"
+		<< "  --samples-min-elapsed-us <us>\n"
+		<< "                             Spread repeated reads across at least this time\n"
 		<< "  -h, --help                 Show this help\n";
 }
 
@@ -496,6 +635,27 @@ static bool parse_swb_opts(int argc, char **argv, swb_opts *opts)
 			opts->device = argv[++i];
 			continue;
 		}
+		if (arg == "--samples") {
+			if (i + 1 >= argc || !parse_u32(argv[++i], &opts->samples) ||
+			    opts->samples == 0) {
+				pr_err("invalid value for --samples");
+				return false;
+			}
+			opts->samples_seen = true;
+			continue;
+		}
+		if (arg == "--bit-stats") {
+			opts->bit_stats = true;
+			continue;
+		}
+		if (arg == "--samples-min-elapsed-us") {
+			if (i + 1 >= argc ||
+			    !parse_u32(argv[++i], &opts->samples_min_elapsed_us)) {
+				pr_err("invalid value for --samples-min-elapsed-us");
+				return false;
+			}
+			continue;
+		}
 		if (!arg.empty() && arg[0] == '-') {
 			pr_err("unknown --swb option: " + arg);
 			return false;
@@ -520,10 +680,18 @@ static bool parse_swb_opts(int argc, char **argv, swb_opts *opts)
 		swb_print_usage();
 		return false;
 	}
+	if (opts->samples_min_elapsed_us != 0 && !opts->samples_seen) {
+		pr_err("--samples-min-elapsed-us requires --samples N");
+		return false;
+	}
 
 	if (pos[0] == "read") {
 		if (pos.size() != 2) {
 			pr_err("read requires <REG_NAME|hex_offset>");
+			return false;
+		}
+		if (opts->bit_stats && !opts->samples_seen) {
+			pr_err("--bit-stats requires --samples N");
 			return false;
 		}
 		opts->cmd = swb_cmd::read;
@@ -532,6 +700,10 @@ static bool parse_swb_opts(int argc, char **argv, swb_opts *opts)
 	}
 
 	if (pos[0] == "write") {
+		if (opts->samples_seen || opts->bit_stats || opts->samples_min_elapsed_us != 0) {
+			pr_err("write does not accept sample/stat options");
+			return false;
+		}
 		if (pos.size() != 3 || !parse_u32(pos[2], &opts->value)) {
 			pr_err("write requires <REG_NAME|hex_offset> <hex_value>");
 			return false;
@@ -542,6 +714,10 @@ static bool parse_swb_opts(int argc, char **argv, swb_opts *opts)
 	}
 
 	if (pos[0] == "burst") {
+		if (opts->samples_seen || opts->bit_stats || opts->samples_min_elapsed_us != 0) {
+			pr_err("burst does not accept sample/stat options");
+			return false;
+		}
 		if (pos.size() != 3 || !parse_u32(pos[2], &opts->count) ||
 		    opts->count == 0 || opts->count > 65536u) {
 			pr_err("burst requires <REG_NAME|hex_offset> <count> with count in 1..65536");
@@ -552,12 +728,45 @@ static bool parse_swb_opts(int argc, char **argv, swb_opts *opts)
 		return true;
 	}
 
+	if (pos[0] == "stat") {
+		if (pos.size() != 2) {
+			pr_err("stat requires <REG_NAME|hex_offset> --samples N");
+			return false;
+		}
+		if (!opts->samples_seen) {
+			pr_err("stat requires --samples N");
+			return false;
+		}
+		opts->cmd = swb_cmd::stat;
+		opts->target = pos[1];
+		opts->bit_stats = true;
+		return true;
+	}
+
 	if (pos[0] == "dump-all") {
+		if (opts->samples_seen || opts->bit_stats || opts->samples_min_elapsed_us != 0) {
+			pr_err("dump-all does not accept sample/stat options");
+			return false;
+		}
 		if (pos.size() != 1) {
 			pr_err("dump-all takes no positional arguments");
 			return false;
 		}
 		opts->cmd = swb_cmd::dump_all;
+		return true;
+	}
+
+	if (pos[0] == "dump-stats") {
+		if (pos.size() != 1) {
+			pr_err("dump-stats takes no positional arguments");
+			return false;
+		}
+		if (!opts->samples_seen) {
+			pr_err("dump-stats requires --samples N");
+			return false;
+		}
+		opts->cmd = swb_cmd::dump_stats;
+		opts->bit_stats = true;
 		return true;
 	}
 
@@ -604,6 +813,17 @@ static int swb_run(const swb_opts& opts)
 	case swb_cmd::read:
 		if (!swb_resolve_reg(opts.target, opts.cmd, &reg))
 			return 1;
+		if (opts.samples_seen) {
+			vector<uint32_t> values =
+				swb_read_samples(dev, reg, opts.samples, opts.samples_min_elapsed_us);
+			if (opts.bit_stats) {
+				swb_print_bit_stats(reg, values);
+			} else {
+				for (uint32_t value : values)
+					std::cout << hex_u32(value) << '\n';
+			}
+			return 0;
+		}
 		swb_print_value(reg, swb_read_reg(dev, reg));
 		return 0;
 	case swb_cmd::write:
@@ -621,6 +841,12 @@ static int swb_run(const swb_opts& opts)
 			item.name = reg.name + "+" + swb_offset_text(i);
 			swb_print_value(item, swb_read_reg(dev, item));
 		}
+		return 0;
+	case swb_cmd::stat:
+		if (!swb_resolve_reg(opts.target, opts.cmd, &reg))
+			return 1;
+		swb_print_bit_stats(reg, swb_read_samples(dev, reg, opts.samples,
+							  opts.samples_min_elapsed_us));
 		return 0;
 	case swb_cmd::dump_all:
 		std::cout
@@ -640,6 +866,20 @@ static int swb_run(const swb_opts& opts)
 				<< "| `" << item.name << "` | `" << swb_space_name(item.space)
 				<< "` | `" << swb_offset_text(item.offset)
 				<< "` | `" << hex_u32(value) << "` | " << value << " |\n";
+		}
+		return 0;
+	case swb_cmd::dump_stats:
+		for (const auto& entry : swb_pcie_registers_generated::registers) {
+			swb_reg_ref item;
+
+			item.reg = &entry;
+			item.offset = entry.offset;
+			item.space = entry.space;
+			item.name = entry.name;
+			item.named = true;
+			swb_print_bit_stats(item, swb_read_samples(dev, item, opts.samples,
+								   opts.samples_min_elapsed_us));
+			std::cout << '\n';
 		}
 		return 0;
 	default:
