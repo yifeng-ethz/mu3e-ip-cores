@@ -1,0 +1,1381 @@
+------------------------------------------------------------
+Timing Analyzer Summary
+------------------------------------------------------------
+
+Type  : Slow 1100mV 85C Model Setup 'lvds_firefly_clk'
+Slack : -2.439
+TNS   : -1131.415
+
+Type  : Slow 1100mV 85C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : -0.910
+TNS   : -128.804
+
+Type  : Slow 1100mV 85C Model Setup 'transceiver_pll_clock[0]'
+Slack : 0.347
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.389
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.404
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.430
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.645
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'max10_spi_virtual_clk'
+Slack : 0.692
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'spare_clk_osc'
+Slack : 4.327
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 6.010
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'altera_reserved_tck'
+Slack : 7.723
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Setup 'n/a'
+Slack : 10.247
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'lvds_firefly_clk'
+Slack : -1.214
+TNS   : -1.214
+
+Type  : Slow 1100mV 85C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.245
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'transceiver_pll_clock[0]'
+Slack : 0.253
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.283
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'altera_reserved_tck'
+Slack : 0.292
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'spare_clk_osc'
+Slack : 0.297
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.348
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.351
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.351
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.363
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'max10_spi_virtual_clk'
+Slack : 8.939
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Hold 'n/a'
+Slack : 15.871
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'lvds_firefly_clk'
+Slack : 1.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 1.403
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'transceiver_pll_clock[0]'
+Slack : 2.108
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 3.338
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.066
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.136
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.614
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 9.009
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'altera_reserved_tck'
+Slack : 15.140
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Recovery 'spare_clk_osc'
+Slack : 15.883
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'transceiver_pll_clock[0]'
+Slack : 0.480
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'spare_clk_osc'
+Slack : 0.601
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.616
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'lvds_firefly_clk'
+Slack : 0.626
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.640
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.658
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.664
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.898
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'altera_reserved_tck'
+Slack : 0.902
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.927
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.master_cgb_inst[0].tx_cgb_master|hfclkpout'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_plls.gen_tx_plls.tx_plls|pll[0].pll.cmu_pll.tx_pll|clkcdr'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~FRACTIONAL_PLL|vcoph[0]'
+Slack : 0.391
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_fclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.397
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'
+Slack : 1.250
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.584
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.584
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.584
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.584
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.598
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.110
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.113
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.115
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.118
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'transceiver_pll_clock[0]'
+Slack : 2.245
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 3.047
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'lvds_firefly_clk'
+Slack : 3.075
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'LVDS_clk_si1_fpga_A'
+Slack : 3.855
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'alt_cal_av_edge_detect_clk'
+Slack : 4.329
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'sv_reconfig_pma_testbus_clk_0'
+Slack : 7.435
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'spare_clk_osc'
+Slack : 9.074
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 11.583
+TNS   : 0.000
+
+Type  : Slow 1100mV 85C Model Minimum Pulse Width 'altera_reserved_tck'
+Slack : 15.555
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'lvds_firefly_clk'
+Slack : -2.360
+TNS   : -1050.213
+
+Type  : Slow 1100mV 0C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : -0.674
+TNS   : -18.444
+
+Type  : Slow 1100mV 0C Model Setup 'transceiver_pll_clock[0]'
+Slack : 0.424
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.477
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.493
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.595
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.697
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'max10_spi_virtual_clk'
+Slack : 0.804
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'spare_clk_osc'
+Slack : 4.826
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 6.296
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'altera_reserved_tck'
+Slack : 8.329
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Setup 'n/a'
+Slack : 10.605
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'lvds_firefly_clk'
+Slack : -1.185
+TNS   : -1.185
+
+Type  : Slow 1100mV 0C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.228
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'transceiver_pll_clock[0]'
+Slack : 0.237
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'spare_clk_osc'
+Slack : 0.260
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.264
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'altera_reserved_tck'
+Slack : 0.268
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.297
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.329
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.332
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.335
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'max10_spi_virtual_clk'
+Slack : 8.842
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Hold 'n/a'
+Slack : 15.711
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'lvds_firefly_clk'
+Slack : 1.411
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 1.620
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'transceiver_pll_clock[0]'
+Slack : 2.348
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 3.523
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.212
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.292
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.722
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 9.198
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'altera_reserved_tck'
+Slack : 15.314
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Recovery 'spare_clk_osc'
+Slack : 16.127
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'transceiver_pll_clock[0]'
+Slack : 0.387
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.548
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'spare_clk_osc'
+Slack : 0.554
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'lvds_firefly_clk'
+Slack : 0.566
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.591
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.591
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.596
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.812
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'altera_reserved_tck'
+Slack : 0.837
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.846
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.master_cgb_inst[0].tx_cgb_master|hfclkpout'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_plls.gen_tx_plls.tx_plls|pll[0].pll.cmu_pll.tx_pll|clkcdr'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_fclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.391
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~FRACTIONAL_PLL|vcoph[0]'
+Slack : 0.391
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'
+Slack : 1.250
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.586
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.586
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.586
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.586
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.599
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.055
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.058
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.060
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.068
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'transceiver_pll_clock[0]'
+Slack : 2.217
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 3.023
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'lvds_firefly_clk'
+Slack : 3.053
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.180
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'LVDS_clk_si1_fpga_A'
+Slack : 3.846
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'alt_cal_av_edge_detect_clk'
+Slack : 4.302
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'sv_reconfig_pma_testbus_clk_0'
+Slack : 7.395
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'spare_clk_osc'
+Slack : 9.054
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 11.560
+TNS   : 0.000
+
+Type  : Slow 1100mV 0C Model Minimum Pulse Width 'altera_reserved_tck'
+Slack : 15.466
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'lvds_firefly_clk'
+Slack : -1.126
+TNS   : -286.225
+
+Type  : Fast 1100mV 85C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 2.384
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'transceiver_pll_clock[0]'
+Slack : 2.544
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.659
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.701
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.954
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 3.013
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'max10_spi_virtual_clk'
+Slack : 4.776
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'spare_clk_osc'
+Slack : 6.828
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 7.868
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'altera_reserved_tck'
+Slack : 11.385
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Setup 'n/a'
+Slack : 13.582
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'lvds_firefly_clk'
+Slack : -0.670
+TNS   : -0.670
+
+Type  : Fast 1100mV 85C Model Hold 'altera_reserved_tck'
+Slack : 0.118
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.154
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'transceiver_pll_clock[0]'
+Slack : 0.159
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.165
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'spare_clk_osc'
+Slack : 0.178
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.196
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.201
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.202
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.203
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'max10_spi_virtual_clk'
+Slack : 5.279
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Hold 'n/a'
+Slack : 13.439
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'transceiver_pll_clock[0]'
+Slack : 3.394
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'lvds_firefly_clk'
+Slack : 3.985
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 4.253
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.316
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.888
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.899
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 5.296
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 10.233
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'altera_reserved_tck'
+Slack : 16.147
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Recovery 'spare_clk_osc'
+Slack : 17.073
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'transceiver_pll_clock[0]'
+Slack : 0.275
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'lvds_firefly_clk'
+Slack : 0.313
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'spare_clk_osc'
+Slack : 0.323
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.334
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.336
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.338
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.344
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'altera_reserved_tck'
+Slack : 0.426
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.499
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.528
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.master_cgb_inst[0].tx_cgb_master|hfclkpout'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_plls.gen_tx_plls.tx_plls|pll[0].pll.cmu_pll.tx_pll|clkcdr'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_fclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.393
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~FRACTIONAL_PLL|vcoph[0]'
+Slack : 0.396
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'
+Slack : 1.250
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.591
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.591
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.591
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.591
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.596
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.283
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.285
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.285
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.290
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'transceiver_pll_clock[0]'
+Slack : 2.397
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'lvds_firefly_clk'
+Slack : 3.177
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.194
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 3.199
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'LVDS_clk_si1_fpga_A'
+Slack : 3.848
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'alt_cal_av_edge_detect_clk'
+Slack : 4.624
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'sv_reconfig_pma_testbus_clk_0'
+Slack : 8.635
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'spare_clk_osc'
+Slack : 9.188
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 11.718
+TNS   : 0.000
+
+Type  : Fast 1100mV 85C Model Minimum Pulse Width 'altera_reserved_tck'
+Slack : 15.158
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'lvds_firefly_clk'
+Slack : -0.721
+TNS   : -132.547
+
+Type  : Fast 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.885
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 2.937
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.950
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'transceiver_pll_clock[0]'
+Slack : 2.952
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 3.155
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'max10_spi_virtual_clk'
+Slack : 4.861
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'spare_clk_osc'
+Slack : 6.975
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 8.342
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'altera_reserved_tck'
+Slack : 12.043
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Setup 'n/a'
+Slack : 14.143
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'lvds_firefly_clk'
+Slack : -0.683
+TNS   : -0.683
+
+Type  : Fast 1100mV 0C Model Hold 'altera_reserved_tck'
+Slack : 0.098
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.136
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'transceiver_pll_clock[0]'
+Slack : 0.137
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.151
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'spare_clk_osc'
+Slack : 0.154
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.180
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.183
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.187
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.190
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'max10_spi_virtual_clk'
+Slack : 5.217
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Hold 'n/a'
+Slack : 13.286
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'transceiver_pll_clock[0]'
+Slack : 3.773
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'lvds_firefly_clk'
+Slack : 4.287
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 4.481
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 4.583
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 5.070
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 5.088
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 5.411
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 10.469
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'altera_reserved_tck'
+Slack : 16.251
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Recovery 'spare_clk_osc'
+Slack : 17.466
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'transceiver_pll_clock[0]'
+Slack : 0.219
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'lvds_firefly_clk'
+Slack : 0.282
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'spare_clk_osc'
+Slack : 0.293
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.301
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.306
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.307
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.309
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'altera_reserved_tck'
+Slack : 0.379
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.448
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Removal 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 0.474
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_cdr|clk90bdes'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.master_cgb_inst[0].tx_cgb_master|hfclkpout'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_plls.gen_tx_plls.tx_plls|pll[0].pll.cmu_pll.tx_pll|clkcdr'
+Slack : 0.160
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_fclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 0.395
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~FRACTIONAL_PLL|vcoph[0]'
+Slack : 0.396
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~FRACTIONAL_PLL|vcoph[0]'
+Slack : 1.250
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.593
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.593
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.593
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_rx_pma|rx_pmas[0].rx_pma.rx_pma_deser|clk90b'
+Slack : 1.593
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pma|av_tx_pma|tx_pma_insts[0].av_tx_pma_ch_inst|tx_pma_ch.tx_cgb|pclk[0]'
+Slack : 1.597
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.274
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.276
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.277
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_rx_pcs|wys|rcvdclkpma'
+Slack : 2.279
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'transceiver_pll_clock[0]'
+Slack : 2.392
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'lvds_firefly_clk'
+Slack : 3.186
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr1|ip_altera_xcvr_native_av_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[0].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[1].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[2].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'e_fe_block|firefly|e_xcvr2|fastlink_small_inst|gen_native_inst.av_xcvr_native_insts[3].gen_bonded_group_native.av_xcvr_native_inst|inst_av_pcs|ch[0].inst_av_pcs_ch|inst_av_hssi_8g_tx_pcs|wys|txpmalocalclk'
+Slack : 3.192
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|data_path_subsystem|lvds_rx_28nm_0|ALTLVDS_RX_component|auto_generated|pll_sclk~PLL_OUTPUT_COUNTER|divclk'
+Slack : 3.195
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'LVDS_clk_si1_fpga_A'
+Slack : 3.854
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'alt_cal_av_edge_detect_clk'
+Slack : 4.616
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'sv_reconfig_pma_testbus_clk_0'
+Slack : 8.685
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'spare_clk_osc'
+Slack : 9.191
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width '\g_feb_system_v3:q_feb_system|u_feb_system_v3|control_path_subsystem|pll_156t40|altera_pll_i|general[0].gpll~PLL_OUTPUT_COUNTER|divclk'
+Slack : 11.712
+TNS   : 0.000
+
+Type  : Fast 1100mV 0C Model Minimum Pulse Width 'altera_reserved_tck'
+Slack : 15.161
+TNS   : 0.000
+
+------------------------------------------------------------

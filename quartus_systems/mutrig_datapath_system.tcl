@@ -1,0 +1,110 @@
+# qsys scripting (.tcl) file for mutrig_datapath_system
+package require -exact qsys 16.0
+
+create_system {mutrig_datapath_system}
+set_module_property VERSION 1.0.0.0511
+
+set_project_property DEVICE_FAMILY {Arria V}
+set_project_property DEVICE {5AGXBA7D4F31C5}
+set_project_property HIDE_FROM_IP_CATALOG {false}
+
+# Instances and instance parameters
+# (disabled instances are intentionally culled)
+add_instance dbg_counter_fab_sclr dbg_counter_fab 1.0.1
+
+add_instance debug_clock altera_clock_bridge 18.1
+set_instance_parameter_value debug_clock {EXPLICIT_CLOCK_RATE} {125000000.0}
+set_instance_parameter_value debug_clock {NUM_CLOCK_OUTPUTS} {1}
+
+add_instance issp_cnt_sclr altera_in_system_sources_probes 18.1
+set_instance_parameter_value issp_cnt_sclr {create_source_clock} {1}
+set_instance_parameter_value issp_cnt_sclr {create_source_clock_enable} {0}
+set_instance_parameter_value issp_cnt_sclr {gui_use_auto_index} {1}
+set_instance_parameter_value issp_cnt_sclr {instance_id} {NONE}
+set_instance_parameter_value issp_cnt_sclr {probe_width} {0}
+set_instance_parameter_value issp_cnt_sclr {sld_instance_index} {10}
+set_instance_parameter_value issp_cnt_sclr {source_initial_value} {0}
+set_instance_parameter_value issp_cnt_sclr {source_width} {2}
+
+add_instance lvdserr_count_subsystem avst_errcnt_system 1.0
+
+add_instance mch_count_subsystem avst_chcnt_system 1.0
+
+add_instance mutrig_frame_assembly mutrig_frame_assembly 1.0.15
+set_instance_parameter_value mutrig_frame_assembly {ASIC_ID} {0}
+set_instance_parameter_value mutrig_frame_assembly {DEBUG_BYPASS_ERROR} {0}
+set_instance_parameter_value mutrig_frame_assembly {SIMULATION_EN} {0}
+
+add_instance system_clock_reset_interface clock_source 18.1
+set_instance_parameter_value system_clock_reset_interface {clockFrequency} {125000000.0}
+set_instance_parameter_value system_clock_reset_interface {clockFrequencyKnown} {1}
+set_instance_parameter_value system_clock_reset_interface {resetSynchronousEdges} {DEASSERT}
+
+# exported interfaces
+add_interface avmm_errcnt avalon slave
+set_interface_property avmm_errcnt EXPORT_OF lvdserr_count_subsystem.avmm_errcnt
+add_interface avst_in avalon_streaming sink
+set_interface_property avst_in EXPORT_OF lvdserr_count_subsystem.avst_in
+add_interface clk clock sink
+set_interface_property clk EXPORT_OF system_clock_reset_interface.clk_in
+add_interface debug_clock_in_clk clock sink
+set_interface_property debug_clock_in_clk EXPORT_OF debug_clock.in_clk
+add_interface hit_type0_out avalon_streaming source
+set_interface_property hit_type0_out EXPORT_OF mch_count_subsystem.hit_type0_out
+add_interface mch_count_subsystem_avmm_counter_value avalon slave
+set_interface_property mch_count_subsystem_avmm_counter_value EXPORT_OF mch_count_subsystem.avmm_counter_value
+add_interface mch_count_subsystem_avmm_rst_interval avalon slave
+set_interface_property mch_count_subsystem_avmm_rst_interval EXPORT_OF mch_count_subsystem.avmm_rst_interval
+add_interface mutrig_frame_assembly_csr avalon slave
+set_interface_property mutrig_frame_assembly_csr EXPORT_OF mutrig_frame_assembly.csr
+add_interface mutrig_frame_assembly_headerinfo avalon_streaming source
+set_interface_property mutrig_frame_assembly_headerinfo EXPORT_OF mutrig_frame_assembly.headerinfo
+add_interface reset reset sink
+set_interface_property reset EXPORT_OF system_clock_reset_interface.clk_in_reset
+add_interface sclr_counter_req reset sink
+set_interface_property sclr_counter_req EXPORT_OF mch_count_subsystem.sclr_counter_req
+
+# connections and connection parameters
+add_connection dbg_counter_fab_sclr.to_counter_control_port_b lvdserr_count_subsystem.counter_sclr
+set_connection_parameter_value dbg_counter_fab_sclr.to_counter_control_port_b/lvdserr_count_subsystem.counter_sclr endPort {}
+set_connection_parameter_value dbg_counter_fab_sclr.to_counter_control_port_b/lvdserr_count_subsystem.counter_sclr endPortLSB {0}
+set_connection_parameter_value dbg_counter_fab_sclr.to_counter_control_port_b/lvdserr_count_subsystem.counter_sclr startPort {}
+set_connection_parameter_value dbg_counter_fab_sclr.to_counter_control_port_b/lvdserr_count_subsystem.counter_sclr startPortLSB {0}
+set_connection_parameter_value dbg_counter_fab_sclr.to_counter_control_port_b/lvdserr_count_subsystem.counter_sclr width {0}
+
+add_connection debug_clock.out_clk dbg_counter_fab_sclr.clock_sink
+
+add_connection debug_clock.out_clk issp_cnt_sclr.source_clk
+
+add_connection issp_cnt_sclr.sources dbg_counter_fab_sclr.to_source
+set_connection_parameter_value issp_cnt_sclr.sources/dbg_counter_fab_sclr.to_source endPort {}
+set_connection_parameter_value issp_cnt_sclr.sources/dbg_counter_fab_sclr.to_source endPortLSB {0}
+set_connection_parameter_value issp_cnt_sclr.sources/dbg_counter_fab_sclr.to_source startPort {}
+set_connection_parameter_value issp_cnt_sclr.sources/dbg_counter_fab_sclr.to_source startPortLSB {0}
+set_connection_parameter_value issp_cnt_sclr.sources/dbg_counter_fab_sclr.to_source width {0}
+
+add_connection lvdserr_count_subsystem.avst_out mutrig_frame_assembly.rx8b1k
+
+add_connection mutrig_frame_assembly.hit_type0 mch_count_subsystem.hit_type0_in
+
+add_connection system_clock_reset_interface.clk dbg_counter_fab_sclr.clock_sink_1
+
+add_connection system_clock_reset_interface.clk lvdserr_count_subsystem.counter_clk
+
+add_connection system_clock_reset_interface.clk mch_count_subsystem.clk
+
+add_connection system_clock_reset_interface.clk mutrig_frame_assembly.clock_sink
+
+add_connection system_clock_reset_interface.clk_reset lvdserr_count_subsystem.counter_rst
+
+add_connection system_clock_reset_interface.clk_reset mch_count_subsystem.reset
+
+add_connection system_clock_reset_interface.clk_reset mutrig_frame_assembly.reset_sink
+
+# interconnect requirements
+set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
+set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
+
+save_system {mutrig_datapath_system.qsys}

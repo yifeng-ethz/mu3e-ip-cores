@@ -1,0 +1,13 @@
+parse_v3_pretest_readme.py run log
+input_fit_summary=syn/top.fit.summary
+input_fit_report=syn/reports/top.fit.rpt
+input_sta_summary=syn/top.sta.summary
+input_sta_report=syn/reports/top.sta.rpt
+fit_entity_rows=3380
+sta_summary_setup_entries=48
+sta_report_setup_rows=48
+clock_wns=lvds_firefly_clk:-2.439, lvds_rx_sclk:-0.910, transceiver_pll[0]:0.347, rx_pcs_rcvdclkpma:0.389, max10_spi:0.692, spare_clk_osc:4.327, pll_156t40:6.010, altera_reserved_tck:7.723
+requested_entity_missing=none
+expected_missing_entity=emulator_inject_fanout (no standalone fit row in Fitter Resource Utilization by Entity)
+output_readme=firmware_builds/systems/v3_pretest-260511/README.md
+postprocess=normalized leading top hierarchy segment for subsystem WNS cells

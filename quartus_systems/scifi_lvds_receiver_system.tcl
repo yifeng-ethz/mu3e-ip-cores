@@ -1,0 +1,465 @@
+# qsys scripting (.tcl) file for scifi_lvds_receiver_system
+package require -exact qsys 16.0
+
+create_system {scifi_lvds_receiver_system}
+set_module_property VERSION 1.0.0.0511
+
+set_project_property DEVICE_FAMILY {Arria V}
+set_project_property DEVICE {5AGXBA7D4F31C5}
+set_project_property HIDE_FROM_IP_CATALOG {false}
+
+# Instances and instance parameters
+# (disabled instances are intentionally culled)
+add_instance areset_iopll altera_reset_bridge 18.1
+set_instance_parameter_value areset_iopll {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value areset_iopll {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value areset_iopll {SYNCHRONOUS_EDGES} {none}
+set_instance_parameter_value areset_iopll {USE_RESET_REQUEST} {0}
+
+add_instance ip_8b10b_decoder_0 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_0 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_0 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_0 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_1 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_1 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_1 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_1 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_2 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_2 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_2 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_2 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_3 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_3 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_3 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_3 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_4 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_4 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_4 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_4 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_5 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_5 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_5 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_5 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_6 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_6 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_6 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_6 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_7 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_7 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value ip_8b10b_decoder_7 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_7 {g_BYTES} {1}
+
+add_instance ip_8b10b_decoder_8 ip_8b10b_decoder 1.3.1
+set_instance_parameter_value ip_8b10b_decoder_8 {CHANNEL_WIDTH} {1}
+set_instance_parameter_value ip_8b10b_decoder_8 {FLIP_10B} {1}
+set_instance_parameter_value ip_8b10b_decoder_8 {g_BYTES} {1}
+
+add_instance lvds_rx_control_0 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_0 {CHANNEL_INDEX} {0}
+set_instance_parameter_value lvds_rx_control_0 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_0 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_0 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_1 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_1 {CHANNEL_INDEX} {1}
+set_instance_parameter_value lvds_rx_control_1 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_1 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_1 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_2 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_2 {CHANNEL_INDEX} {2}
+set_instance_parameter_value lvds_rx_control_2 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_2 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_2 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_3 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_3 {CHANNEL_INDEX} {3}
+set_instance_parameter_value lvds_rx_control_3 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_3 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_3 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_4 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_4 {CHANNEL_INDEX} {4}
+set_instance_parameter_value lvds_rx_control_4 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_4 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_4 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_5 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_5 {CHANNEL_INDEX} {5}
+set_instance_parameter_value lvds_rx_control_5 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_5 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_5 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_6 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_6 {CHANNEL_INDEX} {6}
+set_instance_parameter_value lvds_rx_control_6 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_6 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_6 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_7 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_7 {CHANNEL_INDEX} {7}
+set_instance_parameter_value lvds_rx_control_7 {CHANNEL_WIDTH} {3}
+set_instance_parameter_value lvds_rx_control_7 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_7 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_control_8 lvds_rx_control 1.1.7
+set_instance_parameter_value lvds_rx_control_8 {CHANNEL_INDEX} {0}
+set_instance_parameter_value lvds_rx_control_8 {CHANNEL_WIDTH} {1}
+set_instance_parameter_value lvds_rx_control_8 {SYNC_PATTERN} {250}
+set_instance_parameter_value lvds_rx_control_8 {TARGETED_TX_DEVICE} {MuTRiG}
+
+add_instance lvds_rx_fabric scifi_rx_ctrl_fab 2.0.1
+set_instance_parameter_value lvds_rx_fabric {N_RX_LANE_USED} {9}
+set_instance_parameter_value lvds_rx_fabric {RX_DATA_W} {10}
+set_instance_parameter_value lvds_rx_fabric {TOTAL_N_RX_LANE} {9}
+
+add_instance r2s_fifo_reset_link altera_avalon_dc_fifo 18.1
+set_instance_parameter_value r2s_fifo_reset_link {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value r2s_fifo_reset_link {CHANNEL_WIDTH} {0}
+set_instance_parameter_value r2s_fifo_reset_link {ENABLE_EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value r2s_fifo_reset_link {ERROR_WIDTH} {0}
+set_instance_parameter_value r2s_fifo_reset_link {EXPLICIT_MAXCHANNEL} {0}
+set_instance_parameter_value r2s_fifo_reset_link {FIFO_DEPTH} {16}
+set_instance_parameter_value r2s_fifo_reset_link {RD_SYNC_DEPTH} {3}
+set_instance_parameter_value r2s_fifo_reset_link {SYMBOLS_PER_BEAT} {1}
+set_instance_parameter_value r2s_fifo_reset_link {USE_IN_FILL_LEVEL} {0}
+set_instance_parameter_value r2s_fifo_reset_link {USE_OUT_FILL_LEVEL} {0}
+set_instance_parameter_value r2s_fifo_reset_link {USE_PACKETS} {0}
+set_instance_parameter_value r2s_fifo_reset_link {WR_SYNC_DEPTH} {3}
+
+add_instance r_reset_link_splitter altera_avalon_st_splitter 18.1
+set_instance_parameter_value r_reset_link_splitter {BITS_PER_SYMBOL} {9}
+set_instance_parameter_value r_reset_link_splitter {CHANNEL_WIDTH} {1}
+set_instance_parameter_value r_reset_link_splitter {DATA_WIDTH} {9}
+set_instance_parameter_value r_reset_link_splitter {ERROR_DESCRIPTOR} {}
+set_instance_parameter_value r_reset_link_splitter {ERROR_WIDTH} {1}
+set_instance_parameter_value r_reset_link_splitter {MAX_CHANNELS} {1}
+set_instance_parameter_value r_reset_link_splitter {NUMBER_OF_OUTPUTS} {2}
+set_instance_parameter_value r_reset_link_splitter {QUALIFY_VALID_OUT} {1}
+set_instance_parameter_value r_reset_link_splitter {READY_LATENCY} {0}
+set_instance_parameter_value r_reset_link_splitter {USE_CHANNEL} {1}
+set_instance_parameter_value r_reset_link_splitter {USE_DATA} {1}
+set_instance_parameter_value r_reset_link_splitter {USE_ERROR} {0}
+set_instance_parameter_value r_reset_link_splitter {USE_PACKETS} {0}
+set_instance_parameter_value r_reset_link_splitter {USE_READY} {0}
+set_instance_parameter_value r_reset_link_splitter {USE_VALID} {1}
+
+add_instance rx_clock_out_bridge altera_clock_bridge 18.1
+set_instance_parameter_value rx_clock_out_bridge {EXPLICIT_CLOCK_RATE} {125000000.0}
+set_instance_parameter_value rx_clock_out_bridge {NUM_CLOCK_OUTPUTS} {1}
+
+add_instance scifi_lvds_rx scifi_lvds_rx 3.0
+
+add_instance system_clock_in_bridge altera_clock_bridge 18.1
+set_instance_parameter_value system_clock_in_bridge {EXPLICIT_CLOCK_RATE} {0.0}
+set_instance_parameter_value system_clock_in_bridge {NUM_CLOCK_OUTPUTS} {1}
+
+add_instance system_reset altera_reset_bridge 18.1
+set_instance_parameter_value system_reset {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value system_reset {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value system_reset {SYNCHRONOUS_EDGES} {none}
+set_instance_parameter_value system_reset {USE_RESET_REQUEST} {0}
+
+# exported interfaces
+add_interface areset_iopll_in_reset reset sink
+set_interface_property areset_iopll_in_reset EXPORT_OF areset_iopll.in_reset
+add_interface mutrig0_8b1k_data avalon_streaming source
+set_interface_property mutrig0_8b1k_data EXPORT_OF ip_8b10b_decoder_0.out8b
+add_interface mutrig1_8b1k_data avalon_streaming source
+set_interface_property mutrig1_8b1k_data EXPORT_OF ip_8b10b_decoder_1.out8b
+add_interface mutrig2_8b1k_data avalon_streaming source
+set_interface_property mutrig2_8b1k_data EXPORT_OF ip_8b10b_decoder_2.out8b
+add_interface mutrig3_8b1k_data avalon_streaming source
+set_interface_property mutrig3_8b1k_data EXPORT_OF ip_8b10b_decoder_3.out8b
+add_interface mutrig4_8b1k_data avalon_streaming source
+set_interface_property mutrig4_8b1k_data EXPORT_OF ip_8b10b_decoder_4.out8b
+add_interface mutrig5_8b1k_data avalon_streaming source
+set_interface_property mutrig5_8b1k_data EXPORT_OF ip_8b10b_decoder_5.out8b
+add_interface mutrig6_8b1k_data avalon_streaming source
+set_interface_property mutrig6_8b1k_data EXPORT_OF ip_8b10b_decoder_6.out8b
+add_interface mutrig7_8b1k_data avalon_streaming source
+set_interface_property mutrig7_8b1k_data EXPORT_OF ip_8b10b_decoder_7.out8b
+add_interface r_reset_link_firefly_data avalon_streaming source
+set_interface_property r_reset_link_firefly_data EXPORT_OF r_reset_link_splitter.out0
+add_interface rx_clock_125_out clock source
+set_interface_property rx_clock_125_out EXPORT_OF rx_clock_out_bridge.out_clk
+add_interface s_reset_link_firefly_data avalon_streaming source
+set_interface_property s_reset_link_firefly_data EXPORT_OF r2s_fifo_reset_link.out
+add_interface scifi_lvds_rx_0_rx_inclock_pll clock sink
+set_interface_property scifi_lvds_rx_0_rx_inclock_pll EXPORT_OF scifi_lvds_rx.rx_inclock_pll
+add_interface scifi_lvds_rx_0_rx_serial_data conduit end
+set_interface_property scifi_lvds_rx_0_rx_serial_data EXPORT_OF scifi_lvds_rx.rx_serial_data
+add_interface system_clock_125_in clock sink
+set_interface_property system_clock_125_in EXPORT_OF system_clock_in_bridge.in_clk
+add_interface system_reset_in_reset reset sink
+set_interface_property system_reset_in_reset EXPORT_OF system_reset.in_reset
+
+# connections and connection parameters
+add_connection areset_iopll.out_reset scifi_lvds_rx.pll_areset
+
+add_connection ip_8b10b_decoder_8.out8b r_reset_link_splitter.in
+
+add_connection lvds_rx_control_0.lvds_rxout ip_8b10b_decoder_0.in10b
+
+add_connection lvds_rx_control_0.receiver_control_port lvds_rx_fabric.to_ctrl_0
+set_connection_parameter_value lvds_rx_control_0.receiver_control_port/lvds_rx_fabric.to_ctrl_0 endPort {}
+set_connection_parameter_value lvds_rx_control_0.receiver_control_port/lvds_rx_fabric.to_ctrl_0 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_0.receiver_control_port/lvds_rx_fabric.to_ctrl_0 startPort {}
+set_connection_parameter_value lvds_rx_control_0.receiver_control_port/lvds_rx_fabric.to_ctrl_0 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_0.receiver_control_port/lvds_rx_fabric.to_ctrl_0 width {0}
+
+add_connection lvds_rx_control_1.lvds_rxout ip_8b10b_decoder_1.in10b
+
+add_connection lvds_rx_control_1.receiver_control_port lvds_rx_fabric.to_ctrl_1
+set_connection_parameter_value lvds_rx_control_1.receiver_control_port/lvds_rx_fabric.to_ctrl_1 endPort {}
+set_connection_parameter_value lvds_rx_control_1.receiver_control_port/lvds_rx_fabric.to_ctrl_1 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_1.receiver_control_port/lvds_rx_fabric.to_ctrl_1 startPort {}
+set_connection_parameter_value lvds_rx_control_1.receiver_control_port/lvds_rx_fabric.to_ctrl_1 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_1.receiver_control_port/lvds_rx_fabric.to_ctrl_1 width {0}
+
+add_connection lvds_rx_control_1.rx_10b_data lvds_rx_fabric.to_ctrl_1_10b_data
+set_connection_parameter_value lvds_rx_control_1.rx_10b_data/lvds_rx_fabric.to_ctrl_1_10b_data endPort {}
+set_connection_parameter_value lvds_rx_control_1.rx_10b_data/lvds_rx_fabric.to_ctrl_1_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_1.rx_10b_data/lvds_rx_fabric.to_ctrl_1_10b_data startPort {}
+set_connection_parameter_value lvds_rx_control_1.rx_10b_data/lvds_rx_fabric.to_ctrl_1_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_1.rx_10b_data/lvds_rx_fabric.to_ctrl_1_10b_data width {0}
+
+add_connection lvds_rx_control_2.lvds_rxout ip_8b10b_decoder_2.in10b
+
+add_connection lvds_rx_control_2.receiver_control_port lvds_rx_fabric.to_ctrl_2
+set_connection_parameter_value lvds_rx_control_2.receiver_control_port/lvds_rx_fabric.to_ctrl_2 endPort {}
+set_connection_parameter_value lvds_rx_control_2.receiver_control_port/lvds_rx_fabric.to_ctrl_2 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_2.receiver_control_port/lvds_rx_fabric.to_ctrl_2 startPort {}
+set_connection_parameter_value lvds_rx_control_2.receiver_control_port/lvds_rx_fabric.to_ctrl_2 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_2.receiver_control_port/lvds_rx_fabric.to_ctrl_2 width {0}
+
+add_connection lvds_rx_control_2.rx_10b_data lvds_rx_fabric.to_ctrl_2_10b_data
+set_connection_parameter_value lvds_rx_control_2.rx_10b_data/lvds_rx_fabric.to_ctrl_2_10b_data endPort {}
+set_connection_parameter_value lvds_rx_control_2.rx_10b_data/lvds_rx_fabric.to_ctrl_2_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_2.rx_10b_data/lvds_rx_fabric.to_ctrl_2_10b_data startPort {}
+set_connection_parameter_value lvds_rx_control_2.rx_10b_data/lvds_rx_fabric.to_ctrl_2_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_2.rx_10b_data/lvds_rx_fabric.to_ctrl_2_10b_data width {0}
+
+add_connection lvds_rx_control_3.lvds_rxout ip_8b10b_decoder_3.in10b
+
+add_connection lvds_rx_control_3.receiver_control_port lvds_rx_fabric.to_ctrl_3
+set_connection_parameter_value lvds_rx_control_3.receiver_control_port/lvds_rx_fabric.to_ctrl_3 endPort {}
+set_connection_parameter_value lvds_rx_control_3.receiver_control_port/lvds_rx_fabric.to_ctrl_3 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_3.receiver_control_port/lvds_rx_fabric.to_ctrl_3 startPort {}
+set_connection_parameter_value lvds_rx_control_3.receiver_control_port/lvds_rx_fabric.to_ctrl_3 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_3.receiver_control_port/lvds_rx_fabric.to_ctrl_3 width {0}
+
+add_connection lvds_rx_control_3.rx_10b_data lvds_rx_fabric.to_ctrl_3_10b_data
+set_connection_parameter_value lvds_rx_control_3.rx_10b_data/lvds_rx_fabric.to_ctrl_3_10b_data endPort {}
+set_connection_parameter_value lvds_rx_control_3.rx_10b_data/lvds_rx_fabric.to_ctrl_3_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_3.rx_10b_data/lvds_rx_fabric.to_ctrl_3_10b_data startPort {}
+set_connection_parameter_value lvds_rx_control_3.rx_10b_data/lvds_rx_fabric.to_ctrl_3_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_3.rx_10b_data/lvds_rx_fabric.to_ctrl_3_10b_data width {0}
+
+add_connection lvds_rx_control_4.lvds_rxout ip_8b10b_decoder_4.in10b
+
+add_connection lvds_rx_control_4.receiver_control_port lvds_rx_fabric.to_ctrl_4
+set_connection_parameter_value lvds_rx_control_4.receiver_control_port/lvds_rx_fabric.to_ctrl_4 endPort {}
+set_connection_parameter_value lvds_rx_control_4.receiver_control_port/lvds_rx_fabric.to_ctrl_4 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_4.receiver_control_port/lvds_rx_fabric.to_ctrl_4 startPort {}
+set_connection_parameter_value lvds_rx_control_4.receiver_control_port/lvds_rx_fabric.to_ctrl_4 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_4.receiver_control_port/lvds_rx_fabric.to_ctrl_4 width {0}
+
+add_connection lvds_rx_control_4.rx_10b_data lvds_rx_fabric.to_ctrl_4_10b_data
+set_connection_parameter_value lvds_rx_control_4.rx_10b_data/lvds_rx_fabric.to_ctrl_4_10b_data endPort {}
+set_connection_parameter_value lvds_rx_control_4.rx_10b_data/lvds_rx_fabric.to_ctrl_4_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_4.rx_10b_data/lvds_rx_fabric.to_ctrl_4_10b_data startPort {}
+set_connection_parameter_value lvds_rx_control_4.rx_10b_data/lvds_rx_fabric.to_ctrl_4_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_4.rx_10b_data/lvds_rx_fabric.to_ctrl_4_10b_data width {0}
+
+add_connection lvds_rx_control_5.lvds_rxout ip_8b10b_decoder_5.in10b
+
+add_connection lvds_rx_control_5.receiver_control_port lvds_rx_fabric.to_ctrl_5
+set_connection_parameter_value lvds_rx_control_5.receiver_control_port/lvds_rx_fabric.to_ctrl_5 endPort {}
+set_connection_parameter_value lvds_rx_control_5.receiver_control_port/lvds_rx_fabric.to_ctrl_5 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_5.receiver_control_port/lvds_rx_fabric.to_ctrl_5 startPort {}
+set_connection_parameter_value lvds_rx_control_5.receiver_control_port/lvds_rx_fabric.to_ctrl_5 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_5.receiver_control_port/lvds_rx_fabric.to_ctrl_5 width {0}
+
+add_connection lvds_rx_control_6.lvds_rxout ip_8b10b_decoder_6.in10b
+
+add_connection lvds_rx_control_6.receiver_control_port lvds_rx_fabric.to_ctrl_6
+set_connection_parameter_value lvds_rx_control_6.receiver_control_port/lvds_rx_fabric.to_ctrl_6 endPort {}
+set_connection_parameter_value lvds_rx_control_6.receiver_control_port/lvds_rx_fabric.to_ctrl_6 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_6.receiver_control_port/lvds_rx_fabric.to_ctrl_6 startPort {}
+set_connection_parameter_value lvds_rx_control_6.receiver_control_port/lvds_rx_fabric.to_ctrl_6 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_6.receiver_control_port/lvds_rx_fabric.to_ctrl_6 width {0}
+
+add_connection lvds_rx_control_6.rx_10b_data lvds_rx_fabric.to_ctrl_6_10b_data
+set_connection_parameter_value lvds_rx_control_6.rx_10b_data/lvds_rx_fabric.to_ctrl_6_10b_data endPort {}
+set_connection_parameter_value lvds_rx_control_6.rx_10b_data/lvds_rx_fabric.to_ctrl_6_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_6.rx_10b_data/lvds_rx_fabric.to_ctrl_6_10b_data startPort {}
+set_connection_parameter_value lvds_rx_control_6.rx_10b_data/lvds_rx_fabric.to_ctrl_6_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_6.rx_10b_data/lvds_rx_fabric.to_ctrl_6_10b_data width {0}
+
+add_connection lvds_rx_control_7.lvds_rxout ip_8b10b_decoder_7.in10b
+
+add_connection lvds_rx_control_7.receiver_control_port lvds_rx_fabric.to_ctrl_7
+set_connection_parameter_value lvds_rx_control_7.receiver_control_port/lvds_rx_fabric.to_ctrl_7 endPort {}
+set_connection_parameter_value lvds_rx_control_7.receiver_control_port/lvds_rx_fabric.to_ctrl_7 endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_7.receiver_control_port/lvds_rx_fabric.to_ctrl_7 startPort {}
+set_connection_parameter_value lvds_rx_control_7.receiver_control_port/lvds_rx_fabric.to_ctrl_7 startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_7.receiver_control_port/lvds_rx_fabric.to_ctrl_7 width {0}
+
+add_connection lvds_rx_control_8.lvds_rxout ip_8b10b_decoder_8.in10b
+
+add_connection lvds_rx_control_8.rx_10b_data lvds_rx_fabric.to_ctrl_8_10b_data
+set_connection_parameter_value lvds_rx_control_8.rx_10b_data/lvds_rx_fabric.to_ctrl_8_10b_data endPort {}
+set_connection_parameter_value lvds_rx_control_8.rx_10b_data/lvds_rx_fabric.to_ctrl_8_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_control_8.rx_10b_data/lvds_rx_fabric.to_ctrl_8_10b_data startPort {}
+set_connection_parameter_value lvds_rx_control_8.rx_10b_data/lvds_rx_fabric.to_ctrl_8_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_control_8.rx_10b_data/lvds_rx_fabric.to_ctrl_8_10b_data width {0}
+
+add_connection lvds_rx_fabric.to_ctrl_0_10b_data lvds_rx_control_0.rx_10b_data
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_0_10b_data/lvds_rx_control_0.rx_10b_data endPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_0_10b_data/lvds_rx_control_0.rx_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_0_10b_data/lvds_rx_control_0.rx_10b_data startPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_0_10b_data/lvds_rx_control_0.rx_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_0_10b_data/lvds_rx_control_0.rx_10b_data width {0}
+
+add_connection lvds_rx_fabric.to_ctrl_5_10b_data lvds_rx_control_5.rx_10b_data
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_5_10b_data/lvds_rx_control_5.rx_10b_data endPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_5_10b_data/lvds_rx_control_5.rx_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_5_10b_data/lvds_rx_control_5.rx_10b_data startPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_5_10b_data/lvds_rx_control_5.rx_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_5_10b_data/lvds_rx_control_5.rx_10b_data width {0}
+
+add_connection lvds_rx_fabric.to_ctrl_7_10b_data lvds_rx_control_7.rx_10b_data
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_7_10b_data/lvds_rx_control_7.rx_10b_data endPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_7_10b_data/lvds_rx_control_7.rx_10b_data endPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_7_10b_data/lvds_rx_control_7.rx_10b_data startPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_7_10b_data/lvds_rx_control_7.rx_10b_data startPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_7_10b_data/lvds_rx_control_7.rx_10b_data width {0}
+
+add_connection lvds_rx_fabric.to_ctrl_8 lvds_rx_control_8.receiver_control_port
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_8/lvds_rx_control_8.receiver_control_port endPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_8/lvds_rx_control_8.receiver_control_port endPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_8/lvds_rx_control_8.receiver_control_port startPort {}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_8/lvds_rx_control_8.receiver_control_port startPortLSB {0}
+set_connection_parameter_value lvds_rx_fabric.to_ctrl_8/lvds_rx_control_8.receiver_control_port width {0}
+
+add_connection r_reset_link_splitter.out1 r2s_fifo_reset_link.in
+
+add_connection scifi_lvds_rx.control_port lvds_rx_fabric.control_port
+set_connection_parameter_value scifi_lvds_rx.control_port/lvds_rx_fabric.control_port endPort {}
+set_connection_parameter_value scifi_lvds_rx.control_port/lvds_rx_fabric.control_port endPortLSB {0}
+set_connection_parameter_value scifi_lvds_rx.control_port/lvds_rx_fabric.control_port startPort {}
+set_connection_parameter_value scifi_lvds_rx.control_port/lvds_rx_fabric.control_port startPortLSB {0}
+set_connection_parameter_value scifi_lvds_rx.control_port/lvds_rx_fabric.control_port width {0}
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_0.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_1.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_2.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_3.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_4.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_5.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_6.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_7.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock ip_8b10b_decoder_8.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_0.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_1.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_2.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_3.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_4.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_5.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_6.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_7.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_control_8.clock_sink
+
+add_connection scifi_lvds_rx.rx_outclock lvds_rx_fabric.dummy_clock
+
+add_connection scifi_lvds_rx.rx_outclock r2s_fifo_reset_link.in_clk
+
+add_connection scifi_lvds_rx.rx_outclock r_reset_link_splitter.clk
+
+add_connection scifi_lvds_rx.rx_outclock rx_clock_out_bridge.in_clk
+
+add_connection scifi_lvds_rx.rx_parallel_data lvds_rx_fabric.lvds_rx_parallel_data_input
+set_connection_parameter_value scifi_lvds_rx.rx_parallel_data/lvds_rx_fabric.lvds_rx_parallel_data_input endPort {}
+set_connection_parameter_value scifi_lvds_rx.rx_parallel_data/lvds_rx_fabric.lvds_rx_parallel_data_input endPortLSB {0}
+set_connection_parameter_value scifi_lvds_rx.rx_parallel_data/lvds_rx_fabric.lvds_rx_parallel_data_input startPort {}
+set_connection_parameter_value scifi_lvds_rx.rx_parallel_data/lvds_rx_fabric.lvds_rx_parallel_data_input startPortLSB {0}
+set_connection_parameter_value scifi_lvds_rx.rx_parallel_data/lvds_rx_fabric.lvds_rx_parallel_data_input width {0}
+
+add_connection system_clock_in_bridge.out_clk r2s_fifo_reset_link.out_clk
+
+add_connection system_reset.out_reset ip_8b10b_decoder_0.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_1.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_2.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_3.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_4.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_5.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_6.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_7.reset_sink
+
+add_connection system_reset.out_reset ip_8b10b_decoder_8.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_0.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_1.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_2.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_3.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_4.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_5.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_6.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_7.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_control_8.reset_sink
+
+add_connection system_reset.out_reset lvds_rx_fabric.dummy_reset
+
+add_connection system_reset.out_reset r2s_fifo_reset_link.in_clk_reset
+
+add_connection system_reset.out_reset r2s_fifo_reset_link.out_clk_reset
+
+add_connection system_reset.out_reset r_reset_link_splitter.reset
+
+# interconnect requirements
+set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {HANDSHAKE}
+set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
+
+save_system {scifi_lvds_receiver_system.qsys}

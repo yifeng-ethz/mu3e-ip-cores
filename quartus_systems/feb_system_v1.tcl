@@ -1,0 +1,116 @@
+# qsys scripting (.tcl) file for feb_system_v1
+package require -exact qsys 16.1
+
+create_system {feb_system_v1}
+set_module_property VERSION 1.0.0.0511
+
+set_project_property DEVICE_FAMILY {Arria V}
+set_project_property DEVICE {5AGXBA7D4F31C5}
+set_project_property HIDE_FROM_IP_CATALOG {false}
+
+add_instance cclk156_bridge altera_clock_bridge 18.1
+set_instance_parameter_value cclk156_bridge {EXPLICIT_CLOCK_RATE} {156250000.0}
+set_instance_parameter_value cclk156_bridge {NUM_CLOCK_OUTPUTS} {1}
+
+add_instance cclk156_source clock_source 18.1
+set_instance_parameter_value cclk156_source {clockFrequency} {156250000.0}
+set_instance_parameter_value cclk156_source {clockFrequencyKnown} {1}
+set_instance_parameter_value cclk156_source {resetSynchronousEdges} {DEASSERT}
+
+add_instance control_path_subsystem debug_sc_system 1.0
+
+add_instance data_path_subsystem scifi_datapath_system 1.0
+
+add_instance mclk125_source clock_source 18.1
+set_instance_parameter_value mclk125_source {clockFrequency} {125000000.0}
+set_instance_parameter_value mclk125_source {clockFrequencyKnown} {1}
+set_instance_parameter_value mclk125_source {resetSynchronousEdges} {DEASSERT}
+
+add_instance temp_sensor_vector_bridge onewire_sense_vector_bridge 26.0.330
+
+add_instance upload_lvds_reset_bridge altera_reset_bridge 18.1
+set_instance_parameter_value upload_lvds_reset_bridge {ACTIVE_LOW_RESET} {0}
+set_instance_parameter_value upload_lvds_reset_bridge {NUM_RESET_OUTPUTS} {1}
+set_instance_parameter_value upload_lvds_reset_bridge {SYNCHRONOUS_EDGES} {deassert}
+set_instance_parameter_value upload_lvds_reset_bridge {USE_RESET_REQUEST} {0}
+
+add_instance upload_subsystem upload_system 1.0
+
+add_interface cclk156 clock sink
+set_interface_property cclk156 EXPORT_OF cclk156_bridge.in_clk
+add_interface download_sc conduit end
+set_interface_property download_sc EXPORT_OF control_path_subsystem.sc_hub_hub_sc_packet_downlink
+add_interface inject conduit end
+set_interface_property inject EXPORT_OF data_path_subsystem.inject
+add_interface lvds_pll_inclock clock sink
+set_interface_property lvds_pll_inclock EXPORT_OF data_path_subsystem.lvds_pll_inclock
+add_interface mclk125 clock sink
+set_interface_property mclk125 EXPORT_OF mclk125_source.clk_in
+add_interface mutrig_cfg_ctrl_0_spi_export2top conduit end
+set_interface_property mutrig_cfg_ctrl_0_spi_export2top EXPORT_OF control_path_subsystem.mutrig_cfg_ctrl_0_spi_export2top
+add_interface mutrig_reset conduit end
+set_interface_property mutrig_reset EXPORT_OF data_path_subsystem.mutrig_reset
+add_interface redriver conduit end
+set_interface_property redriver EXPORT_OF data_path_subsystem.redriver
+add_interface reset reset sink
+set_interface_property reset EXPORT_OF mclk125_source.clk_in_reset
+add_interface sense_dq conduit end
+set_interface_property sense_dq EXPORT_OF temp_sensor_vector_bridge.sense_dq
+add_interface serial conduit end
+set_interface_property serial EXPORT_OF data_path_subsystem.serial
+add_interface to_firefly_ucc8 conduit end
+set_interface_property to_firefly_ucc8 EXPORT_OF control_path_subsystem.to_firefly_ucc8
+add_interface upload_data0_sc_rc avalon_streaming source
+set_interface_property upload_data0_sc_rc EXPORT_OF upload_subsystem.upload_data0_sc_rc
+add_interface upload_data1 avalon_streaming source
+set_interface_property upload_data1 EXPORT_OF data_path_subsystem.hit_type3_lower
+
+add_connection cclk156_bridge.out_clk cclk156_source.clk_in
+
+add_connection cclk156_source.clk control_path_subsystem.clk156_in_clk
+add_connection cclk156_source.clk data_path_subsystem.avmm_clk
+add_connection cclk156_source.clk data_path_subsystem.xcvr_clock
+add_connection cclk156_source.clk upload_subsystem.control_clock
+
+add_connection cclk156_source.clk_reset control_path_subsystem.clk156_in_rst
+add_connection cclk156_source.clk_reset data_path_subsystem.avmm_rst
+add_connection cclk156_source.clk_reset data_path_subsystem.xcvr_reset
+add_connection cclk156_source.clk_reset upload_subsystem.control_clock_reset
+
+add_connection control_path_subsystem.avmm_port data_path_subsystem.avmm_port
+set_connection_parameter_value control_path_subsystem.avmm_port/data_path_subsystem.avmm_port arbitrationPriority {1}
+set_connection_parameter_value control_path_subsystem.avmm_port/data_path_subsystem.avmm_port baseAddress {0x0000}
+set_connection_parameter_value control_path_subsystem.avmm_port/data_path_subsystem.avmm_port defaultConnection {0}
+
+add_connection control_path_subsystem.data_sc_merger_out upload_subsystem.upload_sc
+add_connection control_path_subsystem.sclr_counter_req data_path_subsystem.counter_sclr
+add_connection control_path_subsystem.temp_sensor_mutrig0 temp_sensor_vector_bridge.temp_sensor_mutrig0
+add_connection control_path_subsystem.temp_sensor_mutrig1 temp_sensor_vector_bridge.temp_sensor_mutrig1
+add_connection control_path_subsystem.temp_sensor_sipm0 temp_sensor_vector_bridge.temp_sensor_sipm0
+add_connection control_path_subsystem.temp_sensor_sipm1 temp_sensor_vector_bridge.temp_sensor_sipm1
+add_connection control_path_subsystem.temp_sensor_dab0 temp_sensor_vector_bridge.temp_sensor_dab0
+add_connection control_path_subsystem.temp_sensor_dab1 temp_sensor_vector_bridge.temp_sensor_dab1
+
+add_connection data_path_subsystem.hit_type3_upper upload_subsystem.upload_data
+add_connection data_path_subsystem.lvds_outclock upload_lvds_reset_bridge.clk
+add_connection data_path_subsystem.lvds_outclock upload_subsystem.lvds_outclock
+add_connection data_path_subsystem.rstlink upload_subsystem.synclink
+add_connection upload_subsystem.runctl_mgmt_host data_path_subsystem.runctl_mgmt_host
+
+add_connection mclk125_source.clk control_path_subsystem.clk125_in_clk
+add_connection mclk125_source.clk data_path_subsystem.monitor_clock_125_in
+add_connection mclk125_source.clk temp_sensor_vector_bridge.clock_interface
+
+add_connection mclk125_source.clk_reset cclk156_source.clk_in_reset
+add_connection mclk125_source.clk_reset data_path_subsystem.monitor_reset_in_reset
+add_connection mclk125_source.clk_reset upload_lvds_reset_bridge.in_reset
+add_connection cclk156_source.clk_reset temp_sensor_vector_bridge.reset_interface
+
+add_connection upload_lvds_reset_bridge.out_reset upload_subsystem.lvds_outclock_reset
+
+set_interconnect_requirement {$system} {qsys_mm.clockCrossingAdapter} {AUTO}
+set_interconnect_requirement {$system} {qsys_mm.enableEccProtection} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.insertDefaultSlave} {FALSE}
+set_interconnect_requirement {$system} {qsys_mm.maxAdditionalLatency} {1}
+
+save_system {feb_system_v1.qsys}
