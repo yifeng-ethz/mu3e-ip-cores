@@ -3,7 +3,7 @@
 **Companion docs:** [DV_INT_PLAN.md](DV_INT_PLAN.md), [DV_BASIC.md](DV_BASIC.md), [DV_EDGE.md](DV_EDGE.md), [DV_ERROR.md](DV_ERROR.md), [DV_PROF.md](DV_PROF.md), [BUG_HISTORY.md](BUG_HISTORY.md)
 **Parent:** DV_INT_PLAN.md
 **ID Range:** X001-X192
-**Total:** 192 cases (4 implemented / 0 waived)
+**Total:** 192 cases (8 implemented / 0 waived)
 
 **Methodology key:**
 - **D** directed - single deterministic stimulus with a golden expectation.
@@ -15,7 +15,7 @@ This file is the ERROR bucket for SWB rdma_pretest-260511 integration verificati
 
 | Section | Cases | ID Range | What it Proves | Current Case |
 |---|---:|---|---|---|
-| RC | 32 | X001-X032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 1/32 |
+| RC | 32 | X001-X032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 5/32 |
 | SC | 32 | X033-X064 | PCIe and JTAG slow-control reaches SWB-local CSR and debug fallback paths | 1/32 |
 | DT | 128 | X065-X192 | FEB-to-SWB RDMA RQE traffic is reconciled by the per-stage ledger scoreboard | 2/128 |
 
@@ -24,10 +24,10 @@ This file is the ERROR bucket for SWB rdma_pretest-260511 integration verificati
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---:|---|---|---|
 | X001 | D | mid-flight RESET while OPQ has RQEs in flight | 1 | accept one RQE/OPQ packet then force the reset-drain model | in-flight packet is accounted as dropped and no DMA event is emitted | uvm/swb_rdma_pretest/tests/tb_int_x001_test.sv |
-| X002 | D | ERROR RC reserved legal state-pair seed 2 | 1 | runctl sequence covers legal state holds and transitions for seed 2 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| X003 | D | ERROR RC reserved legal state-pair seed 3 | 1 | runctl sequence covers legal state holds and transitions for seed 3 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| X004 | D | ERROR RC reserved legal state-pair seed 4 | 1 | runctl sequence covers legal state holds and transitions for seed 4 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| X005 | D | ERROR RC reserved legal state-pair seed 5 | 1 | runctl sequence covers legal state holds and transitions for seed 5 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
+| X002 | D | mid-flight RESET during RUN_PREP state shadow update | 1 | assert reset while RUN_PREP is being reflected into local shadows | the shadow returns to IDLE without ghost datapath activity | uvm/swb_rdma_pretest/tests/tb_int_x002_test.sv |
+| X003 | D | mid-flight RESET during host DMA issue | 1 | accept one RQE/OPQ packet then reset during host DMA issue | the in-flight packet is dropped and no DMA event reaches the host | uvm/swb_rdma_pretest/tests/tb_int_x003_test.sv |
+| X004 | D | truncated run-control state word is rejected | 1 | drive a truncated state word on the structural reset-link path | the state shadow remains unchanged and no packet is emitted | uvm/swb_rdma_pretest/tests/tb_int_x004_test.sv |
+| X005 | D | truncated state word followed by legal recovery | 1 | drive one truncated state word then a legal recovery state | the malformed word is contained and the recovery path accounts for the held packet | uvm/swb_rdma_pretest/tests/tb_int_x005_test.sv |
 | X006 | D | ERROR RC reserved legal state-pair seed 6 | 1 | runctl sequence covers legal state holds and transitions for seed 6 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
 | X007 | D | ERROR RC reserved legal state-pair seed 7 | 1 | runctl sequence covers legal state holds and transitions for seed 7 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
 | X008 | D | ERROR RC reserved legal state-pair seed 8 | 1 | runctl sequence covers legal state holds and transitions for seed 8 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |

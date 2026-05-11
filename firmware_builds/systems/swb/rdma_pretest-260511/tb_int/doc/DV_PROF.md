@@ -3,7 +3,7 @@
 **Companion docs:** [DV_INT_PLAN.md](DV_INT_PLAN.md), [DV_BASIC.md](DV_BASIC.md), [DV_EDGE.md](DV_EDGE.md), [DV_ERROR.md](DV_ERROR.md), [DV_PROF.md](DV_PROF.md), [BUG_HISTORY.md](BUG_HISTORY.md)
 **Parent:** DV_INT_PLAN.md
 **ID Range:** P001-P192
-**Total:** 192 cases (2 implemented / 0 waived)
+**Total:** 192 cases (6 implemented / 0 waived)
 
 **Methodology key:**
 - **D** directed - single deterministic stimulus with a golden expectation.
@@ -15,17 +15,17 @@ This file is the PROF bucket for SWB rdma_pretest-260511 integration verificatio
 
 | Section | Cases | ID Range | What it Proves | Current Case |
 |---|---:|---|---|---|
-| RC | 32 | P001-P032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 0/32 |
+| RC | 32 | P001-P032 | reset-link and fallback run-control reaches SWB-local consumers without backpressure | 3/32 |
 | SC | 32 | P033-P064 | PCIe and JTAG slow-control reaches SWB-local CSR and debug fallback paths | 0/32 |
-| DT | 128 | P065-P192 | FEB-to-SWB RDMA RQE traffic is reconciled by the per-stage ledger scoreboard | 2/128 |
+| DT | 128 | P065-P192 | FEB-to-SWB RDMA RQE traffic is reconciled by the per-stage ledger scoreboard | 3/128 |
 
 ## 2. RC
 
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---:|---|---|---|
-| P001 | D | PROF RC reserved legal state-pair seed 1 | 1 | runctl sequence covers legal state holds and transitions for seed 1 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| P002 | D | PROF RC reserved legal state-pair seed 2 | 1 | runctl sequence covers legal state holds and transitions for seed 2 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
-| P003 | D | PROF RC reserved legal state-pair seed 3 | 1 | runctl sequence covers legal state holds and transitions for seed 3 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
+| P001 | D | long RUNNING window structural load | 1 | hold RUNNING while driving a balanced 32-RQE structural load | RQE, CQE, OPQ, and DMA ledgers reconcile across the long window | uvm/swb_rdma_pretest/tests/tb_int_p001_test.sv |
+| P002 | D | RUN_NUMBER bumps between short host batches | 1 | bump RUN_NUMBER between two short balanced host batches | both short batches reconcile and no stale sidecar crosses the run boundary | uvm/swb_rdma_pretest/tests/tb_int_p002_test.sv |
+| P003 | D | watchdog overlap while OPQ drains under load | 1 | overlap watchdog service with a draining OPQ burst | emitted and dropped counts reconcile while DMA events remain closed | uvm/swb_rdma_pretest/tests/tb_int_p003_test.sv |
 | P004 | D | PROF RC reserved legal state-pair seed 4 | 1 | runctl sequence covers legal state holds and transitions for seed 4 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
 | P005 | D | PROF RC reserved legal state-pair seed 5 | 1 | runctl sequence covers legal state holds and transitions for seed 5 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
 | P006 | D | PROF RC reserved legal state-pair seed 6 | 1 | runctl sequence covers legal state holds and transitions for seed 6 | run_window_db records only legal transitions and every local IP shadow state matches | TBD |
@@ -98,7 +98,7 @@ This file is the PROF bucket for SWB rdma_pretest-260511 integration verificatio
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---:|---|---|---|
 | P065 | D | scaled 100 kHz/channel x 4 lanes PROF smoke | 1 | drive a scaled four-lane load preserving the 100 kHz/channel ratio | accepted, dropped, and emitted counts reconcile with zero drops | uvm/swb_rdma_pretest/tests/tb_int_p065_test.sv |
-| P066 | R | PROF DT reserved RQE/OPQ/DMA sweep seed 2 | 1 | sequence randomizes legal SWB datapath pressure for seed 2 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |
+| P066 | D | host CQE turnaround under balanced four-lane load | 1 | drive 64 RQEs with matching CQEs under balanced four-lane pressure | sidecar lineage closes and host DMA events remain bounded | uvm/swb_rdma_pretest/tests/tb_int_p066_test.sv |
 | P067 | D/R | PROF DT reserved RQE/OPQ/DMA sweep seed 3 | 1 | sequence randomizes legal SWB datapath pressure for seed 3 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |
 | P068 | D | sustained RQE ingress at line-rate structural scale | 1 | drive a 128-RQE structural line-rate burst | RQE, OPQ, and DMA ledgers reconcile without halt | uvm/swb_rdma_pretest/tests/tb_int_p068_test.sv |
 | P069 | R | PROF DT reserved RQE/OPQ/DMA sweep seed 5 | 1 | sequence randomizes legal SWB datapath pressure for seed 5 | per-stage ledger reconciles ingress, OPQ egress, event-builder output, and PCIe DMA event counts | TBD |

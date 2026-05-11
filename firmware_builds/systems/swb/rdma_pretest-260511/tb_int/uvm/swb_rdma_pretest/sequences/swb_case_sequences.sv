@@ -5,6 +5,9 @@ package tb_int_swb_case_sequences_pkg;
 
     import uvm_pkg::*;
     import tb_int_swb_case_model_pkg::*;
+    import tb_int_host_memory_pkg::*;
+    import tb_int_host_memory_model_pkg::*;
+    import tb_int_host_polling_core_pkg::*;
     `include "uvm_macros.svh"
 
     class swb_case_sequence extends uvm_object;
@@ -17,6 +20,8 @@ package tb_int_swb_case_sequences_pkg;
         virtual opq_lane_if         opq_lane2_vif;
         virtual opq_lane_if         opq_lane3_vif;
         virtual pcie_dma_egress_if  pcie_dma_vif;
+        host_memory_model           host_mem;
+        host_polling_core           host_core;
 
         function new(string name = "swb_case_sequence");
             super.new(name);
@@ -29,7 +34,9 @@ package tb_int_swb_case_sequences_pkg;
             virtual opq_lane_if         opq_lane1_vif_i,
             virtual opq_lane_if         opq_lane2_vif_i,
             virtual opq_lane_if         opq_lane3_vif_i,
-            virtual pcie_dma_egress_if  pcie_dma_vif_i
+            virtual pcie_dma_egress_if  pcie_dma_vif_i,
+            host_memory_model           host_mem_i = null,
+            host_polling_core           host_core_i = null
         );
             rdma_rqe_vif = rdma_rqe_vif_i;
             rdma_cqe_vif = rdma_cqe_vif_i;
@@ -38,6 +45,8 @@ package tb_int_swb_case_sequences_pkg;
             opq_lane2_vif = opq_lane2_vif_i;
             opq_lane3_vif = opq_lane3_vif_i;
             pcie_dma_vif = pcie_dma_vif_i;
+            host_mem = host_mem_i;
+            host_core = host_core_i;
         endfunction
 
         task automatic drive_opq_lane(int unsigned lane, logic [31:0] payload);
@@ -78,12 +87,30 @@ package tb_int_swb_case_sequences_pkg;
             return {32'h5A5A_0000, idx[31:0]};
         endfunction
 
+        function rqe_t make_host_rqe(int unsigned idx);
+            host_memory_config_t cfg;
+
+            if (host_mem == null)
+                cfg = host_memory_default_config();
+            else
+                cfg = host_mem.cfg;
+            make_host_rqe = '0;
+            make_host_rqe.addr = cfg.HOST_DATA_BASE_ADDR +
+                                 ((idx % cfg.N_SEGMENTS) * cfg.SEG_BYTES);
+            make_host_rqe.len = 32'd32;
+            make_host_rqe.key = 32'h5151_0001;
+            make_host_rqe.sidecar_id = make_wqe_sidecar_id(idx);
+            make_host_rqe.opaque_tag = {64'h5357_425F_5251_455F,
+                                        32'h0000_0000, idx[31:0]};
+        endfunction
+
         task automatic drive_case(string case_id);
             swb_case_expectation_t exp;
             int unsigned packet_idx;
             int unsigned lane_counts[4];
             int unsigned lane;
             int unsigned emitted_packets;
+            rqe_t host_rqe;
 
             exp = swb_case_expectation(case_id);
             lane_counts[0] = exp.lane0_packets;
@@ -95,6 +122,11 @@ package tb_int_swb_case_sequences_pkg;
             `uvm_info("SWB_SEQ", $sformatf("drive %s title=\"%s\"", case_id, exp.title), UVM_LOW)
 
             for (packet_idx = 0; packet_idx < exp.rqe_ingress; packet_idx++) begin
+                if (host_mem != null) begin
+                    host_rqe = make_host_rqe(packet_idx);
+                    host_mem.host_post_rqe(packet_idx % host_mem.cfg.RQ_DEPTH,
+                                           host_rqe);
+                end
                 rdma_rqe_vif.drive_rqe({192'h0, 32'h5351_4500, packet_idx[31:0]},
                                        make_wqe_sidecar_id(packet_idx));
             end
