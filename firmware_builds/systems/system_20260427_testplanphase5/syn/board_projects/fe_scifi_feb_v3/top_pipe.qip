@@ -2,7 +2,7 @@
 # Self-contained SciFi FEB board build for the local v3 system.
 #
 
-set system_syn [file normalize [file join $::quartus(qip_path) .. ..]]
+set system_syn_root [file normalize [file join $::quartus(qip_path) .. ..]]
 
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/top.vhd"]
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/scifi_path.vhd"]
@@ -29,7 +29,7 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/wrapp
 set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "src/wrappers/feb_system_v3/feb_system_pipe_top.vhd"]
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "src/fe/top_FEB_v2.sdc"]
 
-set_global_assignment -name QIP_FILE [file join $system_syn "feb_system_v3_pipe/synthesis/feb_system_v3_pipe.qip"]
+set_global_assignment -name QIP_FILE [file join $system_syn_root "feb_system_v3_pipe/synthesis/feb_system_v3_pipe.qip"]
 
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_ds/alt_issp_ds/synthesis/alt_issp_ds.qip"]
 set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_srst/alt_issp_srst/synthesis/alt_issp_srst.qip"]

@@ -53,3 +53,25 @@ git rebase --rebase-merges origin/main
 - The rewrite was limited to parent repository commit messages.
 - Submodule repositories were not rewritten by this migration.
 - GitHub repository graphs may take time to recalculate after the force-push.
+
+## 2026-05-04 Main Branch Verification
+
+The parent `main` branch was rechecked after the rewrite:
+
+| Item | SHA |
+|---|---|
+| Verified local `main` tip | `0f034468c9bd83d8fcf47020bf295658554d33d6` |
+| Verified `origin/main` tip | `0f034468c9bd83d8fcf47020bf295658554d33d6` |
+| Verified tree hash at both tips | `848f8b372f792b45b607b66e6be1bac29bd703ee` |
+| Post-rewrite base confirmed as ancestor | `f6c98fe9fb91cfbf4351a2d04fd812b5e7a83068` |
+
+Verification commands run on 2026-05-04:
+
+```bash
+git fetch origin --prune
+git merge-base --is-ancestor f6c98fe9fb91cfbf4351a2d04fd812b5e7a83068 main
+git log --format='%H%n%B%n---END---' main -- | rg -i 'Co-Authored-By: Claude|anthropic'
+```
+
+The local and remote `main` tips matched, the post-rewrite base was an ancestor
+of `main`, and the trailer scan returned no matches.

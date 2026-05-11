@@ -37,11 +37,12 @@ source [locate_project_spec]
 proc usage {} {
     puts "Usage:"
     puts "  system-console -cli --jdi <top.jdi> --script=phase5_histogram_bin_dump.tcl --"
-    puts "      --profile <rate|delay|header|delay-hit-t|delay-debug1|delay-debug2> --out <bins.csv>"
+    puts "      --profile <rate|delay|header|delay-hit-t|delay-hit-t-pre|delay-hit-t-post|delay-debug1|delay-debug2|delay-debug3> --out <bins.csv>"
     puts "      optional: --wait-ms <preset interval + guard> --lane-filter <0..7> --csr-base 0x00020400 --bin-base 0x00020000"
     puts "      optional: --left-bound <signed> --bin-width <n> --right-bound <signed> --control <hex> --key-loc <hex> --key-value <hex> --interval-clocks <n>"
     puts "      optional: --read-chunk-words <1..256> --read-delay-ms <delay between chunks> --unsafe-bulk-read"
     puts "      optional: --rate-ingress-base-list 0x00020C00,0x00020C10"
+    puts "      optional diagnostic: --onclick-base 0x00022000 --onclick-repeat <n> --onclick-gap-ms <n>"
 }
 
 proc parse_i {text} {
@@ -91,10 +92,11 @@ proc builtin_preset_spec_by_id {preset_id} {
         "csr.commit" "0x1"]
 
     switch -- $preset_id {
-        "delay_hit_t" {
+        "delay_hit_t" -
+        "delay_hit_t_pre" {
             return [dict create \
-                id "delay_hit_t" \
-                label "Hit T signed delay" \
+                id $preset_id \
+                label {Hit T signed delay, pre-rbCAM type1 ts[12:0]} \
                 sample_interval_ms 1000 \
                 sample_guard_ms 50 \
                 field_values [dict merge $common_interval [dict create \
@@ -103,8 +105,27 @@ proc builtin_preset_spec_by_id {preset_id} {
                     "csr.filter" "0x0" \
                     "left_bound.left_bound" "-1000" \
                     "bin_width.bin_width" "0x10" \
-                    "keys_location.update_key_low" "0x1e" \
-                    "keys_location.update_key_high" "0x26" \
+                    "keys_location.update_key_low" "0x11" \
+                    "keys_location.update_key_high" "0x1d" \
+                    "keys_location.filter_key_low" "0x23" \
+                    "keys_location.filter_key_high" "0x26" \
+                    "keys_value.filter_key_value" "0x0" \
+                    "keys_value.update_key_value" "0x0"]]]
+        }
+        "delay_hit_t_post" {
+            return [dict create \
+                id $preset_id \
+                label {Hit T signed delay, post-rbCAM type2 ts[11:0]} \
+                sample_interval_ms 1000 \
+                sample_guard_ms 50 \
+                field_values [dict merge $common_interval [dict create \
+                    "csr.mode" "0x1" \
+                    "csr.representation" "0x0" \
+                    "csr.filter" "0x0" \
+                    "left_bound.left_bound" "-1000" \
+                    "bin_width.bin_width" "0x10" \
+                    "keys_location.update_key_low" "0x11" \
+                    "keys_location.update_key_high" "0x1c" \
                     "keys_location.filter_key_low" "0x23" \
                     "keys_location.filter_key_high" "0x26" \
                     "keys_value.filter_key_value" "0x0" \
@@ -137,6 +158,25 @@ proc builtin_preset_spec_by_id {preset_id} {
                 sample_guard_ms 50 \
                 field_values [dict merge $common_interval [dict create \
                     "csr.mode" "0xe" \
+                    "csr.representation" "0x0" \
+                    "csr.filter" "0x0" \
+                    "left_bound.left_bound" "-1000" \
+                    "bin_width.bin_width" "0x10" \
+                    "keys_location.update_key_low" "0x1e" \
+                    "keys_location.update_key_high" "0x22" \
+                    "keys_location.filter_key_low" "0x23" \
+                    "keys_location.filter_key_high" "0x26" \
+                    "keys_value.filter_key_value" "0x0" \
+                    "keys_value.update_key_value" "0x0"]]]
+        }
+        "delay_debug3" {
+            return [dict create \
+                id "delay_debug3" \
+                label "rbCAM debug_3 egress hit delay" \
+                sample_interval_ms 1000 \
+                sample_guard_ms 50 \
+                field_values [dict merge $common_interval [dict create \
+                    "csr.mode" "0xd" \
                     "csr.representation" "0x0" \
                     "csr.filter" "0x0" \
                     "left_bound.left_bound" "-1000" \
@@ -207,11 +247,20 @@ proc preset_id_for_profile {profile lane_filter} {
     if {$profile eq "delay-hit" || $profile eq "delay_hit" || $profile eq "delay-hit-t" || $profile eq "delay_hit_t"} {
         return "delay_hit_t"
     }
+    if {$profile eq "delay-hit-t-pre" || $profile eq "delay_hit_t_pre"} {
+        return "delay_hit_t_pre"
+    }
+    if {$profile eq "delay-hit-t-post" || $profile eq "delay_hit_t_post"} {
+        return "delay_hit_t_post"
+    }
     if {$profile eq "delay-debug1" || $profile eq "delay_debug1" || $profile eq "debug1"} {
         return "delay_debug1"
     }
     if {$profile eq "delay-debug2" || $profile eq "delay_debug2" || $profile eq "debug2"} {
         return "delay_debug2"
+    }
+    if {$profile eq "delay-debug3" || $profile eq "delay_debug3" || $profile eq "debug3" || $profile eq "delay-rbcam" || $profile eq "delay_rbcam"} {
+        return "delay_debug3"
     }
     if {$profile eq "delay" || $profile eq "header"} {
         if {$lane_filter eq ""} {
@@ -231,7 +280,11 @@ proc preset_id_for_profile {profile lane_filter} {
 }
 
 proc profile_uses_pre_hit_stream {profile} {
-    return [expr {$profile eq "rate" || $profile eq "delay-hit" || $profile eq "delay_hit" || $profile eq "delay-hit-t" || $profile eq "delay_hit_t"}]
+    return [expr {$profile eq "rate" || \
+        $profile eq "delay-hit" || $profile eq "delay_hit" || \
+        $profile eq "delay-hit-t" || $profile eq "delay_hit_t" || \
+        $profile eq "delay-hit-t-pre" || $profile eq "delay_hit_t_pre" || \
+        $profile eq "delay-hit-t-post" || $profile eq "delay_hit_t_post"}]
 }
 
 proc profile_supports_asic_filter {profile} {
@@ -340,6 +393,31 @@ proc read_histogram_bins {svc bin_base read_chunk_words read_delay_ms} {
     return $bins
 }
 
+proc injector_mode_offset {svc injector_base} {
+    set values [master_read_32 $svc $injector_base 1]
+    set word0 [expr {[parse_i [lindex $values 0]] & 0xffffffff}]
+    if {$word0 == 0x4D494E4A} {
+        return 8
+    }
+    return 0
+}
+
+proc fire_onclick_pulses {svc injector_base repeat_count gap_ms} {
+    if {$repeat_count <= 0} {
+        return
+    }
+    if {$gap_ms < 0} {
+        error "--onclick-gap-ms must be non-negative"
+    }
+    set mode_offset [injector_mode_offset $svc $injector_base]
+    for {set idx 0} {$idx < $repeat_count} {incr idx} {
+        master_write_32 $svc [expr {$injector_base + $mode_offset}] 4
+        if {$gap_ms > 0} {
+            after $gap_ms
+        }
+    }
+}
+
 proc wait_apply_clear {svc csr_base} {
     for {set idx 0} {$idx < 100} {incr idx} {
         set control [read_csr_word $svc $csr_base 2]
@@ -431,7 +509,7 @@ proc configure_histogram {svc csr_base profile lane_filter} {
 if {[catch {
     lassign [::board_test::jtag::parse_args \
         $argv \
-        {profile out wait-ms lane-filter csr-base bin-base left-bound right-bound bin-width key-loc key-value control interval-clocks read-chunk-words read-delay-ms rate-ingress-base-list master-pattern fallback-pattern service-tag} \
+        {profile out wait-ms lane-filter csr-base bin-base read-chunk-words read-delay-ms rate-ingress-base-list master-pattern fallback-pattern service-tag onclick-base onclick-repeat onclick-gap-ms} \
         {unsafe-bulk-read}] opt_kvs positional
     array set opts $opt_kvs
 
@@ -473,6 +551,18 @@ if {[catch {
         error "histogram bin bulk reads require --unsafe-bulk-read"
     }
     set ingress_bases [split_u32_csv $opts(rate-ingress-base-list) [list 0x00020C00 0x00020C10]]
+    set onclick_base 0x00022000
+    if {$opts(onclick-base) ne ""} {
+        set onclick_base [parse_i $opts(onclick-base)]
+    }
+    set onclick_repeat 0
+    if {$opts(onclick-repeat) ne ""} {
+        set onclick_repeat [parse_i $opts(onclick-repeat)]
+    }
+    set onclick_gap_ms 0
+    if {$opts(onclick-gap-ms) ne ""} {
+        set onclick_gap_ms [parse_i $opts(onclick-gap-ms)]
+    }
     set service_tag $::board_test::jtag::default_service_tag
     if {$opts(service-tag) ne ""} {
         set service_tag $opts(service-tag)
@@ -549,6 +639,7 @@ if {[catch {
     }
     master_write_32 $svc $bin_base 0
     set stats_before_wait [read_histogram_stats $svc $csr_base]
+    fire_onclick_pulses $svc $onclick_base $onclick_repeat $onclick_gap_ms
     after $wait_ms
     set stats_after_wait [read_histogram_stats $svc $csr_base]
     set bins [read_histogram_bins $svc $bin_base $read_chunk_words $read_delay_ms]
@@ -580,6 +671,9 @@ if {[catch {
         bin_base [hex32 $bin_base] \
         read_chunk_words $read_chunk_words \
         read_delay_ms $read_delay_ms \
+        onclick_base [hex32 $onclick_base] \
+        onclick_repeat $onclick_repeat \
+        onclick_gap_ms $onclick_gap_ms \
         ingress_status "{$ingress_status}" \
         wait_ms $wait_ms \
         stats_before_wait "{$stats_before_wait}" \

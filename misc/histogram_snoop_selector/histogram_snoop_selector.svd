@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance">
+  <name>histogram_snoop_selector</name>
+  <version>26.1.0.0502</version>
+  <description>Nonblocking runtime selector between hit-processor and rbCAM histogram snoops.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <peripherals>
+    <peripheral>
+      <name>histogram_snoop_selector</name>
+      <baseAddress>0x00000000</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x20</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register><name>UID</name><description>Read ASCII HSNP; any write clears counters.</description><addressOffset>0x00</addressOffset><size>32</size><access>read-write</access><resetValue>0x48534E50</resetValue></register>
+        <register><name>META</name><description>Write page select: 0 VERSION, 1 VERSION_DATE, 2 VERSION_GIT, 3 INSTANCE_ID. Read returns selected page.</description><addressOffset>0x04</addressOffset><size>32</size><access>read-write</access></register>
+        <register><name>CONTROL</name><description>Bit 0 selects rbCAM egress. Bit 1 enables rbCAM hit-word filtering. Bit 8 clears counters when written as one.</description><addressOffset>0x08</addressOffset><size>32</size><access>read-write</access><resetValue>0x00000002</resetValue></register>
+        <register><name>STATUS</name><description>Live source/filter status, input valids, rbCAM hit-region state, histogram ready/valid, and last rbCAM subheader timestamp.</description><addressOffset>0x0C</addressOffset><size>32</size><access>read-only</access><resetValue>0x00000000</resetValue></register>
+        <register><name>HP_SEEN_LO</name><description>Low 32 bits of hit-processor snoop valid samples.</description><addressOffset>0x10</addressOffset><size>32</size><access>read-only</access><resetValue>0x00000000</resetValue></register>
+        <register><name>RB_SEEN_LO</name><description>Low 32 bits of accepted rbCAM hit-word snoop samples.</description><addressOffset>0x14</addressOffset><size>32</size><access>read-only</access><resetValue>0x00000000</resetValue></register>
+        <register><name>HIST_EMIT_LO</name><description>Low 32 bits of selected samples emitted to histogram.</description><addressOffset>0x18</addressOffset><size>32</size><access>read-only</access><resetValue>0x00000000</resetValue></register>
+        <register><name>HIST_DROP_LO</name><description>Low 32 bits of selected samples dropped because the histogram was not ready.</description><addressOffset>0x1C</addressOffset><size>32</size><access>read-only</access><resetValue>0x00000000</resetValue></register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>

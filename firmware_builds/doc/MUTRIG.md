@@ -1,6 +1,26 @@
 # MUTRIG.md - MuTRiG3 configuration and lock notes
 
-Date: 2026-04-30
+Date: 2026-05-06
+
+## Source References
+
+For MuTRiG hit validation, transmit-mode semantics, and LVDS frame structure,
+use the online wiki as the source of truth:
+
+- `online/wiki/mutrig_hitTx.md`
+- `online/wiki/mutrig_hitTxData.md`
+
+The local reference used for this note is the `online_sc/online` checkout of
+`mu3e/online.git` at commit `1a781e6aa35092e2c73a294d618538731c07db4b`.
+This wiki copy defines RCV_ALL behavior, `tx_mode` meanings, LVDS framing,
+frame flags, hit counter, CRC, trailer, and the exact long-hit and short-hit
+bit layouts.
+
+Do not treat the older `online/wiki/mutrig_settings.md` short-mode row as the
+bit-layout authority. It says short mode transmits T timestamps and E flags, but
+the completed `mutrig_hitTxData.md` short-hit table defines generic timestamp
+fields plus `Energy_Flag`, and the inspected MuTRiG source packs the E-side
+fields in short mode.
 
 ## Source Of Truth
 
@@ -130,7 +150,44 @@ rate, delay, or histogram claim.
 
 With TDC injection enabled, the MuTRiG cuts off the analog frontend input. The
 shared external trigger bus injects into the digital TDC counters and generates
-hits with deterministic or rate-controlled timing.
+hits with deterministic or rate-controlled timing. The online `mutrig_dmon`
+wiki names DMON0 as the Q input to the TDC: a rising DMON0 edge creates the
+timestamp. DMON1 is the flag input and determines whether that timestamp is
+classified as T-like or E-like.
+
+## Hit Transmission Contract
+
+The online wiki defines the hit-validation rule as follows. With `RCV_ALL=0`, a
+hit is sent only after an E-type timestamp follows a T-type timestamp. With
+`RCV_ALL=1`, every TDC timestamp can create a transmitted hit, so use it for
+PLL-test/DMON0-style operation where no E timestamp is present.
+
+For the FEB smoke/reference operating point, drive the TDC-injection line as
+DMON0/Q and leave DMON1/flag low. That produces T-type timestamps with
+`Energy_Flag=0` and requires `RCV_ALL=1`. The E/T threshold DAC settings belong
+to the analog frontend path and do not affect this bypassed DMON0/Q injection.
+In analog-enabled operation (`tdctest_n=1`, CML path enabled), the T and E
+frontend branches are both real inputs to the TDC; setting the E threshold so it
+does not fire leaves the received short-mode `RCV_ALL=1` stream dominated by
+T-branch timestamps, consistent with the wiki wording.
+
+For `tx_mode`, the wiki defines short event transmission as one transmitted
+timestamp and long event transmission as a tuple of two succeeding timestamps,
+typically T then E. The inspected MuTRiG RTL is consistent with that high-level
+contract: `tx_mode=0b100` selects the short packing path, and long mode sends
+the full 48-bit L2 record. The source RTL's short packing physically uses the
+E-side L2 fields:
+
+```text
+channel, E_BadHit, ECC, E_Fine, E_Flag, pad
+```
+
+This still matches `mutrig_hitTxData.md`: short bits `[27:23]` are channel,
+`[22]` is bad-hit, `[21:7]` coarse counter, `[6:2]` fine counter, `[1]`
+`Energy_Flag`, and `[0]` zero padding. For DMON0-only `RCV_ALL=1` hits, the
+T-type timestamp is carried in those generic short timestamp fields with
+`Energy_Flag=0`. Long mode also matches the wiki's 48-bit table: channel, T
+bad/coarse/fine, E bad/coarse/fine, and E flag.
 
 Recommended debug interpretation:
 

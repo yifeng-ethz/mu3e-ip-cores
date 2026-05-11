@@ -496,6 +496,11 @@
  <connection
    kind="clock"
    version="18.1"
+   start="mclk125_souce.clk"
+   end="upload_subsystem.upload_sc_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
    start="osc50_source.out_clk"
    end="bringup_subsystem.clk_in" />
  <connection
@@ -558,6 +563,11 @@
    version="18.1"
    start="mclk125_souce.clk_reset"
    end="data_path_subsystem.monitor_reset_in_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="mclk125_souce.clk_reset"
+   end="upload_subsystem.upload_sc_clock_reset" />
  <connection
    kind="reset"
    version="18.1"

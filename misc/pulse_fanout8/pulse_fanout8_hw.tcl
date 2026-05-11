@@ -2,8 +2,8 @@ package require -exact qsys 16.1
 
 set_module_property NAME pulse_fanout8
 set_module_property DISPLAY_NAME "Pulse Fanout x8"
-set_module_property VERSION 1.0
-set_module_property DESCRIPTION "Simple 1-to-8 conduit pulse fanout helper."
+set_module_property VERSION 1.2
+set_module_property DESCRIPTION "Registered conduit pulse fanout helper with explicit exported pulse registers."
 set_module_property GROUP "Mu3e Utility/Modules"
 set_module_property AUTHOR "OpenAI Codex"
 set_module_property INTERNAL false

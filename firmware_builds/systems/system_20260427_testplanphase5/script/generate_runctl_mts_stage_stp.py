@@ -42,6 +42,9 @@ MTS_PREFIX = {
     1: f"{DP_PREFIX}mts_processor:mts_preprocessor_1|",
 }
 
+INJECTOR_PREFIX = f"{DP_PREFIX}mutrig_injector_multiheader:mutrig_injector_0|"
+INJECT_FANOUT_PREFIX = f"{DP_PREFIX}pulse_fanout8:emulator_inject_fanout|"
+
 DEASM0_PREFIX = (
     f"{DP_PREFIX}"
     "feb_system_v3_pipe_data_path_subsystem_mutrig_datapath_subsystem_0:mutrig_datapath_subsystem_0|"
@@ -173,6 +176,47 @@ def deassembly_gate_bits(prefix: str) -> list[str]:
     return signals
 
 
+def injector_signals() -> list[str]:
+    signals = [
+        f"{INJECTOR_PREFIX}avs_csr_write",
+        f"{INJECTOR_PREFIX}avs_csr_read",
+        f"{INJECTOR_PREFIX}avs_csr_waitrequest",
+        f"{INJECTOR_PREFIX}onclick_write_pulse",
+        f"{INJECTOR_PREFIX}onclick_injector_pulse",
+        f"{INJECTOR_PREFIX}periodic_injector_pulse",
+        f"{INJECTOR_PREFIX}header_injector_pulse",
+        f"{INJECTOR_PREFIX}random_injector_pulse",
+        f"{INJECTOR_PREFIX}periodic_async_pulse",
+        f"{INJECTOR_PREFIX}header_match_valid",
+        f"{INJECTOR_PREFIX}coe_inject_pulse",
+        f"{INJECT_FANOUT_PREFIX}coe_inject_pulse",
+        f"{INJECT_FANOUT_PREFIX}coe_aux_inject_pulse",
+        f"{INJECT_FANOUT_PREFIX}coe_out0_pulse",
+        f"{INJECT_FANOUT_PREFIX}coe_out8_pulse",
+        f"{INJECT_FANOUT_PREFIX}coe_out0_masked_pulse",
+        f"{QSYS}inject_pulse",
+        f"{QSYS}inject_masked_pulse",
+        f"{DP_PREFIX}inject_pulse",
+        f"{DP_PREFIX}inject_masked_pulse",
+    ]
+    for field, width in (
+        ("avs_csr_address", 4),
+        ("avs_csr_writedata", 32),
+        ("csr.mode", 4),
+        ("csr.header_delay", 16),
+        ("csr.header_interval", 16),
+        ("csr.injection_multiplicity", 16),
+        ("csr.header_ch", 4),
+        ("csr.pulse_interval", 32),
+        ("csr.pulse_high_cycles", 8),
+        ("asi_headerinfo0_data", 42),
+        ("asi_headerinfo0_channel", 4),
+    ):
+        signals.extend(bits(f"{INJECTOR_PREFIX}{field}", width))
+    signals.append(f"{INJECTOR_PREFIX}asi_headerinfo0_valid")
+    return signals
+
+
 def default_signals() -> list[str]:
     signals: list[str] = []
 
@@ -189,6 +233,8 @@ def default_signals() -> list[str]:
 
     for adapter_idx in (19, 26, 22):
         signals.extend(branch(ADAPTER_PREFIX[adapter_idx], "out_0", include_ready=True))
+
+    signals.extend(injector_signals())
 
     signals.extend(ctrl_sink(MTS_PREFIX[0]))
     signals.extend(run_state_bits(MTS_PREFIX[0]))
@@ -213,41 +259,6 @@ def default_signals() -> list[str]:
         )
     )
 
-    signals.extend(ctrl_sink(EMU0_PREFIX))
-    signals.extend(
-        [
-            f"{EMU0_PREFIX}ctrl_state_q[3]",
-            f"{EMU0_PREFIX}ctrl_state_q[4]",
-        ]
-    )
-
-    signals.extend(
-        stream(
-            EMU0_PREFIX,
-            "aso_tx8b1k",
-            data_width=9,
-            error_width=3,
-            channel_width=4,
-        )
-    )
-    signals.extend(
-        stream(
-            MUX0_PREFIX,
-            "asi_emu",
-            data_width=9,
-            error_width=3,
-            channel_width=4,
-        )
-    )
-    signals.extend(
-        stream(
-            MUX0_PREFIX,
-            "aso",
-            data_width=9,
-            error_width=3,
-            channel_width=4,
-        )
-    )
     signals.extend(
         stream(
             ADAPTER034_PREFIX,
@@ -263,7 +274,7 @@ def default_signals() -> list[str]:
             "out_0",
             data_width=9,
             error_width=3,
-            channel_width=5,
+            channel_width=4,
             include_ready=True,
         )
     )

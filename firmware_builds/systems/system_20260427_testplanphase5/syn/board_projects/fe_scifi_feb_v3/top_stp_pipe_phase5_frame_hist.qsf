@@ -18,26 +18,27 @@
 #
 # Quartus Prime
 # Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
-# Date created = 03:20:40  May 04, 2026
+# Date created = 16:09:31  April 30, 2026
+#
+# -------------------------------------------------------------------------- #
+#
+# Notes:
+#
+# 1) The default values for assignments are stored in the file:
+#		top_stp_pipe_phase5_frame_hist_assignment_defaults.qdf
+#    If this file doesn't exist, see file:
+#		assignment_defaults.qdf
+#
+# 2) Altera recommends that you do not modify this file. This
+#    file is updated automatically by the Quartus Prime software
+#    and any changes you make may be lost or overwritten.
 #
 # -------------------------------------------------------------------------- #
 
-QUARTUS_VERSION = "18.1"
-DATE = "03:20:40  May 04, 2026"
 
-# Revisions
-
-PROJECT_REVISION = "top_stp_pipe_phase6_injector_boundary"
-PROJECT_REVISION = "top"
-PROJECT_REVISION = "top_nostp_pipe"
-PROJECT_REVISION = "top_stp_pipe_runctl_hitstack0"
-PROJECT_REVISION = "top_stp_pipe_runctl_ready"
-PROJECT_REVISION = "top_stp_pipe_runctl_ingress"
-PROJECT_REVISION = "top_stp_pipe_sc156_lite"
-PROJECT_REVISION = "top_stp_pipe_sc125"
-PROJECT_REVISION = "top_stp_pipe_sc"
-PROJECT_REVISION = "top_nostp_pipe_lvdsctrl_nofe"
-PROJECT_REVISION = "top_nostp_pipe_lvdsctrl"
-PROJECT_REVISION = "top_nostp_lat4"
-PROJECT_REVISION = "top_nostp_qsysfix"
-PROJECT_REVISION = "top_nostp"
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE AUTO
+set_global_assignment -name TOP_LEVEL_ENTITY top_stp_pipe_phase5_frame_hist
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
+set_global_assignment -name PROJECT_CREATION_TIME_DATE "16:09:31  APRIL 30, 2026"
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
