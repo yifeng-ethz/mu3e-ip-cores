@@ -495,6 +495,14 @@ def emit_selected_tests_pkg() -> str:
         "",
     ]
     lines.extend(f"    import {case.test_pkg}::*;" for case in IMPLEMENTED_CASES)
+    # Hand-authored auxiliary tests that are not part of the IMPLEMENTED_CASES
+    # case ledger but share the SWB tb_int harness. Each entry appears here so
+    # the UVM factory sees the class type and emit_filelist() compiles the
+    # file. Keep this list short and only for tests the user-facing
+    # IMPLEMENTED_CASES list cannot model (e.g. directed run-control sweeps,
+    # bug-repro tests with no associated Case row).
+    lines.append("    // Directed run-control opcode sweep (BUG-RC-RESET-SCWEDGE Phase 3 repro)")
+    lines.append("    import tb_int_run_sequence_directed_test_pkg::*;")
     lines.extend([
         "",
         "endpackage",
@@ -542,8 +550,12 @@ def emit_filelist() -> str:
         "uvm/swb_rdma_pretest/sequences/swb_case_sequences.sv",
     ]
     lines.extend(f"uvm/swb_rdma_pretest/sequences/{case.case_id}.sv" for case in IMPLEMENTED_CASES)
+    # Hand-authored auxiliary sequence (not a Case row).
+    lines.append("uvm/swb_rdma_pretest/sequences/run_sequence_directed.sv")
     lines.append("uvm/swb_rdma_pretest/tb_int_base_test.sv")
     lines.extend(f"uvm/swb_rdma_pretest/tests/tb_int_{case.class_suffix}_test.sv" for case in IMPLEMENTED_CASES)
+    # Hand-authored auxiliary test (BUG-RC-RESET-SCWEDGE Phase 3 repro).
+    lines.append("uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_test.sv")
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv")
     lines.extend([
         "uvm/swb_rdma_pretest/tb_int_smoke_test.sv",

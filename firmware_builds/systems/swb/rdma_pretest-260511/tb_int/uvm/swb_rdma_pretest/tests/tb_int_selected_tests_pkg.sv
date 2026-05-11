@@ -43,5 +43,7 @@ package tb_int_swb_selected_tests_pkg;
     import tb_int_p065_test_pkg::*;
     import tb_int_p066_test_pkg::*;
     import tb_int_p068_test_pkg::*;
+    // Directed run-control opcode sweep (BUG-RC-RESET-SCWEDGE Phase 3 repro)
+    import tb_int_run_sequence_directed_test_pkg::*;
 
 endpackage
