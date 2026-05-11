@@ -1214,7 +1214,7 @@
  <module
    name="emulator_mutrig_0"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1237,7 +1237,7 @@
  <module
    name="emulator_mutrig_1"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1260,7 +1260,7 @@
  <module
    name="emulator_mutrig_2"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1283,7 +1283,7 @@
  <module
    name="emulator_mutrig_3"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1306,7 +1306,7 @@
  <module
    name="emulator_mutrig_4"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1329,7 +1329,7 @@
  <module
    name="emulator_mutrig_5"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1352,7 +1352,7 @@
  <module
    name="emulator_mutrig_6"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1375,7 +1375,7 @@
  <module
    name="emulator_mutrig_7"
    kind="emulator_mutrig"
-   version="26.1.9.418"
+   version="26.3.0.0506"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
   <parameter name="BUILD" value="418" />
@@ -1437,7 +1437,7 @@
  <module
    name="histogram_ingress_bridge_0"
    kind="histogram_ingress_bridge"
-   version="26.0.1.421"
+   version="26.1.6.0429"
    enabled="1">
   <parameter name="BUILD" value="421" />
   <parameter name="DEFAULT_SELECT_POST" value="0" />
@@ -1453,7 +1453,7 @@
  <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.1.1.416"
+   version="26.1.6.0429"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
   <parameter name="AVST_DATA_WIDTH" value="39" />
@@ -1532,7 +1532,7 @@
  <module
    name="lvds_rx_controller_pro_0"
    kind="lvds_rx_controller_pro"
-   version="25.1.630"
+   version="26.2.1.0506"
    enabled="1">
   <parameter name="AVMM_ADDR_W" value="4" />
   <parameter name="DECODED_USE_CHANNEL" value="1" />
@@ -1601,7 +1601,7 @@
  <module
    name="mts_preprocessor_0"
    kind="mts_preprocessor"
-   version="26.0.2.416"
+   version="26.1.0.0506"
    enabled="1">
   <parameter name="BANK" value="UP" />
   <parameter name="BUILD" value="416" />
@@ -1626,7 +1626,7 @@
  <module
    name="mts_preprocessor_1"
    kind="mts_preprocessor"
-   version="26.0.2.416"
+   version="26.1.0.0506"
    enabled="1">
   <parameter name="BANK" value="DW" />
   <parameter name="BUILD" value="416" />
@@ -1763,7 +1763,7 @@
  <module
    name="mutrig_injector_0"
    kind="mutrig_injector_multiheader"
-   version="26.0.326"
+   version="26.0.3.0429"
    enabled="1">
   <parameter name="HEADERINFO_CHANNEL_W" value="4" />
  </module>
