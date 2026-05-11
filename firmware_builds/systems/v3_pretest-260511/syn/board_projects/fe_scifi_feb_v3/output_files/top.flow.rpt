@@ -1,5 +1,5 @@
 Flow report for top
-Mon May 11 12:53:25 2026
+Mon May 11 15:04:07 2026
 Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
 
 
@@ -40,15 +40,15 @@ refer to the applicable agreement for further details.
 +-----------------------------------------------------------------------------------+
 ; Flow Summary                                                                      ;
 +---------------------------------+-------------------------------------------------+
-; Flow Status                     ; Flow Failed - Mon May 11 12:53:24 2026          ;
+; Flow Status                     ; Flow Failed - Mon May 11 15:04:06 2026          ;
 ; Quartus Prime Version           ; 18.1.0 Build 625 09/12/2018 SJ Standard Edition ;
 ; Revision Name                   ; top                                             ;
 ; Top-level Entity Name           ; top                                             ;
 ; Family                          ; Arria V                                         ;
 ; Device                          ; 5AGXBA7D4F31C5                                  ;
 ; Timing Models                   ; Final                                           ;
-; Logic utilization (in ALMs)     ; 146,608 / 91,680 ( 160 % )                      ;
-; Total registers                 ; 236674                                          ;
+; Logic utilization (in ALMs)     ; 146,935 / 91,680 ( 160 % )                      ;
+; Total registers                 ; 236672                                          ;
 ; Total pins                      ; 218 / 426 ( 51 % )                              ;
 ; Total virtual pins              ; 0                                               ;
 ; Total block memory bits         ; 2,823,882 / 13,987,840 ( 20 % )                 ;
@@ -67,7 +67,7 @@ refer to the applicable agreement for further details.
 +-------------------+---------------------+
 ; Option            ; Setting             ;
 +-------------------+---------------------+
-; Start date & time ; 05/11/2026 12:01:52 ;
+; Start date & time ; 05/11/2026 14:15:44 ;
 ; Main task         ; Compilation         ;
 ; Revision Name     ; top                 ;
 +-------------------+---------------------+
@@ -78,7 +78,7 @@ refer to the applicable agreement for further details.
 +------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+-----------------+------------+
 ; Assignment Name                    ; Value                                                                                                                                                                      ; Default Value ; Entity Name     ; Section Id ;
 +------------------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+-----------------+------------+
-; COMPILER_SIGNATURE_ID              ; 16263631718209.177849371219070                                                                                                                                             ; --            ; --              ; --         ;
+; COMPILER_SIGNATURE_ID              ; 129743161469253.177850174422126                                                                                                                                            ; --            ; --              ; --         ;
 ; FITTER_EFFORT                      ; Standard Fit                                                                                                                                                               ; Auto Fit      ; --              ; --         ;
 ; MAX_CORE_JUNCTION_TEMP             ; 85                                                                                                                                                                         ; --            ; --              ; --         ;
 ; MIN_CORE_JUNCTION_TEMP             ; 0                                                                                                                                                                          ; --            ; --              ; --         ;
@@ -127,7 +127,7 @@ refer to the applicable agreement for further details.
 ; SLD_INFO                           ; QSYS_NAME alt_issp_ds HAS_SOPCINFO 1 GENERATION_ID 1722605050                                                                                                              ; --            ; alt_issp_ds     ; --         ;
 ; SLD_INFO                           ; QSYS_NAME alt_issp_srst HAS_SOPCINFO 1 GENERATION_ID 1722605110                                                                                                            ; --            ; alt_issp_srst   ; --         ;
 ; SLD_INFO                           ; QSYS_NAME clk_ctrl_single HAS_SOPCINFO 1 GENERATION_ID 1776085119                                                                                                          ; --            ; clk_ctrl_single ; --         ;
-; SLD_INFO                           ; QSYS_NAME feb_system_v3 HAS_SOPCINFO 1 GENERATION_ID 1778493606                                                                                                            ; --            ; feb_system_v3   ; --         ;
+; SLD_INFO                           ; QSYS_NAME feb_system_v3 HAS_SOPCINFO 1 GENERATION_ID 1778501358                                                                                                            ; --            ; feb_system_v3   ; --         ;
 ; SLD_INFO                           ; QSYS_NAME unnamed HAS_SOPCINFO 1 GENERATION_ID 1722605134                                                                                                                  ; --            ; unnamed         ; --         ;
 ; SOPCINFO_FILE                      ; generated/legacy_fe/ip/clk_ctrl_single/synthesis/../../clk_ctrl_single.sopcinfo                                                                                            ; --            ; --              ; --         ;
 ; SOPCINFO_FILE                      ; /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/../../feb_system_v3.sopcinfo                         ; --            ; --              ; --         ;
@@ -162,9 +162,9 @@ refer to the applicable agreement for further details.
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 ; Module Name          ; Elapsed Time ; Average Processors Used ; Peak Virtual Memory ; Total CPU Time (on all processors) ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
-; Analysis & Synthesis ; 00:14:21     ; 2.5                     ; 5667 MB             ; 00:25:24                           ;
-; Fitter               ; 00:36:05     ; 1.2                     ; 9911 MB             ; 03:08:28                           ;
-; Total                ; 00:50:26     ; --                      ; --                  ; 03:33:52                           ;
+; Analysis & Synthesis ; 00:14:48     ; 2.6                     ; 5636 MB             ; 00:25:51                           ;
+; Fitter               ; 00:32:29     ; 1.2                     ; 9913 MB             ; 02:26:56                           ;
+; Total                ; 00:47:17     ; --                      ; --                  ; 02:52:47                           ;
 +----------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
