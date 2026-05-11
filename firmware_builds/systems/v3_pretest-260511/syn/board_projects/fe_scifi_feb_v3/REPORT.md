@@ -23,10 +23,13 @@ The build is fit-clean at 61,385 / 91,680 ALMs (67%). TimeQuest still reports ne
 
 - Exit code: 0
 - Error count: 0
-- Runtime: approximately 41 s
-- Console log: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_162955.console.log`
-- Status file: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_162955.status`
+- Runtime: approximately 33 s from the Qsys log timestamps
+- Console log: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_164511_isolated.console.log`
+- Status file: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3_qsys_generate_20260511_164511_isolated.status`
 - Report: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/feb_system_v3_generation.rpt`
+- Search path: 64 active IP paths from the current repo, with `firmware_builds/systems/*/syn` and `firmware_builds/systems/system_20260427_testplanphase5` excluded.
+- Isolated catalog: enabled through a temporary Qsys user catalog, preventing stale user `ipx` entries from the Apr 27 reference snapshot from being scanned.
+- IP version bumps required: none.
 - Result: PASS. The report contains `Info: qsys-generate succeeded.` and no `Error:` lines. The generated synthesis submodules include `cam_primitive_m10k_sv.sv`, confirming that Qsys resolved the post-fix rbCAM package.
 
 ## Phase 4 - Quartus Compile
