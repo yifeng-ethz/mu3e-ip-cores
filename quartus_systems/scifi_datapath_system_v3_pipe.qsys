@@ -1490,8 +1490,8 @@
   <parameter name="DEF_BIN_WIDTH" value="1" />
   <parameter name="DEF_INTERVAL_CLOCKS" value="125000000" />
   <parameter name="DEF_LEFT_BOUND" value="0" />
-  <parameter name="ENABLE_PACKET" value="false" />
-  <parameter name="ENABLE_PINGPONG" value="true" />
+  <parameter name="ENABLE_PACKET" value="0" />
+  <parameter name="ENABLE_PINGPONG" value="1" />
   <parameter name="FIFO_ADDR_WIDTH" value="8" />
   <parameter name="FILTER_KEY_BIT_HI" value="38" />
   <parameter name="FILTER_KEY_BIT_LO" value="35" />
@@ -1504,7 +1504,7 @@
   <parameter name="N_PORTS" value="1" />
   <parameter name="SAR_KEY_WIDTH" value="8" />
   <parameter name="SAR_TICK_WIDTH" value="16" />
-  <parameter name="SNOOP_EN" value="false" />
+  <parameter name="SNOOP_EN" value="0" />
   <parameter name="UPDATE_KEY_BIT_HI" value="34" />
   <parameter name="UPDATE_KEY_BIT_LO" value="30" />
   <parameter name="UPDATE_KEY_REPRESENTATION" value="SIGNED" />
