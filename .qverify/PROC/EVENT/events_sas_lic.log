@@ -1,0 +1,5 @@
+# Version 2024.1_2 5779543 linux_x86_64 03-Apr-2024
+# log created Thu Apr 30 16:04:16 2026 by yifeng on teferi.ethz.ch
+# timestamp-diff mem-used-diff mem-total-diff msg-level event-label annotation
+2087686014200 9728 0 1 > log-init | thread: sas/lic:0
+18 464 0 1 + lic-mgr-thread | 

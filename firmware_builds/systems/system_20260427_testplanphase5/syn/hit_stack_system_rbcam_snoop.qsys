@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags=""
+   categories="System" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element data_splitter_0
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element datapath_clock_0
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element feb_frame_assembly_0
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element hit_stack_system
+   {
+      datum _originalDeviceFamily
+      {
+         value = "Arria V";
+         type = "String";
+      }
+   }
+   element ring_buffer_cam_0
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element ring_buffer_cam_1
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element ring_buffer_cam_2
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element ring_buffer_cam_3
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element run_control_splitter_0
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element run_ctrl_cdc_d2x
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element xcvr_clock_0
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="5AGXBA7D4F31C5" />
+ <parameter name="deviceFamily" value="Arria V" />
+ <parameter name="deviceSpeedGrade" value="5_H4" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="top.qpf" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript></instanceScript>
+ <interface
+   name="datapath_clock"
+   internal="datapath_clock_0.clk_in"
+   type="clock"
+   dir="end" />
+ <interface
+   name="datapath_reset"
+   internal="datapath_clock_0.clk_in_reset"
+   type="reset"
+   dir="end" />
+ <interface
+   name="feb_frame_assembly_csr"
+   internal="feb_frame_assembly_0.csr"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="frame_debug_burst"
+   internal="feb_frame_assembly_0.debug_burst"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="frame_debug_delay8loss"
+   internal="feb_frame_assembly_0.debug_delay8loss"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="frame_debug_filllevel"
+   internal="feb_frame_assembly_0.debug_filllevel"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="frame_debug_loss8fill"
+   internal="feb_frame_assembly_0.debug_loss8fill"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="frame_debug_ts"
+   internal="feb_frame_assembly_0.debug_ts"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="frame_ts_delta"
+   internal="feb_frame_assembly_0.ts_delta"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="hit_type3"
+   internal="feb_frame_assembly_0.hit_type3"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="hit_type_1"
+   internal="data_splitter_0.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="ring_buffer_cam_0_csr"
+   internal="ring_buffer_cam_0.csr"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="ring_buffer_cam_0_filllevel"
+   internal="ring_buffer_cam_0.filllevel"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ring_buffer_cam_0_hit_type2_snoop"
+   internal="rbcam0_hit_type2_splitter.out1"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ring_buffer_cam_1_csr"
+   internal="ring_buffer_cam_1.csr"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="ring_buffer_cam_1_filllevel"
+   internal="ring_buffer_cam_1.filllevel"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ring_buffer_cam_1_hit_type2_snoop"
+   internal="rbcam1_hit_type2_splitter.out1"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ring_buffer_cam_2_csr"
+   internal="ring_buffer_cam_2.csr"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="ring_buffer_cam_2_filllevel"
+   internal="ring_buffer_cam_2.filllevel"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ring_buffer_cam_2_hit_type2_snoop"
+   internal="rbcam2_hit_type2_splitter.out1"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ring_buffer_cam_3_csr"
+   internal="ring_buffer_cam_3.csr"
+   type="avalon"
+   dir="end" />
+ <interface
+   name="ring_buffer_cam_3_filllevel"
+   internal="ring_buffer_cam_3.filllevel"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ring_buffer_cam_3_hit_type2_snoop"
+   internal="rbcam3_hit_type2_splitter.out1"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="run_control_signal"
+   internal="run_control_splitter_0.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="xcvr_clock"
+   internal="xcvr_clock_0.clk_in"
+   type="clock"
+   dir="end" />
+ <interface
+   name="xcvr_reset"
+   internal="xcvr_clock_0.clk_in_reset"
+   type="reset"
+   dir="end" />
+ <module
+   name="data_splitter_0"
+   kind="altera_avalon_st_splitter"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="39" />
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="39" />
+  <parameter name="ERROR_DESCRIPTOR" value="tserr" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="15" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="4" />
+  <parameter name="QUALIFY_VALID_OUT" value="0" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="1" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="1" />
+  <parameter name="USE_PACKETS" value="1" />
+  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
+   name="datapath_clock_0"
+   kind="clock_source"
+   version="18.1"
+   enabled="1">
+  <parameter name="clockFrequency" value="125000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="BOTH" />
+ </module>
+ <module
+   name="feb_frame_assembly_0"
+   kind="feb_frame_assembly"
+   version="26.0.328"
+   enabled="1">
+  <parameter name="DEBUG" value="1" />
+  <parameter name="INTERLEAVING_FACTOR" value="4" />
+  <parameter name="N_SHD" value="128" />
+ </module>
+ <module
+   name="ring_buffer_cam_0"
+   kind="ring_buffer_cam"
+   version="26.0.330"
+   enabled="1">
+  <parameter name="DEBUG" value="1" />
+  <parameter name="ENCODER_LEAF_WIDTH" value="16" />
+  <parameter name="ENCODER_PIPE_STAGES" value="4" />
+  <parameter name="INTERLEAVING_FACTOR" value="4" />
+  <parameter name="INTERLEAVING_INDEX" value="0" />
+  <parameter name="N_PARTITIONS" value="4" />
+  <parameter name="RING_BUFFER_N_ENTRY" value="512" />
+  <parameter name="SEARCH_KEY_WIDTH" value="8" />
+  <parameter name="SIDE_DATA_BITS" value="31" />
+ </module>
+ <module
+   name="ring_buffer_cam_1"
+   kind="ring_buffer_cam"
+   version="26.0.330"
+   enabled="1">
+  <parameter name="DEBUG" value="1" />
+  <parameter name="ENCODER_LEAF_WIDTH" value="16" />
+  <parameter name="ENCODER_PIPE_STAGES" value="4" />
+  <parameter name="INTERLEAVING_FACTOR" value="4" />
+  <parameter name="INTERLEAVING_INDEX" value="1" />
+  <parameter name="N_PARTITIONS" value="4" />
+  <parameter name="RING_BUFFER_N_ENTRY" value="512" />
+  <parameter name="SEARCH_KEY_WIDTH" value="8" />
+  <parameter name="SIDE_DATA_BITS" value="31" />
+ </module>
+ <module
+   name="ring_buffer_cam_2"
+   kind="ring_buffer_cam"
+   version="26.0.330"
+   enabled="1">
+  <parameter name="DEBUG" value="1" />
+  <parameter name="ENCODER_LEAF_WIDTH" value="16" />
+  <parameter name="ENCODER_PIPE_STAGES" value="4" />
+  <parameter name="INTERLEAVING_FACTOR" value="4" />
+  <parameter name="INTERLEAVING_INDEX" value="2" />
+  <parameter name="N_PARTITIONS" value="4" />
+  <parameter name="RING_BUFFER_N_ENTRY" value="512" />
+  <parameter name="SEARCH_KEY_WIDTH" value="8" />
+  <parameter name="SIDE_DATA_BITS" value="31" />
+ </module>
+ <module
+   name="ring_buffer_cam_3"
+   kind="ring_buffer_cam"
+   version="26.0.330"
+   enabled="1">
+  <parameter name="DEBUG" value="1" />
+  <parameter name="ENCODER_LEAF_WIDTH" value="16" />
+  <parameter name="ENCODER_PIPE_STAGES" value="4" />
+  <parameter name="INTERLEAVING_FACTOR" value="4" />
+  <parameter name="INTERLEAVING_INDEX" value="3" />
+  <parameter name="N_PARTITIONS" value="4" />
+  <parameter name="RING_BUFFER_N_ENTRY" value="512" />
+  <parameter name="SEARCH_KEY_WIDTH" value="8" />
+  <parameter name="SIDE_DATA_BITS" value="31" />
+ </module>
+ <module
+   name="rbcam0_hit_type2_splitter"
+   kind="avst_snoop_splitter"
+   version="26.0.0.502"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="36" />
+  <parameter name="EMPTY_WIDTH" value="1" />
+  <parameter name="ERROR_WIDTH" value="1" />
+ </module>
+ <module
+   name="rbcam1_hit_type2_splitter"
+   kind="avst_snoop_splitter"
+   version="26.0.0.502"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="36" />
+  <parameter name="EMPTY_WIDTH" value="1" />
+  <parameter name="ERROR_WIDTH" value="1" />
+ </module>
+ <module
+   name="rbcam2_hit_type2_splitter"
+   kind="avst_snoop_splitter"
+   version="26.0.0.502"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="36" />
+  <parameter name="EMPTY_WIDTH" value="1" />
+  <parameter name="ERROR_WIDTH" value="1" />
+ </module>
+ <module
+   name="rbcam3_hit_type2_splitter"
+   kind="avst_snoop_splitter"
+   version="26.0.0.502"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="36" />
+  <parameter name="EMPTY_WIDTH" value="1" />
+  <parameter name="ERROR_WIDTH" value="1" />
+ </module>
+ <module
+   name="run_control_splitter_0"
+   kind="altera_avalon_st_splitter"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="9" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="6" />
+  <parameter name="QUALIFY_VALID_OUT" value="0" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <module
+   name="run_ctrl_cdc_d2x"
+   kind="altera_avalon_dc_fifo"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="RD_SYNC_DEPTH" value="3" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_IN_FILL_LEVEL" value="0" />
+  <parameter name="USE_OUT_FILL_LEVEL" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="WR_SYNC_DEPTH" value="3" />
+ </module>
+ <module name="xcvr_clock_0" kind="clock_source" version="18.1" enabled="1">
+  <parameter name="clockFrequency" value="156250000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="BOTH" />
+ </module>
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="ring_buffer_cam_0.hit_type2"
+   end="rbcam0_hit_type2_splitter.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="rbcam0_hit_type2_splitter.out0"
+   end="feb_frame_assembly_0.hit_type2_0" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="ring_buffer_cam_1.hit_type2"
+   end="rbcam1_hit_type2_splitter.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="rbcam1_hit_type2_splitter.out0"
+   end="feb_frame_assembly_0.hit_type2_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="ring_buffer_cam_2.hit_type2"
+   end="rbcam2_hit_type2_splitter.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="rbcam2_hit_type2_splitter.out0"
+   end="feb_frame_assembly_0.hit_type2_2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="ring_buffer_cam_3.hit_type2"
+   end="rbcam3_hit_type2_splitter.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="rbcam3_hit_type2_splitter.out0"
+   end="feb_frame_assembly_0.hit_type2_3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_cdc_d2x.out"
+   end="feb_frame_assembly_0.ctrl_xcvr" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="data_splitter_0.out0"
+   end="ring_buffer_cam_0.hit_type1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter_0.out0"
+   end="ring_buffer_cam_0.run_control" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="data_splitter_0.out1"
+   end="ring_buffer_cam_1.hit_type1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter_0.out1"
+   end="ring_buffer_cam_1.run_control" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="data_splitter_0.out2"
+   end="ring_buffer_cam_2.hit_type1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter_0.out2"
+   end="ring_buffer_cam_2.run_control" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="data_splitter_0.out3"
+   end="ring_buffer_cam_3.hit_type1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter_0.out3"
+   end="ring_buffer_cam_3.run_control" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter_0.out4"
+   end="feb_frame_assembly_0.ctrl_datapath" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter_0.out5"
+   end="run_ctrl_cdc_d2x.in" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="run_control_splitter_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="data_splitter_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="rbcam0_hit_type2_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="rbcam1_hit_type2_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="rbcam2_hit_type2_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="rbcam3_hit_type2_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="ring_buffer_cam_2.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="ring_buffer_cam_0.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="ring_buffer_cam_1.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="ring_buffer_cam_3.clock_interface" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="feb_frame_assembly_0.datapath_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="datapath_clock_0.clk"
+   end="run_ctrl_cdc_d2x.in_clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="xcvr_clock_0.clk"
+   end="run_ctrl_cdc_d2x.out_clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="xcvr_clock_0.clk"
+   end="feb_frame_assembly_0.xcvr_clock" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="feb_frame_assembly_0.datapath_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="run_ctrl_cdc_d2x.in_clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="xcvr_clock_0.clk_reset"
+   end="run_ctrl_cdc_d2x.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="run_control_splitter_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="data_splitter_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="rbcam0_hit_type2_splitter.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="rbcam1_hit_type2_splitter.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="rbcam2_hit_type2_splitter.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="rbcam3_hit_type2_splitter.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="ring_buffer_cam_2.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="ring_buffer_cam_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="ring_buffer_cam_1.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="datapath_clock_0.clk_reset"
+   end="ring_buffer_cam_3.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="xcvr_clock_0.clk_reset"
+   end="feb_frame_assembly_0.xcvr_reset" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

@@ -1,0 +1,136 @@
+{
+  "latency_hist": {
+    "max": 1220,
+    "min": 922,
+    "p50": 922,
+    "p90": 1143,
+    "p99": 1215,
+    "total": 165
+  },
+  "log": {
+    "drop_summary": {
+      "clean": 168,
+      "error": 0
+    },
+    "lane_cfg": {
+      "0": {
+        "burst_center": 16,
+        "burst_size": 5,
+        "hit_mode": 3,
+        "hit_rate": 2048,
+        "noise_rate": 0
+      },
+      "1": {
+        "burst_center": 16,
+        "burst_size": 4,
+        "hit_mode": 0,
+        "hit_rate": 0,
+        "noise_rate": 0
+      },
+      "2": {
+        "burst_center": 16,
+        "burst_size": 4,
+        "hit_mode": 0,
+        "hit_rate": 0,
+        "noise_rate": 0
+      },
+      "3": {
+        "burst_center": 16,
+        "burst_size": 4,
+        "hit_mode": 0,
+        "hit_rate": 0,
+        "noise_rate": 0
+      },
+      "4": {
+        "burst_center": 16,
+        "burst_size": 4,
+        "hit_mode": 0,
+        "hit_rate": 0,
+        "noise_rate": 0
+      },
+      "5": {
+        "burst_center": 16,
+        "burst_size": 4,
+        "hit_mode": 0,
+        "hit_rate": 0,
+        "noise_rate": 0
+      },
+      "6": {
+        "burst_center": 16,
+        "burst_size": 4,
+        "hit_mode": 0,
+        "hit_rate": 0,
+        "noise_rate": 0
+      },
+      "7": {
+        "burst_center": 16,
+        "burst_size": 4,
+        "hit_mode": 0,
+        "hit_rate": 0,
+        "noise_rate": 0
+      }
+    },
+    "ts_summary": {
+      "enabled": 0,
+      "gen_mod": 0,
+      "mts_in_mismatch": 103,
+      "mts_in_under": 0,
+      "mts_out_channel": 103,
+      "mts_out_delta": 165,
+      "mts_out_error": 0,
+      "mts_out_tcc": 21,
+      "mts_out_under": 3,
+      "type0_mismatch": 103,
+      "type0_under": 0
+    }
+  },
+  "rate_hist": {
+    "asic_totals": {
+      "0": 168,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    "channel_totals": {
+      "0": 4,
+      "1": 5,
+      "2": 7,
+      "3": 8,
+      "4": 9,
+      "5": 6,
+      "6": 7,
+      "7": 6,
+      "8": 7,
+      "9": 7,
+      "10": 7,
+      "11": 7,
+      "12": 7,
+      "13": 7,
+      "14": 7,
+      "15": 8,
+      "16": 8,
+      "17": 9,
+      "18": 7,
+      "19": 6,
+      "20": 5,
+      "21": 4,
+      "22": 3,
+      "23": 3,
+      "24": 2,
+      "25": 1,
+      "26": 2,
+      "27": 2,
+      "28": 2,
+      "29": 2,
+      "30": 2,
+      "31": 1
+    },
+    "nonzero_bins": 32,
+    "total": 168
+  },
+  "report_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/model/phase4/inputs/rtl_ticket_fifo_periodic5_2k_20260502"
+}

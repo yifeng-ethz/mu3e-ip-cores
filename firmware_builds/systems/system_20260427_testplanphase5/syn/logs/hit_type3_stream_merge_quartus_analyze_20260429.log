@@ -1,0 +1,26 @@
+Info: *******************************************************************
+Info: Running Quartus Prime Analyze Current File
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Wed Apr 29 14:45:28 2026
+Info: Command: quartus_map --read_settings_files=off --write_settings_files=off tmp_hit_type3_merge --analyze_file=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/hit_type3_stream_merge/rtl/hit_type3_stream_merge.sv
+Info (20034): Auto device selection is not supported for Cyclone V device family. The default device, 5CGXFC7C7F23C8, is set.
+Warning (18236): Number of processors has not been specified which may cause overloading on shared machines.  Set the global assignment NUM_PARALLEL_PROCESSORS in your QSF to an appropriate value for best performance.
+Info (20030): Parallel compilation is enabled and will use 16 of the 32 processors detected
+Info: Quartus Prime Analyze Current File was successful. 0 errors, 1 warning
+    Info: Peak virtual memory: 1237 megabytes
+    Info: Processing ended: Wed Apr 29 14:45:37 2026
+    Info: Elapsed time: 00:00:09
+    Info: Total CPU time (on all processors): 00:00:24
