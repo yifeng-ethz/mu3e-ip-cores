@@ -83,11 +83,22 @@ package tb_int_run_sequence_directed_pkg;
     // SC-WEDGE silicon-side expectation. Reported here as documentation only.
     localparam bit [31:0] SC_WEDGE_PAYLOAD_EXPECTED = 32'hEEEE_EEEE;
 
+    // Wedge-probe expectation enum. Used by the wedge / wedge-fixed tests to
+    // assert the post-CMD_RESET SC read pattern.
+    typedef enum int unsigned {
+        WEDGE_MODE_NONE        = 0, // legacy: emit info marker only
+        WEDGE_MODE_EXPECT_WEDGE = 1, // expect 0xEEEE_EEEE on STATUS after 0x30
+        WEDGE_MODE_EXPECT_FIXED = 2  // expect 0x4849_5354 on STATUS after 0x30
+    } wedge_mode_e;
+
     class run_sequence_directed extends uvm_object;
         `uvm_object_utils(run_sequence_directed)
 
         virtual runctl_phy_if rc_vif;
         virtual sc_avmm_if    sc_vif;
+
+        // Configurable check mode. Default = legacy (no hard assertion).
+        wedge_mode_e wedge_check_mode = WEDGE_MODE_NONE;
 
         // Number of clock cycles each opcode is held on data/valid. 16 cycles
         // is enough for the receive FSM in runctl_mgmt_host to latch the
@@ -212,25 +223,61 @@ package tb_int_run_sequence_directed_pkg;
             run_step( 8, OP_STOP_SYNC_TEST,  "stop-sync-test 0x25");
             run_step( 9, OP_TEST_SYNC,       "test-sync 0x26");
 
-            // Step 10 = CMD_RESET 0x30. On silicon this should leave the SC
-            // plane returning RSP3+0xEEEEEEEE for every subsequent read. In
-            // behavioural sim the stub responder is decoupled from the
-            // ext_hard_reset broadcast, so the AVMM read will return
-            // STUB_READDATA. Flag the discrepancy as a uvm_info marker, NOT a
-            // uvm_error, so the test PASSes in sim today and can be promoted
-            // to xfail-by-default when the real-DUT bind path lands.
+            // Step 10 = CMD_RESET 0x30. With the behavioural topology model
+            // in tb_int_top, the mock_ext_hard_reset cascades through a
+            // 2-flop pipeline into mock_sc_plane_reset, which gates the SC
+            // AVMM stub responder. Without the BUG_RC_RESET_SCWEDGE_FIXED
+            // guard the post-reset reads return SC_WEDGE_PAYLOAD_EXPECTED
+            // (0xEEEEEEEE); with the guard defined the pipeline is broken
+            // and reads return the legacy STUB_READDATA (0x4849_5354).
             run_step(10, OP_CMD_RESET, "CMD_RESET 0x30");
 
-            if (obs_status[10] === SC_WEDGE_PAYLOAD_EXPECTED) begin
-                `uvm_info("RC_SEQ",
-                          "SC-WEDGE silicon-side payload observed (0xEEEEEEEE). Bug is live.",
-                          UVM_LOW)
-            end else begin
-                `uvm_info("RC_SEQ",
-                          $sformatf("SC-WEDGE pre-fix silicon-only marker: behavioural stub returned 0x%08h on STATUS read after CMD_RESET. Bug repro requires TB_INT_BIND_REAL_DUT or a Qsys-bound stub modelling ext_hard_reset broadcast.",
-                                    obs_status[10]),
-                          UVM_LOW)
-            end
+            // Wedge-probe phase. The post-CMD_RESET probe pattern matches the
+            // on-board diagnostic flow (sample CSR after issuing 0x30,
+            // verify whether the plane wedged). When wedge_check_mode is
+            // set, the result is asserted as a hard test condition.
+            case (wedge_check_mode)
+                WEDGE_MODE_EXPECT_WEDGE: begin
+                    if (obs_status[10] === SC_WEDGE_PAYLOAD_EXPECTED) begin
+                        `uvm_info("RC_SEQ",
+                                  $sformatf("WEDGE OK: post-CMD_RESET STATUS read returned 0x%08h (expected 0x%08h). BUG-RC-RESET-SCWEDGE topology repro is LIVE.",
+                                            obs_status[10],
+                                            SC_WEDGE_PAYLOAD_EXPECTED),
+                                  UVM_LOW)
+                    end else begin
+                        `uvm_error("RC_SEQ",
+                                   $sformatf("WEDGE MISS: post-CMD_RESET STATUS read returned 0x%08h, expected 0x%08h (SC plane should have wedged).",
+                                             obs_status[10],
+                                             SC_WEDGE_PAYLOAD_EXPECTED))
+                    end
+                end
+                WEDGE_MODE_EXPECT_FIXED: begin
+                    if (obs_status[10] === STUB_READDATA) begin
+                        `uvm_info("RC_SEQ",
+                                  $sformatf("WEDGE FIXED: post-CMD_RESET STATUS read returned 0x%08h (expected 0x%08h). Qsys fix broke the ext_hard_reset -> SC plane pipeline.",
+                                            obs_status[10],
+                                            STUB_READDATA),
+                                  UVM_LOW)
+                    end else begin
+                        `uvm_error("RC_SEQ",
+                                   $sformatf("FIX MISS: post-CMD_RESET STATUS read returned 0x%08h, expected 0x%08h (SC plane should NOT have wedged after fix).",
+                                             obs_status[10],
+                                             STUB_READDATA))
+                    end
+                end
+                default: begin
+                    if (obs_status[10] === SC_WEDGE_PAYLOAD_EXPECTED) begin
+                        `uvm_info("RC_SEQ",
+                                  "SC-WEDGE silicon-side payload observed (0xEEEEEEEE). Bug is live.",
+                                  UVM_LOW)
+                    end else begin
+                        `uvm_info("RC_SEQ",
+                                  $sformatf("SC-WEDGE pre-fix silicon-only marker: behavioural stub returned 0x%08h on STATUS read after CMD_RESET. Bug repro requires TB_INT_BIND_REAL_DUT or a Qsys-bound stub modelling ext_hard_reset broadcast.",
+                                            obs_status[10]),
+                                  UVM_LOW)
+                    end
+                end
+            endcase
 
             `uvm_info("RC_SEQ", "directed run-sequence sweep complete", UVM_LOW)
         endtask

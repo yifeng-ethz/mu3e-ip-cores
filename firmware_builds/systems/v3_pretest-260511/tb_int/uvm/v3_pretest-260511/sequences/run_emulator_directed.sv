@@ -78,8 +78,20 @@ package tb_int_run_emulator_directed_pkg;
     localparam int unsigned OP_HOLD_CYCLES = 16;
     localparam int unsigned OP_IDLE_CYCLES = 16;
 
+    // Splitter-check expectation enum. Used by the run_emul_blocked /
+    // run_emul_fixed test wrappers to assert the post-start-run TOTAL_HITS
+    // signature.
+    typedef enum int unsigned {
+        EMUL_MODE_NONE          = 0, // legacy: emit info marker only
+        EMUL_MODE_EXPECT_BLOCKED = 1, // expect TOTAL_HITS == 0 (splitter blocks)
+        EMUL_MODE_EXPECT_FIXED   = 2  // expect TOTAL_HITS == hit_count
+    } emul_mode_e;
+
     class run_emulator_directed extends uvm_object;
         `uvm_object_utils(run_emulator_directed)
+
+        // Configurable check mode. Default = legacy (no hard assertion).
+        emul_mode_e emul_check_mode = EMUL_MODE_NONE;
 
         // PHY drivers
         virtual runctl_phy_if rc_vif;
@@ -273,25 +285,54 @@ package tb_int_run_emulator_directed_pkg;
                                 obs_actual_hits),
                       UVM_LOW)
 
-            // Splitter-blockage flag. On silicon (Phase 3 evidence): when
-            // the splitter outN_ready dangles, the start-run broadcast
-            // never reaches emulator_mutrig and PORT_STATUS stays at
-            // 0x000000FF (idle) while TOTAL_HITS stays 0. In behavioural
-            // sim the stub returns STUB_READDATA so we cannot directly
-            // observe the silicon-side signatures; emit a uvm_info marker
-            // documenting the gap so the parent regression can promote it
-            // to xfail when TB_INT_BIND_REAL_DUT lands.
-            if (obs_port_status === SI_PORT_STATUS_IDLE
-                    && obs_total_hits === 32'h0) begin
-                `uvm_info("RC_EMU_SEQ",
-                          "BUG-RC-RUN-EMUL silicon-side signature observed: PORT_STATUS=0x000000FF, TOTAL_HITS=0. run_control_splitter likely blocks broadcast.",
-                          UVM_LOW)
-            end else begin
-                `uvm_info("RC_EMU_SEQ",
-                          $sformatf("BUG-RC-RUN-EMUL pre-fix silicon-only marker: behavioural stub returned PORT_STATUS=0x%08h TOTAL_HITS=0x%08h (not the silicon-idle 0x000000FF/0x00000000 signature). Bug repro requires TB_INT_BIND_REAL_DUT with feb_system_v3 Qsys tree.",
-                                    obs_port_status, obs_total_hits),
-                          UVM_LOW)
-            end
+            // Splitter-blockage check. With the behavioural topology model
+            // in tb_int_top.sv, the SC AVMM responder is address-aware:
+            // address CSR_HISTO_TOTAL_HITS returns the mock_total_hits_cnt
+            // counter which increments only when (stage_a_vif.valid &&
+            // mock_emulator_running). Without BUG_RC_RUN_EMUL_FIXED the
+            // splitter outN_ready dangling-input collapse keeps
+            // mock_emulator_running=0 and TOTAL_HITS stays 0. With the
+            // guard defined the splitter ignores out_ready and the
+            // broadcast propagates so TOTAL_HITS reaches hit_count.
+            case (emul_check_mode)
+                EMUL_MODE_EXPECT_BLOCKED: begin
+                    if (obs_total_hits === 32'h0) begin
+                        `uvm_info("RC_EMU_SEQ",
+                                  $sformatf("BLOCKED OK: TOTAL_HITS=0x%08h (expected 0). BUG-RC-RUN-EMUL splitter dangling-ready collapse is LIVE.",
+                                            obs_total_hits),
+                                  UVM_LOW)
+                    end else begin
+                        `uvm_error("RC_EMU_SEQ",
+                                   $sformatf("BLOCKED MISS: TOTAL_HITS=0x%08h, expected 0 (splitter should have blocked the RUNNING broadcast).",
+                                             obs_total_hits))
+                    end
+                end
+                EMUL_MODE_EXPECT_FIXED: begin
+                    if (obs_total_hits === hit_count) begin
+                        `uvm_info("RC_EMU_SEQ",
+                                  $sformatf("FIXED OK: TOTAL_HITS=0x%08h (expected 0x%08h). Qsys fix tied outN_ready to 1'b1 and the splitter broadcast propagated.",
+                                            obs_total_hits, hit_count),
+                                  UVM_LOW)
+                    end else begin
+                        `uvm_error("RC_EMU_SEQ",
+                                   $sformatf("FIXED MISS: TOTAL_HITS=0x%08h, expected 0x%08h.",
+                                             obs_total_hits, hit_count))
+                    end
+                end
+                default: begin
+                    if (obs_port_status === SI_PORT_STATUS_IDLE
+                            && obs_total_hits === 32'h0) begin
+                        `uvm_info("RC_EMU_SEQ",
+                                  "BUG-RC-RUN-EMUL silicon-side signature observed: PORT_STATUS=0x000000FF, TOTAL_HITS=0. run_control_splitter likely blocks broadcast.",
+                                  UVM_LOW)
+                    end else begin
+                        `uvm_info("RC_EMU_SEQ",
+                                  $sformatf("BUG-RC-RUN-EMUL pre-fix silicon-only marker: behavioural stub returned PORT_STATUS=0x%08h TOTAL_HITS=0x%08h (not the silicon-idle 0x000000FF/0x00000000 signature). Bug repro requires TB_INT_BIND_REAL_DUT with feb_system_v3 Qsys tree.",
+                                            obs_port_status, obs_total_hits),
+                                  UVM_LOW)
+                    end
+                end
+            endcase
 
             // Close the run window.
             repeat (4) @(posedge stage_a_vif.clk);

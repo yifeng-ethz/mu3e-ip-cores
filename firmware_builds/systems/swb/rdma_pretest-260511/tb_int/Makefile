@@ -29,7 +29,7 @@ ERROR_CASES := X001 X002 X003 X004 X005 X033 X065 X069
 PROF_CASES := P001 P002 P003 P065 P066 P068
 SELECTED_CASES := $(BASIC_CASES) $(EDGE_CASES) $(ERROR_CASES) $(PROF_CASES)
 
-.PHONY: docs check modelsim_ini lib comp_uvm smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED
+.PHONY: docs check modelsim_ini lib comp_uvm comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED
 
 docs:
 	python3 script/generate_swb_tb_int_assets.py
@@ -123,6 +123,33 @@ run_RC_DIRECTED: comp_uvm
 	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_sequence_directed_test +ARB_SEED=$(SEED) +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_DIRECTED -l $(SIM_ROOT)/RC_DIRECTED/transcript -do "run -all; quit -f"
 	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/RC_DIRECTED/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_DIRECTED/transcript; then exit 1; fi
+
+# BUG-RC-RESET-SCWEDGE behavioural topology repro (PRE-FIX). Uses the
+# default WORK dir (no BUG_RC_RESET_SCWEDGE_FIXED define), so the
+# mock_sc_plane_reset cascade is active. Expects post-CMD_RESET STATUS
+# read == 0xEEEE_EEEE.
+run_RC_DIRECTED_WEDGE: comp_uvm
+	mkdir -p $(SIM_ROOT)/RC_DIRECTED_WEDGE
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_sequence_directed_wedge_test +ARB_SEED=$(SEED) +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_DIRECTED_WEDGE -l $(SIM_ROOT)/RC_DIRECTED_WEDGE/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/RC_DIRECTED_WEDGE/transcript
+	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_DIRECTED_WEDGE/transcript; then exit 1; fi
+
+# BUG-RC-RESET-SCWEDGE behavioural topology repro (POST-FIX). Compiles
+# into a separate WORK dir (work_tb_int_wedge_fixed) with
+# +define+BUG_RC_RESET_SCWEDGE_FIXED so the mock_ext_hard_reset ->
+# mock_sc_plane_reset pipeline is BROKEN. Expects post-CMD_RESET STATUS
+# read == 0x4849_5354 ("HIST" stub pattern).
+comp_uvm_wedge_fixed: docs lib
+	test -d work_tb_int_wedge_fixed || $(VLIB) work_tb_int_wedge_fixed
+	$(VMAP) -modelsimini modelsim.ini work_wedge_fixed work_tb_int_wedge_fixed
+	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_wedge_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+BUG_RC_RESET_SCWEDGE_FIXED $(UVM_INCDIR) $(UVM_SRC)
+	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_wedge_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+BUG_RC_RESET_SCWEDGE_FIXED $(UVM_INCDIR) -f script/tb_int.f
+
+run_RC_DIRECTED_WEDGE_FIXED: comp_uvm_wedge_fixed
+	mkdir -p $(SIM_ROOT)/RC_DIRECTED_WEDGE_FIXED
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work work_tb_int_wedge_fixed $(TB_TOP) +UVM_TESTNAME=tb_int_run_sequence_directed_wedge_fixed_test +ARB_SEED=$(SEED) +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_DIRECTED_WEDGE_FIXED -l $(SIM_ROOT)/RC_DIRECTED_WEDGE_FIXED/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/RC_DIRECTED_WEDGE_FIXED/transcript
+	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_DIRECTED_WEDGE_FIXED/transcript; then exit 1; fi
 
 structural_preflight: docs
 	python3 script/run_basic_bucket_sweep.py
