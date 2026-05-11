@@ -18,7 +18,7 @@ BUCKETS = {
         "summary": "happy-path SWB run-control, slow-control, and datapath flow",
         "rc": "nominal SWB reset-link transmitter",
         "sc": "host PCIe sc_tool over /dev/mudaq0",
-        "dt": "one legal FEB-to-SWB RDMA SQE through OPQ and host DMA",
+        "dt": "one legal FEB-to-SWB RDMA RQE through OPQ and host DMA",
     },
     "DV_EDGE.md": {
         "prefix": "E",
@@ -36,7 +36,7 @@ BUCKETS = {
         "summary": "fault injection and recovery on SWB control and datapath paths",
         "rc": "illegal or interrupted run-state attempts",
         "sc": "faulted slow-control transactions",
-        "dt": "malformed SQE, OPQ, event-builder, and DMA fault recovery",
+        "dt": "malformed RQE, OPQ, event-builder, and DMA fault recovery",
     },
     "DV_PROF.md": {
         "prefix": "P",
@@ -118,19 +118,19 @@ def dt_special(prefix: str, bucket_title: str) -> list[str]:
             row(
                 "B065",
                 "D",
-                "SWB one-SQE ingress through OPQ to PCIe DMA egress",
+                "SWB one-RQE ingress through OPQ to PCIe DMA egress",
                 1,
-                "inject one FEB-to-SWB RDMA SQE, one OPQ packet, and one host-DMA beat",
+                "inject one FEB-to-SWB RDMA RQE, one OPQ packet, and one host-DMA beat",
                 "scoreboard reconciles one ingress, zero drops, and one PCIe egress event",
                 "uvm/swb_rdma_pretest/tb_int_smoke_test.sv",
             ),
             row(
                 "B066",
                 "D",
-                "rdma_subsystem SQ and CQ ring nominal accounting",
+                "rdma_subsystem RQ and CQ ring nominal accounting",
                 1,
-                "drive one legal SQE and observe one CQE completion",
-                "SQ consumed count and CQ posted count both advance by one",
+                "drive one legal RQE and observe one CQE completion",
+                "RQ consumed count and CQ posted count both advance by one",
             ),
             row(
                 "B067",
@@ -151,20 +151,20 @@ def dt_special(prefix: str, bucket_title: str) -> list[str]:
         ]
     if prefix == "E":
         return [
-            row("E065", "D", "minimum legal SQE packet", 1, "drive smallest legal SQE payload", "egress closes one packet and all counters remain in range"),
-            row("E066", "D", "maximum legal SQE packet", 1, "drive maximum legal SQE payload", "packet is split or packed only at legal boundaries"),
+            row("E065", "D", "minimum legal RQE packet", 1, "drive smallest legal RQE payload", "egress closes one packet and all counters remain in range"),
+            row("E066", "D", "maximum legal RQE packet", 1, "drive maximum legal RQE payload", "packet is split or packed only at legal boundaries"),
             row("E067", "D", "OPQ lane-boundary packet", 1, "drive lane 3 at the frame boundary", "OPQ preserves ordering and reports no late drop"),
             row("E068", "D", "PCIe DMA end-of-event boundary", 1, "drive event ending exactly on one 256-bit beat", "DMA asserts endofevent on the expected beat"),
         ]
     if prefix == "X":
         return [
-            row("X065", "D", "malformed SQE is rejected", 1, "drive one SQE with illegal length", "error counter advances and no PCIe DMA beat is emitted"),
+            row("X065", "D", "malformed RQE is rejected", 1, "drive one RQE with illegal length", "error counter advances and no PCIe DMA beat is emitted"),
             row("X066", "D", "OPQ malformed packet recovery", 1, "drive a packet missing EOP then a legal packet", "legal packet after recovery reaches egress"),
             row("X067", "D", "event-builder timeout recovery", 1, "withhold the closing beat until timeout", "timeout is reported and the next legal packet closes"),
             row("X068", "D", "PCIe DMA backpressure timeout", 1, "hold DMA ready low beyond the programmed budget", "halt counter advances and no data corruption is observed"),
         ]
     return [
-        row("P065", "D", "one-second nominal SQE stream", 1, "drive sustained legal SQEs for one stable window", "accepted, dropped, and emitted counts reconcile"),
+        row("P065", "D", "one-second nominal RQE stream", 1, "drive sustained legal RQEs for one stable window", "accepted, dropped, and emitted counts reconcile"),
         row("P066", "D", "OPQ four-lane balanced rate", 1, "drive equal rate on all four OPQ lanes", "egress service share remains balanced"),
         row("P067", "D", "event-builder packing efficiency", 1, "drive repeated medium packets", "host packet fill stays above the configured efficiency floor"),
         row("P068", "D", "PCIe DMA sustained push", 1, "drive continuous legal DMA beats", "DMA queue fill remains bounded and no halt is asserted"),
@@ -172,7 +172,7 @@ def dt_special(prefix: str, bucket_title: str) -> list[str]:
 
 
 DT_AXES = [
-    "SQE ingress rate",
+    "RQE ingress rate",
     "OPQ lane mix",
     "event-builder packet fill",
     "rdma host DMA burst length",

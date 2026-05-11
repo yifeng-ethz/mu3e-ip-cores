@@ -9,11 +9,11 @@
 
 ## Scenario
 
-SWB DT sidecar lineage at FEB-side rdma SQE ingress
+SWB DT sidecar lineage at FEB-side rdma RQE ingress
 
 ## Stimulus
 
-drive one SQE with DEBUG_LEVEL 2 sidecar identity
+drive one RQE with DEBUG_LEVEL 2 sidecar identity
 
 ## Pass Criteria
 

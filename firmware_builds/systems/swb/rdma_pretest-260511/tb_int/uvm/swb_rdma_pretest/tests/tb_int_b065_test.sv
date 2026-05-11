@@ -1,5 +1,5 @@
 // tb_int_b065_test.sv
-// BASIC B065: SWB DT one SQE ingress through OPQ to PCIe DMA egress.
+// BASIC B065: SWB DT one RQE ingress through OPQ to PCIe DMA egress.
 
 package tb_int_b065_test_pkg;
 

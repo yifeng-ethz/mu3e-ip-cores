@@ -1,5 +1,5 @@
 // tb_int_x001_test.sv
-// ERROR X001: mid-flight RESET while OPQ has SQEs in flight.
+// ERROR X001: mid-flight RESET while OPQ has RQEs in flight.
 
 package tb_int_x001_test_pkg;
 

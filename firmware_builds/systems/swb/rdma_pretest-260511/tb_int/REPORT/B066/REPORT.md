@@ -13,11 +13,11 @@ SWB DT rdma_subsystem CQE round-trip
 
 ## Stimulus
 
-drive one legal SQE and observe one CQE completion
+drive one legal RQE and observe one CQE completion
 
 ## Pass Criteria
 
-SQ consumed count and CQ posted count both advance by one
+RQ consumed count and CQ posted count both advance by one
 
 ## Evidence
 

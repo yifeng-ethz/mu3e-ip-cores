@@ -114,7 +114,7 @@ architecture arch of swb_block is
     signal rdma_csr_rdata : std_logic_vector(31 downto 0) := (others => '0');
     signal rdma_csr_uid : std_logic_vector(31 downto 0) := (others => '0');
     signal rdma_csr_status : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_cnt_sqe_consumed : std_logic_vector(31 downto 0) := (others => '0');
+    signal rdma_cnt_rqe_consumed : std_logic_vector(31 downto 0) := (others => '0');
     signal rdma_cnt_cqe_posted : std_logic_vector(31 downto 0) := (others => '0');
     signal rdma_cnt_bytes_written : std_logic_vector(31 downto 0) := (others => '0');
     signal rdma_cnt_opq_input_w : std_logic_vector(31 downto 0) := (others => '0');
@@ -138,7 +138,7 @@ architecture arch of swb_block is
         csr_rdata              : out std_logic_vector(31 downto 0);
         csr_uid                : out std_logic_vector(31 downto 0);
         csr_status             : out std_logic_vector(31 downto 0);
-        cnt_sqe_consumed       : out std_logic_vector(31 downto 0);
+        cnt_rqe_consumed       : out std_logic_vector(31 downto 0);
         cnt_cqe_posted         : out std_logic_vector(31 downto 0);
         cnt_bytes_written      : out std_logic_vector(31 downto 0);
         cnt_opq_input_w        : out std_logic_vector(31 downto 0);
@@ -409,7 +409,7 @@ begin
         csr_rdata              => rdma_csr_rdata,
         csr_uid                => rdma_csr_uid,
         csr_status             => rdma_csr_status,
-        cnt_sqe_consumed       => rdma_cnt_sqe_consumed,
+        cnt_rqe_consumed       => rdma_cnt_rqe_consumed,
         cnt_cqe_posted         => rdma_cnt_cqe_posted,
         cnt_bytes_written      => rdma_cnt_bytes_written,
         cnt_opq_input_w        => rdma_cnt_opq_input_w,
@@ -430,7 +430,7 @@ begin
     o_readregs(EVENT_BUILD_STATUS_REGISTER_R) <= rdma_csr_status;
     o_readregs(EVENT_BUILD_IDLE_NOT_HEADER_R) <= rdma_cnt_opq_input_w;
     o_readregs(EVENT_BUILD_SKIP_EVENT_DMA_R) <= rdma_cnt_bytes_written;
-    o_readregs(EVENT_BUILD_CNT_EVENT_DMA_R) <= rdma_cnt_sqe_consumed;
+    o_readregs(EVENT_BUILD_CNT_EVENT_DMA_R) <= rdma_cnt_rqe_consumed;
     o_readregs(EVENT_BUILD_TAG_FIFO_FULL_R) <= rdma_cnt_cqe_posted;
     o_readregs(BUFFER_STATUS_REGISTER_R) <= rdma_cnt_halt;
     o_readregs(DMA_CNT_WORDS_REGISTER_R) <= rdma_cnt_eoe_observed;
@@ -439,7 +439,7 @@ begin
     counter_mux(0)(63 downto 32) <= (others => '0');
     counter_mux(1)(31 downto 0) <= rdma_csr_status;
     counter_mux(1)(63 downto 32) <= (others => '0');
-    counter_mux(2)(31 downto 0) <= rdma_cnt_sqe_consumed;
+    counter_mux(2)(31 downto 0) <= rdma_cnt_rqe_consumed;
     counter_mux(2)(63 downto 32) <= (others => '0');
     counter_mux(3)(31 downto 0) <= rdma_cnt_cqe_posted;
     counter_mux(3)(63 downto 32) <= (others => '0');
@@ -460,7 +460,7 @@ begin
     counter_mux(12) <= (others => '0');
 
     rate_mux(0) <= rdma_csr_status;
-    rate_mux(1) <= rdma_cnt_sqe_consumed;
+    rate_mux(1) <= rdma_cnt_rqe_consumed;
     rate_mux(2) <= rdma_cnt_cqe_posted;
     rate_mux(3) <= rdma_cnt_bytes_written;
     rate_mux(4) <= rdma_cnt_opq_input_w;

@@ -8,7 +8,7 @@
 ## 1. Top
 
 `tb_int/uvm/swb_rdma_pretest/tb_int_top.sv` instantiates the staged SWB
-`top` entity and declares bind-facing interfaces for RDMA SQE ingress, OPQ
+`top` entity and declares bind-facing interfaces for RDMA RQE ingress, OPQ
 lane observation, and PCIe x8 DMA egress.
 
 ## 2. Reuse

@@ -13,11 +13,11 @@ rdma CQE timeout
 
 ## Stimulus
 
-drive one SQE then suppress CQE writeback
+drive one RQE then suppress CQE writeback
 
 ## Pass Criteria
 
-SQE ingress is observed and CQE count remains zero
+RQE ingress is observed and CQE count remains zero
 
 ## Evidence
 

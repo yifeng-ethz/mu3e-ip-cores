@@ -10,7 +10,7 @@ package tb_int_swb_case_sequences_pkg;
     class swb_case_sequence extends uvm_object;
         `uvm_object_utils(swb_case_sequence)
 
-        virtual rdma_sqe_ingress_if rdma_sqe_vif;
+        virtual rdma_rqe_ingress_if rdma_rqe_vif;
         virtual rdma_cqe_egress_if  rdma_cqe_vif;
         virtual opq_lane_if         opq_lane0_vif;
         virtual opq_lane_if         opq_lane1_vif;
@@ -23,7 +23,7 @@ package tb_int_swb_case_sequences_pkg;
         endfunction
 
         function void configure(
-            virtual rdma_sqe_ingress_if rdma_sqe_vif_i,
+            virtual rdma_rqe_ingress_if rdma_rqe_vif_i,
             virtual rdma_cqe_egress_if  rdma_cqe_vif_i,
             virtual opq_lane_if         opq_lane0_vif_i,
             virtual opq_lane_if         opq_lane1_vif_i,
@@ -31,7 +31,7 @@ package tb_int_swb_case_sequences_pkg;
             virtual opq_lane_if         opq_lane3_vif_i,
             virtual pcie_dma_egress_if  pcie_dma_vif_i
         );
-            rdma_sqe_vif = rdma_sqe_vif_i;
+            rdma_rqe_vif = rdma_rqe_vif_i;
             rdma_cqe_vif = rdma_cqe_vif_i;
             opq_lane0_vif = opq_lane0_vif_i;
             opq_lane1_vif = opq_lane1_vif_i;
@@ -86,8 +86,8 @@ package tb_int_swb_case_sequences_pkg;
 
             `uvm_info("SWB_SEQ", $sformatf("drive %s title=\"%s\"", case_id, exp.title), UVM_LOW)
 
-            for (packet_idx = 0; packet_idx < exp.sqe_ingress; packet_idx++) begin
-                rdma_sqe_vif.drive_sqe({192'h0, 32'h5351_4500, packet_idx[31:0]},
+            for (packet_idx = 0; packet_idx < exp.rqe_ingress; packet_idx++) begin
+                rdma_rqe_vif.drive_rqe({192'h0, 32'h5351_4500, packet_idx[31:0]},
                                        {32'h5A00_0000, packet_idx[31:0]});
             end
 

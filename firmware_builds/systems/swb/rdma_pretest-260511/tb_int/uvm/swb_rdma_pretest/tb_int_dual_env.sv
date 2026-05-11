@@ -6,7 +6,7 @@ package tb_int_swb_dual_env_pkg;
     import uvm_pkg::*;
     import tb_int_runctl_phy_agent_pkg::*;
     import tb_int_sc_phy_agent_pkg::*;
-    import tb_int_rdma_sqe_ingress_monitor_pkg::*;
+    import tb_int_rdma_rqe_ingress_monitor_pkg::*;
     import tb_int_rdma_cqe_egress_monitor_pkg::*;
     import tb_int_opq_lane_fill_monitor_pkg::*;
     import tb_int_pcie_dma_egress_monitor_pkg::*;
@@ -18,7 +18,7 @@ package tb_int_swb_dual_env_pkg;
 
         runctl_phy_agent          runctl_phy;
         sc_phy_agent              sc_phy;
-        rdma_sqe_ingress_monitor  rdma_sqe_mon;
+        rdma_rqe_ingress_monitor  rdma_rqe_mon;
         opq_lane_fill_monitor     opq_lane_mon[4];
         pcie_dma_egress_monitor   pcie_dma_mon;
 
@@ -30,7 +30,7 @@ package tb_int_swb_dual_env_pkg;
             super.build_phase(phase);
             runctl_phy = runctl_phy_agent::type_id::create("runctl_phy", this);
             sc_phy = sc_phy_agent::type_id::create("sc_phy", this);
-            rdma_sqe_mon = rdma_sqe_ingress_monitor::type_id::create("rdma_sqe_mon", this);
+            rdma_rqe_mon = rdma_rqe_ingress_monitor::type_id::create("rdma_rqe_mon", this);
             foreach (opq_lane_mon[i]) begin
                 opq_lane_mon[i] = opq_lane_fill_monitor::type_id::create($sformatf("opq_lane_mon%0d", i), this);
                 uvm_config_db#(int unsigned)::set(this, $sformatf("opq_lane_mon%0d", i), "lane_id", i);
@@ -74,7 +74,7 @@ package tb_int_swb_dual_env_pkg;
 
         virtual function void connect_phase(uvm_phase phase);
             super.connect_phase(phase);
-            nominal.rdma_sqe_mon.ap.connect(scoreboard.stage_imp);
+            nominal.rdma_rqe_mon.ap.connect(scoreboard.stage_imp);
             foreach (nominal.opq_lane_mon[i])
                 nominal.opq_lane_mon[i].ap.connect(scoreboard.stage_imp);
             nominal.pcie_dma_mon.ap.connect(scoreboard.stage_imp);

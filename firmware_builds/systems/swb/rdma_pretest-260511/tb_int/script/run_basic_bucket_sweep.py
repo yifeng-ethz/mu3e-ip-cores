@@ -54,7 +54,7 @@ def run_b065() -> tuple[str, list[str]]:
     missing = check_required_paths()
     lines: list[str] = [
         "CASE B065",
-        "scenario=SWB one-SQE ingress through OPQ to PCIe DMA egress",
+        "scenario=SWB one-RQE ingress through OPQ to PCIe DMA egress",
     ]
     if missing:
         lines.append("status=BLOCKED")

@@ -20,7 +20,7 @@ module swb_rdma_subsystem_bridge (
     output logic [31:0]      csr_rdata,
     output logic [31:0]      csr_uid,
     output logic [31:0]      csr_status,
-    output logic [31:0]      cnt_sqe_consumed,
+    output logic [31:0]      cnt_rqe_consumed,
     output logic [31:0]      cnt_cqe_posted,
     output logic [31:0]      cnt_bytes_written,
     output logic [31:0]      cnt_opq_input_w,
@@ -40,7 +40,7 @@ module swb_rdma_subsystem_bridge (
 
     localparam logic [7:0] CSR_UID_ADDR               = 8'h00;
     localparam logic [7:0] CSR_STATUS_ADDR            = 8'h0c;
-    localparam logic [7:0] CSR_CNT_SQE_CONSUMED_ADDR  = 8'h34;
+    localparam logic [7:0] CSR_CNT_RQE_CONSUMED_ADDR  = 8'h34;
     localparam logic [7:0] CSR_CNT_CQE_POSTED_ADDR    = 8'h38;
     localparam logic [7:0] CSR_CNT_BYTES_WRITTEN_ADDR = 8'h3c;
     localparam logic [7:0] CSR_CNT_OPQ_INPUT_W_ADDR   = 8'h40;
@@ -135,7 +135,7 @@ module swb_rdma_subsystem_bridge (
             4'd0: scan_addr_for_index = selected_addr;
             4'd1: scan_addr_for_index = CSR_UID_ADDR;
             4'd2: scan_addr_for_index = CSR_STATUS_ADDR;
-            4'd3: scan_addr_for_index = CSR_CNT_SQE_CONSUMED_ADDR;
+            4'd3: scan_addr_for_index = CSR_CNT_RQE_CONSUMED_ADDR;
             4'd4: scan_addr_for_index = CSR_CNT_CQE_POSTED_ADDR;
             4'd5: scan_addr_for_index = CSR_CNT_BYTES_WRITTEN_ADDR;
             4'd6: scan_addr_for_index = CSR_CNT_OPQ_INPUT_W_ADDR;
@@ -166,7 +166,7 @@ module swb_rdma_subsystem_bridge (
             csr_rdata           <= 32'h0000_0000;
             csr_uid             <= 32'h0000_0000;
             csr_status          <= 32'h0000_0000;
-            cnt_sqe_consumed    <= 32'h0000_0000;
+            cnt_rqe_consumed    <= 32'h0000_0000;
             cnt_cqe_posted      <= 32'h0000_0000;
             cnt_bytes_written   <= 32'h0000_0000;
             cnt_opq_input_w     <= 32'h0000_0000;
@@ -253,7 +253,7 @@ module swb_rdma_subsystem_bridge (
                         case (read_addr_latched)
                             CSR_UID_ADDR:               csr_uid           <= s_axil_rdata;
                             CSR_STATUS_ADDR:            csr_status        <= s_axil_rdata;
-                            CSR_CNT_SQE_CONSUMED_ADDR:  cnt_sqe_consumed  <= s_axil_rdata;
+                            CSR_CNT_RQE_CONSUMED_ADDR:  cnt_rqe_consumed  <= s_axil_rdata;
                             CSR_CNT_CQE_POSTED_ADDR:    cnt_cqe_posted    <= s_axil_rdata;
                             CSR_CNT_BYTES_WRITTEN_ADDR: cnt_bytes_written <= s_axil_rdata;
                             CSR_CNT_OPQ_INPUT_W_ADDR:   cnt_opq_input_w   <= s_axil_rdata;

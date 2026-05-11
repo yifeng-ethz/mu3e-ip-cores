@@ -1,5 +1,5 @@
 // tb_int_p068_test.sv
-// PROF P068: sustained SQE ingress at line-rate structural scale.
+// PROF P068: sustained RQE ingress at line-rate structural scale.
 
 package tb_int_p068_test_pkg;
 
