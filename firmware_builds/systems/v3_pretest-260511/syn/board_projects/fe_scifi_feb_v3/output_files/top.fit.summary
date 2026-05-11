@@ -1,12 +1,12 @@
-Fitter Status : Failed - Mon May 11 12:53:23 2026
+Fitter Status : Failed - Mon May 11 15:04:05 2026
 Quartus Prime Version : 18.1.0 Build 625 09/12/2018 SJ Standard Edition
 Revision Name : top
 Top-level Entity Name : top
 Family : Arria V
 Device : 5AGXBA7D4F31C5
 Timing Models : Final
-Logic utilization (in ALMs) : 146,608 / 91,680 ( 160 % )
-Total registers : 236674
+Logic utilization (in ALMs) : 146,935 / 91,680 ( 160 % )
+Total registers : 236672
 Total pins : 218 / 426 ( 51 % )
 Total virtual pins : 0
 Total block memory bits : 2,823,882 / 13,987,840 ( 20 % )
