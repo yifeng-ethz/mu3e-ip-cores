@@ -1,0 +1,292 @@
+#!/usr/bin/env python3
+"""run_tool — run-control + capture orchestrator for the Mu3e SWB/FEB pipeline.
+
+Targets the FEB↔SWB lifetime-histogram debug flow. Performs:
+  1. (optional) Program both SOFs.
+  2. Wait for FEB SC ring (sc_tool 0x08800 → 0x454D5554).
+  3. Configure SWB datapath: SWB_LINK_MASK_SCIFI, optional USE_BIT_MERGER.
+  4. Configure FEB emulators (existing run_rbcam_feb_hist_latency.py path or
+     direct sc writes).
+  5. Launch dma_tool in background, wait for it to come up.
+  6. Issue rc_tool reset → stop-reset → run-prepare → sync → start-run.
+  7. Wait --duration-s.
+  8. Issue rc_tool end-run, stop dma_tool.
+  9. Read FEB histogram CSRs + SWB OPQ counters, write conservation summary.
+
+Designed to be a drop-in companion to the existing sc_tool / rc_tool / dma_tool
+binaries — same CLI conventions, same defaults, same exit-code semantics.
+
+Author: yifeng
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import signal
+import subprocess
+import sys
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+
+DEFAULT_BIN_DIR = Path("/home/yifeng/packages/online_dpv2/online/build/switching_pc/tools")
+DEFAULT_INSTALL_DIR = Path("/home/yifeng/packages/online_dpv2/online/install/bin")
+
+# SWB register indices (a10_pcie_registers.h)
+SWB_LINK_MASK_SCIFI = 0x11
+SWB_READOUT_STATE = 0x13
+DMA_REGISTER = 0x38
+
+USE_BIT_MERGER = 0x4  # bit 2 of SWB_READOUT_STATE selects OPQ datapath
+
+
+@dataclass
+class Tools:
+    sc_tool: Path
+    rc_tool: Path
+    dma_tool: Path
+    rw: Path
+    swb_ring_lock: Path = Path("/home/yifeng/.local/bin/swb_ring_lock")
+
+
+def find_tools() -> Tools:
+    """Locate sc/rc/dma_tool/rw, preferring online_dpv2/online/build over install."""
+    candidates = [DEFAULT_BIN_DIR, DEFAULT_INSTALL_DIR]
+    found = {}
+    for name in ("sc_tool", "rc_tool", "dma_tool", "rw"):
+        for cdir in candidates:
+            p = cdir / name
+            if p.exists() and os.access(p, os.X_OK):
+                found[name] = p
+                break
+        if name not in found:
+            sys.exit(f"run_tool: cannot locate {name} in {candidates}")
+    return Tools(**found)
+
+
+def run(cmd: list[str], *, capture: bool = True, check: bool = True) -> subprocess.CompletedProcess[str]:
+    res = subprocess.run(cmd, text=True, capture_output=capture)
+    if check and res.returncode != 0:
+        sys.stderr.write(f"run_tool: command failed rc={res.returncode}: {' '.join(map(str, cmd))}\n")
+        if capture:
+            sys.stderr.write(res.stdout + res.stderr)
+        sys.exit(res.returncode)
+    return res
+
+
+def sc_write(tools: Tools, link: int, addr: int, words: list[int]) -> None:
+    args = [
+        str(tools.swb_ring_lock),
+        str(tools.sc_tool),
+        str(link),
+        "write",
+        f"0x{addr:05X}",
+        *[f"0x{w & 0xFFFFFFFF:08X}" for w in words],
+        "--quiet",
+    ]
+    run(args)
+
+
+def sc_read(tools: Tools, link: int, addr: int, count: int = 1) -> list[int]:
+    args = [
+        str(tools.swb_ring_lock),
+        str(tools.sc_tool),
+        str(link),
+        "read",
+        f"0x{addr:05X}",
+        str(count),
+        "--quiet",
+    ]
+    res = run(args)
+    payloads = re.findall(r"payload\[(\d+)\]\s*=\s*(0x[0-9A-Fa-f]+)", res.stdout + res.stderr)
+    if len(payloads) != count:
+        sys.exit(f"run_tool: SC read 0x{addr:05X} expected {count} words, got {len(payloads)}")
+    return [int(v, 16) for _, v in payloads]
+
+
+def rw_write(tools: Tools, idx: int, val: int) -> None:
+    run([str(tools.rw), "wwr", f"0x{idx:02X}", f"0x{val & 0xFFFFFFFF:08X}"], capture=False, check=True)
+
+
+def rw_read(tools: Tools, idx: int) -> int:
+    res = run([str(tools.rw), "rr", f"0x{idx:02X}"])
+    line = res.stdout.strip().splitlines()[0]
+    return int(line, 16)
+
+
+def rc_send(tools: Tools, cmd: str, *, run_no: int | None = None, feb: int = 7) -> None:
+    args = [str(tools.rc_tool), "send", cmd, "--device", "/dev/mudaq0", "--feb", str(feb)]
+    if run_no is not None:
+        args.extend(["--run", str(run_no)])
+    run(args, capture=False, check=False)  # rc_tool prints to stderr
+
+
+def wait_for_feb(tools: Tools, link: int, *, timeout_s: float = 30.0, expected_uid: int = 0x454D5554) -> None:
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        try:
+            uid = sc_read(tools, link, 0x08800)[0]
+            if uid == expected_uid:
+                return
+        except SystemExit:
+            pass
+        time.sleep(2)
+    sys.exit(f"run_tool: FEB SC ring did not stabilize (UID {expected_uid:#x}) after {timeout_s}s")
+
+
+def configure_swb(tools: Tools, *, link_mask_scifi: int, use_opq: bool) -> dict:
+    """Set SWB datapath. Returns the resulting register snapshot."""
+    rw_write(tools, SWB_LINK_MASK_SCIFI, link_mask_scifi)
+    state = USE_BIT_MERGER if use_opq else 0x2  # 0x2 = stream merger; 0x4 = OPQ merger
+    rw_write(tools, SWB_READOUT_STATE, state)
+    rw_write(tools, DMA_REGISTER, 0x1)
+    time.sleep(0.1)
+    return {
+        "SWB_LINK_MASK_SCIFI": rw_read(tools, SWB_LINK_MASK_SCIFI),
+        "SWB_READOUT_STATE": rw_read(tools, SWB_READOUT_STATE),
+        "DMA_REGISTER": rw_read(tools, DMA_REGISTER),
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--duration-s", type=int, default=5, help="run duration after start-run (default 5)")
+    ap.add_argument("--rate-q16", type=int, default=52, help="emulator hit_rate q16 (default 52 = ~100k preset)")
+    ap.add_argument("--output-dir", type=Path, default=Path("/tmp/run_tool"))
+    ap.add_argument("--feb-link", type=int, default=2)
+    ap.add_argument("--feb-target", type=int, default=7)
+    ap.add_argument("--feb-sof", type=Path, default=None, help="program FEB before run (optional)")
+    ap.add_argument("--swb-sof", type=Path, default=None, help="program SWB before run (optional)")
+    ap.add_argument("--skip-program", action="store_true")
+    ap.add_argument("--skip-feb-config", action="store_true", help="don't run rbcam latency-style FEB config")
+    ap.add_argument("--use-opq", action="store_true", help="enable USE_BIT_MERGER (OPQ datapath); default off")
+    ap.add_argument("--swb-link-mask-scifi", type=lambda s: int(s, 0), default=0x4)
+    ap.add_argument("--staging-mb", type=int, default=64)
+    ap.add_argument("--af-pct", type=int, default=80)
+    args = ap.parse_args()
+
+    tools = find_tools()
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    summary: dict = {"started_at": time.time(), "args": {k: str(v) for k, v in vars(args).items()}}
+
+    # 1. Program (optional)
+    if not args.skip_program:
+        if args.swb_sof:
+            print(f"run_tool: programming SWB {args.swb_sof}")
+            run(["quartus_pgm", "-c", "DE5 [3-6.2]", "-m", "JTAG", "-o", f"p;{args.swb_sof}@1"], capture=False)
+            run(["sudo", "-n", "/usr/local/sbin/mudaq_recover_pcie"], capture=False)
+            time.sleep(2)
+        if args.feb_sof:
+            print(f"run_tool: programming FEB {args.feb_sof}")
+            run(["quartus_pgm", "-c", "USB-BlasterII [7-2]", "-m", "JTAG", "-o", f"p;{args.feb_sof}@1"], capture=False)
+            time.sleep(8)
+
+    # 2. Wait for FEB SC ring
+    wait_for_feb(tools, args.feb_link)
+    print("run_tool: FEB SC ring up")
+
+    # 3. SWB config
+    swb_state = configure_swb(tools, link_mask_scifi=args.swb_link_mask_scifi, use_opq=args.use_opq)
+    print(f"run_tool: SWB state {swb_state}")
+    summary["swb_state"] = swb_state
+
+    # 4. FEB config (delegate to existing rbcam latency script for compatibility)
+    if not args.skip_feb_config:
+        rbcam = Path("/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/script/run_rbcam_feb_hist_latency.py")
+        if rbcam.exists():
+            cfg_dir = args.output_dir / "feb_config_warmup"
+            cfg_dir.mkdir(exist_ok=True, parents=True)
+            print(f"run_tool: FEB config via {rbcam}")
+            run([
+                str(tools.swb_ring_lock), "python3", str(rbcam),
+                "--link", str(args.feb_link),
+                "--sc-tool", str(tools.sc_tool),
+                "--rc-tool", str(tools.rc_tool),
+                "--device", "/dev/mudaq0",
+                "--rates", "100k",
+                "--wait-ms", "200",
+                "--skip-egress",
+                "--output-dir", str(cfg_dir),
+            ], capture=False, check=False)
+
+    # 5. Launch dma_tool
+    dma_log = args.output_dir / "dma_tool.log"
+    dma_out = args.output_dir / "capture.bin"
+    print(f"run_tool: launching dma_tool → {dma_out}")
+    dma_proc = subprocess.Popen(
+        [
+            str(tools.dma_tool),
+            "--duration-s", "0",  # 0 = until SIGINT
+            "--staging-mb", str(args.staging_mb),
+            "--af-pct", str(args.af_pct),
+            "--out", str(dma_out),
+        ],
+        stdout=open(dma_log, "wb"),
+        stderr=subprocess.STDOUT,
+        preexec_fn=os.setsid,
+    )
+    time.sleep(1)
+    if dma_proc.poll() is not None:
+        sys.exit(f"run_tool: dma_tool exited prematurely; see {dma_log}")
+
+    try:
+        # 6. Run-control sequence
+        run_no = int(time.time()) & 0xFFFFFF
+        print(f"run_tool: rc_tool sequence run={run_no}")
+        rc_send(tools, "reset", feb=args.feb_target)
+        rc_send(tools, "stop-reset", feb=args.feb_target)
+        rc_send(tools, "run-prepare", run_no=run_no, feb=args.feb_target)
+        rc_send(tools, "sync", feb=args.feb_target)
+        rc_send(tools, "start-run", feb=args.feb_target)
+
+        # 7. Wait
+        print(f"run_tool: running for {args.duration_s} s")
+        time.sleep(args.duration_s)
+
+        # 8. End-run + stop dma_tool
+        rc_send(tools, "end-run", feb=args.feb_target)
+        time.sleep(0.5)
+    finally:
+        os.killpg(os.getpgid(dma_proc.pid), signal.SIGINT)
+        try:
+            dma_proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            os.killpg(os.getpgid(dma_proc.pid), signal.SIGKILL)
+            dma_proc.wait()
+
+    # 9. Read counters / hist
+    final_state = {
+        "SWB_LINK_MASK_SCIFI": rw_read(tools, SWB_LINK_MASK_SCIFI),
+        "SWB_READOUT_STATE": rw_read(tools, SWB_READOUT_STATE),
+        "DMA_REGISTER": rw_read(tools, DMA_REGISTER),
+    }
+    summary["final_swb_state"] = final_state
+    summary["dma_capture_bytes"] = dma_out.stat().st_size if dma_out.exists() else 0
+    summary["dma_log"] = str(dma_log)
+    if dma_log.exists():
+        summary["dma_summary"] = dma_log.read_text().splitlines()[-3:]
+
+    # FEB hist_0 totals + drops
+    try:
+        hist0 = sc_read(tools, args.feb_link, 0x0A908)[0]  # offset 8 = TOTAL_HITS
+        hist0_drops = sc_read(tools, args.feb_link, 0x0A906)[0]  # offset 6 = DROPPED_HITS (per phase4 layout)
+        summary["hist_0_total_hits"] = hist0
+        summary["hist_0_dropped_hits"] = hist0_drops
+    except SystemExit:
+        summary["hist_0_total_hits"] = "<read failed>"
+
+    summary["finished_at"] = time.time()
+    summary_path = args.output_dir / "debug_daq_summary.json"
+    summary_path.write_text(json.dumps(summary, indent=2))
+    print(f"run_tool: summary at {summary_path}")
+    print(f"  capture file:    {dma_out} ({summary['dma_capture_bytes']} bytes)")
+    print(f"  hist_0 total:    {summary.get('hist_0_total_hits')}")
+    print(f"  hist_0 drops:    {summary.get('hist_0_dropped_hits')}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

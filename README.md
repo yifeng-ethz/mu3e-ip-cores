@@ -233,6 +233,10 @@ mu3e-ip-cores/
 │   └── infra/                  # CMSIS-SVD and shared board bring-up metadata helpers
 ├── templates/                  # Shared document and code templates
 ├── tools/                      # Analysis, visualization, and local developer tools
+│   ├── packet_transaction_traffic_analyzer/
+│   └── run_script/             # SWB+FEB on-board debug + bring-up tools (sc_tool, rc_tool,
+│                               # dma_tool, run_tool, test_scifi_sc_hub, etc.) — moved
+│                               # from online_dpv2 + online_sc on 2026-05-11; see README
 └── trash_bin/                  # Deprecated plans, debug dumps, and unclassified old work
 ```
 
