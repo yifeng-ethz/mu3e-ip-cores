@@ -121,15 +121,43 @@ readback. Long firmware names and short aliases are both accepted:
 ./sc_tool --swb read VERSION_REGISTER_R
 ./sc_tool --swb read LINK_LOCKED_LOW
 ./sc_tool --swb read RESET_LINK_STATUS
+./sc_tool --swb read LINK_LOCKED_LOW --samples 1000 --bit-stats
+./sc_tool --swb stat RESET_LINK_STATUS --samples 1000
 ./sc_tool --swb write DMA_REGISTER 0x00000001
 ./sc_tool --swb burst RESET_LINK_STATUS_REGISTER_R 3
 ./sc_tool --swb dump-all
+./sc_tool --swb dump-stats --samples 1000
 ./sc_tool --swb-list-regs
 ```
 
 `--swb` register offsets are BAR word indices, matching the firmware package
 constants. For example, `LINK_LOCKED_LOW_REGISTER_R` is offset `0x36`, which
 maps to BAR0 byte address `0xD8`.
+
+### SWB BAR CDC-drift hazard
+
+The SWB status registers are not CDC-clean in the current firmware. Status bits
+such as `LINK_LOCKED_LOW_REGISTER_R`, `LINK_LOCKED_HIGH_REGISTER_R`, and
+`RESET_LINK_STATUS_REGISTER_R` cross from the xcvr clock domain into the PCIe
+`coreclkout` domain without a synchronizer chain. Single-shot host reads of
+these registers are NOT TRUSTWORTHY for status interpretation because they can
+return metastable or bit-torn values.
+
+For status decisions, always use repeated bit-stability sampling:
+
+```
+~/.local/bin/swb_ring_lock ./sc_tool --swb read <reg> --samples 1000 --bit-stats
+```
+
+`sc_tool --swb stat <reg> --samples 1000` is an alias for the same sampled
+status read. Use the per-bit majority vote and the stable/unstable bit lists;
+do not make link/reset decisions from a single `sc_tool --swb read` or `rw rr`
+of these status offsets.
+
+Count-style registers (`CNT_*`) accumulate in their source domain and can be
+read single-shot only when no events are in flight. For sanity, read counters
+with `--samples 2` and compare both values before treating the snapshot as
+static.
 
 ### FEB SC-ring mode
 
