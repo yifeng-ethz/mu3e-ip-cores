@@ -70,7 +70,7 @@ PER_CHECKPOINT_BOUNDS: dict[str, dict[str, tuple[float, float]]] = {
         "post_rbcam": (2000.0, 2200.0),
         "feb_egress": (2049.0, 6143.0),
         "opq_ingress": (2049.0, 6159.0),
-        "opq_egress": (0.0, 32768.0),
+        "opq_egress": (0.0, 32768.0 + 6159.0),
     },
 }
 
@@ -120,7 +120,44 @@ def bounds_for_row(row: Mapping[str, object]) -> BoundDecision:
             name = mode_by_id.get(int(mode_id))  # type: ignore[arg-type]
         except (TypeError, ValueError):
             name = None
-    return bounds_for_mode(None if name is None else str(name))
+    decision = bounds_for_mode(None if name is None else str(name))
+    if decision.mode == "header_sync" and decision.bounds:
+        return BoundDecision(decision.mode, header_sync_row_bounds(row, decision.bounds))
+    return decision
+
+
+def popcount_field(row: Mapping[str, object], count_key: str, mask_key: str, width: int) -> int:
+    value = row.get(count_key)
+    try:
+        count = int(str(value), 0)
+        if 0 < count <= width:
+            return count
+    except (TypeError, ValueError):
+        pass
+    try:
+        mask = int(str(row.get(mask_key, 0)), 0)
+    except (TypeError, ValueError):
+        return width
+    return max(1, min(width, mask.bit_count()))
+
+
+def header_sync_row_bounds(
+    row: Mapping[str, object],
+    base: Mapping[str, tuple[float, float]],
+) -> dict[str, tuple[float, float]]:
+    bounds = dict(base)
+    lower, upper = bounds["opq_egress"]
+    lane_count = popcount_field(row, "lane_popcount", "lane_mask", ACTIVE_ASICS_ALL_CHANNEL)
+    channel_count = popcount_field(row, "channel_popcount", "channel_mask", CHANNELS_PER_ASIC)
+
+    # The published 4356-cycle OPQ lower edge is the all-ASIC/all-channel
+    # header-sync anchor.  Sparse rows can select an earlier valid header slot,
+    # so derive a conservative lower edge from the 16-cycle selected-slot
+    # spacing and one ASIC-group guard instead of applying the dense-row edge.
+    selected_slot_relief = HEADER_SYNC_ASIC_STAGGER_8NS * max(0, CHANNELS_PER_ASIC - channel_count)
+    asic_group_relief = 64.0 if lane_count < ACTIVE_ASICS_ALL_CHANNEL else 0.0
+    bounds["opq_egress"] = (max(0.0, lower - selected_slot_relief - asic_group_relief), upper)
+    return bounds
 
 
 def framing_formula(mode: str | None) -> str:
@@ -136,4 +173,3 @@ def framing_formula(mode: str | None) -> str:
     if normalized == "onclick":
         return "D_i=(T_i-GTS_hit)/8 ns; alpha_onclick(t) from commanded pulse count"
     return "D_i=(T_i-GTS_hit)/8 ns; alpha_periodic(t)=N*(floor(t/period)+1)"
-
