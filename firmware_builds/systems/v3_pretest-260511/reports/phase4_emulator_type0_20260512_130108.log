@@ -1,0 +1,133 @@
+# Phase 4 emulator type0 Round 3 mini sanity
+created=2026-05-12T13:01:08+02:00
+sof=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof
+sof_sha256=55d1f09361c75e7fdcf5a404e056e5b8cf458a6d38fb024c3d94ebe9590d7b46
+## SC sanity reads
+SC hub UID 0x0FE80
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0FE80
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000FE80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 72 us
+  timing total        : 72 us
+  secondary before    : 0x00FF
+  secondary after     : 0x0104
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x00FF
+  ring end            : 0x0104
+  type                : RD
+  link                : 2
+  addr                : 0x0FE80
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000FE80
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x53434842
+histogram UID 0x0A900
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A900
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A900
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 72 us
+  timing total        : 72 us
+  secondary before    : 0x0047
+  secondary after     : 0x004C
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x80000001
+info: observed packet:
+  ring start          : 0x0047
+  ring end            : 0x004C
+  type                : RD
+  link                : 2
+  addr                : 0x0A900
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A900
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x48495354
+runctl UID 0x0C000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0C000
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000C000
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 61 us
+  timing matched      : 73 us
+  timing total        : 73 us
+  secondary before    : 0x0000
+  secondary after     : 0x0005
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0005
+  type                : RD
+  link                : 2
+  addr                : 0x0C000
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000C000
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x52434D48
+## Phase 4 emulator type0 board probe
+command=~/.local/bin/swb_ring_lock -- python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/run_phase4_emutype0_board_probe.py --sc-tool tools/run_script/build/sc_tool --link 2 --output-dir firmware_builds/systems/v3_pretest-260511/reports/phase4_emulator_type0_20260512_130108 --run-seconds 4
+firmware_builds/systems/v3_pretest-260511/reports/phase4_emulator_type0_20260512_130108
+probe_exit=0
+completed=2026-05-12T13:01:31+02:00
