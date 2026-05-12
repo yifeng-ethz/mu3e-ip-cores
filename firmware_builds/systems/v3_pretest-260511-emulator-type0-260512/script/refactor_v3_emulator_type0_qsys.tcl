@@ -3,6 +3,8 @@
 # Keep this edit in Tcl so Platform Designer owns the system XML state.
 package require -exact qsys 16.0
 
+set ::type0_emulator_inst emulator_mutrig_qsys_inst
+
 proc has_instance {name} {
     return [expr {[lsearch -exact [get_instances] $name] >= 0}]
 }
@@ -62,34 +64,34 @@ proc remove_legacy_emulator_topology {} {
 }
 
 proc configure_single_emulator {} {
-    add_instance emulator_mutrig_qsys_lane emulator_mutrig 26.3.0.0506
-    set_optional_param emulator_mutrig_qsys_lane BYTE_STREAM_ENABLE false
-    set_optional_param emulator_mutrig_qsys_lane CLUSTER_LANE_COUNT_DEFAULT 8
-    set_optional_param emulator_mutrig_qsys_lane CLUSTER_LANE_INDEX_DEFAULT 0
-    set_optional_param emulator_mutrig_qsys_lane ASIC_ID_DEFAULT 0
-    set_optional_param emulator_mutrig_qsys_lane INSTANCE_ID 0
-    set_optional_param emulator_mutrig_qsys_lane FIFO_DEPTH 64
-    set_optional_param emulator_mutrig_qsys_lane DEBUG_LEVEL 0
-    set_optional_param emulator_mutrig_qsys_lane VERSION_MAJOR 26
-    set_optional_param emulator_mutrig_qsys_lane VERSION_MINOR 3
-    set_optional_param emulator_mutrig_qsys_lane VERSION_PATCH 0
-    set_optional_param emulator_mutrig_qsys_lane BUILD 506
-    set_optional_param emulator_mutrig_qsys_lane VERSION_DATE 20260506
-    set_optional_param emulator_mutrig_qsys_lane VERSION_GIT 0
+    add_instance $::type0_emulator_inst emulator_mutrig 26.3.0.0506
+    set_optional_param $::type0_emulator_inst BYTE_STREAM_ENABLE false
+    set_optional_param $::type0_emulator_inst CLUSTER_LANE_COUNT_DEFAULT 8
+    set_optional_param $::type0_emulator_inst CLUSTER_LANE_INDEX_DEFAULT 0
+    set_optional_param $::type0_emulator_inst ASIC_ID_DEFAULT 0
+    set_optional_param $::type0_emulator_inst INSTANCE_ID 0
+    set_optional_param $::type0_emulator_inst FIFO_DEPTH 64
+    set_optional_param $::type0_emulator_inst DEBUG_LEVEL 0
+    set_optional_param $::type0_emulator_inst VERSION_MAJOR 26
+    set_optional_param $::type0_emulator_inst VERSION_MINOR 3
+    set_optional_param $::type0_emulator_inst VERSION_PATCH 0
+    set_optional_param $::type0_emulator_inst BUILD 506
+    set_optional_param $::type0_emulator_inst VERSION_DATE 20260506
+    set_optional_param $::type0_emulator_inst VERSION_GIT 0
 
-    add_connection_once lvds_rx_28nm_0.outclock emulator_mutrig_qsys_lane.data_clock
-    add_connection_once master_datapath.master_reset emulator_mutrig_qsys_lane.data_reset
-    add_connection_once emulator_ctrl_splitter.out0 emulator_mutrig_qsys_lane.ctrl
-    add_connection_once emulator_inject_fanout.out0 emulator_mutrig_qsys_lane.inject
-    add_mm_connection mm_pipeline_lvds_csr_emu_dbg.m0 emulator_mutrig_qsys_lane.csr 0x0000
-    add_mm_connection master_datapath.master emulator_mutrig_qsys_lane.csr 0x00002000
+    add_connection_once lvds_rx_28nm_0.outclock ${::type0_emulator_inst}.data_clock
+    add_connection_once master_datapath.master_reset ${::type0_emulator_inst}.data_reset
+    add_connection_once emulator_ctrl_splitter.out0 ${::type0_emulator_inst}.ctrl
+    add_connection_once emulator_inject_fanout.out0 ${::type0_emulator_inst}.inject
+    add_mm_connection mm_pipeline_lvds_csr_emu_dbg.m0 ${::type0_emulator_inst}.csr 0x0000
+    add_mm_connection master_datapath.master ${::type0_emulator_inst}.csr 0x00002000
 }
 
 proc configure_emulator_hit_fanout {} {
     add_instance emulator_hit_type0_fanout hit_type0_fanout8 26.0.0.0512
     add_connection_once lvds_rx_28nm_0.outclock emulator_hit_type0_fanout.clk
     add_connection_once master_datapath.master_reset emulator_hit_type0_fanout.rst
-    add_connection_once emulator_mutrig_qsys_lane.hit_type0 emulator_hit_type0_fanout.in
+    add_connection_once ${::type0_emulator_inst}.hit_type0 emulator_hit_type0_fanout.in
 }
 
 proc configure_arb_supercore {} {

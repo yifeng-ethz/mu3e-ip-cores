@@ -1,70 +1,100 @@
-# Phase 4 Emulator-Type0 Round 2 Compile
+# Phase 4 Emulator Type0 Round 2 Compile
 
 Date: 2026-05-12
+Build: `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512`
+Board project: `syn/board_projects/fe_scifi_feb_v3`
+SOF: `syn/board_projects/fe_scifi_feb_v3/output_files/top.sof`
 
 ## Purpose
 
-Compile the FEB v3 emulator-type0 Qsys refactor after the Round 1 tb_int/FEB+SWB co-run passed.
+Round 2 takes the Round 1 emulator-type0 topology into the FEB v3 Quartus build, regenerates the Platform Designer system through Tcl, and produces the retest SOF for on-board Phase 4.
 
-## Inputs
+## Qsys Regeneration
 
-- Build directory: `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512`
-- Qsys generate status: `syn/feb_system_v3_qsys_generate_20260512_095900_isolated.status`
-- Quartus project: `syn/board_projects/fe_scifi_feb_v3/top.qpf`
+- Applied the build-local Tcl refactor through `script/apply_v3_emulator_type0_qsys.sh`.
+- Generated `syn/feb_system_v3.qsys` with `script/generate_feb_system_v3.sh` and the canonical isolated search path.
+- Included the build-local `quartus_systems/` and `ip/hit_type0_fanout8/` search roots.
+- Excluded historical `firmware_builds/systems/*/syn/` generated trees from the Qsys catalog.
+- Generation status: `syn/feb_system_v3_qsys_generate_20260512_110700_isolated.status`, `exit_code=0`, `error_count=0`.
+- Generated `*.qsys` files are not writable after regeneration; edits stayed in Tcl recipes.
 
-## Commands
+Topology checks:
 
-```sh
-firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/generate_feb_system_v3.sh
-quartus_sh --flow compile top
-```
+| Check | Result |
+|---|---|
+| Type0 emulator instance name | `emulator_mutrig_qsys_inst` |
+| Emulator cluster lanes | `CLUSTER_LANE_COUNT_DEFAULT => 8` |
+| Emulator byte stream mode | `BYTE_STREAM_ENABLE => false` |
+| Arbiter lanes | 8 generated `lane_0..lane_7` instances |
+| Arbiter default mode | 8 x `MODE_DEFAULT => 1` |
+| Readyless run-control timing adapters | None in run-control mux, run-control splitter, emulator-control splitter, or `arb_hit_type0_supercore_0` |
+| CSR timing mitigation | Added one pipelined Avalon-MM bridge per arbiter lane (`csr_pipe_0..csr_pipe_7`) |
 
-## Qsys Generate Verdict
+## Compile Attempts
 
-- Status file: `syn/feb_system_v3_qsys_generate_20260512_095900_isolated.status`
-- `exit_code=0`
-- Search path used the local whitelist from `script/qsys_search_path.sh`.
-- Generated `feb_system_v3` contains `emulator_mutrig_qsys_inst : component emulator_mutrig_qsys_lane`; the instance label intentionally differs from the component name to avoid a Quartus VHDL name collision.
+| Stamp | Result | Notes |
+|---|---|---|
+| `20260512_101045_emutype0` | Exit 0, timing failed | Found new slow85 setup miss, worst `pll_sclk=-1.331 ns`, from Platform Designer command mux into `arb_hit_type0` CSR counters. |
+| `20260512_110230_emutype0_csrpipe` | Exit 3 | Compile stopped on generated VHDL duplicate name: instance label matched component name `emulator_mutrig_qsys_lane`. |
+| `20260512_111100_emutype0_csrpipe2` | Exit 0, timing failed | CSR path was removed; remaining misses were unrelated FEB frame-assembly/LVDS interconnect paths. |
+| `20260512_115400_emutype0_perf` | Exit 0, timing failed | Final retest SOF generated with speed physical synthesis and router timing optimization enabled. |
 
-## Quartus Compile Verdict
+Final compile status:
 
-- Status file: `syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_101045_emutype0.status`
-- Log file: `syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_101045_emutype0.console.log`
-- `exit_code=0`
-- Quartus result: `Full Compilation was successful. 0 errors, 1975 warnings`
-- Fitter result: `Fitter was successful. 0 errors, 30 warnings`
-- Timing Analyzer result: `Timing Analyzer was successful. 0 errors, 24 warnings`
+- Status: `syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_115400_emutype0_perf.status`
+- Console: `syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_115400_emutype0_perf.console.log`
+- Start/end: 2026-05-12 11:56:14 to 12:50:30 Europe/Zurich.
+- Analysis & Synthesis: successful, 0 errors, 1487 warnings.
+- Fitter: successful, 0 errors, 29 warnings.
+- Assembler: successful, 0 errors, 0 warnings.
+- Timing Analyzer: successful, 0 errors, 23 warnings, timing requirements not met.
+- Full compilation: successful, 0 errors, 1539 warnings.
 
-## Bitstream
-
-- SOF: `syn/board_projects/fe_scifi_feb_v3/output_files/top.sof`
-- Size: 13 MiB
-- SHA256: `11cce55e14610d4cf902d6e6fac7de14268b13bcdf6bc0cd6576f052049c615a`
-- RBF: `syn/board_projects/fe_scifi_feb_v3/output_files/top.rbf`
-- Size: 6.7 MiB
-
-## Resource Summary
+## Resources
 
 From `output_files/top.fit.summary`:
 
-- Logic utilization: `65,890 / 91,680 ALMs (72%)`
-- Registers: `100769`
-- Block memory bits: `3,961,842 / 13,987,840 (28%)`
-- RAM blocks: `518 / 1,366 (38%)`
-- PLLs: `7 / 21 (33%)`
+| Resource | Usage |
+|---|---:|
+| Logic utilization | 77,053 / 91,680 ALMs (84%) |
+| Registers | 117,650 |
+| Block memory bits | 4,016,568 / 13,987,840 (29%) |
+| RAM blocks | 528 / 1,366 (39%) |
+| DSP blocks | 0 / 800 (0%) |
+| HSSI RX PCSs | 4 / 9 (44%) |
+| HSSI TX PCSs | 8 / 9 (89%) |
+| PLLs | 7 / 21 (33%) |
 
-## STA Summary
+## Timing
 
-The compile produced a usable SOF, but the inherited LVDS receive-clock setup path still misses the relaxed timing gate:
+Round 2 does not meet the requested non-STP signoff target of setup slack >= 0 ns on all 4 corners. It does meet the debug-image relaxed envelope used for STP-armed iteration: 2/4 setup corners clean and worst setup slack >= -0.4 ns.
 
-- Setup slacks across timing models: `-1.331 ns`, `-0.923 ns`, `0.620 ns`, `0.796 ns`
-- Hold slacks across timing models: `0.195 ns`, `0.173 ns`, `0.085 ns`, `0.070 ns`
-- Worst recovery slack: `0.432 ns`
-- Worst removal slack: `0.206 ns`
-- Worst minimum pulse-width slack: `0.160 ns`
+Final setup summary from `output_files/top.sta.summary`:
 
-This is not final STA closure. It is sufficient for the next iterative-debug board probe because the failing path is the inherited LVDS receive clock path, while the Phase 4 emulator-type0 path under test is internally generated.
+| Corner | Worst setup slack | TNS | Notes |
+|---|---:|---:|---|
+| Slow 1100 mV 85 C | -0.369 ns | -3.142 ns | Worst clock `transceiver_pll_clock[0]`; LVDS `pll_sclk` is -0.163 ns. |
+| Slow 1100 mV 0 C | -0.156 ns | -0.272 ns | LVDS `pll_sclk` is -0.001 ns. |
+| Fast 1100 mV 85 C | 0.619 ns | 0.000 ns | Clean. |
+| Fast 1100 mV 0 C | 0.797 ns | 0.000 ns | Clean. |
+
+Slow85 detailed timing evidence:
+
+- Status: `syn/board_projects/fe_scifi_feb_v3/quartus_sta_round2_final_slow85_20260512_125500.status`
+- Worst path report: `syn/board_projects/fe_scifi_feb_v3/round2_sta/round2_transceiver_pll_clock_setup_paths.rpt`
+- LVDS path report: `syn/board_projects/fe_scifi_feb_v3/round2_sta/round2_lvds_pll_sclk_setup_paths.rpt`
+
+The final worst setup path is inside FEB frame assembly on `transceiver_pll_clock[0]`, not inside the new emulator type0 fanout or arbiter CSR path.
+
+## SOF Identity
+
+`sha256sum`:
+
+| File | SHA256 |
+|---|---|
+| `output_files/top.sof` | `55d1f09361c75e7fdcf5a404e056e5b8cf458a6d38fb024c3d94ebe9590d7b46` |
+| `output_files/top.rbf` | `410b8911029c76ba2cb5c06b0ab413178d3ef7f2c1dc8015915c1a0802db6cb5` |
 
 ## Verdict
 
-Round 2 compile: **PASS for bitstream generation, FAIL for final timing closure**. Proceed to controlled on-board Phase 4 probe with this SOF, then decide whether another compile is justified by the board result.
+Round 2 produced a valid Quartus output image and removed the new emulator CSR timing failure, but it is a timing-risk retest SOF rather than clean non-STP timing signoff. Proceeding to Round 3 is acceptable for the Phase 4 emulator-path board check only if the timing risk is carried forward explicitly.

@@ -190,7 +190,7 @@
          type = "int";
       }
    }
-   element emulator_mutrig_qsys_lane
+   element emulator_mutrig_qsys_inst
    {
       datum _sortIndex
       {
@@ -1219,7 +1219,7 @@
    version="1.2"
    enabled="1" />
  <module
-   name="emulator_mutrig_qsys_lane"
+   name="emulator_mutrig_qsys_inst"
    kind="emulator_mutrig"
    version="26.3.0.506"
    enabled="1">
@@ -2061,7 +2061,7 @@
    kind="avalon"
    version="18.1"
    start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="emulator_mutrig_qsys_lane.csr">
+   end="emulator_mutrig_qsys_inst.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
@@ -2493,7 +2493,7 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
-   end="emulator_mutrig_qsys_lane.csr">
+   end="emulator_mutrig_qsys_inst.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x2000" />
   <parameter name="defaultConnection" value="false" />
@@ -2731,7 +2731,7 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="emulator_mutrig_qsys_lane.hit_type0"
+   start="emulator_mutrig_qsys_inst.hit_type0"
    end="emulator_hit_type0_fanout.in" />
  <connection
    kind="avalon_streaming"
@@ -2857,7 +2857,7 @@
    kind="avalon_streaming"
    version="18.1"
    start="emulator_ctrl_splitter.out0"
-   end="emulator_mutrig_qsys_lane.ctrl" />
+   end="emulator_mutrig_qsys_inst.ctrl" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3282,7 +3282,7 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
-   end="emulator_mutrig_qsys_lane.data_clock" />
+   end="emulator_mutrig_qsys_inst.data_clock" />
  <connection
    kind="clock"
    version="18.1"
@@ -3339,7 +3339,7 @@
    kind="conduit"
    version="18.1"
    start="emulator_inject_fanout.out0"
-   end="emulator_mutrig_qsys_lane.inject">
+   end="emulator_mutrig_qsys_inst.inject">
   <parameter name="endPort" value="" />
   <parameter name="endPortLSB" value="0" />
   <parameter name="startPort" value="" />
@@ -3506,7 +3506,7 @@
    kind="reset"
    version="18.1"
    start="master_datapath.master_reset"
-   end="emulator_mutrig_qsys_lane.data_reset" />
+   end="emulator_mutrig_qsys_inst.data_reset" />
  <connection
    kind="reset"
    version="18.1"
