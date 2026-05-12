@@ -1,6 +1,6 @@
 # FEB to SWB Cosim Usage
 
-## RN.BASIC 208-row sweep
+## RN.BASIC 194-row sweep
 
 Run the complete RN.BASIC sim sweep from this directory:
 
@@ -21,7 +21,7 @@ make run_BASIC DRY_RUN=1
 `scripts/rn_basic_cosim.py` parses
 `../v3_pretest-260511/doc/TEST_BASIC.md`, stamps each row into
 `REPORT/RN.BASIC.NNN/row_config.json`, precompiles the shared Questa corun
-once, and dispatches up to 30 row runs per batch.  Use `WORK_ROOT=<scratch>`
+once, and dispatches up to 16 row runs per batch for this host.  Use `WORK_ROOT=<scratch>`
 when the raw Questa CSVs will not fit under `cosim/REPORT`; the runner still
 writes the requested checkpoint evidence back to `REPORT/RN.BASIC.NNN/`.
 Intermediate raw files are truncated after collection by default.  Set
@@ -30,7 +30,7 @@ Each row receives row-specific `+RN_BASIC_*` plusargs plus the source-mode
 controls available in the FEB/SWB corun wrapper.  The summary is written to:
 
 ```text
-REPORT/RN.BASIC.208_summary.json
+REPORT/RN.BASIC.194_summary.json
 ```
 
 Each row evidence directory contains the three condition checkpoints:
@@ -41,8 +41,9 @@ Each row evidence directory contains the three condition checkpoints:
   `mts_preprocessor`; includes `theoretical_hits`
 - `delay_hist_bin_a.json` and `delay_hist_bin_b.json`: dual-bank histogram
   bin readings derived from the row-filtered hit trace
-- `delay_scoreboard.json`: `true_ts[]`, `measured_ts[]`, `delay_ns[]`, and
-  delay statistics from emulator truth to post-rbCAM observation
+- `delay_scoreboard.json`: `true_ts[]`, `measured_ts[]`, `delay_ns[]`,
+  `delay_cycles[]`, 5 percentile cycle keys, and delay statistics from
+  emulator truth to post-rbCAM observation
 - `delay_plot.svg`: measured delay versus emulator true timestamp
 - `rdma_rxbuffer.bin`: row-filtered 64-bit DMA hit records as raw bytes
 - `rdma_rxbuffer_summary.json`: byte count, record count, first/last records,
