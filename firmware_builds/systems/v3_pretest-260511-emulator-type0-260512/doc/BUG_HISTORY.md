@@ -21,6 +21,7 @@ Severity legend:
 |---|---|---|---|---|---|---|---|
 | [BUG-005-H](#bug-005-h-phase4_5_sweep-read-the-live-csr-13-counter-while-interval-pulses-reset-it-mid-run) | H | non-datapath-refactor | `common (default sweep configuration)` | fixed | FEB v3 emulator-type0 phase 4.5 sweep, 2026-05-12 | this commit | `scripts/cotest/phase4_5_sweep.py` programmed `INTERVAL_CFG = run_window` so the LIVE CSR 13 counter reset every 1 s during the 4 s window, and the sweep read the wrong offset (`0x10` = SCRATCH) for the STABLE CSR 17 latch. |
 | [BUG-006-I](#bug-006-i-histogram-input-fifos-are-empty-on-every-row-of-the-2026-05-12-sweep) | I | hard stuck error | `common (every sweep row on this session)` | open | FEB v3 emulator-type0 phase 4.5 sweep, 2026-05-12 | next commit | `histogram_statistics_v2` input hit_fifos read `PORT_STATUS = 0x000000FF` on every row even though `arb_hit_type0_supercore` reports `ingress_emu_hits` of 159M-1.27B. The path between arb egress and histogram ingress delivers nothing in this board session. |
+| [BUG-007-H](#bug-007-h-phase4_5_sweep-mode-dispatch-written-to-mutrig_format-instead-of-signal-csr) | H | non-datapath-refactor | `common (all burst/periodic mode rows)` | fixed | Phase 4.5 sim diag commit 6029646e, 2026-05-12 | this commit | `configure_emulator()` OR-ed hit_mode into MUTRIG_FORMAT bits [1:0] (format flags only) instead of writing the SIGNAL CSR (offset 0x08); all three mode rows ran identical direct-mode behavior. |
 
 ## 2026-05-12
 
@@ -66,3 +67,27 @@ Severity legend:
 - Evidence:
   - 32-row sweep verdict.json + counters.json under `sweep_evidence/`.
   - Findings section of `doc/PHASE4_5_SWEEP_REPORT.html` documents the BUG-006-I hand-off.
+
+### BUG-007-H: phase4_5_sweep mode-dispatch written to MUTRIG_FORMAT instead of SIGNAL CSR
+
+- First seen:
+  - Phase 4.5 sim diag commit 6029646e revealed the mis-mapping; logged 2026-05-12.
+- Symptom:
+  - Rows `p45_021` (burst, hit_mode=01) and `p45_022` (periodic, hit_mode=11) ran
+    identical behavior to direct-mode rows. MUTRIG_FORMAT=0x21/0x23 set `short_mode`
+    and `gen_idle` format flags; the SIGNAL CSR remained 0x00 so `cfg_signal_hit_mode_sig=0`
+    and `cfg_signal_internal_sub_mode=0` on both rows (same as direct mode).
+- Root cause:
+  - `configure_emulator()` computed `mutrig_fmt = 0x20 | (hit_mode & 0x3)` and wrote it to
+    MUTRIG_FORMAT (CSR offset 0x0A). Per `frontend_csr.sv:285-289` MUTRIG_FORMAT decodes
+    format flags only: `short_mode[0]`, `gen_idle[1]`, `tx_mode[4:2]`, `type0_enable[5]`.
+    The actual mode-dispatch is at SIGNAL (CSR offset 0x08, `frontend_csr.sv:277-280`):
+    `hit_mode_sig[0]` and `internal_sub_mode[1]`.
+- Fix:
+  - `configure_emulator()` now computes `signal_word = hit_mode & 0x3` and writes it to
+    `EMU_SIGNAL_W`. MUTRIG_FORMAT is always 0x20 (type0-enable=1, format defaults).
+  - `dry_run_row()` updated to print the SIGNAL write (not MUTRIG_FORMAT) as the mode line.
+  - Commit references: sim diag in 6029646e; fix in this commit.
+- Evidence:
+  - `python3 scripts/cotest/phase4_5_sweep.py --dry-run --row p45_021_all_lanes_default_default_burst`
+    prints `SIGNAL=0x00000001` and `MUTRIG_FORMAT=0x00000020`.

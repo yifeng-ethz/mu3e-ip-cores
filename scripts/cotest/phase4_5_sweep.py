@@ -754,17 +754,39 @@ def configure_emulator(sc_tool: Path, link: int,
                        log_fh: Optional[Any] = None) -> dict[str, Any]:
     """Program emulator_mutrig channel_mask, rate, and hit_mode.
 
-    MUTRIG_FORMAT word: bit[1:0] = hit_mode; upper bits inherit from the
-    Round 3 working baseline (0x20). For hit_mode "00" direct mode this
-    yields 0x20; for "01" burst -> 0x21; for "11" periodic -> 0x23.
+    Fix 1 (sim diag commit 6029646e): MUTRIG_FORMAT (CSR 0x0A) carries
+    format flags only -- short_mode[0], gen_idle[1], tx_mode[4:2],
+    type0_enable[5]. It does NOT dispatch hit_mode. The mode-dispatch
+    bits live in the SIGNAL CSR (CSR 0x08, frontend_csr.sv:277-289):
+      bit[0] cfg_signal_hit_mode_sig     : 0 = internal, 1 = external
+      bit[1] cfg_signal_internal_sub_mode: 0 = direct (Poisson PRNG),
+                                           1 = periodic (phase accumulator)
+
+    Mode encoding that matches the sweep row hit_mode field:
+      direct   (00b, hit_mode=0): SIGNAL=0x00  hit_mode_sig=0 sub_mode=0
+      burst    (01b, hit_mode=1): SIGNAL=0x01  hit_mode_sig=1 (external)
+      periodic (11b, hit_mode=3): SIGNAL=0x03  hit_mode_sig=1 sub_mode=1
+
+    MUTRIG_FORMAT is always written as 0x20 (type0-enable bit[5]=1,
+    all other format flags = default). This was already the correct
+    constant for direct-mode rows; for burst/periodic rows the prior
+    code wrote 0x21/0x23 which set format bits, not mode bits.
     """
-    mutrig_fmt_base = 0x20
-    mutrig_fmt = mutrig_fmt_base | (hit_mode & 0x3)
+    # MUTRIG_FORMAT: always 0x20 (type0 stream enabled, format defaults).
+    # Do NOT OR in hit_mode here -- see comment above.
+    mutrig_fmt = 0x20
+
+    # SIGNAL CSR encodes the actual hit mode (direct / burst / periodic).
+    # Bit[0]=hit_mode_sig, bit[1]=internal_sub_mode.
+    signal_word = hit_mode & 0x3
+
     writes: list[tuple[str, int, int]] = [
         ("CHANNEL_MASK",  EMU_BASE_WORD + EMU_CHANNEL_MASK_W,  channel_mask & 0xFFFFFFFF),
         ("CENTRAL",       EMU_BASE_WORD + EMU_CENTRAL_W,       0x00000001),
-        ("SIGNAL",        EMU_BASE_WORD + EMU_SIGNAL_W,        0x00000000),
+        # SIGNAL: mode dispatch -- direct=0x00, burst=0x01, periodic=0x03
+        ("SIGNAL",        EMU_BASE_WORD + EMU_SIGNAL_W,        signal_word),
         ("BACKGROUND",    EMU_BASE_WORD + EMU_BACKGROUND_W,    0x00000000),
+        # MUTRIG_FORMAT: format flags only; type0-enable=1, rest=0 -> 0x20
         ("MUTRIG_FORMAT", EMU_BASE_WORD + EMU_MUTRIG_FORMAT_W, mutrig_fmt),
         ("RATES",         EMU_BASE_WORD + EMU_RATES_W,         rate_88fp & 0xFFFF),
         ("CLUSTER_FIX",   EMU_BASE_WORD + EMU_CLUSTER_FIX_W,   0x00004000 | (3 << 7) | 0),
@@ -1763,8 +1785,16 @@ def dry_run_row(row: dict[str, Any], row_idx: int,
     p(f"  [3] emulator_mutrig channel_mask={cm} rate={rate} hit_mode={mode}")
     p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_CHANNEL_MASK_W:05X} {cm} --quiet  # CHANNEL_MASK")
     p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_RATES_W:05X} {rate} --quiet  # RATES")
-    fmt = 0x20 | (int(mode, 2) & 0x3)
-    p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_MUTRIG_FORMAT_W:05X} 0x{fmt:08X} --quiet  # MUTRIG_FORMAT")
+    # Fix 1 (sim diag 6029646e): mode-dispatch goes to SIGNAL CSR, NOT MUTRIG_FORMAT.
+    # SIGNAL[0]=hit_mode_sig (0=internal, 1=external/burst),
+    # SIGNAL[1]=internal_sub_mode (0=direct/Poisson, 1=periodic).
+    # hit_mode field: direct=00b -> SIGNAL=0x00, burst=01b -> SIGNAL=0x01, periodic=11b -> SIGNAL=0x03.
+    signal_val = int(mode, 2) & 0x3
+    p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_SIGNAL_W:05X} 0x{signal_val:08X} --quiet"
+      f"  # SIGNAL (mode-dispatch: direct=0x00 burst=0x01 periodic=0x03)")
+    # MUTRIG_FORMAT: format flags only -- type0-enable=1, rest=0 -> 0x20. Never encodes mode.
+    fmt = 0x20
+    p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_MUTRIG_FORMAT_W:05X} 0x{fmt:08X} --quiet  # MUTRIG_FORMAT (type0-enable only)")
     p(f"")
     p(f"  [4] histogram: LEFT=0 RIGHT=255 BIN_WIDTH=1 KEY_LOC=channel_post")
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_LEFT_BOUND_W:05X} 0x00000000 --quiet")
@@ -1893,6 +1923,12 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
         enable_lvds_lanes(sc_tool, link, log_fh=log_fh)
 
         # Arb lane mask
+        # NOTE: arb MODE write order now safe per abb3e455; legacy ordering
+        # preserved for stability. The Opus arb fix decoupled MODE-clear from
+        # PREPARING so writing arb MODE in the configure stage (before 0x10)
+        # is architecturally correct. A future hardening pass could defer
+        # MODE writes to after PREPARING confirmation, but the current order
+        # is not a hazard.
         arb_cfg = configure_arb_lane_mask(sc_tool, link,
                                           int(row["lane_mask"], 16),
                                           log_fh=log_fh)
