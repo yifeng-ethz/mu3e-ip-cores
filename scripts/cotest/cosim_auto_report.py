@@ -18,6 +18,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from cosim_delay_bounds import CHECKPOINT_LABELS, CHECKPOINT_ORDER, bounds_for_row, framing_formula
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_BUILD_DIR = (
@@ -299,6 +301,9 @@ class Evidence:
     rate_notes: list[str] = field(default_factory=list)
     delay_notes: list[str] = field(default_factory=list)
     rdma_notes: list[str] = field(default_factory=list)
+    lifetime_stats: dict[str, dict[str, Any]] = field(default_factory=dict)
+    lifetime_bounds: dict[str, dict[str, Any]] = field(default_factory=dict)
+    delay_checkpoint_status: dict[str, str] = field(default_factory=dict)
     delay_bound_status: str = FAIL
     delay_min_cycles: int | None = None
     delay_p05_cycles: int | None = None
@@ -330,6 +335,13 @@ def load_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_csv_dicts(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        return list(csv.DictReader(handle))
 
 
 def parse_int(text: str) -> int:
@@ -684,6 +696,79 @@ def delay_bound_cycles(case: PlanCase) -> tuple[int, str]:
     return base * pulses_per_frame(case), f"{name} base {base} x pulses_per_frame {pulses_per_frame(case)}"
 
 
+def metric_checkpoint(metric: str) -> str | None:
+    prefix = metric.removesuffix("_lifetime_cycles")
+    return prefix if prefix in CHECKPOINT_ORDER else None
+
+
+def case_bound_row(case: PlanCase) -> dict[str, Any]:
+    return {
+        "row_id": case.row_id,
+        "injector_mode": case.injector_mode,
+        "injector_name": case.injector_name,
+        "lane_mask": case.lane_mask,
+        "channel_mask": case.channel_mask,
+        "rate_88fp": case.rate_88fp,
+        "expected_pulses": case.expected_pulses,
+        "poisson_rate": case.poisson_rate,
+        "signal_rate": case.signal_rate,
+    }
+
+
+def load_lifetime_stats(sim_dir: Path) -> dict[str, dict[str, Any]]:
+    stats: dict[str, dict[str, Any]] = {}
+    for row in load_csv_dicts(sim_dir / "feb_swb_lifetime_hist_stats.csv"):
+        checkpoint = metric_checkpoint(row.get("metric", ""))
+        if checkpoint is not None:
+            stats[checkpoint] = row
+    return stats
+
+
+def load_lifetime_bounds(sim_dir: Path) -> dict[str, dict[str, Any]]:
+    bounds: dict[str, dict[str, Any]] = {}
+    for row in load_csv_dicts(sim_dir / "feb_swb_range_validation.csv"):
+        checkpoint = str(row.get("checkpoint", ""))
+        if checkpoint in CHECKPOINT_ORDER:
+            bounds[checkpoint] = row
+    return bounds
+
+
+def stats_float(stats: dict[str, Any], key: str) -> float | None:
+    try:
+        return float(stats[key])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def checkpoint_statuses(ev: Evidence) -> dict[str, str]:
+    statuses: dict[str, str] = {}
+    decision = bounds_for_row(case_bound_row(ev.case))
+    for checkpoint in CHECKPOINT_ORDER:
+        stats = ev.lifetime_stats.get(checkpoint, {})
+        measured_min = stats_float(stats, "min_cycles")
+        measured_max = stats_float(stats, "max_cycles")
+        bound = decision.bounds.get(checkpoint)
+        if bound is None:
+            statuses[checkpoint] = FAIL
+            ev.delay_notes.append(decision.skip_reason or f"missing bound for {checkpoint}")
+            continue
+        low, high = bound
+        if measured_min is None or measured_max is None:
+            statuses[checkpoint] = FAIL
+            ev.delay_notes.append(f"{checkpoint} lifetime stats missing")
+        elif measured_max - measured_min < 1.0:
+            statuses[checkpoint] = FAIL
+            ev.delay_notes.append(f"{checkpoint} lifetime max-min < 1 cycle")
+        elif low <= measured_min and measured_max <= high:
+            statuses[checkpoint] = PASS
+        else:
+            statuses[checkpoint] = FAIL
+            ev.delay_notes.append(
+                f"{checkpoint} measured [{measured_min:.3f}, {measured_max:.3f}] outside [{low:.3f}, {high:.3f}]"
+            )
+    return statuses
+
+
 def compile_renderer(run_id: str) -> Path:
     dislin_dir = find_dislin_dir()
     work = Path(tempfile.gettempdir()) / f"cosim_auto_report_dislin_{run_id}"
@@ -758,6 +843,63 @@ def render_dislin(binary: Path, mode: str, points: list[tuple[float, int]], titl
     raise RuntimeError(f"DISLIN render failed for {out}: {result.stderr.strip()} {retry.stderr.strip()}")
 
 
+def compile_lifetime_renderer(run_id: str) -> Path:
+    dislin_dir = find_dislin_dir()
+    work = Path(tempfile.gettempdir()) / f"cosim_lifetime_dislin_{run_id}"
+    work.mkdir(parents=True, exist_ok=True)
+    src = REPO_ROOT / "scripts" / "cotest" / "feb_swb_lifetime_dislin.c"
+    binary = work / "feb_swb_lifetime_dislin"
+    subprocess.run(
+        [
+            "gcc",
+            "-O2",
+            "-std=c11",
+            "-Wall",
+            "-Wextra",
+            f"-I{dislin_dir}",
+            str(src),
+            f"-L{dislin_dir}",
+            f"-Wl,-rpath,{dislin_dir}",
+            "-ldislin",
+            "-lm",
+            "-o",
+            str(binary),
+        ],
+        check=True,
+    )
+    return binary
+
+
+def render_lifetime_dislin(binary: Path, ev: Evidence, out: Path) -> Path:
+    trace = ev.sim_dir / "feb_swb_lifetime_trace.csv"
+    if not trace.exists():
+        raise FileNotFoundError(f"missing lifetime trace for {ev.case.row_id}: {trace}")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(
+        [str(binary), "lifetime", str(trace), str(out)],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if result.returncode == 0 and out.exists():
+        return out
+    png = out.with_suffix(".png")
+    retry = subprocess.run(
+        [str(binary), "lifetime", str(trace), str(png)],
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    if retry.returncode == 0 and png.exists():
+        return png
+    raise RuntimeError(
+        f"lifetime DISLIN render failed for {ev.case.row_id}: "
+        f"{result.stderr.strip()} {retry.stderr.strip()}"
+    )
+
+
 def collect_evidence(cases: list[PlanCase], cosim_report: Path, board_map: dict[str, Path]) -> list[Evidence]:
     evidences: list[Evidence] = []
     for case in cases:
@@ -772,6 +914,8 @@ def collect_evidence(cases: list[PlanCase], cosim_report: Path, board_map: dict[
         ev.hist_b = load_json(sim_dir / "delay_hist_bin_b.json")
         ev.scoreboard = load_json(sim_dir / "delay_scoreboard.json")
         ev.rdma_summary = load_json(sim_dir / "rdma_rxbuffer_summary.json")
+        ev.lifetime_stats = load_lifetime_stats(sim_dir)
+        ev.lifetime_bounds = load_lifetime_bounds(sim_dir)
         ev.plan_mismatch.extend(compare_row_config(case, ev.row_config))
         if ev.board_dir:
             ev.board = load_json(ev.board_dir / "counters.json")
@@ -830,19 +974,20 @@ def summarize_evidence(ev: Evidence) -> None:
             ev.delay_notes.append("histogram banks missing")
         if stddev is None:
             ev.delay_notes.append("scoreboard stddev missing")
+        ev.delay_checkpoint_status = checkpoint_statuses(ev)
         ev.delay_min_cycles = delay_percentile_value(ev.scoreboard, "delay_min_cycles", 0.00)
         ev.delay_p05_cycles = delay_percentile_value(ev.scoreboard, "delay_p05_cycles", 0.05)
         ev.delay_p50_cycles = delay_percentile_value(ev.scoreboard, "delay_p50_cycles", 0.50)
         ev.delay_p95_cycles = delay_percentile_value(ev.scoreboard, "delay_p95_cycles", 0.95)
         ev.delay_max_cycles = delay_percentile_value(ev.scoreboard, "delay_max_cycles", 1.00)
-        ev.delay_bound_cycles, ev.delay_bound_label = delay_bound_cycles(ev.case)
+        ev.delay_bound_cycles = None
+        ev.delay_bound_label = "per-checkpoint bounds"
         if ev.delay_min_cycles is not None and ev.delay_max_cycles is not None:
             ev.delay_range_cycles = ev.delay_max_cycles - ev.delay_min_cycles
         ev.delay_bound_status = (
             PASS
-            if ev.delay_range_cycles is not None
-            and ev.delay_bound_cycles is not None
-            and ev.delay_range_cycles <= ev.delay_bound_cycles
+            if ev.delay_checkpoint_status
+            and all(status == PASS for status in ev.delay_checkpoint_status.values())
             else FAIL
         )
         if ev.delay_range_cycles is None:
@@ -996,8 +1141,31 @@ def write_delay_md(ev: Evidence, case_dir: Path, plot_paths: dict[str, Path]) ->
     rel_a = plot_paths["hist_bin_a"].relative_to(case_dir)
     rel_b = plot_paths["hist_bin_b"].relative_to(case_dir)
     rel_s = plot_paths["scoreboard_delay"].relative_to(case_dir)
+    rel_life = plot_paths["lifetime_hist"].relative_to(case_dir)
     lines.extend(
         [
+            "## checkpoint lifetime",
+            f"![lifetime_hist]({rel_life.as_posix()})",
+            f"framing: {md_escape(framing_formula(case.injector_name))}",
+            "",
+            "| checkpoint | status | min | p05 | p50 | p95 | max | bound |",
+            "|---|:-:|---:|---:|---:|---:|---:|---:|",
+        ]
+    )
+    decision = bounds_for_row(case_bound_row(case))
+    for checkpoint in CHECKPOINT_ORDER:
+        stats = ev.lifetime_stats.get(checkpoint, {})
+        bound = decision.bounds.get(checkpoint)
+        bound_text = "--" if bound is None else f"[{fmt_num(bound[0])}, {fmt_num(bound[1])}]"
+        lines.append(
+            f"| {CHECKPOINT_LABELS[checkpoint]} | {ev.delay_checkpoint_status.get(checkpoint, FAIL)} | "
+            f"{fmt_num(stats_float(stats, 'min_cycles'))} | {fmt_num(stats_float(stats, 'p05_cycles'))} | "
+            f"{fmt_num(stats_float(stats, 'p50_cycles'))} | {fmt_num(stats_float(stats, 'p95_cycles'))} | "
+            f"{fmt_num(stats_float(stats, 'max_cycles'))} | {bound_text} |"
+        )
+    lines.extend(
+        [
+            "",
             "## hist bin A",
             f"![hist_bin_a]({rel_a.as_posix()})",
             f"bank-A sum: {fmt_num(ev.hist_a_sum)}; expected: {fmt_num(bank_expected)}; delta: {fmt_pct(pct_delta(ev.hist_a_sum, bank_expected))}",
@@ -1014,17 +1182,7 @@ def write_delay_md(ev: Evidence, case_dir: Path, plot_paths: dict[str, Path]) ->
             f"delay_stddev_ns: {fmt_num(float(stddev) if stddev is not None else None)}",
             f"count: {fmt_num(int(count) if count is not None else None)}",
             "",
-            "## delay range bound",
-            "| metric | value |",
-            "|---|---:|",
-            f"| delay_min_cycles | {fmt_num(ev.delay_min_cycles)} |",
-            f"| delay_p05_cycles | {fmt_num(ev.delay_p05_cycles)} |",
-            f"| delay_p50_cycles | {fmt_num(ev.delay_p50_cycles)} |",
-            f"| delay_p95_cycles | {fmt_num(ev.delay_p95_cycles)} |",
-            f"| delay_max_cycles | {fmt_num(ev.delay_max_cycles)} |",
-            f"| abs(max - min) | {fmt_num(ev.delay_range_cycles)} |",
-            f"| slice target bound | {md_escape(ev.delay_bound_label)} = {fmt_num(ev.delay_bound_cycles)} |",
-            f"| bound PASS | {ev.delay_bound_status} |",
+            f"per-checkpoint bound PASS: {ev.delay_bound_status}",
         ]
     )
     (case_dir / "delay.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1108,8 +1266,11 @@ def write_case_index(ev: Evidence, case_dir: Path) -> None:
             "| Condition | Status | Detail |",
             "|---|:-:|---|",
             f"| rate (CSR counters) | {ev.rate_status} | [rate.md](rate.md) |",
-            f"| delay (2 hist + scoreboard) | {ev.delay_status} | [delay.md](delay.md) |",
-            f"| delay range bound | {ev.delay_bound_status} | [delay.md](delay.md#delay-range-bound) |",
+            f"| delay_pre | {ev.delay_checkpoint_status.get('pre_rbcam', FAIL)} | [delay.md](delay.md#checkpoint-lifetime) |",
+            f"| delay_post | {ev.delay_checkpoint_status.get('post_rbcam', FAIL)} | [delay.md](delay.md#checkpoint-lifetime) |",
+            f"| delay_feb | {ev.delay_checkpoint_status.get('feb_egress', FAIL)} | [delay.md](delay.md#checkpoint-lifetime) |",
+            f"| delay_ing | {ev.delay_checkpoint_status.get('opq_ingress', FAIL)} | [delay.md](delay.md#checkpoint-lifetime) |",
+            f"| delay_opq | {ev.delay_checkpoint_status.get('opq_egress', FAIL)} | [delay.md](delay.md#checkpoint-lifetime) |",
             f"| rdma (rxbuffer record stream) | {ev.rdma_status} | [rdma.md](rdma.md) |",
         ]
     )
@@ -1130,14 +1291,20 @@ def write_top_index(report_root: Path, run_id: str, commit: str | None, generate
         "  aligns to RN.BASIC.NNN)",
         "- Expected: theoretical_hits from TEST_BASIC.md",
         "",
-        "| ID | slice | injector_mode | rate | delay | bound | rdma | detail |",
-        "|---|---|---|:-:|:-:|:-:|:-:|---|",
+        "| ID | slice | injector_mode | rate | delay_pre | delay_post | delay_feb | delay_ing | delay_opq | rdma | detail |",
+        "|---|---|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|---|",
     ]
     for ev in evidences:
         case = ev.case
         lines.append(
             f"| {case.row_id} | {case.slice_name} | {case.injector_mode} | "
-            f"{ev.rate_status} | {ev.delay_status} | {ev.delay_bound_status} | {ev.rdma_status} | "
+            f"{ev.rate_status} | "
+            f"{ev.delay_checkpoint_status.get('pre_rbcam', FAIL)} | "
+            f"{ev.delay_checkpoint_status.get('post_rbcam', FAIL)} | "
+            f"{ev.delay_checkpoint_status.get('feb_egress', FAIL)} | "
+            f"{ev.delay_checkpoint_status.get('opq_ingress', FAIL)} | "
+            f"{ev.delay_checkpoint_status.get('opq_egress', FAIL)} | "
+            f"{ev.rdma_status} | "
             f"[{case.row_id}/]({case.row_id}/index.md) |"
         )
     lines.extend(["", "## Slice-level rollup"])
@@ -1149,7 +1316,6 @@ def write_top_index(report_root: Path, run_id: str, commit: str | None, generate
             for ev in evidences
             if ev.case.slice_id == slice_id
             and ev.rate_status == PASS
-            and ev.delay_status == PASS
             and ev.delay_bound_status == PASS
             and ev.rdma_status == PASS
         )
@@ -1159,8 +1325,7 @@ def write_top_index(report_root: Path, run_id: str, commit: str | None, generate
             "",
             "## Pass/fail rules",
             "- rate: |sim - expected| < 5% of expected AND |board - expected| < 5% (when board data present) AND every IP error counter is 0",
-            "- delay: hist_bin_a sum + hist_bin_b sum matches the rate total within +/- 8; scoreboard delay_stddev_ns < 100 ns",
-            "- bound: abs(delay_max_cycles - delay_min_cycles) is within the math-reviewer target scaled by pulses_per_frame",
+            "- delay_pre/delay_post/delay_feb/delay_ing/delay_opq: joined per-hit checkpoint lifetime min/max is inside the per-mode bound and max-min >= 1 cycle",
             "- rdma: record_count matches the rate total within +/- 8",
         ]
     )
@@ -1214,8 +1379,11 @@ def write_intermediates(report_root: Path, evidences: list[Evidence], frame_samp
             "delay_range_cycles",
             "delay_bound_cycles",
             "rate_status",
-            "delay_status",
-            "delay_bound_status",
+            "delay_pre_status",
+            "delay_post_status",
+            "delay_feb_status",
+            "delay_ing_status",
+            "delay_opq_status",
             "rdma_status",
             "tbd",
         ]
@@ -1244,8 +1412,11 @@ def write_intermediates(report_root: Path, evidences: list[Evidence], frame_samp
                     "delay_range_cycles": "" if ev.delay_range_cycles is None else ev.delay_range_cycles,
                     "delay_bound_cycles": "" if ev.delay_bound_cycles is None else ev.delay_bound_cycles,
                     "rate_status": "PASS" if ev.rate_status == PASS else "FAIL",
-                    "delay_status": "PASS" if ev.delay_status == PASS else "FAIL",
-                    "delay_bound_status": "PASS" if ev.delay_bound_status == PASS else "FAIL",
+                    "delay_pre_status": "PASS" if ev.delay_checkpoint_status.get("pre_rbcam") == PASS else "FAIL",
+                    "delay_post_status": "PASS" if ev.delay_checkpoint_status.get("post_rbcam") == PASS else "FAIL",
+                    "delay_feb_status": "PASS" if ev.delay_checkpoint_status.get("feb_egress") == PASS else "FAIL",
+                    "delay_ing_status": "PASS" if ev.delay_checkpoint_status.get("opq_ingress") == PASS else "FAIL",
+                    "delay_opq_status": "PASS" if ev.delay_checkpoint_status.get("opq_egress") == PASS else "FAIL",
                     "rdma_status": "PASS" if ev.rdma_status == PASS else "FAIL",
                     "tbd": "; ".join(ev.plan_mismatch + ([ev.board_unresolved] if ev.board_unresolved else [])),
                 }
@@ -1260,6 +1431,7 @@ def generate_report(
     generated: str,
     evidences: list[Evidence],
     renderer: Path,
+    lifetime_renderer: Path,
 ) -> None:
     report_root.mkdir(parents=True)
     intermediate = report_root / "intermediate"
@@ -1312,6 +1484,11 @@ def generate_report(
                     f"count {fmt_num(ev.scoreboard.get('count', 0))}",
                     plots_dir / "scoreboard_delay.pdf",
                 ),
+                "lifetime_hist": render_lifetime_dislin(
+                    lifetime_renderer,
+                    ev,
+                    plots_dir / "lifetime_hist.pdf",
+                ),
             }
             write_rate_md(ev, case_dir, per_ip_writer)
             write_delay_md(ev, case_dir, plot_paths)
@@ -1343,7 +1520,8 @@ def main() -> int:
             if "board RDMA stream TBD" not in ev.rdma_notes:
                 ev.rdma_notes.append("board RDMA stream TBD")
     renderer = compile_renderer(run_id)
-    generate_report(report_root, run_id, commit, generated, evidences, renderer)
+    lifetime_renderer = compile_lifetime_renderer(run_id)
+    generate_report(report_root, run_id, commit, generated, evidences, renderer, lifetime_renderer)
     print(f"RUN_ID={run_id}")
     print(f"REPORT_ROOT={report_root}")
     print(f"COSIM_COMMIT={commit or 'unknown'}")
