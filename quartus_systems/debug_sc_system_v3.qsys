@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="3.0.0.0511"
-   description=""
+   version="3.1.0.0512"
+   description="Drops dead legacy charge_injection_pulser_0 and pulse_out_conduit export; SC slot 4 is free."
    tags="INTERNAL_COMPONENT=false"
    categories="" />
  <parameter name="bonusData"><![CDATA[bonusData 
@@ -25,11 +25,11 @@
          type = "int";
       }
    }
-   element pll_156t40
+   element firefly_xcvr_ctrl_0
    {
       datum _sortIndex
       {
-         value = "2";
+         value = "13";
          type = "int";
       }
    }
@@ -38,86 +38,6 @@
       datum _sortIndex
       {
          value = "3";
-         type = "int";
-      }
-   }
-   element mm_bridge
-   {
-      datum _sortIndex
-      {
-         value = "4";
-         type = "int";
-      }
-   }
-   element sc_hub_cmd_pipe
-   {
-      datum _sortIndex
-      {
-         value = "5";
-         type = "int";
-      }
-   }
-   element sc_hub
-   {
-      datum _sortIndex
-      {
-         value = "6";
-         type = "int";
-      }
-   }
-   element scratch_pad_ram
-   {
-      datum _sortIndex
-      {
-         value = "7";
-         type = "int";
-      }
-   }
-   element mutrig_cfg_ctrl_0
-   {
-      datum _sortIndex
-      {
-         value = "8";
-         type = "int";
-      }
-   }
-   element onewire_master_controller_0
-   {
-      datum _sortIndex
-      {
-         value = "9";
-         type = "int";
-      }
-   }
-   element onewire_master_0
-   {
-      datum _sortIndex
-      {
-         value = "10";
-         type = "int";
-      }
-   }
-   element on_die_temp_sense_ctrl
-   {
-      datum _sortIndex
-      {
-         value = "11";
-         type = "int";
-      }
-   }
-   element on_die_temp_sense
-   {
-      datum _sortIndex
-      {
-         value = "12";
-         type = "int";
-      }
-   }
-   element firefly_xcvr_ctrl_0
-   {
-      datum _sortIndex
-      {
-         value = "13";
          type = "int";
       }
    }
@@ -145,15 +65,88 @@
          type = "int";
       }
    }
-   element charge_injection_pulser_0
+   element mm_bridge
    {
       datum _sortIndex
       {
-         value = "17";
+         value = "4";
          type = "int";
       }
    }
-}]]></parameter>
+   element mutrig_cfg_ctrl_0
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element on_die_temp_sense
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+   }
+   element on_die_temp_sense_ctrl
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+   }
+   element onewire_master_0
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element onewire_master_controller_0
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element pll_156t40
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element sc_hub
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element sc_hub_cmd_pipe
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element scratch_pad_ram
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+}
+]]></parameter>
  <parameter name="clockCrossingAdapter" value="AUTO" />
  <parameter name="device" value="5AGXBA7D4F31C5" />
  <parameter name="deviceFamily" value="Arria V" />
@@ -174,7 +167,6 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="avmm_port" internal="mm_bridge.m0" type="avalon" dir="start" />
- <interface name="upload_avmm_port" internal="upload_mm_bridge.m0" type="avalon" dir="start" />
  <interface name="clk125_in_clk" internal="clk125.in_clk" type="clock" dir="end" />
  <interface name="clk156_in_clk" internal="clk156.clk_in" type="clock" dir="end" />
  <interface
@@ -188,15 +180,15 @@
    type="avalon_streaming"
    dir="start" />
  <interface
-   name="max10_link"
-   internal="max10_prog_avmm_0.max10_link"
-   type="conduit"
-   dir="end" />
- <interface
    name="legacy_firefly_mon"
    internal="legacy_firefly_bridge.m0"
    type="avalon"
    dir="start" />
+ <interface
+   name="max10_link"
+   internal="max10_prog_avmm_0.max10_link"
+   type="conduit"
+   dir="end" />
  <interface
    name="max10_link_clock"
    internal="max10_link_clk_bridge.in_clk"
@@ -205,11 +197,6 @@
  <interface
    name="mutrig_cfg_ctrl_0_spi_export2top"
    internal="mutrig_cfg_ctrl_0.spi_export2top"
-   type="conduit"
-   dir="end" />
- <interface
-   name="pulse_out_conduit"
-   internal="charge_injection_pulser_0.pulse_out_conduit"
    type="conduit"
    dir="end" />
  <interface
@@ -232,16 +219,11 @@
    internal="firefly_xcvr_ctrl_0.to_firefly_ucc8"
    type="conduit"
    dir="end" />
- <module
-   name="charge_injection_pulser_0"
-   kind="charge_injection_pulser"
-   version="4.0.5"
-   enabled="1">
-  <parameter name="CLK_FREQUENCY" value="125000000" />
-  <parameter name="DEBUG" value="1" />
-  <parameter name="DEF_PULSE_FREQ" value="100000" />
-  <parameter name="DEF_PULSE_WIDTH" value="20" />
- </module>
+ <interface
+   name="upload_avmm_port"
+   internal="upload_mm_bridge.m0"
+   type="avalon"
+   dir="start" />
  <module name="clk125" kind="altera_clock_bridge" version="18.1" enabled="1">
   <parameter name="DERIVED_CLOCK_RATE" value="0" />
   <parameter name="EXPLICIT_CLOCK_RATE" value="125000000" />
@@ -253,11 +235,10 @@
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
  </module>
- <module name="pll_reset_inactive" kind="inactive_reset_source" version="26.0.0.0425" enabled="1" />
  <module
    name="firefly_xcvr_ctrl_0"
    kind="firefly_xcvr_ctrl"
-   version="26.0.330"
+   version="26.2.423"
    enabled="1">
   <parameter name="AVS_FIREFLY_ADDR_W" value="5" />
   <parameter name="DEBUG" value="1" />
@@ -340,45 +321,9 @@
   <parameter name="USE_RESPONSE" value="1" />
  </module>
  <module
-   name="upload_mm_bridge"
-   kind="altera_avalon_mm_bridge"
-   version="18.1"
-   enabled="1">
-  <parameter name="ADDRESS_UNITS" value="WORDS" />
-  <parameter name="ADDRESS_WIDTH" value="5" />
-  <parameter name="DATA_WIDTH" value="32" />
-  <parameter name="LINEWRAPBURSTS" value="0" />
-  <parameter name="MAX_BURST_SIZE" value="1" />
-  <parameter name="MAX_PENDING_RESPONSES" value="4" />
-  <parameter name="PIPELINE_COMMAND" value="0" />
-  <parameter name="PIPELINE_RESPONSE" value="1" />
-  <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
-  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
-  <parameter name="USE_RESPONSE" value="1" />
- </module>
- <module
-   name="sc_hub_cmd_pipe"
-   kind="altera_avalon_mm_bridge"
-   version="18.1"
-   enabled="1">
-  <parameter name="ADDRESS_UNITS" value="WORDS" />
- <parameter name="ADDRESS_WIDTH" value="18" />
- <parameter name="DATA_WIDTH" value="32" />
- <parameter name="LINEWRAPBURSTS" value="0" />
- <parameter name="MAX_BURST_SIZE" value="1" />
- <parameter name="MAX_PENDING_RESPONSES" value="1" />
-  <parameter name="PIPELINE_COMMAND" value="0" />
- <parameter name="PIPELINE_RESPONSE" value="0" />
-  <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
-  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
-  <parameter name="USE_RESPONSE" value="1" />
- </module>
- <module
    name="mutrig_cfg_ctrl_0"
    kind="mutrig_cfg_ctrl"
-   version="24.0.817"
+   version="24.1.423"
    enabled="1">
   <parameter name="CLK_FREQUENCY" value="125000000" />
   <parameter name="CLK_FREQUENCY_SPI" value="40000000" />
@@ -418,7 +363,7 @@
  <module
    name="onewire_master_0"
    kind="onewire_master"
-   version="24.0.911.1"
+   version="26.2.1.428"
    enabled="1">
   <parameter name="AVMM_DATA_WIDTH" value="32" />
   <parameter name="AVST_CHANNEL_WIDTH" value="3" />
@@ -447,16 +392,24 @@
  <module
    name="onewire_master_controller_0"
    kind="onewire_master_controller"
-   version="24.0.918"
+   version="26.2.1.428"
    enabled="1">
   <parameter name="AUTO_COMPLETE_INTERRUPTS_USED" value="1" />
   <parameter name="AVMM_DATA_WIDTH" value="32" />
   <parameter name="AVST_CHANNEL_WIDTH" value="3" />
   <parameter name="AVST_DATA_WIDTH" value="8" />
+  <parameter name="BUILD" value="428" />
   <parameter name="DEBUG_LV" value="0" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1331121475" />
   <parameter name="N_DQ_LINES" value="6" />
   <parameter name="REF_CLOCK_RATE" value="125000000" />
   <parameter name="SENSOR_TYPE" value="DS18B20" />
+  <parameter name="VERSION_DATE" value="20260428" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="2" />
+  <parameter name="VERSION_PATCH" value="1" />
  </module>
  <module name="pll_156t40" kind="altera_pll" version="18.1" enabled="1">
   <parameter name="debug_print_output" value="false" />
@@ -661,7 +614,12 @@
   <parameter name="gui_switchover_mode">Automatic Switchover</parameter>
   <parameter name="gui_use_locked" value="true" />
  </module>
- <module name="sc_hub" kind="sc_hub_v2" version="26.6.9.414" enabled="1">
+ <module
+   name="pll_reset_inactive"
+   kind="inactive_reset_source"
+   version="26.0.0.425"
+   enabled="1" />
+ <module name="sc_hub" kind="sc_hub_v2" version="26.6.10.423" enabled="1">
   <parameter name="ADDR_WIDTH" value="18" />
   <parameter name="ATOMIC_ENABLE" value="true" />
   <parameter name="AXI4_ID_WIDTH" value="4" />
@@ -700,12 +658,30 @@
   <parameter name="WR_TIMEOUT_CYCLES" value="1024" />
  </module>
  <module
+   name="sc_hub_cmd_pipe"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="18" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="18" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
+  <parameter name="USE_RESPONSE" value="1" />
+ </module>
+ <module
    name="scratch_pad_ram"
    kind="altera_avalon_onchip_memory2"
    version="18.1"
    enabled="1">
   <parameter name="allowInSystemMemoryContentEditor" value="true" />
-  <parameter name="autoInitializationFileName">debug_sc_system_v3_scratch_pad_ram</parameter>
+  <parameter name="autoInitializationFileName">$${FILENAME}_scratch_pad_ram</parameter>
   <parameter name="blockType" value="M10K" />
   <parameter name="copyInitFile" value="false" />
   <parameter name="dataWidth" value="32" />
@@ -730,6 +706,24 @@
   <parameter name="useNonDefaultInitFile" value="false" />
   <parameter name="useShallowMemBlocks" value="false" />
   <parameter name="writable" value="true" />
+ </module>
+ <module
+   name="upload_mm_bridge"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="4" />
+  <parameter name="PIPELINE_COMMAND" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="1" />
  </module>
  <connection
    kind="avalon"
@@ -763,6 +757,15 @@
    version="18.1"
    start="onewire_master_controller_0.ctrl"
    end="onewire_master_0.ctrl">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="sc_hub.hub"
+   end="sc_hub_cmd_pipe.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
@@ -807,15 +810,6 @@
    kind="avalon"
    version="18.1"
    start="sc_hub_cmd_pipe.m0"
-   end="charge_injection_pulser_0.csr_avmm">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00013000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="sc_hub_cmd_pipe.m0"
    end="firefly_xcvr_ctrl_0.firefly">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00014000" />
@@ -839,7 +833,11 @@
   <parameter name="baseAddress" value="0x00030000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="avalon" version="18.1" start="sc_hub_cmd_pipe.m0" end="mm_bridge.s0">
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="sc_hub_cmd_pipe.m0"
+   end="mm_bridge.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00020000" />
   <parameter name="defaultConnection" value="false" />
@@ -851,15 +849,6 @@
    end="scratch_pad_ram.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="sc_hub.hub"
-   end="sc_hub_cmd_pipe.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -905,15 +894,6 @@
    end="sc_hub.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0400" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="jtag_master.master"
-   end="charge_injection_pulser_0.csr_avmm">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x04c4" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -971,9 +951,41 @@
    version="18.1"
    start="onewire_master_controller_0.tx"
    end="onewire_master_0.tx" />
- <connection kind="clock" version="18.1" start="clk125.out_clk" end="jtag_master.clk" />
- <connection kind="clock" version="18.1" start="clk125.out_clk" end="mm_bridge.clk" />
- <connection kind="clock" version="18.1" start="clk125.out_clk" end="sc_hub_cmd_pipe.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk156.clk"
+   end="pll_reset_inactive.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk156.clk"
+   end="pll_156t40.refclk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk125.out_clk"
+   end="jtag_master.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk125.out_clk"
+   end="mm_bridge.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk125.out_clk"
+   end="sc_hub_cmd_pipe.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk125.out_clk"
+   end="legacy_firefly_bridge.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk125.out_clk"
+   end="upload_mm_bridge.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -999,42 +1011,21 @@
    version="18.1"
    start="clk125.out_clk"
    end="max10_prog_avmm_0.csr_clock" />
- <connection kind="clock" version="18.1" start="clk125.out_clk" end="sc_hub.hub_clock" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="clk156.clk"
-   end="pll_156t40.refclk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="clk156.clk"
-   end="pll_reset_inactive.clk" />
  <connection
    kind="clock"
    version="18.1"
    start="clk125.out_clk"
-   end="firefly_xcvr_ctrl_0.system_clock" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="clk125.out_clk"
-   end="legacy_firefly_bridge.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="clk125.out_clk"
-   end="upload_mm_bridge.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="clk125.out_clk"
-   end="charge_injection_pulser_0.clock_interface" />
+   end="sc_hub.hub_clock" />
  <connection
    kind="clock"
    version="18.1"
    start="max10_link_clk_bridge.out_clk"
    end="max10_prog_avmm_0.link_clock" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk125.out_clk"
+   end="firefly_xcvr_ctrl_0.system_clock" />
  <connection
    kind="clock"
    version="18.1"
@@ -1143,8 +1134,13 @@
  <connection
    kind="reset"
    version="18.1"
-   start="pll_reset_inactive.reset"
-   end="pll_156t40.reset" />
+   start="clk156.clk_reset"
+   end="legacy_firefly_bridge.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="clk156.clk_reset"
+   end="upload_mm_bridge.reset" />
  <connection
    kind="reset"
    version="18.1"
@@ -1160,16 +1156,6 @@
    version="18.1"
    start="clk156.clk_reset"
    end="firefly_xcvr_ctrl_0.system_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="clk156.clk_reset"
-   end="legacy_firefly_bridge.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="clk156.clk_reset"
-   end="upload_mm_bridge.reset" />
  <connection
    kind="reset"
    version="18.1"
@@ -1209,11 +1195,6 @@
    kind="reset"
    version="18.1"
    start="jtag_master.master_reset"
-   end="charge_injection_pulser_0.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="jtag_master.master_reset"
    end="mutrig_cfg_ctrl_0.spi_reset" />
  <connection
    kind="reset"
@@ -1225,6 +1206,11 @@
    version="18.1"
    start="jtag_master.master_reset"
    end="on_die_temp_sense_ctrl.system_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="pll_reset_inactive.reset"
+   end="pll_156t40.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="AUTO" />
  <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.enableInstrumentation" value="FALSE" />
