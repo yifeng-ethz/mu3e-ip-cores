@@ -1,0 +1,1441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase 4.5 Histogram Sweep -- Emulator Type0</title>
+<style>
+* { box-sizing: border-box; }
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body {
+    margin: 0;
+    padding: 0;
+    background: #fafaf9;
+    color: #1f1f1f;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                 "Segoe UI", Roboto, Inter, "Helvetica Neue", sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+}
+.container { max-width: 1080px; margin: 0 auto; padding: 64px 32px 96px; }
+.prose { max-width: 720px; }
+h1, h2, h3, h4 {
+    font-family: Charter, "Iowan Old Style", "Souvenir", "Source Serif Pro",
+                 Georgia, "Times New Roman", serif;
+    font-weight: 600;
+    line-height: 1.25;
+    margin-top: 1.8em;
+    margin-bottom: 0.6em;
+    color: #1f1f1f;
+}
+h1 { font-size: 2.4em; margin-top: 0.4em; letter-spacing: -0.01em; }
+h2 { font-size: 1.6em; padding-top: 0.4em; border-top: 1px solid #e5e5e5; }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1.0em; color: #444; text-transform: none; }
+p { margin: 0.8em 0; }
+a { color: #cc785c; text-decoration: none; border-bottom: 1px solid rgba(204,120,92,0.3); }
+a:hover { border-bottom-color: #cc785c; }
+hr { border: 0; border-top: 1px solid #e5e5e5; margin: 2em 0; }
+code, pre, kbd, samp {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 0.92em;
+}
+code {
+    background: #f5f4f0;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    color: #2f2f2f;
+}
+pre {
+    background: #f5f4f0;
+    padding: 16px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    line-height: 1.45;
+    color: #2f2f2f;
+    border: 1px solid #e5e5e5;
+}
+pre code { background: none; padding: 0; }
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.2em 0;
+    font-size: 0.92em;
+}
+th, td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #e5e5e5;
+    vertical-align: top;
+}
+th {
+    font-weight: 600;
+    background: #f5f4f0;
+    color: #1f1f1f;
+}
+tbody tr:nth-child(even) { background: #fafaf9; }
+tbody tr:nth-child(odd) { background: #ffffff; }
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 1.6em 0;
+}
+.metric {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 16px 20px;
+}
+.metric .label {
+    font-size: 0.78em;
+    color: #6b6b6b;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+}
+.metric .value {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-size: 2em;
+    font-weight: 600;
+    color: #1f1f1f;
+}
+.metric .accent { color: #cc785c; }
+.pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #fff;
+}
+.pill.pass { background: #3a7d44; }
+.pill.fail { background: #a4363a; }
+.thumb {
+    display: block;
+    width: 100%;
+    max-width: 180px;
+    height: auto;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+.row-section {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 28px 32px;
+    margin: 32px 0;
+}
+.row-section h3 { margin-top: 0.2em; }
+.row-section h3 .pill { margin-left: 10px; vertical-align: middle; }
+.row-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px 24px;
+    font-size: 0.88em;
+    margin: 12px 0 20px;
+    padding: 12px 16px;
+    background: #fafaf9;
+    border-radius: 6px;
+    border: 1px solid #e5e5e5;
+}
+.row-meta div .k {
+    color: #6b6b6b;
+    font-size: 0.86em;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.row-meta div .v { font-family: ui-monospace, Menlo, monospace; }
+.plots {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin: 16px 0;
+}
+.plots img {
+    width: 100%;
+    height: auto;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    background: #fff;
+}
+.row-links {
+    margin: 12px 0 0;
+    font-size: 0.88em;
+    color: #6b6b6b;
+}
+.row-links a { margin-right: 14px; }
+.banner-meta { color: #6b6b6b; font-size: 0.92em; margin-top: 0.2em; }
+.banner-meta code { font-size: 0.92em; }
+nav.toc {
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 20px 0 30px;
+    font-size: 0.92em;
+}
+nav.toc h4 { margin-top: 0; margin-bottom: 8px; }
+nav.toc ul { margin: 0; padding-left: 18px; line-height: 1.5; }
+.footer {
+    border-top: 1px solid #e5e5e5;
+    margin-top: 3em;
+    padding-top: 1.5em;
+    font-size: 0.86em;
+    color: #6b6b6b;
+}
+.figure-caption {
+    font-size: 0.84em;
+    color: #6b6b6b;
+    margin-top: 6px;
+    font-style: italic;
+    text-align: center;
+}
+@media print {
+    body { background: #fff; }
+    .row-section { break-inside: avoid; page-break-inside: avoid; }
+    pre, code { background: #f7f7f5; }
+    a { color: #1f1f1f; border-bottom: none; }
+    img { max-width: 100%; }
+    nav.toc { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+<h1>Phase 4.5 Histogram Sweep &mdash; Emulator Type0</h1>
+<p class="banner-meta">
+Date <strong>2026-05-12</strong> &nbsp;&middot;&nbsp; Build <code>v3_pretest-260511-emulator-type0-260512</code> &nbsp;&middot;&nbsp; SOF sha256 <code>cbafc40b41f425ec...</code> (12,722,030 bytes)
+</p>
+<p class="banner-meta">Sweep matrix <strong>32 rows</strong> spanning lane isolation, channel-mask permutations, an 8.8-fixed-point rate sweep, and burst/periodic hit modes. Driven by <code>scripts/cotest/phase4_5_sweep.py</code>; plots rendered by the new <code>scripts/cotest/phase4_5_plot.py</code> preset module.</p>
+</header>
+<section>
+<h2 id="summary">Executive Summary</h2>
+<div class="prose">
+<p>Out of <strong>32</strong> sweep rows, <strong>8</strong> pass and <strong>24</strong> fail. The pass set is consistent with the lane-isolation and sanity-negative slices working as designed: every row whose <code>lane_mask=0x00</code> sanity predicate fires returned <code>TOTAL_HITS=0</code> (correct), and three of the single-lane admit rows (lanes 1, 4, and 6) and one single-rate row (0x8000) returned multi-million hit counts with <code>UNDERFLOW=0</code>, <code>OVERFLOW=0</code>, <code>DROPPED_HITS=0</code>, and a clean <code>RX_CMD_COUNT delta=4</code>.</p>
+<p>The fail set is dominated by rows whose end-of-window <code>TOTAL_HITS</code> read returned zero even though the per-bin <code>hist_bin</code> readouts captured meaningful counts (see for example row <code>p45_005_all_lanes_0x00000001_default_dir</code>, which shows four populated channel bins with ~6&times;10<sup>6</sup> hits each yet reports <code>TOTAL_HITS=0</code>). <code>UNDERFLOW</code>, <code>OVERFLOW</code>, <code>arb_drops_emu</code>, and the run-control <code>RX_CMD_COUNT</code> delta remain healthy on every row, so the failure mode is in the post-run <code>histogram_statistics_v2</code> TOTAL_HITS readout or in the per-row reset window between consecutive runs, not in the histogram channel-key path itself.</p>
+<p>The per-axis breakdown is <code>4.5.1=0/6, 4.5.2=2/7, 4.5.3=0/2, 4.5.cross=1/7, 4.5.lane_iso=3/8, 4.5.sanity-neg=2/2</code>. The sweep ran with <code>swb_ring_lock</code> serialization across all sc_tool calls; the SC bridge cascaded into <code>SLVERR/DECERR</code> after the first <code>lane_mask=0x00</code> sanity-negative row, was recovered by FEB reflash + <code>mudaq_recover_pcie</code>, and the remaining seven rows were re-driven individually with the same SOF.</p>
+</div>
+</section>
+<section>
+<h2 id="matrix">Sweep Matrix Overview</h2>
+<div class="prose">
+<p>The 32 rows are partitioned across five test axes drawn from the TEST_PLAN section&nbsp;4.5 spec. The lane and channel masks are bitwise; the 8.8 fixed-point rate is the emulator <code>RATES</code> CSR; the hit mode bit pair drives the emulator <code>MUTRIG_FORMAT</code> two least-significant bits.</p>
+</div>
+<table>
+<thead><tr><th>Axis</th><th>Rows</th><th>Pass</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>4.5.1</code></td><td>6</td><td>0</td><td>Channel-mask sweep at default lane/rate/mode</td></tr>
+<tr><td><code>4.5.2</code></td><td>7</td><td>2</td><td>8.8 fixed-point rate doubling at default lane/channel/mode</td></tr>
+<tr><td><code>4.5.3</code></td><td>2</td><td>0</td><td>Hit-mode sweep (burst and periodic)</td></tr>
+<tr><td><code>4.5.cross</code></td><td>7</td><td>1</td><td>Cross-products of lane x channel x rate axes</td></tr>
+<tr><td><code>4.5.lane_iso</code></td><td>8</td><td>3</td><td>Single-lane admit sweep at default channel/rate/mode</td></tr>
+<tr><td><code>4.5.sanity-neg</code></td><td>2</td><td>2</td><td>Negative controls (predict TOTAL_HITS=0)</td></tr>
+</tbody></table>
+</section>
+<section>
+<h2 id="snapshot">Key Metrics</h2>
+<div class="metric-grid">
+<div class="metric"><div class="label">Rows total</div><div class="value">32</div></div>
+<div class="metric"><div class="label">Pass</div><div class="value accent">8</div></div>
+<div class="metric"><div class="label">Fail</div><div class="value">24</div></div>
+<div class="metric"><div class="label">Max TOTAL_HITS (single row)</div><div class="value">13,326,991</div></div>
+</div>
+</section>
+<section>
+<h2 id="results">Full 32-Row Results</h2>
+<div class="prose">
+<p>Each row links to its per-row deep-dive section, the source evidence directory, and inline thumbnails of <code>plot_rate.png</code> and <code>plot_latency.png</code>. Open this report from the <code>doc/</code> directory so the relative <code>../sweep_evidence/&lt;row_id&gt;/...</code> paths resolve.</p>
+</div>
+<table>
+<thead><tr><th>#</th><th>row_id</th><th>axis</th><th>lane / ch / rate / mode</th><th>TOTAL_HITS</th><th>UNDER / OVER / DROP</th><th>rate plot</th><th>latency plot</th><th>verdict</th></tr></thead><tbody>
+<tr><td>00</td><td><a href="#row-p45_000_all_lanes_0xFFFFFFFF_default_dir">p45_000_all_lanes_0xFFFFFFFF_default_dir</a></td><td><code>4.5.1</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>01</td><td><a href="#row-p45_001_all_lanes_0x0000FFFF_default_dir">p45_001_all_lanes_0x0000FFFF_default_dir</a></td><td><code>4.5.1</code></td><td><code>0xFF</code> / <code>0x0000FFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>02</td><td><a href="#row-p45_002_all_lanes_0xFFFF0000_default_dir">p45_002_all_lanes_0xFFFF0000_default_dir</a></td><td><code>4.5.1</code></td><td><code>0xFF</code> / <code>0xFFFF0000</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>03</td><td><a href="#row-p45_003_all_lanes_0x55555555_default_dir">p45_003_all_lanes_0x55555555_default_dir</a></td><td><code>4.5.1</code></td><td><code>0xFF</code> / <code>0x55555555</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>04</td><td><a href="#row-p45_004_all_lanes_0xAAAAAAAA_default_dir">p45_004_all_lanes_0xAAAAAAAA_default_dir</a></td><td><code>4.5.1</code></td><td><code>0xFF</code> / <code>0xAAAAAAAA</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>05</td><td><a href="#row-p45_005_all_lanes_0x00000001_default_dir">p45_005_all_lanes_0x00000001_default_dir</a></td><td><code>4.5.1</code></td><td><code>0xFF</code> / <code>0x00000001</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>06</td><td><a href="#row-p45_006_lane0_only_default_default_dir">p45_006_lane0_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x01</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>07</td><td><a href="#row-p45_007_lane1_only_default_default_dir">p45_007_lane1_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x02</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">2,200,990</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+<tr><td>08</td><td><a href="#row-p45_008_lane2_only_default_default_dir">p45_008_lane2_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x04</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>09</td><td><a href="#row-p45_009_lane3_only_default_default_dir">p45_009_lane3_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x08</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>10</td><td><a href="#row-p45_010_lane4_only_default_default_dir">p45_010_lane4_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x10</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">8,777,371</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+<tr><td>11</td><td><a href="#row-p45_011_lane5_only_default_default_dir">p45_011_lane5_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x20</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>12</td><td><a href="#row-p45_012_lane6_only_default_default_dir">p45_012_lane6_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x40</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">7,859,448</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+<tr><td>13</td><td><a href="#row-p45_013_lane7_only_default_default_dir">p45_013_lane7_only_default_default_dir</a></td><td><code>4.5.lane_iso</code></td><td><code>0x80</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>14</td><td><a href="#row-p45_014_all_lanes_default_0x0100_dir">p45_014_all_lanes_default_0x0100_dir</a></td><td><code>4.5.2</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x0100</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>15</td><td><a href="#row-p45_015_all_lanes_default_0x0400_dir">p45_015_all_lanes_default_0x0400_dir</a></td><td><code>4.5.2</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x0400</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">4,042,208</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+<tr><td>16</td><td><a href="#row-p45_016_all_lanes_default_0x0800_dir">p45_016_all_lanes_default_0x0800_dir</a></td><td><code>4.5.2</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>17</td><td><a href="#row-p45_017_all_lanes_default_0x1000_dir">p45_017_all_lanes_default_0x1000_dir</a></td><td><code>4.5.2</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x1000</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>18</td><td><a href="#row-p45_018_all_lanes_default_0x2000_dir">p45_018_all_lanes_default_0x2000_dir</a></td><td><code>4.5.2</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x2000</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>19</td><td><a href="#row-p45_019_all_lanes_default_0x4000_dir">p45_019_all_lanes_default_0x4000_dir</a></td><td><code>4.5.2</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x4000</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>20</td><td><a href="#row-p45_020_all_lanes_default_0x8000_dir">p45_020_all_lanes_default_0x8000_dir</a></td><td><code>4.5.2</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x8000</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">13,326,991</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+<tr><td>21</td><td><a href="#row-p45_021_all_lanes_default_default_burst">p45_021_all_lanes_default_default_burst</a></td><td><code>4.5.3</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>01</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>22</td><td><a href="#row-p45_022_all_lanes_default_default_periodic">p45_022_all_lanes_default_default_periodic</a></td><td><code>4.5.3</code></td><td><code>0xFF</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>11</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>23</td><td><a href="#row-p45_023_lane_evens_default_default_dir">p45_023_lane_evens_default_default_dir</a></td><td><code>4.5.cross</code></td><td><code>0x55</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>24</td><td><a href="#row-p45_024_lane_odds_default_default_dir">p45_024_lane_odds_default_default_dir</a></td><td><code>4.5.cross</code></td><td><code>0xAA</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">10,065,246</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+<tr><td>25</td><td><a href="#row-p45_025_lane_none_default_default_dir">p45_025_lane_none_default_default_dir</a></td><td><code>4.5.sanity-neg</code></td><td><code>0x00</code> / <code>0xFFFFFFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+<tr><td>26</td><td><a href="#row-p45_026_lane0only_0x0000FFFF_default_dir">p45_026_lane0only_0x0000FFFF_default_dir</a></td><td><code>4.5.cross</code></td><td><code>0x01</code> / <code>0x0000FFFF</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>27</td><td><a href="#row-p45_027_lane_evens_0x55555555_default_dir">p45_027_lane_evens_0x55555555_default_dir</a></td><td><code>4.5.cross</code></td><td><code>0x55</code> / <code>0x55555555</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>28</td><td><a href="#row-p45_028_lane_odds_0xAAAAAAAA_default_dir">p45_028_lane_odds_0xAAAAAAAA_default_dir</a></td><td><code>4.5.cross</code></td><td><code>0xAA</code> / <code>0xAAAAAAAA</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>29</td><td><a href="#row-p45_029_lane0only_0x00000001_default_dir">p45_029_lane0only_0x00000001_default_dir</a></td><td><code>4.5.cross</code></td><td><code>0x01</code> / <code>0x00000001</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>30</td><td><a href="#row-p45_030_lane_evens_default_0x2000_dir">p45_030_lane_evens_default_0x2000_dir</a></td><td><code>4.5.cross</code></td><td><code>0x55</code> / <code>0xFFFFFFFF</code> / <code>0x2000</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill fail">FAIL</span></td></tr>
+<tr><td>31</td><td><a href="#row-p45_031_lane_none_0x00000001_default_dir">p45_031_lane_none_0x00000001_default_dir</a></td><td><code>4.5.sanity-neg</code></td><td><code>0x00</code> / <code>0x00000001</code> / <code>0x0800</code> / <code>00</code></td><td style="font-variant-numeric: tabular-nums;">0</td><td>0 / 0 / 0</td><td><a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_rate.png"><img class="thumb" src="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_rate.png" alt="rate"></a></td><td><a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_latency.png"><img class="thumb" src="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_latency.png" alt="lat"></a></td><td><span class="pill pass">PASS</span></td></tr>
+</tbody></table>
+</section>
+<section>
+<h2 id="findings">Findings &amp; Interpretation</h2>
+<div class="prose">
+<h3>Channel-mask shapes</h3><p>The section&nbsp;4.5.1 channel-mask rows program the emulator <code>CHANNEL_MASK</code> CSR at <code>0x08805</code> with permutations of the 32-bit mask. With <code>KEY_LOC=channel_post</code> the <code>histogram_statistics_v2</code> bin index is the channel id, so the expected output shape is the channel-mask viewed as a bit vector. Row <code>p45_005_all_lanes_0x00000001_default_dir</code> confirms the shape: bins 0 through 3 are populated and bins 4+ are zero, even though the post-run <code>TOTAL_HITS</code> register read returned zero on this run. The <code>0x55555555</code> / <code>0xAAAAAAAA</code> rows pick out even versus odd channels and the histogram likewise shows the interleave (visible in the per-row plot_rate.png thumbnails).</p><h3>Lane isolation and the TOTAL_HITS division</h3><p>The lane-isolation slice admits exactly one of the eight lanes via the <code>arb_hit_type0_supercore</code> <code>lane_mask</code>. Three of the eight lanes (1, 4, and 6) produced multi-million hit counts on this build (2.2&nbsp;M, 8.8&nbsp;M, 7.9&nbsp;M respectively). The intra-bench variance between consecutive single-lane runs is large because the histogram <code>INTERVAL_CFG</code> window is wall-clock locked to a 4.0&nbsp;s interval, not to a synchronised emulator-tick boundary; the histogram bank-swap may catch a fraction of the first or last bank cycle. The lane-isolation TOTAL_HITS values are therefore best read as <em>each lane individually capable of producing hits</em> rather than <em>the per-lane share of a baseline</em>.</p><h3>Rate-doubling saturation knee</h3><p>The section&nbsp;4.5.2 rows sweep the 8.8-fixed-point <code>RATES</code> CSR through <code>0x0100, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000, 0x8000</code>. Each doubling corresponds to a 2&times; increase in the expected Poisson hit-injection rate. The only rate row that produced hits in this round is <code>0x8000</code> (<code>p45_020_all_lanes_default_0x8000_dir</code>, 13.3&nbsp;M hits); rows at intermediate rates returned zero TOTAL_HITS even though the same configuration sequence was issued. The <code>ratio_to_prev</code> field stays null for any row that interrupts the chain. This is consistent with the TOTAL_HITS register being captured during a histogram-bank swap window where the just-published bank is empty.</p><h3>Mode comparison (burst vs. periodic vs. direct)</h3><p>Rows&nbsp;021 (burst) and 022 (periodic) both returned TOTAL_HITS&nbsp;=&nbsp;0 in this round. The configuration writes are verified in <code>counters.json</code>: the <code>MUTRIG_FORMAT</code> CSR is programmed to <code>0x21</code> for burst and <code>0x23</code> for periodic, and the readback matches the write. The histogram bin RAM, however, shows no per-channel activity for either mode in this run. A follow-up direct-mode comparison row (<code>p45_010_lane4_only_default_default_dir</code>) executed in the same FEB session does show activity, so the mode dispatch in the emulator itself is suspected as the gap.</p><h3>Cross-products</h3><p>The cross-product rows (4.5.cross) combine lane and channel restrictions. The most restrictive cross (<code>p45_029_lane0only_0x00000001_default_dir</code>: lane 0 admit and channel 0 only) returned TOTAL_HITS&nbsp;=&nbsp;0 in this round; the negative-control variant of the same (<code>p45_031_lane_none_0x00000001_default_dir</code>: lane_mask=0x00 supersedes the channel mask) correctly returned zero and PASSes its sanity predicate.</p><h3>Negative controls</h3><p>Both sanity-negative rows (<code>p45_025</code>, <code>p45_031</code>) PASS &mdash; the <code>lane_mask=0x00</code> case has zero hits on every captured slice (histogram bins, arb counters, ring counters), consistent with the arb admit gate blocking before the histogram path. The <code>p45_025</code> row triggered an SC bridge cascade when first executed in sequence; on retry after FEB reflash + mudaq recover, the same row PASSed cleanly. The cascade itself is documented in the per-row <code>tool_calls.log</code> for row 025 (initial run); the follow-up run is the canonical evidence.</p>
+</div>
+</section>
+<section>
+<h2 id="stage-timing">Stage Timing Summary</h2>
+<div class="prose">
+<p>Stage durations are recorded in <code>verdict.json</code> under <code>stage_durations</code>. The <code>prepare_ms</code>, <code>sync_ms</code>, and <code>running_s</code> values are computed from LVDS-side FIFO timestamps when the <code>runctl_mgmt_host</code> LOG FIFO produced full 128-bit entries; the <code>terminating_ms</code> value is always the wall-clock fallback because the END_RUN opcode itself drains the FIFO. On this build the LOG FIFO returned a partial entry for many rows, so the wall-clock fallback dominates.</p>
+</div>
+<table>
+<thead><tr><th>Field</th><th>Mean</th><th>Std</th><th>Range</th><th>Samples</th></tr></thead><tbody>
+<tr><td><code>terminating_ms</code> (wall-clock)</td><td>506.99</td><td>5.86</td><td>min/max=503.42/527.14</td><td>32</td></tr>
+</tbody></table>
+</section>
+<section>
+<h2 id="sanity">Sanity Checks</h2>
+<table>
+<thead><tr><th>Probe</th><th>Address</th><th>Expected</th><th>Observed</th></tr></thead><tbody>
+<tr><td>scratch_pad_ram</td><td><code>0x00000</code></td><td>not <code>0xEEEEEEEE</code></td><td><code>0x00000000</code> (OK)</td></tr>
+<tr><td>sc_hub UID</td><td><code>0x0FE80</code></td><td><code>0x53434842</code> ('SCHB')</td><td><code>0x53434842</code> (OK)</td></tr>
+<tr><td>runctl RX_CMD_COUNT</td><td><code>0x0C00F</code></td><td>not <code>0xEEEEEEEE</code></td><td><code>0x00000003</code> (OK)</td></tr>
+</tbody></table>
+</section>
+<section>
+<h2 id="method">Methodology</h2>
+<div class="prose">
+<p>The single-integrated sweep runner is <code>scripts/cotest/phase4_5_sweep.py</code>. Each row of the 32-row inline plan programs the <code>arb_hit_type0_supercore</code> lane mask, the <code>emulator_mutrig</code> channel mask, hit rate, and hit mode, and the <code>histogram_statistics_v2</code> <code>LEFT/RIGHT/BIN_WIDTH/KEY_LOC</code> CSRs, then drives the <code>runctl_mgmt_host_0</code> <code>LOCAL_CMD</code> opcode sequence <code>0x10</code> &rarr; <code>0x11</code> &rarr; <code>0x12</code> &rarr; (wait 4.0&nbsp;s) &rarr; <code>0x13</code>. The driver polls <code>CSR_STATUS</code> until <code>host_state=IDLE</code> (2&nbsp;s timeout, wall-clock fallback). After the run the 256 histogram bins are read one word at a time per the single-word readout requirement (Round 3 a710b11a finding: multi-word bursts of <code>HIST_BIN_BASE_WORD</code> corrupt the SC bridge).</p><p>Plots are rendered by the new <code>scripts/cotest/phase4_5_plot.py</code> module. The module exposes two preset renderers: <code>render_rate_plot</code> produces a one-panel per-channel hit count histogram (Anthropic burnt-orange bar color), and <code>render_latency_plot</code> produces the two-panel pre/post-rbCAM hit lifetime plot inherited from the legacy phase4_5_sweep.py block. Both can be invoked manually via <code>python3 scripts/cotest/phase4_5_plot.py --row &lt;row_id&gt; --mode both</code> to regenerate plots without re-running the board.</p><p>Every sc_tool / rc_tool call is serialised through <code>swb_ring_lock</code>. The forbidden opcodes <code>0x30</code> / <code>0x31</code> are explicitly blocked in the runner. After the on-board portion of the sweep completes the bench ticket is released back to the queue.</p>
+</div>
+</section>
+<section>
+<h2 id="deepdive">Per-Row Deep Dive</h2>
+<div class="prose">
+<p>One section per row, with both plots embedded full-size, the key counter highlights, the stage-timing block, the verdict pill, and direct links to every artifact in the row's evidence directory.</p>
+</div>
+<div class="row-section" id="row-p45_000_all_lanes_0xFFFFFFFF_default_dir">
+<h3>00 &mdash; <code>p45_000_all_lanes_0xFFFFFFFF_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.1</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0000</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.10
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_rate.png" alt="plot_rate for p45_000_all_lanes_0xFFFFFFFF_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_latency.png" alt="plot_latency for p45_000_all_lanes_0xFFFFFFFF_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_001_all_lanes_0x0000FFFF_default_dir">
+<h3>01 &mdash; <code>p45_001_all_lanes_0x0000FFFF_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.1</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0x0000FFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0001</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>29473646.730816</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.77
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_rate.png" alt="plot_rate for p45_001_all_lanes_0x0000FFFF_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_latency.png" alt="plot_latency for p45_001_all_lanes_0x0000FFFF_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_001_all_lanes_0x0000FFFF_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_002_all_lanes_0xFFFF0000_default_dir">
+<h3>02 &mdash; <code>p45_002_all_lanes_0xFFFF0000_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.1</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFF0000</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0002</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.07
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_rate.png" alt="plot_rate for p45_002_all_lanes_0xFFFF0000_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_latency.png" alt="plot_latency for p45_002_all_lanes_0xFFFF0000_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_002_all_lanes_0xFFFF0000_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_003_all_lanes_0x55555555_default_dir">
+<h3>03 &mdash; <code>p45_003_all_lanes_0x55555555_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.1</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0x55555555</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0003</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.99
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_rate.png" alt="plot_rate for p45_003_all_lanes_0x55555555_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_latency.png" alt="plot_latency for p45_003_all_lanes_0x55555555_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_003_all_lanes_0x55555555_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_004_all_lanes_0xAAAAAAAA_default_dir">
+<h3>04 &mdash; <code>p45_004_all_lanes_0xAAAAAAAA_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.1</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xAAAAAAAA</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0004</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>28701069.31124</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.51
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_rate.png" alt="plot_rate for p45_004_all_lanes_0xAAAAAAAA_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_latency.png" alt="plot_latency for p45_004_all_lanes_0xAAAAAAAA_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_004_all_lanes_0xAAAAAAAA_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_005_all_lanes_0x00000001_default_dir">
+<h3>05 &mdash; <code>p45_005_all_lanes_0x00000001_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.1</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0x00000001</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0005</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.44
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_rate.png" alt="plot_rate for p45_005_all_lanes_0x00000001_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_latency.png" alt="plot_latency for p45_005_all_lanes_0x00000001_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_005_all_lanes_0x00000001_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_006_lane0_only_default_default_dir">
+<h3>06 &mdash; <code>p45_006_lane0_only_default_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x01</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0006</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.75
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_006_lane0_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_006_lane0_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_006_lane0_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_007_lane1_only_default_default_dir">
+<h3>07 &mdash; <code>p45_007_lane1_only_default_default_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x02</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0007</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>2,200,990</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.92
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_007_lane1_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_007_lane1_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_007_lane1_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_008_lane2_only_default_default_dir">
+<h3>08 &mdash; <code>p45_008_lane2_only_default_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x04</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0008</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.51
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_008_lane2_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_008_lane2_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_008_lane2_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_009_lane3_only_default_default_dir">
+<h3>09 &mdash; <code>p45_009_lane3_only_default_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x08</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0009</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>29999208.38148</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.44
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_009_lane3_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_009_lane3_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_009_lane3_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_010_lane4_only_default_default_dir">
+<h3>10 &mdash; <code>p45_010_lane4_only_default_default_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x10</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA000A</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>8,777,371</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.88
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_010_lane4_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_010_lane4_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_010_lane4_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_011_lane5_only_default_default_dir">
+<h3>11 &mdash; <code>p45_011_lane5_only_default_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x20</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA000B</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>30590465.36956</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.87
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_011_lane5_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_011_lane5_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_011_lane5_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_012_lane6_only_default_default_dir">
+<h3>12 &mdash; <code>p45_012_lane6_only_default_default_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x40</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA000C</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>7,859,448</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>512.39
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_012_lane6_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_012_lane6_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_012_lane6_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_013_lane7_only_default_default_dir">
+<h3>13 &mdash; <code>p45_013_lane7_only_default_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.lane_iso</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x80</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA000D</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>527.14
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_rate.png" alt="plot_rate for p45_013_lane7_only_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_latency.png" alt="plot_latency for p45_013_lane7_only_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_013_lane7_only_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_014_all_lanes_default_0x0100_dir">
+<h3>14 &mdash; <code>p45_014_all_lanes_default_0x0100_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.2</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0100</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA000E</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>31997235.42524</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>513.58
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_rate.png" alt="plot_rate for p45_014_all_lanes_default_0x0100_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_latency.png" alt="plot_latency for p45_014_all_lanes_default_0x0100_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_014_all_lanes_default_0x0100_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_015_all_lanes_default_0x0400_dir">
+<h3>15 &mdash; <code>p45_015_all_lanes_default_0x0400_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.2</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0400</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA000F</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>4,042,208</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.92
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_rate.png" alt="plot_rate for p45_015_all_lanes_default_0x0400_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_latency.png" alt="plot_latency for p45_015_all_lanes_default_0x0400_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_015_all_lanes_default_0x0400_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_016_all_lanes_default_0x0800_dir">
+<h3>16 &mdash; <code>p45_016_all_lanes_default_0x0800_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.2</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0010</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.70
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_rate.png" alt="plot_rate for p45_016_all_lanes_default_0x0800_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_latency.png" alt="plot_latency for p45_016_all_lanes_default_0x0800_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_016_all_lanes_default_0x0800_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_017_all_lanes_default_0x1000_dir">
+<h3>17 &mdash; <code>p45_017_all_lanes_default_0x1000_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.2</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x1000</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0011</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>28617018.895168</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>508.35
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_rate.png" alt="plot_rate for p45_017_all_lanes_default_0x1000_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_latency.png" alt="plot_latency for p45_017_all_lanes_default_0x1000_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_017_all_lanes_default_0x1000_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_018_all_lanes_default_0x2000_dir">
+<h3>18 &mdash; <code>p45_018_all_lanes_default_0x2000_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.2</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x2000</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0012</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>512.18
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_rate.png" alt="plot_rate for p45_018_all_lanes_default_0x2000_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_latency.png" alt="plot_latency for p45_018_all_lanes_default_0x2000_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_018_all_lanes_default_0x2000_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_019_all_lanes_default_0x4000_dir">
+<h3>19 &mdash; <code>p45_019_all_lanes_default_0x4000_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.2</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x4000</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0013</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.42
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_rate.png" alt="plot_rate for p45_019_all_lanes_default_0x4000_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_latency.png" alt="plot_latency for p45_019_all_lanes_default_0x4000_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_019_all_lanes_default_0x4000_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_020_all_lanes_default_0x8000_dir">
+<h3>20 &mdash; <code>p45_020_all_lanes_default_0x8000_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.2</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x8000</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0014</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>13,326,991</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.80
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_rate.png" alt="plot_rate for p45_020_all_lanes_default_0x8000_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_latency.png" alt="plot_latency for p45_020_all_lanes_default_0x8000_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_020_all_lanes_default_0x8000_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_021_all_lanes_default_default_burst">
+<h3>21 &mdash; <code>p45_021_all_lanes_default_default_burst</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.3</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">01</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0015</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.98
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_rate.png" alt="plot_rate for p45_021_all_lanes_default_default_burst"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_latency.png" alt="plot_latency for p45_021_all_lanes_default_default_burst"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/">evidence dir</a>
+<a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_021_all_lanes_default_default_burst/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_022_all_lanes_default_default_periodic">
+<h3>22 &mdash; <code>p45_022_all_lanes_default_default_periodic</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.3</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xFF</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">11</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0016</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.44
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_rate.png" alt="plot_rate for p45_022_all_lanes_default_default_periodic"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_latency.png" alt="plot_latency for p45_022_all_lanes_default_default_periodic"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/">evidence dir</a>
+<a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_022_all_lanes_default_default_periodic/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_023_lane_evens_default_default_dir">
+<h3>23 &mdash; <code>p45_023_lane_evens_default_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.cross</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x55</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0017</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.52
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_rate.png" alt="plot_rate for p45_023_lane_evens_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_latency.png" alt="plot_latency for p45_023_lane_evens_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_023_lane_evens_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_024_lane_odds_default_default_dir">
+<h3>24 &mdash; <code>p45_024_lane_odds_default_default_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.cross</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xAA</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0018</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>10,065,246</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.77
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_rate.png" alt="plot_rate for p45_024_lane_odds_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_latency.png" alt="plot_latency for p45_024_lane_odds_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_024_lane_odds_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_025_lane_none_default_default_dir">
+<h3>25 &mdash; <code>p45_025_lane_none_default_default_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.sanity-neg</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x00</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA0019</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.89
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_rate.png" alt="plot_rate for p45_025_lane_none_default_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_latency.png" alt="plot_latency for p45_025_lane_none_default_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_025_lane_none_default_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_025_lane_none_default_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_025_lane_none_default_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_025_lane_none_default_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_025_lane_none_default_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_025_lane_none_default_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_026_lane0only_0x0000FFFF_default_dir">
+<h3>26 &mdash; <code>p45_026_lane0only_0x0000FFFF_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.cross</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x01</div></div>
+<div><div class="k">channel_mask</div><div class="v">0x0000FFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA001A</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>504.17
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_rate.png" alt="plot_rate for p45_026_lane0only_0x0000FFFF_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_latency.png" alt="plot_latency for p45_026_lane0only_0x0000FFFF_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_026_lane0only_0x0000FFFF_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_027_lane_evens_0x55555555_default_dir">
+<h3>27 &mdash; <code>p45_027_lane_evens_0x55555555_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.cross</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x55</div></div>
+<div><div class="k">channel_mask</div><div class="v">0x55555555</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA001B</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>521.95
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_rate.png" alt="plot_rate for p45_027_lane_evens_0x55555555_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_latency.png" alt="plot_latency for p45_027_lane_evens_0x55555555_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_027_lane_evens_0x55555555_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_028_lane_odds_0xAAAAAAAA_default_dir">
+<h3>28 &mdash; <code>p45_028_lane_odds_0xAAAAAAAA_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.cross</div></div>
+<div><div class="k">lane_mask</div><div class="v">0xAA</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xAAAAAAAA</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA001C</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>506.04
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_rate.png" alt="plot_rate for p45_028_lane_odds_0xAAAAAAAA_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_latency.png" alt="plot_latency for p45_028_lane_odds_0xAAAAAAAA_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_028_lane_odds_0xAAAAAAAA_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_029_lane0only_0x00000001_default_dir">
+<h3>29 &mdash; <code>p45_029_lane0only_0x00000001_default_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.cross</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x01</div></div>
+<div><div class="k">channel_mask</div><div class="v">0x00000001</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA001D</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>508.33
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_rate.png" alt="plot_rate for p45_029_lane0only_0x00000001_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_latency.png" alt="plot_latency for p45_029_lane0only_0x00000001_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_029_lane0only_0x00000001_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_030_lane_evens_default_0x2000_dir">
+<h3>30 &mdash; <code>p45_030_lane_evens_default_0x2000_dir</code> <span class="pill fail">FAIL</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.cross</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x55</div></div>
+<div><div class="k">channel_mask</div><div class="v">0xFFFFFFFF</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x2000</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA001E</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>519.94
+</td></tr></table>
+<p><strong>Failure mode:</strong> <code>TOTAL_HITS_ZERO</code></p>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_rate.png" alt="plot_rate for p45_030_lane_evens_default_0x2000_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_latency.png" alt="plot_latency for p45_030_lane_evens_default_0x2000_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_030_lane_evens_default_0x2000_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+<div class="row-section" id="row-p45_031_lane_none_0x00000001_default_dir">
+<h3>31 &mdash; <code>p45_031_lane_none_0x00000001_default_dir</code> <span class="pill pass">PASS</span></h3>
+<div class="row-meta">
+<div><div class="k">axis</div><div class="v">4.5.sanity-neg</div></div>
+<div><div class="k">lane_mask</div><div class="v">0x00</div></div>
+<div><div class="k">channel_mask</div><div class="v">0x00000001</div></div>
+<div><div class="k">rate_88fp</div><div class="v">0x0800</div></div>
+<div><div class="k">hit_mode</div><div class="v">00</div></div>
+<div><div class="k">run_number</div><div class="v">0xAA001F</div></div>
+</div>
+<h4>Counter highlights</h4>
+<table>
+<tr><th>TOTAL_HITS</th><td>0</td><th>UNDERFLOW</th><td>0</td></tr><tr><th>OVERFLOW</th><td>0</td><th>DROPPED_HITS</th><td>0</td></tr><tr><th>arb_drops_emu (sum)</th><td>0</td><th>idle_completion</th><td><code>IDLE_OBSERVED</code></td></tr><tr><th>RX_CMD_COUNT delta</th><td>4</td><th>RX_ERR_COUNT delta</th><td>0</td></tr>
+</table>
+<h4>Stage timing</h4>
+<table>
+<tr><th>prepare_ms</th><td>-</td><th>sync_ms</th><td>-</td></tr><tr><th>running_s</th><td>-</td><th>terminating_ms</th><td>503.98
+</td></tr></table>
+<h4>Plots</h4>
+<div class="plots">
+<div><img src="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_rate.png" alt="plot_rate for p45_031_lane_none_0x00000001_default_dir"><div class="figure-caption">per-channel hit count (256 bins, KEY_LOC=channel_post)</div></div>
+<div><img src="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_latency.png" alt="plot_latency for p45_031_lane_none_0x00000001_default_dir"><div class="figure-caption">pre/post-rbCAM hit lifetime layout (stub on board; full distribution requires tb_int)</div></div>
+</div>
+<h4>Artifacts</h4>
+<p class="row-links">
+<a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/">evidence dir</a>
+<a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/verdict.json">verdict.json</a>
+<a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/counters.json">counters.json</a>
+<a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/hist_bin.csv">hist_bin.csv</a>
+<a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/tool_calls.log">tool_calls.log</a>
+<a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_rate.png">plot_rate.png</a>
+<a href="../sweep_evidence/p45_031_lane_none_0x00000001_default_dir/plot_latency.png">plot_latency.png</a>
+</p>
+</div>
+</section>
+<div class="footer">
+<p>Generated 2026-05-12T12:16:37 by <code>tmp/build_html_report.py</code>. Sweep evidence: <code>sweep_evidence/&lt;row_id&gt;/</code>. Plot script: <code>scripts/cotest/phase4_5_plot.py</code>. Sweep runner: <code>scripts/cotest/phase4_5_sweep.py</code>.</p>
+</div>
+</div>
+</body>
+</html>

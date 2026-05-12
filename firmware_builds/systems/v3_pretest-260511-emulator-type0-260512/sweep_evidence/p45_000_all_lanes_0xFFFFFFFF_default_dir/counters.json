@@ -1,0 +1,860 @@
+{
+  "row": {
+    "row_id": "p45_000_all_lanes_0xFFFFFFFF_default_dir",
+    "lane_mask": "0xFF",
+    "channel_mask": "0xFFFFFFFF",
+    "rate_88fp": "0x0800",
+    "hit_mode": "00",
+    "interval_seconds": 4.0,
+    "axis_section": "4.5.1",
+    "expected_behavior": "section 4.5.1: all 32 channels populated (Poisson spread); UNDERFLOW=0 OVERFLOW=0",
+    "sanity_negative": false
+  },
+  "row_idx": 0,
+  "started": "2026-05-12T12:04:12",
+  "sc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
+  "link": 2,
+  "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir",
+  "arb_lane_cfg": {
+    "lane0": {
+      "addr": "0x088A3",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    },
+    "lane1": {
+      "addr": "0x088C3",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    },
+    "lane2": {
+      "addr": "0x088E3",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    },
+    "lane3": {
+      "addr": "0x08903",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    },
+    "lane4": {
+      "addr": "0x08923",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    },
+    "lane5": {
+      "addr": "0x08943",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    },
+    "lane6": {
+      "addr": "0x08963",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    },
+    "lane7": {
+      "addr": "0x08983",
+      "enabled": true,
+      "written": "0x00000001",
+      "readback": "0x00100D05"
+    }
+  },
+  "emulator_cfg": {
+    "CHANNEL_MASK": {
+      "addr": "0x08805",
+      "written": "0xFFFFFFFF",
+      "readback": "0x00000005"
+    },
+    "CENTRAL": {
+      "addr": "0x08807",
+      "written": "0x00000001",
+      "readback": "0x00000001"
+    },
+    "SIGNAL": {
+      "addr": "0x08808",
+      "written": "0x00000000",
+      "readback": "0x00000000"
+    },
+    "BACKGROUND": {
+      "addr": "0x08809",
+      "written": "0x00000000",
+      "readback": "0x00000000"
+    },
+    "MUTRIG_FORMAT": {
+      "addr": "0x0880A",
+      "written": "0x00000020",
+      "readback": "0x00000020"
+    },
+    "RATES": {
+      "addr": "0x0880B",
+      "written": "0x00000800",
+      "readback": "0x00000800"
+    },
+    "CLUSTER_FIX": {
+      "addr": "0x0880C",
+      "written": "0x00004180",
+      "readback": "0x00004180"
+    },
+    "PRNG_SEED": {
+      "addr": "0x0880E",
+      "written": "0xDEADBEEF",
+      "readback": "0xDEADBEEF"
+    },
+    "TIMEBASE_SEED": {
+      "addr": "0x0880F",
+      "written": "0x00010001",
+      "readback": "0x00010001"
+    }
+  },
+  "histogram_cfg": {
+    "LEFT_BOUND": "0x00000000",
+    "RIGHT_BOUND": "0x00000100",
+    "BIN_WIDTH": "0x00000001",
+    "KEY_LOC": "0x26231511",
+    "INTERVAL_CFG": "0x1DCD6500",
+    "CONTROL_APPLY": "0x00000100"
+  },
+  "ingress_status": "0x00000503",
+  "downstream_cfg": {
+    "mts_ctrl": "0x20000011",
+    "ring_ctrl": "0x00000011"
+  },
+  "stage_recipe": {
+    "row_idx": 0,
+    "stage_durations": {
+      "prepare_ms": null,
+      "sync_ms": null,
+      "running_s": null,
+      "terminating_ms": 504.09913063049316
+    },
+    "wall_clock_durations": {
+      "prepare_s": 0.029156208038330078,
+      "sync_s": 0.22489094734191895,
+      "running_s": 4.23039984703064,
+      "terminating_s": 0.5441949367523193,
+      "total_s": 5.028641939163208
+    },
+    "fifo_entries": [
+      {
+        "raw_words": [
+          "0x32075932",
+          "0x592F1300",
+          "0x33A9F64D",
+          "0xF64A1100"
+        ],
+        "recv_ts": 55007142631727,
+        "run_command": 19,
+        "payload32": 866776653,
+        "exec_ts_lo": 4132049152
+      },
+      {
+        "raw_words": [
+          "0x354FD8A2",
+          "0xD89F1200",
+          "0x539062F3",
+          "0x62F01300"
+        ],
+        "recv_ts": 58617053239455,
+        "run_command": 18,
+        "payload32": 1401971443,
+        "exec_ts_lo": 1659900672
+      }
+    ],
+    "cmd_traces": [
+      {
+        "cmd": "0x10",
+        "word": "0xAA000010",
+        "runctl_status": "0x00000003",
+        "runctl_last_cmd": "0x00000013",
+        "wall_start": 1778580253.5581691,
+        "wall_end": 1778580253.5739057
+      },
+      {
+        "cmd": "0x11",
+        "word": "0x00000011",
+        "runctl_status": "0x00000003",
+        "runctl_last_cmd": "0x00000011",
+        "wall_start": 1778580253.7773025,
+        "wall_end": 1778580253.7987971
+      },
+      {
+        "cmd": "0x12",
+        "word": "0x00000012",
+        "runctl_status": "0x00000003",
+        "runctl_last_cmd": "0x00000012",
+        "wall_start": 1778580253.9990447,
+        "wall_end": 1778580254.025173
+      },
+      {
+        "cmd": "0x13",
+        "word": "0x00000013",
+        "runctl_status": "0x00000003",
+        "runctl_last_cmd": "0x00000013",
+        "wall_start": 1778580258.0292408,
+        "wall_end": 1778580258.069291
+      }
+    ],
+    "drain_pre_iter": 2,
+    "drain_post_iter": 0,
+    "idle_completion": "IDLE_OBSERVED",
+    "idle_observed_ts": 1778580258.5733924,
+    "run_number_written": 11141120,
+    "run_number_readback": 0,
+    "run_number_writeback_ok": false,
+    "rx_cmd_count_pre": 3,
+    "rx_cmd_count_post": 7,
+    "rx_cmd_count_delta": 4,
+    "rx_err_count_pre": 156286,
+    "rx_err_count_post": 156286,
+    "rx_err_count_delta": 0,
+    "log_entries_count": 2,
+    "t0_wall": 1778580253.5447521,
+    "t1_wall": 1778580258.573394,
+    "run_number_pre": 0
+  },
+  "snapshot_pre": {
+    "timestamp": "2026-05-12T12:04:12",
+    "sc_hub_uid": "0x53434842",
+    "runctl": {
+      "UID": {
+        "addr": "0x0C000",
+        "value": "0x52434D48",
+        "value_int": 1380142408
+      },
+      "STATUS": {
+        "addr": "0x0C003",
+        "value": "0x00000003",
+        "value_int": 3
+      },
+      "LAST_CMD": {
+        "addr": "0x0C004",
+        "value": "0x00000013",
+        "value_int": 19
+      },
+      "RUN_NUMBER": {
+        "addr": "0x0C006",
+        "value": "0x00000000",
+        "value_int": 0
+      },
+      "RX_CMD_COUNT": {
+        "addr": "0x0C00F",
+        "value": "0x00000003",
+        "value_int": 3
+      },
+      "RX_ERR_COUNT": {
+        "addr": "0x0C010",
+        "value": "0x0002627E",
+        "value_int": 156286
+      },
+      "LOG_STATUS": {
+        "addr": "0x0C011",
+        "value": "0x0000000C",
+        "value_int": 12
+      },
+      "RECV_TS": {
+        "value_int": 3484510836,
+        "value": "0x0000CFB16A74"
+      },
+      "EXEC_TS": {
+        "value_int": 3484510839,
+        "value": "0x0000CFB16A77"
+      }
+    },
+    "arb": [
+      {
+        "lane": 0,
+        "base": "0x088A0",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      },
+      {
+        "lane": 1,
+        "base": "0x088C0",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      },
+      {
+        "lane": 2,
+        "base": "0x088E0",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      },
+      {
+        "lane": 3,
+        "base": "0x08900",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      },
+      {
+        "lane": 4,
+        "base": "0x08920",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      },
+      {
+        "lane": 5,
+        "base": "0x08940",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      },
+      {
+        "lane": 6,
+        "base": "0x08960",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      },
+      {
+        "lane": 7,
+        "base": "0x08980",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 42567460,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 42567460
+      }
+    ],
+    "histogram": {
+      "raw": [
+        "0x48495354",
+        "0x1A01A1F7",
+        "0x00000100",
+        "0x00000000",
+        "0x00000100",
+        "0x00000001",
+        "0x26231511",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x1DCD6500",
+        "0x00000000",
+        "0x000000FF",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "UNDERFLOW": 0,
+      "OVERFLOW": 0,
+      "INTERVAL_CFG": 500000000,
+      "BANK_STATUS": 0,
+      "PORT_STATUS": 255,
+      "TOTAL_HITS": 0,
+      "DROPPED_HITS": 0,
+      "COAL_STATUS": 0,
+      "LAST_INT_HITS": 0
+    },
+    "ring": {
+      "hs0_rb0": {
+        "base": "0x0AC00",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 824,
+        "inerr_count": 0,
+        "push_count": 10641750,
+        "pop_count": 10127802,
+        "overwrite_count": 513124,
+        "cache_miss_count": 0
+      },
+      "hs0_rb1": {
+        "base": "0x0AC20",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 780,
+        "inerr_count": 0,
+        "push_count": 10641486,
+        "pop_count": 10113390,
+        "overwrite_count": 527316,
+        "cache_miss_count": 0
+      },
+      "hs0_rb2": {
+        "base": "0x0AC40",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 789,
+        "inerr_count": 0,
+        "push_count": 10642188,
+        "pop_count": 10122471,
+        "overwrite_count": 518928,
+        "cache_miss_count": 0
+      },
+      "hs0_rb3": {
+        "base": "0x0AC60",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 740,
+        "inerr_count": 0,
+        "push_count": 10641861,
+        "pop_count": 10141813,
+        "overwrite_count": 499308,
+        "cache_miss_count": 0
+      },
+      "hs1_rb0": {
+        "base": "0x0AD00",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 824,
+        "inerr_count": 0,
+        "push_count": 10641750,
+        "pop_count": 10127802,
+        "overwrite_count": 513124,
+        "cache_miss_count": 0
+      },
+      "hs1_rb1": {
+        "base": "0x0AD20",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 780,
+        "inerr_count": 0,
+        "push_count": 10641486,
+        "pop_count": 10113390,
+        "overwrite_count": 527316,
+        "cache_miss_count": 0
+      },
+      "hs1_rb2": {
+        "base": "0x0AD40",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 789,
+        "inerr_count": 0,
+        "push_count": 10642188,
+        "pop_count": 10122471,
+        "overwrite_count": 518928,
+        "cache_miss_count": 0
+      },
+      "hs1_rb3": {
+        "base": "0x0AD60",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 740,
+        "inerr_count": 0,
+        "push_count": 10641861,
+        "pop_count": 10141813,
+        "overwrite_count": 499308,
+        "cache_miss_count": 0
+      }
+    },
+    "mts": [
+      {
+        "idx": 0,
+        "base": "0x09000",
+        "status_control": "0x20000010",
+        "discard_hits": 0,
+        "expected_latency": 2000,
+        "total_hits": 42567460
+      },
+      {
+        "idx": 1,
+        "base": "0x0A000",
+        "status_control": "0x20000010",
+        "discard_hits": 0,
+        "expected_latency": 2000,
+        "total_hits": 42567460
+      }
+    ],
+    "frame_asm": {
+      "hs0_frame": {
+        "base": "0x0B400",
+        "declared_hits": 173969694728912896,
+        "actual_hits": 173969694728912896,
+        "missing_hits": 0
+      },
+      "hs1_frame": {
+        "base": "0x0B410",
+        "declared_hits": 173969694728912896,
+        "actual_hits": 173969694728912896,
+        "missing_hits": 0
+      }
+    }
+  },
+  "snapshot_post": {
+    "timestamp": "2026-05-12T12:04:18",
+    "sc_hub_uid": "0x53434842",
+    "runctl": {
+      "UID": {
+        "addr": "0x0C000",
+        "value": "0x52434D48",
+        "value_int": 1380142408
+      },
+      "STATUS": {
+        "addr": "0x0C003",
+        "value": "0x80000003",
+        "value_int": 2147483651
+      },
+      "LAST_CMD": {
+        "addr": "0x0C004",
+        "value": "0x00000013",
+        "value_int": 19
+      },
+      "RUN_NUMBER": {
+        "addr": "0x0C006",
+        "value": "0x00000000",
+        "value_int": 0
+      },
+      "RX_CMD_COUNT": {
+        "addr": "0x0C00F",
+        "value": "0x00000007",
+        "value_int": 7
+      },
+      "RX_ERR_COUNT": {
+        "addr": "0x0C010",
+        "value": "0x0002627E",
+        "value_int": 156286
+      },
+      "LOG_STATUS": {
+        "addr": "0x0C011",
+        "value": "0x00010000",
+        "value_int": 65536
+      },
+      "RECV_TS": {
+        "value_int": 353589289712,
+        "value": "0x0052539062F0"
+      },
+      "EXEC_TS": {
+        "value_int": 353589289715,
+        "value": "0x0052539062F3"
+      }
+    },
+    "arb": [
+      {
+        "lane": 0,
+        "base": "0x088A0",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      },
+      {
+        "lane": 1,
+        "base": "0x088C0",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      },
+      {
+        "lane": 2,
+        "base": "0x088E0",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      },
+      {
+        "lane": 3,
+        "base": "0x08900",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      },
+      {
+        "lane": 4,
+        "base": "0x08920",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      },
+      {
+        "lane": 5,
+        "base": "0x08940",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      },
+      {
+        "lane": 6,
+        "base": "0x08960",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      },
+      {
+        "lane": 7,
+        "base": "0x08980",
+        "uid": "0x41486430",
+        "mode": "0x00100D05",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 74785284,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 74785284
+      }
+    ],
+    "histogram": {
+      "raw": [
+        "0x48495354",
+        "0x1A01A1F7",
+        "0x00000100",
+        "0x00000000",
+        "0x00000100",
+        "0x00000001",
+        "0x26231511",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x1DCD6500",
+        "0x00000001",
+        "0x000000FF",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "UNDERFLOW": 0,
+      "OVERFLOW": 0,
+      "INTERVAL_CFG": 500000000,
+      "BANK_STATUS": 1,
+      "PORT_STATUS": 255,
+      "TOTAL_HITS": 0,
+      "DROPPED_HITS": 0,
+      "COAL_STATUS": 0,
+      "LAST_INT_HITS": 0
+    },
+    "ring": {
+      "hs0_rb0": {
+        "base": "0x0AC00",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 824,
+        "inerr_count": 32217824,
+        "push_count": 10641750,
+        "pop_count": 10127802,
+        "overwrite_count": 513124,
+        "cache_miss_count": 0
+      },
+      "hs0_rb1": {
+        "base": "0x0AC20",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 780,
+        "inerr_count": 32217824,
+        "push_count": 10641486,
+        "pop_count": 10113390,
+        "overwrite_count": 527316,
+        "cache_miss_count": 0
+      },
+      "hs0_rb2": {
+        "base": "0x0AC40",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 789,
+        "inerr_count": 32217824,
+        "push_count": 10642188,
+        "pop_count": 10122471,
+        "overwrite_count": 518928,
+        "cache_miss_count": 0
+      },
+      "hs0_rb3": {
+        "base": "0x0AC60",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 740,
+        "inerr_count": 32217824,
+        "push_count": 10641861,
+        "pop_count": 10141813,
+        "overwrite_count": 499308,
+        "cache_miss_count": 0
+      },
+      "hs1_rb0": {
+        "base": "0x0AD00",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 824,
+        "inerr_count": 32217824,
+        "push_count": 10641750,
+        "pop_count": 10127802,
+        "overwrite_count": 513124,
+        "cache_miss_count": 0
+      },
+      "hs1_rb1": {
+        "base": "0x0AD20",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 780,
+        "inerr_count": 32217824,
+        "push_count": 10641486,
+        "pop_count": 10113390,
+        "overwrite_count": 527316,
+        "cache_miss_count": 0
+      },
+      "hs1_rb2": {
+        "base": "0x0AD40",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 789,
+        "inerr_count": 32217824,
+        "push_count": 10642188,
+        "pop_count": 10122471,
+        "overwrite_count": 518928,
+        "cache_miss_count": 0
+      },
+      "hs1_rb3": {
+        "base": "0x0AD60",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 740,
+        "inerr_count": 32217824,
+        "push_count": 10641861,
+        "pop_count": 10141813,
+        "overwrite_count": 499308,
+        "cache_miss_count": 0
+      }
+    },
+    "mts": [
+      {
+        "idx": 0,
+        "base": "0x09000",
+        "status_control": "0x20000010",
+        "discard_hits": 0,
+        "expected_latency": 2000,
+        "total_hits": 74785284
+      },
+      {
+        "idx": 1,
+        "base": "0x0A000",
+        "status_control": "0x20000010",
+        "discard_hits": 0,
+        "expected_latency": 2000,
+        "total_hits": 74785284
+      }
+    ],
+    "frame_asm": {
+      "hs0_frame": {
+        "base": "0x0B400",
+        "declared_hits": 173969694728912896,
+        "actual_hits": 173969694728912896,
+        "missing_hits": 0
+      },
+      "hs1_frame": {
+        "base": "0x0B410",
+        "declared_hits": 173969694728912896,
+        "actual_hits": 173969694728912896,
+        "missing_hits": 0
+      }
+    }
+  },
+  "verdict": {
+    "pass": false,
+    "total_hits": 0,
+    "underflow": 0,
+    "overflow": 0,
+    "dropped_hits": 0,
+    "arb_drops_emu": 0,
+    "ratio_to_prev": null,
+    "hist_sum": 0,
+    "sanity_negative": false,
+    "run_number_writeback_ok": false,
+    "run_number_written": 11141120,
+    "run_number_readback": 0,
+    "rx_cmd_count_delta": 4,
+    "rx_err_count_delta": 0,
+    "log_entries_count": 2,
+    "stage_durations": {
+      "prepare_ms": null,
+      "sync_ms": null,
+      "running_s": null,
+      "terminating_ms": 504.09913063049316
+    },
+    "idle_completion": "IDLE_OBSERVED",
+    "failure_mode": "TOTAL_HITS_ZERO"
+  }
+}
