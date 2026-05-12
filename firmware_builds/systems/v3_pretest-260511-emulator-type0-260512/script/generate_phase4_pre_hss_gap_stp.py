@@ -39,7 +39,7 @@ def add(group: str, probes: list[Probe], *names: str) -> None:
 
 def default_probes() -> list[Probe]:
     dp = DP_PREFIX
-    emu0_qsys = f"{dp}emulator_mutrig_qsys_lane:emulator_mutrig_0|"
+    emu0_qsys = f"{dp}emulator_mutrig_qsys_inst:emulator_mutrig_0|"
     emu0_core = f"{emu0_qsys}emulator_mutrig:u_emulator_mutrig|"
     emu0_frontend_run_ctl = f"{emu0_core}frontend_run_ctl:u_frontend_run_ctl|"
     adapter_032 = (

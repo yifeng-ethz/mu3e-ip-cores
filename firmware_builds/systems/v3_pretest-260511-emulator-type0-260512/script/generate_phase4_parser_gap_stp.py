@@ -44,7 +44,7 @@ def add_bits(group: str, probes: list[Probe], base: str, width: int) -> None:
 
 def default_probes() -> list[Probe]:
     dp = DP_PREFIX
-    emu0_qsys = f"{dp}emulator_mutrig_qsys_lane:emulator_mutrig_0|"
+    emu0_qsys = f"{dp}emulator_mutrig_qsys_inst:emulator_mutrig_0|"
     emu0_core = f"{emu0_qsys}emulator_mutrig:u_emulator_mutrig|"
     emu0_run = f"{emu0_core}frontend_run_ctl:u_frontend_run_ctl|"
     fifo = f"{dp}altera_avalon_sc_fifo:decoded_lane_fifo_0|"

@@ -66,7 +66,7 @@ def default_probes() -> list[Probe]:
         f"{dp}feb_system_v3_data_path_subsystem_emulator_ctrl_splitter:emulator_ctrl_splitter|"
     )
     dbg_mm2runctrl = f"{dp}dbg_mm2runctrl:dbg_mm2runctrl_0|"
-    emu0_qsys = f"{dp}emulator_mutrig_qsys_lane:emulator_mutrig_0|"
+    emu0_qsys = f"{dp}emulator_mutrig_qsys_inst:emulator_mutrig_0|"
     emu0_core = f"{emu0_qsys}emulator_mutrig:u_emulator_mutrig|"
     emu0_frontend_run_ctl = f"{emu0_core}frontend_run_ctl:u_frontend_run_ctl|"
 
