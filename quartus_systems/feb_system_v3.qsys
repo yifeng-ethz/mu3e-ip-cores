@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="1.0"
-   description="rc-readyless rollout with BYTE_STREAM_ENABLE=true emulator outputs. Drops dead control_path_subsystem.pulse_out_conduit export; scifi_inject remains driven by mutrig_injector_0."
+   version="1.0.1.0512"
+   description="Adds mclk125 reset synchronization for upload-sc reset; datapath monitor reset is synchronized inside scifi_datapath_system_v3."
    tags="INTERNAL_COMPONENT=false"
    categories="" />
  <parameter name="bonusData"><![CDATA[bonusData 
@@ -70,6 +70,22 @@
       datum _sortIndex
       {
          value = "9";
+         type = "int";
+      }
+   }
+   element mclk125_reset_bridge
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+   }
+   element mclk125_reset_sync
+   {
+      datum _sortIndex
+      {
+         value = "14";
          type = "int";
       }
    }
@@ -290,7 +306,7 @@
  <module
    name="data_path_subsystem"
    kind="scifi_datapath_system_v3"
-   version="1.0"
+   version="3.0.4.512"
    enabled="1">
   <parameter name="AUTO_AVMM_CLK_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_AVMM_CLK_CLOCK_RATE" value="156250000" />
@@ -364,6 +380,47 @@
   <parameter name="NUM_RESET_OUTPUTS" value="1" />
   <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
   <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <module
+   name="mclk125_reset_bridge"
+   kind="altera_reset_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ACTIVE_LOW_RESET" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="NUM_RESET_OUTPUTS" value="1" />
+  <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
+  <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <module
+   name="mclk125_reset_sync"
+   kind="altera_reset_controller"
+   version="18.1"
+   enabled="1">
+  <parameter name="MIN_RST_ASSERTION_TIME" value="3" />
+  <parameter name="NUM_RESET_INPUTS" value="1" />
+  <parameter name="OUTPUT_RESET_SYNC_EDGES" value="deassert" />
+  <parameter name="RESET_REQUEST_PRESENT" value="0" />
+  <parameter name="RESET_REQ_EARLY_DSRT_TIME" value="1" />
+  <parameter name="RESET_REQ_WAIT_TIME" value="1" />
+  <parameter name="SYNC_DEPTH" value="2" />
+  <parameter name="USE_RESET_REQUEST_IN0" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN1" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN10" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN11" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN12" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN13" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN14" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN15" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN2" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN3" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN4" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN5" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN6" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN7" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN8" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN9" value="0" />
+  <parameter name="USE_RESET_REQUEST_INPUT" value="0" />
  </module>
  <module name="mclk125_souce" kind="clock_source" version="18.1" enabled="1">
   <parameter name="clockFrequency" value="125000000" />
@@ -484,6 +541,16 @@
    kind="clock"
    version="18.1"
    start="mclk125_souce.clk"
+   end="mclk125_reset_bridge.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="mclk125_souce.clk"
+   end="mclk125_reset_sync.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="mclk125_souce.clk"
    end="control_path_subsystem.clk125_in_clk" />
  <connection
    kind="clock"
@@ -569,6 +636,11 @@
    kind="reset"
    version="18.1"
    start="mclk125_souce.clk_reset"
+   end="mclk125_reset_bridge.in_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="mclk125_souce.clk_reset"
    end="data_path_subsystem.monitor_reset_in_reset" />
  <connection
    kind="reset"
@@ -579,7 +651,7 @@
    kind="reset"
    version="18.1"
    start="mclk125_souce.clk_reset"
-   end="upload_subsystem.upload_sc_clock_reset" />
+   end="mclk125_reset_sync.reset_in0" />
  <connection
    kind="reset"
    version="18.1"
@@ -615,6 +687,11 @@
    version="18.1"
    start="ext_reset_merge_cclk156.reset_out"
    end="ext_reset_pipe1_cclk156.in_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="mclk125_reset_sync.reset_out"
+   end="upload_subsystem.upload_sc_clock_reset" />
  <connection
    kind="reset"
    version="18.1"
