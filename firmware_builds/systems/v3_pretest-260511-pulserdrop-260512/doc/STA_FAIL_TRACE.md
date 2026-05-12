@@ -127,3 +127,79 @@ an added pipeline/bridge boundary or regenerating with an interconnect option
 that cuts the long Merlin feedback cone. No timing exception should be applied
 without a functional proof.
 
+## 2026-05-12 reset-sync partial closure
+
+Command rerun after Qsys reset synchronization:
+
+```text
+quartus_sh --flow compile top -c top
+quartus_sta top -c top
+quartus_sta -t sta/run_4corners_1p0_trace.tcl
+```
+
+The generated Qsys reset topology now contains:
+
+- parent `mclk125_reset_sync` (`altera_reset_controller`, `SYNC_DEPTH=2`) for `upload_subsystem.upload_sc_clock_reset`
+- child `monitor_reset_sync` (`altera_reset_controller`, `SYNC_DEPTH=2`) for `master_datapath.clk_reset`, `lvds_rx_controller_pro_0.{control,data}_reset`, `mutrig_reset_controller_0.dpa_reset`, `mm_clock_crossing_bridge.m0_reset`, and `mm_pipeline_jtagmaster2rstctrl.reset`
+
+The raw board reset now feeds the child synchronizer input only:
+
+```text
+monitor_reset_in_reset_reset_n_ports_inv -> monitor_reset_sync.reset_in0
+monitor_reset_sync_reset_out_reset -> mm_pipeline_jtagmaster2rstctrl_reset_reset_bridge_in_reset_reset
+```
+
+No `set_false_path`, `set_max_delay`, or synchronized-side timing exception was added.
+
+### New 1.0x four-corner WNS
+
+| Corner | Setup WNS | Hold WNS | Recovery WNS | Removal WNS | Verdict |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Slow 1100 mV 85 C | -3.220 ns | +0.187 ns | +1.628 ns | +0.375 ns | FAIL |
+| Slow 1100 mV 0 C | -3.074 ns | +0.170 ns | +1.832 ns | +0.361 ns | FAIL |
+| Fast 1100 mV 85 C | -1.764 ns | +0.077 ns | +3.456 ns | +0.274 ns | FAIL |
+| Fast 1100 mV 0 C | -1.647 ns | +0.062 ns | +3.819 ns | +0.211 ns | FAIL |
+
+Recovery is closed on all four corners. The old Slow85 recovery failure from
+`board_reset_adapter.u_board_reset.board_reset_n_int~DUPLICATE` into
+`mm_interconnect_0.crosser_011/crosser_007.clock_xer.in_data_buffer[*]`
+is no longer present in the top recovery reports.
+
+### New worst setup paths
+
+| Corner | Rank | Slack | Source | Destination | Launch clock | Latch clock |
+| --- | ---: | ---: | --- | --- | --- | --- |
+| Slow85 | 1 | -3.220 ns | `runctl_mgmt_host_0.snap_exec_ts_lvds[9]` | `runctl_mgmt_host_0.snap_exec_ts_mm_q0[9]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Slow85 | 2 | -2.922 ns | `runctl_mgmt_host_0.snap_run_number_lvds[2]` | `runctl_mgmt_host_0.snap_run_number_mm_q0[2]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Slow85 | 3 | -2.899 ns | `runctl_mgmt_host_0.snap_run_number_lvds[3]` | `runctl_mgmt_host_0.snap_run_number_mm_q0[3]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Slow0 | 1 | -3.074 ns | `runctl_mgmt_host_0.snap_exec_ts_lvds[9]` | `runctl_mgmt_host_0.snap_exec_ts_mm_q0[9]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Slow0 | 2 | -2.771 ns | `runctl_mgmt_host_0.snap_exec_ts_lvds[14]` | `runctl_mgmt_host_0.snap_exec_ts_mm_q0[14]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Slow0 | 3 | -2.763 ns | `runctl_mgmt_host_0.snap_run_number_lvds[3]` | `runctl_mgmt_host_0.snap_run_number_mm_q0[3]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Fast85 | 1 | -1.764 ns | `runctl_mgmt_host_0.snap_exec_ts_lvds[9]` | `runctl_mgmt_host_0.snap_exec_ts_mm_q0[9]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Fast85 | 2 | -1.534 ns | `runctl_mgmt_host_0.snap_run_number_lvds[3]` | `runctl_mgmt_host_0.snap_run_number_mm_q0[3]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Fast85 | 3 | -1.525 ns | `runctl_mgmt_host_0.snap_exec_ts_lvds[32]` | `runctl_mgmt_host_0.snap_exec_ts_mm_q0[32]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Fast0 | 1 | -1.647 ns | `runctl_mgmt_host_0.snap_exec_ts_lvds[9]` | `runctl_mgmt_host_0.snap_exec_ts_mm_q0[9]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Fast0 | 2 | -1.446 ns | `runctl_mgmt_host_0.snap_run_number_lvds[3]` | `runctl_mgmt_host_0.snap_run_number_mm_q0[3]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+| Fast0 | 3 | -1.433 ns | `runctl_mgmt_host_0.snap_run_number_lvds[2]` | `runctl_mgmt_host_0.snap_run_number_mm_q0[2]` | `pll_sclk~PLL_OUTPUT_COUNTER|divclk` | `transceiver_pll_clock[0]` |
+
+The remaining failures are setup-only paths in `upload_subsystem.runctl_mgmt_host_0`
+snapshot synchronization from the LVDS clock domain to `transceiver_pll_clock[0]`.
+They are not the original Qsys Avalon-ST reset-recovery crosser paths.
+
+Evidence files:
+
+- `syn/feb_system_v3_qsys_generate_20260512_2318_reset_sync_metadata_isolated.status`
+- `syn/board_projects/fe_scifi_feb_v3/quartus_compile_reset_sync_20260512.console.log`
+- `syn/board_projects/fe_scifi_feb_v3/quartus_sta_reset_sync_20260512.console.log`
+- `syn/board_projects/fe_scifi_feb_v3/quartus_sta_1p0_trace_reset_sync_20260512.console.log`
+- `syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/summary_1p0.txt`
+- `syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/*_{setup,hold,recovery,removal}_full_path.rpt`
+
+SOF produced by the partial-closure compile:
+
+```text
+65ec83118934df80f7485b2e85bec7813e7c6a0d12fe8bc8c76ae310f01123b0  output_files/top.sof
+```
+
+Verdict: `partial-closure`. Reset recovery is fixed; integration 1.0x still
+fails setup, so no further timing fix was attempted in this run.

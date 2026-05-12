@@ -39,6 +39,7 @@ foreach {label op} $corners {
     set setup_path [file join $report_dir "${label}_setup_full_path.rpt"]
     set hold_path [file join $report_dir "${label}_hold_full_path.rpt"]
     set recovery_path [file join $report_dir "${label}_recovery_full_path.rpt"]
+    set removal_path [file join $report_dir "${label}_removal_full_path.rpt"]
 
     report_timing -setup -npaths 20 -detail full_path -show_routing \
         -file $setup_path
@@ -46,10 +47,13 @@ foreach {label op} $corners {
         -file $hold_path
     report_timing -recovery -npaths 20 -detail full_path -show_routing \
         -file $recovery_path
+    report_timing -removal -npaths 20 -detail full_path -show_routing \
+        -file $removal_path
 
     puts $summary_fh "setup_report: $setup_path"
     puts $summary_fh "hold_report: $hold_path"
     puts $summary_fh "recovery_report: $recovery_path"
+    puts $summary_fh "removal_report: $removal_path"
     puts $summary_fh ""
 }
 
