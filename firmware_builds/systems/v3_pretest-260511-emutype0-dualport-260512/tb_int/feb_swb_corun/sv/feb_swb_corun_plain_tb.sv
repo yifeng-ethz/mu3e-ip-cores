@@ -3,7 +3,7 @@
 module feb_swb_corun_plain_tb;
   import feb_swb_corun_pkg::*;
 
-  localparam int ACTIVE_LANES = 2;
+  localparam int ACTIVE_LANES = 4;
   localparam int CHANNELS_PER_ASIC = 32;
   localparam int DEFAULT_ASIC_COUNT = 8;
   localparam int MAX_ASIC_COUNT = 8;
@@ -279,10 +279,10 @@ module feb_swb_corun_plain_tb;
 
   function automatic int unsigned source_lane_for_asic(input int unsigned asic);
     begin
-      if (ACTIVE_LANES < 2 || active_asic_count != MAX_ASIC_COUNT) begin
+      if (ACTIVE_LANES <= 1) begin
         return 0;
       end
-      return (asic >= 4) ? 0 : 1;
+      return (asic / 2) % ACTIVE_LANES;
     end
   endfunction
 
@@ -955,7 +955,8 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "fifo_overflow=0x%0h", fifo_overflow);
       $fdisplay(summary_fd, "fifo_underflow=0x%0h", fifo_underflow);
 
-      assert(swb_enable_mask == 4'h3) else $fatal(1, "SWB lane mask mismatch");
+      assert(swb_enable_mask == ((4'h1 << ACTIVE_LANES) - 4'h1))
+        else $fatal(1, "SWB lane mask mismatch");
       assert(fifo_overflow == '0) else $fatal(1, "adapter FIFO overflow");
       assert(fifo_underflow == '0) else $fatal(1, "adapter FIFO underflow");
       assert(expected_hits.size() == expected_hits_runtime)
@@ -1111,6 +1112,8 @@ module feb_swb_corun_plain_tb;
     fork
       drive_lane(0);
       drive_lane(1);
+      drive_lane(2);
+      drive_lane(3);
     join
 
     for (int cyc = 0; cyc < drain_swb_cycles; cyc++) begin
