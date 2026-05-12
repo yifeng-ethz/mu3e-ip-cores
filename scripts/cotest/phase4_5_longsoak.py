@@ -4,6 +4,10 @@
 # ============================================================================
 """Run the directed 100k-hit single-channel ping-pong histogram soak.
 
+Default ping-pong period 1 ms (125,000 cycles @ 125 MHz); 10x faster
+sampling than the prior 10 ms; override via --interval-ms 10.0 if a
+longer interval is needed for slow-rate runs.
+
 This helper intentionally reuses phase4_5_sweep.py for all SC access,
 address constants, retry policy, and run-control opcode handling. Run it
 under swb_ring_lock, for example:
@@ -11,6 +15,9 @@ under swb_ring_lock, for example:
   PHASE4_5_BUILD_DIR=/abs/path/to/build \
     /home/yifeng/.local/bin/swb_ring_lock \
     python3 scripts/cotest/phase4_5_longsoak.py
+
+  # Use 10 ms ping-pong period (prior default) for slow-rate runs:
+  python3 scripts/cotest/phase4_5_longsoak.py --interval-ms 10.0
 """
 from __future__ import annotations
 
@@ -28,7 +35,12 @@ from typing import Any
 import phase4_5_sweep as sweep
 
 
-INTERVAL_10MS_CYCLES = 1_250_000
+# Fix 2: default ping-pong period changed from 10 ms (1,250,000 cycles) to
+# 1 ms (125,000 cycles) per user directive. Override via --interval-ms.
+# 125 MHz clock: 1 ms = 125,000 cycles, 10 ms = 1,250,000 cycles.
+INTERVAL_1MS_CYCLES  = 125_000      # 1 ms @ 125 MHz (new default)
+INTERVAL_10MS_CYCLES = 1_250_000    # 10 ms @ 125 MHz (legacy; use --interval-ms 10.0)
+DEFAULT_INTERVAL_MS  = 1.0
 DEFAULT_TARGET_HITS = 100_000
 DEFAULT_RUN_SECONDS = 0.100
 DEFAULT_CAL_SECONDS = 0.050
@@ -225,9 +237,10 @@ def _write_final_bins(path: Path, bins: list[int]) -> None:
 
 
 def _run_soak(sc_tool: Path, link: int, rate_88fp: int,
-              run_seconds: float, intervals: int, log_fh: Any) -> dict[str, Any]:
+              run_seconds: float, intervals: int, interval_clocks: int,
+              log_fh: Any) -> dict[str, Any]:
     cfg = _configure_common(
-        sc_tool, link, rate_88fp, INTERVAL_10MS_CYCLES, log_fh,
+        sc_tool, link, rate_88fp, interval_clocks, log_fh,
     )
     snap_pre = sweep.full_snapshot(sc_tool, link, log_fh=log_fh)
 
@@ -301,7 +314,7 @@ def _run_soak(sc_tool: Path, link: int, rate_88fp: int,
     return {
         "rate_88fp": f"0x{rate_88fp:04X}",
         "run_seconds": run_seconds,
-        "interval_clocks": INTERVAL_10MS_CYCLES,
+        "interval_clocks": interval_clocks,
         "intervals_requested": intervals,
         "common_config": cfg,
         "snap_pre": snap_pre,
@@ -366,10 +379,18 @@ def main() -> int:
                         help="Skip calibration and use this 8.8 rate")
     parser.add_argument("--no-calibrate", action="store_true")
     parser.add_argument("--build-dir", type=Path, default=sweep.BUILD_DIR)
+    parser.add_argument(
+        "--interval-ms", type=float, default=DEFAULT_INTERVAL_MS,
+        help=(
+            "Ping-pong interval in ms (default 1.0 ms = 125,000 cycles @ 125 MHz). "
+            "Use --interval-ms 10.0 for 10 ms (legacy 1,250,000-cycle period)."
+        ),
+    )
     args = parser.parse_args()
 
     out_dir = _ensure_output_dir(args.build_dir.resolve())
     log_path = out_dir / "tool_calls.log"
+    interval_clocks = int(args.interval_ms * 125_000)
     try:
         with open(log_path, "w", encoding="ascii") as log_fh:
             if args.no_calibrate or args.rate_88fp is not None:
@@ -389,7 +410,7 @@ def main() -> int:
 
             soak = _run_soak(
                 args.sc_tool, args.link, chosen_rate, args.run_seconds,
-                intervals=10, log_fh=log_fh,
+                intervals=10, interval_clocks=interval_clocks, log_fh=log_fh,
             )
     except Exception as exc:
         failure = {
@@ -432,7 +453,7 @@ def main() -> int:
         "difference_hits": observed_cumulative - args.target_hits,
         "tolerance_hits": args.tolerance_hits,
         "rate_88fp": f"0x{chosen_rate:04X}",
-        "interval_clocks": INTERVAL_10MS_CYCLES,
+        "interval_clocks": soak["interval_clocks"],
         "run_seconds": args.run_seconds,
         "intervals_captured": len(interval_records),
         "toggle_misses": toggle_misses,

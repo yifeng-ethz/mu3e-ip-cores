@@ -1059,10 +1059,13 @@ debug-FIFO level readouts.
 #### 4.5.4 Ping-pong sanity
 
 `BANK_STATUS` (word offset `0x2C/4 = 0x0B`) must alternate between active-A
-and active-B every `INTERVAL_CFG` interval. Read it 32 times across the run
-and confirm the alternation is regular (stddev < 1 interval). If it's
-not, the histogram ping-pong ISP missed an interval edge and one bank is
-being written over an un-drained read.
+and active-B every `INTERVAL_CFG` interval. Read it 32+ times across the run
+at the new 1 ms ping-pong cadence; alternation regularity check stddev < 1 ms.
+If it is not regular, the histogram ping-pong ISP missed an interval edge and
+one bank is being written over an un-drained read.
+
+Long-soak (100k single-channel hits) uses `phase4_5_longsoak.py --interval-ms 1.0`
+for 10x finer bank-toggle observation.
 
 ### 4.6 Pass/Fail criterion for Phase 4
 
