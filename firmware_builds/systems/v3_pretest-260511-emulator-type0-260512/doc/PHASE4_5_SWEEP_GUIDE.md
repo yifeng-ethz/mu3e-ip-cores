@@ -4,7 +4,8 @@ Date: 2026-05-12
 
 ## Purpose
 
-One-page operator guide for `script/phase4_5_sweep.py`, the single
+One-page operator guide for `scripts/cotest/phase4_5_sweep.py` (relative to
+mu3e-ip-cores repo root), the single
 integrated TEST_PLAN section 4.5 sweep runner for the FEB v3
 emulator-type0 build (commit a710b11a working baseline).
 
@@ -49,14 +50,14 @@ For every row in the 32-row sweep matrix, the script
 
 ```bash
 /home/yifeng/.local/bin/swb_ring_lock \
-    python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/phase4_5_sweep.py --all
+    python3 scripts/cotest/phase4_5_sweep.py --all
 ```
 
 ### Single row
 
 ```bash
 /home/yifeng/.local/bin/swb_ring_lock \
-    python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/phase4_5_sweep.py \
+    python3 scripts/cotest/phase4_5_sweep.py \
         --row p45_000_all_lanes_0xFFFFFFFF_default_dir
 ```
 
@@ -64,19 +65,19 @@ For every row in the 32-row sweep matrix, the script
 
 ```bash
 # print every command without executing
-python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/phase4_5_sweep.py --dry-run --all
+python3 scripts/cotest/phase4_5_sweep.py --dry-run --all
 
 # list 32 row_ids
-python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/phase4_5_sweep.py --list
+python3 scripts/cotest/phase4_5_sweep.py --list
 
 # synthetic-data plot + LOG_POP decoder self-test
-python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/phase4_5_sweep.py --plot-smoke
+python3 scripts/cotest/phase4_5_sweep.py --plot-smoke
 
 # rebuild master table from existing sweep_evidence/
-python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/phase4_5_sweep.py --regen-table
+python3 scripts/cotest/phase4_5_sweep.py --regen-table
 
 # dump the inline plan to a json file
-python3 firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/phase4_5_sweep.py --export-plan /tmp/plan.json
+python3 scripts/cotest/phase4_5_sweep.py --export-plan /tmp/plan.json
 ```
 
 ## Flag reference
@@ -229,12 +230,18 @@ Python exception:
 
 | Path | Owner |
 |------|-------|
-| `script/phase4_5_sweep.py` | THE script (all integrated) |
+| `<REPO_ROOT>/scripts/cotest/phase4_5_sweep.py` | THE script (all integrated, repo-level) |
 | `doc/PHASE4_5_SWEEP_GUIDE.md` | this guide |
 | `doc/PHASE4_5_SWEEP_TABLE.md` | auto-regenerated master table |
 | `sweep_evidence/<row_id>/` | per-row artifacts |
 | `sweep_evidence/_smoke/` | smoke-test artifacts (synthetic) |
 | `script/phase4_5_*.deprecated.*` | move-aside copies of the legacy 4-file split (kept for audit) |
+
+To target a different build (evidence/doc output dir), override the build dir
+via env var:
+```
+PHASE4_5_BUILD_DIR=/abs/path/to/build python3 scripts/cotest/phase4_5_sweep.py --all
+```
 
 ## Reading the master table
 
