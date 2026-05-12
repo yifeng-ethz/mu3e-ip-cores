@@ -30,6 +30,8 @@ runs at this build dir.
 | BUG-002-T | T | closure-blocker | swept | fixed | 2026-05-12 auto-report | 1d946b02 | 7585741f cosim row_config files still describe the 208-row layout after TEST_BASIC was trimmed to 194 rows at 786da8b2. |
 | BUG-003-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 2 slice 3 rerun | cfae13e1 | Onclick sanity rows carried expected_pulses=10 but the cosim source emitted one pulse per 1 ms window. |
 | BUG-004-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 3 slice 4 rerun | 254d7c87 | Four-ASIC RN.BASIC masks were compressed onto two SWB physical lanes and checked against the stale two-lane oracle. |
+| BUG-005-R | R | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | 4e798bc/02679b20 | Native-signoff OPQ src_compat left page_allocator.handle_credit_update_valid_i unconnected, corrupting full-mask backlog payload identity. |
+| BUG-006-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | a073596b/e9eaeaea | Native-signoff lossless traces were failed by stale generated-OPQ summary assumptions and non-closure defaults. |
 
 ---
 
@@ -110,6 +112,58 @@ runs at this build dir.
   from 20/32 PASS to 28/32 PASS. potential_hazard: RN.BASIC.163-166 remain
   open as a separate full-8-lane OPQ/RDMA ceiling cluster.
 - Commit: 254d7c87 `[PATCH] HW: v3_pretest-260511 corun lane compaction`.
+
+### BUG-005-R: OPQ src_compat wrapper drops handle credit return
+
+- First seen: `make run_BASIC SLICE=4 PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_iter3_slice4_20260512`, then isolated with
+  RN.BASIC.163 native-signoff directed reruns.
+- Symptom: RN.BASIC.163-166 full-mask rows reached OPQ ingress with 125,138
+  generated hits, but the default profile emitted only 75,217 OPQ/RDMA hits.
+  With enlarged OPQ memories the endpoint count recovered to 125,138, but
+  8,422 expected DMA payloads were replaced by zero-payload ghost hits.
+- Root cause: `packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic.sv`
+  had drifted from the maintained OPQ RTL and did not connect
+  `block_path_lane_credit_update_valid` to
+  `page_allocator.handle_credit_update_valid_i`. The allocator therefore had
+  stale handle FIFO credit information under full-mask backlog and could
+  recycle handle storage before the block mover had consumed the old handle.
+- Fix status: fixed; the source-compat wrapper now wires the handle credit
+  return and closes the adjacent unconnected debug ports so compile warnings
+  do not hide future functional port drift. after_fix_outcome: RN.BASIC.163
+  moved from 116,716/125,138 matched hits with 8,422 ghosts to
+  125,138/125,138 matched hits with zero ghosts; RN.BASIC.163-166 all pass
+  rate, delay, and RDMA after the paired analyzer/defaults fixes.
+  potential_hazard: the closure evidence uses the native-signoff OPQ profile
+  documented in `COSIM_USAGE.md`; smaller generated/default OPQ profiles remain
+  capacity probes, not RN.BASIC closure evidence.
+- Commit: packet_scheduler 4e798bc
+  `[PATCH] HW: v3_pretest-260511 opq handle credit`; parent pointer 02679b20
+  `[PATCH] HW: v3_pretest-260511 packet scheduler pointer`.
+
+### BUG-006-H: native-signoff OPQ traces failed stale generated-summary checks
+
+- First seen: RN.BASIC.163 rerun after BUG-005-R fixed OPQ payload identity.
+- Symptom: the trace analyzer returned FAIL with `issue_count=2` solely because
+  `run_swb_corun.log` did not contain `OPQ_NATIVE_SUMMARY` and
+  `OPQ_NATIVE_LANE_SUMMARY`, even though the per-hit lineage showed
+  OPQ ingress = OPQ egress = DMA = 125,138 and zero ghosts.
+- Root cause: `tb_int/feb_swb_corun/scripts/analyze_feb_swb_trace.py` treated
+  generated-OPQ text summaries as mandatory for every lossless run. The
+  RN.BASIC make target also still defaulted to the stale generated/default OPQ
+  profile and `PARALLEL=30`, which did not match the safe closure setup.
+- Fix status: fixed; missing native summary text is waived only when the trace
+  itself proves lossless OPQ/DMA bijection with every hit row PASS, and
+  `cosim/Makefile` now exports the native-signoff OPQ profile, repo-root source
+  path, `/data2` build root, and `PARALLEL=16` default. after_fix_outcome:
+  analyzer replay on the row-163 trace returns `TRACE_DEBUG_PASS`; RN.BASIC.163
+  rerun returns rate/delay/RDMA PASS; RN.BASIC.163-166 all pass with
+  `issue_count=0`. potential_hazard: nonzero OPQ drop/ghost evidence remains
+  fatal; this fix only suppresses missing text-summary issues when the trace is
+  otherwise bijective.
+- Commit: a073596b
+  `[PATCH] HW: v3_pretest-260511 opq lossless analyzer`; e9eaeaea
+  `[PATCH] HW: v3_pretest-260511 rn basic opq defaults`.
 
 ## Format for new entries
 

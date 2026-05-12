@@ -50,3 +50,30 @@
   went 20/32 to 28/32. BUG-004-H is closed for RN.BASIC.167-194 except the
   separate full-mask rows RN.BASIC.163-166, which still fail at
   OPQ/RDMA egress with 75,217/125,000 hits and move to the next cluster.
+
+## 2026-05-12 - Iter 4
+
+- Cluster being closed: BUG-005-R full-mask OPQ handle-credit corruption in
+  RN.BASIC.163-166, plus BUG-006-H native-signoff analyzer/defaults fallout.
+- Root-cause hypothesis: the OPQ source-compat wrapper used by the cosim
+  native-signoff compile had drifted from maintained RTL and left
+  `page_allocator.handle_credit_update_valid_i` unconnected, so full-mask
+  backlog recycled handle slots and emitted zero-payload ghosts after counts
+  were otherwise conserved. Once that was fixed, the harness still failed
+  because it required generated-OPQ text summaries that native-signoff traces
+  do not emit.
+- Patch summary:
+  - `packet_scheduler/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic.sv`:
+    wire `block_path_lane_credit_update_valid` into the page allocator and
+    hook the adjacent debug-only ports.
+  - `tb_int/feb_swb_corun/scripts/analyze_feb_swb_trace.py`: allow missing
+    native OPQ text summaries only when the per-hit trace proves exact
+    OPQ-ingress / OPQ-egress / DMA bijection with no ghosts.
+  - `cosim/Makefile`: default `PARALLEL=16` and export the native-signoff OPQ
+    profile rooted at this repo.
+  - `cosim/doc/COSIM_USAGE.md`: document the closure command, `/data2` scratch
+    workflow, and native-signoff OPQ profile.
+- Re-run PASS count delta: RN.BASIC.163 moved from 116,716/125,138 matched
+  hits with 8,422 ghosts to 125,138/125,138 matched hits with zero ghosts.
+  RN.BASIC.163-166 went 0/4 to 4/4 PASS under the corrected native-signoff
+  profile; slice 4 is therefore closed by composition from 28/32 to 32/32.
