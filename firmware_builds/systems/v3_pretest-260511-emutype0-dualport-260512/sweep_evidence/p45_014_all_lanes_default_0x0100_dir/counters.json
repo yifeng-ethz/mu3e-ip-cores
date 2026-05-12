@@ -874,6 +874,28 @@
     },
     "idle_completion": "IDLE_OBSERVED",
     "failure_mode": null,
-    "warnings": "HIST_BIN_SUM_NE_CSR13_diff=31860544_sum=0_csr13=31860544"
+    "warnings": "HIST_BIN_SUM_NE_CSR13_diff=31860544_sum=0_csr13=31860544",
+    "bucket": "PERF",
+    "active_channels": 256,
+    "requested_hps": 125000000.0,
+    "deliverable_hps": 125000000.0,
+    "opq_ceiling_hps": 250000000.0,
+    "theoretical_window_ms": 4000.0,
+    "theoretical_hits": 500000000.0,
+    "theoretical_loss_pct": 0.0,
+    "sim_delta_pct": null,
+    "board_delta_pct": -93.62789120000001
+  },
+  "theoretical": {
+    "bucket": "PERF",
+    "active_channels": 256,
+    "rate_88fp": "0x0100",
+    "per_active_channel_hps": 488281.25,
+    "requested_hps": 125000000.0,
+    "deliverable_hps": 125000000.0,
+    "opq_ceiling_hps": 250000000.0,
+    "run_window_ms": 4000.0,
+    "theoretical_hits": 500000000.0,
+    "theoretical_loss_pct": 0.0
   }
 }

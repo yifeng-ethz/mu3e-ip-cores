@@ -870,6 +870,28 @@
     },
     "idle_completion": "IDLE_OBSERVED",
     "failure_mode": null,
-    "warnings": null
+    "warnings": null,
+    "bucket": "BASIC",
+    "active_channels": 0,
+    "requested_hps": 0.0,
+    "deliverable_hps": 0.0,
+    "opq_ceiling_hps": 250000000.0,
+    "theoretical_window_ms": 4000.0,
+    "theoretical_hits": 0.0,
+    "theoretical_loss_pct": null,
+    "sim_delta_pct": null,
+    "board_delta_pct": null
+  },
+  "theoretical": {
+    "bucket": "BASIC",
+    "active_channels": 0,
+    "rate_88fp": "0x0800",
+    "per_active_channel_hps": 3906250.0,
+    "requested_hps": 0.0,
+    "deliverable_hps": 0.0,
+    "opq_ceiling_hps": 250000000.0,
+    "run_window_ms": 4000.0,
+    "theoretical_hits": 0.0,
+    "theoretical_loss_pct": null
   }
 }

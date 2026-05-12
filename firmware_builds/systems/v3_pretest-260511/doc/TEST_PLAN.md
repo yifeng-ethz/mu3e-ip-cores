@@ -10,12 +10,13 @@ bucket has its own file under `doc/`:
 | Bucket | File | Cases | Methodology | Bucket Purpose |
 |---|---|---:|---|---|
 | **BU** Bring-up | [TEST_BU.md](TEST_BU.md) | 25 | B | cold read of every CSR / UID / META; no stimulus |
-| **BASIC** | [TEST_BASIC.md](TEST_BASIC.md) | 159 | D + R | happy-path SC + RC + RN data flow at below-saturation rates |
-| **PERF** | [TEST_PERF.md](TEST_PERF.md) | 15 | P + D | SC aggressive reads under RUNNING; RN saturation curve; long-soak |
+| **BASIC** | [TEST_BASIC.md](TEST_BASIC.md) | 151 | D + R | happy-path SC + RC + RN data flow at below-saturation rates |
+| **PERF** | [TEST_PERF.md](TEST_PERF.md) | 14 | P + D | SC aggressive reads under RUNNING; RN saturation curve; long-soak (waived from cosim) |
 | **ERROR** | [TEST_ERROR.md](TEST_ERROR.md) | 12 | E | illegal opcode sequences; invalid CSR values; reject-or-error |
 | **EDGE** | [TEST_EDGE.md](TEST_EDGE.md) | 6 | D | corner masks; single-channel; SC + RUNNING concurrency |
 
-**Total: 217 cases** across 5 bucket files.
+**Total: 208 cases** across 5 bucket files. Every row (except long-soak waivers)
+runs in BOTH cosim AND on-board, with theory/sim/board cross-validation.
 
 **Companion docs:**
 [SIM_CONVENTIONS.md](SIM_CONVENTIONS.md),
@@ -36,7 +37,9 @@ bucket has its own file under `doc/`:
 | **SC** | Slow control - BIST writes / aggressive reads | TEST_BASIC.md (SC.BASIC) + TEST_PERF.md (SC.AG) |
 | **RC** | Run control - opcode sequences | TEST_BASIC.md (RC.BASIC) + TEST_ERROR.md (RC.ERROR) |
 | **RN** | Run datapath - emulator -> hist -> OPQ -> RDMA | TEST_BASIC.md (RN.BASIC) + TEST_PERF.md (RN.PROF) + TEST_ERROR.md (RN.ERROR) + TEST_EDGE.md (RN.EDGE) |
-| **RN.COSIM** | End-to-end FEB+SWB cosim | TEST_BASIC.md (sanity) + TEST_PERF.md (long-soak) |
+
+**Note:** there is no separate `RN.COSIM` bucket. The cosim is the **sim
+evidence stream** for every RN row; see the 3-evidence model below.
 
 ## Methodology key
 
@@ -52,32 +55,70 @@ bucket has its own file under `doc/`:
 
 - **BU**: read-only identity / metadata probe of every IP. Must pass before any
   later bucket is trusted.
-- **BASIC**: aggregate hit rate < 50% of OPQ ingress ceiling. Theoretical-delta
-  < 5% on both sim and board.
-- **PERF**: aggregate rate at or above the ceiling. Saturation curve measured;
-  loss expected to match clipped theoretical_hits. Also includes SC reads
-  during RUNNING (aggressive) and long-soak (>= 10 s).
+- **BASIC**: aggregate hit rate < 50% of OPQ ingress ceiling. Sim and board
+  both compare directly against `theoretical_hits` and should be lossless
+  within tolerance.
+- **PERF**: aggregate rate at or above 50% of the OPQ ceiling, including rows
+  above the ceiling. Saturation curve rows are measured against clipped
+  `theoretical_hits`; loss beyond that curve appears as a negative theory
+  delta. Also includes SC reads during RUNNING (aggressive) and long-soak
+  (>= 10 s).
 - **ERROR**: stimulus deliberately violates the IP contract. IP must reject
   gracefully without corrupting valid state.
 - **EDGE**: corner cases of the legal contract (boundary masks, single-channel
   / single-lane, simultaneous SC + RUNNING).
 
-## 3-evidence model
+## 3-evidence model (theory / sim / board)
 
-Every RN row PASSes only if all THREE evidence streams agree within tolerance:
+Every row in every bucket (BASIC, PERF, ERROR, EDGE) has THREE evidence
+streams that MUST agree with each other:
 
-| Evidence | Source | Window | Purpose |
-|---|---|---|---|
-| **E1** post-TERM CSR snapshot | SC reads of all counters AFTER `STATUS=IDLE` post-`0x13` | end-of-run, single point | authoritative final count |
-| **E2** hist during-running readout | `hist_bin[0..255]` in BOTH `INTERVAL_CFG_NEVER_FIRE` mode AND `INTERVAL_CFG = 1 ms` mode | during RUNNING + at end | per-channel + per-interval shape |
-| **E3** offline RDMA dump | SWB RDMA host-memory dump after END_RUN; per-FEB ring of hit-records | post-run, off-line replay | end-to-end transit confirmation |
+| Evidence | Source | Notes |
+|---|---|---|
+| **theory** | mathematical reference from the math codex (`theoretical_hits` from the model above) | golden reference; lossless or saturation-clipped |
+| **sim** | dual-UVM FEB <-> SWB cosim run for the same row | full DUT in `cosim/`; not a behavioural model |
+| **board** | on-board sweep on the latest arbfix FEB SOF | `phase4_5_sweep.py --row <row_id>` |
 
-For BASIC: E1, E2 sum-of-bins, and E3 record-count all agree with
-`theoretical_hits` within `|delta| < 5%`.
-For PERF: E1, E2, E3 agree with each other; collectively may sit below
-`theoretical_hits` by the saturation delta.
-For ERROR: E1 shows the rejection footprint; E2 and E3 may be empty.
-For EDGE: same as BASIC unless row note declares otherwise.
+**PASS criterion for every row** = all three measurements agree within
+tolerance. There is no separate "cosim sanity" bucket - cosim IS the sim
+evidence column for every row.
+
+| Bucket | Tolerance |
+|---|---|
+| BASIC | `|theory - sim| < 5%` AND `|theory - board| < 5%` |
+| PERF | both deltas measured against the clipped theoretical curve; the row PASSes if `(sim_delta, board_delta)` both fall on the saturation curve within ~10% noise |
+| ERROR | sim and board both report the rejection footprint; theory is the contract assertion (error counter set / no corruption) |
+| EDGE | same as BASIC unless noted |
+
+**Waivers:** long-soak rows (RUNNING >= 10 s) are waived from the cosim
+evidence requirement because the sim wall time would be prohibitive. These
+rows declare `cosim_waived = true` in the row note and rely on theory + board
+only.
+
+### Per-row sub-evidence (collected from each stream)
+
+Inside each of `sim` and `board`, three sub-measurements are recorded for
+cross-validation:
+
+| Sub-evidence | Source | Window |
+|---|---|---|
+| post-TERM CSR snapshot | counters read AFTER `STATUS=IDLE` post-`0x13` | end-of-run, single point |
+| hist during-running readout | `hist_bin[0..255]` in `INTERVAL_CFG_NEVER_FIRE` mode + `INTERVAL_CFG = 1 ms` periodic mode | during RUNNING + at end |
+| offline RDMA dump | SWB RDMA host-memory dump after END_RUN | post-run, off-line replay |
+
+All three sub-measurements (within one stream) agree with each other within
++/- 8 hits (pipeline drain tolerance). Then the stream-level total is
+compared against theory.
+
+## Parallel cosim execution
+
+The dual-UVM cosim at `cosim/` supports up to **30 parallel sim invocations**
+on the same workstation (sized by the host's available cores; the harness
+makes each row's `vsim` instance self-contained). The standard sweep runner
+groups the 128 RN.BASIC rows into 5 batches of 30 (and one partial batch),
+reducing wall-clock from ~6 hours sequential to ~15 minutes parallel.
+Codex agents that dispatch a sweep should use `make run_BASIC PARALLEL=30`
+or equivalent (TBD in cosim Makefile; see `cosim/doc/COSIM_USAGE.md`).
 
 ## SIM time conventions
 
@@ -93,14 +134,19 @@ in the row note. See `SIM_CONVENTIONS.md`.
 
 ```
 active_channels = popcount(channel_mask) * popcount(lane_mask)
-per_channel_rate_hps = rate_88fp / 256 * (125e6 / 256)
-requested_hits = per_channel_rate_hps * active_channels * run_window_s
+per_active_channel_hps = rate_88fp * (125e6 / 65536)
+requested_hps = per_active_channel_hps * active_channels
+requested_hits = requested_hps * run_window_s
 theoretical_hits = min(requested_hits, opq_ceiling_hps * run_window_s)
 sim_delta_pct   = (sim_total_hits   - theoretical_hits) / theoretical_hits * 100
 board_delta_pct = (board_total_hits - theoretical_hits) / theoretical_hits * 100
 ```
 
-`opq_ceiling_hps = 250e6` (user spec; codex confirmation in flight).
+`opq_ceiling_hps = 250e6` for the May 2026 retest. The standalone OPQ signoff
+project closes at 275 MHz (1.1x margin), while the operational target remains
+the user-specified 250 MHz aggregate delivery ceiling. The two theory deltas
+are independent comparisons against theory; the normalized sim-vs-board rate
+delta is retained only as a third comparison column in the HTML report.
 
 ---
 
@@ -139,10 +185,12 @@ board_delta_pct = (board_total_hits - theoretical_hits) / theoretical_hits * 100
 | RN.PROF (in TEST_PERF.md) | 6 | partial; saturation knee at `0x4000` observed | OPQ ingress ceiling probe |
 | RN.ERROR (in TEST_ERROR.md) | 6 | pending | invalid configs during run |
 | RN.EDGE (in TEST_EDGE.md) | 6 | RN.EDGE.002 sim-vs-board inversion pending arbfix retest | corner masks |
-| RN.COSIM.001 (in TEST_BASIC.md) | 1 | infrastructure done; lossless at 1 ms below ceiling | 6 checkpoints |
-| RN.COSIM.002 (in TEST_PERF.md) | 1 | pending | 10 s long-soak |
 
-**Total: 217 cases.** PASS count is currently dominated by BU+SC.BASIC+RC.BASIC + sim RN.BASIC; the remaining gates close as the in-flight arbfix retest + cosim + BASIC/PERF codex dispatches return.
+**Total: 208 cases.** Each row (except long-soak waivers) carries three
+agreeing evidence streams: theory, cosim sim, and board. PASS count is
+currently dominated by BU+SC.BASIC+RC.BASIC + sim RN.BASIC; the remaining
+gates close as the in-flight arbfix retest + cosim 1 ms rerun + BASIC/PERF
+codex dispatches return.
 
 ---
 
@@ -179,7 +227,10 @@ Bug ledger:
 
 ## Open items
 
-- **OPQ aggregate ingress ceiling**: user-stated 250 MHz; exact RTL confirmation pending (codex1 BASIC/PERF dispatch in flight). Once confirmed, RN.BASIC threshold of < 50% ceiling and RN.PROF curve cross-check the value.
+- **OPQ aggregate ingress ceiling**: 250 MHz operational target confirmed
+  against the OPQ signoff collateral; standalone signoff closes at 275 MHz
+  margin. RN.BASIC threshold is therefore < 125 Mhit/s requested aggregate,
+  and RN.PROF rows use clipped theoretical_hits at 250 Mhit/s.
 - **RN.BASIC matrix population**: 128-row enumeration lives in `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()` (BASIC/PERF codex in flight expands today's 32 rows to 128).
 - **RC.ERROR closure**: harness exists at `tb_int/feb_swb_corun`. Each ERROR row may leave the FSM in a non-IDLE state; sequencing requires explicit recovery between rows.
 - **E3 offline RDMA dump**: not yet wired end-to-end. Current evidence covers E1 + E2. E3 requires a SWB host-memory dump tool.
