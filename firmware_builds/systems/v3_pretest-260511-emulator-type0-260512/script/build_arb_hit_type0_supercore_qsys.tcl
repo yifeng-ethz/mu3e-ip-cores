@@ -39,6 +39,21 @@ proc configure_arb_child {name lane} {
     set_required_param $name VERSION_GIT 0
 }
 
+proc configure_csr_pipeline_bridge {name} {
+    add_instance $name altera_avalon_mm_bridge 18.1
+    set_required_param $name DATA_WIDTH 32
+    set_required_param $name SYMBOL_WIDTH 8
+    set_required_param $name ADDRESS_WIDTH 5
+    set_required_param $name USE_AUTO_ADDRESS_WIDTH 0
+    set_required_param $name ADDRESS_UNITS WORDS
+    set_required_param $name MAX_BURST_SIZE 1
+    set_required_param $name MAX_PENDING_RESPONSES 1
+    set_required_param $name LINEWRAPBURSTS 0
+    set_required_param $name PIPELINE_COMMAND 1
+    set_required_param $name PIPELINE_RESPONSE 1
+    set_required_param $name USE_RESPONSE 0
+}
+
 proc export_existing_interface {name type dir target} {
     catch {add_interface $name $type $dir}
     set_interface_property $name EXPORT_OF $target
@@ -77,13 +92,18 @@ export_existing_interface run_ctrl avalon_streaming sink run_ctrl_splitter.in
 
 for {set lane 0} {$lane < 8} {incr lane} {
     set inst lane_$lane
+    set csr_bridge csr_pipe_$lane
     configure_arb_child $inst $lane
+    configure_csr_pipeline_bridge $csr_bridge
 
     add_connection clk_bridge.out_clk $inst.clk
     add_connection reset_bridge.out_reset $inst.rst
+    add_connection clk_bridge.out_clk $csr_bridge.clk
+    add_connection reset_bridge.out_reset $csr_bridge.reset
     add_connection run_ctrl_splitter.out$lane $inst.run_ctrl
+    add_connection $csr_bridge.m0 $inst.csr
 
-    export_existing_interface csr_$lane avalon slave $inst.csr
+    export_existing_interface csr_$lane avalon slave $csr_bridge.s0
     export_existing_interface real_in_$lane avalon_streaming sink $inst.real_in
     export_existing_interface emu_in_$lane avalon_streaming sink $inst.emu_in
     export_existing_interface selected_out_$lane avalon_streaming source $inst.selected_out

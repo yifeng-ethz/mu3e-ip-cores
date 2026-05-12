@@ -17,6 +17,70 @@
          type = "int";
       }
    }
+   element csr_pipe_0
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element csr_pipe_1
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element csr_pipe_2
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element csr_pipe_3
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element csr_pipe_4
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+   }
+   element csr_pipe_5
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+   }
+   element csr_pipe_6
+   {
+      datum _sortIndex
+      {
+         value = "16";
+         type = "int";
+      }
+   }
+   element csr_pipe_7
+   {
+      datum _sortIndex
+      {
+         value = "18";
+         type = "int";
+      }
+   }
    element lane_0
    {
       datum _sortIndex
@@ -29,7 +93,7 @@
    {
       datum _sortIndex
       {
-         value = "4";
+         value = "5";
          type = "int";
       }
    }
@@ -37,7 +101,7 @@
    {
       datum _sortIndex
       {
-         value = "5";
+         value = "7";
          type = "int";
       }
    }
@@ -45,7 +109,7 @@
    {
       datum _sortIndex
       {
-         value = "6";
+         value = "9";
          type = "int";
       }
    }
@@ -53,7 +117,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "11";
          type = "int";
       }
    }
@@ -61,7 +125,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "13";
          type = "int";
       }
    }
@@ -69,7 +133,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "15";
          type = "int";
       }
    }
@@ -77,7 +141,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "17";
          type = "int";
       }
    }
@@ -119,14 +183,14 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_bridge.in_clk" type="clock" dir="end" />
- <interface name="csr_0" internal="lane_0.csr" type="avalon" dir="end" />
- <interface name="csr_1" internal="lane_1.csr" type="avalon" dir="end" />
- <interface name="csr_2" internal="lane_2.csr" type="avalon" dir="end" />
- <interface name="csr_3" internal="lane_3.csr" type="avalon" dir="end" />
- <interface name="csr_4" internal="lane_4.csr" type="avalon" dir="end" />
- <interface name="csr_5" internal="lane_5.csr" type="avalon" dir="end" />
- <interface name="csr_6" internal="lane_6.csr" type="avalon" dir="end" />
- <interface name="csr_7" internal="lane_7.csr" type="avalon" dir="end" />
+ <interface name="csr_0" internal="csr_pipe_0.s0" type="avalon" dir="end" />
+ <interface name="csr_1" internal="csr_pipe_1.s0" type="avalon" dir="end" />
+ <interface name="csr_2" internal="csr_pipe_2.s0" type="avalon" dir="end" />
+ <interface name="csr_3" internal="csr_pipe_3.s0" type="avalon" dir="end" />
+ <interface name="csr_4" internal="csr_pipe_4.s0" type="avalon" dir="end" />
+ <interface name="csr_5" internal="csr_pipe_5.s0" type="avalon" dir="end" />
+ <interface name="csr_6" internal="csr_pipe_6.s0" type="avalon" dir="end" />
+ <interface name="csr_7" internal="csr_pipe_7.s0" type="avalon" dir="end" />
  <interface
    name="emu_in_0"
    internal="lane_0.emu_in"
@@ -261,6 +325,150 @@
   <parameter name="DERIVED_CLOCK_RATE" value="0" />
   <parameter name="EXPLICIT_CLOCK_RATE" value="0" />
   <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="csr_pipe_0"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_1"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_2"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_3"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_4"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_5"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_6"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_7"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
  </module>
  <module name="lane_0" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
   <parameter name="BUILD" value="511" />
@@ -406,6 +614,46 @@
   <parameter name="USE_READY" value="0" />
   <parameter name="USE_VALID" value="1" />
  </module>
+ <connection kind="avalon" version="18.1" start="csr_pipe_0.m0" end="lane_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_1.m0" end="lane_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_2.m0" end="lane_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_3.m0" end="lane_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_4.m0" end="lane_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_5.m0" end="lane_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_6.m0" end="lane_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_7.m0" end="lane_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -465,7 +713,17 @@
    kind="clock"
    version="18.1"
    start="clk_bridge.out_clk"
+   end="csr_pipe_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
    end="lane_1.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_1.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -475,7 +733,17 @@
    kind="clock"
    version="18.1"
    start="clk_bridge.out_clk"
+   end="csr_pipe_2.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
    end="lane_3.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_3.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -485,7 +753,17 @@
    kind="clock"
    version="18.1"
    start="clk_bridge.out_clk"
+   end="csr_pipe_4.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
    end="lane_5.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_5.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -495,12 +773,62 @@
    kind="clock"
    version="18.1"
    start="clk_bridge.out_clk"
+   end="csr_pipe_6.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
    end="lane_7.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_7.clk" />
  <connection
    kind="reset"
    version="18.1"
    start="reset_bridge.out_reset"
    end="run_ctrl_splitter.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_2.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_4.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_7.reset" />
  <connection
    kind="reset"
    version="18.1"
