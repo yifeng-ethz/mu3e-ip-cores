@@ -1,0 +1,7 @@
+checkpoint,metric,count,range_low_cycles,range_high_cycles,observed_min_cycles,observed_max_cycles,status,note
+pre_rbcam,pre_rbcam_lifetime_cycles,35328,0.000,0.000,0.000,0.000,PASS,synthetic pass-through marker in feb_swb_corun; not real rbCAM latency
+post_rbcam,post_rbcam_lifetime_cycles,35328,0.000,0.000,0.000,0.000,PASS,synthetic pass-through marker in feb_swb_corun; not real rbCAM latency
+feb_egress,feb_egress_lifetime_cycles,35328,2049.000,6143.000,2828.500,4260.500,PASS,profile-specific FEB store-and-forward lifetime from carried hit GTS
+opq_ingress,opq_ingress_lifetime_cycles,35328,2049.000,6159.000,2829.750,4261.750,PASS,FEB store-and-forward plus parallel CDC/direct SWB ingress adapter range
+opq_egress,opq_egress_lifetime_cycles,35328,4354.000,99130.500,5263.750,96511.250,PASS,lossless finite-burst OPQ queue-model envelope from measured frame service recurrence
+dma,dma_lifetime_cycles,35328,4354.000,99642.500,5268.750,96514.750,PASS,lossless OPQ queue-model envelope plus DMA packing allowance

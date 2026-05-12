@@ -1,0 +1,7 @@
+metric,checkpoint,count,min_cycles,p05_cycles,p50_cycles,p95_cycles,max_cycles,mean_cycles
+pre_rbcam_lifetime_cycles,pre-rbCAM,35328,0.000,0.000,0.000,0.000,0.000,0.000
+post_rbcam_lifetime_cycles,post-rbCAM,35328,0.000,0.000,0.000,0.000,0.000,0.000
+feb_egress_lifetime_cycles,FEB egress,35328,2828.500,2946.500,3496.500,4128.500,4260.500,3489.529
+opq_ingress_lifetime_cycles,OPQ ingress,35328,2829.750,2947.750,3497.750,4129.750,4261.750,3490.779
+opq_egress_lifetime_cycles,OPQ egress,35328,5263.750,9290.250,50754.750,92219.250,96511.250,51161.261
+dma_lifetime_cycles,DMA,35328,5268.750,9294.250,50759.000,92223.750,96514.750,51165.511

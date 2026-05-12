@@ -1,0 +1,3 @@
+metric,checkpoint,count,min_cycles,p05_cycles,p50_cycles,p95_cycles,max_cycles,mean_cycles
+pre_rbcam_lifetime_cycles,pre-rbCAM virtual MuTRiG model,35328,725.000,753.000,835.000,917.000,945.000,835.000
+post_rbcam_lifetime_cycles,post-rbCAM DEBUG age reference,3136,2001.000,2012.000,2070.000,2128.000,2139.000,2069.959
