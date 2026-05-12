@@ -27,7 +27,8 @@ runs at this build dir.
 | bug_id | class | severity | encounterability | status | first seen | commit | summary |
 |---|---|---|---|---|---|---|---|
 | BUG-001-H | H | closure-blocker | swept | TBD | 2026-05-12 auto-report | n/a | p45 board sweep rows are PERF/4 s evidence and cannot be mapped as BASIC/1 ms measured data. |
-| BUG-002-T | T | closure-blocker | swept | TBD | 2026-05-12 auto-report | n/a | 7585741f cosim row_config files still describe the 208-row layout after TEST_BASIC was trimmed to 194 rows at 786da8b2. |
+| BUG-002-T | T | closure-blocker | swept | fixed | 2026-05-12 auto-report | 1d946b02 | 7585741f cosim row_config files still describe the 208-row layout after TEST_BASIC was trimmed to 194 rows at 786da8b2. |
+| BUG-003-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 2 slice 3 rerun | cfae13e1 | Onclick sanity rows carried expected_pulses=10 but the cosim source emitted one pulse per 1 ms window. |
 
 ---
 
@@ -56,9 +57,36 @@ runs at this build dir.
   RN.BASIC.163-194 to emulator-only cases.
 - Root cause: the cosim sweep evidence predates the TEST_BASIC reshape commit
   and was not regenerated after the plan changed.
-- Fix status: TBD; auto-report preserves the evidence but marks mismatched
-  rows as unresolved rather than treating stale counters as matching plan rows.
-- Commit: n/a; requires a fresh cosim sweep or a reviewed row remap manifest.
+- Fix status: fixed; `rn_basic_cosim.py` now parses contiguous
+  RN.BASIC.001-194 from `TEST_BASIC.md`, uses rows 161-162 for onclick,
+  rows 163-194 for emulator-only, and ignores stale saved `row_config.json`
+  when selecting a row. The summary path is now `RN.BASIC.194_summary.json`;
+  after_fix_outcome: dry-run ends at RN.BASIC.194 with slice 3 and slice 4
+  remapped to the 194-row plan; potential_hazard: old untracked row evidence
+  directories remain stale until overwritten by targeted or full reruns.
+- Commit: 1d946b02 `[PATCH] HW: v3_pretest-260511 rn basic 194 runner`.
+
+### BUG-003-H: onclick cosim source emits one pulse instead of expected_pulses
+
+- First seen: `make run_BASIC SLICE=3 PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_iter1_slice3_20260512` after BUG-002-T parser
+  repair.
+- Symptom: RN.BASIC.161 reported 256 hits against 2,560 theoretical hits, and
+  RN.BASIC.162 reported 8 hits against 80 theoretical hits. Delay and RDMA
+  parity passed because the generated smaller source stream was internally
+  conserved.
+- Root cause: `RnBasicRow.sim_hit_period_8ns()` forced slice 3 to
+  `RUN_WINDOW_8NS`, so the periodic source emitted one pulse per selected
+  channel in the 1 ms window even though the onclick sanity rows encode
+  `expected_pulses=10`.
+- Fix status: fixed; slice 3 now derives source period from
+  `RUN_WINDOW_8NS // expected_pulses`, yielding ten generated pulses per
+  selected channel. after_fix_outcome: slice 3 rerun went 0/2 PASS to 2/2
+  PASS; RN.BASIC.161 reports 2,560 hits and RN.BASIC.162 reports 80 hits with
+  rate/delay/RDMA all PASS. potential_hazard: the source-mode approximation
+  still models onclick as deterministic periodic source evidence rather than
+  an RTL mode-write edge sequence.
+- Commit: cfae13e1 `[PATCH] HW: v3_pretest-260511 onclick pulse count`.
 
 ## Format for new entries
 
