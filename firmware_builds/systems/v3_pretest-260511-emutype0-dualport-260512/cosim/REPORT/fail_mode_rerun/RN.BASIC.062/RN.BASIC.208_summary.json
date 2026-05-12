@@ -1,0 +1,67 @@
+{
+  "batches": [
+    {
+      "batch": 1,
+      "ended_at": "2026-05-12T18:20:56+00:00",
+      "rows": [
+        "RN.BASIC.062"
+      ],
+      "started_at": "2026-05-12T18:20:31+00:00",
+      "wall_clock_s": 25.056939601898193
+    }
+  ],
+  "ended_at": "2026-05-12T18:20:56+00:00",
+  "parallel": 16,
+  "rows": [
+    {
+      "conditions": {
+        "delay": "PASS",
+        "rate": "PASS",
+        "rdma": "PASS"
+      },
+      "csr_total": 245,
+      "rdma_record_count": 245,
+      "report_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/cosim/REPORT/fail_mode_rerun/RN.BASIC.062/RN.BASIC.062",
+      "returncode": 0,
+      "row_id": "RN.BASIC.062",
+      "slice": 1,
+      "status": "PASS",
+      "theoretical_hits": 244,
+      "work_dir": "/data3/yifeng/rn_basic_fail_mode_rerun_20260512/RN.BASIC.062/RN.BASIC.062"
+    }
+  ],
+  "selected_count": 1,
+  "selected_rows": [
+    "RN.BASIC.062"
+  ],
+  "slice_summary": {
+    "1": {
+      "fail": 0,
+      "not_run": 0,
+      "pass": 1,
+      "total": 1
+    },
+    "2": {
+      "fail": 0,
+      "not_run": 0,
+      "pass": 0,
+      "total": 0
+    },
+    "3": {
+      "fail": 0,
+      "not_run": 0,
+      "pass": 0,
+      "total": 0
+    },
+    "4": {
+      "fail": 0,
+      "not_run": 0,
+      "pass": 0,
+      "total": 0
+    }
+  },
+  "started_at": "2026-05-12T18:20:28+00:00",
+  "suite": "RN.BASIC",
+  "total_rows_planned": 208,
+  "wall_clock_s": 28.17608952522278
+}

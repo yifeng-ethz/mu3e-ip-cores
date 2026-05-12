@@ -1,0 +1,81 @@
+{
+  "arb_hit_type0_supercore": {
+    "dropped_hits": 0,
+    "selected_count": {
+      "0": 245
+    }
+  },
+  "checkpoints": {
+    "feb_egress_hits": 245,
+    "opq_egress_hits": 245,
+    "post_rbcam_hits": 245,
+    "pre_rbcam_hits": 245,
+    "rdma_hits": 245,
+    "source_generation_hits": 245,
+    "swb_ingress_hits": 245
+  },
+  "clipped_hits": 244,
+  "csr_total": 245,
+  "error_counters": {
+    "corun_ghost_hits": 0,
+    "corun_missing_hits": 0,
+    "fifo_overflow": 0,
+    "fifo_underflow": 0,
+    "filtered_failed_hits": 0,
+    "sim_returncode": 0,
+    "trace_fail_hits": 0,
+    "trace_issue_count": 0
+  },
+  "feb_frame_assembly": {
+    "actual_hits": 245
+  },
+  "histogram_statistics_v2": {
+    "last_interval_total_hits_csr17": 245,
+    "total_hits_csr13": 245
+  },
+  "mts_preprocessor": {
+    "mts_preprocessor_0": {
+      "debug_burst_count": 245,
+      "ts_delta_max": 0,
+      "ts_delta_min": 0
+    },
+    "mts_preprocessor_1": {
+      "debug_burst_count": 245,
+      "ts_delta_max": 0,
+      "ts_delta_min": 0
+    }
+  },
+  "mutrig_cfg_ctrl": {
+    "injector_mode": 2,
+    "status": "TERM"
+  },
+  "mutrig_frame_deassembly": {
+    "crc_err": {
+      "0": 0
+    },
+    "frame_count": {
+      "0": 245
+    }
+  },
+  "pass": true,
+  "ring_buffer_cam": {
+    "rbcam_0": {
+      "pop_cnt": 245,
+      "push_cnt": 245
+    },
+    "rbcam_1": {
+      "pop_cnt": 0,
+      "push_cnt": 0
+    },
+    "rbcam_2": {
+      "pop_cnt": 0,
+      "push_cnt": 0
+    },
+    "rbcam_3": {
+      "pop_cnt": 0,
+      "push_cnt": 0
+    }
+  },
+  "row_id": "RN.BASIC.062",
+  "theoretical_hits": 244
+}
