@@ -1,0 +1,31 @@
+{
+  "row": {
+    "row_id": "p45_025_lane_none_default_default_dir",
+    "lane_mask": "0x00",
+    "channel_mask": "0xFFFFFFFF",
+    "rate_88fp": "0x0800",
+    "hit_mode": "00",
+    "interval_seconds": 4.0,
+    "axis_section": "4.5.sanity-neg",
+    "expected_behavior": "sanity-negative: TOTAL_HITS == 0 (all lanes blocked)",
+    "sanity_negative": true
+  },
+  "row_idx": 25,
+  "started": "2026-05-12T12:08:16",
+  "sc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
+  "link": 2,
+  "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/sweep_evidence/p45_025_lane_none_default_default_dir",
+  "verdict": {
+    "pass": false,
+    "total_hits": 0,
+    "underflow": null,
+    "overflow": null,
+    "dropped_hits": null,
+    "arb_drops_emu": null,
+    "ratio_to_prev": null,
+    "hist_sum": 0,
+    "stage_durations": {},
+    "failure_mode": "FATAL: RuntimeError: sc_write failed addr=0x0C013 words=[17] rc=4 retries=3 tail=' [8] invalid RD_NI link=138 addr=0x00000 rsp=SLVERR ack=1 declared=58884 actual=0 start=0x2008\\nwarn: scan ended with an incomplete candidate packet\\nerr: timed out waiting for matching secondary reply\\n'",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 1791, in run_row\n    stage_rec = run_stage_recipe(sc_tool, link, row, row_idx, log_fh=log_fh)\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 1175, in run_stage_recipe\n    trace_sync = drive_local_cmd(sc_tool, link, CMD_RUN_SYNC, 0, log_fh=log_fh)\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 1011, in drive_local_cmd\n    sc_write(sc_tool, link, RUNCTL_LOCAL_CMD_ADDR, [word], log_fh=log_fh)\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 559, in sc_write\n    raise RuntimeError(\nRuntimeError: sc_write failed addr=0x0C013 words=[17] rc=4 retries=3 tail=' [8] invalid RD_NI link=138 addr=0x00000 rsp=SLVERR ack=1 declared=58884 actual=0 start=0x2008\\nwarn: scan ended with an incomplete candidate packet\\nerr: timed out waiting for matching secondary reply\\n'\n"
+  }
+}

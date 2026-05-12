@@ -106,17 +106,10 @@ HIST_NUM_BINS                 = 256    # 8-bit channel id space
 HIST_BIN_READ_BURST           = False  # MUST be False (Round 3 a710b11a)
 
 # ----------------------------------------------------------------------------
-# Plot style constants (matplotlib only -- NOT DISLIN, NOT seaborn)
+# Plot style constants live in phase4_5_plot.py (single source of truth).
+# The renderers are imported lazily by _make_plots() below; keep this file
+# free of matplotlib imports so --dry-run does not require it.
 # ----------------------------------------------------------------------------
-PLOT_X_LIM                    = (-1000, 3096)
-PLOT_X_LABEL                  = "hit lifetime [8 ns cycles]"
-PLOT_Y_LABEL                  = "hits / bin [%]"
-PLOT_PRE_TITLE                = "pre-rbCAM checkpoint lifetime, bound [0.0, 2000.0] cycles"
-PLOT_POST_TITLE               = "post-rbCAM checkpoint lifetime, bound [2000.0, 2200.0] cycles"
-PLOT_PRE_COLOR                = "#4472C4"      # blue
-PLOT_POST_COLOR               = "#70AD47"      # green
-PLOT_DPI                      = 300
-PLOT_FIGSIZE                  = (12.0, 8.0)
 
 # ----------------------------------------------------------------------------
 # Address map (mirrored from run-control_mgmt/rtl/runctl_mgmt_host.sv and
@@ -1348,76 +1341,58 @@ def compute_verdict(row: dict[str, Any], snap_pre: dict[str, Any],
 
 
 # ============================================================================
-# Plot generator (matplotlib only)
+# Plot generator (imports preset renderers from phase4_5_plot.py)
 # ============================================================================
+#
+# The plot functions live in scripts/cotest/phase4_5_plot.py so that the
+# same renderers can be invoked manually post-sweep without re-running the
+# board side. This script only WRITES the inputs (hist_bin.csv) and CALLS
+# the renderers. To regenerate plots without running the sweep:
+#
+#   python3 scripts/cotest/phase4_5_plot.py --row <row_id> --mode both
+#
+# The import is local to keep --dry-run independent of matplotlib being
+# installed; downstream callers should pass plain Python lists.
+# ----------------------------------------------------------------------------
 
-def make_plot(hist_bins: list[int], row_id: str, out_path: Path) -> None:
-    """Render the 2-panel pre/post-rbCAM checkpoint lifetime plot.
+def _make_plots(hist_bins: list[int], row_id: str,
+                rate_path: Path, latency_path: Path,
+                row_meta: Optional[dict[str, Any]] = None) -> None:
+    """Render both rate and latency plots for one row.
 
     Inputs:
-      hist_bins  : 256 ints from sweep_evidence/<row_id>/hist_bin.csv
-      row_id     : row id for the suptitle
-      out_path   : target plot.png (will be saved at PLOT_DPI dpi)
-
-    The function renders an annotated empty plot if the bins are all zero.
+      hist_bins    : 256 ints from sweep_evidence/<row_id>/hist_bin.csv
+      row_id       : row id for the suptitle
+      rate_path    : target plot_rate.png
+      latency_path : target plot_latency.png
+      row_meta     : optional dict with lane_mask/channel_mask/rate_88fp/hit_mode
+                     used to compose the title suffix.
     """
-    # late import so --dry-run doesn't depend on matplotlib being installed
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    import numpy as np
+    # late import so --dry-run does not depend on matplotlib being installed
+    from phase4_5_plot import render_rate_plot, render_latency_plot
 
-    if len(hist_bins) != HIST_NUM_BINS:
-        # pad / truncate defensively
-        hist_bins = (list(hist_bins) + [0] * HIST_NUM_BINS)[:HIST_NUM_BINS]
+    suffix_bits = []
+    if row_meta:
+        if row_meta.get("lane_mask"):
+            suffix_bits.append(f"lane={row_meta['lane_mask']}")
+        if row_meta.get("channel_mask"):
+            suffix_bits.append(f"ch={row_meta['channel_mask']}")
+        if row_meta.get("rate_88fp"):
+            suffix_bits.append(f"rate={row_meta['rate_88fp']}")
+        if row_meta.get("hit_mode"):
+            suffix_bits.append(f"mode={row_meta['hit_mode']}")
+    title_suffix = " ".join(suffix_bits)
 
-    arr = np.asarray(hist_bins, dtype=np.int64)
-    pre_slice  = slice(0, HIST_NUM_BINS // 2)
-    post_slice = slice(HIST_NUM_BINS // 2, HIST_NUM_BINS)
-    pre_counts  = arr[pre_slice]
-    post_counts = arr[post_slice]
-
-    x_min, x_max = PLOT_X_LIM
-    bin_width_x  = (x_max - x_min) / HIST_NUM_BINS
-    pre_centers  = x_min + (np.arange(pre_slice.start, pre_slice.stop)  + 0.5) * bin_width_x
-    post_centers = x_min + (np.arange(post_slice.start, post_slice.stop) + 0.5) * bin_width_x
-
-    fig, axes = plt.subplots(2, 1, figsize=PLOT_FIGSIZE, constrained_layout=True)
-    fig.suptitle(f"FEB/SWB ASIC0..7 all-channel hit lifetime ({row_id})",
-                 fontsize=10)
-
-    for ax, centers, counts, title, color in (
-        (axes[0], pre_centers,  pre_counts,  PLOT_PRE_TITLE,  PLOT_PRE_COLOR),
-        (axes[1], post_centers, post_counts, PLOT_POST_TITLE, PLOT_POST_COLOR),
-    ):
-        ax.set_xlim(PLOT_X_LIM)
-        ax.set_xlabel(PLOT_X_LABEL, fontsize=8)
-        ax.set_ylabel(PLOT_Y_LABEL, fontsize=8)
-        ax.set_title(title, fontsize=9)
-        ax.tick_params(labelsize=7)
-        total = int(counts.sum())
-        if total == 0:
-            ax.text(0.5, 0.5, "no hits captured", ha="center", va="center",
-                    transform=ax.transAxes, fontsize=12, color="gray")
-            continue
-        pct = counts.astype(np.float64) / total * 100.0
-        ax.bar(centers, pct, width=bin_width_x * 0.9,
-               color=color, alpha=0.85, linewidth=0)
-        # p05 / p50 / p95
-        cum = np.cumsum(counts)
-        for p, label in ((5, "p05"), (50, "p50"), (95, "p95")):
-            idx = int(np.searchsorted(cum, total * p / 100.0))
-            idx = min(idx, len(centers) - 1)
-            x_p = float(centers[idx])
-            ax.axvline(x_p, color="black", linewidth=0.8,
-                       linestyle="--", alpha=0.7)
-            ax.text(x_p, ax.get_ylim()[1] * 0.92,
-                    f"{label}={x_p:.0f}",
-                    rotation=90, fontsize=6, ha="right", va="top")
-
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(str(out_path), dpi=PLOT_DPI, bbox_inches="tight")
-    plt.close(fig)
+    render_rate_plot(hist_bins, row_id, rate_path,
+                     title_suffix=title_suffix)
+    note_latency = (
+        "no per-hit timestamps available on board; the histogram is keyed "
+        "by channel_id (KEY_LOC=channel_post), see tb_int simulation for "
+        "the full lifetime distribution"
+    )
+    render_latency_plot(hist_bins, row_id, latency_path,
+                        title_suffix=title_suffix,
+                        note=note_latency)
 
 
 # ============================================================================
@@ -1430,6 +1405,9 @@ def collect_evidence_records() -> dict[str, dict[str, Any]]:
         return out
     for ev_dir in sorted(EVIDENCE_ROOT.iterdir()):
         if ev_dir.name.startswith("_"):
+            continue
+        # skip move-aside backups (rename pattern "<rid>.bak.<ts>")
+        if ".bak." in ev_dir.name:
             continue
         verdict_path = ev_dir / "verdict.json"
         counters_path = ev_dir / "counters.json"
@@ -1486,15 +1464,22 @@ def regen_master_table() -> Path:
     lines.append("")
     lines.append("## Per-Row Results")
     lines.append("")
-    # HTML double-column header
+    lines.append(
+        "Every entry in the **Evidence** column is a clickable relative "
+        "link to the per-row evidence directory or artifact. Open this "
+        "file from `doc/` so the relative `../sweep_evidence/...` paths "
+        "resolve."
+    )
+    lines.append("")
+    # HTML double-column header. Evidence columns now contain 7 file links.
     lines.append("<table>")
     lines.append("<thead>")
     lines.append("<tr>"
                   "<th rowspan=2>row_id</th>"
                   "<th colspan=5>Conditions</th>"
                   "<th colspan=4>Stage timing</th>"
-                  "<th colspan=5>Evidence</th>"
-                  "<th rowspan=2>Plot</th>"
+                  "<th colspan=5>Counter summary</th>"
+                  "<th colspan=6>Evidence (clickable)</th>"
                   "<th rowspan=2>Verdict</th>"
                   "</tr>")
     lines.append("<tr>"
@@ -1512,6 +1497,12 @@ def regen_master_table() -> Path:
                   "<th>OVER</th>"
                   "<th>rxcmd&Delta;</th>"
                   "<th>ratio</th>"
+                  "<th>dir</th>"
+                  "<th>rate.png</th>"
+                  "<th>latency.png</th>"
+                  "<th>hist.csv</th>"
+                  "<th>counters</th>"
+                  "<th>log</th>"
                   "</tr>")
     lines.append("</thead>")
     lines.append("<tbody>")
@@ -1527,20 +1518,35 @@ def regen_master_table() -> Path:
         if p is False: return "FAIL"
         return "PENDING"
 
+    def _evidence_links(rid: str) -> str:
+        base = f"../sweep_evidence/{rid}"
+        return (
+            f"<td><a href=\"{base}/\">dir</a></td>"
+            f"<td><a href=\"{base}/plot_rate.png\">rate</a></td>"
+            f"<td><a href=\"{base}/plot_latency.png\">lat</a></td>"
+            f"<td><a href=\"{base}/hist_bin.csv\">csv</a></td>"
+            f"<td><a href=\"{base}/counters.json\">json</a> / "
+            f"<a href=\"{base}/verdict.json\">v</a></td>"
+            f"<td><a href=\"{base}/tool_calls.log\">log</a></td>"
+        )
+
     for row in plan:
         rid = row["row_id"]
         rec = records.get(rid)
         if rec is None:
-            lines.append(f"<tr>"
-                          f"<td><a href=\"../sweep_evidence/{rid}/\">{rid}</a></td>"
-                          f"<td>{row['lane_mask']}</td>"
-                          f"<td>{row['channel_mask']}</td>"
-                          f"<td>{row['rate_88fp']}</td>"
-                          f"<td>{row['hit_mode']}</td>"
-                          f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
-                          f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
-                          f"<td>-</td><td>PENDING</td>"
-                          f"</tr>")
+            lines.append(
+                f"<tr>"
+                f"<td><a href=\"../sweep_evidence/{rid}/\">{rid}</a></td>"
+                f"<td>{row['lane_mask']}</td>"
+                f"<td>{row['channel_mask']}</td>"
+                f"<td>{row['rate_88fp']}</td>"
+                f"<td>{row['hit_mode']}</td>"
+                f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
+                f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
+                + _evidence_links(rid)
+                + f"<td>PENDING</td>"
+                f"</tr>"
+            )
             continue
         v = rec["verdict"]
         sd = v.get("stage_durations", {}) or {}
@@ -1561,8 +1567,8 @@ def regen_master_table() -> Path:
             f"<td>{_fmt_num(v.get('overflow'))}</td>"
             f"<td>{_fmt_num(v.get('rx_cmd_count_delta'))}</td>"
             f"<td>{_fmt_num(v.get('ratio_to_prev'))}</td>"
-            f"<td><a href=\"../sweep_evidence/{rid}/plot.png\">plot</a></td>"
-            f"<td>{_fmt_pass(v.get('pass'))}</td>"
+            + _evidence_links(rid)
+            + f"<td>{_fmt_pass(v.get('pass'))}</td>"
             f"</tr>"
         )
     lines.append("</tbody>")
@@ -1817,9 +1823,12 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
             json.dump(verdict, f, indent=2)
             f.write("\n")
 
-        # Plot
+        # Plots (rate + latency via phase4_5_plot.py)
         try:
-            make_plot(hist_bins, rid, ev_dir / "plot.png")
+            _make_plots(hist_bins, rid,
+                        ev_dir / "plot_rate.png",
+                        ev_dir / "plot_latency.png",
+                        row_meta=row)
         except Exception as exc:
             _log(log_fh, f"PLOT_ERROR: {exc}\n{traceback.format_exc()}")
             print(f"  WARNING: plot generation failed: {exc}", file=sys.stderr)
@@ -1874,10 +1883,12 @@ def _finalize_row_after_fatal(record: dict[str, Any], ev_dir: Path,
         with open(ev_dir / "verdict.json", "w", encoding="ascii") as f:
             json.dump(verdict, f, indent=2)
             f.write("\n")
-        # Always emit an annotated empty plot so the test agent gets the file
+        # Always emit annotated empty plots so the test agent gets the files
         try:
-            make_plot([0] * HIST_NUM_BINS, record["row"]["row_id"],
-                      ev_dir / "plot.png")
+            _make_plots([0] * HIST_NUM_BINS, record["row"]["row_id"],
+                        ev_dir / "plot_rate.png",
+                        ev_dir / "plot_latency.png",
+                        row_meta=record.get("row"))
         except Exception:
             pass
     except Exception:
@@ -1892,7 +1903,11 @@ def _finalize_row_after_fatal(record: dict[str, Any], ev_dir: Path,
 # ============================================================================
 
 def smoke_plot(output_dir: Path) -> Path:
-    """Render a synthetic-data plot to verify matplotlib path."""
+    """Render synthetic-data plots to verify the matplotlib path.
+
+    Renders both plot_rate.png and plot_latency.png via phase4_5_plot.py and
+    returns the rate plot path (callers used to expect a single file).
+    """
     import math
     output_dir.mkdir(parents=True, exist_ok=True)
     bins: list[int] = []
@@ -1907,9 +1922,12 @@ def smoke_plot(output_dir: Path) -> Path:
         w.writerow(["bin_idx", "count"])
         for i, c in enumerate(bins):
             w.writerow([i, c])
-    out_png = output_dir / "plot.png"
-    make_plot(bins, "_smoke_synthetic", out_png)
-    return out_png
+    _make_plots(bins, "_smoke_synthetic",
+                output_dir / "plot_rate.png",
+                output_dir / "plot_latency.png",
+                row_meta={"lane_mask": "0xFF", "channel_mask": "synthetic",
+                          "rate_88fp": "n/a",  "hit_mode":     "n/a"})
+    return output_dir / "plot_rate.png"
 
 
 def smoke_logpop_decode() -> dict[str, Any]:
