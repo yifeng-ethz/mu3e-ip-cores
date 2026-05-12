@@ -2,7 +2,7 @@
 
 **Parent:** [TEST_PLAN.md](TEST_PLAN.md)
 **Siblings:** [TEST_BU.md](TEST_BU.md), [TEST_BASIC.md](TEST_BASIC.md), [TEST_ERROR.md](TEST_ERROR.md), [TEST_EDGE.md](TEST_EDGE.md)
-**ID range:** SC.AG.001-008, RN.PROF.001-006, RN.COSIM.002
+**ID range:** SC.AG.001-008, RN.PROF.001-007
 **Total:** 15 cases
 
 **Methodology key:**
@@ -15,9 +15,14 @@ ceiling, or that pile concurrent SC traffic on top of a RUNNING window.
 Loss is expected by design; the row passes when measured loss matches the
 theoretical-clipping curve within tolerance.
 
-**Evidence model (PERF):** E1, E2, E3 must agree with each other; collectively
-may sit below `theoretical_hits` by the saturation delta. A row PASSES if
-the measured loss matches the predicted clipped curve within tolerance.
+**Evidence model (PERF):** every row carries **three agreeing evidence
+streams** - theory (math reference, clipped at OPQ ceiling), sim (dual-UVM
+FEB-SWB cosim), and board. All three must collectively sit below
+`theoretical_hits` by the saturation delta and agree with each other on the
+clipping shape. A row PASSES if the measured loss matches the predicted
+clipped curve within tolerance. Long-soak rows (>= 10 s) may waive the
+**sim** evidence stream and rely on theory + board only - the row's
+`cosim_waived` flag must be set explicitly in the test record.
 
 ---
 
@@ -26,8 +31,7 @@ the measured loss matches the predicted clipped curve within tolerance.
 | Section | Cases | ID range | What it Proves | Function Reference |
 |---|---:|---|---|---|
 | SC.AG | 8 | SC.AG.001-008 | SC plane reads during RUNNING do not disrupt hit traffic; reads return monotone snapshots | sc_tool + `phase4_5_sweep.py` |
-| RN.PROF | 6 | RN.PROF.001-006 | OPQ ingress saturation curve at 50% / 100% / 150% / 200% / 6-lane / 2-lane | `phase4_5_sweep.py` |
-| RN.COSIM.002 | 1 | RN.COSIM.002 | 10 s long-soak; per-interval bank-toggle stability under sustained load | `scripts/cotest/phase4_5_longsoak.py` |
+| RN.PROF | 7 | RN.PROF.001-007 | OPQ ingress saturation curve at 50% / 100% / 150% / 200% / 6-lane / 2-lane + 10 s long-soak | `phase4_5_sweep.py` + `scripts/cotest/phase4_5_longsoak.py` |
 
 ---
 
@@ -81,14 +85,15 @@ clips per the earlier 32-row sweep). Saturation knee documented in
 
 ---
 
-## 4. RN.COSIM.002 - Long-soak
+## 4. RN.PROF.007 - Long-soak
 
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---:|---|---|---|
-| RN.COSIM.002 | P | 10 s long-soak | 1 | `phase4_5_longsoak.py --interval-ms 1.0`, rate = 0.5 x ceiling, RUNNING window = 10 s (explicit long-soak exception to the 1 ms convention) | bank-toggle regularity stddev < 1 ms across 10000 intervals; E1 = theoretical over the full 10 s window; per-interval E2 readout shape matches at every bank-swap | `scripts/cotest/phase4_5_longsoak.py` |
+| RN.PROF.007 | P | 10 s long-soak (`cosim_waived=true`) | 1 | `phase4_5_longsoak.py --interval-ms 1.0`, rate = 0.5 x ceiling, RUNNING window = 10 s (explicit long-soak exception to the 1 ms convention; sim evidence waived because cosim wall-time at 10 s is prohibitive) | theory + board agree within tolerance; bank-toggle regularity stddev < 1 ms across 10000 intervals; E1 = theoretical over the full 10 s window; per-interval E2 readout shape matches at every bank-swap | `scripts/cotest/phase4_5_longsoak.py` |
 
-**RN.COSIM.002 verdict:** pending; requires explicit `long_soak` flag and
-~30-60 min sim wall budget.
+**RN.PROF.007 verdict:** pending on-board; cosim evidence stream is waived
+per the long-soak exception (theory + board comparison only). All other
+PERF rows still carry full theory / sim / board.
 
 ---
 
