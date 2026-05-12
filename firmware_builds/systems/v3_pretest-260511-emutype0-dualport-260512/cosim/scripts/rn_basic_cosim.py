@@ -692,6 +692,7 @@ def build_row_make_command(
         str(args.feb_corun_dir),
         "SHELL=/bin/bash",
         "run_swb_corun",
+        f"OPQ_ADAPTOR_VHDL_SOURCE={args.opq_adaptor_vhdl}",
         f"REPORT_DIR={report_dir}",
         f"RUN_LOG={report_dir / 'run_swb_corun.log'}",
         f"SOURCE_MODE={row.sim_source_mode()}",
@@ -712,6 +713,7 @@ def run_precompile(args: argparse.Namespace) -> None:
         str(args.feb_corun_dir),
         "SHELL=/bin/bash",
         "compile_swb_corun",
+        f"OPQ_ADAPTOR_VHDL_SOURCE={args.opq_adaptor_vhdl}",
     ]
     print("RN.BASIC precompile:", " ".join(cmd), flush=True)
     subprocess.run(cmd, check=True)
@@ -927,6 +929,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cosim-root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--test-basic", type=Path)
     parser.add_argument("--feb-corun-dir", type=Path)
+    parser.add_argument("--opq-adaptor-vhdl", type=Path)
     parser.add_argument("--report-root", type=Path)
     parser.add_argument("--work-root", type=Path)
     parser.add_argument("--parallel", type=int, default=30)
@@ -946,6 +949,10 @@ def main(argv: list[str] | None = None) -> int:
     args.cosim_root = args.cosim_root.resolve()
     args.test_basic = (args.test_basic or default_test_basic(args.cosim_root)).resolve()
     args.feb_corun_dir = (args.feb_corun_dir or default_corun_dir(args.cosim_root)).resolve()
+    args.opq_adaptor_vhdl = (
+        args.opq_adaptor_vhdl
+        or (args.feb_corun_dir / "vhd" / "ingress_egress_adaptor_native_sv_scifi.vhd")
+    ).resolve()
     args.report_root = (args.report_root or (args.cosim_root / "REPORT")).resolve()
     args.work_root = (args.work_root or args.report_root).resolve()
 
@@ -957,6 +964,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(f"missing TEST_BASIC.md: {args.test_basic}")
     if not args.collect_only and not args.dry_run and not args.feb_corun_dir.is_dir():
         parser.error(f"missing FEB/SWB corun directory: {args.feb_corun_dir}")
+    if not args.collect_only and not args.dry_run and not args.opq_adaptor_vhdl.is_file():
+        parser.error(f"missing OPQ adapter VHDL: {args.opq_adaptor_vhdl}")
 
     started = time.time()
     plan = parse_test_basic(args.test_basic)
