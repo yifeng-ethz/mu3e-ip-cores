@@ -228,6 +228,28 @@ stable one-second rate polling.</code></pre>
 <p>The remaining failure mode is distinct from the live-vs-stable race: the <code>histogram_statistics_v2</code> ingress is currently not receiving any hits in this board session. Every row's post-run <code>PORT_STATUS</code> reads <code>0x000000FF</code> (all eight per-port hit_fifos empty, <code>fifo_level_max = 0</code>), while <code>arb_hit_type0_supercore</code> reports lane <code>ingress_emu</code> and <code>egress_emu</code> counters that grow monotonically from <code>~274&nbsp;M</code> on row&nbsp;0 to <code>~1.27&nbsp;B</code> on row&nbsp;31 -- traffic flows through arb, but the path between arb egress and histogram ingress is delivering nothing on every row. This is a second bug independent of the live-counter contract, suspected on the arb-to-histogram ingress mux or the timing of the histogram <code>CONTROL.apply</code> settle against <code>BANK_STATUS</code>. The clean cross-validation table below isolates the failure to &laquo;upstream of histogram input FIFOs&raquo;.</p>
 <p>Maximum observed <code>TOTAL_HITS_csr13</code> on this run: <code>0</code>. All arb <code>drops_emu</code> sums are zero. All <code>RX_CMD_COUNT</code> deltas are 4. All idle completions are <code>IDLE_OBSERVED</code>.</p>
 </div></section>
+
+<section><h2 id="normalization">Run Window Normalization</h2>
+<div class="prose">
+<p>Sim and board run the same emulator configuration but with very different
+RUN windows: sim defaults to <strong>10 ms</strong> (1,250,000 cycles at 125&nbsp;MHz)
+while board defaults to <strong>4000 ms</strong> (4&nbsp;s). Absolute hit counts therefore
+diverge by approximately 400x even when the per-channel rate is identical.</p>
+<p>The <strong>&#916;% rate</strong> column normalizes to <strong>hits per millisecond</strong>:</p>
+<pre><code>sim_hits_per_ms   = sim_total_hits / sim_run_ms
+board_hits_per_ms = board_total_hits / board_run_ms
+delta_pct_rate    = (board_rate - sim_rate) / sim_rate * 100</code></pre>
+<p>A &#916;% rate near zero means sim and board agree on the per-channel hit rate.
+Large &#916;% values indicate real behavioral divergence (FIFO saturation,
+CSR-write race, lane-admit failure, etc.) and are the only actionable comparison
+across mismatched run windows.</p>
+<p>A new sim convention (RUNNING stage = 1&nbsp;ms sharp) is being adopted to make
+direct comparisons even cleaner; once new sim evidence at 1&nbsp;ms RUNNING lands,
+this report will refresh automatically. Long-soak runs (10&nbsp;s+) are flagged
+explicitly in their row notes.</p>
+</div>
+</section>
+
 <section>
 <h2 id="matrix">Sweep Matrix Overview</h2>
 <table>
