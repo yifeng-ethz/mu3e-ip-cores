@@ -1,6 +1,12 @@
 {
   "pass": false,
   "total_hits": 0,
+  "total_hits_csr13": 0,
+  "last_interval_total_hits_csr17": 0,
+  "last_interval_dropped_hits_csr18": 0,
+  "hist_bin_sum": 0,
+  "hist_bin_sum_matches_csr13": true,
+  "csr13_vs_hist_diff": 0,
   "underflow": 0,
   "overflow": 0,
   "dropped_hits": 0,
@@ -8,9 +14,9 @@
   "ratio_to_prev": null,
   "hist_sum": 0,
   "sanity_negative": false,
-  "run_number_writeback_ok": false,
+  "run_number_writeback_ok": true,
   "run_number_written": 11141139,
-  "run_number_readback": 11141138,
+  "run_number_readback": 11141139,
   "rx_cmd_count_delta": 4,
   "rx_err_count_delta": 0,
   "log_entries_count": 2,
@@ -18,8 +24,9 @@
     "prepare_ms": null,
     "sync_ms": null,
     "running_s": null,
-    "terminating_ms": 503.4201145172119
+    "terminating_ms": 511.3711357116699
   },
   "idle_completion": "IDLE_OBSERVED",
-  "failure_mode": "TOTAL_HITS_ZERO"
+  "failure_mode": "TOTAL_HITS_ZERO",
+  "warnings": null
 }

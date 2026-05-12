@@ -11,7 +11,7 @@
     "sanity_negative": false
   },
   "row_idx": 3,
-  "started": "2026-05-12T12:04:40",
+  "started": "2026-05-12T12:44:04",
   "sc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
   "link": 2,
   "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/sweep_evidence/p45_003_all_lanes_0x55555555_default_dir",
@@ -117,10 +117,10 @@
     "RIGHT_BOUND": "0x00000100",
     "BIN_WIDTH": "0x00000001",
     "KEY_LOC": "0x26231511",
-    "INTERVAL_CFG": "0x1DCD6500",
+    "INTERVAL_CFG": "0xFFFFFFFF",
     "CONTROL_APPLY": "0x00000100"
   },
-  "ingress_status": "0x00000503",
+  "ingress_status": "0x00000403",
   "downstream_cfg": {
     "mts_ctrl": "0x20000011",
     "ring_ctrl": "0x00000011"
@@ -131,39 +131,39 @@
       "prepare_ms": null,
       "sync_ms": null,
       "running_s": null,
-      "terminating_ms": 504.9879550933838
+      "terminating_ms": 505.41067123413086
     },
     "wall_clock_durations": {
-      "prepare_s": 0.017246007919311523,
-      "sync_s": 0.26762843132019043,
-      "running_s": 4.256275653839111,
-      "terminating_s": 0.5347409248352051,
-      "total_s": 5.075891017913818
+      "prepare_s": 0.034227609634399414,
+      "sync_s": 0.2382829189300537,
+      "running_s": 4.214066505432129,
+      "terminating_s": 0.5197749137878418,
+      "total_s": 5.006351947784424
     },
     "fifo_entries": [
       {
         "raw_words": [
-          "0x01F879C6",
-          "0x79C31300",
-          "0x03A42492",
-          "0x248F1100"
+          "0xBF2A0E5C",
+          "0x0E591000",
+          "0xC0EB1B5D",
+          "0x1B5A1100"
         ],
-        "recv_ts": 2166706567619,
-        "run_command": 19,
-        "payload32": 61088914,
-        "exec_ts_lo": 613355776
+        "recv_ts": 210187350445657,
+        "run_command": 16,
+        "payload32": 3236633437,
+        "exec_ts_lo": 458887424
       },
       {
         "raw_words": [
-          "0x05D6AF43",
-          "0xAF401200",
-          "0x23C3C563",
-          "0xC5601300"
+          "0xC2A09321",
+          "0x931E1200",
+          "0xE0887A8B",
+          "0x7A881300"
         ],
-        "recv_ts": 6419621588800,
+        "recv_ts": 213994919007006,
         "run_command": 18,
-        "payload32": 600032611,
-        "exec_ts_lo": 3311407872
+        "payload32": 3767040651,
+        "exec_ts_lo": 2055738112
       }
     ],
     "cmd_traces": [
@@ -171,55 +171,55 @@
         "cmd": "0x10",
         "word": "0xAA000310",
         "runctl_status": "0x00000003",
-        "runctl_last_cmd": "0x00000013",
-        "wall_start": 1778580281.4680848,
-        "wall_end": 1778580281.4771237
+        "runctl_last_cmd": "0x00000010",
+        "wall_start": 1778582645.464415,
+        "wall_end": 1778582645.4903727
       },
       {
         "cmd": "0x11",
         "word": "0x00000011",
         "runctl_status": "0x00000003",
         "runctl_last_cmd": "0x00000011",
-        "wall_start": 1778580281.6807067,
-        "wall_end": 1778580281.7447524
+        "wall_start": 1778582645.693657,
+        "wall_end": 1778582645.7286563
       },
       {
         "cmd": "0x12",
         "word": "0x00000012",
         "runctl_status": "0x00000003",
         "runctl_last_cmd": "0x00000012",
-        "wall_start": 1778580281.945054,
-        "wall_end": 1778580281.996986
+        "wall_start": 1778582645.9289253,
+        "wall_end": 1778582645.9386928
       },
       {
         "cmd": "0x13",
         "word": "0x00000013",
         "runctl_status": "0x00000003",
         "runctl_last_cmd": "0x00000013",
-        "wall_start": 1778580286.001069,
-        "wall_end": 1778580286.0307786
+        "wall_start": 1778582649.9427652,
+        "wall_end": 1778582649.957084
       }
     ],
     "drain_pre_iter": 0,
     "drain_post_iter": 0,
     "idle_completion": "IDLE_OBSERVED",
-    "idle_observed_ts": 1778580286.5357697,
+    "idle_observed_ts": 1778582650.462498,
     "run_number_written": 11141123,
-    "run_number_readback": 11141121,
-    "run_number_writeback_ok": false,
-    "rx_cmd_count_pre": 15,
-    "rx_cmd_count_post": 19,
+    "run_number_readback": 11141123,
+    "run_number_writeback_ok": true,
+    "rx_cmd_count_pre": 52,
+    "rx_cmd_count_post": 56,
     "rx_cmd_count_delta": 4,
-    "rx_err_count_pre": 156286,
-    "rx_err_count_post": 156286,
+    "rx_err_count_pre": 1557492,
+    "rx_err_count_post": 1557492,
     "rx_err_count_delta": 0,
     "log_entries_count": 2,
-    "t0_wall": 1778580281.4598804,
-    "t1_wall": 1778580286.5357714,
+    "t0_wall": 1778582645.4561481,
+    "t1_wall": 1778582650.4625,
     "run_number_pre": 11141121
   },
   "snapshot_pre": {
-    "timestamp": "2026-05-12T12:04:40",
+    "timestamp": "2026-05-12T12:44:04",
     "sc_hub_uid": "0x53434842",
     "runctl": {
       "UID": {
@@ -244,13 +244,13 @@
       },
       "RX_CMD_COUNT": {
         "addr": "0x0C00F",
-        "value": "0x0000000F",
-        "value_int": 15
+        "value": "0x00000034",
+        "value_int": 52
       },
       "RX_ERR_COUNT": {
         "addr": "0x0C010",
-        "value": "0x0002627E",
-        "value_int": 156286
+        "value": "0x0017C3F4",
+        "value_int": 1557492
       },
       "LOG_STATUS": {
         "addr": "0x0C011",
@@ -258,12 +258,12 @@
         "value_int": 65536
       },
       "RECV_TS": {
-        "value_int": 355933587890,
-        "value": "0x0052DF4B89B2"
+        "value_int": 251462184337,
+        "value": "0x003A8C506D91"
       },
       "EXEC_TS": {
-        "value_int": 355933587893,
-        "value": "0x0052DF4B89B5"
+        "value_int": 251462184340,
+        "value": "0x003A8C506D94"
       }
     },
     "arb": [
@@ -274,11 +274,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       },
       {
         "lane": 1,
@@ -287,11 +287,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       },
       {
         "lane": 2,
@@ -300,11 +300,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       },
       {
         "lane": 3,
@@ -313,11 +313,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       },
       {
         "lane": 4,
@@ -326,11 +326,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       },
       {
         "lane": 5,
@@ -339,11 +339,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       },
       {
         "lane": 6,
@@ -352,11 +352,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       },
       {
         "lane": 7,
@@ -365,11 +365,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 106632292,
+        "ingress_emu_hits": 306479248,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 106632292
+        "egress_emu_hits": 306479248
       }
     ],
     "histogram": {
@@ -384,9 +384,11 @@
         "0x00000000",
         "0x00000000",
         "0x00000000",
-        "0x1DCD6500",
+        "0xFFFFFFFF",
         "0x00000000",
         "0x000000FF",
+        "0x00000000",
+        "0x00000000",
         "0x00000000",
         "0x00000000",
         "0x00000000",
@@ -394,12 +396,14 @@
       ],
       "UNDERFLOW": 0,
       "OVERFLOW": 0,
-      "INTERVAL_CFG": 500000000,
+      "INTERVAL_CFG": 4294967295,
       "BANK_STATUS": 0,
       "PORT_STATUS": 255,
       "TOTAL_HITS": 0,
       "DROPPED_HITS": 0,
       "COAL_STATUS": 0,
+      "LAST_INTERVAL_TOTAL_HITS": 0,
+      "LAST_INTERVAL_DROPPED_HITS": 0,
       "LAST_INT_HITS": 0
     },
     "ring": {
@@ -408,7 +412,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -419,7 +423,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -430,7 +434,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -441,7 +445,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -452,7 +456,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -463,7 +467,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -474,7 +478,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -485,7 +489,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 31847008,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -499,7 +503,7 @@
         "status_control": "0x20000010",
         "discard_hits": 0,
         "expected_latency": 2000,
-        "total_hits": 106632292
+        "total_hits": 0
       },
       {
         "idx": 1,
@@ -507,7 +511,7 @@
         "status_control": "0x20000010",
         "discard_hits": 0,
         "expected_latency": 2000,
-        "total_hits": 106632292
+        "total_hits": 0
       }
     ],
     "frame_asm": {
@@ -526,7 +530,7 @@
     }
   },
   "snapshot_post": {
-    "timestamp": "2026-05-12T12:04:46",
+    "timestamp": "2026-05-12T12:44:10",
     "sc_hub_uid": "0x53434842",
     "runctl": {
       "UID": {
@@ -546,18 +550,18 @@
       },
       "RUN_NUMBER": {
         "addr": "0x0C006",
-        "value": "0x00AA0001",
-        "value_int": 11141121
+        "value": "0x00AA0003",
+        "value_int": 11141123
       },
       "RX_CMD_COUNT": {
         "addr": "0x0C00F",
-        "value": "0x00000013",
-        "value_int": 19
+        "value": "0x00000038",
+        "value_int": 56
       },
       "RX_ERR_COUNT": {
         "addr": "0x0C010",
-        "value": "0x0002627E",
-        "value_int": 156286
+        "value": "0x0017C3F4",
+        "value_int": 1557492
       },
       "LOG_STATUS": {
         "addr": "0x0C011",
@@ -565,12 +569,12 @@
         "value_int": 65536
       },
       "RECV_TS": {
-        "value_int": 357082318176,
-        "value": "0x005323C3C560"
+        "value_int": 252875143816,
+        "value": "0x003AE0887A88"
       },
       "EXEC_TS": {
-        "value_int": 357082318179,
-        "value": "0x005323C3C563"
+        "value_int": 252875143819,
+        "value": "0x003AE0887A8B"
       }
     },
     "arb": [
@@ -581,11 +585,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       },
       {
         "lane": 1,
@@ -594,11 +598,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       },
       {
         "lane": 2,
@@ -607,11 +611,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       },
       {
         "lane": 3,
@@ -620,11 +624,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       },
       {
         "lane": 4,
@@ -633,11 +637,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       },
       {
         "lane": 5,
@@ -646,11 +650,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       },
       {
         "lane": 6,
@@ -659,11 +663,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       },
       {
         "lane": 7,
@@ -672,11 +676,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 138502872,
+        "ingress_emu_hits": 338328292,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 138502872
+        "egress_emu_hits": 338328292
       }
     ],
     "histogram": {
@@ -691,9 +695,11 @@
         "0x00000000",
         "0x00000000",
         "0x00000000",
-        "0x1DCD6500",
-        "0x00000001",
+        "0xFFFFFFFF",
+        "0x00000000",
         "0x000000FF",
+        "0x00000000",
+        "0x00000000",
         "0x00000000",
         "0x00000000",
         "0x00000000",
@@ -701,12 +707,14 @@
       ],
       "UNDERFLOW": 0,
       "OVERFLOW": 0,
-      "INTERVAL_CFG": 500000000,
-      "BANK_STATUS": 1,
+      "INTERVAL_CFG": 4294967295,
+      "BANK_STATUS": 0,
       "PORT_STATUS": 255,
       "TOTAL_HITS": 0,
       "DROPPED_HITS": 0,
       "COAL_STATUS": 0,
+      "LAST_INTERVAL_TOTAL_HITS": 0,
+      "LAST_INTERVAL_DROPPED_HITS": 0,
       "LAST_INT_HITS": 0
     },
     "ring": {
@@ -715,7 +723,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -726,7 +734,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -737,7 +745,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -748,7 +756,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -759,7 +767,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -770,7 +778,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -781,7 +789,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -792,7 +800,7 @@
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
         "fill_level": 0,
-        "inerr_count": 63717588,
+        "inerr_count": 0,
         "push_count": 0,
         "pop_count": 0,
         "overwrite_count": 0,
@@ -806,7 +814,7 @@
         "status_control": "0x20000010",
         "discard_hits": 0,
         "expected_latency": 2000,
-        "total_hits": 138502872
+        "total_hits": 0
       },
       {
         "idx": 1,
@@ -814,7 +822,7 @@
         "status_control": "0x20000010",
         "discard_hits": 0,
         "expected_latency": 2000,
-        "total_hits": 138502872
+        "total_hits": 0
       }
     ],
     "frame_asm": {
@@ -835,6 +843,12 @@
   "verdict": {
     "pass": false,
     "total_hits": 0,
+    "total_hits_csr13": 0,
+    "last_interval_total_hits_csr17": 0,
+    "last_interval_dropped_hits_csr18": 0,
+    "hist_bin_sum": 0,
+    "hist_bin_sum_matches_csr13": true,
+    "csr13_vs_hist_diff": 0,
     "underflow": 0,
     "overflow": 0,
     "dropped_hits": 0,
@@ -842,9 +856,9 @@
     "ratio_to_prev": null,
     "hist_sum": 0,
     "sanity_negative": false,
-    "run_number_writeback_ok": false,
+    "run_number_writeback_ok": true,
     "run_number_written": 11141123,
-    "run_number_readback": 11141121,
+    "run_number_readback": 11141123,
     "rx_cmd_count_delta": 4,
     "rx_err_count_delta": 0,
     "log_entries_count": 2,
@@ -852,9 +866,10 @@
       "prepare_ms": null,
       "sync_ms": null,
       "running_s": null,
-      "terminating_ms": 504.9879550933838
+      "terminating_ms": 505.41067123413086
     },
     "idle_completion": "IDLE_OBSERVED",
-    "failure_mode": "TOTAL_HITS_ZERO"
+    "failure_mode": "TOTAL_HITS_ZERO",
+    "warnings": null
   }
 }

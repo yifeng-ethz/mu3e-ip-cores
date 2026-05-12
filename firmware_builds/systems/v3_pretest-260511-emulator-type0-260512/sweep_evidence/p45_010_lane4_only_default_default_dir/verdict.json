@@ -1,25 +1,32 @@
 {
-  "pass": true,
-  "total_hits": 8777371,
+  "pass": false,
+  "total_hits": 0,
+  "total_hits_csr13": 0,
+  "last_interval_total_hits_csr17": 0,
+  "last_interval_dropped_hits_csr18": 0,
+  "hist_bin_sum": 0,
+  "hist_bin_sum_matches_csr13": true,
+  "csr13_vs_hist_diff": 0,
   "underflow": 0,
   "overflow": 0,
   "dropped_hits": 0,
   "arb_drops_emu": 0,
   "ratio_to_prev": null,
-  "hist_sum": 16837527,
+  "hist_sum": 0,
   "sanity_negative": false,
-  "run_number_writeback_ok": true,
+  "run_number_writeback_ok": false,
   "run_number_written": 11141130,
-  "run_number_readback": 11141130,
+  "run_number_readback": 11141129,
   "rx_cmd_count_delta": 4,
   "rx_err_count_delta": 0,
   "log_entries_count": 2,
   "stage_durations": {
     "prepare_ms": null,
-    "sync_ms": null,
+    "sync_ms": 29309423.067584,
     "running_s": null,
-    "terminating_ms": 503.88193130493164
+    "terminating_ms": 504.0547847747803
   },
   "idle_completion": "IDLE_OBSERVED",
-  "failure_mode": null
+  "failure_mode": "TOTAL_HITS_ZERO",
+  "warnings": null
 }
