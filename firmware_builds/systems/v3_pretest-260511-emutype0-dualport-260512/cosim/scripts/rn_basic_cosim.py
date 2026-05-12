@@ -88,7 +88,8 @@ class RnBasicRow:
 
     def sim_hit_period_8ns(self) -> int:
         if self.slice == 3:
-            return RUN_WINDOW_8NS
+            pulses = max(1, int(self.expected_pulses or 1))
+            return max(1, RUN_WINDOW_8NS // pulses)
         if self.rate_88fp <= 0:
             return RUN_WINDOW_8NS
         return max(1, int(round(RATE_BASE / self.rate_88fp)))
