@@ -185,3 +185,26 @@
   `syn/feb_system_v3.qsys`. The parent `feb_system_v3.qsys` is local to
   `syn/`, not `quartus_systems/`; it was regenerated together with the three
   local subsystem Qsys files.
+
+## 2026-05-13 - Per-Checkpoint Bound Iter 1
+
+- Full refreshed-DUT sweep command:
+  `make run_BASIC PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_per_checkpoint_20260513`.
+- Sweep execution reached all 194 rows and every row process returned `rc=0`,
+  but the aggregate summary exited nonzero with 183/194 PASS. Slice rollup:
+  slice 1 128/128, slice 2 23/32, slice 3 0/2, slice 4 32/32.
+- Failure signature: all failing rows were per-checkpoint OPQ egress bound
+  mismatches, not RDMA or trace bijection failures. Header-sync rows
+  RN.BASIC.132-140 measured valid OPQ egress minima below the all-channel
+  reference lower edge; onclick rows RN.BASIC.161-162 measured maxima around
+  33.36k cycles, above the non-cumulative 32,768-cycle queue-only upper edge.
+- Fix: `scripts/cotest/cosim_delay_bounds.py` now derives the header-sync OPQ
+  lower edge from the selected lane/channel population instead of applying the
+  dense all-ASIC/all-channel lower edge to sparse rows, and the onclick OPQ
+  upper edge includes the cumulative OPQ-ingress allowance.
+- Validation before rerun: replaying the new bound calculation over the
+  completed 194-row stats produced zero failing range rows; RN.BASIC.132 now
+  uses `[3860.000, 99133.500]`, RN.BASIC.140 uses
+  `[3796.000, 99133.500]`, and RN.BASIC.161/162 use
+  `[0.000, 38927.000]` for OPQ egress.
