@@ -1446,14 +1446,15 @@ def main() -> int:
 
     def header_sync_expected_phase(abs_ts_8ns: int, asic: int) -> bool:
         burst_count = max(args.header_sync_burst_count, 1)
-        actual_phase = abs_ts_8ns % VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES
         for burst_idx in range(burst_count):
             expected_phase = (
                 args.header_sync_phase_8ns
                 + (burst_idx * args.header_sync_burst_spacing_8ns)
                 + (asic * args.header_sync_asic_stagger_8ns)
-            ) % VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES
-            if actual_phase == expected_phase:
+            )
+            if args.expected_hit_period_8ns <= 0 or abs_ts_8ns < expected_phase:
+                continue
+            if (abs_ts_8ns - expected_phase) % args.expected_hit_period_8ns == 0:
                 return True
         return False
 

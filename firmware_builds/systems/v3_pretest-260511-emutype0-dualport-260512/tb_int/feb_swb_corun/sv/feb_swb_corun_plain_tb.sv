@@ -470,20 +470,20 @@ module feb_swb_corun_plain_tb;
   task automatic generate_header_sync_source_model();
     int unsigned hit_id;
     int unsigned abs_ts_8ns;
-    int unsigned header_base_8ns;
+    int unsigned pulse_base_8ns;
     int unsigned phase_8ns;
     int unsigned burst_count;
     begin
       hit_id = 0;
       burst_count = (header_sync_burst_count == 0) ? 1 : header_sync_burst_count;
-      header_base_8ns = 0;
-      while ((header_base_8ns + header_sync_phase_8ns) < run_window_8ns) begin
+      pulse_base_8ns = 0;
+      while ((pulse_base_8ns + header_sync_phase_8ns) < run_window_8ns) begin
         for (int unsigned burst_idx = 0; burst_idx < burst_count; burst_idx++) begin
           for (int unsigned asic = 0; asic < active_asic_count; asic++) begin
             phase_8ns = header_sync_phase_8ns +
                         (burst_idx * header_sync_burst_spacing_8ns) +
                         (asic * header_sync_asic_stagger_8ns);
-            abs_ts_8ns = header_base_8ns + phase_8ns;
+            abs_ts_8ns = pulse_base_8ns + phase_8ns;
             if (abs_ts_8ns >= run_window_8ns) begin
               continue;
             end
@@ -493,7 +493,7 @@ module feb_swb_corun_plain_tb;
             end
           end
         end
-        header_base_8ns += VIRTUAL_MUTRIG_SHORT_FRAME_8NS;
+        pulse_base_8ns += hit_period_8ns;
       end
       expected_time_samples_runtime = source_hits_unsorted.size() / CHANNELS_PER_ASIC;
     end
