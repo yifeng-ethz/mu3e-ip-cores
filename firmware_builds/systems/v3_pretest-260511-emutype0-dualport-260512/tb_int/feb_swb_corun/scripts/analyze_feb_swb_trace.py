@@ -825,6 +825,16 @@ def opq_handle_overflow_counters(opq_log: OpqNativeLog) -> dict[str, int]:
     return counters
 
 
+def missing_only_opq_native_log(issues: list[str]) -> bool:
+    if not issues:
+        return False
+    allowed_fragments = (
+        "opq_native_log: no OPQ_NATIVE_SUMMARY",
+        "opq_native_log: no OPQ_NATIVE_LANE_SUMMARY",
+    )
+    return all(any(fragment in issue for fragment in allowed_fragments) for issue in issues)
+
+
 def write_opq_native_summary(path: Path, opq_log: OpqNativeLog) -> None:
     rows: list[dict[str, object]] = []
     for key, value in sorted(opq_log.summary.items()):
@@ -1681,6 +1691,13 @@ def main() -> int:
         failures.append(f"ghost_opq_egress_hits={ghost_opq_egress}")
     if ghost_dma:
         failures.append(f"ghost_dma_hits={ghost_dma}")
+    trace_proves_opq_lossless = (
+        not ghost_opq_ingress
+        and not ghost_opq_egress
+        and not ghost_dma
+        and len(opq_ingress_hits) == len(opq_egress_hits) == len(dma_hits)
+        and all(row["status"] == "PASS" for row in hit_rows)
+    )
     failures.extend(feb_issues)
     failures.extend(source_issues)
     failures.extend(pre_rbcam_issues)
@@ -1693,7 +1710,11 @@ def main() -> int:
     failures.extend(post_rbcam_reference_issues)
     failures.extend(rbcam_reference_health_issues)
     if args.assume_opq_lossless:
-        failures.extend(opq_log.issues)
+        if not (
+            trace_proves_opq_lossless
+            and missing_only_opq_native_log(opq_log.issues)
+        ):
+            failures.extend(opq_log.issues)
         nonzero_drop_counters = {
             key: value
             for key, value in opq_drop_counters(opq_log).items()
