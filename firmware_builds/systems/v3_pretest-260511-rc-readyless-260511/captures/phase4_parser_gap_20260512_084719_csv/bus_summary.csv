@@ -1,0 +1,16 @@
+bus,width,known_samples,unknown_samples,nonzero_samples,first_known_ps,first_nonzero_ps,first_change_ps,unique_values,final_hex,qualifier,qualifier_one_samples
+u_feb_system.u_qsys.data_path_subsystem.avalon_st_adapter_009.out_0_channel,4,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.avalon_st_adapter_009.out_0_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.avalon_st_adapter_009.out_0_data,9,4097,1,4089,500,500,299500,7,0x1bc,u_feb_system.u_qsys.data_path_subsystem.avalon_st_adapter_009.out_0_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.avalon_st_adapter_009.out_0_error,3,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.avalon_st_adapter_009.out_0_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.decoded_lane_fifo_0.out_channel,5,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.decoded_lane_fifo_0.out_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.decoded_lane_fifo_0.out_data,9,4097,1,4089,500,500,299500,7,0x1bc,u_feb_system.u_qsys.data_path_subsystem.decoded_lane_fifo_0.out_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.decoded_lane_fifo_0.out_error,3,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.decoded_lane_fifo_0.out_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.decoded_din_channel,4,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.decoded_din_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.decoded_din_data,9,4097,1,4089,500,500,299500,7,0x1bc,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.decoded_din_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.decoded_din_error,3,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.decoded_din_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.asi_rx8b1k_data,9,4097,1,4089,500,500,299500,7,0x1bc,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.asi_rx8b1k_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.asi_rx8b1k_error,3,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.asi_rx8b1k_valid,2048
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.i_data,8,4097,1,4093,500,500,300500,7,0xbc,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.p_new_word,0
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.p_frame_len,10,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.p_new_word,0
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.p_word_cnt,10,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.p_new_word,0
+u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.run_ctrl_data,9,4097,1,0,500,never,never,1,0x0,u_feb_system.u_qsys.data_path_subsystem.mutrig_datapath_subsystem_0.run_ctrl_valid,0

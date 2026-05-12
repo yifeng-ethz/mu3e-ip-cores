@@ -1,0 +1,391 @@
+# Phase 4 parser-gap STP capture log 20260512_084719
+bench_ticket=ticket_20260512T064723Z_codex_phase4_parser_gap_stp.txt
+sof=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_parser_gap/top_stp_phase4_parser_gap.sof
+sof_sha256=507c3b7ed78a39d08519595aedf1895d57199d9647f387eb5489955ea54545b7
+
+## program_feb
+program_feb.sh: programming /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_parser_gap/top_stp_phase4_parser_gap.sof on cable 'USB-BlasterII [7-2]'
+Info: *******************************************************************
+Info: Running Quartus Prime Programmer
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions
+    Info: and other software and tools, and its AMPP partner logic
+    Info: functions, and any output files from any of the foregoing
+    Info: (including device programming or simulation files), and any
+    Info: associated documentation or information are expressly subject
+    Info: to the terms and conditions of the Intel Program License
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Tue May 12 08:47:52 2026
+Info: Command: quartus_pgm -c "USB-BlasterII [7-2]" --mode=JTAG -o p;/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_parser_gap/top_stp_phase4_parser_gap.sof@1
+Info (213045): Using programming cable "USB-BlasterII [7-2]"
+Info (213011): Using programming file /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_parser_gap/top_stp_phase4_parser_gap.sof with checksum 0x14D4C4A6 for device 5AGXBA7D4F31@1
+Info (209060): Started Programmer operation at Tue May 12 08:47:54 2026
+Info (209016): Configuring device index 1
+Info (209017): Device 1 contains JTAG ID code 0x02A020DD
+Info (209007): Configuration succeeded -- 1 device(s) configured
+Info (209011): Successfully performed operation(s)
+Info (209061): Ended Programmer operation at Tue May 12 08:47:58 2026
+Info: Quartus Prime Programmer was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 474 megabytes
+    Info: Processing ended: Tue May 12 08:47:58 2026
+    Info: Elapsed time: 00:00:06
+    Info: Total CPU time (on all processors): 00:00:01
+program_feb.sh: FEB programmed. Waiting 20 s for LVDS PLL + firefly transceiver settle.
+                (See ~/.claude/.../feedback_feb_post_program_settle.md or ~/AGENTS.md.)
+program_feb.sh: settle window elapsed; FEB is SC-ready.
+program_feb_exit=0
+
+## mudaq_recover_pcie
+Recovering PCIe device 0000:0b:00.0 (0x1172:0x0004)...
+unloaded 'mudaq'
+/usr/local/lib/mudaq-recover
+loaded 'mudaq'
+mudaq_recover_pcie_exit=0
+
+## device_check
+crw-rw-rw- 1 root users 10, 124 May 12 08:48 /dev/mudaq0
+dev_mudaq0_ls_exit=0
+
+## phase1_sanity_scratch_0x00000
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x13000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x00000
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00000000
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 71 us
+  timing total        : 71 us
+  secondary before    : 0x0000
+  secondary after     : 0x0005
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0005
+  type                : RD
+  link                : 2
+  addr                : 0x00000
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00000000
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000
+phase1_scratch_exit=0
+
+## phase1_sanity_sc_hub_uid_0x0FE80
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x13000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0FE80
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000FE80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 72 us
+  timing total        : 72 us
+  secondary before    : 0x032A
+  secondary after     : 0x032F
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x032A
+  ring end            : 0x032F
+  type                : RD
+  link                : 2
+  addr                : 0x0FE80
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000FE80
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x53434842
+phase1_sc_hub_uid_exit=0
+
+## phase1_sanity_runctl_rx_cmd_count_0x0C00F
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x13000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0C00F
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000C00F
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 61 us
+  timing matched      : 73 us
+  timing total        : 73 us
+  secondary before    : 0x0000
+  secondary after     : 0x0005
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0005
+  type                : RD
+  link                : 2
+  addr                : 0x0C00F
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000C00F
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000
+phase1_runctl_rx_count_exit=0
+
+## phase4_parser_gap_capture_sequence
+
+## pre_bank_status
+cmd: /home/yifeng/.local/bin/swb_ring_lock tools/run_script/build/sc_tool 2 read 0x0A90B 1
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x13000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A90B
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A90B
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 71 us
+  timing total        : 71 us
+  secondary before    : 0x00F9
+  secondary after     : 0x00FE
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x00F9
+  ring end            : 0x00FE
+  type                : RD
+  link                : 2
+  addr                : 0x0A90B
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A90B
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000001
+pre_bank_status_exit=0
+pre_bank_status_value=0x00000001
+
+## pre_port_status
+cmd: /home/yifeng/.local/bin/swb_ring_lock tools/run_script/build/sc_tool 2 read 0x0A90C 1
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x13000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A90C
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A90C
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 71 us
+  timing total        : 71 us
+  secondary before    : 0x0153
+  secondary after     : 0x0158
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x40000001
+info: observed packet:
+  ring start          : 0x0153
+  ring end            : 0x0158
+  type                : RD
+  link                : 2
+  addr                : 0x0A90C
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A90C
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x000000FF
+pre_port_status_exit=0
+pre_port_status_value=0x000000FF
+
+## pre_total_hits
+cmd: /home/yifeng/.local/bin/swb_ring_lock tools/run_script/build/sc_tool 2 read 0x0A90D 1
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x13000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A90D
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A90D
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 72 us
+  timing total        : 72 us
+  secondary before    : 0x1AE1
+  secondary after     : 0x1AE6
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x1AE1
+  ring end            : 0x1AE6
+  type                : RD
+  link                : 2
+  addr                : 0x0A90D
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A90D
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000
+pre_total_hits_exit=0
+pre_total_hits_value=0x00000000
+capture_cmd: /data1/intelFPGA/18.1/quartus/bin/quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/signaltap/phase4_parser_gap.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.vcd phase4_parser_gap_lvds phase4_parser_gap parser_input_valid_rise 'capture_[clock clicks]' 120.0
+quartus_stp_early_exit_output:
+Info: *******************************************************************
+Info: Running Quartus Prime Signal Tap
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions
+    Info: and other software and tools, and its AMPP partner logic
+    Info: functions, and any output files from any of the foregoing
+    Info: (including device programming or simulation files), and any
+    Info: associated documentation or information are expressly subject
+    Info: to the terms and conditions of the Intel Program License
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Tue May 12 08:50:17 2026
+Info: Command: quartus_stp -t /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/signaltap/phase4_parser_gap.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.vcd phase4_parser_gap_lvds phase4_parser_gap parser_input_valid_rise "capture_[clock clicks]" 120.0
+Info: Quartus(args): /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/signaltap/phase4_parser_gap.stp /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.vcd phase4_parser_gap_lvds phase4_parser_gap parser_input_valid_rise {capture_[clock clicks]} 120.0
+Using hardware : USB-BlasterII [7-2]
+Using device   : @1: 5AGT(FC7H3|MC7G3)/5AGXBA7D4/.. (0x02A020DD)
+Opening STP    : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/signaltap/phase4_parser_gap.stp
+Signal set     : phase4_parser_gap
+Trigger        : parser_input_valid_rise
+Data log       : capture_[clock clicks]
+Output VCD     : /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.vcd
+Timeout (s)    : 120.0
+Info (16704): Signal Tap data acquisition is in IDLE state:
+Info (16704): Signal Tap data acquisition is in FILL state:
+Info (16704): Signal Tap data acquisition is in DONE state:
+Wrote /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.vcd
+Info (23030): Evaluation of Tcl script /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/capture_signaltap_vcd.tcl was successful
+Info: Quartus Prime Signal Tap was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 787 megabytes
+    Info: Processing ended: Tue May 12 08:50:18 2026
+    Info: Elapsed time: 00:00:01
+    Info: Total CPU time (on all processors): 00:00:00
+quartus_stp_exit=0
+
+## summarize_signaltap_vcd
+summary_path=firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.summary.md
+summary_exit=0
+
+## bench_release
+bench_release_exit=0
+bench_release_status=OK

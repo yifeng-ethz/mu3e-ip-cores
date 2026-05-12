@@ -1,6 +1,6 @@
 # FEB SciFi v3 On-Board Test Plan
 
-**Revision**: 2026-04-20 / draft-0
+**Revision**: 2026-05-12 / draft-1
 **Target**: `mu3e-ip-cores/firmware_builds/feb_system_v3` on FEB SciFi prototype
 **Host**: teferi (`yifeng@teferi`, `/dev/mudaq0` via SWB on link 2)
 **Authoring scope**: comprehensive on-board sign-off — not a liveness smoke test.
@@ -863,6 +863,16 @@ counters at RTL word offsets `0x18..0x37` are **NOT host-reachable** (the
 Qsys exposes 16 words = bytes `0x00..0x3F` per instance only). Verify the
 emulator chain via the downstream observable counters listed below.
 
+**Hardware-first debug rule**: for this Phase 4 blocker, the board observation
+chooses the debug boundary. The known-good side is the FEB run-control command
+path through `runctl_mgmt_host_0.LOCAL_CMD` and `dbg_mm2runctrl_0.HOST_CMD`
+to `run_control_splitter`; the unknown side is the splitter fan-out into the
+emulator `asi_ctrl` leaves and the downstream histogram/FEB frame-assembly hit
+flow. Simulation is used only to mirror or de-risk that boundary before a
+rebuild. If the rebuilt hardware still shows zero hits, go directly to
+SignalTap across the known-good/unknown gap instead of treating sim-only
+evidence as a sufficient RTL-fix claim.
+
 Procedure (CSR addresses are sc_tool word addresses behind `mm_bridge`):
 
 | Step | Action | Word addr | Expected/value |
@@ -900,12 +910,15 @@ state**. Observed 2026-05-11: after `enable` (0x32) the FEB FSM rejects
 `end-run` (0x13); `abort-run` (0x14) is accepted from any state. The safe
 end-of-run sequence in this build is `end-run` → (if rejected) `abort-run`.
 
-10. Repeat steps 7–9 with a SignalTap capture if hits do not flow. The
-    most likely root cause is the run_control_splitter sink-termination
-    issue (B002 pattern, memory note `feedback_qsys_terminate_dangling`):
-    a downstream sink with un-tied `outN_ready` on a `USE_READY=0` splitter
-    silently blocks the broadcast, and `run_generating` never asserts on
-    one or more emulator instances.
+10. If hits do not flow after the rc-readyless rebuild, repeat steps 7–9 with
+    a SignalTap capture. This condition is active as of the 2026-05-12
+    hardware retest (§4.10): run-control CSRs advance, but histogram and
+    frame-assembly hit counters stay zero. Use
+    `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp`
+    first. It probes the known-good/unknown gap: run-control mux output,
+    splitter input, splitter `out0/out1/out12/out15`, emulator control
+    splitter `out0/out1/out7`, emulator0 `asi_ctrl`, emulator0
+    `frontend_run_ctl` state/run-generating, and emulator0 TX output.
 
 11. `rc_tool send end-run` (if rejected by FSM, `rc_tool send abort-run`).
     Confirm `feb_frame_assembly_HSS0` actual hit count freezes (no further
@@ -1072,7 +1085,8 @@ being written over an un-drained read.
   `histogram_statistics_0` (was the -1.376 ns LVDS Setup violator).
 - SC-WEDGE fix already inherited.
 - Worst Setup: -0.620 ns (improved from -1.376 ns). 2/4 corners pass.
-- Does NOT include rc-readyless IP changes (commit `17e0cec8`).
+- Does NOT include the full rc-readyless IP + Qsys closure
+  (`17e0cec8` + `93ce227c` + `f3981273`).
 
 **Pre-test sanity** (after `program_feb.sh` 20 s settle + `mudaq_recover_pcie`):
 
@@ -1125,12 +1139,820 @@ reaches the splitter (confirmed via both `runctl_mgmt_host_0.LOCAL_CMD` and
 `dbg_mm2runctrl.HOST_CMD` injection paths), but the downstream sinks
 (emulator_mutrig asi_ctrl inputs) do not receive it. The auto-inserted
 `timing_adapter` components on the splitter outputs are the suspected carrier:
-they insert a ready handshake that the USE_READY=0 splitter cannot satisfy,
-blocking the AVST broadcast. The rc-readyless IP rollout (commit `17e0cec8`,
-mutrig_frame_deassembly fix pending) eliminates these adapters by setting
-USE_READY=0 on all sinks.
+they can insert a ready handshake that blocks the AVST broadcast if a sink is
+still ready-capable or if the Qsys instance pin is stale. The rc-readyless
+rollout (`17e0cec8` for the first five sinks, `93ce227c` for
+`mutrig_frame_deassembly`, and `f3981273` for the stale master Qsys instance
+pin) is the intended closure path: the next build must prove that no
+run-control fan-out adapter can deassert splitter ready.
 
 Log: `reports/phase4_postfix1_20260511_213411.log`.
+
+### 4.8 Phase 4 rc-readyless rebuild gate (handoff status, 2026-05-12)
+
+The next Phase 4 retest should use the SOF from
+`firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/`, which folds
+in all three required fixes:
+
+| Fix | Required source state | Status |
+|---|---|---|
+| SC-WEDGE | `feb_system_v3.qsys` keeps `control_path_subsystem.clk156_in_rst` on `cclk156_source.clk_reset`, not `ext_hard_reset` | master pre-flight complete |
+| hist-debug-disconnect | `scifi_datapath_system_v3*.qsys` has the 6 debug AVST histogram connections removed | master pre-flight complete |
+| rc-readyless | all 6 run-control sink IPs declare readyless AVST sinks, including `mutrig_frame_deassembly` 26.2.0.0511 | IP + master Qsys pre-flight complete |
+
+Master Qsys pre-flight commit:
+`f3981273` (`[FIX] Pre-flight master qsys bump for rc-readyless full rollout
+(mutrig_frame_deassembly_0)`). It records:
+
+- `quartus_systems/feb_system_v3.qsys` version `3.0.2.0511 -> 3.0.3.0511`.
+- `quartus_systems/scifi_datapath_system_v3{,_pipe,_lat4}.qsys` version
+  `3.0.2.0511 -> 3.0.3.0511`.
+- `quartus_systems/mutrig_datapath_system_v3.qsys` system version
+  `3.0.0.0511 -> 3.0.1.0511`.
+- `mutrig_frame_deassembly_0` instance pin
+  `26.1.0.0506 -> 26.2.0.0511`.
+- `tb_int/doc/BUG_HISTORY.md` entry `BUG-002-R`, documenting the stale
+  Qsys instance pin that allowed a run-control timing adapter to remain.
+
+Current build-directory state at handoff:
+
+| Item | Expected for retest | Current status |
+|---|---|---|
+| build dir | `v3_pretest-260511-rc-readyless-260511/` | exists |
+| `syn/` tree | copied baseline plus regenerated master Qsys systems | generated |
+| qsys-generate log | `syn/feb_system_v3_qsys_generate_<TS>_isolated.status` + console log | **pass**: `syn/feb_system_v3_qsys_generate_20260512_005752_isolated.status`, `exit_code=0`, `error_count=0` |
+| run-control adapter proof | no `run_control_splitter` fan-out adapter can deassert ready | **pass**: ready-to-readyless wrappers drive `in_ready=1`; outputs 6/14/15 are direct ready consumers |
+| Quartus compile | `quartus_compile_top_<TS>_rcreadyless.status` + console log | **flow pass**: `syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_010600_rcreadyless.status`, `exit_code=0`, runtime `2445` s |
+| SOF | `syn/board_projects/fe_scifi_feb_v3/output_files/top.sof` | **exists**: `12678639` bytes, SHA-256 `2171cd90643967aef85993ac384707807ffcf418b1b23652443277bd3f8d3f2e` |
+| compile report | `doc/RC_READYLESS_COMPILE.md` | updated with Qsys, adapter, resources, timing violations, SOF/RBF hashes |
+| SignalTap gap compile | `doc/RC_READYLESS_STP_COMPILE.md`, revision `top_stp_phase4_rc_readyless_gap` | **flow pass**: `99/99` probes found, SignalTap `35024` connected, full compile `rc=0`; debug-load candidate only |
+| SignalTap gap capture | `doc/RC_READYLESS_STP_CAPTURE.md`, capture `phase4_rc_readyless_gap_20260512_042348` | **complete / Phase 4 still fail**: run-control reaches emulator lane 0 and `run_generating=1`; `aso_tx8b1k_valid` never asserts |
+
+`v3_pretest-260511-rc-readyless-260511` now has a generated SOF/RBF, but it is
+**not timing-clean**. `output_files/top.sta.rpt` reports timing not met at the
+two slow corners and also reports unconstrained setup/hold requirements. Do not
+use this as a production/signoff image. For the Phase 4 hardware-first debug
+loop, it is only a debug-load candidate if the shared bench owner accepts the
+FEB iterative-debug timing relaxation.
+
+Compile/timing facts:
+
+- Full Quartus flow: successful, `0 errors`, `1580 warnings`.
+- SOF: `output_files/top.sof`, SHA-256
+  `2171cd90643967aef85993ac384707807ffcf418b1b23652443277bd3f8d3f2e`.
+- RBF: `output_files/top.rbf`, SHA-256
+  `b3a7c4fa070228b0a0629f9170b7c23056436b7d65e2c43ee5caa1565e23d000`.
+- Slow 1100 mV 85 C setup: LVDS RX `pll_sclk` divclk slack `-1.029`,
+  TNS `-138.950`; `transceiver_pll_clock[0]` slack `-0.223`, TNS `-0.842`.
+- Slow 1100 mV 85 C recovery: `lvds_firefly_clk` slack `-1.324`,
+  TNS `-4110.829`.
+- Slow 1100 mV 0 C setup: LVDS RX `pll_sclk` divclk slack `-0.707`,
+  TNS `-60.808`.
+- Slow 1100 mV 0 C recovery: `lvds_firefly_clk` slack `-1.225`,
+  TNS `-3804.867`.
+- Other critical warning: Nios RAM init depth mismatch (`16384` design depth vs
+  `32768` init-file depth), with Quartus truncating the extra init content.
+
+Dedicated SignalTap gap-compile facts:
+
+- STP source:
+  `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp`.
+- Node Finder report:
+  `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap_nodes.md`,
+  `99/99` probes found, `0` missing.
+- Quartus revision: `top_stp_phase4_rc_readyless_gap`; output directory:
+  `syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_rc_readyless_gap_clkfix`.
+- Acquisition clock fixed to the exported Qsys port `lvds_outclock_clk`.
+  The previous internal-name attempt used `lvds_rx_28nm_0_outclock_clk` and
+  produced an acquisition-clock disconnect warning; do not reuse it.
+- SignalTap map evidence:
+  `Info (35024): Successfully connected in-system debug instance
+  "phase4_rc_readyless_gap_lvds" to all 231 required data inputs, trigger
+  inputs, acquisition clocks, and dynamic pins`.
+- Full STP compile:
+  `quartus_compile_top_stp_phase4_rc_readyless_gap_clkfix_20260512_0328.console.log`,
+  watcher result `rc=0`, `0 errors`, `1580 warnings`.
+- STP SOF: `top_stp_phase4_rc_readyless_gap.sof`, SHA-256
+  `7dd7f9303a7551d4b0074136a38f2b818ad37e1d20ec4a9decfd6dd21e7f03ad`.
+- STP RBF: `top_stp_phase4_rc_readyless_gap.rbf`, SHA-256
+  `70bd0ec7f67d48e500f14dc6232a616f90645eb278606ac25922760bd38e9a6c`.
+- STP JDI: `top_stp_phase4_rc_readyless_gap.jdi`, SHA-256
+  `362404a223d94d36e24fa0d5c3f4b4c3b061947ab7a68fc9029fc5a49bfa26d9`.
+- STP timing status: slow 85 C setup/recovery fail (`-1.345` / `-1.335`);
+  slow 0 C setup/recovery fail (`-1.177` / `-1.242`); both fast corners pass.
+  This satisfies the FEB iterative-debug rule of at least 2 of 4 corners
+  during the debug loop, but it is not production/signoff timing closure.
+
+Dedicated SignalTap capture facts:
+
+- Capture report:
+  `v3_pretest-260511-rc-readyless-260511/doc/RC_READYLESS_STP_CAPTURE.md`.
+- Capture directory:
+  `v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_rc_readyless_gap_20260512_042348`.
+- Stimulus: preconditioned `LOCAL_CMD=0x10`, `0x11`, then armed STP and issued
+  `LOCAL_CMD=0x12`.
+- VCD:
+  `local_start_run.vcd`; parsed summary:
+  `local_start_run_vcd_summary.log`.
+- Trigger result: `run_control_splitter.out15_valid` rose at `128500 ps` with
+  `out15_data=0x008`; `emulator_ctrl_splitter.out0_valid` and
+  `emulator_mutrig_0.asi_ctrl_valid` rose at the same timestamp with
+  `0x008`.
+- Emulator result: `run_generating` first high at `129500 ps`, final
+  `frame_rst=0`, final `aso_tx8b1k_valid=0`, final
+  `aso_tx8b1k_data=0x1bc`.
+- Post-capture counters: histogram `TOTAL_HITS=0`, `PORT_STATUS=0xFF`, and
+  HSS0/HSS1 actual-hit counters remain zero.
+- Preliminary root-cause evidence:
+  `syn/feb_system_v3.sopcinfo` wires all eight
+  `data_path_subsystem_emulator_mutrig_N.tx8b1k` outputs to decoded-lane mux
+  inputs while the emulator instances keep `BYTE_STREAM_ENABLE=false`; RTL then
+  intentionally ties `aso_tx8b1k_valid` low and drives idle K28.5.
+
+The required adapter proof after qsys-generate is:
+
+```bash
+cd firmware_builds/systems/v3_pretest-260511-rc-readyless-260511
+rg -n "outUseReady|timing_adapter_0" \
+  syn/feb_system_v3/synthesis/submodules/feb_system_v3_data_path_subsystem_avalon_st_adapter_018.v
+rg -n "ready\\[0\\] = 1|in_ready\\s*=\\s*ready\\[0\\]" \
+  syn/feb_system_v3/synthesis/submodules/feb_system_v3_data_path_subsystem_avalon_st_adapter_018_timing_adapter_0.sv
+rg -n "run_control_splitter_out(6|14|15)_" \
+  syn/feb_system_v3/synthesis/submodules/feb_system_v3_data_path_subsystem.vhd
+```
+
+Expected result: any generated ready-to-readyless adapter on the splitter
+fan-out must have `outUseReady=0` and must drive `in_ready=1`; direct outputs
+6/14/15 must terminate at ordinary ready/valid consumers. A literal
+`timing_adapter` filename match is not a failure in Quartus 18.1; a
+ready-deasserting adapter is the failure.
+
+The rc-readyless SOF was retested on hardware after bench-queue claim/release.
+See §4.10 for the raw log pointers and counter table. Phase 4 remains failed:
+`runctl_mgmt_host_0.LOCAL_CMD` and `dbg_mm2runctrl_0.HOST_CMD` both inject
+start-run successfully, but `TOTAL_HITS`, `LAST_INT_HITS`, and
+`feb_frame_assembly_HSS0/HSS1` actual-hit counters remain zero.
+
+The follow-up SignalTap capture is now decisive enough for the next fix loop:
+`LOCAL_CMD=0x12` propagates through `run_control_mux`,
+`run_control_splitter.out15`, `emulator_ctrl_splitter.out0`, and
+`emulator_mutrig_0.asi_ctrl`; lane 0 asserts `run_generating` and deasserts
+`frame_rst`, but `aso_tx8b1k_valid` never asserts and `aso_tx8b1k_data` stays
+at idle `0x1bc`.
+
+Hardware-first debug status:
+
+1. Qsys regeneration and the generated-wrapper adapter proof are complete.
+2. Quartus compile and SOF/RBF generation are complete, but timing is not
+   clean; the image is a debug-load candidate only under the FEB
+   iterative-debug relaxation.
+3. Shared-bench hardware retest was run on the exact SOF SHA-256
+   `2171cd90643967aef85993ac384707807ffcf418b1b23652443277bd3f8d3f2e`.
+4. The retest still shows zero hit flow after `run-prepare -> sync ->
+   start-run` and after direct `dbg_mm2runctrl` start-run injection.
+5. A focused SignalTap gap tap now exists and is Node-Finder clean:
+   `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp`,
+   report
+   `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap_nodes.md`
+   (`99/99` probes found). Quartus import/map/full compile are complete for
+   revision `top_stp_phase4_rc_readyless_gap`.
+6. The shared-bench STP capture is complete:
+   `v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_rc_readyless_gap_20260512_042348/local_start_run.vcd`.
+   It moves the known-good boundary through emulator run-control and identifies
+   the first missing observable as the lane-0 `tx8b1k` byte-stream valid.
+
+Confirmatory simulation evidence from 2026-05-12 is recorded in
+`tb_int/REPORT/RC_EMUL/REPORT.md`. The run
+`SIM_ROOT=sim/iter_20260512_rc_emul make run_RC_EMUL_BLOCKED run_RC_EMUL_FIXED`
+shows the behavioural mirror in two modes:
+
+- `RC_EMUL_BLOCKED`: `TOTAL_HITS=0x00000000`, showing the blocked splitter
+  fan-out model reproduces the hardware-class symptom.
+- `RC_EMUL_FIXED`: `TOTAL_HITS=0x00000010`, showing the ready-tied model lets
+  the run-control broadcast propagate in the mirror.
+
+Both runs have `UVM_ERROR=0`, `UVM_FATAL=0`, 16 pre/post/FEB closed records,
+and zero drops. This is **not** a hardware closure artifact: the harness is a
+behavioural mirror and hardware counters are unavailable in
+`counter_agreement.csv`.
+
+The 2026-05-12 STP capture supersedes the behavioural mirror as the decisive
+hardware boundary. The quick support sim in
+`v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_rc_readyless_gap_20260512_042348/sim_byte_stream_disable.log`
+elaborates `emulator_mutrig` with `BYTE_STREAM_ENABLE=0` and reports
+`tx_valid=0`, `tx_data=1bc`, matching the captured idle byte-stream output.
+
+### 4.9 Phase 4 plot and RDMA closure status (math review, 2026-05-12)
+
+Independent math/DV review found no current end-to-end hit-loss closure. Treat
+the current blocker as hardware-first until a positive-hit board run exists.
+
+Current non-closure facts:
+
+- Latest Phase 4 hardware evidence is the pre-HSS STP capture in
+  `v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_pre_hss_gap_20260512_050729/`
+  and report `v3_pretest-260511-rc-readyless-260511/doc/PRE_HSS_STP_CAPTURE.md`.
+  Reset-link `start-run` reaches the emulator and `run_generating` asserts, but
+  `aso_tx8b1k_valid`, `avalon_st_adapter_032.in_0_valid`,
+  `decoded_lane_mux_0.in1_valid`, MTS valid outputs, histogram pre/post valids,
+  and HSS counters remain zero.
+- The rc-readyless gate, disabled-byte-stream contract fix, and pre-HSS STP
+  compile have all advanced the hardware boundary, but there is still no
+  positive legal hit-flow capture. The exact hardware-stimulus sim now
+  reproduces the zero-byte-stream result when `emu_signal=1` and shows that
+  changing only `SIGNAL` to `0` restores byte-stream valid. The next required
+  artifact is therefore a corrected-stimulus hardware capture that shows
+  `tx8b1k_valid` and downstream pre-HSS valid movement before any
+  rate/latency/RDMA closure can be accepted.
+- The RDMA/SWB checklist is explicitly non-passing as of
+  `2026-05-11T02:39:05Z`: `pass_rows=0`, `fail_rows=631`, `pending_rows=320`
+  in `rdma_subsystem/test_plan/CHECKLIST.md`.
+
+Existing Phase 4 plots under
+`systems/system_20260427_testplanphase5/model/phase4/artifacts/` are useful
+historical calibration, not current-build closure:
+
+- `phase4_rate_sweep.{csv,png,svg}` shows the model/HDL physical cap at
+  200 Mhit/s, but the historical board curve knees near 135 Mhit/s. Rate
+  sign-off remains open.
+- `phase4_latency_tlm_vs_rtl.{csv,png,svg}` shows the old RTL latency histogram
+  extending to about 1.6k cycles while the TLM short-frame model support is
+  around one 910-cycle frame. That RTL data is stale for short-frame latency
+  sign-off.
+- `phase4_queue_depth_regions.{csv,png,svg}` and
+  `phase4_mutrig_latency_model.{csv,png,svg}` are model/truth artifacts. They
+  define expectations and debug hypotheses, but they do not prove the current
+  FEB/SWB/RDMA chain.
+
+The next accepted plot packet must be generated after the current build has
+positive hardware hit flow. It must include raw CSV bins, rendered PNG/SVG,
+script provenance, firmware/SOF/build identifiers, CP or run ID, seed/run
+duration, and machine-readable pass/fail JSON.
+
+### 4.10 Phase 4 rc-readyless hardware retest 2026-05-12
+
+The rc-readyless debug SOF was flashed and retested on hardware under a shared
+bench-queue claim. The programmed image was
+`v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof`,
+SHA-256 `2171cd90643967aef85993ac384707807ffcf418b1b23652443277bd3f8d3f2e`.
+
+Raw artifacts:
+
+- `reports/phase4_rc_readyless_20260511_235457.log` — program/recovery
+  preflight. FEB program succeeded and basic SC reads passed, but emulator2
+  UID read hit `SC secondary did not report ready after reset`.
+- `reports/phase4_rc_readyless_sc_recovery_20260511_235558.log` — post-PCIe
+  recovery sanity pass. Scratch, sc_hub UID, emulator2 UID, histogram UID,
+  total hits, and runctl status all read correctly.
+- `reports/phase4_rc_readyless_runctl_20260511_235638.log` — decisive
+  run-control/counter pass; aggregate exit code 0.
+- `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp`
+  and `phase4_rc_readyless_gap_nodes.md` — first SignalTap gap tap, Node Finder
+  `99/99` probes found. The fixed STP revision now imports and compiles through
+  Quartus as `top_stp_phase4_rc_readyless_gap`.
+- `v3_pretest-260511-rc-readyless-260511/doc/RC_READYLESS_STP_COMPILE.md` —
+  SignalTap compile report for the gap tap. The compile log is
+  `syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_stp_phase4_rc_readyless_gap_clkfix_20260512_0328.console.log`;
+  output files live in
+  `syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_rc_readyless_gap_clkfix`.
+  Map connected the SignalTap instance to all 231 required inputs, and the STP
+  SOF hash is
+  `7dd7f9303a7551d4b0074136a38f2b818ad37e1d20ec4a9decfd6dd21e7f03ad`.
+- `v3_pretest-260511-rc-readyless-260511/doc/RC_READYLESS_STP_CAPTURE.md` —
+  on-board SignalTap capture report. Capture files live under
+  `signaltap/captures/phase4_rc_readyless_gap_20260512_042348/`; the primary
+  files are `local_start_run.vcd`, `local_start_run_vcd_summary.log`,
+  `local_start_run_stp.log`, `local_start_run_stim.log`,
+  `post_capture_counters.log`, and `sim_byte_stream_disable.log`.
+
+Decisive counter results from the run-control pass:
+
+| Checkpoint | Evidence |
+|---|---|
+| SWB link lock | `LINK_LOCKED_LOW` majority `0x00000F00`; stable bits b11..b8 only, link bit 2 stable 0 |
+| Run-control LOCAL_CMD | writes `0x10`, `0x11`, `0x12` produce `LAST_CMD=0x12`, `RX_CMD_COUNT=3`, `STATUS=0x00000003` |
+| Histogram after start-run | `BANK_STATUS` toggles 0/1/0 across samples, but `PORT_STATUS=0x000000FF`, `TOTAL_HITS=0`, `LAST_INT_HITS=0`, drop/under/overflow 0 |
+| Frame assembly after start-run | HSS0/HSS1 type words `0x38`, actual-hit high/low counters all 0 |
+| Direct `dbg_mm2runctrl` injection | `SENT_COUNT 0 -> 1`, `LAST_SENT=0x00004A08`, `STATUS=0x00000821` |
+| After direct injection | `TOTAL_HITS=0`, `PORT_STATUS=0xFF`, HSS0/HSS1 actual counters 0 |
+| Cleanup | end-run sets `LAST_CMD=0x13`, `RX_CMD_COUNT=4`, scratch re-read remains 0 |
+
+Decisive SignalTap gap-capture results:
+
+| Checkpoint | Evidence |
+|---|---|
+| STP trigger | `run_control_splitter.out15_valid` rising edge captured after `LOCAL_CMD=0x12` |
+| Run-control payload | `run_control_mux.out_data=0x008`, `run_control_splitter.out15_data=0x008` |
+| Emulator-control fan-out | `emulator_ctrl_splitter.out0_valid` and `emulator_mutrig_0.asi_ctrl_valid` first high at `128500 ps`, payload `0x008` |
+| Emulator run state | `run_generating` first high at `129500 ps`, final `run_generating=1`, final `frame_rst=0` |
+| First byte-stream source | `aso_tx8b1k_valid` never high; final `aso_tx8b1k_data=0x1bc` |
+| Counter aftermath | Histogram `TOTAL_HITS=0`, `PORT_STATUS=0xFF`; HSS0/HSS1 actual counters remain 0 |
+| Source/sim confirmation | generated `.sopcinfo` has `BYTE_STREAM_ENABLE=false` while wiring `emulator_mutrig_N.tx8b1k` to decoded-lane muxes; minimal Questa log reports `tx_valid=0`, `tx_data=1bc` for `BYTE_STREAM_ENABLE=0` |
+
+Verdict: **PHASE 4 FAIL — rc-readyless did not clear the zero-hit blocker**.
+Known-good now extends through run-control CSR reception, direct
+`dbg_mm2runctrl` command injection, `run_control_splitter.out15`,
+`emulator_ctrl_splitter.out0`, `emulator_mutrig_0.asi_ctrl`, and lane-0
+`run_generating`. The first failed observable is the byte-stream source:
+`aso_tx8b1k_valid` is tied low while downstream Qsys consumes `tx8b1k`.
+The next fix loop must either set `BYTE_STREAM_ENABLE=true` for all eight
+emulator instances on the current `tx8b1k` path, or rewire the integration to
+consume the emulator's direct `hit_type0` source instead. That
+`BYTE_STREAM_ENABLE=true` path was built and smoked in §4.11; the later
+pre-HSS STP capture in §4.13 shows the byte-stream valid is still dark under
+the exact board stimulus, so §4.10 is no longer the latest active boundary.
+
+### 4.11 Phase 4 byte-stream contract fix candidate 2026-05-12
+
+The follow-up fix keeps the existing decoded-lane mux wiring and enables the
+emulator byte-stream output. The 2026-05-12 hardware smoke retires the captured
+`aso_tx8b1k_valid=0` / disabled-byte-stream blocker as a build-contract issue,
+but it is still not Phase 4 closure. The first smoke produced post-selected
+histogram counter activity, and the follow-up pre-HSS probe showed that activity
+is not yet legal hit-flow evidence: `histogram_ingress_bridge_0.pre_in`,
+`mts_preprocessor_0.hit_type1_out`, rbCAM, and
+`feb_frame_assembly_HSS0/HSS1` remain dark.
+
+The later pre-HSS STP capture in §4.13 supersedes the broad interpretation of
+this smoke: enabling `BYTE_STREAM_ENABLE` was necessary for the wired
+`tx8b1k` path, but it was not sufficient under the actual board
+JTAG/reset-link stimulus. `aso_tx8b1k_valid` is still the first failed
+observable in the latest hardware capture. The §4.13 directed sim then
+reproduces that failure with `emu_signal=1` and restores byte-stream output
+when only `SIGNAL` is changed to `0`.
+
+Source/Qsys state:
+
+- Tcl recipe:
+  `firmware_builds/systems/v3_pretest-260511/script/update_v3_byte_stream_contract.tcl`.
+- Wrapper:
+  `firmware_builds/systems/v3_pretest-260511/script/apply_v3_byte_stream_contract.sh`.
+- Applied to
+  `quartus_systems/scifi_datapath_system_v3{,_pipe,_lat4}.qsys`; each file now
+  has eight `BYTE_STREAM_ENABLE=true` emulator instance parameters.
+- `quartus_systems/feb_system_v3.qsys` was also validated through the same
+  recipe to keep the wrapper system in the reproducible Qsys path.
+
+Generated-system evidence:
+
+- Regeneration status:
+  `v3_pretest-260511-rc-readyless-260511/syn/feb_system_v3_qsys_generate_20260512_044214_byte_stream_fix_isolated.status`,
+  `exit_code=0`, `error_count=0`.
+- Regenerated `.sopcinfo` has eight `BYTE_STREAM_ENABLE` parameters at
+  emulator instances and still wires
+  `data_path_subsystem_emulator_mutrig_N.tx8b1k` to
+  `data_path_subsystem_decoded_lane_mux_N.in1` for lanes `0..7`.
+
+Directed simulation evidence:
+
+- Run directory:
+  `v3_pretest-260511-rc-readyless-260511/tb_int/sim_byte_stream_axis_20260512_0443/`.
+- `BYTE_STREAM_ENABLE=0`: `valid_high_count=0`, `first_valid_ps=None`,
+  first data stays idle `110111100` (`0x1bc` with control bit).
+- `BYTE_STREAM_ENABLE=1`: `valid_high_count=16`, first valid at
+  `12708000 ps`.
+
+Compile result:
+
+- Compile log:
+  `v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_0445_byte_stream_fix.console.log`.
+- Flow result: `Quartus Prime Full Compilation was successful. 0 errors,
+  1587 warnings`; elapsed `00:37:42`, CPU `02:02:51`.
+- Fresh SOF:
+  `syn/board_projects/fe_scifi_feb_v3/output_files/top.sof`,
+  SHA-256 `c8239ef1ab2f0bc21da91e0de41ca4c452531cb363677c43c9fb3f7930712dcd`,
+  size `12678659`.
+- Fresh RBF:
+  `syn/board_projects/fe_scifi_feb_v3/output_files/top.rbf`,
+  SHA-256 `5dc37ae000a5e37a677f8dcae0a62e769416675342a8409a88f86807e4951bd1`,
+  size `7079716`.
+- Fitter resources: `65,358 / 91,680` ALMs (`71%`), `101241` registers,
+  `4,130,506 / 13,987,840` block-memory bits (`30%`), `556 / 1,366` RAM
+  blocks (`41%`), HSSI TX `8 / 9` (`89%`).
+- Timing status: debug-load only, not production signoff. Slow 85C setup worst
+  slack is `-2.226 ns`, slow 85C recovery worst slack is `-1.339 ns`; the
+  image is acceptable only under the iterative-debug FEB rule.
+
+Hardware smoke evidence:
+
+- Artifact directory:
+  `v3_pretest-260511-rc-readyless-260511/hw_smoke/phase4_byte_stream_fix_20260512_0526/`.
+- Bench queue: claimed as `codex_v3_byte_stream_fix_smoke`, prolonged once,
+  and released after teardown.
+- Programming: `program_feb.log` shows `quartus_pgm` success on
+  `USB-BlasterII [7-2]` and the mandatory 20 s FEB settle.
+- PCIe recovery: `mudaq_recover_pcie.log` unloads and reloads `mudaq`.
+- JTAG run-control setup: `jtag_setup_start.log` writes
+  `{0x00FFFF30, 0x00000240, 0x00FFFF31, 0x01023510, 0x00000011, 0x00000012}`;
+  `runctl_status=0x00000003`, `runctl_last_cmd=0x00020012`.
+- SC run-control readback before end-run:
+  `sc_runctl_last_cmd.log` returns `0x00020012` and
+  `sc_runctl_rx_cmd_count.log` returns `0x00000006`. After JTAG teardown,
+  `sc_runctl_last_cmd_after_end.log` returns `0x00020013` and
+  `sc_runctl_rx_cmd_count_after_end.log` returns `0x00000007`.
+- Rate-configured post-selected histogram dump:
+  `jtag_setup_start.log` uses `hist_snoop_source=post`; the corresponding
+  `hist_rate_dump.log` reports `live_select_post 1` and
+  `post_hit_filter_enabled 0`.
+  `hist_rate_dump.log` reports `stats_after_wait={underflow_count 0
+  overflow_count 0 total_hits 836042 dropped_hits 0 ... last_interval_total_hits
+  7995716 last_interval_dropped_hits 0}`. The CSV
+  `hist_rate_bins.csv` sums to `7995716` counts, all in bin `0`.
+- Independent SC histogram read after the rate dump:
+  `sc_hist_after_rate_0x0A908_len11.log` returns `UNDERFLOW=0`,
+  `OVERFLOW=0`, `PORT_STATUS=0x000200FF`, `TOTAL_HITS=0x001C9282`,
+  `DROPPED_HITS=0`, `COAL_STATUS=0x00000100`,
+  `LAST_INT_HITS=0x007A0144`.
+- HSS frame-assembly counters are still zero:
+  `sc_hss0_after_hist_rate.log` and `sc_hss1_after_hist_rate.log` both show
+  declared/actual/missing hit high/low words all `0`.
+- Interpretation: because the post path was selected with the post-hit filter
+  disabled, this is word-counter evidence, not a hit-conservation proof.
+
+Pre-HSS boundary probe:
+
+- Artifact directory:
+  `v3_pretest-260511-rc-readyless-260511/hw_smoke/phase4_pre_hss_probe_20260512_0541/`.
+- Bench queue: claimed as `codex_v3_pre_hss_probe` and released after teardown.
+- Programming and recovery:
+  `program_feb.log` reloads the same byte-stream-fix SOF
+  (`c8239ef1ab2f0bc21da91e0de41ca4c452531cb363677c43c9fb3f7930712dcd`) and
+  waits the mandatory 20 s; `mudaq_recover_pcie.log` reloads `mudaq`.
+- JTAG setup:
+  `jtag_setup_pre_start.log` uses `hist_snoop_source=pre`,
+  `selector={source pre ...}`, `runctl_last_cmd=0x00020012`, and one active
+  emulator lane (`active_lane=0`, `emu_hit_rate=0x00000800`).
+- Pre-HSS histogram dump:
+  `hist_pre_rate_dump.log` reports `live_select_post 0`,
+  `pre_packet_active 0`, `post_packet_active 0`, and all histogram statistics
+  zero after the 1.1 s wait. `hist_pre_rate_bins.csv` has
+  `sum(count)=0`.
+- Independent SC histogram read:
+  `sc_hist_pre_after_rate_0x0A908_len11.log` returns `TOTAL_HITS=0`,
+  `DROPPED_HITS=0`, `LAST_INT_HITS=0`, `UNDERFLOW=0`, `OVERFLOW=0`, and
+  `PORT_STATUS=0x000000FF`.
+- Stage counters:
+  `sc_mts0_after_pre_rate_0x09000_len5.log` and
+  `sc_mts1_after_pre_rate_0x0A000_len5.log` keep their visible totals at zero;
+  all eight rbCAM snapshots under `0x0AC00..0x0AD60` return the `RBCM` UID with
+  push/pop/error-style payload words still zero; HSS0/HSS1 declared/actual/
+  missing counters remain zero.
+- Teardown:
+  `jtag_teardown_pre_stop.log` reaches `runctl_last_cmd=0x00020013`.
+
+Debug gate after this smoke, superseded by §4.13:
+
+1. Treat the Qsys `BYTE_STREAM_ENABLE=true` change as the fix for the captured
+   disabled-byte-stream contract, but keep the hardware claim limited to
+   post-selected histogram word-counter activity.
+2. The active hardware gap is now upstream of the pre-HSS hit stream:
+   post-selected histogram counts are nonzero, while
+   `histogram_ingress_bridge_0.pre_in` / `mts_preprocessor_0.hit_type1_out`,
+   MTS visible totals, rbCAM push/pop-style counters, and HSS counters are zero.
+3. Use the next hardware-first loop to probe `decoded_lane_mux_0.out`,
+   decoded-lane FIFO output, mutrig-datapath type0 output,
+   `mts_preprocessor_0.hit_type0_in`, `mts_preprocessor_0.hit_type1_out`, and
+   `histogram_ingress_bridge_0.pre_in/pre_out`. The focused SignalTap source
+   for that gap is now imported and compiled as
+   `top_stp_phase4_pre_hss_gap`; use the compiled image for the next
+   hardware-first capture. Caveat: Node Finder resolves `76/76` probes, but
+   map connects only `129/185` SignalTap inputs because wide payload, channel,
+   and error aliases are not preserved. Treat it as a loadable handshake/stage
+   localization image, not a payload-complete capture image. This capture has
+   now been run; see §4.13 for the current blocker.
+
+### 4.12 Phase 4 pre-HSS SignalTap compile 2026-05-12
+
+Purpose: narrow the active hardware gap left by §4.11. Post-selected histogram
+word counters advance, but legal pre-HSS hit flow is still dark at
+`histogram_ingress_bridge_0.pre_in/pre_out`,
+`mts_preprocessor_0.hit_type1_out`, MTS visible totals, rbCAM payload counters,
+and HSS frame-assembly counters.
+
+Supporting sim:
+
+- Testbench:
+  `v3_pretest-260511-rc-readyless-260511/tb_int/tb_pre_hss_axis.sv`.
+- Run directory:
+  `v3_pretest-260511-rc-readyless-260511/tb_int/sim_pre_hss_axis_20260512/`.
+- Result:
+  ```text
+  PRE_HSS_AXIS_COUNTS tx_valid=11659 emu_type0=1919 parser_headers=19 parser_hits=1918
+  *** PRE_HSS_AXIS PASSED ***
+  Errors: 0, Warnings: 11
+  ```
+- Interpretation: the reduced source/parser path is decodable in sim, but this
+  does not explain the on-board dark pre-HSS boundary and is not an RTL-fix
+  proof.
+
+SignalTap compile:
+
+- Report:
+  `v3_pretest-260511-rc-readyless-260511/doc/PRE_HSS_STP_COMPILE.md`.
+- STP file:
+  `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_pre_hss_gap.stp`.
+- Dedicated revision:
+  `top_stp_phase4_pre_hss_gap`.
+- Node Finder:
+  `phase4_pre_hss_gap_nodes_top_stp_phase4_pre_hss_gap.md`, `76/76` probes
+  found, `0` missing.
+- Full compile:
+  `Quartus Prime Full Compilation was successful. 0 errors, 1580 warnings`;
+  watcher `rc=0`, elapsed `00:38:35`, CPU `02:06:57`.
+- Programming files:
+  `output_files_stp_phase4_pre_hss_gap/top_stp_phase4_pre_hss_gap.sof`
+  SHA-256 `bbb2b17af1a65c63394acfae40606968565dd562f54d5606ca6ce2aa77dd939c`,
+  size `12684913`; `.rbf` SHA-256
+  `f472dbbae6a1b64ef57aaa0d150c0f57e1aefd8393f791a302da58c60cdd7d46`,
+  size `7117568`.
+- Fitter resources: `65,557 / 91,680` ALMs (`72%`), `102648` registers,
+  `4,209,354 / 13,987,840` block-memory bits (`30%`), `564 / 1,366` RAM
+  blocks (`41%`), HSSI TX `8 / 9` (`89%`).
+- Timing status: debug-load only, not production signoff. Slow 85C setup
+  slack `-1.097 ns`, slow 85C recovery slack `-1.330 ns`; slow 0C setup
+  `-0.728 ns`, slow 0C recovery `-1.236 ns`. Both fast corners pass, so it
+  meets the FEB iterative-debug rule of `2/4` corners passing.
+
+SignalTap caveat:
+
+- Quartus map reports `Critical Warning (35025)`: instance
+  `phase4_pre_hss_gap_lvds` is partially connected to `129` of `185` required
+  inputs, with `56` missing sources/connections.
+- The missing unique aliases are payload/channel/error style probes such as
+  `decoded_lane_mux_0_out_{channel,data,error}`,
+  `decoded_lane_fifo_0_out_{channel,data,error}`,
+  `mutrig_datapath_subsystem_0_hit_type0_out_{channel,data,error}`,
+  `mts_preprocessor_0_hit_type1_out_{channel,data}`, and
+  `histogram_ingress_bridge_0_{pre_out_data,hist_out_data}`.
+- Use this image to localize the first dark handshake/stage on hardware. If
+  the next capture needs actual payload words, regenerate with preserved/source
+  pre-synthesis payload taps or retarget payload probes to post-synthesis nets.
+
+Compile-time next hardware action was to claim the bench queue, program
+`top_stp_phase4_pre_hss_gap.sof`, arm `phase4_pre_hss_gap.stp`, and capture the
+first missing transition between decoded-lane mux/FIFO, mutrig-datapath type0,
+MTS ingress/egress, and the histogram pre tap. Do not treat the sim-only
+pre-HSS smoke as closure. The resulting capture is recorded in §4.13.
+
+### 4.13 Phase 4 pre-HSS SignalTap capture 2026-05-12
+
+The §4.12 hardware action has now been run. This capture is the current Phase 4
+source of truth and keeps Phase 4 failed.
+
+Report and artifacts:
+
+- Capture report:
+  `v3_pretest-260511-rc-readyless-260511/doc/PRE_HSS_STP_CAPTURE.md`.
+- Capture directory:
+  `v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_pre_hss_gap_20260512_050729/`.
+- Programmed STP SOF:
+  `v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_pre_hss_gap/top_stp_phase4_pre_hss_gap.sof`,
+  SHA-256
+  `bbb2b17af1a65c63394acfae40606968565dd562f54d5606ca6ce2aa77dd939c`.
+- Successful VCD:
+  `run_generating_start_run.vcd`; parsed summary:
+  `run_generating_vcd_summary.log`.
+
+Bench and setup facts:
+
+- Bench queue was claimed before programming and released after teardown.
+- FEB programming succeeded with Quartus checksum `0x147FE76A`, `0` errors,
+  `0` warnings, followed by the mandatory 20 s settle.
+- PCIe was recovered with `mudaq_recover_pcie` and the `mudaq` module reloaded.
+- JTAG setup required explicit data/upload master patterns under the FEB
+  `USB-BlasterII [7-2]` path.
+- Stimulus used lane 0 in emulator mode:
+  `hist_snoop_source=pre`, `emu_hit_rate=0x00000800`,
+  `emu_control=0x00000001`, `emu_signal=0x00000001`,
+  `MUTRIG_FORMAT=0x00000020`, and `cluster_fix=0x00004000`.
+
+Trigger sequence:
+
+- First attempt used the original `decoded_mux_valid_rise` trigger. `rc_tool`
+  `start-run` advanced reset-link status from `0x11000003` to `0x12000004`,
+  but SignalTap timed out after 120 s with no trigger and no VCD export.
+- The run state was cleaned with `end-run -> reset -> stop-reset`, then setup
+  was repeated.
+- A copied STP retargeted only the trigger expression to lane-0
+  `run_generating` rising edge. The STP trigger name stayed
+  `decoded_mux_valid_rise`.
+- The retargeted capture reached SignalTap `DONE`, exported
+  `run_generating_start_run.vcd`, and Quartus SignalTap ended with `0` errors,
+  `0` warnings.
+
+Decisive VCD facts:
+
+| Checkpoint | Evidence |
+|---|---|
+| Emulator control input | `emulator_mutrig_0.asi_ctrl_valid` first high at `127500 ps`; `asi_ctrl_ready` stays ready |
+| Emulator run state | `run_generating` first high at `128500 ps`, final `1`; `frame_rst` final `0` |
+| Byte-stream source | `emulator_mutrig_0.aso_tx8b1k_valid` never high, `0` rises, final `0` |
+| Byte-stream adapter | `avalon_st_adapter_032.in_0_valid` and `out_0_valid` never high |
+| Decoded-lane mux input | `decoded_lane_mux_0.in1_valid` never high |
+| Mutrig/MTS path | `hit_type0_out_valid`, `mux_mutrig2processor.out_valid`, and `mts_preprocessor_0.aso_hit_type1_valid` never high |
+| Histogram path | `histogram_ingress_bridge_0.asi_pre_valid`, `aso_pre_valid`, `aso_hist_valid`, and `hist_post_cdc_0.out_valid` never high |
+
+Some downstream valids, including `decoded_lane_mux_0.out_valid` and
+`decoded_lane_fifo_0.*_valid`, are already high or toggling from the first
+captured sample while the upstream byte-stream valid and mux input are dark.
+They are not legal hit-flow proof and must not be used as closure evidence.
+
+Post-capture counters:
+
+- Histogram read `0x0A908`, 11 words: `PORT_STATUS=0x000000FF`,
+  `TOTAL_HITS=0`, `DROPPED_HITS=0`, underflow `0`, overflow `0`.
+- MTS0/MTS1 reads at `0x09000` and `0x0A000`: visible totals remain zero.
+- HSS0/HSS1 reads at `0x0B400` and `0x0B410`: type/id words are present
+  (`0x38`, `0x2`), but declared/actual/missing hit counters are all zero.
+- Run-control readback after capture: `LAST_CMD=0x00020012`,
+  `RX_CMD_COUNT=0x00000010`.
+- Teardown sent `end-run` and reported `runctl_last_cmd=0x00020013`,
+  `runctl_status=0x00000003`.
+
+Directed sim confirmation:
+
+- Testbench:
+  `v3_pretest-260511-rc-readyless-260511/tb_int/tb_pre_hss_axis_hwstim.sv`.
+- Run directory:
+  `v3_pretest-260511-rc-readyless-260511/tb_int/sim_pre_hss_hwstim_20260512/`.
+- Compile: `compile_emulator.log` and `compile_tb.log` report `Errors: 0`.
+- Exact board tuple:
+  `SIGNAL=0x1`, `MUTRIG_FORMAT=0x20`, `cluster_fix=0x4000` gives
+  `tx_valid=0`, `type0=0`, first tx time `0`, final `tx_data=0x1bc`.
+- One-bit control:
+  changing only `SIGNAL` to `0x0` gives `tx_valid=3038`, `type0=481`,
+  first tx at `253324000 ps`, with `Errors: 0`, `Warnings: 6`.
+
+RTL interpretation: `frontend_trigger_engine.sv` launches internal random hits
+only when `!cfg_hit_mode_sig`. The board setup's `emu_signal=1` writes
+`SIGNAL[0]=1`, selecting signal/external mode. Because this setup did not
+provide a matching external inject pulse, no tickets reach the lane emitter and
+`aso_tx8b1k_valid` correctly remains zero.
+
+Interim verdict for this capture: **PHASE 4 FAIL — this specific
+`SIGNAL=1` setup is a stimulus/CSR mode mismatch, not an apparent downstream
+rbCAM/HSS/RDMA datapath bug**. The hardware known-good boundary reaches
+lane-0 emulator run-control and `run_generating`; sim confirms that
+`emu_signal=1` explains the zero byte-stream source. The corrected-stimulus
+hardware rerun is recorded in §4.14 and supersedes this as the current active
+blocker boundary.
+
+### 4.14 Phase 4 corrected-stimulus pre-HSS SignalTap capture 2026-05-12
+
+Purpose: run the next hardware-first pass from §4.13 with internal random-hit
+generation (`SIGNAL=0`) and determine whether the first missing legal-hit
+boundary stays at the byte-stream source or moves downstream.
+
+Report and artifacts:
+
+- Capture report:
+  `v3_pretest-260511-rc-readyless-260511/doc/PRE_HSS_STP_CAPTURE.md`.
+- Capture directory:
+  `v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_pre_hss_signal0_20260512_053323/`.
+- Trigger STP:
+  `phase4_pre_hss_gap_trigger_txvalid.stp`; copied from
+  `phase4_pre_hss_gap.stp` with only the trigger condition changed to
+  `emulator_mutrig_0.aso_tx8b1k_valid` rising edge.
+- VCD:
+  `txvalid_start_run_default_signal0.vcd`; parsed summary:
+  `txvalid_vcd_summary.log`.
+
+Setup caveats:
+
+- The explicit System Console setup with `--emu-signal 0` failed twice before
+  run start with a Java `ThreadPoolExecutor` rejection.
+- The partial SC readback after that failure did show lane 0
+  `SIGNAL=0`, but also showed default-ish `MUTRIG_FORMAT=0x22` and default
+  rate/cluster fields, not the exact sim tuple `format=0x20/cluster_fix=0x4000`.
+- A reset attempt wedged the SC leaf path (`RSP3`, `0xEEEEEEEE`). The board was
+  reprogrammed and PCIe recovered; the capture then used the fresh image's
+  default internal-random `SIGNAL=0` state and avoided reset during teardown.
+
+Run-control and capture facts:
+
+- `run-prepare`: reset-link status `0x31000000 -> 0x00010299`.
+- `sync`: `0x00010299 -> 0x11000003`.
+- SignalTap capture with `start-run`: `0x11000003 -> 0x12000004`.
+- SignalTap reached `DONE`, exported the VCD, and Quartus reported
+  `0` errors, `0` warnings.
+- Teardown used `end-run` only: `0x12000004 -> 0x13000000`.
+
+Decisive VCD facts:
+
+| Checkpoint | Evidence |
+|---|---|
+| Run state | `run_generating` high for all captured samples |
+| Byte-stream source | `emulator_mutrig_0.aso_tx8b1k_valid` first high at `128500 ps`, `1408` one-samples |
+| Adapter | `avalon_st_adapter_032.in_0_valid` and `out_0_valid` first high at `128500 ps`, `1408` one-samples |
+| Decoded-lane mux input | `decoded_lane_mux_0.in1_valid` first high at `128500 ps`, `1408` one-samples |
+| Decoded-lane FIFO | `decoded_lane_fifo_0.out_valid` toggles (`512` rises, `1024` one-samples); payload probes are not trusted in this STP image |
+| Mutrig parser/header | `mutrig_datapath_subsystem_0.headerinfo_valid` and `hit_type0_out_valid` never high |
+| MTS path | `mux_mutrig2processor.out_valid`, `mts_preprocessor_0.asi_hit_type0_valid`, and `aso_hit_type1_valid` never high |
+| Histogram/HSS path | `histogram_ingress_bridge_0.asi_pre_valid`, `aso_pre_valid`, `aso_hist_valid`, and `hist_post_cdc_0.out_valid` never high |
+
+Post-capture counters:
+
+- Histogram read `0x0A908`, 11 words: `PORT_STATUS=0x000000FF`,
+  `TOTAL_HITS=0`, drops/underflow/overflow all `0`.
+- MTS0/MTS1 reads at `0x09000` and `0x0A000`: visible totals remain zero.
+- HSS0/HSS1 reads at `0x0B400` and `0x0B410`: type/id words are present
+  (`0x38`, `0x2`), but declared/actual/missing hit counters are all zero.
+- Run-control readback: `LAST_CMD=0x00000012`, `RX_CMD_COUNT=0x00000003`.
+
+Verdict: **PHASE 4 FAIL — corrected/default internal stimulus restores
+byte-stream valid, but legal pre-HSS hit flow is still dark at the
+mutrig-datapath parser/header boundary**. The current hardware known-good side
+is now lane-0 `tx8b1k` valid through the adapter/mux/FIFO handshake boundary.
+The unknown side starts at `mutrig_datapath_subsystem_0.headerinfo_valid` /
+`hit_type0_out_valid` and remains dark through MTS, histogram, HSS, rbCAM, and
+RDMA/offline proof. The next STP pass should probe emitted byte values, decoded
+FIFO output payload/control, frame receiver parser state, and the parser CSR
+and reset mode. A reliable SC/JTAG config path is also required before claiming
+the exact `SIGNAL=0`, `MUTRIG_FORMAT=0x20`, `cluster_fix=0x4000` sim tuple on
+hardware.
+
+### 4.15 Parser-gap STP capture 2026-05-12
+
+Purpose: run the next parser-gap capture from the §4.14 boundary with the
+compiled parser-gap STP image and the supported SC `LOCAL_CMD` fallback path.
+This attempt stopped at the SignalTap stop condition below and is not a valid
+Phase 4 §4.2-§4.3 stimulus-qualified capture.
+
+Image and setup:
+
+- SOF:
+  `v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_parser_gap/top_stp_phase4_parser_gap.sof`.
+- SOF SHA-256:
+  `507c3b7ed78a39d08519595aedf1895d57199d9647f387eb5489955ea54545b7`.
+- STP:
+  `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_parser_gap.stp`.
+- Node Finder:
+  `phase4_parser_gap_nodes_top_stp_phase4_parser_gap_postcompile.md`,
+  `122/122` probes found.
+- Bench ticket:
+  `ticket_20260512T064723Z_codex_phase4_parser_gap_stp.txt`.
+- Programming and recovery:
+  `program_feb.sh` returned `0`, Quartus programmer checksum `0x14D4C4A6`;
+  `mudaq_recover_pcie` returned `0`; `/dev/mudaq0` was present.
+
+Phase-1 mini-sanity:
+
+| Probe | Address | Value | Verdict |
+|---|---:|---:|---|
+| `scratch_pad_ram` | `0x00000` | `0x00000000` | `rsp=OK`, not `0xEEEEEEEE` |
+| `sc_hub` UID | `0x0FE80` | `0x53434842` | `rsp=OK`, `"SCHB"` |
+| `runctl_mgmt_host_0.CSR_RX_CMD_COUNT` | `0x0C00F` | `0x00000000` | `rsp=OK`, fresh boot |
+
+Pre-arm counter snapshot:
+
+| Metric | Address | Value |
+|---|---:|---:|
+| `BANK_STATUS` | `0x0A90B` | `0x00000001` |
+| `PORT_STATUS` | `0x0A90C` | `0x000000FF` |
+| `TOTAL_HITS` | `0x0A90D` | `0x00000000` |
+
+SignalTap action:
+
+- Command opened instance `phase4_parser_gap_lvds`, signal set
+  `phase4_parser_gap`, trigger `parser_input_valid_rise`, data log
+  `capture_[clock clicks]`, timeout `120 s`.
+- SignalTap reported `IDLE -> FILL -> DONE`, exported
+  `v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.vcd`,
+  and returned `0` errors / `0` warnings.
+- Stop condition: acquisition reached `DONE` before any SC write to
+  `LOCAL_CMD` could be issued. The intended `0x10 -> 0x11 -> 0x12`, 4 s
+  wait, counter snapshot, and `0x13` sequence was therefore not run. No
+  `0x30` or `0x31` reset opcode was sent.
+
+Pre-stimulus VCD summary:
+
+| Signal group | Observation |
+|---|---|
+| Known failing outputs | `mutrig_datapath_subsystem_0.headerinfo_valid` and `hit_type0_out_valid` never asserted |
+| Parser input path | `avalon_st_adapter_009.out_0_valid`, `decoded_lane_fifo_0.out_valid`, `decoded_din_valid`, and `mutrig_frame_deassembly_0.asi_rx8b1k_valid` toggled before run start |
+| Run/emulator controls | `run_generating`, `emulator_mutrig_0.aso_tx8b1k_valid`, `run_ctrl_valid`, `receiver_go`, and `enable` stayed low |
+| Parser progress | `p_new_word`, `n_new_word`, `aso_headerinfo_valid`, and `aso_hit_type0_valid` stayed low |
+| Payload note | observed buses sit mostly at idle/control values `0x1bc` / `0xbc`; this is not legal hit-flow evidence |
+
+Artifacts:
+
+- Log:
+  `v3_pretest-260511/reports/phase4_parser_gap_20260512_084719.log`.
+- VCD:
+  `v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.vcd`.
+- Summary:
+  `v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719.summary.md`.
+- CSV sidecars:
+  `v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719_csv/`.
+
+Verdict: **STOPPED - premature parser-input trigger**. This capture does not
+advance the Phase 4 hardware boundary beyond §4.14. It does show that
+`parser_input_valid_rise` is not selective enough for the requested board
+sequence because the adapter/FIFO/parser-input valid path can toggle while
+run-control and emulator source valid are still low. The next investigation
+step needs user direction: use a run-qualified parser trigger, a staged arm
+after `0x10/0x11`, or another precondition that prevents this idle/control
+traffic from consuming the capture.
 
 ---
 
@@ -1151,6 +1973,34 @@ Each phase produces a structured report written to `systems/system_20260427_test
 The reports are the sign-off artifact; the test plan is successful if and
 only if these four reports are on disk, checked in, and review-approved.
 
+For the current `v3_pretest-260511` closure, the reviewed minimum deliverables
+are stricter:
+
+- **Current-build pre-gate proof**: SWB SciFi link 2 locked, SC plane alive,
+  run-control reaches FEB emulators, histogram `TOTAL_HITS > 0`,
+  `feb_frame_assembly_HSS0/HSS1` actual-hit counters advance,
+  `DROPPED_HITS/UNDERFLOW/OVERFLOW == 0`, and any armed SignalTap error
+  triggers either do not fire or have a captured explanation.
+- **Counter-conservation ledger**: common hit-equivalent stages
+  `H1..H6` covering emulator, frame assembly, rbCAM ingress, rbCAM egress,
+  histogram, and FEB TX; then byte/job stages `B7 = 4 * CNT_OPQ_INPUT_W`,
+  `B8 = CNT_BYTES_WRITTEN`, and `Q9 = CNT_CQE_POSTED` for SWB/RDMA.
+  Modes A/B require exact adjacent equality; Mode C uses the documented
+  Poisson 5-sigma tolerance, and masked channels must be exactly zero.
+- **Rate plot packet**: raw per-channel ingress/egress bins, stage deltas,
+  expected counts, tolerances, CSV, PNG/SVG, and script provenance for every
+  mode/mask/rate point.
+- **Latency plot packet**: five normalized lifetime panels for `pre_rbcam`,
+  `post_rbcam`, FEB egress, OPQ ingress, and OPQ egress/offline, with raw bins,
+  quantiles, expected sample count, and sim/board comparison.
+- **Offline-disk proof**: fresh `dma.bin`, decoded hit records, total decoded
+  hits equal to first-stage generated hits, per-channel active/masked count
+  comparison, timestamp/inter-arrival distribution check, and frame-boundary
+  checks.
+- **Provenance**: firmware/SOF/build ID, CP ID, seed, run duration,
+  start/stop timestamps, raw counter snapshots, raw dumps, rendered plots, and
+  pass/fail JSON.
+
 ---
 
 ## 6. Open items / known caveats
@@ -1165,10 +2015,52 @@ only if these four reports are on disk, checked in, and review-approved.
   `scifi_datapath_system_v3.qsys` internal byte bases. Verify on-board with
   the histogram UID check before relying on the derived numbers for every
   register.
-- **SignalTap .stp authoring**: no pre-built `.stp` files for v3 triggers
-  in §4.3 yet; they are to be authored on first run and checked into
-  `systems/system_20260427_testplanphase5/signaltap/`.
+- **SignalTap .stp authoring**: the rc-readyless Phase 4 gap tap is authored
+  at
+  `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp`
+  with Node Finder report `phase4_rc_readyless_gap_nodes.md` (`99/99` found).
+  Quartus import, map, and full compile are complete for
+  `top_stp_phase4_rc_readyless_gap`; programming, arming, and on-board capture
+  are complete in
+  `signaltap/captures/phase4_rc_readyless_gap_20260512_042348/`. Broader §4.3
+  trigger taps remain to be authored as needed after the next fix candidate.
+  The follow-up pre-HSS gap tap is authored at
+  `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_pre_hss_gap.stp`.
+  Quartus import and full compile are complete for
+  `top_stp_phase4_pre_hss_gap`; the dedicated Node Finder report
+  `phase4_pre_hss_gap_nodes_top_stp_phase4_pre_hss_gap.md` shows `76/76`
+  found. Caveat: map connects only `129/185` SignalTap inputs because
+  payload/channel/error aliases are not preserved, so the image is loadable for
+  handshake/stage localization but not payload-complete capture. The pre-HSS
+  hardware capture is complete in
+  `signaltap/captures/phase4_pre_hss_gap_20260512_050729/`; the
+  corrected-stimulus/default `SIGNAL=0` capture is complete in
+  `signaltap/captures/phase4_pre_hss_signal0_20260512_053323/`. See
+  `v3_pretest-260511-rc-readyless-260511/doc/PRE_HSS_STP_CAPTURE.md`.
 - **Ping-pong interval tuning**: §4.5.4 assumes `INTERVAL_CFG` yields an
   interval > the time needed for one full host-side read of hist_bin (256
   words). If it doesn't, raise `INTERVAL_CFG` until it does; a too-short
   interval aliases the alternation check.
+- **rc-readyless hardware gate**: `v3_pretest-260511-rc-readyless-260511`
+  has Qsys, adapter proof, Quartus flow exit 0, SOF/RBF artifacts, the
+  SignalTap gap capture, a byte-stream fix smoke, and two follow-up pre-HSS
+  STP captures. The byte-stream fix image restores post-selected histogram
+  word-counter activity with zero drops/underflow/overflow in that profile. The
+  first pre-HSS STP capture showed `aso_tx8b1k_valid=0` because the setup used
+  `emu_signal=1` without an external inject source; the exact-stimulus sim
+  reproduced that and restored byte-stream output when only `SIGNAL` changed to
+  `0`. The corrected/default `SIGNAL=0` hardware capture then restored
+  `aso_tx8b1k_valid` through the adapter/mux/FIFO handshake boundary, but
+  `headerinfo_valid`, `hit_type0_out_valid`, MTS valids, pre-HSS histogram
+  valids, rbCAM payload counters, and HSS frame-assembly counters remain zero.
+  This is a debug-load candidate, not production signoff.
+- **next active blocker**: under the latest hardware source of truth in
+  §4.14, reset-link `start-run` reaches lane-0 emulator run-control,
+  `run_generating`, `emulator_mutrig_0.aso_tx8b1k_valid`, the adapter, the
+  decoded-lane mux input, and the decoded-lane FIFO handshake boundary. The
+  first still-dark legal-hit signals are
+  `mutrig_datapath_subsystem_0.headerinfo_valid` and `hit_type0_out_valid`.
+  The next pass should use STP to probe emitted byte values, decoded FIFO
+  payload/control, frame receiver parser state, and parser CSR/reset mode, and
+  should also repair the SC/JTAG setup path so the exact `SIGNAL=0`,
+  `MUTRIG_FORMAT=0x20`, `cluster_fix=0x4000` tuple can be replayed on board.
