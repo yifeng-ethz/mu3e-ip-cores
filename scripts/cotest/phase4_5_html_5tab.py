@@ -690,6 +690,203 @@ def gather_rdma_evidence(row_id: str, max_frames: int = 8) -> dict[str, Any]:
     return out
 
 
+def gather_scoreboard_evidence(row_id: str) -> dict[str, Any] | None:
+    """Read scoreboard.json for a row. The scoreboard is the sim-only monitor
+    that checks per-checkpoint hit accounting against the source true-hit-list.
+
+    Each entry has: checkpoint, total_hits, ghost_hits, broken_hits, missing_hits.
+    """
+    path = RN_BASIC_REPORT_ROOT / row_id / "scoreboard.json"
+    if not path.is_file():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def gather_runlog_evidence(row_id: str) -> dict[str, Any] | None:
+    """Read run_log.json for a row. The run log captures phase transitions
+    and CSR configure activity along the 1 ms RUNNING window.
+    """
+    path = RN_BASIC_REPORT_ROOT / row_id / "run_log.json"
+    if not path.is_file():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def dummy_evidence_RN_BASIC_001() -> dict[str, Any]:
+    """Synthesised perfect evidence for RN.BASIC.001 so the showcase popup
+    renders end-to-end without depending on a successful cosim run.
+
+    RN.BASIC.001 = slice 1 periodic, lane=0xFF, chan=0xFFFFFFFF, rate=0x0100,
+    expected theoretical hits = 125,000 in a 1 ms RUNNING window.
+    """
+    theory = 125000
+    # counter / rate evidence - per-IP CSR snapshot at TERM
+    counter = {
+        "theoretical_hits": theory,
+        "row_id": "RN.BASIC.001",
+        "arb_hit_type0_supercore": {
+            "SELECTED_COUNT_lane0": 15625, "SELECTED_COUNT_lane1": 15625,
+            "SELECTED_COUNT_lane2": 15625, "SELECTED_COUNT_lane3": 15625,
+            "SELECTED_COUNT_lane4": 15625, "SELECTED_COUNT_lane5": 15625,
+            "SELECTED_COUNT_lane6": 15625, "SELECTED_COUNT_lane7": 15625,
+            "TOTAL_SELECTED": 125000,
+            "DROPPED_HITS": 0,
+            "ERROR_STICKY": 0,
+        },
+        "histogram_statistics_v2": {
+            "TOTAL_HITS_CSR13": 125000,
+            "LAST_INTERVAL_TOTAL_HITS_CSR17": 125000,
+            "hist_bin_sum": 124998,
+            "UNDERFLOW": 0, "OVERFLOW": 0,
+        },
+        "ring_buffer_cam_0": {"push_cnt": 31250, "pop_cnt": 31250},
+        "ring_buffer_cam_1": {"push_cnt": 31250, "pop_cnt": 31250},
+        "ring_buffer_cam_2": {"push_cnt": 31250, "pop_cnt": 31250},
+        "ring_buffer_cam_3": {"push_cnt": 31250, "pop_cnt": 31250},
+        "mts_preprocessor_0": {"ts_delta_min": 642, "ts_delta_max": 4172, "debug_burst": 0},
+        "mts_preprocessor_1": {"ts_delta_min": 644, "ts_delta_max": 4174, "debug_burst": 0},
+        "mutrig_frame_deassembly": {
+            "frame_count_per_lane": [1953, 1953, 1953, 1953, 1953, 1953, 1953, 1953],
+            "crc_err": 0,
+        },
+        "feb_frame_assembly_0": {"actual_hits": 62500},
+        "feb_frame_assembly_1": {"actual_hits": 62500},
+    }
+    # delay evidence - 5-checkpoint percentile stats per the math review
+    delay = {
+        "hist_a": {"count": 62500, "delay_min_cycles": 27, "delay_p05_cycles": 118,
+                    "delay_p50_cycles": 527, "delay_p95_cycles": 941, "delay_max_cycles": 1040,
+                    "checkpoint": "pre-rbCAM", "bound_lower": 0, "bound_upper": 2000},
+        "hist_b": {"count": 62500, "delay_min_cycles": 2014, "delay_p05_cycles": 2022,
+                    "delay_p50_cycles": 2098, "delay_p95_cycles": 2174, "delay_max_cycles": 2196,
+                    "checkpoint": "post-rbCAM", "bound_lower": 2000, "bound_upper": 2200},
+        "scoreboard": {"count": 125000, "delay_mean_ns": 4216.4, "delay_stddev_ns": 88.7,
+                       "delay_min_cycles": 27, "delay_p05_cycles": 118,
+                       "delay_p50_cycles": 527, "delay_p95_cycles": 941, "delay_max_cycles": 95829,
+                       "checkpoint": "all", "bound_lower": 0, "bound_upper": 99133.5},
+        "pdf_a_rel": None,
+        "pdf_b_rel": None,
+    }
+    # rdma evidence - hex sample + decoded frames
+    rdma = {
+        "summary": {"bytes_total": 250000, "record_count": 124998,
+                    "first_record_hex": "bcfa00010001006400000000",
+                    "last_record_hex": "bcfa00fa01006400dd5e1f9c",
+                    "record_size_avg": 8.0},
+        "frames": [
+            {"frame_idx": 0, "byte_offset": 0, "length": 64, "packet_type_raw": 0b111000,
+             "packet_type_label": "SciFi", "subframe_count": 4,
+             "hex": "bce8000000010064dead0064bee70064cafe00649c0801640102016401030164010401649c0805640106016401070164010801649c0809640a0a0b0c"},
+            {"frame_idx": 1, "byte_offset": 64, "length": 64, "packet_type_raw": 0b111000,
+             "packet_type_label": "SciFi", "subframe_count": 4,
+             "hex": "bce8000000020064feed0064c0de0064baad00649c0801640202026402030264020402649c0805640206026402070264020802649c08096402"},
+            {"frame_idx": 2, "byte_offset": 128, "length": 56, "packet_type_raw": 0b111000,
+             "packet_type_label": "SciFi", "subframe_count": 3,
+             "hex": "bce80000000300641c1f0064b0bc0064ace100649c08016403030364030403649c0805640306036403070364030803649c08096403"},
+        ],
+        "hex_lines": _dummy_hex_lines(),
+        "bytes_total_truncated_at": 256,
+    }
+    # scoreboard evidence - per-checkpoint monitor table
+    scoreboard = {
+        "source_hit_count": theory,
+        "ghost_total": 0,
+        "broken_total": 0,
+        "missing_total": 2,
+        "notes": ("Sim-only monitor comparing each checkpoint's hit stream "
+                  "against the source true-hit-list (resolved via hit_id back "
+                  "to the emulator-side payload). Ghost = hit not in source. "
+                  "Broken = payload mismatch vs source. Missing = source hit "
+                  "never seen at this checkpoint."),
+        "monitors": [
+            {"checkpoint": "pre-rbCAM",         "total_hits": 125000, "ghost_hits": 0, "broken_hits": 0, "missing_hits": 0},
+            {"checkpoint": "post-rbCAM",        "total_hits": 125000, "ghost_hits": 0, "broken_hits": 0, "missing_hits": 0},
+            {"checkpoint": "FEB egress",        "total_hits": 125000, "ghost_hits": 0, "broken_hits": 0, "missing_hits": 0},
+            {"checkpoint": "OPQ ingress",       "total_hits": 125000, "ghost_hits": 0, "broken_hits": 0, "missing_hits": 0},
+            {"checkpoint": "OPQ egress",        "total_hits": 124998, "ghost_hits": 0, "broken_hits": 0, "missing_hits": 2},
+            {"checkpoint": "RDMA host rxbuffer","total_hits": 124998, "ghost_hits": 0, "broken_hits": 0, "missing_hits": 2},
+        ],
+    }
+    # run log evidence
+    runlog = {
+        "run_length_ms": 1.0,
+        "events": [
+            {"t_ms": 0.000000, "type": "RUN_START",  "ip": "",                            "detail": "test harness reset, FSM in IDLE"},
+            {"t_ms": 0.000234, "type": "CSR_WRITE",  "ip": "histogram_statistics_v2",     "detail": "LEFT_BOUND=0x00 RIGHT_BOUND=0xFF BIN_WIDTH=1 INTERVAL_CFG=0xFFFFFFFF"},
+            {"t_ms": 0.000412, "type": "CSR_WRITE",  "ip": "arb_hit_type0_supercore",     "detail": "per-lane MODE=EMU x8"},
+            {"t_ms": 0.000578, "type": "CSR_WRITE",  "ip": "emulator_mutrig_0..7",        "detail": "lane_mask=0xFF channel_mask=0xFFFFFFFF rate_88fp=0x0100 hit_mode=direct"},
+            {"t_ms": 0.000812, "type": "CSR_WRITE",  "ip": "mutrig_injector_multiheader", "detail": "mode=0 (off, slice 1 periodic uses emulator hit-gen)"},
+            {"t_ms": 0.001020, "type": "CSR_WRITE",  "ip": "runctl_mgmt_host",            "detail": "RUN_NUMBER=0x00AA0001"},
+            {"t_ms": 0.001234, "type": "PHASE",      "ip": "runctl FSM",                  "detail": "0x10 RUN_PREPARE; STATUS PREPARING"},
+            {"t_ms": 0.003456, "type": "PHASE",      "ip": "runctl FSM",                  "detail": "0x11 SYNC; STATUS SYNCING; SYNC pulse propagated"},
+            {"t_ms": 0.005678, "type": "PHASE",      "ip": "runctl FSM",                  "detail": "0x12 START_RUN; STATUS RUNNING; emulators armed"},
+            {"t_ms": 0.250000, "type": "MARKER",     "ip": "histogram_statistics_v2",     "detail": "TOTAL_HITS_CSR13 readback during running = 31254"},
+            {"t_ms": 0.500000, "type": "MARKER",     "ip": "histogram_statistics_v2",     "detail": "TOTAL_HITS_CSR13 readback during running = 62498"},
+            {"t_ms": 0.750000, "type": "MARKER",     "ip": "histogram_statistics_v2",     "detail": "TOTAL_HITS_CSR13 readback during running = 93746"},
+            {"t_ms": 1.005678, "type": "PHASE",      "ip": "runctl FSM",                  "detail": "0x13 END_RUN; STATUS TERMINATING; drain in progress"},
+            {"t_ms": 1.012345, "type": "PHASE",      "ip": "runctl FSM",                  "detail": "STATUS IDLE; terminating complete"},
+            {"t_ms": 1.013012, "type": "CSR_READ",   "ip": "histogram_statistics_v2",     "detail": "TOTAL_HITS_CSR13 post-TERM = 125000 (theory 125000)"},
+            {"t_ms": 1.013234, "type": "CSR_READ",   "ip": "arb_hit_type0_supercore",     "detail": "DROPPED_HITS = 0 across all 8 lanes"},
+            {"t_ms": 1.013456, "type": "CSR_READ",   "ip": "ring_buffer_cam_0..3",        "detail": "push_cnt = pop_cnt = 31250 per slot"},
+            {"t_ms": 1.014000, "type": "RUN_END",    "ip": "",                            "detail": "run length 1.0 ms; 194-row plan: row 1/194 complete"},
+        ],
+    }
+    return {
+        "counter": counter,
+        "delay": delay,
+        "rdma": rdma,
+        "scoreboard": scoreboard,
+        "runlog": runlog,
+        "hit_count": 125000,
+        "run_length_ms": 1.0,
+        "is_dummy": True,
+    }
+
+
+def _dummy_hex_lines() -> list[dict[str, Any]]:
+    """Synthesise 16 rows of 16-byte rdma hex with K28.5/K28.4 markers placed
+    at frame and subframe boundaries to demonstrate the colorized viewer."""
+    raw = bytearray(256)
+    # Plant frames at offset 0, 64, 128 with K28.5 (0xBC); subframes at +16, +32, +48
+    for fbase in (0, 64, 128):
+        raw[fbase] = SWB_K285
+        raw[fbase + 1] = 0xE8  # 0b111010xx -> packet_type bits in 0..5
+        raw[fbase + 16] = SWB_K284
+        raw[fbase + 32] = SWB_K284
+        raw[fbase + 48] = SWB_K284
+    # Idle bytes after the last frame
+    for i in range(184, 256):
+        if (i % 8) == 0:
+            raw[i] = SWB_K237
+        else:
+            raw[i] = (0x40 + (i & 0x0F))
+    # Fill payload positions with a pattern so search is meaningful
+    for i in range(256):
+        if raw[i] == 0:
+            raw[i] = ((i * 31) & 0xFF) or 0x42
+    lines: list[dict[str, Any]] = []
+    for off in range(0, 256, 16):
+        chunk = bytes(raw[off:off + 16])
+        roles = []
+        for b in chunk:
+            if b == SWB_K285:
+                roles.append("5")
+            elif b == SWB_K284:
+                roles.append("4")
+            elif b == SWB_K237:
+                roles.append("7")
+            else:
+                roles.append("d")
+        lines.append({"o": off, "h": chunk.hex(), "r": "".join(roles)})
+    return lines
+
+
 def basic_rows_html() -> str:
     """Render the BASIC tab table with the requested column groups."""
     basic_rows = parse_markdown_rows(DOC_DIR / "TEST_BASIC.md", "RN.BASIC.")
@@ -718,20 +915,46 @@ def basic_rows_html() -> str:
         chan_mask = row.get("channel_mask", "0xFFFFFFFF")
         rate_field = row.get("rate_88fp", "0x0100" if slice_id != 3 else "N/A")
         theory_info = basic_row_theory(row)
-        # Gather evidence (lazy in HTML, eager at generation time)
-        rate_ev = gather_rate_evidence(rid)
+        # Gather evidence (eager at generation time; lazy in browser via inline JSON)
+        counter_ev = gather_rate_evidence(rid)
         delay_ev = gather_delay_evidence(rid)
         rdma_ev = gather_rdma_evidence(rid)
+        sb_ev = gather_scoreboard_evidence(rid)
+        run_ev = gather_runlog_evidence(rid)
+        hit_count = theory_info.get("theory_hits")
+        run_length_ms = RUN_WINDOW_MS
+        # RN.BASIC.001 is the showcase: always override with the perfect dummy
+        # so the popup behaviour is reviewable before the cosim sweep emits
+        # real evidence in this shape.
+        if rid == "RN.BASIC.001":
+            dummy = dummy_evidence_RN_BASIC_001()
+            counter_ev = dummy["counter"]
+            delay_ev = dummy["delay"]
+            rdma_ev = dummy["rdma"]
+            sb_ev = dummy["scoreboard"]
+            run_ev = dummy["runlog"]
+            hit_count = dummy["hit_count"]
+            run_length_ms = dummy["run_length_ms"]
         evidence_json[rid] = {
-            "rate": rate_ev,
+            "counter": counter_ev,
             "delay": delay_ev,
             "rdma": rdma_ev,
+            "scoreboard": sb_ev,
+            "runlog": run_ev,
             "slice": slice_id,
             "slice_label": slice_label,
+            "is_dummy": rid == "RN.BASIC.001",
         }
-        rate_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="rate">View</button>' if rate_ev else '<span class="ev-pending">pending</span>'
+        run_len_str = f"{run_length_ms:.1f}"
+        run_len_cell = (
+            f'<button class="ev-btn run-len" data-row="{rid}" data-ev="runlog">{run_len_str}</button>'
+            if run_ev else
+            f'<span class="ev-pending">{run_len_str}</span>'
+        )
+        counter_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="counter">View</button>' if counter_ev else '<span class="ev-pending">pending</span>'
         delay_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="delay">View</button>' if any(delay_ev.get(k) is not None for k in ("hist_a", "hist_b", "scoreboard")) else '<span class="ev-pending">pending</span>'
         rdma_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="rdma">View</button>' if rdma_ev.get("frames") else '<span class="ev-pending">pending</span>'
+        sb_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="scoreboard">View</button>' if sb_ev else '<span class="ev-pending">pending</span>'
         cells = [
             f"<td class=\"id\">{html.escape(rid)}</td>",
             f"<td>{html.escape(str(lane_mask))}</td>",
@@ -739,27 +962,29 @@ def basic_rows_html() -> str:
             f"<td>{html.escape(str(hit_mode))}</td>",
             f"<td>{html.escape(str(rate_field))}</td>",
             f"<td>{html.escape(theory_info['popcount'])}</td>",
-            f"<td class=\"num\">{fmt_num(theory_info['theory_hits'])}</td>",
-            f"<td class=\"num\">{fmt_num(theory_info['theory_hits_per_ms'])}</td>",
-            f"<td class=\"ev\">{rate_btn}</td>",
+            f"<td class=\"num\">{fmt_num(hit_count)}</td>",
+            f"<td class=\"num run-len-cell\">{run_len_cell}</td>",
+            f"<td class=\"ev\">{counter_btn}</td>",
             f"<td class=\"ev\">{delay_btn}</td>",
             f"<td class=\"ev\">{rdma_btn}</td>",
+            f"<td class=\"ev\">{sb_btn}</td>",
         ]
         body_rows_html.append(f'<tr data-row="{rid}" data-slice="{slice_id}">{"".join(cells)}</tr>')
 
     note = (
         "<p class=\"note\">194-row RN.BASIC plan from TEST_BASIC.md. "
-        "Configuration columns are taken directly from the test plan; "
-        "Expected Hits/ms is recomputed from the formula clipped at the OPQ ingress ceiling. "
-        "Evidence buttons open inline popups with rate (per-IP CSR counters), delay (DISLIN lifetime plots, 2 hist banks), and rdma (rx-buffer hex dump with mu3e frame decode).</p>"
+        "Configuration columns are taken directly from the test plan. "
+        "Packets carries popcount, the committed hit count (sim scoreboard-traced; equals theory at PASS rows), and the run length in ms (click for a UVM-style run log). "
+        "Evidence buttons open inline popups for counter (per-IP CSR counters), delay (DISLIN lifetime plots, 2 hist banks), rdma (rx-buffer hex with mu3e frame decode), and scoreboard (sim-only per-checkpoint monitor: ghost / broken / missing hits resolved against the source true-hit-list). "
+        "RN.BASIC.001 carries a synthetic perfect dummy so the popup layout is reviewable end-to-end before the real cosim evidence lands.</p>"
     )
     header_html = (
         '<thead>'
         '<tr class="hg1">'
         '<th rowspan="2">ID</th>'
         '<th colspan="4" class="grp">Configuration</th>'
-        '<th colspan="3" class="grp">Expected Hits/ms</th>'
-        '<th colspan="3" class="grp">Evidence</th>'
+        '<th colspan="3" class="grp">Packets</th>'
+        '<th colspan="4" class="grp">Evidence</th>'
         '</tr>'
         '<tr class="hg2">'
         '<th>lane_mask</th>'
@@ -767,11 +992,12 @@ def basic_rows_html() -> str:
         '<th>hit_mode</th>'
         '<th>rate_88fp</th>'
         '<th>popcount</th>'
-        '<th>theory hits</th>'
-        '<th>theory hits/ms</th>'
-        '<th>rate</th>'
+        '<th>hit count</th>'
+        '<th>run length (ms)</th>'
+        '<th>counter</th>'
         '<th>delay</th>'
         '<th>rdma</th>'
+        '<th>scoreboard</th>'
         '</tr>'
         '</thead>'
     )
@@ -972,6 +1198,7 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
   font-weight: 650;
 }
 .ev-btn:hover { background: var(--accent-weak); }
+.ev-btn.run-len { font-variant-numeric: tabular-nums; padding: 3px 8px; min-width: 46px; }
 .ev-pending { color: var(--muted); font-style: italic; font-size: 11px; }
 
 /* Modal */
@@ -1099,8 +1326,8 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     }).join('');
     return h + b + '</tbody></table>';
   }
-  function renderRate(rid, data){
-    if (!data) return '<p class="ev-pending">No rate evidence found for ' + rid + '. Run the cosim sweep for this row.</p>';
+  function renderCounter(rid, data){
+    if (!data) return '<p class="ev-pending">No counter evidence found for ' + rid + '. Run the cosim sweep for this row.</p>';
     var theory = data.theoretical_hits;
     var rows = [];
     var keys = Object.keys(data).sort();
@@ -1121,9 +1348,70 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
         rows.push([ip, k, fmtNum(v), theory != null ? fmtNum(theory) : '', pct]);
       });
     });
-    var header = 'Rate evidence - ' + rid + (theory != null ? ' (theory ' + fmtNum(theory) + ' hits)' : '');
+    var header = 'Counter evidence - ' + rid + (theory != null ? ' (theory ' + fmtNum(theory) + ' hits)' : '');
+    var note = '<p class="legend">Counters are absolute committed counts at TERM. Rate = counter / run_length_ms.</p>';
+    return '<p><strong>' + header + '</strong></p>' + note
+         + asTable(['IP', 'counter name', 'measured / sim', 'expected', 'delta vs theory'], rows);
+  }
+  function renderScoreboard(rid, data){
+    if (!data) return '<p class="ev-pending">No scoreboard evidence found for ' + rid + '. Sim-only -- scoreboard.json missing.</p>';
+    var notes = data.notes || '';
+    var srcCount = data.source_hit_count;
+    var monitors = data.monitors || [];
+    var rows = monitors.map(function(m){
+      return [
+        m.checkpoint,
+        m.total_hits != null ? m.total_hits : '',
+        m.ghost_hits != null ? m.ghost_hits : '',
+        m.broken_hits != null ? m.broken_hits : '',
+        m.missing_hits != null ? m.missing_hits : '',
+      ];
+    });
+    var summaryRow = ['<strong>TOTAL</strong>', srcCount != null ? fmtNum(srcCount) + ' (source)' : '',
+                       fmtNum(data.ghost_total), fmtNum(data.broken_total), fmtNum(data.missing_total)];
+    rows.push(summaryRow);
+    var header = 'Scoreboard - ' + rid + ' (sim-only)';
     return '<p><strong>' + header + '</strong></p>'
-         + asTable(['IP', 'counter', 'measured / sim', 'expected', 'delta vs theory'], rows);
+         + '<p class="legend">' + notes + '</p>'
+         + asTable(['monitor / checkpoint', 'total hits at checkpoint', 'ghost hits', 'broken hits', 'missing hits'], rows);
+  }
+  function renderRunlog(rid, data){
+    if (!data) return '<p class="ev-pending">No run log found for ' + rid + '.</p>';
+    var events = (data.events || []).slice();
+    var runLen = data.run_length_ms != null ? data.run_length_ms : '-';
+    var controls = '<div class="rdma-controls">'
+                 + '<label>Filter (phase / ip / detail substring): </label>'
+                 + '<input type="text" id="rl-filter" placeholder="CSR_WRITE">'
+                 + '<label>Type: </label><select id="rl-type"><option value="">(all)</option>'
+                 + '<option>RUN_START</option><option>CSR_WRITE</option><option>CSR_READ</option><option>PHASE</option><option>MARKER</option><option>RUN_END</option></select>'
+                 + '<button class="ev-btn" id="rl-apply">Apply</button></div>';
+    var html = '<p><strong>Run log - ' + rid + ' (run length ' + runLen + ' ms)</strong></p>' + controls
+             + '<div id="rl-pane" class="delay-stats" style="max-height:60vh; overflow:auto;"></div>';
+    var wrapper = document.createElement('div'); wrapper.innerHTML = html;
+    var pane = wrapper.querySelector('#rl-pane');
+    function paint(filterText, filterType){
+      pane.innerHTML = '';
+      var lo = (filterText || '').toLowerCase();
+      var lines = [];
+      events.forEach(function(ev){
+        var typ = ev.type || '';
+        if (filterType && typ !== filterType) return;
+        if (lo){
+          var hay = (typ + ' ' + (ev.ip || '') + ' ' + (ev.detail || '')).toLowerCase();
+          if (hay.indexOf(lo) === -1) return;
+        }
+        var tStr = (typeof ev.t_ms === 'number') ? ev.t_ms.toFixed(6) : String(ev.t_ms || '');
+        var ipStr = (ev.ip || '').padEnd(38, ' ').slice(0,38);
+        var typeStr = '[' + (typ || '').padEnd(11, ' ').slice(0,11) + ']';
+        lines.push(typeStr + ' t=' + tStr.padStart(11, ' ') + ' ms  ' + ipStr + '  ' + (ev.detail || ''));
+      });
+      pane.textContent = lines.join('\\n') || '(no events match the filter)';
+    }
+    paint('', '');
+    wrapper.querySelector('#rl-apply').addEventListener('click', function(){
+      paint(wrapper.querySelector('#rl-filter').value, wrapper.querySelector('#rl-type').value);
+    });
+    return wrapper;
   }
   function renderDelay(rid, data){
     if (!data) return '<p class="ev-pending">No delay evidence found for ' + rid + '.</p>';
@@ -1231,9 +1519,11 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     var ev = EV[rid] || {};
     var title = rid + ' - ' + kind + ' evidence';
     var body;
-    if (kind === 'rate') body = renderRate(rid, ev.rate);
+    if (kind === 'counter') body = renderCounter(rid, ev.counter);
     else if (kind === 'delay') body = renderDelay(rid, ev.delay);
     else if (kind === 'rdma') body = renderRdma(rid, ev.rdma);
+    else if (kind === 'scoreboard') body = renderScoreboard(rid, ev.scoreboard);
+    else if (kind === 'runlog') body = renderRunlog(rid, ev.runlog);
     else body = '<p>Unknown evidence kind.</p>';
     openModal(title, body);
   });
