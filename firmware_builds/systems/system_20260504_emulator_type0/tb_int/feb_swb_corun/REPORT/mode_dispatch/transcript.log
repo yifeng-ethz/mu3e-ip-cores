@@ -1,0 +1,36 @@
+# ** Note: (vsim-220) 'questa.ini' is used as the ini file.
+# vsim -ini questa.ini -c -suppress 19 -suppress 3009 -work work_phase45_fail_modes phase4_5_fail_mode_tb "+P45_TEST=mode" "+P45_REPORT_ROOT=../REPORT" -l ../REPORT/mode_dispatch/transcript.log -do "run -all; quit -f"
+# Start time: 13:09:07 on May 12,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# //  Questa Sim-64
+# //  Version 2026.1_1 linux_x86_64 Mar  2 2026
+# //
+# // Unpublished work. Copyright 2026 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# Loading sv_std.std
+# Loading work.be_mutrig_pkg(fast)
+# Loading work.frontend_ticket_bus_pkg(fast)
+# Loading work.phase4_5_fail_mode_if_sv_unit(fast)
+# Loading work.phase4_5_fail_mode_tb(fast)
+# Loading work.phase4_5_fail_mode_if(fast)
+# run -all
+# P45_MODE_DISPATCH mode=0x00 direct mutrig_format=0x20 start
+# P45_MODE_DISPATCH mode=0x00 direct tx=7936 hist_total=63488 shape=fixed_cluster_ch0_3
+# P45_MODE_DISPATCH mode=0x01 burst-board-write mutrig_format=0x21 start
+# P45_MODE_DISPATCH mode=0x01 burst-board-write tx=7936 hist_total=63488 shape=fixed_cluster_ch0_3
+# P45_MODE_DISPATCH mode=0x11 periodic-board-write mutrig_format=0x23 start
+# P45_MODE_DISPATCH mode=0x11 periodic-board-write tx=7936 hist_total=63488 shape=fixed_cluster_ch0_3
+# P45_MODE_DISPATCH_PASS
+# ** Note: $finish    : phase4_5_fail_mode_tb.sv(211)
+#    Time: 3056460 ns  Iteration: 1  Instance: /phase4_5_fail_mode_tb
+# End time: 13:09:08 on May 12,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
