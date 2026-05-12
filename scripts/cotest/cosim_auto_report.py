@@ -299,6 +299,15 @@ class Evidence:
     rate_notes: list[str] = field(default_factory=list)
     delay_notes: list[str] = field(default_factory=list)
     rdma_notes: list[str] = field(default_factory=list)
+    delay_bound_status: str = FAIL
+    delay_min_cycles: int | None = None
+    delay_p05_cycles: int | None = None
+    delay_p50_cycles: int | None = None
+    delay_p95_cycles: int | None = None
+    delay_max_cycles: int | None = None
+    delay_range_cycles: int | None = None
+    delay_bound_cycles: int | None = None
+    delay_bound_label: str = ""
     sim_total: int | None = None
     board_total: int | None = None
     hist_a_sum: int | None = None
@@ -351,6 +360,21 @@ def fmt_pct(value: float | None) -> str:
     if value is None or not math.isfinite(value):
         return "--"
     return f"{value:.2f}%"
+
+
+def percentile(values: list[int], pct: float) -> int | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    rank = (len(ordered) - 1) * pct
+    low = int(math.floor(rank))
+    high = int(math.ceil(rank))
+    if low == high:
+        return ordered[low]
+    fraction = rank - low
+    return int(round(ordered[low] + (ordered[high] - ordered[low]) * fraction))
 
 
 def md_escape(text: str) -> str:
@@ -614,6 +638,52 @@ def delay_hist_points(scoreboard: dict[str, Any]) -> list[tuple[float, int]]:
     return [(float(key), value) for key, value in sorted(counts.items())] or [(0.0, 0)]
 
 
+def delay_cycles_from_scoreboard(scoreboard: dict[str, Any]) -> list[int]:
+    cycles = scoreboard.get("delay_cycles", [])
+    values: list[int] = []
+    if isinstance(cycles, list):
+        for value in cycles:
+            try:
+                values.append(int(round(float(value))))
+            except (TypeError, ValueError):
+                continue
+    if values:
+        return values
+
+    delays = scoreboard.get("delay_ns", [])
+    if isinstance(delays, list):
+        for value in delays:
+            try:
+                values.append(int(round(float(value) / 8.0)))
+            except (TypeError, ValueError):
+                continue
+    return values
+
+
+def delay_percentile_value(scoreboard: dict[str, Any], key: str, pct: float) -> int | None:
+    value = scoreboard.get(key)
+    if value is not None:
+        try:
+            return int(round(float(value)))
+        except (TypeError, ValueError):
+            pass
+    return percentile(delay_cycles_from_scoreboard(scoreboard), pct)
+
+
+def pulses_per_frame(case: PlanCase) -> int:
+    if case.expected_pulses is not None:
+        return max(1, int(case.expected_pulses))
+    if case.rate_88fp <= 0:
+        return 1
+    return max(1, int(round(float(case.rate_88fp) / 256.0)))
+
+
+def delay_bound_cycles(case: PlanCase) -> tuple[int, str]:
+    base = 300 if case.injector_mode == 1 else 900
+    name = "headersync" if case.injector_mode == 1 else "periodic/main-clock"
+    return base * pulses_per_frame(case), f"{name} base {base} x pulses_per_frame {pulses_per_frame(case)}"
+
+
 def compile_renderer(run_id: str) -> Path:
     dislin_dir = find_dislin_dir()
     work = Path(tempfile.gettempdir()) / f"cosim_auto_report_dislin_{run_id}"
@@ -760,6 +830,23 @@ def summarize_evidence(ev: Evidence) -> None:
             ev.delay_notes.append("histogram banks missing")
         if stddev is None:
             ev.delay_notes.append("scoreboard stddev missing")
+        ev.delay_min_cycles = delay_percentile_value(ev.scoreboard, "delay_min_cycles", 0.00)
+        ev.delay_p05_cycles = delay_percentile_value(ev.scoreboard, "delay_p05_cycles", 0.05)
+        ev.delay_p50_cycles = delay_percentile_value(ev.scoreboard, "delay_p50_cycles", 0.50)
+        ev.delay_p95_cycles = delay_percentile_value(ev.scoreboard, "delay_p95_cycles", 0.95)
+        ev.delay_max_cycles = delay_percentile_value(ev.scoreboard, "delay_max_cycles", 1.00)
+        ev.delay_bound_cycles, ev.delay_bound_label = delay_bound_cycles(ev.case)
+        if ev.delay_min_cycles is not None and ev.delay_max_cycles is not None:
+            ev.delay_range_cycles = ev.delay_max_cycles - ev.delay_min_cycles
+        ev.delay_bound_status = (
+            PASS
+            if ev.delay_range_cycles is not None
+            and ev.delay_bound_cycles is not None
+            and ev.delay_range_cycles <= ev.delay_bound_cycles
+            else FAIL
+        )
+        if ev.delay_range_cycles is None:
+            ev.delay_notes.append("scoreboard delay percentiles missing")
 
         rdma_ok = ev.rdma_record_count is not None and ev.sim_total is not None and abs(ev.rdma_record_count - ev.sim_total) <= 8
         ev.rdma_status = PASS if rdma_ok else FAIL
@@ -926,6 +1013,18 @@ def write_delay_md(ev: Evidence, case_dir: Path, plot_paths: dict[str, Path]) ->
             f"delay_mean_ns: {fmt_num(float(mean) if mean is not None else None)}",
             f"delay_stddev_ns: {fmt_num(float(stddev) if stddev is not None else None)}",
             f"count: {fmt_num(int(count) if count is not None else None)}",
+            "",
+            "## delay range bound",
+            "| metric | value |",
+            "|---|---:|",
+            f"| delay_min_cycles | {fmt_num(ev.delay_min_cycles)} |",
+            f"| delay_p05_cycles | {fmt_num(ev.delay_p05_cycles)} |",
+            f"| delay_p50_cycles | {fmt_num(ev.delay_p50_cycles)} |",
+            f"| delay_p95_cycles | {fmt_num(ev.delay_p95_cycles)} |",
+            f"| delay_max_cycles | {fmt_num(ev.delay_max_cycles)} |",
+            f"| abs(max - min) | {fmt_num(ev.delay_range_cycles)} |",
+            f"| slice target bound | {md_escape(ev.delay_bound_label)} = {fmt_num(ev.delay_bound_cycles)} |",
+            f"| bound PASS | {ev.delay_bound_status} |",
         ]
     )
     (case_dir / "delay.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -1010,6 +1109,7 @@ def write_case_index(ev: Evidence, case_dir: Path) -> None:
             "|---|:-:|---|",
             f"| rate (CSR counters) | {ev.rate_status} | [rate.md](rate.md) |",
             f"| delay (2 hist + scoreboard) | {ev.delay_status} | [delay.md](delay.md) |",
+            f"| delay range bound | {ev.delay_bound_status} | [delay.md](delay.md#delay-range-bound) |",
             f"| rdma (rxbuffer record stream) | {ev.rdma_status} | [rdma.md](rdma.md) |",
         ]
     )
@@ -1030,21 +1130,29 @@ def write_top_index(report_root: Path, run_id: str, commit: str | None, generate
         "  aligns to RN.BASIC.NNN)",
         "- Expected: theoretical_hits from TEST_BASIC.md",
         "",
-        "| ID | slice | injector_mode | rate | delay | rdma | detail |",
-        "|---|---|---|:-:|:-:|:-:|---|",
+        "| ID | slice | injector_mode | rate | delay | bound | rdma | detail |",
+        "|---|---|---|:-:|:-:|:-:|:-:|---|",
     ]
     for ev in evidences:
         case = ev.case
         lines.append(
             f"| {case.row_id} | {case.slice_name} | {case.injector_mode} | "
-            f"{ev.rate_status} | {ev.delay_status} | {ev.rdma_status} | "
+            f"{ev.rate_status} | {ev.delay_status} | {ev.delay_bound_status} | {ev.rdma_status} | "
             f"[{case.row_id}/]({case.row_id}/index.md) |"
         )
     lines.extend(["", "## Slice-level rollup"])
     slice_totals = {1: 128, 2: 32, 3: 2, 4: 32}
     slice_names = {1: "Slice 1 periodic", 2: "Slice 2 headersync", 3: "Slice 3 onclick", 4: "Slice 4 emul-only"}
     for slice_id in [1, 2, 3, 4]:
-        passed = sum(1 for ev in evidences if ev.case.slice_id == slice_id and ev.rate_status == PASS and ev.delay_status == PASS and ev.rdma_status == PASS)
+        passed = sum(
+            1
+            for ev in evidences
+            if ev.case.slice_id == slice_id
+            and ev.rate_status == PASS
+            and ev.delay_status == PASS
+            and ev.delay_bound_status == PASS
+            and ev.rdma_status == PASS
+        )
         lines.append(f"- {slice_names[slice_id]}: {passed} PASS / {slice_totals[slice_id]}")
     lines.extend(
         [
@@ -1052,6 +1160,7 @@ def write_top_index(report_root: Path, run_id: str, commit: str | None, generate
             "## Pass/fail rules",
             "- rate: |sim - expected| < 5% of expected AND |board - expected| < 5% (when board data present) AND every IP error counter is 0",
             "- delay: hist_bin_a sum + hist_bin_b sum matches the rate total within +/- 8; scoreboard delay_stddev_ns < 100 ns",
+            "- bound: abs(delay_max_cycles - delay_min_cycles) is within the math-reviewer target scaled by pulses_per_frame",
             "- rdma: record_count matches the rate total within +/- 8",
         ]
     )
@@ -1097,8 +1206,16 @@ def write_intermediates(report_root: Path, evidences: list[Evidence], frame_samp
             "hist_a_sum",
             "hist_b_sum",
             "rdma_record_count",
+            "delay_min_cycles",
+            "delay_p05_cycles",
+            "delay_p50_cycles",
+            "delay_p95_cycles",
+            "delay_max_cycles",
+            "delay_range_cycles",
+            "delay_bound_cycles",
             "rate_status",
             "delay_status",
+            "delay_bound_status",
             "rdma_status",
             "tbd",
         ]
@@ -1119,8 +1236,16 @@ def write_intermediates(report_root: Path, evidences: list[Evidence], frame_samp
                     "hist_a_sum": "" if ev.hist_a_sum is None else ev.hist_a_sum,
                     "hist_b_sum": "" if ev.hist_b_sum is None else ev.hist_b_sum,
                     "rdma_record_count": "" if ev.rdma_record_count is None else ev.rdma_record_count,
+                    "delay_min_cycles": "" if ev.delay_min_cycles is None else ev.delay_min_cycles,
+                    "delay_p05_cycles": "" if ev.delay_p05_cycles is None else ev.delay_p05_cycles,
+                    "delay_p50_cycles": "" if ev.delay_p50_cycles is None else ev.delay_p50_cycles,
+                    "delay_p95_cycles": "" if ev.delay_p95_cycles is None else ev.delay_p95_cycles,
+                    "delay_max_cycles": "" if ev.delay_max_cycles is None else ev.delay_max_cycles,
+                    "delay_range_cycles": "" if ev.delay_range_cycles is None else ev.delay_range_cycles,
+                    "delay_bound_cycles": "" if ev.delay_bound_cycles is None else ev.delay_bound_cycles,
                     "rate_status": "PASS" if ev.rate_status == PASS else "FAIL",
                     "delay_status": "PASS" if ev.delay_status == PASS else "FAIL",
+                    "delay_bound_status": "PASS" if ev.delay_bound_status == PASS else "FAIL",
                     "rdma_status": "PASS" if ev.rdma_status == PASS else "FAIL",
                     "tbd": "; ".join(ev.plan_mismatch + ([ev.board_unresolved] if ev.board_unresolved else [])),
                 }
