@@ -141,6 +141,24 @@
   no p45 PERF/4 s board bytes were normalized into the BASIC/1 ms cosim
   closure.
 
+## 2026-05-13 - Per-Checkpoint Refresh
+
+- Cluster being closed: BUG-009-T per-checkpoint delay-bound model and
+  BUG-010-H lifetime analyzer join bug, before the refreshed RN.BASIC sweep.
+- Qsys refresh action:
+  - `script/apply_reset_sync_v3.sh`: applied the local
+    `add_mclk125_reset_bridge_v3.tcl` qsys-script recipe to both SciFi
+    datapath Qsys variants and the local `syn/feb_system_v3.qsys`.
+  - `script/regenerate_local_qsys_clean.sh`: regenerated all four local Qsys
+    files with `qsys-generate --clear-output-directory`.
+- Qsys refresh evidence: all four clean status files from stamp
+  `20260513_003225` report `exit_code=0` and `error_count=0`; regenerated
+  `syn/feb_system_v3/synthesis/feb_system_v3.vhd` mtime is
+  `2026-05-13 00:34:26 +0200`.
+  `pulse_fanout8.sv` contains the three-stage `async_reg` synchronizers from
+  `bff7ea43`, `mclk125_reset_sync` is present in the parent generated VHDL,
+  and `monitor_reset_sync` is present in the data-path generated VHDL.
+
 ## 2026-05-13 - Per-Checkpoint Delay Evidence Review
 
 - Cluster being closed: BUG-009-T per-checkpoint bound model and BUG-010-H
@@ -160,11 +178,10 @@
 - Validation completed before DUT refresh: Python compile passed; the available
   sanity trace produced nonzero five-checkpoint stats and the DISLIN lifetime
   PDF rendered with `Warnings: 0`.
-- Phase-D stop: the refreshed-DUT step was not run because
-  `firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/`
-  does not contain the required local `feb_system_v3.qsys` copy named in the
-  2026-05-13 user update. The build dir only has
-  `scifi_datapath_system_v3.qsys`, `scifi_datapath_system_v3_pipe.qsys`, and
-  `arb_hit_type0_supercore.qsys`; `feb_system_v3.qsys` exists under `syn/`.
-  Per the update, the source mapping must be clarified before copying Qsys
-  files or running `qsys-generate --clean-output-directory`.
+- Phase-D DUT refresh completed against the local Qsys files present in the
+  cosim build: `quartus_systems/arb_hit_type0_supercore.qsys`,
+  `quartus_systems/scifi_datapath_system_v3.qsys`,
+  `quartus_systems/scifi_datapath_system_v3_pipe.qsys`, and
+  `syn/feb_system_v3.qsys`. The parent `feb_system_v3.qsys` is local to
+  `syn/`, not `quartus_systems/`; it was regenerated together with the three
+  local subsystem Qsys files.
