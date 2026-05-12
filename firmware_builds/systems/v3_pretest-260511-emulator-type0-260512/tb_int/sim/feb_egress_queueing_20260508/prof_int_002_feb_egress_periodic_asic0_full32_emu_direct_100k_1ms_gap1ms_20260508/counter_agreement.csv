@@ -1,0 +1,5 @@
+phase,counter,scoreboard_count,counter_count,available,agree
+check,stage_a,3168,3168,1,1
+check,pre_rbcam,12672,12672,1,1
+check,post_rbcam,3168,3168,1,1
+check,feb_egress,3168,3168,1,1
