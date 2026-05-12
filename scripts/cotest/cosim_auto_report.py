@@ -1073,7 +1073,7 @@ def write_rdma_md(ev: Evidence, case_dir: Path) -> dict[str, Any]:
         )
         for idx in range(8):
             sim_hex = samples[idx] if idx < len(samples) else "--"
-            lines.append(f"| {idx} | -- | {sim_hex} | -- | {FAIL} |")
+            lines.append(f"| {idx} | -- | {sim_hex} | -- | TBD |")
         lines.append("")
     lines.extend(
         [
