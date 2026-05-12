@@ -36,10 +36,31 @@ runs at this build dir.
 | BUG-008-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 6 RN.BASIC.082 | 59663d3c | Single-ASIC periodic row kept empty physical lanes enabled and decoded the native SciFi header alias as MuPix. |
 | BUG-009-T | T | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a | Single global delay bound replaced with 5 per-checkpoint bounds (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress, OPQ egress) per injector mode. |
 | BUG-010-H | H | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a | Analyzer reported delay_max_cycles = delay_min_cycles = 0 because it subtracted abs_ts_8ns from itself instead of joining upstream/downstream checkpoint traces on hit_id. |
+| BUG-009-R | R | closure-blocker | swept | fixed in IP standalone; integration re-fit pending | 2026-05-13 integration STA trace #103 | run-control_mgmt 24be671 | snap_*_lvds -> snap_*_mm_q0 CDC missing synchronized update/valid handshake; STA timed the multi-bit crossing as a normal setup endpoint. |
 
 ---
 
 ## 2026-05-13
+
+### BUG-009-R: run-control snapshot CSR CDC timed as a normal setup path
+
+- First seen: integration STA setup trace #103 for
+  `v3_pretest-260511-pulserdrop-260512` at commit `9b6dcf7a`.
+- Symptom: all 40 worst-10-per-corner setup failures pointed at
+  `run-control_mgmt/runctl_mgmt_host`; worst Slow85 slack was `-3.220 ns` on
+  `snap_exec_ts_lvds[9] -> snap_exec_ts_mm_q0[9]`.
+- Root cause: `snap_*_lvds -> snap_*_mm_q0` CDC missing synchronized
+  update/valid handshake; STA times the multi-bit crossing as a normal setup
+  endpoint and reports `-3.220 ns` Slow85 setup.
+- Fix status: fixed in `run-control_mgmt` commit `24be671`; the LVDS snapshot
+  now waits through a five-cycle stable phase, toggles a single-bit update
+  notice, and captures the multi-bit snapshot bus in `mm_clk` only on the
+  synchronized update pulse. Standalone 1.1x STA closed in iteration 3 with
+  setup, hold, recovery, and removal nonnegative in all four corners.
+  potential_hazard: integration closure still depends on clean Qsys
+  regeneration and a full top re-fit of the pulser-drop build.
+- Commit: run-control_mgmt `24be671`
+  `[FIX] HW: gate runctl snapshot CDC`.
 
 ### BUG-009-T: single global delay bound hides per-checkpoint failures
 
