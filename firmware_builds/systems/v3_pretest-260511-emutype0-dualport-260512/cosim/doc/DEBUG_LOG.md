@@ -31,3 +31,22 @@
 - Re-run PASS count delta: slice 3 went 0/2 to 2/2; RN.BASIC.161 reports
   2,560/2,560 hits and RN.BASIC.162 reports 80/80 hits, with rate, delay, and
   RDMA all PASS. BUG-003-H is closed.
+
+## 2026-05-12 - Iter 3
+
+- Cluster being closed: BUG-004-H four-ASIC lane-mask compaction in the
+  FEB/SWB corun harness.
+- Root-cause hypothesis: the cosim source and trace checker still used the old
+  two-lane virtual mapping, so 0x55/0xAA rows overloaded two SWB physical lanes
+  instead of exercising the four-lane OPQ wrapper.
+- Patch summary:
+  - `tb_int/feb_swb_corun/sv/feb_swb_corun_plain_tb.sv`: drive four lanes and
+    map adjacent ASIC pairs onto SWB lanes 0..3.
+  - `tb_int/feb_swb_corun/sv/feb_swb_parallel_cdc_adapter.sv`: derive
+    `swb_enable_mask` from `ACTIVE_LANES`.
+  - `tb_int/feb_swb_corun/scripts/analyze_feb_swb_trace.py`: use the same
+    adjacent-pair lane oracle as the harness.
+- Re-run PASS count delta: directed RN.BASIC.167 went FAIL to PASS; slice 4
+  went 20/32 to 28/32. BUG-004-H is closed for RN.BASIC.167-194 except the
+  separate full-mask rows RN.BASIC.163-166, which still fail at
+  OPQ/RDMA egress with 75,217/125,000 hits and move to the next cluster.
