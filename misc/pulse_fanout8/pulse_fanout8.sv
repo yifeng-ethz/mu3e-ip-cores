@@ -32,12 +32,18 @@ module pulse_fanout8 (
     output logic coe_out8_pulse,
     output logic coe_out8_masked_pulse
 );
+    (* async_reg = "true", preserve = "true" *) logic [2:0] inject_pulse_sync;
+    (* async_reg = "true", preserve = "true" *) logic [2:0] aux_inject_pulse_sync;
     logic merged_inject_pulse_d;
 
-    assign merged_inject_pulse_d = coe_inject_pulse | coe_aux_inject_pulse;
+    assign merged_inject_pulse_d =
+        (inject_pulse_sync[1] & ~inject_pulse_sync[2]) |
+        (aux_inject_pulse_sync[1] & ~aux_inject_pulse_sync[2]);
 
     always_ff @(posedge csi_clk) begin
         if (rsi_reset) begin
+            inject_pulse_sync    <= 3'b000;
+            aux_inject_pulse_sync<= 3'b000;
             coe_out0_pulse        <= 1'b0;
             coe_out1_pulse        <= 1'b0;
             coe_out2_pulse        <= 1'b0;
@@ -57,6 +63,8 @@ module pulse_fanout8 (
             coe_out7_masked_pulse <= 1'b0;
             coe_out8_masked_pulse <= 1'b0;
         end else begin
+            inject_pulse_sync     <= {inject_pulse_sync[1:0], coe_inject_pulse};
+            aux_inject_pulse_sync <= {aux_inject_pulse_sync[1:0], coe_aux_inject_pulse};
             coe_out0_pulse        <= merged_inject_pulse_d;
             coe_out1_pulse        <= merged_inject_pulse_d;
             coe_out2_pulse        <= merged_inject_pulse_d;
