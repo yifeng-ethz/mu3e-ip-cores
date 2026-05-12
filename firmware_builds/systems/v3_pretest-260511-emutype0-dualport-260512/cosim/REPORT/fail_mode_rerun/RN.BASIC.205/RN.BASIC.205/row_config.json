@@ -1,0 +1,23 @@
+{
+  "channel_mask": 4294967295,
+  "channel_mask_hex": "0xFFFFFFFF",
+  "channel_popcount": 32,
+  "clipped_hits": 15625,
+  "expected_pulses": null,
+  "index": 205,
+  "injector_mode": 0,
+  "injector_name": "emul_only",
+  "lane_mask": 64,
+  "lane_mask_hex": "0x40",
+  "lane_popcount": 1,
+  "poisson_rate": 256,
+  "rate_88fp": 256,
+  "rate_88fp_hex": "0x0100",
+  "rate_ratio": "100p / 0s",
+  "row_id": "RN.BASIC.205",
+  "signal_rate": 0,
+  "sim_hit_period_8ns": 256,
+  "sim_source_mode": "poisson",
+  "slice": 4,
+  "theoretical_hits": 15625
+}

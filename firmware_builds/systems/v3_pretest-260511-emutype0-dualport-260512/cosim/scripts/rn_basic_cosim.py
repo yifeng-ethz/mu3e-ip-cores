@@ -215,6 +215,38 @@ def parse_test_basic(path: Path) -> list[RnBasicRow]:
     return rows
 
 
+def row_from_saved_config(path: Path) -> RnBasicRow:
+    data = json.loads(path.read_text(encoding="ascii"))
+    return RnBasicRow(
+        row_id=str(data["row_id"]),
+        index=int(data["index"]),
+        slice=int(data["slice"]),
+        injector_mode=int(data["injector_mode"]),
+        injector_name=str(data["injector_name"]),
+        lane_mask=int(data["lane_mask"]),
+        channel_mask=int(data["channel_mask"]),
+        rate_88fp=int(data["rate_88fp"]),
+        theoretical_hits=int(data["theoretical_hits"]),
+        clipped_hits=int(data["clipped_hits"]),
+        expected_pulses=(
+            None if data.get("expected_pulses") is None else int(data["expected_pulses"])
+        ),
+        poisson_rate=None if data.get("poisson_rate") is None else int(data["poisson_rate"]),
+        signal_rate=None if data.get("signal_rate") is None else int(data["signal_rate"]),
+        rate_ratio=data.get("rate_ratio"),
+    )
+
+
+def saved_row_plan(cosim_root: Path, row: str | None) -> list[RnBasicRow] | None:
+    if not row:
+        return None
+    normalized = normalize_row_id(row)
+    cfg_path = cosim_root / "REPORT" / normalized / "row_config.json"
+    if not cfg_path.is_file():
+        return None
+    return [row_from_saved_config(cfg_path)]
+
+
 def read_key_values(path: Path) -> dict[str, str]:
     values: dict[str, str] = {}
     if not path.is_file():
@@ -902,8 +934,12 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(f"missing FEB/SWB corun directory: {args.feb_corun_dir}")
 
     started = time.time()
-    plan = parse_test_basic(args.test_basic)
-    selected = selected_plan(plan, args.row, args.slice_id)
+    saved_plan = saved_row_plan(args.cosim_root, args.row)
+    if saved_plan is not None and args.slice_id is None:
+        selected = saved_plan
+    else:
+        plan = parse_test_basic(args.test_basic)
+        selected = selected_plan(plan, args.row, args.slice_id)
     results, batches = run_rows(args, selected)
     if not args.dry_run:
         summary_path = write_suite_summary(args, selected, results, batches, started)

@@ -1,0 +1,23 @@
+{
+  "channel_mask": 1,
+  "channel_mask_hex": "0x00000001",
+  "channel_popcount": 1,
+  "clipped_hits": 244,
+  "expected_pulses": null,
+  "index": 62,
+  "injector_mode": 2,
+  "injector_name": "periodic",
+  "lane_mask": 1,
+  "lane_mask_hex": "0x01",
+  "lane_popcount": 1,
+  "poisson_rate": null,
+  "rate_88fp": 128,
+  "rate_88fp_hex": "0x0080",
+  "rate_ratio": null,
+  "row_id": "RN.BASIC.062",
+  "signal_rate": null,
+  "sim_hit_period_8ns": 512,
+  "sim_source_mode": "periodic",
+  "slice": 1,
+  "theoretical_hits": 244
+}

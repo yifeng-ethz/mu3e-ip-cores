@@ -1,0 +1,102 @@
+{
+  "arb_hit_type0_supercore": {
+    "dropped_hits": 0,
+    "selected_count": {
+      "0": 4416,
+      "1": 4416,
+      "2": 4416,
+      "3": 4416,
+      "4": 4416,
+      "5": 4416,
+      "6": 4416,
+      "7": 4416
+    }
+  },
+  "checkpoints": {
+    "feb_egress_hits": 35328,
+    "opq_egress_hits": 35328,
+    "post_rbcam_hits": 35328,
+    "pre_rbcam_hits": 35328,
+    "rdma_hits": 35328,
+    "source_generation_hits": 35328,
+    "swb_ingress_hits": 35328
+  },
+  "clipped_hits": 125000,
+  "csr_total": 35328,
+  "error_counters": {
+    "corun_ghost_hits": 0,
+    "corun_missing_hits": 0,
+    "fifo_overflow": 0,
+    "fifo_underflow": 0,
+    "filtered_failed_hits": 0,
+    "sim_returncode": 0,
+    "trace_fail_hits": 0,
+    "trace_issue_count": 0
+  },
+  "feb_frame_assembly": {
+    "actual_hits": 35328
+  },
+  "histogram_statistics_v2": {
+    "last_interval_total_hits_csr17": 35328,
+    "total_hits_csr13": 35328
+  },
+  "mts_preprocessor": {
+    "mts_preprocessor_0": {
+      "debug_burst_count": 35328,
+      "ts_delta_max": 0,
+      "ts_delta_min": 0
+    },
+    "mts_preprocessor_1": {
+      "debug_burst_count": 35328,
+      "ts_delta_max": 0,
+      "ts_delta_min": 0
+    }
+  },
+  "mutrig_cfg_ctrl": {
+    "injector_mode": 1,
+    "status": "TERM"
+  },
+  "mutrig_frame_deassembly": {
+    "crc_err": {
+      "0": 0,
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+      "6": 0,
+      "7": 0
+    },
+    "frame_count": {
+      "0": 4416,
+      "1": 4416,
+      "2": 4416,
+      "3": 4416,
+      "4": 4416,
+      "5": 4416,
+      "6": 4416,
+      "7": 4416
+    }
+  },
+  "pass": false,
+  "ring_buffer_cam": {
+    "rbcam_0": {
+      "pop_cnt": 8832,
+      "push_cnt": 8832
+    },
+    "rbcam_1": {
+      "pop_cnt": 8832,
+      "push_cnt": 8832
+    },
+    "rbcam_2": {
+      "pop_cnt": 8832,
+      "push_cnt": 8832
+    },
+    "rbcam_3": {
+      "pop_cnt": 8832,
+      "push_cnt": 8832
+    }
+  },
+  "row_id": "RN.BASIC.129",
+  "theoretical_hits": 125000
+}
