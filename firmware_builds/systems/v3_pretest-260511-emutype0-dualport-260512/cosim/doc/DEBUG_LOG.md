@@ -117,3 +117,26 @@
   min/p05/p50/p95/max all 0 cycles. BUG-008-H is closed; by composition from
   the iter4 full sweep plus iter5 slice-2 closure, the next full sweep should
   move 193/194 to 194/194.
+
+## 2026-05-12 - Closure
+
+- Iter count: 6 debug iterations.
+- Clusters closed: BUG-002-T, BUG-003-H, BUG-004-H, BUG-005-R, BUG-006-H,
+  BUG-007-H, BUG-008-H.
+- Final full sweep: `make run_BASIC PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_full_20260512_final` completed with
+  RN.BASIC.001-194 all PASS. Slice rollup: slice 1 128/128, slice 2 32/32,
+  slice 3 2/2, slice 4 32/32; total 194/194.
+- Delay hard evidence: all 194 `delay_scoreboard.json` files contain
+  `delay_min_cycles`, `delay_p05_cycles`, `delay_p50_cycles`,
+  `delay_p95_cycles`, and `delay_max_cycles`; maximum observed
+  `abs(max - min)` across the sweep is 0 cycles, within every scaled
+  math-reviewer bound.
+- Final auto-report:
+  `firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/reports/rn_basic_194_final_20260512_iter6_h5a6a44f7_report43f79e6b/`.
+  Its top-level `index.md` has 194 rows with green rate, delay, bound, and
+  RDMA columns.
+- Deferred item: BUG-001-H remains the board-evidence compatibility item.
+  The final auto-report records `BOARD_MAPPED=0` and `BOARD_UNRESOLVED=32`;
+  no p45 PERF/4 s board bytes were normalized into the BASIC/1 ms cosim
+  closure.
