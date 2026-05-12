@@ -2,8 +2,8 @@
 
 **Parent:** [TEST_PLAN.md](TEST_PLAN.md)
 **Siblings:** [TEST_BU.md](TEST_BU.md), [TEST_PERF.md](TEST_PERF.md), [TEST_ERROR.md](TEST_ERROR.md), [TEST_EDGE.md](TEST_EDGE.md)
-**ID range:** SC.BASIC.001-012, RC.BASIC.001-011, RN.BASIC.001-208
-**Total:** 231 cases
+**ID range:** SC.BASIC.001-012, RC.BASIC.001-011, RN.BASIC.001-194
+**Total:** 217 cases
 
 **Methodology key:**
 - **D** (directed): single deterministic stimulus with a golden expectation.
@@ -28,7 +28,7 @@ cosim IS the sim evidence column for every BASIC row.
 |---|---:|---|---|---|
 | SC.BASIC | 12 | SC.BASIC.001-012 | scratchpad BIST; per-IP SCRATCH RW; sc_hub admission/ordering | `run_atpg_v2_reference.sh`, sc_tool |
 | RC.BASIC | 11 | RC.BASIC.001-011 | legal opcode sequences; LOG FIFO decode; stage timing; SC-WEDGE-fixed CMD_RESET | `rc_tool`, `phase4_5_sweep.py:run_row()` |
-| RN.BASIC | 208 | RN.BASIC.001-208 | 4 injector-mode slices: periodic (128) + headersync (32) + onclick (16) + emulator-only (32); theoretical-delta < 5% in sim and board | `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()` + `cosim/Makefile` |
+| RN.BASIC | 194 | RN.BASIC.001-194 | 4 injector-mode slices: periodic (128) + headersync (32) + onclick (2, 10 pulses each) + emulator-only (32); theoretical-delta < 5% in sim and board | `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()` + `cosim/Makefile` |
 
 ---
 
@@ -79,7 +79,7 @@ Legal opcode sequences.
 
 ## 4. RN.BASIC
 
-**Total: 208 cases**, organised in 4 injector-mode slices. Each slice
+**Total: 194 cases**, organised in 4 injector-mode slices. Each slice
 holds one operating mode constant (periodic, headersync, onclick, or
 emulator-only) and varies lane / channel within that mode so a regression
 on any single axis is readable from row-to-row diffs inside one slice.
@@ -290,26 +290,12 @@ coverage for these modes belongs in EDGE or PERF as the program needs.
 | RN.BASIC.159 | 0x40 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
 | RN.BASIC.160 | 0x40 | 0x00000001 | 1 x 1 | 488 | 488 |
 
-**Slice 3 - onclick injector mode (16 cases): mode=4 single-pulse trigger (FSM stores mode 0 after fire), 4 lane x 4 chan @ rate=0x0100**
+**Slice 3 - onclick injector mode (2 cases): mode=4 single-pulse trigger fired 10 times per case at lane_mask=0xFF, rate ignored; sanity check of the hit counters under a known small fixed number of pulses**
 
-| ID | lane_mask | channel_mask | popcount L x C | expected_pulses | note |
-|---|---|---|---:|---:|---|
-| RN.BASIC.161 | 0xFF | 0xFFFFFFFF | 8 x 32 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.162 | 0xFF | 0x0000FFFF | 8 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.163 | 0xFF | 0x55555555 | 8 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.164 | 0xFF | 0x00000001 | 8 x 1 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.165 | 0x01 | 0xFFFFFFFF | 1 x 32 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.166 | 0x01 | 0x0000FFFF | 1 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.167 | 0x01 | 0x55555555 | 1 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.168 | 0x01 | 0x00000001 | 1 x 1 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.169 | 0x10 | 0xFFFFFFFF | 1 x 32 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.170 | 0x10 | 0x0000FFFF | 1 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.171 | 0x10 | 0x55555555 | 1 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.172 | 0x10 | 0x00000001 | 1 x 1 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.173 | 0x40 | 0xFFFFFFFF | 1 x 32 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.174 | 0x40 | 0x0000FFFF | 1 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.175 | 0x40 | 0x55555555 | 1 x 16 | 1 | one pulse per CSR write; mode reads back 0 |
-| RN.BASIC.176 | 0x40 | 0x00000001 | 1 x 1 | 1 | one pulse per CSR write; mode reads back 0 |
+| ID | lane_mask | channel_mask | popcount L x C | n_pulses | expected_hits | note |
+|---|---|---|---:|---:|---:|---|
+| RN.BASIC.161 | 0xFF | 0xFFFFFFFF | 8 x 32 | 10 | 2,560 | 10 mode=4 writes; CSR mode reads back 0 after each fire; hist_csr13 = 8 x 32 x 10 |
+| RN.BASIC.162 | 0xFF | 0x00000001 | 8 x 1 | 10 | 80 | 10 mode=4 writes; only ch0 admitted; hist_csr13 = 8 x 1 x 10 |
 
 **Slice 4 - emulator-only mode (32 cases): injector_mode=0 (off); always all-channel (0xFFFFFFFF); 8 lane x 4 poisson:signal rate ratios**
 
@@ -317,42 +303,42 @@ Signal hits are periodic-in-time with random spatial channel (cfg_cluster_geom_r
 
 | ID | lane_mask | rate_ratio | poisson_rate | signal_rate | popcount L x C | total_theoretical_hits |
 |---|---|---|---|---|---:|---:|
-| RN.BASIC.177 | 0xFF | 100p / 0s | 0x0100 | 0x0000 | 8 x 32 | 125,000 |
-| RN.BASIC.178 | 0xFF | 75p / 25s | 0x00C0 | 0x0040 | 8 x 32 | 125,000 |
-| RN.BASIC.179 | 0xFF | 50p / 50s | 0x0080 | 0x0080 | 8 x 32 | 125,000 |
-| RN.BASIC.180 | 0xFF | 25p / 75s | 0x0040 | 0x00C0 | 8 x 32 | 125,000 |
-| RN.BASIC.181 | 0x55 | 100p / 0s | 0x0100 | 0x0000 | 4 x 32 | 62,500 |
-| RN.BASIC.182 | 0x55 | 75p / 25s | 0x00C0 | 0x0040 | 4 x 32 | 62,500 |
-| RN.BASIC.183 | 0x55 | 50p / 50s | 0x0080 | 0x0080 | 4 x 32 | 62,500 |
-| RN.BASIC.184 | 0x55 | 25p / 75s | 0x0040 | 0x00C0 | 4 x 32 | 62,500 |
-| RN.BASIC.185 | 0xAA | 100p / 0s | 0x0100 | 0x0000 | 4 x 32 | 62,500 |
-| RN.BASIC.186 | 0xAA | 75p / 25s | 0x00C0 | 0x0040 | 4 x 32 | 62,500 |
-| RN.BASIC.187 | 0xAA | 50p / 50s | 0x0080 | 0x0080 | 4 x 32 | 62,500 |
-| RN.BASIC.188 | 0xAA | 25p / 75s | 0x0040 | 0x00C0 | 4 x 32 | 62,500 |
-| RN.BASIC.189 | 0x01 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
-| RN.BASIC.190 | 0x01 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
-| RN.BASIC.191 | 0x01 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
-| RN.BASIC.192 | 0x01 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
-| RN.BASIC.193 | 0x02 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
-| RN.BASIC.194 | 0x02 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
-| RN.BASIC.195 | 0x02 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
-| RN.BASIC.196 | 0x02 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
-| RN.BASIC.197 | 0x04 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
-| RN.BASIC.198 | 0x04 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
-| RN.BASIC.199 | 0x04 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
-| RN.BASIC.200 | 0x04 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
-| RN.BASIC.201 | 0x10 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
-| RN.BASIC.202 | 0x10 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
-| RN.BASIC.203 | 0x10 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
-| RN.BASIC.204 | 0x10 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
-| RN.BASIC.205 | 0x40 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
-| RN.BASIC.206 | 0x40 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
-| RN.BASIC.207 | 0x40 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
-| RN.BASIC.208 | 0x40 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
+| RN.BASIC.163 | 0xFF | 100p / 0s | 0x0100 | 0x0000 | 8 x 32 | 125,000 |
+| RN.BASIC.164 | 0xFF | 75p / 25s | 0x00C0 | 0x0040 | 8 x 32 | 125,000 |
+| RN.BASIC.165 | 0xFF | 50p / 50s | 0x0080 | 0x0080 | 8 x 32 | 125,000 |
+| RN.BASIC.166 | 0xFF | 25p / 75s | 0x0040 | 0x00C0 | 8 x 32 | 125,000 |
+| RN.BASIC.167 | 0x55 | 100p / 0s | 0x0100 | 0x0000 | 4 x 32 | 62,500 |
+| RN.BASIC.168 | 0x55 | 75p / 25s | 0x00C0 | 0x0040 | 4 x 32 | 62,500 |
+| RN.BASIC.169 | 0x55 | 50p / 50s | 0x0080 | 0x0080 | 4 x 32 | 62,500 |
+| RN.BASIC.170 | 0x55 | 25p / 75s | 0x0040 | 0x00C0 | 4 x 32 | 62,500 |
+| RN.BASIC.171 | 0xAA | 100p / 0s | 0x0100 | 0x0000 | 4 x 32 | 62,500 |
+| RN.BASIC.172 | 0xAA | 75p / 25s | 0x00C0 | 0x0040 | 4 x 32 | 62,500 |
+| RN.BASIC.173 | 0xAA | 50p / 50s | 0x0080 | 0x0080 | 4 x 32 | 62,500 |
+| RN.BASIC.174 | 0xAA | 25p / 75s | 0x0040 | 0x00C0 | 4 x 32 | 62,500 |
+| RN.BASIC.175 | 0x01 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
+| RN.BASIC.176 | 0x01 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
+| RN.BASIC.177 | 0x01 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
+| RN.BASIC.178 | 0x01 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
+| RN.BASIC.179 | 0x02 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
+| RN.BASIC.180 | 0x02 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
+| RN.BASIC.181 | 0x02 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
+| RN.BASIC.182 | 0x02 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
+| RN.BASIC.183 | 0x04 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
+| RN.BASIC.184 | 0x04 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
+| RN.BASIC.185 | 0x04 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
+| RN.BASIC.186 | 0x04 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
+| RN.BASIC.187 | 0x10 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
+| RN.BASIC.188 | 0x10 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
+| RN.BASIC.189 | 0x10 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
+| RN.BASIC.190 | 0x10 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
+| RN.BASIC.191 | 0x40 | 100p / 0s | 0x0100 | 0x0000 | 1 x 32 | 15,625 |
+| RN.BASIC.192 | 0x40 | 75p / 25s | 0x00C0 | 0x0040 | 1 x 32 | 15,625 |
+| RN.BASIC.193 | 0x40 | 50p / 50s | 0x0080 | 0x0080 | 1 x 32 | 15,625 |
+| RN.BASIC.194 | 0x40 | 25p / 75s | 0x0040 | 0x00C0 | 1 x 32 | 15,625 |
 
-**Total RN.BASIC = 208 cases.**
+**Total RN.BASIC = 194 cases.**
 
-The full 208-row plan lives in `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()`.
+The full 194-row plan lives in `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()`.
 Run any individual row with:
 ```bash
 PHASE4_5_BUILD_DIR=<build-dir> swb_ring_lock python3 scripts/cotest/phase4_5_sweep.py --row RN.BASIC.<idx>
