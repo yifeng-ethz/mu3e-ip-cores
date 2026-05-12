@@ -10,12 +10,12 @@ bucket has its own file under `doc/`:
 | Bucket | File | Cases | Methodology | Bucket Purpose |
 |---|---|---:|---|---|
 | **BU** Bring-up | [TEST_BU.md](TEST_BU.md) | 25 | B | cold read of every CSR / UID / META; no stimulus |
-| **BASIC** | [TEST_BASIC.md](TEST_BASIC.md) | 151 | D + R | happy-path SC + RC + RN data flow at below-saturation rates |
+| **BASIC** | [TEST_BASIC.md](TEST_BASIC.md) | 231 | D + R | happy-path SC + RC + RN data flow; RN.BASIC is 4 injector-mode slices (periodic 128 + headersync 32 + onclick 16 + emul-only 32) |
 | **PERF** | [TEST_PERF.md](TEST_PERF.md) | 15 | P + D | SC aggressive reads under RUNNING; RN saturation curve; long-soak (waived from cosim) |
 | **ERROR** | [TEST_ERROR.md](TEST_ERROR.md) | 12 | E | illegal opcode sequences; invalid CSR values; reject-or-error |
-| **EDGE** | [TEST_EDGE.md](TEST_EDGE.md) | 8 | D | corner masks; single-channel; SC + RUNNING concurrency; headersync + periodic injector-mode coverage |
+| **EDGE** | [TEST_EDGE.md](TEST_EDGE.md) | 6 | D | corner masks; single-channel; sanity-neg; max-rate without overload; SC + RUNNING concurrency |
 
-**Total: 211 cases** across 5 bucket files. Every row (except long-soak waivers)
+**Total: 289 cases** across 5 bucket files. Every row (except long-soak waivers)
 runs in BOTH cosim AND on-board, with theory/sim/board cross-validation.
 
 **Companion docs:**
@@ -181,12 +181,12 @@ delta is retained only as a third comparison column in the HTML report.
 | SC.AG (in TEST_PERF.md) | 8 | partial | BUG-006-S burst-read corruption documented |
 | RC.BASIC (in TEST_BASIC.md) | 11 | PASS on-board | SC-WEDGE on-board verified post-`abb3e455` |
 | RC.ERROR (in TEST_ERROR.md) | 6 | tb_int harness ready; selective board run pending | |
-| RN.BASIC (in TEST_BASIC.md) | 128 | sim 32/32 PASS (10 ms); board pending arbfix retest | 8 x 4 x 4 matrix |
+| RN.BASIC (in TEST_BASIC.md) | 208 | layout reshape 2026-05-12 to 4 injector-mode slices; sweep dispatch pending under new plan | periodic 128 + headersync 32 + onclick 16 + emul-only 32 |
 | RN.PROF (in TEST_PERF.md) | 7 | partial; saturation knee at `0x4000` observed; long-soak (RN.PROF.007) on-board pending, cosim waived | OPQ ingress ceiling probe + 10 s soak |
 | RN.ERROR (in TEST_ERROR.md) | 6 | pending | invalid configs during run |
-| RN.EDGE (in TEST_EDGE.md) | 8 | RN.EDGE.002 sim-vs-board inversion pending arbfix retest; EDGE.007 + EDGE.008 injector-mode rows added | corner masks + injector-mode coverage |
+| RN.EDGE (in TEST_EDGE.md) | 6 | RN.EDGE.002 sim-vs-board inversion pending arbfix retest | corner masks; injector-mode rows moved to BASIC |
 
-**Total: 211 cases.** Each row (except long-soak waivers) carries three
+**Total: 289 cases.** Each row (except long-soak waivers) carries three
 agreeing evidence streams: theory, cosim sim, and board. PASS count is
 currently dominated by BU+SC.BASIC+RC.BASIC + sim RN.BASIC; the remaining
 gates close as the in-flight arbfix retest + cosim 1 ms rerun + BASIC/PERF
