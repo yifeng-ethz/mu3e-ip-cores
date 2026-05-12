@@ -32,6 +32,7 @@ runs at this build dir.
 | BUG-004-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 3 slice 4 rerun | 254d7c87 | Four-ASIC RN.BASIC masks were compressed onto two SWB physical lanes and checked against the stale two-lane oracle. |
 | BUG-005-R | R | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | 4e798bc/02679b20 | Native-signoff OPQ src_compat left page_allocator.handle_credit_update_valid_i unconnected, corrupting full-mask backlog payload identity. |
 | BUG-006-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | a073596b/e9eaeaea | Native-signoff lossless traces were failed by stale generated-OPQ summary assumptions and non-closure defaults. |
+| BUG-007-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 5 slice 2 | 1c30b766 | Header-sync cosim source advanced on the virtual short-frame interval instead of the RN.BASIC pulse interval. |
 
 ---
 
@@ -164,6 +165,29 @@ runs at this build dir.
 - Commit: a073596b
   `[PATCH] HW: v3_pretest-260511 opq lossless analyzer`; e9eaeaea
   `[PATCH] HW: v3_pretest-260511 rn basic opq defaults`.
+
+### BUG-007-H: header-sync source cadence uses short-frame interval
+
+- First seen: full RN.BASIC.194 sweep at
+  `/data2/cosim_work_full_20260512_iter4closure` after BUG-005-R and
+  BUG-006-H closure.
+- Symptom: all 32 slice-2 rows failed only the rate checkpoint. RN.BASIC.129
+  reported 35,328 generated/post-rbCAM/RDMA hits against 125,000 theoretical
+  hits, while trace, FIFO, ghost, missing, and downstream conservation errors
+  were all zero.
+- Root cause: `generate_header_sync_source_model()` emitted one burst per
+  `VIRTUAL_MUTRIG_SHORT_FRAME_8NS` interval, producing about 138 samples per
+  selected channel in 1 ms. RN.BASIC slice 2 is specified as header-sync mode
+  at `rate=0x0100`, so the cosim source must preserve the header phase while
+  advancing on the row `HIT_PERIOD_8NS` cadence.
+- Fix status: fixed; the source model now advances header-sync bursts by
+  `HIT_PERIOD_8NS`, and the trace analyzer validates the same
+  phase-plus-period schedule. after_fix_outcome: `make run_BASIC SLICE=2
+  PARALLEL=16 WORK_ROOT=/data2/cosim_work_iter5_slice2_20260512` went 0/32 to
+  32/32 PASS; RN.BASIC.129 reports 124,928/125,000 hits with zero trace/corun
+  errors. potential_hazard: this is a cosim stimulus repair only; the final
+  board-compatible BASIC sweep remains tracked by BUG-001-H.
+- Commit: 1c30b766 `[PATCH] HW: v3_pretest-260511 headersync cadence`.
 
 ## Format for new entries
 
