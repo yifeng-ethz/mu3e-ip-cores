@@ -1219,7 +1219,7 @@ def write_intermediates(report_root: Path, evidences: list[Evidence], frame_samp
             "rdma_status",
             "tbd",
         ]
-        writer = csv.DictWriter(fh, fieldnames=fields)
+        writer = csv.DictWriter(fh, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         for ev in evidences:
             writer.writerow(
@@ -1280,6 +1280,7 @@ def generate_report(
                 "sim_delta_pct",
                 "board_delta_pct",
             ],
+            lineterminator="\n",
         )
         per_ip_writer.writeheader()
         for ev in evidences:
