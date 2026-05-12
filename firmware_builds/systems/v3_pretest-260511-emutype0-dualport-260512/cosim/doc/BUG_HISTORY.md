@@ -34,7 +34,7 @@ runs at this build dir.
 | BUG-006-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | a073596b/e9eaeaea | Native-signoff lossless traces were failed by stale generated-OPQ summary assumptions and non-closure defaults. |
 | BUG-007-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 5 slice 2 | 1c30b766 | Header-sync cosim source advanced on the virtual short-frame interval instead of the RN.BASIC pulse interval. |
 | BUG-008-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 6 RN.BASIC.082 | 59663d3c | Single-ASIC periodic row kept empty physical lanes enabled and decoded the native SciFi header alias as MuPix. |
-| BUG-009-T | T | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a | Single global delay bound replaced with 5 per-checkpoint bounds (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress, OPQ egress) per injector mode. |
+| BUG-009-T | T | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a/9b527599 | Single global delay bound replaced with 5 per-checkpoint bounds (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress, OPQ egress) per injector mode. |
 | BUG-010-H | H | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a | Analyzer reported delay_max_cycles = delay_min_cycles = 0 because it subtracted abs_ts_8ns from itself instead of joining upstream/downstream checkpoint traces on hit_id. |
 | BUG-009-R | R | closure-blocker | swept | fixed in IP standalone; integration re-fit pending | 2026-05-13 integration STA trace #103 | run-control_mgmt 24be671 | snap_*_lvds -> snap_*_mm_q0 CDC missing synchronized update/valid handshake; STA timed the multi-bit crossing as a normal setup endpoint. |
 
@@ -76,13 +76,18 @@ runs at this build dir.
 - Fix status: fixed; `scripts/cotest/cosim_delay_bounds.py` defines
   per-mode checkpoint bounds and the auto-report now emits
   `delay_pre`, `delay_post`, `delay_feb`, `delay_ing`, and `delay_opq`
-  PASS/FAIL columns. after_fix_outcome: the available sanity trace validates
-  all five checkpoint bounds with non-flat distributions; refreshed full-sweep
-  closure is separately blocked on the missing local `feb_system_v3.qsys`
-  Phase-D source mapping. potential_hazard: periodic, onclick, and emul-only
-  OPQ bounds are intentionally conservative until reviewer anchor numbers are
-  published.
-- Commit: be528d5a `[PATCH] HW: v3_pretest-260511 per-checkpoint delay evidence`.
+  PASS/FAIL columns. The header-sync OPQ lower edge is row-derived for sparse
+  lane/channel masks, while the dense all-ASIC/all-channel anchor remains
+  `[4356.0, 99133.5]`. after_fix_outcome: refreshed DUT sweep
+  `make run_BASIC PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_per_checkpoint_20260513_iter2` completed
+  194/194 PASS, with all five delay columns PASS for every row and
+  DISLIN lifetime reports generated under
+  `reports/rn_basic_194_per_checkpoint_20260513_iter2_h9b527599/`.
+  potential_hazard: periodic and emul-only OPQ bounds remain conservative
+  until reviewer anchor numbers are published.
+- Commit: be528d5a `[PATCH] HW: v3_pretest-260511 per-checkpoint delay evidence`;
+  9b527599 `[PATCH] HW: v3_pretest-260511 derive rn basic opq bounds`.
 
 ### BUG-010-H: lifetime analyzer subtracts a checkpoint timestamp from itself
 
@@ -98,11 +103,11 @@ runs at this build dir.
   materializes per-checkpoint hit CSVs, joins the five checkpoints by
   `hit_id`, computes non-flat per-checkpoint lifetime percentiles, and writes
   `feb_swb_range_validation.csv` for the auto-report. after_fix_outcome:
-  the available sanity trace reports nonzero min/p05/p50/p95/max for all five
-  checkpoints and DISLIN renders with `Warnings: 0`; refreshed full-sweep
-  closure is separately blocked on the missing local `feb_system_v3.qsys`
-  Phase-D source mapping. potential_hazard: stale pre-`be528d5a` row
-  directories must be regenerated before they can be used as closure evidence.
+  the refreshed DUT sweep generated nonzero min/p05/p50/p95/max for all five
+  checkpoints in every RN.BASIC row, produced zero flat-distribution errors,
+  and closed 194/194 PASS with the multi-panel DISLIN lifetime PDFs present
+  for all rows. potential_hazard: stale pre-`be528d5a` row directories must be
+  regenerated before they can be used as closure evidence.
 - Commit: be528d5a `[PATCH] HW: v3_pretest-260511 per-checkpoint delay evidence`.
 
 ## 2026-05-12

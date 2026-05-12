@@ -208,3 +208,29 @@
   uses `[3860.000, 99133.500]`, RN.BASIC.140 uses
   `[3796.000, 99133.500]`, and RN.BASIC.161/162 use
   `[0.000, 38927.000]` for OPQ egress.
+
+## 2026-05-13 - Per-Checkpoint Closure
+
+- Final refreshed-DUT sweep command:
+  `make run_BASIC PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_per_checkpoint_20260513_iter2`.
+- Result: `RN.BASIC.194_summary.json` reports 194/194 PASS. Slice rollup:
+  slice 1 128/128, slice 2 32/32, slice 3 2/2, slice 4 32/32.
+- Per-checkpoint rollup from
+  `reports/rn_basic_194_per_checkpoint_20260513_iter2_h9b527599/intermediate/per_case_summary.csv`:
+  every row passes `rate`, `delay_pre`, `delay_post`, `delay_feb`,
+  `delay_ing`, `delay_opq`, and `rdma`.
+- RN.BASIC.001 sample lifetime stats:
+  pre-rbCAM `27.000/125.000/536.000/945.000/1043.000`,
+  post-rbCAM `2000.000/2008.000/2100.000/2188.000/2196.000`,
+  FEB egress `2622.500/2670.500/3398.500/4124.500/4172.500`,
+  OPQ ingress `2623.750/2671.750/3399.750/4125.750/4173.750`,
+  OPQ egress `4188.750/7008.825/19926.000/32824.175/35711.750`
+  for min/p05/p50/p95/max in 8 ns cycles.
+- Final auto-report:
+  `firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/reports/rn_basic_194_per_checkpoint_20260513_iter2_h9b527599/`.
+  `RN.BASIC.001/plots/lifetime_hist.pdf` exists and the full report contains
+  194 `lifetime_hist.pdf` files.
+- BUG-009-T and BUG-010-H are closed for the cosim evidence stream. BUG-001-H
+  remains the separate board-evidence compatibility limitation recorded in the
+  auto-report as `BOARD_MAPPED=0`, `BOARD_UNRESOLVED=32`.
