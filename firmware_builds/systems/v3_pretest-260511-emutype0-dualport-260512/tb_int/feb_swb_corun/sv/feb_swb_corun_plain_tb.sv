@@ -63,7 +63,8 @@ module feb_swb_corun_plain_tb;
   logic [3:0]   swb_endofpacket;
   logic [3:0]   swb_debug_valid;
   logic [255:0] swb_debug_meta;
-  logic [3:0]   swb_enable_mask;
+  logic [3:0]   adapter_lane_mask;
+  logic [3:0]   swb_enable_mask = 4'h0;
   logic [ACTIVE_LANES-1:0] fifo_overflow;
   logic [ACTIVE_LANES-1:0] fifo_underflow;
 
@@ -164,7 +165,7 @@ module feb_swb_corun_plain_tb;
     .swb_endofpacket(swb_endofpacket),
     .swb_debug_valid(swb_debug_valid),
     .swb_debug_meta(swb_debug_meta),
-    .swb_enable_mask(swb_enable_mask),
+    .swb_enable_mask(adapter_lane_mask),
     .fifo_overflow(fifo_overflow),
     .fifo_underflow(fifo_underflow)
   );
@@ -283,6 +284,21 @@ module feb_swb_corun_plain_tb;
         return 0;
       end
       return (asic / 2) % ACTIVE_LANES;
+    end
+  endfunction
+
+  function automatic logic [3:0] rn_basic_swb_enable_mask();
+    logic [3:0] mask;
+    int unsigned lane;
+    begin
+      mask = 4'h0;
+      for (int unsigned asic = 0; asic < active_asic_count; asic++) begin
+        if (rn_basic_lane_mask[asic]) begin
+          lane = source_lane_for_asic(asic);
+          mask[lane] = 1'b1;
+        end
+      end
+      return mask;
     end
   endfunction
 
@@ -944,6 +960,7 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "expected_hits=%0d", expected_hits.size());
       $fdisplay(summary_fd, "expected_dma_words=%0d", expected_dma_words_runtime);
       $fdisplay(summary_fd, "feb_hit_count=%0d", feb_hit_count);
+      $fdisplay(summary_fd, "adapter_lane_mask=0x%0h", adapter_lane_mask);
       $fdisplay(summary_fd, "opq_beats=%0d", opq_beat_count);
       $fdisplay(summary_fd, "dma_payload_words=%0d", dma_payload_word_count);
       $fdisplay(summary_fd, "dma_padding_words=%0d", dma_padding_word_count);
@@ -955,8 +972,10 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "fifo_overflow=0x%0h", fifo_overflow);
       $fdisplay(summary_fd, "fifo_underflow=0x%0h", fifo_underflow);
 
-      assert(swb_enable_mask == ((4'h1 << ACTIVE_LANES) - 4'h1))
-        else $fatal(1, "SWB lane mask mismatch");
+      assert(adapter_lane_mask == ((4'h1 << ACTIVE_LANES) - 4'h1))
+        else $fatal(1, "adapter lane mask mismatch");
+      assert(swb_enable_mask != 4'h0 && ((swb_enable_mask & ~adapter_lane_mask) == 4'h0))
+        else $fatal(1, "SWB lane mask outside adapter lanes");
       assert(fifo_overflow == '0) else $fatal(1, "adapter FIFO overflow");
       assert(fifo_underflow == '0) else $fatal(1, "adapter FIFO underflow");
       assert(expected_hits.size() == expected_hits_runtime)
@@ -1099,6 +1118,10 @@ module feb_swb_corun_plain_tb;
     n_frames_runtime = (run_window_8ns + FRAME_STRIDE_8NS - 1) / FRAME_STRIDE_8NS;
     total_source_buckets = n_frames_runtime * N_SHD;
     expected_time_samples_runtime = 0;
+    swb_enable_mask = rn_basic_swb_enable_mask();
+    if (swb_enable_mask == 4'h0) begin
+      $fatal(1, "RN.BASIC selected no SWB lanes lane_mask=0x%0h", rn_basic_lane_mask);
+    end
     build_source_model();
     expected_hits_runtime = source_hits.size();
     expected_dma_words_runtime = compute_expected_dma_words();
