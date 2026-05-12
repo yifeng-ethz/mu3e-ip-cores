@@ -1,0 +1,49 @@
+# ** Note: (vsim-220) 'questa.ini' is used as the ini file.
+# vsim -ini questa.ini -c -suppress 19 -suppress 3009 -work work_phase45_sim_rows phase4_5_sim_row_p45_022_all_lanes_default_default_periodic_tb "+P45_SIM_EVIDENCE_DIR=../sim_evidence/p45_022_all_lanes_default_default_periodic" "+P45_SIM_RUN_CYCLES=1250000" -l ../sim_evidence/p45_022_all_lanes_default_default_periodic/transcript.log -do "run -all; quit -f" 
+# Start time: 15:05:31 on May 12,2026
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_ticket_distributor.sv(15): (vopt-13314) Defaulting port 'sig_offer_ticket' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_ticket_distributor.sv(20): (vopt-13314) Defaulting port 'bkg_offer_ticket' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/backend_mutrig/be_mutrig_lane_emitter.sv(18): (vopt-13314) Defaulting port 'ticket_data' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=19.
+# //  Questa Sim-64
+# //  Version 2026.1_1 linux_x86_64 Mar  2 2026
+# //
+# // Unpublished work. Copyright 2026 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# Loading sv_std.std
+# Loading work.be_mutrig_pkg(fast)
+# Loading work.frontend_ticket_bus_pkg(fast)
+# Loading work.phase4_5_sim_row_p45_022_all_lanes_default_default_periodic_tb(fast)
+# run -all
+# P45_SIM_ROW_START row_id=p45_022_all_lanes_default_default_periodic lane_mask=0xff channel_mask=0xffffffff rate=0x0800 hit_mode=11 run_cycles=1250000
+# P45_SIM_ROW_PASS row_id=p45_022_all_lanes_default_default_periodic sim_total_hits=1649912 predicate=total_hits_gt_0
+# ** Note: $finish    : sequences/phase4_5_sim_row_p45_022_all_lanes_default_default_periodic.sv(659)
+#    Time: 10006324 ns  Iteration: 1  Instance: /phase4_5_sim_row_p45_022_all_lanes_default_default_periodic_tb
+# End time: 15:05:46 on May 12,2026, Elapsed time: 0:00:15
+# Errors: 0, Warnings: 19

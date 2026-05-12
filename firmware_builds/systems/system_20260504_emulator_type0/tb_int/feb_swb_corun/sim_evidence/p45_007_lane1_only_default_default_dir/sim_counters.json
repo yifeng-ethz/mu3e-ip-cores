@@ -1,0 +1,76 @@
+{
+  "row": {
+    "row_id": "p45_007_lane1_only_default_default_dir",
+    "lane_mask": "0x02",
+    "channel_mask": "0xffffffff",
+    "rate_88fp": "0x0800",
+    "hit_mode": "00",
+    "interval_seconds": 4.000000,
+    "axis_section": "4.5.lane_iso",
+    "expected_behavior": "lane 1 admit-only; TOTAL_HITS ~= 1/8 of baseline",
+    "sanity_negative": false
+  },
+  "sim": {
+    "verdict": "PASS",
+    "sim_pass_predicate": "total_hits_gt_0",
+    "sim_total_hits": 206239,
+    "sim_hist_bin_sum": 206239,
+    "run_cycles": 1250000,
+    "default_run_cycles": 500000000,
+    "clock_hz": 125000000,
+    "harness": "feb_swb_corun compact directed row sim"
+  },
+  "run_control_sequence": [
+    {"host_opcode": "0x10", "decoded_word": "0x002", "state": "PREPARING"},
+    {"host_opcode": "0x11", "decoded_word": "0x004", "state": "SYNCING"},
+    {"host_opcode": "0x12", "decoded_word": "0x008", "state": "RUNNING"},
+    {"host_opcode": "0x13", "decoded_word": "0x010", "state": "TERMINATING"}
+  ],
+  "emulator_cfg": {
+    "SIGNAL": "0x00000000",
+    "MUTRIG_FORMAT": "0x00000020",
+    "RATES": "0x0800",
+    "CLUSTER_FIX": "0x00004f80",
+    "LANE_ENABLE_MASK": "0x01 per scalar emulator lane"
+  },
+  "histogram_statistics_v2": {
+    "LEFT_BOUND": 0,
+    "RIGHT_BOUND": 255,
+    "BIN_WIDTH": 1,
+    "KEY_LOC": "channel_post",
+    "INTERVAL_CFG": "0xFFFFFFFF",
+    "TOTAL_HITS": 206239,
+    "LAST_INTERVAL_TOTAL_HITS": 0,
+    "hist_bin_sum": 206239
+  },
+  "arb_hit_type0_supercore": [
+    {"lane": 0, "expected_mode": "REAL", "MODE": "0x00000000", "STATUS": "0x00009300", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 0, "DROP_COUNT": 206225, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0},
+    {"lane": 1, "expected_mode": " EMU", "MODE": "0x00000001", "STATUS": "0x00000d55", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 206244, "DROP_COUNT": 0, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0},
+    {"lane": 2, "expected_mode": "REAL", "MODE": "0x00000000", "STATUS": "0x00009300", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 0, "DROP_COUNT": 206232, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0},
+    {"lane": 3, "expected_mode": "REAL", "MODE": "0x00000000", "STATUS": "0x00009300", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 0, "DROP_COUNT": 206236, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0},
+    {"lane": 4, "expected_mode": "REAL", "MODE": "0x00000000", "STATUS": "0x00009300", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 0, "DROP_COUNT": 206239, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0},
+    {"lane": 5, "expected_mode": "REAL", "MODE": "0x00000000", "STATUS": "0x00009300", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 0, "DROP_COUNT": 206243, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0},
+    {"lane": 6, "expected_mode": "REAL", "MODE": "0x00000000", "STATUS": "0x00009300", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 0, "DROP_COUNT": 206247, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0},
+    {"lane": 7, "expected_mode": "REAL", "MODE": "0x00000000", "STATUS": "0x00009300", "WATCHDOG_COUNT": 0, "SELECTED_COUNT": 0, "DROP_COUNT": 206250, "FIFO_LEVEL_MAX_EMU": 0, "FIFO_LEVEL_MAX_REAL": 0}
+  ],
+  "emulator_mutrig": [
+    {"lane": 0, "frame_count": 806, "hit_count": 206498, "drop_count": 0, "tx_observed": 206239},
+    {"lane": 1, "frame_count": 806, "hit_count": 206502, "drop_count": 0, "tx_observed": 206239},
+    {"lane": 2, "frame_count": 806, "hit_count": 206506, "drop_count": 0, "tx_observed": 206239},
+    {"lane": 3, "frame_count": 806, "hit_count": 206509, "drop_count": 0, "tx_observed": 206239},
+    {"lane": 4, "frame_count": 806, "hit_count": 206513, "drop_count": 0, "tx_observed": 206239},
+    {"lane": 5, "frame_count": 806, "hit_count": 206517, "drop_count": 0, "tx_observed": 206239},
+    {"lane": 6, "frame_count": 806, "hit_count": 206520, "drop_count": 0, "tx_observed": 206239},
+    {"lane": 7, "frame_count": 806, "hit_count": 206524, "drop_count": 0, "tx_observed": 206239}
+  ],
+  "ring_buffer_cam_debug_counters": {
+    "available": false,
+    "reason": "compact feb_swb_corun Phase 4.5 row harness does not instantiate ring_buffer_cam", 
+    "push": 0, "pop": 0, "overwrite": 0, "drops": 0
+  },
+  "mts_preprocessor": {
+    "available": false,
+    "reason": "compact feb_swb_corun Phase 4.5 row harness does not instantiate mts_preprocessor", 
+    "PORT_STATUS": "0x00000000", "PROCESSOR_STATUS": "0x00000000"
+  }
+}
