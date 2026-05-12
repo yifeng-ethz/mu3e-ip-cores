@@ -2,8 +2,8 @@
 
 **Parent:** [TEST_PLAN.md](TEST_PLAN.md)
 **Siblings:** [TEST_BU.md](TEST_BU.md), [TEST_BASIC.md](TEST_BASIC.md), [TEST_PERF.md](TEST_PERF.md), [TEST_ERROR.md](TEST_ERROR.md)
-**ID range:** RN.EDGE.001-006
-**Total:** 6 cases
+**ID range:** RN.EDGE.001-008
+**Total:** 8 cases
 
 **Methodology key:** **D** (directed): single deterministic stimulus with a
 golden expectation.
@@ -24,7 +24,7 @@ a specific equality.
 
 | Section | Cases | ID range | What it Proves | Function Reference |
 |---|---:|---|---|---|
-| RN.EDGE | 6 | RN.EDGE.001-006 | corner-case stimulus patterns; sanity-neg; max-rate without overload; SC+RUNNING concurrency | `phase4_5_sweep.py` + tb_int |
+| RN.EDGE | 8 | RN.EDGE.001-008 | corner-case stimulus patterns; sanity-neg; max-rate without overload; SC+RUNNING concurrency; headersync + periodic injector-mode coverage | `phase4_5_sweep.py` + tb_int |
 
 ---
 
@@ -38,9 +38,13 @@ a specific equality.
 | RN.EDGE.004 | D | burst-mode coverage | 1 | hit_mode=burst (SIGNAL=0x01); all-lanes; default rate | E2 shape = cluster centered at `burst_center` | `phase4_5_sweep.py` (existing row `p45_021`) |
 | RN.EDGE.005 | D | periodic-mode coverage | 1 | hit_mode=periodic (SIGNAL=0x03); all-lanes; default rate | E2 shape = delta-function at periodic intervals | `phase4_5_sweep.py` (existing row `p45_022`) |
 | RN.EDGE.006 | D | SC reads during RUNNING + EDGE config | 1 | concurrent SC.AG.001..008 during EDGE.001-style run | both EDGE.001 and SC.AG pass; E1 unaffected by concurrent SC traffic | combined harness |
+| RN.EDGE.007 | D | headersync injector-mode coverage | 1 | mutrig_injector mode=1 (headersync); lane_mask=0xFF; chan=0xFFFFFFFF; rate=0x0100; emul iid_only; pulse_interval CSR programmed to user-set value | injector fires only on headerinfo events; E2 shape shows pulse alignment with the synthesised header timestamps | `phase4_5_sweep.py` injector-mode harness |
+| RN.EDGE.008 | D | periodic injector-mode coverage | 1 | mutrig_injector mode=2 (periodic, main clock); lane_mask=0xFF; chan=0xFFFFFFFF; rate=0x0100; emul iid_only | injector fires at programmed pulse_interval; E2 shape shows uniform pulse train under sync periodic mode | `phase4_5_sweep.py` injector-mode harness |
 
 **RN.EDGE verdict:** RN.EDGE.002 sim-vs-board inversion (`p45_025` lane-leak)
-under arbfix retest in flight; other EDGE rows PASS in sim and pending
+under arbfix retest in flight; RN.EDGE.007 / RN.EDGE.008 are new
+injector-mode coverage rows added 2026-05-12 (moved out of BASIC per the
+emul-mode-anchor reshape); other EDGE rows PASS in sim and pending
 on-board arbfix retest.
 
 ---

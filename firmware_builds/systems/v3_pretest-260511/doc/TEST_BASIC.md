@@ -28,7 +28,7 @@ cosim IS the sim evidence column for every BASIC row.
 |---|---:|---|---|---|
 | SC.BASIC | 12 | SC.BASIC.001-012 | scratchpad BIST; per-IP SCRATCH RW; sc_hub admission/ordering | `run_atpg_v2_reference.sh`, sc_tool |
 | RC.BASIC | 11 | RC.BASIC.001-011 | legal opcode sequences; LOG FIFO decode; stage timing; SC-WEDGE-fixed CMD_RESET | `rc_tool`, `phase4_5_sweep.py:run_row()` |
-| RN.BASIC | 128 | RN.BASIC.001-128 | 8 lane_masks x 4 channel_masks x 4 rates, all below saturation; theoretical-delta < 5% in BOTH sim and board | `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()` + `cosim/Makefile` |
+| RN.BASIC | 128 | RN.BASIC.001-128 | 4 emul-mode sub-buckets (iid_only / clustered_only / mixed / bkg_only), each 8 lane_mask x 4 channel_mask at rate=0x0100; theoretical-delta < 5% in sim and board | `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()` + `cosim/Makefile` |
 
 ---
 
@@ -79,24 +79,29 @@ Legal opcode sequences.
 
 ## 4. RN.BASIC
 
-**Total: 128 cases**, organised in 4 slices that anchor on the typical FEB
-SciFi operating point and expand outward to maximise per-axis debuggability
-rather than fan out as a balanced full factorial.
+**Total: 128 cases**, organised in 4 emulator-hit-mode sub-buckets of 32
+cases each. Anchor on the typical operating point and vary lane / channel
+within each emulator mode so a regression on any single axis is readable
+from the row neighbourhood within a sub-bucket.
 
 **Anchor (typical):** `lane_mask=0xFF`, `channel_mask=0xFFFFFFFF`,
-`rate_88fp=0x0100`, `hit_mode=direct`. This is the all-channel / all-ASIC
-operating point that sits right at 50% of the OPQ ingress ceiling (125,000
-hits per 1 ms window).
+`rate_88fp=0x0100`, `injector_mode=0` (off), emulator hit-mode = iid_only.
+This is the all-channel / all-ASIC operating point at 50% of the OPQ
+ingress ceiling (125,000 hits per 1 ms window).
 
-**Injection / hit-mode encoding (per mutrig_injector_multiheader CSR `mode`
-combined with the arb / SIGNAL emission family):**
+**Emulator hit-mode encoding (per `frontend_csr.sv` CSR bits):**
 
-| mode | label | source |
-|---|---|---|
-| 0 | `direct` | arb hit emission, no injector pulse |
-| 1 | `headersync` | injector mode 1 - pulse synchronised to MuTRiG headerinfo channel |
-| 2 | `periodic` | injector mode 2 - sync periodic pulse train |
-| 3 | `async` | injector mode 3 - async periodic pulse train |
+| sub-bucket | label | sig | cluster | bkg | meaning |
+|---|---|---|---|---|---|
+| A | iid_only | 1 | 0 | 0 | Poisson-IID hits per channel, no clustering, no background |
+| B | clustered_only | 0 | 1 | 0 | clustered hit bursts on geometric pattern, no IID, no background |
+| C | mixed | 1 | 1 | 0 | iid AND clustered hits superimposed on the signal path |
+| D | bkg_only | 0 | 0 | 1 | background-only hits via the dedicated bkg generator (rate set by bkg CSR, not rate_88fp) |
+
+**Injector pulse mode** (`mutrig_injector_multiheader` CSR `mode`):
+fixed at `0` (off) across BASIC; headersync (mode 1) and periodic (mode 2)
+injector coverage lives in `TEST_EDGE.md` as dedicated directed rows.
+Async (mode 3) is dropped from BASIC and EDGE per 2026-05-12 directive.
 
 **Common per-row stimulus:**
 - `INTERVAL_CFG = INTERVAL_CFG_NEVER_FIRE (0xFFFFFFFF)` so the full window
@@ -104,8 +109,7 @@ combined with the arb / SIGNAL emission family):**
 - LEFT_BOUND=0, RIGHT_BOUND=255, BIN_WIDTH=1
 - 1 ms RUNNING window in sim and on board
 - Opcode sequence: 0x10 -> 0x11 -> 0x12 -> wait RUNNING -> 0x13
-- For headersync rows: pulse_interval CSR set to the typical 910-cycle
-  header-period (CSR-programmable, no hardcoded constant in RTL)
+- `rate_88fp = 0x0100` fixed across all sub-buckets
 
 **Common per-row pass criteria:**
 - theory (math reference): `theoretical_hits` = `popcount(lane) *
@@ -115,155 +119,159 @@ combined with the arb / SIGNAL emission family):**
 - board: |delta vs theory| < 5%
 - E2 (hist_bin sum + per-interval shape): matches E1 within +/- 8
 - E3 (RDMA dump): record count matches E1 within +/- 8
+- For sub-bucket D (`bkg_only`): theoretical_hits is set by the bkg CSR
+  rate field, not `rate_88fp`; the table values are placeholders against
+  the same lane/chan popcount math at `rate_88fp = 0x0100` so the row-
+  level diff is consistent, but the actual board / sim total depends on
+  the bkg CSR programmed at row start (the runner script sets it)
 
-**Slice A - Mode x Rate at typical mask (16 cases):** lane=0xFF, chan=0xFFFFFFFF
-
-| ID | hit_mode | rate_88fp | popcount L x C | theoretical_hits | clipped_hits |
+| ID | lane_mask | channel_mask | popcount L x C | theoretical_hits | clipped_hits |
 |---|---|---|---:|---:|---:|
-| RN.BASIC.001 | direct (0) | 0x0040 | 8 x 32 | 31,250 | 31,250 |
-| RN.BASIC.002 | direct (0) | 0x0080 | 8 x 32 | 62,500 | 62,500 |
-| RN.BASIC.003 | direct (0) | 0x00C0 | 8 x 32 | 93,750 | 93,750 |
-| RN.BASIC.004 | direct (0) | 0x0100 | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.005 | headersync (1) | 0x0040 | 8 x 32 | 31,250 | 31,250 |
-| RN.BASIC.006 | headersync (1) | 0x0080 | 8 x 32 | 62,500 | 62,500 |
-| RN.BASIC.007 | headersync (1) | 0x00C0 | 8 x 32 | 93,750 | 93,750 |
-| RN.BASIC.008 | headersync (1) | 0x0100 | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.009 | periodic (2) | 0x0040 | 8 x 32 | 31,250 | 31,250 |
-| RN.BASIC.010 | periodic (2) | 0x0080 | 8 x 32 | 62,500 | 62,500 |
-| RN.BASIC.011 | periodic (2) | 0x00C0 | 8 x 32 | 93,750 | 93,750 |
-| RN.BASIC.012 | periodic (2) | 0x0100 | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.013 | async (3) | 0x0040 | 8 x 32 | 31,250 | 31,250 |
-| RN.BASIC.014 | async (3) | 0x0080 | 8 x 32 | 62,500 | 62,500 |
-| RN.BASIC.015 | async (3) | 0x00C0 | 8 x 32 | 93,750 | 93,750 |
-| RN.BASIC.016 | async (3) | 0x0100 | 8 x 32 | 125,000 | 125,000 |
+| RN.BASIC.001 | 0xFF | 0xFFFFFFFF | 8 x 32 | 125,000 | 125,000 |
+| RN.BASIC.002 | 0xFF | 0x0000FFFF | 8 x 16 | 62,500 | 62,500 |
+| RN.BASIC.003 | 0xFF | 0x55555555 | 8 x 16 | 62,500 | 62,500 |
+| RN.BASIC.004 | 0xFF | 0x00000001 | 8 x 1 | 3,906 | 3,906 |
+| RN.BASIC.005 | 0x55 | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 |
+| RN.BASIC.006 | 0x55 | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.007 | 0x55 | 0x55555555 | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.008 | 0x55 | 0x00000001 | 4 x 1 | 1,953 | 1,953 |
+| RN.BASIC.009 | 0xAA | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 |
+| RN.BASIC.010 | 0xAA | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.011 | 0xAA | 0x55555555 | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.012 | 0xAA | 0x00000001 | 4 x 1 | 1,953 | 1,953 |
+| RN.BASIC.013 | 0x01 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.014 | 0x01 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.015 | 0x01 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.016 | 0x01 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.017 | 0x02 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.018 | 0x02 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.019 | 0x02 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.020 | 0x02 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.021 | 0x04 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.022 | 0x04 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.023 | 0x04 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.024 | 0x04 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.025 | 0x10 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.026 | 0x10 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.027 | 0x10 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.028 | 0x10 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.029 | 0x40 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.030 | 0x40 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.031 | 0x40 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.032 | 0x40 | 0x00000001 | 1 x 1 | 488 | 488 |
 
-**Slice B - Lane x Mode at typical chan/rate (32 cases):** chan=0xFFFFFFFF, rate=0x0100
+**Sub-bucket B - clustered_only (sig=0, cluster=1, bkg=0) (32 cases): rate_88fp=0x0100, injector_mode=0 (off)**
 
-| ID | lane_mask | hit_mode | popcount L x C | theoretical_hits | clipped_hits |
+| ID | lane_mask | channel_mask | popcount L x C | theoretical_hits | clipped_hits |
 |---|---|---|---:|---:|---:|
-| RN.BASIC.017 | 0xFF | direct (0) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.018 | 0xFF | headersync (1) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.019 | 0xFF | periodic (2) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.020 | 0xFF | async (3) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.021 | 0x55 | direct (0) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.022 | 0x55 | headersync (1) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.023 | 0x55 | periodic (2) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.024 | 0x55 | async (3) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.025 | 0xAA | direct (0) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.026 | 0xAA | headersync (1) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.027 | 0xAA | periodic (2) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.028 | 0xAA | async (3) | 4 x 32 | 62,500 | 62,500 |
-| RN.BASIC.029 | 0x01 | direct (0) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.030 | 0x01 | headersync (1) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.031 | 0x01 | periodic (2) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.032 | 0x01 | async (3) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.033 | 0x02 | direct (0) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.034 | 0x02 | headersync (1) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.035 | 0x02 | periodic (2) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.036 | 0x02 | async (3) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.037 | 0x04 | direct (0) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.038 | 0x04 | headersync (1) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.039 | 0x04 | periodic (2) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.040 | 0x04 | async (3) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.041 | 0x10 | direct (0) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.042 | 0x10 | headersync (1) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.043 | 0x10 | periodic (2) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.044 | 0x10 | async (3) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.045 | 0x40 | direct (0) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.046 | 0x40 | headersync (1) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.047 | 0x40 | periodic (2) | 1 x 32 | 15,625 | 15,625 |
-| RN.BASIC.048 | 0x40 | async (3) | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.033 | 0xFF | 0xFFFFFFFF | 8 x 32 | 125,000 | 125,000 |
+| RN.BASIC.034 | 0xFF | 0x0000FFFF | 8 x 16 | 62,500 | 62,500 |
+| RN.BASIC.035 | 0xFF | 0x55555555 | 8 x 16 | 62,500 | 62,500 |
+| RN.BASIC.036 | 0xFF | 0x00000001 | 8 x 1 | 3,906 | 3,906 |
+| RN.BASIC.037 | 0x55 | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 |
+| RN.BASIC.038 | 0x55 | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.039 | 0x55 | 0x55555555 | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.040 | 0x55 | 0x00000001 | 4 x 1 | 1,953 | 1,953 |
+| RN.BASIC.041 | 0xAA | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 |
+| RN.BASIC.042 | 0xAA | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.043 | 0xAA | 0x55555555 | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.044 | 0xAA | 0x00000001 | 4 x 1 | 1,953 | 1,953 |
+| RN.BASIC.045 | 0x01 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.046 | 0x01 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.047 | 0x01 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.048 | 0x01 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.049 | 0x02 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.050 | 0x02 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.051 | 0x02 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.052 | 0x02 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.053 | 0x04 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.054 | 0x04 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.055 | 0x04 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.056 | 0x04 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.057 | 0x10 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.058 | 0x10 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.059 | 0x10 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.060 | 0x10 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.061 | 0x40 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.062 | 0x40 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.063 | 0x40 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.064 | 0x40 | 0x00000001 | 1 x 1 | 488 | 488 |
 
-**Slice C - Chan x Mode at typical lane/rate (16 cases):** lane=0xFF, rate=0x0100
+**Sub-bucket C - mixed (sig=1, cluster=1, bkg=0) (32 cases): rate_88fp=0x0100, injector_mode=0 (off)**
 
-| ID | channel_mask | hit_mode | popcount L x C | theoretical_hits | clipped_hits |
+| ID | lane_mask | channel_mask | popcount L x C | theoretical_hits | clipped_hits |
 |---|---|---|---:|---:|---:|
-| RN.BASIC.049 | 0xFFFFFFFF | direct (0) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.050 | 0xFFFFFFFF | headersync (1) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.051 | 0xFFFFFFFF | periodic (2) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.052 | 0xFFFFFFFF | async (3) | 8 x 32 | 125,000 | 125,000 |
-| RN.BASIC.053 | 0x0000FFFF | direct (0) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.054 | 0x0000FFFF | headersync (1) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.055 | 0x0000FFFF | periodic (2) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.056 | 0x0000FFFF | async (3) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.057 | 0x55555555 | direct (0) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.058 | 0x55555555 | headersync (1) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.059 | 0x55555555 | periodic (2) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.060 | 0x55555555 | async (3) | 8 x 16 | 62,500 | 62,500 |
-| RN.BASIC.061 | 0x00000001 | direct (0) | 8 x 1 | 3,906 | 3,906 |
-| RN.BASIC.062 | 0x00000001 | headersync (1) | 8 x 1 | 3,906 | 3,906 |
-| RN.BASIC.063 | 0x00000001 | periodic (2) | 8 x 1 | 3,906 | 3,906 |
-| RN.BASIC.064 | 0x00000001 | async (3) | 8 x 1 | 3,906 | 3,906 |
+| RN.BASIC.065 | 0xFF | 0xFFFFFFFF | 8 x 32 | 125,000 | 125,000 |
+| RN.BASIC.066 | 0xFF | 0x0000FFFF | 8 x 16 | 62,500 | 62,500 |
+| RN.BASIC.067 | 0xFF | 0x55555555 | 8 x 16 | 62,500 | 62,500 |
+| RN.BASIC.068 | 0xFF | 0x00000001 | 8 x 1 | 3,906 | 3,906 |
+| RN.BASIC.069 | 0x55 | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 |
+| RN.BASIC.070 | 0x55 | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.071 | 0x55 | 0x55555555 | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.072 | 0x55 | 0x00000001 | 4 x 1 | 1,953 | 1,953 |
+| RN.BASIC.073 | 0xAA | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 |
+| RN.BASIC.074 | 0xAA | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.075 | 0xAA | 0x55555555 | 4 x 16 | 31,250 | 31,250 |
+| RN.BASIC.076 | 0xAA | 0x00000001 | 4 x 1 | 1,953 | 1,953 |
+| RN.BASIC.077 | 0x01 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.078 | 0x01 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.079 | 0x01 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.080 | 0x01 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.081 | 0x02 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.082 | 0x02 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.083 | 0x02 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.084 | 0x02 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.085 | 0x04 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.086 | 0x04 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.087 | 0x04 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.088 | 0x04 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.089 | 0x10 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.090 | 0x10 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.091 | 0x10 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.092 | 0x10 | 0x00000001 | 1 x 1 | 488 | 488 |
+| RN.BASIC.093 | 0x40 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 |
+| RN.BASIC.094 | 0x40 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.095 | 0x40 | 0x55555555 | 1 x 16 | 7,812 | 7,812 |
+| RN.BASIC.096 | 0x40 | 0x00000001 | 1 x 1 | 488 | 488 |
 
-**Slice D - Combined sparse Lane x Chan x Rate at direct mode (64 cases):**
-hit_mode=direct (0); rates 0x0080 (low) and 0x0400 (mid)
+**Sub-bucket D - bkg_only (sig=0, cluster=0, bkg=1) (32 cases): rate_88fp=0x0100, injector_mode=0 (off)**
 
-| ID | lane_mask | channel_mask | rate_88fp | popcount L x C | theoretical_hits | clipped_hits |
-|---|---|---|---|---:|---:|---:|
-| RN.BASIC.065 | 0xFF | 0xFFFFFFFF | 0x0080 | 8 x 32 | 62,500 | 62,500 |
-| RN.BASIC.066 | 0xFF | 0xFFFFFFFF | 0x0400 | 8 x 32 | 500,000 | 250,000 (clipped at OPQ ceiling) |
-| RN.BASIC.067 | 0xFF | 0x0000FFFF | 0x0080 | 8 x 16 | 31,250 | 31,250 |
-| RN.BASIC.068 | 0xFF | 0x0000FFFF | 0x0400 | 8 x 16 | 250,000 | 250,000 (above 50% threshold) |
-| RN.BASIC.069 | 0xFF | 0x55555555 | 0x0080 | 8 x 16 | 31,250 | 31,250 |
-| RN.BASIC.070 | 0xFF | 0x55555555 | 0x0400 | 8 x 16 | 250,000 | 250,000 (above 50% threshold) |
-| RN.BASIC.071 | 0xFF | 0x00000001 | 0x0080 | 8 x 1 | 1,953 | 1,953 |
-| RN.BASIC.072 | 0xFF | 0x00000001 | 0x0400 | 8 x 1 | 15,625 | 15,625 |
-| RN.BASIC.073 | 0x55 | 0xFFFFFFFF | 0x0080 | 4 x 32 | 31,250 | 31,250 |
-| RN.BASIC.074 | 0x55 | 0xFFFFFFFF | 0x0400 | 4 x 32 | 250,000 | 250,000 (above 50% threshold) |
-| RN.BASIC.075 | 0x55 | 0x0000FFFF | 0x0080 | 4 x 16 | 15,625 | 15,625 |
-| RN.BASIC.076 | 0x55 | 0x0000FFFF | 0x0400 | 4 x 16 | 125,000 | 125,000 |
-| RN.BASIC.077 | 0x55 | 0x55555555 | 0x0080 | 4 x 16 | 15,625 | 15,625 |
-| RN.BASIC.078 | 0x55 | 0x55555555 | 0x0400 | 4 x 16 | 125,000 | 125,000 |
-| RN.BASIC.079 | 0x55 | 0x00000001 | 0x0080 | 4 x 1 | 977 | 977 |
-| RN.BASIC.080 | 0x55 | 0x00000001 | 0x0400 | 4 x 1 | 7,813 | 7,813 |
-| RN.BASIC.081 | 0xAA | 0xFFFFFFFF | 0x0080 | 4 x 32 | 31,250 | 31,250 |
-| RN.BASIC.082 | 0xAA | 0xFFFFFFFF | 0x0400 | 4 x 32 | 250,000 | 250,000 (above 50% threshold) |
-| RN.BASIC.083 | 0xAA | 0x0000FFFF | 0x0080 | 4 x 16 | 15,625 | 15,625 |
-| RN.BASIC.084 | 0xAA | 0x0000FFFF | 0x0400 | 4 x 16 | 125,000 | 125,000 |
-| RN.BASIC.085 | 0xAA | 0x55555555 | 0x0080 | 4 x 16 | 15,625 | 15,625 |
-| RN.BASIC.086 | 0xAA | 0x55555555 | 0x0400 | 4 x 16 | 125,000 | 125,000 |
-| RN.BASIC.087 | 0xAA | 0x00000001 | 0x0080 | 4 x 1 | 977 | 977 |
-| RN.BASIC.088 | 0xAA | 0x00000001 | 0x0400 | 4 x 1 | 7,813 | 7,813 |
-| RN.BASIC.089 | 0x01 | 0xFFFFFFFF | 0x0080 | 1 x 32 | 7,813 | 7,813 |
-| RN.BASIC.090 | 0x01 | 0xFFFFFFFF | 0x0400 | 1 x 32 | 62,500 | 62,500 |
-| RN.BASIC.091 | 0x01 | 0x0000FFFF | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.092 | 0x01 | 0x0000FFFF | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.093 | 0x01 | 0x55555555 | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.094 | 0x01 | 0x55555555 | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.095 | 0x01 | 0x00000001 | 0x0080 | 1 x 1 | 244 | 244 |
-| RN.BASIC.096 | 0x01 | 0x00000001 | 0x0400 | 1 x 1 | 1,953 | 1,953 |
-| RN.BASIC.097 | 0x02 | 0xFFFFFFFF | 0x0080 | 1 x 32 | 7,813 | 7,813 |
-| RN.BASIC.098 | 0x02 | 0xFFFFFFFF | 0x0400 | 1 x 32 | 62,500 | 62,500 |
-| RN.BASIC.099 | 0x02 | 0x0000FFFF | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.100 | 0x02 | 0x0000FFFF | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.101 | 0x02 | 0x55555555 | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.102 | 0x02 | 0x55555555 | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.103 | 0x02 | 0x00000001 | 0x0080 | 1 x 1 | 244 | 244 |
-| RN.BASIC.104 | 0x02 | 0x00000001 | 0x0400 | 1 x 1 | 1,953 | 1,953 |
-| RN.BASIC.105 | 0x04 | 0xFFFFFFFF | 0x0080 | 1 x 32 | 7,813 | 7,813 |
-| RN.BASIC.106 | 0x04 | 0xFFFFFFFF | 0x0400 | 1 x 32 | 62,500 | 62,500 |
-| RN.BASIC.107 | 0x04 | 0x0000FFFF | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.108 | 0x04 | 0x0000FFFF | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.109 | 0x04 | 0x55555555 | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.110 | 0x04 | 0x55555555 | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.111 | 0x04 | 0x00000001 | 0x0080 | 1 x 1 | 244 | 244 |
-| RN.BASIC.112 | 0x04 | 0x00000001 | 0x0400 | 1 x 1 | 1,953 | 1,953 |
-| RN.BASIC.113 | 0x10 | 0xFFFFFFFF | 0x0080 | 1 x 32 | 7,813 | 7,813 |
-| RN.BASIC.114 | 0x10 | 0xFFFFFFFF | 0x0400 | 1 x 32 | 62,500 | 62,500 |
-| RN.BASIC.115 | 0x10 | 0x0000FFFF | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.116 | 0x10 | 0x0000FFFF | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.117 | 0x10 | 0x55555555 | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.118 | 0x10 | 0x55555555 | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.119 | 0x10 | 0x00000001 | 0x0080 | 1 x 1 | 244 | 244 |
-| RN.BASIC.120 | 0x10 | 0x00000001 | 0x0400 | 1 x 1 | 1,953 | 1,953 |
-| RN.BASIC.121 | 0x40 | 0xFFFFFFFF | 0x0080 | 1 x 32 | 7,813 | 7,813 |
-| RN.BASIC.122 | 0x40 | 0xFFFFFFFF | 0x0400 | 1 x 32 | 62,500 | 62,500 |
-| RN.BASIC.123 | 0x40 | 0x0000FFFF | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.124 | 0x40 | 0x0000FFFF | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.125 | 0x40 | 0x55555555 | 0x0080 | 1 x 16 | 3,906 | 3,906 |
-| RN.BASIC.126 | 0x40 | 0x55555555 | 0x0400 | 1 x 16 | 31,250 | 31,250 |
-| RN.BASIC.127 | 0x40 | 0x00000001 | 0x0080 | 1 x 1 | 244 | 244 |
-| RN.BASIC.128 | 0x40 | 0x00000001 | 0x0400 | 1 x 1 | 1,953 | 1,953 |
+| ID | lane_mask | channel_mask | popcount L x C | theoretical_hits | clipped_hits |
+|---|---|---|---:|---:|---:|
+| RN.BASIC.097 | 0xFF | 0xFFFFFFFF | 8 x 32 | 125,000 | 125,000 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.098 | 0xFF | 0x0000FFFF | 8 x 16 | 62,500 | 62,500 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.099 | 0xFF | 0x55555555 | 8 x 16 | 62,500 | 62,500 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.100 | 0xFF | 0x00000001 | 8 x 1 | 3,906 | 3,906 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.101 | 0x55 | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.102 | 0x55 | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.103 | 0x55 | 0x55555555 | 4 x 16 | 31,250 | 31,250 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.104 | 0x55 | 0x00000001 | 4 x 1 | 1,953 | 1,953 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.105 | 0xAA | 0xFFFFFFFF | 4 x 32 | 62,500 | 62,500 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.106 | 0xAA | 0x0000FFFF | 4 x 16 | 31,250 | 31,250 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.107 | 0xAA | 0x55555555 | 4 x 16 | 31,250 | 31,250 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.108 | 0xAA | 0x00000001 | 4 x 1 | 1,953 | 1,953 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.109 | 0x01 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.110 | 0x01 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.111 | 0x01 | 0x55555555 | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.112 | 0x01 | 0x00000001 | 1 x 1 | 488 | 488 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.113 | 0x02 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.114 | 0x02 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.115 | 0x02 | 0x55555555 | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.116 | 0x02 | 0x00000001 | 1 x 1 | 488 | 488 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.117 | 0x04 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.118 | 0x04 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.119 | 0x04 | 0x55555555 | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.120 | 0x04 | 0x00000001 | 1 x 1 | 488 | 488 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.121 | 0x10 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.122 | 0x10 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.123 | 0x10 | 0x55555555 | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.124 | 0x10 | 0x00000001 | 1 x 1 | 488 | 488 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.125 | 0x40 | 0xFFFFFFFF | 1 x 32 | 15,625 | 15,625 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.126 | 0x40 | 0x0000FFFF | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.127 | 0x40 | 0x55555555 | 1 x 16 | 7,812 | 7,812 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+| RN.BASIC.128 | 0x40 | 0x00000001 | 1 x 1 | 488 | 488 (bkg-only rate scales by bkg CSR, not rate_88fp) |
+
+**Total RN.BASIC = 128 cases.**
 
 The full 128-row plan lives in `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()`.
 Run any individual row with:
@@ -272,9 +280,9 @@ PHASE4_5_BUILD_DIR=<build-dir> swb_ring_lock python3 scripts/cotest/phase4_5_swe
 ```
 
 **RN.BASIC verdict:** prior 32-row sim sweep PASS at 10 ms RUNNING (commit
-`967845b5`); 128-row sweep at 1 ms with new anchor layout (mode coverage
-added) is in flight via codex1 BASIC/PERF dispatch. Board PASS at 25/32
-pre-arbfix (commit `47efa242`); arbfix retest is in flight.
+`967845b5`); 128-row sweep with 4 emulator-mode sub-buckets at 1 ms is the
+new BASIC plan as of 2026-05-12; codex1 BASIC/PERF dispatch + arbfix board
+retest are both pending under the new layout.
 
 ---
 
