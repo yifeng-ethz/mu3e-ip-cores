@@ -1,0 +1,16 @@
+key,value
+test_name,smoke
+expected_hits,1000
+driver_total_hits,1000
+driver_port0_hits,500
+driver_port1_hits,500
+hist_fill_in_valid_cycles,500
+fill_in_1_valid_cycles,500
+hist_fill_in_handshakes,500
+fill_in_1_handshakes,500
+hist_bin_write_pulses,844
+max_csr_total_hits,1000
+interval_pulses_seen,3
+intervals_read,1
+interval_bin_sum_total,1000
+pass,1

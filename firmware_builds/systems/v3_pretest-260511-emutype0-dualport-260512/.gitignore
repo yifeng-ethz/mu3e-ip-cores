@@ -1,0 +1,28 @@
+# Generated Qsys/Quartus outputs
+syn/feb_system_v3/
+syn/*.sopcinfo
+syn/*qsys_generate*.console.log
+syn/*qsys_generate*.status
+syn/board_projects/*/db/
+syn/board_projects/*/incremental_db/
+syn/board_projects/*/output_files*/
+syn/board_projects/*/sta_debug_*/
+syn/board_projects/*/timing_debug/
+syn/board_projects/*/*.sof
+syn/board_projects/*/*.pof
+syn/board_projects/*/*.jic
+syn/board_projects/*/*.rpt
+syn/board_projects/*/*.summary
+syn/board_projects/*/*.log
+
+# Simulator and analyzer work products
+tb_int/feb_swb_corun/build/
+tb_int/feb_swb_corun/.old_tb_work/
+tb_int/feb_swb_corun/report*/
+tb_int/feb_swb_corun/uvm/work_feb_swb_uvm/
+tb_int/feb_swb_corun/transcript
+tb_int/feb_swb_corun/vsim.wlf
+
+# Local tool scratch
+script/__pycache__/
+ip/*/qverify_static*/

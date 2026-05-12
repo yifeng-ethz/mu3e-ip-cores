@@ -1,0 +1,32 @@
+{
+  "pass": false,
+  "total_hits": 670029536,
+  "total_hits_csr13": 670029536,
+  "last_interval_total_hits_csr17": 0,
+  "last_interval_dropped_hits_csr18": 0,
+  "hist_bin_sum": 0,
+  "hist_bin_sum_matches_csr13": false,
+  "csr13_vs_hist_diff": 670029536,
+  "underflow": 0,
+  "overflow": 0,
+  "dropped_hits": 162926609,
+  "arb_drops_emu": 0,
+  "ratio_to_prev": null,
+  "hist_sum": 0,
+  "sanity_negative": false,
+  "run_number_writeback_ok": false,
+  "run_number_written": 11141139,
+  "run_number_readback": 11141138,
+  "rx_cmd_count_delta": 4,
+  "rx_err_count_delta": 0,
+  "log_entries_count": 2,
+  "stage_durations": {
+    "prepare_ms": null,
+    "sync_ms": null,
+    "running_s": null,
+    "terminating_ms": 515.5448913574219
+  },
+  "idle_completion": "IDLE_OBSERVED",
+  "failure_mode": "HIST_DROPPED_HITS_NONZERO",
+  "warnings": "HIST_BIN_SUM_NE_CSR13_diff=670029536_sum=0_csr13=670029536"
+}
