@@ -167,7 +167,9 @@ def load_trace_rows(report_root: Path) -> list[TraceRow]:
 
 
 def attach_summary_conditions(report_root: Path, rows: list[TraceRow]) -> None:
-    summary_path = report_root / "RN.BASIC.208_summary.json"
+    summary_path = report_root / "RN.BASIC.194_summary.json"
+    if not summary_path.is_file():
+        summary_path = report_root / "RN.BASIC.208_summary.json"
     if not summary_path.is_file():
         return
     summary = load_json(summary_path)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run and collect RN.BASIC cosim evidence.
 
-The runner owns the sim-side evidence stream for the 208 RN.BASIC rows listed
+The runner owns the sim-side evidence stream for the 194 RN.BASIC rows listed
 in firmware_builds/systems/v3_pretest-260511/doc/TEST_BASIC.md.  It deliberately
 keeps row reports under cosim/REPORT/RN.BASIC.NNN so sim evidence can be
 reviewed without mixing it with board or Quartus outputs.
@@ -163,11 +163,11 @@ def parse_test_basic(path: Path) -> list[RnBasicRow]:
                     clipped_hits=clipped,
                 )
             )
-        elif index <= 176:
+        elif index <= 162:
             lane_mask = parse_int(cols[1])
             channel_mask = parse_int(cols[2])
             expected_pulses = parse_int(cols[4])
-            theory = popcount(lane_mask) * popcount(channel_mask) * expected_pulses
+            theory = parse_int(cols[5])
             rows.append(
                 RnBasicRow(
                     row_id=row_id,
@@ -183,7 +183,7 @@ def parse_test_basic(path: Path) -> list[RnBasicRow]:
                     expected_pulses=expected_pulses,
                 )
             )
-        elif index <= 208:
+        elif index <= 194:
             lane_mask = parse_int(cols[1])
             poisson_rate = parse_int(cols[3])
             signal_rate = parse_int(cols[4])
@@ -207,10 +207,10 @@ def parse_test_basic(path: Path) -> list[RnBasicRow]:
             )
 
     indexes = [row.index for row in rows]
-    expected = list(range(1, 209))
+    expected = list(range(1, 195))
     if indexes != expected:
         raise ValueError(
-            f"{path} yielded {len(rows)} RN.BASIC rows, expected contiguous 001-208"
+            f"{path} yielded {len(rows)} RN.BASIC rows, expected contiguous 001-194"
         )
     return rows
 
@@ -332,6 +332,21 @@ def stddev(values: list[float]) -> float:
     return math.sqrt(sum((value - avg) ** 2 for value in values) / len(values))
 
 
+def percentile(values: list[int], pct: float) -> int | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    if len(ordered) == 1:
+        return ordered[0]
+    rank = (len(ordered) - 1) * pct
+    low = int(math.floor(rank))
+    high = int(math.ceil(rank))
+    if low == high:
+        return ordered[low]
+    fraction = rank - low
+    return int(round(ordered[low] + (ordered[high] - ordered[low]) * fraction))
+
+
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="ascii")
@@ -341,6 +356,7 @@ def build_delay_records(records: list[dict[str, Any]]) -> dict[str, Any]:
     true_ts: list[int] = []
     measured_ts: list[int] = []
     delay_ns: list[float] = []
+    delay_cycles: list[int] = []
     for record in records:
         src_ps = int(record.get("source_generation_time_ps", -1))
         post_ps = int(record.get("post_rbcam_time_ps", -1))
@@ -349,11 +365,19 @@ def build_delay_records(records: list[dict[str, Any]]) -> dict[str, Any]:
         true_value = int(record.get("abs_ts_8ns", 0))
         true_ts.append(true_value)
         measured_ts.append(int(round(post_ps / 8000.0)))
-        delay_ns.append((post_ps - src_ps) / 1000.0)
+        delay_ps = post_ps - src_ps
+        delay_ns.append(delay_ps / 1000.0)
+        delay_cycles.append(int(round(delay_ps / 8000.0)))
     return {
         "true_ts": true_ts,
         "measured_ts": measured_ts,
         "delay_ns": delay_ns,
+        "delay_cycles": delay_cycles,
+        "delay_min_cycles": percentile(delay_cycles, 0.00),
+        "delay_p05_cycles": percentile(delay_cycles, 0.05),
+        "delay_p50_cycles": percentile(delay_cycles, 0.50),
+        "delay_p95_cycles": percentile(delay_cycles, 0.95),
+        "delay_max_cycles": percentile(delay_cycles, 1.00),
         "delay_mean_ns": mean(delay_ns),
         "delay_stddev_ns": stddev(delay_ns),
         "count": len(delay_ns),
@@ -798,7 +822,7 @@ def write_suite_summary(
     ended = time.time()
     data = {
         "suite": "RN.BASIC",
-        "total_rows_planned": 208,
+        "total_rows_planned": 194,
         "selected_rows": [row.row_id for row in selected_rows],
         "selected_count": len(selected_rows),
         "parallel": args.parallel,
@@ -809,7 +833,7 @@ def write_suite_summary(
         "slice_summary": summarize_rows(row_results),
         "rows": row_results,
     }
-    path = args.report_root / "RN.BASIC.208_summary.json"
+    path = args.report_root / "RN.BASIC.194_summary.json"
     write_json(path, data)
     return path
 
@@ -934,12 +958,8 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(f"missing FEB/SWB corun directory: {args.feb_corun_dir}")
 
     started = time.time()
-    saved_plan = saved_row_plan(args.cosim_root, args.row)
-    if saved_plan is not None and args.slice_id is None:
-        selected = saved_plan
-    else:
-        plan = parse_test_basic(args.test_basic)
-        selected = selected_plan(plan, args.row, args.slice_id)
+    plan = parse_test_basic(args.test_basic)
+    selected = selected_plan(plan, args.row, args.slice_id)
     results, batches = run_rows(args, selected)
     if not args.dry_run:
         summary_path = write_suite_summary(args, selected, results, batches, started)
