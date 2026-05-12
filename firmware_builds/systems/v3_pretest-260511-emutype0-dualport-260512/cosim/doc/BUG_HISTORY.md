@@ -29,6 +29,7 @@ runs at this build dir.
 | BUG-001-H | H | closure-blocker | swept | TBD | 2026-05-12 auto-report | n/a | p45 board sweep rows are PERF/4 s evidence and cannot be mapped as BASIC/1 ms measured data. |
 | BUG-002-T | T | closure-blocker | swept | fixed | 2026-05-12 auto-report | 1d946b02 | 7585741f cosim row_config files still describe the 208-row layout after TEST_BASIC was trimmed to 194 rows at 786da8b2. |
 | BUG-003-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 2 slice 3 rerun | cfae13e1 | Onclick sanity rows carried expected_pulses=10 but the cosim source emitted one pulse per 1 ms window. |
+| BUG-004-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 3 slice 4 rerun | 254d7c87 | Four-ASIC RN.BASIC masks were compressed onto two SWB physical lanes and checked against the stale two-lane oracle. |
 
 ---
 
@@ -87,6 +88,28 @@ runs at this build dir.
   still models onclick as deterministic periodic source evidence rather than
   an RTL mode-write edge sequence.
 - Commit: cfae13e1 `[PATCH] HW: v3_pretest-260511 onclick pulse count`.
+
+### BUG-004-H: four-ASIC masks compress onto two physical SWB lanes
+
+- First seen: `make run_BASIC SLICE=4 PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_iter3_slice4_20260512` after the 194-row runner
+  and onclick repairs.
+- Symptom: RN.BASIC.167-174 delivered source/FEB/SWB counts at theory but
+  lost hits at OPQ/RDMA when 0x55 and 0xAA lane masks were driven. A directed
+  4-lane probe moved the failure to trace-only lane mismatches, proving the
+  data path could conserve those rows once all four physical SWB lanes were
+  exercised.
+- Root cause: `feb_swb_corun_plain_tb.sv` still used a two-lane source map and
+  the trace analyzer expected that same stale map. Even/odd four-ASIC masks
+  therefore landed on only two physical lanes instead of using the four-lane
+  OPQ wrapper.
+- Fix status: fixed; the harness now drives four lanes, maps adjacent ASIC
+  pairs onto physical lanes 0..3, derives the adapter enable mask from
+  `ACTIVE_LANES`, and checks traces against the same lane oracle.
+  after_fix_outcome: RN.BASIC.167 directed rerun passed, and slice 4 improved
+  from 20/32 PASS to 28/32 PASS. potential_hazard: RN.BASIC.163-166 remain
+  open as a separate full-8-lane OPQ/RDMA ceiling cluster.
+- Commit: 254d7c87 `[PATCH] HW: v3_pretest-260511 corun lane compaction`.
 
 ## Format for new entries
 
