@@ -343,6 +343,15 @@ if HIST_INGRESS_BANK_COUNT < 1 or HIST_INGRESS_BANK_COUNT > 2:
 DEFAULT_INTERVAL_S   = 4.0
 DEFAULT_INTERVAL_CK  = int(DEFAULT_INTERVAL_S * LVDS_CLK_HZ)  # 500M cycles
 
+# OPQ datapath ceiling. The user-stated operational ceiling is 250 MHz
+# aggregate across all FEB lanes; standalone OPQ signoff closes at 1.1x
+# this value (275 MHz).
+OPQ_CEILING_HPS       = 250_000_000.0
+OPQ_BASIC_FRACTION    = 0.50
+FEB_LANE_COUNT        = 8
+FEB_CHANNEL_COUNT     = 32
+EMU_RATE_DENOM_CYCLES = 256.0 * 256.0
+
 # ----------------------------------------------------------------------------
 # INTERVAL_CFG "never fire within the run window" value
 # ----------------------------------------------------------------------------
@@ -365,11 +374,93 @@ INTERVAL_CFG_NEVER_FIRE   = 0xFFFFFFFF                          # max 32-bit
 INTERVAL_CFG_NEVER_FIRE_S = INTERVAL_CFG_NEVER_FIRE / LVDS_CLK_HZ # ~34.36 s
 
 
+def _popcount_mask(mask_text: str, width_bits: int) -> int:
+    mask = int(mask_text, 16) & ((1 << width_bits) - 1)
+    return mask.bit_count()
+
+
+def active_channel_count(row: dict[str, Any]) -> int:
+    """Return active lane-channel products for the Phase 4.5 rate model."""
+    lane_count = _popcount_mask(row["lane_mask"], FEB_LANE_COUNT)
+    channel_count = _popcount_mask(row["channel_mask"], FEB_CHANNEL_COUNT)
+    return lane_count * channel_count
+
+
+def per_active_channel_hps(row: dict[str, Any]) -> float:
+    """Emulator 8.8 rate: rate_88fp launches per 65536 lvdspll_clk ticks."""
+    return int(row["rate_88fp"], 16) * (LVDS_CLK_HZ / EMU_RATE_DENOM_CYCLES)
+
+
+def aggregate_requested_hps(row: dict[str, Any]) -> float:
+    return per_active_channel_hps(row) * active_channel_count(row)
+
+
+def deliverable_hps(row: dict[str, Any],
+                    opq_ceiling_hps: float = OPQ_CEILING_HPS) -> float:
+    if active_channel_count(row) == 0:
+        return 0.0
+    return min(aggregate_requested_hps(row), opq_ceiling_hps)
+
+
+def theoretical_hits(row: dict[str, Any], run_window_ms: float,
+                     opq_ceiling_hps: float = OPQ_CEILING_HPS) -> float:
+    """Lossless source count clipped only by the OPQ aggregate ceiling."""
+    if active_channel_count(row) == 0:
+        return 0.0
+    requested_hits = aggregate_requested_hps(row) * run_window_ms / 1000.0
+    opq_hits = opq_ceiling_hps * run_window_ms / 1000.0
+    return min(requested_hits, opq_hits)
+
+
+def theoretical_loss_pct(row: dict[str, Any],
+                         opq_ceiling_hps: float = OPQ_CEILING_HPS
+                         ) -> Optional[float]:
+    req = aggregate_requested_hps(row)
+    if req <= 0.0:
+        return None
+    delivered = min(req, opq_ceiling_hps)
+    return (req - delivered) / req * 100.0
+
+
+def bucket_for_row(row: dict[str, Any]) -> str:
+    if active_channel_count(row) == 0:
+        return "BASIC"
+    if aggregate_requested_hps(row) < OPQ_CEILING_HPS * OPQ_BASIC_FRACTION:
+        return "BASIC"
+    return "PERF"
+
+
+def delta_pct_vs_theory(total_hits: Optional[float],
+                        theory_hits: Optional[float]) -> Optional[float]:
+    if total_hits is None or theory_hits is None or theory_hits <= 0.0:
+        return None
+    return (float(total_hits) - float(theory_hits)) / float(theory_hits) * 100.0
+
+
+def theoretical_snapshot(row: dict[str, Any], run_window_ms: float
+                         ) -> dict[str, Any]:
+    requested = aggregate_requested_hps(row)
+    delivered = deliverable_hps(row)
+    return {
+        "bucket": row.get("bucket", bucket_for_row(row)),
+        "active_channels": active_channel_count(row),
+        "rate_88fp": row["rate_88fp"],
+        "per_active_channel_hps": per_active_channel_hps(row),
+        "requested_hps": requested,
+        "deliverable_hps": delivered,
+        "opq_ceiling_hps": OPQ_CEILING_HPS,
+        "run_window_ms": run_window_ms,
+        "theoretical_hits": theoretical_hits(row, run_window_ms),
+        "theoretical_loss_pct": theoretical_loss_pct(row),
+    }
+
+
 def _row(row_id: str, lane_mask: str, channel_mask: str, rate: str,
          mode: str, axis: str, expect: str, *,
          interval_seconds: float = DEFAULT_INTERVAL_S,
-         sanity_negative: bool = False) -> dict[str, Any]:
-    return {
+         sanity_negative: bool = False,
+         bucket: Optional[str] = None) -> dict[str, Any]:
+    row = {
         "row_id":            row_id,
         "lane_mask":         lane_mask,
         "channel_mask":      channel_mask,
@@ -380,17 +471,19 @@ def _row(row_id: str, lane_mask: str, channel_mask: str, rate: str,
         "expected_behavior": expect,
         "sanity_negative":   sanity_negative,
     }
+    row["bucket"] = bucket or bucket_for_row(row)
+    return row
 
 
 def build_plan() -> list[dict[str, Any]]:
-    """Return ~32 sweep rows covering channel_mask, lane_mask, rate, hit_mode.
+    """Return sweep rows covering channel_mask, lane_mask, rate, hit_mode.
 
     Axes per task brief:
       lane_mask    : 0xFF, lane_N_only x8, 0x55, 0xAA, 0x00
       channel_mask : 0xFFFFFFFF, 0x0000FFFF, 0xFFFF0000, 0x55555555,
                      0xAAAAAAAA, 0x00000001
       rate_88fp    : 0x0100, 0x0400, 0x0800 (default), 0x1000, 0x2000,
-                     0x4000, 0x8000
+                     0x4000, 0x8000, 0xFFFF
       hit_mode     : "00" direct, "01" burst, "11" periodic
 
     Coverage:
@@ -399,8 +492,9 @@ def build_plan() -> list[dict[str, Any]]:
       section 4.5.2 rate-doubling    :  7 rows  (default lane/channel/mode)
       section 4.5.3 hit-mode         :  2 rows  (burst + periodic)
       cross-products + sanity-neg    :  9 rows
+      saturation PERF probes         :  4 rows
       ----------------------------------------------------------------
-      TOTAL                          : 32 rows
+      TOTAL                          : 36 rows
     """
     rows: list[dict[str, Any]] = []
 
@@ -512,6 +606,37 @@ def build_plan() -> list[dict[str, Any]]:
         rate="0x0800", mode="00", axis="4.5.sanity-neg",
         expect="sanity-negative: lane mask supersedes channel mask",
         sanity_negative=True,
+    ))
+
+    # PERF saturation probes. These intentionally request rates above the
+    # OPQ aggregate ceiling; loss is measured against clipped theoretical_hits.
+    rows.append(_row(
+        "p45_032_perf_all_lanes_default_0xFFFF_dir",
+        lane_mask="0xFF", channel_mask="0xFFFFFFFF",
+        rate="0xFFFF", mode="00", axis="4.5.PERF",
+        expect="PERF saturation: all lanes/all channels at max emulator rate",
+        bucket="PERF",
+    ))
+    rows.append(_row(
+        "p45_033_perf_all_lanes_lowhalf_0xFFFF_dir",
+        lane_mask="0xFF", channel_mask="0x0000FFFF",
+        rate="0xFFFF", mode="00", axis="4.5.PERF",
+        expect="PERF saturation: all lanes, low-half channels, max rate",
+        bucket="PERF",
+    ))
+    rows.append(_row(
+        "p45_034_perf_lane_evens_default_0xFFFF_dir",
+        lane_mask="0x55", channel_mask="0xFFFFFFFF",
+        rate="0xFFFF", mode="00", axis="4.5.PERF",
+        expect="PERF saturation: even lanes/all channels at max rate",
+        bucket="PERF",
+    ))
+    rows.append(_row(
+        "p45_035_perf_lane0only_default_0xFFFF_dir",
+        lane_mask="0x01", channel_mask="0xFFFFFFFF",
+        rate="0xFFFF", mode="00", axis="4.5.PERF",
+        expect="PERF saturation: single lane/all channels at max rate",
+        bucket="PERF",
     ))
 
     return rows
@@ -1395,6 +1520,9 @@ def compute_verdict(row: dict[str, Any], snap_pre: dict[str, Any],
 
     # Authoritative total_hits for the run: CSR 13.
     total_hits = total_hits_csr13
+    run_window_ms = float(row.get("interval_seconds", DEFAULT_INTERVAL_S)) * 1000.0
+    theory = theoretical_snapshot(row, run_window_ms)
+    board_delta_pct = delta_pct_vs_theory(total_hits, theory["theoretical_hits"])
 
     arb_drops = 0
     for lane_rec in snap_post.get("arb", []):
@@ -1471,6 +1599,16 @@ def compute_verdict(row: dict[str, Any], snap_pre: dict[str, Any],
         "dropped_hits":      dropped,
         "arb_drops_emu":     arb_drops,
         "ratio_to_prev":     ratio_to_prev,
+        "bucket":            theory["bucket"],
+        "active_channels":   theory["active_channels"],
+        "requested_hps":     theory["requested_hps"],
+        "deliverable_hps":   theory["deliverable_hps"],
+        "opq_ceiling_hps":   theory["opq_ceiling_hps"],
+        "theoretical_window_ms": theory["run_window_ms"],
+        "theoretical_hits":  theory["theoretical_hits"],
+        "theoretical_loss_pct": theory["theoretical_loss_pct"],
+        "sim_delta_pct":     None,
+        "board_delta_pct":   board_delta_pct,
         "hist_sum":          hist_bin_sum,                # back-compat alias
         "sanity_negative":   sanity_neg,
         "run_number_writeback_ok": stage_rec.get("run_number_writeback_ok", False),
@@ -1624,6 +1762,7 @@ def regen_master_table() -> Path:
     lines.append("<tr>"
                   "<th rowspan=2>row_id</th>"
                   "<th colspan=5>Conditions</th>"
+                  "<th colspan=6>Theoretical model</th>"
                   "<th colspan=4>Stage timing</th>"
                   "<th colspan=7>Counter summary</th>"
                   "<th colspan=6>Evidence (clickable)</th>"
@@ -1635,6 +1774,12 @@ def regen_master_table() -> Path:
                   "<th>rate</th>"
                   "<th>mode</th>"
                   "<th>run_number</th>"
+                  "<th>bucket</th>"
+                  "<th>active_ch</th>"
+                  "<th>req_Mhit/s</th>"
+                  "<th>theoretical_hits</th>"
+                  "<th>sim&Delta;% theory</th>"
+                  "<th>board&Delta;% theory</th>"
                   "<th>prep_ms</th>"
                   "<th>sync_ms</th>"
                   "<th>running_s</th>"
@@ -1662,6 +1807,21 @@ def regen_master_table() -> Path:
             return f"{x:.2f}"
         return str(x)
 
+    def _fmt_hits(x: Any) -> str:
+        if x is None:
+            return "-"
+        return str(int(round(float(x))))
+
+    def _fmt_mhits(x: Any) -> str:
+        if x is None:
+            return "-"
+        return f"{float(x) / 1.0e6:.3f}"
+
+    def _fmt_pct(x: Any) -> str:
+        if x is None:
+            return "-"
+        return f"{float(x):+.2f}%"
+
     def _fmt_pass(p: Any) -> str:
         if p is True:  return "PASS"
         if p is False: return "FAIL"
@@ -1682,6 +1842,10 @@ def regen_master_table() -> Path:
     for row in plan:
         rid = row["row_id"]
         rec = records.get(rid)
+        row_theory = theoretical_snapshot(
+            row, float(row.get("interval_seconds", DEFAULT_INTERVAL_S)) * 1000.0
+        )
+        bucket = row_theory["bucket"]
         if rec is None:
             lines.append(
                 f"<tr>"
@@ -1690,7 +1854,14 @@ def regen_master_table() -> Path:
                 f"<td>{row['channel_mask']}</td>"
                 f"<td>{row['rate_88fp']}</td>"
                 f"<td>{row['hit_mode']}</td>"
-                f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
+                f"<td>-</td>"
+                f"<td>{bucket}</td>"
+                f"<td>{row_theory['active_channels']}</td>"
+                f"<td>{_fmt_mhits(row_theory['requested_hps'])}</td>"
+                f"<td>{_fmt_hits(row_theory['theoretical_hits'])}</td>"
+                f"<td>-</td>"
+                f"<td>-</td>"
+                f"<td>-</td><td>-</td><td>-</td><td>-</td>"
                 f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
                 f"<td>-</td><td>-</td>"
                 + _evidence_links(rid)
@@ -1704,6 +1875,14 @@ def regen_master_table() -> Path:
         csr13 = v.get("total_hits_csr13", v.get("total_hits"))
         csr17 = v.get("last_interval_total_hits_csr17")
         hbsum = v.get("hist_bin_sum", v.get("hist_sum"))
+        theory_hits = v.get("theoretical_hits", row_theory["theoretical_hits"])
+        requested_hps = v.get("requested_hps", row_theory["requested_hps"])
+        active_channels = v.get("active_channels", row_theory["active_channels"])
+        bucket = v.get("bucket", bucket)
+        sim_delta = v.get("sim_delta_pct")
+        board_delta = v.get("board_delta_pct")
+        if board_delta is None:
+            board_delta = delta_pct_vs_theory(csr13, theory_hits)
         lines.append(
             f"<tr>"
             f"<td><a href=\"../sweep_evidence/{rid}/\">{rid}</a></td>"
@@ -1712,6 +1891,12 @@ def regen_master_table() -> Path:
             f"<td>{row['rate_88fp']}</td>"
             f"<td>{row['hit_mode']}</td>"
             f"<td>0x{(v.get('run_number_written') or 0):06X}</td>"
+            f"<td>{bucket}</td>"
+            f"<td>{active_channels}</td>"
+            f"<td>{_fmt_mhits(requested_hps)}</td>"
+            f"<td>{_fmt_hits(theory_hits)}</td>"
+            f"<td>{_fmt_pct(sim_delta)}</td>"
+            f"<td>{_fmt_pct(board_delta)}</td>"
             f"<td>{_fmt_num(sd.get('prepare_ms'))}</td>"
             f"<td>{_fmt_num(sd.get('sync_ms'))}</td>"
             f"<td>{_fmt_num(sd.get('running_s'))}</td>"
@@ -1763,6 +1948,10 @@ def dry_run_row(row: dict[str, Any], row_idx: int,
 
     p(f"=== DRY-RUN row {row_idx}: {row['row_id']} ===")
     p(f"  axis={row['axis_section']}  sanity_neg={row.get('sanity_negative', False)}")
+    theory = theoretical_snapshot(row, float(interval_s) * 1000.0)
+    p(f"  bucket={theory['bucket']} active_channels={theory['active_channels']} "
+      f"requested={theory['requested_hps'] / 1.0e6:.3f} Mhit/s "
+      f"theoretical_hits={theory['theoretical_hits']:.0f}")
     p(f"  expected: {row['expected_behavior']}")
     p(f"  run_number (self-generated) = 0x{run_number:08X}")
     p(f"")
@@ -1899,6 +2088,9 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
         "link":         link,
         "evidence_dir": str(ev_dir),
     }
+    record["theoretical"] = theoretical_snapshot(
+        row, float(row.get("interval_seconds", DEFAULT_INTERVAL_S)) * 1000.0
+    )
 
     # Open the tool_calls.log immediately so every retry attempt is captured
     log_fh = open(log_path, "w", encoding="ascii")
@@ -2030,6 +2222,8 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
         status_label = "PASS" if verdict["pass"] else "FAIL"
         print(f"  [{rid}] {status_label}  "
               f"csr13={verdict['total_hits_csr13']}  "
+              f"theory={verdict['theoretical_hits']:.0f}  "
+              f"board_delta={verdict['board_delta_pct']}  "
               f"csr17={verdict['last_interval_total_hits_csr17']}  "
               f"hist_sum={verdict['hist_bin_sum']}  "
               f"sum_matches_csr13={verdict['hist_bin_sum_matches_csr13']}  "
@@ -2053,6 +2247,9 @@ def _finalize_row_after_fatal(record: dict[str, Any], ev_dir: Path,
     structured verdict.json that records the failure mode.
     """
     tb = traceback.format_exc()
+    row = record.get("row", {})
+    run_window_ms = float(row.get("interval_seconds", DEFAULT_INTERVAL_S)) * 1000.0
+    theory = theoretical_snapshot(row, run_window_ms) if row else {}
     verdict = {
         "pass":          False,
         "total_hits":    0,
@@ -2067,6 +2264,16 @@ def _finalize_row_after_fatal(record: dict[str, Any], ev_dir: Path,
         "dropped_hits":  None,
         "arb_drops_emu": None,
         "ratio_to_prev": None,
+        "bucket":        theory.get("bucket"),
+        "active_channels": theory.get("active_channels"),
+        "requested_hps": theory.get("requested_hps"),
+        "deliverable_hps": theory.get("deliverable_hps"),
+        "opq_ceiling_hps": theory.get("opq_ceiling_hps"),
+        "theoretical_window_ms": theory.get("run_window_ms"),
+        "theoretical_hits": theory.get("theoretical_hits"),
+        "theoretical_loss_pct": theory.get("theoretical_loss_pct"),
+        "sim_delta_pct": None,
+        "board_delta_pct": delta_pct_vs_theory(0, theory.get("theoretical_hits")),
         "hist_sum":      0,
         "stage_durations": {},
         "failure_mode":  f"FATAL: {type(exc).__name__}: {exc}",
@@ -2214,7 +2421,7 @@ def main() -> int:
             print(f"  {i:2d}  {r['row_id']:60s} "
                   f"lane={r['lane_mask']:6s} ch={r['channel_mask']:10s} "
                   f"rate={r['rate_88fp']:6s} mode={r['hit_mode']:2s} "
-                  f"axis={r['axis_section']}")
+                  f"bucket={r['bucket']:5s} axis={r['axis_section']}")
         return 0
 
     if args.export_plan:

@@ -28,5 +28,15 @@
   },
   "idle_completion": "IDLE_OBSERVED",
   "failure_mode": "TOTAL_HITS_ZERO",
-  "warnings": null
+  "warnings": null,
+  "bucket": "PERF",
+  "active_channels": 256,
+  "requested_hps": 16000000000.0,
+  "deliverable_hps": 250000000.0,
+  "opq_ceiling_hps": 250000000.0,
+  "theoretical_window_ms": 4000.0,
+  "theoretical_hits": 1000000000.0,
+  "theoretical_loss_pct": 98.4375,
+  "sim_delta_pct": null,
+  "board_delta_pct": -100.0
 }
