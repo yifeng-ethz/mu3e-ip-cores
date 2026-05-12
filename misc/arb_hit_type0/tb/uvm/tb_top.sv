@@ -30,6 +30,10 @@ module tb_top;
     emu_if.init_source();
     csr_if.init_master();
     runctl_if.init_source();
+    // rc-network is readyless (USE_READY=0 broadcast); the IP no longer
+    // exports asi_ctrl_ready. Force the TB interface "ready" to 1 so the
+    // runctl driver's wait_for_ready loop returns immediately.
+    runctl_if.ready = 1'b1;
     rst = 1'b1;
     repeat (16) @(posedge clk);
     rst = 1'b0;
@@ -48,7 +52,8 @@ module tb_top;
 
     .asi_ctrl_data              (runctl_if.data),
     .asi_ctrl_valid             (runctl_if.valid),
-    .asi_ctrl_ready             (runctl_if.ready),
+    // .asi_ctrl_ready dropped: rc-network is readyless (26.3.0+). Interface
+    // signal runctl_if.ready is forced to 1 in the tb_top initial block.
 
     .asi_real_data              (real_if.data),
     .asi_real_valid             (real_if.valid),

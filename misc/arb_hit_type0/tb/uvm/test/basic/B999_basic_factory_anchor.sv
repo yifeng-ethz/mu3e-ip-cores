@@ -30,6 +30,7 @@ import B029_watchdog_threshold_default_test_sv_unit::*;
 import B030_run_control_run_prep_resets_state_test_sv_unit::*;
 import B031_run_control_reset_clears_counters_test_sv_unit::*;
 import B032_frame_counters_native_eop_test_sv_unit::*;
+import B033_mode_preserved_through_run_test_sv_unit::*;
 
 module B999_basic_factory_anchor;
   initial begin
@@ -65,6 +66,7 @@ module B999_basic_factory_anchor;
     void'(B030_run_control_run_prep_resets_state_test::type_id::get());
     void'(B031_run_control_reset_clears_counters_test::type_id::get());
     void'(B032_frame_counters_native_eop_test::type_id::get());
+    void'(B033_mode_preserved_through_run_test::type_id::get());
   end
 endmodule
 

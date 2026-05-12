@@ -20,7 +20,12 @@ class R015_run_control_run_prep_during_packet_seq extends R_error_base_seq;
     wait_cycles(4);
     send_runctl(runctl_seq_item::RUN_PREPARING_WORD_CONST);
     wait_cycles(12);
-    expect_status_mask(32'h0000_0070, 32'h0000_0000);
+    // 26.6.0 contract: RUN_PREPARING preserves stream packet-open state.
+    // The SOP-without-EOP packet driven above leaves merged_packet_open ([4])
+    // and real_source_open ([5]) set; emu_source_open ([6]) is clear because
+    // the EMU stream was never driven. Pre-fix expected all three bits = 0;
+    // post-fix the user MODE config and stream-shape state survive PREP.
+    expect_status_mask(32'h0000_0070, 32'h0000_0030);
     csr_read_pair(ARB_REG_INGRESS_REAL_HITS_L_ADDR, ingress_hits_v);
     expect64("RUN_PREP preserves ingress hit counters", ingress_hits_v, 64'd1);
     drive_packet(ARB_SRC_REAL, 1, 45'h015_0000_0002, 3'b000, 4'h1);

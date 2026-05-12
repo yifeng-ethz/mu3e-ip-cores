@@ -30,6 +30,7 @@ BASIC_TESTS += B029_watchdog_threshold_default_test
 BASIC_TESTS += B030_run_control_run_prep_resets_state_test
 BASIC_TESTS += B031_run_control_reset_clears_counters_test
 BASIC_TESTS += B032_frame_counters_native_eop_test
+BASIC_TESTS += B033_mode_preserved_through_run_test
 
 BASIC_RUNS := $(addprefix run_,$(BASIC_TESTS))
 

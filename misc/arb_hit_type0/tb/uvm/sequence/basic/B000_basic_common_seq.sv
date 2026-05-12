@@ -1020,6 +1020,12 @@ class B000_basic_base_seq extends arb_hit_type0_base_vseq;
     expect_csr32(ARB_REG_WATCHDOG_ADDR, 32'd500, "B029 watchdog default");
   endtask
 
+  // B030 (26.6.0 contract): RUN_PREPARING transitions the run_state FSM but
+  // PRESERVES MODE, sticky errors, and stream packet-open flags. Only
+  // RUN_RESETTING (ctrl_data[7]) returns CSR config stickies to defaults
+  // and clears counters. See arb_hit_type0_runctl.sv 26.4.0 header. The
+  // old "RUN_PREP clears stream state" semantics were the lane-admit
+  // asymmetry root cause (Phase 4.5 on-board sweep).
   task automatic case_B030_run_control_run_prep_resets_state();
     int unsigned beats_v;
     int unsigned sop_v;
@@ -1040,16 +1046,27 @@ class B000_basic_base_seq extends arb_hit_type0_base_vseq;
     expect_counter(ARB_REG_INGRESS_REAL_HITS_L_ADDR, 64'd1, "B030 pre-RUN_PREP ingress");
     send_runctl(runctl_seq_item::RUN_PREPARING_WORD_CONST);
     wait_cycles(10);
+    // After fix: RUN_PREPARING preserves MODE (REAL still REAL here, since the
+    // test never wrote MODE before PREP) and preserves the source-open bits.
+    // The packet was driven sop_only=1 (SOP without EOP), so the arbiter still
+    // has the merged_packet_open / real_source_open bits set after PREP. The
+    // FIFO has drained (one beat was egressed) so REAL_EMPTY is set; EMU_EMPTY
+    // is set because the emulator was never driven.
     expected_v      = 32'd0;
-    expected_v[8]   = 1'b1;
-    expected_v[10]  = 1'b1;
+    expected_v[1:0] = ARB_MODE_REAL_CONST;     // MODE preserved (default REAL).
+    expected_v[3:2] = ARB_MODE_REAL_CONST;     // mode_pending also REAL.
+    expected_v[4]   = 1'b1;                    // merged_packet_open.
+    expected_v[5]   = 1'b1;                    // real_source_open (SOP w/o EOP).
+    expected_v[6]   = 1'b0;                    // emu_source_open never opened.
+    expected_v[8]   = 1'b1;                    // REAL_EMPTY (drained).
+    expected_v[10]  = 1'b1;                    // EMU_EMPTY (never driven).
     expect_status_mask(
       STATUS_MODE_PENDING_MASK_CONST |
       STATUS_OPEN_MASK_CONST |
       STATUS_REAL_EMPTY_MASK_CONST |
       STATUS_EMU_EMPTY_MASK_CONST,
       expected_v,
-      "B030 RUN_PREP cleared stream state"
+      "B030 RUN_PREP preserves stream state (26.6.0 contract)"
     );
     expect_counter(ARB_REG_INGRESS_REAL_HITS_L_ADDR, 64'd1, "B030 RUN_PREP preserved counters");
     check_no_egress(8, "B030 no packet leak after RUN_PREP");
@@ -1092,6 +1109,62 @@ class B000_basic_base_seq extends arb_hit_type0_base_vseq;
     expect_counter(ARB_REG_EGRESS_REAL_FRAMES_L_ADDR, 64'd3, "B032 egress real frames");
     expect_counter(ARB_REG_INGRESS_EMU_FRAMES_L_ADDR, 64'd2, "B032 ingress emu frames");
     expect_counter(ARB_REG_EGRESS_EMU_FRAMES_L_ADDR, 64'd2, "B032 egress emu frames");
+  endtask
+
+  // B033 - MODE preserved through normal run sequence; cleared only on RESET.
+  //
+  // Phase 4.5 on-board sweep found that lanes which had their MODE register
+  // written just before RUN_PREPARING propagated returned to MODE_REAL and
+  // stopped admitting hits. Pre-fix, stream_clear=reset_start cleared MODE on
+  // RUN_PREPARING (ctrl_data[1]). Post-fix, stream_clear fires only on
+  // RUN_RESETTING (ctrl_data[7]), so PREP/SYNC/RUN/END_RUN preserve user MODE
+  // and only RESET returns CSR config stickies to defaults.
+  task automatic case_B033_mode_preserved_through_run_seq();
+    bit [31:0] expected_emu_v;
+    bit [31:0] expected_real_v;
+
+    expected_emu_v        = 32'd0;
+    expected_emu_v[1:0]   = ARB_MODE_EMU_CONST;
+    expected_emu_v[3:2]   = ARB_MODE_EMU_CONST;
+
+    expected_real_v       = 32'd0;
+    expected_real_v[1:0]  = ARB_MODE_REAL_CONST;
+    expected_real_v[3:2]  = ARB_MODE_REAL_CONST;
+
+    // 1. Configure MODE = EMU (set_mode also waits 4 cycles for commit).
+    set_mode(ARB_MODE_EMU_CONST);
+    expect_status_mask(STATUS_MODE_PENDING_MASK_CONST, expected_emu_v,
+                       "B033 baseline EMU after CSR write");
+
+    // 2. RUN_PREPARING must NOT clear MODE (this is the fix).
+    send_runctl(runctl_seq_item::RUN_PREPARING_WORD_CONST);
+    wait_cycles(4);
+    expect_status_mask(STATUS_MODE_PENDING_MASK_CONST, expected_emu_v,
+                       "B033 MODE preserved across RUN_PREPARING");
+
+    // 3. RUN_SYNCING must NOT clear MODE.
+    send_runctl(runctl_seq_item::RUN_SYNCING_WORD_CONST);
+    wait_cycles(4);
+    expect_status_mask(STATUS_MODE_PENDING_MASK_CONST, expected_emu_v,
+                       "B033 MODE preserved across RUN_SYNCING");
+
+    // 4. RUN_RUNNING must NOT clear MODE.
+    send_runctl(runctl_seq_item::RUN_RUNNING_WORD_CONST);
+    wait_cycles(4);
+    expect_status_mask(STATUS_MODE_PENDING_MASK_CONST, expected_emu_v,
+                       "B033 MODE preserved across RUN_RUNNING");
+
+    // 5. RUN_TERMINATING (END_RUN) must NOT clear MODE.
+    send_runctl(runctl_seq_item::RUN_TERMINATING_WORD_CONST);
+    wait_cycles(4);
+    expect_status_mask(STATUS_MODE_PENDING_MASK_CONST, expected_emu_v,
+                       "B033 MODE preserved across RUN_TERMINATING");
+
+    // 6. RUN_RESETTING IS the explicit reset opcode; MODE must clear to REAL.
+    send_runctl(runctl_seq_item::RUN_RESETTING_WORD_CONST);
+    wait_cycles(4);
+    expect_status_mask(STATUS_MODE_PENDING_MASK_CONST, expected_real_v,
+                       "B033 MODE cleared back to REAL after RUN_RESETTING");
   endtask
 endclass
 
