@@ -229,11 +229,12 @@ HIST_SCRATCH_W                  = 0x10    # CSR 16 -- general-purpose RW scratch
 HIST_LAST_INTERVAL_TOTAL_HITS_W = 0x11    # CSR 17 -- STABLE: hits latched at the most recent interval_pulse before the live counter reset
 HIST_LAST_INTERVAL_DROPPED_HITS_W = 0x12  # CSR 18 -- STABLE: dropped-hits latched at the most recent interval_pulse
 HIST_INGRESS_BASE_WORD          = 0x0AB00
+HIST_INGRESS_BANK_BASE_WORDS    = [0x0AB00, 0x0AB10]
 HIST_INGRESS_CONTROL_W          = 0x02
 HIST_INGRESS_STATUS_W           = 0x03
 
-# KEY_LOC magic constant: (38 << 24) | (35 << 16) | (21 << 8) | 17
-HIST_KEY_LOC_CHANNEL_POST       = (38 << 24) | (35 << 16) | (21 << 8) | 17
+# MTS hit_type1 payload: ASIC[38:35], channel[34:30].
+HIST_KEY_LOC_CHANNEL_POST       = (38 << 24) | (35 << 16) | (34 << 8) | 30
 
 # mts_preprocessor_0 / _1
 MTS_BASE_WORDS                  = [0x09000, 0x0A000]
@@ -307,6 +308,19 @@ DOC_DIR       = BUILD_DIR / "doc"
 TABLE_PATH    = DOC_DIR / "PHASE4_5_SWEEP_TABLE.md"
 DEFAULT_SC_TOOL = REPO_ROOT / "tools" / "run_script" / "build" / "sc_tool"
 DEFAULT_LINK    = 2
+_dualport_build = "dualport" in BUILD_DIR.name
+HIST_INGRESS_SOURCE = os.environ.get(
+    "PHASE4_5_HIST_INGRESS_SOURCE",
+    "pre" if _dualport_build else "post",
+).strip().lower()
+HIST_INGRESS_BANK_COUNT = int(os.environ.get(
+    "PHASE4_5_HIST_INGRESS_BANKS",
+    "2" if _dualport_build else "1",
+))
+if HIST_INGRESS_SOURCE not in {"pre", "post"}:
+    raise RuntimeError("PHASE4_5_HIST_INGRESS_SOURCE must be 'pre' or 'post'")
+if HIST_INGRESS_BANK_COUNT < 1 or HIST_INGRESS_BANK_COUNT > 2:
+    raise RuntimeError("PHASE4_5_HIST_INGRESS_BANKS must be 1 or 2")
 
 # ============================================================================
 # Sweep matrix (inline -- no external JSON)
@@ -810,23 +824,31 @@ def configure_histogram(sc_tool: Path, link: int,
     return out
 
 
-def select_histogram_post(sc_tool: Path, link: int,
-                          log_fh: Optional[Any] = None) -> int:
-    sc_write_stable(sc_tool, link,
-                    HIST_INGRESS_BASE_WORD + HIST_INGRESS_CONTROL_W,
-                    [0x00000001], log_fh=log_fh)
-    status = 0
-    for _ in range(50):
+def select_histogram_source(sc_tool: Path, link: int,
+                            source: str = HIST_INGRESS_SOURCE,
+                            bank_count: int = HIST_INGRESS_BANK_COUNT,
+                            log_fh: Optional[Any] = None) -> dict[str, str]:
+    select_post = 1 if source == "post" else 0
+    expected = 0x3 if select_post else 0x0
+    statuses: dict[str, str] = {}
+    for bank, base in enumerate(HIST_INGRESS_BANK_BASE_WORDS[:bank_count]):
+        label = f"bank{bank}"
         try:
-            status = sc_read(sc_tool, link,
-                             HIST_INGRESS_BASE_WORD + HIST_INGRESS_STATUS_W, 1,
-                             log_fh=log_fh)[0]
+            sc_write_stable(sc_tool, link,
+                            base + HIST_INGRESS_CONTROL_W,
+                            [select_post], log_fh=log_fh)
+            status = 0
+            for _ in range(50):
+                status = sc_read(sc_tool, link,
+                                 base + HIST_INGRESS_STATUS_W, 1,
+                                 log_fh=log_fh)[0]
+                if (status & 0x7) == expected:
+                    break
+                time.sleep(0.02)
+            statuses[label] = f"0x{status:08X}"
         except RuntimeError:
-            break
-        if (status & 0x7) == 0x3:
-            break
-        time.sleep(0.02)
-    return status
+            statuses[label] = "NOT_AVAILABLE"
+    return statuses
 
 
 def configure_downstream(sc_tool: Path, link: int,
@@ -1751,8 +1773,9 @@ def dry_run_row(row: dict[str, Any], row_idx: int,
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_INTERVAL_CFG_W:05X} "
       f"0x{INTERVAL_CFG_NEVER_FIRE:08X} --quiet  # INTERVAL_CFG (never-fire; live counter accumulates full run)")
     p(f"")
-    p(f"  [5] select post-rbCAM histogram path (ingress mux)")
-    p(f"  CMD: {sc_tool} {link} write 0x{HIST_INGRESS_BASE_WORD+HIST_INGRESS_CONTROL_W:05X} 0x00000001 --quiet")
+    p(f"  [5] select {HIST_INGRESS_SOURCE} histogram path on {HIST_INGRESS_BANK_COUNT} ingress bridge(s)")
+    ingress_select_word = 1 if HIST_INGRESS_SOURCE == "post" else 0
+    p(f"  CMD: {sc_tool} {link} write 0x{HIST_INGRESS_BASE_WORD+HIST_INGRESS_CONTROL_W:05X} 0x{ingress_select_word:08X} --quiet")
     p(f"")
     p(f"  [6] downstream: MTS + ring_buffer_cam_0..7")
     for base in MTS_BASE_WORDS:
@@ -1902,8 +1925,8 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
         hist_cfg = configure_histogram(sc_tool, link, interval_clocks,
                                        log_fh=log_fh)
 
-        # Ingress mux: post-rbCAM
-        ingress_status = select_histogram_post(sc_tool, link, log_fh=log_fh)
+        # Ingress mux: pre-rbCAM for dualport builds, post-rbCAM for legacy builds.
+        ingress_status = select_histogram_source(sc_tool, link, log_fh=log_fh)
 
         # Downstream
         ds_cfg = configure_downstream(sc_tool, link, log_fh=log_fh)
@@ -1925,7 +1948,8 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
             "arb_lane_cfg":   arb_cfg,
             "emulator_cfg":   emu_cfg,
             "histogram_cfg":  hist_cfg,
-            "ingress_status": f"0x{ingress_status:08X}",
+            "ingress_source": HIST_INGRESS_SOURCE,
+            "ingress_status": ingress_status,
             "downstream_cfg": ds_cfg,
             "stage_recipe":   stage_rec,
             "snapshot_pre":   snap_pre,

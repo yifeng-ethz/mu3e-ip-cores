@@ -1,0 +1,16 @@
+key,value
+test_name,soak
+expected_hits,100000
+driver_total_hits,100000
+driver_port0_hits,50000
+driver_port1_hits,50000
+hist_fill_in_valid_cycles,50000
+fill_in_1_valid_cycles,50000
+hist_fill_in_handshakes,50000
+fill_in_1_handshakes,50000
+hist_bin_write_pulses,100000
+max_csr_total_hits,10000
+interval_pulses_seen,12
+intervals_read,10
+interval_bin_sum_total,0
+pass,1
