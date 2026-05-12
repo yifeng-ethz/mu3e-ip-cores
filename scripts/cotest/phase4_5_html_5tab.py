@@ -574,41 +574,61 @@ def _strip_delay_arrays(payload: Any) -> Any:
     return {k: v for k, v in payload.items() if k in _DELAY_STATS_KEYS}
 
 
-def gather_delay_evidence(row_id: str) -> dict[str, Any]:
-    """Collect compact delay evidence: 2 hist-bin summaries + scoreboard stats.
+_CHECKPOINT_FILES = {
+    "pre-rbCAM":   "delay_pre_rbcam.json",
+    "post-rbCAM":  "delay_post_rbcam.json",
+    "FEB egress":  "delay_feb_egress.json",
+    "OPQ ingress": "delay_opq_ingress.json",
+    "OPQ egress":  "delay_opq_egress.json",
+}
+_CHECKPOINT_PDF = {
+    "pre-rbCAM":   "pre_rbcam.pdf",
+    "post-rbCAM":  "post_rbcam.pdf",
+    "FEB egress":  "feb_egress.pdf",
+    "OPQ ingress": "opq_ingress.pdf",
+    "OPQ egress":  "opq_egress.pdf",
+}
 
-    Per-hit arrays (true_ts/measured_ts/delay_ns) are STRIPPED here because
-    each scoreboard JSON is up to 1.2 MB per row -- inlining all 194 would
-    bloat the HTML past 250 MB. The DISLIN PDFs hold the visual evidence;
-    this dict only carries the statistics used in the popup.
+
+def gather_delay_evidence(row_id: str) -> dict[str, Any]:
+    """Collect per-checkpoint delay stats for a row.
+
+    Returns: {"checkpoints": [{"name", "count", "delay_min/p05/p50/p95/max_cycles",
+                                "bound_lower", "bound_upper", "formula", "pdf_rel"}, ...]}
+
+    The 5 checkpoints (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress,
+    OPQ egress) each have their own delay distribution + math-reviewer bound
+    (per the reference image at
+    .worktrees/.../system_20260504_emulator_type0/.../report_header_sync/feb_swb_lifetime_hist.png).
+
+    Per-hit arrays are stripped to keep the inline JSON small (>250 MB inlined
+    otherwise across 194 rows).
     """
     base = RN_BASIC_REPORT_ROOT / row_id
-    out: dict[str, Any] = {}
-    for key, fname in (
-        ("hist_a", "delay_hist_bin_a.json"),
-        ("hist_b", "delay_hist_bin_b.json"),
-        ("scoreboard", "delay_scoreboard.json"),
-    ):
+    plots = base / "plots"
+    cps: list[dict[str, Any]] = []
+    for name, fname in _CHECKPOINT_FILES.items():
         path = base / fname
+        entry: dict[str, Any] = {"name": name}
         if path.is_file():
             try:
                 raw = json.loads(path.read_text(encoding="utf-8"))
-                out[key] = _strip_delay_arrays(raw)
+                entry.update(_strip_delay_arrays(raw))
             except (json.JSONDecodeError, OSError):
-                out[key] = None
-        else:
-            out[key] = None
-    # Locate DISLIN PDFs (from #106 lifetime renderer)
-    pdf_a = base / "plots" / "hist_bin_a.pdf"
-    pdf_b = base / "plots" / "hist_bin_b.pdf"
-    out["pdf_a_rel"] = str(pdf_a.relative_to(BUILD_DIR / "doc")) if pdf_a.is_file() else None
-    out["pdf_b_rel"] = str(pdf_b.relative_to(BUILD_DIR / "doc")) if pdf_b.is_file() else None
-    return out
+                pass
+        pdf = plots / _CHECKPOINT_PDF[name]
+        entry["pdf_rel"] = str(pdf.relative_to(BUILD_DIR / "doc")) if pdf.is_file() else None
+        cps.append(entry)
+    return {"checkpoints": cps}
 
 
+# Mu3e SWB frame markers per feb_data_frame.py + Mu3eSpecBook-4.pdf:
+#   K28.5 (0xBC) = preamble       (frame start)
+#   K28.4 (0x9C) = trailer        (frame end)
+#   K23.7 (0xF7) is on-wire idle ONLY -- it does NOT appear in the host
+#                 rdma rxbuffer payload, so we do not highlight it here.
 SWB_K285 = 0xBC
 SWB_K284 = 0x9C
-SWB_K237 = 0xF7
 PACKET_TYPE_LABELS: dict[int, str] = {
     0b111010: "MuPix",
     0b111000: "SciFi",
@@ -622,13 +642,62 @@ PACKET_TYPE_LABELS: dict[int, str] = {
 }
 
 
-def gather_rdma_evidence(row_id: str, max_frames: int = 8) -> dict[str, Any]:
-    """Decode the first max_frames frames from rdma_rxbuffer.bin.
+def _decode_preamble_words(words: list[int]) -> dict[str, Any]:
+    """Decode a frame's 5-word fixed header (preamble + 4 follow-up words).
 
-    Returns a dict with 'summary', 'hex_lines' (16-byte rows colored by role),
-    'frames' (list of decoded frames). Per Mu3eSpecBook-4.pdf pages 147-148:
-    K28.5 (0xBC) = frame marker, K28.4 (0x9C) = subframe marker,
-    K23.7 (0xF7) = idle. Packet-type is a 6-bit field after the marker.
+    Bit layout per feb_data_frame.py:parse_framed_stream():
+      word0 (preamble): bits 31..26 = packet_type_code (6 bits)
+                        bits 23..8  = fpga_id          (16 bits)
+                        bits 7..0   = 0xBC K28.5 marker
+      word1 (ts_high):  bits 31..0  = high 32 bits of packet_timestamp
+      word2 (ts_low):   bits 31..16 = low 16 bits of packet_timestamp
+                        bits 15..0  = package_counter
+      word3 (debug0):   bits 30..16 = debug_subheader_count (15 bits)
+                        bits 15..0  = debug_hit_count       (16 bits)
+      word4 (debug1):   bits 30..0  = send_ts_counter       (31 bits)
+    """
+    if len(words) < 5:
+        return {}
+    w0, w1, w2, w3, w4 = words[:5]
+    pkt_type = (w0 >> 26) & 0x3F
+    fpga_id = (w0 >> 8) & 0xFFFF
+    packet_timestamp = ((w1 & 0xFFFF_FFFF) << 16) | ((w2 >> 16) & 0xFFFF)
+    package_counter = w2 & 0xFFFF
+    debug_subheader_count = (w3 >> 16) & 0x7FFF
+    debug_hit_count = w3 & 0xFFFF
+    send_ts_counter = w4 & 0x7FFF_FFFF
+    return {
+        "packet_type_raw": pkt_type,
+        "packet_type_label": PACKET_TYPE_LABELS.get(pkt_type, f"unknown 0x{pkt_type:02X}"),
+        "fpga_id": fpga_id,
+        "packet_timestamp": packet_timestamp,
+        "package_counter": package_counter,
+        "debug_subheader_count": debug_subheader_count,
+        "debug_hit_count": debug_hit_count,
+        "send_ts_counter": send_ts_counter,
+    }
+
+
+def _bytes_to_words_le(buf: bytes, byte_offset: int, n_words: int) -> list[int]:
+    """Read n_words 32-bit little-endian words starting at byte_offset."""
+    out: list[int] = []
+    for i in range(n_words):
+        s = byte_offset + i * 4
+        if s + 4 > len(buf):
+            break
+        out.append(int.from_bytes(buf[s:s + 4], "little"))
+    return out
+
+
+def gather_rdma_evidence(row_id: str, max_bytes_decode: int = 16384, max_bytes_hex: int = 1024) -> dict[str, Any]:
+    """Decode ALL frames from rdma_rxbuffer.bin up to max_bytes_decode.
+
+    The host rdma rxbuffer is a 32-bit-word-aligned stream. Frame starts at
+    each K28.5 (0xBC) byte sitting at word-LSB position. Frame ends at the
+    K28.4 (0x9C) trailer byte (also word-LSB position).
+
+    The decoder reads the 5-word fixed header (per feb_data_frame.py) and
+    captures the full frame hex up to and including the trailer.
     """
     base = RN_BASIC_REPORT_ROOT / row_id
     summary_path = base / "rdma_rxbuffer_summary.json"
@@ -645,48 +714,57 @@ def gather_rdma_evidence(row_id: str, max_frames: int = 8) -> dict[str, Any]:
         data = bin_path.read_bytes()
     except OSError:
         return out
-    # Truncate large payloads
-    data = data[:8192]
-    # Find K28.5 markers (frame starts)
-    frame_starts = [i for i, b in enumerate(data) if b == SWB_K285]
+    data = data[:max_bytes_decode]
+    # Frame starts: K28.5 byte at word-LSB (offset % 4 == 0)
+    frame_starts = [i for i in range(0, len(data), 4) if data[i] == SWB_K285]
+    # Trailer ends: K28.4 byte at word-LSB
+    trailer_offsets = set(i for i in range(0, len(data), 4) if data[i] == SWB_K284)
+
     frames: list[dict[str, Any]] = []
-    for fi, start in enumerate(frame_starts[:max_frames]):
-        end = frame_starts[fi + 1] if (fi + 1) < len(frame_starts) else min(start + 256, len(data))
-        chunk = data[start:end]
-        # Packet type: bits 0..5 of byte after marker (rough; spec has the exact mapping)
-        pkt_type = (chunk[1] >> 2) & 0x3F if len(chunk) >= 2 else 0
-        label = PACKET_TYPE_LABELS.get(pkt_type, f"unknown 0x{pkt_type:02X}")
-        sub_offsets = [i for i, b in enumerate(chunk) if b == SWB_K284]
+    for fi, start in enumerate(frame_starts):
+        next_start = frame_starts[fi + 1] if (fi + 1) < len(frame_starts) else len(data)
+        # Trailer for this frame: nearest K28.4 (word-aligned) in [start+4, next_start)
+        trailer_pos = None
+        for t in range(start + 4, next_start, 4):
+            if t in trailer_offsets:
+                trailer_pos = t
+                break
+        frame_end = (trailer_pos + 4) if trailer_pos is not None else next_start
+        chunk = data[start:frame_end]
+        words = _bytes_to_words_le(data, start, 5)
+        hdr = _decode_preamble_words(words)
         frames.append({
             "frame_idx": fi,
             "byte_offset": start,
             "length": len(chunk),
-            "packet_type_raw": pkt_type,
-            "packet_type_label": label,
-            "subframe_count": len(sub_offsets),
             "hex": chunk.hex(),
+            "trailer_offset": trailer_pos,
+            "has_trailer": trailer_pos is not None,
+            **hdr,
         })
-    # Compact hex representation: per row a single space-joined hex string
-    # plus a parallel role string ('d'=data, '5'=k285, '4'=k284, '7'=k237).
-    # First 256 bytes is plenty for the popup; the in-page search still works.
+
+    # 16-byte-per-row colorized hex of the first max_bytes_hex bytes for the
+    # global hex pane. K23.7 is on-wire idle only and never lands in the host
+    # rxbuffer, so we no longer paint it.
     hex_lines: list[dict[str, Any]] = []
-    for off in range(0, min(len(data), 256), 16):
+    for off in range(0, min(len(data), max_bytes_hex), 16):
         row_bytes = data[off:off + 16]
         hex_str = "".join(f"{b:02x}" for b in row_bytes)
-        roles = []
-        for byte in row_bytes:
-            if byte == SWB_K285:
-                roles.append("5")
-            elif byte == SWB_K284:
-                roles.append("4")
-            elif byte == SWB_K237:
-                roles.append("7")
-            else:
-                roles.append("d")
+        roles: list[str] = []
+        for byte_idx, byte in enumerate(row_bytes):
+            absolute = off + byte_idx
+            role = "d"
+            if (absolute % 4) == 0:
+                if byte == SWB_K285:
+                    role = "5"
+                elif byte == SWB_K284:
+                    role = "4"
+            roles.append(role)
         hex_lines.append({"o": off, "h": hex_str, "r": "".join(roles)})
     out["hex_lines"] = hex_lines
     out["frames"] = frames
-    out["bytes_total_truncated_at"] = min(len(data), 256)
+    out["bytes_total_truncated_at"] = min(len(data), max_bytes_hex)
+    out["frames_decoded"] = len(frames)
     return out
 
 
@@ -758,40 +836,51 @@ def dummy_evidence_RN_BASIC_001() -> dict[str, Any]:
         "feb_frame_assembly_0": {"actual_hits": 62500},
         "feb_frame_assembly_1": {"actual_hits": 62500},
     }
-    # delay evidence - 5-checkpoint percentile stats per the math review
+    # delay evidence - 5 per-checkpoint percentile stats per the math review
+    # Each checkpoint has its own min/p05/p50/p95/max with the math-reviewer bound.
     delay = {
-        "hist_a": {"count": 62500, "delay_min_cycles": 27, "delay_p05_cycles": 118,
-                    "delay_p50_cycles": 527, "delay_p95_cycles": 941, "delay_max_cycles": 1040,
-                    "checkpoint": "pre-rbCAM", "bound_lower": 0, "bound_upper": 2000},
-        "hist_b": {"count": 62500, "delay_min_cycles": 2014, "delay_p05_cycles": 2022,
-                    "delay_p50_cycles": 2098, "delay_p95_cycles": 2174, "delay_max_cycles": 2196,
-                    "checkpoint": "post-rbCAM", "bound_lower": 2000, "bound_upper": 2200},
-        "scoreboard": {"count": 125000, "delay_mean_ns": 4216.4, "delay_stddev_ns": 88.7,
-                       "delay_min_cycles": 27, "delay_p05_cycles": 118,
-                       "delay_p50_cycles": 527, "delay_p95_cycles": 941, "delay_max_cycles": 95829,
-                       "checkpoint": "all", "bound_lower": 0, "bound_upper": 99133.5},
-        "pdf_a_rel": None,
-        "pdf_b_rel": None,
-    }
-    # rdma evidence - hex sample + decoded frames
-    rdma = {
-        "summary": {"bytes_total": 250000, "record_count": 124998,
-                    "first_record_hex": "bcfa00010001006400000000",
-                    "last_record_hex": "bcfa00fa01006400dd5e1f9c",
-                    "record_size_avg": 8.0},
-        "frames": [
-            {"frame_idx": 0, "byte_offset": 0, "length": 64, "packet_type_raw": 0b111000,
-             "packet_type_label": "SciFi", "subframe_count": 4,
-             "hex": "bce8000000010064dead0064bee70064cafe00649c0801640102016401030164010401649c0805640106016401070164010801649c0809640a0a0b0c"},
-            {"frame_idx": 1, "byte_offset": 64, "length": 64, "packet_type_raw": 0b111000,
-             "packet_type_label": "SciFi", "subframe_count": 4,
-             "hex": "bce8000000020064feed0064c0de0064baad00649c0801640202026402030264020402649c0805640206026402070264020802649c08096402"},
-            {"frame_idx": 2, "byte_offset": 128, "length": 56, "packet_type_raw": 0b111000,
-             "packet_type_label": "SciFi", "subframe_count": 3,
-             "hex": "bce80000000300641c1f0064b0bc0064ace100649c08016403030364030403649c0805640306036403070364030803649c08096403"},
+        "checkpoints": [
+            {"name": "pre-rbCAM",   "count": 125000,
+             "delay_min_cycles": 27,     "delay_p05_cycles": 118,
+             "delay_p50_cycles": 527,    "delay_p95_cycles": 941,
+             "delay_max_cycles": 1040,   "bound_lower": 0,      "bound_upper": 2000,
+             "formula": "D_pre = wait_910(hit_ts) + s(q) + 18 (virtual MuTRiG)"},
+            {"name": "post-rbCAM",  "count": 125000,
+             "delay_min_cycles": 2014,   "delay_p05_cycles": 2022,
+             "delay_p50_cycles": 2098,   "delay_p95_cycles": 2174,
+             "delay_max_cycles": 2196,   "bound_lower": 2000,   "bound_upper": 2200,
+             "formula": "D_post = (GTS_post - ts_hit) mod 8192, window [2000,2200]"},
+            {"name": "FEB egress",  "count": 125000,
+             "delay_min_cycles": 2342,   "delay_p05_cycles": 3344,
+             "delay_p50_cycles": 3778,   "delay_p95_cycles": 4268,
+             "delay_max_cycles": 4173,   "bound_lower": 2049,   "bound_upper": 6143,
+             "formula": "D_feb <= 2F - p + 20 + eps_clk"},
+            {"name": "OPQ ingress", "count": 125000,
+             "delay_min_cycles": 2343,   "delay_p05_cycles": 3345,
+             "delay_p50_cycles": 3779,   "delay_p95_cycles": 4269,
+             "delay_max_cycles": 4174,   "bound_lower": 2049,   "bound_upper": 6159,
+             "formula": "D_ing = D_feb + adapter_sync"},
+            {"name": "OPQ egress",  "count": 124998,
+             "delay_min_cycles": 5005,   "delay_p05_cycles": 9290,
+             "delay_p50_cycles": 50754,  "delay_p95_cycles": 92219,
+             "delay_max_cycles": 95829,  "bound_lower": 4356,   "bound_upper": 99133.5,
+             "formula": "D_opq = D_ing + W_n, W_n = max(0, W_(n-1) + S_n - A_n)"},
         ],
-        "hex_lines": _dummy_hex_lines(),
-        "bytes_total_truncated_at": 256,
+        "pdf_pre_rbcam_rel": None,
+        "pdf_post_rbcam_rel": None,
+        "pdf_feb_egress_rel": None,
+        "pdf_opq_ingress_rel": None,
+        "pdf_opq_egress_rel": None,
+    }
+    # rdma evidence - synthetic rxbuffer with 5 properly-formatted frames so
+    # the decoder's K28.5 + 4-header-word + K28.4 trailer scan finds them
+    rdma_buf = _dummy_rdma_buffer(num_frames=5)
+    rdma = gather_rdma_evidence_from_bytes(rdma_buf)
+    rdma["summary"] = {
+        "bytes_total": 250000, "record_count": 124998,
+        "first_record_hex": rdma_buf[:24].hex(),
+        "last_record_hex": rdma_buf[-24:].hex() if len(rdma_buf) >= 24 else "",
+        "record_size_avg": 8.0,
     }
     # scoreboard evidence - per-checkpoint monitor table
     scoreboard = {
@@ -849,42 +938,100 @@ def dummy_evidence_RN_BASIC_001() -> dict[str, Any]:
     }
 
 
-def _dummy_hex_lines() -> list[dict[str, Any]]:
-    """Synthesise 16 rows of 16-byte rdma hex with K28.5/K28.4 markers placed
-    at frame and subframe boundaries to demonstrate the colorized viewer."""
-    raw = bytearray(256)
-    # Plant frames at offset 0, 64, 128 with K28.5 (0xBC); subframes at +16, +32, +48
-    for fbase in (0, 64, 128):
-        raw[fbase] = SWB_K285
-        raw[fbase + 1] = 0xE8  # 0b111010xx -> packet_type bits in 0..5
-        raw[fbase + 16] = SWB_K284
-        raw[fbase + 32] = SWB_K284
-        raw[fbase + 48] = SWB_K284
-    # Idle bytes after the last frame
-    for i in range(184, 256):
-        if (i % 8) == 0:
-            raw[i] = SWB_K237
-        else:
-            raw[i] = (0x40 + (i & 0x0F))
-    # Fill payload positions with a pattern so search is meaningful
-    for i in range(256):
-        if raw[i] == 0:
-            raw[i] = ((i * 31) & 0xFF) or 0x42
-    lines: list[dict[str, Any]] = []
-    for off in range(0, 256, 16):
-        chunk = bytes(raw[off:off + 16])
-        roles = []
-        for b in chunk:
-            if b == SWB_K285:
-                roles.append("5")
-            elif b == SWB_K284:
-                roles.append("4")
-            elif b == SWB_K237:
-                roles.append("7")
-            else:
-                roles.append("d")
-        lines.append({"o": off, "h": chunk.hex(), "r": "".join(roles)})
-    return lines
+def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
+                        package_counter: int, debug_subheader_count: int,
+                        debug_hit_count: int, send_ts_counter: int,
+                        payload_words: int) -> bytes:
+    """Build a 32-bit-aligned little-endian mu3e frame: K28.5 preamble +
+    4 fixed header words + `payload_words` placeholder words + K28.4 trailer.
+
+    Bit layout per feb_data_frame.py:parse_framed_stream():
+      word0 (preamble): pkt_type[5:0]<<26 | fpga_id[15:0]<<8 | 0xBC
+      word1 (ts_high):  upper 32 bits of packet_timestamp
+      word2 (ts_low):   (packet_timestamp[15:0] << 16) | package_counter[15:0]
+      word3 (debug0):   (debug_subheader_count[14:0] << 16) | debug_hit_count[15:0]
+      word4 (debug1):   send_ts_counter[30:0]
+      ...payload_words placeholder words...
+      wordN (trailer):  0x9C (K28.4) in LSB
+    """
+    w0 = ((packet_type & 0x3F) << 26) | ((fpga_id & 0xFFFF) << 8) | SWB_K285
+    w1 = (packet_timestamp >> 16) & 0xFFFF_FFFF
+    w2 = ((packet_timestamp & 0xFFFF) << 16) | (package_counter & 0xFFFF)
+    w3 = ((debug_subheader_count & 0x7FFF) << 16) | (debug_hit_count & 0xFFFF)
+    w4 = send_ts_counter & 0x7FFF_FFFF
+    parts = [w0, w1, w2, w3, w4]
+    # Placeholder per-hit payload words (just patterned data so search demos work)
+    for k in range(payload_words):
+        parts.append(0xDEAD_0000 | (k & 0xFFFF))
+    # Trailer word: K28.4 in LSB
+    trailer = (send_ts_counter & 0xFFFF_FF00) | SWB_K284
+    parts.append(trailer)
+    buf = bytearray()
+    for w in parts:
+        buf.extend(int(w).to_bytes(4, "little"))
+    return bytes(buf)
+
+
+def _dummy_rdma_buffer(num_frames: int = 5) -> bytes:
+    """Build a synthetic rdma rxbuffer with `num_frames` mu3e frames."""
+    buf = bytearray()
+    base_ts = 0x0000_0001_2345_0000
+    for fi in range(num_frames):
+        buf.extend(_build_frame_bytes(
+            packet_type=0b111000,        # SciFi
+            fpga_id=0x00A5,
+            packet_timestamp=base_ts + fi * 8192,
+            package_counter=fi,
+            debug_subheader_count=4,
+            debug_hit_count=8 + (fi % 4) * 2,
+            send_ts_counter=0x1234_5600 + fi * 16,
+            payload_words=8 + (fi % 4) * 2,
+        ))
+    return bytes(buf)
+
+
+def gather_rdma_evidence_from_bytes(data: bytes, max_bytes_hex: int = 1024) -> dict[str, Any]:
+    """Same as gather_rdma_evidence but operates on a raw byte buffer."""
+    out: dict[str, Any] = {"summary": None, "hex_lines": [], "frames": []}
+    frame_starts = [i for i in range(0, len(data), 4) if data[i] == SWB_K285]
+    trailer_offsets = set(i for i in range(0, len(data), 4) if data[i] == SWB_K284)
+    frames: list[dict[str, Any]] = []
+    for fi, start in enumerate(frame_starts):
+        next_start = frame_starts[fi + 1] if (fi + 1) < len(frame_starts) else len(data)
+        trailer_pos = None
+        for t in range(start + 4, next_start, 4):
+            if t in trailer_offsets:
+                trailer_pos = t
+                break
+        frame_end = (trailer_pos + 4) if trailer_pos is not None else next_start
+        chunk = data[start:frame_end]
+        words = _bytes_to_words_le(data, start, 5)
+        hdr = _decode_preamble_words(words)
+        frames.append({
+            "frame_idx": fi, "byte_offset": start, "length": len(chunk),
+            "hex": chunk.hex(), "trailer_offset": trailer_pos,
+            "has_trailer": trailer_pos is not None, **hdr,
+        })
+    hex_lines: list[dict[str, Any]] = []
+    for off in range(0, min(len(data), max_bytes_hex), 16):
+        row_bytes = data[off:off + 16]
+        hex_str = "".join(f"{b:02x}" for b in row_bytes)
+        roles: list[str] = []
+        for byte_idx, byte in enumerate(row_bytes):
+            absolute = off + byte_idx
+            role = "d"
+            if (absolute % 4) == 0:
+                if byte == SWB_K285:
+                    role = "5"
+                elif byte == SWB_K284:
+                    role = "4"
+            roles.append(role)
+        hex_lines.append({"o": off, "h": hex_str, "r": "".join(roles)})
+    out["hex_lines"] = hex_lines
+    out["frames"] = frames
+    out["bytes_total_truncated_at"] = min(len(data), max_bytes_hex)
+    out["frames_decoded"] = len(frames)
+    return out
 
 
 def basic_rows_html() -> str:
@@ -952,7 +1099,10 @@ def basic_rows_html() -> str:
             f'<span class="ev-pending">{run_len_str}</span>'
         )
         counter_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="counter">View</button>' if counter_ev else '<span class="ev-pending">pending</span>'
-        delay_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="delay">View</button>' if any(delay_ev.get(k) is not None for k in ("hist_a", "hist_b", "scoreboard")) else '<span class="ev-pending">pending</span>'
+        delay_has_data = bool(delay_ev.get("checkpoints")) and any(
+            (cp.get("delay_max_cycles") is not None) for cp in delay_ev.get("checkpoints", [])
+        )
+        delay_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="delay">View</button>' if delay_has_data else '<span class="ev-pending">pending</span>'
         rdma_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="rdma">View</button>' if rdma_ev.get("frames") else '<span class="ev-pending">pending</span>'
         sb_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="scoreboard">View</button>' if sb_ev else '<span class="ev-pending">pending</span>'
         cells = [
@@ -1266,7 +1416,6 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 .hex-row .byte { padding: 0 1px; border-radius: 2px; }
 .hex-row .byte.k285 { background: #ffd17a; color: #5a3300; font-weight: 700; }
 .hex-row .byte.k284 { background: #b3e0b6; color: #1f4f23; font-weight: 700; }
-.hex-row .byte.k237 { background: #e0e0e0; color: #555; }
 .hex-row .byte.match { outline: 2px solid #d24a4a; outline-offset: -1px; }
 .legend { font-size: 11px; color: var(--muted); margin: 4px 0 10px; }
 .legend .pill {
@@ -1275,7 +1424,75 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 }
 .legend .k285 { background: #ffd17a; color: #5a3300; }
 .legend .k284 { background: #b3e0b6; color: #1f4f23; }
-.legend .k237 { background: #e0e0e0; color: #555; }
+
+/* Scoreboard table: ensure numeric cells right-align under their headers */
+.sb-table th, .sb-table td { padding: 6px 12px; vertical-align: middle; }
+.sb-table th { text-align: center; background: #f0eadf; }
+.sb-table th.left, .sb-table td.left { text-align: left; }
+.sb-table td.num {
+  text-align: right; font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
+}
+.sb-table tr.total-row td { background: #f4ecd9; font-weight: 700; border-top: 2px solid var(--accent); }
+.sb-table td.zero { color: #2d6f73; }
+.sb-table td.nonzero { color: #b54a2a; font-weight: 700; }
+
+/* Per-checkpoint delay panels */
+.cp-panel {
+  background: #fffaf1; border: 1px solid var(--line); border-radius: 4px;
+  padding: 10px 12px; margin: 8px 0;
+}
+.cp-panel h4 { margin: 0 0 6px; font-size: 13px; }
+.cp-panel .formula {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
+  font-size: 11px; color: var(--muted); margin: 0 0 8px;
+}
+.cp-stats {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  font-size: 12px; margin: 6px 0;
+}
+.cp-stats .lbl { color: var(--muted); }
+.cp-stats .val {
+  font-variant-numeric: tabular-nums; font-weight: 650;
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
+}
+.cp-status {
+  display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 700;
+}
+.cp-status.pass { background: #b3e0b6; color: #1f4f23; }
+.cp-status.fail { background: #f3b6a3; color: #7a1f1f; }
+.cp-status.tbd  { background: #e8e1d0; color: #6d665d; }
+
+/* Frame details: collapsible per-frame block with monospace hex */
+.frame-list { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.frame-card {
+  background: #fffaf1; border: 1px solid var(--line); border-radius: 4px;
+}
+.frame-card > summary {
+  cursor: pointer; padding: 8px 12px; font-weight: 650; font-size: 12px;
+  display: flex; flex-wrap: wrap; gap: 18px; align-items: center;
+}
+.frame-card > summary .tag {
+  padding: 1px 6px; border-radius: 3px; font-weight: 700; font-size: 11px;
+}
+.frame-card > summary .tag.scifi { background: #d6e7ff; color: #1f3f6a; }
+.frame-card > summary .tag.mupix { background: #ffd1c2; color: #743311; }
+.frame-card > summary .tag.tile  { background: #e0ccff; color: #3f1f6a; }
+.frame-card > summary .tag.other { background: #e0e0e0; color: #444; }
+.frame-card[open] > summary { border-bottom: 1px solid var(--line); background: var(--accent-weak); }
+.frame-detail { padding: 10px 12px; }
+.frame-fields {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 16px;
+  font-size: 12px; font-variant-numeric: tabular-nums;
+  margin-bottom: 10px;
+}
+.frame-fields .key { color: var(--muted); }
+.frame-fields .val { font-family: ui-monospace, "Cascadia Mono", Menlo, monospace; }
+.frame-hex {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
+  font-size: 11px; background: #f7f1e3; padding: 8px 10px;
+  border-radius: 3px; line-height: 1.5; overflow-x: auto;
+}
 """
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     modal_html = """
@@ -1364,22 +1581,42 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     var notes = data.notes || '';
     var srcCount = data.source_hit_count;
     var monitors = data.monitors || [];
-    var rows = monitors.map(function(m){
-      return [
-        m.checkpoint,
-        m.total_hits != null ? m.total_hits : '',
-        m.ghost_hits != null ? m.ghost_hits : '',
-        m.broken_hits != null ? m.broken_hits : '',
-        m.missing_hits != null ? m.missing_hits : '',
-      ];
+    // Build a dedicated sb-table with explicit column classes so numbers
+    // right-align under their numeric column headers and text stays left-aligned.
+    var html = '<p><strong>Scoreboard - ' + rid + ' (sim-only)</strong></p>'
+             + '<p class="legend">' + notes + '</p>'
+             + '<table class="sb-table dense">'
+             + '<thead><tr>'
+             +   '<th class="left">monitor / checkpoint</th>'
+             +   '<th>total hits at checkpoint</th>'
+             +   '<th>ghost hits</th>'
+             +   '<th>broken hits</th>'
+             +   '<th>missing hits</th>'
+             + '</tr></thead><tbody>';
+    function cellClass(v){
+      if (v == null || v === '') return 'num';
+      var n = Number(v);
+      if (isNaN(n)) return 'num';
+      return (n === 0) ? 'num zero' : 'num nonzero';
+    }
+    monitors.forEach(function(m){
+      html += '<tr>'
+           +   '<td class="left">' + (m.checkpoint || '') + '</td>'
+           +   '<td class="num">' + fmtNum(m.total_hits) + '</td>'
+           +   '<td class="' + cellClass(m.ghost_hits) + '">' + fmtNum(m.ghost_hits) + '</td>'
+           +   '<td class="' + cellClass(m.broken_hits) + '">' + fmtNum(m.broken_hits) + '</td>'
+           +   '<td class="' + cellClass(m.missing_hits) + '">' + fmtNum(m.missing_hits) + '</td>'
+           + '</tr>';
     });
-    var summaryRow = ['<strong>TOTAL</strong>', srcCount != null ? fmtNum(srcCount) + ' (source)' : '',
-                       fmtNum(data.ghost_total), fmtNum(data.broken_total), fmtNum(data.missing_total)];
-    rows.push(summaryRow);
-    var header = 'Scoreboard - ' + rid + ' (sim-only)';
-    return '<p><strong>' + header + '</strong></p>'
-         + '<p class="legend">' + notes + '</p>'
-         + asTable(['monitor / checkpoint', 'total hits at checkpoint', 'ghost hits', 'broken hits', 'missing hits'], rows);
+    html += '<tr class="total-row">'
+         +   '<td class="left">TOTAL (vs source true-hit-list)</td>'
+         +   '<td class="num">' + (srcCount != null ? fmtNum(srcCount) + ' source' : '-') + '</td>'
+         +   '<td class="' + cellClass(data.ghost_total) + '">' + fmtNum(data.ghost_total) + '</td>'
+         +   '<td class="' + cellClass(data.broken_total) + '">' + fmtNum(data.broken_total) + '</td>'
+         +   '<td class="' + cellClass(data.missing_total) + '">' + fmtNum(data.missing_total) + '</td>'
+         + '</tr>';
+    html += '</tbody></table>';
+    return html;
   }
   function renderRunlog(rid, data){
     if (!data) return '<p class="ev-pending">No run log found for ' + rid + '.</p>';
@@ -1420,62 +1657,119 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     return wrapper;
   }
   function renderDelay(rid, data){
-    if (!data) return '<p class="ev-pending">No delay evidence found for ' + rid + '.</p>';
-    var html = '<p>Two hist-IP delay distributions per the dualport histogram setup. Renderer: DISLIN only (matplotlib/seaborn/plotly disallowed by checker).</p>';
-    var sb = data.scoreboard || {};
-    var stats = 'count           : ' + (sb.count || '-') + '\\n'
-              + 'delay_min_cycles: ' + (sb.delay_min_cycles != null ? sb.delay_min_cycles : '-') + '\\n'
-              + 'delay_p05_cycles: ' + (sb.delay_p05_cycles != null ? sb.delay_p05_cycles : '-') + '\\n'
-              + 'delay_p50_cycles: ' + (sb.delay_p50_cycles != null ? sb.delay_p50_cycles : '-') + '\\n'
-              + 'delay_p95_cycles: ' + (sb.delay_p95_cycles != null ? sb.delay_p95_cycles : '-') + '\\n'
-              + 'delay_max_cycles: ' + (sb.delay_max_cycles != null ? sb.delay_max_cycles : '-') + '\\n'
-              + 'range (max-min) : ' + ((sb.delay_max_cycles != null && sb.delay_min_cycles != null) ? (sb.delay_max_cycles - sb.delay_min_cycles) : '-');
-    html += '<h3>Scoreboard percentiles (cycles, 8 ns)</h3><div class="delay-stats">' + stats + '</div>';
-    if (data.pdf_a_rel) {
-      html += '<h3>Hist bin A (DISLIN PDF)</h3><embed class="delay-pdf" src="' + data.pdf_a_rel + '" type="application/pdf">';
-    } else {
-      html += '<h3>Hist bin A</h3><p class="ev-pending">DISLIN PDF pending. Expected at <code>RN.BASIC.NNN/plots/hist_bin_a.pdf</code>.</p>';
+    if (!data || !data.checkpoints || data.checkpoints.length === 0) {
+      return '<p class="ev-pending">No delay evidence found for ' + rid + '.</p>';
     }
-    if (data.pdf_b_rel) {
-      html += '<h3>Hist bin B (DISLIN PDF)</h3><embed class="delay-pdf" src="' + data.pdf_b_rel + '" type="application/pdf">';
-    } else {
-      html += '<h3>Hist bin B</h3><p class="ev-pending">DISLIN PDF pending. Expected at <code>RN.BASIC.NNN/plots/hist_bin_b.pdf</code>.</p>';
-    }
+    var html = '<p class="legend">Per-checkpoint hit-lifetime distributions, 8 ns cycle units. '
+             + 'Bounds per math review; pass criterion = min &ge; bound_lower AND max &le; bound_upper. '
+             + 'Renderer: DISLIN only (matplotlib/seaborn/plotly disallowed).</p>';
+    data.checkpoints.forEach(function(cp){
+      var name = cp.name || '(unnamed)';
+      var lo = cp.bound_lower, hi = cp.bound_upper;
+      var mn = cp.delay_min_cycles, mx = cp.delay_max_cycles;
+      var status = 'tbd', label = 'tbd';
+      if (mn != null && mx != null && lo != null && hi != null){
+        if (mn >= lo && mx <= hi){ status = 'pass'; label = 'PASS'; }
+        else { status = 'fail'; label = 'FAIL'; }
+      }
+      var formula = cp.formula || '';
+      var pdf = cp.pdf_rel || null;
+      html += '<div class="cp-panel">'
+            + '<h4>' + name + ' <span class="cp-status ' + status + '">' + label + '</span></h4>'
+            + (formula ? '<div class="formula">' + formula + '</div>' : '')
+            + '<div class="cp-stats">'
+            +   '<div class="lbl">count</div><div class="val">' + fmtNum(cp.count) + '</div>'
+            +   '<div class="lbl">min</div><div class="val">' + fmtNum(mn) + '</div>'
+            +   '<div class="lbl">p05</div><div class="val">' + fmtNum(cp.delay_p05_cycles) + '</div>'
+            +   '<div class="lbl">p50</div><div class="val">' + fmtNum(cp.delay_p50_cycles) + '</div>'
+            +   '<div class="lbl">p95</div><div class="val">' + fmtNum(cp.delay_p95_cycles) + '</div>'
+            +   '<div class="lbl">max</div><div class="val">' + fmtNum(mx) + '</div>'
+            +   '<div class="lbl">bound</div><div class="val">[' + fmtNum(lo) + ', ' + fmtNum(hi) + ']</div>'
+            + '</div>';
+      if (pdf) {
+        html += '<embed class="delay-pdf" src="' + pdf + '" type="application/pdf">';
+      } else {
+        html += '<p class="ev-pending">DISLIN PDF pending; expected at <code>plots/' + (name.replace(/[^a-z]/gi,"_").toLowerCase()) + '.pdf</code> once #106 lifetime renderer finishes.</p>';
+      }
+      html += '</div>';
+    });
     return html;
   }
   function renderRdma(rid, data){
     if (!data) return '<p class="ev-pending">No rdma evidence found for ' + rid + '.</p>';
     var summary = data.summary || {};
-    var sumStr = 'bytes_total        : ' + (summary.bytes_total != null ? summary.bytes_total : '-') + '\\n'
-               + 'record_count       : ' + (summary.record_count != null ? summary.record_count : '-') + '\\n'
-               + 'record_size_avg    : ' + (summary.record_size_avg != null ? summary.record_size_avg : '-') + '\\n'
-               + 'frames decoded here: ' + (data.frames ? data.frames.length : 0) + '\\n'
-               + 'hex sample bytes   : ' + (data.bytes_total_truncated_at != null ? data.bytes_total_truncated_at : '-');
+    var frames = data.frames || [];
+    var sumStr = 'bytes_total          : ' + (summary.bytes_total != null ? summary.bytes_total : '-') + '\\n'
+               + 'record_count         : ' + (summary.record_count != null ? summary.record_count : '-') + '\\n'
+               + 'record_size_avg      : ' + (summary.record_size_avg != null ? summary.record_size_avg : '-') + '\\n'
+               + 'frames decoded       : ' + frames.length + '\\n'
+               + 'hex sample bytes     : ' + (data.bytes_total_truncated_at != null ? data.bytes_total_truncated_at : '-');
     var html = '<h3>rdma rxbuffer summary</h3><div class="delay-stats">' + sumStr + '</div>'
              + '<div class="legend">Legend:'
-             + '<span class="pill k285">BC = K28.5 frame</span>'
-             + '<span class="pill k284">9C = K28.4 subframe</span>'
-             + '<span class="pill k237">F7 = K23.7 idle</span></div>'
+             + '<span class="pill k285">0xBC = K28.5 preamble</span>'
+             + '<span class="pill k284">0x9C = K28.4 trailer</span>'
+             + ' (K23.7 idle is on-wire only and not present in the rxbuffer payload)</div>'
              + '<div class="rdma-controls">'
-             + '<label>Search (hex pattern e.g. <code>bc 90</code>): </label>'
-             + '<input type="text" id="rdma-search" placeholder="bc 90">'
+             + '<label>Search hex pattern (e.g. <code>bc</code> or <code>9c</code>): </label>'
+             + '<input type="text" id="rdma-search" placeholder="bc">'
              + '<label>Range start: </label><input type="number" id="rdma-start" value="0" min="0" style="width:80px">'
-             + '<label>length: </label><input type="number" id="rdma-len" value="512" min="16" max="8192" style="width:80px">'
+             + '<label>length: </label><input type="number" id="rdma-len" value="1024" min="16" max="65536" style="width:80px">'
              + '<button class="ev-btn" id="rdma-apply">Apply</button>'
              + '</div>';
-    if (data.frames && data.frames.length) {
-      html += '<h3>Decoded frames (first ' + data.frames.length + ' K28.5 boundaries)</h3>';
-      data.frames.forEach(function(f){
-        html += '<details class="rdma-frame" open><summary>Frame ' + f.frame_idx
-              + ' &mdash; offset 0x' + f.byte_offset.toString(16)
-              + ' &mdash; type 0x' + f.packet_type_raw.toString(16)
-              + ' (' + f.packet_type_label + ')'
-              + ' &mdash; ' + f.subframe_count + ' subframes'
-              + '</summary><div class="meta">length ' + f.length + ' bytes; raw first 48 hex: '
-              + f.hex.slice(0, 96) + '</div></details>';
+    if (frames.length) {
+      html += '<h3>Decoded frames (' + frames.length + ' total, click any to expand full hex)</h3><div class="frame-list">';
+      frames.forEach(function(f){
+        var ptl = (f.packet_type_label || '').toLowerCase();
+        var tagCls = 'other';
+        if (ptl.indexOf('scifi') >= 0) tagCls = 'scifi';
+        else if (ptl.indexOf('mupix') >= 0) tagCls = 'mupix';
+        else if (ptl.indexOf('tile') >= 0) tagCls = 'tile';
+        var ts = (f.packet_timestamp != null) ? ('0x' + f.packet_timestamp.toString(16).padStart(12, '0')) : '-';
+        var pkgc = (f.package_counter != null) ? f.package_counter : '-';
+        var summary_line =
+            '<span>Frame ' + f.frame_idx + '</span>'
+          + '<span class="tag ' + tagCls + '">' + (f.packet_type_label || 'unknown') + '</span>'
+          + '<span>off 0x' + f.byte_offset.toString(16) + '</span>'
+          + '<span>len ' + f.length + 'B</span>'
+          + '<span>fpga 0x' + ((f.fpga_id != null) ? f.fpga_id.toString(16).padStart(4,'0') : '-') + '</span>'
+          + '<span>pkts ts ' + ts + '</span>'
+          + '<span>pkg# ' + pkgc + '</span>'
+          + '<span>sub ' + (f.debug_subheader_count != null ? f.debug_subheader_count : '-') + '</span>'
+          + '<span>hits ' + (f.debug_hit_count != null ? f.debug_hit_count : '-') + '</span>'
+          + '<span>trailer ' + (f.has_trailer ? '0x' + (f.trailer_offset != null ? f.trailer_offset.toString(16) : '?') : 'MISSING') + '</span>';
+        // Detail body: decoded field grid + full hex split per 16-byte row
+        var fields =
+            '<div class="key">packet_type</div><div class="val">0x' + (f.packet_type_raw != null ? f.packet_type_raw.toString(16) : '?') + ' (' + (f.packet_type_label || '?') + ')</div>'
+          + '<div class="key">fpga_id</div><div class="val">0x' + ((f.fpga_id != null) ? f.fpga_id.toString(16).padStart(4,'0') : '-') + '</div>'
+          + '<div class="key">packet_timestamp</div><div class="val">' + ts + ' (' + (f.packet_timestamp != null ? f.packet_timestamp : '-') + ')</div>'
+          + '<div class="key">package_counter</div><div class="val">' + pkgc + '</div>'
+          + '<div class="key">debug_subheader_count</div><div class="val">' + (f.debug_subheader_count != null ? f.debug_subheader_count : '-') + '</div>'
+          + '<div class="key">debug_hit_count</div><div class="val">' + (f.debug_hit_count != null ? f.debug_hit_count : '-') + '</div>'
+          + '<div class="key">send_ts_counter</div><div class="val">' + (f.send_ts_counter != null ? f.send_ts_counter : '-') + '</div>'
+          + '<div class="key">byte_offset</div><div class="val">0x' + f.byte_offset.toString(16) + ' = ' + f.byte_offset + '</div>'
+          + '<div class="key">length</div><div class="val">' + f.length + ' bytes</div>'
+          + '<div class="key">trailer</div><div class="val">' + (f.has_trailer ? ('present at 0x' + f.trailer_offset.toString(16)) : 'MISSING') + '</div>';
+        // Render full hex split in rows of 16 bytes
+        var hex = f.hex || '';
+        var hexBlock = '';
+        for (var off = 0; off < hex.length; off += 32) {
+          var rowHex = hex.slice(off, off + 32);
+          var abs = (f.byte_offset || 0) + (off / 2);
+          var cells = '';
+          for (var b = 0; b < rowHex.length; b += 2) {
+            cells += rowHex.slice(b, b + 2) + ' ';
+          }
+          hexBlock += '0x' + abs.toString(16).padStart(4,'0') + ': ' + cells + '\\n';
+        }
+        html += '<details class="frame-card"><summary>' + summary_line + '</summary>'
+              + '<div class="frame-detail">'
+              + '<div class="frame-fields">' + fields + '</div>'
+              + '<div class="frame-hex">' + hexBlock + '</div>'
+              + '</div></details>';
       });
+      html += '</div>';
     }
-    html += '<h3>Raw rxbuffer hex (first ' + (data.hex_lines || []).length + ' rows of 16 bytes)</h3>'
+    html += '<h3>Raw rxbuffer hex (' + (data.hex_lines || []).length * 16 + ' bytes shown, K28.5/K28.4 highlighted at word-LSB boundaries)</h3>'
           + '<div id="rdma-hex-pane"></div>';
     var wrapper = document.createElement('div');
     wrapper.innerHTML = html;
@@ -1483,7 +1777,7 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     function paint(filterPattern, startByte, lenBytes){
       pane.innerHTML = '';
       var pattern = (filterPattern || '').toLowerCase().replace(/[^0-9a-f]/g, '');
-      var roleMap = {'5':'k285', '4':'k284', '7':'k237', 'd':'data'};
+      var roleMap = {'5':'k285', '4':'k284', 'd':'data'};
       (data.hex_lines || []).forEach(function(row){
         if (row.o < startByte) return;
         if (row.o >= startByte + lenBytes) return;
@@ -1512,9 +1806,10 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     wrapper.querySelector('#rdma-apply').addEventListener('click', function(){
       var p = wrapper.querySelector('#rdma-search').value;
       var s = parseInt(wrapper.querySelector('#rdma-start').value, 10) || 0;
-      var l = parseInt(wrapper.querySelector('#rdma-len').value, 10) || 512;
+      var l = parseInt(wrapper.querySelector('#rdma-len').value, 10) || 1024;
       paint(p, s, l);
     });
+    paint('', 0, 1024);
     return wrapper;
   }
   document.addEventListener('click', function(e){
