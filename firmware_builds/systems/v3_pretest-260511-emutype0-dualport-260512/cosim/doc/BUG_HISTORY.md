@@ -36,7 +36,7 @@ runs at this build dir.
 | BUG-008-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 6 RN.BASIC.082 | 59663d3c | Single-ASIC periodic row kept empty physical lanes enabled and decoded the native SciFi header alias as MuPix. |
 | BUG-009-T | T | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a/9b527599 | Single global delay bound replaced with 5 per-checkpoint bounds (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress, OPQ egress) per injector mode. |
 | BUG-010-H | H | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a | Analyzer reported delay_max_cycles = delay_min_cycles = 0 because it subtracted abs_ts_8ns from itself instead of joining upstream/downstream checkpoint traces on hit_id. |
-| BUG-009-R | R | closure-blocker | swept | fixed in IP standalone; integration re-fit pending | 2026-05-13 integration STA trace #103 | run-control_mgmt 24be671 | snap_*_lvds -> snap_*_mm_q0 CDC missing synchronized update/valid handshake; STA timed the multi-bit crossing as a normal setup endpoint. |
+| BUG-009-R | R | closure-blocker | swept | fixed in IP standalone; integration re-fit exposes different data-path FIFO setup failure | 2026-05-13 integration STA trace #103 | run-control_mgmt 24be671/023fb18 | snap_*_lvds -> snap_*_mm_q0 CDC missing synchronized update/valid handshake; STA timed the multi-bit crossing as a normal setup endpoint. |
 
 ---
 
@@ -52,15 +52,23 @@ runs at this build dir.
 - Root cause: `snap_*_lvds -> snap_*_mm_q0` CDC missing synchronized
   update/valid handshake; STA times the multi-bit crossing as a normal setup
   endpoint and reports `-3.220 ns` Slow85 setup.
-- Fix status: fixed in `run-control_mgmt` commit `24be671`; the LVDS snapshot
-  now waits through a five-cycle stable phase, toggles a single-bit update
-  notice, and captures the multi-bit snapshot bus in `mm_clk` only on the
-  synchronized update pulse. Standalone 1.1x STA closed in iteration 3 with
-  setup, hold, recovery, and removal nonnegative in all four corners.
-  potential_hazard: integration closure still depends on clean Qsys
-  regeneration and a full top re-fit of the pulser-drop build.
-- Commit: run-control_mgmt `24be671`
-  `[FIX] HW: gate runctl snapshot CDC`.
+- Fix status: fixed in `run-control_mgmt` commits `24be671` and `023fb18`;
+  the LVDS snapshot now waits through a five-cycle stable phase, toggles a
+  single-bit update notice, and captures the multi-bit snapshot bus in
+  `mm_clk` only on the synchronized update pulse. The separate
+  `recv_state_lvds` / `host_state_lvds` STATUS family now uses the same held
+  LVDS source plus synchronized update-toggle capture. Standalone 1.1x STA
+  closed in iteration 4 with setup, hold, recovery, and removal nonnegative
+  in all four corners.
+  potential_hazard: integration 1.0x re-fit no longer reports the original
+  run-control snapshot CDC in the failing setup list, but still fails on a
+  different `altera_avalon_mm_clock_crossing_bridge:cmd_fifo` data-path FIFO
+  setup family and needs a separate user-approved fix.
+- Commits:
+  - run-control_mgmt `24be671`
+    `[FIX] HW: gate runctl snapshot CDC`
+  - run-control_mgmt `023fb18`
+    `[FIX] HW: gate runctl status CDC`
 
 ### BUG-009-T: single global delay bound hides per-checkpoint failures
 
