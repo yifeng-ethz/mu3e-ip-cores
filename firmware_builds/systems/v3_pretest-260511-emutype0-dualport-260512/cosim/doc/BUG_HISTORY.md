@@ -33,6 +33,7 @@ runs at this build dir.
 | BUG-005-R | R | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | 4e798bc/02679b20 | Native-signoff OPQ src_compat left page_allocator.handle_credit_update_valid_i unconnected, corrupting full-mask backlog payload identity. |
 | BUG-006-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | a073596b/e9eaeaea | Native-signoff lossless traces were failed by stale generated-OPQ summary assumptions and non-closure defaults. |
 | BUG-007-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 5 slice 2 | 1c30b766 | Header-sync cosim source advanced on the virtual short-frame interval instead of the RN.BASIC pulse interval. |
+| BUG-008-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 6 RN.BASIC.082 | 59663d3c | Single-ASIC periodic row kept empty physical lanes enabled and decoded the native SciFi header alias as MuPix. |
 
 ---
 
@@ -188,6 +189,36 @@ runs at this build dir.
   errors. potential_hazard: this is a cosim stimulus repair only; the final
   board-compatible BASIC sweep remains tracked by BUG-001-H.
 - Commit: 1c30b766 `[PATCH] HW: v3_pretest-260511 headersync cadence`.
+
+### BUG-008-H: single-lane native OPQ SciFi alias is decoded as MuPix
+
+- First seen: full RN.BASIC.194 sweep at
+  `/data2/cosim_work_full_20260512_iter4closure`, then isolated with
+  `make run_BASIC ROW=RN.BASIC.082 PARALLEL=16
+  WORK_ROOT=/data2/cosim_work_iter6_row082_20260512 KEEP_RAW_TRACES=1`.
+- Symptom: RN.BASIC.082 generated and delivered 7,808 hits through FEB egress,
+  SWB ingress, and OPQ ingress, but per-hit matching reported one missing DMA
+  hit and one ghost DMA hit. The raw OPQ egress trace replaced the final
+  channel-31 payload from subheader 8 with the first channel-0 payload from
+  subheader 40 under the old timestamp, then emitted that channel-0 payload
+  again after the correct subheader.
+- Root cause: the corun SWB register shim kept all four physical OPQ lanes
+  enabled even when the RN.BASIC row selected only one ASIC lane. That let
+  enabled empty-lane traffic perturb the native OPQ merge boundary. When the
+  lane mask was corrected, the native-SV OPQ wrapper exposed the second
+  harness bug: its external VHDL adapter treated unknown K28.5 package header
+  aliases as `MUPIX_HEADER_ID`, so the downstream MuSiP mux decoded the SciFi
+  payload in the wrong 64-bit detector format.
+- Fix status: fixed; `rn_basic_cosim.py` now compiles the RN.BASIC corun with
+  a local SciFi-only native OPQ adapter, the harness derives the SWB enable
+  mask from the selected RN.BASIC physical lanes, and the local adapter maps
+  unknown native K28.5 header aliases back to `SCIFI_HEADER_ID`. after_fix_outcome:
+  RN.BASIC.082 directed rerun reports 7,808/7,808 pass hits, zero fail hits,
+  zero ghosts, `issue_count=0`, and delay min/p05/p50/p95/max all 0 cycles.
+  potential_hazard: this adapter is intentionally SciFi-only for RN.BASIC
+  closure; mixed-detector MuSiP coruns must use a detector-aware adapter.
+- Commit: 59663d3c
+  `[PATCH] HW: v3_pretest-260511 native opq scifi shim`.
 
 ## Format for new entries
 

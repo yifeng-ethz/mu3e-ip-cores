@@ -95,3 +95,25 @@
 - Re-run PASS count delta: slice 2 went 0/32 to 32/32; RN.BASIC.129 reports
   124,928/125,000 hits with zero trace/corun errors, and RN.BASIC.160 reports
   488/488 hits. BUG-007-H is closed.
+
+## 2026-05-12 - Iter 6
+
+- Cluster being closed: BUG-008-H single-lane native OPQ SciFi header alias and
+  stale all-lane SWB mask in RN.BASIC.082.
+- Root-cause hypothesis: the row selected ASIC 2 only, but the corun SWB
+  register shim still enabled all four physical OPQ lanes. That exposed an
+  empty-lane native OPQ merge boundary and, after masking the inactive lanes,
+  the native adapter still decoded the OPQ SciFi header alias as MuPix.
+- Patch summary:
+  - `cosim/scripts/rn_basic_cosim.py`: pass a local RN.BASIC native OPQ adapter
+    into both precompile and row runs.
+  - `tb_int/feb_swb_corun/sv/feb_swb_corun_plain_tb.sv`: derive the SWB
+    enable mask from the selected RN.BASIC physical lanes.
+  - `tb_int/feb_swb_corun/vhd/ingress_egress_adaptor_native_sv_scifi.vhd`:
+    map unknown native K28.5 header aliases to `SCIFI_HEADER_ID` in this
+    SciFi-only cosim.
+- Re-run PASS count delta: RN.BASIC.082 directed rerun went 0/1 to 1/1; the
+  row reports 7,808/7,808 pass hits, zero ghosts, `issue_count=0`, and delay
+  min/p05/p50/p95/max all 0 cycles. BUG-008-H is closed; by composition from
+  the iter4 full sweep plus iter5 slice-2 closure, the next full sweep should
+  move 193/194 to 194/194.
