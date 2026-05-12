@@ -15,12 +15,20 @@ COSIM_BUILD_DIR ?= $(COSIM_ROOT)/build
 COSIM_WORK ?= cosim_work
 FEB_CORUN_DIR ?= $(COSIM_ROOT)/../tb_int/feb_swb_corun
 REPORT_DIR ?= $(COSIM_ROOT)/REPORT/sanity_1ms
+REPORT_ROOT ?= $(COSIM_ROOT)/REPORT
+WORK_ROOT ?=
 EXPECTED_HITS ?= 6400
 
 RUN_WINDOW_8NS ?= 125000
 HIT_PERIOD_8NS ?= 5000
 ASIC_COUNT ?= 8
 DRAIN_SWB_CYCLES ?= 800000
+PARALLEL ?= 30
+ROW ?=
+SLICE ?=
+COLLECT_ONLY ?= 0
+DRY_RUN ?= 0
+KEEP_RAW_TRACES ?= 0
 
 COSIM_SV_SOURCES := \
 	$(COSIM_ROOT)/sv/feb_egress_meta_pkg.sv \
@@ -35,7 +43,27 @@ COSIM_SV_SOURCES := \
 	$(COSIM_ROOT)/uvm/sequences/sanity_1ms_periodic_all_channel_seq.sv \
 	$(COSIM_ROOT)/uvm/cosim_top_pkg.sv
 
-.PHONY: compile_cosim run_COSIM_SANITY summarize_COSIM_SANITY
+BASIC_ARGS :=
+ifneq ($(strip $(ROW)),)
+BASIC_ARGS += --row $(ROW)
+endif
+ifneq ($(strip $(SLICE)),)
+BASIC_ARGS += --slice $(SLICE)
+endif
+ifeq ($(strip $(COLLECT_ONLY)),1)
+BASIC_ARGS += --collect-only
+endif
+ifeq ($(strip $(DRY_RUN)),1)
+BASIC_ARGS += --dry-run
+endif
+ifeq ($(strip $(KEEP_RAW_TRACES)),1)
+BASIC_ARGS += --keep-raw-traces
+endif
+ifneq ($(strip $(WORK_ROOT)),)
+BASIC_ARGS += --work-root $(WORK_ROOT)
+endif
+
+.PHONY: compile_cosim run_COSIM_SANITY summarize_COSIM_SANITY run_BASIC
 
 compile_cosim:
 	mkdir -p $(COSIM_BUILD_DIR)
@@ -66,3 +94,10 @@ summarize_COSIM_SANITY:
 		--hit-period-8ns $(HIT_PERIOD_8NS) \
 		--run-window-8ns $(RUN_WINDOW_8NS) \
 		--asic-count $(ASIC_COUNT)
+
+run_BASIC:
+	$(PYTHON) $(COSIM_ROOT)/scripts/rn_basic_cosim.py \
+		--cosim-root $(COSIM_ROOT) \
+		--report-root $(REPORT_ROOT) \
+		--parallel $(PARALLEL) \
+		$(BASIC_ARGS)
