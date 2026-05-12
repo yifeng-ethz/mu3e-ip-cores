@@ -495,37 +495,295 @@ def fmt_pct(value: float | None) -> str:
     return f"{value:+.2f}%"
 
 
+RN_BASIC_REPORT_ROOT = DUALPORT_BUILD_DIR / "cosim" / "REPORT"
+RUN_WINDOW_MS = 1.0
+
+
+def popcount(value: int) -> int:
+    return bin(value).count("1")
+
+
+def parse_hex_token(value: str | None) -> int | None:
+    if not value:
+        return None
+    match = re.search(r"0[xX][0-9A-Fa-f]+", value)
+    if not match:
+        return None
+    try:
+        return int(match.group(0), 16)
+    except ValueError:
+        return None
+
+
+def basic_row_theory(row: dict[str, str]) -> dict[str, Any]:
+    """Compute popcount + theory_hits + theory_hits_per_ms for a TEST_BASIC row.
+
+    Slice 1/2/4: theoretical_hits = popcount(L)*popcount(C)*rate/65536*125e6*1ms
+    Slice 3 onclick: theoretical_hits = popcount(L)*popcount(C)*n_pulses (10)
+    """
+    lane = parse_hex_token(row.get("lane_mask"))
+    chan = parse_hex_token(row.get("channel_mask"))
+    rate = parse_hex_token(row.get("rate_88fp"))
+    pulses = int_from_text(row.get("n_pulses", "") or "")
+    pl = popcount(lane) if lane is not None else None
+    pc = popcount(chan) if chan is not None else None
+    pop_str = f"{pl} x {pc}" if pl is not None and pc is not None else row.get("popcount L x C", "")
+    theory: int | float | None = None
+    if pulses is not None and pl is not None and pc is not None:
+        theory = pl * pc * pulses
+    elif rate is not None and pl is not None and pc is not None:
+        theory_f = pl * pc * (rate / 65536.0) * 125e6 * (RUN_WINDOW_MS / 1000.0)
+        ceil = 250_000.0
+        theory = int(round(min(theory_f, ceil)))
+    if theory is None:
+        clipped = int_from_text(row.get("clipped_hits", "") or row.get("theoretical_hits", "") or row.get("expected_hits", "") or "")
+        theory = clipped
+    theory_per_ms = (theory / RUN_WINDOW_MS) if isinstance(theory, (int, float)) else None
+    return {
+        "popcount": pop_str,
+        "theory_hits": theory,
+        "theory_hits_per_ms": theory_per_ms,
+        "lane_pop": pl,
+        "chan_pop": pc,
+    }
+
+
+def gather_rate_evidence(row_id: str) -> dict[str, Any] | None:
+    """Read rate_csr_dump.json for a row. Returns None if missing."""
+    path = RN_BASIC_REPORT_ROOT / row_id / "rate_csr_dump.json"
+    if not path.is_file():
+        return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+_DELAY_STATS_KEYS = {
+    "count", "delay_mean_ns", "delay_stddev_ns",
+    "delay_min_cycles", "delay_p05_cycles", "delay_p50_cycles",
+    "delay_p95_cycles", "delay_max_cycles",
+    "checkpoint", "bound_lower", "bound_upper",
+}
+
+
+def _strip_delay_arrays(payload: Any) -> Any:
+    """Strip per-hit arrays from a delay JSON; keep only summary scalars."""
+    if not isinstance(payload, dict):
+        return payload
+    return {k: v for k, v in payload.items() if k in _DELAY_STATS_KEYS}
+
+
+def gather_delay_evidence(row_id: str) -> dict[str, Any]:
+    """Collect compact delay evidence: 2 hist-bin summaries + scoreboard stats.
+
+    Per-hit arrays (true_ts/measured_ts/delay_ns) are STRIPPED here because
+    each scoreboard JSON is up to 1.2 MB per row -- inlining all 194 would
+    bloat the HTML past 250 MB. The DISLIN PDFs hold the visual evidence;
+    this dict only carries the statistics used in the popup.
+    """
+    base = RN_BASIC_REPORT_ROOT / row_id
+    out: dict[str, Any] = {}
+    for key, fname in (
+        ("hist_a", "delay_hist_bin_a.json"),
+        ("hist_b", "delay_hist_bin_b.json"),
+        ("scoreboard", "delay_scoreboard.json"),
+    ):
+        path = base / fname
+        if path.is_file():
+            try:
+                raw = json.loads(path.read_text(encoding="utf-8"))
+                out[key] = _strip_delay_arrays(raw)
+            except (json.JSONDecodeError, OSError):
+                out[key] = None
+        else:
+            out[key] = None
+    # Locate DISLIN PDFs (from #106 lifetime renderer)
+    pdf_a = base / "plots" / "hist_bin_a.pdf"
+    pdf_b = base / "plots" / "hist_bin_b.pdf"
+    out["pdf_a_rel"] = str(pdf_a.relative_to(BUILD_DIR / "doc")) if pdf_a.is_file() else None
+    out["pdf_b_rel"] = str(pdf_b.relative_to(BUILD_DIR / "doc")) if pdf_b.is_file() else None
+    return out
+
+
+SWB_K285 = 0xBC
+SWB_K284 = 0x9C
+SWB_K237 = 0xF7
+PACKET_TYPE_LABELS: dict[int, str] = {
+    0b111010: "MuPix",
+    0b111000: "SciFi",
+    0b110100: "Tile",
+    0b111011: "MuPix Debug",
+    0b111001: "SciFi Debug",
+    0b110101: "Tile Debug",
+    0b000111: "SlowControl",
+    0b000010: "BERTs",
+    0b000000: "Idle",
+}
+
+
+def gather_rdma_evidence(row_id: str, max_frames: int = 8) -> dict[str, Any]:
+    """Decode the first max_frames frames from rdma_rxbuffer.bin.
+
+    Returns a dict with 'summary', 'hex_lines' (16-byte rows colored by role),
+    'frames' (list of decoded frames). Per Mu3eSpecBook-4.pdf pages 147-148:
+    K28.5 (0xBC) = frame marker, K28.4 (0x9C) = subframe marker,
+    K23.7 (0xF7) = idle. Packet-type is a 6-bit field after the marker.
+    """
+    base = RN_BASIC_REPORT_ROOT / row_id
+    summary_path = base / "rdma_rxbuffer_summary.json"
+    bin_path = base / "rdma_rxbuffer.bin"
+    out: dict[str, Any] = {"summary": None, "hex_lines": [], "frames": []}
+    if summary_path.is_file():
+        try:
+            out["summary"] = json.loads(summary_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            out["summary"] = None
+    if not bin_path.is_file():
+        return out
+    try:
+        data = bin_path.read_bytes()
+    except OSError:
+        return out
+    # Truncate large payloads
+    data = data[:8192]
+    # Find K28.5 markers (frame starts)
+    frame_starts = [i for i, b in enumerate(data) if b == SWB_K285]
+    frames: list[dict[str, Any]] = []
+    for fi, start in enumerate(frame_starts[:max_frames]):
+        end = frame_starts[fi + 1] if (fi + 1) < len(frame_starts) else min(start + 256, len(data))
+        chunk = data[start:end]
+        # Packet type: bits 0..5 of byte after marker (rough; spec has the exact mapping)
+        pkt_type = (chunk[1] >> 2) & 0x3F if len(chunk) >= 2 else 0
+        label = PACKET_TYPE_LABELS.get(pkt_type, f"unknown 0x{pkt_type:02X}")
+        sub_offsets = [i for i, b in enumerate(chunk) if b == SWB_K284]
+        frames.append({
+            "frame_idx": fi,
+            "byte_offset": start,
+            "length": len(chunk),
+            "packet_type_raw": pkt_type,
+            "packet_type_label": label,
+            "subframe_count": len(sub_offsets),
+            "hex": chunk.hex(),
+        })
+    # Compact hex representation: per row a single space-joined hex string
+    # plus a parallel role string ('d'=data, '5'=k285, '4'=k284, '7'=k237).
+    # First 256 bytes is plenty for the popup; the in-page search still works.
+    hex_lines: list[dict[str, Any]] = []
+    for off in range(0, min(len(data), 256), 16):
+        row_bytes = data[off:off + 16]
+        hex_str = "".join(f"{b:02x}" for b in row_bytes)
+        roles = []
+        for byte in row_bytes:
+            if byte == SWB_K285:
+                roles.append("5")
+            elif byte == SWB_K284:
+                roles.append("4")
+            elif byte == SWB_K237:
+                roles.append("7")
+            else:
+                roles.append("d")
+        hex_lines.append({"o": off, "h": hex_str, "r": "".join(roles)})
+    out["hex_lines"] = hex_lines
+    out["frames"] = frames
+    out["bytes_total_truncated_at"] = min(len(data), 256)
+    return out
+
+
 def basic_rows_html() -> str:
+    """Render the BASIC tab table with the requested column groups."""
     basic_rows = parse_markdown_rows(DOC_DIR / "TEST_BASIC.md", "RN.BASIC.")
     by_id = {row["ID"]: row for row in basic_rows}
-    rows: list[list[Any]] = []
-    for idx in range(1, 129):
+    # Slice routing per the 194-row plan
+    def slice_for(idx: int) -> tuple[int, str]:
+        if idx <= 128:
+            return 1, "periodic"
+        if idx <= 160:
+            return 2, "headersync"
+        if idx <= 162:
+            return 3, "onclick"
+        return 4, "emul-only"
+
+    evidence_json: dict[str, dict[str, Any]] = {}
+    body_rows_html: list[str] = []
+    for idx in range(1, 195):
         rid = f"RN.BASIC.{idx:03d}"
         row = by_id.get(rid, {"ID": rid})
-        theory = int_from_text(row.get("clipped_hits", row.get("theoretical_hits", "")))
-        rows.append([
-            rid,
-            row.get("lane_mask", "0xFF"),
-            row.get("channel_mask", "0xFFFFFFFF"),
-            row.get("hit_mode", "direct (0)"),
-            row.get("rate_88fp", "0x0100"),
-            row.get("popcount L x C", ""),
-            fmt_num(theory),
-            fmt_num(theory),
-            "pending",
-            "pending",
-            "pending",
-            "pending",
-        ])
+        slice_id, slice_label = slice_for(idx)
+        # Slice 3 uses different headers ("n_pulses", "expected_hits"); fill defaults
+        hit_mode = row.get("hit_mode")
+        if hit_mode is None:
+            hit_mode = {1: "periodic", 2: "headersync", 3: "onclick", 4: "direct (off)"}[slice_id]
+        lane_mask = row.get("lane_mask", "0xFF")
+        chan_mask = row.get("channel_mask", "0xFFFFFFFF")
+        rate_field = row.get("rate_88fp", "0x0100" if slice_id != 3 else "N/A")
+        theory_info = basic_row_theory(row)
+        # Gather evidence (lazy in HTML, eager at generation time)
+        rate_ev = gather_rate_evidence(rid)
+        delay_ev = gather_delay_evidence(rid)
+        rdma_ev = gather_rdma_evidence(rid)
+        evidence_json[rid] = {
+            "rate": rate_ev,
+            "delay": delay_ev,
+            "rdma": rdma_ev,
+            "slice": slice_id,
+            "slice_label": slice_label,
+        }
+        rate_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="rate">View</button>' if rate_ev else '<span class="ev-pending">pending</span>'
+        delay_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="delay">View</button>' if any(delay_ev.get(k) is not None for k in ("hist_a", "hist_b", "scoreboard")) else '<span class="ev-pending">pending</span>'
+        rdma_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="rdma">View</button>' if rdma_ev.get("frames") else '<span class="ev-pending">pending</span>'
+        cells = [
+            f"<td class=\"id\">{html.escape(rid)}</td>",
+            f"<td>{html.escape(str(lane_mask))}</td>",
+            f"<td>{html.escape(str(chan_mask))}</td>",
+            f"<td>{html.escape(str(hit_mode))}</td>",
+            f"<td>{html.escape(str(rate_field))}</td>",
+            f"<td>{html.escape(theory_info['popcount'])}</td>",
+            f"<td class=\"num\">{fmt_num(theory_info['theory_hits'])}</td>",
+            f"<td class=\"num\">{fmt_num(theory_info['theory_hits_per_ms'])}</td>",
+            f"<td class=\"ev\">{rate_btn}</td>",
+            f"<td class=\"ev\">{delay_btn}</td>",
+            f"<td class=\"ev\">{rdma_btn}</td>",
+        ]
+        body_rows_html.append(f'<tr data-row="{rid}" data-slice="{slice_id}">{"".join(cells)}</tr>')
+
     note = (
-        "<p class=\"note\">The BASIC tab is the 128-row RN.BASIC plan from TEST_BASIC.md. "
-        "Existing evidence directories are named p45_* from the prior 32-row sweep, so RN.BASIC evidence columns remain pending until that row-id stream is emitted.</p>"
+        "<p class=\"note\">194-row RN.BASIC plan from TEST_BASIC.md. "
+        "Configuration columns are taken directly from the test plan; "
+        "Expected Hits/ms is recomputed from the formula clipped at the OPQ ingress ceiling. "
+        "Evidence buttons open inline popups with rate (per-IP CSR counters), delay (DISLIN lifetime plots, 2 hist banks), and rdma (rx-buffer hex dump with mu3e frame decode).</p>"
     )
-    return note + table(
-        ["ID", "lane_mask", "channel_mask", "hit_mode", "rate_88fp", "popcount", "theory hits", "theory hits/ms", "sim hits/ms", "sim_delta_pct", "board hits/ms", "board_delta_pct"],
-        rows,
-        "dense",
+    header_html = (
+        '<thead>'
+        '<tr class="hg1">'
+        '<th rowspan="2">ID</th>'
+        '<th colspan="4" class="grp">Configuration</th>'
+        '<th colspan="3" class="grp">Expected Hits/ms</th>'
+        '<th colspan="3" class="grp">Evidence</th>'
+        '</tr>'
+        '<tr class="hg2">'
+        '<th>lane_mask</th>'
+        '<th>channel_mask</th>'
+        '<th>hit_mode</th>'
+        '<th>rate_88fp</th>'
+        '<th>popcount</th>'
+        '<th>theory hits</th>'
+        '<th>theory hits/ms</th>'
+        '<th>rate</th>'
+        '<th>delay</th>'
+        '<th>rdma</th>'
+        '</tr>'
+        '</thead>'
     )
+    body_html = '<tbody>' + ''.join(body_rows_html) + '</tbody>'
+    table_html = '<table class="basic-grid dense">' + header_html + body_html + '</table>'
+    # Inline the evidence JSON so popups work without a web server
+    evidence_blob = (
+        '<script id="basic-evidence" type="application/json">'
+        + html.escape(json.dumps(evidence_json, separators=(",", ":")))
+        + "</script>"
+    )
+    return note + table_html + evidence_blob
 
 
 def observed_p45_rows() -> list[dict[str, Any]]:
@@ -698,8 +956,290 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
   color: #274b45;
   margin: 0 0 14px;
 }
+.basic-grid th.grp { background: #e9e0cd; text-align: center; }
+.basic-grid th, .basic-grid td { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.basic-grid td.num { text-align: right; }
+.basic-grid td.ev { text-align: center; }
+.basic-grid td.id { font-weight: 650; }
+.ev-btn {
+  cursor: pointer;
+  padding: 3px 9px;
+  border: 1px solid var(--accent);
+  background: var(--panel);
+  color: var(--accent);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 650;
+}
+.ev-btn:hover { background: var(--accent-weak); }
+.ev-pending { color: var(--muted); font-style: italic; font-size: 11px; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,12,8,0.55);
+  display: none; align-items: flex-start; justify-content: center;
+  z-index: 100; padding: 4vh 2vw; overflow-y: auto;
+}
+.modal-backdrop.open { display: flex; }
+.modal-card {
+  background: var(--panel); border-radius: 8px; border: 1px solid var(--line);
+  width: 100%; max-width: 1100px; max-height: 92vh; overflow: auto;
+  box-shadow: 0 22px 60px rgba(0,0,0,0.25);
+}
+.modal-head {
+  padding: 14px 18px; border-bottom: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center;
+  background: #f4ecd9; border-radius: 8px 8px 0 0;
+}
+.modal-head h3 { margin: 0; font-size: 15px; }
+.modal-close {
+  cursor: pointer; padding: 4px 10px; border: 1px solid var(--line);
+  background: transparent; border-radius: 4px; font-weight: 700;
+}
+.modal-body { padding: 16px 18px 22px; }
+.rate-table th, .rate-table td { font-size: 12px; }
+.rate-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.rate-table tr.ip-section td {
+  background: #efe6d3; font-weight: 700; padding-top: 8px;
+}
+.delay-pdf {
+  width: 100%; height: 520px; border: 1px solid var(--line);
+  border-radius: 4px; margin-bottom: 12px; background: #fff;
+}
+.delay-stats {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
+  font-size: 11px; background: #f7f1e3; padding: 8px 10px;
+  border-radius: 4px; margin: 4px 0 12px; white-space: pre;
+}
+.rdma-controls {
+  display: flex; gap: 10px; margin-bottom: 10px;
+  align-items: center; flex-wrap: wrap;
+}
+.rdma-controls input {
+  padding: 5px 9px; border: 1px solid var(--line);
+  border-radius: 4px; font-family: ui-monospace, monospace;
+}
+.rdma-frame {
+  background: #fffaf1; border: 1px solid var(--line);
+  border-radius: 4px; padding: 8px 10px; margin: 8px 0;
+}
+.rdma-frame summary { font-weight: 650; padding: 0; }
+.rdma-frame .meta { color: var(--muted); font-size: 11px; }
+.hex-row {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
+  font-size: 12px; line-height: 1.55; padding: 1px 0;
+}
+.hex-row .off { color: var(--muted); margin-right: 10px; }
+.hex-row .byte { padding: 0 1px; border-radius: 2px; }
+.hex-row .byte.k285 { background: #ffd17a; color: #5a3300; font-weight: 700; }
+.hex-row .byte.k284 { background: #b3e0b6; color: #1f4f23; font-weight: 700; }
+.hex-row .byte.k237 { background: #e0e0e0; color: #555; }
+.hex-row .byte.match { outline: 2px solid #d24a4a; outline-offset: -1px; }
+.legend { font-size: 11px; color: var(--muted); margin: 4px 0 10px; }
+.legend .pill {
+  display: inline-block; padding: 1px 6px; margin: 0 4px 0 8px;
+  border-radius: 3px; font-weight: 700;
+}
+.legend .k285 { background: #ffd17a; color: #5a3300; }
+.legend .k284 { background: #b3e0b6; color: #1f4f23; }
+.legend .k237 { background: #e0e0e0; color: #555; }
 """
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    modal_html = """
+<div id="ev-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="ev-modal-title">Evidence</h3>
+      <button class="modal-close" id="ev-modal-close" aria-label="Close">x</button>
+    </div>
+    <div class="modal-body" id="ev-modal-body"></div>
+  </div>
+</div>
+"""
+    modal_js = """
+<script>
+(function(){
+  var raw = document.getElementById('basic-evidence');
+  var EV = {};
+  if (raw) {
+    try { EV = JSON.parse(raw.textContent || raw.innerText || '{}'); } catch (e) { EV = {}; }
+  }
+  function $(id){return document.getElementById(id);}
+  function openModal(title, body){
+    $('ev-modal-title').textContent = title;
+    var b = $('ev-modal-body'); b.innerHTML = '';
+    if (typeof body === 'string') { b.innerHTML = body; } else { b.appendChild(body); }
+    var m = $('ev-modal'); m.classList.add('open'); m.setAttribute('aria-hidden','false');
+  }
+  function closeModal(){
+    var m = $('ev-modal'); m.classList.remove('open'); m.setAttribute('aria-hidden','true');
+  }
+  $('ev-modal-close').addEventListener('click', closeModal);
+  $('ev-modal').addEventListener('click', function(e){ if(e.target.id==='ev-modal') closeModal(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+
+  function fmtNum(x){
+    if (x === null || x === undefined || x === '') return '';
+    if (typeof x === 'number') {
+      if (Math.abs(x) >= 1000) return x.toLocaleString();
+      return String(x);
+    }
+    return String(x);
+  }
+  function asTable(headers, rows){
+    var h = '<table class="rate-table dense"><thead><tr>'
+            + headers.map(function(x){return '<th>'+x+'</th>';}).join('')
+            + '</tr></thead><tbody>';
+    var b = rows.map(function(r){
+      if (r.section) { return '<tr class="ip-section"><td colspan="'+headers.length+'">'+r.section+'</td></tr>'; }
+      return '<tr>' + r.map(function(c, i){
+        var cls = (typeof c === 'number') ? ' class="num"' : '';
+        return '<td'+cls+'>'+fmtNum(c)+'</td>';
+      }).join('') + '</tr>';
+    }).join('');
+    return h + b + '</tbody></table>';
+  }
+  function renderRate(rid, data){
+    if (!data) return '<p class="ev-pending">No rate evidence found for ' + rid + '. Run the cosim sweep for this row.</p>';
+    var theory = data.theoretical_hits;
+    var rows = [];
+    var keys = Object.keys(data).sort();
+    keys.forEach(function(ip){
+      if (ip === 'theoretical_hits' || ip === 'row_id' || ip === 'meta') return;
+      var entry = data[ip];
+      if (typeof entry !== 'object' || entry === null) {
+        rows.push([ip, '', fmtNum(entry), '', '']);
+        return;
+      }
+      rows.push({section: ip});
+      Object.keys(entry).forEach(function(k){
+        var v = entry[k];
+        var pct = '';
+        if (theory && typeof v === 'number' && v > 0 && /total|hits|count|csr13|selected/i.test(k)){
+          pct = ((v - theory) / theory * 100).toFixed(2) + '%';
+        }
+        rows.push([ip, k, fmtNum(v), theory != null ? fmtNum(theory) : '', pct]);
+      });
+    });
+    var header = 'Rate evidence - ' + rid + (theory != null ? ' (theory ' + fmtNum(theory) + ' hits)' : '');
+    return '<p><strong>' + header + '</strong></p>'
+         + asTable(['IP', 'counter', 'measured / sim', 'expected', 'delta vs theory'], rows);
+  }
+  function renderDelay(rid, data){
+    if (!data) return '<p class="ev-pending">No delay evidence found for ' + rid + '.</p>';
+    var html = '<p>Two hist-IP delay distributions per the dualport histogram setup. Renderer: DISLIN only (matplotlib/seaborn/plotly disallowed by checker).</p>';
+    var sb = data.scoreboard || {};
+    var stats = 'count           : ' + (sb.count || '-') + '\\n'
+              + 'delay_min_cycles: ' + (sb.delay_min_cycles != null ? sb.delay_min_cycles : '-') + '\\n'
+              + 'delay_p05_cycles: ' + (sb.delay_p05_cycles != null ? sb.delay_p05_cycles : '-') + '\\n'
+              + 'delay_p50_cycles: ' + (sb.delay_p50_cycles != null ? sb.delay_p50_cycles : '-') + '\\n'
+              + 'delay_p95_cycles: ' + (sb.delay_p95_cycles != null ? sb.delay_p95_cycles : '-') + '\\n'
+              + 'delay_max_cycles: ' + (sb.delay_max_cycles != null ? sb.delay_max_cycles : '-') + '\\n'
+              + 'range (max-min) : ' + ((sb.delay_max_cycles != null && sb.delay_min_cycles != null) ? (sb.delay_max_cycles - sb.delay_min_cycles) : '-');
+    html += '<h3>Scoreboard percentiles (cycles, 8 ns)</h3><div class="delay-stats">' + stats + '</div>';
+    if (data.pdf_a_rel) {
+      html += '<h3>Hist bin A (DISLIN PDF)</h3><embed class="delay-pdf" src="' + data.pdf_a_rel + '" type="application/pdf">';
+    } else {
+      html += '<h3>Hist bin A</h3><p class="ev-pending">DISLIN PDF pending. Expected at <code>RN.BASIC.NNN/plots/hist_bin_a.pdf</code>.</p>';
+    }
+    if (data.pdf_b_rel) {
+      html += '<h3>Hist bin B (DISLIN PDF)</h3><embed class="delay-pdf" src="' + data.pdf_b_rel + '" type="application/pdf">';
+    } else {
+      html += '<h3>Hist bin B</h3><p class="ev-pending">DISLIN PDF pending. Expected at <code>RN.BASIC.NNN/plots/hist_bin_b.pdf</code>.</p>';
+    }
+    return html;
+  }
+  function renderRdma(rid, data){
+    if (!data) return '<p class="ev-pending">No rdma evidence found for ' + rid + '.</p>';
+    var summary = data.summary || {};
+    var sumStr = 'bytes_total        : ' + (summary.bytes_total != null ? summary.bytes_total : '-') + '\\n'
+               + 'record_count       : ' + (summary.record_count != null ? summary.record_count : '-') + '\\n'
+               + 'record_size_avg    : ' + (summary.record_size_avg != null ? summary.record_size_avg : '-') + '\\n'
+               + 'frames decoded here: ' + (data.frames ? data.frames.length : 0) + '\\n'
+               + 'hex sample bytes   : ' + (data.bytes_total_truncated_at != null ? data.bytes_total_truncated_at : '-');
+    var html = '<h3>rdma rxbuffer summary</h3><div class="delay-stats">' + sumStr + '</div>'
+             + '<div class="legend">Legend:'
+             + '<span class="pill k285">BC = K28.5 frame</span>'
+             + '<span class="pill k284">9C = K28.4 subframe</span>'
+             + '<span class="pill k237">F7 = K23.7 idle</span></div>'
+             + '<div class="rdma-controls">'
+             + '<label>Search (hex pattern e.g. <code>bc 90</code>): </label>'
+             + '<input type="text" id="rdma-search" placeholder="bc 90">'
+             + '<label>Range start: </label><input type="number" id="rdma-start" value="0" min="0" style="width:80px">'
+             + '<label>length: </label><input type="number" id="rdma-len" value="512" min="16" max="8192" style="width:80px">'
+             + '<button class="ev-btn" id="rdma-apply">Apply</button>'
+             + '</div>';
+    if (data.frames && data.frames.length) {
+      html += '<h3>Decoded frames (first ' + data.frames.length + ' K28.5 boundaries)</h3>';
+      data.frames.forEach(function(f){
+        html += '<details class="rdma-frame" open><summary>Frame ' + f.frame_idx
+              + ' &mdash; offset 0x' + f.byte_offset.toString(16)
+              + ' &mdash; type 0x' + f.packet_type_raw.toString(16)
+              + ' (' + f.packet_type_label + ')'
+              + ' &mdash; ' + f.subframe_count + ' subframes'
+              + '</summary><div class="meta">length ' + f.length + ' bytes; raw first 48 hex: '
+              + f.hex.slice(0, 96) + '</div></details>';
+      });
+    }
+    html += '<h3>Raw rxbuffer hex (first ' + (data.hex_lines || []).length + ' rows of 16 bytes)</h3>'
+          + '<div id="rdma-hex-pane"></div>';
+    var wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    var pane = wrapper.querySelector('#rdma-hex-pane');
+    function paint(filterPattern, startByte, lenBytes){
+      pane.innerHTML = '';
+      var pattern = (filterPattern || '').toLowerCase().replace(/[^0-9a-f]/g, '');
+      var roleMap = {'5':'k285', '4':'k284', '7':'k237', 'd':'data'};
+      (data.hex_lines || []).forEach(function(row){
+        if (row.o < startByte) return;
+        if (row.o >= startByte + lenBytes) return;
+        var lineDiv = document.createElement('div');
+        lineDiv.className = 'hex-row';
+        var off = document.createElement('span');
+        off.className = 'off';
+        off.textContent = '0x' + row.o.toString(16).padStart(4,'0') + ':';
+        lineDiv.appendChild(off);
+        var rowHex = row.h || '';
+        var rowRoles = row.r || '';
+        for (var idx = 0; idx < rowRoles.length; idx++){
+          var b = document.createElement('span');
+          var hexPair = rowHex.slice(idx*2, idx*2+2);
+          b.className = 'byte ' + (roleMap[rowRoles.charAt(idx)] || 'data');
+          b.textContent = hexPair + ' ';
+          if (pattern && rowHex.slice(idx*2, idx*2 + pattern.length) === pattern){
+            b.classList.add('match');
+          }
+          lineDiv.appendChild(b);
+        }
+        pane.appendChild(lineDiv);
+      });
+    }
+    paint('', 0, 512);
+    wrapper.querySelector('#rdma-apply').addEventListener('click', function(){
+      var p = wrapper.querySelector('#rdma-search').value;
+      var s = parseInt(wrapper.querySelector('#rdma-start').value, 10) || 0;
+      var l = parseInt(wrapper.querySelector('#rdma-len').value, 10) || 512;
+      paint(p, s, l);
+    });
+    return wrapper;
+  }
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest('button.ev-btn[data-row]');
+    if (!btn) return;
+    var rid = btn.getAttribute('data-row');
+    var kind = btn.getAttribute('data-ev');
+    var ev = EV[rid] || {};
+    var title = rid + ' - ' + kind + ' evidence';
+    var body;
+    if (kind === 'rate') body = renderRate(rid, ev.rate);
+    else if (kind === 'delay') body = renderDelay(rid, ev.delay);
+    else if (kind === 'rdma') body = renderRdma(rid, ev.rdma);
+    else body = '<p>Unknown evidence kind.</p>';
+    openModal(title, body);
+  });
+})();
+</script>
+"""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -717,6 +1257,8 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 {''.join(tab_panels)}
 </div>
 </main>
+{modal_html}
+{modal_js}
 </body>
 </html>
 """

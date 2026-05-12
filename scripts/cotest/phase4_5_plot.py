@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ALLOW_MATPLOTLIB_LEGACY: pre-DISLIN-rule sweep plotter; migrate to DISLIN.
 # ============================================================================
 # phase4_5_plot.py -- Preset-driven plot renderer for Phase 4.5 sweep evidence.
 # ============================================================================
