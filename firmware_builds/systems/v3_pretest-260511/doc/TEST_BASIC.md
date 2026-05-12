@@ -2,8 +2,8 @@
 
 **Parent:** [TEST_PLAN.md](TEST_PLAN.md)
 **Siblings:** [TEST_BU.md](TEST_BU.md), [TEST_PERF.md](TEST_PERF.md), [TEST_ERROR.md](TEST_ERROR.md), [TEST_EDGE.md](TEST_EDGE.md)
-**ID range:** SC.BASIC.001-012, RC.BASIC.001-011, RN.BASIC.001-128, RN.COSIM.001
-**Total:** 152 cases
+**ID range:** SC.BASIC.001-012, RC.BASIC.001-011, RN.BASIC.001-128
+**Total:** 151 cases
 
 **Methodology key:**
 - **D** (directed): single deterministic stimulus with a golden expectation.
@@ -11,12 +11,14 @@
   scoreboard checks count parity.
 
 **Bucket purpose:** happy-path verification across SC, RC, and RN. Aggregate
-hit rate stays below 50% of OPQ ingress ceiling. Both sim and board deltas
-vs `theoretical_hits` must stay within `|delta| < 5%`.
+hit rate stays below 50% of OPQ ingress ceiling. Each RN row carries
+**three agreeing evidence streams** (theory / cosim sim / board), each
+within `|delta vs theory| < 5%`.
 
-**Evidence model (BASIC):** all three E1 (post-TERM CSR snapshot), E2 (hist
-during-running readout), and E3 (offline RDMA dump) must agree with
-`theoretical_hits` within 5%.
+**Evidence model (BASIC):** theory (math reference), sim (dual-UVM FEB-SWB
+cosim run for the same row), and board (on-board sweep) all agree with each
+other within `|delta| < 5%`. There is no separate "cosim sanity" row - the
+cosim IS the sim evidence column for every BASIC row.
 
 ---
 
@@ -26,8 +28,7 @@ during-running readout), and E3 (offline RDMA dump) must agree with
 |---|---:|---|---|---|
 | SC.BASIC | 12 | SC.BASIC.001-012 | scratchpad BIST; per-IP SCRATCH RW; sc_hub admission/ordering | `run_atpg_v2_reference.sh`, sc_tool |
 | RC.BASIC | 11 | RC.BASIC.001-011 | legal opcode sequences; LOG FIFO decode; stage timing; SC-WEDGE-fixed CMD_RESET | `rc_tool`, `phase4_5_sweep.py:run_row()` |
-| RN.BASIC | 128 | RN.BASIC.001-128 | 8 lane_masks x 4 channel_masks x 4 rates, all below saturation; theoretical-delta < 5% | `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()` |
-| RN.COSIM.001 | 1 | RN.COSIM.001 | 6-checkpoint cosim sanity, lossless at 1 ms below ceiling | `cosim/Makefile` |
+| RN.BASIC | 128 | RN.BASIC.001-128 | 8 lane_masks x 4 channel_masks x 4 rates, all below saturation; theoretical-delta < 5% in BOTH sim and board | `scripts/cotest/phase4_5_sweep.py:rn_basic_plan()` + `cosim/Makefile` |
 
 ---
 
@@ -128,14 +129,20 @@ in flight.
 
 ---
 
-## 5. RN.COSIM.001
+## 5. Cosim as a per-row evidence stream
 
-| ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
-|---|---|---|---:|---|---|---|
-| RN.COSIM.001 | D | 6-checkpoint cosim sanity at 1 ms | 1 | feb_swb cosim, 1 ms RUNNING, rate well below ceiling | pre-rbCAM = post-rbCAM = FEB egress = SWB ingress = OPQ egress = RDMA egress (lossless through all 6); cosim ingress byte-exact within 1-cycle CDC delta | `cosim/Makefile` |
+The dual-UVM FEB <-> SWB cosim at `cosim/` is the **sim** evidence stream for
+every RN.BASIC row (and every other RN row in other buckets). When a row
+runs, the harness produces a cosim transcript at:
 
-**RN.COSIM.001 verdict:** infrastructure done (15 SV/UVM files, 1050 lines);
-1 ms rerun in flight via codex1 cosim dispatch.
+`firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/cosim/REPORT/<row_id>/`
+
+with the 6 checkpoints (pre-rbCAM, post-rbCAM, FEB egress, SWB ingress, OPQ
+egress, RDMA egress) for that row.
+
+Parallel execution: up to **30 cosim invocations** in parallel (see
+`cosim/doc/COSIM_USAGE.md`). The 128 RN.BASIC rows complete in roughly 5
+batches of 30 (~15 min wall) vs ~6 hours sequential.
 
 ---
 

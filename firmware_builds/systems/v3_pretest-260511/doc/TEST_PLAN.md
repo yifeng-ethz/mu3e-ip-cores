@@ -11,11 +11,11 @@ bucket has its own file under `doc/`:
 |---|---|---:|---|---|
 | **BU** Bring-up | [TEST_BU.md](TEST_BU.md) | 25 | B | cold read of every CSR / UID / META; no stimulus |
 | **BASIC** | [TEST_BASIC.md](TEST_BASIC.md) | 151 | D + R | happy-path SC + RC + RN data flow at below-saturation rates |
-| **PERF** | [TEST_PERF.md](TEST_PERF.md) | 14 | P + D | SC aggressive reads under RUNNING; RN saturation curve; long-soak (waived from cosim) |
+| **PERF** | [TEST_PERF.md](TEST_PERF.md) | 15 | P + D | SC aggressive reads under RUNNING; RN saturation curve; long-soak (waived from cosim) |
 | **ERROR** | [TEST_ERROR.md](TEST_ERROR.md) | 12 | E | illegal opcode sequences; invalid CSR values; reject-or-error |
 | **EDGE** | [TEST_EDGE.md](TEST_EDGE.md) | 6 | D | corner masks; single-channel; SC + RUNNING concurrency |
 
-**Total: 208 cases** across 5 bucket files. Every row (except long-soak waivers)
+**Total: 209 cases** across 5 bucket files. Every row (except long-soak waivers)
 runs in BOTH cosim AND on-board, with theory/sim/board cross-validation.
 
 **Companion docs:**
@@ -182,11 +182,11 @@ delta is retained only as a third comparison column in the HTML report.
 | RC.BASIC (in TEST_BASIC.md) | 11 | PASS on-board | SC-WEDGE on-board verified post-`abb3e455` |
 | RC.ERROR (in TEST_ERROR.md) | 6 | tb_int harness ready; selective board run pending | |
 | RN.BASIC (in TEST_BASIC.md) | 128 | sim 32/32 PASS (10 ms); board pending arbfix retest | 8 x 4 x 4 matrix |
-| RN.PROF (in TEST_PERF.md) | 6 | partial; saturation knee at `0x4000` observed | OPQ ingress ceiling probe |
+| RN.PROF (in TEST_PERF.md) | 7 | partial; saturation knee at `0x4000` observed; long-soak (RN.PROF.007) on-board pending, cosim waived | OPQ ingress ceiling probe + 10 s soak |
 | RN.ERROR (in TEST_ERROR.md) | 6 | pending | invalid configs during run |
 | RN.EDGE (in TEST_EDGE.md) | 6 | RN.EDGE.002 sim-vs-board inversion pending arbfix retest | corner masks |
 
-**Total: 208 cases.** Each row (except long-soak waivers) carries three
+**Total: 209 cases.** Each row (except long-soak waivers) carries three
 agreeing evidence streams: theory, cosim sim, and board. PASS count is
 currently dominated by BU+SC.BASIC+RC.BASIC + sim RN.BASIC; the remaining
 gates close as the in-flight arbfix retest + cosim 1 ms rerun + BASIC/PERF
@@ -206,10 +206,9 @@ Key per-bucket evidence commits (see individual bucket files for per-row details
 | RC.BASIC | PASS on-board | `5bd7e112` (SC-WEDGE on-board), `abb3e455` (arb MODE-clear) |
 | RC.ERROR | pending | tb_int |
 | RN.BASIC | sim 32/32 PASS; board 25/32 on dualport pre-arbfix | `967845b5`, `47efa242`, arbfix retest in flight |
-| RN.PROF | partial | `47efa242` |
+| RN.PROF | partial | `47efa242`; RN.PROF.007 long-soak pending (cosim waived) |
 | RN.ERROR | pending | tb_int |
 | RN.EDGE | RN.EDGE.002 inversion pending arbfix | `47efa242`, arbfix retest |
-| RN.COSIM | sanity done; long-soak pending | cosim 1 ms re-run in flight |
 
 Per-row board evidence:
 `firmware_builds/systems/v3_pretest-260511-emutype0-dualport*/sweep_evidence/<row_id>/`
