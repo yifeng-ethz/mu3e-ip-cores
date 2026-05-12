@@ -3,3 +3,7 @@ report/
 report*/
 transcript
 vsim.wlf
+uvm/work_*/
+uvm/transcript
+uvm/*.wlf
+
