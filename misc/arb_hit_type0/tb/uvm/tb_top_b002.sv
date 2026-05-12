@@ -124,8 +124,11 @@ module tb_top_b002;
     assign csr_read      = 1'b0;
     assign csr_writedata = 32'd0;
 
-    // DUT ctrl ready (should be 1'b1 per arb_hit_type0_runctl.sv:59)
+    // DUT ctrl ready was dropped at the entity boundary in arb_hit_type0
+    // 26.3.0 (rc-network is readyless). Probe stays in scope but is no longer
+    // tied to the DUT port.
     logic dut_ctrl_ready;
+    assign dut_ctrl_ready = 1'b1;
 
     arb_hit_type0 dut_b002 (
         .clk                        (clk),
@@ -140,7 +143,7 @@ module tb_top_b002;
 
         .asi_ctrl_data              (stage3_out_data[0]),
         .asi_ctrl_valid             (stage3_out_valid[0]),
-        .asi_ctrl_ready             (dut_ctrl_ready),
+        // .asi_ctrl_ready dropped: rc-network readyless (26.3.0+).
 
         .asi_real_data              (asi_real_data_tied),
         .asi_real_valid             (1'b0),

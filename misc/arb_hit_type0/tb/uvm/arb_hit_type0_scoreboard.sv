@@ -292,7 +292,13 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
 
   function void write_runctl(runctl_seq_item txn);
     run_state = decode_run_state(txn.data);
-    if (txn.data[1] || txn.data[7]) begin
+    // stream_clear fires only on RUN_RESETTING ([7]) per 26.4.0 RTL:
+    // returns MODE / sticky config to defaults AND clears FIFO/arbiter
+    // stream-shape state. RUN_PREPARING ([1]) preserves user MODE config
+    // and stream-shape state (this is the lane-admit asymmetry fix).
+    // RUN_PREPARING still triggers the FSM state transition (run_state)
+    // and the staged reset FSM via reset_start, but no clears.
+    if (txn.data[7]) begin
       real_fifo.delete();
       emu_fifo.delete();
       expected_egress_q.delete();

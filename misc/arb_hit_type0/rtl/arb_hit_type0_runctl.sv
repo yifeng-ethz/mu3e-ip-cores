@@ -1,10 +1,15 @@
 // arb_hit_type0_runctl.sv
 // 9-bit Avalon-ST run-control sink and staged reset orchestrator.
 //
-// Version : 26.3.0
-// Date    : 20260511
+// Version : 26.4.0
+// Date    : 20260512
 // Change  : 26.2.0 (20260504) Register counter clear from staged reset.
 //           26.3.0 (20260511) Drop asi_ctrl_ready; rc-network is readyless.
+//           26.4.0 (20260512) Decouple stream_clear from RUN_PREPARING; MODE
+//                              now clears only on RESETTING (ctrl_data[7]).
+//                              Normal run sequence (PREP/SYNC/RUN/END_RUN)
+//                              preserves MODE config. Fix for lane-admit
+//                              asymmetry observed in on-board Phase 4.5 sweep.
 
 module arb_hit_type0_runctl (
     input  logic       clk,
@@ -57,8 +62,11 @@ module arb_hit_type0_runctl (
     endfunction
 
     // rc-network is readyless (USE_READY=0 broadcast); no ready output here.
+    // stream_clear is decoupled from reset_start: RUN_PREPARING (ctrl_data[1])
+    // must NOT clear user MODE / sticky config; only RUN_RESETTING (ctrl_data[7])
+    // returns the CSR config stickies to their reset defaults. See header.
     assign reset_start    = asi_ctrl_valid & (asi_ctrl_data[1] | asi_ctrl_data[7]) & ~reset_active;
-    assign stream_clear   = reset_start;
+    assign stream_clear   = asi_ctrl_valid & asi_ctrl_data[7] & ~reset_active;
     always_ff @(posedge clk or posedge rst) begin : runctl_state
         if (rst) begin
             run_state         <= RUN_IDLE_CONST;

@@ -3,14 +3,19 @@
 // between the real MuTRiG hit_type0 stream and the emulator hit_type0
 // stream with 16-deep ingress FIFOs per source.
 //
-// Version : 26.5.0
-// Date    : 20260511
+// Version : 26.6.0
+// Date    : 20260512
 // Change  : 26.4.1 (20260506) Preserve per-hit metadata valid through the
 //                              selected DEBUG sideband.
 //           26.5.0 (20260511) Drop run_ctrl ready output to match rc-network
 //                              readyless contract. The original constant '1'
 //                              driver inside arb_hit_type0_runctl.sv is no
 //                              longer routed onto the entity boundary.
+//           26.6.0 (20260512) Decouple stream_clear from RUN_PREPARING in the
+//                              runctl submodule; MODE / sticky config now
+//                              clear only on RUN_RESETTING. Fixes lane-admit
+//                              asymmetry seen in on-board Phase 4.5 sweep
+//                              (Qsys CSR/RC ordering race during run start).
 
 module arb_hit_type0 #(
     parameter integer MODE_DEFAULT      = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
@@ -19,10 +24,10 @@ module arb_hit_type0 #(
     parameter integer WATCHDOG_DEFAULT  = 500,          // FAW threshold cycles, 0 disables
     parameter integer IP_UID            = 32'h41485430, // ASCII "AHT0"
     parameter integer VERSION_MAJOR     = 26,
-    parameter integer VERSION_MINOR     = 5,
+    parameter integer VERSION_MINOR     = 6,
     parameter integer VERSION_PATCH     = 0,
-    parameter integer BUILD             = 511,
-    parameter integer VERSION_DATE      = 20260511,
+    parameter integer BUILD             = 512,
+    parameter integer VERSION_DATE      = 20260512,
     parameter integer VERSION_GIT       = 32'h0000_0000,
     parameter integer INSTANCE_ID       = 0
 ) (
