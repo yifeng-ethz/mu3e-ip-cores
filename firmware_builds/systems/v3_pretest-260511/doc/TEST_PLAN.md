@@ -3,10 +3,10 @@
 **Revision**: 2026-05-12 / draft-1
 **Target**: `mu3e-ip-cores/firmware_builds/feb_system_v3` on FEB SciFi prototype
 **Host**: teferi (`yifeng@teferi`, `/dev/mudaq0` via SWB on link 2)
-**Authoring scope**: comprehensive on-board sign-off — not a liveness smoke test.
+**Authoring scope**: comprehensive on-board sign-off - not a liveness smoke test.
 Each phase is designed to exercise enough of the datapath to surface asymmetries,
 stale-data hazards, CDC glitches, protocol-regression, and address-map drift
-that a simple `read UID → print` run would miss.
+that a simple `read UID -> print` run would miss.
 
 **2026-04-21 validation note**: the active software/tooling path in this repo
 now targets QuestaOne 2026 (`/data1/questaone_sim/questasim`) and headless
@@ -16,17 +16,31 @@ the current bring-up path.
 
 ---
 
+## SIM time conventions
+
+All UVM directed simulation sequences use a fixed RUNNING stage duration of
+exactly 1 ms unless the sequence name and report explicitly declare a long-soak
+exception. At `lvdspll_clk = 125 MHz`, the simulation timebase is 8 ns per tick,
+so the standard RUNNING window is `RUN_WINDOW_8NS = 125000`.
+PREPARE, SYNC, and TERMINATE may take whatever time the harness needs for reset,
+handshake, drain, and analyzer settle; they are not part of the fixed comparison
+window. Count and rate comparisons across directed rows must use the absolute
+hit count produced inside this 1 ms RUNNING window, without post-scaling. Long
+soaks are reserved for explicitly named 10 s or longer stress/aging runs and
+must document their nonstandard RUNNING duration in the sequence/test name and
+report. See `SIM_CONVENTIONS.md` for the one-page tuning reference.
+
 ## 0. Hardware, firmware, and source-of-truth
 
 ### 0.1 Board wiring and link map
 
 | Board | Role | PCIe endpoint | JTAG cable tag | SC link index |
 |---|---|---|---|---|
-| SWB (A10 DE5) | SC master, reset-link master | `1172:0004` → `/dev/mudaq0` | `DE5 [3-6.2]` | — |
-| FEB SciFi | DUT | — | `USB-BlasterII [7-2]` | **2** (per memory `feb_scifi_link_mapping`) |
+| SWB (A10 DE5) | SC master, reset-link master | `1172:0004` -> `/dev/mudaq0` | `DE5 [3-6.2]` | - |
+| FEB SciFi | DUT | - | `USB-BlasterII [7-2]` | **2** (per memory `feb_scifi_link_mapping`) |
 
 The FEB SciFi is on **SWB SC link 2**. `LINK_LOCKED_HIGH_REGISTER_R = 0x00000F00`
-(bits 8..11 set) is **other** boards and does not confirm the SciFi FEB is up —
+(bits 8..11 set) is **other** boards and does not confirm the SciFi FEB is up -
 the SciFi link bit is in the low link-lock register. The full test plan assumes
 only link 2 is being driven; other links may be unplugged.
 
@@ -39,18 +53,18 @@ only link 2 is being driven; other links may be unplugged.
 
 **Pre-flight checklist before any test below:**
 
-1. `jtagconfig -n` — expect `DE5 [3-6.2]` and `USB-BlasterII [7-2]`.
+1. `jtagconfig -n` - expect `DE5 [3-6.2]` and `USB-BlasterII [7-2]`.
 2. Flash SWB with `online_sc` top.sof (if cold-booted or toggled since last SC probe).
 3. Flash FEB SciFi with v3 top.sof.
-4. `sudo -n /usr/local/sbin/mudaq_recover_pcie` — if `/dev/mudaq0` reads return
+4. `sudo -n /usr/local/sbin/mudaq_recover_pcie` - if `/dev/mudaq0` reads return
    all-ones, or after any SWB reflash. **Do not** use `pcie_uio_rescan`.
-5. `lsmod | grep mudaq` then `ls /dev/mudaq0` — both must succeed.
-6. `../systems/system_20260427_testplanphase5/script/build_local_tools.py` — refresh `systems/system_20260427_testplanphase5/bin/sc_tool` and
+5. `lsmod | grep mudaq` then `ls /dev/mudaq0` - both must succeed.
+6. `../systems/system_20260427_testplanphase5/script/build_local_tools.py` - refresh `systems/system_20260427_testplanphase5/bin/sc_tool` and
    `systems/system_20260427_testplanphase5/bin/rc_tool` from the local sources before relying on any stale
    installed copy.
-7. `../systems/system_20260427_testplanphase5/script/sc_tool read 0x00000` (scratch_pad_ram @ word 0) — must return a
+7. `../systems/system_20260427_testplanphase5/script/sc_tool read 0x00000` (scratch_pad_ram @ word 0) - must return a
    well-formed 32-bit reply, not `0xffffffff`.
-8. `../systems/system_20260427_testplanphase5/script/check_ip_metadata.py` — VERSION/GIT cross-check over SC and JTAG
+8. `../systems/system_20260427_testplanphase5/script/check_ip_metadata.py` - VERSION/GIT cross-check over SC and JTAG
    must pass for every reachable IP that exposes live metadata.
 9. Kill any stale `system-console` holding JTAG (memory `kill_system_console`).
 
@@ -59,7 +73,7 @@ only link 2 is being driven; other links may be unplugged.
 | Tool | Purpose |
 |---|---|
 | `build_local_tools.py` | Build the local `sc_tool` / `rc_tool` copies into `systems/system_20260427_testplanphase5/bin/` using the checked-in sources in `../systems/system_20260427_testplanphase5/script/`. |
-| `sc_tool` | 18-bit-word SC transactions. All register probing goes through this tool. **test_slowcontrol is deprecated (memory `sc_hub_word_addressed`) — do not use.** |
+| `sc_tool` | 18-bit-word SC transactions. All register probing goes through this tool. **test_slowcontrol is deprecated (memory `sc_hub_word_addressed`) - do not use.** |
 | `rc_tool` | Send reset-link command bytes from SWB, read `RESET_LINK_STATUS_REGISTER_R` for state echo. |
 | `extract_svd_inventory.py` | Resolve every reachable Qsys slave to its SVD file, SC word base, JTAG byte base, and VERSION/GIT capability. |
 | `check_ip_metadata.py` | Bring-up metadata audit. Reads VERSION and GIT via SC hub and JTAG, then compares the live values against SVD and Qsys metadata. |
@@ -69,7 +83,7 @@ only link 2 is being driven; other links may be unplugged.
 | `run_atpg_v2_reference.sh` | Reference Phase-2 BIST runner, now path-hardened to the local board-test tool layout. |
 | `run_rc_reg_v2_reference.sh` | Reference Phase-3 reset-domain runner, now path-hardened to the local board-test tool layout. |
 
-libmudaq is from `online_dpv2`; v3 libmudaq is an open item (`../systems/system_20260427_testplanphase5/script/README.md` §Build).
+libmudaq is from `online_dpv2`; v3 libmudaq is an open item (`../systems/system_20260427_testplanphase5/script/README.md` section Build).
 For the tests below this is acceptable: the SWB-side SC register addresses are
 part of the `online_sc` SOF, not the FEB v3, and libmudaq only wraps those.
 
@@ -78,13 +92,13 @@ part of the `online_sc` SOF, not the FEB v3, and libmudaq only wraps those.
 `sc_hub v2` packets are **word-addressed** (`byte_addr / 4`). This is the only
 address representation used in the tables below. Verified 2026-04-16; `sc_tool`
 masks input to 18 bits via `sc_addr_mask = 0x0003ffff`. Do **not** send Qsys
-byte addresses to `sc_tool` — they will land on the wrong word and the reply
+byte addresses to `sc_tool` - they will land on the wrong word and the reply
 will decode as random data (or a legitimate `ack=OK` but for the wrong
 register).
 
 ---
 
-## 1. Phase 1 — Bring-up: per-slave register audit
+## 1. Phase 1 - Bring-up: per-slave register audit
 
 **Goal**: Every slave on the SC hub responds, UID matches SVD, VERSION/GIT
 metadata matches the packaged SVD plus Qsys integration values where exposed,
@@ -162,7 +176,7 @@ Expected outcomes:
 - Live `VERSION_GIT` matches the source `VERSION_GIT` when exposed.
 
 A live value that **regresses** below the source (e.g. live VERSION_DATE
-older than the source-of-truth date) is a Phase-1 blocker — it means the
+older than the source-of-truth date) is a Phase-1 blocker - it means the
 SOF on the board is older than the local source tree and every downstream
 phase will be testing the wrong firmware.
 
@@ -181,32 +195,32 @@ must both be reachable before later phases are trusted.
 
 | Slave | Qsys byte base | `sc_tool` word addr | UID expected | VERSION expected (META page 0) | Source path | Probes |
 |---|---|---|---|---|---|---|
-| `scratch_pad_ram` | `0x00000` | `0x00000` | n/a (RAM) | n/a | Qsys built-in RAM | §1.2 |
-| `onewire_master_controller_0` | `0x11000` | `0x04400` | `0x4F574D43` ("OWMC") | `26.2.1.MMDD` packed | `onewire_temp_sense/rtl/vhdl/onewire_master_controller/onewire_master_controller.vhd` | §1.3 |
-| `max10_prog_avmm_0` | `0x12000` | `0x04800` | `0x4D312850` ("M1(P") | `0.1.0.0` (RTL default, build still in flux) | `feb_max10_comm/legacy/max10_prog_avmm/rtl/max10_prog_avmm.vhd` | §1.4 |
-| `charge_injection_pulser_0` | `0x13000` | `0x04C00` | **WO — skip read** | n/a | `charge_injection/legacy/charge_inj_pulser.vhd` | §1.5 |
-| `firefly_xcvr_ctrl_0` | `0x14000` | `0x05000` | n/a (no UID exposed) | n/a | `firefly_xcvr_i2c_master/firefly_xcvr_ctrl.vhd` | §1.6 |
-| `on_die_temp_sense_ctrl` | `0x15000` | `0x05400` | n/a (no UID exposed) | n/a | `alt_temp_sense_controller/altera_temp_sense_ctrl.vhd` | §1.7 |
-| `legacy_firefly_bridge` | `0x16000` | `0x05800` | n/a (bridge) | n/a | Qsys bridge | §1.8 |
-| `mm_bridge` (to datapath) | `0x20000` | `0x08000` | bridge span | n/a | Qsys bridge | §1.9 + Phase 4 |
-| `→ emulator_mutrig_0..7.csr` (via mm_bridge) | `0x20|2000..|21C0` | `0x08800..0x08870` | `0x454D5554` ("EMUT") | `26.3.0.<BUILD>` (BUILD = decimal day, currently 506) | `emulator_mutrig/rtl/emulator_mutrig.sv` | §1.9 |
-| `→ dbg_mm2runctrl_0.csr` (via mm_bridge) | `0x20|2200` | `0x08880` | `0x4D325243` ("M2RC") | non-META; reg[1]=`0x00000801` is HW-status | `misc/dbg_issp_fab/dbg_mm2runctrl.sv` | §1.9 |
-| `→ histogram_statistics_0.csr` (via mm_bridge) | `0x20|A400` | `0x0A900` | `0x48495354` ("HIST") | `26.1.6.429` per Tcl override; RTL default is `26.1.6.<git>` | `histogram_statistics/rtl/histogram_statistics_v2.vhd` + `script/update_scifi_datapath_v3_histogram_stats.tcl` | §1.9 |
-| `→ histogram_statistics_0.hist_bin` (via mm_bridge) | `0x20|A000` | `0x0A800` | n/a (RAM) | n/a | Qsys ping-pong RAM | §1.9 |
-| `→ histogram_ingress_bridge_0.csr` (via mm_bridge) | `0x20|AC00` | `0x0AB00` | `0x48495342` ("HISB") | `26.0.2.<MMDD>` | `histogram_statistics/rtl/histogram_ingress_bridge.vhd` | §1.9 |
-| `upload_mm_bridge` (to upload/runctl CSR) | `0x30000` | `0x0C000` | bridge span | n/a | Qsys bridge | §1.10 + Phase 3 |
-| `→ runctl_mgmt_host_0.csr` (via upload_mm_bridge) | `0x30|0000` | `0x0C000..0x0C013` | `0x52434D48` ("RCMH") | `26.3.0.<BUILD>` (RTL says 12'h505; live shows 505 dec = May 5) | `run-control_mgmt/rtl/runctl_mgmt_host.sv` | §1.10 |
-| `mutrig_cfg_ctrl_0.avmm_csr` | `0x3F010` | `0x0FC04` | n/a (cfg CSR, no UID exposed) | n/a | `mutrig_controller/mutrig_ctrl.vhd` | §1.11 |
+| `scratch_pad_ram` | `0x00000` | `0x00000` | n/a (RAM) | n/a | Qsys built-in RAM | section 1.2 |
+| `onewire_master_controller_0` | `0x11000` | `0x04400` | `0x4F574D43` ("OWMC") | `26.2.1.MMDD` packed | `onewire_temp_sense/rtl/vhdl/onewire_master_controller/onewire_master_controller.vhd` | section 1.3 |
+| `max10_prog_avmm_0` | `0x12000` | `0x04800` | `0x4D312850` ("M1(P") | `0.1.0.0` (RTL default, build still in flux) | `feb_max10_comm/legacy/max10_prog_avmm/rtl/max10_prog_avmm.vhd` | section 1.4 |
+| `charge_injection_pulser_0` | `0x13000` | `0x04C00` | **WO - skip read** | n/a | `charge_injection/legacy/charge_inj_pulser.vhd` | section 1.5 |
+| `firefly_xcvr_ctrl_0` | `0x14000` | `0x05000` | n/a (no UID exposed) | n/a | `firefly_xcvr_i2c_master/firefly_xcvr_ctrl.vhd` | section 1.6 |
+| `on_die_temp_sense_ctrl` | `0x15000` | `0x05400` | n/a (no UID exposed) | n/a | `alt_temp_sense_controller/altera_temp_sense_ctrl.vhd` | section 1.7 |
+| `legacy_firefly_bridge` | `0x16000` | `0x05800` | n/a (bridge) | n/a | Qsys bridge | section 1.8 |
+| `mm_bridge` (to datapath) | `0x20000` | `0x08000` | bridge span | n/a | Qsys bridge | section 1.9 + Phase 4 |
+| `-> emulator_mutrig_0..7.csr` (via mm_bridge) | `0x20|2000..|21C0` | `0x08800..0x08870` | `0x454D5554` ("EMUT") | `26.3.0.<BUILD>` (BUILD = decimal day, currently 506) | `emulator_mutrig/rtl/emulator_mutrig.sv` | section 1.9 |
+| `-> dbg_mm2runctrl_0.csr` (via mm_bridge) | `0x20|2200` | `0x08880` | `0x4D325243` ("M2RC") | non-META; reg[1]=`0x00000801` is HW-status | `misc/dbg_issp_fab/dbg_mm2runctrl.sv` | section 1.9 |
+| `-> histogram_statistics_0.csr` (via mm_bridge) | `0x20|A400` | `0x0A900` | `0x48495354` ("HIST") | `26.1.6.429` per Tcl override; RTL default is `26.1.6.<git>` | `histogram_statistics/rtl/histogram_statistics_v2.vhd` + `script/update_scifi_datapath_v3_histogram_stats.tcl` | section 1.9 |
+| `-> histogram_statistics_0.hist_bin` (via mm_bridge) | `0x20|A000` | `0x0A800` | n/a (RAM) | n/a | Qsys ping-pong RAM | section 1.9 |
+| `-> histogram_ingress_bridge_0.csr` (via mm_bridge) | `0x20|AC00` | `0x0AB00` | `0x48495342` ("HISB") | `26.0.2.<MMDD>` | `histogram_statistics/rtl/histogram_ingress_bridge.vhd` | section 1.9 |
+| `upload_mm_bridge` (to upload/runctl CSR) | `0x30000` | `0x0C000` | bridge span | n/a | Qsys bridge | section 1.10 + Phase 3 |
+| `-> runctl_mgmt_host_0.csr` (via upload_mm_bridge) | `0x30|0000` | `0x0C000..0x0C013` | `0x52434D48` ("RCMH") | `26.3.0.<BUILD>` (RTL says 12'h505; live shows 505 dec = May 5) | `run-control_mgmt/rtl/runctl_mgmt_host.sv` | section 1.10 |
+| `mutrig_cfg_ctrl_0.avmm_csr` | `0x3F010` | `0x0FC04` | n/a (cfg CSR, no UID exposed) | n/a | `mutrig_controller/mutrig_ctrl.vhd` | section 1.11 |
 
 The "VERSION expected" column is the META page-0 packed `{MAJOR,MINOR,PATCH,BUILD}`
 word. The BUILD field is integration-overridable so the exact value floats with
 each FEB recompile; treat the live readback as authoritative once the live
 UID + MAJOR.MINOR.PATCH triple matches the source.
 
-### 1.2 Scratchpad pre-flight — non-destructive
+### 1.2 Scratchpad pre-flight - non-destructive
 
 `scratch_pad_ram` is the canonical health check. In Phase 1 we do **reads only**
-against a range we will then re-use destructively in Phase 2 BIST §2.1.
+against a range we will then re-use destructively in Phase 2 BIST section 2.1.
 
 Procedure:
 
@@ -219,72 +233,72 @@ for a in $(seq 0 15); do ./sc_tool read $(printf "0x%05x" $a); done
 
 Failure modes to catch:
 
-- **No reply / timeout** ⇒ SC preamble never reached scratchpad. Check SC
+- **No reply / timeout** => SC preamble never reached scratchpad. Check SC
   link-lock bit, then the sc_hub primary ring on SignalTap (`sc_main` packet
-  in-progress signal — §4.3 trigger `SC_TORN_PKT`).
-- **`ack != OK` or `rsp != 2'b00`** ⇒ sc_hub is replying with SLVERR. Record
+  in-progress signal - section 4.3 trigger `SC_TORN_PKT`).
+- **`ack != OK` or `rsp != 2'b00`** => sc_hub is replying with SLVERR. Record
   the exact `(addr, ack, rsp)` triple; compare against the decoded `ack`/`rsp`
   fields per the `sc_hub v2` overlay (memory `sc_hub_word_addressed`).
-- **All reads return `0xFFFFFFFF`** ⇒ `/dev/mudaq0` is in BAR-garbage state
-  (the `online_dpv2` SWB SOF regression). Rerun §0.2 step 2 and §0.2 step 4.
+- **All reads return `0xFFFFFFFF`** => `/dev/mudaq0` is in BAR-garbage state
+  (the `online_dpv2` SWB SOF regression). Rerun section 0.2 step 2 and section 0.2 step 4.
 
 ### 1.3 onewire_master_controller_0 (word `0x04400`)
 
 Per `onewire_master_controller_0` SVD, the UID register (offset 0) is a
 32-bit magic. Read:
 
-- `word_addr = 0x04400` → expect the documented UID literal.
-- `word_addr = 0x04401` → version; must equal the `version=` attribute on the
+- `word_addr = 0x04400` -> expect the documented UID literal.
+- `word_addr = 0x04401` -> version; must equal the `version=` attribute on the
   module instance in `debug_sc_system_v3.qsys`.
-- `word_addr = 0x04402..0x0440F` → status / device address / last-byte-read.
+- `word_addr = 0x04402..0x0440F` -> status / device address / last-byte-read.
   These are all RO or RW-scratch; the bring-up check is that every address in
   the declared aperture returns `ack=OK` and does **not** hang.
 
 Failure-to-catch: silent aperture under-decode (hub replies OK on every address
 up to slave span, but the slave itself ignored the read). Check: read two
 out-of-range words (e.g. `0x0440F + 1`, `0x04500`); both must return either
-a decoded slave register or a `SLVERR` from the hub — **not** the same value
+a decoded slave register or a `SLVERR` from the hub - **not** the same value
 as the in-range register. If they return the same value, the hub is reflecting
 the last ring datum (stale preamble reuse) and the test stops.
 
 ### 1.4 max10_prog_avmm_0 (word `0x04800`)
 
-Same audit pattern as §1.3. UID and version register per
+Same audit pattern as section 1.3. UID and version register per
 `common/max10_prog_avmm/max10_prog_avmm.svd`. This slave is a programming
-interface — `start`/`command` bits are RW but must be left at zero after
+interface - `start`/`command` bits are RW but must be left at zero after
 bring-up. Record the contents of the status register `[31:16]=rd_data`.
 
 ### 1.5 charge_injection_pulser_0 (word `0x04C00`)
 
 **Write-only per SVD** (`charge_injection_pulser.svd`): reads are not
 implemented. Phase 1 behavior: issue one read to confirm the hub replies (OK
-or SLVERR — both are acceptable), then skip; the write paths are covered in
+or SLVERR - both are acceptable), then skip; the write paths are covered in
 Phase 4 under `enable=0` guard.
 
 ### 1.6 firefly_xcvr_ctrl_0 (word `0x05000`)
 
-14-word aperture, RW head (I²C command / data), RO tail (last-read data +
+14-word aperture, RW head (I^2C command / data), RO tail (last-read data +
 status). Per `firefly_xcvr_ctrl.svd`:
 
 | Offset (byte) | Word addr | Field | Check |
 |---|---|---|---|
-| `0x00` | `0x05000` | FF1_TEMP_STATUS (RW, `[7:0]=temperature`) | Read, record. Temp in a sane board range (15–60 °C). |
+| `0x00` | `0x05000` | FF1_TEMP_STATUS (RW, `[7:0]=temperature`) | Read, record. Temp in a sane board range (15-60 deg C). |
 | `0x04` | `0x05001` | ... | Iterate through SVD; check `ack=OK` on every word. |
 
-Do **not** trigger an I²C transaction in Phase 1. Set `start=0` guard by
+Do **not** trigger an I^2C transaction in Phase 1. Set `start=0` guard by
 avoiding writes to the `COMMAND` register.
 
 ### 1.7 on_die_temp_sense_ctrl (word `0x05400`)
 
 Per `on_die_temp_sense.svd`. Read temperature, record. Failure mode:
-temperature reads `0x00` or `0xFF` — sensor not initialized. Not a Phase 1
+temperature reads `0x00` or `0xFF` - sensor not initialized. Not a Phase 1
 blocker but a flag for follow-up.
 
 ### 1.8 legacy_firefly_bridge (word `0x05800`)
 
 Bridge. Read one word to confirm it responds; no SVD-level check needed.
 
-### 1.9 mm_bridge (word `0x08000`) — downstream datapath audit
+### 1.9 mm_bridge (word `0x08000`) - downstream datapath audit
 
 `mm_bridge` (byte span `0x20000`) spans into the SciFi datapath exported AVMM
 plane. Phase 1 must now address real datapath slaves through this bridge, not
@@ -321,7 +335,7 @@ If any of these bridged accesses fail while the local control-plane slaves
 still answer, treat that as a bridge integration failure and stop before
 Phase 3 or Phase 4.
 
-### 1.10 upload_mm_bridge (word `0x0C000`) — run-control CSR aperture
+### 1.10 upload_mm_bridge (word `0x0C000`) - run-control CSR aperture
 
 `upload_mm_bridge` exposes `upload_subsystem.csr`, which currently contains
 `runctl_mgmt_host_0.csr` at internal byte base `0x0000`. The external
@@ -357,7 +371,7 @@ in the SWB-side memory note `sc_hub_word_addressed`.
 `test_slowcontrol` to reach subwords. Memory `sc_hub_word_addressed` now
 pins `sc_tool` as the authoritative tool at 18-bit word span, so Phase 1
 uses `sc_tool` exclusively. If `sc_tool` returns SLVERR here, record and
-escalate — do **not** fall back to the deprecated tool.
+escalate - do **not** fall back to the deprecated tool.
 
 ### 1.12 Pass/Fail criterion for Phase 1
 
@@ -366,12 +380,12 @@ All local control-plane slaves, the required datapath leaves behind
 `upload_mm_bridge` return `ack=OK` on the required UID/version (or first
 in-aperture) reads, and the out-of-range reads either SLVERR or return
 slave-specific data (not stale preamble data). No test below may run until
-Phase 1 passes clean — a stale-ring or bridge decode failure in Phase 1 will
+Phase 1 passes clean - a stale-ring or bridge decode failure in Phase 1 will
 silently corrupt every later phase's write/readback comparison.
 
 ---
 
-## 2. Phase 2 — BIST: write/readback/restore, ATPG, scratchpad randomized
+## 2. Phase 2 - BIST: write/readback/restore, ATPG, scratchpad randomized
 
 **Goal**: Every **RW** register in the SC hub aperture survives a
 write/readback/restore cycle without bit-flips; the scratchpad survives an
@@ -380,12 +394,12 @@ PRNG) and an alignment-corner burst; sc_hub v2 admission/back-pressure is
 correct under the same patterns.
 
 Reference: `../systems/system_20260427_testplanphase5/script/run_atpg_v2_reference.sh` (v2, 66-pattern driver). Re-pin
-all slave base addresses to the v3 map in §1.1 before using.
+all slave base addresses to the v3 map in section 1.1 before using.
 
-### 2.1 Scratchpad BIST — destructive
+### 2.1 Scratchpad BIST - destructive
 
 The scratch_pad_ram has a declared span. Derive `N_WORDS` from the Qsys module
-span (`components.ipx` → `scratch_pad_ram` span attribute).
+span (`components.ipx` -> `scratch_pad_ram` span attribute).
 
 Pattern matrix:
 
@@ -406,7 +420,7 @@ For each pattern:
    span here before writing).
 2. Write pattern to each word.
 3. Read back and compare.
-4. On mismatch, record `(addr, expected, got)`; **do not abort** — collect
+4. On mismatch, record `(addr, expected, got)`; **do not abort** - collect
    the full diff for the pattern so a bit-line failure shows up as a
    systematic mask.
 5. Restore original values.
@@ -415,10 +429,10 @@ For each pattern:
 word that differs means the SC-write path has an ack/retry bug (the write
 landed after the comparison). This catches the v2 class of defects where the
 response overtook the write because `sc_hub` let a read through while a write
-was still in flight (memory `sc_hub_robustness_over_throughput` — "stall or
+was still in flight (memory `sc_hub_robustness_over_throughput` - "stall or
 reject, never speculatively accept").
 
-### 2.2 ATPG sweep — all SC-hub-visible RW registers
+### 2.2 ATPG sweep - all SC-hub-visible RW registers
 
 Using the SVD for each slave, enumerate RW registers. For each:
 
@@ -432,14 +446,14 @@ Using the SVD for each slave, enumerate RW registers. For each:
 | 6 | Write PRNG (16 values), read back after each. |
 | 7 | Restore original. |
 
-**Skip**: registers marked WO (e.g. `charge_injection_pulser_0`) — write-only
+**Skip**: registers marked WO (e.g. `charge_injection_pulser_0`) - write-only
 fields are exercised functionally in Phase 4. Handle registers with
-side-effects per SVD: any register whose write triggers an I²C / one-wire
+side-effects per SVD: any register whose write triggers an I^2C / one-wire
 transaction must have `start`/`enable` fields masked to 0 during this sweep.
 
 **Aperture-edge check**: after the sweep, read a word one past the last
-valid offset of each slave; expect either SLVERR or a distinct value — not
-the aperture's last-read data (same hazard as §1.3).
+valid offset of each slave; expect either SLVERR or a distinct value - not
+the aperture's last-read data (same hazard as section 1.3).
 
 ### 2.3 sc_hub admission / ordering regression
 
@@ -449,13 +463,13 @@ reject**, never speculatively accept. Two tests:
 **2.3.a Burst-RW-interleave**: issue a 64-word write burst to scratchpad,
 immediately followed by a single-word read at burst[0]. The read reply must
 reflect the final written value (i.e. ordering held). If the reply is the
-pre-burst value, the hub is reordering — record the `addr_word` in the read
-reply (sc_tool prints `ack`/`rsp` separately per §0.3).
+pre-burst value, the hub is reordering - record the `addr_word` in the read
+reply (sc_tool prints `ack`/`rsp` separately per section 0.3).
 
 **2.3.b Reply-space exhaustion**: issue back-to-back bursts larger than the
 reply FIFO depth without draining. Expected: hub back-pressures the writer
 (host `sc_tool` sees writes slow down), and no reply is lost. Observe on
-SignalTap the `sc_main_ring_valid` / `sc_main_ring_ready` pair (§4.3 trigger
+SignalTap the `sc_main_ring_valid` / `sc_main_ring_ready` pair (section 4.3 trigger
 table).
 
 ### 2.4 Pass/Fail criterion for Phase 2
@@ -463,12 +477,12 @@ table).
 Zero bit-flips across all RW registers and scratchpad after restore; every
 address in-aperture replies `ack=OK` during the sweep; no reply lost under
 burst pressure. Any write that **appears** to succeed but reads back
-differently is a hard fail — it is almost always a sc_hub admission bug and
+differently is a hard fail - it is almost always a sc_hub admission bug and
 must be traced before Phase 3 runs.
 
 ---
 
-## 3. Phase 3 — Run-control test
+## 3. Phase 3 - Run-control test
 
 **Goal**: `runctl_mgmt_host_0` receives commands from SWB over the
 **reset-link wire**, advances the 9-bit one-hot run-state correctly for every
@@ -501,7 +515,7 @@ Current pipe reset policy:
 
 Per memory `feb_swb_runctl_protocol_mismatch`, there is a known
 **protocol-shape hazard**: SWB `a10_reset_link` sends 1-byte commands, FEB
-`runctl_mgmt_host` v26.1 expected a 3-byte packet — `ext_hard_reset` never
+`runctl_mgmt_host` v26.1 expected a 3-byte packet - `ext_hard_reset` never
 fired from a SWB pulse. v26.2 is the fix; Phase 3 must **verify** the fix
 rather than assume it.
 
@@ -523,7 +537,7 @@ Phase-3 primary CSR readback path is therefore:
 - `RX_CMD_COUNT` = `0x0C00F`
 - `LOCAL_CMD` = `0x0C013`
 
-The JTAG path in §3.3 is now strictly a fallback and cross-check.
+The JTAG path in section 3.3 is now strictly a fallback and cross-check.
 
 ### 3.2 Command sweep
 
@@ -552,16 +566,16 @@ Per-opcode procedure:
 
 | Step | Action | Expectation |
 |---|---|---|
-| 1 | Read `rc_tool status` — record `RESET_LINK_CTL_REGISTER_W`, `RESET_LINK_STATUS_REGISTER_R`, `RESET_LINK_RUN_NUMBER_REGISTER_W`, `last state byte`. | Baseline. |
-| 2 | Read `runctl_mgmt_host_0.CSR_STATUS` (`0x0C003`) — decode bits {31:log_fifo_empty, 30:local_cmd_busy, 23:16:host_state, 15:8:recv_state, 5:ct_hreset, 4:dp_hreset, 1:host_idle, 0:recv_idle}. | Baseline = `0x80000003` if quiescent. |
+| 1 | Read `rc_tool status` - record `RESET_LINK_CTL_REGISTER_W`, `RESET_LINK_STATUS_REGISTER_R`, `RESET_LINK_RUN_NUMBER_REGISTER_W`, `last state byte`. | Baseline. |
+| 2 | Read `runctl_mgmt_host_0.CSR_STATUS` (`0x0C003`) - decode bits {31:log_fifo_empty, 30:local_cmd_busy, 23:16:host_state, 15:8:recv_state, 5:ct_hreset, 4:dp_hreset, 1:host_idle, 0:recv_idle}. | Baseline = `0x80000003` if quiescent. |
 | 3 | Read `CSR_RX_CMD_COUNT` (`0x0C00F`). | Baseline counter value N. |
-| 4 | Read `CSR_LAST_CMD` (`0x0C004`) — `{shadow_fpga_addr[15:8], 8'd0, shadow_last_cmd[7:0]}`. | Baseline `0x00000000` if no command has ever run since reset. |
+| 4 | Read `CSR_LAST_CMD` (`0x0C004`) - `{shadow_fpga_addr[15:8], 8'd0, shadow_last_cmd[7:0]}`. | Baseline `0x00000000` if no command has ever run since reset. |
 | 5 | `rc_tool send <cmd>` (optionally `--run <N>` for run-prepare). | sc_tool write returns ack=OK. Settle 5 ms (rc_tool default). |
 | 6 | Re-read `rc_tool status`. | `last state byte` reflects the opcode just sent. |
 | 7 | Re-read `runctl_mgmt_host_0.CSR_STATUS`. | `recv_state[15:8]` and `host_state[23:16]` reflect the opcode-driven FSM update (e.g. `start-run` -> RUNNING, `reset` -> momentary `dp_hreset`/`ct_hreset` window then back to idle, `enable` -> ENABLED). |
 | 8 | Re-read `CSR_RX_CMD_COUNT`. | Value = **N+1 exactly**. Any other value is a dropped packet (N), a double-count (N+2), or the protocol-shape regression. **HARD FAIL CONDITION** |
 | 9 | Re-read `CSR_LAST_CMD`. | Low byte = opcode just sent (e.g. `0x30` for reset). |
-| 10 | Re-read `CSR_STATUS` and confirm hard-reset-window bits closed if applicable. | For `reset`: `ct_hreset` and `dp_hreset` are pulses bounded by `EXT_HARD_RESET_PULSE_CYCLES = 16384` LVDS-PLL cycles ≈ 130 µs — sc_tool readback ~ms later observes them deasserted. |
+| 10 | Re-read `CSR_STATUS` and confirm hard-reset-window bits closed if applicable. | For `reset`: `ct_hreset` and `dp_hreset` are pulses bounded by `EXT_HARD_RESET_PULSE_CYCLES = 16384` LVDS-PLL cycles approx. 130 us - sc_tool readback ~ms later observes them deasserted. |
 
 **Expected RESET_LINK_STATUS echo per opcode** (`rc_tool status` `last state byte`):
 The reset-link echo byte is the opcode itself or the opcode-defined ack symbol;
@@ -569,17 +583,17 @@ record the actual values in the phase log so this column can be tightened
 once the first clean sweep is recorded.
 
 **Expected CSR_RX_CMD_COUNT delta**: +1 per command, exact. Per the Phase-2
-caveat (sc_hub v2 transient ring drops ≈ 0.17%) any single-shot lag must be
+caveat (sc_hub v2 transient ring drops approx. 0.17%) any single-shot lag must be
 distinguished from a real drop by repeating the command and observing whether
 the counter advances on the retry. A persistent lag is a Phase-3 FAIL.
 
-**Targeted regression test for the v26.1→v26.2 fix**: explicitly send
+**Targeted regression test for the v26.1->v26.2 fix**: explicitly send
 `reset` (opcode `0x30`) as a **single** 1-byte packet and verify the
 `CSR_STATUS.dp_hreset` and `CSR_STATUS.ct_hreset` bits pulse high then
 return to 0, AND that `CSR_RX_CMD_COUNT` increments by exactly 1. Pre-v26.2
 this counter and the hard-reset pulse never fired from a SWB one-byte
 packet. Run the sequence 16 times and confirm the counter advances by
-exactly 16 (not 0, not 48 — 48 would be the 3-byte bug re-interpretation).
+exactly 16 (not 0, not 48 - 48 would be the 3-byte bug re-interpretation).
 
 ### 3.3 Fallback path: system-console JTAG inject
 
@@ -599,7 +613,7 @@ Addresses (relative to `0x00030000` on `control_path_subsystem.jtag_master.maste
 | LOCAL_CMD | `0x4C` | write-port: pokes the command directly, bypassing the reset-link wire. |
 
 The JTAG path **also** latches `CSR_RX_CMD_COUNT` (shared counter). The full
-Phase 3 sweep §3.2 must reproduce across both paths — if counts diverge, one
+Phase 3 sweep section 3.2 must reproduce across both paths - if counts diverge, one
 path has a dropped transaction. Mandatory because memory
 `feb_upload_jtag_master_stalled` documents the exact class of hang this
 cross-check catches.
@@ -618,17 +632,17 @@ domain:
   feeds the cclk156/datapath reset merge and releases through the synchronizers
   in `feb_system_v3_pipe.qsys`.
 
-Per SpecBook §4.6.2 the command-to-reset mapping is fixed. For each
+Per SpecBook section 4.6.2 the command-to-reset mapping is fixed. For each
 reset-generating opcode, on SignalTap:
 
 1. Trigger on `runctl_mgmt_host_0.ext_hard_reset` **rising edge** with 1-cycle
    condition `ext_hard_reset == 1'b1 && $past(ext_hard_reset) == 1'b0`.
-2. Capture a window ±256 cycles around the edge in the LVDS outclock domain.
+2. Capture a window +/-256 cycles around the edge in the LVDS outclock domain.
 3. Confirm downstream reset propagation at
    `ext_reset_merge_cclk156.reset_out`, `ext_reset_pipe*_cclk156`, and
    `data_path_subsystem.xcvr_reset`. Separately record `dp_hard_reset` and
    `ct_hard_reset` as IP-local outputs/counters.
-4. Confirm no spurious reset edges between commands (the counter §3.2 step 7
+4. Confirm no spurious reset edges between commands (the counter section 3.2 step 7
    already catches this aggregated; SignalTap confirms no phantom pulses
    below the counter's resolution).
 
@@ -671,7 +685,7 @@ reads (`scratch_pad_ram`, `sc_hub UID`, `onewire UID`) returned `rsp=OK` with
 the expected payload; CSR_RX_CMD_COUNT advanced by exactly +1 across each
 opcode (0x30 -> 0x31 -> 0x10). Evidence:
 `reports/phase3_postfix_20260511_195758.log`. Detailed pre/post snapshots are
-captured in §3.7.
+captured in section 3.7.
 
 ### 3.6 Sim-side directed sequences (BUG-RC-RESET-SCWEDGE, BUG-RC-RUN-EMUL)
 
@@ -699,11 +713,11 @@ labelled `uvm_info` marker on the silicon-vs-stub mismatch so the parent
 regression can promote the marker to xfail when the
 `TB_INT_BIND_REAL_DUT` Qsys-bound compile lands.
 
-### 3.7 Postfix retest 2026-05-11 — BUG-RC-RESET-SCWEDGE on-board verification
+### 3.7 Postfix retest 2026-05-11 - BUG-RC-RESET-SCWEDGE on-board verification
 
 **SOF**: `firmware_builds/systems/v3_pretest-260511-fix-runctl-reset-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof`
 (sha256 prefix `63d5d2fbe608bd88`).
-**Qsys version**: `feb_system_v3.qsys = 3.0.1.0511` — description "runctl_mgmt_host
+**Qsys version**: `feb_system_v3.qsys = 3.0.1.0511` - description "runctl_mgmt_host
 ext_hard_reset SC-plane wedge fix".
 **Topology delta**: broke
 `ext_reset_pipe2_cclk156.out_reset -> control_path_subsystem.clk156_in_rst`;
@@ -732,7 +746,7 @@ replaced with direct
 
 **Key observations**:
 
-- **Post-0x30 SC reads were clean** — no `0xEEEEEEEE` / `RSP3` anywhere.
+- **Post-0x30 SC reads were clean** - no `0xEEEEEEEE` / `RSP3` anywhere.
   Pre-fix SOF wedged every SC slave at this exact step
   (`reports/phase3_20260511_184713.log` lines 261-263). The fix verified.
 - `CSR_RX_CMD_COUNT` advanced exactly +1 per opcode (0 -> 1 -> 2 -> 3),
@@ -749,14 +763,14 @@ replaced with direct
 
 ---
 
-## 4. Phase 4 — Emulator + histogram datapath
+## 4. Phase 4 - Emulator + histogram datapath
 
 **Goal**: the 8-lane `emulator_mutrig` LFSR produces statistically correct
 hit streams that the SciFi data path consumes end-to-end, SWB receives
 structurally well-formed hit records, SignalTap triggers sourced from
 `DV_FORMAL.md` catch every class of datapath abnormality, and
 `histogram_statistics` reflects the injector rate/channel-mask parameters
-exactly — with channel-mask and rate-sweep **derived** patterns, not just
+exactly - with channel-mask and rate-sweep **derived** patterns, not just
 monotonicity.
 
 ### 4.1 Architecture under test (canonical references)
@@ -769,17 +783,17 @@ monotonicity.
   pre-hit-stack or post-hit-stack stream.
 - `mu3e-ip-cores/charge_injection/{charge_injection_pulser,mutrig_injector}.svd`.
 - `mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/DV_FORMAL.md`
-  — source of all SignalTap trigger conditions in §4.3.
+  - source of all SignalTap trigger conditions in section 4.3.
 
 Key datapath wiring verified from `scifi_datapath_system_v3.qsys` (lines
 noted for traceability):
 
-- `run_control_splitter.out0 → histogram_statistics_0.ctrl`.
-- `histogram_ingress_bridge_0.hist_out → histogram_statistics_0.hist_fill_in`.
+- `run_control_splitter.out0 -> histogram_statistics_0.ctrl`.
+- `histogram_ingress_bridge_0.hist_out -> histogram_statistics_0.hist_fill_in`.
 - `histogram_ingress_bridge_0.pre_in` taps the pre-hit-stack stream and
   `histogram_ingress_bridge_0.post_in` taps the post-hit-stack stream.
-- `histogram_ingress_bridge_0.pre_out → hit_stack_subsystem_0.hit_type_1`.
-- 7 more `hist_rate_splitter_N.out1 → histogram_statistics_0.fill_in_N`
+- `histogram_ingress_bridge_0.pre_out -> hit_stack_subsystem_0.hit_type_1`.
+- 7 more `hist_rate_splitter_N.out1 -> histogram_statistics_0.fill_in_N`
   giving per-lane fill taps.
 - `emulator_mutrig_N.data_clock = lvds_rx_28nm_0.outclock`;
   `data_reset = master_datapath.master_reset`.
@@ -790,20 +804,20 @@ generated `feb_system_v3.sopcinfo` address map). External SC word =
 
 | Module | Byte base (internal) | External `sc_tool` word | Span | Comment |
 |---|---|---|---|---|
-| `emulator_mutrig_0..7.csr` | `0x2000..0x21C0` (Δ0x40) | `0x08800..0x08870` (Δ0x10) | 16 words / inst | v3 CSR layout (different from legacy SVD) |
+| `emulator_mutrig_0..7.csr` | `0x2000..0x21C0` (delta0x40) | `0x08800..0x08870` (delta0x10) | 16 words / inst | v3 CSR layout (different from legacy SVD) |
 | `dbg_mm2runctrl_0.csr` | `0x2200` | `0x08880` | 16 words | run-control debug observation, UID="M2RC" |
 | `mts_preprocessor_0.csr` | `0x4000` | `0x09000` | 8 words | first MTS preprocessor stage |
 | `mts_preprocessor_1.csr` | `0x8000` | `0x0A000` | 8 words | second MTS preprocessor stage |
 | `histogram_statistics_0.hist_bin` | `0xA000` | `0x0A800` | 256-bin (RAM) | 256-word ping-pong bin window |
 | `histogram_statistics_0.csr` | `0xA400` | `0x0A900` | 32 words | UID="HIST" |
 | `histogram_ingress_bridge_0.csr` | `0xAC00` | `0x0AB00` | 4 words | UID="HISB" |
-| `ring_buffer_cam_HSS0_0..3.csr` | `0xB000..0xB180` (Δ0x80) | `0x0AC00..0x0AC60` (Δ0x20) | 32 words / inst | UID="RBCM" |
+| `ring_buffer_cam_HSS0_0..3.csr` | `0xB000..0xB180` (delta0x80) | `0x0AC00..0x0AC60` (delta0x20) | 32 words / inst | UID="RBCM" |
 | `mutrig_injector_0.csr` | `0xB200` | `0x0AC80` | 16 words | UID="MINJ" |
-| `ring_buffer_cam_HSS1_0..3.csr` | `0xB400..0xB580` (Δ0x80) | `0x0AD00..0x0AD60` (Δ0x20) | 32 words / inst | UID="RBCM" |
+| `ring_buffer_cam_HSS1_0..3.csr` | `0xB400..0xB580` (delta0x80) | `0x0AD00..0x0AD60` (delta0x20) | 32 words / inst | UID="RBCM" |
 | `feb_frame_assembly_HSS0.csr` | `0xD000` | `0x0B400` | 16 words | no UID; word0=feb_type, word1=feb_id |
 | `feb_frame_assembly_HSS1.csr` | `0xD040` | `0x0B410` | 16 words | no UID; word0=feb_type, word1=feb_id |
 
-**v3 `emulator_mutrig` CSR map (in-aperture words 0..0x0F)** — from
+**v3 `emulator_mutrig` CSR map (in-aperture words 0..0x0F)** - from
 `emulator_mutrig/rtl/frontend/frontend_csr.sv`, NOT the legacy SVD:
 
 | Word | Name | Access | Description |
@@ -832,18 +846,18 @@ Verify on the board by reading the `histogram_statistics_0` UID at
 `0x0A900` (expect `0x48495354`) and `emulator_mutrig_0` UID at `0x08800`
 (expect `0x454D5554`) before running any Phase 4 sub-test below.
 
-### 4.2 4a — Emulator not-stuck verification
+### 4.2 4a - Emulator not-stuck verification
 
 **Claim**: with `cfg_central_global_enable=1` (default at reset) and the
 runctl FSM in run-state `0x12` (start-run, AVST one-hot
 `9'b000001000` reaching emulator `asi_ctrl`), `run_generating=ctrl_state_q[3]`
 asserts inside every emulator and hits flow downstream through
-`mts_preprocessor → ring_buffer_cam → feb_frame_assembly`, with
+`mts_preprocessor -> ring_buffer_cam -> feb_frame_assembly`, with
 `histogram_statistics_0.TOTAL_HITS` and
 `feb_frame_assembly_HSS0.actual_hit_cnt_all` advancing within a few hundred
 ms.
 
-**CRITICAL — runctl reset opcodes are forbidden in this build.** Do NOT send
+**CRITICAL - runctl reset opcodes are forbidden in this build.** Do NOT send
 `reset` (0x30) or `stop-reset` (0x31): they wedge the FEB SC plane on the
 current v3_pretest SOF (every SC reply becomes `0xEEEEEEEE`, recovery
 requires reflash). Only the 10 PASS opcodes from Phase 3 are safe here:
@@ -852,7 +866,7 @@ abort-run (0x14), start-link-test (0x20), stop-link-test (0x21),
 start-sync-test (0x24), stop-sync-test (0x25), test-sync (0x26).
 
 **Prerequisite**: Reflash FEB via `tools/run_script/program_feb.sh` and
-verify SC plane alive with §1 pre-flight before starting Phase 4. The
+verify SC plane alive with section 1 pre-flight before starting Phase 4. The
 runctl FSM must be at LAST_CMD=0 or any non-reset opcode (the SWB
 `RESET_LINK_STATUS_REGISTER_R` echo byte may show stale state from prior
 runs; what matters is FEB-side `runctl_mgmt_host_0.CSR_LAST_CMD` reads
@@ -884,11 +898,11 @@ Procedure (CSR addresses are sc_tool word addresses behind `mm_bridge`):
 | 2.a | (Optional) Override `cfg_hit_rate` on emulator 0. | `0x0880B` | write `{noise_rate=0x0000, hit_rate=0x0800}` = `0x00000800` for ~8 hits/frame |
 | 2.b | (Optional) Override `PRNG_SEED` on emulator 0. | `0x0880E` | write `0xDEADBEEF` |
 | 2.c | (Optional) Force `LANE_ENABLE` to all 8 lanes on emulator 0. | `0x08812` | write `{asic_id_base=0, lane_enable_mask=0xFF}` = `0x000000FF` |
-| 3 | `rc_tool send run-prepare --run 0x55`. | runctl `0x0C004` `0x0C00F` | LAST_CMD=`0x10`, RX_CMD_COUNT 0→1. SWB-side `RESET_LINK_STATUS_REGISTER_R`=`0x00000055` (run number echo). |
-| 4 | `rc_tool send sync`. | runctl `0x0C004` `0x0C00F` | LAST_CMD=`0x11`, RX_CMD_COUNT 1→2. SWB-side state byte=`0x11`. |
-| 5 | `rc_tool send start-run`. | runctl `0x0C004` `0x0C00F` | LAST_CMD=`0x12`, RX_CMD_COUNT 2→3. SWB-side state byte=`0x12`. |
-| 6 | Wait 500 ms — 2 s. | | runctl FSM is now broadcasting AVST one-hot `9'b000001000` to the run_control_splitter fanout. |
-| 7 | Read histogram TOTAL_HITS. | `0x0A90D` | **must be > 0** within 1–2 s. Expected ≥ ~10^4 hits/sec at default rate × 8 lanes × 8 emulators. |
+| 3 | `rc_tool send run-prepare --run 0x55`. | runctl `0x0C004` `0x0C00F` | LAST_CMD=`0x10`, RX_CMD_COUNT 0->1. SWB-side `RESET_LINK_STATUS_REGISTER_R`=`0x00000055` (run number echo). |
+| 4 | `rc_tool send sync`. | runctl `0x0C004` `0x0C00F` | LAST_CMD=`0x11`, RX_CMD_COUNT 1->2. SWB-side state byte=`0x11`. |
+| 5 | `rc_tool send start-run`. | runctl `0x0C004` `0x0C00F` | LAST_CMD=`0x12`, RX_CMD_COUNT 2->3. SWB-side state byte=`0x12`. |
+| 6 | Wait 500 ms - 2 s. | | runctl FSM is now broadcasting AVST one-hot `9'b000001000` to the run_control_splitter fanout. |
+| 7 | Read histogram TOTAL_HITS. | `0x0A90D` | **must be > 0** within 1-2 s. Expected >= ~10^4 hits/sec at default rate x 8 lanes x 8 emulators. |
 | 7.b | Read histogram LAST_INT_HITS. | `0x0A911` | latched at every 1-second BANK interval; must be > 0 after the first interval edge. |
 | 7.c | Read histogram BANK_STATUS. | `0x0A90B` | active_bank toggles each second (bit 0 flips), so over 2 s expect the value to change at least once. |
 | 7.d | Read histogram PORT_STATUS. | `0x0A90C` | `fifo_empty_mask` should DROP below `0xFF` while hits are flowing; `fifo_level_max` should be non-zero. |
@@ -898,7 +912,7 @@ Procedure (CSR addresses are sc_tool word addresses behind `mm_bridge`):
 
 **Run-control state observability note**: `runctl_mgmt_host_0.CSR_STATUS`
 at `0x0C003` is observed to read `0x00000003` (host_idle | recv_idle) even
-while the FEB-side reset-link FSM is in run-state 0x12 — the host_state[23:16]
+while the FEB-side reset-link FSM is in run-state 0x12 - the host_state[23:16]
 and recv_state[15:8] sub-fields read as 0 due to a sampling skew between
 the `host_state_sync_q1` flop and the SC clock. Treat the SWB-side
 `RESET_LINK_STATUS_REGISTER_R` echo byte (top 8 bits of `rc_tool status`)
@@ -908,11 +922,11 @@ here are bit 31 (log_fifo_empty) and bit 30 (local_cmd_busy).
 **Order constraint**: `end-run` (0x13) is **not accepted from every prior
 state**. Observed 2026-05-11: after `enable` (0x32) the FEB FSM rejects
 `end-run` (0x13); `abort-run` (0x14) is accepted from any state. The safe
-end-of-run sequence in this build is `end-run` → (if rejected) `abort-run`.
+end-of-run sequence in this build is `end-run` -> (if rejected) `abort-run`.
 
-10. If hits do not flow after the rc-readyless rebuild, repeat steps 7–9 with
+10. If hits do not flow after the rc-readyless rebuild, repeat steps 7-9 with
     a SignalTap capture. This condition is active as of the 2026-05-12
-    hardware retest (§4.10): run-control CSRs advance, but histogram and
+    hardware retest (section 4.10): run-control CSRs advance, but histogram and
     frame-assembly hit counters stay zero. Use
     `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp`
     first. It probes the known-good/unknown gap: run-control mux output,
@@ -924,27 +938,27 @@ end-of-run sequence in this build is `end-run` → (if rejected) `abort-run`.
     Confirm `feb_frame_assembly_HSS0` actual hit count freezes (no further
     increment), `BANK_STATUS` interval timer stops (no further bank
     flips), and SC plane remains alive (re-read scratch_pad_ram at
-    `0x00000` and emulator UID at `0x08800` — must NOT return
+    `0x00000` and emulator UID at `0x08800` - must NOT return
     `0xEEEEEEEE`).
 
 Failure modes caught:
 
-- **No hits in TOTAL_HITS, BANK_STATUS unchanged** ⇒ `run_generating` never
+- **No hits in TOTAL_HITS, BANK_STATUS unchanged** => `run_generating` never
   asserted, OR run_control_splitter sink dangling. Verify the splitter
   outputs are all `ready=1`-terminated in
-  `scifi_datapath_system_v3_pipe.qsys`. Cross-check via §3.4 SignalTap
+  `scifi_datapath_system_v3_pipe.qsys`. Cross-check via section 3.4 SignalTap
   trigger `run_control_splitter_outN_valid` rising-edge.
-- **TOTAL_HITS increments but feb_frame_assembly actual=0** ⇒ histogram tap
+- **TOTAL_HITS increments but feb_frame_assembly actual=0** => histogram tap
   works, but post-hit-stack egress is stuck. Suspect mts_preprocessor or
   ring_buffer_cam backpressure; inspect `PORT_STATUS.fifo_level_max` and
   `histogram_statistics_0.DROPPED_HITS`.
 - **Histogram BANK_STATUS toggles, hits = 0 in feb_frame_assembly,
-  but PORT_STATUS shows fifo_empty_mask < 0xFF** ⇒ hits are arriving at
+  but PORT_STATUS shows fifo_empty_mask < 0xFF** => hits are arriving at
   the histogram's ingress FIFOs but not being committed; check
   `apply_pending` bit in histogram CONTROL and any `error` flag in
   CONTROL[31:24].
 
-### 4.3 4c — SignalTap triggers from DV_FORMAL.md (1-cycle combinational)
+### 4.3 4c - SignalTap triggers from DV_FORMAL.md (1-cycle combinational)
 
 These are all 1-cycle conditions per user requirement (not temporal spread).
 Source: `firmware_builds/systems/system_20260427_testplanphase5/tb/INT_fe_scifi_v3-2026-04-17/DV_FORMAL.md`. Collected by
@@ -952,7 +966,7 @@ extracting every SVA that reduces to a single-cycle antecedent-implies-
 consequent with the consequent on the same cycle.
 
 Trigger is placed as SignalTap's `In` condition with the listed expression
-in the target hierarchy. The capture window is set to 1k–8k samples
+in the target hierarchy. The capture window is set to 1k-8k samples
 asymmetric (trigger position 20%) so the *preceding* cycles are recorded.
 
 **Run Phase 4c triggers in the order below; one trigger at a time to avoid
@@ -973,10 +987,10 @@ Stp multiplexing delays.**
 
 **Placement note**: the SignalTap .stp is to live in
 `systems/system_20260427_testplanphase5/signaltap/phase4c_<id>.stp` (one per trigger). Use
-`common/firmware/util/signaltap/…` templates if available in the project,
+`common/firmware/util/signaltap/...` templates if available in the project,
 otherwise author them from scratch and check in after first-run capture.
 
-### 4.4 4b — SWB hit-reception verification
+### 4.4 4b - SWB hit-reception verification
 
 **Claim**: with the emulator running (4a), the SWB sees a well-formed hit
 stream on its front-end FIFO; `histogram_statistics_0.TOTAL_HITS` and the
@@ -984,39 +998,39 @@ SWB-side per-link hit counter advance together.
 
 Procedure:
 
-1. After §4.2 step 10 (8 emulators running), poll
+1. After section 4.2 step 10 (8 emulators running), poll
    `histogram_statistics_0.TOTAL_HITS` (word offset `0x34/4 = 0x0D` from the
    histogram CSR base).
 2. Simultaneously, read the SWB per-link hit counter via `sc_tool` on the
-   SWB (register address from `online_sc` — **not** from this v3 tree).
+   SWB (register address from `online_sc` - **not** from this v3 tree).
 3. Over a 10-second window, both must advance at approximately the same
    rate, within a tolerance set by the intermediate `decoded_lane_fifo_N`
-   depth (≤ `fifo_level_max` from PORT_STATUS).
+   depth (<= `fifo_level_max` from PORT_STATUS).
 4. `histogram_statistics_0.DROPPED_HITS` (word offset `0x38/4 = 0x0E`) must
-   remain 0 at the default rate of §4.2 step 2. If it advances, the
-   downstream sink is back-pressuring — record the value and correlate with
-   §4.3 `DROP_INC` trigger.
+   remain 0 at the default rate of section 4.2 step 2. If it advances, the
+   downstream sink is back-pressuring - record the value and correlate with
+   section 4.3 `DROP_INC` trigger.
 
 Failure modes:
 
-- **Histogram advances, SWB doesn't** ⇒ the LVDS TX → SWB RX link dropped.
+- **Histogram advances, SWB doesn't** => the LVDS TX -> SWB RX link dropped.
   Check SWB link-lock for link 2.
-- **SWB advances, histogram doesn't** ⇒ histogram tap is disconnected.
-  Unusual; cross-ref Qsys wiring lines 2353 and 2365–2395.
+- **SWB advances, histogram doesn't** => histogram tap is disconnected.
+  Unusual; cross-ref Qsys wiring lines 2353 and 2365-2395.
 
-### 4.5 4d — Histogram channel-mask and rate-sweep
+### 4.5 4d - Histogram channel-mask and rate-sweep
 
 **Claim**: histogram bin population exactly reflects
-`(rate × mask_bit_count)` per lane, scaled by the `fill_in_N` splitter ratio.
-Derived patterns — not an equal check, but a parametric one.
+`(rate x mask_bit_count)` per lane, scaled by the `fill_in_N` splitter ratio.
+Derived patterns - not an equal check, but a parametric one.
 
 Set-up: before each run below, write `LEFT_BOUND=0`, `RIGHT_BOUND=255`,
 `BIN_WIDTH=1` so each bin covers one channel ID; this turns the histogram
 into a direct per-channel hit distribution.
 
-#### 4.5.1 Channel-mask sweep (8 lanes × mask)
+#### 4.5.1 Channel-mask sweep (8 lanes x mask)
 
-For each lane N ∈ 0..7 in turn:
+For each lane N in 0..7 in turn:
 
 | Run | `inject_channel_mask` on lane N | Expected histogram (lane N slice) |
 |---|---|---|
@@ -1038,10 +1052,10 @@ Keep `inject_channel_mask = 0xFFFFFFFF`. Sweep `hit_rate` in 8.8 fixed-point:
 run for a fixed interval (set via `INTERVAL_CFG` to define the histogram
 ping-pong period), then read `TOTAL_HITS`.
 
-**Derived pattern (must hold)**: `TOTAL_HITS[i] / TOTAL_HITS[i-1] ≈ 2.0 ±
+**Derived pattern (must hold)**: `TOTAL_HITS[i] / TOTAL_HITS[i-1] approx. 2.0 +/-
 tolerance` across consecutive rate doublings, until the point where
 `fifo_level_max` in `PORT_STATUS` clips. The clipping point identifies the
-downstream saturation knee — record its rate in the test report. This is a
+downstream saturation knee - record its rate in the test report. This is a
 far more sensitive check than a single-rate sanity test because a
 drop-on-back-pressure bug would flatten the ratio below 2.0 before any
 absolute count looks wrong.
@@ -1053,7 +1067,7 @@ Set `csr[0x00].hit_mode = 2'b01` (burst), run, record pattern. Then
 delta-function histogram; burst mode produces a cluster centered at
 `burst_center` (csr[0x02]). Any observed widening/smearing beyond what the
 config predicts is the in-line ring_buffer_cam / hit_stack_subsystem
-jittering timestamps — correlate with `histogram_statistics_1.debug_2..6`
+jittering timestamps - correlate with `histogram_statistics_1.debug_2..6`
 debug-FIFO level readouts.
 
 #### 4.5.4 Ping-pong sanity
@@ -1069,15 +1083,15 @@ for 10x finer bank-toggle observation.
 
 ### 4.6 Pass/Fail criterion for Phase 4
 
-- §4.2 8-lane not-stuck: pass.
-- §4.3 no unexpected trigger fires (SOP_NO_EOP, CRC_ERR, RR_VIOL, SC_TORN,
+- section 4.2 8-lane not-stuck: pass.
+- section 4.3 no unexpected trigger fires (SOP_NO_EOP, CRC_ERR, RR_VIOL, SC_TORN,
   INJ_ARM) during a 60-second clean run; if any fires, capture the window
   and attach to the report.
-- §4.4 SWB and histogram advance together, DROPPED_HITS = 0 at default
+- section 4.4 SWB and histogram advance together, DROPPED_HITS = 0 at default
   rate.
-- §4.5.1 every mask produces exactly the predicted bin pattern.
-- §4.5.2 rate-doubling ratio holds up to the knee; knee is documented.
-- §4.5.4 ping-pong alternation is regular.
+- section 4.5.1 every mask produces exactly the predicted bin pattern.
+- section 4.5.2 rate-doubling ratio holds up to the knee; knee is documented.
+- section 4.5.4 ping-pong alternation is regular.
 
 ### 4.7 Phase 4 postfix-1 retest 2026-05-11 (phase4-fix SOF)
 
@@ -1100,10 +1114,10 @@ for 10x finer bank-toggle observation.
 | `runctl_mgmt_host_0.CSR_RX_CMD_COUNT` | `0x0C00F` | `0x00000000` | ack=OK, fresh boot |
 
 **SWB LVDS link status note**: `LINK_LOCKED_LOW_REGISTER_R = 0x00000F00`
-(bits 8..11 locked = other boards). Bit 2 (SciFi FEB link 2) = 0 — LVDS
+(bits 8..11 locked = other boards). Bit 2 (SciFi FEB link 2) = 0 - LVDS
 transceiver link NOT locked. `rc_tool send` commands do not echo back (STATUS
 stuck at `0x00000042` from prior session). Run-control injected via SC write
-to `LOCAL_CMD` at `0x0C013` (TEST_PLAN §3.3 fallback), which does reach the
+to `LOCAL_CMD` at `0x0C013` (TEST_PLAN section 3.3 fallback), which does reach the
 `runctl_mgmt_host_0` FSM (RX_CMD_COUNT increments correctly).
 
 **Run-control opcode sweep (LOCAL_CMD SC write)**:
@@ -1134,7 +1148,7 @@ delivered RC_RUNNING to the run_control_splitter (`SENT_COUNT = 0 -> 1`,
 `LAST_SENT = 0x00004A08` = RC_RUNNING state word). No change in TOTAL_HITS or
 PORT_STATUS after this injection either.
 
-**Verdict**: **PHASE 4 FAIL — rc-readyless rebuild needed**.
+**Verdict**: **PHASE 4 FAIL - rc-readyless rebuild needed**.
 
 Root cause: the hist-debug-disconnect fix (timing improvement) did NOT resolve
 the PORT_STATUS=0xFF symptom. The run_control_splitter RC_RUNNING broadcast
@@ -1291,7 +1305,7 @@ fan-out must have `outUseReady=0` and must drive `in_ready=1`; direct outputs
 ready-deasserting adapter is the failure.
 
 The rc-readyless SOF was retested on hardware after bench-queue claim/release.
-See §4.10 for the raw log pointers and counter table. Phase 4 remains failed:
+See section 4.10 for the raw log pointers and counter table. Phase 4 remains failed:
 `runctl_mgmt_host_0.LOCAL_CMD` and `dbg_mm2runctrl_0.HOST_CMD` both inject
 start-run successfully, but `TOTAL_HITS`, `LAST_INT_HITS`, and
 `feb_frame_assembly_HSS0/HSS1` actual-hit counters remain zero.
@@ -1401,19 +1415,19 @@ SHA-256 `2171cd90643967aef85993ac384707807ffcf418b1b23652443277bd3f8d3f2e`.
 
 Raw artifacts:
 
-- `reports/phase4_rc_readyless_20260511_235457.log` — program/recovery
+- `reports/phase4_rc_readyless_20260511_235457.log` - program/recovery
   preflight. FEB program succeeded and basic SC reads passed, but emulator2
   UID read hit `SC secondary did not report ready after reset`.
-- `reports/phase4_rc_readyless_sc_recovery_20260511_235558.log` — post-PCIe
+- `reports/phase4_rc_readyless_sc_recovery_20260511_235558.log` - post-PCIe
   recovery sanity pass. Scratch, sc_hub UID, emulator2 UID, histogram UID,
   total hits, and runctl status all read correctly.
-- `reports/phase4_rc_readyless_runctl_20260511_235638.log` — decisive
+- `reports/phase4_rc_readyless_runctl_20260511_235638.log` - decisive
   run-control/counter pass; aggregate exit code 0.
 - `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp`
-  and `phase4_rc_readyless_gap_nodes.md` — first SignalTap gap tap, Node Finder
+  and `phase4_rc_readyless_gap_nodes.md` - first SignalTap gap tap, Node Finder
   `99/99` probes found. The fixed STP revision now imports and compiles through
   Quartus as `top_stp_phase4_rc_readyless_gap`.
-- `v3_pretest-260511-rc-readyless-260511/doc/RC_READYLESS_STP_COMPILE.md` —
+- `v3_pretest-260511-rc-readyless-260511/doc/RC_READYLESS_STP_COMPILE.md` -
   SignalTap compile report for the gap tap. The compile log is
   `syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_stp_phase4_rc_readyless_gap_clkfix_20260512_0328.console.log`;
   output files live in
@@ -1421,7 +1435,7 @@ Raw artifacts:
   Map connected the SignalTap instance to all 231 required inputs, and the STP
   SOF hash is
   `7dd7f9303a7551d4b0074136a38f2b818ad37e1d20ec4a9decfd6dd21e7f03ad`.
-- `v3_pretest-260511-rc-readyless-260511/doc/RC_READYLESS_STP_CAPTURE.md` —
+- `v3_pretest-260511-rc-readyless-260511/doc/RC_READYLESS_STP_CAPTURE.md` -
   on-board SignalTap capture report. Capture files live under
   `signaltap/captures/phase4_rc_readyless_gap_20260512_042348/`; the primary
   files are `local_start_run.vcd`, `local_start_run_vcd_summary.log`,
@@ -1452,7 +1466,7 @@ Decisive SignalTap gap-capture results:
 | Counter aftermath | Histogram `TOTAL_HITS=0`, `PORT_STATUS=0xFF`; HSS0/HSS1 actual counters remain 0 |
 | Source/sim confirmation | generated `.sopcinfo` has `BYTE_STREAM_ENABLE=false` while wiring `emulator_mutrig_N.tx8b1k` to decoded-lane muxes; minimal Questa log reports `tx_valid=0`, `tx_data=1bc` for `BYTE_STREAM_ENABLE=0` |
 
-Verdict: **PHASE 4 FAIL — rc-readyless did not clear the zero-hit blocker**.
+Verdict: **PHASE 4 FAIL - rc-readyless did not clear the zero-hit blocker**.
 Known-good now extends through run-control CSR reception, direct
 `dbg_mm2runctrl` command injection, `run_control_splitter.out15`,
 `emulator_ctrl_splitter.out0`, `emulator_mutrig_0.asi_ctrl`, and lane-0
@@ -1461,9 +1475,9 @@ Known-good now extends through run-control CSR reception, direct
 The next fix loop must either set `BYTE_STREAM_ENABLE=true` for all eight
 emulator instances on the current `tx8b1k` path, or rewire the integration to
 consume the emulator's direct `hit_type0` source instead. That
-`BYTE_STREAM_ENABLE=true` path was built and smoked in §4.11; the later
-pre-HSS STP capture in §4.13 shows the byte-stream valid is still dark under
-the exact board stimulus, so §4.10 is no longer the latest active boundary.
+`BYTE_STREAM_ENABLE=true` path was built and smoked in section 4.11; the later
+pre-HSS STP capture in section 4.13 shows the byte-stream valid is still dark under
+the exact board stimulus, so section 4.10 is no longer the latest active boundary.
 
 ### 4.11 Phase 4 byte-stream contract fix candidate 2026-05-12
 
@@ -1476,11 +1490,11 @@ is not yet legal hit-flow evidence: `histogram_ingress_bridge_0.pre_in`,
 `mts_preprocessor_0.hit_type1_out`, rbCAM, and
 `feb_frame_assembly_HSS0/HSS1` remain dark.
 
-The later pre-HSS STP capture in §4.13 supersedes the broad interpretation of
+The later pre-HSS STP capture in section 4.13 supersedes the broad interpretation of
 this smoke: enabling `BYTE_STREAM_ENABLE` was necessary for the wired
 `tx8b1k` path, but it was not sufficient under the actual board
 JTAG/reset-link stimulus. `aso_tx8b1k_valid` is still the first failed
-observable in the latest hardware capture. The §4.13 directed sim then
+observable in the latest hardware capture. The section 4.13 directed sim then
 reproduces that failure with `emu_signal=1` and restores byte-stream output
 when only `SIGNAL` is changed to `0`.
 
@@ -1603,7 +1617,7 @@ Pre-HSS boundary probe:
 - Teardown:
   `jtag_teardown_pre_stop.log` reaches `runctl_last_cmd=0x00020013`.
 
-Debug gate after this smoke, superseded by §4.13:
+Debug gate after this smoke, superseded by section 4.13:
 
 1. Treat the Qsys `BYTE_STREAM_ENABLE=true` change as the fix for the captured
    disabled-byte-stream contract, but keep the hardware claim limited to
@@ -1622,11 +1636,11 @@ Debug gate after this smoke, superseded by §4.13:
    map connects only `129/185` SignalTap inputs because wide payload, channel,
    and error aliases are not preserved. Treat it as a loadable handshake/stage
    localization image, not a payload-complete capture image. This capture has
-   now been run; see §4.13 for the current blocker.
+   now been run; see section 4.13 for the current blocker.
 
 ### 4.12 Phase 4 pre-HSS SignalTap compile 2026-05-12
 
-Purpose: narrow the active hardware gap left by §4.11. Post-selected histogram
+Purpose: narrow the active hardware gap left by section 4.11. Post-selected histogram
 word counters advance, but legal pre-HSS hit flow is still dark at
 `histogram_ingress_bridge_0.pre_in/pre_out`,
 `mts_preprocessor_0.hit_type1_out`, MTS visible totals, rbCAM payload counters,
@@ -1695,11 +1709,11 @@ Compile-time next hardware action was to claim the bench queue, program
 `top_stp_phase4_pre_hss_gap.sof`, arm `phase4_pre_hss_gap.stp`, and capture the
 first missing transition between decoded-lane mux/FIFO, mutrig-datapath type0,
 MTS ingress/egress, and the histogram pre tap. Do not treat the sim-only
-pre-HSS smoke as closure. The resulting capture is recorded in §4.13.
+pre-HSS smoke as closure. The resulting capture is recorded in section 4.13.
 
 ### 4.13 Phase 4 pre-HSS SignalTap capture 2026-05-12
 
-The §4.12 hardware action has now been run. This capture is the current Phase 4
+The section 4.12 hardware action has now been run. This capture is the current Phase 4
 source of truth and keeps Phase 4 failed.
 
 Report and artifacts:
@@ -1792,17 +1806,17 @@ only when `!cfg_hit_mode_sig`. The board setup's `emu_signal=1` writes
 provide a matching external inject pulse, no tickets reach the lane emitter and
 `aso_tx8b1k_valid` correctly remains zero.
 
-Interim verdict for this capture: **PHASE 4 FAIL — this specific
+Interim verdict for this capture: **PHASE 4 FAIL - this specific
 `SIGNAL=1` setup is a stimulus/CSR mode mismatch, not an apparent downstream
 rbCAM/HSS/RDMA datapath bug**. The hardware known-good boundary reaches
 lane-0 emulator run-control and `run_generating`; sim confirms that
 `emu_signal=1` explains the zero byte-stream source. The corrected-stimulus
-hardware rerun is recorded in §4.14 and supersedes this as the current active
+hardware rerun is recorded in section 4.14 and supersedes this as the current active
 blocker boundary.
 
 ### 4.14 Phase 4 corrected-stimulus pre-HSS SignalTap capture 2026-05-12
 
-Purpose: run the next hardware-first pass from §4.13 with internal random-hit
+Purpose: run the next hardware-first pass from section 4.13 with internal random-hit
 generation (`SIGNAL=0`) and determine whether the first missing legal-hit
 boundary stays at the byte-stream source or moves downstream.
 
@@ -1862,7 +1876,7 @@ Post-capture counters:
   (`0x38`, `0x2`), but declared/actual/missing hit counters are all zero.
 - Run-control readback: `LAST_CMD=0x00000012`, `RX_CMD_COUNT=0x00000003`.
 
-Verdict: **PHASE 4 FAIL — corrected/default internal stimulus restores
+Verdict: **PHASE 4 FAIL - corrected/default internal stimulus restores
 byte-stream valid, but legal pre-HSS hit flow is still dark at the
 mutrig-datapath parser/header boundary**. The current hardware known-good side
 is now lane-0 `tx8b1k` valid through the adapter/mux/FIFO handshake boundary.
@@ -1876,10 +1890,10 @@ hardware.
 
 ### 4.15 Parser-gap STP capture 2026-05-12
 
-Purpose: run the next parser-gap capture from the §4.14 boundary with the
+Purpose: run the next parser-gap capture from the section 4.14 boundary with the
 compiled parser-gap STP image and the supported SC `LOCAL_CMD` fallback path.
 This attempt stopped at the SignalTap stop condition below and is not a valid
-Phase 4 §4.2-§4.3 stimulus-qualified capture.
+Phase 4 section 4.2-section 4.3 stimulus-qualified capture.
 
 Image and setup:
 
@@ -1949,7 +1963,7 @@ Artifacts:
   `v3_pretest-260511-rc-readyless-260511/captures/phase4_parser_gap_20260512_084719_csv/`.
 
 Verdict: **STOPPED - premature parser-input trigger**. This capture does not
-advance the Phase 4 hardware boundary beyond §4.14. It does show that
+advance the Phase 4 hardware boundary beyond section 4.14. It does show that
 `parser_input_valid_rise` is not selective enough for the requested board
 sequence because the adapter/FIFO/parser-input valid path can toggle while
 run-control and emulator source valid are still low. The next investigation
@@ -2079,13 +2093,13 @@ remained zero and SWB readout was not reconfigured.
 
 Each phase produces a structured report written to `systems/system_20260427_testplanphase5/reports/`:
 
-- `phase1_bringup_<date>.md` — one row per slave, showing UID, version,
+- `phase1_bringup_<date>.md` - one row per slave, showing UID, version,
   first-word read, out-of-range probe result.
-- `phase2_bist_<date>.md` — pass/fail count per register; any bit-flip with
+- `phase2_bist_<date>.md` - pass/fail count per register; any bit-flip with
   `(addr, expected, got, pattern)`.
-- `phase3_runctl_<date>.md` — counter deltas for every opcode on both paths,
+- `phase3_runctl_<date>.md` - counter deltas for every opcode on both paths,
   SignalTap capture file pointer for each hard-reset edge.
-- `phase4_emulator_<date>.md` — not-stuck table, SignalTap captures for all
+- `phase4_emulator_<date>.md` - not-stuck table, SignalTap captures for all
   triggers that fired (or explicit "no fire" with observation duration),
   mask-sweep and rate-sweep tables.
 
@@ -2141,7 +2155,7 @@ are stricter:
   Quartus import, map, and full compile are complete for
   `top_stp_phase4_rc_readyless_gap`; programming, arming, and on-board capture
   are complete in
-  `signaltap/captures/phase4_rc_readyless_gap_20260512_042348/`. Broader §4.3
+  `signaltap/captures/phase4_rc_readyless_gap_20260512_042348/`. Broader section 4.3
   trigger taps remain to be authored as needed after the next fix candidate.
   The follow-up pre-HSS gap tap is authored at
   `v3_pretest-260511-rc-readyless-260511/signaltap/phase4_pre_hss_gap.stp`.
@@ -2156,7 +2170,7 @@ are stricter:
   corrected-stimulus/default `SIGNAL=0` capture is complete in
   `signaltap/captures/phase4_pre_hss_signal0_20260512_053323/`. See
   `v3_pretest-260511-rc-readyless-260511/doc/PRE_HSS_STP_CAPTURE.md`.
-- **Ping-pong interval tuning**: §4.5.4 assumes `INTERVAL_CFG` yields an
+- **Ping-pong interval tuning**: section 4.5.4 assumes `INTERVAL_CFG` yields an
   interval > the time needed for one full host-side read of hist_bin (256
   words). If it doesn't, raise `INTERVAL_CFG` until it does; a too-short
   interval aliases the alternation check.
@@ -2174,7 +2188,7 @@ are stricter:
   valids, rbCAM payload counters, and HSS frame-assembly counters remain zero.
   This is a debug-load candidate, not production signoff.
 - **next active blocker**: under the latest hardware source of truth in
-  §4.14, reset-link `start-run` reaches lane-0 emulator run-control,
+  section 4.14, reset-link `start-run` reaches lane-0 emulator run-control,
   `run_generating`, `emulator_mutrig_0.aso_tx8b1k_valid`, the adapter, the
   decoded-lane mux input, and the decoded-lane FIFO handshake boundary. The
   first still-dark legal-hit signals are
