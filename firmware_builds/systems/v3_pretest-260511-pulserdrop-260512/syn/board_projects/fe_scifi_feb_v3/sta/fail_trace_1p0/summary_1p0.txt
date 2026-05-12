@@ -1,0 +1,26 @@
+FEB SciFi v3 integration STA trace at 1.0x nominal clocks
+Project: top
+Revision: top
+Generated: 2026-05-12 21:44:03 CEST
+Clock source: board-local top.qip SDC_FILE entries, no 1.1x override
+
+## slow85 (5_H4_slow_1100mv_85c)
+setup_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/slow85_setup_full_path.rpt
+hold_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/slow85_hold_full_path.rpt
+recovery_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/slow85_recovery_full_path.rpt
+
+## slow0 (5_H4_slow_1100mv_0c)
+setup_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/slow0_setup_full_path.rpt
+hold_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/slow0_hold_full_path.rpt
+recovery_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/slow0_recovery_full_path.rpt
+
+## fast85 (MIN_fast_1100mv_85c)
+setup_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/fast85_setup_full_path.rpt
+hold_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/fast85_hold_full_path.rpt
+recovery_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/fast85_recovery_full_path.rpt
+
+## fast0 (MIN_fast_1100mv_0c)
+setup_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/fast0_setup_full_path.rpt
+hold_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/fast0_hold_full_path.rpt
+recovery_report: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/sta/fail_trace_1p0/fast0_recovery_full_path.rpt
+
