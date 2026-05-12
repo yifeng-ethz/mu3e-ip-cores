@@ -5,7 +5,7 @@
 Run the complete RN.BASIC sim sweep from this directory:
 
 ```sh
-make run_BASIC PARALLEL=30
+make run_BASIC PARALLEL=16 WORK_ROOT=/data2/cosim_work_<run_id>
 ```
 
 Useful scoped runs:
@@ -13,7 +13,7 @@ Useful scoped runs:
 ```sh
 make run_BASIC ROW=RN.BASIC.001
 make run_BASIC ROW=1
-make run_BASIC SLICE=1 PARALLEL=30
+make run_BASIC SLICE=1 PARALLEL=16 WORK_ROOT=/data2/cosim_work_<run_id>
 make run_BASIC COLLECT_ONLY=1
 make run_BASIC DRY_RUN=1
 ```
@@ -53,6 +53,13 @@ PASS rules follow `TEST_BASIC.md`: rate must be within 5 percent of the row
 math model with zero reported error counters, the two hist banks must sum to
 the rate CSR count within +/-8 hits and have `delay_stddev_ns < 100`, and the
 RDMA record count must match the rate CSR count within +/-8 hits.
+
+`make run_BASIC` defaults to the native-signoff OPQ source rooted at this
+repo, with the RN.BASIC lossless queue profile used by the closure reruns:
+`OPQ_N_HIT=4095`, `OPQ_LANE_FIFO_DEPTH=65536`,
+`OPQ_TICKET_FIFO_DEPTH=65536`, `OPQ_HANDLE_FIFO_DEPTH=512`,
+`OPQ_PAGE_RAM_DEPTH=524288`, and `OPQ_DEBUG_LEVEL=0`.  Override those only
+for directed debug, not for closure evidence.
 
 The current corun publishes full source traces and the RN.BASIC collector
 filters by `lane_mask` and `channel_mask` when stamping per-row evidence.  The
