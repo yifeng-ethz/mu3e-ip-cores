@@ -11,6 +11,7 @@ VLOG ?= $(QUESTA_HOME)/linux_x86_64/vlog
 UVM_SRC ?= $(QUESTA_HOME)/verilog_src/uvm-1.2/src
 
 COSIM_ROOT := $(CURDIR)
+REPO_ROOT ?= $(abspath $(COSIM_ROOT)/../../../..)
 COSIM_BUILD_DIR ?= $(COSIM_ROOT)/build
 COSIM_WORK ?= cosim_work
 FEB_CORUN_DIR ?= $(COSIM_ROOT)/../tb_int/feb_swb_corun
@@ -63,7 +64,12 @@ ifneq ($(strip $(WORK_ROOT)),)
 BASIC_ARGS += --work-root $(WORK_ROOT)
 endif
 
-.PHONY: compile_cosim run_COSIM_SANITY summarize_COSIM_SANITY run_BASIC
+AUTO_REPORT_ARGS :=
+ifneq ($(strip $(RUN_ID)),)
+AUTO_REPORT_ARGS += --run-id $(RUN_ID)
+endif
+
+.PHONY: compile_cosim run_COSIM_SANITY summarize_COSIM_SANITY run_BASIC auto_report
 
 compile_cosim:
 	mkdir -p $(COSIM_BUILD_DIR)
@@ -101,3 +107,8 @@ run_BASIC:
 		--report-root $(REPORT_ROOT) \
 		--parallel $(PARALLEL) \
 		$(BASIC_ARGS)
+
+auto_report:
+	$(PYTHON) $(REPO_ROOT)/scripts/cotest/cosim_auto_report.py \
+		--build-dir $(COSIM_ROOT)/.. \
+		$(AUTO_REPORT_ARGS)
