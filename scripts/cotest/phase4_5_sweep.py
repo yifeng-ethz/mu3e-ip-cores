@@ -9,16 +9,19 @@
 #   judgment calls -- every grace period, every reset window, every retry
 #   strategy is baked in.
 #
-#   Usage:
-#       python3 phase4_5_sweep.py --dry-run                 # smoke / preview
+#   Usage (run from any cwd; script resolves paths relative to itself):
+#       python3 scripts/cotest/phase4_5_sweep.py --dry-run               # preview
 #       /home/yifeng/.local/bin/swb_ring_lock \
-#           python3 phase4_5_sweep.py --all                 # full sweep
+#           python3 scripts/cotest/phase4_5_sweep.py --all               # full sweep
 #       /home/yifeng/.local/bin/swb_ring_lock \
-#           python3 phase4_5_sweep.py --row p45_001_all_lanes_0x0000FFFF_0x0800_dir
-#       python3 phase4_5_sweep.py --list                    # list row_ids
-#       python3 phase4_5_sweep.py --export-plan plan.json   # dump plan
-#       python3 phase4_5_sweep.py --plot-smoke              # synthetic plot
-#       python3 phase4_5_sweep.py --regen-table             # rebuild table
+#           python3 scripts/cotest/phase4_5_sweep.py --row p45_001_all_lanes_0x0000FFFF_0x0800_dir
+#       python3 scripts/cotest/phase4_5_sweep.py --list                  # list row_ids
+#       python3 scripts/cotest/phase4_5_sweep.py --export-plan plan.json # dump plan
+#       python3 scripts/cotest/phase4_5_sweep.py --plot-smoke            # synthetic plot
+#       python3 scripts/cotest/phase4_5_sweep.py --regen-table           # rebuild table
+#
+#   To target a different build (evidence/doc output dir) override via env var:
+#       PHASE4_5_BUILD_DIR=/abs/path/to/build python3 scripts/cotest/phase4_5_sweep.py --all
 #
 #   Hard rules honoured:
 #     - All sc_tool / rc_tool calls are routed through swb_ring_lock.
@@ -255,9 +258,27 @@ def ticks_to_s(ticks: int) -> float:
 # ----------------------------------------------------------------------------
 # Path layout (absolute, computed from __file__ so cwd can be anything)
 # ----------------------------------------------------------------------------
+# Script lives at <REPO_ROOT>/scripts/cotest/phase4_5_sweep.py.
+# Evidence + doc live under a build dir (default: v3_pretest-260511
+# emulator-type0). Override via env var PHASE4_5_BUILD_DIR=/abs/path.
 SCRIPT_DIR    = Path(__file__).resolve().parent
-BUILD_DIR     = SCRIPT_DIR.parent   # firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/
-REPO_ROOT     = BUILD_DIR.parents[2]  # mu3e-ip-cores/
+
+def _find_repo_root(start: Path) -> Path:
+    """Walk up from `start` to find the mu3e-ip-cores repo root.
+
+    Marker: a directory containing both `firmware_builds/` and
+    `tools/run_script/`. Raises RuntimeError if not found.
+    """
+    for p in [start, *start.parents]:
+        if (p / "firmware_builds").is_dir() and (p / "tools" / "run_script").is_dir():
+            return p
+    raise RuntimeError(f"Could not locate mu3e-ip-cores repo root from {start}")
+
+REPO_ROOT     = _find_repo_root(SCRIPT_DIR)
+DEFAULT_BUILD_DIR_REL = "firmware_builds/systems/v3_pretest-260511-emulator-type0-260512"
+_env_build = os.environ.get("PHASE4_5_BUILD_DIR", "").strip()
+BUILD_DIR     = (Path(_env_build).expanduser().resolve()
+                 if _env_build else REPO_ROOT / DEFAULT_BUILD_DIR_REL)
 EVIDENCE_ROOT = BUILD_DIR / "sweep_evidence"
 DOC_DIR       = BUILD_DIR / "doc"
 TABLE_PATH    = DOC_DIR / "PHASE4_5_SWEEP_TABLE.md"
