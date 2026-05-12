@@ -73,6 +73,22 @@
          type = "int";
       }
    }
+   element mclk125_reset_bridge
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+   }
+   element mclk125_reset_sync
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+   }
    element mclk125_souce
    {
       datum _sortIndex
@@ -187,9 +203,7 @@
    dir="end" />
  <interface
    name="pulse_out_conduit"
-   internal="control_path_subsystem.pulse_out_conduit"
-   type="conduit"
-   dir="end" />
+   internal="control_path_subsystem.pulse_out_conduit" />
  <interface
    name="redriver"
    internal="data_path_subsystem.redriver"
@@ -267,9 +281,9 @@
  <module
    name="control_path_subsystem"
    kind="debug_sc_system_v3"
-   version="3.0.0.511"
+   version="3.1.0.512"
    enabled="1">
-  <parameter name="AUTO_AVMM_PORT_ADDRESS_MAP"><![CDATA[<address-map><slave name='data_path_subsystem_lvds_rx_controller_pro_0.csr' start='0x0' end='0x40' /><slave name='data_path_subsystem_mutrig_reset_controller_0.reconfig_mgmt' start='0x200' end='0x300' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_0_backpressure_fifo.csr' start='0x860' end='0x870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_1_backpressure_fifo.csr' start='0x1860' end='0x1870' /><slave name='data_path_subsystem_emulator_mutrig_qsys_inst.csr' start='0x2000' end='0x2040' /><slave name='data_path_subsystem_dbg_mm2runctrl_0.csr' start='0x2200' end='0x2240' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_0.csr' start='0x2280' end='0x2300' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_1.csr' start='0x2300' end='0x2380' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_2.csr' start='0x2380' end='0x2400' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_3.csr' start='0x2400' end='0x2480' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_4.csr' start='0x2480' end='0x2500' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_5.csr' start='0x2500' end='0x2580' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_6.csr' start='0x2580' end='0x2600' /><slave name='data_path_subsystem_arb_hit_type0_supercore_0_lane_7.csr' start='0x2600' end='0x2680' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_2_backpressure_fifo.csr' start='0x2860' end='0x2870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_3_backpressure_fifo.csr' start='0x3860' end='0x3870' /><slave name='data_path_subsystem_mts_preprocessor_0.csr' start='0x4000' end='0x4020' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_4_backpressure_fifo.csr' start='0x4860' end='0x4870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_5_backpressure_fifo.csr' start='0x5860' end='0x5870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_6_backpressure_fifo.csr' start='0x6860' end='0x6870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_7_backpressure_fifo.csr' start='0x7860' end='0x7870' /><slave name='data_path_subsystem_mts_preprocessor_1.csr' start='0x8000' end='0x8020' /><slave name='data_path_subsystem_histogram_statistics_0.hist_bin' start='0xA000' end='0xA400' /><slave name='data_path_subsystem_histogram_statistics_0.csr' start='0xA400' end='0xA480' /><slave name='data_path_subsystem_histogram_ingress_bridge_0.csr' start='0xAC00' end='0xAC10' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_0.csr' start='0xB000' end='0xB080' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_1.csr' start='0xB080' end='0xB100' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_2.csr' start='0xB100' end='0xB180' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_3.csr' start='0xB180' end='0xB200' /><slave name='data_path_subsystem_mutrig_injector_0.csr' start='0xB200' end='0xB240' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_0.csr' start='0xB400' end='0xB480' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_1.csr' start='0xB480' end='0xB500' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_2.csr' start='0xB500' end='0xB580' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_3.csr' start='0xB580' end='0xB600' /><slave name='data_path_subsystem_hit_stack_subsystem_0_feb_frame_assembly_0.csr' start='0xD000' end='0xD040' /><slave name='data_path_subsystem_hit_stack_subsystem_1_feb_frame_assembly_0.csr' start='0xD040' end='0xD080' /></address-map>]]></parameter>
+  <parameter name="AUTO_AVMM_PORT_ADDRESS_MAP"><![CDATA[<address-map><slave name='data_path_subsystem_lvds_rx_controller_pro_0.csr' start='0x0' end='0x40' /><slave name='data_path_subsystem_mutrig_reset_controller_0.reconfig_mgmt' start='0x200' end='0x300' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_0_backpressure_fifo.csr' start='0x860' end='0x870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_1_backpressure_fifo.csr' start='0x1860' end='0x1870' /><slave name='data_path_subsystem_emulator_mutrig_0.csr' start='0x2000' end='0x2040' /><slave name='data_path_subsystem_emulator_mutrig_1.csr' start='0x2040' end='0x2080' /><slave name='data_path_subsystem_emulator_mutrig_2.csr' start='0x2080' end='0x20C0' /><slave name='data_path_subsystem_emulator_mutrig_3.csr' start='0x20C0' end='0x2100' /><slave name='data_path_subsystem_emulator_mutrig_4.csr' start='0x2100' end='0x2140' /><slave name='data_path_subsystem_emulator_mutrig_5.csr' start='0x2140' end='0x2180' /><slave name='data_path_subsystem_emulator_mutrig_6.csr' start='0x2180' end='0x21C0' /><slave name='data_path_subsystem_emulator_mutrig_7.csr' start='0x21C0' end='0x2200' /><slave name='data_path_subsystem_dbg_mm2runctrl_0.csr' start='0x2200' end='0x2240' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_2_backpressure_fifo.csr' start='0x2860' end='0x2870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_3_backpressure_fifo.csr' start='0x3860' end='0x3870' /><slave name='data_path_subsystem_mts_preprocessor_0.csr' start='0x4000' end='0x4020' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_4_backpressure_fifo.csr' start='0x4860' end='0x4870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_5_backpressure_fifo.csr' start='0x5860' end='0x5870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_6_backpressure_fifo.csr' start='0x6860' end='0x6870' /><slave name='data_path_subsystem_mutrig_datapath_subsystem_7_backpressure_fifo.csr' start='0x7860' end='0x7870' /><slave name='data_path_subsystem_mts_preprocessor_1.csr' start='0x8000' end='0x8020' /><slave name='data_path_subsystem_histogram_statistics_0.hist_bin' start='0xA000' end='0xA400' /><slave name='data_path_subsystem_histogram_statistics_0.csr' start='0xA400' end='0xA480' /><slave name='data_path_subsystem_histogram_ingress_bridge_0.csr' start='0xAC00' end='0xAC10' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_0.csr' start='0xB000' end='0xB080' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_1.csr' start='0xB080' end='0xB100' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_2.csr' start='0xB100' end='0xB180' /><slave name='data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_3.csr' start='0xB180' end='0xB200' /><slave name='data_path_subsystem_mutrig_injector_0.csr' start='0xB200' end='0xB240' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_0.csr' start='0xB400' end='0xB480' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_1.csr' start='0xB480' end='0xB500' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_2.csr' start='0xB500' end='0xB580' /><slave name='data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_3.csr' start='0xB580' end='0xB600' /><slave name='data_path_subsystem_hit_stack_subsystem_0_feb_frame_assembly_0.csr' start='0xD000' end='0xD040' /><slave name='data_path_subsystem_hit_stack_subsystem_1_feb_frame_assembly_0.csr' start='0xD040' end='0xD080' /></address-map>]]></parameter>
   <parameter name="AUTO_AVMM_PORT_ADDRESS_WIDTH" value="AddressWidth = 16" />
   <parameter name="AUTO_CLK125_IN_CLK_CLOCK_DOMAIN" value="4" />
   <parameter name="AUTO_CLK125_IN_CLK_CLOCK_RATE" value="125000000" />
@@ -295,7 +309,7 @@
  <module
    name="data_path_subsystem"
    kind="scifi_datapath_system_v3"
-   version="1.0"
+   version="3.0.4.512"
    enabled="1">
   <parameter name="AUTO_AVMM_CLK_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_AVMM_CLK_CLOCK_RATE" value="156250000" />
@@ -369,6 +383,47 @@
   <parameter name="NUM_RESET_OUTPUTS" value="1" />
   <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
   <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <module
+   name="mclk125_reset_bridge"
+   kind="altera_reset_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ACTIVE_LOW_RESET" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
+  <parameter name="NUM_RESET_OUTPUTS" value="1" />
+  <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
+  <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <module
+   name="mclk125_reset_sync"
+   kind="altera_reset_controller"
+   version="18.1"
+   enabled="1">
+  <parameter name="MIN_RST_ASSERTION_TIME" value="3" />
+  <parameter name="NUM_RESET_INPUTS" value="1" />
+  <parameter name="OUTPUT_RESET_SYNC_EDGES" value="deassert" />
+  <parameter name="RESET_REQUEST_PRESENT" value="0" />
+  <parameter name="RESET_REQ_EARLY_DSRT_TIME" value="1" />
+  <parameter name="RESET_REQ_WAIT_TIME" value="1" />
+  <parameter name="SYNC_DEPTH" value="2" />
+  <parameter name="USE_RESET_REQUEST_IN0" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN1" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN10" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN11" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN12" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN13" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN14" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN15" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN2" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN3" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN4" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN5" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN6" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN7" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN8" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN9" value="0" />
+  <parameter name="USE_RESET_REQUEST_INPUT" value="0" />
  </module>
  <module name="mclk125_souce" kind="clock_source" version="18.1" enabled="1">
   <parameter name="clockFrequency" value="125000000" />
@@ -489,6 +544,16 @@
    kind="clock"
    version="18.1"
    start="mclk125_souce.clk"
+   end="mclk125_reset_bridge.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="mclk125_souce.clk"
+   end="mclk125_reset_sync.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="mclk125_souce.clk"
    end="control_path_subsystem.clk125_in_clk" />
  <connection
    kind="clock"
@@ -574,6 +639,11 @@
    kind="reset"
    version="18.1"
    start="mclk125_souce.clk_reset"
+   end="mclk125_reset_bridge.in_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="mclk125_souce.clk_reset"
    end="data_path_subsystem.monitor_reset_in_reset" />
  <connection
    kind="reset"
@@ -584,7 +654,7 @@
    kind="reset"
    version="18.1"
    start="mclk125_souce.clk_reset"
-   end="upload_subsystem.upload_sc_clock_reset" />
+   end="mclk125_reset_sync.reset_in0" />
  <connection
    kind="reset"
    version="18.1"
@@ -620,6 +690,11 @@
    version="18.1"
    start="ext_reset_merge_cclk156.reset_out"
    end="ext_reset_pipe1_cclk156.in_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="mclk125_reset_sync.reset_out"
+   end="upload_subsystem.upload_sc_clock_reset" />
  <connection
    kind="reset"
    version="18.1"

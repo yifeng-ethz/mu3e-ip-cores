@@ -476,6 +476,14 @@
          type = "int";
       }
    }
+   element monitor_reset_sync
+   {
+      datum _sortIndex
+      {
+         value = "74";
+         type = "int";
+      }
+   }
    element mts_preprocessor_0
    {
       datum _sortIndex
@@ -1664,6 +1672,36 @@
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="DEASSERT" />
+ </module>
+ <module
+   name="monitor_reset_sync"
+   kind="altera_reset_controller"
+   version="18.1"
+   enabled="1">
+  <parameter name="MIN_RST_ASSERTION_TIME" value="3" />
+  <parameter name="NUM_RESET_INPUTS" value="1" />
+  <parameter name="OUTPUT_RESET_SYNC_EDGES" value="deassert" />
+  <parameter name="RESET_REQUEST_PRESENT" value="0" />
+  <parameter name="RESET_REQ_EARLY_DSRT_TIME" value="1" />
+  <parameter name="RESET_REQ_WAIT_TIME" value="1" />
+  <parameter name="SYNC_DEPTH" value="2" />
+  <parameter name="USE_RESET_REQUEST_IN0" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN1" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN10" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN11" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN12" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN13" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN14" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN15" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN2" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN3" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN4" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN5" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN6" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN7" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN8" value="0" />
+  <parameter name="USE_RESET_REQUEST_IN9" value="0" />
+  <parameter name="USE_RESET_REQUEST_INPUT" value="0" />
  </module>
  <module
    name="mts_preprocessor_0"
@@ -3039,6 +3077,11 @@
    kind="clock"
    version="18.1"
    start="monitor_clock_125.clk"
+   end="monitor_reset_sync.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="monitor_clock_125.clk"
    end="lvds_rx_controller_pro_0.control_clock" />
  <connection
    kind="clock"
@@ -3397,38 +3440,8 @@
  <connection
    kind="reset"
    version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="master_datapath.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="lvds_rx_controller_pro_0.control_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="lvds_rx_controller_pro_0.data_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mutrig_reset_controller_0.dpa_reset" />
- <connection
-   kind="reset"
-   version="18.1"
    start="xcvr156_clock.clk_reset"
    end="hist_post_cdc_0.in_clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_clock_crossing_bridge.m0_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_jtagmaster2rstctrl.reset" />
  <connection
    kind="reset"
    version="18.1"
@@ -3489,6 +3502,11 @@
    version="18.1"
    start="monitor_clock_125.clk_reset"
    end="mm_pipeline_lvds_csr_hitstack_frame.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_clock_125.clk_reset"
+   end="monitor_reset_sync.reset_in0" />
  <connection
    kind="reset"
    version="18.1"
@@ -3784,6 +3802,36 @@
    version="18.1"
    start="reset_bridge_export.out_reset"
    end="histogram_statistics_0.interval_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="master_datapath.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="lvds_rx_controller_pro_0.control_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="lvds_rx_controller_pro_0.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_reset_controller_0.dpa_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_clock_crossing_bridge.m0_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_jtagmaster2rstctrl.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="AUTO" />
  <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
