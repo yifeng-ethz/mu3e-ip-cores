@@ -1,6 +1,12 @@
 {
   "pass": false,
   "total_hits": 0,
+  "total_hits_csr13": 0,
+  "last_interval_total_hits_csr17": 0,
+  "last_interval_dropped_hits_csr18": 0,
+  "hist_bin_sum": 0,
+  "hist_bin_sum_matches_csr13": true,
+  "csr13_vs_hist_diff": 0,
   "underflow": 0,
   "overflow": 0,
   "dropped_hits": 0,
@@ -15,11 +21,12 @@
   "rx_err_count_delta": 0,
   "log_entries_count": 2,
   "stage_durations": {
-    "prepare_ms": 28617018.895168,
+    "prepare_ms": null,
     "sync_ms": null,
     "running_s": null,
-    "terminating_ms": 508.3467960357666
+    "terminating_ms": 508.6820125579834
   },
   "idle_completion": "IDLE_OBSERVED",
-  "failure_mode": "TOTAL_HITS_ZERO"
+  "failure_mode": "TOTAL_HITS_ZERO",
+  "warnings": null
 }

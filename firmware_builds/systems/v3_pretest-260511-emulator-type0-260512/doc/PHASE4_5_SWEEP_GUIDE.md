@@ -20,7 +20,9 @@ For every row in the 32-row sweep matrix, the script
 1. Programs `arb_hit_type0_supercore` admit `lane_mask`.
 2. Programs `emulator_mutrig` `channel_mask`, `rate_88fp`, `hit_mode`.
 3. Programs `histogram_statistics_v2` `LEFT=0 RIGHT=255 BIN_WIDTH=1
-   KEY_LOC=channel_post`.
+   KEY_LOC=channel_post`, and `INTERVAL_CFG = INTERVAL_CFG_NEVER_FIRE`
+   so the LIVE current-interval counter accumulates the full run
+   (see Live-vs-Stable Counter Contract below).
 4. Drains the `runctl_mgmt_host_0` LOG FIFO.
 5. Writes a self-defined run_number `0xAA0000 | row_idx` to
    `CSR_RUN_NUMBER`.
@@ -30,10 +32,57 @@ For every row in the 32-row sweep matrix, the script
    to wall-clock).
 8. Drains the LOG FIFO and decodes the 128-bit entries.
 9. Reads all 256 histogram bins ONE WORD AT A TIME.
-10. Snapshots every counter (arb, hist, ring, mts, frame, runctl).
-11. Computes a structured verdict per row.
+10. Snapshots every counter (arb, hist, ring, mts, frame, runctl) and
+    captures `csr13 TOTAL_HITS` (LIVE), `csr17 LAST_INTERVAL_TOTAL_HITS`
+    (STABLE), and `hist_bin_sum` for cross-validation.
+11. Computes a structured verdict per row (`total_hits_csr13` is the
+    authoritative full-run total; `hist_bin_sum_matches_csr13` is a
+    warning-only cross-check with an 8-hit pipeline tolerance).
 12. Renders a 2-panel matplotlib plot.
 13. Regenerates `doc/PHASE4_5_SWEEP_TABLE.md`.
+
+## Live-vs-Stable Counter Contract
+
+`histogram_statistics_v2_hw.tcl` documents this contract verbatim:
+
+> *"TOTAL_HITS and DROPPED_HITS are LIVE CURRENT-INTERVAL counters.
+> LAST_INTERVAL_TOTAL_HITS and LAST_INTERVAL_DROPPED_HITS latch the
+> completed interval just before the live counters reset, allowing
+> stable one-second rate polling."*
+
+CSR offset 13 (`TOTAL_HITS`) maps to `csr_total_hits`, a live accumulator
+cleared at every `interval_pulse`. The pulse period equals `INTERVAL_CFG`
+clock cycles at `lvdspll_clk = 125 MHz` (8 ns / tick).
+
+On the FEB v3 emulator-type0 build, `histogram_statistics_0.interval_reset`
+is wired only to the generic POR reset bridge, so the periodic timer is
+the sole source of `interval_pulse`. If `INTERVAL_CFG <= run window`,
+multiple pulses fire during the run; the post-end-run `TOTAL_HITS` read
+returns at most the `t=last_pulse..end_run` partial (often zero), and the
+ping-pong `hist_bin` bank reflects only one interval's worth of data.
+
+To get the full-run total in `TOTAL_HITS`, the script programs
+`INTERVAL_CFG = INTERVAL_CFG_NEVER_FIRE = 0xFFFFFFFF` (~34.36 s @
+125 MHz). No interval pulse fires during any reasonable run window; the
+live counter accumulates every hit, and the dual-bank SRAM never swaps,
+so `hist_bin[0..255]` reads the same accumulator.
+
+A hard safety check refuses to start a row whose `interval_seconds`
+exceeds `INTERVAL_CFG_NEVER_FIRE_S = 34.36 s` (the entire matrix's max
+is 4 s today). If a future row needs a longer window, switch to manual
+`interval_reset` between runs.
+
+Three counters are captured every row for cross-validation:
+
+| Field in `verdict.json` | CSR | Reflects |
+|---|---|---|
+| `total_hits_csr13` | 13 | LIVE current-interval accumulator (authoritative full-run total under INTERVAL_CFG_NEVER_FIRE) |
+| `last_interval_total_hits_csr17` | 17 | STABLE last-completed-interval latch (should be 0 or stale; no interval pulse fired) |
+| `hist_bin_sum` | hist_bin[0..255] | per-channel SRAM sum (must equal `total_hits_csr13` &plusmn;8) |
+
+`hist_bin_sum_matches_csr13` is a warning-only flag (not a verdict fail),
+because end-of-run pipeline drain can leave a small residual between the
+CSR sample and the bin-RAM reads.
 
 ## Pre-flight
 
@@ -131,7 +180,7 @@ NEVER deletes files.
 
 A row PASSes when all of the following hold:
 
-- `TOTAL_HITS > 0` (or `== 0` for `sanity_negative` rows)
+- `total_hits_csr13 > 0` (or `== 0` for `sanity_negative` rows)
 - `UNDERFLOW == 0`
 - `OVERFLOW == 0`
 - histogram `DROPPED_HITS == 0`
@@ -139,10 +188,19 @@ A row PASSes when all of the following hold:
 - `RX_CMD_COUNT` delta `== 4` (one for each of 0x10/0x11/0x12/0x13)
 - `RX_ERR_COUNT` delta `== 0`
 
+`total_hits_csr13` is the LIVE CSR 13 accumulator captured post-end-run.
+With `INTERVAL_CFG_NEVER_FIRE` it equals the full-run total.
+
 `run_number_writeback_ok` is captured as a non-fatal sanity flag in
 `verdict.json`. If `CSR_RUN_NUMBER` only latches from the LVDS
 RUN_PREPARE payload (not the side-load), the flag is `false` but the
 verdict does not depend on it.
+
+`hist_bin_sum_matches_csr13` is a WARNING-only flag (not a fail). It
+fires when `abs(hist_bin_sum - total_hits_csr13) > 8` (8-hit pipeline
+drain tolerance). A mismatch reported here is logged in
+`verdict.warnings` but the row's PASS predicate still uses CSR 13
+alone.
 
 `failure_mode` in `verdict.json` lists every predicate that failed.
 
@@ -181,7 +239,7 @@ Each row is listed by `--list`.
 | IP block | counters captured |
 |---|---|
 | arb_hit_type0_supercore | 8 lanes x {MODE, FIFO_LEVEL_MAX, ingress_emu_hits, drops_emu, egress_emu_hits, ingress_real_hits, drops_real, egress_real_hits} |
-| histogram_statistics_v2 | UNDERFLOW, OVERFLOW, INTERVAL_CFG, BANK_STATUS, PORT_STATUS, TOTAL_HITS, DROPPED_HITS, COAL_STATUS, LAST_INT_HITS, hist_bin[0..255] |
+| histogram_statistics_v2 | UNDERFLOW, OVERFLOW, INTERVAL_CFG, BANK_STATUS, PORT_STATUS, TOTAL_HITS (CSR 13, LIVE), DROPPED_HITS (CSR 14, LIVE), COAL_STATUS, LAST_INTERVAL_TOTAL_HITS (CSR 17, STABLE), LAST_INTERVAL_DROPPED_HITS (CSR 18, STABLE), hist_bin[0..255] |
 | ring_buffer_cam_0..7 | uid, ctrl, fill_level, inerr_count, push_count, pop_count, overwrite_count, cache_miss_count |
 | mts_preprocessor_0/1 | status_control, discard_hits, expected_latency, total_hits |
 | feb_frame_assembly_HSS0/1 | declared_hits, actual_hits, missing_hits |

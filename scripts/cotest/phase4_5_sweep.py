@@ -50,6 +50,34 @@ each row the master table doc/PHASE4_5_SWEEP_TABLE.md is regenerated.
 
 All grace periods are tunable via top-of-file constants. The default
 profile is tuned so the test agent only has to run the script.
+
+LIVE-vs-STABLE counter contract (histogram_statistics_v2):
+    From histogram_statistics_v2_hw.tcl (verbatim):
+      "TOTAL_HITS and DROPPED_HITS are LIVE CURRENT-INTERVAL counters.
+       LAST_INTERVAL_TOTAL_HITS and LAST_INTERVAL_DROPPED_HITS latch the
+       completed interval just before the live counters reset, allowing
+       stable one-second rate polling."
+    CSR offset 13 (TOTAL_HITS) is a LIVE accumulator. It resets every
+    interval_pulse fires (period = HIST_INTERVAL_CFG clock cycles).
+    CSR offset 17 (LAST_INTERVAL_TOTAL_HITS) is the STABLE snapshot of
+    the just-completed interval (one interval window's worth).
+    hist_bin[0..255] is dual-bank ping-pong SRAM; reading the inactive
+    bank returns the LAST completed interval's per-channel counts.
+
+    If HIST_INTERVAL_CFG <= run_window, multiple interval pulses fire
+    DURING the run window:
+      - TOTAL_HITS resets every pulse -> reads at end of run return at
+        most the t=last_pulse..end_run partial (often 0).
+      - LAST_INTERVAL_TOTAL_HITS holds the most recent completed interval
+        only (NOT the full run total).
+      - hist_bin[] returns one interval's bank, not the run total.
+    To capture the full run window in TOTAL_HITS we configure
+    HIST_INTERVAL_CFG = INTERVAL_CFG_NEVER_FIRE so no interval pulse
+    fires during any reasonable run window; TOTAL_HITS then accumulates
+    every hit from the start of the run until END_RUN drains. Reading
+    TOTAL_HITS post-end-run gives the authoritative run total, and
+    hist_bin[0..255] (which never bank-swaps in this configuration)
+    holds the same per-channel decomposition.
 """
 from __future__ import annotations
 
@@ -194,10 +222,12 @@ HIST_OVERFLOW_W                 = 0x09
 HIST_INTERVAL_CFG_W             = 0x0A
 HIST_BANK_STATUS_W              = 0x0B
 HIST_PORT_STATUS_W              = 0x0C
-HIST_TOTAL_HITS_W               = 0x0D
-HIST_DROPPED_HITS_W             = 0x0E
+HIST_TOTAL_HITS_W               = 0x0D    # CSR 13 -- LIVE current-interval accepted-hit counter (resets at every interval_pulse)
+HIST_DROPPED_HITS_W             = 0x0E    # CSR 14 -- LIVE current-interval dropped-hit counter
 HIST_COAL_STATUS_W              = 0x0F
-HIST_LAST_INT_HITS_W            = 0x10
+HIST_SCRATCH_W                  = 0x10    # CSR 16 -- general-purpose RW scratch (was mislabelled LAST_INT_HITS_W in earlier revisions)
+HIST_LAST_INTERVAL_TOTAL_HITS_W = 0x11    # CSR 17 -- STABLE: hits latched at the most recent interval_pulse before the live counter reset
+HIST_LAST_INTERVAL_DROPPED_HITS_W = 0x12  # CSR 18 -- STABLE: dropped-hits latched at the most recent interval_pulse
 HIST_INGRESS_BASE_WORD          = 0x0AB00
 HIST_INGRESS_CONTROL_W          = 0x02
 HIST_INGRESS_STATUS_W           = 0x03
@@ -298,6 +328,27 @@ DEFAULT_LINK    = 2
 
 DEFAULT_INTERVAL_S   = 4.0
 DEFAULT_INTERVAL_CK  = int(DEFAULT_INTERVAL_S * LVDS_CLK_HZ)  # 500M cycles
+
+# ----------------------------------------------------------------------------
+# INTERVAL_CFG "never fire within the run window" value
+# ----------------------------------------------------------------------------
+# histogram_statistics_v2 owns a LIVE current-interval counter
+# (csr_total_hits, CSR 13) that resets at every interval_pulse. The
+# pulse fires every HIST_INTERVAL_CFG clock cycles (lvdspll_clk = 125 MHz
+# -> 8 ns/tick). When INTERVAL_CFG <= run window, multiple interval
+# pulses fire DURING the run, and the post-end-run TOTAL_HITS read returns
+# at most the t=last_pulse..end_run partial -- frequently 0.
+#
+# We need TOTAL_HITS (and the ping-pong hist_bin bank) to accumulate
+# the full run window. Setting INTERVAL_CFG to its maximum 32-bit value
+# (0xFFFFFFFF = 4294967295 cycles = ~34.36 s @ 125 MHz) ensures no
+# interval_pulse fires for any reasonable test run.
+#
+# Hard safety check below: if a row's interval_seconds exceeds
+# INTERVAL_CFG_NEVER_FIRE_S we refuse to start the row (would require
+# a different strategy: manual interval_reset between runs).
+INTERVAL_CFG_NEVER_FIRE   = 0xFFFFFFFF                          # max 32-bit
+INTERVAL_CFG_NEVER_FIRE_S = INTERVAL_CFG_NEVER_FIRE / LVDS_CLK_HZ # ~34.36 s
 
 
 def _row(row_id: str, lane_mask: str, channel_mask: str, rate: str,
@@ -827,8 +878,11 @@ def snap_arb(sc_tool: Path, link: int,
 def snap_hist(sc_tool: Path, link: int,
               log_fh: Optional[Any] = None) -> dict[str, Any]:
     try:
-        # 17 words covers offsets 0x00..0x10 in one transaction (NOT the bin RAM)
-        words = sc_read(sc_tool, link, HIST_CSR_BASE_WORD, 17, log_fh=log_fh)
+        # 19 words covers offsets 0x00..0x12 in one transaction (NOT the bin RAM).
+        # We need offsets 0x11 (LAST_INTERVAL_TOTAL_HITS) and 0x12
+        # (LAST_INTERVAL_DROPPED_HITS) for cross-validation of the LIVE
+        # CSR 13 counter against the STABLE CSR 17 latch.
+        words = sc_read(sc_tool, link, HIST_CSR_BASE_WORD, 19, log_fh=log_fh)
         return {
             "raw":            [f"0x{w:08X}" for w in words],
             "UNDERFLOW":      words[HIST_UNDERFLOW_W],
@@ -836,16 +890,24 @@ def snap_hist(sc_tool: Path, link: int,
             "INTERVAL_CFG":   words[HIST_INTERVAL_CFG_W],
             "BANK_STATUS":    words[HIST_BANK_STATUS_W],
             "PORT_STATUS":    words[HIST_PORT_STATUS_W],
+            # LIVE current-interval counters (reset on interval_pulse)
             "TOTAL_HITS":     words[HIST_TOTAL_HITS_W],
             "DROPPED_HITS":   words[HIST_DROPPED_HITS_W],
             "COAL_STATUS":    words[HIST_COAL_STATUS_W],
-            "LAST_INT_HITS":  words[HIST_LAST_INT_HITS_W],
+            # STABLE last-interval snapshots (latched at most recent interval_pulse)
+            "LAST_INTERVAL_TOTAL_HITS":   words[HIST_LAST_INTERVAL_TOTAL_HITS_W],
+            "LAST_INTERVAL_DROPPED_HITS": words[HIST_LAST_INTERVAL_DROPPED_HITS_W],
+            # Back-compat alias (was offset 0x10 = SCRATCH, mis-labelled in old runs)
+            "LAST_INT_HITS":  words[HIST_LAST_INTERVAL_TOTAL_HITS_W],
         }
     except RuntimeError as exc:
         return {"error": str(exc),
                 "TOTAL_HITS": 0, "UNDERFLOW": 0, "OVERFLOW": 0,
                 "DROPPED_HITS": 0, "BANK_STATUS": 0, "PORT_STATUS": 0,
-                "INTERVAL_CFG": 0, "COAL_STATUS": 0, "LAST_INT_HITS": 0}
+                "INTERVAL_CFG": 0, "COAL_STATUS": 0,
+                "LAST_INTERVAL_TOTAL_HITS": 0,
+                "LAST_INTERVAL_DROPPED_HITS": 0,
+                "LAST_INT_HITS": 0}
 
 
 def read_hist_bins(sc_tool: Path, link: int,
@@ -1261,10 +1323,34 @@ def compute_verdict(row: dict[str, Any], snap_pre: dict[str, Any],
                     hist_bins: list[int],
                     prev_total_hits: Optional[int]) -> dict[str, Any]:
     hist_post = snap_post.get("histogram", {})
-    total_hits   = int(hist_post.get("TOTAL_HITS",  0) or 0)
-    underflow    = int(hist_post.get("UNDERFLOW",   0) or 0)
-    overflow     = int(hist_post.get("OVERFLOW",    0) or 0)
+    # LIVE current-interval accumulator (CSR 13). With
+    # INTERVAL_CFG=INTERVAL_CFG_NEVER_FIRE this is the authoritative
+    # full-run total because no interval_pulse fires during the run.
+    total_hits_csr13 = int(hist_post.get("TOTAL_HITS",  0) or 0)
+    # STABLE last-interval snapshot (CSR 17). Should be 0 or stale on
+    # a clean run with INTERVAL_CFG=NEVER_FIRE (no interval pulse
+    # latched anything). Captured for cross-validation only.
+    last_interval_total_hits_csr17 = int(
+        hist_post.get("LAST_INTERVAL_TOTAL_HITS", 0) or 0
+    )
+    last_interval_dropped_hits_csr18 = int(
+        hist_post.get("LAST_INTERVAL_DROPPED_HITS", 0) or 0
+    )
+    underflow    = int(hist_post.get("UNDERFLOW",    0) or 0)
+    overflow     = int(hist_post.get("OVERFLOW",     0) or 0)
     dropped      = int(hist_post.get("DROPPED_HITS", 0) or 0)
+    hist_bin_sum = int(sum(hist_bins))
+
+    # Cross-validation: with INTERVAL_CFG=NEVER_FIRE the ping-pong bank
+    # never swaps, so hist_bin[0..255] reads the same accumulator that
+    # CSR 13 reports. Allow an 8-hit tolerance for in-flight pipeline
+    # drain between the CSR 13 sample and the bin-RAM single-word reads.
+    HIST_CROSS_TOL = 8
+    csr13_vs_hist_diff = abs(hist_bin_sum - total_hits_csr13)
+    hist_bin_sum_matches_csr13 = (csr13_vs_hist_diff <= HIST_CROSS_TOL)
+
+    # Authoritative total_hits for the run: CSR 13.
+    total_hits = total_hits_csr13
 
     arb_drops = 0
     for lane_rec in snap_post.get("arb", []):
@@ -1307,6 +1393,16 @@ def compute_verdict(row: dict[str, Any], snap_pre: dict[str, Any],
             f"RX_ERR_COUNT_DELTA_NE_0_GOT_{stage_rec.get('rx_err_count_delta')}"
         )
 
+    # hist_bin_sum vs CSR 13 mismatch is reported as a WARNING (not a
+    # failure) so a partial drain at end-of-run does not flip an
+    # otherwise healthy row.
+    warnings: list[str] = []
+    if not hist_bin_sum_matches_csr13:
+        warnings.append(
+            f"HIST_BIN_SUM_NE_CSR13_diff={csr13_vs_hist_diff}_"
+            f"sum={hist_bin_sum}_csr13={total_hits_csr13}"
+        )
+
     passed = (
         traffic_predicate
         and underflow == 0
@@ -1319,13 +1415,19 @@ def compute_verdict(row: dict[str, Any], snap_pre: dict[str, Any],
 
     return {
         "pass":              passed,
-        "total_hits":        total_hits,
+        "total_hits":        total_hits,                  # authoritative = CSR 13
+        "total_hits_csr13":  total_hits_csr13,            # LIVE counter
+        "last_interval_total_hits_csr17":   last_interval_total_hits_csr17,
+        "last_interval_dropped_hits_csr18": last_interval_dropped_hits_csr18,
+        "hist_bin_sum":      hist_bin_sum,
+        "hist_bin_sum_matches_csr13": hist_bin_sum_matches_csr13,
+        "csr13_vs_hist_diff": csr13_vs_hist_diff,
         "underflow":         underflow,
         "overflow":          overflow,
         "dropped_hits":      dropped,
         "arb_drops_emu":     arb_drops,
         "ratio_to_prev":     ratio_to_prev,
-        "hist_sum":          int(sum(hist_bins)),
+        "hist_sum":          hist_bin_sum,                # back-compat alias
         "sanity_negative":   sanity_neg,
         "run_number_writeback_ok": stage_rec.get("run_number_writeback_ok", False),
         "run_number_written":      stage_rec.get("run_number_written"),
@@ -1337,6 +1439,7 @@ def compute_verdict(row: dict[str, Any], snap_pre: dict[str, Any],
         "idle_completion":         stage_rec.get("idle_completion",
                                                  "WALL_CLOCK_FALLBACK"),
         "failure_mode":            "; ".join(failure_modes) if failure_modes else None,
+        "warnings":                "; ".join(warnings)      if warnings      else None,
     }
 
 
@@ -1478,7 +1581,7 @@ def regen_master_table() -> Path:
                   "<th rowspan=2>row_id</th>"
                   "<th colspan=5>Conditions</th>"
                   "<th colspan=4>Stage timing</th>"
-                  "<th colspan=5>Counter summary</th>"
+                  "<th colspan=7>Counter summary</th>"
                   "<th colspan=6>Evidence (clickable)</th>"
                   "<th rowspan=2>Verdict</th>"
                   "</tr>")
@@ -1492,7 +1595,9 @@ def regen_master_table() -> Path:
                   "<th>sync_ms</th>"
                   "<th>running_s</th>"
                   "<th>term_ms</th>"
-                  "<th>TOTAL_HITS</th>"
+                  "<th>csr13_TOTAL</th>"
+                  "<th>csr17_LAST_INT</th>"
+                  "<th>hist_bin_sum</th>"
                   "<th>UNDER</th>"
                   "<th>OVER</th>"
                   "<th>rxcmd&Delta;</th>"
@@ -1543,6 +1648,7 @@ def regen_master_table() -> Path:
                 f"<td>{row['hit_mode']}</td>"
                 f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
                 f"<td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>"
+                f"<td>-</td><td>-</td>"
                 + _evidence_links(rid)
                 + f"<td>PENDING</td>"
                 f"</tr>"
@@ -1550,6 +1656,10 @@ def regen_master_table() -> Path:
             continue
         v = rec["verdict"]
         sd = v.get("stage_durations", {}) or {}
+        # Backward-compat: older verdict.json may lack csr13/csr17/hist_bin_sum
+        csr13 = v.get("total_hits_csr13", v.get("total_hits"))
+        csr17 = v.get("last_interval_total_hits_csr17")
+        hbsum = v.get("hist_bin_sum", v.get("hist_sum"))
         lines.append(
             f"<tr>"
             f"<td><a href=\"../sweep_evidence/{rid}/\">{rid}</a></td>"
@@ -1562,7 +1672,9 @@ def regen_master_table() -> Path:
             f"<td>{_fmt_num(sd.get('sync_ms'))}</td>"
             f"<td>{_fmt_num(sd.get('running_s'))}</td>"
             f"<td>{_fmt_num(sd.get('terminating_ms'))}</td>"
-            f"<td>{_fmt_num(v.get('total_hits'))}</td>"
+            f"<td>{_fmt_num(csr13)}</td>"
+            f"<td>{_fmt_num(csr17)}</td>"
+            f"<td>{_fmt_num(hbsum)}</td>"
             f"<td>{_fmt_num(v.get('underflow'))}</td>"
             f"<td>{_fmt_num(v.get('overflow'))}</td>"
             f"<td>{_fmt_num(v.get('rx_cmd_count_delta'))}</td>"
@@ -1637,7 +1749,7 @@ def dry_run_row(row: dict[str, Any], row_idx: int,
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_RIGHT_BOUND_W:05X} 0x000000FF --quiet")
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_BIN_WIDTH_W:05X} 0x00000001 --quiet")
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_INTERVAL_CFG_W:05X} "
-      f"0x{int(interval_s*LVDS_CLK_HZ):08X} --quiet  # INTERVAL_CFG")
+      f"0x{INTERVAL_CFG_NEVER_FIRE:08X} --quiet  # INTERVAL_CFG (never-fire; live counter accumulates full run)")
     p(f"")
     p(f"  [5] select post-rbCAM histogram path (ingress mux)")
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_INGRESS_BASE_WORD+HIST_INGRESS_CONTROL_W:05X} 0x00000001 --quiet")
@@ -1770,7 +1882,23 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
                                      log_fh=log_fh)
 
         # Histogram
-        interval_clocks = int(row["interval_seconds"] * LVDS_CLK_HZ)
+        # LIVE-vs-STABLE counter contract (see top-of-file docstring):
+        # Setting INTERVAL_CFG = run_window per-row caused csr_total_hits
+        # (CSR 13) to reset every interval_pulse during the run, leaving
+        # the post-end-run read at 0 or at a partial. We program
+        # INTERVAL_CFG = INTERVAL_CFG_NEVER_FIRE so no interval_pulse
+        # fires during the run; csr_total_hits then accumulates the full
+        # run total and the ping-pong hist_bin bank never swaps.
+        if row["interval_seconds"] > INTERVAL_CFG_NEVER_FIRE_S:
+            raise RuntimeError(
+                f"row interval_seconds={row['interval_seconds']:.2f} exceeds "
+                f"INTERVAL_CFG_NEVER_FIRE_S={INTERVAL_CFG_NEVER_FIRE_S:.2f}s; "
+                "histogram_statistics_v2 INTERVAL_CFG cannot hold off the "
+                "interval_pulse for this long without a different reset "
+                "strategy. Reduce interval_seconds or switch to a manual "
+                "interval_reset between runs."
+            )
+        interval_clocks = INTERVAL_CFG_NEVER_FIRE
         hist_cfg = configure_histogram(sc_tool, link, interval_clocks,
                                        log_fh=log_fh)
 
@@ -1840,9 +1968,12 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
             _log(log_fh, f"REGEN_TABLE_ERROR: {exc}")
 
         status_label = "PASS" if verdict["pass"] else "FAIL"
-        print(f"  [{rid}] {status_label}  TOTAL_HITS={verdict['total_hits']}  "
+        print(f"  [{rid}] {status_label}  "
+              f"csr13={verdict['total_hits_csr13']}  "
+              f"csr17={verdict['last_interval_total_hits_csr17']}  "
+              f"hist_sum={verdict['hist_bin_sum']}  "
+              f"sum_matches_csr13={verdict['hist_bin_sum_matches_csr13']}  "
               f"drops_emu={verdict['arb_drops_emu']}  "
-              f"hist_sum={verdict['hist_sum']}  "
               f"rxcmd_delta={verdict.get('rx_cmd_count_delta')}  "
               f"idle={verdict['idle_completion']}",
               flush=True)
@@ -1865,6 +1996,12 @@ def _finalize_row_after_fatal(record: dict[str, Any], ev_dir: Path,
     verdict = {
         "pass":          False,
         "total_hits":    0,
+        "total_hits_csr13":  0,
+        "last_interval_total_hits_csr17":   0,
+        "last_interval_dropped_hits_csr18": 0,
+        "hist_bin_sum":  0,
+        "hist_bin_sum_matches_csr13": False,
+        "csr13_vs_hist_diff": 0,
         "underflow":     None,
         "overflow":      None,
         "dropped_hits":  None,
@@ -1873,6 +2010,7 @@ def _finalize_row_after_fatal(record: dict[str, Any], ev_dir: Path,
         "hist_sum":      0,
         "stage_durations": {},
         "failure_mode":  f"FATAL: {type(exc).__name__}: {exc}",
+        "warnings":      None,
         "traceback":     tb,
     }
     record["verdict"] = verdict

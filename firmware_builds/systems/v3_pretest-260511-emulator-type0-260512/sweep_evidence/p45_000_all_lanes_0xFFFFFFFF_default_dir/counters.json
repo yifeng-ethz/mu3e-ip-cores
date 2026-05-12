@@ -11,7 +11,7 @@
     "sanity_negative": false
   },
   "row_idx": 0,
-  "started": "2026-05-12T12:04:12",
+  "started": "2026-05-12T12:43:31",
   "sc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
   "link": 2,
   "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_default_dir",
@@ -117,10 +117,10 @@
     "RIGHT_BOUND": "0x00000100",
     "BIN_WIDTH": "0x00000001",
     "KEY_LOC": "0x26231511",
-    "INTERVAL_CFG": "0x1DCD6500",
+    "INTERVAL_CFG": "0xFFFFFFFF",
     "CONTROL_APPLY": "0x00000100"
   },
-  "ingress_status": "0x00000503",
+  "ingress_status": "0x00000403",
   "downstream_cfg": {
     "mts_ctrl": "0x20000011",
     "ring_ctrl": "0x00000011"
@@ -131,39 +131,39 @@
       "prepare_ms": null,
       "sync_ms": null,
       "running_s": null,
-      "terminating_ms": 504.09913063049316
+      "terminating_ms": 504.02188301086426
     },
     "wall_clock_durations": {
-      "prepare_s": 0.029156208038330078,
-      "sync_s": 0.22489094734191895,
-      "running_s": 4.23039984703064,
-      "terminating_s": 0.5441949367523193,
-      "total_s": 5.028641939163208
+      "prepare_s": 0.02976393699645996,
+      "sync_s": 0.2188427448272705,
+      "running_s": 4.2134010791778564,
+      "terminating_s": 0.5321741104125977,
+      "total_s": 4.994181871414185
     },
     "fifo_entries": [
       {
         "raw_words": [
-          "0x32075932",
-          "0x592F1300",
-          "0x33A9F64D",
-          "0xF64A1100"
+          "0xCFFDB090",
+          "0xB08D1000",
+          "0xD1923324",
+          "0x33211100"
         ],
-        "recv_ts": 55007142631727,
-        "run_command": 19,
-        "payload32": 866776653,
-        "exec_ts_lo": 4132049152
+        "recv_ts": 228688495947917,
+        "run_command": 16,
+        "payload32": 3516019492,
+        "exec_ts_lo": 857805056
       },
       {
         "raw_words": [
-          "0x354FD8A2",
-          "0xD89F1200",
-          "0x539062F3",
-          "0x62F01300"
+          "0xD32DEF68",
+          "0xEF651300",
+          "0xF1356E4C",
+          "0x6E491300"
         ],
-        "recv_ts": 58617053239455,
-        "run_command": 18,
-        "payload32": 1401971443,
-        "exec_ts_lo": 1659900672
+        "recv_ts": 232194243620709,
+        "run_command": 19,
+        "payload32": 4046810700,
+        "exec_ts_lo": 1850282752
       }
     ],
     "cmd_traces": [
@@ -171,362 +171,55 @@
         "cmd": "0x10",
         "word": "0xAA000010",
         "runctl_status": "0x00000003",
-        "runctl_last_cmd": "0x00000013",
-        "wall_start": 1778580253.5581691,
-        "wall_end": 1778580253.5739057
+        "runctl_last_cmd": "0x00000010",
+        "wall_start": 1778582613.3629818,
+        "wall_end": 1778582613.3717906
       },
       {
         "cmd": "0x11",
         "word": "0x00000011",
         "runctl_status": "0x00000003",
         "runctl_last_cmd": "0x00000011",
-        "wall_start": 1778580253.7773025,
-        "wall_end": 1778580253.7987971
+        "wall_start": 1778582613.5749972,
+        "wall_end": 1778582613.5906339
       },
       {
         "cmd": "0x12",
         "word": "0x00000012",
         "runctl_status": "0x00000003",
-        "runctl_last_cmd": "0x00000012",
-        "wall_start": 1778580253.9990447,
-        "wall_end": 1778580254.025173
+        "runctl_last_cmd": "0x00000013",
+        "wall_start": 1778582613.790904,
+        "wall_end": 1778582613.8003283
       },
       {
         "cmd": "0x13",
         "word": "0x00000013",
         "runctl_status": "0x00000003",
         "runctl_last_cmd": "0x00000013",
-        "wall_start": 1778580258.0292408,
-        "wall_end": 1778580258.069291
+        "wall_start": 1778582617.8040779,
+        "wall_end": 1778582617.8321843
       }
     ],
-    "drain_pre_iter": 2,
+    "drain_pre_iter": 0,
     "drain_post_iter": 0,
     "idle_completion": "IDLE_OBSERVED",
-    "idle_observed_ts": 1778580258.5733924,
+    "idle_observed_ts": 1778582618.3362093,
     "run_number_written": 11141120,
-    "run_number_readback": 0,
-    "run_number_writeback_ok": false,
-    "rx_cmd_count_pre": 3,
-    "rx_cmd_count_post": 7,
+    "run_number_readback": 11141120,
+    "run_number_writeback_ok": true,
+    "rx_cmd_count_pre": 40,
+    "rx_cmd_count_post": 44,
     "rx_cmd_count_delta": 4,
-    "rx_err_count_pre": 156286,
-    "rx_err_count_post": 156286,
+    "rx_err_count_pre": 1557492,
+    "rx_err_count_post": 1557492,
     "rx_err_count_delta": 0,
     "log_entries_count": 2,
-    "t0_wall": 1778580253.5447521,
-    "t1_wall": 1778580258.573394,
-    "run_number_pre": 0
+    "t0_wall": 1778582613.3420293,
+    "t1_wall": 1778582618.3362112,
+    "run_number_pre": 11141140
   },
   "snapshot_pre": {
-    "timestamp": "2026-05-12T12:04:12",
-    "sc_hub_uid": "0x53434842",
-    "runctl": {
-      "UID": {
-        "addr": "0x0C000",
-        "value": "0x52434D48",
-        "value_int": 1380142408
-      },
-      "STATUS": {
-        "addr": "0x0C003",
-        "value": "0x00000003",
-        "value_int": 3
-      },
-      "LAST_CMD": {
-        "addr": "0x0C004",
-        "value": "0x00000013",
-        "value_int": 19
-      },
-      "RUN_NUMBER": {
-        "addr": "0x0C006",
-        "value": "0x00000000",
-        "value_int": 0
-      },
-      "RX_CMD_COUNT": {
-        "addr": "0x0C00F",
-        "value": "0x00000003",
-        "value_int": 3
-      },
-      "RX_ERR_COUNT": {
-        "addr": "0x0C010",
-        "value": "0x0002627E",
-        "value_int": 156286
-      },
-      "LOG_STATUS": {
-        "addr": "0x0C011",
-        "value": "0x0000000C",
-        "value_int": 12
-      },
-      "RECV_TS": {
-        "value_int": 3484510836,
-        "value": "0x0000CFB16A74"
-      },
-      "EXEC_TS": {
-        "value_int": 3484510839,
-        "value": "0x0000CFB16A77"
-      }
-    },
-    "arb": [
-      {
-        "lane": 0,
-        "base": "0x088A0",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      },
-      {
-        "lane": 1,
-        "base": "0x088C0",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      },
-      {
-        "lane": 2,
-        "base": "0x088E0",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      },
-      {
-        "lane": 3,
-        "base": "0x08900",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      },
-      {
-        "lane": 4,
-        "base": "0x08920",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      },
-      {
-        "lane": 5,
-        "base": "0x08940",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      },
-      {
-        "lane": 6,
-        "base": "0x08960",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      },
-      {
-        "lane": 7,
-        "base": "0x08980",
-        "uid": "0x41486430",
-        "mode": "0x00100D05",
-        "fifo_level_max": 16,
-        "ingress_real_hits": 0,
-        "ingress_emu_hits": 42567460,
-        "drops_real": 0,
-        "drops_emu": 0,
-        "egress_real_hits": 0,
-        "egress_emu_hits": 42567460
-      }
-    ],
-    "histogram": {
-      "raw": [
-        "0x48495354",
-        "0x1A01A1F7",
-        "0x00000100",
-        "0x00000000",
-        "0x00000100",
-        "0x00000001",
-        "0x26231511",
-        "0x00000000",
-        "0x00000000",
-        "0x00000000",
-        "0x1DCD6500",
-        "0x00000000",
-        "0x000000FF",
-        "0x00000000",
-        "0x00000000",
-        "0x00000000",
-        "0x00000000"
-      ],
-      "UNDERFLOW": 0,
-      "OVERFLOW": 0,
-      "INTERVAL_CFG": 500000000,
-      "BANK_STATUS": 0,
-      "PORT_STATUS": 255,
-      "TOTAL_HITS": 0,
-      "DROPPED_HITS": 0,
-      "COAL_STATUS": 0,
-      "LAST_INT_HITS": 0
-    },
-    "ring": {
-      "hs0_rb0": {
-        "base": "0x0AC00",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 824,
-        "inerr_count": 0,
-        "push_count": 10641750,
-        "pop_count": 10127802,
-        "overwrite_count": 513124,
-        "cache_miss_count": 0
-      },
-      "hs0_rb1": {
-        "base": "0x0AC20",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 780,
-        "inerr_count": 0,
-        "push_count": 10641486,
-        "pop_count": 10113390,
-        "overwrite_count": 527316,
-        "cache_miss_count": 0
-      },
-      "hs0_rb2": {
-        "base": "0x0AC40",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 789,
-        "inerr_count": 0,
-        "push_count": 10642188,
-        "pop_count": 10122471,
-        "overwrite_count": 518928,
-        "cache_miss_count": 0
-      },
-      "hs0_rb3": {
-        "base": "0x0AC60",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 740,
-        "inerr_count": 0,
-        "push_count": 10641861,
-        "pop_count": 10141813,
-        "overwrite_count": 499308,
-        "cache_miss_count": 0
-      },
-      "hs1_rb0": {
-        "base": "0x0AD00",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 824,
-        "inerr_count": 0,
-        "push_count": 10641750,
-        "pop_count": 10127802,
-        "overwrite_count": 513124,
-        "cache_miss_count": 0
-      },
-      "hs1_rb1": {
-        "base": "0x0AD20",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 780,
-        "inerr_count": 0,
-        "push_count": 10641486,
-        "pop_count": 10113390,
-        "overwrite_count": 527316,
-        "cache_miss_count": 0
-      },
-      "hs1_rb2": {
-        "base": "0x0AD40",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 789,
-        "inerr_count": 0,
-        "push_count": 10642188,
-        "pop_count": 10122471,
-        "overwrite_count": 518928,
-        "cache_miss_count": 0
-      },
-      "hs1_rb3": {
-        "base": "0x0AD60",
-        "uid": "0x5242434D",
-        "ctrl": "0x00000011",
-        "fill_level": 740,
-        "inerr_count": 0,
-        "push_count": 10641861,
-        "pop_count": 10141813,
-        "overwrite_count": 499308,
-        "cache_miss_count": 0
-      }
-    },
-    "mts": [
-      {
-        "idx": 0,
-        "base": "0x09000",
-        "status_control": "0x20000010",
-        "discard_hits": 0,
-        "expected_latency": 2000,
-        "total_hits": 42567460
-      },
-      {
-        "idx": 1,
-        "base": "0x0A000",
-        "status_control": "0x20000010",
-        "discard_hits": 0,
-        "expected_latency": 2000,
-        "total_hits": 42567460
-      }
-    ],
-    "frame_asm": {
-      "hs0_frame": {
-        "base": "0x0B400",
-        "declared_hits": 173969694728912896,
-        "actual_hits": 173969694728912896,
-        "missing_hits": 0
-      },
-      "hs1_frame": {
-        "base": "0x0B410",
-        "declared_hits": 173969694728912896,
-        "actual_hits": 173969694728912896,
-        "missing_hits": 0
-      }
-    }
-  },
-  "snapshot_post": {
-    "timestamp": "2026-05-12T12:04:18",
+    "timestamp": "2026-05-12T12:43:32",
     "sc_hub_uid": "0x53434842",
     "runctl": {
       "UID": {
@@ -546,18 +239,18 @@
       },
       "RUN_NUMBER": {
         "addr": "0x0C006",
-        "value": "0x00000000",
-        "value_int": 0
+        "value": "0x00AA0014",
+        "value_int": 11141140
       },
       "RX_CMD_COUNT": {
         "addr": "0x0C00F",
-        "value": "0x00000007",
-        "value_int": 7
+        "value": "0x00000028",
+        "value_int": 40
       },
       "RX_ERR_COUNT": {
         "addr": "0x0C010",
-        "value": "0x0002627E",
-        "value_int": 156286
+        "value": "0x0017C3F4",
+        "value_int": 1557492
       },
       "LOG_STATUS": {
         "addr": "0x0C011",
@@ -565,12 +258,12 @@
         "value_int": 65536
       },
       "RECV_TS": {
-        "value_int": 353589289712,
-        "value": "0x0052539062F0"
+        "value_int": 245735093521,
+        "value": "0x003936F3F511"
       },
       "EXEC_TS": {
-        "value_int": 353589289715,
-        "value": "0x0052539062F3"
+        "value_int": 245735093524,
+        "value": "0x003936F3F514"
       }
     },
     "arb": [
@@ -581,11 +274,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       },
       {
         "lane": 1,
@@ -594,11 +287,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       },
       {
         "lane": 2,
@@ -607,11 +300,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       },
       {
         "lane": 3,
@@ -620,11 +313,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       },
       {
         "lane": 4,
@@ -633,11 +326,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       },
       {
         "lane": 5,
@@ -646,11 +339,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       },
       {
         "lane": 6,
@@ -659,11 +352,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       },
       {
         "lane": 7,
@@ -672,11 +365,11 @@
         "mode": "0x00100D05",
         "fifo_level_max": 16,
         "ingress_real_hits": 0,
-        "ingress_emu_hits": 74785284,
+        "ingress_emu_hits": 274622500,
         "drops_real": 0,
         "drops_emu": 0,
         "egress_real_hits": 0,
-        "egress_emu_hits": 74785284
+        "egress_emu_hits": 274622500
       }
     ],
     "histogram": {
@@ -691,9 +384,11 @@
         "0x00000000",
         "0x00000000",
         "0x00000000",
-        "0x1DCD6500",
-        "0x00000001",
+        "0xFFFFFFFF",
+        "0x00000000",
         "0x000000FF",
+        "0x00000000",
+        "0x00000000",
         "0x00000000",
         "0x00000000",
         "0x00000000",
@@ -701,12 +396,14 @@
       ],
       "UNDERFLOW": 0,
       "OVERFLOW": 0,
-      "INTERVAL_CFG": 500000000,
-      "BANK_STATUS": 1,
+      "INTERVAL_CFG": 4294967295,
+      "BANK_STATUS": 0,
       "PORT_STATUS": 255,
       "TOTAL_HITS": 0,
       "DROPPED_HITS": 0,
       "COAL_STATUS": 0,
+      "LAST_INTERVAL_TOTAL_HITS": 0,
+      "LAST_INTERVAL_DROPPED_HITS": 0,
       "LAST_INT_HITS": 0
     },
     "ring": {
@@ -714,88 +411,88 @@
         "base": "0x0AC00",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 824,
-        "inerr_count": 32217824,
-        "push_count": 10641750,
-        "pop_count": 10127802,
-        "overwrite_count": 513124,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       },
       "hs0_rb1": {
         "base": "0x0AC20",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 780,
-        "inerr_count": 32217824,
-        "push_count": 10641486,
-        "pop_count": 10113390,
-        "overwrite_count": 527316,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       },
       "hs0_rb2": {
         "base": "0x0AC40",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 789,
-        "inerr_count": 32217824,
-        "push_count": 10642188,
-        "pop_count": 10122471,
-        "overwrite_count": 518928,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       },
       "hs0_rb3": {
         "base": "0x0AC60",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 740,
-        "inerr_count": 32217824,
-        "push_count": 10641861,
-        "pop_count": 10141813,
-        "overwrite_count": 499308,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       },
       "hs1_rb0": {
         "base": "0x0AD00",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 824,
-        "inerr_count": 32217824,
-        "push_count": 10641750,
-        "pop_count": 10127802,
-        "overwrite_count": 513124,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       },
       "hs1_rb1": {
         "base": "0x0AD20",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 780,
-        "inerr_count": 32217824,
-        "push_count": 10641486,
-        "pop_count": 10113390,
-        "overwrite_count": 527316,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       },
       "hs1_rb2": {
         "base": "0x0AD40",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 789,
-        "inerr_count": 32217824,
-        "push_count": 10642188,
-        "pop_count": 10122471,
-        "overwrite_count": 518928,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       },
       "hs1_rb3": {
         "base": "0x0AD60",
         "uid": "0x5242434D",
         "ctrl": "0x00000011",
-        "fill_level": 740,
-        "inerr_count": 32217824,
-        "push_count": 10641861,
-        "pop_count": 10141813,
-        "overwrite_count": 499308,
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
         "cache_miss_count": 0
       }
     },
@@ -806,7 +503,7 @@
         "status_control": "0x20000010",
         "discard_hits": 0,
         "expected_latency": 2000,
-        "total_hits": 74785284
+        "total_hits": 0
       },
       {
         "idx": 1,
@@ -814,20 +511,331 @@
         "status_control": "0x20000010",
         "discard_hits": 0,
         "expected_latency": 2000,
-        "total_hits": 74785284
+        "total_hits": 0
       }
     ],
     "frame_asm": {
       "hs0_frame": {
         "base": "0x0B400",
-        "declared_hits": 173969694728912896,
-        "actual_hits": 173969694728912896,
+        "declared_hits": 0,
+        "actual_hits": 0,
         "missing_hits": 0
       },
       "hs1_frame": {
         "base": "0x0B410",
-        "declared_hits": 173969694728912896,
-        "actual_hits": 173969694728912896,
+        "declared_hits": 0,
+        "actual_hits": 0,
+        "missing_hits": 0
+      }
+    }
+  },
+  "snapshot_post": {
+    "timestamp": "2026-05-12T12:43:38",
+    "sc_hub_uid": "0x53434842",
+    "runctl": {
+      "UID": {
+        "addr": "0x0C000",
+        "value": "0x52434D48",
+        "value_int": 1380142408
+      },
+      "STATUS": {
+        "addr": "0x0C003",
+        "value": "0x80000003",
+        "value_int": 2147483651
+      },
+      "LAST_CMD": {
+        "addr": "0x0C004",
+        "value": "0x00000013",
+        "value_int": 19
+      },
+      "RUN_NUMBER": {
+        "addr": "0x0C006",
+        "value": "0x00AA0000",
+        "value_int": 11141120
+      },
+      "RX_CMD_COUNT": {
+        "addr": "0x0C00F",
+        "value": "0x0000002C",
+        "value_int": 44
+      },
+      "RX_ERR_COUNT": {
+        "addr": "0x0C010",
+        "value": "0x0017C3F4",
+        "value_int": 1557492
+      },
+      "LOG_STATUS": {
+        "addr": "0x0C011",
+        "value": "0x00010000",
+        "value_int": 65536
+      },
+      "RECV_TS": {
+        "value_int": 248859946569,
+        "value": "0x0039F1356E49"
+      },
+      "EXEC_TS": {
+        "value_int": 248859946572,
+        "value": "0x0039F1356E4C"
+      }
+    },
+    "arb": [
+      {
+        "lane": 0,
+        "base": "0x088A0",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      },
+      {
+        "lane": 1,
+        "base": "0x088C0",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      },
+      {
+        "lane": 2,
+        "base": "0x088E0",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      },
+      {
+        "lane": 3,
+        "base": "0x08900",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      },
+      {
+        "lane": 4,
+        "base": "0x08920",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      },
+      {
+        "lane": 5,
+        "base": "0x08940",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      },
+      {
+        "lane": 6,
+        "base": "0x08960",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      },
+      {
+        "lane": 7,
+        "base": "0x08980",
+        "uid": "0x41486430",
+        "mode": "0x00100505",
+        "fifo_level_max": 16,
+        "ingress_real_hits": 0,
+        "ingress_emu_hits": 274622500,
+        "drops_real": 0,
+        "drops_emu": 0,
+        "egress_real_hits": 0,
+        "egress_emu_hits": 274622500
+      }
+    ],
+    "histogram": {
+      "raw": [
+        "0x48495354",
+        "0x1A01A1F7",
+        "0x00000100",
+        "0x00000000",
+        "0x00000100",
+        "0x00000001",
+        "0x26231511",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0xFFFFFFFF",
+        "0x00000000",
+        "0x000000FF",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "UNDERFLOW": 0,
+      "OVERFLOW": 0,
+      "INTERVAL_CFG": 4294967295,
+      "BANK_STATUS": 0,
+      "PORT_STATUS": 255,
+      "TOTAL_HITS": 0,
+      "DROPPED_HITS": 0,
+      "COAL_STATUS": 0,
+      "LAST_INTERVAL_TOTAL_HITS": 0,
+      "LAST_INTERVAL_DROPPED_HITS": 0,
+      "LAST_INT_HITS": 0
+    },
+    "ring": {
+      "hs0_rb0": {
+        "base": "0x0AC00",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      },
+      "hs0_rb1": {
+        "base": "0x0AC20",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      },
+      "hs0_rb2": {
+        "base": "0x0AC40",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      },
+      "hs0_rb3": {
+        "base": "0x0AC60",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      },
+      "hs1_rb0": {
+        "base": "0x0AD00",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      },
+      "hs1_rb1": {
+        "base": "0x0AD20",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      },
+      "hs1_rb2": {
+        "base": "0x0AD40",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      },
+      "hs1_rb3": {
+        "base": "0x0AD60",
+        "uid": "0x5242434D",
+        "ctrl": "0x00000011",
+        "fill_level": 0,
+        "inerr_count": 0,
+        "push_count": 0,
+        "pop_count": 0,
+        "overwrite_count": 0,
+        "cache_miss_count": 0
+      }
+    },
+    "mts": [
+      {
+        "idx": 0,
+        "base": "0x09000",
+        "status_control": "0x20000010",
+        "discard_hits": 0,
+        "expected_latency": 2000,
+        "total_hits": 0
+      },
+      {
+        "idx": 1,
+        "base": "0x0A000",
+        "status_control": "0x20000010",
+        "discard_hits": 0,
+        "expected_latency": 2000,
+        "total_hits": 0
+      }
+    ],
+    "frame_asm": {
+      "hs0_frame": {
+        "base": "0x0B400",
+        "declared_hits": 0,
+        "actual_hits": 0,
+        "missing_hits": 0
+      },
+      "hs1_frame": {
+        "base": "0x0B410",
+        "declared_hits": 0,
+        "actual_hits": 0,
         "missing_hits": 0
       }
     }
@@ -835,6 +843,12 @@
   "verdict": {
     "pass": false,
     "total_hits": 0,
+    "total_hits_csr13": 0,
+    "last_interval_total_hits_csr17": 0,
+    "last_interval_dropped_hits_csr18": 0,
+    "hist_bin_sum": 0,
+    "hist_bin_sum_matches_csr13": true,
+    "csr13_vs_hist_diff": 0,
     "underflow": 0,
     "overflow": 0,
     "dropped_hits": 0,
@@ -842,9 +856,9 @@
     "ratio_to_prev": null,
     "hist_sum": 0,
     "sanity_negative": false,
-    "run_number_writeback_ok": false,
+    "run_number_writeback_ok": true,
     "run_number_written": 11141120,
-    "run_number_readback": 0,
+    "run_number_readback": 11141120,
     "rx_cmd_count_delta": 4,
     "rx_err_count_delta": 0,
     "log_entries_count": 2,
@@ -852,9 +866,10 @@
       "prepare_ms": null,
       "sync_ms": null,
       "running_s": null,
-      "terminating_ms": 504.09913063049316
+      "terminating_ms": 504.02188301086426
     },
     "idle_completion": "IDLE_OBSERVED",
-    "failure_mode": "TOTAL_HITS_ZERO"
+    "failure_mode": "TOTAL_HITS_ZERO",
+    "warnings": null
   }
 }
