@@ -140,3 +140,31 @@
   The final auto-report records `BOARD_MAPPED=0` and `BOARD_UNRESOLVED=32`;
   no p45 PERF/4 s board bytes were normalized into the BASIC/1 ms cosim
   closure.
+
+## 2026-05-13 - Per-Checkpoint Delay Evidence Review
+
+- Cluster being closed: BUG-009-T per-checkpoint bound model and BUG-010-H
+  lifetime percentile analyzer.
+- Patch summary:
+  - `scripts/cotest/cosim_lifetime_analyzer.py`: materializes checkpoint CSVs,
+    joins by `hit_id`, computes non-flat min/p05/p50/p95/max, validates
+    per-checkpoint bounds, and fails rows on flat, out-of-range, or skipped
+    bound evidence.
+  - `scripts/cotest/cosim_delay_bounds.py`: defines the four RN.BASIC
+    injector-mode bound tables.
+  - `scripts/cotest/feb_swb_lifetime_dislin.c`: renders the five stacked
+    lifetime panels with bound and percentile markers.
+  - `cosim/scripts/rn_basic_cosim.py` and `scripts/cotest/cosim_auto_report.py`:
+    export the per-checkpoint CSVs and replace the single delay-bound summary
+    with `delay_pre`, `delay_post`, `delay_feb`, `delay_ing`, and `delay_opq`.
+- Validation completed before DUT refresh: Python compile passed; the available
+  sanity trace produced nonzero five-checkpoint stats and the DISLIN lifetime
+  PDF rendered with `Warnings: 0`.
+- Phase-D stop: the refreshed-DUT step was not run because
+  `firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/`
+  does not contain the required local `feb_system_v3.qsys` copy named in the
+  2026-05-13 user update. The build dir only has
+  `scifi_datapath_system_v3.qsys`, `scifi_datapath_system_v3_pipe.qsys`, and
+  `arb_hit_type0_supercore.qsys`; `feb_system_v3.qsys` exists under `syn/`.
+  Per the update, the source mapping must be clarified before copying Qsys
+  files or running `qsys-generate --clean-output-directory`.
