@@ -1954,6 +1954,122 @@ step needs user direction: use a run-qualified parser trigger, a staged arm
 after `0x10/0x11`, or another precondition that prevents this idle/control
 traffic from consuming the capture.
 
+### 4.16 Emulator type0 Phase 4 closure 2026-05-12
+
+Build:
+`firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/`.
+This build replaces the legacy byte-stream emulator fanout with the reviewed
+type0 topology: one `emulator_mutrig_qsys_inst`, `BYTE_STREAM_ENABLE=false`,
+`CLUSTER_LANE_COUNT_DEFAULT=8`, `hit_type0_fanout8`, and the build-local
+`arb_hit_type0_supercore`.
+
+SOF identity:
+
+| Field | Value |
+|---|---|
+| SOF | `v3_pretest-260511-emulator-type0-260512/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof` |
+| SHA256 | `55d1f09361c75e7fdcf5a404e056e5b8cf458a6d38fb024c3d94ebe9590d7b46` |
+| Quartus final compile | `quartus_compile_top_20260512_115400_emutype0_perf.status`, `exit_code=0` |
+| Round 2 evidence | `v3_pretest-260511-emulator-type0-260512/doc/PHASE4_EMULATOR_TYPE0_ROUND2_COMPILE.md` |
+| Round 3 evidence | `v3_pretest-260511-emulator-type0-260512/doc/PHASE4_EMULATOR_TYPE0_ROUND3_BOARD.md` |
+
+Round 1 tb_int simulation matched the reference image at the architectural
+checkpoints:
+
+| Checkpoint | Samples | p05 | p50 | p95 |
+|---|---:|---:|---:|---:|
+| pre-rbCAM | 35,328 | 753.000 | 835.000 | 917.000 |
+| post-rbCAM | 3,136 | 2012.000 | 2070.000 | 2128.000 |
+| FEB egress | 35,328 | 2946.500 | 3496.500 | 4128.500 |
+| OPQ ingress | 35,328 | 2947.750 | 3497.750 | 4129.750 |
+| OPQ egress | 35,328 | 9290.250 | 50754.750 | 92219.250 |
+
+Round 2 compile status:
+
+| Item | Result |
+|---|---|
+| A&S / Fitter / Assembler / STA | Completed with 0 errors |
+| Resource use | 77,053 / 91,680 ALMs (84%), 117,650 registers, 4,016,568 memory bits, 528 RAM blocks |
+| Slow85 setup | -0.369 ns worst (`transceiver_pll_clock[0]`), LVDS `pll_sclk` -0.163 ns |
+| Slow0 setup | -0.156 ns worst, LVDS `pll_sclk` -0.001 ns |
+| Fast85 setup | +0.619 ns worst |
+| Fast0 setup | +0.797 ns worst |
+
+Timing note: this SOF is a board retest image, not clean non-STP signoff.
+The new emulator/arbiter CSR timing path that appeared in Round 2 was removed
+by per-lane CSR pipeline bridges, but the final build still has slow-corner
+legacy frame-assembly/LVDS setup misses. Treat all hardware results below as
+functional Phase 4 emulator-path evidence, not final timing signoff.
+
+Round 3 on-board sequence:
+
+- Flashed only the FEB with `program_feb.sh`; no SWB reflash was done.
+- Waited the mandatory 20 s post-flash settle, then ran
+  `sudo -n /usr/local/sbin/mudaq_recover_pcie`.
+- Used `~/.local/bin/swb_ring_lock` for every `sc_tool` call.
+- Phase 1 mini-sanity reads returned:
+  `SCHB=0x53434842` at `0x0FE80`,
+  `HIST=0x48495354` at `0x0A900`, and
+  `RCMH=0x52434D48` at `0x0C000`; none returned `0xEEEEEEEE`.
+- Issued only `LOCAL_CMD` opcodes `0x10`, `0x11`, `0x12`, and `0x13`.
+  Opcodes `0x30` and `0x31` were not issued.
+
+Run-control trace:
+
+| Step | LOCAL_CMD word | LAST_CMD |
+|---|---:|---:|
+| run-prepare | `0x03088510` | `0x00000010` |
+| sync | `0x00000011` | `0x00000011` |
+| start-run | `0x00000012` | `0x00000012` |
+| end-run | `0x00000013` | `0x00000013` |
+
+Round 4 checkpoint-count comparison uses the 4 s board window captured in
+Round 3. The simulation count anchor is the Round 1 tb_int `expected_hits =
+35328`; the board run is wall-clock-rate driven, so the useful comparison is
+counter liveness, monotonicity, zero drops, and order-of-magnitude scale
+rather than exact equality to a finite sim transaction count.
+
+| Checkpoint / proxy | Sim count | Board count, 4 s | Board/sim scale | Verdict |
+|---|---:|---:|---:|---|
+| pre-rbCAM proxy: `arb_hit_type0_supercore` EMU ingress | 35,328 | 261,472,521 | 7401.283 | Live, no arb EMU drops |
+| arb egress selected EMU | 35,328 | 261,472,589 | 7401.285 | Live, no arb EMU drops |
+| MTS/preprocessor aggregate | 35,328 | 74,691,320 | 2114.224 | Live downstream count |
+| rbCAM push aggregate | 35,328 | 75,020,829 | 2123.552 | Live post-selector ingress |
+| rbCAM pop aggregate | 35,328 | 71,263,041 | 2017.183 | Live post-rbCAM egress |
+| FEB egress: frame-assembly actual hits | 35,328 | 71,606,815 | 2026.914 | Live, missing hits 0 |
+| Histogram live `TOTAL_HITS` snapshot | 35,328 | 3,567,472 | 100.981 | Live interval counter |
+| Histogram `hist_bin[0..63]` sum | 35,328 | 7,537,459 | 213.357 | Binned traffic present |
+| SWB OPQ ingress: `CNT_OPQ_INPUT_W` | 35,328 | 0 | 0.000 | Not claimed in this FEB-only probe |
+| SWB OPQ egress: `CNT_BYTES_WRITTEN` / DMA words | 35,328 | 0 | 0.000 | Not claimed in this FEB-only probe |
+
+Board histogram evidence:
+
+| Counter | Before | During/after 4 s | After end-run |
+|---|---:|---:|---:|
+| `TOTAL_HITS` | 0 | 3,567,472 | 861,772 |
+| `BANK_STATUS` | `0x00000000` | `0x00000000` | `0x00000001` |
+| `PORT_STATUS` | `0x000000FF` | `0x000200FE` | `0x000200FF` |
+| `DROPPED_HITS` | 0 | 0 | 0 |
+
+`BANK_STATUS` samples during RUNNING were `[0, 0, 1, 1, 0, 0, 1, 1]`.
+The Phase 4 emulator LOCAL_CMD path therefore passes the on-board not-stuck
+criterion: `TOTAL_HITS > 0`, bank status toggles, and `PORT_STATUS != 0xFF`
+while RUNNING.
+
+Artifacts:
+
+- Board log:
+  `v3_pretest-260511/reports/phase4_emulator_type0_20260512_130108.log`.
+- Board JSON:
+  `v3_pretest-260511/reports/phase4_emulator_type0_20260512_130108/phase4_emutype0_board_probe.json`.
+- OPQ read-only snapshot:
+  `v3_pretest-260511/reports/phase4_emulator_type0_round4_opq_20260512_130614.log`.
+
+Verdict: **PASS for FEB-local Phase 4 emulator type0 functional closure**.
+Open caveats: non-STP timing signoff is still open, and OPQ/RDMA closure is
+not claimed by this FEB-only LOCAL_CMD probe because SWB OPQ/DMA counters
+remained zero and SWB readout was not reconfigured.
+
 ---
 
 ## 5. Report deliverables

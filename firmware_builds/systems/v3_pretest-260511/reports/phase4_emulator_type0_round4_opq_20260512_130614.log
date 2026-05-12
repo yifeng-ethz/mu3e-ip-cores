@@ -1,0 +1,20 @@
+# Phase 4 emulator type0 Round 4 OPQ read-only snapshot
+created=2026-05-12T13:06:23+02:00
+## EVENT_BUILD_IDLE_NOT_HEADER_R
+swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d
+EVENT_BUILD_IDLE_NOT_HEADER_R=0x00000000 (0) space=rr offset=0x1D
+## EVENT_BUILD_SKIP_EVENT_DMA_R
+swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d
+EVENT_BUILD_SKIP_EVENT_DMA_R=0x00000000 (0) space=rr offset=0x1E
+## EVENT_BUILD_CNT_EVENT_DMA_R
+swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d
+EVENT_BUILD_CNT_EVENT_DMA_R=0x00000000 (0) space=rr offset=0x1F
+## EVENT_BUILD_TAG_FIFO_FULL_R
+swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d
+EVENT_BUILD_TAG_FIFO_FULL_R=0x00000000 (0) space=rr offset=0x20
+## BUFFER_STATUS_REGISTER_R
+swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d
+BUFFER_STATUS_REGISTER_R=0x00000000 (0) space=rr offset=0x1B
+## DMA_CNT_WORDS_REGISTER_R
+swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d
+DMA_CNT_WORDS_REGISTER_R=0x00000000 (0) space=rr offset=0x32
