@@ -34,8 +34,47 @@ runs at this build dir.
 | BUG-006-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 4 RN.BASIC.163 | a073596b/e9eaeaea | Native-signoff lossless traces were failed by stale generated-OPQ summary assumptions and non-closure defaults. |
 | BUG-007-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 5 slice 2 | 1c30b766 | Header-sync cosim source advanced on the virtual short-frame interval instead of the RN.BASIC pulse interval. |
 | BUG-008-H | H | closure-blocker | swept | fixed | 2026-05-12 iter 6 RN.BASIC.082 | 59663d3c | Single-ASIC periodic row kept empty physical lanes enabled and decoded the native SciFi header alias as MuPix. |
+| BUG-009-T | T | closure-blocker | swept | open at start | 2026-05-13 per-checkpoint review | TBD | Single global delay bound replaced with 5 per-checkpoint bounds (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress, OPQ egress) per injector mode. |
+| BUG-010-H | H | closure-blocker | swept | open at start | 2026-05-13 per-checkpoint review | TBD | Analyzer reported delay_max_cycles = delay_min_cycles = 0 because it subtracted abs_ts_8ns from itself instead of joining upstream/downstream checkpoint traces on hit_id. |
 
 ---
+
+## 2026-05-13
+
+### BUG-009-T: single global delay bound hides per-checkpoint failures
+
+- First seen: per-checkpoint review of the final RN.BASIC cosim auto-report at
+  `92184df7`.
+- Symptom: the generated report used one row-level delay target
+  (300 cycles for header-sync, 900 cycles for periodic-like rows) and checked
+  only `abs(delay_max_cycles - delay_min_cycles)`, so a row could pass without
+  proving the five FEB->SWB checkpoint contracts independently.
+- Root cause: the report model collapsed pre-rbCAM, post-rbCAM, FEB egress,
+  OPQ ingress, and OPQ egress into one global delay spread instead of using the
+  per-mode checkpoint envelopes.
+- Fix status: open at start; `scripts/cotest/cosim_delay_bounds.py` defines
+  per-mode checkpoint bounds and the auto-report now emits
+  `delay_pre`, `delay_post`, `delay_feb`, `delay_ing`, and `delay_opq`
+  PASS/FAIL columns. Final closure commit is TBD until the refreshed sweep is
+  complete.
+- Commit: TBD.
+
+### BUG-010-H: lifetime analyzer subtracts a checkpoint timestamp from itself
+
+- First seen: per-checkpoint review of
+  `feb_swb_lifetime_hist_stats.csv` from the final RN.BASIC evidence.
+- Symptom: every row could report `delay_min_cycles = delay_max_cycles = 0`
+  for the delay-bound evidence even though the checkpoint traces contain real
+  per-hit timing spread.
+- Root cause: the analyzer path used a single scoreboard/post-rbCAM timestamp
+  surface and did not join checkpoint records on `hit_id`; the resulting
+  subtraction collapsed to zero and the global spread check passed vacuously.
+- Fix status: open at start; `scripts/cotest/cosim_lifetime_analyzer.py`
+  materializes per-checkpoint hit CSVs, joins the five checkpoints by
+  `hit_id`, computes non-flat per-checkpoint lifetime percentiles, and writes
+  `feb_swb_range_validation.csv` for the auto-report. Final closure commit is
+  TBD until the refreshed sweep is complete.
+- Commit: TBD.
 
 ## 2026-05-12
 

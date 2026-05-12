@@ -24,6 +24,10 @@ from pathlib import Path
 from typing import Any
 
 
+REPO_ROOT = Path(__file__).resolve().parents[5]
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "cotest"))
+from cosim_lifetime_analyzer import LifetimeAnalysisError, analyze_lifetime_dir  # noqa: E402
+
 RUN_WINDOW_8NS = 125000
 OPQ_INGRESS_CEILING = 250000
 CHANNELS_PER_ASIC = 32
@@ -492,6 +496,16 @@ EVIDENCE_FILES = {
     "delay_hist_bin_b.json",
     "delay_scoreboard.json",
     "delay_plot.svg",
+    "feb_swb_emulator_emit_trace.csv",
+    "feb_swb_pre_rbcam_trace.csv",
+    "feb_swb_post_rbcam_trace.csv",
+    "feb_swb_feb_egress_trace.csv",
+    "feb_swb_ingress_trace.csv",
+    "feb_swb_opq_trace.csv",
+    "feb_swb_lifetime_trace.csv",
+    "feb_swb_lifetime_hist_stats.csv",
+    "feb_swb_range_validation.csv",
+    "feb_swb_corun_summary.txt",
     "rdma_rxbuffer.bin",
     "rdma_rxbuffer_summary.json",
     "intermediate_manifest.json",
@@ -510,6 +524,15 @@ def collect_evidence(
     trace_summary = read_key_values(work_dir / "feb_swb_trace_debug_summary.txt")
     corun_summary = read_key_values(work_dir / "feb_swb_corun_summary.txt")
     records = read_filtered_hit_debug(work_dir, row)
+    lifetime_error = ""
+    lifetime_conditions = {
+        "delay_pre": "FAIL",
+        "delay_post": "FAIL",
+        "delay_feb": "FAIL",
+        "delay_ing": "FAIL",
+        "delay_opq": "FAIL",
+    }
+    lifetime_bound_pass = False
 
     source_count = sum(1 for record in records if int(record.get("source_generation_time_ps", -1)) >= 0)
     pre_count = sum(1 for record in records if int(record.get("pre_rbcam_time_ps", -1)) >= 0)
@@ -537,7 +560,27 @@ def collect_evidence(
         "fifo_overflow": nonzero_int(corun_summary.get("fifo_overflow")),
         "fifo_underflow": nonzero_int(corun_summary.get("fifo_underflow")),
         "sim_returncode": returncode if returncode is not None else 0,
+        "lifetime_analysis": 0,
     }
+
+    try:
+        lifetime_summary = analyze_lifetime_dir(work_dir, output_dir, row.to_json(), validate_flat=True)
+        bound_status = {
+            item["checkpoint"]: item["status"]
+            for item in lifetime_summary.get("bounds", [])
+            if isinstance(item, dict)
+        }
+        lifetime_conditions = {
+            "delay_pre": str(bound_status.get("pre_rbcam", "FAIL")),
+            "delay_post": str(bound_status.get("post_rbcam", "FAIL")),
+            "delay_feb": str(bound_status.get("feb_egress", "FAIL")),
+            "delay_ing": str(bound_status.get("opq_ingress", "FAIL")),
+            "delay_opq": str(bound_status.get("opq_egress", "FAIL")),
+        }
+        lifetime_bound_pass = all(value == "PASS" for value in lifetime_conditions.values())
+    except LifetimeAnalysisError as exc:
+        lifetime_error = str(exc)
+        error_counters["lifetime_analysis"] = 1
 
     csr_total = post_count
     tolerance = max(1.0, row.theoretical_hits * 0.05)
@@ -622,6 +665,8 @@ def collect_evidence(
         abs(hist_total - csr_total) <= 8
         and delay_data["count"] > 0
         and float(delay_data["delay_stddev_ns"]) < 100.0
+        and not lifetime_error
+        and lifetime_bound_pass
     )
 
     rdma_summary = write_rdma_buffer(output_dir, records)
@@ -639,9 +684,10 @@ def collect_evidence(
         "rdma_record_count": rdma_summary["record_count"],
         "conditions": {
             "rate": "PASS" if rate_pass else "FAIL",
-            "delay": "PASS" if delay_pass else "FAIL",
+            **lifetime_conditions,
             "rdma": "PASS" if rdma_pass else "FAIL",
         },
+        "lifetime_analysis_error": lifetime_error,
         "status": "PASS" if row_pass else "FAIL",
     }
 
