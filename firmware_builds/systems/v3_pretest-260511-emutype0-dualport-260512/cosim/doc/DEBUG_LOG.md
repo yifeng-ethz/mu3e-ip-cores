@@ -77,3 +77,21 @@
   hits with 8,422 ghosts to 125,138/125,138 matched hits with zero ghosts.
   RN.BASIC.163-166 went 0/4 to 4/4 PASS under the corrected native-signoff
   profile; slice 4 is therefore closed by composition from 28/32 to 32/32.
+
+## 2026-05-12 - Iter 5
+
+- Cluster being closed: BUG-007-H header-sync source cadence under-generation
+  in slice 2.
+- Root-cause hypothesis: the header-sync cosim source emitted one burst per
+  virtual short-frame interval instead of using the RN.BASIC `0x0100` pulse
+  interval, so source_generation, rbCAM, RDMA, and histogram counters all
+  conserved a smaller stream.
+- Patch summary:
+  - `tb_int/feb_swb_corun/sv/feb_swb_corun_plain_tb.sv`: advance header-sync
+    bursts by `HIT_PERIOD_8NS` while preserving per-ASIC header phase and burst
+    spacing.
+  - `tb_int/feb_swb_corun/scripts/analyze_feb_swb_trace.py`: validate the
+    same header-phase plus period schedule in the trace oracle.
+- Re-run PASS count delta: slice 2 went 0/32 to 32/32; RN.BASIC.129 reports
+  124,928/125,000 hits with zero trace/corun errors, and RN.BASIC.160 reports
+  488/488 hits. BUG-007-H is closed.
