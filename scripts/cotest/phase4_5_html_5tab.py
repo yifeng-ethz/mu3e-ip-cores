@@ -1003,10 +1003,16 @@ def basic_rows_html() -> str:
     )
     body_html = '<tbody>' + ''.join(body_rows_html) + '</tbody>'
     table_html = '<table class="basic-grid dense">' + header_html + body_html + '</table>'
-    # Inline the evidence JSON so popups work without a web server
+    # Inline the evidence JSON so popups work without a web server.
+    # HTML5 <script> bodies are raw text -- HTML entities are NOT decoded
+    # by the parser, so we MUST NOT html-escape here (doing so leaves
+    # &quot; literals in textContent which then break JSON.parse()).
+    # The only HTML-level hazard is a premature </script> close; replace
+    # any "</" with "<\/" which JSON.parse accepts cleanly.
+    raw_json = json.dumps(evidence_json, separators=(",", ":")).replace("</", "<\\/")
     evidence_blob = (
         '<script id="basic-evidence" type="application/json">'
-        + html.escape(json.dumps(evidence_json, separators=(",", ":")))
+        + raw_json
         + "</script>"
     )
     return note + table_html + evidence_blob

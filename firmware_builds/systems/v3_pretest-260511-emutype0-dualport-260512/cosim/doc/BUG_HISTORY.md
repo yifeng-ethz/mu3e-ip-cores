@@ -300,3 +300,28 @@ tb_int integration ledgers:
 - Root cause: which IP / which signal / which CSR
 - Fix status: state + mechanism + after_fix_outcome + potential_hazard
 - Commit: SHA + one-line subject
+
+### BUG-011-H: 5-tab evidence popups silently rendered empty bodies
+
+- First seen: user reported that clicking evidence View buttons in
+  `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/doc/PHASE4_5_SWEEP_REPORT_5TAB.html`
+  showed no popup content despite the dummy RN.BASIC.001 evidence being
+  embedded.
+- Symptom: every click on a `.ev-btn` opened the modal element but the
+  modal body remained empty; no console error surfaced because the
+  parser failure was swallowed by a try/catch fallback to `EV = {}`.
+- Root cause: the inlined evidence JSON was wrapped through
+  `html.escape()` before being placed in a `<script type="application/json">`
+  block. HTML5 treats script-element bodies as raw text and does NOT
+  decode entity references, so `textContent` returned the literal
+  `&quot;` etc strings, which JSON.parse threw on.
+- Fix status: fixed; emit the evidence JSON without `html.escape()`, only
+  neutralising `</` against premature script termination via `<\/`. The
+  generator at `scripts/cotest/phase4_5_html_5tab.py:basic_rows_html()`
+  now uses `json.dumps(...).replace("</", "<\\/")`.
+- Validation: headless chromium click test on all 5 buttons returns
+  `OPEN=true` with non-empty body lengths (counter 4612, delay 629,
+  rdma 11393, scoreboard 1379, runlog 2689). The embedded basic-evidence
+  blob now starts with `{"RN.BASIC.001":{...}}` literal characters.
+- Commit: this commit `[FIX] HW: v3_pretest-260511 5-tab evidence popup
+  JSON parse fix`.
