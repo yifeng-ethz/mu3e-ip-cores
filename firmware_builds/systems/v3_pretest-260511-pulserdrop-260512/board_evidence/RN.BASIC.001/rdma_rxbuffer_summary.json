@@ -1,0 +1,11 @@
+{
+  "bytes_total": 0,
+  "record_count": 0,
+  "record_size_avg": 0.0,
+  "first_record_hex": "",
+  "last_record_hex": "",
+  "dma_command": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/dma_tool --out /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/board_evidence/RN.BASIC.001/rdma_rxbuffer.bin --duration-s 1 --quiet",
+  "dma_returncode": 0,
+  "dma_stdout_tail": "",
+  "dma_stderr_tail": "dma_tool: summary: read_words=0 written_words=0 bytes_written=0 DMA_CNT_WORDS_REGISTER_R=0 output=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/board_evidence/RN.BASIC.001/rdma_rxbuffer.bin\n"
+}

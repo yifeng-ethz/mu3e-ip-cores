@@ -1,0 +1,14 @@
+{
+  "case_id": "BU023",
+  "scenario": "RESET_LINK_STATUS baseline",
+  "stimulus_addr_word": "SWB:RESET_LINK_STATUS",
+  "measured_word_hex": "0x13000000",
+  "expected_uid_or_meta": "default/last reset-link status, nominal 0x14000000",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d\nRESET_LINK_STATUS_REGISTER_R=0x13000000 (318767104) space=rr offset=0x35",
+  "ts_iso": "2026-05-13T06:28:27Z",
+  "rc_tool_status_tail": "RESET_LINK_CTL_REGISTER_W        = 0x00000000\nRESET_LINK_STATUS_REGISTER_R     = 0x13000000\nRESET_LINK_RUN_NUMBER_REGISTER_W = 0x00010299\nlast state byte              = 0x13 (end-run)",
+  "rc_tool_status_rc": 0,
+  "v2_basis": "carried_forward_from_107_prior_json; targeted v2 rerun overwrites prior FAIL rows BU012, BU013, BU014, BU020, BU025",
+  "v2_ts_iso": "2026-05-13T07:33:52Z"
+}

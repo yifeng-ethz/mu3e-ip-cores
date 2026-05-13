@@ -1,0 +1,7 @@
+RN.BASIC.001 executed after BU v2 residual failures per explicit user override.
+Forbidden opcodes 0x30/0x31 were not used.
+All sc_tool and rc_tool invocations in this collection were wrapped by swb_ring_lock.
+BU v2 shows histogram live VERSION remains 0x1A000000 because the generated instantiation overrides VERSION_MINOR=0 BUILD=0 despite current component defaults.
+Canonical pulserdrop Qsys has no arb_hit_type0_supercore at 0x088A0; arb lane MODE writes read back zero and are not functional.
+Current emulator_mutrig qsys lane CSR_ADDR_WIDTH=4 exposes no channel_mask CSR; requested channel_mask=0xFFFFFFFF is recorded but not enforceable through this map.
+Histogram TOTAL_HITS post TERM=0; theory=125000; rdma_bytes=0; wall_run_cmd_window_s=0.139434.

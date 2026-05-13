@@ -1,0 +1,41 @@
+{
+  "case_id": "BU006",
+  "scenario": "firefly_xcvr_ctrl UID + META",
+  "stimulus_addr_word": "0x05000",
+  "measured_word_hex": "0x00000039 0x00000039",
+  "expected_uid_or_meta": "firefly_xcvr_ctrl_0 metadata row reachable",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000039\n  payload[1] = 0x00000039",
+  "ts_iso": "2026-05-13T06:28:18Z",
+  "attempts": [
+    {
+      "addr": 20480,
+      "count": 2,
+      "rc": 0,
+      "values": [
+        57,
+        57
+      ],
+      "tail": "  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000039\n  payload[1] = 0x00000039",
+      "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x05000\n  request length     : 2 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 6\n  expected reply words (declared) : 6\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00005000\n  wmem[2] = 0x00000002\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 73 us\n  timing total        : 73 us\n  secondary before    : 0x0000\n  secondary after     : 0x0006\n  secondary delta     : 6 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0000\n  ring end            : 0x0006\n  type                : RD\n  link                : 2\n  addr                : 0x05000\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 2\n  declared payload    : 2\n  actual payload      : 2\n  declared ring words : 6\n  actual ring words   : 6\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00005000\n  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000039\n  payload[1] = 0x00000039\n"
+    }
+  ],
+  "metadata_script_pulserdrop_qsys": {
+    "command": "python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/check_ip_metadata.py --qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3.qsys --skip-jtag --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool --instances firefly_xcvr_ctrl_0",
+    "rc": 0,
+    "verdict": "NO_LIVE_ROWS",
+    "stdout": "",
+    "stderr": "",
+    "tail": ""
+  },
+  "metadata_script_legacy_debug_qsys": {
+    "command": "python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/check_ip_metadata.py --qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/debug_sc_system_v3.qsys --skip-jtag --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool --instances firefly_xcvr_ctrl_0",
+    "rc": 0,
+    "verdict": "NO_LIVE_ROWS",
+    "stdout": "",
+    "stderr": "",
+    "tail": ""
+  },
+  "v2_basis": "carried_forward_from_107_prior_json; targeted v2 rerun overwrites prior FAIL rows BU012, BU013, BU014, BU020, BU025",
+  "v2_ts_iso": "2026-05-13T07:33:52Z"
+}

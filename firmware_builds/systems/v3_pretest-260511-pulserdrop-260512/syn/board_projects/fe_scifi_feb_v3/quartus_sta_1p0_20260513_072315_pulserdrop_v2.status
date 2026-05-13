@@ -1,0 +1,8 @@
+start_utc=2026-05-13T07:23:15Z
+end_utc=2026-05-13T07:25:07Z
+nominal_log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/quartus_sta_1p0_nominal_20260513_072315_pulserdrop_v2.console.log
+trace_log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/quartus_sta_1p0_trace_20260513_072315_pulserdrop_v2.console.log
+nominal_exit_code=0
+trace_exit_code=0
+nominal_warning_lines=24
+trace_warning_lines=24

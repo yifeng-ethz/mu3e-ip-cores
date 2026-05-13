@@ -1,0 +1,191 @@
+{
+  "case_id": "BU014",
+  "scenario": "arb_hit_type0_supercore META",
+  "stimulus_addr_word": "0x088A0 + lane MODE offsets",
+  "measured_word_hex": "0x00000000 0x00000000 0x00000000 0x00000000",
+  "expected_uid_or_meta": "supercore UID 0x41485430, LANE_COUNT=8",
+  "verdict": "FAIL",
+  "ts_iso": "2026-05-13T07:33:52Z",
+  "attempts": [
+    {
+      "addr": 34976,
+      "count": 4,
+      "rc": 0,
+      "values": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "values_hex": [
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  raw addr word       : 0x000088A0\n  raw len word        : 0x00010004\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n  payload[1] = 0x00000000\n  payload[2] = 0x00000000\n  payload[3] = 0x00000000",
+      "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x088A0\n  request length     : 4 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 8\n  expected reply words (declared) : 8\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x000088A0\n  wmem[2] = 0x00000004\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 75 us\n  timing total        : 75 us\n  secondary before    : 0x00AF\n  secondary after     : 0x00B7\n  secondary delta     : 8 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x00AF\n  ring end            : 0x00B7\n  type                : RD\n  link                : 2\n  addr                : 0x088A0\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 4\n  declared payload    : 4\n  actual payload      : 4\n  declared ring words : 8\n  actual ring words   : 8\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x000088A0\n  raw len word        : 0x00010004\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n  payload[1] = 0x00000000\n  payload[2] = 0x00000000\n  payload[3] = 0x00000000\n",
+      "stderr": "",
+      "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x088A0 4 --quiet"
+    }
+  ],
+  "lane_modes": [
+    {
+      "lane": 0,
+      "addr": "0x088A3",
+      "attempt": {
+        "addr": 34979,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x000088A3\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x088A3\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x000088A3\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 72 us\n  timing total        : 72 us\n  secondary before    : 0x0063\n  secondary after     : 0x0068\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0063\n  ring end            : 0x0068\n  type                : RD\n  link                : 2\n  addr                : 0x088A3\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x000088A3\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x088A3 1 --quiet"
+      }
+    },
+    {
+      "lane": 1,
+      "addr": "0x088C3",
+      "attempt": {
+        "addr": 35011,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x000088C3\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x088C3\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x000088C3\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 70 us\n  timing total        : 70 us\n  secondary before    : 0x24A4\n  secondary after     : 0x24A9\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x24A4\n  ring end            : 0x24A9\n  type                : RD\n  link                : 2\n  addr                : 0x088C3\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x000088C3\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x088C3 1 --quiet"
+      }
+    },
+    {
+      "lane": 2,
+      "addr": "0x088E3",
+      "attempt": {
+        "addr": 35043,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x000088E3\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x088E3\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x000088E3\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 61 us\n  timing matched      : 73 us\n  timing total        : 73 us\n  secondary before    : 0x127B\n  secondary after     : 0x1280\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x127B\n  ring end            : 0x1280\n  type                : RD\n  link                : 2\n  addr                : 0x088E3\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x000088E3\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x088E3 1 --quiet"
+      }
+    },
+    {
+      "lane": 3,
+      "addr": "0x08903",
+      "attempt": {
+        "addr": 35075,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008903\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x08903\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00008903\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 72 us\n  timing total        : 72 us\n  secondary before    : 0x1A08\n  secondary after     : 0x1A0D\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x1A08\n  ring end            : 0x1A0D\n  type                : RD\n  link                : 2\n  addr                : 0x08903\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008903\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x08903 1 --quiet"
+      }
+    },
+    {
+      "lane": 4,
+      "addr": "0x08923",
+      "attempt": {
+        "addr": 35107,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008923\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x08923\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00008923\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 62 us\n  timing matched      : 75 us\n  timing total        : 75 us\n  secondary before    : 0x0653\n  secondary after     : 0x0658\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0653\n  ring end            : 0x0658\n  type                : RD\n  link                : 2\n  addr                : 0x08923\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008923\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x08923 1 --quiet"
+      }
+    },
+    {
+      "lane": 5,
+      "addr": "0x08943",
+      "attempt": {
+        "addr": 35139,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008943\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x08943\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00008943\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 4330 us\n  timing total        : 4330 us\n  secondary before    : 0x5D16\n  secondary after     : 0x6179\n  secondary delta     : 1123 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x6174\n  ring end            : 0x6179\n  type                : RD\n  link                : 2\n  addr                : 0x08943\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008943\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x08943 1 --quiet"
+      }
+    },
+    {
+      "lane": 6,
+      "addr": "0x08963",
+      "attempt": {
+        "addr": 35171,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008963\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x08963\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00008963\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 59 us\n  timing matched      : 69 us\n  timing total        : 69 us\n  secondary before    : 0x0061\n  secondary after     : 0x0066\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0061\n  ring end            : 0x0066\n  type                : RD\n  link                : 2\n  addr                : 0x08963\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008963\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x08963 1 --quiet"
+      }
+    },
+    {
+      "lane": 7,
+      "addr": "0x08983",
+      "attempt": {
+        "addr": 35203,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          0
+        ],
+        "values_hex": [
+          "0x00000000"
+        ],
+        "tail": "  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008983\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x08983\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00008983\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 72 us\n  timing total        : 72 us\n  secondary before    : 0x0264\n  secondary after     : 0x0269\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0264\n  ring end            : 0x0269\n  type                : RD\n  link                : 2\n  addr                : 0x08983\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008983\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n",
+        "stderr": "",
+        "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x08983 1 --quiet"
+      }
+    }
+  ],
+  "qsys_regen_artifact": {
+    "source_version": "arb_hit_type0_supercore 26.6.0.0512",
+    "generated_component_presence": "ABSENT from regenerated canonical feb_system_v3/scifi_datapath_system_v3 address map",
+    "finding": "The canonical root Qsys used for this regen has no arb_hit_type0_supercore instance at 0x088A0; no raw XML/Qsys edit was made."
+  }
+}

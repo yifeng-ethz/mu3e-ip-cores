@@ -1,0 +1,1364 @@
+{
+  "row_id": "RN.BASIC.001",
+  "events": [
+    {
+      "t_ms": 0.004,
+      "type": "RUN_START",
+      "ip": "",
+      "detail": "RN.BASIC.001 board collection start",
+      "ts_iso": "2026-05-13T07:41:07Z"
+    },
+    {
+      "t_ms": 254.024,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.CLEAR_BIN0.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:07Z"
+    },
+    {
+      "t_ms": 389.597,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.CLEAR_BIN0.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:07Z"
+    },
+    {
+      "t_ms": 451.143,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.LEFT_BOUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:07Z"
+    },
+    {
+      "t_ms": 591.065,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.LEFT_BOUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:07Z"
+    },
+    {
+      "t_ms": 655.412,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.RIGHT_BOUND.first=0x000000FF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:07Z"
+    },
+    {
+      "t_ms": 791.883,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.RIGHT_BOUND.second=0x000000FF rb=0x000000FF rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 852.225,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.BIN_WIDTH.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 974.245,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.BIN_WIDTH.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 1035.612,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.KEY_LOC.first=0x2623221E rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 1157.238,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.KEY_LOC.second=0x2623221E rb=0x2623221E rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 1220.917,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.INTERVAL_CFG.first=0xFFFFFFFF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 1376.328,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.INTERVAL_CFG.second=0xFFFFFFFF rb=0xFFFFFFFF rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 1492.53,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.CONTROL_APPLY.first=0x00000101 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 1667.77,
+      "type": "CSR_WRITE",
+      "ip": "hist",
+      "detail": "hist.CONTROL_APPLY.second=0x00000101 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:08Z"
+    },
+    {
+      "t_ms": 1729.288,
+      "type": "CSR_WRITE",
+      "ip": "hist_ingress",
+      "detail": "hist_ingress.CONTROL_SELECT_POST.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 1857.838,
+      "type": "CSR_WRITE",
+      "ip": "hist_ingress",
+      "detail": "hist_ingress.CONTROL_SELECT_POST.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 1985.035,
+      "type": "CSR_WRITE",
+      "ip": "mts_preprocessor_0",
+      "detail": "mts_preprocessor_0.CONTROL.first=0x20000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2118.033,
+      "type": "CSR_WRITE",
+      "ip": "mts_preprocessor_0",
+      "detail": "mts_preprocessor_0.CONTROL.second=0x20000011 rb=0x20000010 rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2179.995,
+      "type": "CSR_WRITE",
+      "ip": "mts_preprocessor_1",
+      "detail": "mts_preprocessor_1.CONTROL.first=0x20000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2302.076,
+      "type": "CSR_WRITE",
+      "ip": "mts_preprocessor_1",
+      "detail": "mts_preprocessor_1.CONTROL.second=0x20000011 rb=0x20000010 rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2364.735,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb0",
+      "detail": "hs0_rb0.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2487.592,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb0",
+      "detail": "hs0_rb0.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2548.007,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb1",
+      "detail": "hs0_rb1.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2686.17,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb1",
+      "detail": "hs0_rb1.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:09Z"
+    },
+    {
+      "t_ms": 2779.256,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb2",
+      "detail": "hs0_rb2.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 2907.911,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb2",
+      "detail": "hs0_rb2.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 2968.706,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb3",
+      "detail": "hs0_rb3.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3092.503,
+      "type": "CSR_WRITE",
+      "ip": "hs0_rb3",
+      "detail": "hs0_rb3.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3153.728,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb0",
+      "detail": "hs1_rb0.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3276.196,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb0",
+      "detail": "hs1_rb0.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3337.695,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb1",
+      "detail": "hs1_rb1.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3459.668,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb1",
+      "detail": "hs1_rb1.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3520.52,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb2",
+      "detail": "hs1_rb2.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3648.128,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb2",
+      "detail": "hs1_rb2.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:10Z"
+    },
+    {
+      "t_ms": 3709.037,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb3",
+      "detail": "hs1_rb3.CONTROL.first=0x00000011 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 3854.934,
+      "type": "CSR_WRITE",
+      "ip": "hs1_rb3",
+      "detail": "hs1_rb3.CONTROL.second=0x00000011 rb=0x00000011 rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 3923.819,
+      "type": "CSR_WRITE",
+      "ip": "lvds",
+      "detail": "lvds.LANE_GO.first=0x000001FF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4046.288,
+      "type": "CSR_WRITE",
+      "ip": "lvds",
+      "detail": "lvds.LANE_GO.second=0x000001FF rb=0x000001FF rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4107.558,
+      "type": "CSR_WRITE",
+      "ip": "mutrig_injector_multiheader",
+      "detail": "mutrig_injector_multiheader.MODE.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4235.036,
+      "type": "CSR_WRITE",
+      "ip": "mutrig_injector_multiheader",
+      "detail": "mutrig_injector_multiheader.MODE.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4295.926,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane0.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4424.378,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane0.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4485.383,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane1.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4619.184,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane1.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4680.5,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane2.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:11Z"
+    },
+    {
+      "t_ms": 4803.549,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane2.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 4864.406,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane3.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 4986.967,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane3.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5047.7,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane4.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5184.502,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane4.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5245.751,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane5.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5373.275,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane5.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5434.189,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane6.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5564.785,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane6.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5629.817,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane7.MODE_EMU.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:12Z"
+    },
+    {
+      "t_ms": 5751.829,
+      "type": "CSR_WRITE",
+      "ip": "arb_hit_type0_supercore",
+      "detail": "arb_hit_type0_supercore.lane7.MODE_EMU.second=0x00000001 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 5816.677,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 5940.047,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6000.78,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6121.762,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6186.079,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6309.244,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6397.714,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6556.989,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6617.978,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:13Z"
+    },
+    {
+      "t_ms": 6742.343,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 6811.609,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 6933.704,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7001.166,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7123.71,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7185.165,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7317.907,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_0",
+      "detail": "emulator_mutrig_0.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7387.666,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7512.961,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7573.37,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:14Z"
+    },
+    {
+      "t_ms": 7697.286,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 7758.227,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 7900.448,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 7961.228,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8096.348,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8158.023,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8280.456,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8341.846,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8463.882,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8524.764,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8646.696,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:15Z"
+    },
+    {
+      "t_ms": 8707.716,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 8833.782,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_1",
+      "detail": "emulator_mutrig_1.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 8894.526,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9018.312,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9080.066,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9203.02,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9264.344,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9404.906,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9465.481,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9600.012,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9661.026,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:16Z"
+    },
+    {
+      "t_ms": 9783.139,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 9848.099,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 9979.999,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10062.549,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10184.53,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10245.601,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10389.915,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_2",
+      "detail": "emulator_mutrig_2.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10451.314,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10577.576,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10638.79,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:17Z"
+    },
+    {
+      "t_ms": 10760.548,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 10823.451,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 10951.587,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11012.465,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11136.117,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11197.629,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11320.798,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11381.881,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11529.974,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11591.154,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:18Z"
+    },
+    {
+      "t_ms": 11713.078,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 11774.326,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 11908.188,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_3",
+      "detail": "emulator_mutrig_3.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 11968.767,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 12092.052,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 12162.526,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 12285.445,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 12386.091,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 12508.4,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 12571.454,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:19Z"
+    },
+    {
+      "t_ms": 12706.488,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 12767.558,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 12888.922,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 12949.554,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13071.154,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13139.394,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13262.911,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13324.036,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13446.027,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_4",
+      "detail": "emulator_mutrig_4.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13506.512,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13640.355,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:20Z"
+    },
+    {
+      "t_ms": 13701.24,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 13826.507,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 13896.555,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14027.659,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14087.598,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14209.959,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14272.124,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14430.543,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14491.546,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14638.81,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:21Z"
+    },
+    {
+      "t_ms": 14699.53,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 14830.68,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 14891.353,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15015.261,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_5",
+      "detail": "emulator_mutrig_5.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15079.219,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15200.963,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15262.176,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15384.219,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15452.082,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15573.974,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15640.78,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:22Z"
+    },
+    {
+      "t_ms": 15767.519,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 15838.555,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 15980.818,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16044.89,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16171.428,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16232.004,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16356.432,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16424.416,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16552.584,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_6",
+      "detail": "emulator_mutrig_6.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16613.445,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.CENTRAL.first=0x00000001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:23Z"
+    },
+    {
+      "t_ms": 16743.126,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.CENTRAL.second=0x00000001 rb=0x00000001 rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 16804.411,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.SIGNAL_PERIODIC.first=0x00000002 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 16928.476,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.SIGNAL_PERIODIC.second=0x00000002 rb=0x00000002 rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 16989.753,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.BACKGROUND.first=0x00000000 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 17129.881,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.BACKGROUND.second=0x00000000 rb=0x00000000 rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 17195.857,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.MUTRIG_FORMAT_TYPE0.first=0x00000020 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 17319.599,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.MUTRIG_FORMAT_TYPE0.second=0x00000020 rb=0x00000020 rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 17380.612,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.RATES.first=0x00000100 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 17509.706,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.RATES.second=0x00000100 rb=0x00000100 rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 17571.424,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.CLUSTER_FIX.first=0x00004180 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:24Z"
+    },
+    {
+      "t_ms": 17714.429,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.CLUSTER_FIX.second=0x00004180 rb=0x00004180 rc=0",
+      "ts_iso": "2026-05-13T07:41:25Z"
+    },
+    {
+      "t_ms": 17778.401,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.PRNG_SEED.first=0xDEADBEEF rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:25Z"
+    },
+    {
+      "t_ms": 17900.4,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.PRNG_SEED.second=0xDEADBEEF rb=0xDEADBEEF rc=0",
+      "ts_iso": "2026-05-13T07:41:25Z"
+    },
+    {
+      "t_ms": 17961.609,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.TIMEBASE_SEED.first=0x00010001 rb=NA rc=0",
+      "ts_iso": "2026-05-13T07:41:25Z"
+    },
+    {
+      "t_ms": 18084.104,
+      "type": "CSR_WRITE",
+      "ip": "emulator_mutrig_7",
+      "detail": "emulator_mutrig_7.TIMEBASE_SEED.second=0x00010001 rb=0x00010001 rc=0",
+      "ts_iso": "2026-05-13T07:41:25Z"
+    },
+    {
+      "t_ms": 18581.897,
+      "type": "DMA_START",
+      "ip": "dma_tool",
+      "detail": "starting 1s capture around 1ms run window",
+      "ts_iso": "2026-05-13T07:41:25Z",
+      "command": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/dma_tool --out /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/board_evidence/RN.BASIC.001/rdma_rxbuffer.bin --duration-s 1 --quiet"
+    },
+    {
+      "t_ms": 18752.444,
+      "type": "PHASE",
+      "ip": "rc_tool",
+      "detail": "send 0x10 rc=0",
+      "ts_iso": "2026-05-13T07:41:26Z",
+      "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/rc_tool send 0x10 --feb 2 --quiet --run 11141121",
+      "stdout_tail": "",
+      "stderr_tail": ""
+    },
+    {
+      "t_ms": 18822.766,
+      "type": "PHASE",
+      "ip": "rc_tool",
+      "detail": "send 0x11 rc=0",
+      "ts_iso": "2026-05-13T07:41:26Z",
+      "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/rc_tool send 0x11 --feb 2 --quiet",
+      "stdout_tail": "",
+      "stderr_tail": ""
+    },
+    {
+      "t_ms": 18893.066,
+      "type": "PHASE",
+      "ip": "rc_tool",
+      "detail": "send 0x12 rc=0",
+      "ts_iso": "2026-05-13T07:41:26Z",
+      "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/rc_tool send 0x12 --feb 2 --quiet",
+      "stdout_tail": "",
+      "stderr_tail": ""
+    },
+    {
+      "t_ms": 18963.256,
+      "type": "PHASE",
+      "ip": "rc_tool",
+      "detail": "send 0x13 rc=0",
+      "ts_iso": "2026-05-13T07:41:26Z",
+      "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/rc_tool send 0x13 --feb 2 --quiet",
+      "stdout_tail": "",
+      "stderr_tail": ""
+    },
+    {
+      "t_ms": 19600.27,
+      "type": "DMA_END",
+      "ip": "dma_tool",
+      "detail": "dma_tool rc=0",
+      "ts_iso": "2026-05-13T07:41:26Z",
+      "stdout_tail": "",
+      "stderr_tail": "dma_tool: summary: read_words=0 written_words=0 bytes_written=0 DMA_CNT_WORDS_REGISTER_R=0 output=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/board_evidence/RN.BASIC.001/rdma_rxbuffer.bin\n"
+    },
+    {
+      "t_ms": 21364.689,
+      "type": "RUN_END",
+      "ip": "",
+      "detail": "RN.BASIC.001 board collection end",
+      "ts_iso": "2026-05-13T07:41:28Z"
+    }
+  ]
+}
