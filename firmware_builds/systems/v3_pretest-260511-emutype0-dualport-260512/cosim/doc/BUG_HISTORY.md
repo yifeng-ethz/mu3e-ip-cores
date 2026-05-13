@@ -63,7 +63,10 @@ runs at this build dir.
   potential_hazard: integration 1.0x re-fit no longer reports the original
   run-control snapshot CDC in the failing setup list, but still fails on a
   different `altera_avalon_mm_clock_crossing_bridge:cmd_fifo` data-path FIFO
-  setup family and needs a separate user-approved fix.
+  setup family and needs a separate user-approved fix. Final 1.0x integration
+  WNS was `Slow85 = -0.956 ns`, `Slow0 = -0.577 ns`, `Fast85 = 0.485 ns`,
+  and `Fast0 = 0.682 ns`; hold, recovery, and removal were nonnegative in all
+  four corners.
 - Commits:
   - run-control_mgmt `24be671`
     `[FIX] HW: gate runctl snapshot CDC`
