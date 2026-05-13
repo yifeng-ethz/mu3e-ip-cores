@@ -1,0 +1,10 @@
+{
+  "case_id": "BU024",
+  "scenario": "DMA_STATUS baseline",
+  "stimulus_addr_word": "SWB:DMA_STATUS",
+  "measured_word_hex": "0x00000000",
+  "expected_uid_or_meta": "quiescent DMA status readable at cold boot",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d\nDMA_STATUS_R=0x00000000 (0) space=rr offset=0x11",
+  "ts_iso": "2026-05-13T06:28:27Z"
+}

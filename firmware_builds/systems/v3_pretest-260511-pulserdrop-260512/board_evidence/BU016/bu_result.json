@@ -1,0 +1,13 @@
+{
+  "case_id": "BU016",
+  "scenario": "hit_type0_fanout8 instance",
+  "stimulus_addr_word": "n/a",
+  "measured_word_hex": "firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3/synthesis/submodules/pulse_fanout8.sv outputs=9 masked_outputs=9",
+  "expected_uid_or_meta": "one fanout source present with at least 8 pulse outputs",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "",
+  "ts_iso": "2026-05-13T06:28:24Z",
+  "inspected_path": "firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3/synthesis/submodules/pulse_fanout8.sv",
+  "output_pulse_ports": 9,
+  "masked_output_pulse_ports": 9
+}

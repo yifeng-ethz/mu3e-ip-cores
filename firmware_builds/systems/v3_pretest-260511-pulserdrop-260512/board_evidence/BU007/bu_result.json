@@ -1,0 +1,38 @@
+{
+  "case_id": "BU007",
+  "scenario": "on_die_temp_sense UID",
+  "stimulus_addr_word": "0x05400",
+  "measured_word_hex": "0x00000030",
+  "expected_uid_or_meta": "on_die_temp_sense_ctrl row reachable",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "  raw addr word       : 0x00005400\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000030",
+  "ts_iso": "2026-05-13T06:28:19Z",
+  "attempts": [
+    {
+      "addr": 21504,
+      "count": 1,
+      "rc": 0,
+      "values": [
+        48
+      ],
+      "tail": "  raw addr word       : 0x00005400\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000030",
+      "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x05400\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00005400\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 61 us\n  timing matched      : 73 us\n  timing total        : 73 us\n  secondary before    : 0x0060\n  secondary after     : 0x0065\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0060\n  ring end            : 0x0065\n  type                : RD\n  link                : 2\n  addr                : 0x05400\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00005400\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000030\n"
+    }
+  ],
+  "metadata_script_pulserdrop_qsys": {
+    "command": "python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/check_ip_metadata.py --qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3.qsys --skip-jtag --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool --instances on_die_temp_sense_ctrl",
+    "rc": 0,
+    "verdict": "NO_LIVE_ROWS",
+    "stdout": "",
+    "stderr": "",
+    "tail": ""
+  },
+  "metadata_script_legacy_debug_qsys": {
+    "command": "python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/check_ip_metadata.py --qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/debug_sc_system_v3.qsys --skip-jtag --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool --instances on_die_temp_sense_ctrl",
+    "rc": 0,
+    "verdict": "NO_LIVE_ROWS",
+    "stdout": "",
+    "stderr": "",
+    "tail": ""
+  }
+}

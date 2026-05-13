@@ -1,0 +1,172 @@
+{
+  "case_id": "BU018",
+  "scenario": "ring_buffer_cam debug counters",
+  "stimulus_addr_word": "0x0AC00..0x0AD60 debug_msg2",
+  "measured_word_hex": "0x0AC00:uid=0x5242434D push=0 pop=0; 0x0AC20:uid=0x5242434D push=0 pop=0; 0x0AC40:uid=0x5242434D push=0 pop=0; 0x0AC60:uid=0x5242434D push=0 pop=0; 0x0AD00:uid=0x5242434D push=0 pop=0; 0x0AD20:uid=0x5242434D push=0 pop=0; 0x0AD40:uid=0x5242434D push=0 pop=0; 0x0AD60:uid=0x5242434D push=0 pop=0",
+  "expected_uid_or_meta": "all rbCAM UIDs 0x5242434D; push_cnt=pop_cnt=0 at cold boot",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000",
+  "ts_iso": "2026-05-13T06:28:25Z",
+  "reads": [
+    {
+      "idx": 0,
+      "base": "0x0AC00",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present"
+    },
+    {
+      "idx": 1,
+      "base": "0x0AC20",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000"
+    },
+    {
+      "idx": 2,
+      "base": "0x0AC40",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000"
+    },
+    {
+      "idx": 3,
+      "base": "0x0AC60",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000"
+    },
+    {
+      "idx": 4,
+      "base": "0x0AD00",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000"
+    },
+    {
+      "idx": 5,
+      "base": "0x0AD20",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000"
+    },
+    {
+      "idx": 6,
+      "base": "0x0AD40",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000"
+    },
+    {
+      "idx": 7,
+      "base": "0x0AD60",
+      "uid": "0x5242434D",
+      "push_cnt": 0,
+      "pop_cnt": 0,
+      "values": [
+        "0x5242434D",
+        "0x1A02B1FF",
+        "0x00000011",
+        "0x000007D0",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000",
+        "0x00000000"
+      ],
+      "tail": "  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000"
+    }
+  ]
+}
