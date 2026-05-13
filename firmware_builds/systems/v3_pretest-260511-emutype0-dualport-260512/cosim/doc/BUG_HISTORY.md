@@ -42,6 +42,21 @@ runs at this build dir.
 
 ## 2026-05-13
 
+### Frame timestamp progression audit: RN.BASIC.001 confirmed PASS
+
+- First checked: targeted RN.BASIC.001 cosim rerun at
+  `/data2/cosim_frame_ts_20260513_rn001` after the saved
+  `rdma_rxbuffer.bin` still started with byte `0x80` instead of K28.5
+  `0xBC` after one poll and no companion wire-format `.bin` was present.
+- Source: tb-side lane-0 FEB egress frame-boundary dump
+  `frame_ts_progression.csv`, copied into
+  `cosim/REPORT/RN.BASIC.001/`.
+- Result: 66 frame preambles checked; `frame[0].packet_timestamp` was
+  `0x000000000000`; all 65 inter-frame deltas were `0x000000000800`
+  with zero outliers.
+- Status: confirmed PASS for first timestamp == 0 and consecutive delta
+  == `0x800`; no `BUG-013-T` or `BUG-013-R` entry was opened.
+
 ### BUG-009-R: run-control snapshot CSR CDC timed as a normal setup path
 
 - First seen: integration STA setup trace #103 for
