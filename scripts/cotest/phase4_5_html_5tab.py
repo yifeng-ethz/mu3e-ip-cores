@@ -574,52 +574,104 @@ def _strip_delay_arrays(payload: Any) -> Any:
     return {k: v for k, v in payload.items() if k in _DELAY_STATS_KEYS}
 
 
-_CHECKPOINT_FILES = {
-    "pre-rbCAM":   "delay_pre_rbcam.json",
-    "post-rbCAM":  "delay_post_rbcam.json",
-    "FEB egress":  "delay_feb_egress.json",
-    "OPQ ingress": "delay_opq_ingress.json",
-    "OPQ egress":  "delay_opq_egress.json",
+# Math-reviewer per-checkpoint bounds (header-sync example values shown in
+# the worktree reference plot; periodic / emul-only / onclick rows fall back
+# to these same windows until #106 emits per-mode bounds in the row config).
+_CHECKPOINT_BOUNDS_HEADER_SYNC = {
+    "pre-rbCAM":   (0.0, 2000.0),
+    "post-rbCAM":  (2000.0, 2200.0),
+    "FEB egress":  (2049.0, 6143.0),
+    "OPQ ingress": (2049.0, 6159.0),
+    "OPQ egress":  (4356.0, 99133.5),
 }
-_CHECKPOINT_PDF = {
-    "pre-rbCAM":   "pre_rbcam.pdf",
-    "post-rbCAM":  "post_rbcam.pdf",
-    "FEB egress":  "feb_egress.pdf",
-    "OPQ ingress": "opq_ingress.pdf",
-    "OPQ egress":  "opq_egress.pdf",
+_CHECKPOINT_FORMULA = {
+    "pre-rbCAM":   "D_pre = wait_910(hit_ts) + s(q) + 18 (virtual MuTRiG)",
+    "post-rbCAM":  "D_post = (GTS_post - ts_hit) mod 8192",
+    "FEB egress":  "D_feb <= 2F - p + 20 + eps_clk",
+    "OPQ ingress": "D_ing = D_feb + adapter_sync",
+    "OPQ egress":  "D_opq = D_ing + W_n, W_n = max(0, W_(n-1) + S_n - A_n)",
 }
+_CHECKPOINT_METRIC_TO_NAME = {
+    "pre_rbcam_lifetime_cycles":   "pre-rbCAM",
+    "post_rbcam_lifetime_cycles":  "post-rbCAM",
+    "feb_egress_lifetime_cycles":  "FEB egress",
+    "opq_ingress_lifetime_cycles": "OPQ ingress",
+    "opq_egress_lifetime_cycles":  "OPQ egress",
+}
+
+
+def _parse_lifetime_stats_csv(path: Path) -> dict[str, dict[str, float]]:
+    """Parse feb_swb_lifetime_hist_stats.csv -> {checkpoint_name: {stat_key: value}}.
+
+    Columns: metric, checkpoint, count, min_cycles, p05_cycles, p50_cycles,
+    p95_cycles, max_cycles, mean_cycles.
+    """
+    out: dict[str, dict[str, float]] = {}
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return out
+    lines = text.splitlines()
+    if not lines:
+        return out
+    header = [h.strip() for h in lines[0].split(",")]
+    for line in lines[1:]:
+        if not line.strip():
+            continue
+        cells = [c.strip() for c in line.split(",")]
+        if len(cells) < len(header):
+            continue
+        row = dict(zip(header, cells))
+        cp_name = row.get("checkpoint") or _CHECKPOINT_METRIC_TO_NAME.get(row.get("metric", ""), "")
+        if not cp_name:
+            continue
+
+        def fnum(key: str) -> float | None:
+            v = row.get(key, "")
+            try:
+                return float(v)
+            except (TypeError, ValueError):
+                return None
+
+        out[cp_name] = {
+            "count": fnum("count"),
+            "delay_min_cycles": fnum("min_cycles"),
+            "delay_p05_cycles": fnum("p05_cycles"),
+            "delay_p50_cycles": fnum("p50_cycles"),
+            "delay_p95_cycles": fnum("p95_cycles"),
+            "delay_max_cycles": fnum("max_cycles"),
+            "delay_mean_cycles": fnum("mean_cycles"),
+        }
+    return out
 
 
 def gather_delay_evidence(row_id: str) -> dict[str, Any]:
-    """Collect per-checkpoint delay stats for a row.
+    """Collect per-checkpoint delay stats for a row from the cosim's
+    `feb_swb_lifetime_hist_stats.csv` (5 checkpoints, one row each).
 
-    Returns: {"checkpoints": [{"name", "count", "delay_min/p05/p50/p95/max_cycles",
-                                "bound_lower", "bound_upper", "formula", "pdf_rel"}, ...]}
+    Each checkpoint entry carries: count, delay_min/p05/p50/p95/max_cycles,
+    bound_lower, bound_upper (math-reviewer window), formula text, and
+    optional pdf_rel to a DISLIN plot if rendered.
 
-    The 5 checkpoints (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress,
-    OPQ egress) each have their own delay distribution + math-reviewer bound
-    (per the reference image at
-    .worktrees/.../system_20260504_emulator_type0/.../report_header_sync/feb_swb_lifetime_hist.png).
-
-    Per-hit arrays are stripped to keep the inline JSON small (>250 MB inlined
-    otherwise across 194 rows).
+    The cosim per-hit arrays in delay_scoreboard.json are deliberately NOT
+    inlined here -- they balloon the report to >250 MB across 194 rows.
     """
     base = RN_BASIC_REPORT_ROOT / row_id
-    plots = base / "plots"
+    stats_csv = base / "feb_swb_lifetime_hist_stats.csv"
+    by_name = _parse_lifetime_stats_csv(stats_csv) if stats_csv.is_file() else {}
     cps: list[dict[str, Any]] = []
-    for name, fname in _CHECKPOINT_FILES.items():
-        path = base / fname
-        entry: dict[str, Any] = {"name": name}
-        if path.is_file():
-            try:
-                raw = json.loads(path.read_text(encoding="utf-8"))
-                entry.update(_strip_delay_arrays(raw))
-            except (json.JSONDecodeError, OSError):
-                pass
-        pdf = plots / _CHECKPOINT_PDF[name]
-        entry["pdf_rel"] = str(pdf.relative_to(BUILD_DIR / "doc")) if pdf.is_file() else None
+    for name in ("pre-rbCAM", "post-rbCAM", "FEB egress", "OPQ ingress", "OPQ egress"):
+        lo, hi = _CHECKPOINT_BOUNDS_HEADER_SYNC[name]
+        entry: dict[str, Any] = {
+            "name": name,
+            "bound_lower": lo,
+            "bound_upper": hi,
+            "formula": _CHECKPOINT_FORMULA[name],
+            "pdf_rel": None,
+        }
+        entry.update(by_name.get(name, {}))
         cps.append(entry)
-    return {"checkpoints": cps}
+    return {"checkpoints": cps, "source_csv": stats_csv.name if stats_csv.is_file() else None}
 
 
 # Mu3e SWB frame markers per feb_data_frame.py + Mu3eSpecBook-4.pdf:
@@ -1103,7 +1155,8 @@ def basic_rows_html() -> str:
             (cp.get("delay_max_cycles") is not None) for cp in delay_ev.get("checkpoints", [])
         )
         delay_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="delay">View</button>' if delay_has_data else '<span class="ev-pending">pending</span>'
-        rdma_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="rdma">View</button>' if rdma_ev.get("frames") else '<span class="ev-pending">pending</span>'
+        rdma_has_buf = bool(rdma_ev.get("hex_lines"))
+        rdma_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="rdma">View</button>' if rdma_has_buf else '<span class="ev-pending">pending</span>'
         sb_btn = f'<button class="ev-btn" data-row="{rid}" data-ev="scoreboard">View</button>' if sb_ev else '<span class="ev-pending">pending</span>'
         cells = [
             f"<td class=\"id\">{html.escape(rid)}</td>",
@@ -1716,6 +1769,9 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
              + '<label>length: </label><input type="number" id="rdma-len" value="1024" min="16" max="65536" style="width:80px">'
              + '<button class="ev-btn" id="rdma-apply">Apply</button>'
              + '</div>';
+    if (!frames.length) {
+      html += '<p class="legend">No K28.5/K28.4 framed packets in this rxbuffer -- this row cosim emitted host-format hit records (8-byte each per the rdma_rxbuffer_summary). The hex pane below shows the raw record stream.</p>';
+    }
     if (frames.length) {
       html += '<h3>Decoded frames (' + frames.length + ' total, click any to expand full hex)</h3><div class="frame-list">';
       frames.forEach(function(f){
