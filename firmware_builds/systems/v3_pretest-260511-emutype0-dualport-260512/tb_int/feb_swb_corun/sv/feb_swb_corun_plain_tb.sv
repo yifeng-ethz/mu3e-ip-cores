@@ -125,12 +125,17 @@ module feb_swb_corun_plain_tb;
   int pre_rbcam_trace_fd;
   int post_rbcam_trace_fd;
   int feb_egress_trace_fd;
+  int frame_ts_progression_fd;
   int ingress_trace_fd;
   int feb_egress_waveform_fd;
   int ingress_waveform_fd;
   int opq_trace_fd;
   int dma_trace_fd;
   int summary_fd;
+  int unsigned frame_ts_lane;
+  longint unsigned frame_ts_byte_offset;
+  longint unsigned frame_ts_prev_packet_timestamp;
+  bit frame_ts_seen_prev;
   string trace_dir;
 
   assign reset_n = !reset;
@@ -615,6 +620,45 @@ module feb_swb_corun_plain_tb;
     end
   endtask
 
+  task automatic write_frame_ts_progression(
+      input int unsigned frame_id,
+      input longint unsigned byte_offset,
+      input int unsigned ts_high_word,
+      input int unsigned ts_low_pkg_word);
+    longint unsigned packet_timestamp;
+    longint unsigned delta_vs_prev;
+    begin
+      if (frame_ts_progression_fd == 0) begin
+        return;
+      end
+
+      packet_timestamp = (longint'(ts_high_word) << 16) |
+                         ((ts_low_pkg_word >> 16) & 16'hffff);
+      if (frame_ts_seen_prev) begin
+        delta_vs_prev = packet_timestamp - frame_ts_prev_packet_timestamp;
+        $fdisplay(frame_ts_progression_fd,
+                  "%0d,%0d,0x%08h,0x%08h,0x%012h,0x%012h,%0d",
+                  frame_id,
+                  byte_offset,
+                  ts_high_word,
+                  ts_low_pkg_word,
+                  packet_timestamp,
+                  delta_vs_prev,
+                  delta_vs_prev);
+      end else begin
+        $fdisplay(frame_ts_progression_fd,
+                  "%0d,%0d,0x%08h,0x%08h,0x%012h,NA,NA",
+                  frame_id,
+                  byte_offset,
+                  ts_high_word,
+                  ts_low_pkg_word,
+                  packet_timestamp);
+      end
+      frame_ts_prev_packet_timestamp = packet_timestamp;
+      frame_ts_seen_prev = 1'b1;
+    end
+  endtask
+
   task automatic drive_frame(input int lane, input int unsigned frame_id);
     longint unsigned frame_base;
     int unsigned shd_idx;
@@ -649,6 +693,10 @@ module feb_swb_corun_plain_tb;
       end
 
       wait_until_hit_timebase(dispatch_time_8ns);
+      if (lane == frame_ts_lane) begin
+        write_frame_ts_progression(frame_id, frame_ts_byte_offset, ts_high_word,
+                                   {ts_low_word, frame_id[15:0]});
+      end
       drive_feb_word(lane, 4'h1, make_sop(lane), 1'b1, 1'b0, 1'b0, 64'h0);
       drive_feb_word(lane, 4'h0, ts_high_word, 1'b0, 1'b0, 1'b0, 64'h0);
       drive_feb_word(lane, 4'h0, {ts_low_word, frame_id[15:0]}, 1'b0, 1'b0, 1'b0, 64'h0);
@@ -699,6 +747,9 @@ module feb_swb_corun_plain_tb;
       end
 
       drive_feb_word(lane, 4'h1, {24'h0, SWB_K284}, 1'b0, 1'b1, 1'b0, 64'h0);
+      if (lane == frame_ts_lane) begin
+        frame_ts_byte_offset += longint'((5 + N_SHD + total_hits + 1) * 4);
+      end
     end
   endtask
 
@@ -730,6 +781,7 @@ module feb_swb_corun_plain_tb;
       pre_rbcam_trace_fd = 0;
       post_rbcam_trace_fd = 0;
       feb_egress_trace_fd = 0;
+      frame_ts_progression_fd = 0;
       ingress_trace_fd = 0;
       feb_egress_waveform_fd = 0;
       ingress_waveform_fd = 0;
@@ -740,6 +792,7 @@ module feb_swb_corun_plain_tb;
         pre_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_pre_rbcam_trace.csv"}, "w");
         post_rbcam_trace_fd = $fopen({trace_dir, "/feb_swb_post_rbcam_trace.csv"}, "w");
         feb_egress_trace_fd = $fopen({trace_dir, "/feb_swb_feb_egress_trace.csv"}, "w");
+        frame_ts_progression_fd = $fopen({trace_dir, "/frame_ts_progression.csv"}, "w");
         ingress_trace_fd = $fopen({trace_dir, "/feb_swb_ingress_trace.csv"}, "w");
         feb_egress_waveform_fd = $fopen({trace_dir, "/feb_swb_feb_egress_waveform.csv"}, "w");
         ingress_waveform_fd = $fopen({trace_dir, "/feb_swb_swb_ingress_waveform.csv"}, "w");
@@ -749,6 +802,7 @@ module feb_swb_corun_plain_tb;
       summary_fd = $fopen({trace_dir, "/feb_swb_corun_summary.txt"}, "w");
       if ((!scan_only && (source_trace_fd == 0 || pre_rbcam_trace_fd == 0 ||
                           post_rbcam_trace_fd == 0 || feb_egress_trace_fd == 0 ||
+                          frame_ts_progression_fd == 0 ||
                           ingress_trace_fd == 0 || feb_egress_waveform_fd == 0 ||
                           ingress_waveform_fd == 0 || opq_trace_fd == 0 ||
                           dma_trace_fd == 0)) ||
@@ -764,6 +818,8 @@ module feb_swb_corun_plain_tb;
                   "time_ps,lane,hit_id,channel,abs_ts_8ns,hit_word,expected_dma_hit,debug_meta");
         $fdisplay(feb_egress_trace_fd,
                   "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
+        $fdisplay(frame_ts_progression_fd,
+                  "frame_idx,byte_offset,ts_high_word,ts_low_pkg_word,packet_timestamp_hex,delta_vs_prev_hex,delta_vs_prev_dec");
         $fdisplay(ingress_trace_fd,
                   "time_ps,lane,valid,datak,data,sop,eop,debug_valid,debug_meta");
         $fdisplay(feb_egress_waveform_fd,
@@ -1032,6 +1088,10 @@ module feb_swb_corun_plain_tb;
     poisson_seed = DEFAULT_POISSON_SEED;
     rn_basic_lane_mask = 64'h0000_0000_0000_00ff;
     rn_basic_channel_mask = 64'h0000_0000_ffff_ffff;
+    frame_ts_lane = 0;
+    frame_ts_byte_offset = 0;
+    frame_ts_prev_packet_timestamp = 0;
+    frame_ts_seen_prev = 1'b0;
     header_sync_phase_8ns = DEFAULT_HEADER_SYNC_PHASE_8NS;
     header_sync_burst_count = DEFAULT_HEADER_SYNC_BURST_COUNT;
     header_sync_burst_spacing_8ns = DEFAULT_HEADER_SYNC_BURST_SPACING_8NS;
@@ -1085,6 +1145,9 @@ module feb_swb_corun_plain_tb;
     if (!$value$plusargs("RN_BASIC_CHANNEL_MASK=%d", rn_basic_channel_mask)) begin
       rn_basic_channel_mask = 64'h0000_0000_ffff_ffff;
     end
+    if (!$value$plusargs("FEB_SWB_FRAME_TS_LANE=%d", frame_ts_lane)) begin
+      frame_ts_lane = 0;
+    end
     if (!$value$plusargs("FEB_SWB_HEADER_SYNC_PHASE_8NS=%d", header_sync_phase_8ns)) begin
       header_sync_phase_8ns = DEFAULT_HEADER_SYNC_PHASE_8NS;
     end
@@ -1104,6 +1167,10 @@ module feb_swb_corun_plain_tb;
       $fatal(1,
              "invalid FEB_SWB runtime config run_window_8ns=%0d hit_period_8ns=%0d asic_count=%0d",
              run_window_8ns, hit_period_8ns, active_asic_count);
+    end
+    if (frame_ts_lane >= ACTIVE_LANES) begin
+      $fatal(1, "invalid FEB_SWB_FRAME_TS_LANE=%0d active_lanes=%0d",
+             frame_ts_lane, ACTIVE_LANES);
     end
     if (source_mode == SOURCE_MODE_HEADER_SYNC &&
         (header_sync_phase_8ns >= VIRTUAL_MUTRIG_SHORT_FRAME_8NS ||
@@ -1151,6 +1218,7 @@ module feb_swb_corun_plain_tb;
 
     if (ingress_trace_fd != 0) $fclose(ingress_trace_fd);
     if (feb_egress_trace_fd != 0) $fclose(feb_egress_trace_fd);
+    if (frame_ts_progression_fd != 0) $fclose(frame_ts_progression_fd);
     if (ingress_waveform_fd != 0) $fclose(ingress_waveform_fd);
     if (feb_egress_waveform_fd != 0) $fclose(feb_egress_waveform_fd);
     if (source_trace_fd != 0) $fclose(source_trace_fd);

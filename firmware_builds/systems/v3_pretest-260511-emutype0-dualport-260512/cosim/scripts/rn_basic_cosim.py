@@ -15,6 +15,7 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -505,6 +506,7 @@ EVIDENCE_FILES = {
     "feb_swb_lifetime_trace.csv",
     "feb_swb_lifetime_hist_stats.csv",
     "feb_swb_range_validation.csv",
+    "frame_ts_progression.csv",
     "feb_swb_corun_summary.txt",
     "rdma_rxbuffer.bin",
     "rdma_rxbuffer_summary.json",
@@ -520,6 +522,9 @@ def collect_evidence(
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     write_json(output_dir / "row_config.json", row.to_json())
+    frame_ts_path = work_dir / "frame_ts_progression.csv"
+    if frame_ts_path.is_file():
+        shutil.copyfile(frame_ts_path, output_dir / "frame_ts_progression.csv")
 
     trace_summary = read_key_values(work_dir / "feb_swb_trace_debug_summary.txt")
     corun_summary = read_key_values(work_dir / "feb_swb_corun_summary.txt")
