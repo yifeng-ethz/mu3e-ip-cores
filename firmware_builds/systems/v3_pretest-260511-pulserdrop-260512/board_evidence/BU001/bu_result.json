@@ -1,0 +1,22 @@
+{
+  "case_id": "BU001",
+  "scenario": "scratch_pad_ram quiescent",
+  "stimulus_addr_word": "0x00000",
+  "measured_word_hex": "0x00000000",
+  "expected_uid_or_meta": "well-formed 32-bit reply not 0xFFFFFFFF",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "  raw addr word       : 0x00000000\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+  "ts_iso": "2026-05-13T06:28:14Z",
+  "attempts": [
+    {
+      "addr": 0,
+      "count": 1,
+      "rc": 0,
+      "values": [
+        0
+      ],
+      "tail": "  raw addr word       : 0x00000000\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000",
+      "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x00000\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00000000\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 72 us\n  timing total        : 72 us\n  secondary before    : 0x0150\n  secondary after     : 0x0155\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0150\n  ring end            : 0x0155\n  type                : RD\n  link                : 2\n  addr                : 0x00000\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00000000\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00000000\n"
+    }
+  ]
+}

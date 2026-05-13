@@ -1,0 +1,31 @@
+{
+  "case_id": "BU020",
+  "scenario": "live-vs-source metadata gate",
+  "stimulus_addr_word": "check_ip_metadata.py",
+  "measured_word_hex": "pulserdrop_qsys=NO_LIVE_ROWS legacy_debug_qsys=PASS",
+  "expected_uid_or_meta": "no live VERSION below Section 2.5 source; drift documented",
+  "verdict": "FAIL",
+  "raw_sc_tool_tail": "PASS max10_prog_avmm_0 svd=feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd exp_ver=0x00020000 qsys_ver=0x00020000 sc_ver=0x00020000 jtag_ver=n/a exp_git=n/a sc_git=n/a jtag_git=n/a\nPASS sc_hub svd=slow-control_hub/sc_hub.svd exp_ver=0x1A06919E qsys_ver=0x1A06919E sc_ver=0x1A06919E jtag_ver=n/a exp_git=0x05E3EABD sc_git=0x05E3EABD jtag_git=n/a",
+  "ts_iso": "2026-05-13T06:28:27Z",
+  "metadata_script_pulserdrop_qsys": {
+    "command": "python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/check_ip_metadata.py --qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3.qsys --skip-jtag --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
+    "rc": 0,
+    "verdict": "NO_LIVE_ROWS",
+    "stdout": "",
+    "stderr": "",
+    "tail": ""
+  },
+  "metadata_script_legacy_debug_qsys": {
+    "command": "python3 /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/script/check_ip_metadata.py --qsys /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/system_20260427_testplanphase5/syn/debug_sc_system_v3.qsys --skip-jtag --sc-tool /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
+    "rc": 0,
+    "verdict": "PASS",
+    "stdout": "PASS max10_prog_avmm_0 svd=feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd exp_ver=0x00020000 qsys_ver=0x00020000 sc_ver=0x00020000 jtag_ver=n/a exp_git=n/a sc_git=n/a jtag_git=n/a\nPASS sc_hub svd=slow-control_hub/sc_hub.svd exp_ver=0x1A06919E qsys_ver=0x1A06919E sc_ver=0x1A06919E jtag_ver=n/a exp_git=0x05E3EABD sc_git=0x05E3EABD jtag_git=n/a\n",
+    "stderr": "",
+    "tail": "PASS max10_prog_avmm_0 svd=feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd exp_ver=0x00020000 qsys_ver=0x00020000 sc_ver=0x00020000 jtag_ver=n/a exp_git=n/a sc_git=n/a jtag_git=n/a\nPASS sc_hub svd=slow-control_hub/sc_hub.svd exp_ver=0x1A06919E qsys_ver=0x1A06919E sc_ver=0x1A06919E jtag_ver=n/a exp_git=0x05E3EABD sc_git=0x05E3EABD jtag_git=n/a"
+  },
+  "prior_metadata_failures": [
+    "BU012",
+    "BU013",
+    "BU014"
+  ]
+}
