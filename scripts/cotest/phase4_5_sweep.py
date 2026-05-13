@@ -1148,9 +1148,9 @@ def snap_frame_asm(sc_tool: Path, link: int,
             words = sc_read(sc_tool, link, base, 8, log_fh=log_fh)
             out[name] = {
                 "base":          f"0x{base:05X}",
-                "declared_hits": read_u64_pair_from_words(words, 2, 3),
-                "actual_hits":   read_u64_pair_from_words(words, 4, 5),
-                "missing_hits":  read_u64_pair_from_words(words, 6, 7),
+                "declared_hits": read_u64_pair_from_words(words, 3, 2),
+                "actual_hits":   read_u64_pair_from_words(words, 5, 4),
+                "missing_hits":  read_u64_pair_from_words(words, 7, 6),
             }
         except RuntimeError as exc:
             out[name] = {"error": str(exc)}
