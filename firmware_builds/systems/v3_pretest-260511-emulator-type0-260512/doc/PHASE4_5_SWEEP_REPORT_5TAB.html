@@ -263,7 +263,7 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 <body>
 <main>
 <h1>Phase 4.5 Sweep Report</h1>
-<p class="sub">v3_pretest-260511 emulator type0 cross-validation. Generated 2026-05-13 08:33:57 from local docs and existing evidence.</p>
+<p class="sub">v3_pretest-260511 emulator type0 cross-validation. Generated 2026-05-13 08:45:00 from local docs and existing evidence.</p>
 <div class="tabs">
 <input type="radio" id="tab-bu" name="tabs" checked><label for="tab-bu">BU</label><input type="radio" id="tab-basic" name="tabs"><label for="tab-basic">BASIC</label><input type="radio" id="tab-perf" name="tabs"><label for="tab-perf">PERF</label><input type="radio" id="tab-error" name="tabs"><label for="tab-error">ERROR</label><input type="radio" id="tab-edge" name="tabs"><label for="tab-edge">EDGE</label>
 <section class="panel" id="panel-bu"><h2>BU</h2><table class="dense master">
@@ -12667,6 +12667,11 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
                    + '<span class="pill hit">hit (asic + channel + ts + idx)</span>'
                    + '<span class="pill trailer">trailer (K28.4 marker)</span>'
                    + '</div>';
+        // Display: bytes are stored little-endian on disk (LSB first), but
+        // each 32-bit word is rendered MSB-first so a human reader sees the
+        // word as it would appear written out (e.g. 0xBC at the END of the
+        // preamble word makes the K28.5 marker easy to spot). The byte
+        // offset annotation is still the disk offset.
         var hexLines = '';
         for (var off = 0; off < hex.length; off += 32) {
           var abs = (f.byte_offset || 0) + (off / 2);
@@ -12674,15 +12679,16 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
           for (var b = 0; b < 32; b += 8) {
             var idx = off + b;
             if (idx + 8 > hex.length) break;
-            var wb0 = hex.slice(idx,     idx + 2);
+            var wb0 = hex.slice(idx,     idx + 2); // LSB on disk
             var wb1 = hex.slice(idx + 2, idx + 4);
             var wb2 = hex.slice(idx + 4, idx + 6);
-            var wb3 = hex.slice(idx + 6, idx + 8);
+            var wb3 = hex.slice(idx + 6, idx + 8); // MSB on disk
             var wordIdx = (idx / 8) | 0;
             var byte3 = parseInt(wb3, 16);
             var role = wordRoleAt(wordIdx, byte3);
+            // Render MSB..LSB so the K28.5 (LSB) sits at the END
             wordsHtml += '<span class="word ' + role + '">'
-                       + wb0 + ' ' + wb1 + ' ' + wb2 + ' ' + wb3
+                       + wb3 + ' ' + wb2 + ' ' + wb1 + ' ' + wb0
                        + '</span><span class="ws"> </span>';
           }
           hexLines += '<div><span class="off">0x' + abs.toString(16).padStart(4,'0') + '</span>'
