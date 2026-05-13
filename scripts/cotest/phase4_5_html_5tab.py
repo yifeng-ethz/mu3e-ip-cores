@@ -1041,23 +1041,27 @@ def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
     return bytes(buf)
 
 
-def _dummy_rdma_buffer(num_frames: int = 4) -> bytes:
-    """Build a synthetic rdma rxbuffer with `num_frames` mu3e frames.
+def _dummy_rdma_buffer(num_frames: int = 3) -> bytes:
+    """Build a synthetic rdma rxbuffer with `num_frames` Mu3e frames in the
+    canonical wire format the SWB DMA packer will emit:
 
-    Each dummy frame carries 8 subheaders x 3 hits (24 hits per frame) to
-    keep the popup readable. The on-wire spec allows up to 128 subheaders.
+    - 128 subheaders per frame (the N_SHD=128 spec; each subheader covers
+      a 16-tick subwindow so frame spans 128 x 16 = 2048 = 0x800 ticks).
+    - 1 hit per subheader (keeps the popup readable; the real silicon may
+      carry 0..K hits per subheader depending on rate).
+    - packet_timestamp starts at 0 for frame 0 and increments by 0x800
+      per frame (matches the #110 sim verification).
     """
     buf = bytearray()
-    base_ts = 0x0000_0001_2345_0000
     for fi in range(num_frames):
         buf.extend(_build_frame_bytes(
             packet_type=0b111000,             # SciFi
             fpga_id=0x00A5,
-            packet_timestamp=base_ts + fi * 8192,
+            packet_timestamp=fi * 0x800,      # frame[0]=0, delta=0x800
             package_counter=fi,
-            send_ts_counter=0x1234_5600 + fi * 16,
-            subheader_count=8,
-            hits_per_subheader=3,
+            send_ts_counter=fi * 0x800,
+            subheader_count=128,              # canonical N_SHD per Mu3eSpecBook
+            hits_per_subheader=1,
         ))
     return bytes(buf)
 
