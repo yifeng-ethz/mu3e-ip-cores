@@ -1,0 +1,39 @@
+{
+  "case_id": "BU025",
+  "scenario": "BU gate",
+  "stimulus_addr_word": "aggregate BU001-BU024 v2",
+  "measured_word_hex": "pass=20 fail=4 noise=0",
+  "expected_uid_or_meta": "24/24 PASS, no sustained NOISE",
+  "verdict": "FAIL",
+  "raw_sc_tool_tail": "",
+  "ts_iso": "2026-05-13T07:33:52Z",
+  "pass_ids": [
+    "BU001",
+    "BU002",
+    "BU003",
+    "BU004",
+    "BU005",
+    "BU006",
+    "BU007",
+    "BU008",
+    "BU009",
+    "BU010",
+    "BU011",
+    "BU015",
+    "BU016",
+    "BU017",
+    "BU018",
+    "BU019",
+    "BU021",
+    "BU022",
+    "BU023",
+    "BU024"
+  ],
+  "fail_ids": [
+    "BU012",
+    "BU013",
+    "BU014",
+    "BU020"
+  ],
+  "noise_ids": []
+}

@@ -1,0 +1,38 @@
+{
+  "case_id": "BU021",
+  "scenario": "mm_bridge round-trip",
+  "stimulus_addr_word": "0x08000,0x08001",
+  "measured_word_hex": "0x08000=0x00FA0009 0x08001=0x000001FF",
+  "expected_uid_or_meta": "both reads succeed",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "  raw addr word       : 0x00008001\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x000001FF",
+  "ts_iso": "2026-05-13T06:28:27Z",
+  "attempts": [
+    [
+      {
+        "addr": 32768,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          16384009
+        ],
+        "tail": "  raw addr word       : 0x00008000\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00FA0009",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x08000\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00008000\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 59 us\n  timing matched      : 69 us\n  timing total        : 69 us\n  secondary before    : 0x05AD\n  secondary after     : 0x05B2\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x05AD\n  ring end            : 0x05B2\n  type                : RD\n  link                : 2\n  addr                : 0x08000\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008000\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x00FA0009\n"
+      }
+    ],
+    [
+      {
+        "addr": 32769,
+        "count": 1,
+        "rc": 0,
+        "values": [
+          511
+        ],
+        "tail": "  raw addr word       : 0x00008001\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x000001FF",
+        "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x08001\n  request length     : 1 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 5\n  expected reply words (declared) : 5\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00008001\n  wmem[2] = 0x00000001\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 71 us\n  timing total        : 71 us\n  secondary before    : 0x01CA\n  secondary after     : 0x01CF\n  secondary delta     : 5 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x01CA\n  ring end            : 0x01CF\n  type                : RD\n  link                : 2\n  addr                : 0x08001\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 1\n  declared payload    : 1\n  actual payload      : 1\n  declared ring words : 5\n  actual ring words   : 5\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00008001\n  raw len word        : 0x00010001\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x000001FF\n"
+      }
+    ]
+  ],
+  "v2_basis": "carried_forward_from_107_prior_json; targeted v2 rerun overwrites prior FAIL rows BU012, BU013, BU014, BU020, BU025",
+  "v2_ts_iso": "2026-05-13T07:33:52Z"
+}

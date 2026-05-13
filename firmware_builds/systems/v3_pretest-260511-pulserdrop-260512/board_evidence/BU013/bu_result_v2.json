@@ -1,0 +1,60 @@
+{
+  "case_id": "BU013",
+  "scenario": "mts_preprocessor_0 / _1 UID",
+  "stimulus_addr_word": "0x09000,0x0A000",
+  "measured_word_hex": "0x09000=0x20000010 0x00000000; 0x0A000=0x20000010 0x00000000",
+  "expected_uid_or_meta": "both UIDs 0x4D546350",
+  "verdict": "FAIL",
+  "ts_iso": "2026-05-13T07:33:52Z",
+  "reads": [
+    {
+      "base": "0x09000",
+      "attempts": [
+        {
+          "addr": 36864,
+          "count": 2,
+          "rc": 0,
+          "values": [
+            536870928,
+            0
+          ],
+          "values_hex": [
+            "0x20000010",
+            "0x00000000"
+          ],
+          "tail": "  raw header          : 0x1C0002BC\n  raw addr word       : 0x00009000\n  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x20000010\n  payload[1] = 0x00000000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present",
+          "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x09000\n  request length     : 2 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 6\n  expected reply words (declared) : 6\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x00009000\n  wmem[2] = 0x00000002\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 146 us\n  timing total        : 146 us\n  secondary before    : 0x0400\n  secondary after     : 0x044A\n  secondary delta     : 74 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0400\n  ring end            : 0x0406\n  type                : RD\n  link                : 2\n  addr                : 0x09000\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 2\n  declared payload    : 2\n  actual payload      : 2\n  declared ring words : 6\n  actual ring words   : 6\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x00009000\n  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x20000010\n  payload[1] = 0x00000000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present\n",
+          "stderr": "",
+          "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x09000 2 --quiet"
+        }
+      ]
+    },
+    {
+      "base": "0x0A000",
+      "attempts": [
+        {
+          "addr": 40960,
+          "count": 2,
+          "rc": 0,
+          "values": [
+            536870928,
+            0
+          ],
+          "values_hex": [
+            "0x20000010",
+            "0x00000000"
+          ],
+          "tail": "  actual ring words   : 6\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x0000A000\n  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x20000010\n  payload[1] = 0x00000000",
+          "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x0A000\n  request length     : 2 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 6\n  expected reply words (declared) : 6\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x0000A000\n  wmem[2] = 0x00000002\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 73 us\n  timing total        : 73 us\n  secondary before    : 0x0066\n  secondary after     : 0x006C\n  secondary delta     : 6 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0066\n  ring end            : 0x006C\n  type                : RD\n  link                : 2\n  addr                : 0x0A000\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 2\n  declared payload    : 2\n  actual payload      : 2\n  declared ring words : 6\n  actual ring words   : 6\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x0000A000\n  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x20000010\n  payload[1] = 0x00000000\n",
+          "stderr": "",
+          "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x0A000 2 --quiet"
+        }
+      ]
+    }
+  ],
+  "qsys_regen_artifact": {
+    "component_version_html": "mts_preprocessor 26.3.0.512",
+    "generated_component_note": "Generated component is current, but the generated mts_processor component declaration exposes no IP_UID/VERSION generics and live CSR word 0 remains control/status, not UID.",
+    "finding": "The canonical Qsys package version alone does not create the live UID aperture expected by BU013."
+  }
+}

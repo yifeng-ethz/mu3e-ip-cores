@@ -1,0 +1,45 @@
+{
+  "case_id": "BU011",
+  "scenario": "runctl_mgmt_host CSR sweep",
+  "stimulus_addr_word": "0x0C000..0x0C011",
+  "measured_word_hex": "0x52434D48 0x1A032201 0x00000000 0x80000003 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 0x9A5976D2 0x00000019 0x00000000 0x0001C61A 0x00010000",
+  "expected_uid_or_meta": "UID 0x52434D48, LAST_CMD=0, RX_CMD_COUNT=0",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "  payload[14] = 0x00000019\n  payload[15] = 0x00000000\n  payload[16] = 0x0001C61A\n  payload[17] = 0x00010000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present",
+  "ts_iso": "2026-05-13T06:28:20Z",
+  "attempts": [
+    {
+      "addr": 49152,
+      "count": 18,
+      "rc": 0,
+      "values": [
+        1380142408,
+        436412929,
+        0,
+        2147483651,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2589554386,
+        25,
+        0,
+        116250,
+        65536
+      ],
+      "tail": "  payload[14] = 0x00000019\n  payload[15] = 0x00000000\n  payload[16] = 0x0001C61A\n  payload[17] = 0x00010000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present",
+      "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x0C000\n  request length     : 18 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 22\n  expected reply words (declared) : 22\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x0000C000\n  wmem[2] = 0x00000012\n  wmem[3] = 0x0000009C\n  timing main ready   : 61 us\n  timing matched      : 127 us\n  timing total        : 127 us\n  secondary before    : 0x4799\n  secondary after     : 0x47C3\n  secondary delta     : 42 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x4799\n  ring end            : 0x47AF\n  type                : RD\n  link                : 2\n  addr                : 0x0C000\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 18\n  declared payload    : 18\n  actual payload      : 18\n  declared ring words : 22\n  actual ring words   : 22\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x0000C000\n  raw len word        : 0x00010012\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x52434D48\n  payload[1] = 0x1A032201\n  payload[2] = 0x00000000\n  payload[3] = 0x80000003\n  payload[4] = 0x00000000\n  payload[5] = 0x00000000\n  payload[6] = 0x00000000\n  payload[7] = 0x00000000\n  payload[8] = 0x00000000\n  payload[9] = 0x00000000\n  payload[10] = 0x00000000\n  payload[11] = 0x00000000\n  payload[12] = 0x00000000\n  payload[13] = 0x9A5976D2\n  payload[14] = 0x00000019\n  payload[15] = 0x00000000\n  payload[16] = 0x0001C61A\n  payload[17] = 0x00010000\nwarn: secondary pointer delta does not match matched packet size; extra traffic may be present\n"
+    }
+  ],
+  "decoded": {
+    "LAST_CMD": 0,
+    "RX_CMD_COUNT": 0
+  },
+  "v2_basis": "carried_forward_from_107_prior_json; targeted v2 rerun overwrites prior FAIL rows BU012, BU013, BU014, BU020, BU025",
+  "v2_ts_iso": "2026-05-13T07:33:52Z"
+}

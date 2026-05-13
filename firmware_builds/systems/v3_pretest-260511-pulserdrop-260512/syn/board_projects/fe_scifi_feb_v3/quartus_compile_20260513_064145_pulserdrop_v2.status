@@ -1,0 +1,7 @@
+start_utc=2026-05-13T06:41:45Z
+end_utc=2026-05-13T07:22:40Z
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/quartus_compile_20260513_064145_pulserdrop_v2.console.log
+exit_code=0
+warning_lines=1689
+old_sof_sha256=1a551dc43a3c0abd810b550c5aabc7bae73de5ba89e758e3d9fa32cce7c71bc6
+new_sof_sha256=fbf1155a9f73aad1cc58acb13290dc06737311ff922e5a4dd6896293263dcc55

@@ -1,0 +1,15 @@
+{
+  "case_id": "BU022",
+  "scenario": "LINK_LOCKED_LOW status",
+  "stimulus_addr_word": "SWB:LINK_LOCKED_LOW",
+  "measured_word_hex": "0x00000F00",
+  "expected_uid_or_meta": "bit 2 (FEB link 2) state visible",
+  "verdict": "PASS",
+  "raw_sc_tool_tail": "swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d\nLINK_LOCKED_LOW_REGISTER_R=0x00000F00 (3840) space=rr offset=0x36",
+  "ts_iso": "2026-05-13T06:28:27Z",
+  "decoded": {
+    "bit2": 0
+  },
+  "v2_basis": "carried_forward_from_107_prior_json; targeted v2 rerun overwrites prior FAIL rows BU012, BU013, BU014, BU020, BU025",
+  "v2_ts_iso": "2026-05-13T07:33:52Z"
+}

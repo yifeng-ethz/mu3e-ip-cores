@@ -1,0 +1,6 @@
+command=/data1/intelFPGA/18.1/quartus/sopc_builder/bin/qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3.qsys --synthesis=VHDL --clear-output-directory --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3 --family=Arria V --part=5AGXBA7D4F31C5 --search-path=<71 paths>,$
+exit_code=0
+error_count=0
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3_qsys_generate_20260513_064021_pulserdrop_v2_isolated.console.log
+report=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/feb_system_v3/feb_system_v3_generation.rpt
+isolated_catalog=/tmp/qsys_user_catalog.ztoana

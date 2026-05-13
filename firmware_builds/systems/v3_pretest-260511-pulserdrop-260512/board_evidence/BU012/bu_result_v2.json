@@ -1,0 +1,34 @@
+{
+  "case_id": "BU012",
+  "scenario": "histogram_statistics_v2 UID + live VERSION",
+  "stimulus_addr_word": "0x0A900",
+  "measured_word_hex": "0x48495354 0x1A000000",
+  "expected_uid_or_meta": "UID 0x48495354, VERSION >= 0x1A0201FF (26.2.0.0511)",
+  "verdict": "FAIL",
+  "ts_iso": "2026-05-13T07:33:52Z",
+  "attempts": [
+    {
+      "addr": 43264,
+      "count": 2,
+      "rc": 0,
+      "values": [
+        1212765012,
+        436207616
+      ],
+      "values_hex": [
+        "0x48495354",
+        "0x1A000000"
+      ],
+      "tail": "  actual ring words   : 6\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x0000A900\n  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x48495354\n  payload[1] = 0x1A000000",
+      "text": "info: request summary:\n  type               : RD\n  link               : 2\n  addr               : 0x0A900\n  request length     : 2 word(s)\n  main length reg    : 2\n  expected reply words (actual)   : 6\n  expected reply words (declared) : 6\ninfo: request words written to SC main:\n  wmem[0] = 0x1C0002BC\n  wmem[1] = 0x0000A900\n  wmem[2] = 0x00000002\n  wmem[3] = 0x0000009C\n  timing main ready   : 60 us\n  timing matched      : 73 us\n  timing total        : 73 us\n  secondary before    : 0x0000\n  secondary after     : 0x0006\n  secondary delta     : 6 word(s)\n  SC main status      : 0x00000001\n  SC state            : 0x20000001\ninfo: observed packet:\n  ring start          : 0x0000\n  ring end            : 0x0006\n  type                : RD\n  link                : 2\n  addr                : 0x0A900\n  rsp                 : OK (0)\n  ack                 : 1\n  echoed length       : 2\n  declared payload    : 2\n  actual payload      : 2\n  declared ring words : 6\n  actual ring words   : 6\n  raw header          : 0x1C0002BC\n  raw addr word       : 0x0000A900\n  raw len word        : 0x00010002\n  raw trailer         : 0x0000009C\ninfo: packet payload:\n  payload[0] = 0x48495354\n  payload[1] = 0x1A000000\n",
+      "stderr": "",
+      "command": "/home/yifeng/.local/bin/swb_ring_lock -- /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x0A900 2 --quiet"
+    }
+  ],
+  "qsys_regen_artifact": {
+    "component_version_html": "histogram_statistics_v2 26.2.0.511",
+    "generated_component_default": "VERSION_MAJOR=26 VERSION_MINOR=2 VERSION_PATCH=0 BUILD=511",
+    "generated_instantiation_override": "VERSION_MAJOR=26 VERSION_MINOR=0 VERSION_PATCH=0 BUILD=0",
+    "finding": "The regenerated component catalog is current, but the canonical Qsys instance parameter override still bakes the old live VERSION word."
+  }
+}

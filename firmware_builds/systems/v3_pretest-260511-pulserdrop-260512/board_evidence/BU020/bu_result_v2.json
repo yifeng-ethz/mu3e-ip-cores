@@ -1,0 +1,15 @@
+{
+  "case_id": "BU020",
+  "scenario": "live-vs-source metadata gate",
+  "stimulus_addr_word": "targeted v2 live UID/version reads plus generated-artifact trace",
+  "measured_word_hex": "targeted_fail_ids=['BU012', 'BU013', 'BU014']",
+  "expected_uid_or_meta": "no live VERSION below source and required live UID apertures present",
+  "verdict": "FAIL",
+  "ts_iso": "2026-05-13T07:33:52Z",
+  "prior_metadata_failures": [
+    "BU012",
+    "BU013",
+    "BU014"
+  ],
+  "finding": "Qsys regen resolved component catalog versions for histogram and MTS, but generated instance/live CSR apertures still do not match source; arb supercore is absent from canonical Qsys."
+}
