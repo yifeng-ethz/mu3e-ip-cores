@@ -37,6 +37,8 @@ runs at this build dir.
 | BUG-009-T | T | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a/9b527599 | Single global delay bound replaced with 5 per-checkpoint bounds (pre-rbCAM, post-rbCAM, FEB egress, OPQ ingress, OPQ egress) per injector mode. |
 | BUG-010-H | H | closure-blocker | swept | fixed | 2026-05-13 per-checkpoint review | be528d5a | Analyzer reported delay_max_cycles = delay_min_cycles = 0 because it subtracted abs_ts_8ns from itself instead of joining upstream/downstream checkpoint traces on hit_id. |
 | BUG-009-R | R | closure-blocker | swept | fixed in IP standalone; integration re-fit exposes different data-path FIFO setup failure | 2026-05-13 integration STA trace #103 | run-control_mgmt 24be671/023fb18 | snap_*_lvds -> snap_*_mm_q0 CDC missing synchronized update/valid handshake; STA timed the multi-bit crossing as a normal setup endpoint. |
+| BUG-014-T | T | closure-blocker | directed-only | TBD | 2026-05-13 #108 BU v2 review | eae3f6d3 | BU012/BU013 identity expectations compare source/catalog metadata against live CSRs whose generated instance parameters or RTL register maps do not expose those values. |
+| BUG-014-H | H | closure-blocker | directed-only | TBD | 2026-05-13 #108 BU/RN001 board evidence | eae3f6d3 | Canonical pulserdrop Qsys has no routable arb_hit_type0_supercore CSR at the TEST_BU address; board RN.BASIC.001 reaches run-control but no hits reach histogram. |
 
 ---
 
@@ -356,3 +358,52 @@ tb_int integration ledgers:
   blob now starts with `{"RN.BASIC.001":{...}}` literal characters.
 - Commit: this commit `[FIX] HW: v3_pretest-260511 5-tab evidence popup
   JSON parse fix`.
+
+## 2026-05-13
+
+### BUG-014-T: BU012/BU013 identity expectations target non-identity CSRs
+
+- First seen: #108 pulserdrop BU v2 review at commit `eae3f6d3`, after Qsys
+  regen/recompile/reflash still reported BU012 and BU013 FAIL.
+- Symptom: BU012 expected the current histogram source/catalog metadata
+  version, but live `histogram_statistics_v2` returned UID `0x48495354` and
+  VERSION `0x1A000000`. BU013 expected `mts_preprocessor_0/1` identity words,
+  but both live apertures returned the functional CSR sequence
+  `0x20000010, 0x00000000, 0x000007D0, 0x00000000, 0x00000000`.
+- Root cause: BU012 compares source defaults against a generated Qsys instance
+  that overrides the histogram version parameters to `26.0.0.0000`; BU013
+  compares against metadata that `mts_processor.vhd` does not expose in its
+  CSR map. MTS word 0 is control/status, word 1 is the discard-hit counter,
+  and word 2 is expected latency.
+- Fix status: TBD. Mechanism: either align TEST_BU to the generated Qsys/live
+  CSR contract, or make a separate approved Qsys/RTL change that exposes the
+  desired identity values. after_fix_outcome: none yet. potential_hazard:
+  rerunning BU without changing the plan or identity CSR contract will keep
+  reporting the same two failures even when the silicon image is otherwise
+  current.
+- Commit: this commit
+  `[PATCH] HW: v3_pretest-260511 diagnose pulserdrop BU RN001`.
+
+### BUG-014-H: pulserdrop top map drops the arb_hit_type0_supercore route
+
+- First seen: #108 pulserdrop BU014 and RN.BASIC.001 board evidence at commit
+  `eae3f6d3`.
+- Symptom: BU014 read `0x088A0` and received four zero words instead of the
+  expected per-lane `arb_hit_type0` identity/MODE CSR. The same board capture
+  then ran RN.BASIC.001 with run-control command count advanced to `0x32`, but
+  histogram `TOTAL_HITS`, RDMA records, and histogram last-interval hits all
+  remained zero.
+- Root cause: canonical `quartus_systems/*.qsys` has no real
+  `arb_hit_type0_supercore` instance, and the pulserdrop
+  `syn/feb_system_v3.qsys` `AUTO_AVMM_PORT_ADDRESS_MAP` has no
+  `data_path_subsystem_arb_hit_type0_supercore_0_lane_*` rows. The prior
+  dual-port build added those rows at `47efa242`; the top-map rows disappeared
+  at `b8107d97` during the cosim Qsys DUT refresh.
+- Fix status: TBD. Mechanism: restore the arb supercore and lane CSR routes
+  through the canonical Qsys Tcl generator only, regenerate, and verify the
+  top map before any board RN rerun. after_fix_outcome: none yet.
+  potential_hazard: saved RN.BASIC.001 cosim conserves 31,264 hits through
+  RDMA because that harness includes the functional arb path, so it cannot by
+  itself close the current pulserdrop board topology.
+- Commit: this commit
+  `[PATCH] HW: v3_pretest-260511 diagnose pulserdrop BU RN001`.
