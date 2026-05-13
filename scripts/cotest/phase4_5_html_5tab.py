@@ -990,32 +990,49 @@ def dummy_evidence_RN_BASIC_001() -> dict[str, Any]:
     }
 
 
-def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
-                        package_counter: int, debug_subheader_count: int,
-                        debug_hit_count: int, send_ts_counter: int,
-                        payload_words: int) -> bytes:
-    """Build a 32-bit-aligned little-endian mu3e frame: K28.5 preamble +
-    4 fixed header words + `payload_words` placeholder words + K28.4 trailer.
+# Subheader marker convention (dummy / decoder fallback): a 32-bit word
+# whose top 8 bits are 0xFE is treated as a subheader. The next 7 bits
+# carry the in-frame subheader index (0..127), and the bottom 16 bits
+# carry the per-subheader hit count. This is the role tag used to color
+# the frame hex view; the canonical board format will declare its own
+# subheader marker via the preamble's debug_subheader_count field plus
+# inline subheader words.
+SUBHEADER_TAG = 0xFE
 
-    Bit layout per feb_data_frame.py:parse_framed_stream():
-      word0 (preamble): pkt_type[5:0]<<26 | fpga_id[15:0]<<8 | 0xBC
-      word1 (ts_high):  upper 32 bits of packet_timestamp
-      word2 (ts_low):   (packet_timestamp[15:0] << 16) | package_counter[15:0]
-      word3 (debug0):   (debug_subheader_count[14:0] << 16) | debug_hit_count[15:0]
-      word4 (debug1):   send_ts_counter[30:0]
-      ...payload_words placeholder words...
-      wordN (trailer):  0x9C (K28.4) in LSB
+
+def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
+                        package_counter: int, send_ts_counter: int,
+                        subheader_count: int, hits_per_subheader: int) -> bytes:
+    """Build a 32-bit-aligned little-endian mu3e frame.
+
+    Structure (per Mu3eSpecBook + feb_data_frame.py):
+      word 0:    preamble (K28.5 in LSB + packet_type + fpga_id)
+      word 1:    ts_high
+      word 2:    ts_low + package_counter
+      word 3:    debug0 (subheader_count + per-frame hit_count)
+      word 4:    debug1 (send_ts_counter)
+      // 128 subheaders per frame (truncated for the dummy):
+      for i in 0..subheader_count-1:
+        word S_i:  subheader_i (SUBHEADER_TAG<<24 | i<<16 | hits_per_subheader)
+        words H_0..H_{N-1}: hits with channel + ts payload
+      last word: trailer (K28.4 in LSB)
     """
+    total_hits = subheader_count * hits_per_subheader
     w0 = ((packet_type & 0x3F) << 26) | ((fpga_id & 0xFFFF) << 8) | SWB_K285
     w1 = (packet_timestamp >> 16) & 0xFFFF_FFFF
     w2 = ((packet_timestamp & 0xFFFF) << 16) | (package_counter & 0xFFFF)
-    w3 = ((debug_subheader_count & 0x7FFF) << 16) | (debug_hit_count & 0xFFFF)
+    w3 = ((subheader_count & 0x7FFF) << 16) | (total_hits & 0xFFFF)
     w4 = send_ts_counter & 0x7FFF_FFFF
     parts = [w0, w1, w2, w3, w4]
-    # Placeholder per-hit payload words (just patterned data so search demos work)
-    for k in range(payload_words):
-        parts.append(0xDEAD_0000 | (k & 0xFFFF))
-    # Trailer word: K28.4 in LSB
+    for sh in range(subheader_count):
+        # subheader: SUBHEADER_TAG<<24 | sh_idx<<16 | hits_per_subheader
+        parts.append((SUBHEADER_TAG << 24) | ((sh & 0x7F) << 16) | (hits_per_subheader & 0xFFFF))
+        for h in range(hits_per_subheader):
+            # hit: asic<<29 | channel<<24 | ts<<8 | hit_idx_low
+            asic = sh & 0x7
+            channel = h & 0x1F
+            ts = ((sh * hits_per_subheader + h) & 0xFFFF)
+            parts.append(((asic & 0x7) << 29) | ((channel & 0x1F) << 24) | ((ts & 0xFFFF) << 8) | (h & 0xFF))
     trailer = (send_ts_counter & 0xFFFF_FF00) | SWB_K284
     parts.append(trailer)
     buf = bytearray()
@@ -1024,20 +1041,23 @@ def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
     return bytes(buf)
 
 
-def _dummy_rdma_buffer(num_frames: int = 5) -> bytes:
-    """Build a synthetic rdma rxbuffer with `num_frames` mu3e frames."""
+def _dummy_rdma_buffer(num_frames: int = 4) -> bytes:
+    """Build a synthetic rdma rxbuffer with `num_frames` mu3e frames.
+
+    Each dummy frame carries 8 subheaders x 3 hits (24 hits per frame) to
+    keep the popup readable. The on-wire spec allows up to 128 subheaders.
+    """
     buf = bytearray()
     base_ts = 0x0000_0001_2345_0000
     for fi in range(num_frames):
         buf.extend(_build_frame_bytes(
-            packet_type=0b111000,        # SciFi
+            packet_type=0b111000,             # SciFi
             fpga_id=0x00A5,
             packet_timestamp=base_ts + fi * 8192,
             package_counter=fi,
-            debug_subheader_count=4,
-            debug_hit_count=8 + (fi % 4) * 2,
             send_ts_counter=0x1234_5600 + fi * 16,
-            payload_words=8 + (fi % 4) * 2,
+            subheader_count=8,
+            hits_per_subheader=3,
         ))
     return bytes(buf)
 
@@ -1543,9 +1563,31 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 .frame-fields .val { font-family: ui-monospace, "Cascadia Mono", Menlo, monospace; }
 .frame-hex {
   font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
-  font-size: 11px; background: #f7f1e3; padding: 8px 10px;
-  border-radius: 3px; line-height: 1.5; overflow-x: auto;
+  font-size: 11px; background: #fefcf6; padding: 8px 10px;
+  border-radius: 3px; line-height: 1.55; overflow-x: auto;
 }
+.frame-hex .off { color: var(--muted); margin-right: 12px; }
+.frame-hex .word {
+  display: inline-block; padding: 0 2px; margin: 0 1px;
+  border-radius: 2px; transition: background 120ms;
+}
+/* Role colors: header (preamble + 4 fixed words), subheader, hit, trailer */
+.frame-hex .word.header    { background: #d6e7ff; color: #1f3f6a; font-weight: 650; }
+.frame-hex .word.subheader { background: #fff2bd; color: #6a4f0a; font-weight: 650; }
+.frame-hex .word.hit       { background: transparent; color: #25211b; }
+.frame-hex .word.trailer   { background: #b3e0b6; color: #1f4f23; font-weight: 700; }
+.frame-hex .word .ws { color: var(--muted); margin: 0 2px; }
+.frame-hex-legend {
+  font-size: 10.5px; color: var(--muted);
+  margin: 4px 0 6px; display: flex; flex-wrap: wrap; gap: 12px;
+}
+.frame-hex-legend .pill {
+  padding: 1px 6px; border-radius: 3px; font-weight: 700;
+}
+.frame-hex-legend .pill.header    { background: #d6e7ff; color: #1f3f6a; }
+.frame-hex-legend .pill.subheader { background: #fff2bd; color: #6a4f0a; }
+.frame-hex-legend .pill.hit       { background: #efe9d8; color: #5c5446; }
+.frame-hex-legend .pill.trailer   { background: #b3e0b6; color: #1f4f23; }
 """
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     modal_html = """
@@ -1805,28 +1847,62 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
           + '<div class="key">byte_offset</div><div class="val">0x' + f.byte_offset.toString(16) + ' = ' + f.byte_offset + '</div>'
           + '<div class="key">length</div><div class="val">' + f.length + ' bytes</div>'
           + '<div class="key">trailer</div><div class="val">' + (f.has_trailer ? ('present at 0x' + f.trailer_offset.toString(16)) : 'MISSING') + '</div>';
-        // Render full hex split in rows of 16 bytes
+        // Render full hex split in rows of 16 bytes (= 4 little-endian 32-bit words),
+        // colored by word role: header / subheader / hit / trailer.
         var hex = f.hex || '';
-        var hexBlock = '';
+        var bodyBytes = hex.length / 2;
+        var totalWords = Math.floor(bodyBytes / 4);
+        var SUBHEADER_TAG = 0xFE;
+        function wordRoleAt(wordIdx, byte3) {
+          if (wordIdx < 5) return 'header';
+          if (wordIdx === totalWords - 1) return 'trailer';
+          if (byte3 === SUBHEADER_TAG) return 'subheader';
+          return 'hit';
+        }
+        var legend = '<div class="frame-hex-legend">'
+                   + '<span class="pill header">header (preamble + ts_high + ts_low + debug0 + debug1)</span>'
+                   + '<span class="pill subheader">subheader (0xFE tag, SH idx + hits_per_subheader)</span>'
+                   + '<span class="pill hit">hit (asic + channel + ts + idx)</span>'
+                   + '<span class="pill trailer">trailer (K28.4 marker)</span>'
+                   + '</div>';
+        var hexLines = '';
         for (var off = 0; off < hex.length; off += 32) {
-          var rowHex = hex.slice(off, off + 32);
           var abs = (f.byte_offset || 0) + (off / 2);
-          var cells = '';
-          for (var b = 0; b < rowHex.length; b += 2) {
-            cells += rowHex.slice(b, b + 2) + ' ';
+          var wordsHtml = '';
+          for (var b = 0; b < 32; b += 8) {
+            var idx = off + b;
+            if (idx + 8 > hex.length) break;
+            var wb0 = hex.slice(idx,     idx + 2);
+            var wb1 = hex.slice(idx + 2, idx + 4);
+            var wb2 = hex.slice(idx + 4, idx + 6);
+            var wb3 = hex.slice(idx + 6, idx + 8);
+            var wordIdx = (idx / 8) | 0;
+            var byte3 = parseInt(wb3, 16);
+            var role = wordRoleAt(wordIdx, byte3);
+            wordsHtml += '<span class="word ' + role + '">'
+                       + wb0 + ' ' + wb1 + ' ' + wb2 + ' ' + wb3
+                       + '</span><span class="ws"> </span>';
           }
-          hexBlock += '0x' + abs.toString(16).padStart(4,'0') + ': ' + cells + '\\n';
+          hexLines += '<div><span class="off">0x' + abs.toString(16).padStart(4,'0') + '</span>'
+                    + wordsHtml + '</div>';
         }
         html += '<details class="frame-card"><summary>' + summary_line + '</summary>'
               + '<div class="frame-detail">'
               + '<div class="frame-fields">' + fields + '</div>'
-              + '<div class="frame-hex">' + hexBlock + '</div>'
+              + legend
+              + '<div class="frame-hex">' + hexLines + '</div>'
               + '</div></details>';
       });
       html += '</div>';
     }
-    html += '<h3>Raw rxbuffer hex (' + (data.hex_lines || []).length * 16 + ' bytes shown, K28.5/K28.4 highlighted at word-LSB boundaries)</h3>'
-          + '<div id="rdma-hex-pane"></div>';
+    // When no frames decoded (e.g. cosim host-format hit-record buffer), fall
+    // back to a global hex pane so the bytes are still inspectable. With
+    // decoded frames the per-frame card is the canonical view; the global
+    // pane is hidden.
+    if (!frames.length) {
+      html += '<h3>Raw rxbuffer hex (' + (data.hex_lines || []).length * 16 + ' bytes shown)</h3>'
+            + '<div id="rdma-hex-pane"></div>';
+    }
     var wrapper = document.createElement('div');
     wrapper.innerHTML = html;
     var pane = wrapper.querySelector('#rdma-hex-pane');
@@ -1858,14 +1934,22 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
         pane.appendChild(lineDiv);
       });
     }
-    paint('', 0, 512);
-    wrapper.querySelector('#rdma-apply').addEventListener('click', function(){
-      var p = wrapper.querySelector('#rdma-search').value;
-      var s = parseInt(wrapper.querySelector('#rdma-start').value, 10) || 0;
-      var l = parseInt(wrapper.querySelector('#rdma-len').value, 10) || 1024;
-      paint(p, s, l);
-    });
-    paint('', 0, 1024);
+    var applyBtn = wrapper.querySelector('#rdma-apply');
+    if (applyBtn && pane) {
+      applyBtn.addEventListener('click', function(){
+        var p = wrapper.querySelector('#rdma-search').value;
+        var s = parseInt(wrapper.querySelector('#rdma-start').value, 10) || 0;
+        var l = parseInt(wrapper.querySelector('#rdma-len').value, 10) || 1024;
+        paint(p, s, l);
+      });
+    }
+    // Hide the rdma-controls when no global hex pane exists (frame-decoded path).
+    if (!pane) {
+      var ctl = wrapper.querySelector('.rdma-controls');
+      if (ctl) ctl.style.display = 'none';
+    } else {
+      paint('', 0, 1024);
+    }
     return wrapper;
   }
   document.addEventListener('click', function(e){
