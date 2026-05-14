@@ -121,7 +121,7 @@ def parse_hex(value: str) -> int:
 
 
 def frame_base_8ns(hit: HitRecord) -> int:
-    return (hit.ts_high << 16) | hit.ts_low
+    return (hit.ts_high << 16) | ((hit.ts_low >> 12) << 12)
 
 
 def bucket_start_8ns(hit: HitRecord) -> int:
@@ -130,6 +130,15 @@ def bucket_start_8ns(hit: HitRecord) -> int:
 
 def source_abs_ts_8ns(hit: HitRecord) -> int:
     return bucket_start_8ns(hit) + source_ts_low_nibble(hit.hit_word)
+
+
+def true_packet_ts_8ns(ts_high: int, ts_low: int, shd_ts: int, hit_word: int) -> int:
+    return (
+        ((ts_high & 0xFFFF_FFFF) << 16)
+        | (((ts_low >> 12) & 0xF) << 12)
+        | ((shd_ts & 0xFF) << 4)
+        | source_ts_low_nibble(hit_word)
+    )
 
 
 def source_asic(hit_word: int) -> int:
@@ -210,16 +219,14 @@ def debug_hit_id(meta: int) -> int:
 
 def make_mutrig_dma_hit(ts_high: int, ts_low: int, shd_ts: int, hit_word: int) -> int:
     data_word = 0
+    true_ts = true_packet_ts_8ns(ts_high, ts_low, shd_ts, hit_word)
     data_word |= 1 << 63
     data_word |= (source_asic(hit_word) & 0x3) << 61
     data_word |= ((hit_word >> 17) & 0x1F) << 56
     data_word |= (hit_word & 0x1FF) << 47
     data_word |= ((hit_word >> 14) & 0x7) << 44
     data_word |= ((hit_word >> 9) & 0x1F) << 39
-    data_word |= (ts_high & ((1 << 23) - 1)) << 16
-    data_word |= ((ts_low >> 11) & 0x1F) << 11
-    data_word |= (shd_ts & 0x7F) << 4
-    data_word |= (hit_word >> 28) & 0xF
+    data_word |= true_ts & DMA_TS_MASK
     return data_word
 
 
@@ -737,6 +744,91 @@ def parse_dma_hits(path: Path) -> tuple[list[DmaHit], int]:
             )
         payload_idx += 1
     return hits, padding_words
+
+
+def parse_dma_wire_hits(path: Path) -> tuple[list[DmaHit], int, list[str]]:
+    hits: list[DmaHit] = []
+    issues: list[str] = []
+    padding_words = 0
+    in_frame = False
+    field_index = 0
+    ts_high = 0
+    ts_low = 0
+    frame_id = 0
+    current_shd = -1
+    current_hit_remaining = 0
+    word_idx = 0
+
+    for row in read_csv(path):
+        time_ps = int(row["time_ps"])
+        dma_word = parse_hex(row["data"])
+        if dma_word == DMA_PADDING_WORD:
+            padding_words += 1
+            continue
+        for slot in range(8):
+            data = (dma_word >> (slot * 32)) & 0xFFFF_FFFF
+            low_byte = data & 0xFF
+            if not in_frame:
+                if data == 0:
+                    padding_words += 1
+                    continue
+                if low_byte != K285:
+                    issues.append(
+                        f"dma_wire: data outside a frame word_idx={word_idx} "
+                        f"slot={slot} data=0x{data:08x}"
+                    )
+                    word_idx += 1
+                    continue
+                in_frame = True
+                field_index = 0
+                current_shd = -1
+                current_hit_remaining = 0
+                word_idx += 1
+                continue
+
+            if current_hit_remaining > 0:
+                hits.append(
+                    DmaHit(
+                        time_ps=time_ps,
+                        word_idx=word_idx,
+                        slot=slot,
+                        hit_word=make_mutrig_dma_hit(ts_high, ts_low, current_shd, data),
+                        end_of_event=0,
+                    )
+                )
+                current_hit_remaining -= 1
+                word_idx += 1
+                continue
+
+            if low_byte == K284:
+                in_frame = False
+                field_index = 0
+                current_shd = -1
+                word_idx += 1
+                continue
+
+            field_index += 1
+            if field_index == 1:
+                ts_high = data
+            elif field_index == 2:
+                ts_low = (data >> 16) & 0xFFFF
+                frame_id = data & 0xFFFF
+            elif field_index <= 4:
+                pass
+            elif low_byte == K237:
+                current_shd = (data >> 24) & 0xFF
+                current_hit_remaining = (data >> 8) & 0xFFFF
+            elif data != 0:
+                issues.append(
+                    f"dma_wire: expected subheader/eop frame={frame_id} "
+                    f"word_idx={word_idx} slot={slot} data=0x{data:08x}"
+                )
+            word_idx += 1
+
+    if in_frame:
+        issues.append("dma_wire: unterminated frame at end of DMA trace")
+
+    return hits, padding_words, issues
 
 
 def parse_checkpoint_hits(path: Path, stage: str) -> tuple[list[CheckpointRecord], list[str]]:
@@ -1356,6 +1448,7 @@ def main() -> int:
     parser.add_argument("--header-sync-asic-stagger-8ns", default=16, type=int)
     parser.add_argument("--opq-log", type=Path)
     parser.add_argument("--assume-opq-lossless", action="store_true")
+    parser.add_argument("--dma-wire-format", action="store_true")
     args = parser.parse_args()
 
     trace_dir = args.trace_dir
@@ -1396,7 +1489,13 @@ def main() -> int:
         "opq_egress",
         has_lane=False,
     )
-    dma_hits, padding_words = parse_dma_hits(trace_dir / "feb_swb_dma_trace.csv")
+    if args.dma_wire_format:
+        dma_hits, padding_words, dma_issues = parse_dma_wire_hits(
+            trace_dir / "feb_swb_dma_trace.csv"
+        )
+    else:
+        dma_hits, padding_words = parse_dma_hits(trace_dir / "feb_swb_dma_trace.csv")
+        dma_issues = []
     opq_log = parse_opq_native_log(args.opq_log)
     tb_int_root = Path(__file__).resolve().parents[2]
     pre_rbcam_reference, pre_rbcam_reference_issues = (
@@ -1705,6 +1804,7 @@ def main() -> int:
     failures.extend(post_rbcam_issues)
     failures.extend(ingress_issues)
     failures.extend(opq_issues)
+    failures.extend(dma_issues)
     failures.extend(ingress_frame_issues)
     failures.extend(opq_frame_issues)
     failures.extend(pre_rbcam_reference_issues)

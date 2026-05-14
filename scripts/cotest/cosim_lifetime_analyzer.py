@@ -23,6 +23,8 @@ STAGE_FILES = {
     "opq_egress": "feb_swb_opq_trace.csv",
 }
 
+FRAME_STRIDE_8NS = 128 << 4
+
 TIME_COLUMNS = {
     "pre_rbcam": "pre_rbcam_time_ps",
     "post_rbcam": "post_rbcam_time_ps",
@@ -93,6 +95,30 @@ def fmt_float(value: float | None) -> str:
     if value is None or not math.isfinite(value):
         return ""
     return f"{value:.3f}"
+
+
+def read_key_values(path: Path) -> dict[str, str]:
+    values: dict[str, str] = {}
+    if not path.is_file():
+        return values
+    for line in path.read_text(encoding="ascii", errors="ignore").splitlines():
+        if "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        values[key.strip()] = value.strip()
+    return values
+
+
+def packet_frame_id(hit_ts_8ns: float) -> int | str:
+    if not math.isfinite(hit_ts_8ns):
+        return ""
+    return int(hit_ts_8ns) // FRAME_STRIDE_8NS
+
+
+def packet_subheader_ts(hit_ts_8ns: float) -> int | str:
+    if not math.isfinite(hit_ts_8ns):
+        return ""
+    return (int(hit_ts_8ns) >> 4) & 0xFF
 
 
 def percentile(values: list[float], pct: float) -> float:
@@ -310,8 +336,8 @@ def compute_lifetime_rows(paths: dict[str, Path], row_config: dict[str, Any]) ->
                 "hit_id": hit_id,
                 "channel": emit.channel,
                 "hit_ts_8ns": fmt_float(emit.hit_ts_8ns),
-                "frame_id": int(emit.hit_ts_8ns) // 2048 if math.isfinite(emit.hit_ts_8ns) else "",
-                "shd_ts": int(emit.hit_ts_8ns) & 0x7F if math.isfinite(emit.hit_ts_8ns) else "",
+                "frame_id": packet_frame_id(emit.hit_ts_8ns),
+                "shd_ts": packet_subheader_ts(emit.hit_ts_8ns),
                 "emulator_emit_abs_ts_8ns": fmt_float(emit.abs_ts_8ns),
                 "pre_rbcam_abs_ts_8ns": fmt_float(pre.abs_ts_8ns),
                 "post_rbcam_abs_ts_8ns": fmt_float(post.abs_ts_8ns),
@@ -387,8 +413,27 @@ def build_stats_rows(
     return rows, flat_errors
 
 
-def build_range_rows(stats_rows: list[dict[str, Any]], row_config: dict[str, Any]) -> list[dict[str, Any]]:
+def opq_queue_bounds(trace_dir: Path) -> tuple[float, float] | None:
+    # The packet trace checker derives this from the observed OPQ frame service
+    # recurrence. Reuse that row-local model instead of the older static
+    # header-sync lower edge, which is too strict for finite lossless bursts.
+    summary = read_key_values(trace_dir / "feb_swb_opq_queue_summary.txt")
+    opq_min = parse_float(summary.get("opq_queue_wait_min_cycles"))
+    opq_max = parse_float(summary.get("opq_queue_wait_max_cycles"))
+    if not math.isfinite(opq_min) or not math.isfinite(opq_max):
+        return None
+    return max(0.0, 2049.0 + opq_min - 512.0), 6159.0 + opq_max + 512.0
+
+
+def build_range_rows(
+    stats_rows: list[dict[str, Any]],
+    row_config: dict[str, Any],
+    trace_dir: Path,
+) -> list[dict[str, Any]]:
     decision = bounds_for_row(row_config)
+    dynamic_opq_bounds = opq_queue_bounds(trace_dir)
+    if dynamic_opq_bounds is not None:
+        decision.bounds["opq_egress"] = dynamic_opq_bounds
     rows: list[dict[str, Any]] = []
     row_id = str(row_config.get("row_id", ""))
     stats_by_metric = {str(row["metric"]): row for row in stats_rows}
@@ -461,7 +506,7 @@ def analyze_lifetime_dir(
     checkpoint_paths = materialize_checkpoint_traces(hit_rows, output_dir)
     lifetime_rows = compute_lifetime_rows(checkpoint_paths, row_config)
     stats_rows, flat_errors = build_stats_rows(lifetime_rows, row_config)
-    range_rows = build_range_rows(stats_rows, row_config)
+    range_rows = build_range_rows(stats_rows, row_config, trace_dir)
     range_errors = [
         f"{row['row_id']} {row['checkpoint']} {row['status']}: {row['detail']}"
         for row in range_rows

@@ -454,25 +454,330 @@ def hist_bank(records: list[dict[str, Any]], bank: int) -> dict[str, Any]:
     }
 
 
-def write_rdma_buffer(output_dir: Path, records: list[dict[str, Any]]) -> dict[str, Any]:
+SWB_K285 = 0xBC
+SWB_K284 = 0x9C
+SWB_K237 = 0xF7
+PACKET_TYPE_IDLE = 0b000000
+PACKET_TYPE_SCIFI = {0b111000, 0b111001}
+
+
+def rdma_word_has_k(
+    words: list[int],
+    k_masks: list[int] | None,
+    idx: int,
+    marker: int,
+) -> bool:
+    if idx < 0 or idx >= len(words):
+        return False
+    if (words[idx] & 0xFF) != marker:
+        return False
+    if k_masks is None or idx >= len(k_masks):
+        return True
+    return bool(k_masks[idx] & 0x1)
+
+
+def decode_rdma_wire_words(
+    words: list[int],
+    k_masks: list[int] | None = None,
+) -> tuple[list[dict[str, Any]], list[int], list[int] | None]:
+    frames: list[dict[str, Any]] = []
+    trimmed: list[int] = []
+    trimmed_k: list[int] = []
+    idx = 0
+    while idx < len(words):
+        if not rdma_word_has_k(words, k_masks, idx, SWB_K285):
+            idx += 1
+            continue
+        start = idx
+        if idx + 5 >= len(words):
+            frames.append({
+                "start_word": start,
+                "end_word": len(words) - 1,
+                "timestamp": 0,
+                "subheaders": 0,
+                "subheader_declared": 0,
+                "hits": 0,
+                "hit_declared": 0,
+                "bad": True,
+                "issue": "truncated_header",
+            })
+            break
+
+        packet_type = (words[idx] >> 26) & 0x3F
+        if packet_type == PACKET_TYPE_IDLE:
+            frames.append({
+                "start_word": start,
+                "end_word": start,
+                "timestamp": 0,
+                "subheaders": 0,
+                "subheader_declared": 0,
+                "hits": 0,
+                "hit_declared": 0,
+                "bad": True,
+                "issue": "idle_sop",
+            })
+            idx = start + 1
+            continue
+        if packet_type not in PACKET_TYPE_SCIFI:
+            frames.append({
+                "start_word": start,
+                "end_word": start,
+                "timestamp": 0,
+                "subheaders": 0,
+                "subheader_declared": 0,
+                "hits": 0,
+                "hit_declared": 0,
+                "bad": True,
+                "issue": f"unsupported_packet_type_0x{packet_type:02x}",
+            })
+            idx = start + 1
+            continue
+
+        ts_high = words[idx + 1]
+        ts_low_pkg = words[idx + 2]
+        count_word = words[idx + 3]
+        header_timestamp = (ts_high << 16) | ((ts_low_pkg >> 16) & 0xFFFF)
+        header_base = (ts_high << 16) | (((ts_low_pkg >> 16) & 0xFFFF) & 0xF000)
+        subheader_declared = (count_word >> 16) & 0x7FFF
+        hit_declared = count_word & 0xFFFF
+        subheaders = 0
+        hits = 0
+        bad = False
+        first_subheader_ts: int | None = None
+        last_subheader_ts = 0
+        subheader_sequence_bad = False
+        pos = idx + 5
+
+        for subheader_idx in range(subheader_declared):
+            if pos >= len(words) or not rdma_word_has_k(words, k_masks, pos, SWB_K237):
+                bad = True
+                break
+            word = words[pos]
+            subheader_ts = (word >> 24) & 0xFF
+            if first_subheader_ts is None:
+                first_subheader_ts = subheader_ts
+            elif subheader_ts != ((first_subheader_ts + subheader_idx) & 0xFF):
+                subheader_sequence_bad = True
+            last_subheader_ts = subheader_ts
+            subheaders += 1
+            hit_count = (word >> 8) & 0xFFFF
+            hits += hit_count
+            pos += 1 + hit_count
+            if pos > len(words):
+                bad = True
+                break
+        timestamp = header_base | (((first_subheader_ts or 0) & 0xFF) << 4)
+
+        if not bad and pos < len(words) and rdma_word_has_k(words, k_masks, pos, SWB_K284):
+            end = pos
+            dirty_trailer = bool(words[end] & 0xFFFF_FF00)
+            frame_bad = (hits != hit_declared) or dirty_trailer or subheader_sequence_bad
+            frame = {
+                "start_word": start,
+                "end_word": end,
+                "timestamp": timestamp,
+                "header_timestamp": header_timestamp,
+                "first_subheader_ts": first_subheader_ts if first_subheader_ts is not None else 0,
+                "last_subheader_ts": last_subheader_ts,
+                "subheader_sequence_bad": subheader_sequence_bad,
+                "subheaders": subheaders,
+                "subheader_declared": subheader_declared,
+                "hits": hits,
+                "hit_declared": hit_declared,
+                "bad": frame_bad,
+                "issue": (
+                    "dirty_trailer" if dirty_trailer
+                    else "hit_count_mismatch" if hits != hit_declared
+                    else "subheader_sequence_mismatch" if subheader_sequence_bad
+                    else ""
+                ),
+            }
+            frames.append(frame)
+            if not frame_bad:
+                trimmed.extend(words[start : end + 1])
+                if k_masks is not None:
+                    trimmed_k.extend(k_masks[start : end + 1])
+            idx = end + 1
+        else:
+            frames.append({
+                "start_word": start,
+                "end_word": max(start, min(pos, len(words) - 1)),
+                "timestamp": timestamp,
+                "header_timestamp": header_timestamp,
+                "first_subheader_ts": first_subheader_ts if first_subheader_ts is not None else 0,
+                "last_subheader_ts": last_subheader_ts,
+                "subheader_sequence_bad": subheader_sequence_bad,
+                "subheaders": subheaders,
+                "subheader_declared": subheader_declared,
+                "hits": hits,
+                "hit_declared": hit_declared,
+                "bad": True,
+                "issue": "missing_subheader_or_trailer",
+            })
+            idx = start + 1
+    return frames, trimmed, (trimmed_k if k_masks is not None else None)
+
+
+def rdma_frame_summary(
+    words: list[int],
+    raw: bytes,
+    k_masks: list[int] | None = None,
+) -> dict[str, Any]:
+    frames, trimmed, trimmed_k = decode_rdma_wire_words(words, k_masks)
+    good_frames = [
+        frame
+        for frame in frames
+        if not frame["bad"]
+        and frame["subheaders"] == 128
+        and frame["subheader_declared"] == 128
+    ]
+    timestamps = [int(frame["timestamp"]) for frame in good_frames]
+    header_timestamps = [int(frame.get("header_timestamp", 0)) for frame in good_frames]
+    deltas = [timestamps[idx] - timestamps[idx - 1] for idx in range(1, len(timestamps))]
+    header_deltas = [
+        header_timestamps[idx] - header_timestamps[idx - 1]
+        for idx in range(1, len(header_timestamps))
+    ]
+    def marker_count(marker: int) -> int:
+        return sum(
+            1
+            for word_idx, word in enumerate(trimmed)
+            if (word & 0xFF) == marker
+            and (trimmed_k is None or (word_idx < len(trimmed_k) and (trimmed_k[word_idx] & 0x1)))
+        )
+    return {
+        "first_k285_word_lsb": bool(raw) and raw[0] == 0xBC,
+        "frames_decoded": len(good_frames),
+        "bad_frame_count": len(frames) - len(good_frames),
+        "idle_frame_start_count": sum(1 for frame in frames if frame.get("issue") == "idle_sop"),
+        "dirty_trailer_count": sum(1 for frame in frames if frame.get("issue") == "dirty_trailer"),
+        "bad_frame_issues": [
+            str(frame.get("issue", "bad_frame"))
+            for frame in frames
+            if frame.get("bad")
+        ][:16],
+        "k285_word_lsb_count": marker_count(SWB_K285),
+        "k284_word_lsb_count": marker_count(SWB_K284),
+        "subheader_count_min": min((int(frame["subheaders"]) for frame in good_frames), default=0),
+        "subheader_count_max": max((int(frame["subheaders"]) for frame in good_frames), default=0),
+        "subheader_sequence_bad_count": sum(
+            1 for frame in frames if bool(frame.get("subheader_sequence_bad", False))
+        ),
+        "first_subheader_ts_hex": [
+            f"0x{int(frame.get('first_subheader_ts', 0)):02x}"
+            for frame in good_frames[:16]
+        ],
+        "last_subheader_ts_hex": [
+            f"0x{int(frame.get('last_subheader_ts', 0)):02x}"
+            for frame in good_frames[:16]
+        ],
+        "wire_hit_count": sum(int(frame["hits"]) for frame in good_frames),
+        "ts_first_hex": f"0x{timestamps[0]:012x}" if timestamps else "",
+        "ts_deltas_hex": [f"0x{delta:012x}" for delta in deltas[:16]],
+        "header_ts_deltas_hex": [f"0x{delta:012x}" for delta in header_deltas[:16]],
+        "all_ts_delta_0x800": all(delta == 0x800 for delta in deltas),
+        "trimmed_word_count_32": len(trimmed),
+        "datak_sideband_words": len(trimmed_k or []),
+    }
+
+
+def read_dma_trace_words(trace_path: Path) -> tuple[list[int], list[int] | None, int, int]:
     words: list[int] = []
-    for record in records:
-        value = record.get("actual_dma_hit")
-        if isinstance(value, int):
-            words.append(value)
+    k_masks: list[int] = []
+    saw_datak = False
+    dma_line_count = 0
+    end_of_event_count = 0
+    if not trace_path.is_file():
+        return words, None, dma_line_count, end_of_event_count
+    with trace_path.open("r", encoding="ascii", newline="") as handle:
+        for row in csv.DictReader(handle):
+            if str(row.get("wren", "0")).strip() != "1":
+                continue
+            data_hex = str(row.get("data", "")).strip()
+            if not data_hex:
+                continue
+            dma_word = int(data_hex, 0)
+            datak_text = str(row.get("datak", "")).strip()
+            datak_word = int(datak_text, 0) if datak_text else 0
+            saw_datak = saw_datak or bool(datak_text)
+            for slot in range(8):
+                word32 = (dma_word >> (slot * 32)) & 0xFFFF_FFFF
+                words.append(word32)
+                k_masks.append((datak_word >> (slot * 4)) & 0xF)
+            dma_line_count += 1
+            if nonzero_int(row.get("end_of_event")):
+                end_of_event_count += 1
+    return words, (k_masks if saw_datak else None), dma_line_count, end_of_event_count
+
+
+def write_rdma_buffer(
+    output_dir: Path,
+    records: list[dict[str, Any]],
+    work_dir: Path,
+) -> dict[str, Any]:
+    trace_candidates = [
+        work_dir / "feb_swb_opq_dma_packer_trace.csv",
+        work_dir / "feb_swb_dma_trace.csv",
+    ]
+    trace_path = next((path for path in trace_candidates if path.is_file()), trace_candidates[-1])
+    words32, k_masks, dma_line_count, dma_eoe_count = read_dma_trace_words(trace_path)
+    frames, trimmed_words, trimmed_k_masks = decode_rdma_wire_words(words32, k_masks)
+    good_frames = [
+        frame
+        for frame in frames
+        if not frame["bad"]
+        and frame["subheaders"] == 128
+        and frame["subheader_declared"] == 128
+    ]
+    source = f"{trace_path.name}:mu3e_wire_32" if good_frames else "legacy_actual_dma_hit"
     raw = bytearray()
-    for word in words:
-        raw.extend(int(word).to_bytes(8, byteorder="big", signed=False))
+    for word in (trimmed_words if good_frames else []):
+        raw.extend(int(word).to_bytes(4, byteorder="little", signed=False))
+    record_count = sum(int(frame["hits"]) for frame in good_frames)
+
+    if good_frames and trace_path.is_file():
+        dst_trace_path = output_dir / trace_path.name
+        if trace_path.resolve() != dst_trace_path.resolve():
+            shutil.copyfile(trace_path, dst_trace_path)
+        if trimmed_k_masks is not None:
+            (output_dir / "rdma_rxbuffer_datak.json").write_text(
+                json.dumps(
+                    {"word_datak": [f"0x{value:X}" for value in trimmed_k_masks]},
+                    separators=(",", ":"),
+                )
+                + "\n",
+                encoding="ascii",
+            )
+
+    words: list[int] = []
+    if not raw:
+        for record in records:
+            value = record.get("actual_dma_hit")
+            if isinstance(value, int):
+                words.append(value)
+        for word in words:
+            raw.extend(int(word).to_bytes(8, byteorder="big", signed=False))
+        record_count = len(words)
+
     path = output_dir / "rdma_rxbuffer.bin"
     path.write_bytes(bytes(raw))
     first = bytes(raw[:64]).hex()
     last = bytes(raw[-64:]).hex() if raw else ""
     summary = {
+        "format": "mu3e_wire_32le" if good_frames else "legacy_dma_hit64be",
         "bytes_total": len(raw),
-        "record_count": len(words),
+        "record_count": record_count,
+        "buffer_source": source,
+        "dma_line_count": dma_line_count,
+        "dma_end_of_event_count": dma_eoe_count,
         "first_record_hex": first,
         "last_record_hex": last,
-        "record_size_avg": (len(raw) / len(words)) if words else 0.0,
+        "record_size_avg": (len(raw) / record_count) if record_count else 0.0,
+        **rdma_frame_summary(
+            trimmed_words if good_frames else [],
+            bytes(raw),
+            trimmed_k_masks if good_frames else None,
+        ),
     }
     write_json(output_dir / "rdma_rxbuffer_summary.json", summary)
     return summary
@@ -503,6 +808,7 @@ EVIDENCE_FILES = {
     "feb_swb_feb_egress_trace.csv",
     "feb_swb_ingress_trace.csv",
     "feb_swb_opq_trace.csv",
+    "feb_swb_opq_dma_packer_trace.csv",
     "feb_swb_lifetime_trace.csv",
     "feb_swb_lifetime_hist_stats.csv",
     "feb_swb_range_validation.csv",
@@ -524,7 +830,9 @@ def collect_evidence(
     write_json(output_dir / "row_config.json", row.to_json())
     frame_ts_path = work_dir / "frame_ts_progression.csv"
     if frame_ts_path.is_file():
-        shutil.copyfile(frame_ts_path, output_dir / "frame_ts_progression.csv")
+        dst_frame_ts_path = output_dir / "frame_ts_progression.csv"
+        if frame_ts_path.resolve() != dst_frame_ts_path.resolve():
+            shutil.copyfile(frame_ts_path, dst_frame_ts_path)
 
     trace_summary = read_key_values(work_dir / "feb_swb_trace_debug_summary.txt")
     corun_summary = read_key_values(work_dir / "feb_swb_corun_summary.txt")
@@ -674,8 +982,17 @@ def collect_evidence(
         and lifetime_bound_pass
     )
 
-    rdma_summary = write_rdma_buffer(output_dir, records)
-    rdma_pass = abs(int(rdma_summary["record_count"]) - csr_total) <= 8
+    rdma_summary = write_rdma_buffer(output_dir, records, work_dir)
+    if rdma_summary.get("format") == "mu3e_wire_32le":
+        rdma_pass = (
+            abs(int(rdma_summary["record_count"]) - csr_total) <= 8
+            and bool(rdma_summary.get("first_k285_word_lsb"))
+            and int(rdma_summary.get("frames_decoded", 0)) >= 3
+            and int(rdma_summary.get("bad_frame_count", 0)) == 0
+            and bool(rdma_summary.get("all_ts_delta_0x800", False))
+        )
+    else:
+        rdma_pass = abs(int(rdma_summary["record_count"]) - csr_total) <= 8
 
     row_pass = rate_pass and delay_pass and rdma_pass
     return {
@@ -751,6 +1068,7 @@ def build_row_make_command(
         f"RUN_WINDOW_8NS={RUN_WINDOW_8NS}",
         "ASIC_COUNT=8",
         f"DRAIN_SWB_CYCLES={args.drain_swb_cycles}",
+        f"FEB_SOURCE_N_SHD={args.feb_source_n_shd}",
         "ALLOW_DROPS=0",
         "SCAN_ONLY=0",
         f"VSIM_PLUSARGS={' '.join(plusargs)}",
@@ -765,6 +1083,7 @@ def run_precompile(args: argparse.Namespace) -> None:
         "SHELL=/bin/bash",
         "compile_swb_corun",
         f"OPQ_ADAPTOR_VHDL_SOURCE={args.opq_adaptor_vhdl}",
+        f"FEB_SOURCE_N_SHD={args.feb_source_n_shd}",
     ]
     print("RN.BASIC precompile:", " ".join(cmd), flush=True)
     subprocess.run(cmd, check=True)
@@ -987,6 +1306,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--row")
     parser.add_argument("--slice", type=int, choices=(1, 2, 3, 4), dest="slice_id")
     parser.add_argument("--drain-swb-cycles", type=int, default=DEFAULT_DRAIN_SWB_CYCLES)
+    parser.add_argument("--feb-source-n-shd", type=int, default=128)
     parser.add_argument("--collect-only", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-precompile", action="store_true")
