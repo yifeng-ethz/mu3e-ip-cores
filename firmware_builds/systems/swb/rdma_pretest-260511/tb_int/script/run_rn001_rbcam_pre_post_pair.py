@@ -83,7 +83,7 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--max-decode-bytes", type=int, default=4 * 1024 * 1024)
     ap.add_argument("--staging-mb", type=int, default=64)
     ap.add_argument("--af-pct", type=int, default=80)
-    ap.add_argument("--hist-running-probe-period-s", type=float, default=0.1,
+    ap.add_argument("--hist-running-probe-period-s", type=float, default=0.0,
                     help="sample histogram CSR words during RUNNING")
     ap.add_argument("--hist-running-bin-sample-s", type=float, action="append",
                     default=None,

@@ -14,6 +14,7 @@ import datetime as dt
 import json
 import mmap
 import os
+import re
 import signal
 import struct
 import subprocess
@@ -98,6 +99,11 @@ PACKET_TYPE_SC_READ = 0x0
 PACKET_TYPE_SC_WRITE = 0x1
 SC_TRAILER_WORD = 0x0000009C
 PACKET_TYPE_SCIFI = {0b111000, 0b111001}
+HISTBIN_RE = re.compile(r"histbin\[(\d+)\]=0x([0-9A-Fa-f]+)")
+HISTBIN_ERROR_RE = re.compile(r"histbin_error\[(\d+)\].*")
+HISTBIN_SUMMARY_RE = re.compile(
+    r"histbins_summary\s+read_count=(\d+)\s+error_count=(\d+)\s+requested=(\d+)"
+)
 
 REG_MEM_WRITEADDR_LOW_R = 0x06
 REG_DMA_STATUS_TOP_R = 0x11
@@ -691,6 +697,79 @@ def read_hist_bins_mmio(mmio: SwbMmio, link: int, log_fh: Any,
     }
 
 
+def read_hist_bins_sc_tool(sc_tool: Path, link: int, log_fh: Any,
+                           timeout_s: float = 10.0) -> tuple[list[int], dict[str, Any]]:
+    cmd = [
+        str(sc_tool),
+        str(link),
+        "histbins",
+        f"0x{sweep.HIST_BIN_BASE_WORD:05X}",
+        str(sweep.HIST_NUM_BINS),
+        "--quiet",
+        "--reply-timeout-ms",
+        "50",
+        "--poll-us",
+        "100",
+    ]
+    log_line(log_fh, "CMD: " + " ".join(cmd))
+    try:
+        proc = subprocess.run(
+            cmd, text=True, capture_output=True, timeout=timeout_s
+        )
+    except subprocess.TimeoutExpired as exc:
+        log_line(log_fh, f"TIMEOUT: {exc}")
+        return [0] * sweep.HIST_NUM_BINS, {
+            "read_method": "sc_tool_histbins",
+            "read_count": 0,
+            "error_count": sweep.HIST_NUM_BINS,
+            "aborted": True,
+            "timeout_s": timeout_s,
+            "errors_head": [{"error": str(exc)}],
+        }
+
+    log_line(log_fh, f"RC:  {proc.returncode}")
+    if proc.stdout:
+        log_line(log_fh, "OUT: " + proc.stdout.rstrip())
+    if proc.stderr:
+        log_line(log_fh, "ERR: " + proc.stderr.rstrip())
+    log_line(log_fh, "")
+
+    bins = [0] * sweep.HIST_NUM_BINS
+    errors: list[dict[str, Any]] = []
+    summary: dict[str, int] = {
+        "read_count": 0,
+        "error_count": 0,
+        "requested": sweep.HIST_NUM_BINS,
+    }
+    for line in proc.stdout.splitlines():
+        match = HISTBIN_RE.search(line)
+        if match is not None:
+            idx = int(match.group(1))
+            if 0 <= idx < sweep.HIST_NUM_BINS:
+                bins[idx] = int(match.group(2), 16)
+            continue
+        err_match = HISTBIN_ERROR_RE.search(line)
+        if err_match is not None:
+            errors.append({"bin": int(err_match.group(1)), "line": line})
+            continue
+        summary_match = HISTBIN_SUMMARY_RE.search(line)
+        if summary_match is not None:
+            summary = {
+                "read_count": int(summary_match.group(1)),
+                "error_count": int(summary_match.group(2)),
+                "requested": int(summary_match.group(3)),
+            }
+    return bins, {
+        "read_method": "sc_tool_histbins",
+        "returncode": proc.returncode,
+        "read_count": summary["read_count"],
+        "error_count": summary["error_count"],
+        "requested": summary["requested"],
+        "aborted": proc.returncode not in (0, 4),
+        "errors_head": errors[:8],
+    }
+
+
 def drive_local_cmd_mmio(mmio: SwbMmio, link: int, cmd: int, payload24: int,
                          log_fh: Any) -> dict[str, Any]:
     if cmd in sweep.FORBIDDEN_OPCODES:
@@ -834,11 +913,131 @@ def summarize_delay_histogram(hist_bins: list[int],
     }
 
 
+def summarize_hist_ingress_source(statuses: dict[str, str],
+                                  requested_source: str) -> dict[str, Any]:
+    expected_low3 = 0x3 if requested_source == "post" else 0x0
+    banks: dict[str, Any] = {}
+    invalid_reasons: list[str] = []
+    for bank, raw_status in statuses.items():
+        bank_record: dict[str, Any] = {"raw": raw_status}
+        try:
+            word = int(raw_status, 16)
+        except (TypeError, ValueError):
+            bank_record["available"] = False
+            banks[bank] = bank_record
+            invalid_reasons.append(f"{bank}: status not available")
+            continue
+
+        low3 = word & 0x7
+        select_post_live = bool(word & 0x1)
+        select_post_req = bool(word & 0x2)
+        switch_pending = bool(word & 0x4)
+        pre_packet_active = bool(word & (1 << 8))
+        post_packet_active = bool(word & (1 << 9))
+        bank_record.update({
+            "available": True,
+            "status_low3": f"0x{low3:X}",
+            "select_post_live": select_post_live,
+            "select_post_req": select_post_req,
+            "switch_pending": switch_pending,
+            "pre_packet_active": pre_packet_active,
+            "post_packet_active": post_packet_active,
+            "post_hit_filter_enabled": bool(word & (1 << 10)),
+            "post_hit_region": (word >> 11) & 0x1,
+            "live_source": "post" if select_post_live else "pre",
+            "requested_source": "post" if select_post_req else "pre",
+            "source_selected": low3 == expected_low3,
+            "clean_idle_before_run": (
+                low3 == expected_low3
+                and not pre_packet_active
+                and not post_packet_active
+            ),
+        })
+        if low3 != expected_low3:
+            invalid_reasons.append(
+                f"{bank}: status_low3=0x{low3:X}, expected 0x{expected_low3:X}"
+            )
+        if switch_pending:
+            invalid_reasons.append(f"{bank}: source switch still pending")
+        if pre_packet_active:
+            invalid_reasons.append(f"{bank}: pre_packet_active before run")
+        if post_packet_active:
+            invalid_reasons.append(f"{bank}: post_packet_active before run")
+        banks[bank] = bank_record
+
+    all_source_selected = bool(banks) and all(
+        bank.get("source_selected", False) for bank in banks.values()
+    )
+    clean_idle_before_run = bool(banks) and all(
+        bank.get("clean_idle_before_run", False) for bank in banks.values()
+    )
+    return {
+        "requested_source": requested_source,
+        "expected_status_low3": f"0x{expected_low3:X}",
+        "banks": banks,
+        "source_selected": all_source_selected,
+        "clean_idle_before_run": clean_idle_before_run,
+        "valid_for_hist_compare": all_source_selected and clean_idle_before_run,
+        "invalid_reasons": invalid_reasons,
+    }
+
+
+def summarize_hist_evidence(record: dict[str, Any],
+                            selected_sample: Optional[dict[str, Any]]) -> dict[str, Any]:
+    invalid_reasons: list[str] = []
+    selected_phase = record.get("hist_bins_selected_phase")
+    if selected_phase != "running":
+        invalid_reasons.append(
+            "selected bins are post-run; 1 ms ping-pong bins normally refresh "
+            "to the last empty post-run interval"
+        )
+    source_status = record.get("hist_source_status", {})
+    if not source_status.get("valid_for_hist_compare", False):
+        invalid_reasons.extend(source_status.get("invalid_reasons", []))
+    if selected_sample is None:
+        invalid_reasons.append("no RUNNING-phase 256-bin sample was captured")
+    else:
+        bin_read = selected_sample.get("bin_read", {})
+        if bin_read.get("read_count") != sweep.HIST_NUM_BINS:
+            invalid_reasons.append(
+                f"hist bin read_count={bin_read.get('read_count')}, expected {sweep.HIST_NUM_BINS}"
+            )
+        if bin_read.get("error_count", 0) != 0:
+            invalid_reasons.append(
+                f"hist bin error_count={bin_read.get('error_count')}"
+            )
+        if bin_read.get("aborted", False):
+            invalid_reasons.append("hist bin read aborted")
+
+    return {
+        "valid_for_comparison": len(invalid_reasons) == 0,
+        "invalid_reasons": invalid_reasons,
+        "selected_phase": selected_phase,
+        "selected_label": record.get("hist_bins_selected_label"),
+        "selected_sample_elapsed_s": (
+            selected_sample.get("elapsed_since_start_s", selected_sample.get("elapsed_s"))
+            if selected_sample is not None else None
+        ),
+        "post_run_bins_valid_for_1ms_rate": False,
+    }
+
+
+def apply_hist_evidence_gate(comparison: dict[str, Any],
+                             evidence: dict[str, Any]) -> None:
+    comparison["evidence_valid"] = evidence["valid_for_comparison"]
+    comparison["evidence_invalid_reasons"] = evidence["invalid_reasons"]
+    if not evidence["valid_for_comparison"]:
+        comparison["pass"] = False
+    elif "pass" not in comparison:
+        comparison["pass"] = comparison.get("hist_bin_sum", 0) > 0
+
+
 def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
                           row_idx: int, log_fh: Any,
                           probe_period_s: float = 0.0,
                           hist_probe_period_s: float = 0.0,
-                          hist_bin_sample_delays_s: Optional[list[float]] = None
+                          hist_bin_sample_delays_s: Optional[list[float]] = None,
+                          hist_bin_sc_tool: Optional[Path] = None
                           ) -> dict[str, Any]:
     """Run RN.BASIC.001 stage commands without reopening /dev/mudaq0."""
     rid = row["row_id"]
@@ -921,7 +1120,12 @@ def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
                 label = f"run_bins_{bin_sample_idx:03d}"
                 sample_start = time.time()
                 hist_before = snap_hist_mmio(mmio, link, log_fh, label + "_before")
-                bins, bin_read_meta = read_hist_bins_mmio(mmio, link, log_fh)
+                if hist_bin_sc_tool is not None:
+                    bins, bin_read_meta = read_hist_bins_sc_tool(
+                        hist_bin_sc_tool, link, log_fh
+                    )
+                else:
+                    bins, bin_read_meta = read_hist_bins_mmio(mmio, link, log_fh)
                 hist_after = snap_hist_mmio(mmio, link, log_fh, label + "_after")
                 sample_end = time.time()
                 sample = {
@@ -1285,6 +1489,9 @@ def run_board_capture(args: argparse.Namespace) -> int:
         record["ingress_status"] = sweep.select_histogram_source(
             args.sc_tool, args.link, log_fh=log_fh
         )
+        record["hist_source_status"] = summarize_hist_ingress_source(
+            record["ingress_status"], args.hist_ingress_source
+        )
         record["downstream_cfg"] = sweep.configure_downstream(
             args.sc_tool, args.link, log_fh=log_fh
         )
@@ -1310,6 +1517,7 @@ def run_board_capture(args: argparse.Namespace) -> int:
                     probe_period_s=args.probe_period_s,
                     hist_probe_period_s=args.hist_running_probe_period_s,
                     hist_bin_sample_delays_s=args.hist_running_bin_sample_s,
+                    hist_bin_sc_tool=args.sc_tool,
                 )
         finally:
             stop_dma_capture(dma_proc, dma_log_fh)
@@ -1323,21 +1531,32 @@ def run_board_capture(args: argparse.Namespace) -> int:
         running_hist_samples = record["stage_recipe"].get(
             "running_hist_bin_samples", []
         )
+        selected_running_sample: Optional[dict[str, Any]] = None
         if running_hist_samples:
-            record["hist_bins"] = running_hist_samples[0]["bins"]
+            selected_running_sample = running_hist_samples[0]
+            record["hist_bins"] = selected_running_sample["bins"]
             record["hist_bins_selected_phase"] = "running"
-            record["hist_bins_selected_label"] = running_hist_samples[0]["label"]
+            record["hist_bins_selected_label"] = selected_running_sample["label"]
         else:
             record["hist_bins"] = record["post_run_hist_bins"]
             record["hist_bins_selected_phase"] = "post_run"
             record["hist_bins_selected_label"] = "post_run"
+        record["hist_evidence"] = summarize_hist_evidence(
+            record, selected_running_sample
+        )
         record["hist_readout_policy"] = {
             "selected_phase": record["hist_bins_selected_phase"],
             "post_run_bins_valid_for_1ms_rate": False,
             "reason": (
                 "With 1 ms ping-pong intervals, post-END bins normally show "
                 "the last empty post-run interval; RUNNING-phase samples are "
-                "the evidence used for rate comparison."
+                "the only evidence eligible for rate/delay comparison."
+            ),
+            "comparison_evidence_valid": (
+                record["hist_evidence"]["valid_for_comparison"]
+            ),
+            "comparison_invalid_reasons": (
+                record["hist_evidence"]["invalid_reasons"]
             ),
         }
         if args.hist_preset == "delay":
@@ -1345,17 +1564,33 @@ def run_board_capture(args: argparse.Namespace) -> int:
                 record["hist_bins"], args.hist_interval_clocks,
                 source=args.hist_ingress_source
             )
+            apply_hist_evidence_gate(
+                record["delay_comparison"], record["hist_evidence"]
+            )
             record["post_run_delay_comparison"] = summarize_delay_histogram(
                 record["post_run_hist_bins"], args.hist_interval_clocks,
                 source=args.hist_ingress_source
             )
+            record["post_run_delay_comparison"]["evidence_valid"] = False
+            record["post_run_delay_comparison"]["evidence_invalid_reasons"] = [
+                "post-run bins are expected to reflect empty 1 ms intervals after END_RUN"
+            ]
+            record["post_run_delay_comparison"]["pass"] = False
         else:
             record["rate_comparison"] = summarize_rate_histogram(
                 record["hist_bins"], args.hist_interval_clocks
             )
+            apply_hist_evidence_gate(
+                record["rate_comparison"], record["hist_evidence"]
+            )
             record["post_run_rate_comparison"] = summarize_rate_histogram(
                 record["post_run_hist_bins"], args.hist_interval_clocks
             )
+            record["post_run_rate_comparison"]["evidence_valid"] = False
+            record["post_run_rate_comparison"]["evidence_invalid_reasons"] = [
+                "post-run bins are expected to reflect empty 1 ms intervals after END_RUN"
+            ]
+            record["post_run_rate_comparison"]["pass"] = False
         record["cosim_expectation"] = {
             "source": "RN.BASIC.001 cosim 1 ms window",
             "total_hits_per_ms": RN001_EXPECTED_TOTAL_PER_MS,
@@ -1403,6 +1638,8 @@ def run_board_capture(args: argparse.Namespace) -> int:
     print(f"frame0_packet_timestamp={record['rdma']['frame0_packet_timestamp']}")
     print(f"delta_hist={record['rdma']['inter_frame_delta_histogram']}")
     print(f"hist_bins_selected_phase={record['hist_bins_selected_phase']}")
+    print(f"hist_source_status={record['hist_source_status']}")
+    print(f"hist_evidence={record['hist_evidence']}")
     if args.hist_preset == "delay":
         print(f"delay_comparison={record['delay_comparison']}")
         print(f"post_run_delay_comparison={record['post_run_delay_comparison']}")

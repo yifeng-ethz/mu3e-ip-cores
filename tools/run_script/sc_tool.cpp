@@ -51,6 +51,7 @@ enum class sc_cmd {
 	invalid = 0,
 	read,
 	write,
+	histbins,
 	diag,
 };
 
@@ -217,6 +218,7 @@ static void print_usage()
 		<< "Usage:\n"
 		<< "  sc_tool <link> read <addr> [len] [options]\n"
 		<< "  sc_tool <link> write <addr> <word> [word ...] [options]\n"
+		<< "  sc_tool <link> histbins <base> <count> [options]\n"
 		<< "  sc_tool <link> diag [options]\n"
 		<< "  sc_tool --swb read|write|burst|dump-all ...\n"
 		<< "  sc_tool --swb-list-regs\n"
@@ -235,6 +237,7 @@ static void print_usage()
 		<< "Examples:\n"
 		<< "  sc_tool 2 write 0x0000 0x12345678\n"
 		<< "  sc_tool 2 read 0xFE8F 9\n"
+		<< "  sc_tool 2 histbins 0x0A800 256 --quiet --reply-timeout-ms 50\n"
 		<< "  sc_tool 2 diag\n"
 		<< "  sc_tool --swb read LINK_LOCKED_LOW\n";
 }
@@ -1035,6 +1038,26 @@ static bool parse_opts(int argc, char **argv, sc_opts *opts)
 		return true;
 	}
 
+	if (pos[0] == "histbins") {
+		uint32_t addr;
+		uint32_t count;
+
+		opts->cmd = sc_cmd::histbins;
+		if (pos.size() != 3 || !parse_u32(pos[1], &addr) ||
+		    !parse_u32(pos[2], &count)) {
+			pr_err("histbins requires <base> <count>");
+			return false;
+		}
+		if (addr > sc_addr_mask || count == 0 ||
+		    count > 0xffffu || addr + count - 1u > sc_addr_mask) {
+			pr_err("histbins range must fit in the SC address aperture");
+			return false;
+		}
+		opts->addr = addr;
+		opts->read_len = count;
+		return true;
+	}
+
 	if (pos[0] == "diag") {
 		if (pos.size() != 1) {
 			pr_err("diag takes no positional arguments");
@@ -1488,6 +1511,52 @@ static int sc_run_request(mudaq::MudaqDevice& dev, const sc_opts& opts,
 	return 0;
 }
 
+static int sc_run_histbins(mudaq::MudaqDevice& dev, const sc_opts& opts)
+{
+	sc_opts read_opts = opts;
+	uint32_t error_count = 0;
+	uint32_t read_count = 0;
+
+	read_opts.cmd = sc_cmd::read;
+	read_opts.read_len = 1;
+	read_opts.dump_ring = false;
+
+	for (uint32_t idx = 0; idx < opts.read_len; ++idx) {
+		sc_request req;
+		sc_xfer_result res;
+		uint32_t addr = opts.addr + idx;
+
+		read_opts.addr = addr;
+		req = sc_build_request(read_opts);
+		res = sc_run_xfer(dev, read_opts, req);
+		if (res.ok && res.packet.rsp == 0 && res.packet.payload.size() == 1) {
+			std::cout << "histbin[" << idx << "]="
+				  << hex_u32(res.packet.payload[0])
+				  << " addr=" << hex_addr(addr)
+				  << " secondary_delta=" << res.secondary_delta_words
+				  << '\n';
+			++read_count;
+			continue;
+		}
+
+		++error_count;
+		std::cout << "histbin_error[" << idx << "]"
+			  << " addr=" << hex_addr(addr)
+			  << " main_ready=" << (res.main_ready ? 1 : 0)
+			  << " matched=" << (res.matched ? 1 : 0)
+			  << " rsp=" << (res.matched ? res.packet.rsp : 0xffffffffu)
+			  << " secondary_delta=" << res.secondary_delta_words
+			  << '\n';
+	}
+
+	std::cout << "histbins_summary"
+		  << " read_count=" << read_count
+		  << " error_count=" << error_count
+		  << " requested=" << opts.read_len
+		  << '\n';
+	return error_count == 0 ? 0 : 4;
+}
+
 static int sc_run_diag(mudaq::MudaqDevice& dev, const sc_opts& opts)
 {
 	sc_opts read_opts = opts;
@@ -1593,6 +1662,9 @@ int main(int argc, char **argv)
 	case sc_cmd::write:
 		req = sc_build_request(opts);
 		rc = sc_run_request(dev, opts, req, nullptr);
+		break;
+	case sc_cmd::histbins:
+		rc = sc_run_histbins(dev, opts);
 		break;
 	case sc_cmd::diag:
 		rc = sc_run_diag(dev, opts);

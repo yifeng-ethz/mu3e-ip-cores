@@ -40,6 +40,7 @@ Historical formal note:
 | [BUG-004-R](#bug-004-r-swb-firmware-left-dirty-k284-trailer-metadata-and-no-idle-sop-guard) | R | datapath-contract | `always-on (OPQ egress marker contract)` | partial | `RN.BASIC.001` RDMA popup / K-symbol audit | `pending` | SWB firmware could forward a true K28.4 trailer with nonzero metadata bits and had no simulation guard for illegal Idle-frame SOPs at the OPQ-to-DMA boundary. |
 | [BUG-005-H](#bug-005-h-swb-opq-signaltap-used-optimized-wrapper-aliases) | H | non-datapath-refactor | `directed-only (SignalTap compile gate)` | fixed-debug-loadable | RN.BASIC.001 SWB OPQ STP Node Finder | `d0b58930` / `bc192229` | The OPQ STP targeted wrapper-local aliases that Quartus optimized or exposed only as aggregate nodes, so the debug image could not prove the OPQ-to-DMA boundary. |
 | [BUG-006-H](#bug-006-h-board-rate-hist-readout-sampled-the-empty-post-run-1-ms-bank) | H | non-datapath-refactor | `common (1 ms board histogram readback after END_RUN)` | fixed-harness / board-rerun-pending | RN.BASIC.001 pre/post rbCAM board pair, 2026-05-14 | `pending` | The board runner compared post-END `hist_bin` data even though the 1 ms ping-pong histogram had already advanced into empty post-run intervals. |
+| [BUG-007-R](#bug-007-r-histogram-ingress-bridge-can-remain-pending-on-a-stale-packet-state) | R | non-datapath-refactor | `common (pre/post histogram source switching after partial traffic)` | open | RN.BASIC.001 live RUNNING hist samples, 2026-05-14 | `pending` | The histogram ingress bridge can report a pending pre/post switch while a stale packet-active bit prevents the requested source from becoming live. |
 
 ## 2026-05-14
 
@@ -85,12 +86,29 @@ Historical formal note:
     - `rate_comparison.active_bin_sum = 0` and `inactive_bin_sum = 0` on all
       four pre/post runs, including runs with nonzero decoded RDMA frames
   - after_fix_outcome:
-    - syntax and whitespace checks passed; board rerun is still required before
-      claiming 256 active channels on hardware
+    - `tools/run_script/sc_tool.cpp` now has a single-process `histbins`
+      command so the runner can read 256 bins during RUNNING without reopening
+      the control path 256 separate times
+    - `RN.BASIC.001_swb_dma_packer_20260514_170457` completed a clean
+      RUNNING read of 256 bins with `error_count = 0`; the bin sum `8172`
+      agrees with `LAST_INTERVAL_TOTAL_HITS = 8174` to within two hits
+    - the same run is not accepted as a pre-rbCAM rate comparison because
+      `ingress_status.bank0 = 0x00000105`, which decodes as live post,
+      requested pre, switch pending, and `pre_packet_active = 1`
+    - `RN.BASIC.001_swb_dma_packer_20260514_170640` showed post-run bins are
+      not useful for the 1 ms setting and the RUNNING sample itself had
+      `histbins` `error_count = 3`; it is therefore not accepted as a
+      47-channel post-rbCAM physics result
+    - `RN.BASIC.001_swb_dma_packer_20260514_171247` used the guarded runner and
+      explicitly reported `post_run_rate_comparison.evidence_valid = false`
+      with the reason that post-run bins are expected to reflect empty 1 ms
+      intervals after `END_RUN`
   - potential_hazard:
     - medium; single-word reads of 256 bins during RUNNING can span multiple
       1 ms completed banks, so the result is acceptable only for stable-flow
       min/p50/max checks, not for exact same-interval per-bin conservation
+    - high if the histogram ingress source status is not decoded; a pre/post
+      key can be programmed while the bridge is still live on the other source
   - Claude Opus 4.7 xhigh review decision:
     - pending / not run in this turn
 - Expected RN.BASIC.001 histogram targets:
@@ -100,6 +118,60 @@ Historical formal note:
   - delay preset: range `[-1000, 3096)` cycles with 16-cycle bins; expected
     pre-rbCAM min/p50/max is approximately `27/536/1043` cycles and expected
     post-rbCAM min/p50/max is approximately `2000/2100/2196` cycles
+- Commit:
+  - pending
+
+### BUG-007-R: Histogram ingress bridge can remain pending on a stale packet state
+- First seen in:
+  - `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_swb_dma_packer_20260514_170457/board_summary.json`
+  - `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_swb_dma_packer_20260514_170640/board_summary.json`
+  - `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_swb_dma_packer_20260514_171247/board_summary.json`
+- Symptom:
+  - The runner requested the pre-rbCAM histogram source and programmed the pre
+    rate key `KEY_LOC = 0x2623251E`, but the bridge status read
+    `ingress_status.bank0 = 0x00000105`.
+  - Decoding `histogram_ingress_bridge.vhd` status bits gives:
+    `select_post_live = 1`, `select_post_req = 0`, `switch_pending = 1`, and
+    `pre_packet_active = 1`.
+  - The resulting RUNNING histogram bins are not meaningful for the requested
+    source. In the `170457` run only seven bins were nonzero even though
+    RN.BASIC.001 expects all 256 channels active at about `122/123`
+    hits/channel/ms.
+  - The guarded `171247` rerun again decoded `bank0` as `0x00000105`; it set
+    `hist_evidence.valid_for_comparison = false` and carried the concrete
+    invalid reasons into `rate_comparison.evidence_invalid_reasons`.
+- Root cause:
+  - `histogram_ingress_bridge.vhd` only changes the live source when
+    `switch_safe = 1`.
+  - `switch_safe` requires both packet-active flags low and both pre/post valid
+    inputs low. A stale or unterminated pre packet can therefore keep the
+    bridge in `switch_pending = 1` and leave the histogram live on the old
+    source.
+- Fix status:
+  - state:
+    - open; board harness now decodes the selector status and marks histogram
+      comparisons invalid unless the requested source is actually live and the
+      pre-run packet state is idle
+  - mechanism:
+    - no RTL repair yet
+    - next RTL candidate is a controlled packet-state clear or a source-select
+      reset path that is safe to assert before `RUN_PREPARE`, plus a status
+      proof that `STATUS[2:0]` reaches `0x0` for pre or `0x3` for post before
+      a RUNNING bin sample is compared
+  - before_fix_outcome:
+    - the harness reported active-channel counts directly even when the source
+      bridge status showed requested source and live source did not match
+  - after_fix_outcome:
+    - harness guard validated on `RN.BASIC.001_swb_dma_packer_20260514_171247`;
+      rate comparison was kept failed because the requested histogram source
+      was not actually selected
+    - RTL fix and board rerun with `STATUS[2:0] = 0x0` for pre or `0x3` for
+      post are still pending
+  - potential_hazard:
+    - medium for histogram evidence; the datapath can still have live hits, but
+      rate/delay comparisons are untrustworthy until selector status is stable
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run in this turn
 - Commit:
   - pending
 
