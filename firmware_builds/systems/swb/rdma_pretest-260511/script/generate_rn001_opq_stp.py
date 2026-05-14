@@ -12,6 +12,7 @@ from pathlib import Path
 
 SWB = "swb_block:e_swb_block|"
 ADAPT = f"{SWB}ingress_egress_adaptor:e_ingress_egress_adaptor|"
+PIPE = f"{SWB}swb_opq_dma_pipeline:e_opq_dma_pipeline|"
 DEFAULT_CLOCK = f"{SWB}i_clk"
 DEFAULT_TRIGGER = f"{SWB}opq_dma_input_valid"
 
@@ -56,12 +57,12 @@ def default_probes() -> list[Probe]:
     add(
         "20 opq_egress_raw",
         probes,
-        f"{SWB}opq_egress_valid",
-        f"{SWB}opq_egress_sop",
-        f"{SWB}opq_egress_eop",
+        f"{ADAPT}opq_egress_valid",
+        f"{ADAPT}opq_egress_sop",
+        f"{ADAPT}opq_egress_eop",
     )
-    add_bits("20 opq_egress_raw", probes, f"{SWB}opq_egress_data", 32)
-    add_bits("20 opq_egress_raw", probes, f"{SWB}opq_egress_datak", 4)
+    add_bits("20 opq_egress_raw", probes, f"{ADAPT}opq_egress_data", 32)
+    add_bits("20 opq_egress_raw", probes, f"{ADAPT}opq_egress_datak", 4)
 
     add(
         "21 opq_egress_to_packer",
@@ -76,8 +77,13 @@ def default_probes() -> list[Probe]:
     add(
         "30 opq_dma_pipeline",
         probes,
-        f"{SWB}opq_dma_wren",
-        f"{SWB}opq_dma_endofevent",
+        f"{PIPE}opq_accept_valid",
+        f"{PIPE}opq_is_sop",
+        f"{PIPE}opq_is_eop",
+        f"{PIPE}opq_dma_sop",
+        f"{PIPE}opq_dma_eop",
+        f"{PIPE}o_dma_wen",
+        f"{PIPE}o_end_of_event",
         f"{SWB}o_dma_wren",
         f"{SWB}o_endofevent",
         f"{SWB}opq_dma_status",
@@ -86,7 +92,8 @@ def default_probes() -> list[Probe]:
         f"{SWB}opq_dma_event_count",
         f"{SWB}opq_dma_halt_count",
     )
-    add_bits("30 opq_dma_pipeline", probes, f"{SWB}opq_dma_data", 256)
+    add_bits("30 opq_dma_pipeline_opq_word", probes, f"{PIPE}opq_dma_data", 32)
+    add_bits("31 opq_dma_output_256b", probes, f"{PIPE}o_dma_data", 256)
 
     return probes
 
