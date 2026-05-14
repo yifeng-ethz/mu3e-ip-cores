@@ -1,0 +1,12 @@
+log=firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/codex_swb_opq_zero_subheader_rn001_board_after_feb_20260514_073954.log
+rc=2
+elapsed=0:05.28
+evidence_dir=firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_swb_dma_packer_20260514_073955
+rdma_bytes=524288
+manual_frames_decoded=769
+first_frame_count_word=0x0080002B
+good_subheader_frames_128=671
+bad_subheader_frames=98
+dominant_timestamp_delta=0x1000
+event_build_tag_fifo_full=0x000002E8
+note=OPQ zero-hit-subheader fix is visible on board, but this 50 ms run hit the 524288-byte host capture cap and tag FIFO full incremented; not RN.BASIC.001 closure evidence.

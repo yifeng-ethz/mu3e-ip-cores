@@ -47,6 +47,7 @@ SWB_RING_LOCK = Path("/home/yifeng/.local/bin/swb_ring_lock")
 
 K285 = 0xBC
 K284 = 0x9C
+K237 = 0xF7
 USE_BIT_MERGER = 0x4
 USE_BIT_SCIFI = 0x200
 SCIFI_LINK2_MASK = 0x4
@@ -75,11 +76,23 @@ REG_DMA_STATUS_R = 0x38
 MUDAQ_REGS_RW_INDEX = 0
 MUDAQ_REGS_RO_INDEX = 1
 MUDAQ_MEM_RW_INDEX = 2
+MUDAQ_DMABUF_CTRL_INDEX = 4
 MUDAQ_REGS_BYTES = 4096
 MUDAQ_MEM_RW_BYTES = 1 << 18
+MUDAQ_DMABUF_CTRL_BYTES = 4096
 PACKET_TYPE_SC = 0x7
 PACKET_TYPE_SC_WRITE = 0x1
 SC_TRAILER_WORD = 0x0000009C
+PACKET_TYPE_SCIFI = {0b111000, 0b111001}
+
+REG_DMA_STATUS_TOP_R = 0x11
+REG_EVENT_BUILD_STATUS_R = 0x1C
+REG_EVENT_BUILD_IDLE_NOT_HEADER_R = 0x1D
+REG_EVENT_BUILD_SKIP_EVENT_DMA_R = 0x1E
+REG_EVENT_BUILD_CNT_EVENT_DMA_R = 0x1F
+REG_EVENT_BUILD_TAG_FIFO_FULL_R = 0x20
+REG_BUFFER_STATUS_R = 0x1B
+REG_DMA_CNT_WORDS_R = 0x32
 
 
 def have_swb_ring_lock() -> bool:
@@ -251,8 +264,20 @@ class SwbMmio:
             mmap.PROT_READ | mmap.PROT_WRITE,
             offset=MUDAQ_MEM_RW_INDEX * self.page_size,
         )
+        try:
+            self.dma_ctrl: Optional[mmap.mmap] = mmap.mmap(
+                self.fd,
+                MUDAQ_DMABUF_CTRL_BYTES,
+                mmap.MAP_SHARED,
+                mmap.PROT_READ,
+                offset=MUDAQ_DMABUF_CTRL_INDEX * self.page_size,
+            )
+        except OSError:
+            self.dma_ctrl = None
 
     def close(self) -> None:
+        if self.dma_ctrl is not None:
+            self.dma_ctrl.close()
         self.mem_rw.close()
         self.regs_ro.close()
         self.regs_rw.close()
@@ -292,11 +317,75 @@ class SwbMmio:
         start = idx * 4
         return self._unpack(self.mem_rw[start:start + 4])
 
+    def read_dma_ctrl_words(self, count: int = 8) -> list[int]:
+        if self.dma_ctrl is None:
+            return []
+        return [self._unpack(self.dma_ctrl[idx * 4:idx * 4 + 4])
+                for idx in range(count)]
+
+
+def snapshot_dma_mmio(mmio: SwbMmio, label: str) -> dict[str, Any]:
+    ctrl_words = mmio.read_dma_ctrl_words(8)
+    ctrl3_words = (ctrl_words[3] >> 2) if len(ctrl_words) > 3 else 0
+    ctrl0_words = (ctrl_words[0] * 8) if len(ctrl_words) > 0 else 0
+    ctrl_write_words = ctrl3_words if ctrl3_words != 0 else ctrl0_words
+    return {
+        "label": label,
+        "wall": time.time(),
+        "rw": {
+            "DMA_REGISTER_W": f"0x{mmio.read_reg_rw(REG_DMA_REGISTER_W):08X}",
+            "SWB_READOUT_STATE_REGISTER_W": (
+                f"0x{mmio.read_reg_rw(REG_SWB_READOUT_STATE_W):08X}"
+            ),
+            "FARM_READOUT_STATE_REGISTER_W": (
+                f"0x{mmio.read_reg_rw(REG_FARM_READOUT_STATE_W):08X}"
+            ),
+            "GET_N_DMA_WORDS_REGISTER_W": (
+                f"0x{mmio.read_reg_rw(0x0C):08X}"
+            ),
+        },
+        "ro": {
+            "DMA_STATUS_R": f"0x{mmio.read_reg_ro(REG_DMA_STATUS_TOP_R):08X}",
+            "DMA_STATUS_REGISTER_R": f"0x{mmio.read_reg_ro(REG_DMA_STATUS_R):08X}",
+            "EVENT_BUILD_STATUS_REGISTER_R": (
+                f"0x{mmio.read_reg_ro(REG_EVENT_BUILD_STATUS_R):08X}"
+            ),
+            "EVENT_BUILD_IDLE_NOT_HEADER_R": (
+                f"0x{mmio.read_reg_ro(REG_EVENT_BUILD_IDLE_NOT_HEADER_R):08X}"
+            ),
+            "EVENT_BUILD_SKIP_EVENT_DMA_R": (
+                f"0x{mmio.read_reg_ro(REG_EVENT_BUILD_SKIP_EVENT_DMA_R):08X}"
+            ),
+            "EVENT_BUILD_CNT_EVENT_DMA_R": (
+                f"0x{mmio.read_reg_ro(REG_EVENT_BUILD_CNT_EVENT_DMA_R):08X}"
+            ),
+            "EVENT_BUILD_TAG_FIFO_FULL_R": (
+                f"0x{mmio.read_reg_ro(REG_EVENT_BUILD_TAG_FIFO_FULL_R):08X}"
+            ),
+            "BUFFER_STATUS_REGISTER_R": (
+                f"0x{mmio.read_reg_ro(REG_BUFFER_STATUS_R):08X}"
+            ),
+            "DMA_CNT_WORDS_REGISTER_R": (
+                f"0x{mmio.read_reg_ro(REG_DMA_CNT_WORDS_R):08X}"
+            ),
+        },
+        "dma_ctrl": [f"0x{word:08X}" for word in ctrl_words],
+        "dma_ctrl_write_word": (
+            f"0x{ctrl_write_words:08X}" if ctrl_words else None
+        ),
+        "dma_ctrl_write_word_source": (
+            "ctrl3_shifted" if ctrl3_words != 0 else "ctrl0_256b_lines"
+        ),
+    }
+
 
 def enable_dma_mmio(mmio: SwbMmio) -> dict[str, str]:
-    mmio.write_reg(REG_DMA_REGISTER_W, 0x1)
+    current = mmio.read_reg_rw(REG_DMA_REGISTER_W)
+    if (current & 0x1) == 0:
+        mmio.write_reg(REG_DMA_REGISTER_W, 0x1)
     time.sleep(0.001)
     return {
+        "DMA_REGISTER_W_BEFORE": f"0x{current:08X}",
         "DMA_REGISTER_W": f"0x{mmio.read_reg_rw(REG_DMA_REGISTER_W):08X}",
         "DMA_STATUS_REGISTER_R": f"0x{mmio.read_reg_ro(REG_DMA_STATUS_R):08X}",
         "SWB_READOUT_STATE_REGISTER_W": (
@@ -368,12 +457,14 @@ def drive_local_cmd_mmio(mmio: SwbMmio, link: int, cmd: int, payload24: int,
 
 
 def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
-                          row_idx: int, log_fh: Any) -> dict[str, Any]:
+                          row_idx: int, log_fh: Any,
+                          probe_period_s: float = 0.0) -> dict[str, Any]:
     """Run RN.BASIC.001 stage commands without reopening /dev/mudaq0."""
     rid = row["row_id"]
     record: dict[str, Any] = {
         "row_idx": row_idx,
         "cmd_traces": [],
+        "midrun_dma_probes": [],
         "wall_clock_durations": {},
         "dma_enable_pre": enable_dma_mmio(mmio),
     }
@@ -407,7 +498,23 @@ def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
     trace_start = drive_local_cmd_mmio(mmio, link, sweep.CMD_START_RUN, 0, log_fh)
     record["cmd_traces"].append(trace_start)
     t_after_start = time.time()
-    time.sleep(float(row["interval_seconds"]))
+    run_duration_s = float(row["interval_seconds"])
+    if probe_period_s > 0.0:
+        deadline = t_after_start + run_duration_s
+        next_probe = t_after_start
+        probe_idx = 0
+        while time.time() < deadline:
+            now = time.time()
+            if now >= next_probe:
+                probe = snapshot_dma_mmio(mmio, f"run_{probe_idx:03d}")
+                probe["elapsed_since_start_s"] = now - t_after_start
+                record["midrun_dma_probes"].append(probe)
+                log_line(log_fh, "MMIO_DMA_PROBE: " + json.dumps(probe, sort_keys=True))
+                probe_idx += 1
+                next_probe += probe_period_s
+            time.sleep(min(0.001, max(0.0, deadline - time.time())))
+    else:
+        time.sleep(run_duration_s)
     t_after_run = time.time()
 
     print(f"  [{rid}] mmio step 5: drive 0x13 END_RUN", flush=True)
@@ -427,6 +534,7 @@ def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
     record["t0_wall"] = t0
     record["t1_wall"] = t1
     record["dma_final_before_stop"] = enable_dma_mmio(mmio)
+    record["dma_probe_before_stop"] = snapshot_dma_mmio(mmio, "before_stop")
     return record
 
 
@@ -461,57 +569,176 @@ def words_le(data: bytes, byte_offset: int, n_words: int) -> list[int]:
     return out
 
 
-def decode_rxbuffer(path: Path, max_decode_bytes: int) -> dict[str, Any]:
-    raw = path.read_bytes() if path.is_file() else b""
-    scan = raw[:max_decode_bytes]
-    frame_starts = [idx for idx in range(0, len(scan), 4) if scan[idx] == K285]
-    trailer_offsets = {idx for idx in range(0, len(scan), 4) if scan[idx] == K284}
+def decode_wire_frames_from_words(words: list[int]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     frames: list[dict[str, Any]] = []
-    for frame_idx, start in enumerate(frame_starts):
-        next_start = (
-            frame_starts[frame_idx + 1]
-            if frame_idx + 1 < len(frame_starts)
-            else len(scan)
-        )
-        trailer_pos = None
-        for pos in range(start + 4, next_start, 4):
-            if pos in trailer_offsets:
-                trailer_pos = pos
-                break
-        frame_end = trailer_pos + 4 if trailer_pos is not None else next_start
-        header = decode_preamble_words(words_le(scan, start, 5))
-        frames.append({
-            "frame_idx": frame_idx,
-            "byte_offset": start,
-            "length": frame_end - start,
-            "trailer_offset": trailer_pos,
-            "has_trailer": trailer_pos is not None,
-            **header,
-        })
+    issues: list[dict[str, Any]] = []
+    idx = 0
+    while idx < len(words):
+        if (words[idx] & 0xFF) != K285:
+            idx += 1
+            continue
 
-    ts_values = [
-        int(frame["packet_timestamp"])
-        for frame in frames
-        if frame.get("packet_timestamp") is not None
+        start = idx
+        if idx + 5 > len(words):
+            issues.append({
+                "word_idx": start,
+                "type": "truncated_header",
+                "word": f"0x{words[start]:08X}",
+            })
+            break
+
+        header = decode_preamble_words(words[start:start + 5])
+        packet_type = int(header.get("packet_type_raw", -1))
+        if packet_type == 0:
+            issues.append({
+                "word_idx": start,
+                "type": "idle_sop",
+                "word": f"0x{words[start]:08X}",
+            })
+            idx += 1
+            continue
+        if packet_type not in PACKET_TYPE_SCIFI:
+            issues.append({
+                "word_idx": start,
+                "type": f"unsupported_packet_type_0x{packet_type:02X}",
+                "word": f"0x{words[start]:08X}",
+            })
+            idx += 1
+            continue
+
+        count_word = words[start + 3]
+        subheader_declared = (count_word >> 16) & 0x7FFF
+        hit_declared = count_word & 0xFFFF
+        pos = start + 5
+        subheaders: list[dict[str, Any]] = []
+        hits_decoded = 0
+        issue = ""
+
+        for _ in range(subheader_declared):
+            if pos >= len(words):
+                issue = "truncated_subheaders"
+                break
+            sub_word = words[pos]
+            if (sub_word & 0xFF) != K237:
+                issue = f"missing_subheader_at_word_{pos}"
+                break
+            hit_count = (sub_word >> 8) & 0xFFFF
+            subheaders.append({
+                "word_idx": pos - start,
+                "absolute_word_idx": pos,
+                "subheader_idx": (sub_word >> 24) & 0xFF,
+                "hit_count": hit_count,
+                "word": f"0x{sub_word:08X}",
+            })
+            pos += 1
+            if pos + hit_count > len(words):
+                hits_decoded += max(0, len(words) - pos)
+                pos = len(words)
+                issue = "truncated_hits"
+                break
+            hits_decoded += hit_count
+            pos += hit_count
+
+        has_trailer = (
+            issue == ""
+            and pos < len(words)
+            and (words[pos] & 0xFF) == K284
+        )
+        trailer_word = words[pos] if has_trailer else None
+        if issue == "" and not has_trailer:
+            issue = f"missing_trailer_at_word_{pos}"
+        if issue == "" and hits_decoded != hit_declared:
+            issue = f"hit_count_mismatch_{hits_decoded}_vs_{hit_declared}"
+        if issue == "" and trailer_word is not None and (trailer_word & 0xFFFFFF00):
+            issue = f"dirty_trailer_0x{trailer_word:08X}"
+
+        frame = {
+            "frame_idx": len(frames),
+            "word_start": start,
+            "word_end": pos if has_trailer else max(start, min(pos, len(words) - 1)),
+            "byte_offset": start * 4,
+            "length": ((pos + 1 - start) * 4) if has_trailer else max(0, (pos - start) * 4),
+            "subheaders_decoded": len(subheaders),
+            "subheader_declared": subheader_declared,
+            "hits_decoded": hits_decoded,
+            "hit_declared": hit_declared,
+            "has_trailer": has_trailer,
+            "trailer_word": f"0x{trailer_word:08X}" if trailer_word is not None else None,
+            "bad": issue != "",
+            "issue": issue,
+            "subheaders_head": subheaders[:8],
+            "subheaders_tail": subheaders[-8:],
+            **header,
+        }
+        frames.append(frame)
+        if issue != "":
+            issues.append({
+                "word_idx": start,
+                "type": issue,
+                "word": f"0x{words[start]:08X}",
+            })
+            idx = start + 1
+        else:
+            idx = pos + 1
+    return frames, issues
+
+
+def decode_rxbuffer(path: Path, max_decode_bytes: int,
+                    valid_dma_bytes: Optional[int] = None) -> dict[str, Any]:
+    raw = path.read_bytes() if path.is_file() else b""
+    decode_limit = max_decode_bytes
+    if valid_dma_bytes is not None and valid_dma_bytes > 0:
+        decode_limit = min(decode_limit, valid_dma_bytes)
+    scan = raw[:decode_limit]
+    words = [
+        int.from_bytes(scan[idx:idx + 4], "little")
+        for idx in range(0, len(scan) - (len(scan) % 4), 4)
     ]
+    frames, issues = decode_wire_frames_from_words(words)
+    good_frames = [frame for frame in frames if not frame.get("bad")]
+    canonical_frames = [
+        frame
+        for frame in good_frames
+        if int(frame.get("subheader_declared", -1)) == 128
+        and int(frame.get("subheaders_decoded", -1)) == 128
+    ]
+    ts_values = [int(frame["packet_timestamp"]) for frame in canonical_frames]
     delta_hist: dict[str, int] = {}
     for left, right in zip(ts_values, ts_values[1:]):
         delta = (right - left) & 0xFFFFFFFFFFFF
         key = f"0x{delta:X}"
         delta_hist[key] = delta_hist.get(key, 0) + 1
-    frames_with_trailer = [frame for frame in frames if frame.get("has_trailer")]
+    subheader_counts = [
+        int(frame.get("subheaders_decoded", 0))
+        for frame in canonical_frames
+    ]
     return {
         "path": str(path),
         "bytes_total": len(raw),
+        "bytes_decoded": len(scan),
+        "valid_dma_bytes": valid_dma_bytes,
         "first_32_bytes": raw[:32].hex(" "),
         "first_k285_word_lsb": bool(raw) and raw[0] == K285,
-        "k285_word_lsb_count": len(frame_starts),
-        "k284_word_lsb_count": len(trailer_offsets),
-        "frames_decoded": len(frames_with_trailer),
+        "first_good_frame_word": good_frames[0]["word_start"] if good_frames else None,
+        "first_canonical_frame_word": (
+            canonical_frames[0]["word_start"] if canonical_frames else None
+        ),
+        "frames_decoded": len(canonical_frames),
+        "good_frame_count": len(good_frames),
+        "bad_frame_count": len(frames) - len(good_frames),
+        "bad_frame_issues": [issue["type"] for issue in issues[:16]],
         "frame_start_count": len(frames),
-        "all_decoded_frames_have_trailer": len(frames) == len(frames_with_trailer),
+        "all_decoded_frames_have_trailer": all(
+            bool(frame.get("has_trailer")) for frame in good_frames
+        ),
+        "subheader_count_min": min(subheader_counts, default=0),
+        "subheader_count_max": max(subheader_counts, default=0),
+        "wire_hit_count": sum(
+            int(frame.get("hits_decoded", 0)) for frame in canonical_frames
+        ),
         "frame0_packet_timestamp": ts_values[0] if ts_values else None,
         "inter_frame_delta_histogram": delta_hist,
+        "all_ts_delta_0x800": all(key == "0x800" for key in delta_hist.keys()),
         "frames": frames[:16],
     }
 
@@ -542,6 +769,12 @@ def run_board_capture(args: argparse.Namespace) -> int:
     rx_path = evidence_dir / "rdma_rxbuffer.bin"
     dma_log_path = evidence_dir / "dma_tool.log"
     row = rn_basic_001_row()
+    if args.interval_seconds is not None:
+        row["interval_seconds"] = args.interval_seconds
+        row["expected_behavior"] = (
+            f"{row['expected_behavior']} with debug interval override "
+            f"{args.interval_seconds:.6f} s"
+        )
     row_idx = 1
 
     dma_proc: Optional[subprocess.Popen[bytes]] = None
@@ -555,6 +788,7 @@ def run_board_capture(args: argparse.Namespace) -> int:
         "hist_ingress_source": args.hist_ingress_source,
         "hist_ingress_banks": args.hist_ingress_banks,
         "evidence_dir": str(evidence_dir),
+        "preenable_dma_before_capture": args.preenable_dma_before_capture,
     }
 
     with open(tool_log_path, "w", encoding="ascii") as log_fh:
@@ -606,13 +840,19 @@ def run_board_capture(args: argparse.Namespace) -> int:
                                                      log_fh=log_fh)
 
         try:
+            if args.preenable_dma_before_capture:
+                with SwbMmio() as pre_mmio:
+                    record["dma_pre_enable_before_capture"] = enable_dma_mmio(
+                        pre_mmio
+                    )
             dma_proc, dma_log_fh = start_dma_capture(
                 args.dma_tool, rx_path, dma_log_path, args.staging_mb, args.af_pct
             )
             record["dma_started_at"] = dt.datetime.now().isoformat(timespec="seconds")
             with SwbMmio() as mmio:
                 record["stage_recipe"] = run_stage_recipe_mmio(
-                    mmio, args.link, row, row_idx, log_fh=log_fh
+                    mmio, args.link, row, row_idx, log_fh=log_fh,
+                    probe_period_s=args.probe_period_s
                 )
         finally:
             stop_dma_capture(dma_proc, dma_log_fh)
@@ -626,12 +866,26 @@ def run_board_capture(args: argparse.Namespace) -> int:
         )
 
     record["finished_at"] = dt.datetime.now().isoformat(timespec="seconds")
-    record["rdma"] = decode_rxbuffer(rx_path, args.max_decode_bytes)
+    valid_dma_bytes: Optional[int] = None
+    try:
+        dma_cnt_256b = int(
+            record["swb_datapath_post_run"]["DMA_CNT_WORDS_REGISTER_R"], 16
+        )
+        valid_dma_bytes = dma_cnt_256b * 32
+    except (KeyError, TypeError, ValueError):
+        valid_dma_bytes = None
+    record["rdma"] = decode_rxbuffer(
+        rx_path, args.max_decode_bytes, valid_dma_bytes=valid_dma_bytes
+    )
     record["pass"] = (
         record["rdma"]["first_k285_word_lsb"]
+        and record["rdma"]["first_canonical_frame_word"] == 0
         and record["rdma"]["frames_decoded"] > 0
+        and record["rdma"]["bad_frame_count"] == 0
+        and record["rdma"]["subheader_count_min"] == 128
+        and record["rdma"]["subheader_count_max"] == 128
         and record["rdma"]["frame0_packet_timestamp"] == 0
-        and set(record["rdma"]["inter_frame_delta_histogram"].keys()) <= {"0x800"}
+        and record["rdma"]["all_ts_delta_0x800"]
     )
     summary_path = evidence_dir / "board_summary.json"
     summary_path.write_text(json.dumps(record, indent=2) + "\n", encoding="ascii")
@@ -640,7 +894,11 @@ def run_board_capture(args: argparse.Namespace) -> int:
     print(f"summary={summary_path}")
     print(f"rdma_rxbuffer={rx_path}")
     print(f"first_32_bytes={record['rdma']['first_32_bytes']}")
+    print(f"bytes_total={record['rdma']['bytes_total']}")
+    print(f"bytes_decoded={record['rdma']['bytes_decoded']}")
     print(f"frames_decoded={record['rdma']['frames_decoded']}")
+    print(f"bad_frame_count={record['rdma']['bad_frame_count']}")
+    print(f"wire_hit_count={record['rdma']['wire_hit_count']}")
     print(f"frame0_packet_timestamp={record['rdma']['frame0_packet_timestamp']}")
     print(f"delta_hist={record['rdma']['inter_frame_delta_histogram']}")
     print(f"pass={record['pass']}")
@@ -659,6 +917,12 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--hist-ingress-source", choices=["pre", "post"],
                     default="pre")
     ap.add_argument("--hist-ingress-banks", type=int, default=2)
+    ap.add_argument("--interval-seconds", type=float, default=None,
+                    help="debug override for the RN.BASIC.001 START_RUN dwell")
+    ap.add_argument("--probe-period-s", type=float, default=0.0,
+                    help="debug-only mid-run DMA/MMIO sample period")
+    ap.add_argument("--preenable-dma-before-capture", action="store_true",
+                    help="enable DMA before launching dma_tool so the reader snapshots a post-reset write pointer")
     args = ap.parse_args(argv)
     return run_board_capture(args)
 

@@ -1,0 +1,11 @@
+log=firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/board_evidence/RN.BASIC.001_stp_20260513/codex_check_feb_direct_host_after_swb_idle_20260514_075228.log
+rc=0
+elapsed=0:04.93
+evidence_dir=firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/board_evidence/RN.BASIC.001_stp_20260513/RN.BASIC.001_readyless_periodic_20260514_075228
+runctrl_source=runctl_mgmt_host_0
+dbg_all_cmds_accepted=true
+arb_ingress_emu_hits_sum=15740928
+arb_egress_emu_hits_sum=15740928
+arb_drops_emu_sum=0
+hist_total_hits=219768
+board_counter_pass=true

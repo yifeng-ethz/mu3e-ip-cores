@@ -1,6 +1,10 @@
 package require -exact qsys 16.1
 
-set repo_root [file normalize [file join [file dirname [info script]] "../../../../.."]]
+if {[info exists env(REPO_ROOT)]} {
+    set repo_root $env(REPO_ROOT)
+} else {
+    set repo_root "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores"
+}
 set hub_dir [file join $repo_root "quartus_systems/swb"]
 
 cd $hub_dir

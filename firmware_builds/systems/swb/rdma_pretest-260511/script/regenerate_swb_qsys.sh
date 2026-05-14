@@ -10,6 +10,7 @@ opq_dir="${board}/a10/merger/qsys/opq_upstream_4lane_native_sv"
 qsys_script="${QSYS_SCRIPT:-${QUARTUS_ROOTDIR}/sopc_builder/bin/qsys-script}"
 qsys_generate="${QSYS_GENERATE:-${QUARTUS_ROOTDIR}/sopc_builder/bin/qsys-generate}"
 
+export REPO_ROOT="${repo_root}"
 export OPQ_SOURCE_ROOT="${OPQ_SOURCE_ROOT:-${repo_root}/packet_scheduler}"
 
 "${qsys_script}" \

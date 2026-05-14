@@ -95,15 +95,15 @@ set OPQ_LANE_REGION_HTML {<html><table border="1" cellpadding="3" width="100%">
 <tr><td>+C..+F</td><td>DRR Live / Stats</td><td>Live DRR quantum, grant count, beat count, and defer count.</td></tr>
 </table></html>}
 
-if {[info exists ::env(OPQ_SOURCE_ROOT)] && $::env(OPQ_SOURCE_ROOT) ne ""} {
-    set OPQ_SOURCE_ROOT [file normalize $::env(OPQ_SOURCE_ROOT)]
+if {[info exists env(OPQ_SOURCE_ROOT)]} {
+    set OPQ_SOURCE_ROOT $env(OPQ_SOURCE_ROOT)
 } else {
-    set OPQ_SOURCE_ROOT [file normalize [file join [file dirname [info script]] "../../../../../../../../musip_2604/external/mu3e-ip-cores/packet_scheduler"]]
+    set OPQ_SOURCE_ROOT "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler"
 }
 
 proc opq_source_file {relative_path} {
     global OPQ_SOURCE_ROOT
-    return [file normalize [file join $OPQ_SOURCE_ROOT $relative_path]]
+    return [file join $OPQ_SOURCE_ROOT $relative_path]
 }
 
 add_fileset synth QUARTUS_SYNTH
