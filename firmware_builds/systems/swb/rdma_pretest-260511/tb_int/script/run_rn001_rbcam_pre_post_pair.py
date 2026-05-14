@@ -38,6 +38,13 @@ def run_one(args: argparse.Namespace, source: str, index: int) -> dict[str, Any]
         "--af-pct",
         str(args.af_pct),
     ]
+    if args.hist_running_probe_period_s > 0.0:
+        cmd.extend([
+            "--hist-running-probe-period-s",
+            str(args.hist_running_probe_period_s),
+        ])
+    for sample_s in args.hist_running_bin_sample_s:
+        cmd.extend(["--hist-running-bin-sample-s", str(sample_s)])
     if args.sc_tool is not None:
         cmd.extend(["--sc-tool", str(args.sc_tool)])
     if args.dma_tool is not None:
@@ -76,6 +83,11 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--max-decode-bytes", type=int, default=4 * 1024 * 1024)
     ap.add_argument("--staging-mb", type=int, default=64)
     ap.add_argument("--af-pct", type=int, default=80)
+    ap.add_argument("--hist-running-probe-period-s", type=float, default=0.1,
+                    help="sample histogram CSR words during RUNNING")
+    ap.add_argument("--hist-running-bin-sample-s", type=float, action="append",
+                    default=None,
+                    help="sample all 256 histogram bins during RUNNING; may be repeated")
     ap.add_argument("--sc-tool", type=Path, default=None)
     ap.add_argument("--dma-tool", type=Path, default=None)
     ap.add_argument("--output-root", type=Path, default=None)
@@ -86,6 +98,8 @@ def main(argv: list[str]) -> int:
 
     if args.runs_per_source < 1:
         raise SystemExit("--runs-per-source must be >= 1")
+    if args.hist_running_bin_sample_s is None:
+        args.hist_running_bin_sample_s = [0.25]
 
     sources = ["pre", "post"] if args.sources == "both" else [args.sources]
     runs: list[dict[str, Any]] = []

@@ -56,6 +56,10 @@ RN001_EXPECTED_CHANNELS = 256
 RN001_EXPECTED_TOTAL_PER_MS = 31264
 RN001_EXPECTED_PER_CHANNEL_PER_MS = RN001_EXPECTED_TOTAL_PER_MS / RN001_EXPECTED_CHANNELS
 RN001_EXPECTED_THEORETICAL_PER_CHANNEL_PER_MS = 31250 / RN001_EXPECTED_CHANNELS
+RN001_DELAY_EXPECTED_BY_SOURCE = {
+    "pre": {"min_cycles": 27, "p50_cycles": 536, "max_cycles": 1043},
+    "post": {"min_cycles": 2000, "p50_cycles": 2100, "max_cycles": 2196},
+}
 RN001_DEFAULT_RUN_SECONDS = 1.0
 RN001_DEFAULT_HIST_INTERVAL_CLOCKS = sweep.HIST_INTERVAL_1MS_CLOCKS
 SWB_DATAPATH_RESET_MASK = (
@@ -82,15 +86,20 @@ REG_DMA_STATUS_R = 0x38
 MUDAQ_REGS_RW_INDEX = 0
 MUDAQ_REGS_RO_INDEX = 1
 MUDAQ_MEM_RW_INDEX = 2
+MUDAQ_MEM_RO_INDEX = 3
 MUDAQ_DMABUF_CTRL_INDEX = 4
 MUDAQ_REGS_BYTES = 4096
 MUDAQ_MEM_RW_BYTES = 1 << 18
+MUDAQ_MEM_RO_BYTES = 1 << 18
+MUDAQ_MEM_RO_WORDS = 1 << 16
 MUDAQ_DMABUF_CTRL_BYTES = 4096
 PACKET_TYPE_SC = 0x7
+PACKET_TYPE_SC_READ = 0x0
 PACKET_TYPE_SC_WRITE = 0x1
 SC_TRAILER_WORD = 0x0000009C
 PACKET_TYPE_SCIFI = {0b111000, 0b111001}
 
+REG_MEM_WRITEADDR_LOW_R = 0x06
 REG_DMA_STATUS_TOP_R = 0x11
 REG_EVENT_BUILD_STATUS_R = 0x1C
 REG_EVENT_BUILD_IDLE_NOT_HEADER_R = 0x1D
@@ -270,6 +279,13 @@ class SwbMmio:
             mmap.PROT_READ | mmap.PROT_WRITE,
             offset=MUDAQ_MEM_RW_INDEX * self.page_size,
         )
+        self.mem_ro = mmap.mmap(
+            self.fd,
+            MUDAQ_MEM_RO_BYTES,
+            mmap.MAP_SHARED,
+            mmap.PROT_READ,
+            offset=MUDAQ_MEM_RO_INDEX * self.page_size,
+        )
         try:
             self.dma_ctrl: Optional[mmap.mmap] = mmap.mmap(
                 self.fd,
@@ -284,6 +300,7 @@ class SwbMmio:
     def close(self) -> None:
         if self.dma_ctrl is not None:
             self.dma_ctrl.close()
+        self.mem_ro.close()
         self.mem_rw.close()
         self.regs_ro.close()
         self.regs_rw.close()
@@ -322,6 +339,10 @@ class SwbMmio:
     def read_mem_rw(self, idx: int) -> int:
         start = idx * 4
         return self._unpack(self.mem_rw[start:start + 4])
+
+    def read_mem_ro(self, idx: int) -> int:
+        start = (idx & (MUDAQ_MEM_RO_WORDS - 1)) * 4
+        return self._unpack(self.mem_ro[start:start + 4])
 
     def read_dma_ctrl_words(self, count: int = 8) -> list[int]:
         if self.dma_ctrl is None:
@@ -444,6 +465,213 @@ def sc_write_mmio(mmio: SwbMmio, link: int, addr: int, payload: list[int],
     return rec
 
 
+def sc_ring_next(ptr: int) -> int:
+    return (ptr + 1) & (MUDAQ_MEM_RO_WORDS - 1)
+
+
+def sc_ring_advance(ptr: int, words: int) -> int:
+    return (ptr + words) & (MUDAQ_MEM_RO_WORDS - 1)
+
+
+def sc_ring_distance(left: int, right: int) -> int:
+    if right >= left:
+        return right - left
+    return (MUDAQ_MEM_RO_WORDS - left) + right
+
+
+def sc_secondary_top(mmio: SwbMmio) -> int:
+    return (mmio.read_reg_ro(REG_MEM_WRITEADDR_LOW_R) + 1) & (MUDAQ_MEM_RO_WORDS - 1)
+
+
+def sc_scan_mmio_reply(mmio: SwbMmio, start: int, stop: int, link: int,
+                       addr: int, count: int) -> Optional[dict[str, Any]]:
+    ptr = start
+    while ptr != stop:
+        avail = sc_ring_distance(ptr, stop)
+        header = mmio.read_mem_ro(ptr)
+        if (header & 0x1C0000BC) != 0x1C0000BC:
+            ptr = sc_ring_next(ptr)
+            continue
+        if avail < 4:
+            return None
+
+        addr_ptr = sc_ring_next(ptr)
+        len_ptr = sc_ring_next(addr_ptr)
+        addr_word = mmio.read_mem_ro(addr_ptr)
+        len_word = mmio.read_mem_ro(len_ptr)
+        pkt_type = (header >> 24) & 0x3
+        pkt_link = (header >> 8) & 0xFF
+        pkt_addr = addr_word & 0x0003FFFF
+        rsp = (len_word >> 16) & 0x3
+        payload_len = len_word & 0xFFFF
+        total_words = 4 + payload_len
+        if avail < total_words:
+            return None
+
+        trailer_ptr = sc_ring_advance(ptr, 3 + payload_len)
+        trailer = mmio.read_mem_ro(trailer_ptr)
+        if trailer != SC_TRAILER_WORD:
+            ptr = sc_ring_next(ptr)
+            continue
+
+        payload = [
+            mmio.read_mem_ro(sc_ring_advance(ptr, 3 + idx))
+            for idx in range(payload_len)
+        ]
+        if (
+            pkt_type == PACKET_TYPE_SC_READ
+            and pkt_link == link
+            and pkt_addr == (addr & 0x0003FFFF)
+            and payload_len == count
+        ):
+            return {
+                "start": f"0x{ptr:04X}",
+                "stop": f"0x{sc_ring_advance(ptr, total_words):04X}",
+                "header": f"0x{header:08X}",
+                "addr": f"0x{addr_word:08X}",
+                "len": f"0x{len_word:08X}",
+                "rsp": rsp,
+                "payload": payload,
+            }
+        ptr = sc_ring_advance(ptr, total_words)
+    return None
+
+
+def sc_read_mmio(mmio: SwbMmio, link: int, addr: int, count: int,
+                 log_fh: Any, timeout_s: float = 1.0) -> list[int]:
+    """Issue one SC read through the already-open SWB MMIO mapping."""
+    if count < 1:
+        raise ValueError("SC read count must be >= 1")
+
+    header = (
+        (PACKET_TYPE_SC << 26)
+        | (PACKET_TYPE_SC_READ << 24)
+        | ((link & 0xFF) << 8)
+        | K285
+    )
+    words = [header, addr & 0x0003FFFF, count & 0xFFFF, SC_TRAILER_WORD]
+    secondary_before = sc_secondary_top(mmio)
+    for idx, word in enumerate(words):
+        mmio.write_mem_rw(idx, word)
+    _ = mmio.read_mem_rw(len(words) - 1)
+
+    wall_start = time.time()
+    mmio.write_reg(REG_SC_MAIN_LENGTH_W, 2)
+    mmio.write_reg(REG_SC_MAIN_ENABLE_W, 0)
+    mmio.write_reg(REG_SC_MAIN_ENABLE_W, 1)
+    time.sleep(0.0001)
+    mmio.write_reg(REG_SC_MAIN_ENABLE_W, 0)
+
+    main_ready = False
+    deadline = wall_start + timeout_s
+    status = 0
+    while time.time() < deadline:
+        status = mmio.read_reg_ro(REG_SC_MAIN_STATUS_R)
+        if (status & 0x1) != 0:
+            main_ready = True
+            break
+        time.sleep(0.001)
+
+    if not main_ready:
+        rec = {
+            "addr": f"0x{addr:05X}",
+            "count": count,
+            "main_ready": False,
+            "main_status": f"0x{status:08X}",
+        }
+        log_line(log_fh, "MMIO_SC_READ_FAIL: " + json.dumps(rec, sort_keys=True))
+        raise RuntimeError(f"SC main did not become ready for read 0x{addr:05X}")
+
+    while time.time() < deadline:
+        secondary_after = sc_secondary_top(mmio)
+        reply = sc_scan_mmio_reply(mmio, secondary_before, secondary_after,
+                                   link, addr, count)
+        if reply is not None:
+            rec = {
+                "addr": f"0x{addr:05X}",
+                "count": count,
+                "secondary_before": f"0x{secondary_before:04X}",
+                "secondary_after": f"0x{secondary_after:04X}",
+                "main_status": f"0x{status:08X}",
+                "reply": {
+                    **reply,
+                    "payload": [f"0x{word:08X}" for word in reply["payload"]],
+                },
+            }
+            log_line(log_fh, "MMIO_SC_READ: " + json.dumps(rec, sort_keys=True))
+            if int(reply["rsp"]) != 0:
+                raise RuntimeError(
+                    f"SC read 0x{addr:05X} returned rsp={reply['rsp']}"
+                )
+            return [int(word) for word in reply["payload"]]
+        time.sleep(0.001)
+
+    rec = {
+        "addr": f"0x{addr:05X}",
+        "count": count,
+        "secondary_before": f"0x{secondary_before:04X}",
+        "secondary_after": f"0x{sc_secondary_top(mmio):04X}",
+        "main_status": f"0x{status:08X}",
+    }
+    log_line(log_fh, "MMIO_SC_READ_FAIL: " + json.dumps(rec, sort_keys=True))
+    raise RuntimeError(f"timed out waiting for SC read reply 0x{addr:05X}")
+
+
+def snap_hist_mmio(mmio: SwbMmio, link: int, log_fh: Any,
+                   label: str) -> dict[str, Any]:
+    try:
+        words = sc_read_mmio(mmio, link, sweep.HIST_CSR_BASE_WORD, 19, log_fh)
+        return {
+            "label": label,
+            "wall": time.time(),
+            "read_method": "mmio_sc_read",
+            "raw": [f"0x{w:08X}" for w in words],
+            "UNDERFLOW": words[sweep.HIST_UNDERFLOW_W],
+            "OVERFLOW": words[sweep.HIST_OVERFLOW_W],
+            "INTERVAL_CFG": words[sweep.HIST_INTERVAL_CFG_W],
+            "BANK_STATUS": words[sweep.HIST_BANK_STATUS_W],
+            "PORT_STATUS": words[sweep.HIST_PORT_STATUS_W],
+            "TOTAL_HITS": words[sweep.HIST_TOTAL_HITS_W],
+            "DROPPED_HITS": words[sweep.HIST_DROPPED_HITS_W],
+            "COAL_STATUS": words[sweep.HIST_COAL_STATUS_W],
+            "LAST_INTERVAL_TOTAL_HITS": (
+                words[sweep.HIST_LAST_INTERVAL_TOTAL_HITS_W]
+            ),
+            "LAST_INTERVAL_DROPPED_HITS": (
+                words[sweep.HIST_LAST_INTERVAL_DROPPED_HITS_W]
+            ),
+            "LAST_INT_HITS": words[sweep.HIST_LAST_INTERVAL_TOTAL_HITS_W],
+        }
+    except RuntimeError as exc:
+        return {
+            "label": label,
+            "wall": time.time(),
+            "read_method": "mmio_sc_read",
+            "error": str(exc),
+            "TOTAL_HITS": 0,
+            "DROPPED_HITS": 0,
+            "LAST_INTERVAL_TOTAL_HITS": 0,
+            "LAST_INTERVAL_DROPPED_HITS": 0,
+            "LAST_INT_HITS": 0,
+            "INTERVAL_CFG": 0,
+            "BANK_STATUS": 0,
+            "PORT_STATUS": 0,
+            "COAL_STATUS": 0,
+        }
+
+
+def read_hist_bins_mmio(mmio: SwbMmio, link: int, log_fh: Any) -> list[int]:
+    bins: list[int] = []
+    for offset in range(sweep.HIST_NUM_BINS):
+        try:
+            bins.append(sc_read_mmio(
+                mmio, link, sweep.HIST_BIN_BASE_WORD + offset, 1, log_fh
+            )[0])
+        except RuntimeError:
+            bins.append(0)
+    return bins
+
+
 def drive_local_cmd_mmio(mmio: SwbMmio, link: int, cmd: int, payload24: int,
                          log_fh: Any) -> dict[str, Any]:
     if cmd in sweep.FORBIDDEN_OPCODES:
@@ -531,6 +759,8 @@ def summarize_rate_histogram(hist_bins: list[int],
         "per_channel_p50_per_ms": sorted(per_channel_per_ms)[len(per_channel_per_ms) // 2] if per_channel_per_ms else 0.0,
         "per_channel_max_per_ms": max(per_channel_per_ms, default=0.0),
         "per_channel_max_abs_delta": max_abs_delta,
+        "active_nonzero_channels": sum(1 for count in active_bins if count != 0),
+        "inactive_nonzero_bins": sum(1 for count in inactive_bins if count != 0),
         "active_bin_sum": sum(active_bins),
         "inactive_bin_sum": sum(inactive_bins),
         "pass": max_abs_delta <= tolerance_per_channel,
@@ -538,35 +768,73 @@ def summarize_rate_histogram(hist_bins: list[int],
 
 
 def summarize_delay_histogram(hist_bins: list[int],
-                              hist_interval_clocks: int) -> dict[str, Any]:
+                              hist_interval_clocks: int,
+                              source: str = "pre") -> dict[str, Any]:
     interval_ms = hist_interval_clocks / sweep.LVDS_CLK_HZ * 1000.0
+    nonzero_bins = [
+        {"bin": idx, "count": count}
+        for idx, count in enumerate(hist_bins)
+        if count != 0
+    ]
+    total = sum(hist_bins)
+    min_bin = nonzero_bins[0]["bin"] if nonzero_bins else None
+    max_bin = nonzero_bins[-1]["bin"] if nonzero_bins else None
+    p50_bin = None
+    if total > 0:
+        threshold = (total + 1) // 2
+        running = 0
+        for idx, count in enumerate(hist_bins):
+            running += count
+            if running >= threshold:
+                p50_bin = idx
+                break
+
+    def bin_range(idx: Optional[int]) -> Optional[dict[str, int]]:
+        if idx is None:
+            return None
+        low = sweep.HIST_DELAY_LEFT_CYCLES + idx * sweep.HIST_DELAY_BIN_WIDTH_CYCLES
+        return {
+            "bin": idx,
+            "low_cycles": low,
+            "high_cycles": low + sweep.HIST_DELAY_BIN_WIDTH_CYCLES - 1,
+        }
+
     return {
         "hist_interval_clocks": hist_interval_clocks,
         "hist_interval_ms": interval_ms,
         "left_bound_cycles": sweep.HIST_DELAY_LEFT_CYCLES,
         "right_bound_cycles": sweep.HIST_DELAY_RIGHT_CYCLES,
         "bin_width_cycles": sweep.HIST_DELAY_BIN_WIDTH_CYCLES,
-        "nonzero_bins": [
-            {"bin": idx, "count": count}
-            for idx, count in enumerate(hist_bins)
-            if count != 0
-        ][:32],
-        "hist_bin_sum": sum(hist_bins),
+        "expected": RN001_DELAY_EXPECTED_BY_SOURCE.get(source, {}),
+        "observed_min": bin_range(min_bin),
+        "observed_p50": bin_range(p50_bin),
+        "observed_max": bin_range(max_bin),
+        "nonzero_bin_count": len(nonzero_bins),
+        "nonzero_bins": nonzero_bins[:32],
+        "hist_bin_sum": total,
     }
 
 
 def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
                           row_idx: int, log_fh: Any,
-                          probe_period_s: float = 0.0) -> dict[str, Any]:
+                          probe_period_s: float = 0.0,
+                          hist_probe_period_s: float = 0.0,
+                          hist_bin_sample_delays_s: Optional[list[float]] = None
+                          ) -> dict[str, Any]:
     """Run RN.BASIC.001 stage commands without reopening /dev/mudaq0."""
     rid = row["row_id"]
     record: dict[str, Any] = {
         "row_idx": row_idx,
         "cmd_traces": [],
         "midrun_dma_probes": [],
+        "midrun_hist_probes": [],
+        "running_hist_bin_samples": [],
         "wall_clock_durations": {},
         "dma_enable_pre": enable_dma_mmio(mmio),
     }
+    pending_hist_bin_delays = sorted(
+        delay for delay in (hist_bin_sample_delays_s or []) if delay >= 0.0
+    )
 
     print(f"  [{rid}] mmio step 1: GRACE_1", flush=True)
     time.sleep(sweep.GRACE_1_POST_SC_WRITE_S)
@@ -598,20 +866,72 @@ def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
     record["cmd_traces"].append(trace_start)
     t_after_start = time.time()
     run_duration_s = float(row["interval_seconds"])
-    if probe_period_s > 0.0:
+    if probe_period_s > 0.0 or hist_probe_period_s > 0.0 or pending_hist_bin_delays:
         deadline = t_after_start + run_duration_s
-        next_probe = t_after_start
-        probe_idx = 0
-        while time.time() < deadline:
+        next_dma_probe = t_after_start if probe_period_s > 0.0 else None
+        next_hist_probe = t_after_start if hist_probe_period_s > 0.0 else None
+        dma_probe_idx = 0
+        hist_probe_idx = 0
+        bin_sample_idx = 0
+        while time.time() < deadline or pending_hist_bin_delays:
             now = time.time()
-            if now >= next_probe:
-                probe = snapshot_dma_mmio(mmio, f"run_{probe_idx:03d}")
+            if next_dma_probe is not None and now >= next_dma_probe:
+                probe = snapshot_dma_mmio(mmio, f"run_{dma_probe_idx:03d}")
                 probe["elapsed_since_start_s"] = now - t_after_start
                 record["midrun_dma_probes"].append(probe)
                 log_line(log_fh, "MMIO_DMA_PROBE: " + json.dumps(probe, sort_keys=True))
-                probe_idx += 1
-                next_probe += probe_period_s
-            time.sleep(min(0.001, max(0.0, deadline - time.time())))
+                dma_probe_idx += 1
+                next_dma_probe += probe_period_s
+                while next_dma_probe <= time.time():
+                    next_dma_probe += probe_period_s
+            if next_hist_probe is not None and now >= next_hist_probe:
+                hist = snap_hist_mmio(
+                    mmio, link, log_fh, f"run_{hist_probe_idx:03d}"
+                )
+                hist["elapsed_since_start_s"] = now - t_after_start
+                record["midrun_hist_probes"].append(hist)
+                log_line(log_fh, "MMIO_HIST_PROBE: " + json.dumps(hist, sort_keys=True))
+                hist_probe_idx += 1
+                next_hist_probe += hist_probe_period_s
+                while next_hist_probe <= time.time():
+                    next_hist_probe += hist_probe_period_s
+            if pending_hist_bin_delays and now >= (
+                t_after_start + pending_hist_bin_delays[0]
+            ):
+                due_delay_s = pending_hist_bin_delays.pop(0)
+                label = f"run_bins_{bin_sample_idx:03d}"
+                sample_start = time.time()
+                hist_before = snap_hist_mmio(mmio, link, log_fh, label + "_before")
+                bins = read_hist_bins_mmio(mmio, link, log_fh)
+                hist_after = snap_hist_mmio(mmio, link, log_fh, label + "_after")
+                sample_end = time.time()
+                sample = {
+                    "label": label,
+                    "requested_delay_s": due_delay_s,
+                    "elapsed_start_s": sample_start - t_after_start,
+                    "elapsed_end_s": sample_end - t_after_start,
+                    "duration_s": sample_end - sample_start,
+                    "hist_csr_before": hist_before,
+                    "hist_csr_after": hist_after,
+                    "bins": bins,
+                    "bins_sum": sum(bins),
+                }
+                record["running_hist_bin_samples"].append(sample)
+                log_line(log_fh, "MMIO_HIST_BINS: " + json.dumps({
+                    key: value for key, value in sample.items() if key != "bins"
+                }, sort_keys=True))
+                bin_sample_idx += 1
+            sleep_targets: list[float] = []
+            if time.time() < deadline:
+                sleep_targets.append(deadline)
+            if next_dma_probe is not None:
+                sleep_targets.append(next_dma_probe)
+            if next_hist_probe is not None:
+                sleep_targets.append(next_hist_probe)
+            if pending_hist_bin_delays:
+                sleep_targets.append(t_after_start + pending_hist_bin_delays[0])
+            sleep_until = min(sleep_targets) if sleep_targets else time.time()
+            time.sleep(min(0.001, max(0.0, sleep_until - time.time())))
     else:
         time.sleep(run_duration_s)
     t_after_run = time.time()
@@ -888,6 +1208,8 @@ def run_board_capture(args: argparse.Namespace) -> int:
         "hist_ingress_source": args.hist_ingress_source,
         "hist_ingress_banks": args.hist_ingress_banks,
         "hist_preset": args.hist_preset,
+        "hist_running_probe_period_s": args.hist_running_probe_period_s,
+        "hist_running_bin_sample_s": args.hist_running_bin_sample_s,
         "evidence_dir": str(evidence_dir),
         "preenable_dma_before_capture": args.preenable_dma_before_capture,
     }
@@ -965,7 +1287,9 @@ def run_board_capture(args: argparse.Namespace) -> int:
             with SwbMmio() as mmio:
                 record["stage_recipe"] = run_stage_recipe_mmio(
                     mmio, args.link, row, row_idx, log_fh=log_fh,
-                    probe_period_s=args.probe_period_s
+                    probe_period_s=args.probe_period_s,
+                    hist_probe_period_s=args.hist_running_probe_period_s,
+                    hist_bin_sample_delays_s=args.hist_running_bin_sample_s,
                 )
         finally:
             stop_dma_capture(dma_proc, dma_log_fh)
@@ -974,15 +1298,43 @@ def run_board_capture(args: argparse.Namespace) -> int:
                                    record["stage_recipe"], log_fh)
         record["snapshot_post"] = sweep.full_snapshot(args.sc_tool, args.link,
                                                       log_fh=log_fh)
-        record["hist_bins"] = sweep.read_hist_bins(args.sc_tool, args.link,
-                                                   log_fh=log_fh)
+        record["post_run_hist_bins"] = sweep.read_hist_bins(args.sc_tool, args.link,
+                                                            log_fh=log_fh)
+        running_hist_samples = record["stage_recipe"].get(
+            "running_hist_bin_samples", []
+        )
+        if running_hist_samples:
+            record["hist_bins"] = running_hist_samples[0]["bins"]
+            record["hist_bins_selected_phase"] = "running"
+            record["hist_bins_selected_label"] = running_hist_samples[0]["label"]
+        else:
+            record["hist_bins"] = record["post_run_hist_bins"]
+            record["hist_bins_selected_phase"] = "post_run"
+            record["hist_bins_selected_label"] = "post_run"
+        record["hist_readout_policy"] = {
+            "selected_phase": record["hist_bins_selected_phase"],
+            "post_run_bins_valid_for_1ms_rate": False,
+            "reason": (
+                "With 1 ms ping-pong intervals, post-END bins normally show "
+                "the last empty post-run interval; RUNNING-phase samples are "
+                "the evidence used for rate comparison."
+            ),
+        }
         if args.hist_preset == "delay":
             record["delay_comparison"] = summarize_delay_histogram(
-                record["hist_bins"], args.hist_interval_clocks
+                record["hist_bins"], args.hist_interval_clocks,
+                source=args.hist_ingress_source
+            )
+            record["post_run_delay_comparison"] = summarize_delay_histogram(
+                record["post_run_hist_bins"], args.hist_interval_clocks,
+                source=args.hist_ingress_source
             )
         else:
             record["rate_comparison"] = summarize_rate_histogram(
                 record["hist_bins"], args.hist_interval_clocks
+            )
+            record["post_run_rate_comparison"] = summarize_rate_histogram(
+                record["post_run_hist_bins"], args.hist_interval_clocks
             )
         record["cosim_expectation"] = {
             "source": "RN.BASIC.001 cosim 1 ms window",
@@ -1030,10 +1382,13 @@ def run_board_capture(args: argparse.Namespace) -> int:
     print(f"wire_hit_count={record['rdma']['wire_hit_count']}")
     print(f"frame0_packet_timestamp={record['rdma']['frame0_packet_timestamp']}")
     print(f"delta_hist={record['rdma']['inter_frame_delta_histogram']}")
+    print(f"hist_bins_selected_phase={record['hist_bins_selected_phase']}")
     if args.hist_preset == "delay":
         print(f"delay_comparison={record['delay_comparison']}")
+        print(f"post_run_delay_comparison={record['post_run_delay_comparison']}")
     else:
         print(f"rate_comparison={record['rate_comparison']}")
+        print(f"post_run_rate_comparison={record['post_run_rate_comparison']}")
     print(f"pass={record['pass']}")
     return 0 if record["pass"] else 2
 
@@ -1059,6 +1414,11 @@ def main(argv: list[str]) -> int:
                     help="histogram_statistics_v2 INTERVAL_CFG; default is 1 ms at 125 MHz")
     ap.add_argument("--probe-period-s", type=float, default=0.0,
                     help="debug-only mid-run DMA/MMIO sample period")
+    ap.add_argument("--hist-running-probe-period-s", type=float, default=0.0,
+                    help="sample histogram CSR words during RUNNING at this period")
+    ap.add_argument("--hist-running-bin-sample-s", type=float, action="append",
+                    default=[],
+                    help="sample all 256 histogram bins during RUNNING at this elapsed time; may be repeated")
     ap.add_argument("--preenable-dma-before-capture", action="store_true",
                     help="enable DMA before launching dma_tool so the reader snapshots a post-reset write pointer")
     args = ap.parse_args(argv)

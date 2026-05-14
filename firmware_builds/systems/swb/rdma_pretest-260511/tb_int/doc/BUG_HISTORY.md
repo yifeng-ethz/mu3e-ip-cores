@@ -39,8 +39,69 @@ Historical formal note:
 | [BUG-003-H](#bug-003-h-legacy-swb-dma-path-stripped-mu3e-wire-frame-structure) | H | datapath-contract | `always-on (every SWB DMA capture)` | partial | `RN.BASIC.050` cosim / `#109` host rxbuffer trace | `pending` | The legacy SWB DMA path emitted flat 64-bit hit records instead of full Mu3e wire-frame words. |
 | [BUG-004-R](#bug-004-r-swb-firmware-left-dirty-k284-trailer-metadata-and-no-idle-sop-guard) | R | datapath-contract | `always-on (OPQ egress marker contract)` | partial | `RN.BASIC.001` RDMA popup / K-symbol audit | `pending` | SWB firmware could forward a true K28.4 trailer with nonzero metadata bits and had no simulation guard for illegal Idle-frame SOPs at the OPQ-to-DMA boundary. |
 | [BUG-005-H](#bug-005-h-swb-opq-signaltap-used-optimized-wrapper-aliases) | H | non-datapath-refactor | `directed-only (SignalTap compile gate)` | fixed-debug-loadable | RN.BASIC.001 SWB OPQ STP Node Finder | `d0b58930` / `bc192229` | The OPQ STP targeted wrapper-local aliases that Quartus optimized or exposed only as aggregate nodes, so the debug image could not prove the OPQ-to-DMA boundary. |
+| [BUG-006-H](#bug-006-h-board-rate-hist-readout-sampled-the-empty-post-run-1-ms-bank) | H | non-datapath-refactor | `common (1 ms board histogram readback after END_RUN)` | fixed-harness / board-rerun-pending | RN.BASIC.001 pre/post rbCAM board pair, 2026-05-14 | `pending` | The board runner compared post-END `hist_bin` data even though the 1 ms ping-pong histogram had already advanced into empty post-run intervals. |
 
 ## 2026-05-14
+
+### BUG-006-H: Board rate hist readout sampled the empty post-run 1 ms bank
+- First seen in:
+  - `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/rn001_rbcam_rate_pre_post_pair_20260514_1637.json`
+  - `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/STP_OPQ_RN001_PRE_RATE_MIDRUN_20260514_164249/board/RN.BASIC.001_swb_dma_packer_20260514_164250/board_summary.json`
+- Symptom:
+  - Four `RN.BASIC.001` pre/post rbCAM runs all reported `hist_bin` sums of
+    zero when the script read bins after `END_RUN`.
+  - Two pre-rbCAM runs still had decoded RDMA data (`3381` and `193`
+    canonical 128-subheader frames), while both post-rbCAM runs produced zero
+    RDMA bytes. Those two nonzero rxbuffer runs are not treated as clean PASS
+    evidence because the later runs are empty and the DMA buffer may contain
+    stale/drained data.
+  - The mid-run board attempt had nonzero histogram CSR evidence before END:
+    `TOTAL_HITS = 3835`, `LAST_INTERVAL_TOTAL_HITS = 8225`,
+    `INTERVAL_CFG = 125000`, and `PORT_STATUS = 0x000200FF`; the post-END
+    summary then read `TOTAL_HITS = 0`, `LAST_INTERVAL_TOTAL_HITS = 0`, and
+    zero bins.
+- Root cause:
+  - The board runner configured `INTERVAL_CFG = 125000` (1 ms at 125 MHz) but
+    read all 256 histogram bins only after `END_RUN` plus terminate/drain time.
+  - `histogram_statistics_v2` defines `TOTAL_HITS` as a live current-interval
+    counter, `LAST_INTERVAL_TOTAL_HITS` as the most recent completed interval,
+    and `hist_bin` as the frozen completed ping-pong bank. After the run stops,
+    later 1 ms empty intervals legitimately overwrite the visible completed
+    interval with zeros.
+- Fix status:
+  - state:
+    - fixed-harness for the readout phase; board rerun with the new harness is
+      pending
+  - mechanism:
+    - `run_swb_dma_packer_rn001_board.py` now owns SC reads through the same
+      open `/dev/mudaq0` MMIO mapping used for the run-control sequence, so it
+      can sample histogram CSR words and optional 256-bin snapshots during
+      RUNNING without launching a competing `sc_tool` process
+    - `run_rn001_rbcam_pre_post_pair.py` now requests RUNNING histogram CSR
+      probes and one 256-bin RUNNING sample by default
+    - board summaries keep post-run histogram bins as teardown evidence but
+      select RUNNING-phase bins for rate/delay comparisons when available
+  - before_fix_outcome:
+    - `rate_comparison.active_bin_sum = 0` and `inactive_bin_sum = 0` on all
+      four pre/post runs, including runs with nonzero decoded RDMA frames
+  - after_fix_outcome:
+    - syntax and whitespace checks passed; board rerun is still required before
+      claiming 256 active channels on hardware
+  - potential_hazard:
+    - medium; single-word reads of 256 bins during RUNNING can span multiple
+      1 ms completed banks, so the result is acceptable only for stable-flow
+      min/p50/max checks, not for exact same-interval per-bin conservation
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run in this turn
+- Expected RN.BASIC.001 histogram targets:
+  - rate preset: `256` active channels, `31264` hits/ms total,
+    `122.125` hits/channel/ms; acceptable per-channel bins should cluster at
+    `122` or `123` counts for a 1 ms interval
+  - delay preset: range `[-1000, 3096)` cycles with 16-cycle bins; expected
+    pre-rbCAM min/p50/max is approximately `27/536/1043` cycles and expected
+    post-rbCAM min/p50/max is approximately `2000/2100/2196` cycles
+- Commit:
+  - pending
 
 ### BUG-005-H: SWB OPQ SignalTap used optimized wrapper aliases
 - First seen in:
@@ -120,6 +181,20 @@ Historical formal note:
     `syn/board_projects/swb_a10/output_files/top.sof`
   - SOF SHA256:
     `a9328549290d492cfc0bd2c5dbabee88ffdaba45d1ed3753daf87848f5822c36`
+  - programmed/recovered board image:
+    - `quartus_pgm -c "DE5 [3-6.2]"` succeeded with checksum `0x31A81F8C`
+    - PCIe recovered to `/dev/mudaq0`; SWB `VERSION_REGISTER_R` read
+      `0x2B87D22A`
+  - runtime STP capture:
+    `tb_int/REPORT/STP_OPQ_RN001_PRE_RATE_20260514_164001/opq_capture.csv`
+  - runtime STP result:
+    - OPQ egress valid for `22` words, registered `opq_dma_input_*` one cycle
+      later, and three 256-bit DMA writes at samples `523`, `531`, and `537`
+    - decoded words form a clean short startup frame:
+      `K28.5` header, count word `0x00100000`, sixteen `K23.7` subheaders
+      `0x70..0x7F`, and clean `K28.4` trailer `0x0000009C`
+    - this proves live OPQ-to-DMA-pack boundary wiring on board, but does not
+      prove the full RN.BASIC 128-subheader packet reaches OPQ egress/RDMA
   - generator:
     `script/generate_rn001_opq_stp.py`
   - regenerated STP:
