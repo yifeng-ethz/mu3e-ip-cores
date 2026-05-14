@@ -40,6 +40,80 @@ def fmt_hex(value: int) -> str:
     return f"0x{value:08X}"
 
 
+def parse_sv_int_literal(text: str) -> int:
+    text = text.strip().rstrip(",;")
+    match = re.match(r"(?:(\d+)'([dDhHbB]))?([0-9A-Fa-f_xX]+)$", text)
+    if not match:
+        raise ValueError(f"unsupported SystemVerilog literal: {text}")
+    _width, base, digits = match.groups()
+    digits = digits.replace("_", "")
+    if base is None:
+        return int(digits, 0)
+    if base.lower() == "d":
+        return int(digits, 10)
+    if base.lower() == "h":
+        return int(digits, 16)
+    if base.lower() == "b":
+        return int(digits, 2)
+    raise ValueError(f"unsupported SystemVerilog literal base: {base}")
+
+
+def pack_mu3e_version(major: int, minor: int, patch: int, build: int) -> int:
+    return ((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((patch & 0xF) << 12) | (build & 0xFFF)
+
+
+def load_generated_runctl_version_from_vhdl(feb_qsys: Path) -> tuple[int | None, str]:
+    generated_vhdl = (
+        feb_qsys.with_suffix("")
+        / "synthesis"
+        / "submodules"
+        / f"{feb_qsys.stem}_upload_subsystem.vhd"
+    )
+    if not generated_vhdl.is_file():
+        return None, f"missing generated wrapper: {generated_vhdl}"
+    text = generated_vhdl.read_text(encoding="utf-8", errors="replace")
+    values: dict[str, int] = {}
+    for name in ("VERSION_MAJOR", "VERSION_MINOR", "VERSION_PATCH", "BUILD"):
+        matches = re.findall(rf"\b{name}\s*(?:=>|:=)\s*([0-9]+)", text)
+        if not matches:
+            return None, f"{generated_vhdl}: missing generated generic {name}"
+        values[name] = int(matches[-1], 10)
+    return (
+        pack_mu3e_version(
+            values["VERSION_MAJOR"],
+            values["VERSION_MINOR"],
+            values["VERSION_PATCH"],
+            values["BUILD"],
+        ),
+        str(generated_vhdl),
+    )
+
+
+def load_generated_runctl_version(feb_qsys: Path) -> tuple[int | None, str]:
+    vhdl_version, vhdl_source = load_generated_runctl_version_from_vhdl(feb_qsys)
+    if vhdl_version is not None:
+        return vhdl_version, vhdl_source
+    generated_sv = feb_qsys.with_suffix("") / "synthesis" / "submodules" / "runctl_mgmt_host.sv"
+    if not generated_sv.is_file():
+        return None, f"{vhdl_source}; missing generated RTL: {generated_sv}"
+    text = generated_sv.read_text(encoding="utf-8", errors="replace")
+    values: dict[str, int] = {}
+    for name in ("VERSION_MAJOR", "VERSION_MINOR", "VERSION_PATCH", "BUILD"):
+        match = re.search(rf"\bparameter\s+\w+(?:\s*\[[^\]]+\])?\s+{name}\s*=\s*([^,\n;]+)", text)
+        if not match:
+            return None, f"{generated_sv}: missing parameter {name}"
+        values[name] = parse_sv_int_literal(match.group(1))
+    return (
+        pack_mu3e_version(
+            values["VERSION_MAJOR"],
+            values["VERSION_MINOR"],
+            values["VERSION_PATCH"],
+            values["BUILD"],
+        ),
+        str(generated_sv),
+    )
+
+
 def load_uid_reset_value(svd_path: Path) -> int:
     root = ET.parse(svd_path).getroot()
     for reg_name in ("UID", "ID"):
@@ -81,6 +155,16 @@ def load_downstream_map(sopcinfo_path: Path, qsys_path: Path) -> dict[str, int]:
         except Exception as exc:
             errors.append(f"{path}: {exc}")
     raise RuntimeError(" ; ".join(errors))
+
+
+def find_downstream_slave(downstream_map: dict[str, int], *candidates: str) -> str:
+    for candidate in candidates:
+        if candidate in downstream_map:
+            return candidate
+    raise RuntimeError(
+        "none of the expected downstream slaves are present: "
+        + ", ".join(candidates)
+    )
 
 
 def get_manifest_entry(manifest: dict[str, Any], instance: str) -> dict[str, Any]:
@@ -163,9 +247,12 @@ def main() -> int:
     histogram_uid_expected = load_uid_reset_value(HISTOGRAM_SVD)
     histogram_ingress_uid_expected = load_uid_reset_value(HISTOGRAM_INGRESS_SVD)
     runctl_uid_expected = load_uid_reset_value(RUNCTL_SVD)
-    runctl_version_expected = runctl_svd["packed_device_version"]
+    runctl_version_expected, runctl_version_expected_source = load_generated_runctl_version(args.feb_qsys.resolve())
     if runctl_version_expected is None:
-        raise RuntimeError("runctl_mgmt_host SVD is missing a packed device version")
+        runctl_version_expected = runctl_svd["packed_device_version"]
+        runctl_version_expected_source = f"{RUNCTL_SVD} ({runctl_version_expected_source})"
+    if runctl_version_expected is None:
+        raise RuntimeError("runctl_mgmt_host expected version unavailable from generated RTL and SVD")
 
     checks: list[dict[str, Any]] = []
 
@@ -180,9 +267,19 @@ def main() -> int:
         return {"sc_addr": f"0x{addr:05X}", "uid": fmt_hex(value)}
 
     def emulator_probe() -> dict[str, Any]:
-        base = mm_bridge_sc_base + downstream_map["data_path_subsystem_emulator_mutrig_0.csr"] // 4
+        instance = find_downstream_slave(
+            downstream_map,
+            "data_path_subsystem_emulator_mutrig_0.csr",
+            "data_path_subsystem_emulator_mutrig_qsys_inst.csr",
+        )
+        base = mm_bridge_sc_base + downstream_map[instance] // 4
         words = sc_read(args.sc_tool, args.link, base, 2)
+        if words[0] != 0x454D5554:
+            raise RuntimeError(
+                f"{instance} UID mismatch: got {fmt_hex(words[0])}, expected 0x454D5554"
+            )
         return {
+            "instance": instance,
             "sc_addr": f"0x{base:05X}",
             "uid_raw": fmt_hex(words[0]),
             "version_raw": fmt_hex(words[1]),
@@ -245,6 +342,7 @@ def main() -> int:
             "last_cmd": fmt_hex(last_cmd),
             "rx_cmd_count": fmt_hex(rx_cmd_count),
             "local_cmd": fmt_hex(local_cmd),
+            "expected_version_source": runctl_version_expected_source,
         }
 
     def runctl_jtag_check() -> dict[str, Any]:
@@ -333,6 +431,7 @@ def main() -> int:
             "status": fmt_hex(status),
             "last_cmd": fmt_hex(last_cmd),
             "local_cmd": fmt_hex(local_cmd),
+            "expected_version_source": runctl_version_expected_source,
         }
 
     run_check(checks, "mm_bridge.histogram_statistics_0.uid", lambda: hist_uid_check("data_path_subsystem_histogram_statistics_0"))
