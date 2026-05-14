@@ -1,0 +1,4 @@
+pruned after RN.BASIC evidence collection; requested checkpoint files are in the row evidence directory
+RN.BASIC batch 1 done
+RN.BASIC summary /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/cosim/REPORT/RN.BASIC.194_summary.json
+make: Leaving directory '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/cosim'

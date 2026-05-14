@@ -10,8 +10,8 @@
 //
 // Version   : 26.3.10
 // Date      : 20260514
-// Change    : Preserve OPQ words across DMA halffull backpressure with an
-//             internal elastic FIFO.
+// Change    : Preserve OPQ words across DMA halffull backpressure with a
+//             registered-pop elastic FIFO.
 //
 // Outputs: 256b DMA word stream — wen, end_of_event, halffull accounting.
 //          end_of_event is asserted on the last beat of each event boundary,
@@ -87,24 +87,25 @@ module swb_opq_dma_packer #(
     reg [FIFO_PTR_W-1:0]   fifo_wr_ptr;
     reg [FIFO_PTR_W-1:0]   fifo_rd_ptr;
     reg [FIFO_COUNT_W-1:0] fifo_count;
+    reg [OPQ_DATA_W-1:0]   fifo_pop_data;
+    reg [OPQ_DATK_W-1:0]   fifo_pop_datak;
+    reg                    fifo_pop_eop;
+    reg                    fifo_pop_valid;
 
     wire                   fifo_empty;
     wire                   fifo_full;
-    wire                   fifo_read;
+    wire                   fifo_read_req;
     wire                   fifo_write;
     wire                   fifo_overflow;
-    wire [OPQ_DATA_W-1:0]  fifo_rd_data;
-    wire [OPQ_DATK_W-1:0]  fifo_rd_datak;
-    wire                   fifo_rd_eop;
+    wire                   fifo_pop_accept;
 
     assign fifo_empty    = (fifo_count == '0);
     assign fifo_full     = (fifo_count == FIFO_DEPTH_COUNT);
-    assign fifo_read     = !fifo_empty && !i_dma_halffull;
+    assign fifo_pop_accept = fifo_pop_valid && !i_dma_halffull;
+    assign fifo_read_req = !fifo_empty && !i_dma_halffull &&
+                           (!fifo_pop_valid || fifo_pop_accept);
     assign fifo_write    = i_opq_valid && !fifo_full;
     assign fifo_overflow = i_opq_valid && fifo_full;
-    assign fifo_rd_data  = fifo_data[fifo_rd_ptr];
-    assign fifo_rd_datak = fifo_datak[fifo_rd_ptr];
-    assign fifo_rd_eop   = fifo_eop[fifo_rd_ptr];
 
     function automatic logic [FIFO_PTR_W-1:0] fifo_ptr_next(
         input logic [FIFO_PTR_W-1:0] ptr
@@ -130,12 +131,17 @@ module swb_opq_dma_packer #(
             fifo_wr_ptr          <= '0;
             fifo_rd_ptr          <= '0;
             fifo_count           <= '0;
+            fifo_pop_data        <= '0;
+            fifo_pop_datak       <= '0;
+            fifo_pop_eop         <= 1'b0;
+            fifo_pop_valid       <= 1'b0;
         end else begin
             // default
             o_dma_wen         <= 1'b0;
             o_end_of_event    <= 1'b0;
 
-            if ((i_dma_halffull && (i_opq_valid || !fifo_empty)) ||
+            if ((i_dma_halffull && (i_opq_valid || !fifo_empty ||
+                                    fifo_pop_valid)) ||
                 fifo_overflow) begin
                 o_halt_cnt <= o_halt_cnt + 1;
             end
@@ -148,11 +154,17 @@ module swb_opq_dma_packer #(
                 o_input_word_cnt           <= o_input_word_cnt + 1;
             end
 
-            if (fifo_read) begin
-                fifo_rd_ptr <= fifo_ptr_next(fifo_rd_ptr);
+            if (fifo_read_req) begin
+                fifo_pop_data     <= fifo_data[fifo_rd_ptr];
+                fifo_pop_datak    <= fifo_datak[fifo_rd_ptr];
+                fifo_pop_eop      <= fifo_eop[fifo_rd_ptr];
+                fifo_pop_valid    <= 1'b1;
+                fifo_rd_ptr       <= fifo_ptr_next(fifo_rd_ptr);
+            end else if (fifo_pop_accept) begin
+                fifo_pop_valid   <= 1'b0;
             end
 
-            unique case ({fifo_write, fifo_read})
+            unique case ({fifo_write, fifo_read_req})
                 2'b10: begin
                     fifo_count    <= fifo_count + 1'b1;
                 end
@@ -173,22 +185,22 @@ module swb_opq_dma_packer #(
             end
             // synthesis translate_on
 
-            if (fifo_read) begin
+            if (fifo_pop_accept) begin
                 emit_data = accum;
                 emit_datak = accum_datak;
-                emit_data[slot_idx*OPQ_DATA_W +: OPQ_DATA_W] = fifo_rd_data;
-                emit_datak[slot_idx*OPQ_DATK_W +: OPQ_DATK_W] = fifo_rd_datak;
+                emit_data[slot_idx*OPQ_DATA_W +: OPQ_DATA_W] = fifo_pop_data;
+                emit_datak[slot_idx*OPQ_DATK_W +: OPQ_DATK_W] = fifo_pop_datak;
 
                 // Emit either on a full 256b line or immediately on OPQ EOP.
                 // The EOP case pads the remaining slots with zero, so the next
                 // Mu3e frame always starts on a fresh DMA line.
-                if ((slot_idx == SLOTS_PER_DMA - 1) || fifo_rd_eop) begin
+                if ((slot_idx == SLOTS_PER_DMA - 1) || fifo_pop_eop) begin
                     o_dma_data           <= emit_data;
                     o_dma_datak          <= emit_datak;
                     o_dma_wen            <= 1'b1;
                     o_output_word_cnt    <= o_output_word_cnt + 1;
-                    o_end_of_event       <= fifo_rd_eop;
-                    if (fifo_rd_eop) begin
+                    o_end_of_event       <= fifo_pop_eop;
+                    if (fifo_pop_eop) begin
                         o_event_cnt    <= o_event_cnt + 1;
                     end
                     slot_idx       <= '0;
