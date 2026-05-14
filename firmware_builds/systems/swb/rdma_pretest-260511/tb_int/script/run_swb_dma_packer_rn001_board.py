@@ -502,7 +502,8 @@ def sc_scan_mmio_reply(mmio: SwbMmio, start: int, stop: int, link: int,
         pkt_type = (header >> 24) & 0x3
         pkt_link = (header >> 8) & 0xFF
         pkt_addr = addr_word & 0x0003FFFF
-        rsp = (len_word >> 16) & 0x3
+        rsp = (len_word >> 18) & 0x3
+        ack = ((len_word >> 16) & 0x1) != 0
         payload_len = len_word & 0xFFFF
         total_words = 4 + payload_len
         if avail < total_words:
@@ -531,6 +532,7 @@ def sc_scan_mmio_reply(mmio: SwbMmio, start: int, stop: int, link: int,
                 "addr": f"0x{addr_word:08X}",
                 "len": f"0x{len_word:08X}",
                 "rsp": rsp,
+                "ack": ack,
                 "payload": payload,
             }
         ptr = sc_ring_advance(ptr, total_words)
@@ -538,7 +540,7 @@ def sc_scan_mmio_reply(mmio: SwbMmio, start: int, stop: int, link: int,
 
 
 def sc_read_mmio(mmio: SwbMmio, link: int, addr: int, count: int,
-                 log_fh: Any, timeout_s: float = 1.0) -> list[int]:
+                 log_fh: Any, timeout_s: float = 0.1) -> list[int]:
     """Issue one SC read through the already-open SWB MMIO mapping."""
     if count < 1:
         raise ValueError("SC read count must be >= 1")
@@ -660,16 +662,33 @@ def snap_hist_mmio(mmio: SwbMmio, link: int, log_fh: Any,
         }
 
 
-def read_hist_bins_mmio(mmio: SwbMmio, link: int, log_fh: Any) -> list[int]:
+def read_hist_bins_mmio(mmio: SwbMmio, link: int, log_fh: Any,
+                        max_errors: int = 8) -> tuple[list[int], dict[str, Any]]:
     bins: list[int] = []
+    errors: list[dict[str, Any]] = []
     for offset in range(sweep.HIST_NUM_BINS):
         try:
             bins.append(sc_read_mmio(
                 mmio, link, sweep.HIST_BIN_BASE_WORD + offset, 1, log_fh
             )[0])
-        except RuntimeError:
+        except RuntimeError as exc:
             bins.append(0)
-    return bins
+            errors.append({
+                "bin": offset,
+                "addr": f"0x{sweep.HIST_BIN_BASE_WORD + offset:05X}",
+                "error": str(exc),
+            })
+            if len(errors) >= max_errors:
+                break
+    attempted_count = len(bins)
+    if len(bins) < sweep.HIST_NUM_BINS:
+        bins.extend([0] * (sweep.HIST_NUM_BINS - len(bins)))
+    return bins, {
+        "read_count": attempted_count,
+        "error_count": len(errors),
+        "aborted": len(errors) >= max_errors,
+        "errors_head": errors[:8],
+    }
 
 
 def drive_local_cmd_mmio(mmio: SwbMmio, link: int, cmd: int, payload24: int,
@@ -902,7 +921,7 @@ def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
                 label = f"run_bins_{bin_sample_idx:03d}"
                 sample_start = time.time()
                 hist_before = snap_hist_mmio(mmio, link, log_fh, label + "_before")
-                bins = read_hist_bins_mmio(mmio, link, log_fh)
+                bins, bin_read_meta = read_hist_bins_mmio(mmio, link, log_fh)
                 hist_after = snap_hist_mmio(mmio, link, log_fh, label + "_after")
                 sample_end = time.time()
                 sample = {
@@ -913,6 +932,7 @@ def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
                     "duration_s": sample_end - sample_start,
                     "hist_csr_before": hist_before,
                     "hist_csr_after": hist_after,
+                    "bin_read": bin_read_meta,
                     "bins": bins,
                     "bins_sum": sum(bins),
                 }
