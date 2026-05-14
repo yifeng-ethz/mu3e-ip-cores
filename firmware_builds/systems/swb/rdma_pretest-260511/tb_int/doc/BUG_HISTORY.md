@@ -38,7 +38,7 @@ Historical formal note:
 | [BUG-002-H](#bug-002-h-phase-1-link-2-legacy-lvds-smoke-bypassed-the-physical-link-boundary) | H | non-datapath-refactor | `directed-only (hardware debug repro)` | open | `B067` Phase 1 legacy-link preflight | `pending` | Existing SWB tb_int cases pass through abstract RDMA/OPQ/DMA interfaces and do not exercise firefly lock, LVDS word alignment, or LINK_LOCKED[2]. |
 | [BUG-003-H](#bug-003-h-legacy-swb-dma-path-stripped-mu3e-wire-frame-structure) | H | datapath-contract | `always-on (every SWB DMA capture)` | partial | `RN.BASIC.050` cosim / `#109` host rxbuffer trace | `pending` | The legacy SWB DMA path emitted flat 64-bit hit records instead of full Mu3e wire-frame words. |
 | [BUG-004-R](#bug-004-r-swb-firmware-left-dirty-k284-trailer-metadata-and-no-idle-sop-guard) | R | datapath-contract | `always-on (OPQ egress marker contract)` | partial | `RN.BASIC.001` RDMA popup / K-symbol audit | `pending` | SWB firmware could forward a true K28.4 trailer with nonzero metadata bits and had no simulation guard for illegal Idle-frame SOPs at the OPQ-to-DMA boundary. |
-| [BUG-005-H](#bug-005-h-swb-opq-signaltap-used-optimized-wrapper-aliases) | H | non-datapath-refactor | `directed-only (SignalTap compile gate)` | fixed | RN.BASIC.001 SWB OPQ STP Node Finder | `pending` | The OPQ STP targeted wrapper-local aliases that Quartus optimized or exposed only as aggregate nodes, so the debug image could not prove the OPQ-to-DMA boundary. |
+| [BUG-005-H](#bug-005-h-swb-opq-signaltap-used-optimized-wrapper-aliases) | H | non-datapath-refactor | `directed-only (SignalTap compile gate)` | fixed-debug-loadable | RN.BASIC.001 SWB OPQ STP Node Finder | `d0b58930` + this checkpoint | The OPQ STP targeted wrapper-local aliases that Quartus optimized or exposed only as aggregate nodes, so the debug image could not prove the OPQ-to-DMA boundary. |
 
 ## 2026-05-14
 
@@ -71,8 +71,8 @@ Historical formal note:
     instead of stable bit-level tap leaves.
 - Fix status:
   - state:
-    - fixed for STP probe naming and imported-QSF map connectivity; full SWB
-      compile and board capture are still pending
+    - fixed-debug-loadable for STP probe naming, imported-QSF map connectivity,
+      and SWB SOF generation; board capture is still pending
   - mechanism:
     - retargeted raw OPQ egress probes to
       `swb_block:e_swb_block|ingress_egress_adaptor:e_ingress_egress_adaptor|`
@@ -97,9 +97,14 @@ Historical formal note:
       `Info (35024): Successfully connected in-system debug instance
       "rn001_opq_ingress_egress" to all 1103 required data inputs, trigger
       inputs, acquisition clocks, and dynamic pins`
+    - full compile completed successfully with 0 errors and 369 warnings;
+      `output_files/top.sof` SHA256 is
+      `a9328549290d492cfc0bd2c5dbabee88ffdaba45d1ed3753daf87848f5822c36`
   - potential_hazard:
-    - low for STP naming; hardware conclusions remain provisional until the
-      rebuilt image captures nonzero OPQ/RDMA traffic on board
+    - low for STP naming; medium for production timing because STA still has
+      slow-corner setup residuals (-0.121 ns at 100 C, -0.109 ns at 0 C);
+      hardware conclusions remain provisional until the rebuilt image captures
+      nonzero OPQ/RDMA traffic on board
   - Claude Opus 4.7 xhigh review decision:
     - pending / not run in this turn
 - Runtime / coverage context:
@@ -109,14 +114,18 @@ Historical formal note:
     `syn/board_projects/swb_a10/rn001_opq_ingress_egress_nodecheck_20260514_retargeted.md`
   - imported map gate:
     `syn/board_projects/swb_a10/output_files/top.map.rpt`
-  - full compile log in progress:
+  - full compile log:
     `syn/board_projects/swb_a10/codex_swb_opq_stp_imported_fix_compile_20260514_160813.log`
+  - generated debug SOF:
+    `syn/board_projects/swb_a10/output_files/top.sof`
+  - SOF SHA256:
+    `a9328549290d492cfc0bd2c5dbabee88ffdaba45d1ed3753daf87848f5822c36`
   - generator:
     `script/generate_rn001_opq_stp.py`
   - regenerated STP:
     `syn/board_projects/swb_a10/rn001_opq_ingress_egress.stp`
 - Commit:
-  - pending
+  - `d0b58930` plus this checkpoint
 
 ## 2026-05-13
 
