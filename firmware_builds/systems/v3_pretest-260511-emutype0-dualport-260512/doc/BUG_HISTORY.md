@@ -24,8 +24,29 @@ Severity legend:
 | [BUG-007-I](#bug-007-i-feb-top-qsys-carried-stale-eight-emulator-csr-map) | I | non-datapath-refactor | `common (every top-level Qsys regenerate)` | fixed | FEB top Qsys regenerate, 2026-05-14 | this working tree | `syn/feb_system_v3.qsys` still bound `data_path_subsystem` to `3.0.4.512` and exported eight `emulator_mutrig_N` CSR apertures, causing Platform Designer address-map overlaps when the active datapath component only has `emulator_mutrig_qsys_inst`. |
 | [BUG-008-I](#bug-008-i-feb-top-qsys-exported-a-stale-pulse_out_conduit-interface) | I | non-datapath-refactor | `common (every top-level Qsys regenerate after the runctrl refactor)` | fixed-map-gated | FEB top Qsys regenerate, 2026-05-14 | this checkpoint | `syn/feb_system_v3.qsys` still exported `pulse_out_conduit` even though the regenerated datapath/runctrl interface no longer drives that conduit, leaving stale wrapper ports and blocking a clean FEB top compile. |
 | [BUG-009-H](#bug-009-h-feb-stp-generator-used-whole-vector-probes-that-synthesized-into-partial-signaltap-connections) | H | non-datapath-refactor | `directed-only (SignalTap observability build)` | fixed-map-gated | FEB STP map gate, 2026-05-14 | this checkpoint | The first FEB rbCAM-gap STP used whole-vector probes that Node Finder accepted but Quartus map only partially connected; the fixed generator emits bit-expanded instance-port probes and map reports all 631 SignalTap inputs/clocks/pins connected. |
+| [BUG-010-H](#bug-010-h-febswb-corun-smoke-did-not-model-the-declared-128-subheader-frame) | H | non-datapath-refactor | `directed-only (FEB/SWB corun smoke and monitor harness)` | fixed | FEB/SWB corun UVM smoke, 2026-05-14 | this checkpoint | The corun smoke declared 128 subheaders but drove only the active subheader, and the monitors reconstructed true timestamps without rejecting a declared-versus-seen subheader mismatch. |
 
 ## 2026-05-14
+
+### BUG-010-H: FEB/SWB corun smoke did not model the declared 128-subheader frame
+
+- First seen:
+  - FEB/SWB corun UVM harness review after the RN.BASIC cosim frame-format fix, 2026-05-14.
+- Symptom:
+  - The smoke frame declared `subheader_count = 128` in the frame header but emitted only one K28.7 subheader before the hit payload.
+  - The FEB and OPQ monitors reconstructed true hit timestamps but did not independently compare the seen subheader count against the declared frame count.
+- Root cause:
+  - The older corun smoke was built as a minimal hit timestamp path check, not as a strict Mu3e wire-frame shape check.
+  - That left a harness blind spot: a one-subheader trace could still produce a valid reconstructed timestamp and pass even though the frame was not shaped like the validated RN.BASIC cosim frame.
+- Fix:
+  - `tb_int/feb_swb_corun/uvm/tb_top.sv` now drives all 128 subheaders on both FEB and OPQ synthetic frame sources, with the hit payload only under the matching subheader timestamp.
+  - `tb_int/feb_swb_corun/uvm/feb_swb_corun_uvm_pkg.sv` now tracks declared and seen subheader counts and reports `FEB_SWB_FRAME` errors on mismatch.
+  - The corun run window was extended to 4 us so the enlarged frames can drain before the scoreboard summary.
+- Evidence:
+  - `make smoke` in `tb_int/feb_swb_corun/uvm` passed on 2026-05-14.
+  - The smoke summary reported `feb=270`, `opq_debug=2`, `opq_payload=270`, `dma=2`, `dma_payload=2`, `missing_opq=0`, `missing_dma=0`, `ts_mismatch=0`, `true_ts_mismatch=0`, `UVM_ERROR=0`, and `UVM_FATAL=0`.
+- Residuals:
+  - This closes the synthetic FEB/SWB corun harness blind spot only. Board closure still requires STP proof through SWB OPQ and RDMA.
 
 ### BUG-009-H: FEB STP generator used whole-vector probes that synthesized into partial SignalTap connections
 

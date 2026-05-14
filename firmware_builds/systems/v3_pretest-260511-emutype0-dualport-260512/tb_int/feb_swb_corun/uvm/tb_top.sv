@@ -73,6 +73,8 @@ module tb_top;
         input logic [31:0] payload,
         input logic [63:0] meta_bits
     );
+        int unsigned shd;
+
         opq_if0.drive_beat({8'ha5, 2'b00, 14'd0, FEB_SWB_K285},
                            4'b0001, 1'b1, 1'b0, 1'b0, 64'd0);
         opq_if0.drive_beat(32'h00000000, 4'b0000, 1'b0, 1'b0, 1'b0, 64'd0);
@@ -81,10 +83,16 @@ module tb_top;
         opq_if0.drive_beat({1'b0, 15'd128, 16'd1},
                            4'b0000, 1'b0, 1'b0, 1'b0, 64'd0);
         opq_if0.drive_beat(32'hc0010000, 4'b0000, 1'b0, 1'b0, 1'b0, 64'd0);
-        opq_if0.drive_beat({ts_tag[11:4], 16'd1, FEB_SWB_K237},
-                           4'b0001, 1'b0, 1'b0, 1'b0, 64'd0);
-        opq_if0.drive_beat({ts_tag[3:0], payload[27:0]},
-                           4'b0000, 1'b0, 1'b0, 1'b1, meta_bits);
+        for (shd = 0; shd < FEB_SWB_EXPECTED_SUBHEADERS; shd++) begin
+            opq_if0.drive_beat({shd[7:0],
+                                ((shd[7:0] == ts_tag[11:4]) ? 16'd1 : 16'd0),
+                                FEB_SWB_K237},
+                               4'b0001, 1'b0, 1'b0, 1'b0, 64'd0);
+            if (shd[7:0] == ts_tag[11:4]) begin
+                opq_if0.drive_beat({ts_tag[3:0], payload[27:0]},
+                                   4'b0000, 1'b0, 1'b0, 1'b1, meta_bits);
+            end
+        end
         opq_if0.drive_beat({24'h000000, FEB_SWB_K284},
                            4'b0001, 1'b0, 1'b1, 1'b0, 64'd0);
     endtask
@@ -94,6 +102,8 @@ module tb_top;
         input logic [31:0] payload,
         input logic [63:0] meta_bits
     );
+        int unsigned shd;
+
         opq_if1.drive_beat({8'ha5, 2'b00, 14'd1, FEB_SWB_K285},
                            4'b0001, 1'b1, 1'b0, 1'b0, 64'd0);
         opq_if1.drive_beat(32'h00000000, 4'b0000, 1'b0, 1'b0, 1'b0, 64'd0);
@@ -102,10 +112,16 @@ module tb_top;
         opq_if1.drive_beat({1'b0, 15'd128, 16'd1},
                            4'b0000, 1'b0, 1'b0, 1'b0, 64'd0);
         opq_if1.drive_beat(32'hc0010001, 4'b0000, 1'b0, 1'b0, 1'b0, 64'd0);
-        opq_if1.drive_beat({ts_tag[11:4], 16'd1, FEB_SWB_K237},
-                           4'b0001, 1'b0, 1'b0, 1'b0, 64'd0);
-        opq_if1.drive_beat({ts_tag[3:0], payload[27:0]},
-                           4'b0000, 1'b0, 1'b0, 1'b1, meta_bits);
+        for (shd = 0; shd < FEB_SWB_EXPECTED_SUBHEADERS; shd++) begin
+            opq_if1.drive_beat({shd[7:0],
+                                ((shd[7:0] == ts_tag[11:4]) ? 16'd1 : 16'd0),
+                                FEB_SWB_K237},
+                               4'b0001, 1'b0, 1'b0, 1'b0, 64'd0);
+            if (shd[7:0] == ts_tag[11:4]) begin
+                opq_if1.drive_beat({ts_tag[3:0], payload[27:0]},
+                                   4'b0000, 1'b0, 1'b0, 1'b1, meta_bits);
+            end
+        end
         opq_if1.drive_beat({24'h000000, FEB_SWB_K284},
                            4'b0001, 1'b0, 1'b1, 1'b0, 64'd0);
     endtask
@@ -115,6 +131,8 @@ module tb_top;
         input logic [31:0] payload,
         input logic [63:0] meta_bits
     );
+        int unsigned shd;
+
         feb_if0.drive_beat({4'h1, 8'ha5, 2'b00, 14'd0, FEB_SWB_K285},
                            1'b1, 1'b0, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
         feb_if0.drive_beat(36'h0_00000000, 1'b0, 1'b0, 1'b0, 64'd0,
@@ -125,10 +143,19 @@ module tb_top;
                            1'b0, 1'b0, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
         feb_if0.drive_beat({4'h0, 32'hc0010000}, 1'b0, 1'b0, 1'b0,
                            64'd0, 4'd0, 4'd0, 32'd100000);
-        feb_if0.drive_beat({4'h1, ts_tag[11:4], 16'd1, FEB_SWB_K237},
-                           1'b0, 1'b0, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
-        feb_if0.drive_beat({4'h0, ts_tag[3:0], payload[27:0]},
-                           1'b0, 1'b0, 1'b1, meta_bits, 4'd0, 4'd0, 32'd100000);
+        for (shd = 0; shd < FEB_SWB_EXPECTED_SUBHEADERS; shd++) begin
+            feb_if0.drive_beat({4'h1,
+                                shd[7:0],
+                                ((shd[7:0] == ts_tag[11:4]) ? 16'd1 : 16'd0),
+                                FEB_SWB_K237},
+                               1'b0, 1'b0, 1'b0, 64'd0,
+                               4'd0, 4'd0, 32'd100000);
+            if (shd[7:0] == ts_tag[11:4]) begin
+                feb_if0.drive_beat({4'h0, ts_tag[3:0], payload[27:0]},
+                                   1'b0, 1'b0, 1'b1, meta_bits,
+                                   4'd0, 4'd0, 32'd100000);
+            end
+        end
         feb_if0.drive_beat({4'h1, 24'h000000, FEB_SWB_K284},
                            1'b0, 1'b1, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
     endtask
@@ -138,6 +165,8 @@ module tb_top;
         input logic [31:0] payload,
         input logic [63:0] meta_bits
     );
+        int unsigned shd;
+
         feb_if1.drive_beat({4'h1, 8'ha5, 2'b00, 14'd1, FEB_SWB_K285},
                            1'b1, 1'b0, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
         feb_if1.drive_beat(36'h0_00000000, 1'b0, 1'b0, 1'b0, 64'd0,
@@ -148,10 +177,19 @@ module tb_top;
                            1'b0, 1'b0, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
         feb_if1.drive_beat({4'h0, 32'hc0010001}, 1'b0, 1'b0, 1'b0,
                            64'd0, 4'd0, 4'd0, 32'd100000);
-        feb_if1.drive_beat({4'h1, ts_tag[11:4], 16'd1, FEB_SWB_K237},
-                           1'b0, 1'b0, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
-        feb_if1.drive_beat({4'h0, ts_tag[3:0], payload[27:0]},
-                           1'b0, 1'b0, 1'b1, meta_bits, 4'd0, 4'd0, 32'd100000);
+        for (shd = 0; shd < FEB_SWB_EXPECTED_SUBHEADERS; shd++) begin
+            feb_if1.drive_beat({4'h1,
+                                shd[7:0],
+                                ((shd[7:0] == ts_tag[11:4]) ? 16'd1 : 16'd0),
+                                FEB_SWB_K237},
+                               1'b0, 1'b0, 1'b0, 64'd0,
+                               4'd0, 4'd0, 32'd100000);
+            if (shd[7:0] == ts_tag[11:4]) begin
+                feb_if1.drive_beat({4'h0, ts_tag[3:0], payload[27:0]},
+                                   1'b0, 1'b0, 1'b1, meta_bits,
+                                   4'd0, 4'd0, 32'd100000);
+            end
+        end
         feb_if1.drive_beat({4'h1, 24'h000000, FEB_SWB_K284},
                            1'b0, 1'b1, 1'b0, 64'd0, 4'd0, 4'd0, 32'd100000);
     endtask

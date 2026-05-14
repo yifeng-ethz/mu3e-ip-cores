@@ -10,6 +10,7 @@ package feb_swb_corun_uvm_pkg;
     localparam bit [7:0]    FEB_SWB_K285 = 8'hbc;
     localparam bit [7:0]    FEB_SWB_K284 = 8'h9c;
     localparam bit [7:0]    FEB_SWB_K237 = 8'hf7;
+    localparam int unsigned FEB_SWB_EXPECTED_SUBHEADERS = 128;
 
     typedef enum int unsigned {
         FEB_SWB_SOURCE_UNKNOWN    = 0,
@@ -322,6 +323,8 @@ package feb_swb_corun_uvm_pkg;
         bit [31:0] header_ts_high_word;
         bit [31:0] header_ts_low_word;
         bit [7:0]  current_subheader_ts;
+        int unsigned declared_subheaders;
+        int unsigned seen_subheaders;
 
         function new(string name, uvm_component parent);
             super.new(name, parent);
@@ -350,6 +353,8 @@ package feb_swb_corun_uvm_pkg;
             header_ts_high_word   = '0;
             header_ts_low_word    = '0;
             current_subheader_ts  = '0;
+            declared_subheaders   = 0;
+            seen_subheaders       = 0;
         endfunction
 
         function bit sop_word();
@@ -360,19 +365,40 @@ package feb_swb_corun_uvm_pkg;
             return vif.eop || (vif.data[32] && vif.data[7:0] == FEB_SWB_K284);
         endfunction
 
+        function void reset_frame_state();
+            in_frame             = 1'b0;
+            word_index           = 0;
+            header_ts_valid      = 1'b0;
+            subheader_ts_valid   = 1'b0;
+            header_ts_high_word  = '0;
+            header_ts_low_word   = '0;
+            current_subheader_ts = '0;
+            declared_subheaders  = 0;
+            seen_subheaders      = 0;
+        endfunction
+
+        function void check_frame_format();
+            if (declared_subheaders != FEB_SWB_EXPECTED_SUBHEADERS) begin
+                `uvm_error("FEB_SWB_FRAME",
+                           $sformatf("FEB lane%0d declared_subheaders=%0d expected=%0d",
+                                     lane_id, declared_subheaders,
+                                     FEB_SWB_EXPECTED_SUBHEADERS))
+            end
+            if (seen_subheaders != declared_subheaders) begin
+                `uvm_error("FEB_SWB_FRAME",
+                           $sformatf("FEB lane%0d seen_subheaders=%0d declared=%0d",
+                                     lane_id, seen_subheaders,
+                                     declared_subheaders))
+            end
+        endfunction
+
         virtual task run_phase(uvm_phase phase);
             if (vif == null)
                 return;
             forever begin
                 @(posedge vif.clk);
                 if (!vif.rst_n) begin
-                    in_frame             = 1'b0;
-                    word_index           = 0;
-                    header_ts_valid      = 1'b0;
-                    subheader_ts_valid   = 1'b0;
-                    header_ts_high_word  = '0;
-                    header_ts_low_word   = '0;
-                    current_subheader_ts = '0;
+                    reset_frame_state();
                     continue;
                 end
                 if (vif.valid && vif.ready) begin
@@ -398,6 +424,8 @@ package feb_swb_corun_uvm_pkg;
                         header_ts_high_word  = '0;
                         header_ts_low_word   = '0;
                         current_subheader_ts = '0;
+                        declared_subheaders  = 0;
+                        seen_subheaders      = 0;
                     end else if (in_frame) begin
                         word_index++;
                     end
@@ -408,9 +436,12 @@ package feb_swb_corun_uvm_pkg;
                         header_ts_low_word = vif.data[31:0];
                         header_ts_valid    = 1'b1;
                     end
+                    if (in_frame && word_index == 3)
+                        declared_subheaders = int'(vif.data[30:16]);
                     if (sample_subheader) begin
                         current_subheader_ts = vif.data[31:24];
                         subheader_ts_valid   = 1'b1;
+                        seen_subheaders++;
                     end
 
                     sample_hit = in_frame && header_ts_valid &&
@@ -446,13 +477,8 @@ package feb_swb_corun_uvm_pkg;
                     ap.write(item);
 
                     if (sample_eop) begin
-                        in_frame             = 1'b0;
-                        word_index           = 0;
-                        header_ts_valid      = 1'b0;
-                        subheader_ts_valid   = 1'b0;
-                        header_ts_high_word  = '0;
-                        header_ts_low_word   = '0;
-                        current_subheader_ts = '0;
+                        check_frame_format();
+                        reset_frame_state();
                     end
                 end
             end
@@ -475,6 +501,8 @@ package feb_swb_corun_uvm_pkg;
         bit [31:0] header_ts_high_word;
         bit [31:0] header_ts_low_word;
         bit [7:0]  current_subheader_ts;
+        int unsigned declared_subheaders;
+        int unsigned seen_subheaders;
 
         function new(string name, uvm_component parent);
             super.new(name, parent);
@@ -504,6 +532,8 @@ package feb_swb_corun_uvm_pkg;
             header_ts_high_word  = '0;
             header_ts_low_word   = '0;
             current_subheader_ts = '0;
+            declared_subheaders  = 0;
+            seen_subheaders      = 0;
         endfunction
 
         function bit sop_word();
@@ -514,20 +544,41 @@ package feb_swb_corun_uvm_pkg;
             return vif.eop || (vif.datak[0] && vif.data[7:0] == FEB_SWB_K284);
         endfunction
 
+        function void reset_frame_state();
+            in_frame             = 1'b0;
+            word_index           = 0;
+            frame_ts_valid       = 1'b0;
+            frame_ts             = '0;
+            subheader_ts_valid   = 1'b0;
+            header_ts_high_word  = '0;
+            header_ts_low_word   = '0;
+            current_subheader_ts = '0;
+            declared_subheaders  = 0;
+            seen_subheaders      = 0;
+        endfunction
+
+        function void check_frame_format();
+            if (declared_subheaders != FEB_SWB_EXPECTED_SUBHEADERS) begin
+                `uvm_error("FEB_SWB_FRAME",
+                           $sformatf("OPQ lane%0d declared_subheaders=%0d expected=%0d",
+                                     lane_id, declared_subheaders,
+                                     FEB_SWB_EXPECTED_SUBHEADERS))
+            end
+            if (seen_subheaders != declared_subheaders) begin
+                `uvm_error("FEB_SWB_FRAME",
+                           $sformatf("OPQ lane%0d seen_subheaders=%0d declared=%0d",
+                                     lane_id, seen_subheaders,
+                                     declared_subheaders))
+            end
+        endfunction
+
         virtual task run_phase(uvm_phase phase);
             if (vif == null)
                 return;
             forever begin
                 @(posedge vif.clk);
                 if (!vif.rst_n) begin
-                    in_frame       = 1'b0;
-                    word_index     = 0;
-                    frame_ts_valid = 1'b0;
-                    frame_ts       = '0;
-                    subheader_ts_valid   = 1'b0;
-                    header_ts_high_word  = '0;
-                    header_ts_low_word   = '0;
-                    current_subheader_ts = '0;
+                    reset_frame_state();
                     continue;
                 end
                 if (vif.valid && vif.ready) begin
@@ -546,6 +597,8 @@ package feb_swb_corun_uvm_pkg;
                         header_ts_high_word  = '0;
                         header_ts_low_word   = '0;
                         current_subheader_ts = '0;
+                        declared_subheaders  = 0;
+                        seen_subheaders      = 0;
                     end else if (in_frame) begin
                         word_index++;
                     end
@@ -559,6 +612,8 @@ package feb_swb_corun_uvm_pkg;
                         frame_ts[15:0]  = vif.data[31:16];
                         frame_ts_valid  = 1'b1;
                     end
+                    if (in_frame && word_index == 3)
+                        declared_subheaders = int'(vif.data[30:16]);
 
                     sample_subheader =
                         in_frame && feb_swb_word_is_subheader(vif.datak,
@@ -566,6 +621,7 @@ package feb_swb_corun_uvm_pkg;
                     if (sample_subheader) begin
                         current_subheader_ts = vif.data[31:24];
                         subheader_ts_valid   = 1'b1;
+                        seen_subheaders++;
                     end
                     sample_hit = in_frame && frame_ts_valid &&
                                  subheader_ts_valid &&
@@ -599,14 +655,8 @@ package feb_swb_corun_uvm_pkg;
                     ap.write(item);
 
                     if (eop_word()) begin
-                        in_frame       = 1'b0;
-                        word_index     = 0;
-                        frame_ts_valid = 1'b0;
-                        frame_ts       = '0;
-                        subheader_ts_valid   = 1'b0;
-                        header_ts_high_word  = '0;
-                        header_ts_low_word   = '0;
-                        current_subheader_ts = '0;
+                        check_frame_format();
+                        reset_frame_state();
                     end
                 end
             end
@@ -1012,7 +1062,7 @@ package feb_swb_corun_uvm_pkg;
             `uvm_info("FEB_SWB_RUNCTL",
                       "run-control concept: release FEB and SWB from one synchronized simulation epoch; start scoreboarding only after CSR acceptance",
                       UVM_LOW)
-            #2000ns;
+            #4000ns;
             phase.drop_objection(this);
         endtask
     endclass

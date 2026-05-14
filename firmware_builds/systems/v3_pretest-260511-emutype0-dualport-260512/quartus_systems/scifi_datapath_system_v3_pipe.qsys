@@ -4,7 +4,7 @@
    name="$${FILENAME}"
    displayName="$${FILENAME}"
    version="3.0.5.0512"
-   description="Dual-port histogram topology: histogram_statistics_0.N_PORTS=2, histogram_ingress_bridge_0 feeds lanes 0..3 from mts_preprocessor_0, histogram_ingress_bridge_1 feeds lanes 4..7 from mts_preprocessor_1, and both hit_type0 muxes are readyless to avoid Qsys timing_adapter insertion on the arb-to-MTS path."
+   description="Dual-port histogram topology: histogram_statistics_0.N_PORTS=2, histogram_ingress_bridge_0 feeds lanes 0..3 from mts_preprocessor_0, histogram_ingress_bridge_1 feeds lanes 4..7 from mts_preprocessor_1, both hit_type0 muxes are readyless, and the run-control/emulator-control splitters are readyless broadcasts."
    tags=""
    categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
@@ -1212,7 +1212,7 @@
   <parameter name="USE_DATA" value="1" />
   <parameter name="USE_ERROR" value="0" />
   <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_READY" value="1" />
+  <parameter name="USE_READY" value="0" />
   <parameter name="USE_VALID" value="1" />
  </module>
  <module
@@ -1232,26 +1232,26 @@
  <module
    name="emulator_mutrig_qsys_inst"
    kind="emulator_mutrig"
-   version="26.3.0.506"
+   version="26.3.1.513"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
-  <parameter name="BUILD" value="506" />
+  <parameter name="BUILD" value="513" />
   <parameter name="BYTE_STREAM_ENABLE" value="false" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
   <parameter name="CLUSTER_LANE_COUNT_DEFAULT" value="8" />
   <parameter name="CLUSTER_LANE_INDEX_DEFAULT" value="0" />
-  <parameter name="CSR_ADDR_WIDTH" value="4" />
+  <parameter name="CSR_ADDR_WIDTH" value="6" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="64" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260506" />
+  <parameter name="VERSION_DATE" value="20260513" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="3" />
-  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="VERSION_PATCH" value="1" />
  </module>
  <module
    name="hist_post_cdc_0"
@@ -2793,6 +2793,16 @@
    version="18.1"
    start="histogram_ingress_bridge_0.hist_out"
    end="histogram_statistics_0.hist_fill_in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_0.frame_debug_delay8loss"
+   end="histogram_statistics_0.debug_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_1.frame_debug_delay8loss"
+   end="histogram_statistics_0.debug_2" />
  <connection
    kind="avalon_streaming"
    version="18.1"

@@ -27,6 +27,7 @@ DRAIN_SWB_CYCLES ?= 800000
 PARALLEL ?= 16
 ROW ?=
 SLICE ?=
+FEB_SOURCE_N_SHD ?= 128
 COLLECT_ONLY ?= 0
 DRY_RUN ?= 0
 KEEP_RAW_TRACES ?= 0
@@ -125,6 +126,7 @@ run_BASIC:
 		--cosim-root $(COSIM_ROOT) \
 		--report-root $(REPORT_ROOT) \
 		--parallel $(PARALLEL) \
+		--feb-source-n-shd $(FEB_SOURCE_N_SHD) \
 		$(BASIC_ARGS)
 
 auto_report:

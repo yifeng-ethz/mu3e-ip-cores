@@ -39,10 +39,34 @@ runs at this build dir.
 | BUG-009-R | R | closure-blocker | swept | fixed in IP standalone; integration re-fit exposes different data-path FIFO setup failure | 2026-05-13 integration STA trace #103 | run-control_mgmt 24be671/023fb18 | snap_*_lvds -> snap_*_mm_q0 CDC missing synchronized update/valid handshake; STA timed the multi-bit crossing as a normal setup endpoint. |
 | BUG-014-T | T | closure-blocker | directed-only | TBD | 2026-05-13 #108 BU v2 review | eae3f6d3 | BU012/BU013 identity expectations compare source/catalog metadata against live CSRs whose generated instance parameters or RTL register maps do not expose those values. |
 | BUG-014-H | H | closure-blocker | directed-only | TBD | 2026-05-13 #108 BU/RN001 board evidence | eae3f6d3 | Canonical pulserdrop Qsys has no routable arb_hit_type0_supercore CSR at the TEST_BU address; board RN.BASIC.001 reaches run-control but no hits reach histogram. |
+| B-COSIM-SWB-DMA-PACKER-SWAP | H | closure-blocker | directed-only | fixed | 2026-05-13 RN.BASIC.001 packer swap | n/a | Cosim post-OPQ DMA used the legacy SWB hit-record path, so `rdma_rxbuffer.bin` lacked Mu3e K28.5/K28.4 wire framing. |
 
 ---
 
 ## 2026-05-13
+
+### B-COSIM-SWB-DMA-PACKER-SWAP: RN.BASIC.001 RDMA now uses OPQ DMA packer wire frames
+
+- First seen: targeted RN.BASIC.001 evidence review found
+  `rdma_rxbuffer.bin` in the legacy SWB DMA hit-record stream instead of
+  Mu3e wire-format words framed by K28.5 and K28.4.
+- Root cause: the cosim DUT still elaborated the legacy post-OPQ path
+  (`musip_mux_4_1` / `musip_event_builder`) through the historical
+  `swb_block_uvm_wrapper`, while the 5-tab report dummy modeled the intended
+  Mu3e wire format.
+- Fix status: fixed in the cosim harness by defaulting the RN.BASIC.001 build
+  to `SWB_DMA_PACKER_PATH=1`, wrapping `swb_opq_dma_pipeline` behind the
+  legacy DUT port set, excluding the legacy post-OPQ VHDL chain from this
+  elaboration, and teaching the trace/RDMA collector to consume packed 32-bit
+  wire-format DMA.
+- after_fix_outcome: RN.BASIC.001 rerun PASS; `rdma_rxbuffer.bin` is
+  `mu3e_wire_32le`, contains 66 decoded K28.5..K28.4 frames, 0 bad frames,
+  subheader_count min/max 128/128, 31,264 decoded hits matching
+  `csr_total=31,264`, and all consecutive frame timestamp deltas are
+  `0x000000000800`.
+- evidence: `cosim/REPORT/RN.BASIC.001/swb_dma_packer_swap_NOTES.md`,
+  `cosim/REPORT/RN.BASIC.001/rdma_rxbuffer_summary.json`, and
+  `cosim/REPORT/RN.BASIC.001/run_swb_corun.log`.
 
 ### Frame timestamp progression audit: RN.BASIC.001 confirmed PASS
 
