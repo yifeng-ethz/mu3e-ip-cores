@@ -1,0 +1,67 @@
+{
+  "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_dma_enable_sequence_probe_20260514_022659",
+  "samples": [
+    {
+      "label": "dma_write_0",
+      "rw_dma": "0x00000000",
+      "ro_status": "0x00000001",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "dma_write_1",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_0",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_1",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_2",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_3",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_4",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_5",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_6",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    },
+    {
+      "label": "poll_7",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002",
+      "swb_state": "0x00000204"
+    }
+  ],
+  "dma_tool_rc": 0,
+  "rx_bytes": 0
+}

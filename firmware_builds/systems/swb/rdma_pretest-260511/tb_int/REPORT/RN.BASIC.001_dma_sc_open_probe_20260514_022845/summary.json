@@ -1,0 +1,22 @@
+{
+  "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_dma_sc_open_probe_20260514_022845",
+  "samples": [
+    {
+      "label": "before_sc_tool",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002"
+    },
+    {
+      "label": "after_sc_tool",
+      "rw_dma": "0x00000000",
+      "ro_status": "0x00000001"
+    }
+  ],
+  "sc_tool_rc": 0,
+  "sc_tool_stdout_tail": [
+    "swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d",
+    "VERSION_REGISTER_R=0x29288EEC (690523884) space=rr offset=0x01"
+  ],
+  "sc_tool_stderr_tail": [],
+  "dma_tool_rc": 0
+}

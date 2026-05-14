@@ -1,0 +1,17 @@
+{
+  "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_dma_plain_open_probe_20260514_022937",
+  "samples": [
+    {
+      "label": "before_plain_open",
+      "rw_dma": "0x00000001",
+      "ro_status": "0x00000002"
+    },
+    {
+      "label": "after_plain_open",
+      "rw_dma": "0x00000000",
+      "ro_status": "0x00000001"
+    }
+  ],
+  "plain_version": "0x29288EEC",
+  "dma_tool_rc": 0
+}
