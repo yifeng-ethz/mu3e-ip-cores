@@ -22,8 +22,8 @@ Severity legend:
 | [BUG-005-H](#bug-005-h-phase4_5_sweep-read-the-live-csr-13-counter-while-interval-pulses-reset-it-mid-run) | H | non-datapath-refactor | `common (default sweep configuration)` | fixed | FEB v3 emulator-type0 phase 4.5 sweep, 2026-05-12 | this commit | `scripts/cotest/phase4_5_sweep.py` programmed `INTERVAL_CFG = run_window` so the LIVE CSR 13 counter reset every 1 s during the 4 s window, and the sweep read the wrong offset (`0x10` = SCRATCH) for the STABLE CSR 17 latch. |
 | [BUG-006-I](#bug-006-i-histogram-input-fifos-are-empty-on-every-row-of-the-2026-05-12-sweep) | I | hard stuck error | `common (every sweep row on the single-port build)` | fixed-with-residuals | FEB v3 emulator-type0 phase 4.5 sweep, 2026-05-12 | this commit | The single-port topology fed only `mts_preprocessor_0` into `histogram_statistics_0`; lanes 4..7 were routed only to hit-stack bank 1. The dual-port build wires both MTS banks into `histogram_statistics_0` and removes the ready-mismatch hazard on the arb-to-MTS path. |
 | [BUG-007-I](#bug-007-i-feb-top-qsys-carried-stale-eight-emulator-csr-map) | I | non-datapath-refactor | `common (every top-level Qsys regenerate)` | fixed | FEB top Qsys regenerate, 2026-05-14 | this working tree | `syn/feb_system_v3.qsys` still bound `data_path_subsystem` to `3.0.4.512` and exported eight `emulator_mutrig_N` CSR apertures, causing Platform Designer address-map overlaps when the active datapath component only has `emulator_mutrig_qsys_inst`. |
-| [BUG-008-I](#bug-008-i-feb-top-qsys-exported-a-stale-pulse_out_conduit-interface) | I | non-datapath-refactor | `common (every top-level Qsys regenerate after the runctrl refactor)` | fixed-map-gated | FEB top Qsys regenerate, 2026-05-14 | this checkpoint | `syn/feb_system_v3.qsys` still exported `pulse_out_conduit` even though the regenerated datapath/runctrl interface no longer drives that conduit, leaving stale wrapper ports and blocking a clean FEB top compile. |
-| [BUG-009-H](#bug-009-h-feb-stp-generator-used-whole-vector-probes-that-synthesized-into-partial-signaltap-connections) | H | non-datapath-refactor | `directed-only (SignalTap observability build)` | fixed-map-gated | FEB STP map gate, 2026-05-14 | this checkpoint | The first FEB rbCAM-gap STP used whole-vector probes that Node Finder accepted but Quartus map only partially connected; the fixed generator emits bit-expanded instance-port probes and map reports all 631 SignalTap inputs/clocks/pins connected. |
+| [BUG-008-I](#bug-008-i-feb-top-qsys-exported-a-stale-pulse_out_conduit-interface) | I | non-datapath-refactor | `common (every top-level Qsys regenerate after the runctrl refactor)` | fixed-debug-loadable | FEB top Qsys regenerate, 2026-05-14 | this checkpoint | `syn/feb_system_v3.qsys` still exported `pulse_out_conduit` even though the regenerated datapath/runctrl interface no longer drives that conduit, leaving stale wrapper ports and blocking a clean FEB top compile. |
+| [BUG-009-H](#bug-009-h-feb-stp-generator-used-whole-vector-probes-that-synthesized-into-partial-signaltap-connections) | H | non-datapath-refactor | `directed-only (SignalTap observability build)` | fixed-debug-loadable | FEB STP map gate, 2026-05-14 | this checkpoint | The first FEB rbCAM-gap STP used whole-vector probes that Node Finder accepted but Quartus map only partially connected; the fixed generator emits bit-expanded instance-port probes and map reports all 631 SignalTap inputs/clocks/pins connected. |
 | [BUG-010-H](#bug-010-h-febswb-corun-smoke-did-not-model-the-declared-128-subheader-frame) | H | non-datapath-refactor | `directed-only (FEB/SWB corun smoke and monitor harness)` | fixed | FEB/SWB corun UVM smoke, 2026-05-14 | this checkpoint | The corun smoke declared 128 subheaders but drove only the active subheader, and the monitors reconstructed true timestamps without rejecting a declared-versus-seen subheader mismatch. |
 
 ## 2026-05-14
@@ -70,8 +70,20 @@ Severity legend:
     `output_files_stp_phase4_pre_hss_gap/top_stp_phase4_pre_hss_gap.map.rpt` reports
     `Info (35024): Successfully connected in-system debug instance "phase4_pre_hss_gap_lvds" to all 631 required data inputs, trigger inputs, acquisition clocks, and dynamic pins`.
   - Full compile synthesis rerun repeated the same `Info (35024)` before entering fitter.
+  - Full compile for revision `top_stp_phase4_pre_hss_gap` completed on 2026-05-14 with Quartus `0 errors, 1568 warnings`.
+  - Fitter was successful; assembler was successful with 0 errors and 0 warnings.
+  - Generated SOF:
+    `syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_pre_hss_gap/top_stp_phase4_pre_hss_gap.sof`,
+    size `12746320` bytes,
+    SHA256 `cf2dab3903da0455221bfa1b8ea06a2e7006c4a20fca28b9f5973673961fc881`.
+  - STA setup corners:
+    Slow 1100 mV 85 C `-0.440 ns`,
+    Slow 1100 mV 0 C `-0.241 ns`,
+    Fast 1100 mV 85 C `+0.510 ns`,
+    Fast 1100 mV 0 C `+0.694 ns`.
+  - This meets the FEB iterative-debug load gate of at least 2 passing corners, but it is not production timing closure.
 - Residuals:
-  - Full fit/timing and board SignalTap capture are still pending in the live compile/debug run.
+  - Board SignalTap capture is still pending.
   - The STP capture must still be naysayed against frame marker count, subheader count, hit count, timestamp reconstruction, spatial/channel distribution, pre/post rbCAM delay, and SWB OPQ/RDMA continuity before it can close the board datapath.
 
 ### BUG-008-I: FEB top Qsys exported a stale pulse_out_conduit interface
@@ -91,8 +103,9 @@ Severity legend:
 - Evidence:
   - Qsys generation after the CSR-map/export fix completed with `exit_code=0` and `error_count=0`.
   - FEB STP map-only gate completed Analysis & Synthesis with 0 errors on 2026-05-14.
+  - FEB full compile for revision `top_stp_phase4_pre_hss_gap` completed with Quartus `0 errors, 1568 warnings`; the remaining slow-corner setup failures are recorded under BUG-009-H as debug-image timing residuals.
 - Residuals:
-  - Full fit/timing is still pending in the live `top_stp_phase4_pre_hss_gap` compile.
+  - Production timing closure is still open; the current STP image is accepted only for iterative board debug.
 
 ### BUG-007-I: FEB top Qsys carried stale eight-emulator CSR map
 
