@@ -86,11 +86,6 @@ def default_probes() -> list[Probe]:
         f"{PIPE}o_end_of_event",
         f"{SWB}o_dma_wren",
         f"{SWB}o_endofevent",
-        f"{SWB}opq_dma_status",
-        f"{SWB}opq_dma_input_words",
-        f"{SWB}opq_dma_output_words",
-        f"{SWB}opq_dma_event_count",
-        f"{SWB}opq_dma_halt_count",
     )
     add_bits("30 opq_dma_pipeline_opq_word", probes, f"{PIPE}opq_dma_data", 32)
     add_bits("31 opq_dma_output_256b", probes, f"{PIPE}o_dma_data", 256)
