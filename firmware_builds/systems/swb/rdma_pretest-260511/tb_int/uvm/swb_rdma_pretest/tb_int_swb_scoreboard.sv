@@ -5,11 +5,9 @@
 //   - count-only stages (OPQ ingress/emit/drop + PCIe DMA beat/event):
 //     the underlying AVST interfaces have no sidecar conduit, so these
 //     stages cannot carry per-hit lineage. We track running counts only.
-//   - lineage stages (RDMA RQE ingress + RDMA CQE egress): the
-//     rdma_rqe_ingress_if and rdma_cqe_egress_if interfaces both carry
-//     a 64-bit sidecar_id. End-to-end per-WQE lineage closes here by
-//     matching RQE.sidecar_id against CQE.sidecar_id, satisfying
-//     DV_INT_PLAN.md §3 "scoreboard reconciles RQE-to-CQE by sequence id".
+//   - lineage stages (cosim ingress + RDMA RQE ingress + RDMA CQE egress):
+//     the cosim ingress sidecar is the FEB ground-truth hit id. The RDMA
+//     monitors carry a 64-bit sidecar_id for WQE lineage.
 
 package tb_int_swb_scoreboard_pkg;
 
@@ -24,17 +22,24 @@ package tb_int_swb_scoreboard_pkg;
         uvm_analysis_imp#(swb_stage_record, tb_int_swb_ledger_scoreboard) stage_imp;
         string active_case;
 
+        int unsigned cosim_ingress;
         int unsigned rqe_ingress;
         int unsigned cqe_egress;
         int unsigned opq_accept;
         int unsigned opq_emit;
         int unsigned opq_drop;
+        int unsigned opq_frame_ingress_hits;
+        int unsigned opq_frame_egress_hits;
+        int unsigned opq_frame_ts_invalid;
         int unsigned dma_beats;
         int unsigned dma_events;
 
         time rqe_seen_ts[bit [63:0]];
         time cqe_seen_ts[bit [63:0]];
+        time cosim_ingress_seen_ts[bit [63:0]];
 
+        int unsigned cosim_missing_sidecar;
+        int unsigned cosim_duplicate_sidecar;
         int unsigned rqe_missing_sidecar;
         int unsigned cqe_missing_sidecar;
         int unsigned rqe_duplicate_sidecar;
@@ -57,15 +62,22 @@ package tb_int_swb_scoreboard_pkg;
         endfunction
 
         function void reset_counts();
+            cosim_ingress = 0;
             rqe_ingress = 0;
             cqe_egress = 0;
             opq_accept = 0;
             opq_emit = 0;
             opq_drop = 0;
+            opq_frame_ingress_hits = 0;
+            opq_frame_egress_hits = 0;
+            opq_frame_ts_invalid = 0;
             dma_beats = 0;
             dma_events = 0;
             rqe_seen_ts.delete();
             cqe_seen_ts.delete();
+            cosim_ingress_seen_ts.delete();
+            cosim_missing_sidecar = 0;
+            cosim_duplicate_sidecar = 0;
             rqe_missing_sidecar = 0;
             cqe_missing_sidecar = 0;
             rqe_duplicate_sidecar = 0;
@@ -87,6 +99,10 @@ package tb_int_swb_scoreboard_pkg;
             if (item == null)
                 return;
             case (item.stage)
+                SWB_STAGE_COSIM_INGRESS: begin
+                    cosim_ingress++;
+                    record_cosim_ingress_sidecar(item);
+                end
                 SWB_STAGE_RDMA_RQE_INGRESS: begin
                     rqe_ingress++;
                     record_rqe_sidecar(item);
@@ -98,11 +114,41 @@ package tb_int_swb_scoreboard_pkg;
                 SWB_STAGE_OPQ_LANE_ACCEPT:  opq_accept++;
                 SWB_STAGE_OPQ_LANE_EMIT:    opq_emit++;
                 SWB_STAGE_OPQ_LANE_DROP:    opq_drop++;
+                SWB_STAGE_OPQ_FRAME_INGRESS_HIT: begin
+                    opq_frame_ingress_hits++;
+                    if (!item.packet_ts_valid)
+                        opq_frame_ts_invalid++;
+                end
+                SWB_STAGE_OPQ_FRAME_EGRESS_HIT: begin
+                    opq_frame_egress_hits++;
+                    if (!item.packet_ts_valid)
+                        opq_frame_ts_invalid++;
+                end
                 SWB_STAGE_PCIE_DMA_BEAT:    dma_beats++;
                 SWB_STAGE_PCIE_DMA_EVENT:   dma_events++;
                 default: begin
                 end
             endcase
+        endfunction
+
+        function void record_cosim_ingress_sidecar(swb_stage_record item);
+            if (!item.sidecar_valid) begin
+                cosim_missing_sidecar++;
+                `uvm_warning("SWB_SB_COSIM",
+                             $sformatf("%s cosim ingress without sidecar_valid; %s",
+                                       active_case, item.describe()))
+                return;
+            end
+            if (cosim_ingress_seen_ts.exists(item.sidecar_id)) begin
+                cosim_duplicate_sidecar++;
+                `uvm_error("SWB_SB_COSIM",
+                           $sformatf("%s duplicate cosim ingress sidecar_id=0x%016h first_ts=%0t now=%s",
+                                     active_case, item.sidecar_id,
+                                     cosim_ingress_seen_ts[item.sidecar_id],
+                                     item.describe()))
+                return;
+            end
+            cosim_ingress_seen_ts[item.sidecar_id] = item.sample_time;
         endfunction
 
         function void record_rqe_sidecar(swb_stage_record item);
@@ -234,6 +280,11 @@ package tb_int_swb_scoreboard_pkg;
                                      active_case,
                                      rqe_duplicate_sidecar, cqe_duplicate_sidecar))
             end
+            if (opq_frame_ts_invalid != 0) begin
+                `uvm_error("SWB_SB_OPQ_TS",
+                           $sformatf("%s OPQ frame monitor saw %0d hits without reconstructed packet timestamp",
+                                     active_case, opq_frame_ts_invalid))
+            end
         endfunction
 
         function void check_case(string case_id);
@@ -251,9 +302,11 @@ package tb_int_swb_scoreboard_pkg;
             check_sidecar_expectation(exp.rqe_ingress, exp.cqe_egress);
 
             `uvm_info("SWB_SB",
-                      $sformatf("%s PASS title=\"%s\" rqe=%0d cqe=%0d opq=%0d/%0d drop=%0d dma=%0d/%0d sidecar_matched=%0d",
-                                case_id, exp.title, rqe_ingress, cqe_egress,
-                                opq_accept, opq_emit, opq_drop, dma_beats, dma_events,
+                      $sformatf("%s PASS title=\"%s\" cosim_ingress=%0d rqe=%0d cqe=%0d opq=%0d/%0d frame_hits=%0d/%0d drop=%0d dma=%0d/%0d sidecar_matched=%0d",
+                                case_id, exp.title, cosim_ingress, rqe_ingress, cqe_egress,
+                                opq_accept, opq_emit,
+                                opq_frame_ingress_hits, opq_frame_egress_hits,
+                                opq_drop, dma_beats, dma_events,
                                 sidecar_matched),
                       UVM_LOW)
         endfunction

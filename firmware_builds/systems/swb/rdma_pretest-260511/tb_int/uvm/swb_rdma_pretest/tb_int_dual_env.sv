@@ -9,6 +9,7 @@ package tb_int_swb_dual_env_pkg;
     import tb_int_rdma_rqe_ingress_monitor_pkg::*;
     import tb_int_rdma_cqe_egress_monitor_pkg::*;
     import tb_int_opq_lane_fill_monitor_pkg::*;
+    import tb_int_opq_frame_ts_monitor_pkg::*;
     import tb_int_pcie_dma_egress_monitor_pkg::*;
     import tb_int_host_memory_model_pkg::*;
     import tb_int_host_polling_core_pkg::*;
@@ -22,6 +23,8 @@ package tb_int_swb_dual_env_pkg;
         sc_phy_agent              sc_phy;
         rdma_rqe_ingress_monitor  rdma_rqe_mon;
         opq_lane_fill_monitor     opq_lane_mon[4];
+        opq_frame_ts_monitor      opq_ingress_ts_mon[4];
+        opq_frame_ts_monitor      opq_egress_ts_mon[4];
         pcie_dma_egress_monitor   pcie_dma_mon;
 
         function new(string name, uvm_component parent);
@@ -36,6 +39,16 @@ package tb_int_swb_dual_env_pkg;
             foreach (opq_lane_mon[i]) begin
                 opq_lane_mon[i] = opq_lane_fill_monitor::type_id::create($sformatf("opq_lane_mon%0d", i), this);
                 uvm_config_db#(int unsigned)::set(this, $sformatf("opq_lane_mon%0d", i), "lane_id", i);
+            end
+            foreach (opq_ingress_ts_mon[i]) begin
+                opq_ingress_ts_mon[i] = opq_frame_ts_monitor::type_id::create($sformatf("opq_ingress_ts_mon%0d", i), this);
+                uvm_config_db#(int unsigned)::set(this, $sformatf("opq_ingress_ts_mon%0d", i), "lane_id", i);
+                uvm_config_db#(bit)::set(this, $sformatf("opq_ingress_ts_mon%0d", i), "monitor_egress", 1'b0);
+            end
+            foreach (opq_egress_ts_mon[i]) begin
+                opq_egress_ts_mon[i] = opq_frame_ts_monitor::type_id::create($sformatf("opq_egress_ts_mon%0d", i), this);
+                uvm_config_db#(int unsigned)::set(this, $sformatf("opq_egress_ts_mon%0d", i), "lane_id", i);
+                uvm_config_db#(bit)::set(this, $sformatf("opq_egress_ts_mon%0d", i), "monitor_egress", 1'b1);
             end
             pcie_dma_mon = pcie_dma_egress_monitor::type_id::create("pcie_dma_mon", this);
         endfunction
@@ -83,6 +96,10 @@ package tb_int_swb_dual_env_pkg;
             nominal.rdma_rqe_mon.ap.connect(scoreboard.stage_imp);
             foreach (nominal.opq_lane_mon[i])
                 nominal.opq_lane_mon[i].ap.connect(scoreboard.stage_imp);
+            foreach (nominal.opq_ingress_ts_mon[i])
+                nominal.opq_ingress_ts_mon[i].ap.connect(scoreboard.stage_imp);
+            foreach (nominal.opq_egress_ts_mon[i])
+                nominal.opq_egress_ts_mon[i].ap.connect(scoreboard.stage_imp);
             nominal.pcie_dma_mon.ap.connect(scoreboard.stage_imp);
             debug.rdma_cqe_mon.ap.connect(scoreboard.stage_imp);
             host_mem.stage_ap.connect(scoreboard.stage_imp);

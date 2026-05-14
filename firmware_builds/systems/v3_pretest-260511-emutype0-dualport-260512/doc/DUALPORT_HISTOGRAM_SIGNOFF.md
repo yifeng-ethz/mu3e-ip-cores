@@ -11,12 +11,17 @@
 - `histogram_statistics_0.N_PORTS` is `2`.
 - The top-level Qsys version is `3.0.5.0512`.
 - The arb-to-MTS path uses readyless hit_type0 muxes and the MTS `hit_type0_in` sink no longer declares `ready`.
+- The FEB top-level SC map binds the current datapath component, not the stale eight-emulator map:
+  - `data_path_subsystem_emulator_mutrig_qsys_inst.csr`: `0x2000..0x2100`.
+  - `data_path_subsystem_dbg_mm2runctrl_0.csr`: `0x2200..0x2240`.
+  - `data_path_subsystem_histogram_ingress_bridge_0.csr`: `0xAC00..0xAC10`.
+  - `data_path_subsystem_histogram_ingress_bridge_1.csr`: `0xAC10..0xAC20` (`0x0AB04` SC word base).
 
 ## File Structure
 
 - Qsys recipe: `script/update_dualport_histogram_topology.tcl`.
 - Qsys apply wrapper: `script/apply_dualport_histogram_topology.sh`.
-- Version recipe: `script/update_feb_system_v3_dualport_version.tcl`.
+- Top metadata and CSR-map recipe: `script/update_feb_system_v3_dualport_version.tcl`.
 - Focused sim harness: `tb_int/hist_dualport/`.
 - Simulation reports: `tb_int/REPORT/dualport_smoke.md` and `tb_int/REPORT/100k_single_channel_soak.md`.
 - Board long-soak helper: `scripts/cotest/phase4_5_longsoak.py`.
@@ -39,6 +44,7 @@ PHASE4_5_BUILD_DIR=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_buil
 
 ## Test
 
+- Qsys generation: PASS, `*_qsys_generate_20260514_addrmap_fix_clean.status`, all four generated systems report exit code 0 and error count 0 after the FEB top CSR-map fix.
 - Qsys generation: PASS, `feb_system_v3_qsys_generate_20260512_133806_isolated.status`, exit code 0.
 - Simulation smoke: PASS, 1000 observed hits, port0 handshakes 500, port1 handshakes 500, `hist_bin` writes 844.
 - Simulation 100k soak: PASS, 100000 observed hits, port0 handshakes 50000, port1 handshakes 50000, `hist_bin` writes 100000.

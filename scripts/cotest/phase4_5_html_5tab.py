@@ -12,7 +12,9 @@ import datetime as dt
 import html
 import importlib.util
 import json
+import os
 import re
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -36,6 +38,8 @@ SIM_EVIDENCE_ROOT = (
 BOARD_EVIDENCE_ROOT = DUALPORT_BUILD_DIR / "sweep_evidence"
 OUTPUT_HTML = BUILD_DIR / "doc" / "PHASE4_5_SWEEP_REPORT_5TAB.html"
 SWEEP_SCRIPT = REPO_ROOT / "scripts" / "cotest" / "phase4_5_sweep.py"
+DISLIN_DIR = REPO_ROOT / "packet_scheduler" / ".vendor" / "dislin"
+RDMA_CHANNEL_HIST_RENDERER = REPO_ROOT / "scripts" / "cotest" / "render_rdma_channel_hist_dislin.sh"
 
 
 @dataclass(frozen=True)
@@ -74,17 +78,15 @@ def ip_specs() -> list[IpSpec]:
         IpSpec("lvds_rx_controller_pro_0", "mu3e_lvds_controller/lvds_rx_controller_pro_hw.tcl", "mu3e_lvds_controller/lvds_rx_controller_pro.svd", None, "0x20000 / 0x08000", "0x00000000"),
         IpSpec("mutrig_reset_controller_0", "mutrig_reset_controller/mutrig_reset_controller_hw.tcl", "mutrig_reset_controller/mutrig_reset_controller.svd", None, "0x20200 / 0x08080", "0x00000200"),
     ]
-    for lane in range(8):
-        local = 0x2000 + lane * 0x40
-        pkt = 0x08000 + local // 4
-        specs.append(IpSpec(
-            f"emulator_mutrig_{lane}",
-            "emulator_mutrig/emulator_mutrig_hw.tcl",
-            "emulator_mutrig/emulator_mutrig.svd",
-            None,
-            f"0x{pkt * 4:05X} / 0x{pkt:05X}",
-            f"0x{local:08X}",
-        ))
+    specs.append(IpSpec(
+        "emulator_mutrig_qsys_inst",
+        "emulator_mutrig/emulator_mutrig_hw.tcl",
+        "emulator_mutrig/emulator_mutrig.svd",
+        None,
+        "0x22000 / 0x08800",
+        "0x00002000",
+        "single type0 emulator fanout; CSR aperture is 0x100 bytes",
+    ))
     specs.extend([
         IpSpec("arb_hit_type0_supercore_0", "misc/arb_hit_type0/script/arb_hit_type0_supercore_hw.tcl", None, None, "0x22280 / 0x088A0", "0x000022A0", "rc-readyless supercore; lane CSR contents are arb_hit_type0"),
         IpSpec("arb_hit_type0_0", "misc/arb_hit_type0/script/arb_hit_type0_hw.tcl", None, None, "0x22280 / 0x088A0", "0x000022A0", "per-lane CSR behind supercore"),
@@ -93,6 +95,7 @@ def ip_specs() -> list[IpSpec]:
         IpSpec("mts_preprocessor_1", "mutrig_timestamp_processor/mts_processor_hw.tcl", "mutrig_timestamp_processor/mts_processor.svd", "mutrig_timestamp_processor/mts_processor_csr_meta.tcl", "0x28000 / 0x0A000", "0x00008000"),
         IpSpec("histogram_statistics_0", "histogram_statistics/histogram_statistics_v2_hw.tcl", "histogram_statistics/histogram_statistics.svd", None, "0x2A400 / 0x0A900", "0x0000A400"),
         IpSpec("histogram_ingress_bridge_0", "histogram_statistics/histogram_ingress_bridge_hw.tcl", "histogram_statistics/histogram_ingress_bridge.svd", None, "0x2AC00 / 0x0AB00", "0x0000AC00"),
+        IpSpec("histogram_ingress_bridge_1", "histogram_statistics/histogram_ingress_bridge_hw.tcl", "histogram_statistics/histogram_ingress_bridge.svd", None, "0x2AC10 / 0x0AB04", "0x0000AC10"),
     ])
     rbases = [0xB000, 0xB080, 0xB100, 0xB180, 0xB400, 0xB480, 0xB500, 0xB580]
     for idx, local in enumerate(rbases):
@@ -677,10 +680,12 @@ def gather_delay_evidence(row_id: str) -> dict[str, Any]:
 # Mu3e SWB frame markers per feb_data_frame.py + Mu3eSpecBook-4.pdf:
 #   K28.5 (0xBC) = preamble       (frame start)
 #   K28.4 (0x9C) = trailer        (frame end)
-#   K23.7 (0xF7) is on-wire idle ONLY -- it does NOT appear in the host
-#                 rdma rxbuffer payload, so we do not highlight it here.
+#   K23.7 (0xF7) = subheader marker in the DMA-visible Mu3e wire frame
 SWB_K285 = 0xBC
 SWB_K284 = 0x9C
+SWB_K237 = 0xF7
+PACKET_TYPE_IDLE = 0b000000
+PACKET_TYPE_SCIFI = {0b111000, 0b111001}
 PACKET_TYPE_LABELS: dict[int, str] = {
     0b111010: "MuPix",
     0b111000: "SciFi",
@@ -741,20 +746,301 @@ def _bytes_to_words_le(buf: bytes, byte_offset: int, n_words: int) -> list[int]:
     return out
 
 
-def gather_rdma_evidence(row_id: str, max_bytes_decode: int = 16384, max_bytes_hex: int = 1024) -> dict[str, Any]:
-    """Decode ALL frames from rdma_rxbuffer.bin up to max_bytes_decode.
+def _bytes_to_all_words_le(buf: bytes) -> list[int]:
+    return [
+        int.from_bytes(buf[i:i + 4], "little")
+        for i in range(0, len(buf) - (len(buf) % 4), 4)
+    ]
 
-    The host rdma rxbuffer is a 32-bit-word-aligned stream. Frame starts at
-    each K28.5 (0xBC) byte sitting at word-LSB position. Frame ends at the
-    K28.4 (0x9C) trailer byte (also word-LSB position).
 
-    The decoder reads the 5-word fixed header (per feb_data_frame.py) and
-    captures the full frame hex up to and including the trailer.
+def _load_rdma_datak(base: Path) -> list[int] | None:
+    path = base / "rdma_rxbuffer_datak.json"
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="ascii"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    raw = payload.get("word_datak")
+    if not isinstance(raw, list):
+        return None
+    masks: list[int] = []
+    for value in raw:
+        try:
+            masks.append(int(value, 0) if isinstance(value, str) else int(value))
+        except (TypeError, ValueError):
+            return None
+    return masks
+
+
+def _rdma_word_has_k(words: list[int], k_masks: list[int] | None, idx: int, marker: int) -> bool:
+    if idx < 0 or idx >= len(words):
+        return False
+    if (words[idx] & 0xFF) != marker:
+        return False
+    if k_masks is None or idx >= len(k_masks):
+        return True
+    return bool(k_masks[idx] & 0x1)
+
+
+def _decode_subheader_word(word: int, k_is_subheader: bool) -> dict[str, int] | None:
+    if k_is_subheader:
+        return {
+            "subheader_idx": (word >> 24) & 0xFF,
+            "hit_count": (word >> 8) & 0xFFFF,
+            "format": "k237",
+        }
+    if ((word >> 24) & 0xFF) == SUBHEADER_TAG:
+        return {
+            "subheader_idx": (word >> 16) & 0x7F,
+            "hit_count": word & 0xFFFF,
+            "format": "tag_fe",
+        }
+    return None
+
+
+def _decode_hit_word(word: int, frame_hit_idx: int, subheader_idx: int, sub_hit_idx: int) -> dict[str, int | str]:
+    asic = (word >> 22) & 0xF
+    channel = (word >> 17) & 0x1F
+    global_channel = (asic & 0x7) * 32 + channel
+    hit_id = word & 0x1FF
+    label = f"hit[{frame_hit_idx}] sh={subheader_idx} asic={asic} ch={channel} global_ch={global_channel}"
+    return {
+        "frame_hit_idx": frame_hit_idx,
+        "sub_hit_idx": sub_hit_idx,
+        "subheader_idx": subheader_idx,
+        "word": word,
+        "asic": asic,
+        "channel": channel,
+        "global_channel": global_channel,
+        "hit_id": hit_id,
+        "label": label,
+    }
+
+
+def _rdma_hex_lines(data: bytes, max_bytes_hex: int, k_masks: list[int] | None = None) -> list[dict[str, Any]]:
+    hex_lines: list[dict[str, Any]] = []
+    for off in range(0, min(len(data), max_bytes_hex), 16):
+        row_bytes = data[off:off + 16]
+        hex_str = "".join(f"{b:02x}" for b in row_bytes)
+        roles: list[str] = []
+        for byte_idx, byte in enumerate(row_bytes):
+            absolute = off + byte_idx
+            role = "d"
+            if (absolute % 4) == 0:
+                word_idx = absolute // 4
+                k_ok = k_masks is None or (word_idx < len(k_masks) and (k_masks[word_idx] & 0x1))
+                if k_ok and byte == SWB_K285:
+                    role = "5"
+                elif k_ok and byte == SWB_K284:
+                    role = "4"
+                elif k_ok and byte == SWB_K237:
+                    role = "7"
+            roles.append(role)
+        hex_lines.append({"o": off, "h": hex_str, "r": "".join(roles)})
+    return hex_lines
+
+
+def _decode_rdma_frames_from_words(
+    words: list[int],
+    data: bytes,
+    k_masks: list[int] | None = None,
+    max_hit_labels_per_frame: int = 2048,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    frames: list[dict[str, Any]] = []
+    issues: list[dict[str, Any]] = []
+    idx = 0
+    while idx < len(words):
+        if not _rdma_word_has_k(words, k_masks, idx, SWB_K285):
+            idx += 1
+            continue
+
+        start = idx
+        header_words = words[start:start + 5]
+        hdr = _decode_preamble_words(header_words)
+        packet_type = int(hdr.get("packet_type_raw", -1))
+        if packet_type == PACKET_TYPE_IDLE:
+            issues.append({"word_idx": start, "type": "idle_sop", "word": words[start]})
+            idx += 1
+            continue
+        if packet_type not in PACKET_TYPE_SCIFI:
+            issues.append({"word_idx": start, "type": "unsupported_packet_type", "word": words[start]})
+            idx += 1
+            continue
+        if len(header_words) < 5:
+            issues.append({"word_idx": start, "type": "truncated_header", "word": words[start]})
+            break
+
+        subheader_declared = int(hdr.get("debug_subheader_count", 0))
+        hit_declared = int(hdr.get("debug_hit_count", 0))
+        subheaders: list[dict[str, Any]] = []
+        hit_labels: list[dict[str, Any]] = []
+        channel_hist = [0] * 256
+        pos = start + 5
+        hits_decoded = 0
+        bad = False
+        issue = ""
+
+        for _ in range(subheader_declared):
+            if pos >= len(words):
+                bad = True
+                issue = "truncated_subheaders"
+                break
+            sub_info = _decode_subheader_word(
+                words[pos],
+                _rdma_word_has_k(words, k_masks, pos, SWB_K237),
+            )
+            if sub_info is None:
+                bad = True
+                issue = f"missing_subheader_at_word_{pos}"
+                break
+            hit_count = int(sub_info["hit_count"])
+            subheader_idx = int(sub_info["subheader_idx"])
+            sub_entry = {
+                "word_idx": pos - start,
+                "absolute_word_idx": pos,
+                "subheader_idx": subheader_idx,
+                "hit_count": hit_count,
+                "format": sub_info["format"],
+            }
+            subheaders.append(sub_entry)
+            pos += 1
+            for sub_hit_idx in range(hit_count):
+                if pos >= len(words):
+                    bad = True
+                    issue = "truncated_hits"
+                    break
+                hit = _decode_hit_word(words[pos], hits_decoded, subheader_idx, sub_hit_idx)
+                global_channel = int(hit["global_channel"])
+                if 0 <= global_channel < len(channel_hist):
+                    channel_hist[global_channel] += 1
+                if len(hit_labels) < max_hit_labels_per_frame:
+                    hit_labels.append({"word_idx": pos - start, "absolute_word_idx": pos, **hit})
+                hits_decoded += 1
+                pos += 1
+            sub_entry["hit_word_start"] = sub_entry["word_idx"] + 1
+            sub_entry["hit_word_end"] = sub_entry["word_idx"] + hit_count
+            if bad:
+                break
+
+        has_trailer = (not bad) and _rdma_word_has_k(words, k_masks, pos, SWB_K284)
+        trailer_word = words[pos] if has_trailer else None
+        dirty_trailer = bool(has_trailer and trailer_word is not None and (trailer_word & 0xFFFF_FF00))
+        if not has_trailer and not bad:
+            bad = True
+            issue = f"missing_trailer_at_word_{pos}"
+        if dirty_trailer:
+            issues.append({"word_idx": pos, "type": "dirty_trailer", "word": trailer_word})
+        if bad:
+            issues.append({"word_idx": start, "type": issue or "bad_frame", "word": words[start]})
+
+        end = pos if has_trailer else max(start, min(pos, len(words) - 1))
+        byte_start = start * 4
+        byte_end = min(len(data), (end + 1) * 4)
+        channel_nonzero = [
+            {"channel": ch, "count": count}
+            for ch, count in enumerate(channel_hist)
+            if count
+        ]
+        frames.append({
+            "frame_idx": len(frames),
+            "byte_offset": byte_start,
+            "word_start": start,
+            "word_end": end,
+            "length": max(0, byte_end - byte_start),
+            "hex": data[byte_start:byte_end].hex(),
+            "trailer_offset": (end * 4) if has_trailer else None,
+            "trailer_word": trailer_word,
+            "trailer_dirty": dirty_trailer,
+            "has_trailer": has_trailer,
+            "bad": bad,
+            "issue": issue,
+            "subheaders": subheaders,
+            "subheaders_decoded": len(subheaders),
+            "hits_decoded": hits_decoded,
+            "hit_labels": hit_labels,
+            "hit_labels_truncated": hits_decoded > len(hit_labels),
+            "channel_hist": channel_hist,
+            "channel_nonzero": channel_nonzero,
+            **hdr,
+        })
+        idx = end + 1 if end >= start else start + 1
+
+    return frames, issues
+
+
+def _gather_rdma_evidence_from_payload(
+    data: bytes,
+    k_masks: list[int] | None = None,
+    max_bytes_decode: int = 262144,
+    max_bytes_hex: int = 2048,
+) -> dict[str, Any]:
+    data = data[:max_bytes_decode]
+    words = _bytes_to_all_words_le(data)
+    if k_masks is not None:
+        k_masks = k_masks[:len(words)]
+    frames, issues = _decode_rdma_frames_from_words(words, data, k_masks)
+    return {
+        "summary": None,
+        "hex_lines": _rdma_hex_lines(data, max_bytes_hex, k_masks),
+        "frames": frames,
+        "issues": issues,
+        "idle_frame_start_count": sum(1 for issue in issues if issue.get("type") == "idle_sop"),
+        "dirty_trailer_count": sum(1 for issue in issues if issue.get("type") == "dirty_trailer"),
+        "bytes_total_truncated_at": min(len(data), max_bytes_hex),
+        "frames_decoded": len(frames),
+        "datak_sideband": k_masks is not None,
+    }
+
+
+def _attach_rdma_channel_hist_plots(row_id: str, frames: list[dict[str, Any]]) -> None:
+    if not frames or not RDMA_CHANNEL_HIST_RENDERER.is_file():
+        return
+    plot_dir = OUTPUT_HTML.parent / "rdma_channel_hist" / row_id
+    plot_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = plot_dir / "rdma_channel_hist.csv"
+    with csv_path.open("w", encoding="ascii") as handle:
+        handle.write("frame_idx,channel,count\n")
+        for frame in frames:
+            hist = frame.get("channel_hist")
+            if not isinstance(hist, list) or len(hist) != 256:
+                continue
+            for channel, count in enumerate(hist):
+                handle.write(f"{int(frame['frame_idx'])},{channel},{int(count)}\n")
+
+    env = dict(os.environ)
+    env["DISLIN_DIR"] = str(DISLIN_DIR)
+    try:
+        subprocess.run(
+            [str(RDMA_CHANNEL_HIST_RENDERER), str(csv_path), str(plot_dir)],
+            cwd=str(REPO_ROOT),
+            env=env,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        (plot_dir / "rdma_channel_hist_dislin.log").write_text(str(exc) + "\n", encoding="ascii")
+
+    for frame in frames:
+        png = plot_dir / f"frame_{int(frame['frame_idx']):03d}.png"
+        if png.is_file():
+            frame["channel_hist_png_rel"] = png.relative_to(OUTPUT_HTML.parent).as_posix()
+
+
+def gather_rdma_evidence(row_id: str, max_bytes_decode: int = 262144, max_bytes_hex: int = 2048) -> dict[str, Any]:
+    """Decode Mu3e RDMA frames structurally from rdma_rxbuffer.bin.
+
+    The old report view looked for the nearest word-LSB 0x9C after a 0xBC
+    preamble. That misidentified hit payload bytes as K28.4 trailers. This
+    decoder follows the declared subheader and hit counts, and uses the
+    optional datak sideband when the cosim dump carries it.
     """
     base = RN_BASIC_REPORT_ROOT / row_id
     summary_path = base / "rdma_rxbuffer_summary.json"
     bin_path = base / "rdma_rxbuffer.bin"
-    out: dict[str, Any] = {"summary": None, "hex_lines": [], "frames": []}
+    out: dict[str, Any] = {"summary": None, "hex_lines": [], "frames": [], "issues": []}
     if summary_path.is_file():
         try:
             out["summary"] = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -766,57 +1052,13 @@ def gather_rdma_evidence(row_id: str, max_bytes_decode: int = 16384, max_bytes_h
         data = bin_path.read_bytes()
     except OSError:
         return out
-    data = data[:max_bytes_decode]
-    # Frame starts: K28.5 byte at word-LSB (offset % 4 == 0)
-    frame_starts = [i for i in range(0, len(data), 4) if data[i] == SWB_K285]
-    # Trailer ends: K28.4 byte at word-LSB
-    trailer_offsets = set(i for i in range(0, len(data), 4) if data[i] == SWB_K284)
-
-    frames: list[dict[str, Any]] = []
-    for fi, start in enumerate(frame_starts):
-        next_start = frame_starts[fi + 1] if (fi + 1) < len(frame_starts) else len(data)
-        # Trailer for this frame: nearest K28.4 (word-aligned) in [start+4, next_start)
-        trailer_pos = None
-        for t in range(start + 4, next_start, 4):
-            if t in trailer_offsets:
-                trailer_pos = t
-                break
-        frame_end = (trailer_pos + 4) if trailer_pos is not None else next_start
-        chunk = data[start:frame_end]
-        words = _bytes_to_words_le(data, start, 5)
-        hdr = _decode_preamble_words(words)
-        frames.append({
-            "frame_idx": fi,
-            "byte_offset": start,
-            "length": len(chunk),
-            "hex": chunk.hex(),
-            "trailer_offset": trailer_pos,
-            "has_trailer": trailer_pos is not None,
-            **hdr,
-        })
-
-    # 16-byte-per-row colorized hex of the first max_bytes_hex bytes for the
-    # global hex pane. K23.7 is on-wire idle only and never lands in the host
-    # rxbuffer, so we no longer paint it.
-    hex_lines: list[dict[str, Any]] = []
-    for off in range(0, min(len(data), max_bytes_hex), 16):
-        row_bytes = data[off:off + 16]
-        hex_str = "".join(f"{b:02x}" for b in row_bytes)
-        roles: list[str] = []
-        for byte_idx, byte in enumerate(row_bytes):
-            absolute = off + byte_idx
-            role = "d"
-            if (absolute % 4) == 0:
-                if byte == SWB_K285:
-                    role = "5"
-                elif byte == SWB_K284:
-                    role = "4"
-            roles.append(role)
-        hex_lines.append({"o": off, "h": hex_str, "r": "".join(roles)})
-    out["hex_lines"] = hex_lines
-    out["frames"] = frames
-    out["bytes_total_truncated_at"] = min(len(data), max_bytes_hex)
-    out["frames_decoded"] = len(frames)
+    out.update(_gather_rdma_evidence_from_payload(
+        data,
+        _load_rdma_datak(base),
+        max_bytes_decode=max_bytes_decode,
+        max_bytes_hex=max_bytes_hex,
+    ))
+    _attach_rdma_channel_hist_plots(row_id, out.get("frames", []))
     return out
 
 
@@ -961,7 +1203,7 @@ def dummy_evidence_RN_BASIC_001() -> dict[str, Any]:
             {"t_ms": 0.000000, "type": "RUN_START",  "ip": "",                            "detail": "test harness reset, FSM in IDLE"},
             {"t_ms": 0.000234, "type": "CSR_WRITE",  "ip": "histogram_statistics_v2",     "detail": "LEFT_BOUND=0x00 RIGHT_BOUND=0xFF BIN_WIDTH=1 INTERVAL_CFG=0xFFFFFFFF"},
             {"t_ms": 0.000412, "type": "CSR_WRITE",  "ip": "arb_hit_type0_supercore",     "detail": "per-lane MODE=EMU x8"},
-            {"t_ms": 0.000578, "type": "CSR_WRITE",  "ip": "emulator_mutrig_0..7",        "detail": "lane_mask=0xFF channel_mask=0xFFFFFFFF rate_88fp=0x0100 hit_mode=direct"},
+            {"t_ms": 0.000578, "type": "CSR_WRITE",  "ip": "emulator_mutrig_qsys_inst",   "detail": "lane_mask=0xFF channel_mask=0xFFFFFFFF rate_88fp=0x0100 hit_mode=direct"},
             {"t_ms": 0.000812, "type": "CSR_WRITE",  "ip": "mutrig_injector_multiheader", "detail": "mode=0 (off, slice 1 periodic uses emulator hit-gen)"},
             {"t_ms": 0.001020, "type": "CSR_WRITE",  "ip": "runctl_mgmt_host",            "detail": "RUN_NUMBER=0x00AA0001"},
             {"t_ms": 0.001234, "type": "PHASE",      "ip": "runctl FSM",                  "detail": "0x10 RUN_PREPARE; STATUS PREPARING"},
@@ -1002,8 +1244,12 @@ SUBHEADER_TAG = 0xFE
 
 def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
                         package_counter: int, send_ts_counter: int,
-                        subheader_count: int, hits_per_subheader: int) -> bytes:
+                        per_subheader_hits: list[int]) -> bytes:
     """Build a 32-bit-aligned little-endian mu3e frame.
+
+    `per_subheader_hits` is one entry per subheader: each value is the
+    number of hits that follow that subheader. Length determines the
+    subheader_count (128 for the canonical Mu3eSpecBook frame).
 
     Structure (per Mu3eSpecBook + feb_data_frame.py):
       word 0:    preamble (K28.5 in LSB + packet_type + fpga_id)
@@ -1011,29 +1257,32 @@ def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
       word 2:    ts_low + package_counter
       word 3:    debug0 (subheader_count + per-frame hit_count)
       word 4:    debug1 (send_ts_counter)
-      // 128 subheaders per frame (truncated for the dummy):
-      for i in 0..subheader_count-1:
-        word S_i:  subheader_i (SUBHEADER_TAG<<24 | i<<16 | hits_per_subheader)
-        words H_0..H_{N-1}: hits with channel + ts payload
+      for sh in 0..N-1:
+        word S_sh:  subheader (sh_idx<<24 | hits_in_sh<<8 | K23.7)
+        words H_0..H_{hits_in_sh-1}: hits with asic + channel + ts payload
       last word: trailer (K28.4 in LSB)
     """
-    total_hits = subheader_count * hits_per_subheader
+    subheader_count = len(per_subheader_hits)
+    total_hits = sum(per_subheader_hits)
     w0 = ((packet_type & 0x3F) << 26) | ((fpga_id & 0xFFFF) << 8) | SWB_K285
     w1 = (packet_timestamp >> 16) & 0xFFFF_FFFF
     w2 = ((packet_timestamp & 0xFFFF) << 16) | (package_counter & 0xFFFF)
     w3 = ((subheader_count & 0x7FFF) << 16) | (total_hits & 0xFFFF)
     w4 = send_ts_counter & 0x7FFF_FFFF
     parts = [w0, w1, w2, w3, w4]
-    for sh in range(subheader_count):
-        # subheader: SUBHEADER_TAG<<24 | sh_idx<<16 | hits_per_subheader
-        parts.append((SUBHEADER_TAG << 24) | ((sh & 0x7F) << 16) | (hits_per_subheader & 0xFFFF))
-        for h in range(hits_per_subheader):
-            # hit: asic<<29 | channel<<24 | ts<<8 | hit_idx_low
-            asic = sh & 0x7
+    for sh, hits_in_sh in enumerate(per_subheader_hits):
+        parts.append(((sh & 0xFF) << 24) | ((hits_in_sh & 0xFFFF) << 8) | SWB_K237)
+        for h in range(hits_in_sh):
+            # Match the FEB/SWB cosim MuTRiG hit contract:
+            # ts_low_nibble, asic, channel, fine time and a low hit id.
+            asic = (h >> 5) & 0x7
             channel = h & 0x1F
-            ts = ((sh * hits_per_subheader + h) & 0xFFFF)
-            parts.append(((asic & 0x7) << 29) | ((channel & 0x1F) << 24) | ((ts & 0xFFFF) << 8) | (h & 0xFF))
-    trailer = (send_ts_counter & 0xFFFF_FF00) | SWB_K284
+            ts = (sh * 16) & 0xFFFF
+            hit_id = h & 0x1FF
+            parts.append(((ts & 0xF) << 28) | ((asic & 0xF) << 22) |
+                         ((channel & 0x1F) << 17) | ((ts & 0x7) << 14) |
+                         hit_id)
+    trailer = SWB_K284
     parts.append(trailer)
     buf = bytearray()
     for w in parts:
@@ -1042,17 +1291,28 @@ def _build_frame_bytes(packet_type: int, fpga_id: int, packet_timestamp: int,
 
 
 def _dummy_rdma_buffer(num_frames: int = 3) -> bytes:
-    """Build a synthetic rdma rxbuffer with `num_frames` Mu3e frames in the
-    canonical wire format the SWB DMA packer will emit:
+    """Build a synthetic rdma rxbuffer with `num_frames` Mu3e wire frames
+    matching the RN.BASIC.001 stimulus pattern:
 
-    - 128 subheaders per frame (the N_SHD=128 spec; each subheader covers
-      a 16-tick subwindow so frame spans 128 x 16 = 2048 = 0x800 ticks).
-    - 1 hit per subheader (keeps the popup readable; the real silicon may
-      carry 0..K hits per subheader depending on rate).
-    - packet_timestamp starts at 0 for frame 0 and increments by 0x800
-      per frame (matches the #110 sim verification).
+    Row spec: slice 1 periodic, lane_mask=0xFF (8 ASICs), channel_mask=
+    0xFFFFFFFF (32 channels), rate_88fp=0x0100 (period 256 cycles = 16
+    subheaders apart). All 8x32=256 channels fire SIMULTANEOUSLY on each
+    periodic tick.
+
+    Per-frame firing pattern (128 subheaders, 16 ts-ticks each = 2048
+    cycles = 0x800 ticks per frame):
+      - 8 fire events per frame (2048/256 = 8)
+      - Fire events land on subheader indices 0, 16, 32, 48, 64, 80, 96, 112
+      - Each fire deposits 256 hits in that subheader (8 ASICs x 32 ch)
+      - Other 120 subheaders carry 0 hits
+      - Total per frame: 8 x 256 = 2048 hits
+
+    packet_timestamp = frame_idx * 0x800 (matches #110 sim verification).
     """
     buf = bytearray()
+    fire_subheaders = {0, 16, 32, 48, 64, 80, 96, 112}
+    HITS_PER_FIRE = 8 * 32  # popcount(lane_mask) * popcount(channel_mask)
+    per_sh_hits = [HITS_PER_FIRE if i in fire_subheaders else 0 for i in range(128)]
     for fi in range(num_frames):
         buf.extend(_build_frame_bytes(
             packet_type=0b111000,             # SciFi
@@ -1060,54 +1320,14 @@ def _dummy_rdma_buffer(num_frames: int = 3) -> bytes:
             packet_timestamp=fi * 0x800,      # frame[0]=0, delta=0x800
             package_counter=fi,
             send_ts_counter=fi * 0x800,
-            subheader_count=128,              # canonical N_SHD per Mu3eSpecBook
-            hits_per_subheader=1,
+            per_subheader_hits=per_sh_hits,
         ))
     return bytes(buf)
 
 
 def gather_rdma_evidence_from_bytes(data: bytes, max_bytes_hex: int = 1024) -> dict[str, Any]:
     """Same as gather_rdma_evidence but operates on a raw byte buffer."""
-    out: dict[str, Any] = {"summary": None, "hex_lines": [], "frames": []}
-    frame_starts = [i for i in range(0, len(data), 4) if data[i] == SWB_K285]
-    trailer_offsets = set(i for i in range(0, len(data), 4) if data[i] == SWB_K284)
-    frames: list[dict[str, Any]] = []
-    for fi, start in enumerate(frame_starts):
-        next_start = frame_starts[fi + 1] if (fi + 1) < len(frame_starts) else len(data)
-        trailer_pos = None
-        for t in range(start + 4, next_start, 4):
-            if t in trailer_offsets:
-                trailer_pos = t
-                break
-        frame_end = (trailer_pos + 4) if trailer_pos is not None else next_start
-        chunk = data[start:frame_end]
-        words = _bytes_to_words_le(data, start, 5)
-        hdr = _decode_preamble_words(words)
-        frames.append({
-            "frame_idx": fi, "byte_offset": start, "length": len(chunk),
-            "hex": chunk.hex(), "trailer_offset": trailer_pos,
-            "has_trailer": trailer_pos is not None, **hdr,
-        })
-    hex_lines: list[dict[str, Any]] = []
-    for off in range(0, min(len(data), max_bytes_hex), 16):
-        row_bytes = data[off:off + 16]
-        hex_str = "".join(f"{b:02x}" for b in row_bytes)
-        roles: list[str] = []
-        for byte_idx, byte in enumerate(row_bytes):
-            absolute = off + byte_idx
-            role = "d"
-            if (absolute % 4) == 0:
-                if byte == SWB_K285:
-                    role = "5"
-                elif byte == SWB_K284:
-                    role = "4"
-            roles.append(role)
-        hex_lines.append({"o": off, "h": hex_str, "r": "".join(roles)})
-    out["hex_lines"] = hex_lines
-    out["frames"] = frames
-    out["bytes_total_truncated_at"] = min(len(data), max_bytes_hex)
-    out["frames_decoded"] = len(frames)
-    return out
+    return _gather_rdma_evidence_from_payload(data, None, max_bytes_hex=max_bytes_hex)
 
 
 def basic_rows_html() -> str:
@@ -1146,18 +1366,28 @@ def basic_rows_html() -> str:
         run_ev = gather_runlog_evidence(rid)
         hit_count = theory_info.get("theory_hits")
         run_length_ms = RUN_WINDOW_MS
-        # RN.BASIC.001 is the showcase: always override with the perfect dummy
-        # so the popup behaviour is reviewable before the cosim sweep emits
-        # real evidence in this shape.
+        # RN.BASIC.001 showcase: prefer real cosim evidence per evidence type;
+        # fall back to dummy only for types the cosim sweep hasn't produced yet.
+        # The cosim now emits Mu3e wire-format rdma (#111 swb_opq_dma_packer
+        # swap PASS), so rdma_ev is real. is_dummy reflects ONLY whether the
+        # main rdma popup is synthetic — scoreboard / runlog dummies don't
+        # flip the flag.
+        is_dummy = False
         if rid == "RN.BASIC.001":
             dummy = dummy_evidence_RN_BASIC_001()
-            counter_ev = dummy["counter"]
-            delay_ev = dummy["delay"]
-            rdma_ev = dummy["rdma"]
-            sb_ev = dummy["scoreboard"]
-            run_ev = dummy["runlog"]
-            hit_count = dummy["hit_count"]
-            run_length_ms = dummy["run_length_ms"]
+            if not counter_ev:
+                counter_ev = dummy["counter"]
+            if not (delay_ev and delay_ev.get("checkpoints")):
+                delay_ev = dummy["delay"]
+            if not (rdma_ev and rdma_ev.get("hex_lines")):
+                rdma_ev = dummy["rdma"]
+                is_dummy = True
+            if not sb_ev:
+                sb_ev = dummy["scoreboard"]
+            if not run_ev:
+                run_ev = dummy["runlog"]
+            if hit_count is None:
+                hit_count = dummy["hit_count"]
         evidence_json[rid] = {
             "counter": counter_ev,
             "delay": delay_ev,
@@ -1166,7 +1396,7 @@ def basic_rows_html() -> str:
             "runlog": run_ev,
             "slice": slice_id,
             "slice_label": slice_label,
-            "is_dummy": rid == "RN.BASIC.001",
+            "is_dummy": is_dummy,
         }
         run_len_str = f"{run_length_ms:.1f}"
         run_len_cell = (
@@ -1203,7 +1433,7 @@ def basic_rows_html() -> str:
         "Configuration columns are taken directly from the test plan. "
         "Packets carries popcount, the committed hit count (sim scoreboard-traced; equals theory at PASS rows), and the run length in ms (click for a UVM-style run log). "
         "Evidence buttons open inline popups for counter (per-IP CSR counters), delay (DISLIN lifetime plots, 2 hist banks), rdma (rx-buffer hex with mu3e frame decode), and scoreboard (sim-only per-checkpoint monitor: ghost / broken / missing hits resolved against the source true-hit-list). "
-        "RN.BASIC.001 carries a synthetic perfect dummy so the popup layout is reviewable end-to-end before the real cosim evidence lands.</p>"
+        "RN.BASIC.001 popup now carries real cosim evidence after #111 SWB DMA packer swap PASS (66 Mu3e wire frames, all ts deltas 0x800, 31,264 wire hits). Scoreboard / runlog fall back to dummy when the cosim doesn't emit them.</p>"
     )
     header_html = (
         '<thead>'
@@ -1493,6 +1723,7 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 .hex-row .byte { padding: 0 1px; border-radius: 2px; }
 .hex-row .byte.k285 { background: #ffd17a; color: #5a3300; font-weight: 700; }
 .hex-row .byte.k284 { background: #b3e0b6; color: #1f4f23; font-weight: 700; }
+.hex-row .byte.k237 { background: #fff2bd; color: #6a4f0a; font-weight: 700; }
 .hex-row .byte.match { outline: 2px solid #d24a4a; outline-offset: -1px; }
 .legend { font-size: 11px; color: var(--muted); margin: 4px 0 10px; }
 .legend .pill {
@@ -1501,6 +1732,7 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 }
 .legend .k285 { background: #ffd17a; color: #5a3300; }
 .legend .k284 { background: #b3e0b6; color: #1f4f23; }
+.legend .k237 { background: #fff2bd; color: #6a4f0a; }
 
 /* Scoreboard table: ensure numeric cells right-align under their headers */
 .sb-table th, .sb-table td { padding: 6px 12px; vertical-align: middle; }
@@ -1558,6 +1790,10 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 .frame-card > summary .tag.other { background: #e0e0e0; color: #444; }
 .frame-card[open] > summary { border-bottom: 1px solid var(--line); background: var(--accent-weak); }
 .frame-detail { padding: 10px 12px; }
+.frame-main {
+  display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 12px;
+  align-items: start;
+}
 .frame-fields {
   display: grid; grid-template-columns: auto 1fr; gap: 4px 16px;
   font-size: 12px; font-variant-numeric: tabular-nums;
@@ -1592,6 +1828,37 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
 .frame-hex-legend .pill.subheader { background: #fff2bd; color: #6a4f0a; }
 .frame-hex-legend .pill.hit       { background: #efe9d8; color: #5c5446; }
 .frame-hex-legend .pill.trailer   { background: #b3e0b6; color: #1f4f23; }
+.frame-side {
+  border-left: 1px solid var(--line); padding-left: 12px;
+}
+.channel-hist h4, .hit-labels h4 { margin: 0 0 6px; font-size: 12px; }
+.channel-hist-img {
+  display: block; width: 100%; border: 1px solid var(--line); background: #fff;
+}
+.channel-bars {
+  height: 132px; display: grid; grid-template-columns: repeat(64, 1fr);
+  grid-template-rows: repeat(4, 1fr); gap: 1px; align-items: end;
+  border: 1px solid var(--line); padding: 4px; background: #fdfaf2;
+}
+.chbar {
+  height: 100%; display: flex; align-items: end; background: #f3ead5;
+}
+.chbar span {
+  display: block; width: 100%; min-height: 1px; background: #3274a1;
+}
+.hist-note { font-size: 10.5px; color: var(--muted); margin-top: 4px; }
+.hit-labels { margin-top: 12px; }
+.hit-table-wrap { max-height: 220px; overflow: auto; border: 1px solid var(--line); }
+.hit-table-wrap table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+.hit-table-wrap th, .hit-table-wrap td {
+  padding: 2px 4px; border-bottom: 1px solid #eee3ca; white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.hit-table-wrap th { position: sticky; top: 0; background: #fffaf1; }
+@media (max-width: 1050px) {
+  .frame-main { grid-template-columns: 1fr; }
+  .frame-side { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 10px; }
+}
 """
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     modal_html = """
@@ -1794,6 +2061,51 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     });
     return html;
   }
+  function renderChannelHist(f){
+    if (f.channel_hist_png_rel) {
+      return '<div class="channel-hist">'
+           + '<h4>256-channel DISLIN histogram</h4>'
+           + '<img class="channel-hist-img" src="' + f.channel_hist_png_rel + '" alt="256-channel hit histogram for frame ' + f.frame_idx + '">'
+           + '<div class="hist-note">DISLIN PNG, x: global channel 0..255, y: hits in this frame.</div>'
+           + '</div>';
+    }
+    var hist = f.channel_hist || [];
+    var maxv = 1;
+    for (var i = 0; i < 256; i++) maxv = Math.max(maxv, hist[i] || 0);
+    var bars = '';
+    for (var ch = 0; ch < 256; ch++) {
+      var count = hist[ch] || 0;
+      var h = Math.max(count ? 3 : 0, Math.round(100 * count / maxv));
+      bars += '<div class="chbar" title="channel ' + ch + ': ' + count + ' hits">'
+            + '<span style="height:' + h + '%"></span></div>';
+    }
+    return '<div class="channel-hist">'
+         + '<h4>256-channel hit histogram</h4>'
+         + '<div class="channel-bars">' + bars + '</div>'
+         + '<div class="hist-note">x: global channel 0..255, y: hits in this frame, max=' + maxv + '</div>'
+         + '</div>';
+  }
+  function renderHitLabels(f){
+    var hits = f.hit_labels || [];
+    if (!hits.length) return '<div class="hit-labels"><h4>Hit labels</h4><p class="ev-pending">No hit words decoded in this frame.</p></div>';
+    var rows = hits.map(function(h){
+      return '<tr>'
+        + '<td>' + h.frame_hit_idx + '</td>'
+        + '<td>' + h.subheader_idx + '</td>'
+        + '<td>' + h.asic + '</td>'
+        + '<td>' + h.channel + '</td>'
+        + '<td>' + h.global_channel + '</td>'
+        + '<td>0x' + (h.word >>> 0).toString(16).padStart(8, '0') + '</td>'
+        + '</tr>';
+    }).join('');
+    var note = f.hit_labels_truncated ? '<div class="hist-note">Hit table truncated in HTML.</div>' : '';
+    return '<div class="hit-labels">'
+      + '<h4>Hit labels</h4>'
+      + '<div class="hit-table-wrap"><table><thead><tr>'
+      + '<th>#</th><th>sub</th><th>asic</th><th>ch</th><th>global</th><th>word</th>'
+      + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
+      + note + '</div>';
+  }
   function renderRdma(rid, data){
     if (!data) return '<p class="ev-pending">No rdma evidence found for ' + rid + '.</p>';
     var summary = data.summary || {};
@@ -1802,12 +2114,16 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
                + 'record_count         : ' + (summary.record_count != null ? summary.record_count : '-') + '\\n'
                + 'record_size_avg      : ' + (summary.record_size_avg != null ? summary.record_size_avg : '-') + '\\n'
                + 'frames decoded       : ' + frames.length + '\\n'
+               + 'idle frame starts    : ' + (data.idle_frame_start_count != null ? data.idle_frame_start_count : '-') + '\\n'
+               + 'dirty true trailers  : ' + (data.dirty_trailer_count != null ? data.dirty_trailer_count : '-') + '\\n'
+               + 'datak sideband       : ' + (data.datak_sideband ? 'yes' : 'no') + '\\n'
                + 'hex sample bytes     : ' + (data.bytes_total_truncated_at != null ? data.bytes_total_truncated_at : '-');
     var html = '<h3>rdma rxbuffer summary</h3><div class="delay-stats">' + sumStr + '</div>'
              + '<div class="legend">Legend:'
              + '<span class="pill k285">0xBC = K28.5 preamble</span>'
              + '<span class="pill k284">0x9C = K28.4 trailer</span>'
-             + ' (K23.7 idle is on-wire only and not present in the rxbuffer payload)</div>'
+             + '<span class="pill k237">0xF7 = K23.7 subheader</span>'
+             + ' (Idle frame starts are treated as decoder/RTL issues, not as payload frames)</div>'
              + '<div class="rdma-controls">'
              + '<label>Search hex pattern (e.g. <code>bc</code> or <code>9c</code>): </label>'
              + '<input type="text" id="rdma-search" placeholder="bc">'
@@ -1836,9 +2152,10 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
           + '<span>fpga 0x' + ((f.fpga_id != null) ? f.fpga_id.toString(16).padStart(4,'0') : '-') + '</span>'
           + '<span>pkts ts ' + ts + '</span>'
           + '<span>pkg# ' + pkgc + '</span>'
-          + '<span>sub ' + (f.debug_subheader_count != null ? f.debug_subheader_count : '-') + '</span>'
-          + '<span>hits ' + (f.debug_hit_count != null ? f.debug_hit_count : '-') + '</span>'
-          + '<span>trailer ' + (f.has_trailer ? '0x' + (f.trailer_offset != null ? f.trailer_offset.toString(16) : '?') : 'MISSING') + '</span>';
+          + '<span>sub ' + (f.subheaders_decoded != null ? f.subheaders_decoded : '-') + '/' + (f.debug_subheader_count != null ? f.debug_subheader_count : '-') + '</span>'
+          + '<span>hits ' + (f.hits_decoded != null ? f.hits_decoded : '-') + '/' + (f.debug_hit_count != null ? f.debug_hit_count : '-') + '</span>'
+          + '<span>trailer ' + (f.has_trailer ? '0x' + (f.trailer_offset != null ? f.trailer_offset.toString(16) : '?') : 'MISSING') + '</span>'
+          + (f.bad ? '<span class="tag other">BAD ' + (f.issue || '') + '</span>' : '');
         // Detail body: decoded field grid + full hex split per 16-byte row
         var fields =
             '<div class="key">packet_type</div><div class="val">0x' + (f.packet_type_raw != null ? f.packet_type_raw.toString(16) : '?') + ' (' + (f.packet_type_label || '?') + ')</div>'
@@ -1847,26 +2164,60 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
           + '<div class="key">package_counter</div><div class="val">' + pkgc + '</div>'
           + '<div class="key">debug_subheader_count</div><div class="val">' + (f.debug_subheader_count != null ? f.debug_subheader_count : '-') + '</div>'
           + '<div class="key">debug_hit_count</div><div class="val">' + (f.debug_hit_count != null ? f.debug_hit_count : '-') + '</div>'
+          + '<div class="key">subheaders_decoded</div><div class="val">' + (f.subheaders_decoded != null ? f.subheaders_decoded : '-') + '</div>'
+          + '<div class="key">hits_decoded</div><div class="val">' + (f.hits_decoded != null ? f.hits_decoded : '-') + '</div>'
           + '<div class="key">send_ts_counter</div><div class="val">' + (f.send_ts_counter != null ? f.send_ts_counter : '-') + '</div>'
           + '<div class="key">byte_offset</div><div class="val">0x' + f.byte_offset.toString(16) + ' = ' + f.byte_offset + '</div>'
           + '<div class="key">length</div><div class="val">' + f.length + ' bytes</div>'
-          + '<div class="key">trailer</div><div class="val">' + (f.has_trailer ? ('present at 0x' + f.trailer_offset.toString(16)) : 'MISSING') + '</div>';
+          + '<div class="key">trailer</div><div class="val">' + (f.has_trailer ? ('present at 0x' + f.trailer_offset.toString(16) + ', word 0x' + ((f.trailer_word || 0) >>> 0).toString(16).padStart(8, '0')) : 'MISSING') + '</div>'
+          + '<div class="key">trailer_dirty</div><div class="val">' + (f.trailer_dirty ? 'YES' : 'no') + '</div>';
         // Render full hex split in rows of 16 bytes (= 4 little-endian 32-bit words),
         // colored by word role: header / subheader / hit / trailer.
         var hex = f.hex || '';
         var bodyBytes = hex.length / 2;
         var totalWords = Math.floor(bodyBytes / 4);
-        var SUBHEADER_TAG = 0xFE;
-        function wordRoleAt(wordIdx, byte3) {
+        var subByWord = {};
+        var hitRanges = [];
+        (f.subheaders || []).forEach(function(sh){
+          subByWord[sh.word_idx] = sh;
+          if ((sh.hit_count || 0) > 0) {
+            hitRanges.push({s: sh.hit_word_start, e: sh.hit_word_end, sh: sh});
+          }
+        });
+        var hitByWord = {};
+        (f.hit_labels || []).forEach(function(h){ hitByWord[h.word_idx] = h; });
+        function hitRangeAt(wordIdx) {
+          for (var r = 0; r < hitRanges.length; r++) {
+            if (wordIdx >= hitRanges[r].s && wordIdx <= hitRanges[r].e) return hitRanges[r];
+          }
+          return null;
+        }
+        function wordRoleAt(wordIdx) {
           if (wordIdx < 5) return 'header';
           if (wordIdx === totalWords - 1) return 'trailer';
-          if (byte3 === SUBHEADER_TAG) return 'subheader';
-          return 'hit';
+          if (subByWord[wordIdx]) return 'subheader';
+          if (hitRangeAt(wordIdx)) return 'hit';
+          return 'data';
+        }
+        function wordTitleAt(wordIdx, role) {
+          if (role === 'subheader') {
+            var sh = subByWord[wordIdx];
+            return 'subheader ' + sh.subheader_idx + ', hits=' + sh.hit_count;
+          }
+          if (role === 'hit') {
+            var h = hitByWord[wordIdx];
+            if (h) return h.label + ', hit_id=' + h.hit_id;
+            var hr = hitRangeAt(wordIdx);
+            return hr ? ('hit in subheader ' + hr.sh.subheader_idx) : 'hit';
+          }
+          if (role === 'trailer') return 'K28.4 trailer';
+          if (role === 'header') return 'fixed frame header';
+          return 'data';
         }
         var legend = '<div class="frame-hex-legend">'
                    + '<span class="pill header">header (preamble + ts_high + ts_low + debug0 + debug1)</span>'
-                   + '<span class="pill subheader">subheader (0xFE tag, SH idx + hits_per_subheader)</span>'
-                   + '<span class="pill hit">hit (asic + channel + ts + idx)</span>'
+                   + '<span class="pill subheader">subheader (K23.7 + SH idx + hits)</span>'
+                   + '<span class="pill hit">hit (asic + channel + hit id)</span>'
                    + '<span class="pill trailer">trailer (K28.4 marker)</span>'
                    + '</div>';
         // Display: bytes are stored little-endian on disk (LSB first), but
@@ -1886,10 +2237,10 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
             var wb2 = hex.slice(idx + 4, idx + 6);
             var wb3 = hex.slice(idx + 6, idx + 8); // MSB on disk
             var wordIdx = (idx / 8) | 0;
-            var byte3 = parseInt(wb3, 16);
-            var role = wordRoleAt(wordIdx, byte3);
+            var role = wordRoleAt(wordIdx);
+            var title = wordTitleAt(wordIdx, role);
             // Render MSB..LSB so the K28.5 (LSB) sits at the END
-            wordsHtml += '<span class="word ' + role + '">'
+            wordsHtml += '<span class="word ' + role + '" title="' + title + '">'
                        + wb3 + ' ' + wb2 + ' ' + wb1 + ' ' + wb0
                        + '</span><span class="ws"> </span>';
           }
@@ -1898,9 +2249,14 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
         }
         html += '<details class="frame-card"><summary>' + summary_line + '</summary>'
               + '<div class="frame-detail">'
+              + '<div class="frame-main">'
+              + '<div class="frame-left">'
               + '<div class="frame-fields">' + fields + '</div>'
               + legend
               + '<div class="frame-hex">' + hexLines + '</div>'
+              + '</div>'
+              + '<div class="frame-side">' + renderChannelHist(f) + renderHitLabels(f) + '</div>'
+              + '</div>'
               + '</div></details>';
       });
       html += '</div>';
@@ -1919,7 +2275,7 @@ details[open] summary { border-bottom: 1px solid var(--line); background: var(--
     function paint(filterPattern, startByte, lenBytes){
       pane.innerHTML = '';
       var pattern = (filterPattern || '').toLowerCase().replace(/[^0-9a-f]/g, '');
-      var roleMap = {'5':'k285', '4':'k284', 'd':'data'};
+      var roleMap = {'5':'k285', '4':'k284', '7':'k237', 'd':'data'};
       (data.hex_lines || []).forEach(function(row){
         if (row.o < startByte) return;
         if (row.o >= startByte + lenBytes) return;

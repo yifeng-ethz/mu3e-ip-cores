@@ -7,7 +7,7 @@ SYSTEM_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-
 export SYSTEM_DIR
 QSYS_GENERATE_BIN="${QSYS_GENERATE_BIN:-/data1/intelFPGA/18.1/quartus/sopc_builder/bin/qsys-generate}"
 STAMP="${QSYS_GENERATE_STAMP:-$(date +%Y%m%d_%H%M%S)}"
-DESCRIPTION_SCRIPT="${SYSTEM_DIR}/script/update_emulator_type0_descriptions.tcl"
+TOP_PATCH_SCRIPT="${SYSTEM_DIR}/script/update_feb_system_v3_dualport_version.tcl"
 
 . "${SYSTEM_DIR}/script/qsys_search_path.sh"
 
@@ -29,11 +29,11 @@ run_qsys_generate() {
     log="${qsys_dir}/${qsys_base}_qsys_generate_${STAMP}_clean.console.log"
     status="${qsys_dir}/${qsys_base}_qsys_generate_${STAMP}_clean.status"
 
-    if [ "${qsys_base}" = "feb_system_v3" ] && [ -f "${DESCRIPTION_SCRIPT}" ]; then
-        desc_log="${qsys_dir}/${qsys_base}_description_qsys_script_${STAMP}.log"
+    if [ "${qsys_base}" = "feb_system_v3" ] && [ -f "${TOP_PATCH_SCRIPT}" ]; then
+        desc_log="${qsys_dir}/${qsys_base}_top_patch_qsys_script_${STAMP}.log"
         qsys-script \
             --cmd="set ::env(SYSTEM_DIR) {${SYSTEM_DIR}}" \
-            --script="${DESCRIPTION_SCRIPT}" > "${desc_log}" 2>&1
+            --script="${TOP_PATCH_SCRIPT}" > "${desc_log}" 2>&1
     fi
 
     if [ -d "${out_root}" ]; then

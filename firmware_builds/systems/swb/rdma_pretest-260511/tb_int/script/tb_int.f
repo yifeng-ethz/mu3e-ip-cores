@@ -6,6 +6,7 @@
 +incdir+uvm/common/rdma_rqe_ingress_monitor
 +incdir+uvm/common/rdma_cqe_egress_monitor
 +incdir+uvm/common/opq_lane_fill_monitor
++incdir+uvm/common/opq_frame_ts_monitor
 +incdir+uvm/common/pcie_dma_egress_monitor
 +incdir+uvm/common/host_memory_model
 +incdir+uvm/swb_rdma_pretest
@@ -28,6 +29,7 @@ uvm/common/sc_phy_agent/sc_phy_agent.sv
 uvm/common/rdma_rqe_ingress_monitor/rdma_rqe_ingress_monitor.sv
 uvm/common/rdma_cqe_egress_monitor/rdma_cqe_egress_monitor.sv
 uvm/common/opq_lane_fill_monitor/opq_lane_fill_monitor.sv
+uvm/common/opq_frame_ts_monitor/opq_frame_ts_monitor.sv
 uvm/common/pcie_dma_egress_monitor/pcie_dma_egress_monitor.sv
 uvm/swb_rdma_pretest/tb_int_swb_case_model.sv
 uvm/swb_rdma_pretest/tb_int_swb_scoreboard.sv
@@ -118,6 +120,7 @@ uvm/swb_rdma_pretest/tests/tb_int_p068_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_fixed_test.sv
+uvm/swb_rdma_pretest/tests/tb_int_opq_frame_ts_smoke_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv
 uvm/swb_rdma_pretest/tb_int_smoke_test.sv
 uvm/swb_rdma_pretest/tb_int_top.sv

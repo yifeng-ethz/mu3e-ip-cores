@@ -30,8 +30,18 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "cotest"))
 from cosim_lifetime_analyzer import LifetimeAnalysisError, analyze_lifetime_dir  # noqa: E402
 
 RUN_WINDOW_8NS = 125000
+HIST_INTERVAL_CFG_CLOCKS = RUN_WINDOW_8NS
 OPQ_INGRESS_CEILING = 250000
 CHANNELS_PER_ASIC = 32
+HIST_IP_RATE_BINS = 256
+HIST_IP_DELAY_LEFT_CYCLES = -1000
+HIST_IP_DELAY_RIGHT_CYCLES = 3096
+HIST_IP_DELAY_BIN_WIDTH_CYCLES = 16
+HIST_IP_KEY_LOC_PRE_RBCAM_GLOBAL_CHANNEL = (38 << 24) | (35 << 16) | (37 << 8) | 30
+HIST_IP_KEY_LOC_POST_RBCAM_GLOBAL_CHANNEL = (38 << 24) | (35 << 16) | (24 << 8) | 17
+HIST_IP_KEY_LOC_DEBUG_SAMPLE = (23 << 24) | (16 << 16) | (15 << 8) | 0
+HIST_IP_CONTROL_RATE_PRESET = 0x00000101
+HIST_IP_CONTROL_DELAY_PRESET = 0x00000091
 DEFAULT_DRAIN_SWB_CYCLES = 800000
 RATE_BASE = 65536
 EIGHT_NS_TO_NS = 8.0
@@ -108,6 +118,8 @@ class RnBasicRow:
         data["channel_popcount"] = self.channel_popcount
         data["sim_source_mode"] = self.sim_source_mode()
         data["sim_hit_period_8ns"] = self.sim_hit_period_8ns()
+        data["hist_interval_cfg_clocks"] = HIST_INTERVAL_CFG_CLOCKS
+        data["hist_interval_ms"] = HIST_INTERVAL_CFG_CLOCKS * 8.0e-6
         return data
 
 
@@ -275,7 +287,7 @@ def parse_hex_or_missing(value: str) -> int | None:
 def read_filtered_hit_debug(report_dir: Path, row: RnBasicRow) -> list[dict[str, Any]]:
     path = report_dir / "feb_swb_hit_trace_debug.csv"
     if not path.is_file():
-        return []
+        return read_checkpoint_trace_fallback(report_dir, row)
     records: list[dict[str, Any]] = []
     with path.open("r", encoding="ascii", newline="") as handle:
         for raw in csv.DictReader(handle):
@@ -314,7 +326,67 @@ def read_filtered_hit_debug(report_dir: Path, row: RnBasicRow) -> list[dict[str,
                 except ValueError:
                     record[key] = None
             records.append(record)
+    if not records:
+        records = read_checkpoint_trace_fallback(report_dir, row)
     return records
+
+
+def read_checkpoint_trace_fallback(report_dir: Path, row: RnBasicRow) -> list[dict[str, Any]]:
+    """Rebuild the minimum per-hit ledger from preserved checkpoint traces.
+
+    Older row reports may keep `feb_swb_pre_rbcam_trace.csv` and
+    `feb_swb_post_rbcam_trace.csv` after pruning the richer debug trace.  The
+    checkpoint traces are enough for rate and rbCAM delay histogram
+    expectations.
+    """
+    stage_files = {
+        "pre_rbcam_time_ps": report_dir / "feb_swb_pre_rbcam_trace.csv",
+        "post_rbcam_time_ps": report_dir / "feb_swb_post_rbcam_trace.csv",
+        "feb_egress_time_ps": report_dir / "feb_swb_feb_egress_trace.csv",
+        "opq_ingress_time_ps": report_dir / "feb_swb_ingress_trace.csv",
+        "opq_egress_time_ps": report_dir / "feb_swb_opq_trace.csv",
+        "dma_time_ps": report_dir / "feb_swb_dma_trace.csv",
+    }
+    records_by_hit: dict[int, dict[str, Any]] = {}
+    for stage_key, trace_path in stage_files.items():
+        if not trace_path.is_file():
+            continue
+        with trace_path.open("r", encoding="ascii", newline="") as handle:
+            for raw in csv.DictReader(handle):
+                try:
+                    hit_id = int(raw.get("hit_id", "-1"))
+                    source_asic = int(raw.get("source_asic", "-1"))
+                    channel = int(raw.get("channel", "-1"))
+                    hit_ts_8ns = int(round(float(raw.get("hit_ts_8ns", "-1"))))
+                    stage_abs_8ns = int(round(float(raw.get("abs_ts_8ns", "-1"))))
+                except ValueError:
+                    continue
+                if hit_id < 0 or not row.selected(source_asic, channel):
+                    continue
+                record = records_by_hit.setdefault(
+                    hit_id,
+                    {
+                        "hit_id": hit_id,
+                        "payload_hit_id": int(raw.get("payload_hit_id", hit_id)),
+                        "lane": source_asic,
+                        "source_asic": source_asic,
+                        "source_channel": channel,
+                        "abs_ts_8ns": hit_ts_8ns,
+                        "source_generation_time_ps": hit_ts_8ns * 8000,
+                        "pre_rbcam_time_ps": -1,
+                        "post_rbcam_time_ps": -1,
+                        "feb_egress_time_ps": -1,
+                        "opq_ingress_time_ps": -1,
+                        "opq_egress_time_ps": -1,
+                        "dma_time_ps": -1,
+                        "expected_dma_hit": None,
+                        "actual_dma_hit": None,
+                        "debug_meta": None,
+                    },
+                )
+                record[stage_key] = stage_abs_8ns * 8000
+                record["hit_word"] = raw.get("hit_word", record.get("hit_word", ""))
+    return [records_by_hit[key] for key in sorted(records_by_hit)]
 
 
 def count_by(records: list[dict[str, Any]], key: str) -> dict[str, int]:
@@ -451,6 +523,166 @@ def hist_bank(records: list[dict[str, Any]], bank: int) -> dict[str, Any]:
         "bin_width_ns": 1,
         "hist_bins": dict(sorted(bins.items(), key=lambda item: int(item[0]))),
         "hist_bin_sum": sum(bins.values()),
+    }
+
+
+def delay_cycles_at(records: list[dict[str, Any]], stage_key: str) -> list[float]:
+    values: list[float] = []
+    for record in records:
+        src_ps = int(record.get("source_generation_time_ps", -1))
+        stage_ps = int(record.get(stage_key, -1))
+        if src_ps < 0 or stage_ps < 0:
+            continue
+        values.append(int(round((stage_ps - src_ps) / 8000.0)))
+    return values
+
+
+def delay_cycles_from_lifetime_trace(path: Path, column: str) -> list[float]:
+    if not path.is_file():
+        return []
+    values: list[float] = []
+    with path.open("r", encoding="ascii", newline="") as handle:
+        for raw in csv.DictReader(handle):
+            try:
+                values.append(float(raw[column]))
+            except (KeyError, ValueError):
+                continue
+    return values
+
+
+def fixed_delay_hist(values: list[float]) -> dict[str, Any]:
+    bin_count = (
+        (HIST_IP_DELAY_RIGHT_CYCLES - HIST_IP_DELAY_LEFT_CYCLES)
+        // HIST_IP_DELAY_BIN_WIDTH_CYCLES
+    )
+    bins = [0 for _ in range(bin_count)]
+    underflow = 0
+    overflow = 0
+    for value in values:
+        idx = int((value - HIST_IP_DELAY_LEFT_CYCLES) // HIST_IP_DELAY_BIN_WIDTH_CYCLES)
+        if idx < 0:
+            underflow += 1
+        elif idx >= bin_count:
+            overflow += 1
+        else:
+            bins[idx] += 1
+    return {
+        "left_bound_cycles": HIST_IP_DELAY_LEFT_CYCLES,
+        "right_bound_cycles": HIST_IP_DELAY_RIGHT_CYCLES,
+        "bin_width_cycles": HIST_IP_DELAY_BIN_WIDTH_CYCLES,
+        "bin_count": bin_count,
+        "underflow": underflow,
+        "overflow": overflow,
+        "hist_bins": bins,
+        "hist_bin_sum": sum(bins),
+        "count": len(values),
+        "min_cycles": min(values, default=None),
+        "max_cycles": max(values, default=None),
+        "p50_cycles": percentile(values, 0.50),
+    }
+
+
+def build_hist_ip_expectation(row: RnBasicRow,
+                              records: list[dict[str, Any]],
+                              lifetime_trace_path: Path | None = None) -> dict[str, Any]:
+    rate_bins = [0 for _ in range(HIST_IP_RATE_BINS)]
+    for record in records:
+        if int(record.get("post_rbcam_time_ps", -1)) < 0:
+            continue
+        source_asic = int(record.get("source_asic", -1))
+        channel = int(record.get("source_channel", -1))
+        global_channel = ((source_asic & 0x7) * CHANNELS_PER_ASIC) + channel
+        if 0 <= channel < CHANNELS_PER_ASIC and 0 <= global_channel < HIST_IP_RATE_BINS:
+            rate_bins[global_channel] += 1
+
+    active_indices = [
+        asic * CHANNELS_PER_ASIC + channel
+        for asic in range(8)
+        for channel in range(CHANNELS_PER_ASIC)
+        if row.selected(asic, channel)
+    ]
+    active_index_set = set(active_indices)
+    active_bins = [rate_bins[idx] for idx in active_indices]
+    inactive_sum = sum(
+        count for idx, count in enumerate(rate_bins)
+        if idx not in active_index_set
+    )
+    pre_values: list[float] = []
+    post_values: list[float] = []
+    if lifetime_trace_path is not None:
+        pre_values = delay_cycles_from_lifetime_trace(
+            lifetime_trace_path,
+            "pre_rbcam_lifetime_cycles",
+        )
+        post_values = delay_cycles_from_lifetime_trace(
+            lifetime_trace_path,
+            "post_rbcam_lifetime_cycles",
+        )
+    if not pre_values:
+        pre_values = delay_cycles_at(records, "pre_rbcam_time_ps")
+    if not post_values:
+        post_values = delay_cycles_at(records, "post_rbcam_time_ps")
+    active_channels = row.lane_popcount * row.channel_popcount
+    observed_total = sum(active_bins)
+    expected_per_channel = (
+        observed_total / max(1, active_channels)
+        if active_channels else 0.0
+    )
+    expected_theoretical_per_channel = (
+        row.theoretical_hits / max(1, active_channels)
+        if active_channels else 0.0
+    )
+    return {
+        "row_id": row.row_id,
+        "histogram_statistics_v2_csr": {
+            "rate_pre_rbcam_preset": {
+                "LEFT_BOUND": 0,
+                "RIGHT_BOUND": 255,
+                "BIN_WIDTH": 1,
+                "KEY_LOC": f"0x{HIST_IP_KEY_LOC_PRE_RBCAM_GLOBAL_CHANNEL:08X}",
+                "KEY_LOC_FIELD": "hit_type1_data[37:30] = {asic[2:0], channel[4:0]}",
+                "CONTROL_APPLY": f"0x{HIST_IP_CONTROL_RATE_PRESET:08X}",
+                "INTERVAL_CFG": HIST_INTERVAL_CFG_CLOCKS,
+                "interval_ms": HIST_INTERVAL_CFG_CLOCKS * 8.0e-6,
+            },
+            "rate_post_rbcam_preset": {
+                "LEFT_BOUND": 0,
+                "RIGHT_BOUND": 255,
+                "BIN_WIDTH": 1,
+                "KEY_LOC": f"0x{HIST_IP_KEY_LOC_POST_RBCAM_GLOBAL_CHANNEL:08X}",
+                "KEY_LOC_FIELD": "padded_hit_type2_data[24:17] = {asic[2:0], channel[4:0]}",
+                "CONTROL_APPLY": f"0x{HIST_IP_CONTROL_RATE_PRESET:08X}",
+                "INTERVAL_CFG": HIST_INTERVAL_CFG_CLOCKS,
+                "interval_ms": HIST_INTERVAL_CFG_CLOCKS * 8.0e-6,
+            },
+            "delay_preset": {
+                "LEFT_BOUND": HIST_IP_DELAY_LEFT_CYCLES,
+                "RIGHT_BOUND": HIST_IP_DELAY_RIGHT_CYCLES,
+                "BIN_WIDTH": HIST_IP_DELAY_BIN_WIDTH_CYCLES,
+                "KEY_LOC": f"0x{HIST_IP_KEY_LOC_DEBUG_SAMPLE:08X}",
+                "CONTROL_APPLY": f"0x{HIST_IP_CONTROL_DELAY_PRESET:08X}",
+                "CONTROL_MODE": "-7 signed debug_1/debug_2",
+                "INTERVAL_CFG": HIST_INTERVAL_CFG_CLOCKS,
+                "interval_ms": HIST_INTERVAL_CFG_CLOCKS * 8.0e-6,
+            },
+        },
+        "rate_256ch": {
+            "hist_bins": rate_bins,
+            "active_channels": active_channels,
+            "expected_total_per_ms": observed_total,
+            "expected_plan_total_per_ms": row.clipped_hits,
+            "expected_per_active_channel_per_ms": expected_per_channel,
+            "expected_theoretical_per_active_channel_per_ms": expected_theoretical_per_channel,
+            "active_min": min(active_bins, default=0),
+            "active_p50": percentile(active_bins, 0.50),
+            "active_max": max(active_bins, default=0),
+            "active_sum": sum(active_bins),
+            "inactive_sum": inactive_sum,
+        },
+        "delay_cycles": {
+            "pre_rbcam": fixed_delay_hist(pre_values),
+            "post_rbcam": fixed_delay_hist(post_values),
+        },
     }
 
 
@@ -912,6 +1144,8 @@ def collect_evidence(
             "dropped_hits": max(0, source_count - post_count),
         },
         "histogram_statistics_v2": {
+            "interval_cfg_clocks": HIST_INTERVAL_CFG_CLOCKS,
+            "interval_ms": HIST_INTERVAL_CFG_CLOCKS * 8.0e-6,
             "total_hits_csr13": csr_total,
             "last_interval_total_hits_csr17": csr_total,
         },
@@ -973,6 +1207,12 @@ def collect_evidence(
     bank_b = hist_bank(records, 1)
     write_json(output_dir / "delay_hist_bin_a.json", bank_a)
     write_json(output_dir / "delay_hist_bin_b.json", bank_b)
+    write_json(output_dir / "hist_ip_expectation.json",
+               build_hist_ip_expectation(
+                   row,
+                   records,
+                   output_dir / "feb_swb_lifetime_trace.csv",
+               ))
     hist_total = int(bank_a["hist_bin_sum"]) + int(bank_b["hist_bin_sum"])
     delay_pass = (
         abs(hist_total - csr_total) <= 8

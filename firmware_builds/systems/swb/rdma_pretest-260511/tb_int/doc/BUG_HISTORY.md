@@ -35,8 +35,225 @@ Historical formal note:
 | bug_id | class | severity | encounterability | status | first seen | commit | summary |
 |---|---|---|---|---|---|---|---|
 | [BUG-001-H](#bug-001-h-swb-tb-int-had-no-local-synthesis-tree-for-basic-smoke) | H | non-datapath-refactor | `directed-only (harness preflight)` | fixed | `B065` structural preflight | `pending` | SWB tb_int could not run its first BASIC smoke until a local staged board project and Qsys synthesis outputs existed. |
+| [BUG-002-H](#bug-002-h-phase-1-link-2-legacy-lvds-smoke-bypassed-the-physical-link-boundary) | H | non-datapath-refactor | `directed-only (hardware debug repro)` | open | `B067` Phase 1 legacy-link preflight | `pending` | Existing SWB tb_int cases pass through abstract RDMA/OPQ/DMA interfaces and do not exercise firefly lock, LVDS word alignment, or LINK_LOCKED[2]. |
+| [BUG-003-H](#bug-003-h-legacy-swb-dma-path-stripped-mu3e-wire-frame-structure) | H | datapath-contract | `always-on (every SWB DMA capture)` | partial | `RN.BASIC.050` cosim / `#109` host rxbuffer trace | `pending` | The legacy SWB DMA path emitted flat 64-bit hit records instead of full Mu3e wire-frame words. |
+| [BUG-004-R](#bug-004-r-swb-firmware-left-dirty-k284-trailer-metadata-and-no-idle-sop-guard) | R | datapath-contract | `always-on (OPQ egress marker contract)` | partial | `RN.BASIC.001` RDMA popup / K-symbol audit | `pending` | SWB firmware could forward a true K28.4 trailer with nonzero metadata bits and had no simulation guard for illegal Idle-frame SOPs at the OPQ-to-DMA boundary. |
+
+## 2026-05-13
+
+### BUG-004-R: SWB firmware left dirty K28.4 trailer metadata and no Idle-SOP guard
+- First seen in:
+  - `RN.BASIC.001` RDMA popup review of
+    `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/doc/PHASE4_5_SWEEP_REPORT_5TAB.html`
+  - 2026-05-13 K-symbol audit after the popup showed apparent Idle frames and
+    trailer-like words with nonzero upper bytes
+- Symptom:
+  - the original report decoder scanned 32-bit words by low byte only, so
+    payload data with byte `0xBC` or `0x9C` could be mislabeled as Idle or
+    trailer structure when the dump did not carry `datak`
+  - the actual SWB firmware boundary also allowed a true K28.4 trailer word to
+    retain metadata in bits above `data[7:0]`
+  - no simulation assertion failed the run if OPQ egress transmitted an Idle
+    frame SOP or a dirty true K28.4 trailer toward the DMA packer
+- Root cause:
+  - `time_merger_tree.vhd` built `trailerHit(i).data` from upstream header and
+    overflow fields plus trailing byte `0x9C`, so a K-marked trailer could carry
+    nonzero `data[31:8]`
+  - the OPQ egress / DMA packer observation path did not preserve `datak` in the
+    cosim dump, forcing report-side pure-hex marker detection
+  - the maintained SWB DMA packer path did not yet canonicalize true trailers or
+    assert against Idle SOPs and dirty trailers during simulation
+  - the FEB/SWB corun UVM package used a stale K28.4 byte constant (`8'hdc`)
+    instead of `8'h9c`, weakening the marker audit
+- Fix status:
+  - state:
+    - partial; RTL, corun, cosim, and report-side decoding are fixed and
+      simulation-verified
+    - a full SWB Quartus rebuild, reflash, and board rxbuffer capture with this
+      exact guard/canonicalization patch are still pending
+  - mechanism:
+    - changed `time_merger_tree.vhd` to emit a clean K28.4 trailer data word:
+      `x"000000000000009C"`
+    - changed `ingress_egress_adaptor.vhd` to export OPQ egress data plus
+      `datak`, canonicalize true K28.4 trailer data to `x"0000009C"`, and add
+      translate-off assertions for Idle SOP and dirty K28.4 trailer transmission
+    - added the SWB firmware `swb_opq_dma_pipeline.sv` boundary that detects
+      markers from `datak`, canonicalizes true trailers before DMA packing, and
+      fatals in simulation on Idle SOP or dirty trailer words
+    - carried `datak` through the FEB/SWB corun packer trace and cosim report
+      path, then made the RDMA decoder structural instead of a low-byte hex scan
+    - fixed the UVM K28.4 constant to `8'h9c`
+  - before_fix_outcome:
+    - the report popup could decode payload byte collisions as Idle frames
+      because the dump lacked K-symbol provenance
+    - the SWB merger RTL could form a true trailer marker whose upper data bits
+      were nonzero
+  - after_fix_outcome:
+    - `RN.BASIC.001` datak-aware decode reports `66` frames, `0` idle SOPs,
+      `0` dirty true trailers, and `25,600` labeled hits
+    - `/tmp/feb_swb_corun_kcheck_20260513` completed with
+      `FEB_SWB_CORUN_TRACE_PASS`; trace summary showed `datak` present, `66`
+      frames, `0` bad frames, `0` dirty true trailers, and DISLIN `PASS`
+    - `make -C firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/tb_int/feb_swb_corun compile_swb_corun`
+      completed with `0` errors and `0` warnings
+    - standalone `vlog` of the shared packer plus
+      `swb_opq_dma_pipeline.sv` completed with `0` errors and `0` warnings
+    - `make -C firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/tb_int/feb_swb_corun/uvm compile`
+      completed with `0` errors and `0` warnings
+  - potential_hazard:
+    - medium until the new firmware image is rebuilt and checked on the board;
+      current closure proves the marker contract in simulation and regenerated
+      report evidence, not yet in a freshly programmed SWB SOF
+    - PCIe packet out-of-order write behavior is not modeled in this fix; the
+      current rxbuffer frame latch strategy assumes the host-visible buffer is
+      continuous after scatter-gather ordering
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run in this turn
+- Runtime / coverage context:
+  - corun evidence:
+    `/tmp/feb_swb_corun_kcheck_20260513`
+  - regenerated HTML report:
+    `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/doc/PHASE4_5_SWEEP_REPORT_5TAB.html`
+  - generated per-frame DISLIN histograms:
+    `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/doc/rdma_channel_hist/RN.BASIC.001/`
+- Commit:
+  - pending
+
+### BUG-003-H: Legacy SWB DMA path stripped Mu3e wire-frame structure
+- First seen in:
+  - `#109` SWB rdma rxbuffer debug showing host-format 64-bit hit records
+  - `RN.BASIC.050` cosim rxbuffer evidence before the packer switch
+- Symptom:
+  - `/dev/mudaq0` and cosim `rdma_rxbuffer.bin` carried flattened hit records
+    instead of full Mu3e wire-frame words
+  - the legacy path dropped the K28.5 preamble, timestamp/debug header words,
+    subheader role boundaries, and K28.4 trailer before data reached the DMA
+    host payload slots
+- Root cause:
+  - `musip_mux_4_1` unpacked OPQ egress frames and asserted
+    `next_64bit_word_valid` only for hit payloads
+  - `musip_event_builder` then serialized those hit payloads as host-format
+    records, so CSR tuning could not recover the missing frame structure
+- Fix status:
+  - state:
+    - partial; SWB RTL, Quartus compile, static screen, RN.BASIC.050 cosim,
+      SWB flash, PCIe recovery, and RN.BASIC.001 board-attempt evidence are
+      complete
+    - board wire-format verification is blocked by missing upstream OPQ input
+      on the live FEB/SWB chain, not by a decoded host-format DMA stream
+  - mechanism:
+    - marked the legacy `musip_mux_4_1`, `musip_event_builder`, and interim
+      `swb_rdma_subsystem_bridge` path as `LEGACY_DMA_DEAD`
+    - routed raw OPQ egress words through `swb_opq_dma_pipeline` and the
+      maintained `swb_opq_dma_packer`
+    - packed the original 32-bit Mu3e wire-frame words into 256-bit DMA
+      payloads without stripping preamble, subheaders, hits, or trailer
+  - before_fix_outcome:
+    - initial RN.BASIC.050 rxbuffer began with `0x80` hit-record data
+    - wire-frame decoder reported `frames_decoded = 0`
+  - after_fix_outcome:
+    - focused packer static screen: lint error `0`, CDC violations `0`, RDC
+      violations `0`
+    - Quartus full compile of SWB `top` completed with `0` errors and timing
+      positive at all four integration corners
+    - RN.BASIC.050 cosim rxbuffer first bytes:
+      `bc 00 00 e0 00 00 00 00 00 00 00 00 80 00 04 00`
+    - RN.BASIC.050 decoded `62` wire-format frames; frame `0`
+      `packet_timestamp = 0`; inter-frame timestamp delta histogram
+      `{0x800: 61}`; K28.4 trailer count `62`
+    - SWB flash via `DE5 [3-6.2]` succeeded with `0` programmer errors and
+      `0` programmer warnings; `mudaq_recover_pcie` exited `0`
+    - RN.BASIC.001 board sanity passed:
+      `scratch_pad_ram = 0x5AA55A5A`, `sc_hub_uid = 0x53434842`, and
+      runctl `RX_CMD_COUNT` advanced by `4`
+    - RN.BASIC.001 board DMA did not prove wire-format because the live run
+      generated no packer input: `rdma_rxbuffer.bin` was `0` bytes,
+      `frames_decoded = 0`, packer/DMA counters stayed `0`, and histogram
+      `TOTAL_HITS = 0`
+  - potential_hazard:
+    - high for board-level closure until the upstream live traffic source is
+      restored; the programmed SWB image cannot prove wire-frame DMA capture
+      without OPQ egress words entering the packer
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run in this turn
+- Runtime / coverage context:
+  - compile log:
+    `firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/codex_swb_opq_compile_20260513.log`
+  - SOF SHA256:
+    `7b85a2607c48ec677427c348a39f8ed24e71950b8889211bb00cc518f873a7f5`
+  - cosim row evidence:
+    `firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/cosim/REPORT/RN.BASIC.050/rdma_rxbuffer_summary.json`
+  - HTML report:
+    `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/doc/PHASE4_5_SWEEP_REPORT_5TAB.html`
+  - board evidence:
+    `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/RN.BASIC.001_swb_dma_packer_20260513_111043/board_summary.json`
+  - board flash log:
+    `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/REPORT/swb_dma_packer_quartus_pgm_20260513T090601Z.log`
+- Commit:
+  - pending
 
 ## 2026-05-11
+
+### BUG-002-H: Phase 1 link-2 legacy LVDS smoke bypassed the physical-link boundary
+- First seen in:
+  - Apr 27 FEB SOF plus May 11 SWB SOF empty-frame smoke on `2026-05-11`
+  - on-board symptom:
+    - `VERSION_REGISTER_R = 0xE774D90D`
+    - `LINK_LOCKED_LOW_REGISTER_R = 0x13000000`
+    - `LINK_LOCKED_HIGH_REGISTER_R = 0x00000F00`
+    - expected SciFi FEB link-2 lock bit was not set
+  - Phase 1 baseline sim:
+    - `make run_B067 SIM_ROOT=sim_phase1_20260511_legacy_link2 WORK=work_tb_int_phase1_legacy_link2`
+- Symptom:
+  - `B067` passes with one RQE, one CQE, one OPQ emit, and one DMA event
+  - the pass does not prove the requested legacy FEB-to-SWB lock path because
+    the selected SWB tb_int filelist does not compile a legacy LVDS stream
+    source, firefly lock model, word-align observation, or LINK_LOCKED CSR
+    mirror
+  - the compiled structural path starts at `rdma_rqe_ingress_if`, `opq_lane_if`,
+    and `pcie_dma_egress_if`, so it bypasses the board-failing boundary
+- Root cause:
+  - the Phase 1 debug target crosses from the Apr 27 FEB legacy LVDS/firefly
+    boundary to the May 11 SWB RDMA ingress abstraction without a live
+    link-lock/word-align handshake in tb_int
+- Fix status:
+  - state:
+    - open; no RTL or Qsys fix was applied in this iteration
+  - mechanism:
+    - none yet; the next valid Phase 1 step is to promote tb_int with either a
+      live real-DUT bind for the top-level firefly/LVDS path or a focused
+      link-2 adapter model that drives legacy 8b10b symbols through the same
+      lock and CSR mirror signals used by the SWB SOF
+  - before_fix_outcome:
+    - B067 structural sim passes while board `LINK_LOCKED_LOW[2]` remains low,
+      so the sim cannot reproduce or exonerate the board failure
+  - after_fix_outcome:
+    - not available; this iteration intentionally stopped before changing RTL,
+      Qsys, or Signal Tap setup
+  - potential_hazard:
+    - high for board-debug conclusions that rely on current tb_int selected
+      cases, because a direct RDMA-side pass can mask failures at the optical
+      link, XCVR lock, LVDS word-align, or link-lock CSR boundary
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run in this turn
+- Runtime / coverage context:
+  - transcript:
+    `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/sim_phase1_20260511_legacy_link2/B067/transcript`
+  - B067 result:
+    - `B067 PASS title="FEB-side RDMA RQE sidecar lineage" rqe=1 cqe=1 opq=1/1 drop=0 dma=1/1 sidecar_matched=1`
+    - `UVM_ERROR : 0`
+    - `UVM_FATAL : 0`
+  - static audit:
+    - `tb_int/script/tb_int.f` includes `rdma_rqe_ingress_if.sv`,
+      `opq_lane_if.sv`, and `pcie_dma_egress_if.sv`
+    - no compiled tb_int filelist entry binds `lvds_phy_if.sv`,
+      `mutrig_phy_agent.sv`, firefly lock, word-align, or `LINK_LOCKED`
+  - SWB top-level lane map evidence:
+    - current SWB `top.vhd` maps `QSFPC RX(8)` to `feb_rx(2)`
+    - legacy `online_sc/online/switching_pc/a10_board/top.vhd` uses the same
+      `QSFPC RX(8)` to `feb_rx(2)` mapping
+- Commit:
+  - pending
 
 ### BUG-001-H: SWB tb_int had no local synthesis tree for BASIC smoke
 - First seen in:

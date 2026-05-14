@@ -48,5 +48,7 @@ package tb_int_swb_selected_tests_pkg;
     // BUG-RC-RESET-SCWEDGE behavioural topology repro: pre-fix and post-fix
     import tb_int_run_sequence_directed_wedge_test_pkg::*;
     import tb_int_run_sequence_directed_wedge_fixed_test_pkg::*;
+    // OPQ frame timestamp monitor smoke
+    import tb_int_opq_frame_ts_smoke_test_pkg::*;
 
 endpackage

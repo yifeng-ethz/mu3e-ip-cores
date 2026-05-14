@@ -32,10 +32,10 @@
 
 This module ships two preset plot modes:
 
-1. ``render_rate_plot`` -- per-channel hit-count histogram, one panel.
+1. ``render_rate_plot`` -- per-global-channel hit-count histogram, one panel.
    The natural readout of the ``histogram_statistics_v2`` ``hist_bin`` CSR
-   window when ``KEY_LOC = channel_post``. Each of the 256 bins maps to a
-   single channel id. Bar height is ``hits / bin [%]``.
+   window when ``KEY_LOC`` selects ``{asic[2:0], channel[4:0]}``. Each of the
+   256 bins maps to one global channel id. Bar height is ``hits / bin [%]``.
 
 2. ``render_latency_plot`` -- 2-panel pre/post-rbCAM hit lifetime histogram.
    This matches the legacy ``make_plot`` block that used to live inside
@@ -94,9 +94,9 @@ LATENCY_POST_TITLE = (
 )
 
 # Rate mode constants.
-RATE_X_LABEL      = "channel_id"
+RATE_X_LABEL      = "global channel_id"
 RATE_Y_LABEL      = "hits / bin [%]"
-RATE_TITLE        = "per-channel hit count (histogram_statistics_v2, KEY_LOC=channel_post)"
+RATE_TITLE        = "per-global-channel hit count (histogram_statistics_v2)"
 
 # Histogram bin count -- matches sweep_evidence/<row_id>/hist_bin.csv.
 HIST_NUM_BINS     = 256
@@ -129,7 +129,7 @@ def _find_repo_root(start: Path) -> Path:
 
 REPO_ROOT = _find_repo_root(SCRIPT_DIR)
 DEFAULT_BUILD_DIR_REL = (
-    "firmware_builds/systems/v3_pretest-260511-emulator-type0-260512"
+    "firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
 )
 _env_build = os.environ.get("PHASE4_5_BUILD_DIR", "").strip()
 BUILD_DIR = (
@@ -454,7 +454,7 @@ def _render_for_row(row_id: str, mode: str, evidence_root: Path) -> dict:
 
     note_latency = (
         "no per-hit timestamps available on board; the histogram is keyed "
-        "by channel_id (KEY_LOC=channel_post), see tb_int simulation for "
+        "by global channel {asic[2:0], channel[4:0]}, see tb_int simulation for "
         "the full lifetime distribution"
     )
 

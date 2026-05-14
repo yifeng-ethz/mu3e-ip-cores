@@ -186,9 +186,9 @@ SC_HUB_UID_EXPECT               = 0x53434842   # ASCII "SCHB"
 # LVDS lane go (enables lvds_lane_go signal that lets emulator/arb run)
 LVDS_LANE_GO_WORD               = 0x08004
 
-# emulator_mutrig_0 base (lane unit -- single instance in v3 emulator-type0)
+# emulator_mutrig_0 base (single qsys-lane instance in v3 pulserdrop; hit_type0
+# is fanned out to the eight FEB lanes downstream).
 EMU_BASE_WORD                   = 0x08800
-EMU_CHANNEL_MASK_W              = 0x05
 EMU_CENTRAL_W                   = 0x07
 EMU_SIGNAL_W                    = 0x08
 EMU_BACKGROUND_W                = 0x09
@@ -197,6 +197,7 @@ EMU_RATES_W                     = 0x0B
 EMU_CLUSTER_FIX_W               = 0x0C
 EMU_PRNG_SEED_W                 = 0x0E
 EMU_TIMEBASE_SEED_W             = 0x0F
+EMU_LANE_ENABLE_W               = 0x12
 
 # arb_hit_type0_supercore -- 8 lanes, each 0x20 words wide
 ARB_BASE_WORD                   = 0x088A0
@@ -229,12 +230,26 @@ HIST_SCRATCH_W                  = 0x10    # CSR 16 -- general-purpose RW scratch
 HIST_LAST_INTERVAL_TOTAL_HITS_W = 0x11    # CSR 17 -- STABLE: hits latched at the most recent interval_pulse before the live counter reset
 HIST_LAST_INTERVAL_DROPPED_HITS_W = 0x12  # CSR 18 -- STABLE: dropped-hits latched at the most recent interval_pulse
 HIST_INGRESS_BASE_WORD          = 0x0AB00
-HIST_INGRESS_BANK_BASE_WORDS    = [0x0AB00, 0x0AB10]
+HIST_INGRESS_BANK_BASE_WORDS    = [0x0AB00, 0x0AB04]
 HIST_INGRESS_CONTROL_W          = 0x02
 HIST_INGRESS_STATUS_W           = 0x03
 
-# MTS hit_type1 payload: ASIC[38:35], channel[34:30].
-HIST_KEY_LOC_CHANNEL_POST       = (38 << 24) | (35 << 16) | (34 << 8) | 30
+# 256-bin rate histograms use global channel = {ASIC[2:0], channel[4:0]}.
+# The contiguous slice differs before and after rbCAM because hit_type1 carries
+# ASIC/channel in data[38:30], while the filtered post-rbCAM hit body is padded
+# into the low 36 data bits.
+HIST_KEY_LOC_PRE_RBCAM_GLOBAL_CHANNEL  = (38 << 24) | (35 << 16) | (37 << 8) | 30
+HIST_KEY_LOC_POST_RBCAM_GLOBAL_CHANNEL = (38 << 24) | (35 << 16) | (24 << 8) | 17
+HIST_KEY_LOC_HIT_WORD_CHANNEL          = HIST_KEY_LOC_PRE_RBCAM_GLOBAL_CHANNEL
+HIST_KEY_LOC_DEBUG_SAMPLE       = (23 << 24) | (16 << 16) | (15 << 8) | 0
+HIST_CONTROL_APPLY              = 0x00000001
+HIST_CONTROL_KEY_UNSIGNED       = 0x00000100
+HIST_CONTROL_RATE_PRESET        = HIST_CONTROL_APPLY | HIST_CONTROL_KEY_UNSIGNED
+HIST_CONTROL_MODE_DELAY_MTS     = ((-7) & 0xF) << 4
+HIST_CONTROL_DELAY_PRESET       = HIST_CONTROL_APPLY | HIST_CONTROL_MODE_DELAY_MTS
+HIST_DELAY_LEFT_CYCLES          = -1000
+HIST_DELAY_RIGHT_CYCLES         = 3096
+HIST_DELAY_BIN_WIDTH_CYCLES     = 16
 
 # mts_preprocessor_0 / _1
 MTS_BASE_WORDS                  = [0x09000, 0x0A000]
@@ -299,7 +314,7 @@ def _find_repo_root(start: Path) -> Path:
     raise RuntimeError(f"Could not locate mu3e-ip-cores repo root from {start}")
 
 REPO_ROOT     = _find_repo_root(SCRIPT_DIR)
-DEFAULT_BUILD_DIR_REL = "firmware_builds/systems/v3_pretest-260511-emulator-type0-260512"
+DEFAULT_BUILD_DIR_REL = "firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
 _env_build = os.environ.get("PHASE4_5_BUILD_DIR", "").strip()
 BUILD_DIR     = (Path(_env_build).expanduser().resolve()
                  if _env_build else REPO_ROOT / DEFAULT_BUILD_DIR_REL)
@@ -372,6 +387,8 @@ EMU_RATE_DENOM_CYCLES = 256.0 * 256.0
 # a different strategy: manual interval_reset between runs).
 INTERVAL_CFG_NEVER_FIRE   = 0xFFFFFFFF                          # max 32-bit
 INTERVAL_CFG_NEVER_FIRE_S = INTERVAL_CFG_NEVER_FIRE / LVDS_CLK_HZ # ~34.36 s
+HIST_INTERVAL_1MS_CLOCKS  = int(0.001 * LVDS_CLK_HZ)
+HIST_INTERVAL_1MS_S       = HIST_INTERVAL_1MS_CLOCKS / LVDS_CLK_HZ
 
 
 def _popcount_mask(mask_text: str, width_bits: int) -> int:
@@ -855,6 +872,26 @@ def discard_log_fifo(sc_tool: Path, link: int,
 # Configuration helpers (program emulator, arb, histogram, downstream)
 # ============================================================================
 
+def emu_cluster_fix_from_channel_mask(mask: int) -> int:
+    """Encode a contiguous local-channel mask into frontend_csr CLUSTER_FIX."""
+    local_mask = mask & 0xFFFFFFFF
+    if local_mask == 0:
+        return 0x00000000
+    low = (local_mask & -local_mask).bit_length() - 1
+    high = local_mask.bit_length() - 1
+    contiguous = ((1 << (high - low + 1)) - 1) << low
+    if local_mask != contiguous:
+        raise RuntimeError(
+            "current emulator CLUSTER_FIX cannot represent sparse "
+            f"channel_mask=0x{local_mask:08X}"
+        )
+    if high > 31:
+        raise RuntimeError(
+            f"channel_mask=0x{local_mask:08X} exceeds local channel 31"
+        )
+    return (1 << 14) | ((high & 0x7F) << 7) | (low & 0x7F)
+
+
 def configure_arb_lane_mask(sc_tool: Path, link: int, lane_mask: int,
                             log_fh: Optional[Any] = None) -> dict[str, Any]:
     out: dict[str, Any] = {}
@@ -877,62 +914,56 @@ def configure_arb_lane_mask(sc_tool: Path, link: int, lane_mask: int,
 def configure_emulator(sc_tool: Path, link: int,
                        channel_mask: int, rate_88fp: int, hit_mode: int,
                        log_fh: Optional[Any] = None) -> dict[str, Any]:
-    """Program emulator_mutrig channel_mask, rate, and hit_mode.
+    """Program current frontend_csr.sv emulator controls.
 
-    Fix 1 (sim diag commit 6029646e): MUTRIG_FORMAT (CSR 0x0A) carries
-    format flags only -- short_mode[0], gen_idle[1], tx_mode[4:2],
-    type0_enable[5]. It does NOT dispatch hit_mode. The mode-dispatch
-    bits live in the SIGNAL CSR (CSR 0x08, frontend_csr.sv:277-289):
-      bit[0] cfg_signal_hit_mode_sig     : 0 = internal, 1 = external
-      bit[1] cfg_signal_internal_sub_mode: 0 = direct (Poisson PRNG),
-                                           1 = periodic (phase accumulator)
+    The current CSR map has no CHANNEL_MASK register.  CSR 0x05 is
+    LAST_WR_ADDR, so writing a legacy channel mask there only proves that the
+    software is using the wrong map.  Channel selection for the pulserdrop
+    single-lane emulator is represented by CLUSTER_FIX.  For exact evidence,
+    only contiguous local channel masks are accepted here; sparse masks need a
+    separate RTL feature or a different stimulus shape.
 
-    Mode encoding that matches the sweep row hit_mode field:
-      direct   (00b, hit_mode=0): SIGNAL=0x00  hit_mode_sig=0 sub_mode=0
-      burst    (01b, hit_mode=1): SIGNAL=0x01  hit_mode_sig=1 (external)
-      periodic (11b, hit_mode=3): SIGNAL=0x03  hit_mode_sig=1 sub_mode=1
-
-    MUTRIG_FORMAT is always written as 0x20 (type0-enable bit[5]=1,
-    all other format flags = default). This was already the correct
-    constant for direct-mode rows; for burst/periodic rows the prior
-    code wrote 0x21/0x23 which set format bits, not mode bits.
+    SIGNAL is written with the row bits directly:
+      bit[0] cfg_signal_hit_mode_sig      0=internal, 1=external/inject
+      bit[1] cfg_signal_internal_sub_mode 0=Poisson, 1=periodic
+      bit[2] cfg_signal_cluster_geom_mode 0=fixed cluster, 1=random cluster
+    RN.BASIC.001 uses hit_mode=10b, i.e. internal periodic.
     """
     # MUTRIG_FORMAT: always 0x20 (type0 stream enabled, format defaults).
     # Do NOT OR in hit_mode here -- see comment above.
     mutrig_fmt = 0x20
 
-    # SIGNAL CSR encodes the actual hit mode (direct / burst / periodic).
-    # Bit[0]=hit_mode_sig, bit[1]=internal_sub_mode.
-    signal_word = hit_mode & 0x3
+    # SIGNAL CSR encodes the actual mode bits.
+    signal_word = hit_mode & 0x7
+    cluster_fix = emu_cluster_fix_from_channel_mask(channel_mask)
 
     writes: list[tuple[str, int, int]] = [
-        ("CHANNEL_MASK",  EMU_BASE_WORD + EMU_CHANNEL_MASK_W,  channel_mask & 0xFFFFFFFF),
         ("CENTRAL",       EMU_BASE_WORD + EMU_CENTRAL_W,       0x00000001),
-        # SIGNAL: mode dispatch -- direct=0x00, burst=0x01, periodic=0x03
+        # SIGNAL: RN.BASIC.001 uses internal periodic, 0x2.
         ("SIGNAL",        EMU_BASE_WORD + EMU_SIGNAL_W,        signal_word),
         ("BACKGROUND",    EMU_BASE_WORD + EMU_BACKGROUND_W,    0x00000000),
         # MUTRIG_FORMAT: format flags only; type0-enable=1, rest=0 -> 0x20
         ("MUTRIG_FORMAT", EMU_BASE_WORD + EMU_MUTRIG_FORMAT_W, mutrig_fmt),
         ("RATES",         EMU_BASE_WORD + EMU_RATES_W,         rate_88fp & 0xFFFF),
-        ("CLUSTER_FIX",   EMU_BASE_WORD + EMU_CLUSTER_FIX_W,   0x00004000 | (3 << 7) | 0),
+        ("CLUSTER_FIX",   EMU_BASE_WORD + EMU_CLUSTER_FIX_W,   cluster_fix),
         ("PRNG_SEED",     EMU_BASE_WORD + EMU_PRNG_SEED_W,     0xDEADBEEF),
         ("TIMEBASE_SEED", EMU_BASE_WORD + EMU_TIMEBASE_SEED_W, 0x00010001),
+        ("LANE_ENABLE",   EMU_BASE_WORD + EMU_LANE_ENABLE_W,   0x000000FF),
     ]
     out: dict[str, Any] = {}
     for name, addr, value in writes:
         sc_write_stable(sc_tool, link, addr, [value], log_fh=log_fh)
-        try:
-            readback = sc_read(sc_tool, link, addr, 1, log_fh=log_fh)[0]
-            out[name] = {
-                "addr": f"0x{addr:05X}",
-                "written": f"0x{value:08X}",
-                "readback": f"0x{readback:08X}",
-            }
-        except RuntimeError as exc:
-            out[name] = {"addr": f"0x{addr:05X}",
-                          "written": f"0x{value:08X}",
-                          "readback": "NOT_AVAILABLE",
-                          "error": str(exc)}
+        readback = sc_read(sc_tool, link, addr, 1, log_fh=log_fh)[0]
+        out[name] = {
+            "addr": f"0x{addr:05X}",
+            "written": f"0x{value:08X}",
+            "readback": f"0x{readback:08X}",
+        }
+        if readback != (value & 0xFFFFFFFF):
+            raise RuntimeError(
+                f"emulator CSR {name} readback mismatch at 0x{addr:05X}: "
+                f"wrote 0x{value & 0xFFFFFFFF:08X}, read 0x{readback:08X}"
+            )
     return out
 
 
@@ -940,14 +971,16 @@ def configure_histogram(sc_tool: Path, link: int,
                         interval_clocks: int,
                         hist_left: int = 0, hist_right: int = 255,
                         hist_bin_width: int = 1,
+                        key_loc: int = HIST_KEY_LOC_HIT_WORD_CHANNEL,
+                        control_apply: int = HIST_CONTROL_RATE_PRESET,
                         log_fh: Optional[Any] = None) -> dict[str, str]:
     writes: list[tuple[str, int, int]] = [
         ("LEFT_BOUND",    HIST_CSR_BASE_WORD + HIST_LEFT_BOUND_W,   hist_left & 0xFFFFFFFF),
         ("RIGHT_BOUND",   HIST_CSR_BASE_WORD + HIST_RIGHT_BOUND_W,  hist_right & 0xFFFFFFFF),
         ("BIN_WIDTH",     HIST_CSR_BASE_WORD + HIST_BIN_WIDTH_W,    hist_bin_width & 0xFFFFFFFF),
-        ("KEY_LOC",       HIST_CSR_BASE_WORD + HIST_KEY_LOC_W,      HIST_KEY_LOC_CHANNEL_POST),
+        ("KEY_LOC",       HIST_CSR_BASE_WORD + HIST_KEY_LOC_W,      key_loc & 0xFFFFFFFF),
         ("INTERVAL_CFG",  HIST_CSR_BASE_WORD + HIST_INTERVAL_CFG_W, interval_clocks & 0xFFFFFFFF),
-        ("CONTROL_APPLY", HIST_CSR_BASE_WORD + HIST_CONTROL_W,      0x00000101),
+        ("CONTROL_APPLY", HIST_CSR_BASE_WORD + HIST_CONTROL_W,      control_apply & 0xFFFFFFFF),
     ]
     sc_write_stable(sc_tool, link, HIST_BIN_BASE_WORD, [0], log_fh=log_fh)
     for _, addr, value in writes:
@@ -969,6 +1002,50 @@ def configure_histogram(sc_tool: Path, link: int,
         except RuntimeError:
             out[name] = "NOT_AVAILABLE"
     return out
+
+
+def hist_rate_key_loc_for_source(source: str) -> int:
+    if source == "post":
+        return HIST_KEY_LOC_POST_RBCAM_GLOBAL_CHANNEL
+    if source == "pre":
+        return HIST_KEY_LOC_PRE_RBCAM_GLOBAL_CHANNEL
+    raise ValueError(f"unknown histogram rate source {source!r}")
+
+
+def configure_histogram_rate(sc_tool: Path, link: int,
+                             interval_clocks: int = HIST_INTERVAL_1MS_CLOCKS,
+                             source: Optional[str] = None,
+                             log_fh: Optional[Any] = None) -> dict[str, str]:
+    """Configure the 256-bin global-channel rate preset."""
+    rate_source = HIST_INGRESS_SOURCE if source is None else source
+    return configure_histogram(
+        sc_tool,
+        link,
+        interval_clocks,
+        hist_left=0,
+        hist_right=255,
+        hist_bin_width=1,
+        key_loc=hist_rate_key_loc_for_source(rate_source),
+        control_apply=HIST_CONTROL_RATE_PRESET,
+        log_fh=log_fh,
+    )
+
+
+def configure_histogram_delay(sc_tool: Path, link: int,
+                              interval_clocks: int = HIST_INTERVAL_1MS_CLOCKS,
+                              log_fh: Optional[Any] = None) -> dict[str, str]:
+    """Configure the signed delay preset: mode -7, range [-1000, 3096)."""
+    return configure_histogram(
+        sc_tool,
+        link,
+        interval_clocks,
+        hist_left=HIST_DELAY_LEFT_CYCLES,
+        hist_right=HIST_DELAY_RIGHT_CYCLES,
+        hist_bin_width=HIST_DELAY_BIN_WIDTH_CYCLES,
+        key_loc=HIST_KEY_LOC_DEBUG_SAMPLE,
+        control_apply=HIST_CONTROL_DELAY_PRESET,
+        log_fh=log_fh,
+    )
 
 
 def select_histogram_source(sc_tool: Path, link: int,
@@ -1672,7 +1749,7 @@ def _make_plots(hist_bins: list[int], row_id: str,
                      title_suffix=title_suffix)
     note_latency = (
         "no per-hit timestamps available on board; the histogram is keyed "
-        "by channel_id (KEY_LOC=channel_post), see tb_int simulation for "
+        "by global channel {asic[2:0], channel[4:0]}, see tb_int simulation for "
         "the full lifetime distribution"
     )
     render_latency_plot(hist_bins, row_id, latency_path,
@@ -1971,21 +2048,23 @@ def dry_run_row(row: dict[str, Any], row_idx: int,
         p(f"  CMD: {sc_tool} {link} write 0x{addr:05X} 0x{val:08X} --quiet "
           f" # lane{lane} {'ENABLE' if enabled else 'DISABLE'}")
     p(f"")
-    p(f"  [3] emulator_mutrig channel_mask={cm} rate={rate} hit_mode={mode}")
-    p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_CHANNEL_MASK_W:05X} {cm} --quiet  # CHANNEL_MASK")
+    p(f"  [3] emulator_mutrig channel_mask={cm} rate={rate} signal_bits={mode}")
+    cluster_fix = emu_cluster_fix_from_channel_mask(int(cm, 16))
+    p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_CLUSTER_FIX_W:05X} "
+      f"0x{cluster_fix:08X} --quiet  # CLUSTER_FIX (contiguous local channels)")
     p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_RATES_W:05X} {rate} --quiet  # RATES")
-    # Fix 1 (sim diag 6029646e): mode-dispatch goes to SIGNAL CSR, NOT MUTRIG_FORMAT.
-    # SIGNAL[0]=hit_mode_sig (0=internal, 1=external/burst),
-    # SIGNAL[1]=internal_sub_mode (0=direct/Poisson, 1=periodic).
-    # hit_mode field: direct=00b -> SIGNAL=0x00, burst=01b -> SIGNAL=0x01, periodic=11b -> SIGNAL=0x03.
-    signal_val = int(mode, 2) & 0x3
+    # SIGNAL[0]=hit_mode_sig (0=internal, 1=external/inject),
+    # SIGNAL[1]=internal_sub_mode (0=Poisson, 1=periodic),
+    # SIGNAL[2]=cluster_geom_mode (0=fixed, 1=random).
+    signal_val = int(mode, 2) & 0x7
     p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_SIGNAL_W:05X} 0x{signal_val:08X} --quiet"
-      f"  # SIGNAL (mode-dispatch: direct=0x00 burst=0x01 periodic=0x03)")
+      f"  # SIGNAL (RN.BASIC.001 internal periodic is 0x02)")
     # MUTRIG_FORMAT: format flags only -- type0-enable=1, rest=0 -> 0x20. Never encodes mode.
     fmt = 0x20
     p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_MUTRIG_FORMAT_W:05X} 0x{fmt:08X} --quiet  # MUTRIG_FORMAT (type0-enable only)")
+    p(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+EMU_LANE_ENABLE_W:05X} 0x000000FF --quiet  # LANE_ENABLE")
     p(f"")
-    p(f"  [4] histogram: LEFT=0 RIGHT=255 BIN_WIDTH=1 KEY_LOC=channel_post")
+    p(f"  [4] histogram: LEFT=0 RIGHT=255 BIN_WIDTH=1 KEY_LOC=global_channel_{HIST_INGRESS_SOURCE}")
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_LEFT_BOUND_W:05X} 0x00000000 --quiet")
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_RIGHT_BOUND_W:05X} 0x000000FF --quiet")
     p(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+HIST_BIN_WIDTH_W:05X} 0x00000001 --quiet")
@@ -2150,8 +2229,9 @@ def run_row(row: dict[str, Any], row_idx: int, sc_tool: Path, link: int,
                 "interval_reset between runs."
             )
         interval_clocks = INTERVAL_CFG_NEVER_FIRE
-        hist_cfg = configure_histogram(sc_tool, link, interval_clocks,
-                                       log_fh=log_fh)
+        hist_cfg = configure_histogram_rate(sc_tool, link, interval_clocks,
+                                            source=HIST_INGRESS_SOURCE,
+                                            log_fh=log_fh)
 
         # Ingress mux: pre-rbCAM for dualport builds, post-rbCAM for legacy builds.
         ingress_status = select_histogram_source(sc_tool, link, log_fh=log_fh)

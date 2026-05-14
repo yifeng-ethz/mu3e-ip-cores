@@ -14,7 +14,7 @@ QSYS_GENERATE_BIN="${QSYS_GENERATE_BIN:-/data1/intelFPGA/18.1/quartus/sopc_build
 STAMP="${QSYS_GENERATE_STAMP:-$(date +%Y%m%d_%H%M%S)}"
 LOG="${SYN_DIR}/${QSYS_BASENAME}_qsys_generate_${STAMP}_isolated.console.log"
 STATUS="${SYN_DIR}/${QSYS_BASENAME}_qsys_generate_${STAMP}_isolated.status"
-DESCRIPTION_SCRIPT="${SYSTEM_DIR}/script/update_emulator_type0_descriptions.tcl"
+TOP_PATCH_SCRIPT="${SYSTEM_DIR}/script/update_feb_system_v3_dualport_version.tcl"
 
 . "${SYSTEM_DIR}/script/qsys_search_path.sh"
 
@@ -27,7 +27,7 @@ qsys_create_isolated_user_catalog
 
 qsys-script \
     --cmd="set ::env(SYSTEM_DIR) {${SYSTEM_DIR}}" \
-    --script="${DESCRIPTION_SCRIPT}" > "${SYN_DIR}/${QSYS_BASENAME}_description_qsys_script_${STAMP}.log" 2>&1
+    --script="${TOP_PATCH_SCRIPT}" > "${SYN_DIR}/${QSYS_BASENAME}_top_patch_qsys_script_${STAMP}.log" 2>&1
 
 if [ -d "${GENERATED_ROOT}" ]; then
     chmod -R u+w "${GENERATED_ROOT}"

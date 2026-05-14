@@ -4,7 +4,7 @@
 This script assumes the SWB image has already been programmed and PCIe has
 already been recovered. It does not program the FEB. It configures the FEB
 emulator/histogram path through the SWB SC hub, starts host DMA capture, drives
-the local runctl opcode sequence 0x10 -> 0x11 -> 0x12 -> 1 ms -> 0x13, then
+the local runctl opcode sequence 0x10 -> 0x11 -> 0x12 -> 1 s -> 0x13, then
 decodes the captured rxbuffer for Mu3e wire-frame markers.
 """
 from __future__ import annotations
@@ -52,6 +52,12 @@ USE_BIT_MERGER = 0x4
 USE_BIT_SCIFI = 0x200
 SCIFI_LINK2_MASK = 0x4
 DEFAULT_DMA_REQUEST_BLOCKS = 0x80000
+RN001_EXPECTED_CHANNELS = 256
+RN001_EXPECTED_TOTAL_PER_MS = 31264
+RN001_EXPECTED_PER_CHANNEL_PER_MS = RN001_EXPECTED_TOTAL_PER_MS / RN001_EXPECTED_CHANNELS
+RN001_EXPECTED_THEORETICAL_PER_CHANNEL_PER_MS = 31250 / RN001_EXPECTED_CHANNELS
+RN001_DEFAULT_RUN_SECONDS = 1.0
+RN001_DEFAULT_HIST_INTERVAL_CLOCKS = sweep.HIST_INTERVAL_1MS_CLOCKS
 SWB_DATAPATH_RESET_MASK = (
     (1 << 1)
     | (1 << 2)
@@ -456,6 +462,99 @@ def drive_local_cmd_mmio(mmio: SwbMmio, link: int, cmd: int, payload24: int,
     }
 
 
+def attach_runctl_stage_timing(sc_tool: Path, link: int,
+                               stage_record: dict[str, Any],
+                               log_fh: Any) -> None:
+    """Attach FPGA run-control log FIFO timing to the MMIO-driven recipe."""
+    try:
+        fifo_entries = sweep.drain_log_fifo(sc_tool, link, log_fh=log_fh)
+    except RuntimeError as exc:
+        stage_record["runctl_log_error"] = str(exc)
+        return
+
+    stage_record["fifo_entries"] = fifo_entries
+    stage_record["log_entries_count"] = len(fifo_entries)
+    stage_record["timing_source"] = "runctl_mgmt_host_log_fifo_recv_ts"
+    stage_record["stage_durations"] = {
+        "prepare_ms": None,
+        "sync_ms": None,
+        "running_s": None,
+        "terminating_ms": None,
+    }
+    by_cmd = {
+        entry.get("run_command"): entry
+        for entry in fifo_entries
+        if isinstance(entry, dict)
+    }
+    prepare_ts = by_cmd.get(sweep.CMD_RUN_PREPARE, {}).get("recv_ts")
+    sync_ts = by_cmd.get(sweep.CMD_RUN_SYNC, {}).get("recv_ts")
+    start_ts = by_cmd.get(sweep.CMD_START_RUN, {}).get("recv_ts")
+    end_ts = by_cmd.get(sweep.CMD_END_RUN, {}).get("recv_ts")
+    if prepare_ts is not None and sync_ts is not None and sync_ts >= prepare_ts:
+        stage_record["stage_durations"]["prepare_ms"] = sweep.ticks_to_ms(sync_ts - prepare_ts)
+    if sync_ts is not None and start_ts is not None and start_ts >= sync_ts:
+        stage_record["stage_durations"]["sync_ms"] = sweep.ticks_to_ms(start_ts - sync_ts)
+    if start_ts is not None and end_ts is not None and end_ts >= start_ts:
+        stage_record["stage_durations"]["running_s"] = sweep.ticks_to_s(end_ts - start_ts)
+
+
+def summarize_rate_histogram(hist_bins: list[int],
+                             hist_interval_clocks: int) -> dict[str, Any]:
+    interval_ms = hist_interval_clocks / sweep.LVDS_CLK_HZ * 1000.0
+    if interval_ms <= 0.0:
+        interval_ms = 1.0
+    active_bins = hist_bins[:RN001_EXPECTED_CHANNELS]
+    inactive_bins = hist_bins[RN001_EXPECTED_CHANNELS:]
+    per_channel_per_ms = [count / interval_ms for count in active_bins]
+    total_per_ms = sum(active_bins) / interval_ms
+    mean_per_channel_per_ms = (
+        total_per_ms / RN001_EXPECTED_CHANNELS
+        if RN001_EXPECTED_CHANNELS else 0.0
+    )
+    max_abs_delta = max(
+        (abs(value - RN001_EXPECTED_PER_CHANNEL_PER_MS)
+         for value in per_channel_per_ms),
+        default=0.0,
+    )
+    tolerance_per_channel = 8.0
+    return {
+        "hist_interval_clocks": hist_interval_clocks,
+        "hist_interval_ms": interval_ms,
+        "expected_total_per_ms": RN001_EXPECTED_TOTAL_PER_MS,
+        "expected_per_channel_per_ms": RN001_EXPECTED_PER_CHANNEL_PER_MS,
+        "expected_theoretical_per_channel_per_ms": (
+            RN001_EXPECTED_THEORETICAL_PER_CHANNEL_PER_MS
+        ),
+        "total_per_ms": total_per_ms,
+        "mean_per_channel_per_ms": mean_per_channel_per_ms,
+        "per_channel_min_per_ms": min(per_channel_per_ms, default=0.0),
+        "per_channel_p50_per_ms": sorted(per_channel_per_ms)[len(per_channel_per_ms) // 2] if per_channel_per_ms else 0.0,
+        "per_channel_max_per_ms": max(per_channel_per_ms, default=0.0),
+        "per_channel_max_abs_delta": max_abs_delta,
+        "active_bin_sum": sum(active_bins),
+        "inactive_bin_sum": sum(inactive_bins),
+        "pass": max_abs_delta <= tolerance_per_channel,
+    }
+
+
+def summarize_delay_histogram(hist_bins: list[int],
+                              hist_interval_clocks: int) -> dict[str, Any]:
+    interval_ms = hist_interval_clocks / sweep.LVDS_CLK_HZ * 1000.0
+    return {
+        "hist_interval_clocks": hist_interval_clocks,
+        "hist_interval_ms": interval_ms,
+        "left_bound_cycles": sweep.HIST_DELAY_LEFT_CYCLES,
+        "right_bound_cycles": sweep.HIST_DELAY_RIGHT_CYCLES,
+        "bin_width_cycles": sweep.HIST_DELAY_BIN_WIDTH_CYCLES,
+        "nonzero_bins": [
+            {"bin": idx, "count": count}
+            for idx, count in enumerate(hist_bins)
+            if count != 0
+        ][:32],
+        "hist_bin_sum": sum(hist_bins),
+    }
+
+
 def run_stage_recipe_mmio(mmio: SwbMmio, link: int, row: dict[str, Any],
                           row_idx: int, log_fh: Any,
                           probe_period_s: float = 0.0) -> dict[str, Any]:
@@ -750,10 +849,11 @@ def rn_basic_001_row() -> dict[str, Any]:
         "channel_mask": "0xFFFFFFFF",
         "rate_88fp": "0x0040",
         "hit_mode": "10",
-        "interval_seconds": 0.001,
+        "interval_seconds": RN001_DEFAULT_RUN_SECONDS,
         "axis_section": "RN.BASIC.001",
         "expected_behavior": (
-            "RN.BASIC.001 internal periodic all-lane/all-channel 1 ms board capture"
+            "RN.BASIC.001 internal periodic all-lane/all-channel 1 s board "
+            "capture with histogram INTERVAL_CFG at 1 ms"
         ),
         "sanity_negative": False,
         "bucket": "BASIC",
@@ -787,6 +887,7 @@ def run_board_capture(args: argparse.Namespace) -> int:
         "link": args.link,
         "hist_ingress_source": args.hist_ingress_source,
         "hist_ingress_banks": args.hist_ingress_banks,
+        "hist_preset": args.hist_preset,
         "evidence_dir": str(evidence_dir),
         "preenable_dma_before_capture": args.preenable_dma_before_capture,
     }
@@ -827,9 +928,18 @@ def run_board_capture(args: argparse.Namespace) -> int:
             int(row["hit_mode"], 2),
             log_fh=log_fh,
         )
-        record["histogram_cfg"] = sweep.configure_histogram(
-            args.sc_tool, args.link, sweep.INTERVAL_CFG_NEVER_FIRE, log_fh=log_fh
-        )
+        if args.hist_preset == "delay":
+            record["histogram_cfg"] = sweep.configure_histogram_delay(
+                args.sc_tool, args.link, args.hist_interval_clocks, log_fh=log_fh
+            )
+        else:
+            record["histogram_cfg"] = sweep.configure_histogram_rate(
+                args.sc_tool,
+                args.link,
+                args.hist_interval_clocks,
+                source=args.hist_ingress_source,
+                log_fh=log_fh,
+            )
         record["ingress_status"] = sweep.select_histogram_source(
             args.sc_tool, args.link, log_fh=log_fh
         )
@@ -838,6 +948,9 @@ def run_board_capture(args: argparse.Namespace) -> int:
         )
         record["snapshot_pre"] = sweep.full_snapshot(args.sc_tool, args.link,
                                                      log_fh=log_fh)
+        record["runctl_log_drain_pre_iter"] = sweep.discard_log_fifo(
+            args.sc_tool, args.link, log_fh=log_fh
+        )
 
         try:
             if args.preenable_dma_before_capture:
@@ -857,10 +970,26 @@ def run_board_capture(args: argparse.Namespace) -> int:
         finally:
             stop_dma_capture(dma_proc, dma_log_fh)
 
+        attach_runctl_stage_timing(args.sc_tool, args.link,
+                                   record["stage_recipe"], log_fh)
         record["snapshot_post"] = sweep.full_snapshot(args.sc_tool, args.link,
                                                       log_fh=log_fh)
         record["hist_bins"] = sweep.read_hist_bins(args.sc_tool, args.link,
                                                    log_fh=log_fh)
+        if args.hist_preset == "delay":
+            record["delay_comparison"] = summarize_delay_histogram(
+                record["hist_bins"], args.hist_interval_clocks
+            )
+        else:
+            record["rate_comparison"] = summarize_rate_histogram(
+                record["hist_bins"], args.hist_interval_clocks
+            )
+        record["cosim_expectation"] = {
+            "source": "RN.BASIC.001 cosim 1 ms window",
+            "total_hits_per_ms": RN001_EXPECTED_TOTAL_PER_MS,
+            "per_channel_per_ms": RN001_EXPECTED_PER_CHANNEL_PER_MS,
+            "active_channels": RN001_EXPECTED_CHANNELS,
+        }
         record["swb_datapath_post_run"] = read_swb_datapath(
             args.sc_tool, log_fh
         )
@@ -901,6 +1030,10 @@ def run_board_capture(args: argparse.Namespace) -> int:
     print(f"wire_hit_count={record['rdma']['wire_hit_count']}")
     print(f"frame0_packet_timestamp={record['rdma']['frame0_packet_timestamp']}")
     print(f"delta_hist={record['rdma']['inter_frame_delta_histogram']}")
+    if args.hist_preset == "delay":
+        print(f"delay_comparison={record['delay_comparison']}")
+    else:
+        print(f"rate_comparison={record['rate_comparison']}")
     print(f"pass={record['pass']}")
     return 0 if record["pass"] else 2
 
@@ -917,8 +1050,13 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--hist-ingress-source", choices=["pre", "post"],
                     default="pre")
     ap.add_argument("--hist-ingress-banks", type=int, default=2)
+    ap.add_argument("--hist-preset", choices=["rate", "delay"], default="rate",
+                    help="histogram_statistics_v2 preset to program before START_RUN")
     ap.add_argument("--interval-seconds", type=float, default=None,
                     help="debug override for the RN.BASIC.001 START_RUN dwell")
+    ap.add_argument("--hist-interval-clocks", type=lambda s: int(s, 0),
+                    default=RN001_DEFAULT_HIST_INTERVAL_CLOCKS,
+                    help="histogram_statistics_v2 INTERVAL_CFG; default is 1 ms at 125 MHz")
     ap.add_argument("--probe-period-s", type=float, default=0.0,
                     help="debug-only mid-run DMA/MMIO sample period")
     ap.add_argument("--preenable-dma-before-capture", action="store_true",

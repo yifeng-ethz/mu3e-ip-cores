@@ -20,6 +20,7 @@ module tb_int_top;
     import tb_int_rdma_rqe_ingress_monitor_pkg::*;
     import tb_int_rdma_cqe_egress_monitor_pkg::*;
     import tb_int_opq_lane_fill_monitor_pkg::*;
+    import tb_int_opq_frame_ts_monitor_pkg::*;
     import tb_int_pcie_dma_egress_monitor_pkg::*;
     import tb_int_host_memory_pkg::*;
     import tb_int_host_axi_responder_pkg::*;
@@ -308,7 +309,23 @@ module tb_int_top;
                                                  "vif",
                                                  opq_lane0);
         uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon0",
+                                                 "vif",
+                                                 opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon0",
+                                                 "vif",
+                                                 opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
                                                  "uvm_test_top.env.nominal.opq_lane_mon1",
+                                                 "vif",
+                                                 opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon1",
+                                                 "vif",
+                                                 opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon1",
                                                  "vif",
                                                  opq_lane1);
         uvm_config_db#(virtual opq_lane_if)::set(null,
@@ -316,7 +333,23 @@ module tb_int_top;
                                                  "vif",
                                                  opq_lane2);
         uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon2",
+                                                 "vif",
+                                                 opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon2",
+                                                 "vif",
+                                                 opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
                                                  "uvm_test_top.env.nominal.opq_lane_mon3",
+                                                 "vif",
+                                                 opq_lane3);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon3",
+                                                 "vif",
+                                                 opq_lane3);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon3",
                                                  "vif",
                                                  opq_lane3);
         uvm_config_db#(virtual pcie_dma_egress_if)::set(null,
