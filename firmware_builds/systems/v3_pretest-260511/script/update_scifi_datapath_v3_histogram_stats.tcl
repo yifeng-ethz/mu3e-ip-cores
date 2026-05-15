@@ -4,20 +4,15 @@
 package require -exact qsys 16.0
 
 set hist_inst {histogram_statistics_0}
-set bridge_inst {histogram_ingress_bridge_0}
-set post_ts_inst {hist_post_ts_sideband_0}
-set pre_trim_inst {hist_pre_ts_trim_1}
+set retired_histogram_path_insts {histogram_ingress_bridge_0 hist_post_ts_sideband_0 hist_pre_ts_trim_1}
 set run_control_splitter_inst {run_control_splitter}
 set mts_insts {mts_preprocessor_0 mts_preprocessor_1}
 set source_mux_base {0x2880}
 set source_mux_span {0x40}
 set frame_deassembly_csr_base {0x2A80}
 set frame_deassembly_csr_span {0x10}
-set hist_post_ts_sideband_version {26.0.0.0514}
-set hist_pre_ts_trim_version {26.0.0.0514}
 set mutrig_lane_source_mux_version {26.2.1.0503}
 set hist_version_git {968989915}
-set hist_bridge_version_git {968989915}
 set mts_version_git {933047952}
 set emulator_version_git {1131313671}
 array set mutrig_datapath_runctrl_out {
@@ -57,6 +52,19 @@ proc remove_instance_if_present {name} {
     }
 }
 
+proc remove_connections_containing {needle} {
+    set matches {}
+    foreach path [get_connections] {
+        if {[string first $needle $path] >= 0} {
+            lappend matches $path
+        }
+    }
+
+    foreach path $matches {
+        remove_connection $path
+    }
+}
+
 proc add_connection_if_missing {start_if end_if} {
     set path "$start_if/$end_if"
     if {![list_has [get_connections] $path]} {
@@ -83,31 +91,26 @@ proc set_instance_parameter_if_present {inst param value} {
 }
 
 proc set_histogram_ip_identity {} {
-    set_instance_parameter_value $::post_ts_inst {VERSION_MAJOR} {26}
-    set_instance_parameter_value $::post_ts_inst {VERSION_MINOR} {0}
-    set_instance_parameter_value $::post_ts_inst {VERSION_PATCH} {0}
-    set_instance_parameter_value $::post_ts_inst {BUILD} {514}
-    set_instance_parameter_value $::post_ts_inst {VERSION_DATE} {20260514}
-
-    set_instance_parameter_value $::pre_trim_inst {VERSION_MAJOR} {26}
-    set_instance_parameter_value $::pre_trim_inst {VERSION_MINOR} {0}
-    set_instance_parameter_value $::pre_trim_inst {VERSION_PATCH} {0}
-    set_instance_parameter_value $::pre_trim_inst {BUILD} {514}
-    set_instance_parameter_value $::pre_trim_inst {VERSION_DATE} {20260514}
-
     set_instance_parameter_value $::hist_inst {VERSION_MAJOR} {26}
-    set_instance_parameter_value $::hist_inst {VERSION_MINOR} {2}
-    set_instance_parameter_value $::hist_inst {VERSION_PATCH} {4}
+    set_instance_parameter_value $::hist_inst {VERSION_MINOR} {3}
+    set_instance_parameter_value $::hist_inst {VERSION_PATCH} {0}
     set_instance_parameter_value $::hist_inst {BUILD} {515}
     set_instance_parameter_value $::hist_inst {VERSION_DATE} {20260515}
     set_instance_parameter_if_present $::hist_inst {VERSION_GIT} $::hist_version_git
+}
 
-    set_instance_parameter_value $::bridge_inst {VERSION_MAJOR} {26}
-    set_instance_parameter_value $::bridge_inst {VERSION_MINOR} {0}
-    set_instance_parameter_value $::bridge_inst {VERSION_PATCH} {10}
-    set_instance_parameter_value $::bridge_inst {BUILD} {515}
-    set_instance_parameter_value $::bridge_inst {VERSION_DATE} {20260515}
-    set_instance_parameter_if_present $::bridge_inst {VERSION_GIT} $::hist_bridge_version_git
+proc remove_retired_histogram_path {} {
+    foreach inst $::retired_histogram_path_insts {
+        remove_connections_containing "${inst}."
+    }
+
+    remove_connection_if_present {hist_post_cdc_0.out/histogram_statistics_0.hist_fill_in}
+    remove_connection_if_present {mts_preprocessor_0.hit_type1_out/histogram_statistics_0.hist_fill_in}
+    remove_connection_if_present {mts_preprocessor_1.hit_type1_out/histogram_statistics_0.hist_fill_in}
+
+    foreach inst $::retired_histogram_path_insts {
+        remove_instance_if_present $inst
+    }
 }
 
 proc set_mts_ip_identity {} {
@@ -115,7 +118,7 @@ proc set_mts_ip_identity {} {
         if {[list_has [get_instances] $mts_inst]} {
             set_instance_parameter_value $mts_inst {VERSION_MAJOR} {26}
             set_instance_parameter_value $mts_inst {VERSION_MINOR} {3}
-            set_instance_parameter_value $mts_inst {VERSION_PATCH} {3}
+            set_instance_parameter_value $mts_inst {VERSION_PATCH} {4}
             set_instance_parameter_value $mts_inst {BUILD} {515}
             set_instance_parameter_value $mts_inst {VERSION_DATE} {20260515}
             set_instance_parameter_if_present $mts_inst {VERSION_GIT} $::mts_version_git
@@ -217,41 +220,32 @@ proc expose_frame_deassembly_csrs {} {
     }
 }
 
-add_instance_if_missing $post_ts_inst {histogram_post_ts_sideband} $hist_post_ts_sideband_version
-add_instance_if_missing $pre_trim_inst {histogram_pre_ts_trim} $hist_pre_ts_trim_version
+remove_retired_histogram_path
 set_histogram_ip_identity
-
-remove_connection_if_present {hist_post_cdc_0.out/histogram_ingress_bridge_0.post_in}
-add_connection_if_missing {lvds_rx_28nm_0.outclock} "${post_ts_inst}.clock"
-add_connection_if_missing {master_datapath.master_reset} "${post_ts_inst}.reset"
-add_connection_if_missing {hist_post_cdc_0.out} "${post_ts_inst}.in"
-add_connection_if_missing "${post_ts_inst}.out" "${bridge_inst}.post_in"
-
-remove_connection_if_present {mts_preprocessor_1.hit_type1_out/hit_stack_subsystem_1.hit_type_1}
-add_connection_if_missing {lvds_rx_28nm_0.outclock} "${pre_trim_inst}.clock"
-add_connection_if_missing {master_datapath.master_reset} "${pre_trim_inst}.reset"
-add_connection_if_missing {mts_preprocessor_1.hit_type1_out} "${pre_trim_inst}.in"
-add_connection_if_missing "${pre_trim_inst}.out" {hit_stack_subsystem_1.hit_type_1}
 
 set_instance_parameter_value $hist_inst {ENABLE_PACKET} {false}
 set_instance_parameter_value $hist_inst {ENABLE_PINGPONG} {true}
 set_instance_parameter_value $hist_inst {SNOOP_EN} {false}
 set_instance_parameter_if_present $hist_inst {N_DEBUG_INTERFACE} {0}
 
-# The ingress bridge now drives {ts[47:0], payload[38:0]} into the
-# histogram. Positive stream-delay mode (CONTROL.mode=1) subtracts the
-# selected 48-bit timestamp slice from the histogram IP's run-control GTS,
-# then trims the result to SAR_TICK_WIDTH for the normal fill/bin path.
-set_instance_parameter_value $hist_inst {AVST_DATA_WIDTH} {87}
-set_instance_parameter_value $hist_inst {UPDATE_KEY_BIT_LO} {39}
-set_instance_parameter_value $hist_inst {UPDATE_KEY_BIT_HI} {86}
+# The histogram now owns ingress source selection. The primary hit path stays
+# at the legacy 39-bit Type-1 width, while readyless extended sources carry
+# {ts[47:0], payload[38:0]} for delay-mode observability.
+set_instance_parameter_value $hist_inst {AVST_DATA_WIDTH} {39}
+set_instance_parameter_value $hist_inst {N_PORTS} {1}
+set_instance_parameter_value $hist_inst {UPDATE_KEY_BIT_LO} {17}
+set_instance_parameter_value $hist_inst {UPDATE_KEY_BIT_HI} {29}
+set_instance_parameter_value $hist_inst {FILTER_KEY_BIT_LO} {35}
+set_instance_parameter_value $hist_inst {FILTER_KEY_BIT_HI} {38}
 set_instance_parameter_value $hist_inst {UPDATE_KEY_REPRESENTATION} {UNSIGNED}
 set_instance_parameter_value $hist_inst {LOCK_KEY_RANGES} {true}
 set_instance_parameter_value $hist_inst {SAR_KEY_WIDTH} {32}
 set_instance_parameter_value $hist_inst {SAR_TICK_WIDTH} {32}
 
-set_instance_parameter_value $bridge_inst {ENABLE_POST_FORWARD} {0}
-set_instance_parameter_value $bridge_inst {FILTER_POST_HIT_WORDS} {1}
+add_connection_if_missing {mts_preprocessor_0.hit_type1_out} {hit_stack_subsystem_0.hit_type_1}
+add_connection_if_missing {mts_preprocessor_1.hit_type1_out} {hit_stack_subsystem_1.hit_type_1}
+add_connection_if_missing {mts_preprocessor_0.hit_type1_extended_0} "${hist_inst}.hit_type1_extended_0"
+add_connection_if_missing {mts_preprocessor_1.hit_type1_extended_1} "${hist_inst}.hit_type1_extended_1"
 
 set_mts_ip_identity
 

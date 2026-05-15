@@ -294,7 +294,6 @@ offsets. For `sc_tool`, add the SC bridge byte base `0x20000` and divide by 4.
 | `mts_preprocessor_1.csr` | `0x8000`-`0x801F` | `0x28000`-`0x2801F` | `0x0A000`-`0x0A007` |
 | `histogram_statistics_0.hist_bin` | `0xA000`-`0xA3FF` | `0x2A000`-`0x2A3FF` | `0x0A800`-`0x0A8FF` |
 | `histogram_statistics_0.csr` | `0xA400`-`0xA47F` | `0x2A400`-`0x2A47F` | `0x0A900`-`0x0A91F` |
-| `histogram_ingress_bridge_0.csr` | `0xAC00`-`0xAC1F` | `0x2AC00`-`0x2AC1F` | `0x0AB00`-`0x0AB07` |
 | `hit_stack_subsystem_<n>.ring_buffer_cam_<k>.csr` (n=0..1, k=0..3) | `0xB000 + n*0x400 + k*0x80` | `0x2B000 + n*0x400 + k*0x80` | `0x0AC00 + n*0x100 + k*0x20` |
 | `mutrig_injector_0.csr` | `0xB200` | `0x2B200` | `0x0AC80` |
 | `hit_stack_subsystem_<n>.feb_frame_assembly_0.csr` (n=0..1) | `0xD000 + n*0x40` | `0x2D000 + n*0x40` | `0x0B400 + n*0x10` |
@@ -313,10 +312,11 @@ per-bin reads can latch different frozen banks if another interval boundary
 passes while the monitor is running. The live capture script resets the SC
 secondary ring for each `sc_tool` operation by default, because the no-reset
 path can miss the matching reply after stale secondary traffic accumulates.
-The histogram ingress bridge CSR window is eight words in regenerated images:
-words `0x0AB04`-`0x0AB07` report pre accepted beats, post accepted hit words,
-histogram output handshakes, and selected histogram stalls. The capture script
-clears these counters with `CONTROL.clear_counters` during each fresh case
+The histogram ingress bridge is not present in the bridge-free FEB v3 image.
+Source selection is owned by `histogram_statistics_0.csr`: `CONTROL.in_port`
+selects normal fill input (`0`), upper MTS extended stream (`1`), or lower MTS
+extended stream (`2`). The live capture script programs this field directly
+and clears histogram counters through the histogram CSR during each fresh case
 configuration before starting the run.
 
 #### `upload_mm_bridge` (window `0x30000`-`0x3007F`) — upload AVMM map

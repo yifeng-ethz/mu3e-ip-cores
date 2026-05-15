@@ -1,6 +1,9 @@
 # v3_pretest-260511 tb_int
 
-This directory contains the integration UVM harness for the v3_pretest-260511 FEB SciFi build. It reuses the Apr 27 common agents through symlinks where the contracts match, adds v3-specific sidecar monitors, and provides a dual nominal/debug environment for the B065 firefly nominal datapath smoke.
+This directory contains the integration UVM harness for the v3_pretest-260511
+FEB SciFi build. It reuses the Apr 27 common agents through symlinks where the
+contracts match, adds v3-specific sidecar monitors, and provides a dual
+nominal/debug environment for the B065 through B069 datapath sequences.
 
 ## Layout
 
@@ -14,7 +17,10 @@ This directory contains the integration UVM harness for the v3_pretest-260511 FE
 
 - `make smoke` runs B065 in harness-shell mode.
 - `make regress_basic` runs B065 through B069 in harness-shell mode.
+- `make run_RC_EMUL` runs the run-control emulator-directed sequence.
+- `make run_source_mux_frame_parser_cosim` runs the source-mux/frame-parser cosim.
 - `make comp_dut` compiles the generated `syn/feb_system_v3/synthesis/` tree plus the local board-package dependencies needed by the generated tree.
+- `make run_B067 BIND_REAL_DUT=1` compiles and instantiates the generated DUT as `u_dut` while retaining the old dual UVM scoreboard path.
 - `make check_dut_contract` checks whether the generated tree exposes the FEB upload path through `feb_frame_assembly` and `upload_pkt_mux`.
 
 ## Current DUT Scope

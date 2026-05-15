@@ -31,9 +31,21 @@ This page is the coverage summary only. Per-case evidence lives under [`REPORT/`
 
 | status | run_id | kind | build | bucket | case_count | stmt | branch | toggle | functional_cross_pct | txns |
 |:---:|---|---|---|---|---:|---|---|---|---:|---:|
-| [PASS] | `B065_firefly_nominal_smoke` | isolated | firefly_nominal_feb_only | BASIC | 1 | n/a | n/a | n/a | 0.5 | 16 |
+| [PASS] | `B065_firefly_nominal_smoke` | isolated | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | 0.5 | 16 |
+| [PASS] | `B066_emulator_direct_smoke` | isolated | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | 0.5 | 16 |
+| [PASS] | `B067_sidecar_lineage` | isolated | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | 0.5 | 100 |
+| [PASS] | `B068_histogram_cross_check` | isolated | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | 0.5 | 1024 |
+| [PASS] | `B069_upload_pkt_mux_one_hit` | isolated | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | 0.5 | 1 |
+| [PASS] | `RC_EMUL` | directed | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 16 |
+| [PASS] | `SOURCE_MUX_FRAME` | cosim | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 5056 |
+| [PASS] | `B067_bind_real_dut` | bind-smoke | generated_synthesis | BASIC | 1 | n/a | n/a | n/a | n/a | 100 |
 | [PEND] | `all_buckets_frame` | all_buckets_frame | generated_dut | - | 768 | n/a | n/a | n/a | 0.0 | 0 |
 
 ## Non-Claims
 
-No UCDB coverage is claimed in this phase. B065 closes the corrected FEB-only firefly nominal smoke through the legacy `upload_pkt_mux` egress monitor; RDMA SQE/CQE cosim is outside this harness.
+No UCDB coverage is claimed in this phase. B065 through B069 and `RC_EMUL`
+close functional DEBUG_LEVEL=2 per-hit scoreboard evidence in the old dual UVM
+environment; `SOURCE_MUX_FRAME` closes the source-mux/frame-parser cosim; and
+`B067_bind_real_dut` proves the generated `synthesis/` tree compiles and can be
+instantiated as the dormant DUT in the harness. RDMA SQE/CQE cosim is outside
+this harness.

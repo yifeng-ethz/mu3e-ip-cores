@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="3.0.5.516"
-   description="scifi_datapath_system_v3 histogram delay sideband contract: pre-rbCAM Type-1 hits and post-rbCAM FEB-framed hits carry true hit_ts[47:0] above the legacy payload; rbCAM/FEB-forwarded streams are trimmed back to their legacy widths; run-control fanout is readyless; decoded lane traffic uses explicit real/emulator source muxes rather than round-robin streaming multiplexers; parser CSRs and histogram ingress bridge counters are exported for live frame/counter debug."
+   version="3.0.6.515"
+   description="scifi_datapath_system_v3 streaming histogram debug-plane contract: MTS Type-1 payloads remain on the legacy 39-bit main path while readyless hit_type1_extended_0/1 streams carry true hit_ts[47:0] above the payload directly into histogram_statistics_v2; histogram source selection is owned by the histogram CONTROL.in_port CSR; run-control fanout is readyless; decoded lane traffic uses explicit real/emulator source muxes rather than round-robin streaming multiplexers; parser CSRs are exported for live frame debug."
    tags=""
    categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
@@ -187,30 +187,6 @@
       datum _sortIndex
       {
          value = "55";
-         type = "int";
-      }
-   }
-   element hist_post_ts_sideband_0
-   {
-      datum _sortIndex
-      {
-         value = "68";
-         type = "int";
-      }
-   }
-   element hist_pre_ts_trim_1
-   {
-      datum _sortIndex
-      {
-         value = "69";
-         type = "int";
-      }
-   }
-   element histogram_ingress_bridge_0
-   {
-      datum _sortIndex
-      {
-         value = "54";
          type = "int";
       }
    }
@@ -860,11 +836,7 @@
    internal="reset_bridge_export.in_reset"
    type="reset"
    dir="end" />
- <interface
-   name="hit_type3_lower"
-   internal="hit_stack_subsystem_1.hit_type3"
-   type="avalon_streaming"
-   dir="start" />
+ <interface name="hit_type3_lower" internal="hit_stack_subsystem_1.hit_type3" />
  <interface
    name="hit_type3_upper"
    internal="hist_post_splitter_0.out0"
@@ -885,11 +857,7 @@
    internal="receiver_clock_125.out_clk"
    type="clock"
    dir="start" />
- <interface
-   name="lvds_pll_inclock"
-   internal="lvds_rx_28nm_0.inclock"
-   type="clock"
-   dir="end" />
+ <interface name="lvds_pll_inclock" internal="lvds_rx_28nm_0.inclock" />
  <interface
    name="monitor_clock_125_in"
    internal="monitor_clock_125.clk_in"
@@ -900,36 +868,18 @@
    internal="monitor_clock_125.clk_in_reset"
    type="reset"
    dir="end" />
- <interface
-   name="mutrig_reset"
-   internal="mutrig_reset_controller_0.mutrig_reset"
-   type="conduit"
-   dir="end" />
+ <interface name="mutrig_reset" internal="mutrig_reset_controller_0.mutrig_reset" />
  <interface
    name="osc_clock_50_in"
-   internal="mutrig_injector_0.osc_clock_interface"
-   type="clock"
-   dir="end" />
- <interface
-   name="redriver"
-   internal="lvds_rx_controller_pro_0.redriver"
-   type="conduit"
-   dir="end" />
- <interface
-   name="rstlink"
-   internal="lvds_rx_controller_pro_0.decoded8"
-   type="avalon_streaming"
-   dir="start" />
+   internal="mutrig_injector_0.osc_clock_interface" />
+ <interface name="redriver" internal="lvds_rx_controller_pro_0.redriver" />
+ <interface name="rstlink" internal="lvds_rx_controller_pro_0.decoded8" />
  <interface
    name="runctl_mgmt_host"
    internal="run_control_mux.in0"
    type="avalon_streaming"
    dir="end" />
- <interface
-   name="serial"
-   internal="lvds_rx_28nm_0.serial"
-   type="conduit"
-   dir="end" />
+ <interface name="serial" internal="lvds_rx_28nm_0.serial" />
  <interface
    name="xcvr_clock"
    internal="xcvr156_clock.clk_in"
@@ -1363,51 +1313,12 @@
   <parameter name="USE_VALID" value="1" />
  </module>
  <module
-   name="hist_post_ts_sideband_0"
-   kind="histogram_post_ts_sideband"
-   version="26.0.0.514"
-   enabled="1">
-  <parameter name="BUILD" value="514" />
-  <parameter name="VERSION_DATE" value="20260514" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="0" />
-  <parameter name="VERSION_PATCH" value="0" />
- </module>
- <module
-   name="hist_pre_ts_trim_1"
-   kind="histogram_pre_ts_trim"
-   version="26.0.0.514"
-   enabled="1">
-  <parameter name="BUILD" value="514" />
-  <parameter name="VERSION_DATE" value="20260514" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="0" />
-  <parameter name="VERSION_PATCH" value="0" />
- </module>
- <module
-   name="histogram_ingress_bridge_0"
-   kind="histogram_ingress_bridge"
-   version="26.0.10.515"
-   enabled="1">
-  <parameter name="BUILD" value="515" />
-  <parameter name="DEFAULT_SELECT_POST" value="1" />
-  <parameter name="ENABLE_POST_FORWARD" value="0" />
-  <parameter name="FILTER_POST_HIT_WORDS" value="1" />
-  <parameter name="INSTANCE_ID" value="0" />
-  <parameter name="IP_UID" value="1212764994" />
-  <parameter name="VERSION_DATE" value="20260515" />
-  <parameter name="VERSION_GIT" value="968989915" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="0" />
-  <parameter name="VERSION_PATCH" value="10" />
- </module>
- <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.2.4.515"
+   version="26.3.0.515"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
-  <parameter name="AVST_DATA_WIDTH" value="87" />
+  <parameter name="AVST_DATA_WIDTH" value="39" />
   <parameter name="AVS_ADDR_WIDTH" value="8" />
   <parameter name="BUILD" value="515" />
   <parameter name="CHANNELS_PER_PORT" value="32" />
@@ -1432,48 +1343,48 @@
   <parameter name="SAR_KEY_WIDTH" value="32" />
   <parameter name="SAR_TICK_WIDTH" value="32" />
   <parameter name="SNOOP_EN" value="false" />
-  <parameter name="UPDATE_KEY_BIT_HI" value="86" />
-  <parameter name="UPDATE_KEY_BIT_LO" value="39" />
+  <parameter name="UPDATE_KEY_BIT_HI" value="29" />
+  <parameter name="UPDATE_KEY_BIT_LO" value="17" />
   <parameter name="UPDATE_KEY_REPRESENTATION" value="UNSIGNED" />
   <parameter name="VERSION_DATE" value="20260515" />
   <parameter name="VERSION_GIT" value="968989915" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="4" />
+  <parameter name="VERSION_MINOR" value="3" />
+  <parameter name="VERSION_PATCH" value="0" />
  </module>
  <module
    name="hit_stack_subsystem_0"
    kind="hit_stack_system"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_DATAPATH_CLOCK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_DATAPATH_CLOCK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_UNIQUE_ID">$${FILENAME}_hit_stack_subsystem_0</parameter>
-  <parameter name="AUTO_XCVR_CLOCK_CLOCK_DOMAIN" value="9" />
+  <parameter name="AUTO_XCVR_CLOCK_CLOCK_DOMAIN" value="7" />
   <parameter name="AUTO_XCVR_CLOCK_CLOCK_RATE" value="156250000" />
-  <parameter name="AUTO_XCVR_CLOCK_RESET_DOMAIN" value="9" />
+  <parameter name="AUTO_XCVR_CLOCK_RESET_DOMAIN" value="7" />
  </module>
  <module
    name="hit_stack_subsystem_1"
    kind="hit_stack_system"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_DATAPATH_CLOCK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_DATAPATH_CLOCK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
   <parameter name="AUTO_GENERATION_ID" value="0" />
   <parameter name="AUTO_UNIQUE_ID">$${FILENAME}_hit_stack_subsystem_1</parameter>
-  <parameter name="AUTO_XCVR_CLOCK_CLOCK_DOMAIN" value="9" />
+  <parameter name="AUTO_XCVR_CLOCK_CLOCK_DOMAIN" value="7" />
   <parameter name="AUTO_XCVR_CLOCK_CLOCK_RATE" value="156250000" />
-  <parameter name="AUTO_XCVR_CLOCK_RESET_DOMAIN" value="9" />
+  <parameter name="AUTO_XCVR_CLOCK_RESET_DOMAIN" value="7" />
  </module>
  <module
    name="lvds_rx_28nm_0"
@@ -1537,7 +1448,7 @@
   <parameter name="PIPELINE_COMMAND" value="0" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1573,7 +1484,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="11" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1591,7 +1502,7 @@
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="0" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1752,7 +1663,7 @@
  <module
    name="mts_preprocessor_0"
    kind="mts_preprocessor"
-   version="26.3.3.515"
+   version="26.3.4.515"
    enabled="1">
   <parameter name="BANK" value="UP" />
   <parameter name="BUILD" value="515" />
@@ -1774,12 +1685,12 @@
   <parameter name="VERSION_GIT" value="933047952" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="3" />
-  <parameter name="VERSION_PATCH" value="3" />
+  <parameter name="VERSION_PATCH" value="4" />
  </module>
  <module
    name="mts_preprocessor_1"
    kind="mts_preprocessor"
-   version="26.3.3.515"
+   version="26.3.4.515"
    enabled="1">
   <parameter name="BANK" value="DW" />
   <parameter name="BUILD" value="515" />
@@ -1801,16 +1712,16 @@
   <parameter name="VERSION_GIT" value="933047952" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="3" />
-  <parameter name="VERSION_PATCH" value="3" />
+  <parameter name="VERSION_PATCH" value="4" />
  </module>
  <module
    name="mutrig_datapath_subsystem_0"
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -1822,9 +1733,9 @@
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -1836,9 +1747,9 @@
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -1850,9 +1761,9 @@
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -1864,9 +1775,9 @@
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -1878,9 +1789,9 @@
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -1892,9 +1803,9 @@
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -1906,9 +1817,9 @@
    kind="mutrig_datapath_system_v3"
    version="1.0"
    enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="11" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="-1" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
@@ -2109,7 +2020,7 @@
    kind="altera_clock_bridge"
    version="18.1"
    enabled="1">
-  <parameter name="DERIVED_CLOCK_RATE" value="125000000" />
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
   <parameter name="EXPLICIT_CLOCK_RATE" value="125000000" />
   <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
  </module>
@@ -2313,15 +2224,6 @@
    end="emulator_mutrig_7.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x01c0" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hist.m0"
-   end="histogram_ingress_bridge_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0c00" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -3003,15 +2905,6 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
-   end="histogram_ingress_bridge_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00020c00" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
    end="mutrig_lane_source_mux_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x2880" />
@@ -3276,11 +3169,6 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="histogram_ingress_bridge_0.hist_out"
-   end="histogram_statistics_0.hist_fill_in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
    start="mutrig_datapath_subsystem_0.hit_type0_out"
    end="mux_mutrig2processor.in0" />
  <connection
@@ -3321,13 +3209,23 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="mts_preprocessor_1.hit_type1_out"
-   end="hist_pre_ts_trim_1.in" />
+   start="mts_preprocessor_0.hit_type1_extended_0"
+   end="histogram_statistics_0.hit_type1_extended_0" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mts_preprocessor_1.hit_type1_extended_1"
+   end="histogram_statistics_0.hit_type1_extended_1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mts_preprocessor_0.hit_type1_out"
-   end="histogram_ingress_bridge_0.pre_in" />
+   end="hit_stack_subsystem_0.hit_type_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mts_preprocessor_1.hit_type1_out"
+   end="hit_stack_subsystem_1.hit_type_1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3386,23 +3284,8 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hist_pre_ts_trim_1.out"
-   end="hit_stack_subsystem_1.hit_type_1" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
    start="run_control_mux.out"
    end="run_control_splitter.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="hist_post_cdc_0.out"
-   end="hist_post_ts_sideband_0.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="hist_post_ts_sideband_0.out"
-   end="histogram_ingress_bridge_0.post_in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3528,11 +3411,6 @@
    version="18.1"
    start="run_control_splitter.out9"
    end="mutrig_datapath_subsystem_5.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="histogram_ingress_bridge_0.pre_out"
-   end="hit_stack_subsystem_0.hit_type_1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3863,21 +3741,6 @@
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
    end="histogram_statistics_0.clock" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="histogram_ingress_bridge_0.clock" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="hist_post_ts_sideband_0.clock" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="hist_pre_ts_trim_1.clock" />
  <connection
    kind="clock"
    version="18.1"
@@ -4383,11 +4246,6 @@
    kind="reset"
    version="18.1"
    start="master_datapath.master_reset"
-   end="histogram_ingress_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
    end="mm_pipeline_lvds_csr_low.reset" />
  <connection
    kind="reset"
@@ -4439,16 +4297,6 @@
    version="18.1"
    start="master_datapath.master_reset"
    end="mm_pipeline_lvds_csr_hitstack_frame.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="hist_post_ts_sideband_0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="hist_pre_ts_trim_1.reset" />
  <connection
    kind="reset"
    version="18.1"

@@ -1,9 +1,9 @@
 set root [expr {[info exists env(MU3E_IP_CORES_ROOT)] ? $env(MU3E_IP_CORES_ROOT) : "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores"}]
 set system_dir [file join $root firmware_builds systems v3_pretest-260511]
 
-set datapath_version {3.0.5.516}
-set top_description {FEB V3 top with histogram true-timestamp delay sideband: scifi_datapath_system_v3 carries 48-bit hit timestamp sidebands into the histogram tap, trims rbCAM-facing Type-1 hits, uses 0x100-wide emulator CSR windows, keeps run-control fanout readyless, selects emulator byte streams with static per-lane source muxes, exports per-lane frame-deassembly parser CSRs, and gives the histogram ingress bridge an 8-word live counter aperture.}
-set datapath_description {scifi_datapath_system_v3 histogram delay sideband contract: pre-rbCAM Type-1 hits and post-rbCAM FEB-framed hits carry true hit_ts[47:0] above the legacy payload; rbCAM/FEB-forwarded streams are trimmed back to their legacy widths; run-control fanout is readyless; decoded lane traffic uses explicit real/emulator source muxes rather than round-robin streaming multiplexers; parser CSRs and histogram ingress bridge counters are exported for live frame/counter debug.}
+set datapath_version {3.0.6.515}
+set top_description {FEB V3 top with streaming histogram debug plane: scifi_datapath_system_v3 keeps the main MTS-to-rbCAM Type-1 path at 39 bits, carries 48-bit hit timestamp sidebands on readyless MTS extended sources into histogram_statistics_v2, uses 0x100-wide emulator CSR windows, keeps run-control fanout readyless, selects emulator byte streams with static per-lane source muxes, and exports per-lane frame-deassembly parser CSRs.}
+set datapath_description {scifi_datapath_system_v3 streaming histogram debug-plane contract: MTS Type-1 payloads remain on the legacy 39-bit main path while readyless hit_type1_extended_0/1 streams carry true hit_ts[47:0] above the payload directly into histogram_statistics_v2; histogram source selection is owned by the histogram CONTROL.in_port CSR; run-control fanout is readyless; decoded lane traffic uses explicit real/emulator source muxes rather than round-robin streaming multiplexers; parser CSRs are exported for live frame debug.}
 
 set avmm_slaves [list \
     {data_path_subsystem_lvds_rx_controller_pro_0.csr 0x0 0x40} \
@@ -45,7 +45,6 @@ set avmm_slaves [list \
     {data_path_subsystem_mts_preprocessor_1.csr 0x8000 0x8020} \
     {data_path_subsystem_histogram_statistics_0.hist_bin 0xA000 0xA400} \
     {data_path_subsystem_histogram_statistics_0.csr 0xA400 0xA480} \
-    {data_path_subsystem_histogram_ingress_bridge_0.csr 0xAC00 0xAC20} \
     {data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_0.csr 0xB000 0xB080} \
     {data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_1.csr 0xB080 0xB100} \
     {data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_2.csr 0xB100 0xB180} \

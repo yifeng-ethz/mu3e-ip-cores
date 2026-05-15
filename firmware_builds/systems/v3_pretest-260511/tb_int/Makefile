@@ -28,12 +28,23 @@ EMU_RTL_DIR        := $(REPO_ROOT)/emulator_mutrig/rtl
 FRCV_RTL_DIR       := $(REPO_ROOT)/mutrig_frame_deassembly/rtl
 SOURCE_MUX_RTL     := $(REPO_ROOT)/misc/mutrig_lane_source_mux/rtl/mutrig_lane_source_mux.sv
 INTEL_18_SIM_LIB   ?= /data1/intelFPGA/18.1/quartus/eda/sim_lib
+INTEL_VERILOG_LIB  ?= intel_verilog
 UVM_HOME           := $(QUESTA_HOME)/verilog_src/uvm-1.2/src
 QUESTA_UVM_HOME    := $(QUESTA_HOME)/verilog_src/questa_uvm_pkg-1.2/src
 UVM_SRC            := $(UVM_HOME)/uvm_pkg.sv
 UVM_INCDIR         := +incdir+$(UVM_HOME) +incdir+$(QUESTA_UVM_HOME)
 VLOG_OPTS          := -sv -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
-VSIM_OPTS          := -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK)
+BIND_REAL_DUT      ?= 0
+VSIM_LIB_OPTS      :=
+VSIM_DO            := run -all; quit -f
+COMP_UVM_DEPS      := lib
+ifeq ($(BIND_REAL_DUT),1)
+VLOG_OPTS          += +define+TB_INT_BIND_REAL_DUT
+VSIM_LIB_OPTS      += -L lpm -L $(INTEL_VERILOG_LIB)
+VSIM_DO            := assertion enable -off -r /$(TB_TOP)/u_dut/*; run -all; quit -f
+COMP_UVM_DEPS      += comp_dut
+endif
+VSIM_OPTS          := -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(VSIM_LIB_OPTS)
 SOURCE_MUX_FRAME_WORK ?= work_source_mux_frame
 SOURCE_MUX_FRAME_TOP  := tb_source_mux_frame_parser_cosim
 SOURCE_MUX_FRAME_RUN_CYCLES ?= 200000
@@ -69,7 +80,7 @@ EMU_COSIM_SV_SRC = \
 	$(QSYS_LANE_CHAIN_SV_SRC) \
 	uvm/v3_pretest-260511/tb_source_mux_frame_parser_cosim.sv
 
-.PHONY: lib intel_lpm comp_board_deps comp_uvm comp_uvm_emul_fixed qsys_filelists comp_dut check_dut_contract comp_source_mux_frame_parser_cosim run_source_mux_frame_parser_cosim smoke run_B065 run_B066 run_B067 run_B068 run_B069 run_b065 run_b066 run_b067 run_b068 run_b069 run_RC_EMUL run_RC_EMUL_BLOCKED run_RC_EMUL_FIXED regress_basic all_buckets_frame static_screen clean
+.PHONY: lib intel_lpm intel_verilog_libs comp_board_deps comp_uvm comp_uvm_emul_fixed qsys_filelists comp_dut check_dut_contract comp_source_mux_frame_parser_cosim run_source_mux_frame_parser_cosim smoke run_B065 run_B066 run_B067 run_B068 run_B069 run_b065 run_b066 run_b067 run_b068 run_b069 run_RC_EMUL run_RC_EMUL_BLOCKED run_RC_EMUL_FIXED regress_basic all_buckets_frame static_screen clean
 
 modelsim.ini:
 	cp $(QUESTA_HOME)/modelsim.ini modelsim.ini
@@ -85,6 +96,15 @@ intel_lpm: modelsim.ini
 	$(VCOM) -modelsimini modelsim.ini -2008 -work lpm $(INTEL_18_SIM_LIB)/220pack.vhd
 	$(VCOM) -modelsimini modelsim.ini -2008 -work lpm $(INTEL_18_SIM_LIB)/220model.vhd
 
+intel_verilog_libs: modelsim.ini
+	$(VLIB) $(INTEL_VERILOG_LIB)
+	$(VMAP) -modelsimini modelsim.ini $(INTEL_VERILOG_LIB) $(INTEL_VERILOG_LIB)
+	$(VLOG) -modelsimini modelsim.ini -work $(INTEL_VERILOG_LIB) $(INTEL_18_SIM_LIB)/220model.v
+	$(VLOG) -modelsimini modelsim.ini -work $(INTEL_VERILOG_LIB) $(INTEL_18_SIM_LIB)/altera_mf.v
+	$(VLOG) -modelsimini modelsim.ini -sv -work $(INTEL_VERILOG_LIB) $(INTEL_18_SIM_LIB)/altera_lnsim.sv
+	$(VLOG) -modelsimini modelsim.ini -work $(INTEL_VERILOG_LIB) $(INTEL_18_SIM_LIB)/arriav_atoms.v
+	$(VLOG) -modelsimini modelsim.ini -work $(INTEL_VERILOG_LIB) $(INTEL_18_SIM_LIB)/mentor/arriav_atoms_ncrypt.v
+
 comp_board_deps: lib
 	@if [ -n "$(BOARD_UTIL_SLV_PKG)" ]; then \
 		$(VCOM) -modelsimini modelsim.ini -2008 -work $(WORK) $(BOARD_UTIL_SLV_PKG); \
@@ -97,14 +117,14 @@ comp_board_deps: lib
 		echo "WARN: no local board-project mudaq.vhd found; generated max10_prog_avmm.vhd may fail to compile."; \
 	fi
 
-comp_uvm: lib
+comp_uvm: $(COMP_UVM_DEPS)
 	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) $(UVM_SRC)
 	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) -f script/tb_int.f
 
 qsys_filelists:
 	python3 script/qip_to_filelists.py $(QSYS_QIP) $(QSYS_FILELIST_DIR)
 
-comp_dut: qsys_filelists lib intel_lpm comp_board_deps
+comp_dut: qsys_filelists lib intel_lpm intel_verilog_libs comp_board_deps
 	$(VCOM) -modelsimini modelsim.ini -2008 -work $(WORK) -f $(QSYS_FILELIST_DIR)/qsys_vhdl.f
 	@if [ -s "$(QSYS_FILELIST_DIR)/qsys_verilog.f" ]; then $(VLOG) -modelsimini modelsim.ini -work $(WORK) -f $(QSYS_FILELIST_DIR)/qsys_verilog.f; fi
 	@if [ -s "$(QSYS_FILELIST_DIR)/qsys_sv.f" ]; then $(VLOG) -modelsimini modelsim.ini -sv -work $(WORK) -f $(QSYS_FILELIST_DIR)/qsys_sv.f; fi
@@ -135,31 +155,31 @@ smoke: run_B065
 
 run_B065: comp_uvm
 	mkdir -p $(SIM_ROOT)/B065
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b065_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/B065 -l $(SIM_ROOT)/B065/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b065_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/B065 -l $(SIM_ROOT)/B065/transcript -do "$(VSIM_DO)"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/B065/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/B065/transcript; then exit 1; fi
 
 run_B066: comp_uvm
 	mkdir -p $(SIM_ROOT)/B066
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b066_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/B066 -l $(SIM_ROOT)/B066/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b066_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/B066 -l $(SIM_ROOT)/B066/transcript -do "$(VSIM_DO)"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/B066/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/B066/transcript; then exit 1; fi
 
 run_B067: comp_uvm
 	mkdir -p $(SIM_ROOT)/B067
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b067_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=100 +TB_INT_SIM_DIR=$(SIM_ROOT)/B067 -l $(SIM_ROOT)/B067/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b067_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=100 +TB_INT_SIM_DIR=$(SIM_ROOT)/B067 -l $(SIM_ROOT)/B067/transcript -do "$(VSIM_DO)"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/B067/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/B067/transcript; then exit 1; fi
 
 run_B068: comp_uvm
 	mkdir -p $(SIM_ROOT)/B068
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b068_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=1024 +TB_INT_SIM_DIR=$(SIM_ROOT)/B068 -l $(SIM_ROOT)/B068/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b068_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=1024 +TB_INT_SIM_DIR=$(SIM_ROOT)/B068 -l $(SIM_ROOT)/B068/transcript -do "$(VSIM_DO)"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/B068/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/B068/transcript; then exit 1; fi
 
 run_B069: comp_uvm
 	mkdir -p $(SIM_ROOT)/B069
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b069_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=1 +TB_INT_SIM_DIR=$(SIM_ROOT)/B069 -l $(SIM_ROOT)/B069/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_b069_test +ARB_SEED=$(SEED) +TB_INT_EXPECTED_HITS=1 +TB_INT_SIM_DIR=$(SIM_ROOT)/B069 -l $(SIM_ROOT)/B069/transcript -do "$(VSIM_DO)"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/B069/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/B069/transcript; then exit 1; fi
 
@@ -175,7 +195,7 @@ run_b069: run_B069
 # TOTAL_HITS=0 after 16 emulator hits.
 run_RC_EMUL_BLOCKED: comp_uvm
 	mkdir -p $(SIM_ROOT)/RC_EMUL_BLOCKED
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_blocked_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_BLOCKED -l $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_blocked_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_BLOCKED -l $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript -do "$(VSIM_DO)"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript; then exit 1; fi
 
@@ -197,7 +217,7 @@ run_RC_EMUL_FIXED: comp_uvm_emul_fixed
 
 run_RC_EMUL: comp_uvm
 	mkdir -p $(SIM_ROOT)/RC_EMUL
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emulator_directed_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL -l $(SIM_ROOT)/RC_EMUL/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emulator_directed_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL -l $(SIM_ROOT)/RC_EMUL/transcript -do "$(VSIM_DO)"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/RC_EMUL/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_EMUL/transcript; then exit 1; fi
 

@@ -47,8 +47,8 @@ module tb_int_top;
     import tb_int_smoke_test_pkg::*;
     `include "uvm_macros.svh"
 
-    logic clk_125;
-    logic rst;
+    logic clk_125 = 1'b0;
+    logic rst = 1'b1;
 
     lvds_phy_if          lvds_phy_vif(.clk(clk_125), .rst(rst));
     runctl_phy_if        runctl_phy_vif(.clk(clk_125), .rst(rst));
@@ -68,7 +68,20 @@ module tb_int_top;
     // The contract DUT is the generated feb_system_v3 synthesis tree. This
     // FEB-only build exposes the legacy upload_pkt_mux egress; RDMA RQE/CQE
     // cosim is a separate FEB+SWB task (#48).
-    feb_system_v3 u_dut();
+    feb_system_v3 u_dut(
+        .cclk156_clk(clk_125),
+        .lvds_pll_inclock_clk(clk_125),
+        .max10_link_clock_clk(clk_125),
+        .mclk125_clk(clk_125),
+        .osc_clock_50_in_clk(clk_125),
+        .reset_3_reset_n(~rst),
+        .legacy_firefly_mon_waitrequest(1'b0),
+        .legacy_firefly_mon_readdata(32'h0000_0000),
+        .legacy_firefly_mon_readdatavalid(1'b0),
+        .legacy_firefly_mon_response(2'b00),
+        .upload_data0_sc_rc_ready(1'b1),
+        .upload_data1_ready(1'b1)
+    );
 `endif
 
     tb_int_assertions u_tb_int_assertions (

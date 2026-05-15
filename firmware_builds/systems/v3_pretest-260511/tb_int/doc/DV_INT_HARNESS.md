@@ -33,4 +33,18 @@ The v3 layer lives under `tb_int/uvm/v3_pretest-260511/` and provides:
 
 ## 4. Non-Claims
 
-Current B065 through B069 evidence is harness-shell smoke evidence while the DUT bind layer is being widened. BUG-001-R is redesignated because this FEB-only generated tree correctly exposes legacy `feb_frame_assembly` plus `upload_pkt_mux`; RDMA cosim belongs to task #48.
+Current bridge-free Phase A evidence covers B065 through B069, `RC_EMUL`, and
+the source-mux/frame-parser cosim in the old dual UVM environment with
+DEBUG_LEVEL=2 per-hit scoreboard closure. The generated `feb_system_v3`
+`synthesis/` tree also compiles into the harness and is instantiated by
+`BIND_REAL_DUT=1` for the B067 bind smoke.
+
+The bind smoke keeps the generated Qsys system present as `u_dut`, but the old
+dual environment still drives and monitors the behavioral shell taps used by
+the existing per-hit scoreboard. Generated/vendor assertions below `u_dut` are
+disabled in bind mode so dormant unconnected fabric does not mask the UVM
+scoreboard result.
+
+No UCDB/code-coverage closure, full continuous all-buckets frame, RDMA SQE/CQE
+cosim, board run, or full generated-system top-level IO exercise is claimed by
+this phase.

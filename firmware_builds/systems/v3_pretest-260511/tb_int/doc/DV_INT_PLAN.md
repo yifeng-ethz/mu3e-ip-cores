@@ -156,8 +156,7 @@ Per-IP DEBUG_LEVEL mapping for `v3_pretest-260511`:
 | `mts_preprocessor` | 2 | timestamp-reconstructed sidecar + non-wrapping latency (`debug_ts`, `debug_burst`, `ts_delta`); also internal pipeline fill at level 1 |
 | `arb_hit_type0` (inside `hit_stack_subsystem_*`) | 2 | post-arbitration sidecar pass-through; also EMU/REAL L1/L2 fill at level 1 |
 | `ring_buffer_cam` (4x per hit_stack_subsystem, 8x total) | 2 | rbCAM bucket sidecar pass-through; also bucket fill + drain pressure at level 1 |
-| `histogram_ingress_bridge` | 1 | bridge fill (`*_filllevel`) for rate cross-check |
-| `histogram_statistics_v2` | 1 | coalescing queue fill (`overflow_count`, `queue_hit_bin`) |
+| `histogram_statistics_v2` | 1 | internal source selection through `CONTROL.in_port`, coalescing queue fill (`overflow_count`, `queue_hit_bin`), and selected extended-stream count model |
 | `feb_frame_assembly` | 2 | legacy upload framing path before `upload_pkt_mux` |
 | `mutrig_injector_multiheader` | 0 | source-side; no debug payload needed |
 | `pulse_fanout8` | 0 | combinational fanout; no observable state |
@@ -168,6 +167,11 @@ Per-IP DEBUG_LEVEL mapping for `v3_pretest-260511`:
 
 The IP-level `DEBUG_LEVEL` parameter is set per Qsys-instance via
 `set_instance_parameter_value <inst> DEBUG_LEVEL <0/1/2>`.
+
+`histogram_ingress_bridge` is retired in the bridge-free FEB v3 streaming-debug
+topology. The old pre/post source switch is now absorbed inside
+`histogram_statistics_v2`; `CONTROL.in_port = 1/2` selects the upper/lower MTS
+extended stream directly.
 
 **Hard contract (production vs debug vs sim):**
 

@@ -28,7 +28,6 @@ REPO_ROOT = SYSTEM_DIR.parents[2]
 
 SC_HIST_BIN = 0x0A800
 SC_HIST_CSR = 0x0A900
-SC_HIST_BRIDGE = 0x0AB00
 SC_RBCAM_STACK0 = 0x0AC00
 SC_RBCAM_STACK1 = 0x0AD00
 SC_RBCAM_STRIDE = 0x20
@@ -47,16 +46,18 @@ SC_FRAME_DEASM_BASE = 0x08AA0
 SC_FRAME_DEASM_STRIDE = 0x4
 
 HIST_UID = 0x48495354
-HISB_UID = 0x48495342
 RBCAM_UID = 0x5242434D
 EMU_UID = 0x454D5554
 SOURCE_MUX_UID = 0x4D4C534D
 DBG_RUNCTRL_UID = 0x4D325243
-HIST_BRIDGE_CONTROL_CLEAR_COUNTERS = 0x00000100
 
-HIST_KEY_LOC_TS48 = 0x00005627  # update_key_low=39, update_key_high=86
-HIST_CONTROL_MODE0 = 0x00000101  # apply=1, mode=0, unsigned=1
-HIST_CONTROL_DELAY = 0x00000111  # apply=1, mode=1, unsigned=1
+HIST_KEY_LOC_TYPE1 = 0x26231D11  # filter=38:35, update=29:17
+HIST_CONTROL_APPLY = 0x00000001
+HIST_CONTROL_KEY_UNSIGNED = 0x00000100
+HIST_IN_PORT = {
+    "upper": 1,
+    "lower": 2,
+}
 HIST_CLOCK_HZ = 125_000_000
 DEFAULT_HIST_INTERVAL_CLOCKS = HIST_CLOCK_HZ // 1000
 
@@ -438,65 +439,6 @@ def expect_uid(bus: ScBus, addr: int, expected: int, name: str) -> int:
     return observed
 
 
-def decode_bridge_status(word: int) -> dict[str, Any]:
-    return {
-        "raw": fmt_hex(word),
-        "live_select_post": word & 0x1,
-        "requested_select_post": (word >> 1) & 0x1,
-        "switch_pending": (word >> 2) & 0x1,
-        "pre_packet_active": (word >> 8) & 0x1,
-        "post_packet_active": (word >> 9) & 0x1,
-        "post_hit_filter_enabled": (word >> 10) & 0x1,
-        "post_hit_region": (word >> 11) & 0x1,
-    }
-
-
-def decode_hist_bridge(raw: list[int], counter_error: str | None = None) -> dict[str, Any]:
-    row: dict[str, Any] = {
-        "raw": [fmt_hex(v) for v in raw],
-        "uid": fmt_hex(raw[0]) if len(raw) > 0 else None,
-        "meta": fmt_hex(raw[1]) if len(raw) > 1 else None,
-        "control": fmt_hex(raw[2]) if len(raw) > 2 else None,
-        "status": decode_bridge_status(raw[3]) if len(raw) > 3 else None,
-        "counter_words_exported": len(raw) >= 8,
-    }
-    if len(raw) >= 8:
-        row.update({
-            "pre_seen_count": raw[4],
-            "post_seen_count": raw[5],
-            "hist_emit_count": raw[6],
-            "hist_drop_count": raw[7],
-        })
-    if counter_error:
-        row["counter_read_error"] = counter_error
-    return row
-
-
-def read_hist_bridge_counts(bus: ScBus) -> dict[str, Any]:
-    raw = bus.read(SC_HIST_BRIDGE, 4)
-    counter_error = None
-    try:
-        raw.extend(bus.read(SC_HIST_BRIDGE + 4, 4))
-    except Exception as exc:
-        counter_error = str(exc)
-    return decode_hist_bridge(raw, counter_error)
-
-
-def select_bridge_source(bus: ScBus, post: bool) -> dict[str, Any]:
-    expect_uid(bus, SC_HIST_BRIDGE, HISB_UID, "histogram_ingress_bridge")
-    requested = 1 if post else 0
-    bus.write(SC_HIST_BRIDGE + 2, [requested | HIST_BRIDGE_CONTROL_CLEAR_COUNTERS])
-    last = 0
-    for _ in range(200):
-        last = bus.read(SC_HIST_BRIDGE + 3, 1)[0]
-        decoded = decode_bridge_status(last)
-        if decoded["live_select_post"] == requested and decoded["requested_select_post"] == requested and decoded["switch_pending"] == 0:
-            decoded["source"] = "post" if post else "pre"
-            return decoded
-        time.sleep(0.01)
-    raise RuntimeError(f"bridge did not switch to {'post' if post else 'pre'}: {decode_bridge_status(last)}")
-
-
 def configure_emulators(bus: ScBus, q16_rate: int, active_lane: int) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     for lane in range(8):
@@ -634,17 +576,23 @@ def apply_hist_config(
     bus: ScBus,
     *,
     delay_mode: bool,
+    in_port: int,
     left: int,
     bin_width: int,
     interval_clocks: int,
 ) -> dict[str, Any]:
     expect_uid(bus, SC_HIST_CSR, HIST_UID, "histogram_statistics")
-    control = HIST_CONTROL_DELAY if delay_mode else HIST_CONTROL_MODE0
+    control = (
+        HIST_CONTROL_APPLY
+        | HIST_CONTROL_KEY_UNSIGNED
+        | ((in_port & 0x3) << 2)
+        | ((1 if delay_mode else 0) << 4)
+    )
     right = left + 256 * bin_width
     bus.write(SC_HIST_CSR + 3, [left & 0xFFFFFFFF])
     bus.write(SC_HIST_CSR + 4, [right & 0xFFFFFFFF])
     bus.write(SC_HIST_CSR + 5, [bin_width & 0xFFFFFFFF])
-    bus.write(SC_HIST_CSR + 6, [HIST_KEY_LOC_TS48])
+    bus.write(SC_HIST_CSR + 6, [HIST_KEY_LOC_TYPE1])
     bus.write(SC_HIST_CSR + 7, [0])
     bus.write(SC_HIST_CSR + 10, [interval_clocks])
     bus.write(SC_HIST_CSR + 2, [control])
@@ -657,11 +605,12 @@ def apply_hist_config(
     bus.write(SC_HIST_BIN, [0])
     return {
         "mode": "delay" if delay_mode else "mode0",
+        "in_port": in_port,
         "control": fmt_hex(control),
         "left": left,
         "right": right,
         "bin_width": bin_width,
-        "key_loc": fmt_hex(HIST_KEY_LOC_TS48),
+        "key_loc": fmt_hex(HIST_KEY_LOC_TYPE1),
         "interval_clocks": interval_clocks,
     }
 
@@ -855,26 +804,25 @@ def read_hist_bins(bus: ScBus, path: Path, left: int, bin_width: int) -> dict[st
 
 
 def configure_case(args: argparse.Namespace, bus: ScBus, source: str, mode: str) -> dict[str, Any]:
-    is_post = source == "post"
     is_delay = mode == "delay"
+    in_port = HIST_IN_PORT[source]
     left = 0
     bin_width = args.delay_bin_width if is_delay else args.mode0_bin_width
 
     bus.write(SC_LVDS_BASE + 4, [0x000001FF])
     source_mux = configure_source_muxes(bus)
     downstream = configure_downstream(bus)
-    bridge = select_bridge_source(bus, is_post)
     stimulus = configure_emulators(bus, args.q16_rate, args.active_lane)
     time.sleep(args.post_config_ms / 1000.0)
     config = apply_hist_config(
         bus,
         delay_mode=is_delay,
+        in_port=in_port,
         left=left,
         bin_width=bin_width,
         interval_clocks=args.hist_interval_clocks,
     )
     return {
-        "bridge": bridge,
         "config": config,
         "downstream": downstream,
         "source_mux": source_mux,
@@ -922,7 +870,6 @@ def run_csr_counter_readback(args: argparse.Namespace, bus: ScBus, source: str, 
     time.sleep(args.csr_probe_delay_ms / 1000.0)
     runctl = read_runctl_mgmt_host(bus)
     hist = read_hist_counts(bus)
-    bridge_counts = read_hist_bridge_counts(bus)
     mts = read_mts_counts(bus)
     rbcam = read_rbcam_counts(bus)
     emu = read_emulator_visible_cfg(bus)
@@ -940,7 +887,6 @@ def run_csr_counter_readback(args: argparse.Namespace, bus: ScBus, source: str, 
         "probe_delay_ms": args.csr_probe_delay_ms,
         "runctl_mgmt_host": runctl,
         "hist": hist,
-        "hist_bridge": bridge_counts,
         "mts": mts,
         "rbcam": rbcam,
         "emulator": emu,
@@ -983,7 +929,7 @@ def main() -> int:
     parser.add_argument("--run-number-base", type=int, default=514900)
     parser.add_argument("--mode0-bin-width", type=int, default=16_777_216)
     parser.add_argument("--delay-bin-width", type=int, default=64)
-    parser.add_argument("--sources", default="pre,post", help="Comma-separated bridge sources: pre,post")
+    parser.add_argument("--sources", default="upper,lower", help="Comma-separated histogram extended sources: upper,lower")
     parser.add_argument("--modes", default="mode0,delay", help="Comma-separated histogram modes: mode0,delay")
     parser.add_argument("--output-dir", type=Path, default=default_output_dir())
     parser.add_argument("--sc-tool", type=Path, default=default_sc_tool())
@@ -1014,13 +960,12 @@ def main() -> int:
             "addressing": "SC hub packet-word addresses; not Platform Designer/JTAG byte addresses",
             "hist_interval": "default histogram interval is 125000 clocks (1 ms at 125 MHz); bin reads return the frozen previous ping-pong bank",
             "hist_bin_read": "all 256 bins are requested in one SC read so the histogram slave can latch one frozen read bank for the dump",
-            "hist_bridge_counters": "regenerated bridge images expose words 0x0AB04-0x0AB07; the script clears them during each case configuration and samples them in the separate CSR run",
+            "hist_extended_sources": "CONTROL.in_port selects histogram_statistics_v2 hit_type1_extended_0/1 directly; the histogram ingress bridge is not present in this image",
             "sc_transaction_reset": "default is to reset the SC secondary ring on each sc_tool operation; use --no-sc-reset-each-op only for controlled experiments",
         },
         "sc_word_map": {
             "hist_bin": f"0x{SC_HIST_BIN:05X}",
             "hist_csr": f"0x{SC_HIST_CSR:05X}",
-            "hist_bridge": f"0x{SC_HIST_BRIDGE:05X}",
             "rbcam_stack0": f"0x{SC_RBCAM_STACK0:05X}",
             "rbcam_stack1": f"0x{SC_RBCAM_STACK1:05X}",
             "emulator_bases": [f"0x{SC_EMU_BASE + lane * SC_EMU_STRIDE:05X}" for lane in range(8)],
@@ -1041,14 +986,13 @@ def main() -> int:
 
     try:
         expect_uid(bus, SC_HIST_CSR, HIST_UID, "histogram_statistics")
-        expect_uid(bus, SC_HIST_BRIDGE, HISB_UID, "histogram_ingress_bridge")
         expect_uid(bus, SC_RBCAM_STACK0, RBCAM_UID, "ring_buffer_cam_stack0_lane0")
         expect_uid(bus, SC_RBCAM_STACK1, RBCAM_UID, "ring_buffer_cam_stack1_lane0")
 
         sources = [item.strip() for item in args.sources.split(",") if item.strip()]
         modes = [item.strip() for item in args.modes.split(",") if item.strip()]
         for source in sources:
-            if source not in {"pre", "post"}:
+            if source not in HIST_IN_PORT:
                 raise RuntimeError(f"unsupported source '{source}'")
         for mode in modes:
             if mode not in {"mode0", "delay"}:

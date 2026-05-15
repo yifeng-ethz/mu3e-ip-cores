@@ -2,6 +2,7 @@ modelsim.ini
 questa.ini
 work*/
 lpm/
+intel_verilog/
 sim/
 transcript
 *.wlf
