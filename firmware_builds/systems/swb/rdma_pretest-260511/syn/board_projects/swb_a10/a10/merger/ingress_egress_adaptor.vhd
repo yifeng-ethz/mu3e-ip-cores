@@ -1,10 +1,10 @@
 -- -----------------------------------------------------------------------------
 -- File      : ingress_egress_adaptor.vhd
 -- Author    : Yifeng Wang (yifenwan@phys.ethz.ch)
--- Version   : 26.3.8
--- Date      : 20260430
--- Change    : Register the OPQ ingress boundary so MMIO masks and link
---             records do not feed OPQ control counters in the same cycle.
+-- Version   : 26.3.10
+-- Date      : 20260514
+-- Change    : Export raw OPQ egress for the SWB RDMA packer and drive OPQ
+--             ready from the downstream packer backpressure state.
 -- -----------------------------------------------------------------------------
 
 library ieee;
@@ -18,11 +18,17 @@ use work.util_slv.all;
 
 entity ingress_egress_adaptor is
 port (
-    enable        : in std_logic;
-    rx_ingress    : in work.mu3e.link32_array_t(3 downto 0);
-    rx_egress     : out work.mu3e.link32_array_t(3 downto 0);
-    reset_n       : in std_logic;
-    clk           : in std_logic
+    enable              : in std_logic;
+    rx_ingress          : in work.mu3e.link32_array_t(3 downto 0);
+    rx_egress           : out work.mu3e.link32_array_t(3 downto 0);
+    opq_egress_ready    : in std_logic;
+    opq_egress_data     : out std_logic_vector(31 downto 0);
+    opq_egress_datak    : out std_logic_vector(3 downto 0);
+    opq_egress_valid    : out std_logic;
+    opq_egress_sop      : out std_logic;
+    opq_egress_eop      : out std_logic;
+    reset_n             : in std_logic;
+    clk                 : in std_logic
 );
 end entity;
 
@@ -38,6 +44,9 @@ architecture rtl of ingress_egress_adaptor is
     signal ingress_valid             : std_logic_vector(3 downto 0)    := (others    => '0');
     signal ingress_data              : slv36_array_t(3 downto 0)       := (others    => (others => '0'));
     signal ingress_error             : slv3_array_t(3 downto 0)        := (others    => (others => '0'));
+    signal opq_egress_is_trailer     : std_logic;
+    signal opq_egress_is_idle_sop    : std_logic;
+    signal opq_egress_data_clean     : std_logic_vector(31 downto 0);
 
 begin
 
@@ -68,7 +77,7 @@ begin
         egress_startofpacket       => aso_egress_startofpacket,
         egress_endofpacket         => aso_egress_endofpacket,
         egress_valid               => aso_egress_valid,
-        egress_ready               => '1',
+        egress_ready               => opq_egress_ready,
         egress_error               => open,
         egress_data                => aso_egress_data,
         ingress_0_channel          => "00",
@@ -98,6 +107,36 @@ begin
         reset_reset                => not reset_n
     );
 
+    opq_egress_is_trailer  <= '1' when (aso_egress_data(35 downto 32) = "0001") and
+                                       (aso_egress_data(7 downto 0) = x"9C") else '0';
+    opq_egress_is_idle_sop <= '1' when (aso_egress_data(35 downto 32) = "0001") and
+                                       (aso_egress_data(7 downto 0) = x"BC") and
+                                       (aso_egress_data(31 downto 26) = "000000") else '0';
+    opq_egress_data_clean  <= x"0000009C" when opq_egress_is_trailer = '1' else
+                              aso_egress_data(31 downto 0);
+
+    opq_egress_data     <= opq_egress_data_clean;
+    opq_egress_datak    <= aso_egress_data(35 downto 32);
+    opq_egress_valid    <= enable and aso_egress_valid;
+    opq_egress_sop      <= enable and aso_egress_startofpacket;
+    opq_egress_eop      <= enable and aso_egress_endofpacket;
+
+    -- synthesis translate_off
+    p_opq_marker_checks : process(clk)
+    begin
+        if rising_edge(clk) then
+            if reset_n = '1' and enable = '1' and aso_egress_valid = '1' then
+                assert opq_egress_is_idle_sop = '0'
+                    report "SWB OPQ egress transmitted an Idle frame SOP"
+                    severity failure;
+                assert not (opq_egress_is_trailer = '1' and aso_egress_data(31 downto 8) /= x"000000")
+                    report "SWB OPQ egress transmitted a dirty K28.4 trailer"
+                    severity failure;
+            end if;
+        end if;
+    end process;
+    -- synthesis translate_on
+
     egress_mux : process(all)
         variable egress_link : work.mu3e.link32_t;
     begin
@@ -106,7 +145,7 @@ begin
         if enable = '1' then
             rx_egress <= (others => work.mu3e.LINK32_IDLE);
             if aso_egress_valid = '1' then
-                egress_link         := work.mu3e.to_link(aso_egress_data(31 downto 0), aso_egress_data(35 downto 32));
+                egress_link         := work.mu3e.to_link(opq_egress_data_clean, aso_egress_data(35 downto 32));
                 egress_link.idle    := '0';
                 if (aso_egress_data(35 downto 32) = "0001") and (aso_egress_data(7 downto 0) = x"BC") then
                     egress_link.data(31 downto 26)    := MUPIX_HEADER_ID;

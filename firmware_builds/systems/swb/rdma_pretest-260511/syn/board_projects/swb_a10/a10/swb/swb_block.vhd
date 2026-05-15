@@ -106,54 +106,59 @@ architecture arch of swb_block is
 
     signal data_path_reset_n : std_logic;
     signal opq_reset_n : std_logic;
-    signal rdma_reset_n : std_logic;
+    signal dma_reset_n : std_logic;
     attribute altera_attribute : string;
     attribute altera_attribute of opq_reset_n : signal is "-name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON; -name GLOBAL_SIGNAL OFF";
-    attribute altera_attribute of rdma_reset_n : signal is "-name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON; -name GLOBAL_SIGNAL OFF";
+    attribute altera_attribute of dma_reset_n : signal is "-name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON; -name GLOBAL_SIGNAL OFF";
 
-    signal rdma_csr_rdata : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_csr_uid : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_csr_status : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_cnt_rqe_consumed : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_cnt_cqe_posted : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_cnt_bytes_written : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_cnt_opq_input_w : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_cnt_halt : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_cnt_eoe_observed : std_logic_vector(31 downto 0) := (others => '0');
-    signal rdma_host_stub_status : std_logic_vector(31 downto 0) := (others => '0');
+    constant OPQ_DMA_PACKER_UID_CONST : std_logic_vector(31 downto 0) := x"4F505144";
 
-    component swb_rdma_subsystem_bridge is
+    signal opq_egress_data       : std_logic_vector(31 downto 0) := (others => '0');
+    signal opq_egress_datak      : std_logic_vector(3 downto 0) := (others => '0');
+    signal opq_egress_valid      : std_logic := '0';
+    signal opq_egress_sop        : std_logic := '0';
+    signal opq_egress_eop        : std_logic := '0';
+    signal opq_dma_ready         : std_logic := '0';
+    signal opq_dma_input_data    : std_logic_vector(31 downto 0) := (others => '0');
+    signal opq_dma_input_datak   : std_logic_vector(3 downto 0) := (others => '0');
+    signal opq_dma_input_valid   : std_logic := '0';
+    signal opq_dma_input_sop     : std_logic := '0';
+    signal opq_dma_input_eop     : std_logic := '0';
+    signal opq_dma_status        : std_logic_vector(31 downto 0) := (others => '0');
+    signal opq_dma_input_words   : std_logic_vector(31 downto 0) := (others => '0');
+    signal opq_dma_output_words  : std_logic_vector(31 downto 0) := (others => '0');
+    signal opq_dma_event_count   : std_logic_vector(31 downto 0) := (others => '0');
+    signal opq_dma_halt_count    : std_logic_vector(31 downto 0) := (others => '0');
+
+    component swb_opq_dma_pipeline is
     port (
-        clk                    : in  std_logic;
-        reset_n                : in  std_logic;
-        enable                 : in  std_logic;
-        opq_data               : in  std_logic_vector(31 downto 0);
-        opq_datak              : in  std_logic_vector(3 downto 0);
-        opq_valid              : in  std_logic;
-        opq_sop                : in  std_logic;
-        opq_eop                : in  std_logic;
-        csr_addr               : in  std_logic_vector(7 downto 0);
-        csr_wdata              : in  std_logic_vector(31 downto 0);
-        csr_write              : in  std_logic;
-        csr_rdata              : out std_logic_vector(31 downto 0);
-        csr_uid                : out std_logic_vector(31 downto 0);
-        csr_status             : out std_logic_vector(31 downto 0);
-        cnt_rqe_consumed       : out std_logic_vector(31 downto 0);
-        cnt_cqe_posted         : out std_logic_vector(31 downto 0);
-        cnt_bytes_written      : out std_logic_vector(31 downto 0);
-        cnt_opq_input_w        : out std_logic_vector(31 downto 0);
-        cnt_halt               : out std_logic_vector(31 downto 0);
-        cnt_eoe_observed       : out std_logic_vector(31 downto 0);
-        host_stub_status       : out std_logic_vector(31 downto 0);
+        i_clk                  : in  std_logic;
+        i_reset_n              : in  std_logic;
+        i_dma_enable           : in  std_logic;
+        i_dma_halffull         : in  std_logic;
+        i_opq_data             : in  std_logic_vector(31 downto 0);
+        i_opq_datak            : in  std_logic_vector(3 downto 0);
+        i_opq_valid            : in  std_logic;
+        i_opq_sop              : in  std_logic;
+        i_opq_eop              : in  std_logic;
+        o_opq_ready            : out std_logic;
+        o_opq_egress_data      : out std_logic_vector(35 downto 0);
+        o_opq_egress_valid     : out std_logic;
+        o_opq_egress_sop       : out std_logic;
+        o_opq_egress_eop       : out std_logic;
         o_dma_data             : out std_logic_vector(255 downto 0);
-        o_dma_wren             : out std_logic;
-        o_endofevent           : out std_logic
+        o_dma_wen              : out std_logic;
+        o_end_of_event         : out std_logic;
+        o_input_word_cnt       : out std_logic_vector(31 downto 0);
+        o_output_word_cnt      : out std_logic_vector(31 downto 0);
+        o_event_cnt            : out std_logic_vector(31 downto 0);
+        o_halt_cnt             : out std_logic_vector(31 downto 0)
     );
     end component;
 
-    signal rdma_dma_data     : std_logic_vector(255 downto 0) := (others => '0');
-    signal rdma_dma_wren     : std_logic := '0';
-    signal rdma_endofevent   : std_logic := '0';
+    signal opq_dma_data       : std_logic_vector(255 downto 0) := (others => '0');
+    signal opq_dma_wren       : std_logic := '0';
+    signal opq_dma_endofevent : std_logic := '0';
 
 begin
 
@@ -309,13 +314,13 @@ begin
     if ( i_reset_n /= '1' ) then
         data_path_reset_n <= '0';
         opq_reset_n <= '0';
-        rdma_reset_n <= '0';
+        dma_reset_n <= '0';
         mask_n <= (others => '0');
         use_opq_merge <= '0';
     elsif rising_edge(i_clk) then
         data_path_reset_n <= i_resets_n(RESET_BIT_DATA_PATH);
         opq_reset_n <= data_path_reset_n;
-        rdma_reset_n <= data_path_reset_n;
+        dma_reset_n <= data_path_reset_n;
         mask_n <= x"00000000" & i_writeregs(SWB_GENERIC_MASK_REGISTER_W);
         use_opq_merge <= i_writeregs(SWB_READOUT_STATE_REGISTER_W)(USE_BIT_MERGER);
     end if;
@@ -367,106 +372,118 @@ begin
 
     e_ingress_egress_adaptor : entity work.ingress_egress_adaptor
     port map (
-        enable      => use_opq_merge,
-        rx_ingress  => rx_data_sim_opq,
-        rx_egress   => rx_data_sim_merged,
-        reset_n     => opq_reset_n,
-        clk         => i_clk--,
+        enable             => use_opq_merge,
+        rx_ingress         => rx_data_sim_opq,
+        rx_egress          => rx_data_sim_merged,
+        opq_egress_ready   => opq_dma_ready,
+        opq_egress_data    => opq_egress_data,
+        opq_egress_datak   => opq_egress_datak,
+        opq_egress_valid   => opq_egress_valid,
+        opq_egress_sop     => opq_egress_sop,
+        opq_egress_eop     => opq_egress_eop,
+        reset_n            => opq_reset_n,
+        clk                => i_clk--,
     );
 
-    p_rdma_opq_input_pipe : process(i_clk)
+    p_opq_dma_input_pipe : process(i_clk)
     begin
     if rising_edge(i_clk) then
-        if ( rdma_reset_n /= '1' ) then
-            rx_data_sim_merged_r <= (others => work.mu3e.LINK32_IDLE);
+        if ( dma_reset_n /= '1' ) then
+            rx_data_sim_merged_r    <= (others => work.mu3e.LINK32_IDLE);
+            opq_dma_input_data      <= (others => '0');
+            opq_dma_input_datak     <= (others => '0');
+            opq_dma_input_valid     <= '0';
+            opq_dma_input_sop       <= '0';
+            opq_dma_input_eop       <= '0';
         else
-            rx_data_sim_merged_r <= rx_data_sim_merged;
+            rx_data_sim_merged_r    <= rx_data_sim_merged;
+            opq_dma_input_data      <= opq_egress_data;
+            opq_dma_input_datak     <= opq_egress_datak;
+            opq_dma_input_valid     <= opq_egress_valid and opq_dma_ready;
+            opq_dma_input_sop       <= opq_egress_sop and opq_dma_ready;
+            opq_dma_input_eop       <= opq_egress_eop and opq_dma_ready;
         end if;
     end if;
     end process;
 
-    o_opq_data  <= rx_data_sim_merged_r(0).data;
-    o_opq_datak <= rx_data_sim_merged_r(0).datak;
-    o_opq_valid <= not rx_data_sim_merged_r(0).idle;
+    o_opq_data  <= opq_dma_input_data;
+    o_opq_datak <= opq_dma_input_datak;
+    o_opq_valid <= opq_dma_input_valid;
 
-    --! RDMA post-OPQ data path
+    --! OPQ RDMA packer data path
     --! ------------------------------------------------------------------------
     --! ------------------------------------------------------------------------
     --! ------------------------------------------------------------------------
-    e_rdma_subsystem_bridge : swb_rdma_subsystem_bridge
+    -- LEGACY_DMA_DEAD: musip_mux_4_1, musip_event_builder, and the interim
+    -- rdma_subsystem bridge are intentionally not instantiated in this path.
+    e_opq_dma_pipeline : swb_opq_dma_pipeline
     port map (
-        clk                    => i_clk,
-        reset_n                => rdma_reset_n,
-        enable                 => use_opq_merge,
-        opq_data               => rx_data_sim_merged_r(0).data,
-        opq_datak              => rx_data_sim_merged_r(0).datak,
-        opq_valid              => not rx_data_sim_merged_r(0).idle,
-        opq_sop                => rx_data_sim_merged_r(0).sop,
-        opq_eop                => rx_data_sim_merged_r(0).eop,
-        csr_addr               => i_writeregs(SWB_LOOKUP_CTRL_REGISTER_W)(7 downto 0),
-        csr_wdata              => i_writeregs(SWB_LOOKUP_DS_CTRL_REGISTER_W),
-        csr_write              => i_regwritten(SWB_LOOKUP_DS_CTRL_REGISTER_W),
-        csr_rdata              => rdma_csr_rdata,
-        csr_uid                => rdma_csr_uid,
-        csr_status             => rdma_csr_status,
-        cnt_rqe_consumed       => rdma_cnt_rqe_consumed,
-        cnt_cqe_posted         => rdma_cnt_cqe_posted,
-        cnt_bytes_written      => rdma_cnt_bytes_written,
-        cnt_opq_input_w        => rdma_cnt_opq_input_w,
-        cnt_halt               => rdma_cnt_halt,
-        cnt_eoe_observed       => rdma_cnt_eoe_observed,
-        host_stub_status       => rdma_host_stub_status,
-        o_dma_data             => rdma_dma_data,
-        o_dma_wren             => rdma_dma_wren,
-        o_endofevent           => rdma_endofevent
+        i_clk                  => i_clk,
+        i_reset_n              => dma_reset_n,
+        i_dma_enable           => use_opq_merge,
+        i_dma_halffull         => i_dmamemhalffull,
+        i_opq_data             => opq_egress_data,
+        i_opq_datak            => opq_egress_datak,
+        i_opq_valid            => opq_egress_valid,
+        i_opq_sop              => opq_egress_sop,
+        i_opq_eop              => opq_egress_eop,
+        o_opq_ready            => opq_dma_ready,
+        o_opq_egress_data      => open,
+        o_opq_egress_valid     => open,
+        o_opq_egress_sop       => open,
+        o_opq_egress_eop       => open,
+        o_dma_data             => opq_dma_data,
+        o_dma_wen              => opq_dma_wren,
+        o_end_of_event         => opq_dma_endofevent,
+        o_input_word_cnt       => opq_dma_input_words,
+        o_output_word_cnt      => opq_dma_output_words,
+        o_event_cnt            => opq_dma_event_count,
+        o_halt_cnt             => opq_dma_halt_count
     );
 
-    -- Route the rdma_subsystem AXI4-W -> DMA-FIFO bridge output to the legacy
-    -- PCIe DMA0 path (i_pcie0_dma0_wdata/we/eoe on a10_block).
-    o_dma_data   <= rdma_dma_data;
-    o_dma_wren   <= rdma_dma_wren;
-    o_endofevent <= rdma_endofevent;
+    -- Route the OPQ wire-frame packer output to the existing PCIe RDMA path.
+    o_dma_data   <= opq_dma_data;
+    o_dma_wren   <= opq_dma_wren;
+    o_endofevent <= opq_dma_endofevent;
 
-    o_readregs(EVENT_BUILD_STATUS_REGISTER_R) <= rdma_csr_status;
-    o_readregs(EVENT_BUILD_IDLE_NOT_HEADER_R) <= rdma_cnt_opq_input_w;
-    o_readregs(EVENT_BUILD_SKIP_EVENT_DMA_R) <= rdma_cnt_bytes_written;
-    o_readregs(EVENT_BUILD_CNT_EVENT_DMA_R) <= rdma_cnt_rqe_consumed;
-    o_readregs(EVENT_BUILD_TAG_FIFO_FULL_R) <= rdma_cnt_cqe_posted;
-    o_readregs(BUFFER_STATUS_REGISTER_R) <= rdma_cnt_halt;
-    o_readregs(DMA_CNT_WORDS_REGISTER_R) <= rdma_cnt_eoe_observed;
+    opq_dma_status <= x"0000000" & use_opq_merge & i_dmamemhalffull & opq_dma_wren & opq_dma_endofevent;
 
-    counter_mux(0)(31 downto 0) <= rdma_csr_uid;
+    o_readregs(EVENT_BUILD_STATUS_REGISTER_R) <= opq_dma_status;
+    o_readregs(EVENT_BUILD_IDLE_NOT_HEADER_R) <= opq_dma_input_words;
+    o_readregs(EVENT_BUILD_SKIP_EVENT_DMA_R) <= opq_dma_output_words;
+    o_readregs(EVENT_BUILD_CNT_EVENT_DMA_R) <= opq_dma_event_count;
+    o_readregs(EVENT_BUILD_TAG_FIFO_FULL_R) <= opq_dma_halt_count;
+    o_readregs(BUFFER_STATUS_REGISTER_R) <= opq_dma_status;
+    o_readregs(DMA_CNT_WORDS_REGISTER_R) <= opq_dma_output_words;
+
+    counter_mux(0)(31 downto 0) <= OPQ_DMA_PACKER_UID_CONST;
     counter_mux(0)(63 downto 32) <= (others => '0');
-    counter_mux(1)(31 downto 0) <= rdma_csr_status;
+    counter_mux(1)(31 downto 0) <= opq_dma_status;
     counter_mux(1)(63 downto 32) <= (others => '0');
-    counter_mux(2)(31 downto 0) <= rdma_cnt_rqe_consumed;
+    counter_mux(2)(31 downto 0) <= opq_dma_input_words;
     counter_mux(2)(63 downto 32) <= (others => '0');
-    counter_mux(3)(31 downto 0) <= rdma_cnt_cqe_posted;
+    counter_mux(3)(31 downto 0) <= opq_dma_output_words;
     counter_mux(3)(63 downto 32) <= (others => '0');
-    counter_mux(4)(31 downto 0) <= rdma_cnt_bytes_written;
+    counter_mux(4)(31 downto 0) <= opq_dma_event_count;
     counter_mux(4)(63 downto 32) <= (others => '0');
-    counter_mux(5)(31 downto 0) <= rdma_cnt_opq_input_w;
+    counter_mux(5)(31 downto 0) <= opq_dma_halt_count;
     counter_mux(5)(63 downto 32) <= (others => '0');
-    counter_mux(6)(31 downto 0) <= rdma_cnt_halt;
-    counter_mux(6)(63 downto 32) <= (others => '0');
-    counter_mux(7)(31 downto 0) <= rdma_cnt_eoe_observed;
-    counter_mux(7)(63 downto 32) <= (others => '0');
-    counter_mux(8)(31 downto 0) <= rdma_csr_rdata;
-    counter_mux(8)(63 downto 32) <= (others => '0');
-    counter_mux(9)(31 downto 0) <= rdma_host_stub_status;
-    counter_mux(9)(63 downto 32) <= (others => '0');
+    counter_mux(6) <= (others => '0');
+    counter_mux(7) <= (others => '0');
+    counter_mux(8) <= (others => '0');
+    counter_mux(9) <= (others => '0');
     counter_mux(10) <= (others => '0');
     counter_mux(11) <= (others => '0');
     counter_mux(12) <= (others => '0');
 
-    rate_mux(0) <= rdma_csr_status;
-    rate_mux(1) <= rdma_cnt_rqe_consumed;
-    rate_mux(2) <= rdma_cnt_cqe_posted;
-    rate_mux(3) <= rdma_cnt_bytes_written;
-    rate_mux(4) <= rdma_cnt_opq_input_w;
-    rate_mux(5) <= rdma_cnt_halt;
-    rate_mux(6) <= rdma_cnt_eoe_observed;
-    rate_mux(7) <= rdma_host_stub_status;
+    rate_mux(0) <= opq_dma_status;
+    rate_mux(1) <= opq_dma_input_words;
+    rate_mux(2) <= opq_dma_output_words;
+    rate_mux(3) <= opq_dma_event_count;
+    rate_mux(4) <= opq_dma_halt_count;
+    rate_mux(5) <= (others => '0');
+    rate_mux(6) <= (others => '0');
+    rate_mux(7) <= (others => '0');
     rate_mux(8) <= (others => '0');
     rate_mux(9) <= (others => '0');
     rate_mux(10) <= (others => '0');

@@ -286,7 +286,7 @@ begin
         -- we add the hitcounter of both packages
         d0Hit(i).data      <= x"00000000" & a_h(i).data(31 downto 16) & (a_h(i).data(15 downto 0) + b_h(i).data(15 downto 0));
         sbhdrHit(i).data   <= x"00000000" & a_h(i).data(31 downto 24) & overflow(i) & a_h(i).data(7 downto 0);
-        trailerHit(i).data <= x"00000000" & a_h(i).data(31 downto 24) & overflow(i) & x"9C";
+        trailerHit(i).data <= x"000000000000009C";
         errorHit(i).data   <= x"00000000" & error_s(i) & "00" & x"FFFFF9C";
 
         --synthesis translate_off
