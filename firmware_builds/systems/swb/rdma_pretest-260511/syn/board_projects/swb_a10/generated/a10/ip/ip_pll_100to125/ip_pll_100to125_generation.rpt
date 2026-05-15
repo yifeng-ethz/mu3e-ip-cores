@@ -15,11 +15,14 @@ Info: ip_pll_100to125: Running transform generation_view_transform took 0.000s
 Info: iopll_0: Running transform generation_view_transform
 Info: iopll_0: Running transform generation_view_transform took 0.000s
 Info: ip_pll_100to125: Running transform merlin_avalon_transform
-Info: ip_pll_100to125: Running transform merlin_avalon_transform took 0.022s
+Info: ip_pll_100to125: Running transform merlin_avalon_transform took 0.021s
 Info: ip_pll_100to125: "Naming system components in system: ip_pll_100to125"
 Info: ip_pll_100to125: "Processing generation queue"
 Info: ip_pll_100to125: "Generating: ip_pll_100to125"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_pll_100to125/synth/ip_pll_100to125.vhd could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_pll_100to125/altera_iopll_181/synth/ip_pll_100to125_pkg.vhd could not be written to."
 Info: ip_pll_100to125: "Generating: ip_pll_100to125_altera_iopll_181_yilasbi"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_pll_100to125/altera_iopll_181/synth/ip_pll_100to125_altera_iopll_181_yilasbi.v could not be written to."
 Info: ip_pll_100to125: Done "ip_pll_100to125" with 2 modules, 3 files
-Info: qsys-generate succeeded.
+Error: qsys-generate failed with exit code 1: 3 Errors, 0 Warnings
 Info: Finished: Create HDL design files for synthesis

@@ -1,0 +1,6 @@
+command=/data1/intelFPGA/18.1/quartus/sopc_builder/bin/qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore --clear-output-directory --family=Arria V --part=5AGXBA7D4F31C5 --search-path=<72 paths>,$
+exit_code=0
+error_count=0
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore_qsys_generate_20260513_001824_clean.console.log
+report=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore/arb_hit_type0_supercore_generation.rpt
+isolated_catalog=/tmp/qsys_user_catalog.DBac1s

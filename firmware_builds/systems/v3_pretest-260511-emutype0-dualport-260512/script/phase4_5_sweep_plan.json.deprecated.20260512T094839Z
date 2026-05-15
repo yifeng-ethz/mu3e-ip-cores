@@ -1,0 +1,367 @@
+{
+  "_comment": "phase4_5_sweep_plan.json -- TEST_PLAN.md §4.5 histogram/mask/rate/mode sweep matrix",
+  "_format_version": "1",
+  "_created": "2026-05-12",
+
+  "default_template": {
+    "lane_mask":        "0xFF",
+    "channel_mask":     "0xFFFFFFFF",
+    "rate_88fp":        "0x0800",
+    "hit_mode":         "00",
+    "interval_clocks":  125000000,
+    "hist_left":        0,
+    "hist_right":       255,
+    "hist_bin_width":   1,
+    "link":             2,
+    "run_headroom_s":   1.0,
+    "notes":            ""
+  },
+
+  "rows": [
+
+    {
+      "row_id": "p45_000_all_lanes_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "flat 32-channel distribution across all 8 lanes; TOTAL_HITS > 0; UNDERFLOW=0 OVERFLOW=0",
+      "notes":             "§4.5.1 baseline, all-lanes all-channels direct mode"
+    },
+    {
+      "row_id": "p45_001_all_lanes_0x0000FFFF_0x0800_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0x0000FFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "only channels 0..15 populated; bins 16..31 = 0; UNDERFLOW=0 OVERFLOW=0",
+      "notes":             "§4.5.1 low-half mask"
+    },
+    {
+      "row_id": "p45_002_all_lanes_0xFFFF0000_0x0800_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFF0000",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "only channels 16..31 populated; bins 0..15 = 0; UNDERFLOW=0 OVERFLOW=0",
+      "notes":             "§4.5.1 high-half mask"
+    },
+    {
+      "row_id": "p45_003_all_lanes_0x55555555_0x0800_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0x55555555",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "even channels only (0,2,4,...30) populated; odd bins = 0",
+      "notes":             "§4.5.1 even-channel mask"
+    },
+    {
+      "row_id": "p45_004_all_lanes_0xAAAAAAAA_0x0800_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xAAAAAAAA",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "odd channels only (1,3,5,...31) populated; even bins = 0",
+      "notes":             "§4.5.1 odd-channel mask"
+    },
+    {
+      "row_id": "p45_005_all_lanes_0x00000001_0x0800_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0x00000001",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "channel 0 only; bins 1..31 = 0; TOTAL_HITS > 0",
+      "notes":             "§4.5.1 single-channel mask"
+    },
+
+    {
+      "row_id": "p45_006_lane0only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x01",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 0 admitted only; lanes 1..7 disabled in arb; histogram shows ~1/8 of all-lanes rate",
+      "notes":             "lane isolation: lane 0 only"
+    },
+    {
+      "row_id": "p45_007_lane1only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x02",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 1 admitted only",
+      "notes":             "lane isolation: lane 1 only"
+    },
+    {
+      "row_id": "p45_008_lane2only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x04",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 2 admitted only",
+      "notes":             "lane isolation: lane 2 only"
+    },
+    {
+      "row_id": "p45_009_lane3only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x08",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 3 admitted only",
+      "notes":             "lane isolation: lane 3 only"
+    },
+    {
+      "row_id": "p45_010_lane4only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x10",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 4 admitted only",
+      "notes":             "lane isolation: lane 4 only"
+    },
+    {
+      "row_id": "p45_011_lane5only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x20",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 5 admitted only",
+      "notes":             "lane isolation: lane 5 only"
+    },
+    {
+      "row_id": "p45_012_lane6only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x40",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 6 admitted only",
+      "notes":             "lane isolation: lane 6 only"
+    },
+    {
+      "row_id": "p45_013_lane7only_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x80",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane 7 admitted only",
+      "notes":             "lane isolation: lane 7 only"
+    },
+
+    {
+      "row_id": "p45_014_all_lanes_0xFFFFFFFF_0x0100_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0100",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "§4.5.2 lowest rate point; TOTAL_HITS forms rate-doubling baseline",
+      "notes":             "§4.5.2 rate sweep point 1 of 7"
+    },
+    {
+      "row_id": "p45_015_all_lanes_0xFFFFFFFF_0x0400_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0400",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "TOTAL_HITS[15]/TOTAL_HITS[14] ~= 4.0 (x4 step from 0x0100)",
+      "notes":             "§4.5.2 rate sweep point 2 of 7"
+    },
+    {
+      "row_id": "p45_016_all_lanes_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "TOTAL_HITS ratio ~= 2.0 vs previous",
+      "notes":             "§4.5.2 rate sweep point 3 of 7 (same as baseline p45_000)"
+    },
+    {
+      "row_id": "p45_017_all_lanes_0xFFFFFFFF_0x1000_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x1000",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "TOTAL_HITS ratio ~= 2.0 vs previous",
+      "notes":             "§4.5.2 rate sweep point 4 of 7"
+    },
+    {
+      "row_id": "p45_018_all_lanes_0xFFFFFFFF_0x2000_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x2000",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "TOTAL_HITS ratio ~= 2.0; watch for fifo_level_max saturation",
+      "notes":             "§4.5.2 rate sweep point 5 of 7"
+    },
+    {
+      "row_id": "p45_019_all_lanes_0xFFFFFFFF_0x4000_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x4000",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "possible saturation knee; ratio may flatten below 2.0",
+      "notes":             "§4.5.2 rate sweep point 6 of 7"
+    },
+    {
+      "row_id": "p45_020_all_lanes_0xFFFFFFFF_0x8000_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x8000",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "saturation expected; ratio < 2.0 documents downstream knee",
+      "notes":             "§4.5.2 rate sweep point 7 of 7"
+    },
+
+    {
+      "row_id": "p45_021_all_lanes_0xFFFFFFFF_0x0800_burst",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "01",
+      "interval_clocks":   125000000,
+      "expected_behavior": "§4.5.3 burst mode; cluster centered at burst_center; delta vs direct documents rbCAM jitter",
+      "notes":             "§4.5.3 hit_mode burst"
+    },
+    {
+      "row_id": "p45_022_all_lanes_0xFFFFFFFF_0x0800_periodic",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "11",
+      "interval_clocks":   125000000,
+      "expected_behavior": "§4.5.3 periodic mode; delta-function histogram; TOTAL_HITS repeatable",
+      "notes":             "§4.5.3 hit_mode periodic"
+    },
+
+    {
+      "row_id": "p45_023_lane_evens_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x55",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "only even lanes (0,2,4,6) admitted; TOTAL_HITS ~= 4/8 of all-lanes baseline",
+      "notes":             "cross-product: even lanes x all channels"
+    },
+    {
+      "row_id": "p45_024_lane_odds_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0xAA",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "only odd lanes (1,3,5,7) admitted; TOTAL_HITS ~= 4/8 of all-lanes baseline",
+      "notes":             "cross-product: odd lanes x all channels"
+    },
+    {
+      "row_id": "p45_025_none_0xFFFFFFFF_0x0800_dir",
+      "lane_mask":         "0x00",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "all lanes masked off; TOTAL_HITS=0; sanity-negative case",
+      "notes":             "cross-product: none lanes (sanity negative)"
+    },
+    {
+      "row_id": "p45_026_lane0only_0x0000FFFF_0x0800_dir",
+      "lane_mask":         "0x01",
+      "channel_mask":      "0x0000FFFF",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "channel passes channel_mask (low half) but lane mux admits only lane 0; bins 16..31 must be 0 AND only ~1/8 of baseline rate",
+      "notes":             "cross-product: channel_mask low-half x lane0 only -- tests channel-passes-mask-but-lane-drops interaction"
+    },
+    {
+      "row_id": "p45_027_lane_evens_0x55555555_0x0800_dir",
+      "lane_mask":         "0x55",
+      "channel_mask":      "0x55555555",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "even lanes x even channels: double-even selection; TOTAL_HITS ~= (4/8)*(16/32) of baseline",
+      "notes":             "cross-product: even lanes x even channels"
+    },
+    {
+      "row_id": "p45_028_lane_odds_0xAAAAAAAA_0x0800_dir",
+      "lane_mask":         "0xAA",
+      "channel_mask":      "0xAAAAAAAA",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "odd lanes x odd channels; TOTAL_HITS ~= (4/8)*(16/32) of baseline",
+      "notes":             "cross-product: odd lanes x odd channels"
+    },
+    {
+      "row_id": "p45_029_lane0only_0x00000001_0x0800_dir",
+      "lane_mask":         "0x01",
+      "channel_mask":      "0x00000001",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "single lane x single channel; only bin 0 of lane 0 should be nonzero",
+      "notes":             "cross-product: most restrictive -- channel passes mask AND lane admits; all others must be 0"
+    },
+    {
+      "row_id": "p45_030_lane_evens_0xFFFFFFFF_0x2000_dir",
+      "lane_mask":         "0x55",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x2000",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "even lanes at elevated rate; checks rate saturation is per-lane not global",
+      "notes":             "cross-product: even lanes x high rate"
+    },
+    {
+      "row_id": "p45_031_lane0only_0xFFFFFFFF_0x1000_burst",
+      "lane_mask":         "0x01",
+      "channel_mask":      "0xFFFFFFFF",
+      "rate_88fp":         "0x1000",
+      "hit_mode":          "01",
+      "interval_clocks":   125000000,
+      "expected_behavior": "single lane burst mode; burst cluster shape with rbCAM jitter visible on 1-lane path",
+      "notes":             "cross-product: lane0 x burst mode -- isolates rbCAM jitter on single lane"
+    },
+    {
+      "row_id": "p45_032_all_lanes_0x0000FFFF_0x1000_dir",
+      "lane_mask":         "0xFF",
+      "channel_mask":      "0x0000FFFF",
+      "rate_88fp":         "0x1000",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "all lanes, low-half channels, elevated rate; checks lane mux balance under partial channel mask",
+      "notes":             "cross-product: all lanes x low-half x elevated rate"
+    },
+    {
+      "row_id": "p45_033_none_0x00000001_0x0800_dir",
+      "lane_mask":         "0x00",
+      "channel_mask":      "0x00000001",
+      "rate_88fp":         "0x0800",
+      "hit_mode":          "00",
+      "interval_clocks":   125000000,
+      "expected_behavior": "lane mask blocks all even though channel 0 is enabled; TOTAL_HITS=0",
+      "notes":             "cross-product: none lanes x single channel -- confirms lane mask supersedes channel mask"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+command=/data1/intelFPGA/18.1/quartus/bin/quartus_sh --flow compile top
+exit_code=0
+runtime_sec=2245
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260511_164654_postm10k.console.log

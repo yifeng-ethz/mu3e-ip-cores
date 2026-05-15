@@ -17,6 +17,8 @@ interface hit_tap_if (
     logic        hit_id_valid;
     logic [63:0] root_hit_id;
     logic        root_hit_id_valid;
+    logic [47:0] true_hit_ts;
+    logic        true_hit_ts_valid;
     logic        run_origin;
     logic [1:0]  debug_level;
 
@@ -29,6 +31,8 @@ interface hit_tap_if (
         hit_id_valid = 1'b0;
         root_hit_id = '0;
         root_hit_id_valid = 1'b0;
+        true_hit_ts = '0;
+        true_hit_ts_valid = 1'b0;
         run_origin = 1'b0;
         debug_level = 2'd0;
     endtask
@@ -41,7 +45,9 @@ interface hit_tap_if (
         input logic [63:0] drive_root_hit_id,
         input logic        drive_root_hit_id_valid,
         input logic        drive_run_origin,
-        input logic [1:0]  drive_debug_level = 2'd0
+        input logic [1:0]  drive_debug_level = 2'd0,
+        input logic [47:0] drive_true_hit_ts = 48'd0,
+        input logic        drive_true_hit_ts_valid = 1'b0
     );
         @(negedge clk);
         lane_id = drive_lane_id;
@@ -50,6 +56,8 @@ interface hit_tap_if (
         hit_id_valid = drive_hit_id_valid;
         root_hit_id = drive_root_hit_id;
         root_hit_id_valid = drive_root_hit_id_valid;
+        true_hit_ts = drive_true_hit_ts;
+        true_hit_ts_valid = drive_true_hit_ts_valid;
         run_origin = drive_run_origin;
         debug_level = drive_debug_level;
         valid = 1'b1;

@@ -1,0 +1,50 @@
+[*]
+[*] GTKWave Analyzer v3.3.111 (w)1999-2020 BSI
+[*] Wed Nov  9 15:03:18 2022
+[*]
+[dumpfile] "/home/makoeppe/mu3e/online/common/firmware/util/altera/.cache/tb_scfifo_v2.ghw"
+[dumpfile_mtime] "Wed Nov  9 15:00:04 2022"
+[dumpfile_size] 307481
+[savefile] "/home/makoeppe/mu3e/online/common/firmware/util/altera/.cache/tb_scfifo_v2.gtkw"
+[timestart] 0
+[size] 2560 1440
+[pos] -1281 -1
+*-23.000000 2930000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.tb_scfifo_v2.
+[treeopen] top.tb_scfifo_v2.dut0.
+[treeopen] top.tb_scfifo_v2.dut1.
+[sst_width] 247
+[signals_width] 214
+[sst_expanded] 1
+[sst_vpaned_height] 430
+@28
+top.tb_scfifo_v2.clk
+@22
+#{top.tb_scfifo_v2.data[31:0]} top.tb_scfifo_v2.data[31] top.tb_scfifo_v2.data[30] top.tb_scfifo_v2.data[29] top.tb_scfifo_v2.data[28] top.tb_scfifo_v2.data[27] top.tb_scfifo_v2.data[26] top.tb_scfifo_v2.data[25] top.tb_scfifo_v2.data[24] top.tb_scfifo_v2.data[23] top.tb_scfifo_v2.data[22] top.tb_scfifo_v2.data[21] top.tb_scfifo_v2.data[20] top.tb_scfifo_v2.data[19] top.tb_scfifo_v2.data[18] top.tb_scfifo_v2.data[17] top.tb_scfifo_v2.data[16] top.tb_scfifo_v2.data[15] top.tb_scfifo_v2.data[14] top.tb_scfifo_v2.data[13] top.tb_scfifo_v2.data[12] top.tb_scfifo_v2.data[11] top.tb_scfifo_v2.data[10] top.tb_scfifo_v2.data[9] top.tb_scfifo_v2.data[8] top.tb_scfifo_v2.data[7] top.tb_scfifo_v2.data[6] top.tb_scfifo_v2.data[5] top.tb_scfifo_v2.data[4] top.tb_scfifo_v2.data[3] top.tb_scfifo_v2.data[2] top.tb_scfifo_v2.data[1] top.tb_scfifo_v2.data[0]
+@200
+-DUT0
+@22
+#{top.tb_scfifo_v2.dut0.i_wdata[31:0]} top.tb_scfifo_v2.dut0.i_wdata[31] top.tb_scfifo_v2.dut0.i_wdata[30] top.tb_scfifo_v2.dut0.i_wdata[29] top.tb_scfifo_v2.dut0.i_wdata[28] top.tb_scfifo_v2.dut0.i_wdata[27] top.tb_scfifo_v2.dut0.i_wdata[26] top.tb_scfifo_v2.dut0.i_wdata[25] top.tb_scfifo_v2.dut0.i_wdata[24] top.tb_scfifo_v2.dut0.i_wdata[23] top.tb_scfifo_v2.dut0.i_wdata[22] top.tb_scfifo_v2.dut0.i_wdata[21] top.tb_scfifo_v2.dut0.i_wdata[20] top.tb_scfifo_v2.dut0.i_wdata[19] top.tb_scfifo_v2.dut0.i_wdata[18] top.tb_scfifo_v2.dut0.i_wdata[17] top.tb_scfifo_v2.dut0.i_wdata[16] top.tb_scfifo_v2.dut0.i_wdata[15] top.tb_scfifo_v2.dut0.i_wdata[14] top.tb_scfifo_v2.dut0.i_wdata[13] top.tb_scfifo_v2.dut0.i_wdata[12] top.tb_scfifo_v2.dut0.i_wdata[11] top.tb_scfifo_v2.dut0.i_wdata[10] top.tb_scfifo_v2.dut0.i_wdata[9] top.tb_scfifo_v2.dut0.i_wdata[8] top.tb_scfifo_v2.dut0.i_wdata[7] top.tb_scfifo_v2.dut0.i_wdata[6] top.tb_scfifo_v2.dut0.i_wdata[5] top.tb_scfifo_v2.dut0.i_wdata[4] top.tb_scfifo_v2.dut0.i_wdata[3] top.tb_scfifo_v2.dut0.i_wdata[2] top.tb_scfifo_v2.dut0.i_wdata[1] top.tb_scfifo_v2.dut0.i_wdata[0]
+@28
+top.tb_scfifo_v2.dut0.i_we
+top.tb_scfifo_v2.dut0.o_rempty
+top.tb_scfifo_v2.dut0.i_rack
+@22
+#{top.tb_scfifo_v2.dut0.o_rdata[31:0]} top.tb_scfifo_v2.dut0.o_rdata[31] top.tb_scfifo_v2.dut0.o_rdata[30] top.tb_scfifo_v2.dut0.o_rdata[29] top.tb_scfifo_v2.dut0.o_rdata[28] top.tb_scfifo_v2.dut0.o_rdata[27] top.tb_scfifo_v2.dut0.o_rdata[26] top.tb_scfifo_v2.dut0.o_rdata[25] top.tb_scfifo_v2.dut0.o_rdata[24] top.tb_scfifo_v2.dut0.o_rdata[23] top.tb_scfifo_v2.dut0.o_rdata[22] top.tb_scfifo_v2.dut0.o_rdata[21] top.tb_scfifo_v2.dut0.o_rdata[20] top.tb_scfifo_v2.dut0.o_rdata[19] top.tb_scfifo_v2.dut0.o_rdata[18] top.tb_scfifo_v2.dut0.o_rdata[17] top.tb_scfifo_v2.dut0.o_rdata[16] top.tb_scfifo_v2.dut0.o_rdata[15] top.tb_scfifo_v2.dut0.o_rdata[14] top.tb_scfifo_v2.dut0.o_rdata[13] top.tb_scfifo_v2.dut0.o_rdata[12] top.tb_scfifo_v2.dut0.o_rdata[11] top.tb_scfifo_v2.dut0.o_rdata[10] top.tb_scfifo_v2.dut0.o_rdata[9] top.tb_scfifo_v2.dut0.o_rdata[8] top.tb_scfifo_v2.dut0.o_rdata[7] top.tb_scfifo_v2.dut0.o_rdata[6] top.tb_scfifo_v2.dut0.o_rdata[5] top.tb_scfifo_v2.dut0.o_rdata[4] top.tb_scfifo_v2.dut0.o_rdata[3] top.tb_scfifo_v2.dut0.o_rdata[2] top.tb_scfifo_v2.dut0.o_rdata[1] top.tb_scfifo_v2.dut0.o_rdata[0]
+@29
+top.tb_scfifo_v2.dut0.o_wfull
+@200
+-DUT1
+@22
+#{top.tb_scfifo_v2.dut1.i_wdata[31:0]} top.tb_scfifo_v2.dut1.i_wdata[31] top.tb_scfifo_v2.dut1.i_wdata[30] top.tb_scfifo_v2.dut1.i_wdata[29] top.tb_scfifo_v2.dut1.i_wdata[28] top.tb_scfifo_v2.dut1.i_wdata[27] top.tb_scfifo_v2.dut1.i_wdata[26] top.tb_scfifo_v2.dut1.i_wdata[25] top.tb_scfifo_v2.dut1.i_wdata[24] top.tb_scfifo_v2.dut1.i_wdata[23] top.tb_scfifo_v2.dut1.i_wdata[22] top.tb_scfifo_v2.dut1.i_wdata[21] top.tb_scfifo_v2.dut1.i_wdata[20] top.tb_scfifo_v2.dut1.i_wdata[19] top.tb_scfifo_v2.dut1.i_wdata[18] top.tb_scfifo_v2.dut1.i_wdata[17] top.tb_scfifo_v2.dut1.i_wdata[16] top.tb_scfifo_v2.dut1.i_wdata[15] top.tb_scfifo_v2.dut1.i_wdata[14] top.tb_scfifo_v2.dut1.i_wdata[13] top.tb_scfifo_v2.dut1.i_wdata[12] top.tb_scfifo_v2.dut1.i_wdata[11] top.tb_scfifo_v2.dut1.i_wdata[10] top.tb_scfifo_v2.dut1.i_wdata[9] top.tb_scfifo_v2.dut1.i_wdata[8] top.tb_scfifo_v2.dut1.i_wdata[7] top.tb_scfifo_v2.dut1.i_wdata[6] top.tb_scfifo_v2.dut1.i_wdata[5] top.tb_scfifo_v2.dut1.i_wdata[4] top.tb_scfifo_v2.dut1.i_wdata[3] top.tb_scfifo_v2.dut1.i_wdata[2] top.tb_scfifo_v2.dut1.i_wdata[1] top.tb_scfifo_v2.dut1.i_wdata[0]
+@28
+top.tb_scfifo_v2.dut1.i_we
+top.tb_scfifo_v2.dut1.o_rempty
+top.tb_scfifo_v2.dut1.i_rack
+@22
+#{top.tb_scfifo_v2.dut1.o_rdata[31:0]} top.tb_scfifo_v2.dut1.o_rdata[31] top.tb_scfifo_v2.dut1.o_rdata[30] top.tb_scfifo_v2.dut1.o_rdata[29] top.tb_scfifo_v2.dut1.o_rdata[28] top.tb_scfifo_v2.dut1.o_rdata[27] top.tb_scfifo_v2.dut1.o_rdata[26] top.tb_scfifo_v2.dut1.o_rdata[25] top.tb_scfifo_v2.dut1.o_rdata[24] top.tb_scfifo_v2.dut1.o_rdata[23] top.tb_scfifo_v2.dut1.o_rdata[22] top.tb_scfifo_v2.dut1.o_rdata[21] top.tb_scfifo_v2.dut1.o_rdata[20] top.tb_scfifo_v2.dut1.o_rdata[19] top.tb_scfifo_v2.dut1.o_rdata[18] top.tb_scfifo_v2.dut1.o_rdata[17] top.tb_scfifo_v2.dut1.o_rdata[16] top.tb_scfifo_v2.dut1.o_rdata[15] top.tb_scfifo_v2.dut1.o_rdata[14] top.tb_scfifo_v2.dut1.o_rdata[13] top.tb_scfifo_v2.dut1.o_rdata[12] top.tb_scfifo_v2.dut1.o_rdata[11] top.tb_scfifo_v2.dut1.o_rdata[10] top.tb_scfifo_v2.dut1.o_rdata[9] top.tb_scfifo_v2.dut1.o_rdata[8] top.tb_scfifo_v2.dut1.o_rdata[7] top.tb_scfifo_v2.dut1.o_rdata[6] top.tb_scfifo_v2.dut1.o_rdata[5] top.tb_scfifo_v2.dut1.o_rdata[4] top.tb_scfifo_v2.dut1.o_rdata[3] top.tb_scfifo_v2.dut1.o_rdata[2] top.tb_scfifo_v2.dut1.o_rdata[1] top.tb_scfifo_v2.dut1.o_rdata[0]
+@28
+top.tb_scfifo_v2.dut1.o_wfull
+[pattern_trace] 1
+[pattern_trace] 0

@@ -1,0 +1,14 @@
+[*]
+@28
+top.register_map_tb.clk
+top.register_map_tb.reset_n
+@420
+top.register_map_tb.cycle
+@28
+top.register_map_tb.we
+@22
+#{top.register_map_tb.wdata[31:0]} top.register_map_tb.wdata[31] top.register_map_tb.wdata[30] top.register_map_tb.wdata[29] top.register_map_tb.wdata[28] top.register_map_tb.wdata[27] top.register_map_tb.wdata[26] top.register_map_tb.wdata[25] top.register_map_tb.wdata[24] top.register_map_tb.wdata[23] top.register_map_tb.wdata[22] top.register_map_tb.wdata[21] top.register_map_tb.wdata[20] top.register_map_tb.wdata[19] top.register_map_tb.wdata[18] top.register_map_tb.wdata[17] top.register_map_tb.wdata[16] top.register_map_tb.wdata[15] top.register_map_tb.wdata[14] top.register_map_tb.wdata[13] top.register_map_tb.wdata[12] top.register_map_tb.wdata[11] top.register_map_tb.wdata[10] top.register_map_tb.wdata[9] top.register_map_tb.wdata[8] top.register_map_tb.wdata[7] top.register_map_tb.wdata[6] top.register_map_tb.wdata[5] top.register_map_tb.wdata[4] top.register_map_tb.wdata[3] top.register_map_tb.wdata[2] top.register_map_tb.wdata[1] top.register_map_tb.wdata[0]
+@28
+top.register_map_tb.re
+@22
+#{top.register_map_tb.rdata[31:0]} top.register_map_tb.rdata[31] top.register_map_tb.rdata[30] top.register_map_tb.rdata[29] top.register_map_tb.rdata[28] top.register_map_tb.rdata[27] top.register_map_tb.rdata[26] top.register_map_tb.rdata[25] top.register_map_tb.rdata[24] top.register_map_tb.rdata[23] top.register_map_tb.rdata[22] top.register_map_tb.rdata[21] top.register_map_tb.rdata[20] top.register_map_tb.rdata[19] top.register_map_tb.rdata[18] top.register_map_tb.rdata[17] top.register_map_tb.rdata[16] top.register_map_tb.rdata[15] top.register_map_tb.rdata[14] top.register_map_tb.rdata[13] top.register_map_tb.rdata[12] top.register_map_tb.rdata[11] top.register_map_tb.rdata[10] top.register_map_tb.rdata[9] top.register_map_tb.rdata[8] top.register_map_tb.rdata[7] top.register_map_tb.rdata[6] top.register_map_tb.rdata[5] top.register_map_tb.rdata[4] top.register_map_tb.rdata[3] top.register_map_tb.rdata[2] top.register_map_tb.rdata[1] top.register_map_tb.rdata[0]

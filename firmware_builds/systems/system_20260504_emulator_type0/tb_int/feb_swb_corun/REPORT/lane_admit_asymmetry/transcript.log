@@ -1,7 +1,7 @@
 # ** Note: (vsim-220) 'questa.ini' is used as the ini file.
-# vsim -ini questa.ini -c -suppress 19 -suppress 3009 -work work_phase45_fail_modes phase4_5_fail_mode_tb "+P45_TEST=lane" "+P45_REPORT_ROOT=../REPORT" -l ../REPORT/lane_admit_asymmetry/transcript.log -do "run -all; quit -f"
-# Start time: 13:08:56 on May 12,2026
-# ** Note: (vsim-3813) Design is being optimized due to module recompilation...
+# vsim -ini questa.ini -c -suppress 19 -suppress 3009 -work work_phase45_fail_modes phase4_5_fail_mode_tb "+P45_TEST=lane" "+P45_REPORT_ROOT=../REPORT" -l ../REPORT/lane_admit_asymmetry/transcript.log -do "run -all; quit -f" 
+# Start time: 14:59:28 on May 12,2026
+# ** Note: (vsim-3812) Design is being optimized...
 # ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(59): (vopt-13314) Defaulting port 'status_frame_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
 # ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_csr.sv(60): (vopt-13314) Defaulting port 'status_hit_count' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
 # ** Warning: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig/rtl/frontend/frontend_ticket_distributor.sv(15): (vopt-13314) Defaulting port 'sig_offer_ticket' kind to 'var' rather than 'wire' due to default compile option setting of -svinputport=relaxed.
@@ -48,5 +48,5 @@
 # P45_LANE_ASYM_PASS min=7936 max=7936
 # ** Note: $finish    : phase4_5_fail_mode_tb.sv(211)
 #    Time: 8150364 ns  Iteration: 1  Instance: /phase4_5_fail_mode_tb
-# End time: 13:08:59 on May 12,2026, Elapsed time: 0:00:03
+# End time: 14:59:31 on May 12,2026, Elapsed time: 0:00:03
 # Errors: 0, Warnings: 5

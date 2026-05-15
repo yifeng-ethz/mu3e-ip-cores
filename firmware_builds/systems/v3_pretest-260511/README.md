@@ -237,22 +237,22 @@ No missing legs.
 Slaves below are reached via the FEB-side `sc_hub_v2` (`ADDR_WIDTH=18`,
 `debug_sc_system_v3.qsys:664-700`). Qsys-byte addresses are taken from the
 `sc_hub_cmd_pipe.m0 -> <slave>` connections inside `debug_sc_system_v3.qsys`.
-Packet word address = Qsys byte / 4 per the sc_hub v2 word-addressing
-convention. `sc_tool` accepts the Qsys byte address aligned to 4 (it widens
-to 18-bit input and divides by 4 internally).
+The SC hub is word-addressed: `sc_tool` takes the packet-word address
+(`Qsys byte / 4`). System Console/JTAG masters use their own Qsys-byte maps
+and must not use these `sc_tool` words directly.
 
-| # | Slave | Module kind | Qsys byte | Packet word | sc_tool input | Evidence |
+| # | Slave | Module kind | Qsys byte | Packet word | sc_tool input word | Evidence |
 |---|---|---|---|---|---|---|
 |  1 | `scratch_pad_ram.s1` | `altera_avalon_onchip_memory2` | `0x00000` | `0x00000` | `0x00000` | `debug_sc_system_v3.qsys:851-853` |
-|  2 | `onewire_master_controller_0.csr` | `onewire_master_controller` | `0x11000` | `0x04400` | `0x11000` | `debug_sc_system_v3.qsys:780-786` |
-|  3 | `max10_prog_avmm_0.csr_avmm` | `max10_prog_avmm` | `0x12000` | `0x04800` | `0x12000` | `debug_sc_system_v3.qsys:798-804` |
-|  4 | `charge_injection_pulser_0.csr_avmm` (WO) | `charge_injection_pulser` | `0x13000` | `0x04C00` | `0x13000` | `debug_sc_system_v3.qsys:807-813` |
-|  5 | `firefly_xcvr_ctrl_0.firefly` | `firefly_xcvr_ctrl` | `0x14000` | `0x05000` | `0x14000` | `debug_sc_system_v3.qsys:816-822` |
-|  6 | `on_die_temp_sense_ctrl.csr` | `altera_temp_sense_ctrl` | `0x15000` | `0x05400` | `0x15000` | `debug_sc_system_v3.qsys:789-795` |
-|  7 | `legacy_firefly_bridge.s0` (-> `legacy_firefly_mon`) | `altera_avalon_mm_bridge` | `0x16000` | `0x05800` | `0x16000` | `debug_sc_system_v3.qsys:825-831` |
-|  8 | `mm_bridge.s0` (-> `data_path_subsystem.avmm_port`) | `altera_avalon_mm_bridge` | `0x20000`-`0x2FFFF` | `0x08000`-`0x0BFFF` | window | `debug_sc_system_v3.qsys:842-845` + top qsys `feb_system_v3.qsys:421-426` |
-|  9 | `upload_mm_bridge.s0` (-> `upload_subsystem.csr`) | `altera_avalon_mm_bridge` | `0x30000`-`0x3007F` | `0x0C000`-`0x0C01F` | window | `debug_sc_system_v3.qsys:836-840` + top qsys `feb_system_v3.qsys:430-434` |
-| 10 | `mutrig_cfg_ctrl_0.avmm_csr` | `mutrig_cfg_ctrl` | `0x3F010` | `0x0FC04` | N/A (see note) | `debug_sc_system_v3.qsys:771-777` |
+|  2 | `onewire_master_controller_0.csr` | `onewire_master_controller` | `0x11000` | `0x04400` | `0x04400` | `debug_sc_system_v3.qsys:780-786` |
+|  3 | `max10_prog_avmm_0.csr_avmm` | `max10_prog_avmm` | `0x12000` | `0x04800` | `0x04800` | `debug_sc_system_v3.qsys:798-804` |
+|  4 | `charge_injection_pulser_0.csr_avmm` (WO) | `charge_injection_pulser` | `0x13000` | `0x04C00` | `0x04C00` | `debug_sc_system_v3.qsys:807-813` |
+|  5 | `firefly_xcvr_ctrl_0.firefly` | `firefly_xcvr_ctrl` | `0x14000` | `0x05000` | `0x05000` | `debug_sc_system_v3.qsys:816-822` |
+|  6 | `on_die_temp_sense_ctrl.csr` | `altera_temp_sense_ctrl` | `0x15000` | `0x05400` | `0x05400` | `debug_sc_system_v3.qsys:789-795` |
+|  7 | `legacy_firefly_bridge.s0` (-> `legacy_firefly_mon`) | `altera_avalon_mm_bridge` | `0x16000` | `0x05800` | `0x05800` | `debug_sc_system_v3.qsys:825-831` |
+|  8 | `mm_bridge.s0` (-> `data_path_subsystem.avmm_port`) | `altera_avalon_mm_bridge` | `0x20000`-`0x2FFFF` | `0x08000`-`0x0BFFF` | `0x08000`-`0x0BFFF` | `debug_sc_system_v3.qsys:842-845` + top qsys `feb_system_v3.qsys:421-426` |
+|  9 | `upload_mm_bridge.s0` (-> `upload_subsystem.csr`) | `altera_avalon_mm_bridge` | `0x30000`-`0x3007F` | `0x0C000`-`0x0C01F` | `0x0C000`-`0x0C01F` | `debug_sc_system_v3.qsys:836-840` + top qsys `feb_system_v3.qsys:430-434` |
+| 10 | `mutrig_cfg_ctrl_0.avmm_csr` | `mutrig_cfg_ctrl` | `0x3F010` | `0x0FC04` | `0x0FC04` | `debug_sc_system_v3.qsys:771-777` |
 
 Notes:
 
@@ -263,11 +263,11 @@ Notes:
   the `sc_hub v2` overlay map — and is not a Qsys-routed slave on this
   master. The legacy `test_slowcontrol` tool used this overlay; `sc_tool`
   does not.
-- `mutrig_cfg_ctrl_0.avmm_csr` was placed at Qsys byte `0x3F010` — that
-  word address `0xFC04` is outside the `sc_tool` 16-bit-input legacy reach,
-  but **inside** the widened 18-bit input (sc_tool widened on 2026-04-13).
-  Past practice for this slave used `test_slowcontrol`; current sc_tool can
-  reach it at byte `0x3F010` (must be 4-aligned — `0x3F010` is aligned).
+- `mutrig_cfg_ctrl_0.avmm_csr` was placed at Qsys byte `0x3F010`; its
+  packet-word address is `0x0FC04`. That is outside the old 16-bit-input
+  legacy reach but inside the widened 18-bit input. Past practice for this
+  slave used `test_slowcontrol`; current `sc_tool` can reach it at word
+  `0x0FC04`.
 - Bridge windows (`mm_bridge`, `upload_mm_bridge`) are address ranges. The
   child slave maps below define what each byte offset inside the window
   reaches.
@@ -279,28 +279,45 @@ The window enters `data_path_subsystem.avmm_port` (top qsys
 `mm_clock_crossing_bridge.s0` (`scifi_datapath_system_v3.qsys:805-815`).
 Inner address map is published as `AUTO_AVMM_PORT_ADDRESS_MAP` on the
 control_path module instantiation in the top qsys
-(`feb_system_v3.qsys:259`). Inner offsets and their absolute SC byte:
+(`feb_system_v3.qsys:283`). Inner offsets below are JTAG/System Console byte
+offsets. For `sc_tool`, add the SC bridge byte base `0x20000` and divide by 4.
 
-| Inner module | Inner offset | SC byte = `0x20000` + inner |
-|---|---|---|
-| `lvds_rx_controller_pro_0.csr` | `0x0000`-`0x003F` | `0x20000`-`0x2003F` |
-| `mutrig_datapath_subsystem_<k>.backpressure_fifo.csr` (k=0..7) | `0xk860`-`0xk86F` | `0x20860`+k*0x1000 |
-| `mutrig_datapath_subsystem_<k>.mutrig_frame_deassembly_0.csr` (k=0..7) | `0xk900`-`0xk90F` | `0x20900`+k*0x1000 |
-| `dbg_mm2runctrl_0.csr` (not in AUTO map; live connection) | `0x2200` | `0x22200` (evidence `scifi_datapath_system_v3.qsys:2026-2027`) |
-| `mts_preprocessor_0.csr` | `0x4000`-`0x401F` | `0x24000` |
-| `mts_preprocessor_1.csr` | `0x8000`-`0x801F` | `0x28000` |
-| `histogram_statistics_0.hist_bin` | `0xA000`-`0xA3FF` | `0x2A000` |
-| `histogram_statistics_0.csr` | `0xA400`-`0xA47F` | `0x2A400` |
-| `histogram_statistics_1.hist_bin` | `0xA800`-`0xABFF` | `0x2A800` |
-| `histogram_statistics_1.csr` | `0xAC00`-`0xAC7F` | `0x2AC00` |
-| `hit_stack_subsystem_<n>.ring_buffer_cam_<k>.csr` (n=0..1, k=0..3) | `0xB000`+n*0x400+k*0x80 | `0x2B000`+n*0x400+k*0x80 |
-| `mutrig_injector_0.csr` | `0xB200` | `0x2B200` |
-| `hit_stack_subsystem_<n>.feb_frame_assembly_0.csr` (n=0..1) | `0xD000`+n*0x40 | `0x2D000`, `0x2D040` |
+| Inner module | Inner byte offset | SC byte = `0x20000` + inner | `sc_tool` word |
+|---|---|---|---|
+| `lvds_rx_controller_pro_0.csr` | `0x0000`-`0x003F` | `0x20000`-`0x2003F` | `0x08000`-`0x0800F` |
+| `mutrig_datapath_subsystem_<k>.backpressure_fifo.csr` (k=0..7) | `0x0860 + k*0x1000` | `0x20860 + k*0x1000` | `0x08218 + k*0x400` |
+| `emulator_mutrig_<k>.csr` (k=0..7) | `0x2000 + k*0x100` | `0x22000 + k*0x100` | `0x08800 + k*0x40` |
+| `dbg_mm2runctrl_0.csr` | `0x2800` | `0x22800` | `0x08A00` |
+| `mutrig_lane_source_mux_<k>.csr` (k=0..7) | `0x2880 + k*0x40` | `0x22880 + k*0x40` | `0x08A20 + k*0x10` |
+| `mutrig_datapath_subsystem_<k>.csr` frame parser export (k=0..7) | `0x2A80 + k*0x10` | `0x22A80 + k*0x10` | `0x08AA0 + k*0x4` |
+| `mts_preprocessor_0.csr` | `0x4000`-`0x401F` | `0x24000`-`0x2401F` | `0x09000`-`0x09007` |
+| `mts_preprocessor_1.csr` | `0x8000`-`0x801F` | `0x28000`-`0x2801F` | `0x0A000`-`0x0A007` |
+| `histogram_statistics_0.hist_bin` | `0xA000`-`0xA3FF` | `0x2A000`-`0x2A3FF` | `0x0A800`-`0x0A8FF` |
+| `histogram_statistics_0.csr` | `0xA400`-`0xA47F` | `0x2A400`-`0x2A47F` | `0x0A900`-`0x0A91F` |
+| `histogram_ingress_bridge_0.csr` | `0xAC00`-`0xAC1F` | `0x2AC00`-`0x2AC1F` | `0x0AB00`-`0x0AB07` |
+| `hit_stack_subsystem_<n>.ring_buffer_cam_<k>.csr` (n=0..1, k=0..3) | `0xB000 + n*0x400 + k*0x80` | `0x2B000 + n*0x400 + k*0x80` | `0x0AC00 + n*0x100 + k*0x20` |
+| `mutrig_injector_0.csr` | `0xB200` | `0x2B200` | `0x0AC80` |
+| `hit_stack_subsystem_<n>.feb_frame_assembly_0.csr` (n=0..1) | `0xD000 + n*0x40` | `0x2D000 + n*0x40` | `0x0B400 + n*0x10` |
 
-(Source: AUTO_AVMM_PORT_ADDRESS_MAP at `feb_system_v3.qsys:259`, plus the
-live `dbg_mm2runctrl_0.csr` connection at
-`scifi_datapath_system_v3.qsys:2023-2030` which is wired but not echoed in
-the published AUTO map.)
+(Source: current generated `AUTO_AVMM_PORT_ADDRESS_MAP` at
+`feb_system_v3.qsys:283`.)
+
+Histogram live bin readback uses the histogram IP's ping-pong read bank. The
+host reads the frozen previous interval, not the currently accumulating bank.
+For a 1 ms live probe, configure CSR interval word `0x0A90A` to `125000`
+clocks at 125 MHz before starting the run, wait at least 1 ms after
+`start-run`, read `0x0A800`-`0x0A8FF` while the run is still active, and only
+then send `end-run`. CSR counter capture should use a separate fresh run.
+Use one 256-word SC read starting at `0x0A800` for the bin dump; individual
+per-bin reads can latch different frozen banks if another interval boundary
+passes while the monitor is running. The live capture script resets the SC
+secondary ring for each `sc_tool` operation by default, because the no-reset
+path can miss the matching reply after stale secondary traffic accumulates.
+The histogram ingress bridge CSR window is eight words in regenerated images:
+words `0x0AB04`-`0x0AB07` report pre accepted beats, post accepted hit words,
+histogram output handshakes, and selected histogram stalls. The capture script
+clears these counters with `CONTROL.clear_counters` during each fresh case
+configuration before starting the run.
 
 #### `upload_mm_bridge` (window `0x30000`-`0x3007F`) — upload AVMM map
 
@@ -322,14 +339,10 @@ chain and is **not** an SC slave; listed here for completeness.
 
 ### Things to flag
 
-- `dbg_mm2runctrl_0.csr` at SC byte `0x22200` is a live connection but is
-  not echoed in the `AUTO_AVMM_PORT_ADDRESS_MAP` parameter on the
-  `control_path_subsystem` instance (`feb_system_v3.qsys:259`). The
-  parameter looks stale relative to the actual data_path connection set.
-  Address routing still works (qsys-generate uses the live connections, not
-  this label-only parameter), but the table at `feb_system_v3.qsys:259`
-  should be regenerated next time the data_path subsystem is rebuilt to
-  avoid confusion when reading the top qsys directly.
+- The source-mux CSRs occupy the old frame-parser region in the current v3
+  map. The exported per-lane frame-parser CSRs now start at `sc_tool` word
+  `0x08AA0 + k*0x4`; using the old `0x08240/0x08640/0x08A40/...` probes will
+  collide with other live datapath slaves.
 - `bringup_subsystem` is fully isolated — there is no path for SC, the
   data plane, or the SWB to touch the bring-up Nios. If the user expects
   to drive the bring-up Nios from the host, an explicit AVMM or
@@ -339,7 +352,7 @@ chain and is **not** an SC slave; listed here for completeness.
   addresses, slave count 8 plus the legacy `sc_hub` overlay slot). The v3
   ring uses 18-bit addresses end-to-end (`sc_hub_v2.ADDR_WIDTH=18`,
   `debug_sc_system_v3.qsys:665`), and `mutrig_cfg_ctrl_0.avmm_csr` is now
-  reachable by current sc_tool at byte `0x3F010` rather than requiring
+  reachable by current sc_tool at word `0x0FC04` rather than requiring
   `test_slowcontrol`.
 
 ## 9. Cross-references

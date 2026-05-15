@@ -1,0 +1,4 @@
+info: cmd=0x11 (sync) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000011
+info: before: CTL=0x00000000 STATUS=0x00000042
+info: after : CTL=0x00000000 STATUS=0x11000003
+info: ok: o_state_out echoes 0x11

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2026.05.11.12:44:47"
+ date="2026.05.14.07:15:17"
  outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/nios/">
  <perimeter>
   <parameter
@@ -304,7 +304,7 @@
   <parameter name="AUTO_AVM_XCVR1_ADDRESS_WIDTH" value="AddressWidth = -1" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
   <parameter name="AUTO_AVM_XCVR1_ADDRESS_MAP" value="" />
-  <parameter name="AUTO_GENERATION_ID" value="1778496281" />
+  <parameter name="AUTO_GENERATION_ID" value="1778735712" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_UNIQUE_ID" value="" />
   <parameter name="AUTO_AVM_SFP_ADDRESS_MAP" value="" />
@@ -415,97 +415,21 @@
   </sourceFiles>
   <childSourceFiles>
    <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_spi/altera_avalon_spi_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_irq_mapper/altera_irq_mapper_hw.tcl" />
+   <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/altera_avalon_jtag_uart_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/altera_avalon_i2c/altera_avalon_i2c_hw.tcl" />
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sysid_qsys/altera_avalon_sysid_qsys_hw.tcl" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/util/avalon_proxy_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/nios2_ip/altera_nios2_gen2/altera_nios2_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/nios2_ip/altera_nios2_gen2/altera_nios2_unit_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/altera_avalon_onchip_memory2_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_mm_interconnect/altera_mm_interconnect_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_agent/altera_merlin_slave_agent_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_agent/altera_merlin_master_agent_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_adapter/altera_avalon_st_adapter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_error_adapter/avalon-st_error_adapter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_translator/altera_merlin_master_translator_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_traffic_limiter/altera_merlin_traffic_limiter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_timer/altera_avalon_timer_hw.tcl" />
-   <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/util/avalon_proxy_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_irq_mapper/altera_irq_mapper_hw.tcl" />
-   <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/util/flash1616_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_conduit_bridge/altera_tristate_conduit_bridge_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_generic_tristate_controller/altera_generic_tristate_controller_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_aggregator/altera_tristate_controller_aggregator_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_translator/altera_tristate_controller_translator_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_pio/altera_avalon_pio_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_spi/altera_avalon_spi_hw.tcl" />
-   <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/util/avalon_proxy_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_timer/altera_avalon_timer_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_jtag_avalon_master/altera_jtag_avalon_master_hw.tcl" />
    <file
@@ -515,110 +439,186 @@
    <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
    <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+   <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/util/flash1616_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sysid_qsys/altera_avalon_sysid_qsys_hw.tcl" />
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_generic_tristate_controller/altera_generic_tristate_controller_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_translator/altera_tristate_controller_translator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_aggregator/altera_tristate_controller_aggregator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_conduit_bridge/altera_tristate_conduit_bridge_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_timer/altera_avalon_timer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_timer/altera_avalon_timer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/altera_avalon_i2c/altera_avalon_i2c_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_mm_interconnect/altera_mm_interconnect_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_agent/altera_merlin_master_agent_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_agent/altera_merlin_slave_agent_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_traffic_limiter/altera_merlin_traffic_limiter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_adapter/altera_avalon_st_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_error_adapter/avalon-st_error_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_translator/altera_merlin_master_translator_hw.tcl" />
+   <file
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/util/avalon_proxy_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/altera_avalon_onchip_memory2_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_pio/altera_avalon_pio_hw.tcl" />
   </childSourceFiles>
   <messages>
    <message level="Info" culprit="nios">"Generating: nios"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_spi_181_kfqr7jy"</message>
+   <message level="Info" culprit="spi">Starting RTL generation for module 'nios_altera_avalon_spi_181_kfqr7jy'</message>
+   <message level="Info" culprit="spi">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi/generate_rtl.pl --name=nios_altera_avalon_spi_181_kfqr7jy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0008_spi_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0008_spi_gen//nios_altera_avalon_spi_181_kfqr7jy_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="spi">Done RTL generation for module 'nios_altera_avalon_spi_181_kfqr7jy'</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_irq_mapper_181_ftenc7a"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_jtag_uart_181_xottjsy"</message>
    <message level="Info" culprit="jtag_uart">Starting RTL generation for module 'nios_altera_avalon_jtag_uart_181_xottjsy'</message>
-   <message level="Info" culprit="jtag_uart">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=nios_altera_avalon_jtag_uart_181_xottjsy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0006_jtag_uart_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0006_jtag_uart_gen//nios_altera_avalon_jtag_uart_181_xottjsy_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="jtag_uart">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=nios_altera_avalon_jtag_uart_181_xottjsy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0006_jtag_uart_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0006_jtag_uart_gen//nios_altera_avalon_jtag_uart_181_xottjsy_component_configuration.pl  --do_build_sim=0  ]</message>
    <message level="Info" culprit="jtag_uart">Done RTL generation for module 'nios_altera_avalon_jtag_uart_181_xottjsy'</message>
-   <message level="Info" culprit="nios">"Generating: altera_avalon_i2c"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_sysid_qsys_181_vtqjcqa"</message>
+   <message level="Info" culprit="nios">"Generating: nios_avalon_proxy_11_gqppolq"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_nios2_gen2_181_es3c5gq"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_nios2_gen2_unit_181_u3vataq"</message>
    <message level="Info" culprit="cpu">Starting RTL generation for module 'nios_altera_nios2_gen2_unit_181_u3vataq'</message>
-   <message level="Info" culprit="cpu">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=nios_altera_nios2_gen2_unit_181_u3vataq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0014_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0014_cpu_gen//nios_altera_nios2_gen2_unit_181_u3vataq_processor_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*) Starting Nios II generation</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Checking for plaintext license.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Plaintext license not found.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   No license required to generate encrypted Nios II/e.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Elaborating CPU configuration settings</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Creating all objects for CPU</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*)   Generating RTL from CPU objects</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*)   Creating plain-text RTL</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*) Done Nios II generation</message>
+   <message level="Info" culprit="cpu">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=nios_altera_nios2_gen2_unit_181_u3vataq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0014_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0014_cpu_gen//nios_altera_nios2_gen2_unit_181_u3vataq_processor_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:15 (*) Starting Nios II generation</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:15 (*)   Checking for plaintext license.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Plaintext license not found.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   No license required to generate encrypted Nios II/e.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Elaborating CPU configuration settings</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Creating all objects for CPU</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Generating RTL from CPU objects</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Creating plain-text RTL</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:17 (*) Done Nios II generation</message>
    <message level="Info" culprit="cpu">Done RTL generation for module 'nios_altera_nios2_gen2_unit_181_u3vataq'</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_onchip_memory2_181_5wm7isq"</message>
-   <message level="Info" culprit="ram">Starting RTL generation for module 'nios_altera_avalon_onchip_memory2_181_5wm7isq'</message>
-   <message level="Info" culprit="ram">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=nios_altera_avalon_onchip_memory2_181_5wm7isq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0007_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0007_ram_gen//nios_altera_avalon_onchip_memory2_181_5wm7isq_component_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="ram">Done RTL generation for module 'nios_altera_avalon_onchip_memory2_181_5wm7isq'</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_mm_interconnect_181_7d7plwy"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rthbsnq"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_7ivd32q"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_wczosyy"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_2zlkfii"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_5bheg4i"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_6bvg2fi"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_agent"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_rkum6iq"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_zfuqegi"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_o3yyitq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_master_agent"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_axopw5q"</message>
-   <message level="Info" culprit="nios">"Generating: altera_avalon_sc_fifo"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_w2xdz4a"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_st_adapter_181_zi7x6ka"</message>
-   <message level="Info" culprit="nios">"Generating: nios_error_adapter_181_6bjmpii"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rqpxm2q"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_master_translator"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_uemmdvq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_traffic_limiter"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_dcba5ei"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_3ghbssi"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_n6nwmfa"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_vmq5kfq"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_timer_181_twdkgki"</message>
-   <message level="Info" culprit="timer">Starting RTL generation for module 'nios_altera_avalon_timer_181_twdkgki'</message>
-   <message level="Info" culprit="timer">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_twdkgki --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0010_timer_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0010_timer_gen//nios_altera_avalon_timer_181_twdkgki_component_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="timer">Done RTL generation for module 'nios_altera_avalon_timer_181_twdkgki'</message>
-   <message level="Info" culprit="nios">"Generating: nios_avalon_proxy_11_gqppolq"</message>
    <message level="Info" culprit="nios">"Generating: altera_reset_controller"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_irq_mapper_181_ftenc7a"</message>
-   <message level="Info" culprit="nios">"Generating: nios_flash1616_10_skpx6xq"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_tristate_conduit_bridge_181_opfpgwa"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_generic_tristate_controller_181_mhllmlq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_aggregator"</message>
-   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_translator"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_pio_181_dgqnn4a"</message>
-   <message level="Info" culprit="i2c_mask">Starting RTL generation for module 'nios_altera_avalon_pio_181_dgqnn4a'</message>
-   <message level="Info" culprit="i2c_mask">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=nios_altera_avalon_pio_181_dgqnn4a --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0005_i2c_mask_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0005_i2c_mask_gen//nios_altera_avalon_pio_181_dgqnn4a_component_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="i2c_mask">Done RTL generation for module 'nios_altera_avalon_pio_181_dgqnn4a'</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_spi_181_kfqr7jy"</message>
-   <message level="Info" culprit="spi">Starting RTL generation for module 'nios_altera_avalon_spi_181_kfqr7jy'</message>
-   <message level="Info" culprit="spi">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi/generate_rtl.pl --name=nios_altera_avalon_spi_181_kfqr7jy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0008_spi_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0008_spi_gen//nios_altera_avalon_spi_181_kfqr7jy_component_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="spi">Done RTL generation for module 'nios_altera_avalon_spi_181_kfqr7jy'</message>
-   <message level="Info" culprit="nios">"Generating: nios_avalon_proxy_11_kaji5di"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_timer_181_aqotr5y"</message>
-   <message level="Info" culprit="timer_ts">Starting RTL generation for module 'nios_altera_avalon_timer_181_aqotr5y'</message>
-   <message level="Info" culprit="timer_ts">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_aqotr5y --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0011_timer_ts_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0011_timer_ts_gen//nios_altera_avalon_timer_181_aqotr5y_component_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="timer_ts">Done RTL generation for module 'nios_altera_avalon_timer_181_aqotr5y'</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_jtag_avalon_master_181_xgyl4iq"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_sc_fifo"</message>
    <message level="Info" culprit="nios">"Generating: nios_timing_adapter_181_v2af63i"</message>
+   <message level="Info" culprit="nios">"Generating: altera_reset_controller"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_st_jtag_interface"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_st_packets_to_bytes"</message>
-   <message level="Info" culprit="nios">"Generating: altera_reset_controller"</message>
-   <message level="Info" culprit="nios">"Generating: nios_channel_adapter_181_arrjpdi"</message>
    <message level="Info" culprit="nios">"Generating: nios_channel_adapter_181_xiycpqq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_avalon_st_bytes_to_packets"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_packets_to_master"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_sysid_qsys_181_xxvhhmy"</message>
+   <message level="Info" culprit="nios">"Generating: nios_channel_adapter_181_arrjpdi"</message>
+   <message level="Info" culprit="nios">"Generating: altera_avalon_st_bytes_to_packets"</message>
+   <message level="Info" culprit="nios">"Generating: nios_flash1616_10_skpx6xq"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_generic_tristate_controller_181_mhllmlq"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
+   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_translator"</message>
+   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_aggregator"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_tristate_conduit_bridge_181_opfpgwa"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_timer_181_twdkgki"</message>
+   <message level="Info" culprit="timer">Starting RTL generation for module 'nios_altera_avalon_timer_181_twdkgki'</message>
+   <message level="Info" culprit="timer">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_twdkgki --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0010_timer_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0010_timer_gen//nios_altera_avalon_timer_181_twdkgki_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="timer">Done RTL generation for module 'nios_altera_avalon_timer_181_twdkgki'</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_timer_181_aqotr5y"</message>
+   <message level="Info" culprit="timer_ts">Starting RTL generation for module 'nios_altera_avalon_timer_181_aqotr5y'</message>
+   <message level="Info" culprit="timer_ts">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_aqotr5y --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0011_timer_ts_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0011_timer_ts_gen//nios_altera_avalon_timer_181_aqotr5y_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="timer_ts">Done RTL generation for module 'nios_altera_avalon_timer_181_aqotr5y'</message>
+   <message level="Info" culprit="nios">"Generating: altera_avalon_i2c"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_mm_interconnect_181_7d7plwy"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_wczosyy"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_master_agent"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rqpxm2q"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_n6nwmfa"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_3ghbssi"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_agent"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_rkum6iq"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_axopw5q"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_uemmdvq"</message>
+   <message level="Info" culprit="nios">"Generating: altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_5bheg4i"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_7ivd32q"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_w2xdz4a"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_vmq5kfq"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_o3yyitq"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rthbsnq"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_dcba5ei"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_zfuqegi"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_2zlkfii"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_traffic_limiter"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_st_adapter_181_zi7x6ka"</message>
+   <message level="Info" culprit="nios">"Generating: nios_error_adapter_181_6bjmpii"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_6bvg2fi"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_master_translator"</message>
+   <message level="Info" culprit="nios">"Generating: nios_avalon_proxy_11_kaji5di"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_onchip_memory2_181_5wm7isq"</message>
+   <message level="Info" culprit="ram">Starting RTL generation for module 'nios_altera_avalon_onchip_memory2_181_5wm7isq'</message>
+   <message level="Info" culprit="ram">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=nios_altera_avalon_onchip_memory2_181_5wm7isq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0007_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0007_ram_gen//nios_altera_avalon_onchip_memory2_181_5wm7isq_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="ram">Done RTL generation for module 'nios_altera_avalon_onchip_memory2_181_5wm7isq'</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_pio_181_dgqnn4a"</message>
+   <message level="Info" culprit="i2c_mask">Starting RTL generation for module 'nios_altera_avalon_pio_181_dgqnn4a'</message>
+   <message level="Info" culprit="i2c_mask">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=nios_altera_avalon_pio_181_dgqnn4a --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0005_i2c_mask_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0005_i2c_mask_gen//nios_altera_avalon_pio_181_dgqnn4a_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="i2c_mask">Done RTL generation for module 'nios_altera_avalon_pio_181_dgqnn4a'</message>
   </messages>
  </entity>
  <entity kind="avalon_proxy" version="1.1" name="nios_avalon_proxy_11_kaji5di">
@@ -907,16 +907,16 @@
    <message level="Info" culprit="nios">"Generating: nios_altera_nios2_gen2_181_es3c5gq"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_nios2_gen2_unit_181_u3vataq"</message>
    <message level="Info" culprit="cpu">Starting RTL generation for module 'nios_altera_nios2_gen2_unit_181_u3vataq'</message>
-   <message level="Info" culprit="cpu">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=nios_altera_nios2_gen2_unit_181_u3vataq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0014_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0014_cpu_gen//nios_altera_nios2_gen2_unit_181_u3vataq_processor_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*) Starting Nios II generation</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Checking for plaintext license.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Plaintext license not found.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   No license required to generate encrypted Nios II/e.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Elaborating CPU configuration settings</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Creating all objects for CPU</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*)   Generating RTL from CPU objects</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*)   Creating plain-text RTL</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*) Done Nios II generation</message>
+   <message level="Info" culprit="cpu">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=nios_altera_nios2_gen2_unit_181_u3vataq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0014_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0014_cpu_gen//nios_altera_nios2_gen2_unit_181_u3vataq_processor_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:15 (*) Starting Nios II generation</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:15 (*)   Checking for plaintext license.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Plaintext license not found.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   No license required to generate encrypted Nios II/e.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Elaborating CPU configuration settings</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Creating all objects for CPU</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Generating RTL from CPU objects</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Creating plain-text RTL</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:17 (*) Done Nios II generation</message>
    <message level="Info" culprit="cpu">Done RTL generation for module 'nios_altera_nios2_gen2_unit_181_u3vataq'</message>
   </messages>
  </entity>
@@ -951,24 +951,24 @@
   </sourceFiles>
   <childSourceFiles>
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_conduit_bridge/altera_tristate_conduit_bridge_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_generic_tristate_controller/altera_generic_tristate_controller_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_aggregator/altera_tristate_controller_aggregator_hw.tcl" />
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_translator/altera_tristate_controller_translator_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_aggregator/altera_tristate_controller_aggregator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_conduit_bridge/altera_tristate_conduit_bridge_hw.tcl" />
   </childSourceFiles>
   <instantiator instantiator="nios" as="flash" />
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_flash1616_10_skpx6xq"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_tristate_conduit_bridge_181_opfpgwa"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_generic_tristate_controller_181_mhllmlq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_aggregator"</message>
-   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_translator"</message>
    <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
+   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_translator"</message>
+   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_aggregator"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_tristate_conduit_bridge_181_opfpgwa"</message>
   </messages>
  </entity>
  <entity kind="altera_avalon_i2c" version="18.1" name="altera_avalon_i2c">
@@ -1097,7 +1097,7 @@
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_pio_181_dgqnn4a"</message>
    <message level="Info" culprit="i2c_mask">Starting RTL generation for module 'nios_altera_avalon_pio_181_dgqnn4a'</message>
-   <message level="Info" culprit="i2c_mask">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=nios_altera_avalon_pio_181_dgqnn4a --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0005_i2c_mask_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0005_i2c_mask_gen//nios_altera_avalon_pio_181_dgqnn4a_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="i2c_mask">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_pio/generate_rtl.pl --name=nios_altera_avalon_pio_181_dgqnn4a --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0005_i2c_mask_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0005_i2c_mask_gen//nios_altera_avalon_pio_181_dgqnn4a_component_configuration.pl  --do_build_sim=0  ]</message>
    <message level="Info" culprit="i2c_mask">Done RTL generation for module 'nios_altera_avalon_pio_181_dgqnn4a'</message>
   </messages>
  </entity>
@@ -1141,32 +1141,32 @@
    <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
    <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+   <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
   </childSourceFiles>
   <instantiator instantiator="nios" as="jtag_master" />
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_jtag_avalon_master_181_xgyl4iq"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_sc_fifo"</message>
    <message level="Info" culprit="nios">"Generating: nios_timing_adapter_181_v2af63i"</message>
+   <message level="Info" culprit="nios">"Generating: altera_reset_controller"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_st_jtag_interface"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_st_packets_to_bytes"</message>
-   <message level="Info" culprit="nios">"Generating: altera_reset_controller"</message>
-   <message level="Info" culprit="nios">"Generating: nios_channel_adapter_181_arrjpdi"</message>
    <message level="Info" culprit="nios">"Generating: nios_channel_adapter_181_xiycpqq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_avalon_st_bytes_to_packets"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_packets_to_master"</message>
+   <message level="Info" culprit="nios">"Generating: nios_channel_adapter_181_arrjpdi"</message>
+   <message level="Info" culprit="nios">"Generating: altera_avalon_st_bytes_to_packets"</message>
   </messages>
  </entity>
  <entity
@@ -1208,7 +1208,7 @@
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_jtag_uart_181_xottjsy"</message>
    <message level="Info" culprit="jtag_uart">Starting RTL generation for module 'nios_altera_avalon_jtag_uart_181_xottjsy'</message>
-   <message level="Info" culprit="jtag_uart">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=nios_altera_avalon_jtag_uart_181_xottjsy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0006_jtag_uart_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0006_jtag_uart_gen//nios_altera_avalon_jtag_uart_181_xottjsy_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="jtag_uart">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_jtag_uart/generate_rtl.pl --name=nios_altera_avalon_jtag_uart_181_xottjsy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0006_jtag_uart_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0006_jtag_uart_gen//nios_altera_avalon_jtag_uart_181_xottjsy_component_configuration.pl  --do_build_sim=0  ]</message>
    <message level="Info" culprit="jtag_uart">Done RTL generation for module 'nios_altera_avalon_jtag_uart_181_xottjsy'</message>
   </messages>
  </entity>
@@ -1272,7 +1272,7 @@
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_onchip_memory2_181_5wm7isq"</message>
    <message level="Info" culprit="ram">Starting RTL generation for module 'nios_altera_avalon_onchip_memory2_181_5wm7isq'</message>
-   <message level="Info" culprit="ram">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=nios_altera_avalon_onchip_memory2_181_5wm7isq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0007_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0007_ram_gen//nios_altera_avalon_onchip_memory2_181_5wm7isq_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="ram">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_onchip_memory2/generate_rtl.pl --name=nios_altera_avalon_onchip_memory2_181_5wm7isq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0007_ram_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0007_ram_gen//nios_altera_avalon_onchip_memory2_181_5wm7isq_component_configuration.pl  --do_build_sim=0  ]</message>
    <message level="Info" culprit="ram">Done RTL generation for module 'nios_altera_avalon_onchip_memory2_181_5wm7isq'</message>
   </messages>
  </entity>
@@ -1317,24 +1317,24 @@
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_spi_181_kfqr7jy"</message>
    <message level="Info" culprit="spi">Starting RTL generation for module 'nios_altera_avalon_spi_181_kfqr7jy'</message>
-   <message level="Info" culprit="spi">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi/generate_rtl.pl --name=nios_altera_avalon_spi_181_kfqr7jy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0008_spi_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0008_spi_gen//nios_altera_avalon_spi_181_kfqr7jy_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="spi">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64/perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64/perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_spi/generate_rtl.pl --name=nios_altera_avalon_spi_181_kfqr7jy --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0008_spi_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0008_spi_gen//nios_altera_avalon_spi_181_kfqr7jy_component_configuration.pl  --do_build_sim=0  ]</message>
    <message level="Info" culprit="spi">Done RTL generation for module 'nios_altera_avalon_spi_181_kfqr7jy'</message>
   </messages>
  </entity>
  <entity
    kind="altera_avalon_sysid_qsys"
    version="18.1"
-   name="nios_altera_avalon_sysid_qsys_181_xxvhhmy">
+   name="nios_altera_avalon_sysid_qsys_181_vtqjcqa">
   <parameter name="id" value="0" />
-  <parameter name="timestamp" value="1778496281" />
+  <parameter name="timestamp" value="1778735712" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/nios/altera_avalon_sysid_qsys_181/synth/nios_altera_avalon_sysid_qsys_181_xxvhhmy.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/nios/altera_avalon_sysid_qsys_181/synth/nios_altera_avalon_sysid_qsys_181_vtqjcqa.v"
        attributes="" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/nios/altera_avalon_sysid_qsys_181/synth/nios_altera_avalon_sysid_qsys_181_xxvhhmy.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/nios/altera_avalon_sysid_qsys_181/synth/nios_altera_avalon_sysid_qsys_181_vtqjcqa.v"
        attributes="" />
   </childGeneratedFiles>
   <sourceFiles>
@@ -1344,7 +1344,7 @@
   <childSourceFiles/>
   <instantiator instantiator="nios" as="sysid" />
   <messages>
-   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_sysid_qsys_181_xxvhhmy"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_avalon_sysid_qsys_181_vtqjcqa"</message>
   </messages>
  </entity>
  <entity
@@ -1387,7 +1387,7 @@
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_timer_181_twdkgki"</message>
    <message level="Info" culprit="timer">Starting RTL generation for module 'nios_altera_avalon_timer_181_twdkgki'</message>
-   <message level="Info" culprit="timer">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_twdkgki --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0010_timer_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0010_timer_gen//nios_altera_avalon_timer_181_twdkgki_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="timer">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_twdkgki --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0010_timer_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0010_timer_gen//nios_altera_avalon_timer_181_twdkgki_component_configuration.pl  --do_build_sim=0  ]</message>
    <message level="Info" culprit="timer">Done RTL generation for module 'nios_altera_avalon_timer_181_twdkgki'</message>
   </messages>
  </entity>
@@ -1431,7 +1431,7 @@
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_timer_181_aqotr5y"</message>
    <message level="Info" culprit="timer_ts">Starting RTL generation for module 'nios_altera_avalon_timer_181_aqotr5y'</message>
-   <message level="Info" culprit="timer_ts">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_aqotr5y --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0011_timer_ts_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0011_timer_ts_gen//nios_altera_avalon_timer_181_aqotr5y_component_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="timer_ts">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//perl/bin/perl -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/common -I /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer -- /data1/intelFPGA/18.1/quartus/../ip/altera/sopc_builder_ip/altera_avalon_timer/generate_rtl.pl --name=nios_altera_avalon_timer_181_aqotr5y --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0011_timer_ts_gen/ --quartus_dir=/data1/intelFPGA/18.1/quartus --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0011_timer_ts_gen//nios_altera_avalon_timer_181_aqotr5y_component_configuration.pl  --do_build_sim=0  ]</message>
    <message level="Info" culprit="timer_ts">Done RTL generation for module 'nios_altera_avalon_timer_181_aqotr5y'</message>
   </messages>
  </entity>
@@ -1609,35 +1609,49 @@
   </sourceFiles>
   <childSourceFiles>
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_agent/altera_merlin_slave_agent_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_agent/altera_merlin_master_agent_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
    <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_agent/altera_merlin_slave_agent_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
    <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_traffic_limiter/altera_merlin_traffic_limiter_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_adapter/altera_avalon_st_adapter_hw.tcl" />
    <file
@@ -1646,49 +1660,35 @@
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_router/altera_merlin_router_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_translator/altera_merlin_master_translator_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_traffic_limiter/altera_merlin_traffic_limiter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_multiplexer/altera_merlin_multiplexer_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_demultiplexer/altera_merlin_demultiplexer_hw.tcl" />
   </childSourceFiles>
   <instantiator instantiator="nios" as="mm_interconnect_0" />
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_mm_interconnect_181_7d7plwy"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rthbsnq"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_7ivd32q"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_wczosyy"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_2zlkfii"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_5bheg4i"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_6bvg2fi"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_master_agent"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rqpxm2q"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_n6nwmfa"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_3ghbssi"</message>
    <message level="Info" culprit="nios">"Generating: altera_merlin_slave_agent"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_rkum6iq"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_zfuqegi"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_o3yyitq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_master_agent"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_axopw5q"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_uemmdvq"</message>
    <message level="Info" culprit="nios">"Generating: altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_5bheg4i"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_7ivd32q"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_w2xdz4a"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_vmq5kfq"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_o3yyitq"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rthbsnq"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_dcba5ei"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_zfuqegi"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_2zlkfii"</message>
+   <message level="Info" culprit="nios">"Generating: altera_merlin_traffic_limiter"</message>
    <message level="Info" culprit="nios">"Generating: nios_altera_avalon_st_adapter_181_zi7x6ka"</message>
    <message level="Info" culprit="nios">"Generating: nios_error_adapter_181_6bjmpii"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_rqpxm2q"</message>
+   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_router_181_6bvg2fi"</message>
    <message level="Info" culprit="nios">"Generating: altera_merlin_master_translator"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_uemmdvq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
-   <message level="Info" culprit="nios">"Generating: altera_merlin_traffic_limiter"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_dcba5ei"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_3ghbssi"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_multiplexer_181_n6nwmfa"</message>
-   <message level="Info" culprit="nios">"Generating: nios_altera_merlin_demultiplexer_181_vmq5kfq"</message>
   </messages>
  </entity>
  <entity
@@ -2017,16 +2017,16 @@
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_nios2_gen2_unit_181_u3vataq"</message>
    <message level="Info" culprit="cpu">Starting RTL generation for module 'nios_altera_nios2_gen2_unit_181_u3vataq'</message>
-   <message level="Info" culprit="cpu">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=nios_altera_nios2_gen2_unit_181_u3vataq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0014_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0584_7603249893763124633.dir/0014_cpu_gen//nios_altera_nios2_gen2_unit_181_u3vataq_processor_configuration.pl  --do_build_sim=0  ]</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*) Starting Nios II generation</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Checking for plaintext license.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Plaintext license not found.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   No license required to generate encrypted Nios II/e.</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Elaborating CPU configuration settings</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:45 (*)   Creating all objects for CPU</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*)   Generating RTL from CPU objects</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*)   Creating plain-text RTL</message>
-   <message level="Info" culprit="cpu"># 2026.05.11 12:44:46 (*) Done Nios II generation</message>
+   <message level="Info" culprit="cpu">  Generation command is [exec /data1/intelFPGA/18.1/quartus/linux64//eperlcmd -I /data1/intelFPGA/18.1/quartus/linux64//perl/lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/europa -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin/perl_lib -I /data1/intelFPGA/18.1/quartus/sopc_builder/bin -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/cpu_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/nios_lib -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -I /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2 -- /data1/intelFPGA/18.1/quartus/../ip/altera/nios2_ip/altera_nios2_gen2/generate_rtl.epl --name=nios_altera_nios2_gen2_unit_181_u3vataq --dir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0014_cpu_gen/ --quartus_bindir=/data1/intelFPGA/18.1/quartus/linux64/ --verilog --config=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/tmp/alt0587_7658321810322948341.dir/0014_cpu_gen//nios_altera_nios2_gen2_unit_181_u3vataq_processor_configuration.pl  --do_build_sim=0  ]</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:15 (*) Starting Nios II generation</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:15 (*)   Checking for plaintext license.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Plaintext license not found.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   No license required to generate encrypted Nios II/e.</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Elaborating CPU configuration settings</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Creating all objects for CPU</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Generating RTL from CPU objects</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:16 (*)   Creating plain-text RTL</message>
+   <message level="Info" culprit="cpu"># 2026.05.14 07:15:17 (*) Done Nios II generation</message>
    <message level="Info" culprit="cpu">Done RTL generation for module 'nios_altera_nios2_gen2_unit_181_u3vataq'</message>
   </messages>
  </entity>
@@ -2111,18 +2111,18 @@
   </sourceFiles>
   <childSourceFiles>
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_aggregator/altera_tristate_controller_aggregator_hw.tcl" />
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_translator/altera_tristate_controller_translator_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_tristate_controller_aggregator/altera_tristate_controller_aggregator_hw.tcl" />
   </childSourceFiles>
   <instantiator instantiator="nios_flash1616_10_skpx6xq" as="flash" />
   <messages>
    <message level="Info" culprit="nios">"Generating: nios_altera_generic_tristate_controller_181_mhllmlq"</message>
-   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_aggregator"</message>
-   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_translator"</message>
    <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
+   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_translator"</message>
+   <message level="Info" culprit="nios">"Generating: altera_tristate_controller_aggregator"</message>
   </messages>
  </entity>
  <entity
@@ -2312,10 +2312,10 @@
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
   </sourceFiles>
   <childSourceFiles/>
+  <instantiator instantiator="nios_altera_jtag_avalon_master_181_xgyl4iq" as="fifo" />
   <instantiator
      instantiator="nios_altera_mm_interconnect_181_7d7plwy"
      as="jtag_uart_avalon_jtag_slave_agent_rsp_fifo,sysid_control_slave_agent_rsp_fifo,i2c_csr_agent_rsp_fifo,cpu_debug_mem_slave_agent_rsp_fifo,ram_s1_agent_rsp_fifo,timer_s1_agent_rsp_fifo,timer_ts_s1_agent_rsp_fifo,pio_s1_agent_rsp_fifo,i2c_mask_s1_agent_rsp_fifo,avm_xcvr0_slave_agent_rsp_fifo,avm_xcvr1_slave_agent_rsp_fifo,avm_sfp_slave_agent_rsp_fifo,spi_spi_control_port_agent_rsp_fifo,flash_uas_agent_rsp_fifo" />
-  <instantiator instantiator="nios_altera_jtag_avalon_master_181_xgyl4iq" as="fifo" />
   <messages>
    <message level="Info" culprit="nios">"Generating: altera_avalon_sc_fifo"</message>
   </messages>
@@ -2529,11 +2529,11 @@
   </sourceFiles>
   <childSourceFiles/>
   <instantiator
-     instantiator="nios_altera_mm_interconnect_181_7d7plwy"
-     as="jtag_uart_avalon_jtag_slave_translator,sysid_control_slave_translator,i2c_csr_translator,cpu_debug_mem_slave_translator,ram_s1_translator,timer_s1_translator,timer_ts_s1_translator,pio_s1_translator,i2c_mask_s1_translator,avm_xcvr0_slave_translator,avm_xcvr1_slave_translator,avm_sfp_slave_translator,spi_spi_control_port_translator,flash_uas_translator" />
-  <instantiator
      instantiator="nios_altera_generic_tristate_controller_181_mhllmlq"
      as="slave_translator" />
+  <instantiator
+     instantiator="nios_altera_mm_interconnect_181_7d7plwy"
+     as="jtag_uart_avalon_jtag_slave_translator,sysid_control_slave_translator,i2c_csr_translator,cpu_debug_mem_slave_translator,ram_s1_translator,timer_s1_translator,timer_ts_s1_translator,pio_s1_translator,i2c_mask_s1_translator,avm_xcvr0_slave_translator,avm_xcvr1_slave_translator,avm_sfp_slave_translator,spi_spi_control_port_translator,flash_uas_translator" />
   <messages>
    <message level="Info" culprit="nios">"Generating: altera_merlin_slave_translator"</message>
   </messages>

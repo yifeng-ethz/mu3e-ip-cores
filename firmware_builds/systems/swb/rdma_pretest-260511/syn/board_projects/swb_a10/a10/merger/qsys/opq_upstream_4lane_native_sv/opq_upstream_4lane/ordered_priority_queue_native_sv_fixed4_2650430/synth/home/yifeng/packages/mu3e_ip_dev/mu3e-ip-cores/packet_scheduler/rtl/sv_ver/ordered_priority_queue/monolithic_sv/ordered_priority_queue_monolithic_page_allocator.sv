@@ -778,10 +778,10 @@ module ordered_priority_queue_monolithic_page_allocator #(
     idle_tail_flush_base = 1'b0;
     lanes_with_sop_ticket = '0;
     lanes_with_curr_sop_ticket = '0;
-    header_dt_type = ingress_dt_type_i[0];
-    header_feb_id = ingress_feb_id_i[0];
-    header_frame_ts = ingress_frame_ts_i[0];
-    header_running_ts = ingress_frame_ts_i[0];
+    header_dt_type = fetch_header_dt_type_q;
+    header_feb_id = fetch_header_feb_id_q;
+    header_frame_ts = fetch_header_frame_ts_q;
+    header_running_ts = fetch_header_running_ts_q;
     header_lane_selected_v = 1'b0;
     page_allocator_if_read_ticket_ticket_sop = '0;
     page_allocator_if_write_page_shr_data = '0;

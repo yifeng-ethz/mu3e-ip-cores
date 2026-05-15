@@ -124,3 +124,127 @@ firmware_builds/systems/*/syn/scifi_datapath_system_v3_pipe/
 firmware_builds/systems/*/syn/syn/
 /scripts/check_ip_lib_update.py
 
+# --- Codex run-stamp / time-stamp / status sidecars ---
+firmware_builds/systems/*/syn/board_projects/*/codex_*.status
+firmware_builds/systems/*/syn/board_projects/*/codex_*.time
+firmware_builds/systems/*/syn/board_projects/*/codex_*.log
+firmware_builds/systems/*/syn/board_projects/*/flow_*.log
+firmware_builds/systems/*/tb_int/REPORT/codex_*.status
+firmware_builds/systems/*/tb_int/REPORT/codex_*.time
+firmware_builds/systems/*/tb_int/REPORT/codex_*.log
+firmware_builds/systems/*/syn/board_projects/*/quartus_compile_top_*.console.log
+firmware_builds/systems/*/syn/board_projects/*/quartus_sta_top_*.console.log
+firmware_builds/systems/*/syn/board_projects/*/quartus_pgm_*.log
+firmware_builds/systems/*/syn/board_projects/*/feb_system_v3_qsys_generate_*.status
+firmware_builds/systems/*/syn/board_projects/*/feb_system_v3_qsys_generate_*.console.log
+firmware_builds/systems/*/syn/board_projects/*/feb_system_v3_qsys_generate_*.log
+firmware_builds/systems/*/script/feb_system_v3_qsys_generate_*.status
+firmware_builds/systems/*/script/feb_system_v3_qsys_generate_*.console.log
+firmware_builds/systems/*/script/feb_system_v3_qsys_generate_*.log
+firmware_builds/systems/*/script/qsys_*_isolated*/
+firmware_builds/systems/*/script/qdb/
+
+# --- Codex-authored evidence / scratch markdown under board_projects ---
+firmware_builds/systems/*/syn/board_projects/*/rn001_*_current.md
+firmware_builds/systems/*/syn/board_projects/*/codex_*.md
+firmware_builds/systems/*/syn/board_projects/*/*.srf
+
+# --- Quartus per-IP generation artifacts that always rewrite ---
+firmware_builds/systems/*/syn/board_projects/*/generated/**/*_generation_previous.rpt
+firmware_builds/systems/*/syn/board_projects/*/generated/**/*.qicache
+firmware_builds/systems/*/syn/board_projects/*/generated/**/synth/
+firmware_builds/systems/*/syn/board_projects/*/generated/nios/**
+
+# --- tb_int / cosim / board_evidence run trees ---
+firmware_builds/systems/*/tb_int/REPORT/
+firmware_builds/systems/*/tb_int/work*/
+firmware_builds/systems/*/tb_int/sim*/
+firmware_builds/systems/*/tb_int/sim/
+firmware_builds/systems/*/cosim/REPORT/
+firmware_builds/systems/*/cosim/work*/
+firmware_builds/systems/*/cosim/sim*/
+firmware_builds/systems/*/board_evidence/
+firmware_builds/systems/*/signaltap/*.stp.bak*
+firmware_builds/systems/*/signaltap/*.stp.bak.*
+
+# --- Chromium / browser scratch dropped by codex tooling ---
+.chromium_cdp_profiles/
+
+# --- Run-script tooling logs ---
+tools/run_script/**/*.log
+tools/run_script/**/__pycache__/
+
+# --- qverify static-screen run directories (per-IP) ---
+**/static_screen_*/
+**/qverify_cdc_*/
+**/qverify_db/
+**/.qverify/
+
+# --- Sim work + UVM cov dirs anywhere ---
+**/work_tb_int*/
+**/work_uvm*/
+**/cov_default_*/
+
+# --- Catch-all under firmware_builds (path-depth-agnostic) ---
+firmware_builds/**/codex_*.status
+firmware_builds/**/codex_*.time
+firmware_builds/**/codex_*.log
+firmware_builds/**/flow_*.log
+firmware_builds/**/quartus_compile_top_*.console.log
+firmware_builds/**/quartus_sta_top_*.console.log
+firmware_builds/**/quartus_pgm_*.log
+firmware_builds/**/feb_system_v3_qsys_generate_*
+firmware_builds/**/*_generation_previous.rpt
+firmware_builds/**/*.qicache
+firmware_builds/**/*.qoxd
+firmware_builds/**/synth/*.qicache
+firmware_builds/**/board_projects/*/generated/
+firmware_builds/**/board_projects/*/qdb/
+firmware_builds/**/board_projects/*/incremental_db/
+firmware_builds/**/board_projects/*/output_files/
+firmware_builds/**/board_projects/*/db/
+firmware_builds/**/board_projects/*/ip/
+firmware_builds/**/board_projects/*/bts/
+firmware_builds/**/board_projects/*/*.cmp
+firmware_builds/**/board_projects/*/*.srf
+firmware_builds/**/board_projects/*/rn001_*_current.md
+firmware_builds/**/board_projects/*/codex_*.md
+firmware_builds/**/tb_int/REPORT/
+firmware_builds/**/tb_int/work*/
+firmware_builds/**/tb_int/sim/
+firmware_builds/**/cosim/REPORT/
+firmware_builds/**/cosim/work*/
+firmware_builds/**/cosim/sim*/
+firmware_builds/**/board_evidence/
+firmware_builds/**/signaltap/*.stp.bak*
+
+# --- Top-level scratch artifacts from accidental top-dir Quartus runs ---
+/top.qpf
+/top.qsf
+/top.qws
+/top.flow.rpt
+/top.map.rpt
+/top.map.summary
+/top.fit.rpt
+/top.fit.summary
+/top.sta.rpt
+/top.sta.summary
+/top.done
+/vish_stacktrace.vstf
+/memory_content.txt
+/opq_upstream_4lane.qsys
+/qcache/
+/.questa_static_screen/
+
+# --- quartus_systems scratch backups + sopcinfo regens ---
+quartus_systems/*.qsys.bak-*
+quartus_systems/*.sopcinfo
+
+# --- tools/run_script evidence trees (codex-authored, ephemeral) ---
+tools/run_script/build/
+tools/run_script/empty_frame_smoke_*/
+tools/run_script/BASELINE_*/
+tools/run_script/EMPTY_FRAME_SMOKE_*.md
+tools/run_script/BASELINE_*.md
+tools/run_script/PLAN_*.md
+

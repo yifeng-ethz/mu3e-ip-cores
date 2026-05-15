@@ -1330,6 +1330,9 @@ def decode_rxbuffer(path: Path, max_decode_bytes: int,
                     valid_dma_bytes: Optional[int] = None) -> dict[str, Any]:
     raw = path.read_bytes() if path.is_file() else b""
     decode_limit = max_decode_bytes
+    if decode_limit <= 0:
+        decode_limit = len(raw)
+    decode_limit = min(decode_limit, len(raw))
     if valid_dma_bytes is not None and valid_dma_bytes > 0:
         decode_limit = min(decode_limit, valid_dma_bytes)
     scan = raw[:decode_limit]
@@ -1658,7 +1661,12 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--output-root", type=Path, default=DEFAULT_OUT_ROOT)
     ap.add_argument("--staging-mb", type=int, default=64)
     ap.add_argument("--af-pct", type=int, default=80)
-    ap.add_argument("--max-decode-bytes", type=int, default=4 * 1024 * 1024)
+    ap.add_argument(
+        "--max-decode-bytes",
+        type=int,
+        default=0,
+        help="max bytes to decode from rdma_rxbuffer.bin; <=0 decodes up to valid DMA bytes",
+    )
     ap.add_argument("--hist-ingress-source", choices=["pre", "post"],
                     default="pre")
     ap.add_argument("--hist-ingress-banks", type=int, default=2)

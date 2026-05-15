@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2026.05.11.12:43:45"
+ date="2026.05.14.07:12:15"
  outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/">
  <perimeter>
   <parameter
@@ -627,7 +627,7 @@
  </perimeter>
  <entity kind="ip_pcie_x8_256" version="1.0" name="ip_pcie_x8_256">
   <parameter name="AUTO_REFCLK_CLOCK_DOMAIN" value="-1" />
-  <parameter name="AUTO_GENERATION_ID" value="1778496223" />
+  <parameter name="AUTO_GENERATION_ID" value="1778735532" />
   <parameter name="AUTO_DEVICE" value="10AX115N2F45E1SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_REFCLK_CLOCK_RATE" value="-1" />
@@ -663,9 +663,9 @@
    <file
        path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_pll/altera_xcvr_atx_pll_vi/tcl/altera_xcvr_atx_pll_a10_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_pll/altera_xcvr_fpll_vi/tcl/altera_xcvr_fpll_a10_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_native_phy/altera_xcvr_native_vi/tcl/altera_xcvr_native_a10_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_pll/altera_xcvr_fpll_vi/tcl/altera_xcvr_fpll_a10_hw.tcl" />
   </childSourceFiles>
   <messages>
    <message level="Info" culprit="ip_pcie_x8_256">"Generating: ip_pcie_x8_256"</message>
@@ -684,15 +684,6 @@
    <message level="Info" culprit="lcpll_g3xn">add_fileset_file ./a10_xcvr_atx_pll.sv SYSTEM_VERILOG PATH ../source/a10_xcvr_atx_pll.sv</message>
    <message level="Info" culprit="lcpll_g3xn">add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_embedded_debug.sv</message>
    <message level="Info" culprit="lcpll_g3xn">add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_avmm_csr.sv</message>
-   <message level="Info" culprit="ip_pcie_x8_256">"Generating: fpll_g3"</message>
-   <message level="Info" culprit="ip_pcie_x8_256">"Generating: altera_xcvr_fpll_a10"</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv</message>
    <message level="Info" culprit="ip_pcie_x8_256">"Generating: phy_g3x8"</message>
    <message level="Info" culprit="ip_pcie_x8_256">"Generating: ip_pcie_x8_256_altera_xcvr_native_a10_181_n4nfovy"</message>
    <message level="Info" culprit="phy_g3x8">add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv</message>
@@ -728,6 +719,15 @@
    <message level="Info" culprit="phy_g3x8"><![CDATA[<html><font color="blue">Note - </font>When dynamic reconfiguration is enabled, users are recommended to enable multiple reconfiguration profiles for Quartus to perform robust timing closure]]></message>
    <message level="Info" culprit="phy_g3x8">Current IP configuration matches reconfiguration profile 1</message>
    <message level="Info" culprit="phy_g3x8">For the selected device(Unknown), transceiver speed grade is 2 and core speed grade is 1.</message>
+   <message level="Info" culprit="ip_pcie_x8_256">"Generating: fpll_g3"</message>
+   <message level="Info" culprit="ip_pcie_x8_256">"Generating: altera_xcvr_fpll_a10"</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv</message>
   </messages>
  </entity>
  <entity
@@ -2364,9 +2364,9 @@
    <file
        path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_pll/altera_xcvr_atx_pll_vi/tcl/altera_xcvr_atx_pll_a10_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_pll/altera_xcvr_fpll_vi/tcl/altera_xcvr_fpll_a10_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_native_phy/altera_xcvr_native_vi/tcl/altera_xcvr_native_a10_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/alt_xcvr/altera_xcvr_pll/altera_xcvr_fpll_vi/tcl/altera_xcvr_fpll_a10_hw.tcl" />
   </childSourceFiles>
   <instantiator instantiator="ip_pcie_x8_256" as="pcie_a10_hip_0" />
   <messages>
@@ -2385,15 +2385,6 @@
    <message level="Info" culprit="lcpll_g3xn">add_fileset_file ./a10_xcvr_atx_pll.sv SYSTEM_VERILOG PATH ../source/a10_xcvr_atx_pll.sv</message>
    <message level="Info" culprit="lcpll_g3xn">add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_embedded_debug.sv</message>
    <message level="Info" culprit="lcpll_g3xn">add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_avmm_csr.sv</message>
-   <message level="Info" culprit="ip_pcie_x8_256">"Generating: fpll_g3"</message>
-   <message level="Info" culprit="ip_pcie_x8_256">"Generating: altera_xcvr_fpll_a10"</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv</message>
-   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv</message>
    <message level="Info" culprit="ip_pcie_x8_256">"Generating: phy_g3x8"</message>
    <message level="Info" culprit="ip_pcie_x8_256">"Generating: ip_pcie_x8_256_altera_xcvr_native_a10_181_n4nfovy"</message>
    <message level="Info" culprit="phy_g3x8">add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv</message>
@@ -2429,6 +2420,15 @@
    <message level="Info" culprit="phy_g3x8"><![CDATA[<html><font color="blue">Note - </font>When dynamic reconfiguration is enabled, users are recommended to enable multiple reconfiguration profiles for Quartus to perform robust timing closure]]></message>
    <message level="Info" culprit="phy_g3x8">Current IP configuration matches reconfiguration profile 1</message>
    <message level="Info" culprit="phy_g3x8">For the selected device(Unknown), transceiver speed grade is 2 and core speed grade is 1.</message>
+   <message level="Info" culprit="ip_pcie_x8_256">"Generating: fpll_g3"</message>
+   <message level="Info" culprit="ip_pcie_x8_256">"Generating: altera_xcvr_fpll_a10"</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv</message>
+   <message level="Info" culprit="fpll_g3">add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv</message>
   </messages>
  </entity>
  <entity kind="altera_pcie_a10_hip" version="18.1" name="phy_g3x8">

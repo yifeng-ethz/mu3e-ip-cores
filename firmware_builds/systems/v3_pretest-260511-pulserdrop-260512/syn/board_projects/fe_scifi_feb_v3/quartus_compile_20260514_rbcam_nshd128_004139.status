@@ -1,0 +1,9 @@
+start=2026-05-14T00:41:39+02:00
+end=2026-05-14T01:27:58+02:00
+exit_code=0
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/quartus_compile_20260514_rbcam_nshd128_004139.console.log
+a_and_s=Info: Quartus Prime Analysis & Synthesis was successful. 0 errors, 1939 warnings
+fitter=Info: Quartus Prime Fitter was successful. 0 errors, 32 warnings
+assembler=Info: Quartus Prime Assembler was successful. 0 errors, 1 warning
+timing=Info: Quartus Prime Timing Analyzer was successful. 0 errors, 26 warnings
+full=Info (293000): Quartus Prime Full Compilation was successful. 0 errors, 1998 warnings

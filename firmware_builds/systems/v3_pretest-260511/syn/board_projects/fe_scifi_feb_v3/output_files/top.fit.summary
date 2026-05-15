@@ -1,16 +1,16 @@
-Fitter Status : Successful - Mon May 11 17:21:23 2026
+Fitter Status : Successful - Fri May 15 08:57:46 2026
 Quartus Prime Version : 18.1.0 Build 625 09/12/2018 SJ Standard Edition
 Revision Name : top
 Top-level Entity Name : top
 Family : Arria V
 Device : 5AGXBA7D4F31C5
 Timing Models : Final
-Logic utilization (in ALMs) : 61,385 / 91,680 ( 67 % )
-Total registers : 91888
+Logic utilization (in ALMs) : 72,901 / 91,680 ( 80 % )
+Total registers : 111156
 Total pins : 218 / 426 ( 51 % )
 Total virtual pins : 0
-Total block memory bits : 4,032,202 / 13,987,840 ( 29 % )
-Total RAM Blocks : 540 / 1,366 ( 40 % )
+Total block memory bits : 4,128,458 / 13,987,840 ( 30 % )
+Total RAM Blocks : 556 / 1,366 ( 41 % )
 Total DSP Blocks : 0 / 800 ( 0 % )
 Total HSSI RX PCSs : 4 / 9 ( 44 % )
 Total HSSI PMA RX Deserializers : 4 / 9 ( 44 % )

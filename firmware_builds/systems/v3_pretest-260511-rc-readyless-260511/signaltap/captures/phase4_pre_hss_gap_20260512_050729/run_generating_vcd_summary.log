@@ -1,0 +1,40 @@
+Phase 4 pre-HSS run_generating-trigger VCD summary
+VCD: firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_pre_hss_gap_20260512_050729/run_generating_start_run.vcd
+signals=77 timestamps=2050
+
+First-high times and final values:
+- emulator_mutrig_0.asi_ctrl_valid: first_high_ps=127500 rises=1 final=0
+- emulator_mutrig_0.asi_ctrl_ready: first_high_ps=500 rises=1 final=1
+- emulator_mutrig_0.asi_ctrl_data: first_high_ps=None rises=0 final=0
+- emulator_mutrig_0.aso_tx8b1k_valid: first_high_ps=None rises=0 final=0
+- emulator_mutrig_0.u_emulator_mutrig.u_frontend_run_ctl.run_generating: first_high_ps=128500 rises=1 final=1
+- emulator_mutrig_0.u_emulator_mutrig.u_frontend_run_ctl.run_draining: first_high_ps=128500 rises=1 final=1
+- emulator_mutrig_0.u_emulator_mutrig.u_frontend_run_ctl.frame_rst: first_high_ps=500 rises=1 final=0
+- avalon_st_adapter_032.in_0_valid: first_high_ps=None rises=0 final=0
+- avalon_st_adapter_032.out_0_valid: first_high_ps=None rises=0 final=0
+- avalon_st_adapter_032.out_0_ready: first_high_ps=500 rises=1 final=1
+- decoded_lane_mux_0.in1_valid: first_high_ps=None rises=0 final=0
+- decoded_lane_mux_0.in1_ready: first_high_ps=500 rises=1 final=1
+- decoded_lane_mux_0.out_valid: first_high_ps=500 rises=1 final=1
+- decoded_lane_mux_0.out_ready: first_high_ps=500 rises=512 final=0
+- decoded_lane_fifo_0.in_valid: first_high_ps=500 rises=1 final=1
+- decoded_lane_fifo_0.in_ready: first_high_ps=500 rises=512 final=0
+- decoded_lane_fifo_0.out_valid: first_high_ps=500 rises=512 final=0
+- decoded_lane_fifo_0.out_ready: first_high_ps=500 rises=1 final=1
+- mutrig_datapath_subsystem_0.headerinfo_valid: first_high_ps=None rises=0 final=0
+- mutrig_datapath_subsystem_0.hit_type0_out_valid: first_high_ps=None rises=0 final=0
+- mutrig_datapath_subsystem_0.hit_type0_out_ready: first_high_ps=500 rises=1 final=1
+- mux_mutrig2processor.out_valid: first_high_ps=None rises=0 final=0
+- mux_mutrig2processor.out_ready: first_high_ps=500 rises=1 final=1
+- mts_preprocessor_0.asi_hit_type0_valid: first_high_ps=None rises=0 final=0
+- mts_preprocessor_0.asi_hit_type0_ready: first_high_ps=500 rises=1 final=1
+- mts_preprocessor_0.aso_hit_type1_valid: first_high_ps=None rises=0 final=0
+- mts_preprocessor_0.aso_hit_type1_ready: first_high_ps=128500 rises=1 final=1
+- histogram_ingress_bridge_0.asi_pre_valid: first_high_ps=None rises=0 final=0
+- histogram_ingress_bridge_0.asi_pre_ready: first_high_ps=128500 rises=1 final=1
+- histogram_ingress_bridge_0.aso_pre_valid: first_high_ps=None rises=0 final=0
+- histogram_ingress_bridge_0.aso_pre_ready: first_high_ps=128500 rises=1 final=1
+- histogram_ingress_bridge_0.aso_hist_valid: first_high_ps=None rises=0 final=0
+- histogram_ingress_bridge_0.aso_hist_ready: first_high_ps=500 rises=1 final=1
+- hist_post_cdc_0.out_valid: first_high_ps=None rises=0 final=0
+- hist_post_cdc_0.out_ready: first_high_ps=500 rises=1 final=1

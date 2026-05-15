@@ -1,0 +1,5 @@
+command=quartus_sh --flow compile top
+start=2026-05-12T11:56:14+02:00
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_115400_emutype0_perf.console.log
+end=2026-05-12T12:50:30+02:00
+exit_code=0

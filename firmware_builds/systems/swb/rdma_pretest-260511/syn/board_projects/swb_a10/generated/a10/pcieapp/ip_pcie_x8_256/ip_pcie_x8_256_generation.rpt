@@ -32,35 +32,84 @@ Info: ip_pcie_x8_256: Running transform merlin_avalon_transform took 0.020s
 Info: ip_pcie_x8_256: "Naming system components in system: ip_pcie_x8_256"
 Info: ip_pcie_x8_256: "Processing generation queue"
 Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/synth/ip_pcie_x8_256.vhd could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/ip_pcie_x8_256_pkg.vhd could not be written to."
 Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256_altera_pcie_a10_hip_181_x6l2heq"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/ip_pcie_x8_256_altera_pcie_a10_hip_181_x6l2heq.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_a10_hip_pipen1b.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_sc_bitsync.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_reset_delay_sync.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_rs_a10_hip.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_a10_hip_pllnphy.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/skp_det_g3.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altera_xcvr_functions.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/debug/stp/alt_pcie_hip_a10.xml could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/debug/stp/build_stp.tcl could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_tlp_inspector_a10.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_tlp_inspector_cseb_a10.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_tlp_inspector_monitor_a10.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_tlp_inspector_trigger_a10.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_tlp_inspector_pcsig_drive_a10.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_a10_gbfifo.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_a10_scfifo_ext.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altpcie_scfifo_a10.v could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/altera_pci_express.sdc could not be written to."
 Info: phy_g3x8: "Generating: phy_g3x8"
 Info: fpll_g3: "Generating: fpll_g3"
 Info: lcpll_g3xn: "Generating: lcpll_g3xn"
 Info: ip_pcie_x8_256: "Generating: phy_g3x8"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/phy_g3x8.vhd could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/phy_g3x8_pkg.vhd could not be written to."
 Info: ip_pcie_x8_256: "Generating: fpll_g3"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/fpll_g3.vhd could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/fpll_g3_pkg.vhd could not be written to."
 Info: ip_pcie_x8_256: "Generating: lcpll_g3xn"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_pcie_a10_hip_181/synth/lcpll_g3xn.vhd could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/lcpll_g3xn_pkg.vhd could not be written to."
 Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256_altera_xcvr_native_a10_181_n4nfovy"
 Info: phy_g3x8: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_resync.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./alt_xcvr_arbiter.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_arbiter.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_arbiter.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./twentynm_pcs.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_pcs.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/twentynm_pcs.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./twentynm_pma.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_pma.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/twentynm_pma.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/twentynm_xcvr_avmm.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./twentynm_xcvr_native.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_native.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/twentynm_xcvr_native.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_a10_functions_h.sv SYSTEM_VERILOG PATH ..//altera_xcvr_native_a10_functions_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_functions_h.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ..//a10_avmm_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/a10_avmm_h.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_pipe_retry.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_pipe_retry.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_native_pipe_retry.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_avmm_csr.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_avmm_csr.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_native_avmm_csr.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_prbs_accum.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_prbs_accum.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_native_prbs_accum.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_odi_accel.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_odi_accel.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_native_odi_accel.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./alt_xcvr_native_rcfg_arb.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_rcfg_arb.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_arb.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_a10_false_paths.sdc SDC PATH ..//altera_xcvr_native_a10_false_paths.sdc
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_false_paths.sdc could not be written to."
 Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_pcie_dfe_params_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/altera_xcvr_native_pcie_dfe_params_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_params_h.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./pcie_mgmt_commands_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_commands_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/pcie_mgmt_commands_h.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./pcie_mgmt_functions_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_functions_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/pcie_mgmt_functions_h.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./pcie_mgmt_program.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_program.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/pcie_mgmt_program.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./pcie_mgmt_cpu.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_cpu.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/pcie_mgmt_cpu.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./pcie_mgmt_master.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_master.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/pcie_mgmt_master.sv could not be written to."
 Info: phy_g3x8: add_fileset_file ./altera_xcvr_native_pcie_dfe_ip.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/altera_xcvr_native_pcie_dfe_ip.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_ip.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/plain_files.txt could not be written to."
 Info: phy_g3x8: Building configuration data for reconfiguration profile 0
 Info: phy_g3x8: Validating reconfiguration profile 0
 Info: phy_g3x8: When "Transceiver configuration rules" is set to "Gen 3 PIPE", the "Data rate" for the Standard PCS should be set for the power-on configuration of Gen1 PIPE. Under the hood, the "Data rate" for the Gen 3 PCS is set as 8000Mbps which is not reflected in the GUI.
@@ -73,24 +122,59 @@ Info: phy_g3x8: Validating reconfiguration profile 1
 Info: phy_g3x8: Note - When dynamic reconfiguration is enabled, users are recommended to enable multiple reconfiguration profiles for Quartus to perform robust timing closure
 Info: phy_g3x8: Current IP configuration matches reconfiguration profile 1
 Info: phy_g3x8: For the selected device(Unknown), transceiver speed grade is 2 and core speed grade is 1.
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_10g_rx_pcs_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_10g_tx_pcs_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_8g_rx_pcs_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_8g_tx_pcs_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_common_pcs_pma_interface_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_common_pld_pcs_interface_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_gen3_rx_pcs_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_krfec_rx_pcs_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_pipe_gen1_2_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_rx_pcs_pma_interface_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_rx_pld_pcs_interface_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_tx_pcs_pma_interface_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/rcfg_timing_db/ip_pcie_x8_256_hssi_tx_pld_pcs_interface_rcfg_settings_n4nfovy.json could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/ip_pcie_x8_256_altera_xcvr_native_a10_181_n4nfovy.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_opt_logic_n4nfovy.sv could not be written to."
 Info: ip_pcie_x8_256: "Generating: altera_xcvr_fpll_a10"
 Info: fpll_g3: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/twentynm_xcvr_avmm.sv could not be written to."
 Info: fpll_g3: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/alt_xcvr_resync.sv could not be written to."
 Info: fpll_g3: add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/altera_xcvr_fpll_a10.sv could not be written to."
 Info: fpll_g3: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/a10_avmm_h.sv could not be written to."
 Info: fpll_g3: add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/alt_xcvr_native_avmm_nf.sv could not be written to."
 Info: fpll_g3: add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/alt_xcvr_pll_embedded_debug.sv could not be written to."
 Info: fpll_g3: add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/alt_xcvr_pll_avmm_csr.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_fpll_a10_181/synth/plain_files.txt could not be written to."
 Info: ip_pcie_x8_256: "Generating: ip_pcie_x8_256_altera_xcvr_atx_pll_a10_181_6kz3oaa"
 Info: lcpll_g3xn: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/twentynm_xcvr_avmm.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/alt_xcvr_resync.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_arbiter.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_arbiter.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/alt_xcvr_arbiter.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/a10_avmm_h.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./altera_xcvr_native_a10_functions_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/altera_xcvr_native_a10_functions_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/altera_xcvr_native_a10_functions_h.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_atx_pll_rcfg_arb.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_atx_pll_rcfg_arb.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/alt_xcvr_atx_pll_rcfg_arb.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./a10_xcvr_atx_pll.sv SYSTEM_VERILOG PATH ../source/a10_xcvr_atx_pll.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/a10_xcvr_atx_pll.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_embedded_debug.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/alt_xcvr_pll_embedded_debug.sv could not be written to."
 Info: lcpll_g3xn: add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../source/alt_xcvr_pll_avmm_csr.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/alt_xcvr_pll_avmm_csr.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/plain_files.txt could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/ip_pcie_x8_256_altera_xcvr_atx_pll_a10_181_6kz3oaa.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x8_256/altera_xcvr_atx_pll_a10_181/synth/alt_xcvr_atx_pll_rcfg_opt_logic_6kz3oaa.sv could not be written to."
 Info: ip_pcie_x8_256: Done "ip_pcie_x8_256" with 8 modules, 84 files
-Info: qsys-generate succeeded.
+Error: qsys-generate failed with exit code 1: 84 Errors, 4 Warnings
 Info: Finished: Create HDL design files for synthesis

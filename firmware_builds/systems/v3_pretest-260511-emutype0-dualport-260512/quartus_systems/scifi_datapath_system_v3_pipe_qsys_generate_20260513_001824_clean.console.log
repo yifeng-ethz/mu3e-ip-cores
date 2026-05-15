@@ -1,0 +1,782 @@
+qsys-generate input: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys
+qsys-generate output-directory: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe
+qsys-generate synthesis-directory: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis
+qsys-generate search-path-count: 72
+qsys-generate isolated-catalog: /tmp/qsys_user_catalog.DBac1s
+qsys-generate clear-output-directory: yes
+qsys-generate search-path: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/swb,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/CAM,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_frame_assembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy/max10_prog_avmm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firefly_xcvr_i2c_master,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/high_performance_counter_array,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ip_8b10b_decoder,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/lvds_error_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core14,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core20,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_driver,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top/ex_design/qsys_interface_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/avst_snoop_splitter,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/conduit2rst,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_counter_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_issp_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/histogram_snoop_selector,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/hit_type0_readyless_mux4,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/inactive_reset_source,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/pulse_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_channel_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_reset_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_timestamp_processor,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/tb/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_rq_fetcher,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_subsystem,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference/feb_system_v2_snapshot_20260415,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p11,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/v26_0_0331,$
+
+2026.05.13.00:19:12 Info: Saving generation log to /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/scifi_datapath_system_v3_pipe_generation.rpt
+2026.05.13.00:19:12 Info: Starting: <b>Create HDL design files for synthesis</b>
+2026.05.13.00:19:12 Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+2026.05.13.00:19:12 Info: Loading quartus_systems/scifi_datapath_system_v3_pipe.qsys
+2026.05.13.00:19:12 Info: Reading input file
+2026.05.13.00:19:12 Info: Adding arb_hit_type0_supercore_0 [arb_hit_type0_supercore 1.0]
+2026.05.13.00:19:12 Info: Parameterizing module arb_hit_type0_supercore_0
+2026.05.13.00:19:12 Info: Adding dbg_mm2runctrl_0 [dbg_mm2runctrl 1.0.0]
+2026.05.13.00:19:12 Info: Parameterizing module dbg_mm2runctrl_0
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_0 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_0
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_1 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_1
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_2 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_2
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_3 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_3
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_4 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_4
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_5 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_5
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_6 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_6
+2026.05.13.00:19:12 Info: Adding decoded_lane_fifo_7 [altera_avalon_sc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_fifo_7
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_0 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_0
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_1 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_1
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_2 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_2
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_3 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_3
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_4 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_4
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_5 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_5
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_6 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_6
+2026.05.13.00:19:12 Info: Adding decoded_lane_mux_7 [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module decoded_lane_mux_7
+2026.05.13.00:19:12 Info: Adding emulator_ctrl_splitter [altera_avalon_st_splitter 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module emulator_ctrl_splitter
+2026.05.13.00:19:12 Info: Adding emulator_hit_type0_fanout [hit_type0_fanout8 26.0.0.512]
+2026.05.13.00:19:12 Info: Parameterizing module emulator_hit_type0_fanout
+2026.05.13.00:19:12 Info: Adding emulator_inject_fanout [pulse_fanout8 1.2]
+2026.05.13.00:19:12 Info: Parameterizing module emulator_inject_fanout
+2026.05.13.00:19:12 Info: Adding emulator_mutrig_qsys_inst [emulator_mutrig 26.3.0.506]
+2026.05.13.00:19:12 Info: Parameterizing module emulator_mutrig_qsys_inst
+2026.05.13.00:19:12 Info: Adding hist_post_cdc_0 [altera_avalon_dc_fifo 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module hist_post_cdc_0
+2026.05.13.00:19:12 Info: Adding hist_post_splitter_0 [altera_avalon_st_splitter 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module hist_post_splitter_0
+2026.05.13.00:19:12 Info: Adding histogram_ingress_bridge_0 [histogram_ingress_bridge 26.0.2.425]
+2026.05.13.00:19:12 Info: Parameterizing module histogram_ingress_bridge_0
+2026.05.13.00:19:12 Info: Adding histogram_ingress_bridge_1 [histogram_ingress_bridge 26.0.2.425]
+2026.05.13.00:19:12 Info: Parameterizing module histogram_ingress_bridge_1
+2026.05.13.00:19:12 Info: Adding histogram_statistics_0 [histogram_statistics_v2 26.2.0.511]
+2026.05.13.00:19:12 Info: Parameterizing module histogram_statistics_0
+2026.05.13.00:19:12 Info: Adding hit_stack_subsystem_0 [hit_stack_system 1.0]
+2026.05.13.00:19:12 Info: Parameterizing module hit_stack_subsystem_0
+2026.05.13.00:19:12 Info: Adding hit_stack_subsystem_1 [hit_stack_system 1.0]
+2026.05.13.00:19:12 Info: Parameterizing module hit_stack_subsystem_1
+2026.05.13.00:19:12 Info: Adding lvds_rx_28nm_0 [altera_lvds_rx_28nm 24.0.1110]
+2026.05.13.00:19:12 Info: Parameterizing module lvds_rx_28nm_0
+2026.05.13.00:19:12 Info: Adding lvds_rx_controller_pro_0 [lvds_rx_controller_pro 25.1.631]
+2026.05.13.00:19:12 Info: Parameterizing module lvds_rx_controller_pro_0
+2026.05.13.00:19:12 Info: Adding master_datapath [altera_jtag_avalon_master 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module master_datapath
+2026.05.13.00:19:12 Info: Adding mm_clock_crossing_bridge [altera_avalon_mm_clock_crossing_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_clock_crossing_bridge
+2026.05.13.00:19:12 Info: Adding mm_pipeline_jtagmaster2rstctrl [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_jtagmaster2rstctrl
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_emu_dbg [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_emu_dbg
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_hist [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_hist
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_hitstack_frame [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_hitstack_frame
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_hitstack_ring [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_hitstack_ring
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_low [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_low
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_mts1 [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_mts1
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_mutrig3 [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_mutrig3
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_mutrig4_mts0 [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_mutrig4_mts0
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_mutrig5 [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_mutrig5
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_mutrig6 [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_mutrig6
+2026.05.13.00:19:12 Info: Adding mm_pipeline_lvds_csr_mutrig7 [altera_avalon_mm_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module mm_pipeline_lvds_csr_mutrig7
+2026.05.13.00:19:12 Info: Adding monitor_clock_125 [clock_source 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module monitor_clock_125
+2026.05.13.00:19:12 Info: Adding mts_preprocessor_0 [mts_preprocessor 26.3.0.512]
+2026.05.13.00:19:12 Info: Parameterizing module mts_preprocessor_0
+2026.05.13.00:19:12 Info: Adding mts_preprocessor_1 [mts_preprocessor 26.3.0.512]
+2026.05.13.00:19:12 Info: Parameterizing module mts_preprocessor_1
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_0 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_0
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_1 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_1
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_2 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_2
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_3 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_3
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_4 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_4
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_5 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_5
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_6 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_6
+2026.05.13.00:19:12 Info: Adding mutrig_datapath_subsystem_7 [mutrig_datapath_system_v3 3.0.1.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_datapath_subsystem_7
+2026.05.13.00:19:12 Info: Adding mutrig_injector_0 [mutrig_injector_multiheader 26.1.0.511]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_injector_0
+2026.05.13.00:19:12 Info: Adding mutrig_reset_controller_0 [mutrig_reset_controller 1.1.0]
+2026.05.13.00:19:12 Info: Parameterizing module mutrig_reset_controller_0
+2026.05.13.00:19:12 Info: Adding mux_mutrig2processor [hit_type0_readyless_mux4 26.0.0.512]
+2026.05.13.00:19:12 Info: Parameterizing module mux_mutrig2processor
+2026.05.13.00:19:12 Info: Adding mux_mutrig2processor_0 [hit_type0_readyless_mux4 26.0.0.512]
+2026.05.13.00:19:12 Info: Parameterizing module mux_mutrig2processor_0
+2026.05.13.00:19:12 Info: Adding receiver_clock_125 [altera_clock_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module receiver_clock_125
+2026.05.13.00:19:12 Info: Adding reset_bridge_export [altera_reset_bridge 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module reset_bridge_export
+2026.05.13.00:19:12 Info: Adding run_control_mux [multiplexer 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module run_control_mux
+2026.05.13.00:19:12 Info: Adding run_control_splitter [altera_avalon_st_splitter 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module run_control_splitter
+2026.05.13.00:19:12 Info: Adding xcvr156_clock [clock_source 18.1]
+2026.05.13.00:19:12 Info: Parameterizing module xcvr156_clock
+2026.05.13.00:19:12 Info: Building connections
+2026.05.13.00:19:12 Info: Parameterizing connections
+2026.05.13.00:19:12 Info: Validating
+2026.05.13.00:19:13 Info: Done reading input file
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_0.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_0.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_0.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_1.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_1.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_1.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_2.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_2.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_2.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_3.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_3.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_3.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_4.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_4.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_4.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_5.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_5.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_5.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_6.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_6.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_6.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_7.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_7.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.lane_7.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_0: Signal <b>emu_in_0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_1: Signal <b>emu_in_1_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_2: Signal <b>emu_in_2_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_3: Signal <b>emu_in_3_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_4: Signal <b>emu_in_4_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_5: Signal <b>emu_in_5_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_6: Signal <b>emu_in_6_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.emu_in_7: Signal <b>emu_in_7_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_0: Signal <b>real_in_0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_1: Signal <b>real_in_1_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_2: Signal <b>real_in_2_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_3: Signal <b>real_in_3_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_4: Signal <b>real_in_4_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_5: Signal <b>real_in_5_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_6: Signal <b>real_in_6_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.real_in_7: Signal <b>real_in_7_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_0: Signal <b>selected_out_0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_1: Signal <b>selected_out_1_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_2: Signal <b>selected_out_2_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_3: Signal <b>selected_out_3_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_4: Signal <b>selected_out_4_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_5: Signal <b>selected_out_5_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_6: Signal <b>selected_out_6_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.arb_hit_type0_supercore_0.selected_out_7: Signal <b>selected_out_7_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.in: Signal <b>asi_in_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out0: Signal <b>aso_out0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out1: Signal <b>aso_out1_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out2: Signal <b>aso_out2_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out3: Signal <b>aso_out3_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out4: Signal <b>aso_out4_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out5: Signal <b>aso_out5_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out6: Signal <b>aso_out6_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_hit_type0_fanout.out7: Signal <b>aso_out7_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_mutrig_qsys_inst.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_0: <b>ring_buffer_cam_0.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_1: <b>ring_buffer_cam_1.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_2: <b>ring_buffer_cam_2.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_3: <b>ring_buffer_cam_3.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_0: <b>ring_buffer_cam_0.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_1: <b>ring_buffer_cam_1.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_2: <b>ring_buffer_cam_2.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_3: <b>ring_buffer_cam_3.debug_observability</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0: lvds_rx_controller_pro: file generation successful!
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_0.hit_type0_in: Signal <b>asi_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_1.hit_type0_in: Signal <b>asi_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0: Signal <b>aso_hit_type0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7.mutrig_frame_deassembly_0.hit_type0/backpressure_fifo.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7.backpressure_fifo.almost_empty: <b>backpressure_fifo.almost_empty</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor.in0: Signal <b>asi_in0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor.in1: Signal <b>asi_in1_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor.in2: Signal <b>asi_in2_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor.in3: Signal <b>asi_in3_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor.out: Signal <b>aso_out_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor_0.in0: Signal <b>asi_in0_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor_0.in1: Signal <b>asi_in1_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor_0.in2: Signal <b>asi_in2_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor_0.in3: Signal <b>asi_in3_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mux_mutrig2processor_0.out: Signal <b>aso_out_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded0/decoded_lane_mux_0.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded1/decoded_lane_mux_1.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded2/decoded_lane_mux_2.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded3/decoded_lane_mux_3.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded4/decoded_lane_mux_4.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded5/decoded_lane_mux_5.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded6/decoded_lane_mux_6.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: Max channel is 9 for source and 15 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.lvds_rx_controller_pro_0.decoded7/decoded_lane_mux_7.in0: The sink has a valid signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0.hit_type0_out/arb_hit_type0_supercore_0.real_in_0: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1.hit_type0_out/arb_hit_type0_supercore_0.real_in_1: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2.hit_type0_out/arb_hit_type0_supercore_0.real_in_2: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3.hit_type0_out/arb_hit_type0_supercore_0.real_in_3: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4.hit_type0_out/arb_hit_type0_supercore_0.real_in_4: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5.hit_type0_out/arb_hit_type0_supercore_0.real_in_5: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6.hit_type0_out/arb_hit_type0_supercore_0.real_in_6: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7.hit_type0_out/arb_hit_type0_supercore_0.real_in_7: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.hit_type3/hist_post_splitter_0.in: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.hit_type3/hist_post_splitter_0.in: The sink has a empty signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.run_control_mux.out/run_control_splitter.in: Max channel is 1 for source and 0 for sink. Avalon-ST Adapter will be inserted..
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.run_control_mux.out/run_control_splitter.in: The source has a channel signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.run_control_mux.out/run_control_splitter.in: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.hist_post_splitter_0.out1/hist_post_cdc_0.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.hist_post_splitter_0.out1/hist_post_cdc_0.in: The source has a empty signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.emulator_ctrl_splitter.out1/arb_hit_type0_supercore_0.run_ctrl: The source has a ready signal of 1 bits, but the sink does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.run_control_splitter.out14/hit_stack_subsystem_1.run_control_signal: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.run_control_splitter.out15/emulator_ctrl_splitter.in: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Info: scifi_datapath_system_v3_pipe.run_control_splitter.out6/hit_stack_subsystem_0.run_control_signal: The sink has a ready signal of 1 bits, but the source does not. Avalon-ST Adapter will be inserted.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_0.out: <b>decoded_lane_fifo_0.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_1.out: <b>decoded_lane_fifo_1.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_2.out: <b>decoded_lane_fifo_2.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_3.out: <b>decoded_lane_fifo_3.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_4.out: <b>decoded_lane_fifo_4.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_5.out: <b>decoded_lane_fifo_5.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_6.out: <b>decoded_lane_fifo_6.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_fifo_7.out: <b>decoded_lane_fifo_7.out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_0.in1: <b>decoded_lane_mux_0.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_1.in1: <b>decoded_lane_mux_1.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_2.in1: <b>decoded_lane_mux_2.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_3.in1: <b>decoded_lane_mux_3.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_4.in1: <b>decoded_lane_mux_4.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_5.in1: <b>decoded_lane_mux_5.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_6.in1: <b>decoded_lane_mux_6.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.decoded_lane_mux_7.in1: <b>decoded_lane_mux_7.in1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_ctrl_splitter.out2: <b>emulator_ctrl_splitter.out2</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_ctrl_splitter.out3: <b>emulator_ctrl_splitter.out3</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_ctrl_splitter.out4: <b>emulator_ctrl_splitter.out4</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_ctrl_splitter.out5: <b>emulator_ctrl_splitter.out5</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_ctrl_splitter.out6: <b>emulator_ctrl_splitter.out6</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_ctrl_splitter.out7: <b>emulator_ctrl_splitter.out7</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_mutrig_qsys_inst.tx8b1k: <b>emulator_mutrig_qsys_inst.tx8b1k</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_0.post_out: <b>histogram_ingress_bridge_0.post_out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.post_in: <b>histogram_ingress_bridge_1.post_in</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_ingress_bridge_1.post_out: <b>histogram_ingress_bridge_1.post_out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.fill_out: <b>histogram_statistics_0.fill_out</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.debug_1: <b>histogram_statistics_0.debug_1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.debug_2: <b>histogram_statistics_0.debug_2</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.debug_3: <b>histogram_statistics_0.debug_3</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.debug_4: <b>histogram_statistics_0.debug_4</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.debug_5: <b>histogram_statistics_0.debug_5</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.histogram_statistics_0.debug_6: <b>histogram_statistics_0.debug_6</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_debug_burst: <b>hit_stack_subsystem_0.frame_debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_debug_delay8loss: <b>hit_stack_subsystem_0.frame_debug_delay8loss</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_debug_filllevel: <b>hit_stack_subsystem_0.frame_debug_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_debug_loss8fill: <b>hit_stack_subsystem_0.frame_debug_loss8fill</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_debug_ts: <b>hit_stack_subsystem_0.frame_debug_ts</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.frame_ts_delta: <b>hit_stack_subsystem_0.frame_ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_0_filllevel: <b>hit_stack_subsystem_0.ring_buffer_cam_0_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_1_filllevel: <b>hit_stack_subsystem_0.ring_buffer_cam_1_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_2_filllevel: <b>hit_stack_subsystem_0.ring_buffer_cam_2_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_0.ring_buffer_cam_3_filllevel: <b>hit_stack_subsystem_0.ring_buffer_cam_3_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.frame_debug_burst: <b>hit_stack_subsystem_1.frame_debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.frame_debug_delay8loss: <b>hit_stack_subsystem_1.frame_debug_delay8loss</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.frame_debug_filllevel: <b>hit_stack_subsystem_1.frame_debug_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.frame_debug_loss8fill: <b>hit_stack_subsystem_1.frame_debug_loss8fill</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.frame_debug_ts: <b>hit_stack_subsystem_1.frame_debug_ts</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.frame_ts_delta: <b>hit_stack_subsystem_1.frame_ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_0_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_0_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_1_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_1_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_2_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_2_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.hit_stack_subsystem_1.ring_buffer_cam_3_filllevel: <b>hit_stack_subsystem_1.ring_buffer_cam_3_filllevel</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_0.debug_ts: <b>mts_preprocessor_0.debug_ts</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_0.debug_burst: <b>mts_preprocessor_0.debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_0.ts_delta: <b>mts_preprocessor_0.ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_1.debug_ts: <b>mts_preprocessor_1.debug_ts</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_1.debug_burst: <b>mts_preprocessor_1.debug_burst</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mts_preprocessor_1.ts_delta: <b>mts_preprocessor_1.ts_delta</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0.decoded_din: <b>mutrig_datapath_subsystem_0.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0.headerinfo: <b>mutrig_datapath_subsystem_0.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0.run_ctrl: <b>mutrig_datapath_subsystem_0.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1.decoded_din: <b>mutrig_datapath_subsystem_1.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1.headerinfo: <b>mutrig_datapath_subsystem_1.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1.run_ctrl: <b>mutrig_datapath_subsystem_1.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2.decoded_din: <b>mutrig_datapath_subsystem_2.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2.headerinfo: <b>mutrig_datapath_subsystem_2.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2.run_ctrl: <b>mutrig_datapath_subsystem_2.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3.decoded_din: <b>mutrig_datapath_subsystem_3.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3.headerinfo: <b>mutrig_datapath_subsystem_3.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3.run_ctrl: <b>mutrig_datapath_subsystem_3.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4.decoded_din: <b>mutrig_datapath_subsystem_4.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4.headerinfo: <b>mutrig_datapath_subsystem_4.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4.run_ctrl: <b>mutrig_datapath_subsystem_4.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5.decoded_din: <b>mutrig_datapath_subsystem_5.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5.headerinfo: <b>mutrig_datapath_subsystem_5.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5.run_ctrl: <b>mutrig_datapath_subsystem_5.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6.decoded_din: <b>mutrig_datapath_subsystem_6.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6.headerinfo: <b>mutrig_datapath_subsystem_6.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6.run_ctrl: <b>mutrig_datapath_subsystem_6.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7.decoded_din: <b>mutrig_datapath_subsystem_7.decoded_din</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7.headerinfo: <b>mutrig_datapath_subsystem_7.headerinfo</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7.run_ctrl: <b>mutrig_datapath_subsystem_7.run_ctrl</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo0: <b>mutrig_injector_0.headerinfo0</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo1: <b>mutrig_injector_0.headerinfo1</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo2: <b>mutrig_injector_0.headerinfo2</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo3: <b>mutrig_injector_0.headerinfo3</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo4: <b>mutrig_injector_0.headerinfo4</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo5: <b>mutrig_injector_0.headerinfo5</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo6: <b>mutrig_injector_0.headerinfo6</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_injector_0.headerinfo7: <b>mutrig_injector_0.headerinfo7</b> must be connected to an Avalon-ST source
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out2: <b>run_control_splitter.out2</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out3: <b>run_control_splitter.out3</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out4: <b>run_control_splitter.out4</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out5: <b>run_control_splitter.out5</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out8: <b>run_control_splitter.out8</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out9: <b>run_control_splitter.out9</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out10: <b>run_control_splitter.out10</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.run_control_splitter.out11: <b>run_control_splitter.out11</b> must be connected to an Avalon-ST sink
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_inject_fanout: <b>emulator_inject_fanout.out1</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_inject_fanout: <b>emulator_inject_fanout.out2</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_inject_fanout: <b>emulator_inject_fanout.out3</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_inject_fanout: <b>emulator_inject_fanout.out4</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_inject_fanout: <b>emulator_inject_fanout.out5</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_inject_fanout: <b>emulator_inject_fanout.out6</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.emulator_inject_fanout: <b>emulator_inject_fanout.out7</b> must be exported, or connected to a matching conduit.
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_0: <b>mutrig_datapath_subsystem_0.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_1: <b>mutrig_datapath_subsystem_1.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_2: <b>mutrig_datapath_subsystem_2.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_3: <b>mutrig_datapath_subsystem_3.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_4: <b>mutrig_datapath_subsystem_4.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_5: <b>mutrig_datapath_subsystem_5.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_6: <b>mutrig_datapath_subsystem_6.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.mutrig_datapath_subsystem_7: <b>mutrig_datapath_subsystem_7.csr</b> must be connected to an Avalon-MM master
+2026.05.13.00:19:13 Warning: scifi_datapath_system_v3_pipe.: You have exported the interface run_control_mux.in0 but not its associated reset interface.  Export the driver(s) of run_control_mux.reset
+2026.05.13.00:19:14 Info: scifi_datapath_system_v3_pipe: Generating <b>scifi_datapath_system_v3_pipe</b> "<b>scifi_datapath_system_v3_pipe</b>" for QUARTUS_SYNTH
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux.src2 and cmd_mux_002.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux.src3 and cmd_mux_003.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src0 and cmd_mux.sink1
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src1 and cmd_mux_001.sink1
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src4 and cmd_mux_004.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src5 and cmd_mux_005.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src6 and cmd_mux_006.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src7 and cmd_mux_007.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src8 and cmd_mux_008.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src9 and cmd_mux_009.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src10 and cmd_mux_010.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src11 and cmd_mux_011.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src12 and cmd_mux_012.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src13 and cmd_mux_013.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src14 and cmd_mux_014.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src15 and cmd_mux_015.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src16 and cmd_mux_016.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src17 and cmd_mux_017.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src18 and cmd_mux_018.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src19 and cmd_mux_019.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src20 and cmd_mux_020.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src21 and cmd_mux_021.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src22 and cmd_mux_022.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src23 and cmd_mux_023.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src24 and cmd_mux_024.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src25 and cmd_mux_025.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src26 and cmd_mux_026.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src27 and cmd_mux_027.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src28 and cmd_mux_028.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src29 and cmd_mux_029.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src30 and cmd_mux_030.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src31 and cmd_mux_031.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src32 and cmd_mux_032.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src33 and cmd_mux_033.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src34 and cmd_mux_034.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src35 and cmd_mux_035.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between cmd_demux_001.src36 and cmd_mux_036.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux.src1 and rsp_mux_001.sink0
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_001.src1 and rsp_mux_001.sink1
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_002.src0 and rsp_mux.sink2
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_003.src0 and rsp_mux.sink3
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_004.src0 and rsp_mux_001.sink4
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_005.src0 and rsp_mux_001.sink5
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_006.src0 and rsp_mux_001.sink6
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_007.src0 and rsp_mux_001.sink7
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_008.src0 and rsp_mux_001.sink8
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_009.src0 and rsp_mux_001.sink9
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_010.src0 and rsp_mux_001.sink10
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_011.src0 and rsp_mux_001.sink11
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_012.src0 and rsp_mux_001.sink12
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_013.src0 and rsp_mux_001.sink13
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_014.src0 and rsp_mux_001.sink14
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_015.src0 and rsp_mux_001.sink15
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_016.src0 and rsp_mux_001.sink16
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_017.src0 and rsp_mux_001.sink17
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_018.src0 and rsp_mux_001.sink18
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_019.src0 and rsp_mux_001.sink19
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_020.src0 and rsp_mux_001.sink20
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_021.src0 and rsp_mux_001.sink21
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_022.src0 and rsp_mux_001.sink22
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_023.src0 and rsp_mux_001.sink23
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_024.src0 and rsp_mux_001.sink24
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_025.src0 and rsp_mux_001.sink25
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_026.src0 and rsp_mux_001.sink26
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_027.src0 and rsp_mux_001.sink27
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_028.src0 and rsp_mux_001.sink28
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_029.src0 and rsp_mux_001.sink29
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_030.src0 and rsp_mux_001.sink30
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_031.src0 and rsp_mux_001.sink31
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_032.src0 and rsp_mux_001.sink32
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_033.src0 and rsp_mux_001.sink33
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_034.src0 and rsp_mux_001.sink34
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_035.src0 and rsp_mux_001.sink35
+2026.05.13.00:19:17 Info: Inserting clock-crossing logic between rsp_demux_036.src0 and rsp_mux_001.sink36
+2026.05.13.00:19:19 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:19 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:19 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:19 Info: Interconnect is inserted between master mm_pipeline_jtagmaster2rstctrl.m0 and slave mutrig_reset_controller_0.reconfig_mgmt because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:20 Info: avalon_st_adapter: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_001: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_001: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_002: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_002: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_002: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_003: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_003: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_003: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_004: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_004: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_004: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_005: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_005: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_005: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_006: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_006: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_006: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_007: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_007: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_007: Inserting timing_adapter: timing_adapter_1
+2026.05.13.00:19:20 Info: avalon_st_adapter_008: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_009: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_010: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_011: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_012: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_013: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_014: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_015: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_016: Inserting data_format_adapter: data_format_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_016: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_017: Inserting channel_adapter: channel_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_017: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_018: Inserting data_format_adapter: data_format_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_018: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_019: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_020: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_021: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:20 Info: avalon_st_adapter_022: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_0:real_in_0_endofrun (endofrun)"
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_1:real_in_1_endofrun (endofrun)"
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_2:real_in_2_endofrun (endofrun)"
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_3:real_in_3_endofrun (endofrun)"
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_4:real_in_4_endofrun (endofrun)"
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_5:real_in_5_endofrun (endofrun)"
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_6:real_in_6_endofrun (endofrun)"
+2026.05.13.00:19:23 Warning: scifi_datapath_system_v3_pipe: "No matching role found for arb_hit_type0_supercore_0:real_in_7:real_in_7_endofrun (endofrun)"
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.13.00:19:27 Info: arb_hit_type0_supercore_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>arb_hit_type0_supercore</b> "<b>arb_hit_type0_supercore_0</b>"
+2026.05.13.00:19:27 Info: dbg_mm2runctrl_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>dbg_mm2runctrl</b> "<b>dbg_mm2runctrl_0</b>"
+2026.05.13.00:19:27 Info: decoded_lane_fifo_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_sc_fifo</b> "<b>decoded_lane_fifo_0</b>"
+2026.05.13.00:19:27 Info: decoded_lane_mux_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>multiplexer</b> "<b>decoded_lane_mux_0</b>"
+2026.05.13.00:19:27 Info: emulator_ctrl_splitter: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_splitter</b> "<b>emulator_ctrl_splitter</b>"
+2026.05.13.00:19:27 Info: emulator_hit_type0_fanout: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>hit_type0_fanout8</b> "<b>emulator_hit_type0_fanout</b>"
+2026.05.13.00:19:27 Info: emulator_inject_fanout: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>pulse_fanout8</b> "<b>emulator_inject_fanout</b>"
+2026.05.13.00:19:27 Info: emulator_mutrig_qsys_inst: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>emulator_mutrig</b> "<b>emulator_mutrig_qsys_inst</b>"
+2026.05.13.00:19:27 Info: hist_post_cdc_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_dc_fifo</b> "<b>hist_post_cdc_0</b>"
+2026.05.13.00:19:27 Info: histogram_ingress_bridge_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>histogram_ingress_bridge</b> "<b>histogram_ingress_bridge_0</b>"
+2026.05.13.00:19:27 Info: histogram_statistics_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>histogram_statistics_v2</b> "<b>histogram_statistics_0</b>"
+2026.05.13.00:19:28 Info: hit_stack_subsystem_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>hit_stack_system</b> "<b>hit_stack_subsystem_0</b>"
+2026.05.13.00:19:28 Info: hit_stack_subsystem_1: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>hit_stack_system</b> "<b>hit_stack_subsystem_1</b>"
+2026.05.13.00:19:28 Info: lvds_rx_28nm_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_lvds_rx_28nm</b> "<b>lvds_rx_28nm_0</b>"
+2026.05.13.00:19:28 Info: lvds_rx_controller_pro_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>lvds_rx_controller_pro</b> "<b>lvds_rx_controller_pro_0</b>"
+2026.05.13.00:19:28 Info: master_datapath: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_jtag_avalon_master</b> "<b>master_datapath</b>"
+2026.05.13.00:19:28 Info: mm_clock_crossing_bridge: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_mm_clock_crossing_bridge</b> "<b>mm_clock_crossing_bridge</b>"
+2026.05.13.00:19:28 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_dc_fifo.v</b>
+2026.05.13.00:19:28 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_dcfifo_synchronizer_bundle.v</b>
+2026.05.13.00:19:28 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.05.13.00:19:28 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_dc_fifo.sdc</b>
+2026.05.13.00:19:28 Info: mm_pipeline_jtagmaster2rstctrl: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_mm_bridge</b> "<b>mm_pipeline_jtagmaster2rstctrl</b>"
+2026.05.13.00:19:28 Info: mts_preprocessor_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mts_preprocessor</b> "<b>mts_preprocessor_0</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_0: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_0</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_1: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_1: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_1</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_2: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_2: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_2</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_3: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_3: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_3</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_4: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_4: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_4</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_5: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_5: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_5</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_6: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_6: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_6</b>"
+2026.05.13.00:19:28 Info: avalon_st_adapter: Inserting timing_adapter: timing_adapter_0
+2026.05.13.00:19:28 Warning: mutrig_datapath_subsystem_7: "No matching role found for mutrig_frame_deassembly_0:hit_type0:aso_hit_type0_endofrun (endofrun)"
+2026.05.13.00:19:28 Info: mutrig_datapath_subsystem_7: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_datapath_system_v3</b> "<b>mutrig_datapath_subsystem_7</b>"
+2026.05.13.00:19:28 Info: mutrig_injector_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_injector_multiheader</b> "<b>mutrig_injector_0</b>"
+2026.05.13.00:19:28 Info: mutrig_reset_controller_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>mutrig_reset_controller</b> "<b>mutrig_reset_controller_0</b>"
+2026.05.13.00:19:28 Info: mux_mutrig2processor: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>hit_type0_readyless_mux4</b> "<b>mux_mutrig2processor</b>"
+2026.05.13.00:19:28 Info: run_control_mux: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>multiplexer</b> "<b>run_control_mux</b>"
+2026.05.13.00:19:30 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_011: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_012: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_013: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_014: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_015: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_016: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_017: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_018: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_019: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_020: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_021: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_022: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:30 Info: avalon_st_adapter_023: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_024: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_025: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_026: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_027: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_028: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_029: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_030: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_031: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_032: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_033: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_034: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_035: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:31 Info: avalon_st_adapter_036: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: mm_interconnect_0: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.05.13.00:19:32 Info: mm_interconnect_1: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_1</b>"
+2026.05.13.00:19:32 Info: avalon_st_adapter: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_001: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_002: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_003: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_004: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_005: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_006: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_007: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:32 Info: avalon_st_adapter_008: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:33 Info: avalon_st_adapter_009: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:33 Info: avalon_st_adapter_010: Inserting error_adapter: error_adapter_0
+2026.05.13.00:19:33 Info: mm_interconnect_2: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_2</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter_008: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_008</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter_016: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_016</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter_017: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_017</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter_018: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_018</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter_019: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_019</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter_020: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter_020</b>"
+2026.05.13.00:19:33 Info: rst_controller: "<b>scifi_datapath_system_v3_pipe</b>" instantiated <b>altera_reset_controller</b> "<b>rst_controller</b>"
+2026.05.13.00:19:33 Info: lane_0: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>arb_hit_type0</b> "<b>lane_0</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_0: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_1: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_1</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_2: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_2</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_3: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_3</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_4: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_4</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_5: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_5</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_6: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_6</b>"
+2026.05.13.00:19:33 Info: mm_interconnect_7: "<b>arb_hit_type0_supercore_0</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_7</b>"
+2026.05.13.00:19:33 Info: feb_frame_assembly_0: "<b>hit_stack_subsystem_0</b>" instantiated <b>feb_frame_assembly</b> "<b>feb_frame_assembly_0</b>"
+2026.05.13.00:19:33 Info: ring_buffer_cam_0: "<b>hit_stack_subsystem_0</b>" instantiated <b>ring_buffer_cam</b> "<b>ring_buffer_cam_0</b>"
+2026.05.13.00:19:33 Info: jtag_phy_embedded_in_jtag_master: "<b>master_datapath</b>" instantiated <b>altera_jtag_dc_streaming</b> "<b>jtag_phy_embedded_in_jtag_master</b>"
+2026.05.13.00:19:33 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.05.13.00:19:33 Info: timing_adt: "<b>master_datapath</b>" instantiated <b>timing_adapter</b> "<b>timing_adt</b>"
+2026.05.13.00:19:33 Info: b2p: "<b>master_datapath</b>" instantiated <b>altera_avalon_st_bytes_to_packets</b> "<b>b2p</b>"
+2026.05.13.00:19:33 Info: p2b: "<b>master_datapath</b>" instantiated <b>altera_avalon_st_packets_to_bytes</b> "<b>p2b</b>"
+2026.05.13.00:19:33 Info: transacto: "<b>master_datapath</b>" instantiated <b>altera_avalon_packets_to_master</b> "<b>transacto</b>"
+2026.05.13.00:19:33 Info: b2p_adapter: "<b>master_datapath</b>" instantiated <b>channel_adapter</b> "<b>b2p_adapter</b>"
+2026.05.13.00:19:33 Info: p2b_adapter: "<b>master_datapath</b>" instantiated <b>channel_adapter</b> "<b>p2b_adapter</b>"
+2026.05.13.00:19:33 Info: mutrig_frame_deassembly_0: "<b>mutrig_datapath_subsystem_0</b>" instantiated <b>mutrig_frame_deassembly</b> "<b>mutrig_frame_deassembly_0</b>"
+2026.05.13.00:19:33 Info: avalon_st_adapter: "<b>mutrig_datapath_subsystem_0</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.05.13.00:19:33 Info: mm_pipeline_lvds_csr_low_m0_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_translator</b> "<b>mm_pipeline_lvds_csr_low_m0_translator</b>"
+2026.05.13.00:19:33 Info: mutrig_datapath_subsystem_0_backpressure_fifo_csr_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_translator</b> "<b>mutrig_datapath_subsystem_0_backpressure_fifo_csr_translator</b>"
+2026.05.13.00:19:33 Info: mm_pipeline_lvds_csr_low_m0_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_agent</b> "<b>mm_pipeline_lvds_csr_low_m0_agent</b>"
+2026.05.13.00:19:33 Info: mutrig_datapath_subsystem_0_backpressure_fifo_csr_agent: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_agent</b> "<b>mutrig_datapath_subsystem_0_backpressure_fifo_csr_agent</b>"
+2026.05.13.00:19:33 Info: router: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.05.13.00:19:33 Info: router_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.05.13.00:19:33 Info: router_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_002</b>"
+2026.05.13.00:19:33 Info: router_003: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_003</b>"
+2026.05.13.00:19:33 Info: router_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_004</b>"
+2026.05.13.00:19:33 Info: router_005: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_005</b>"
+2026.05.13.00:19:33 Info: router_006: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_006</b>"
+2026.05.13.00:19:33 Info: router_007: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_007</b>"
+2026.05.13.00:19:33 Info: router_008: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_008</b>"
+2026.05.13.00:19:33 Info: router_009: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_009</b>"
+2026.05.13.00:19:33 Info: router_010: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_010</b>"
+2026.05.13.00:19:33 Info: router_011: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_011</b>"
+2026.05.13.00:19:33 Info: router_012: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_012</b>"
+2026.05.13.00:19:33 Info: router_016: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_016</b>"
+2026.05.13.00:19:33 Info: router_017: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_017</b>"
+2026.05.13.00:19:33 Info: router_018: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_018</b>"
+2026.05.13.00:19:33 Info: router_019: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_019</b>"
+2026.05.13.00:19:33 Info: router_020: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_020</b>"
+2026.05.13.00:19:33 Info: router_021: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_021</b>"
+2026.05.13.00:19:33 Info: router_022: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_022</b>"
+2026.05.13.00:19:33 Info: router_023: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_023</b>"
+2026.05.13.00:19:34 Info: router_024: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_024</b>"
+2026.05.13.00:19:34 Info: router_038: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_router</b> "<b>router_038</b>"
+2026.05.13.00:19:34 Info: mm_pipeline_lvds_csr_low_m0_limiter: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_traffic_limiter</b> "<b>mm_pipeline_lvds_csr_low_m0_limiter</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_sc_fifo.v</b>
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.05.13.00:19:34 Info: cmd_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.05.13.00:19:34 Info: cmd_demux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_001</b>"
+2026.05.13.00:19:34 Info: cmd_demux_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_002</b>"
+2026.05.13.00:19:34 Info: cmd_demux_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_004</b>"
+2026.05.13.00:19:34 Info: cmd_demux_005: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_005</b>"
+2026.05.13.00:19:34 Info: cmd_demux_007: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux_007</b>"
+2026.05.13.00:19:34 Info: cmd_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.05.13.00:19:34 Info: rsp_demux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux</b>"
+2026.05.13.00:19:34 Info: rsp_mux: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: rsp_mux_001: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_001</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: rsp_mux_002: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_002</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: rsp_mux_004: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_004</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: rsp_mux_005: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_005</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: rsp_mux_007: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux_007</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: crosser: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_handshake_clock_crosser</b> "<b>crosser</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_st_clock_crosser.v</b>
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_std_synchronizer_nocut.v</b>
+2026.05.13.00:19:34 Info: avalon_st_adapter: "<b>mm_interconnect_0</b>" instantiated <b>altera_avalon_st_adapter</b> "<b>avalon_st_adapter</b>"
+2026.05.13.00:19:34 Info: router: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_router</b> "<b>router</b>"
+2026.05.13.00:19:34 Info: router_001: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_router</b> "<b>router_001</b>"
+2026.05.13.00:19:34 Info: mm_pipeline_lvds_csr_low_s0_burst_adapter: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_burst_adapter</b> "<b>mm_pipeline_lvds_csr_low_s0_burst_adapter</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_stage.sv</b>
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_avalon_st_pipeline_base.v</b>
+2026.05.13.00:19:34 Info: cmd_demux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>cmd_demux</b>"
+2026.05.13.00:19:34 Info: cmd_mux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>cmd_mux</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: rsp_demux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_demultiplexer</b> "<b>rsp_demux</b>"
+2026.05.13.00:19:34 Info: rsp_mux: "<b>mm_interconnect_2</b>" instantiated <b>altera_merlin_multiplexer</b> "<b>rsp_mux</b>"
+2026.05.13.00:19:34 Info: Reusing file <b>/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe/synthesis/submodules/altera_merlin_arbitrator.sv</b>
+2026.05.13.00:19:34 Info: channel_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>channel_adapter</b> "<b>channel_adapter_0</b>"
+2026.05.13.00:19:34 Info: timing_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.05.13.00:19:34 Info: timing_adapter_1: "<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_1</b>"
+2026.05.13.00:19:34 Info: timing_adapter_0: "<b>avalon_st_adapter_008</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.05.13.00:19:34 Info: data_format_adapter_0: "<b>avalon_st_adapter_016</b>" instantiated <b>data_format_adapter</b> "<b>data_format_adapter_0</b>"
+2026.05.13.00:19:34 Info: timing_adapter_0: "<b>avalon_st_adapter_016</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.05.13.00:19:34 Info: channel_adapter_0: "<b>avalon_st_adapter_017</b>" instantiated <b>channel_adapter</b> "<b>channel_adapter_0</b>"
+2026.05.13.00:19:34 Info: timing_adapter_0: "<b>avalon_st_adapter_017</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.05.13.00:19:34 Info: data_format_adapter_0: "<b>avalon_st_adapter_018</b>" instantiated <b>data_format_adapter</b> "<b>data_format_adapter_0</b>"
+2026.05.13.00:19:34 Info: timing_adapter_0: "<b>avalon_st_adapter_018</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.05.13.00:19:34 Info: timing_adapter_0: "<b>avalon_st_adapter_020</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.05.13.00:19:34 Info: timing_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>timing_adapter</b> "<b>timing_adapter_0</b>"
+2026.05.13.00:19:34 Info: error_adapter_0: "<b>avalon_st_adapter</b>" instantiated <b>error_adapter</b> "<b>error_adapter_0</b>"
+2026.05.13.00:19:34 Info: scifi_datapath_system_v3_pipe: Done "<b>scifi_datapath_system_v3_pipe</b>" with 127 modules, 217 files
+2026.05.13.00:19:35 Info: qsys-generate succeeded.
+2026.05.13.00:19:35 Info: Finished: <b>Create HDL design files for synthesis</b>

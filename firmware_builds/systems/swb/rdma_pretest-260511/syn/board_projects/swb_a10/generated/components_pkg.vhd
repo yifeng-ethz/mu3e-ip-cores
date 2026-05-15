@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 
 package cmp is
 
-    constant GIT_HEAD : std_logic_vector(16*4-1 downto 0) := X"ead2ba747caae359";
+    constant GIT_HEAD : std_logic_vector(16*4-1 downto 0) := X"27c85fd060dc2b38";
 
 -- ./a10/ip/ip_clkctrl/ip_clkctrl.cmp
 	component ip_clkctrl is
@@ -251,6 +251,42 @@ package cmp is
 		);
 	end component ip_xcvr_phy_4_40_125_10000_enh;
 
+-- ./a10/ip/ip_xcvr_phy_4_40_125_5000/ip_xcvr_phy_4_40_125_5000.cmp
+	component ip_xcvr_phy_4_40_125_5000 is
+		port (
+			reconfig_write          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- write
+			reconfig_read           : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- read
+			reconfig_address        : in  std_logic_vector(11 downto 0)  := (others => 'X'); -- address
+			reconfig_writedata      : in  std_logic_vector(31 downto 0)  := (others => 'X'); -- writedata
+			reconfig_readdata       : out std_logic_vector(31 downto 0);                     -- readdata
+			reconfig_waitrequest    : out std_logic_vector(0 downto 0);                      -- waitrequest
+			reconfig_clk            : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- clk
+			reconfig_reset          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- reset
+			rx_analogreset          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_analogreset
+			rx_bitslip              : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_bitslip
+			rx_cal_busy             : out std_logic_vector(3 downto 0);                      -- rx_cal_busy
+			rx_cdr_refclk0          : in  std_logic                      := 'X';             -- clk
+			rx_clkout               : out std_logic_vector(3 downto 0);                      -- clk
+			rx_coreclkin            : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- clk
+			rx_digitalreset         : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_digitalreset
+			rx_is_lockedtodata      : out std_logic_vector(3 downto 0);                      -- rx_is_lockedtodata
+			rx_is_lockedtoref       : out std_logic_vector(3 downto 0);                      -- rx_is_lockedtoref
+			rx_parallel_data        : out std_logic_vector(159 downto 0);                    -- rx_parallel_data
+			rx_serial_data          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_serial_data
+			rx_seriallpbken         : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_seriallpbken
+			tx_analogreset          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- tx_analogreset
+			tx_cal_busy             : out std_logic_vector(3 downto 0);                      -- tx_cal_busy
+			tx_clkout               : out std_logic_vector(3 downto 0);                      -- clk
+			tx_coreclkin            : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- clk
+			tx_digitalreset         : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- tx_digitalreset
+			tx_parallel_data        : in  std_logic_vector(159 downto 0) := (others => 'X'); -- tx_parallel_data
+			tx_serial_clk0          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- clk
+			tx_serial_data          : out std_logic_vector(3 downto 0);                      -- tx_serial_data
+			unused_rx_parallel_data : out std_logic_vector(351 downto 0);                    -- unused_rx_parallel_data
+			unused_tx_parallel_data : in  std_logic_vector(351 downto 0) := (others => 'X')  -- unused_tx_parallel_data
+		);
+	end component ip_xcvr_phy_4_40_125_5000;
+
 -- ./a10/ip/ip_xcvr_phy_4_40_125_5000_enh/ip_xcvr_phy_4_40_125_5000_enh.cmp
 	component ip_xcvr_phy_4_40_125_5000_enh is
 		port (
@@ -288,8 +324,8 @@ package cmp is
 		);
 	end component ip_xcvr_phy_4_40_125_5000_enh;
 
--- ./a10/ip/ip_xcvr_phy_4_40_125_5000/ip_xcvr_phy_4_40_125_5000.cmp
-	component ip_xcvr_phy_4_40_125_5000 is
+-- ./a10/ip/ip_xcvr_phy_4_40_125_6250/ip_xcvr_phy_4_40_125_6250.cmp
+	component ip_xcvr_phy_4_40_125_6250 is
 		port (
 			reconfig_write          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- write
 			reconfig_read           : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- read
@@ -322,7 +358,7 @@ package cmp is
 			unused_rx_parallel_data : out std_logic_vector(351 downto 0);                    -- unused_rx_parallel_data
 			unused_tx_parallel_data : in  std_logic_vector(351 downto 0) := (others => 'X')  -- unused_tx_parallel_data
 		);
-	end component ip_xcvr_phy_4_40_125_5000;
+	end component ip_xcvr_phy_4_40_125_6250;
 
 -- ./a10/ip/ip_xcvr_phy_4_40_125_6250_enh/ip_xcvr_phy_4_40_125_6250_enh.cmp
 	component ip_xcvr_phy_4_40_125_6250_enh is
@@ -361,42 +397,6 @@ package cmp is
 		);
 	end component ip_xcvr_phy_4_40_125_6250_enh;
 
--- ./a10/ip/ip_xcvr_phy_4_40_125_6250/ip_xcvr_phy_4_40_125_6250.cmp
-	component ip_xcvr_phy_4_40_125_6250 is
-		port (
-			reconfig_write          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- write
-			reconfig_read           : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- read
-			reconfig_address        : in  std_logic_vector(11 downto 0)  := (others => 'X'); -- address
-			reconfig_writedata      : in  std_logic_vector(31 downto 0)  := (others => 'X'); -- writedata
-			reconfig_readdata       : out std_logic_vector(31 downto 0);                     -- readdata
-			reconfig_waitrequest    : out std_logic_vector(0 downto 0);                      -- waitrequest
-			reconfig_clk            : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- clk
-			reconfig_reset          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- reset
-			rx_analogreset          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_analogreset
-			rx_bitslip              : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_bitslip
-			rx_cal_busy             : out std_logic_vector(3 downto 0);                      -- rx_cal_busy
-			rx_cdr_refclk0          : in  std_logic                      := 'X';             -- clk
-			rx_clkout               : out std_logic_vector(3 downto 0);                      -- clk
-			rx_coreclkin            : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- clk
-			rx_digitalreset         : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_digitalreset
-			rx_is_lockedtodata      : out std_logic_vector(3 downto 0);                      -- rx_is_lockedtodata
-			rx_is_lockedtoref       : out std_logic_vector(3 downto 0);                      -- rx_is_lockedtoref
-			rx_parallel_data        : out std_logic_vector(159 downto 0);                    -- rx_parallel_data
-			rx_serial_data          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_serial_data
-			rx_seriallpbken         : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- rx_seriallpbken
-			tx_analogreset          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- tx_analogreset
-			tx_cal_busy             : out std_logic_vector(3 downto 0);                      -- tx_cal_busy
-			tx_clkout               : out std_logic_vector(3 downto 0);                      -- clk
-			tx_coreclkin            : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- clk
-			tx_digitalreset         : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- tx_digitalreset
-			tx_parallel_data        : in  std_logic_vector(159 downto 0) := (others => 'X'); -- tx_parallel_data
-			tx_serial_clk0          : in  std_logic_vector(3 downto 0)   := (others => 'X'); -- clk
-			tx_serial_data          : out std_logic_vector(3 downto 0);                      -- tx_serial_data
-			unused_rx_parallel_data : out std_logic_vector(351 downto 0);                    -- unused_rx_parallel_data
-			unused_tx_parallel_data : in  std_logic_vector(351 downto 0) := (others => 'X')  -- unused_tx_parallel_data
-		);
-	end component ip_xcvr_phy_4_40_125_6250;
-
 -- ./a10/ip/ip_xcvr_phy_6_40_125_10000_enh/ip_xcvr_phy_6_40_125_10000_enh.cmp
 	component ip_xcvr_phy_6_40_125_10000_enh is
 		port (
@@ -433,6 +433,42 @@ package cmp is
 			unused_tx_parallel_data : in  std_logic_vector(527 downto 0) := (others => 'X')  -- unused_tx_parallel_data
 		);
 	end component ip_xcvr_phy_6_40_125_10000_enh;
+
+-- ./a10/ip/ip_xcvr_phy_6_40_125_5000/ip_xcvr_phy_6_40_125_5000.cmp
+	component ip_xcvr_phy_6_40_125_5000 is
+		port (
+			reconfig_write          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- write
+			reconfig_read           : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- read
+			reconfig_address        : in  std_logic_vector(12 downto 0)  := (others => 'X'); -- address
+			reconfig_writedata      : in  std_logic_vector(31 downto 0)  := (others => 'X'); -- writedata
+			reconfig_readdata       : out std_logic_vector(31 downto 0);                     -- readdata
+			reconfig_waitrequest    : out std_logic_vector(0 downto 0);                      -- waitrequest
+			reconfig_clk            : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- clk
+			reconfig_reset          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- reset
+			rx_analogreset          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_analogreset
+			rx_bitslip              : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_bitslip
+			rx_cal_busy             : out std_logic_vector(5 downto 0);                      -- rx_cal_busy
+			rx_cdr_refclk0          : in  std_logic                      := 'X';             -- clk
+			rx_clkout               : out std_logic_vector(5 downto 0);                      -- clk
+			rx_coreclkin            : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- clk
+			rx_digitalreset         : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_digitalreset
+			rx_is_lockedtodata      : out std_logic_vector(5 downto 0);                      -- rx_is_lockedtodata
+			rx_is_lockedtoref       : out std_logic_vector(5 downto 0);                      -- rx_is_lockedtoref
+			rx_parallel_data        : out std_logic_vector(239 downto 0);                    -- rx_parallel_data
+			rx_serial_data          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_serial_data
+			rx_seriallpbken         : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_seriallpbken
+			tx_analogreset          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- tx_analogreset
+			tx_cal_busy             : out std_logic_vector(5 downto 0);                      -- tx_cal_busy
+			tx_clkout               : out std_logic_vector(5 downto 0);                      -- clk
+			tx_coreclkin            : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- clk
+			tx_digitalreset         : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- tx_digitalreset
+			tx_parallel_data        : in  std_logic_vector(239 downto 0) := (others => 'X'); -- tx_parallel_data
+			tx_serial_clk0          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- clk
+			tx_serial_data          : out std_logic_vector(5 downto 0);                      -- tx_serial_data
+			unused_rx_parallel_data : out std_logic_vector(527 downto 0);                    -- unused_rx_parallel_data
+			unused_tx_parallel_data : in  std_logic_vector(527 downto 0) := (others => 'X')  -- unused_tx_parallel_data
+		);
+	end component ip_xcvr_phy_6_40_125_5000;
 
 -- ./a10/ip/ip_xcvr_phy_6_40_125_5000_enh/ip_xcvr_phy_6_40_125_5000_enh.cmp
 	component ip_xcvr_phy_6_40_125_5000_enh is
@@ -471,8 +507,8 @@ package cmp is
 		);
 	end component ip_xcvr_phy_6_40_125_5000_enh;
 
--- ./a10/ip/ip_xcvr_phy_6_40_125_5000/ip_xcvr_phy_6_40_125_5000.cmp
-	component ip_xcvr_phy_6_40_125_5000 is
+-- ./a10/ip/ip_xcvr_phy_6_40_125_6250/ip_xcvr_phy_6_40_125_6250.cmp
+	component ip_xcvr_phy_6_40_125_6250 is
 		port (
 			reconfig_write          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- write
 			reconfig_read           : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- read
@@ -505,7 +541,7 @@ package cmp is
 			unused_rx_parallel_data : out std_logic_vector(527 downto 0);                    -- unused_rx_parallel_data
 			unused_tx_parallel_data : in  std_logic_vector(527 downto 0) := (others => 'X')  -- unused_tx_parallel_data
 		);
-	end component ip_xcvr_phy_6_40_125_5000;
+	end component ip_xcvr_phy_6_40_125_6250;
 
 -- ./a10/ip/ip_xcvr_phy_6_40_125_6250_enh/ip_xcvr_phy_6_40_125_6250_enh.cmp
 	component ip_xcvr_phy_6_40_125_6250_enh is
@@ -543,42 +579,6 @@ package cmp is
 			unused_tx_parallel_data : in  std_logic_vector(527 downto 0) := (others => 'X')  -- unused_tx_parallel_data
 		);
 	end component ip_xcvr_phy_6_40_125_6250_enh;
-
--- ./a10/ip/ip_xcvr_phy_6_40_125_6250/ip_xcvr_phy_6_40_125_6250.cmp
-	component ip_xcvr_phy_6_40_125_6250 is
-		port (
-			reconfig_write          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- write
-			reconfig_read           : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- read
-			reconfig_address        : in  std_logic_vector(12 downto 0)  := (others => 'X'); -- address
-			reconfig_writedata      : in  std_logic_vector(31 downto 0)  := (others => 'X'); -- writedata
-			reconfig_readdata       : out std_logic_vector(31 downto 0);                     -- readdata
-			reconfig_waitrequest    : out std_logic_vector(0 downto 0);                      -- waitrequest
-			reconfig_clk            : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- clk
-			reconfig_reset          : in  std_logic_vector(0 downto 0)   := (others => 'X'); -- reset
-			rx_analogreset          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_analogreset
-			rx_bitslip              : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_bitslip
-			rx_cal_busy             : out std_logic_vector(5 downto 0);                      -- rx_cal_busy
-			rx_cdr_refclk0          : in  std_logic                      := 'X';             -- clk
-			rx_clkout               : out std_logic_vector(5 downto 0);                      -- clk
-			rx_coreclkin            : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- clk
-			rx_digitalreset         : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_digitalreset
-			rx_is_lockedtodata      : out std_logic_vector(5 downto 0);                      -- rx_is_lockedtodata
-			rx_is_lockedtoref       : out std_logic_vector(5 downto 0);                      -- rx_is_lockedtoref
-			rx_parallel_data        : out std_logic_vector(239 downto 0);                    -- rx_parallel_data
-			rx_serial_data          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_serial_data
-			rx_seriallpbken         : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- rx_seriallpbken
-			tx_analogreset          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- tx_analogreset
-			tx_cal_busy             : out std_logic_vector(5 downto 0);                      -- tx_cal_busy
-			tx_clkout               : out std_logic_vector(5 downto 0);                      -- clk
-			tx_coreclkin            : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- clk
-			tx_digitalreset         : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- tx_digitalreset
-			tx_parallel_data        : in  std_logic_vector(239 downto 0) := (others => 'X'); -- tx_parallel_data
-			tx_serial_clk0          : in  std_logic_vector(5 downto 0)   := (others => 'X'); -- clk
-			tx_serial_data          : out std_logic_vector(5 downto 0);                      -- tx_serial_data
-			unused_rx_parallel_data : out std_logic_vector(527 downto 0);                    -- unused_rx_parallel_data
-			unused_tx_parallel_data : in  std_logic_vector(527 downto 0) := (others => 'X')  -- unused_tx_parallel_data
-		);
-	end component ip_xcvr_phy_6_40_125_6250;
 
 -- ./a10/ip/ip_xcvr_reset_2_100/ip_xcvr_reset_2_100.cmp
 	component ip_xcvr_reset_2_100 is

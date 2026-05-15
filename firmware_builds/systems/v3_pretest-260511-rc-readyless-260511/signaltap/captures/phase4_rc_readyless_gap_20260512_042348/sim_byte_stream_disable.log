@@ -1,0 +1,45 @@
+Reading pref.tcl
+
+# 2026.1_1
+
+# ** Note: (vsim-220) '/data1/questaone_sim-2026.1_1/questasim/linux_x86_64/../questa.ini' is used as the ini file.
+# vsim -c -work work_emu_mutrig_central -t ps emulator_mutrig -do "force -freeze i_clk 0 0, 1 4000 -repeat 8000; force -freeze i_rst 0 0; force -freeze asi_ctrl_data 9'b000001000 0; force -freeze asi_ctrl_valid 1 0; force -freeze coe_inject_pulse 0 0; force -freeze avs_csr_address 0 0; force -freeze avs_csr_read 0 0; force -freeze avs_csr_write 0 0; force -freeze avs_csr_writedata 0 0; run 64 ns; puts "BYTE_STREAM_ENABLE=0"; puts "tx_valid=[examine -radix binary aso_tx8b1k_valid]"; puts "tx_data=[examine -radix hex aso_tx8b1k_data]"; quit -f" -GLANE_COUNT=1 -GBYTE_STREAM_ENABLE=0 
+# Start time: 04:33:23 on May 12,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# //  Questa Sim-64
+# //  Version 2026.1_1 linux_x86_64 Mar  2 2026
+# //
+# // Unpublished work. Copyright 2026 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# Loading sv_std.std
+# Loading work.be_mutrig_pkg(fast)
+# Loading work.frontend_ticket_bus_pkg(fast)
+# Loading work.emulator_mutrig(fast)
+# force -freeze i_clk 0 0, 1 4000 -repeat 8000
+#  force -freeze i_rst 0 0
+#  force -freeze asi_ctrl_data 9'b000001000 0
+#  force -freeze asi_ctrl_valid 1 0
+#  force -freeze coe_inject_pulse 0 0
+#  force -freeze avs_csr_address 0 0
+#  force -freeze avs_csr_read 0 0
+#  force -freeze avs_csr_write 0 0
+#  force -freeze avs_csr_writedata 0 0
+#  run 64 ns
+#  puts "BYTE_STREAM_ENABLE=0"
+BYTE_STREAM_ENABLE=0
+#  puts "tx_valid=[examine -radix binary aso_tx8b1k_valid]"
+tx_valid=0
+#  puts "tx_data=[examine -radix hex aso_tx8b1k_data]"
+tx_data=1bc
+#  quit -f
+# End time: 04:33:23 on May 12,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0

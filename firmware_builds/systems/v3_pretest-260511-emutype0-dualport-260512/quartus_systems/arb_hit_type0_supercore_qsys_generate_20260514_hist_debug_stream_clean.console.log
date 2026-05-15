@@ -1,0 +1,136 @@
+qsys-generate input: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore.qsys
+qsys-generate output-directory: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore
+qsys-generate synthesis-directory: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore/synthesis
+qsys-generate search-path-count: 74
+qsys-generate isolated-catalog: /tmp/qsys_user_catalog.NqM1Aw
+qsys-generate clear-output-directory: yes
+qsys-generate search-path: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/swb,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/CAM,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_frame_assembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy/max10_prog_avmm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firefly_xcvr_i2c_master,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/high_performance_counter_array,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ip_8b10b_decoder,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/lvds_error_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core14,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core20,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_driver,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top/ex_design/qsys_interface_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/avst_snoop_splitter,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/conduit2rst,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_counter_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_issp_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/histogram_snoop_selector,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/hit_type0_readyless_mux4,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/inactive_reset_source,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/pulse_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_channel_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_reset_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_timestamp_processor,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/tb/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_rq_fetcher,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_subsystem,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference/feb_system_v2_snapshot_20260415,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p11,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/v26_0_0331,$
+
+2026.05.14.12:22:04 Info: Saving generation log to /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore/arb_hit_type0_supercore_generation.rpt
+2026.05.14.12:22:04 Info: Starting: <b>Create HDL design files for synthesis</b>
+2026.05.14.12:22:04 Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+2026.05.14.12:22:04 Info: Loading quartus_systems/arb_hit_type0_supercore.qsys
+2026.05.14.12:22:04 Info: Reading input file
+2026.05.14.12:22:04 Info: Adding clk_bridge [altera_clock_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module clk_bridge
+2026.05.14.12:22:04 Info: Adding csr_pipe_0 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_0
+2026.05.14.12:22:04 Info: Adding csr_pipe_1 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_1
+2026.05.14.12:22:04 Info: Adding csr_pipe_2 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_2
+2026.05.14.12:22:04 Info: Adding csr_pipe_3 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_3
+2026.05.14.12:22:04 Info: Adding csr_pipe_4 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_4
+2026.05.14.12:22:04 Info: Adding csr_pipe_5 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_5
+2026.05.14.12:22:04 Info: Adding csr_pipe_6 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_6
+2026.05.14.12:22:04 Info: Adding csr_pipe_7 [altera_avalon_mm_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module csr_pipe_7
+2026.05.14.12:22:04 Info: Adding lane_0 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_0: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_0
+2026.05.14.12:22:04 Info: Adding lane_1 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_1: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_1
+2026.05.14.12:22:04 Info: Adding lane_2 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_2: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_2
+2026.05.14.12:22:04 Info: Adding lane_3 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_3: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_3
+2026.05.14.12:22:04 Info: Adding lane_4 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_4: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_4
+2026.05.14.12:22:04 Info: Adding lane_5 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_5: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_5
+2026.05.14.12:22:04 Info: Adding lane_6 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_6: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_6
+2026.05.14.12:22:04 Info: Adding lane_7 [arb_hit_type0 26.5.0.511]
+2026.05.14.12:22:04 Warning: lane_7: Used arb_hit_type0 <b>26.6.0.512</b> (instead of 26.5.0.511)
+2026.05.14.12:22:04 Info: Parameterizing module lane_7
+2026.05.14.12:22:04 Info: Adding reset_bridge [altera_reset_bridge 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module reset_bridge
+2026.05.14.12:22:04 Info: Adding run_ctrl_splitter [altera_avalon_st_splitter 18.1]
+2026.05.14.12:22:04 Info: Parameterizing module run_ctrl_splitter
+2026.05.14.12:22:04 Info: Building connections
+2026.05.14.12:22:04 Info: Parameterizing connections
+2026.05.14.12:22:04 Info: Validating
+2026.05.14.12:22:04 Info: Done reading input file
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_0.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_0.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_0.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_1.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_1.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_1.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_2.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_2.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_2.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_3.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_3.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_3.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_4.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_4.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_4.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_5.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_5.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_5.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_6.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_6.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_6.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_7.real_in: Signal <b>asi_real_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_7.emu_in: Signal <b>asi_emu_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:04 Warning: arb_hit_type0_supercore.lane_7.selected_out: Signal <b>aso_endofrun</b> has unknown type <b>endofrun</b>
+2026.05.14.12:22:05 Info: arb_hit_type0_supercore: Generating <b>arb_hit_type0_supercore</b> "<b>arb_hit_type0_supercore</b>" for QUARTUS_SYNTH
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:05 Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+2026.05.14.12:22:06 Info: csr_pipe_0: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_avalon_mm_bridge</b> "<b>csr_pipe_0</b>"
+2026.05.14.12:22:06 Info: lane_0: "<b>arb_hit_type0_supercore</b>" instantiated <b>arb_hit_type0</b> "<b>lane_0</b>"
+2026.05.14.12:22:06 Info: run_ctrl_splitter: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_avalon_st_splitter</b> "<b>run_ctrl_splitter</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_0: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_0</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_1: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_1</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_2: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_2</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_3: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_3</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_4: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_4</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_5: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_5</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_6: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_6</b>"
+2026.05.14.12:22:06 Info: mm_interconnect_7: "<b>arb_hit_type0_supercore</b>" instantiated <b>altera_mm_interconnect</b> "<b>mm_interconnect_7</b>"
+2026.05.14.12:22:06 Info: csr_pipe_0_m0_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_master_translator</b> "<b>csr_pipe_0_m0_translator</b>"
+2026.05.14.12:22:06 Info: lane_0_csr_translator: "<b>mm_interconnect_0</b>" instantiated <b>altera_merlin_slave_translator</b> "<b>lane_0_csr_translator</b>"
+2026.05.14.12:22:06 Info: arb_hit_type0_supercore: Done "<b>arb_hit_type0_supercore</b>" with 14 modules, 19 files
+2026.05.14.12:22:06 Info: qsys-generate succeeded.
+2026.05.14.12:22:06 Info: Finished: <b>Create HDL design files for synthesis</b>

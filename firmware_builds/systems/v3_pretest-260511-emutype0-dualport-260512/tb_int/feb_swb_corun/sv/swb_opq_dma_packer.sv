@@ -8,10 +8,10 @@
 //          The OPQ already does the per-lane time-merge; this module just
 //          packs the resulting word stream into 256b DMA writes.
 //
-// Version   : 26.3.10
+// Version   : 26.3.11
 // Date      : 20260514
-// Change    : Preserve OPQ words across DMA halffull backpressure with a
-//             registered-pop elastic FIFO.
+// Change    : Expose OPQ ready so RDMA backpressure reaches the upstream
+//             packet merger before the elastic FIFO overflows.
 //
 // Outputs: 256b DMA word stream — wen, end_of_event, halffull accounting.
 //          end_of_event is asserted on the last beat of each event boundary,
@@ -41,8 +41,9 @@ module swb_opq_dma_packer #(
     input  wire                          i_opq_valid,
     input  wire                          i_opq_sop,
     input  wire                          i_opq_eop,
+    output wire                          o_opq_ready,
 
-    // Backpressure (from PCIe DMA writeback)
+    // Backpressure (from PCIe RDMA writeback)
     input  wire                          i_dma_halffull,
 
     // DMA writeback
@@ -96,16 +97,17 @@ module swb_opq_dma_packer #(
     wire                   fifo_full;
     wire                   fifo_read_req;
     wire                   fifo_write;
-    wire                   fifo_overflow;
+    wire                   opq_stall;
     wire                   fifo_pop_accept;
 
     assign fifo_empty    = (fifo_count == '0);
     assign fifo_full     = (fifo_count == FIFO_DEPTH_COUNT);
+    assign o_opq_ready   = i_reset_n && !fifo_full;
     assign fifo_pop_accept = fifo_pop_valid && !i_dma_halffull;
     assign fifo_read_req = !fifo_empty && !i_dma_halffull &&
                            (!fifo_pop_valid || fifo_pop_accept);
-    assign fifo_write    = i_opq_valid && !fifo_full;
-    assign fifo_overflow = i_opq_valid && fifo_full;
+    assign fifo_write    = i_opq_valid && o_opq_ready;
+    assign opq_stall     = i_opq_valid && !o_opq_ready;
 
     function automatic logic [FIFO_PTR_W-1:0] fifo_ptr_next(
         input logic [FIFO_PTR_W-1:0] ptr
@@ -142,7 +144,7 @@ module swb_opq_dma_packer #(
 
             if ((i_dma_halffull && (i_opq_valid || !fifo_empty ||
                                     fifo_pop_valid)) ||
-                fifo_overflow) begin
+                opq_stall) begin
                 o_halt_cnt <= o_halt_cnt + 1;
             end
 
@@ -175,15 +177,6 @@ module swb_opq_dma_packer #(
                     fifo_count    <= fifo_count;
                 end
             endcase
-
-            // synthesis translate_off
-            if (fifo_overflow) begin
-                $fatal(1,
-                       "swb_opq_dma_packer FIFO overflow: depth=%0d data=0x%08h datak=0x%0h eop=%0b",
-                       BACKPRESSURE_FIFO_DEPTH, i_opq_data, i_opq_datak,
-                       i_opq_eop);
-            end
-            // synthesis translate_on
 
             if (fifo_pop_accept) begin
                 emit_data = accum;

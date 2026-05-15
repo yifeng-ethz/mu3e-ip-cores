@@ -1,0 +1,65 @@
+2026.05.13.00:31:33 Info: Doing: <b>qsys-script --cmd=set ::qsys_target {/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys} --system-file=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/swb,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/CAM,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_frame_assembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy/max10_prog_avmm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firefly_xcvr_i2c_master,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/high_performance_counter_array,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ip_8b10b_decoder,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/lvds_error_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core14,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core20,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_driver,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top/ex_design/qsys_interface_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/avst_snoop_splitter,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/conduit2rst,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_counter_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_issp_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/histogram_snoop_selector,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/hit_type0_readyless_mux4,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/inactive_reset_source,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/pulse_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_channel_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_reset_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_timestamp_processor,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/tb/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_rq_fetcher,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_subsystem,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference/feb_system_v2_snapshot_20260415,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p11,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/v26_0_0331,$ --script=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/script/add_mclk125_reset_bridge_v3.tcl</b>
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync NUM_RESET_INPUTS 1
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync OUTPUT_RESET_SYNC_EDGES deassert
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync RESET_REQUEST_PRESENT 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync RESET_REQ_EARLY_DSRT_TIME 1
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync RESET_REQ_WAIT_TIME 1
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync MIN_RST_ASSERTION_TIME 3
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync SYNC_DEPTH 2
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN0 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN1 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN2 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN3 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN4 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN5 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN6 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN7 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN8 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN9 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN10 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN11 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN12 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN13 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN14 0
+2026.05.13.00:31:39 Info: set_instance_parameter_value monitor_reset_sync USE_RESET_REQUEST_IN15 0
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_instances 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: get_connections 
+2026.05.13.00:31:39 Info: remove_dangling_connections 
+2026.05.13.00:31:39 Info: save_system 

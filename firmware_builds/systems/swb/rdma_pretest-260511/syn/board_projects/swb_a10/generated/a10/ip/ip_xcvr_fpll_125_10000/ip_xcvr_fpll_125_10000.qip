@@ -2,7 +2,7 @@ set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_12
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_TOOL_VERSION "18.1"
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_TOOL_ENV "Qsys"
 set_global_assignment -library "ip_xcvr_fpll_125_10000" -name SOPCINFO_FILE [file join $::quartus(qip_path) "../ip_xcvr_fpll_125_10000.sopcinfo"]
-set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name SLD_INFO "QSYS_NAME ip_xcvr_fpll_125_10000 HAS_SOPCINFO 1 GENERATION_ID 1778496098"
+set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name SLD_INFO "QSYS_NAME ip_xcvr_fpll_125_10000 HAS_SOPCINFO 1 GENERATION_ID 1778735447"
 set_global_assignment -library "ip_xcvr_fpll_125_10000" -name MISC_FILE [file join $::quartus(qip_path) "ip_xcvr_fpll_125_10000.cmp"]
 set_global_assignment -library "ip_xcvr_fpll_125_10000" -name SLD_FILE [file join $::quartus(qip_path) "ip_xcvr_fpll_125_10000.debuginfo"]
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_TARGETED_DEVICE_FAMILY "Arria 10"
@@ -16,7 +16,7 @@ set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_12
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_REPORT_HIERARCHY "On"
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_INTERNAL "Off"
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_VERSION "MS4w"
-set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTc3ODQ5NjA5OA==::QXV0byBHRU5FUkFUSU9OX0lE"
+set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_PARAMETER "QVVUT19HRU5FUkFUSU9OX0lE::MTc3ODczNTQ0Nw==::QXV0byBHRU5FUkFUSU9OX0lE"
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfRkFNSUxZ::QXJyaWEgMTA=::QXV0byBERVZJQ0VfRkFNSUxZ"
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0U=::MTBBWDExNU4yRjQ1RTFTRw==::QXV0byBERVZJQ0U="
 set_global_assignment -entity "ip_xcvr_fpll_125_10000" -library "ip_xcvr_fpll_125_10000" -name IP_COMPONENT_PARAMETER "QVVUT19ERVZJQ0VfU1BFRURHUkFERQ==::MQ==::QXV0byBERVZJQ0VfU1BFRURHUkFERQ=="

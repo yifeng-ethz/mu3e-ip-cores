@@ -18,33 +18,59 @@ Info: ip_xcvr_phy_6_40_125_6250: Running transform generation_view_transform too
 Info: xcvr_native_a10_0: Running transform generation_view_transform
 Info: xcvr_native_a10_0: Running transform generation_view_transform took 0.000s
 Info: ip_xcvr_phy_6_40_125_6250: Running transform merlin_avalon_transform
-Info: ip_xcvr_phy_6_40_125_6250: Running transform merlin_avalon_transform took 0.026s
+Info: ip_xcvr_phy_6_40_125_6250: Running transform merlin_avalon_transform took 0.022s
 Info: ip_xcvr_phy_6_40_125_6250: "Naming system components in system: ip_xcvr_phy_6_40_125_6250"
 Info: ip_xcvr_phy_6_40_125_6250: "Processing generation queue"
 Info: ip_xcvr_phy_6_40_125_6250: "Generating: ip_xcvr_phy_6_40_125_6250"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/synth/ip_xcvr_phy_6_40_125_6250.vhd could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_6_40_125_6250_pkg.vhd could not be written to."
 Info: ip_xcvr_phy_6_40_125_6250: "Generating: ip_xcvr_phy_6_40_125_6250_altera_xcvr_native_a10_181_77lrkra"
 Info: xcvr_native_a10_0: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_resync.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./alt_xcvr_arbiter.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_arbiter.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_arbiter.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./twentynm_pcs.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_pcs.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/twentynm_pcs.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./twentynm_pma.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_pma.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/twentynm_pma.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/twentynm_xcvr_avmm.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./twentynm_xcvr_native.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_native.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/twentynm_xcvr_native.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./altera_xcvr_native_a10_functions_h.sv SYSTEM_VERILOG PATH ..//altera_xcvr_native_a10_functions_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_functions_h.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ..//a10_avmm_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/a10_avmm_h.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./alt_xcvr_native_pipe_retry.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_pipe_retry.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_native_pipe_retry.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./alt_xcvr_native_avmm_csr.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_avmm_csr.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_native_avmm_csr.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./alt_xcvr_native_prbs_accum.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_prbs_accum.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_native_prbs_accum.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./alt_xcvr_native_odi_accel.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_odi_accel.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_native_odi_accel.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./alt_xcvr_native_rcfg_arb.sv SYSTEM_VERILOG PATH ..//alt_xcvr_native_rcfg_arb.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_arb.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./altera_xcvr_native_a10_false_paths.sdc SDC PATH ..//altera_xcvr_native_a10_false_paths.sdc
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_false_paths.sdc could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./altera_xcvr_native_pcie_dfe_params_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/altera_xcvr_native_pcie_dfe_params_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_params_h.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./pcie_mgmt_commands_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_commands_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/pcie_mgmt_commands_h.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./pcie_mgmt_functions_h.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_functions_h.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/pcie_mgmt_functions_h.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./pcie_mgmt_program.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_program.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/pcie_mgmt_program.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./pcie_mgmt_cpu.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_cpu.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/pcie_mgmt_cpu.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./pcie_mgmt_master.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/pcie_mgmt_master.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/pcie_mgmt_master.sv could not be written to."
 Info: xcvr_native_a10_0: add_fileset_file ./altera_xcvr_native_pcie_dfe_ip.sv SYSTEM_VERILOG PATH ../pcie_dfe_ip/altera_xcvr_native_pcie_dfe_ip.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_ip.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/plain_files.txt could not be written to."
 Info: xcvr_native_a10_0: Building configuration data for reconfiguration profile 0
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_6_40_125_6250_altera_xcvr_native_a10_181_77lrkra.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_6_40_125_6250/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_opt_logic_77lrkra.sv could not be written to."
 Info: ip_xcvr_phy_6_40_125_6250: Done "ip_xcvr_phy_6_40_125_6250" with 2 modules, 26 files
-Info: qsys-generate succeeded.
+Error: qsys-generate failed with exit code 1: 26 Errors, 0 Warnings
 Info: Finished: Create HDL design files for synthesis

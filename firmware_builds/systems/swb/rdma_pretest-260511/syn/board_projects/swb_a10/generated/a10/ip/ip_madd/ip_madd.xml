@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2026.05.11.12:42:55"
+ date="2026.05.14.07:11:36"
  outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_madd/">
  <perimeter>
   <parameter
@@ -70,7 +70,7 @@
   </interface>
  </perimeter>
  <entity kind="ip_madd" version="1.0" name="ip_madd">
-  <parameter name="AUTO_GENERATION_ID" value="1778496175" />
+  <parameter name="AUTO_GENERATION_ID" value="1778735496" />
   <parameter name="AUTO_DEVICE" value="10AX115N2F45E1SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_UNIQUE_ID" value="" />

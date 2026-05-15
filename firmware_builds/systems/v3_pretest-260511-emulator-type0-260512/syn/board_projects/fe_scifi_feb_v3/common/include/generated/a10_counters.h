@@ -1,0 +1,54 @@
+/************************************************
+* Register map header file 
+* Automatically generated from local register description: a10_counters.vhd
+* On 2026-04-13T01:02:20.964345
+************************************************/
+
+#ifndef A10_COUNTERS__H 
+#define A10_COUNTERS__H 
+
+
+#define SWB_BANK_BUILDER_IDLE_NOT_HEADER_CNT		0x00
+#define SWB_BANK_BUILDER_SKIP_EVENT_CNT		0x01
+#define SWB_BANK_BUILDER_EVENT_CNT		0x02
+#define SWB_BANK_BUILDER_TAG_FIFO_FULL_CNT		0x03
+#define SWB_DEBUG_RO_CNT		0x04
+#define SWB_STREAM_FIFO_FULL_CNT		0x00
+#define SWB_STREAM_DEBUG_FIFO_ALFULL_CNT		0x01
+#define DUMMY_0_CNT		0x02
+#define DUMMY_1_CNT		0x03
+#define DUMMY_2_CNT		0x04
+#define DUMMY_3_CNT		0x05
+#define SWB_EVENTS_TO_FARM_CNT		0x06
+#define SWB_MERGER_DEBUG_FIFO_ALFULL_CNT		0x07
+#define SWB_DATAPATH_CNT		0x08
+#define SWB_MERGER_HEADER_CNT		0x00
+#define SWB_MERGER_SHEADER_CNT		0x01
+#define SWB_MERGER_HIT_CNT		0x02
+#define SWB_TREE_CNT		0x03
+#define SWB_LAYER0_OUT_CNT		0x04
+#define SWB_LAYER1_OUT_CNT		0x02
+#define SWB_LAYER2_OUT_CNT		0x01
+#define SWB_LINK_FIFO_ALMOST_FULL_CNT		0x00
+#define SWB_LINK_FIFO_FULL_CNT		0x01
+#define SWB_SKIP_EVENT_CNT		0x02
+#define SWB_EVENT_CNT		0x03
+#define SWB_SUB_HEADER_CNT		0x04
+#define SWB_LINK_CNT		0x05
+#define FARM_LINK_FIFO_ALMOST_FULL_CNT		0x00
+#define FARM_LINK_FIFO_FULL_CNT		0x01
+#define FARM_SKIP_EVENT_CNT		0x02
+#define FARM_EVENT_CNT		0x03
+#define FARM_SUB_HEADER_CNT		0x04
+#define FARM_LINK_CNT		0x03
+#define FARM_DDR_BUILDER_IDLE_NOT_HEADER_CNT		0x00
+#define FARM_DDR_BUILDER_SKIP_EVENT_CNT		0x01
+#define FARM_DDR_BUILDER_EVENT_CNT		0x02
+#define FARM_DDR_BUILDER_TAG_FIFO_FULL_CNT		0x03
+#define FARM_BANK_BUILDER_IDLE_NOT_HEADER_CNT		0x00
+#define FARM_BANK_BUILDER_SKIP_EVENT_CNT		0x01
+#define FARM_BANK_BUILDER_EVENT_CNT		0x02
+#define FARM_BANK_BUILDER_TAG_FIFO_FULL_CNT		0x03
+
+
+#endif  //#ifndef A10_COUNTERS__H 

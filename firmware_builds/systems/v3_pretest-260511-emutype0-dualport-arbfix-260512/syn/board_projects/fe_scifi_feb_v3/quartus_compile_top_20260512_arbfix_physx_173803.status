@@ -1,0 +1,5 @@
+command=quartus_sh --flow compile top -c top
+start=2026-05-12T17:38:03+02:00
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_arbfix_physx_173803.console.log
+end=2026-05-12T18:28:01+02:00
+exit_code=0

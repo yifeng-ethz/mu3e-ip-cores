@@ -89,6 +89,7 @@ module feb_swb_corun_plain_tb;
   logic         dma_done;
   logic [255:0] opq_dma_data;
   logic [31:0]  opq_dma_datak;
+  logic         opq_dma_ready;
   logic         opq_dma_wren;
   logic         opq_dma_end_of_event;
   logic [31:0]  opq_dma_input_word_cnt;
@@ -228,6 +229,7 @@ module feb_swb_corun_plain_tb;
     .i_opq_valid(opq_valid && enable_dma),
     .i_opq_sop(opq_sop),
     .i_opq_eop(opq_eop),
+    .o_opq_ready(opq_dma_ready),
     .i_dma_halffull(dma_half_full),
     .o_dma_data(opq_dma_data),
     .o_dma_datak(opq_dma_datak),

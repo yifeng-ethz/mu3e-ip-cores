@@ -1,0 +1,358 @@
+2026.05.12.11:06:15 Info: Doing: <b>qsys-script --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/swb,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/CAM,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_frame_assembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy/max10_prog_avmm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firefly_xcvr_i2c_master,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/high_performance_counter_array,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ip_8b10b_decoder,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/lvds_error_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core14,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core20,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_driver,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top/ex_design/qsys_interface_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/avst_snoop_splitter,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/conduit2rst,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_counter_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_issp_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/histogram_snoop_selector,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/inactive_reset_source,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/pulse_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_channel_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_reset_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_timestamp_processor,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/tb/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_rq_fetcher,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_subsystem,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference/feb_system_v2_snapshot_20260415,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p11,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/v26_0_0331,$ --script=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/build_arb_hit_type0_supercore_qsys.tcl</b>
+2026.05.12.11:06:19 Info: create_system arb_hit_type0_supercore
+2026.05.12.11:06:19 Info: set_project_property DEVICE_FAMILY Arria V
+2026.05.12.11:06:19 Info: Info: The device and speed grade changed to the defaults of the device_family Arria V.
+2026.05.12.11:06:19 Info: set_project_property DEVICE 5AGXBA7D4F31C5
+2026.05.12.11:06:19 Info: set_project_property HIDE_FROM_IP_CATALOG false
+2026.05.12.11:06:19 Info: add_instance clk_bridge altera_clock_bridge 18.1
+2026.05.12.11:06:19 Info: set_instance_parameter_value clk_bridge EXPLICIT_CLOCK_RATE 0.0
+2026.05.12.11:06:19 Info: set_instance_parameter_value clk_bridge NUM_CLOCK_OUTPUTS 1
+2026.05.12.11:06:19 Info: add_instance reset_bridge altera_reset_bridge 18.1
+2026.05.12.11:06:19 Info: set_instance_parameter_value reset_bridge ACTIVE_LOW_RESET 0
+2026.05.12.11:06:19 Info: set_instance_parameter_value reset_bridge SYNCHRONOUS_EDGES deassert
+2026.05.12.11:06:19 Info: set_instance_parameter_value reset_bridge NUM_RESET_OUTPUTS 1
+2026.05.12.11:06:19 Info: set_instance_parameter_value reset_bridge USE_RESET_REQUEST 0
+2026.05.12.11:06:19 Info: add_instance run_ctrl_splitter altera_avalon_st_splitter 18.1
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter BITS_PER_SYMBOL 9
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter CHANNEL_WIDTH 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter DATA_WIDTH 9
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter ERROR_DESCRIPTOR 
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter ERROR_WIDTH 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter MAX_CHANNELS 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter NUMBER_OF_OUTPUTS 8
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter QUALIFY_VALID_OUT 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter READY_LATENCY 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter USE_CHANNEL 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter USE_DATA 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter USE_ERROR 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter USE_PACKETS 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter USE_READY 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value run_ctrl_splitter USE_VALID 1
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk reset_bridge.clk
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk run_ctrl_splitter.clk
+2026.05.12.11:06:20 Info: add_connection reset_bridge.out_reset run_ctrl_splitter.reset
+2026.05.12.11:06:20 Info: add_interface clk clock sink
+2026.05.12.11:06:20 Info: set_interface_property clk EXPORT_OF clk_bridge.in_clk
+2026.05.12.11:06:20 Info: add_interface rst reset sink
+2026.05.12.11:06:20 Info: set_interface_property rst EXPORT_OF reset_bridge.in_reset
+2026.05.12.11:06:20 Info: add_interface run_ctrl avalon_streaming sink
+2026.05.12.11:06:20 Info: set_interface_property run_ctrl EXPORT_OF run_ctrl_splitter.in
+2026.05.12.11:06:20 Info: add_instance lane_0 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 MODE_DEFAULT 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 FIFO_DEPTH 16
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 DEBUG_LEVEL 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 IP_UID 1095263280
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 INSTANCE_ID 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 VERSION_MAJOR 26
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 VERSION_MINOR 5
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 VERSION_PATCH 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 BUILD 511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 VERSION_DATE 20260511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_0 VERSION_GIT 0
+2026.05.12.11:06:20 Info: add_instance csr_pipe_0 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 DATA_WIDTH 32
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 SYMBOL_WIDTH 8
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 ADDRESS_WIDTH 5
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 ADDRESS_UNITS WORDS
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 MAX_BURST_SIZE 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 LINEWRAPBURSTS 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 PIPELINE_COMMAND 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 PIPELINE_RESPONSE 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_0 USE_RESPONSE 0
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk lane_0.clk
+2026.05.12.11:06:20 Info: add_connection reset_bridge.out_reset lane_0.rst
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk csr_pipe_0.clk
+2026.05.12.11:06:20 Info: add_connection reset_bridge.out_reset csr_pipe_0.reset
+2026.05.12.11:06:20 Info: add_connection run_ctrl_splitter.out0 lane_0.run_ctrl
+2026.05.12.11:06:20 Info: add_connection csr_pipe_0.m0 lane_0.csr
+2026.05.12.11:06:20 Info: add_interface csr_0 avalon slave
+2026.05.12.11:06:20 Info: set_interface_property csr_0 EXPORT_OF csr_pipe_0.s0
+2026.05.12.11:06:20 Info: add_interface real_in_0 avalon_streaming sink
+2026.05.12.11:06:20 Info: set_interface_property real_in_0 EXPORT_OF lane_0.real_in
+2026.05.12.11:06:20 Info: add_interface emu_in_0 avalon_streaming sink
+2026.05.12.11:06:20 Info: set_interface_property emu_in_0 EXPORT_OF lane_0.emu_in
+2026.05.12.11:06:20 Info: add_interface selected_out_0 avalon_streaming source
+2026.05.12.11:06:20 Info: set_interface_property selected_out_0 EXPORT_OF lane_0.selected_out
+2026.05.12.11:06:20 Info: add_instance lane_1 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 MODE_DEFAULT 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 FIFO_DEPTH 16
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 DEBUG_LEVEL 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 IP_UID 1095263280
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 INSTANCE_ID 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 VERSION_MAJOR 26
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 VERSION_MINOR 5
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 VERSION_PATCH 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 BUILD 511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 VERSION_DATE 20260511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_1 VERSION_GIT 0
+2026.05.12.11:06:20 Info: add_instance csr_pipe_1 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 DATA_WIDTH 32
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 SYMBOL_WIDTH 8
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 ADDRESS_WIDTH 5
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 ADDRESS_UNITS WORDS
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 MAX_BURST_SIZE 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 LINEWRAPBURSTS 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 PIPELINE_COMMAND 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 PIPELINE_RESPONSE 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_1 USE_RESPONSE 0
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk lane_1.clk
+2026.05.12.11:06:20 Info: add_connection reset_bridge.out_reset lane_1.rst
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk csr_pipe_1.clk
+2026.05.12.11:06:20 Info: add_connection reset_bridge.out_reset csr_pipe_1.reset
+2026.05.12.11:06:20 Info: add_connection run_ctrl_splitter.out1 lane_1.run_ctrl
+2026.05.12.11:06:20 Info: add_connection csr_pipe_1.m0 lane_1.csr
+2026.05.12.11:06:20 Info: add_interface csr_1 avalon slave
+2026.05.12.11:06:20 Info: set_interface_property csr_1 EXPORT_OF csr_pipe_1.s0
+2026.05.12.11:06:20 Info: add_interface real_in_1 avalon_streaming sink
+2026.05.12.11:06:20 Info: set_interface_property real_in_1 EXPORT_OF lane_1.real_in
+2026.05.12.11:06:20 Info: add_interface emu_in_1 avalon_streaming sink
+2026.05.12.11:06:20 Info: set_interface_property emu_in_1 EXPORT_OF lane_1.emu_in
+2026.05.12.11:06:20 Info: add_interface selected_out_1 avalon_streaming source
+2026.05.12.11:06:20 Info: set_interface_property selected_out_1 EXPORT_OF lane_1.selected_out
+2026.05.12.11:06:20 Info: add_instance lane_2 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 MODE_DEFAULT 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 FIFO_DEPTH 16
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 DEBUG_LEVEL 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 IP_UID 1095263280
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 INSTANCE_ID 2
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 VERSION_MAJOR 26
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 VERSION_MINOR 5
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 VERSION_PATCH 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 BUILD 511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 VERSION_DATE 20260511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_2 VERSION_GIT 0
+2026.05.12.11:06:20 Info: add_instance csr_pipe_2 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 DATA_WIDTH 32
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 SYMBOL_WIDTH 8
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 ADDRESS_WIDTH 5
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 ADDRESS_UNITS WORDS
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 MAX_BURST_SIZE 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 LINEWRAPBURSTS 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 PIPELINE_COMMAND 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 PIPELINE_RESPONSE 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value csr_pipe_2 USE_RESPONSE 0
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk lane_2.clk
+2026.05.12.11:06:20 Info: add_connection reset_bridge.out_reset lane_2.rst
+2026.05.12.11:06:20 Info: add_connection clk_bridge.out_clk csr_pipe_2.clk
+2026.05.12.11:06:20 Info: add_connection reset_bridge.out_reset csr_pipe_2.reset
+2026.05.12.11:06:20 Info: add_connection run_ctrl_splitter.out2 lane_2.run_ctrl
+2026.05.12.11:06:20 Info: add_connection csr_pipe_2.m0 lane_2.csr
+2026.05.12.11:06:20 Info: add_interface csr_2 avalon slave
+2026.05.12.11:06:20 Info: set_interface_property csr_2 EXPORT_OF csr_pipe_2.s0
+2026.05.12.11:06:20 Info: add_interface real_in_2 avalon_streaming sink
+2026.05.12.11:06:20 Info: set_interface_property real_in_2 EXPORT_OF lane_2.real_in
+2026.05.12.11:06:20 Info: add_interface emu_in_2 avalon_streaming sink
+2026.05.12.11:06:20 Info: set_interface_property emu_in_2 EXPORT_OF lane_2.emu_in
+2026.05.12.11:06:20 Info: add_interface selected_out_2 avalon_streaming source
+2026.05.12.11:06:20 Info: set_interface_property selected_out_2 EXPORT_OF lane_2.selected_out
+2026.05.12.11:06:20 Info: add_instance lane_3 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_3 MODE_DEFAULT 1
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_3 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_3 FIFO_DEPTH 16
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_3 DEBUG_LEVEL 0
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_3 IP_UID 1095263280
+2026.05.12.11:06:20 Info: set_instance_parameter_value lane_3 INSTANCE_ID 3
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_3 VERSION_MAJOR 26
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_3 VERSION_MINOR 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_3 VERSION_PATCH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_3 BUILD 511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_3 VERSION_DATE 20260511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_3 VERSION_GIT 0
+2026.05.12.11:06:21 Info: add_instance csr_pipe_3 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 DATA_WIDTH 32
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 SYMBOL_WIDTH 8
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 ADDRESS_WIDTH 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 ADDRESS_UNITS WORDS
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 MAX_BURST_SIZE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 LINEWRAPBURSTS 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 PIPELINE_COMMAND 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 PIPELINE_RESPONSE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_3 USE_RESPONSE 0
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk lane_3.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset lane_3.rst
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk csr_pipe_3.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset csr_pipe_3.reset
+2026.05.12.11:06:21 Info: add_connection run_ctrl_splitter.out3 lane_3.run_ctrl
+2026.05.12.11:06:21 Info: add_connection csr_pipe_3.m0 lane_3.csr
+2026.05.12.11:06:21 Info: add_interface csr_3 avalon slave
+2026.05.12.11:06:21 Info: set_interface_property csr_3 EXPORT_OF csr_pipe_3.s0
+2026.05.12.11:06:21 Info: add_interface real_in_3 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property real_in_3 EXPORT_OF lane_3.real_in
+2026.05.12.11:06:21 Info: add_interface emu_in_3 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property emu_in_3 EXPORT_OF lane_3.emu_in
+2026.05.12.11:06:21 Info: add_interface selected_out_3 avalon_streaming source
+2026.05.12.11:06:21 Info: set_interface_property selected_out_3 EXPORT_OF lane_3.selected_out
+2026.05.12.11:06:21 Info: add_instance lane_4 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 MODE_DEFAULT 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 FIFO_DEPTH 16
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 DEBUG_LEVEL 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 IP_UID 1095263280
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 INSTANCE_ID 4
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 VERSION_MAJOR 26
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 VERSION_MINOR 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 VERSION_PATCH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 BUILD 511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 VERSION_DATE 20260511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_4 VERSION_GIT 0
+2026.05.12.11:06:21 Info: add_instance csr_pipe_4 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 DATA_WIDTH 32
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 SYMBOL_WIDTH 8
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 ADDRESS_WIDTH 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 ADDRESS_UNITS WORDS
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 MAX_BURST_SIZE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 LINEWRAPBURSTS 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 PIPELINE_COMMAND 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 PIPELINE_RESPONSE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_4 USE_RESPONSE 0
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk lane_4.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset lane_4.rst
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk csr_pipe_4.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset csr_pipe_4.reset
+2026.05.12.11:06:21 Info: add_connection run_ctrl_splitter.out4 lane_4.run_ctrl
+2026.05.12.11:06:21 Info: add_connection csr_pipe_4.m0 lane_4.csr
+2026.05.12.11:06:21 Info: add_interface csr_4 avalon slave
+2026.05.12.11:06:21 Info: set_interface_property csr_4 EXPORT_OF csr_pipe_4.s0
+2026.05.12.11:06:21 Info: add_interface real_in_4 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property real_in_4 EXPORT_OF lane_4.real_in
+2026.05.12.11:06:21 Info: add_interface emu_in_4 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property emu_in_4 EXPORT_OF lane_4.emu_in
+2026.05.12.11:06:21 Info: add_interface selected_out_4 avalon_streaming source
+2026.05.12.11:06:21 Info: set_interface_property selected_out_4 EXPORT_OF lane_4.selected_out
+2026.05.12.11:06:21 Info: add_instance lane_5 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 MODE_DEFAULT 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 FIFO_DEPTH 16
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 DEBUG_LEVEL 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 IP_UID 1095263280
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 INSTANCE_ID 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 VERSION_MAJOR 26
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 VERSION_MINOR 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 VERSION_PATCH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 BUILD 511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 VERSION_DATE 20260511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_5 VERSION_GIT 0
+2026.05.12.11:06:21 Info: add_instance csr_pipe_5 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 DATA_WIDTH 32
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 SYMBOL_WIDTH 8
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 ADDRESS_WIDTH 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 ADDRESS_UNITS WORDS
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 MAX_BURST_SIZE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 LINEWRAPBURSTS 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 PIPELINE_COMMAND 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 PIPELINE_RESPONSE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_5 USE_RESPONSE 0
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk lane_5.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset lane_5.rst
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk csr_pipe_5.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset csr_pipe_5.reset
+2026.05.12.11:06:21 Info: add_connection run_ctrl_splitter.out5 lane_5.run_ctrl
+2026.05.12.11:06:21 Info: add_connection csr_pipe_5.m0 lane_5.csr
+2026.05.12.11:06:21 Info: add_interface csr_5 avalon slave
+2026.05.12.11:06:21 Info: set_interface_property csr_5 EXPORT_OF csr_pipe_5.s0
+2026.05.12.11:06:21 Info: add_interface real_in_5 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property real_in_5 EXPORT_OF lane_5.real_in
+2026.05.12.11:06:21 Info: add_interface emu_in_5 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property emu_in_5 EXPORT_OF lane_5.emu_in
+2026.05.12.11:06:21 Info: add_interface selected_out_5 avalon_streaming source
+2026.05.12.11:06:21 Info: set_interface_property selected_out_5 EXPORT_OF lane_5.selected_out
+2026.05.12.11:06:21 Info: add_instance lane_6 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 MODE_DEFAULT 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 FIFO_DEPTH 16
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 DEBUG_LEVEL 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 IP_UID 1095263280
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 INSTANCE_ID 6
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 VERSION_MAJOR 26
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 VERSION_MINOR 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 VERSION_PATCH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 BUILD 511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 VERSION_DATE 20260511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_6 VERSION_GIT 0
+2026.05.12.11:06:21 Info: add_instance csr_pipe_6 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 DATA_WIDTH 32
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 SYMBOL_WIDTH 8
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 ADDRESS_WIDTH 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 ADDRESS_UNITS WORDS
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 MAX_BURST_SIZE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 LINEWRAPBURSTS 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 PIPELINE_COMMAND 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 PIPELINE_RESPONSE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_6 USE_RESPONSE 0
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk lane_6.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset lane_6.rst
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk csr_pipe_6.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset csr_pipe_6.reset
+2026.05.12.11:06:21 Info: add_connection run_ctrl_splitter.out6 lane_6.run_ctrl
+2026.05.12.11:06:21 Info: add_connection csr_pipe_6.m0 lane_6.csr
+2026.05.12.11:06:21 Info: add_interface csr_6 avalon slave
+2026.05.12.11:06:21 Info: set_interface_property csr_6 EXPORT_OF csr_pipe_6.s0
+2026.05.12.11:06:21 Info: add_interface real_in_6 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property real_in_6 EXPORT_OF lane_6.real_in
+2026.05.12.11:06:21 Info: add_interface emu_in_6 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property emu_in_6 EXPORT_OF lane_6.emu_in
+2026.05.12.11:06:21 Info: add_interface selected_out_6 avalon_streaming source
+2026.05.12.11:06:21 Info: set_interface_property selected_out_6 EXPORT_OF lane_6.selected_out
+2026.05.12.11:06:21 Info: add_instance lane_7 arb_hit_type0 26.5.0.0511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 MODE_DEFAULT 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 WATCHDOG_DEFAULT 500
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 FIFO_DEPTH 16
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 DEBUG_LEVEL 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 IP_UID 1095263280
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 INSTANCE_ID 7
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 VERSION_MAJOR 26
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 VERSION_MINOR 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 VERSION_PATCH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 BUILD 511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 VERSION_DATE 20260511
+2026.05.12.11:06:21 Info: set_instance_parameter_value lane_7 VERSION_GIT 0
+2026.05.12.11:06:21 Info: add_instance csr_pipe_7 altera_avalon_mm_bridge 18.1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 DATA_WIDTH 32
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 SYMBOL_WIDTH 8
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 ADDRESS_WIDTH 5
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 USE_AUTO_ADDRESS_WIDTH 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 ADDRESS_UNITS WORDS
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 MAX_BURST_SIZE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 MAX_PENDING_RESPONSES 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 LINEWRAPBURSTS 0
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 PIPELINE_COMMAND 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 PIPELINE_RESPONSE 1
+2026.05.12.11:06:21 Info: set_instance_parameter_value csr_pipe_7 USE_RESPONSE 0
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk lane_7.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset lane_7.rst
+2026.05.12.11:06:21 Info: add_connection clk_bridge.out_clk csr_pipe_7.clk
+2026.05.12.11:06:21 Info: add_connection reset_bridge.out_reset csr_pipe_7.reset
+2026.05.12.11:06:21 Info: add_connection run_ctrl_splitter.out7 lane_7.run_ctrl
+2026.05.12.11:06:21 Info: add_connection csr_pipe_7.m0 lane_7.csr
+2026.05.12.11:06:21 Info: add_interface csr_7 avalon slave
+2026.05.12.11:06:21 Info: set_interface_property csr_7 EXPORT_OF csr_pipe_7.s0
+2026.05.12.11:06:21 Info: add_interface real_in_7 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property real_in_7 EXPORT_OF lane_7.real_in
+2026.05.12.11:06:21 Info: add_interface emu_in_7 avalon_streaming sink
+2026.05.12.11:06:21 Info: set_interface_property emu_in_7 EXPORT_OF lane_7.emu_in
+2026.05.12.11:06:21 Info: add_interface selected_out_7 avalon_streaming source
+2026.05.12.11:06:21 Info: set_interface_property selected_out_7 EXPORT_OF lane_7.selected_out
+2026.05.12.11:06:21 Info: set_interconnect_requirement $system qsys_mm.clockCrossingAdapter AUTO
+2026.05.12.11:06:21 Info: set_interconnect_requirement $system qsys_mm.enableEccProtection FALSE
+2026.05.12.11:06:21 Info: set_interconnect_requirement $system qsys_mm.enableInstrumentation FALSE
+2026.05.12.11:06:21 Info: set_interconnect_requirement $system qsys_mm.insertDefaultSlave FALSE
+2026.05.12.11:06:21 Info: set_interconnect_requirement $system qsys_mm.maxAdditionalLatency 4
+2026.05.12.11:06:21 Info: save_system /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/quartus_systems/arb_hit_type0_supercore.qsys
+INFO: saved generated arb_hit_type0_supercore subsystem /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/quartus_systems/arb_hit_type0_supercore.qsys

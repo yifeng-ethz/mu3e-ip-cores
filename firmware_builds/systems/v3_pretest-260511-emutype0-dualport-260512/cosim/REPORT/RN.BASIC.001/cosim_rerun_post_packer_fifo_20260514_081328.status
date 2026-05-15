@@ -1,3 +1,1 @@
-timestamp=20260514_081328
-log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/cosim/REPORT/RN.BASIC.001/cosim_rerun_post_packer_fifo_20260514_081328.log
-rc=0
+pruned after RN.BASIC evidence collection; requested checkpoint files are in the row evidence directory

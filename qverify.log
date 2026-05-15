@@ -9,4 +9,15 @@
 # 
 # Unpublished work. Copyright 2024 Siemens
 # 
-# Command : exit -f
+# usage: lint report item
+#         -status <bug|waived|verified|pending|fixed|uninspected>
+#         [-check <check pattern>...]
+#         [-alias <alias pattern>...]
+#         [-category <category>]
+#         [-rtl_id <rtl id>...]
+#         [-owner <owner>]
+#         [-comment <user comment>]
+#         [-reviewer <reviewer>]
+#         [-arg <argname>=<value pattern>]...
+#         [-help]
+# Waiver flow for lint

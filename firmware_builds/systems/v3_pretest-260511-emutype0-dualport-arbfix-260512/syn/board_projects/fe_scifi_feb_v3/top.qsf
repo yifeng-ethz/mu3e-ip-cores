@@ -1,0 +1,20 @@
+set_global_assignment -name TOP_LEVEL_ENTITY top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name QIP_FILE top.qip
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE util/quartus/settings.tcl
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_a5_base.tcl
+set_global_assignment -name SOURCE_TCL_SCRIPT_FILE assignments/fe_v2_scifi_pins.tcl
+
+# Round 2 emulator-type0 timing closure keeps Standard Fit but biases the
+# build-local image toward setup timing before the final board retest.
+set_global_assignment -name NUM_PARALLEL_PROCESSORS 16
+set_global_assignment -name OPTIMIZATION_MODE "HIGH PERFORMANCE EFFORT"
+set_global_assignment -name OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT EXTRA
+set_global_assignment -name SEED 4
+
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"

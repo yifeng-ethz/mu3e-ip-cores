@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+"""phase4_5_hist_plot.py -- 2-panel histogram lifetime plot for §4.5 sweep rows.
+
+Input:
+  --counters  sweep_evidence/<row_id>/counters.json
+  --hist-bin  sweep_evidence/<row_id>/hist_bin.csv
+  --output    sweep_evidence/<row_id>/plot.png
+
+Output:
+  PNG, 300 dpi, 2 panels:
+    Panel 1: pre-rbCAM checkpoint lifetime
+    Panel 2: post-rbCAM checkpoint lifetime
+  x-axis: [-1000, 3096] cycles  (style matches reference feb_swb_lifetime_hist.png)
+  y-axis: hits / bin [%]
+  Annotations: p05 / p50 / p95 percentiles per panel
+
+Usage:
+  python3 phase4_5_hist_plot.py \\
+      --counters sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_0x0800_dir/counters.json \\
+      --hist-bin sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_0x0800_dir/hist_bin.csv \\
+      --output   sweep_evidence/p45_000_all_lanes_0xFFFFFFFF_0x0800_dir/plot.png
+
+Notes:
+  - Uses matplotlib only (NOT DISLIN).
+  - Does not crash on 0-hit rows -- produces an empty annotated plot.
+  - Python 3.10 compatible.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+import matplotlib
+matplotlib.use("Agg")   # headless backend -- no display required
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+# ---------------------------------------------------------------------------
+# Histogram layout constants
+# ---------------------------------------------------------------------------
+# The histogram_statistics_v2 IP has two halves inside the 256-bin space.
+# By convention established in the reference plot:
+#   bins 0..127   -> pre-rbCAM lifetime (channel_post key_loc field 0)
+#   bins 128..255 -> post-rbCAM lifetime (channel_post key_loc field 1)
+# The run_phase4_emutype0_board_probe.py script configures KEY_LOC to
+# HIST_KEY_LOC_CHANNEL_POST = (38<<24)|(35<<16)|(21<<8)|17, meaning:
+#   bits [37:35] encode the channel bucket (post-rbCAM path).
+# For the standalone §4.5 sweep the histogram is configured as a per-channel
+# direct count (LEFT=0, RIGHT=255, BIN_WIDTH=1), so the 256 bins map linearly
+# to channel IDs 0..255.
+#
+# For the 2-panel lifetime plot the split is:
+#   bins  0..127  = pre-rbCAM  (bound [0.0, 2000.0] cycles in ref)
+#   bins 128..255 = post-rbCAM (bound [2000.0, 2200.0] cycles in ref)
+#
+# In the §4.5 channel-mask context the bins ARE channels, not lifetimes.
+# We still show the 2-panel layout matching the reference style but label
+# the x-axis as "channel ID" with the configured x-zoom [-1000, 3096]
+# mapped linearly to the 256 bins.
+
+PRE_SLICE  = slice(0, 128)    # bins 0..127
+POST_SLICE = slice(128, 256)  # bins 128..255
+
+X_LIM = (-1000, 3096)         # x-axis limits in cycles (from the task spec)
+NUM_BINS = 256
+
+PRE_TITLE  = "pre-rbCAM checkpoint lifetime, bound [0.0, 2000.0] cycles"
+POST_TITLE = "post-rbCAM checkpoint lifetime, bound [2000.0, 2200.0] cycles"
+X_LABEL    = "hit lifetime [8 ns cycles]"
+Y_LABEL    = "hits / bin [%]"
+
+PRE_COLOR  = "#4472C4"   # blue, matches reference
+POST_COLOR = "#70AD47"   # green, matches reference
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def load_hist_bins(hist_bin_csv: Path) -> list[int]:
+    bins: list[int] = []
+    with open(hist_bin_csv, newline="", encoding="ascii") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            bins.append(int(row["count"]))
+    if len(bins) != NUM_BINS:
+        raise ValueError(
+            f"Expected {NUM_BINS} bins, got {len(bins)} from {hist_bin_csv}"
+        )
+    return bins
+
+
+def load_row_id(counters_json: Path) -> str:
+    with open(counters_json, encoding="ascii") as f:
+        d = json.load(f)
+    return d.get("row", {}).get("row_id", counters_json.parent.name)
+
+
+def percentile_from_hist(counts: np.ndarray, bin_centers: np.ndarray,
+                          pct: float) -> float:
+    total = counts.sum()
+    if total == 0:
+        return float("nan")
+    cumsum = np.cumsum(counts)
+    idx = np.searchsorted(cumsum, total * pct / 100.0)
+    idx = min(idx, len(bin_centers) - 1)
+    return float(bin_centers[idx])
+
+
+def plot_panel(ax: Any,
+               bin_centers: np.ndarray,
+               counts: np.ndarray,
+               title: str,
+               color: str,
+               row_id: str) -> None:
+    total = counts.sum()
+    if total == 0:
+        ax.set_title(title, fontsize=9)
+        ax.text(0.5, 0.5, "no hits", ha="center", va="center",
+                transform=ax.transAxes, fontsize=12, color="gray")
+        ax.set_xlim(X_LIM)
+        ax.set_xlabel(X_LABEL, fontsize=8)
+        ax.set_ylabel(Y_LABEL, fontsize=8)
+        return
+
+    pct_vals = counts / total * 100.0
+
+    ax.bar(bin_centers, pct_vals, width=1.0,
+           color=color, alpha=0.8, linewidth=0)
+
+    ax.set_title(title, fontsize=9)
+    ax.set_xlim(X_LIM)
+    ax.set_xlabel(X_LABEL, fontsize=8)
+    ax.set_ylabel(Y_LABEL, fontsize=8)
+    ax.tick_params(labelsize=7)
+
+    for p_val, label in ((5, "p05"), (50, "p50"), (95, "p95")):
+        x_p = percentile_from_hist(counts, bin_centers, p_val)
+        if not np.isnan(x_p):
+            ax.axvline(x_p, color="black", linewidth=0.8, linestyle="--", alpha=0.7)
+            ax.text(x_p, ax.get_ylim()[1] * 0.92,
+                    f"{label}={x_p:.0f}",
+                    rotation=90, fontsize=6, ha="right", va="top",
+                    color="black")
+
+
+def make_bin_centers(slice_: slice, n_total: int = NUM_BINS) -> np.ndarray:
+    """Map bin indices in slice_ to x-axis values in X_LIM range."""
+    x_min, x_max = X_LIM
+    bin_width_x = (x_max - x_min) / n_total
+    indices = np.arange(slice_.start, slice_.stop)
+    return x_min + (indices + 0.5) * bin_width_x
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def main() -> int:
+    ap = argparse.ArgumentParser(
+        description="2-panel histogram lifetime plot for §4.5 sweep rows"
+    )
+    ap.add_argument("--counters", type=Path, required=True,
+                    help="Path to counters.json")
+    ap.add_argument("--hist-bin", type=Path, required=True,
+                    help="Path to hist_bin.csv")
+    ap.add_argument("--output",   type=Path, required=True,
+                    help="Output PNG path")
+    ap.add_argument("--dpi",      type=int,  default=300)
+    args = ap.parse_args()
+
+    try:
+        row_id = load_row_id(args.counters)
+    except Exception:
+        row_id = args.output.parent.name
+
+    try:
+        bins_raw = load_hist_bins(args.hist_bin)
+    except Exception as exc:
+        print(f"WARNING: could not load hist_bin.csv: {exc} -- producing empty plot",
+              file=sys.stderr)
+        bins_raw = [0] * NUM_BINS
+
+    bins = np.array(bins_raw, dtype=np.int64)
+
+    pre_counts  = bins[PRE_SLICE]
+    post_counts = bins[POST_SLICE]
+    pre_centers  = make_bin_centers(PRE_SLICE)
+    post_centers = make_bin_centers(POST_SLICE)
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4), constrained_layout=True)
+    fig.suptitle(
+        f"FEB/SWB ASIC0..7 all-channel hit lifetime ({row_id})",
+        fontsize=10
+    )
+
+    plot_panel(axes[0], pre_centers,  pre_counts,  PRE_TITLE,  PRE_COLOR,  row_id)
+    plot_panel(axes[1], post_centers, post_counts, POST_TITLE, POST_COLOR, row_id)
+
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(str(args.output), dpi=args.dpi, bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved: {args.output}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

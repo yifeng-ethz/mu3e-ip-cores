@@ -1,0 +1,391 @@
+# phase4_5_sweep.py tool_calls.log
+# row=p45_031_lane_none_0x00000001_default_dir row_idx=31 started=2026-05-12T12:09:05
+
+CMD: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x0FE80 1 --quiet
+RC:  4
+OUT: info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0FE80
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000FE80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 61 us
+  timing matched      : 0 us
+  timing total        : 1009700 us
+  secondary before    : 0x0000
+  secondary after     : 0x65F5
+  secondary delta     : 26101 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+warn: skipped non-preamble words while scanning secondary ring
+  skipped ring[0x0000] = 0x00000000
+  skipped ring[0x0001] = 0x00000000
+  skipped ring[0x0002] = 0x00000000
+  skipped ring[0x0003] = 0x00000000
+  skipped ring[0x0004] = 0x00000000
+  skipped ring[0x0005] = 0x00000000
+  skipped ring[0x0006] = 0x00000000
+  skipped ring[0x0007] = 0x00000000
+info: packets observed on secondary ring:
+  [0] invalid WR link=0 addr=0x00940 rsp=OK ack=0 declared=41072 actual=0 start=0x01C9
+  [1] invalid RD_NI link=143 addr=0x01C87 rsp=OK ack=1 declared=65303 actual=0 start=0x02C6
+  [2] invalid WR_NI link=30 addr=0x2E016 rsp=OK ack=0 declared=33 actual=0 start=0x076F
+  [3] invalid RD_NI link=96 addr=0x02860 rsp=DECERR ack=0 declared=179 actual=0 start=0x07DE
+  [4] invalid RD_NI link=107 addr=0x06062 rsp=DECERR ack=0 declared=57345 actual=0 start=0x07EB
+  [5] invalid RD_NI link=107 addr=0x06062 rsp=OK ack=1 declared=192 actual=0 start=0x07F2
+  [6] invalid WR_NI link=28 addr=0x0FD20 rsp=RSP3 ack=1 declared=0 actual=0 start=0x0845
+  [7] invalid RD_NI link=22 addr=0x08060 rsp=OK ack=0 declared=16414 actual=0 start=0x0C4D
+  [8] invalid RD_NI link=22 addr=0x2807E rsp=RSP3 ack=0 declared=7936 actual=0 start=0x0C55
+  [9] invalid WR_NI link=230 addr=0x046C0 rsp=SLVERR ack=0 declared=32896 actual=0 start=0x0CBC
+  [10] invalid WR_NI link=0 addr=0x0FE00 rsp=SLVERR ack=1 declared=0 actual=0 start=0x0CC6
+  [11] invalid RD_NI link=17 addr=0x07B80 rsp=OK ack=0 declared=26368 actual=0 start=0x1043
+  [12] invalid WR link=247 addr=0x010E0 rsp=DECERR ack=1 declared=0 actual=0 start=0x1675
+  [13] invalid WR_NI link=96 addr=0x21703 rsp=OK ack=1 declared=0 actual=0 start=0x339A
+  [14] invalid WR_NI link=96 addr=0x21703 rsp=OK ack=1 declared=0 actual=0 start=0x33A2
+  [15] invalid RD_NI link=152 addr=0x3004E rsp=RSP3 ack=1 declared=34788 actual=0 start=0x33EF
+  [16] invalid RD link=184 addr=0x06080 rsp=RSP3 ack=0 declared=36448 actual=0 start=0x3417
+  [17] invalid RD link=184 addr=0x06080 rsp=RSP3 ack=0 declared=36448 actual=0 start=0x341F
+  [18] invalid RD_NI link=128 addr=0x0E45E rsp=DECERR ack=1 declared=57846 actual=0 start=0x34A0
+  [19] invalid RD_NI link=63 addr=0x0201F rsp=OK ack=0 declared=49280 actual=0 start=0x352B
+  [20] invalid WR link=234 addr=0x00880 rsp=OK ack=0 declared=192 actual=0 start=0x35B4
+  [21] invalid WR link=234 addr=0x00880 rsp=SLVERR ack=1 declared=0 actual=0 start=0x35BB
+  [22] invalid WR link=16 addr=0x26716 rsp=OK ack=0 declared=50206 actual=0 start=0x3631
+  [23] invalid RD link=128 addr=0x3E060 rsp=OK ack=0 declared=57546 actual=0 start=0x36A9
+  [24] invalid WR link=224 addr=0x2F860 rsp=SLVERR ack=0 declared=29696 actual=0 start=0x37A4
+  [25] invalid RD link=0 addr=0x3BE00 rsp=OK ack=0 declared=26592 actual=0 start=0x3812
+  [26] invalid RD_NI link=207 addr=0x33EE2 rsp=SLVERR ack=1 declared=57472 actual=0 start=0x386E
+  [27] invalid RD_NI link=216 addr=0x06BE0 rsp=DECERR ack=0 declared=58048 actual=0 start=0x397A
+  [28] invalid RD link=180 addr=0x0981B rsp=OK ack=0 declared=65296 actual=0 start=0x3D08
+  [29] invalid RD link=13 addr=0x0E173 rsp=SLVERR ack=0 declared=31763 actual=0 start=0x3E07
+  [30] invalid RD_NI link=112 addr=0x0FC01 rsp=RSP3 ack=1 declared=59520 actual=0 start=0x41ED
+  [31] invalid RD_NI link=112 addr=0x0FC01 rsp=RSP3 ack=1 declared=59520 actual=0 start=0x41F5
+  [32] invalid WR link=222 addr=0x0E817 rsp=OK ack=0 declared=7426 actual=0 start=0x4260
+  [33] invalid WR link=222 addr=0x0E817 rsp=SLVERR ack=1 declared=0 actual=0 start=0x4268
+  [34] invalid WR link=236 addr=0x00060 rsp=OK ack=0 declared=57576 actual=0 start=0x42A5
+  [35] invalid WR_NI link=0 addr=0x02374 rsp=OK ack=0 declared=28413 actual=0 start=0x42F6
+  [36] invalid RD link=0 addr=0x1E287 rsp=RSP3 ack=0 declared=924 actual=0 start=0x4368
+  [37] invalid WR link=32 addr=0x3E60B rsp=SLVERR ack=0 declared=62247 actual=0 start=0x436B
+  [38] invalid RD link=125 addr=0x01760 rsp=RSP3 ack=0 declared=32896 actual=0 start=0x43B5
+  [39] invalid WR_NI link=224 addr=0x001EE rsp=OK ack=0 declared=7939 actual=0 start=0x44FF
+  [40] invalid RD_NI link=24 addr=0x0D80D rsp=RSP3 ack=0 declared=32923 actual=0 start=0x4504
+  [41] invalid WR link=151 addr=0x3E004 rsp=RSP3 ack=0 declared=239 actual=0 start=0x45B2
+  [42] invalid RD link=96 addr=0x06060 rsp=OK ack=0 declared=22336 actual=0 start=0x46BE
+  [43] invalid RD link=96 addr=0x180E0 rsp=RSP3 ack=0 declared=3120 actual=0 start=0x46C6
+  [44] invalid RD link=128 addr=0x2E080 rsp=SLVERR ack=1 declared=38371 actual=0 start=0x5BB0
+  [45] invalid WR link=224 addr=0x30700 rsp=DECERR ack=0 declared=52672 actual=0 start=0x5D98
+  [46] invalid WR_NI link=0 addr=0x307E3 rsp=RSP3 ack=0 declared=24332 actual=0 start=0x5DA0
+  [47] invalid WR_NI link=0 addr=0x307E3 rsp=RSP3 ack=0 declared=24332 actual=0 start=0x5DA8
+  [48] invalid RD_NI link=128 addr=0x0CFE8 rsp=SLVERR ack=1 declared=1056 actual=0 start=0x5E20
+  [49] invalid RD_NI link=128 addr=0x0CFE8 rsp=SLVERR ack=1 declared=1056 actual=0 start=0x5E28
+  [50] invalid RD link=4 addr=0x060E0 rsp=RSP3 ack=0 declared=24800 actual=0 start=0x65B3
+  [51] invalid RD_NI link=143 addr=0x29E07 rsp=DECERR ack=1 declared=3069 actual=0 start=0x65CF
+warn: scan ended with an incomplete candidate packet
+ERR: err: timed out waiting for matching secondary reply
+
+RETRY: sc_read addr=0x0FE80 attempt=1 backoff=0.100s
+CMD: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x0FE80 1 --quiet
+RC:  4
+OUT: info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0FE80
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000FE80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 0 us
+  timing total        : 1015994 us
+  secondary before    : 0x0000
+  secondary after     : 0x5D85
+  secondary delta     : 23941 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x40000001
+warn: skipped non-preamble words while scanning secondary ring
+  skipped ring[0x0000] = 0x00000000
+  skipped ring[0x0001] = 0x00000000
+  skipped ring[0x0002] = 0x00000000
+  skipped ring[0x0003] = 0x00000000
+  skipped ring[0x0004] = 0x00000000
+  skipped ring[0x0005] = 0x00000000
+  skipped ring[0x0006] = 0x00000000
+  skipped ring[0x0007] = 0x00000000
+info: packets observed on secondary ring:
+  [0] invalid WR_NI link=128 addr=0x3E0C8 rsp=DECERR ack=0 declared=64679 actual=0 start=0x0499
+  [1] invalid WR_NI link=128 addr=0x3E0C8 rsp=DECERR ack=0 declared=64679 actual=0 start=0x04A1
+  [2] invalid WR_NI link=13 addr=0x20000 rsp=OK ack=0 declared=4140 actual=0 start=0x04CE
+  [3] invalid WR_NI link=13 addr=0x20000 rsp=SLVERR ack=1 declared=0 actual=0 start=0x04D6
+  [4] invalid WR_NI link=154 addr=0x000DB rsp=OK ack=0 declared=32 actual=0 start=0x04E6
+  [5] invalid WR link=249 addr=0x0A4EB rsp=OK ack=0 declared=24608 actual=0 start=0x0559
+  [6] invalid WR link=96 addr=0x01ED1 rsp=OK ack=1 declared=0 actual=0 start=0x0577
+  [7] invalid WR link=96 addr=0x01ED1 rsp=OK ack=0 declared=59591 actual=0 start=0x057F
+  [8] invalid RD link=30 addr=0x09A1E rsp=OK ack=0 declared=51200 actual=0 start=0x06F4
+  [9] invalid RD_NI link=96 addr=0x207F8 rsp=SLVERR ack=0 declared=4108 actual=0 start=0x0864
+  [10] invalid WR link=0 addr=0x0C084 rsp=SLVERR ack=1 declared=0 actual=0 start=0x0BA3
+  [11] invalid RD link=27 addr=0x08040 rsp=DECERR ack=0 declared=36224 actual=0 start=0x0BB2
+  [12] invalid RD_NI link=4 addr=0x02300 rsp=OK ack=0 declared=30592 actual=0 start=0x0C14
+  [13] invalid WR_NI link=128 addr=0x080E0 rsp=OK ack=0 declared=23872 actual=0 start=0x0C7C
+  [14] invalid RD_NI link=235 addr=0x0E197 rsp=SLVERR ack=0 declared=57374 actual=0 start=0x0D66
+  [15] invalid RD_NI link=224 addr=0x2E38A rsp=DECERR ack=0 declared=63496 actual=0 start=0x0DAB
+  [16] invalid RD link=5 addr=0x2E001 rsp=RSP3 ack=1 declared=32768 actual=0 start=0x0DC5
+  [17] invalid RD_NI link=224 addr=0x1C0AF rsp=DECERR ack=0 declared=26816 actual=0 start=0x130E
+  [18] invalid RD_NI link=224 addr=0x1C0AF rsp=DECERR ack=0 declared=26816 actual=0 start=0x1316
+  [19] invalid WR link=52 addr=0x060E0 rsp=OK ack=0 declared=1799 actual=0 start=0x135C
+  [20] invalid WR link=224 addr=0x01940 rsp=OK ack=0 declared=63616 actual=0 start=0x13A8
+  [21] invalid RD_NI link=128 addr=0x0EE00 rsp=OK ack=0 declared=25794 actual=0 start=0x15A2
+  [22] invalid WR_NI link=6 addr=0x1E0A0 rsp=OK ack=0 declared=156 actual=0 start=0x15AB
+  [23] invalid WR link=255 addr=0x2E000 rsp=OK ack=0 declared=27464 actual=0 start=0x15AE
+  [24] invalid WR link=96 addr=0x0682B rsp=OK ack=0 declared=49381 actual=0 start=0x163A
+  [25] invalid WR link=81 addr=0x0E007 rsp=OK ack=0 declared=59120 actual=0 start=0x2FB8
+  [26] invalid RD link=226 addr=0x067E0 rsp=OK ack=1 declared=24004 actual=0 start=0x2FD2
+  [27] invalid RD_NI link=231 addr=0x03A00 rsp=OK ack=0 declared=245 actual=0 start=0x3006
+  [28] invalid RD link=0 addr=0x2F7CE rsp=OK ack=0 declared=7392 actual=0 start=0x3109
+  [29] invalid RD link=100 addr=0x1C000 rsp=DECERR ack=1 declared=64772 actual=0 start=0x310C
+  [30] invalid WR link=246 addr=0x30400 rsp=RSP3 ack=0 declared=48366 actual=0 start=0x31B5
+  [31] invalid WR link=246 addr=0x30400 rsp=RSP3 ack=0 declared=48366 actual=0 start=0x31BD
+  [32] invalid RD link=224 addr=0x360E2 rsp=SLVERR ack=1 declared=160 actual=0 start=0x323D
+  [33] invalid RD link=224 addr=0x360E2 rsp=SLVERR ack=1 declared=160 actual=0 start=0x3243
+  [34] invalid RD link=32 addr=0x18F20 rsp=OK ack=1 declared=7808 actual=0 start=0x32BB
+  [35] invalid WR_NI link=97 addr=0x0E6E0 rsp=OK ack=0 declared=57470 actual=0 start=0x32CB
+  [36] invalid WR_NI link=97 addr=0x0E6E0 rsp=RSP3 ack=0 declared=16446 actual=0 start=0x32D2
+  [37] invalid RD_NI link=245 addr=0x0E706 rsp=DECERR ack=0 declared=37632 actual=0 start=0x333E
+  [38] invalid RD_NI link=131 addr=0x0C057 rsp=RSP3 ack=1 declared=32986 actual=0 start=0x360D
+  [39] invalid RD link=63 addr=0x3FC9D rsp=RSP3 ack=0 declared=3959 actual=0 start=0x36B6
+  [40] invalid RD link=27 addr=0x31BE0 rsp=DECERR ack=1 declared=8416 actual=0 start=0x4EC6
+  [41] invalid RD link=27 addr=0x31BE0 rsp=DECERR ack=1 declared=8416 actual=0 start=0x4ECE
+  [42] invalid RD_NI link=136 addr=0x0E762 rsp=DECERR ack=0 declared=63488 actual=0 start=0x4F39
+  [43] invalid RD_NI link=136 addr=0x0E762 rsp=DECERR ack=0 declared=63488 actual=0 start=0x4F41
+  [44] invalid RD link=15 addr=0x03D88 rsp=RSP3 ack=0 declared=57467 actual=0 start=0x4F97
+  [45] invalid WR link=96 addr=0x02F77 rsp=SLVERR ack=0 declared=32966 actual=0 start=0x5079
+  [46] invalid WR link=31 addr=0x1E0FF rsp=RSP3 ack=0 declared=32736 actual=0 start=0x548F
+  [47] invalid RD link=2 addr=0x0E00F rsp=SLVERR ack=1 declared=35311 actual=0 start=0x572F
+  [48] invalid WR link=17 addr=0x06082 rsp=DECERR ack=1 declared=0 actual=0 start=0x5895
+  [49] invalid WR_NI link=96 addr=0x0A4C7 rsp=OK ack=0 declared=8416 actual=0 start=0x58A8
+  [50] invalid WR_NI link=232 addr=0x10015 rsp=RSP3 ack=0 declared=44540 actual=0 start=0x5905
+  [51] invalid WR link=180 addr=0x1EC04 rsp=RSP3 ack=1 declared=0 actual=0 start=0x5B54
+warn: scan ended with an incomplete candidate packet
+ERR: err: timed out waiting for matching secondary reply
+
+RETRY: sc_read addr=0x0FE80 attempt=2 backoff=0.200s
+CMD: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x0FE80 1 --quiet
+RC:  4
+OUT: info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0FE80
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000FE80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 0 us
+  timing total        : 1048826 us
+  secondary before    : 0x0105
+  secondary after     : 0x1FF1
+  secondary delta     : 7916 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+warn: skipped non-preamble words while scanning secondary ring
+  skipped ring[0x0105] = 0x00000000
+  skipped ring[0x0106] = 0x00000000
+  skipped ring[0x0107] = 0x00000000
+  skipped ring[0x0108] = 0x00000000
+  skipped ring[0x0109] = 0x00000000
+  skipped ring[0x010A] = 0x00000000
+  skipped ring[0x010B] = 0x00000000
+  skipped ring[0x010C] = 0x00000000
+info: packets observed on secondary ring:
+  [0] invalid RD link=160 addr=0x30160 rsp=DECERR ack=0 declared=7299 actual=0 start=0x024F
+  [1] invalid WR link=120 addr=0x1E500 rsp=OK ack=0 declared=128 actual=0 start=0x0318
+  [2] invalid WR link=120 addr=0x1E500 rsp=OK ack=0 declared=128 actual=0 start=0x0320
+  [3] invalid WR link=0 addr=0x05D60 rsp=SLVERR ack=0 declared=32768 actual=0 start=0x0386
+  [4] invalid RD link=32 addr=0x07E00 rsp=SLVERR ack=0 declared=57484 actual=0 start=0x03C3
+  [5] invalid RD link=32 addr=0x07E00 rsp=SLVERR ack=0 declared=57484 actual=0 start=0x03CA
+  [6] invalid RD link=224 addr=0x208E0 rsp=OK ack=0 declared=32832 actual=0 start=0x0472
+  [7] invalid RD link=224 addr=0x208E0 rsp=OK ack=0 declared=32832 actual=0 start=0x047A
+  [8] invalid RD_NI link=48 addr=0x00490 rsp=RSP3 ack=1 declared=41120 actual=0 start=0x04C8
+  [9] invalid WR link=224 addr=0x0E2E0 rsp=OK ack=0 declared=0 actual=0 start=0x059B
+  [10] invalid WR_NI link=2 addr=0x067FD rsp=RSP3 ack=1 declared=0 actual=0 start=0x0959
+  [11] invalid RD link=32 addr=0x06C0B rsp=RSP3 ack=0 declared=57408 actual=0 start=0x098F
+  [12] invalid RD_NI link=215 addr=0x1E888 rsp=RSP3 ack=0 declared=57575 actual=0 start=0x0A48
+  [13] invalid RD_NI link=215 addr=0x1E888 rsp=RSP3 ack=0 declared=57575 actual=0 start=0x0A50
+  [14] invalid RD_NI link=224 addr=0x00000 rsp=SLVERR ack=0 declared=57353 actual=0 start=0x0AA1
+  [15] invalid WR link=192 addr=0x017C0 rsp=OK ack=0 declared=1021 actual=0 start=0x0DA5
+  [16] invalid WR_NI link=27 addr=0x3FB8E rsp=OK ack=0 declared=5106 actual=0 start=0x0E62
+  [17] invalid RD_NI link=134 addr=0x1BCE0 rsp=SLVERR ack=0 declared=12174 actual=0 start=0x0F03
+  [18] invalid RD_NI link=134 addr=0x067E0 rsp=SLVERR ack=0 declared=48140 actual=0 start=0x0F0B
+  [19] invalid RD link=72 addr=0x30360 rsp=OK ack=0 declared=7663 actual=0 start=0x15B3
+  [20] invalid RD link=224 addr=0x0E823 rsp=SLVERR ack=1 declared=64273 actual=0 start=0x1626
+  [21] invalid RD link=224 addr=0x0E823 rsp=SLVERR ack=1 declared=64273 actual=0 start=0x162E
+  [22] invalid RD_NI link=211 addr=0x0E000 rsp=DECERR ack=0 declared=49376 actual=0 start=0x17F8
+  [23] invalid WR_NI link=192 addr=0x30820 rsp=OK ack=0 declared=57368 actual=0 start=0x1802
+  [24] invalid WR link=6 addr=0x06700 rsp=DECERR ack=1 declared=0 actual=0 start=0x1CC6
+  [25] invalid RD link=18 addr=0x037EE rsp=OK ack=0 declared=58880 actual=0 start=0x1CDE
+  [26] invalid WR link=152 addr=0x12360 rsp=OK ack=0 declared=62344 actual=0 start=0x1CE7
+  [27] invalid WR link=152 addr=0x12360 rsp=OK ack=0 declared=62344 actual=0 start=0x1CEE
+  [28] invalid WR link=224 addr=0x0E097 rsp=OK ack=0 declared=41057 actual=0 start=0x1DB2
+  [29] invalid RD_NI link=244 addr=0x18000 rsp=RSP3 ack=0 declared=24712 actual=0 start=0x1F61
+  [30] invalid RD_NI link=244 addr=0x18000 rsp=RSP3 ack=0 declared=24712 actual=0 start=0x1F68
+  [31] invalid WR link=249 addr=0x08D00 rsp=OK ack=0 declared=6144 actual=0 start=0x1FD6
+warn: scan ended with an incomplete candidate packet
+ERR: err: timed out waiting for matching secondary reply
+
+RETRY: sc_read addr=0x0FE80 attempt=3 backoff=0.300s
+CMD: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool 2 read 0x0FE80 1 --quiet
+RC:  4
+OUT: info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0FE80
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000FE80
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 0 us
+  timing total        : 1017571 us
+  secondary before    : 0x1001
+  secondary after     : 0xB1AE
+  secondary delta     : 41389 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x40000001
+warn: skipped non-preamble words while scanning secondary ring
+  skipped ring[0x1001] = 0x00000000
+  skipped ring[0x1002] = 0x00000000
+  skipped ring[0x1003] = 0x00000000
+  skipped ring[0x1004] = 0x00000000
+  skipped ring[0x1005] = 0x00000000
+  skipped ring[0x1006] = 0x00000000
+  skipped ring[0x1007] = 0x00000000
+  skipped ring[0x1008] = 0x00000000
+info: packets observed on secondary ring:
+  [0] invalid WR_NI link=123 addr=0x00C66 rsp=RSP3 ack=1 declared=0 actual=0 start=0x120C
+  [1] invalid RD_NI link=96 addr=0x067A1 rsp=RSP3 ack=0 declared=786 actual=0 start=0x2F41
+  [2] invalid RD link=252 addr=0x09CE0 rsp=OK ack=0 declared=57919 actual=0 start=0x2F78
+  [3] invalid RD link=0 addr=0x199A0 rsp=OK ack=1 declared=36346 actual=0 start=0x2FD1
+  [4] invalid RD link=0 addr=0x199A0 rsp=OK ack=1 declared=36346 actual=0 start=0x2FD9
+  [5] invalid RD link=96 addr=0x1E0F6 rsp=OK ack=0 declared=57568 actual=0 start=0x2FE2
+  [6] invalid RD_NI link=224 addr=0x3F388 rsp=RSP3 ack=1 declared=17135 actual=0 start=0x307E
+  [7] invalid RD_NI link=224 addr=0x3F388 rsp=RSP3 ack=1 declared=17135 actual=0 start=0x3086
+  [8] invalid WR_NI link=30 addr=0x0E50B rsp=SLVERR ack=0 declared=57568 actual=0 start=0x410A
+  [9] invalid RD_NI link=0 addr=0x080FC rsp=OK ack=0 declared=6144 actual=0 start=0x4150
+  [10] invalid RD_NI link=128 addr=0x01800 rsp=OK ack=0 declared=57427 actual=0 start=0x4151
+  [11] invalid RD_NI link=102 addr=0x060FA rsp=OK ack=0 declared=200 actual=0 start=0x4256
+  [12] invalid RD link=224 addr=0x17919 rsp=RSP3 ack=0 declared=39280 actual=0 start=0x4298
+  [13] invalid RD link=224 addr=0x17919 rsp=RSP3 ack=0 declared=39280 actual=0 start=0x429F
+  [14] invalid RD_NI link=16 addr=0x0C300 rsp=OK ack=0 declared=8320 actual=0 start=0x42FD
+  [15] invalid RD link=0 addr=0x003F4 rsp=OK ack=0 declared=41085 actual=0 start=0x4304
+  [16] invalid RD link=0 addr=0x003F4 rsp=OK ack=0 declared=41085 actual=0 start=0x430C
+  [17] invalid RD_NI link=0 addr=0x08980 rsp=OK ack=0 declared=2023 actual=0 start=0x43B1
+  [18] invalid RD_NI link=231 addr=0x2C0DC rsp=OK ack=0 declared=61954 actual=0 start=0x4C84
+  [19] invalid WR_NI link=32 addr=0x064E0 rsp=DECERR ack=1 declared=0 actual=0 start=0x4CDC
+  [20] invalid RD_NI link=101 addr=0x12900 rsp=RSP3 ack=0 declared=160 actual=0 start=0x4D42
+  [21] invalid WR link=153 addr=0x2F67E rsp=OK ack=0 declared=57863 actual=0 start=0x4F94
+  [22] invalid RD_NI link=224 addr=0x00910 rsp=RSP3 ack=1 declared=59744 actual=0 start=0x5020
+  [23] invalid WR_NI link=231 addr=0x11E80 rsp=OK ack=0 declared=57440 actual=0 start=0x50AF
+  [24] invalid WR_NI link=231 addr=0x11E80 rsp=OK ack=0 declared=57440 actual=0 start=0x50B7
+  [25] invalid RD_NI link=226 addr=0x000E0 rsp=RSP3 ack=0 declared=65054 actual=0 start=0x50F8
+  [26] invalid RD link=227 addr=0x106E0 rsp=SLVERR ack=1 declared=65276 actual=0 start=0x5151
+  [27] invalid RD link=254 addr=0x1E266 rsp=DECERR ack=1 declared=40032 actual=0 start=0x5153
+  [28] invalid RD link=227 addr=0x106E0 rsp=SLVERR ack=1 declared=65276 actual=0 start=0x5157
+  [29] invalid RD link=90 addr=0x1E318 rsp=RSP3 ack=1 declared=57598 actual=0 start=0x52A7
+  [30] invalid RD link=224 addr=0x0A0F8 rsp=SLVERR ack=0 declared=59161 actual=0 start=0x52A9
+  [31] invalid RD_NI link=32 addr=0x26A67 rsp=OK ack=0 declared=49360 actual=0 start=0x54BF
+  [32] invalid RD link=230 addr=0x0E060 rsp=SLVERR ack=0 declared=49163 actual=0 start=0x5588
+  [33] invalid RD_NI link=111 addr=0x11C73 rsp=RSP3 ack=0 declared=32832 actual=0 start=0x560D
+  [34] invalid WR link=30 addr=0x0E013 rsp=SLVERR ack=0 declared=4064 actual=0 start=0x565A
+  [35] invalid RD link=224 addr=0x00000 rsp=OK ack=0 declared=0 actual=0 start=0x56AB
+  [36] invalid WR link=119 addr=0x00010 rsp=OK ack=0 declared=34972 actual=0 start=0x5839
+  [37] invalid WR link=96 addr=0x21388 rsp=OK ack=1 declared=0 actual=0 start=0x583C
+  [38] invalid WR link=224 addr=0x10010 rsp=RSP3 ack=0 declared=8207 actual=0 start=0x5942
+  [39] invalid RD link=32 addr=0x1E060 rsp=OK ack=1 declared=34848 actual=0 start=0x597E
+  [40] invalid RD link=188 addr=0x0C760 rsp=OK ack=0 declared=192 actual=0 start=0x5981
+  [41] invalid RD link=32 addr=0x1E060 rsp=OK ack=1 declared=34848 actual=0 start=0x5986
+  [42] invalid RD link=188 addr=0x0C760 rsp=RSP3 ack=1 declared=57536 actual=0 start=0x5989
+  [43] invalid RD link=244 addr=0x0E7C0 rsp=OK ack=0 declared=32779 actual=0 start=0x59E3
+  [44] invalid WR link=160 addr=0x2F15C rsp=RSP3 ack=0 declared=3321 actual=0 start=0x5A26
+  [45] invalid WR link=160 addr=0x2F15C rsp=RSP3 ack=0 declared=3321 actual=0 start=0x5A2E
+  [46] invalid RD link=30 addr=0x0A082 rsp=SLVERR ack=1 declared=31424 actual=0 start=0x711B
+  [47] invalid WR link=34 addr=0x07C00 rsp=OK ack=0 declared=32775 actual=0 start=0x7144
+  [48] invalid WR link=129 addr=0x1EF60 rsp=DECERR ack=0 declared=60399 actual=0 start=0x745C
+  [49] invalid WR_NI link=0 addr=0x01C80 rsp=OK ack=0 declared=32992 actual=0 start=0x74B7
+  [50] invalid RD link=129 addr=0x01C00 rsp=OK ack=0 declared=1248 actual=0 start=0x7606
+  [51] invalid WR link=47 addr=0x0E0E0 rsp=OK ack=0 declared=57568 actual=0 start=0x760E
+  [52] invalid RD_NI link=0 addr=0x300F0 rsp=OK ack=0 declared=63374 actual=0 start=0x7BF0
+  [53] invalid WR_NI link=231 addr=0x16079 rsp=RSP3 ack=0 declared=7168 actual=0 start=0x7C33
+  [54] invalid RD link=0 addr=0x00DE7 rsp=OK ack=0 declared=8432 actual=0 start=0x7C76
+  [55] invalid RD link=11 addr=0x3FF00 rsp=OK ack=0 declared=215 actual=0 start=0x7D19
+  [56] invalid RD_NI link=246 addr=0x0E0FC rsp=OK ack=1 declared=37249 actual=0 start=0x7D39
+  [57] invalid WR_NI link=28 addr=0x0E8F3 rsp=OK ack=0 declared=248 actual=0 start=0x7D3D
+  [58] invalid WR link=224 addr=0x3029B rsp=SLVERR ack=0 declared=10265 actual=0 start=0x81D6
+  [59] invalid RD link=252 addr=0x08027 rsp=OK ack=0 declared=1671 actual=0 start=0x822F
+  [60] invalid RD link=128 addr=0x06080 rsp=OK ack=0 declared=57368 actual=0 start=0x82A8
+  [61] invalid RD_NI link=8 addr=0x08007 rsp=DECERR ack=0 declared=4367 actual=0 start=0x8335
+  [62] invalid WR link=160 addr=0x00091 rsp=RSP3 ack=0 declared=47457 actual=0 start=0x834C
+  [63] invalid WR link=215 addr=0x080EC rsp=OK ack=1 declared=0 actual=0 start=0x839E
+  [64] invalid WR link=215 addr=0x080EC rsp=OK ack=1 declared=0 actual=0 start=0x83A6
+  [65] invalid WR_NI link=96 addr=0x0071A rsp=OK ack=0 declared=65012 actual=0 start=0x8405
+  [66] invalid RD link=63 addr=0x01FCB rsp=SLVERR ack=1 declared=158 actual=0 start=0x84A4
+  [67] invalid RD_NI link=160 addr=0x27D60 rsp=RSP3 ack=1 declared=27419 actual=0 start=0x860F
+  [68] invalid RD_NI link=2 addr=0x200E8 rsp=OK ack=0 declared=7009 actual=0 start=0x866B
+  [69] invalid RD_NI link=226 addr=0x0E0E0 rsp=RSP3 ack=1 declared=43 actual=0 start=0x872A
+  [70] invalid WR link=193 addr=0x1C0C0 rsp=OK ack=0 declared=39817 actual=0 start=0x8771
+  [71] invalid RD link=32 addr=0x0E7E4 rsp=OK ack=0 declared=63214 actual=0 start=0x8829
+  [72] invalid WR_NI link=128 addr=0x100E0 rsp=RSP3 ack=1 declared=0 actual=0 start=0x886D
+  [73] invalid WR_NI link=204 addr=0x0C0E8 rsp=DECERR ack=1 declared=0 actual=0 start=0x8898
+  [74] invalid WR link=148 addr=0x3187B rsp=OK ack=0 declared=64384 actual=0 start=0x89F0
+  [75] invalid RD_NI link=224 addr=0x008DE rsp=SLVERR ack=1 declared=111 actual=0 start=0xA878
+  [76] invalid RD link=143 addr=0x0E200 rsp=OK ack=1 declared=32871 actual=0 start=0xA884
+  [77] invalid RD link=143 addr=0x0E200 rsp=OK ack=1 declared=32871 actual=0 start=0xA88C
+  [78] invalid WR link=128 addr=0x0F91D rsp=SLVERR ack=0 declared=34976 actual=0 start=0xA893
+  [79] invalid WR link=0 addr=0x3001C rsp=OK ack=0 declared=215 actual=0 start=0xA8E6
+  [80] invalid WR link=0 addr=0x3001C rsp=OK ack=0 declared=215 actual=0 start=0xA8EE
+  [81] invalid RD link=224 addr=0x3F0E6 rsp=RSP3 ack=0 declared=57344 actual=0 start=0xA95E
+  [82] invalid RD_NI link=224 addr=0x3FEE4 rsp=OK ack=0 declared=49792 actual=0 start=0xA999
+  [83] invalid WR link=73 addr=0x2D160 rsp=OK ack=1 declared=0 actual=0 start=0xAAB3
+  [84] invalid WR link=73 addr=0x2D160 rsp=OK ack=1 declared=0 actual=0 start=0xAABB
+  [85] invalid WR link=24 addr=0x2881A rsp=RSP3 ack=0 declared=32264 actual=0 start=0xAAC6
+  [86] invalid WR link=24 addr=0x2881A rsp=SLVERR ack=1 declared=0 actual=0 start=0xAACE
+  [87] invalid WR_NI link=193 addr=0x06020 rsp=DECERR ack=0 declared=49376 actual=0 start=0xAB1F
+  [88] invalid RD link=13 addr=0x0F97B rsp=DECERR ack=1 declared=47881 actual=0 start=0xAB59
+  [89] invalid RD_NI link=235 addr=0x000BC rsp=OK ack=0 declared=61688 actual=0 start=0xABB9
+  [90] invalid WR link=224 addr=0x0E2E0 rsp=RSP3 ack=1 declared=0 actual=0 start=0xAC0A
+  [91] invalid WR_NI link=96 addr=0x08002 rsp=RSP3 ack=0 declared=252 actual=0 start=0xAC2D
+  [92] invalid RD link=131 addr=0x10067 rsp=OK ack=0 declared=224 actual=0 start=0xAC53
+  [93] invalid WR link=64 addr=0x39664 rsp=RSP3 ack=0 declared=139 actual=0 start=0xAC83
+  [94] invalid RD_NI link=246 addr=0x00580 rsp=SLVERR ack=1 declared=59168 actual=0 start=0xAD10
+  [95] invalid WR link=251 addr=0x1DE2C rsp=OK ack=0 declared=24 actual=0 start=0xAD2F
+  [96] invalid RD_NI link=0 addr=0x0008B rsp=OK ack=0 declared=24692 actual=0 start=0xB000
+  [97] invalid RD_NI link=0 addr=0x3E880 rsp=OK ack=0 declared=24699 actual=0 start=0xB06C
+  [98] invalid RD_NI link=232 addr=0x3E011 rsp=SLVERR ack=0 declared=57344 actual=0 start=0xB09E
+  [99] invalid RD_NI link=232 addr=0x3E011 rsp=SLVERR ack=0 declared=57344 actual=0 start=0xB0A6
+  [100] invalid RD link=124 addr=0x0F707 rsp=RSP3 ack=0 declared=62755 actual=0 start=0xB11E
+  [101] invalid RD link=9 addr=0x0F18C rsp=OK ack=0 declared=26654 actual=0 start=0xB157
+  [102] invalid RD_NI link=32 addr=0x307E0 rsp=OK ack=0 declared=23731 actual=0 start=0xB19B
+  [103] invalid RD_NI link=32 addr=0x3E07F rsp=OK ack=0 declared=63409 actual=0 start=0xB19F
+  [104] invalid RD_NI link=32 addr=0x3E07F rsp=OK ack=0 declared=63409 actual=0 start=0xB1A6
+warn: scan ended with an incomplete candidate packet
+ERR: err: timed out waiting for matching secondary reply
+

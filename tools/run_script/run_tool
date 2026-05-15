@@ -455,6 +455,8 @@ def main() -> int:
     run_group.add_argument("--feb-link", type=int, default=2)
     run_group.add_argument("--feb-target", type=int, default=7)
     run_group.add_argument("--feb-sof", type=Path, default=None, help="program FEB before run (optional)")
+    run_group.add_argument("--feb-settle-seconds", type=int, default=20,
+                           help="post-FEB-program settle (>=20 mandatory; SC reads in window return trash; default 20)")
     run_group.add_argument("--swb-sof", type=Path, default=None, help="program SWB before run (optional)")
     run_group.add_argument("--skip-program", "--no-program", dest="skip_program", action="store_true",
                            help="skip SOF programming and assume hardware is already configured")
@@ -504,7 +506,18 @@ def main() -> int:
         if args.feb_sof:
             print(f"run_tool: programming FEB {args.feb_sof}")
             run(["quartus_pgm", "-c", "USB-BlasterII [7-2]", "-m", "JTAG", "-o", f"p;{args.feb_sof}@1"], capture=False)
-            time.sleep(8)
+            # FEB LVDS PLL + firefly transceiver word-alignment need ~20s after
+            # FPGA configuration before SC packets can be issued safely. SC reads
+            # during the settle window return clean-looking trash that the SWB
+            # secondary ring parses as floods of "invalid RD/WR" packets with
+            # bogus addresses (50k+ word secondary delta). Confirmed empirically
+            # 2026-05-11. See ~/.claude/.../feedback_feb_post_program_settle.md.
+            settle = int(getattr(args, "feb_settle_seconds", 20))
+            if settle < 20:
+                print(f"run_tool: WARNING --feb-settle-seconds={settle} is below the 20 s minimum; "
+                      f"SC reads issued in the settle window return trash. See README.")
+            print(f"run_tool: waiting {settle} s for FEB LVDS PLL + firefly transceiver to settle")
+            time.sleep(settle)
 
     # 2. Wait for FEB SC ring
     wait_for_feb(tools, args.feb_link)

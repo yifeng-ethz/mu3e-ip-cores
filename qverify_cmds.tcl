@@ -1,1 +1,1 @@
-exit -f
+lint report item -help

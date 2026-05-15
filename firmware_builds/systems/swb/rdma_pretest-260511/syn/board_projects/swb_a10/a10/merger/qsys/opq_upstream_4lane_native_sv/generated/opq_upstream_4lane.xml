@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2026.05.11.12:32:56"
+ date="2026.05.14.07:04:36"
  outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/generated/">
  <perimeter>
   <parameter
@@ -205,7 +205,7 @@
  </perimeter>
  <entity kind="opq_upstream_4lane" version="1.0" name="opq_upstream_4lane">
   <parameter name="AUTO_CLK_CLOCK_RATE" value="-1" />
-  <parameter name="AUTO_GENERATION_ID" value="1778495576" />
+  <parameter name="AUTO_GENERATION_ID" value="1778735076" />
   <parameter name="AUTO_DEVICE" value="10AS066H1F34E1SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_CLK_RESET_DOMAIN" value="-1" />
@@ -254,28 +254,6 @@
    <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_jtag_avalon_master/altera_jtag_avalon_master_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_mm_interconnect/altera_mm_interconnect_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_master_translator/altera_merlin_master_translator_hw.tcl" />
@@ -283,24 +261,46 @@
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_merlin_slave_translator/altera_merlin_slave_translator_hw.tcl" />
    <file
        path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/ordered_priority_queue_native_sv_fixed4_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_jtag_avalon_master/altera_jtag_avalon_master_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
   </childSourceFiles>
   <messages>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_xiycpqq"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_jtag_interface"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_sc_fifo"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_packets_to_master"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_packets_to_bytes"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_bytes_to_packets"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_mm_interconnect_181_amqcmrq"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_master_translator"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_merlin_slave_translator"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: ordered_priority_queue_dut_sv"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_bytes_to_packets"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_xiycpqq"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_jtag_interface"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_packets_to_bytes"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_packets_to_master"</message>
   </messages>
  </entity>
  <entity
@@ -337,38 +337,38 @@
   </sourceFiles>
   <childSourceFiles>
    <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
+   <file
+       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
+   <file
        path="/data1/intelFPGA/18.1/ip/altera/merlin/altera_reset_controller/altera_reset_controller_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
    <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_jtag_phy/altera_avalon_st_jtag_interface_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_sc_fifo/altera_avalon_sc_fifo.v" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_channel_adapter/avalon-st_channel_adapter_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
-   <file
-       path="/data1/intelFPGA/18.1/ip/altera/avalon_st/altera_avalon_st_timing_adapter/avalon-st_timing_adapter_hw.tcl" />
-   <file
        path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_packets_to_bytes/altera_avalon_st_packets_to_bytes_hw.tcl" />
    <file
-       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_st_bytes_to_packets/altera_avalon_st_bytes_to_packets_hw.tcl" />
+       path="/data1/intelFPGA/18.1/ip/altera/sopc_builder_ip/altera_avalon_packets_to_master/altera_avalon_packets_to_master_hw.tcl" />
   </childSourceFiles>
   <instantiator instantiator="opq_upstream_4lane" as="csr_jtag_master" />
   <messages>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_altera_jtag_avalon_master_181_dzttzdy"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_sc_fifo"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_bytes_to_packets"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_reset_controller"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_xiycpqq"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_jtag_interface"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_sc_fifo"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_channel_adapter_181_arrjpdi"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_packets_to_master"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: opq_upstream_4lane_timing_adapter_181_v2af63i"</message>
    <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_packets_to_bytes"</message>
-   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_st_bytes_to_packets"</message>
+   <message level="Info" culprit="opq_upstream_4lane">"Generating: altera_avalon_packets_to_master"</message>
   </messages>
  </entity>
  <entity

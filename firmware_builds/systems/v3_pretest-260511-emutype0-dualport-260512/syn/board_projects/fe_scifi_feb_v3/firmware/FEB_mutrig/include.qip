@@ -1,0 +1,19 @@
+#
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) \
+    "*.vhd" \
+] ] {
+    set_global_assignment -name VHDL_FILE $f
+}
+
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "reset_shift/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "mutrig_datapath/source/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "lvds/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "dummys/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "frame_rcv/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "framebuilder_mux/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "channelmux/vhd/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "prbs_dec/source/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "lapse/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "CC_recalculation/vhd/include.qip"]
+#set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "sorter/sorter.qip"]

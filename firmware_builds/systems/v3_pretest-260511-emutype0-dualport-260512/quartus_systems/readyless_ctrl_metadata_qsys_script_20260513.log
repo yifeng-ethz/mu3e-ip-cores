@@ -1,0 +1,4 @@
+2026.05.13.22:00:55 Info: Doing: <b>qsys-script --cmd=set ::env(SYSTEM_DIR) {/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512} --script=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/script/update_feb_system_v3_dualport_version.tcl</b>
+INFO: updated qsys metadata: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/syn/feb_system_v3.qsys
+INFO: updated qsys metadata: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3.qsys
+INFO: updated qsys metadata: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys

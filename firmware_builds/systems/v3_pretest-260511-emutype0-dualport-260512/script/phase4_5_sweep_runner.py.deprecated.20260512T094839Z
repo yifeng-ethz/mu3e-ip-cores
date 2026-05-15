@@ -1,0 +1,781 @@
+#!/usr/bin/env python3
+"""phase4_5_sweep_runner.py -- TEST_PLAN.md §4.5 per-row executor.
+
+Usage:
+  # dry-run single row
+  python3 phase4_5_sweep_runner.py --dry-run --row p45_000_all_lanes_0xFFFFFFFF_0x0800_dir
+
+  # run single row on board (must be called under swb_ring_lock)
+  /home/yifeng/.local/bin/swb_ring_lock \\
+      python3 phase4_5_sweep_runner.py --row p45_000_all_lanes_0xFFFFFFFF_0x0800_dir
+
+  # run all rows sequentially
+  /home/yifeng/.local/bin/swb_ring_lock \\
+      python3 phase4_5_sweep_runner.py --all
+
+Hard rules honoured:
+  - All sc_tool/rc_tool calls serialised under swb_ring_lock (checked at entry).
+  - hist_bin reads are single-word (NOT burst) per Round 3 a710b11a finding.
+  - Opcodes 0x30 / 0x31 are not issued.
+  - Python 3.10 compatible.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import datetime as dt
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any
+
+# ---------------------------------------------------------------------------
+# Repo-relative paths
+# ---------------------------------------------------------------------------
+REPO_ROOT = Path(__file__).resolve().parents[4]   # mu3e-ip-cores/
+BUILD_DIR = Path(__file__).resolve().parents[1]   # systems/v3_pretest-260511-emulator-type0-260512/
+PLAN_PATH = BUILD_DIR / "script" / "phase4_5_sweep_plan.json"
+EVIDENCE_ROOT = BUILD_DIR / "sweep_evidence"
+TABLE_PATH = BUILD_DIR / "doc" / "PHASE4_5_SWEEP_TABLE.md"
+REGEN_SCRIPT = BUILD_DIR / "script" / "phase4_5_regen_table.py"
+
+DEFAULT_SC_TOOL = REPO_ROOT / "tools" / "run_script" / "build" / "sc_tool"
+DEFAULT_LINK = 2
+
+# ---------------------------------------------------------------------------
+# Address map (from run_phase4_emutype0_board_probe.py -- DO NOT CHANGE without
+# confirming the Qsys address map has not drifted)
+# ---------------------------------------------------------------------------
+SC_HUB_UID_WORD       = 0x0FE80
+SC_HUB_UID            = 0x53434842
+
+RUNCTL_BASE_WORD      = 0x0C000
+RUNCTL_STATUS_WORD    = RUNCTL_BASE_WORD + 0x03
+RUNCTL_LAST_CMD_WORD  = RUNCTL_BASE_WORD + 0x04
+LOCAL_CMD_WORD        = 0x0C013
+
+LVDS_LANE_GO_WORD     = 0x08004
+EMU_BASE_WORD         = 0x08800
+ARB_BASE_WORD         = 0x088A0
+ARB_STRIDE_WORD       = 0x20
+
+HIST_BIN_BASE_WORD    = 0x0A800
+HIST_CSR_BASE_WORD    = 0x0A900
+HIST_INGRESS_BASE_WORD = 0x0AB00
+
+MTS_BASE_WORDS = [0x09000, 0x0A000]
+RING_BASE_WORDS: dict[str, int] = {
+    "hs0_rb0": 0x0AC00, "hs0_rb1": 0x0AC20,
+    "hs0_rb2": 0x0AC40, "hs0_rb3": 0x0AC60,
+    "hs1_rb0": 0x0AD00, "hs1_rb1": 0x0AD20,
+    "hs1_rb2": 0x0AD40, "hs1_rb3": 0x0AD60,
+}
+FRAME_ASM_BASE_WORDS: dict[str, int] = {
+    "hs0_frame": 0x0B400,
+    "hs1_frame": 0x0B410,
+}
+
+HIST_KEY_LOC_CHANNEL_POST = (38 << 24) | (35 << 16) | (21 << 8) | 17
+HIST_NUM_BINS             = 256   # full 256-channel histogram
+
+
+# ---------------------------------------------------------------------------
+# Tool call helpers
+# ---------------------------------------------------------------------------
+
+def _cmd_str(cmd: list[str]) -> str:
+    return " ".join(str(c) for c in cmd)
+
+
+def run(cmd: list[str], *, check: bool = True,
+        log_fh: Any | None = None) -> subprocess.CompletedProcess[str]:
+    if log_fh is not None:
+        log_fh.write(f"CMD: {_cmd_str(cmd)}\n")
+    proc = subprocess.run(cmd, text=True, capture_output=True)
+    if log_fh is not None:
+        log_fh.write(f"RC:  {proc.returncode}\n")
+        if proc.stdout:
+            log_fh.write(f"OUT: {proc.stdout.rstrip()}\n")
+        if proc.stderr:
+            log_fh.write(f"ERR: {proc.stderr.rstrip()}\n")
+        log_fh.write("\n")
+    if check and proc.returncode != 0:
+        raise RuntimeError(
+            f"command failed rc={proc.returncode}: {_cmd_str(cmd)}\n"
+            f"{proc.stdout}{proc.stderr}"
+        )
+    return proc
+
+
+def parse_payload(text: str) -> list[int]:
+    return [
+        int(m.group(2), 16)
+        for m in re.finditer(r"payload\[(\d+)\]\s*=\s*(0x[0-9A-Fa-f]+)", text)
+    ]
+
+
+def sc_read(sc_tool: Path, link: int, addr: int,
+            count: int = 1,
+            log_fh: Any | None = None) -> list[int]:
+    cmd = [str(sc_tool), str(link), "read", f"0x{addr:05X}",
+           str(count), "--quiet"]
+    last = ""
+    for attempt in range(6):
+        proc = run(cmd, check=False, log_fh=log_fh)
+        last = proc.stdout + proc.stderr
+        words = parse_payload(last)
+        if proc.returncode == 0 and len(words) == count:
+            return words
+        time.sleep(0.05 * (attempt + 1))
+    raise RuntimeError(f"SC read failed at 0x{addr:05X} count={count}\n{last}")
+
+
+def sc_write(sc_tool: Path, link: int, addr: int, words: list[int],
+             log_fh: Any | None = None) -> str:
+    cmd = [str(sc_tool), str(link), "write", f"0x{addr:05X}",
+           *[f"0x{w & 0xFFFFFFFF:08X}" for w in words], "--quiet"]
+    last = ""
+    for attempt in range(6):
+        proc = run(cmd, check=False, log_fh=log_fh)
+        last = proc.stdout + proc.stderr
+        if proc.returncode == 0 and not re.search(r"rsp\s*:\s*(SLVERR|DECERR)", last):
+            return last
+        time.sleep(0.05 * (attempt + 1))
+    raise RuntimeError(f"SC write failed at 0x{addr:05X} words={words}\n{last}")
+
+
+def sc_write_stable(sc_tool: Path, link: int, addr: int, words: list[int],
+                    log_fh: Any | None = None) -> None:
+    sc_write(sc_tool, link, addr, words, log_fh=log_fh)
+    sc_write(sc_tool, link, addr, words, log_fh=log_fh)
+
+
+def read_u64_pair(words: list[int], lo: int, hi: int) -> int:
+    return (words[lo] & 0xFFFFFFFF) | ((words[hi] & 0xFFFFFFFF) << 32)
+
+
+def local_cmd(sc_tool: Path, link: int, cmd: int, payload24: int,
+              delay_s: float,
+              log_fh: Any | None = None) -> dict[str, Any]:
+    word = ((payload24 & 0xFFFFFF) << 8) | (cmd & 0xFF)
+    sc_write(sc_tool, link, LOCAL_CMD_WORD, [word], log_fh=log_fh)
+    status = 0
+    for _ in range(50):
+        status = sc_read(sc_tool, link, RUNCTL_STATUS_WORD, log_fh=log_fh)[0]
+        if (status & (1 << 30)) == 0:
+            break
+        time.sleep(0.02)
+    last_cmd = sc_read(sc_tool, link, RUNCTL_LAST_CMD_WORD, log_fh=log_fh)[0]
+    if delay_s > 0:
+        time.sleep(delay_s)
+    return {
+        "cmd": f"0x{cmd:02X}",
+        "word": f"0x{word:08X}",
+        "runctl_status": f"0x{status:08X}",
+        "runctl_last_cmd": f"0x{last_cmd:08X}",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Configuration helpers
+# ---------------------------------------------------------------------------
+
+def configure_emulator(sc_tool: Path, link: int,
+                       channel_mask: int,
+                       rate_88fp: int,
+                       hit_mode: int,
+                       log_fh: Any | None = None) -> dict[str, Any]:
+    """Configure emulator_mutrig: channel_mask, rate, hit_mode.
+
+    MUTRIG_FORMAT word: bit[1:0] = hit_mode; bits[7:2] = other fixed fields.
+    Base MUTRIG_FORMAT from Round 3 working config is 0x23 (direct mode).
+    For burst  (01): (0x23 & ~0x3) | 0x01 = 0x21
+    For periodic (11): (0x23 & ~0x3) | 0x03 = 0x23 (top nibble unchanged)
+    """
+    mutrig_fmt_base = 0x20   # fixed upper bits from Round 3 working config
+    mutrig_fmt = mutrig_fmt_base | (hit_mode & 0x3)
+
+    writes: dict[str, tuple[int, int]] = {
+        "CHANNEL_MASK":  (EMU_BASE_WORD + 0x05, channel_mask & 0xFFFFFFFF),
+        "CENTRAL":       (EMU_BASE_WORD + 0x07, 0x00000001),
+        "SIGNAL":        (EMU_BASE_WORD + 0x08, 0x00000000),
+        "BACKGROUND":    (EMU_BASE_WORD + 0x09, 0x00000000),
+        "MUTRIG_FORMAT": (EMU_BASE_WORD + 0x0A, mutrig_fmt),
+        "RATES":         (EMU_BASE_WORD + 0x0B, rate_88fp & 0xFFFF),
+        "CLUSTER_FIX":   (EMU_BASE_WORD + 0x0C, 0x00004000 | (3 << 7) | 0),
+        "PRNG_SEED":     (EMU_BASE_WORD + 0x0E, 0xDEADBEEF),
+        "TIMEBASE_SEED": (EMU_BASE_WORD + 0x0F, 0x00010001),
+    }
+    for name, (addr, value) in writes.items():
+        sc_write_stable(sc_tool, link, addr, [value], log_fh=log_fh)
+    return {
+        name: {
+            "addr": f"0x{addr:05X}",
+            "written": f"0x{value:08X}",
+            "readback": f"0x{sc_read(sc_tool, link, addr, log_fh=log_fh)[0]:08X}",
+        }
+        for name, (addr, value) in writes.items()
+    }
+
+
+def configure_arb_lane_mask(sc_tool: Path, link: int,
+                             lane_mask: int,
+                             log_fh: Any | None = None) -> dict[str, Any]:
+    """Enable/disable individual arb_hit_type0_supercore lanes via their MODE CSR.
+
+    MODE CSR offset within each lane block: word 0x03 (from ARB_BASE_WORD +
+    lane*ARB_STRIDE_WORD).  Bit 0 = lane enable; bit 1 = watchdog enable.
+    Write 0x00000001 to enable, 0x00000000 to disable.
+    """
+    results: dict[str, Any] = {}
+    for lane in range(8):
+        base = ARB_BASE_WORD + lane * ARB_STRIDE_WORD
+        mode_addr = base + 0x03
+        enabled = bool((lane_mask >> lane) & 1)
+        mode_val = 0x00000001 if enabled else 0x00000000
+        sc_write_stable(sc_tool, link, mode_addr, [mode_val], log_fh=log_fh)
+        readback = sc_read(sc_tool, link, mode_addr, log_fh=log_fh)[0]
+        results[f"lane{lane}"] = {
+            "addr": f"0x{mode_addr:05X}",
+            "enabled": enabled,
+            "written": f"0x{mode_val:08X}",
+            "readback": f"0x{readback:08X}",
+        }
+    return results
+
+
+def configure_histogram(sc_tool: Path, link: int,
+                         interval_clocks: int,
+                         hist_left: int = 0,
+                         hist_right: int = 255,
+                         hist_bin_width: int = 1,
+                         log_fh: Any | None = None) -> dict[str, str]:
+    writes: dict[str, tuple[int, int]] = {
+        "LEFT_BOUND":    (HIST_CSR_BASE_WORD + 0x03, hist_left & 0xFFFFFFFF),
+        "RIGHT_BOUND":   (HIST_CSR_BASE_WORD + 0x04, hist_right & 0xFFFFFFFF),
+        "BIN_WIDTH":     (HIST_CSR_BASE_WORD + 0x05, hist_bin_width & 0xFFFFFFFF),
+        "KEY_LOC":       (HIST_CSR_BASE_WORD + 0x06, HIST_KEY_LOC_CHANNEL_POST),
+        "INTERVAL_CFG":  (HIST_CSR_BASE_WORD + 0x0A, interval_clocks & 0xFFFFFFFF),
+        "CONTROL_APPLY": (HIST_CSR_BASE_WORD + 0x02, 0x00000101),
+    }
+    # Clear bin RAM before config
+    sc_write_stable(sc_tool, link, HIST_BIN_BASE_WORD, [0], log_fh=log_fh)
+    for name, (addr, value) in writes.items():
+        sc_write_stable(sc_tool, link, addr, [value], log_fh=log_fh)
+    for _ in range(50):
+        ctrl = sc_read(sc_tool, link, HIST_CSR_BASE_WORD + 0x02, log_fh=log_fh)[0]
+        if (ctrl & 0x2) == 0:
+            break
+        time.sleep(0.02)
+    return {
+        name: f"0x{sc_read(sc_tool, link, addr, log_fh=log_fh)[0]:08X}"
+        for name, (addr, _) in writes.items()
+    }
+
+
+def select_histogram_post(sc_tool: Path, link: int,
+                           log_fh: Any | None = None) -> int:
+    sc_write_stable(sc_tool, link, HIST_INGRESS_BASE_WORD + 0x02, [0x00000001],
+                    log_fh=log_fh)
+    status = 0
+    for _ in range(50):
+        status = sc_read(sc_tool, link, HIST_INGRESS_BASE_WORD + 0x03,
+                         log_fh=log_fh)[0]
+        if (status & 0x7) == 0x3:
+            break
+        time.sleep(0.02)
+    return status
+
+
+def configure_downstream(sc_tool: Path, link: int,
+                          log_fh: Any | None = None) -> dict[str, Any]:
+    MTS_CTRL_GO               = 1 << 0
+    MTS_CTRL_DISCARD_HITERR   = 1 << 4
+    MTS_CTRL_DELAY_TS_USE_T   = 1 << 29
+    RING_CTRL_GO              = 0x00000001
+    RING_CTRL_FILTER_INERR    = 0x00000010
+    mts_ctrl  = MTS_CTRL_GO | MTS_CTRL_DISCARD_HITERR | MTS_CTRL_DELAY_TS_USE_T
+    ring_ctrl = RING_CTRL_GO | RING_CTRL_FILTER_INERR
+    for base in MTS_BASE_WORDS:
+        sc_write_stable(sc_tool, link, base + 0x00, [mts_ctrl], log_fh=log_fh)
+    for base in RING_BASE_WORDS.values():
+        sc_write_stable(sc_tool, link, base + 0x02, [ring_ctrl], log_fh=log_fh)
+    return {
+        "mts_ctrl":  f"0x{mts_ctrl:08X}",
+        "ring_ctrl": f"0x{ring_ctrl:08X}",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Snapshot helpers
+# ---------------------------------------------------------------------------
+
+def snapshot_arb(sc_tool: Path, link: int,
+                  log_fh: Any | None = None) -> list[dict[str, Any]]:
+    arb = []
+    for lane in range(8):
+        base = ARB_BASE_WORD + lane * ARB_STRIDE_WORD
+        try:
+            words = sc_read(sc_tool, link, base, 30, log_fh=log_fh)
+            arb.append({
+                "lane": lane,
+                "base": f"0x{base:05X}",
+                "uid": f"0x{words[0]:08X}",
+                "mode": f"0x{words[3]:08X}",
+                "ingress_real_hits":  read_u64_pair(words, 0x0A, 0x0B),
+                "ingress_emu_hits":   read_u64_pair(words, 0x0C, 0x0D),
+                "drops_real":         read_u64_pair(words, 0x0E, 0x0F),
+                "drops_emu":          read_u64_pair(words, 0x10, 0x11),
+                "egress_real_hits":   read_u64_pair(words, 0x12, 0x13),
+                "egress_emu_hits":    read_u64_pair(words, 0x14, 0x15),
+                "fifo_level_max":     (words[3] >> 16) & 0xFF,
+            })
+        except RuntimeError as exc:
+            arb.append({"lane": lane, "error": str(exc)})
+    return arb
+
+
+def snapshot_hist_csr(sc_tool: Path, link: int,
+                       log_fh: Any | None = None) -> dict[str, Any]:
+    try:
+        words = sc_read(sc_tool, link, HIST_CSR_BASE_WORD, 17, log_fh=log_fh)
+        return {
+            "raw": [f"0x{w:08X}" for w in words],
+            "UNDERFLOW_COUNT": words[8],
+            "OVERFLOW_COUNT":  words[9],
+            "INTERVAL_CFG":    words[10],
+            "BANK_STATUS":     words[11],
+            "PORT_STATUS":     words[12],
+            "TOTAL_HITS":      words[13],
+            "DROPPED_HITS":    words[14],
+            "COAL_STATUS":     words[15],
+            "LAST_INT_HITS":   words[16],
+        }
+    except RuntimeError as exc:
+        return {"error": str(exc)}
+
+
+def read_hist_bins(sc_tool: Path, link: int,
+                    log_fh: Any | None = None) -> list[int]:
+    """Read all 256 histogram bins one word at a time.
+
+    Burst reads are a known SC bridge corruption trigger (Round 3 a710b11a).
+    This function issues HIST_NUM_BINS=256 single-word reads.
+    """
+    bins = []
+    for offset in range(HIST_NUM_BINS):
+        addr = HIST_BIN_BASE_WORD + offset
+        bins.append(sc_read(sc_tool, link, addr, 1, log_fh=log_fh)[0])
+    return bins
+
+
+def snapshot_ring(sc_tool: Path, link: int,
+                   log_fh: Any | None = None) -> dict[str, Any]:
+    ring: dict[str, Any] = {}
+    for name, base in RING_BASE_WORDS.items():
+        try:
+            words = sc_read(sc_tool, link, base, 10, log_fh=log_fh)
+            ring[name] = {
+                "base":              f"0x{base:05X}",
+                "uid":               f"0x{words[0]:08X}",
+                "ctrl":              f"0x{words[2]:08X}",
+                "fill_level":        words[4],
+                "inerr_count":       words[5],
+                "push_count":        words[6],
+                "pop_count":         words[7],
+                "overwrite_count":   words[8],
+                "cache_miss_count":  words[9],
+            }
+        except RuntimeError as exc:
+            ring[name] = {"error": str(exc)}
+    return ring
+
+
+def snapshot_mts(sc_tool: Path, link: int,
+                  log_fh: Any | None = None) -> list[dict[str, Any]]:
+    mts = []
+    for idx, base in enumerate(MTS_BASE_WORDS):
+        try:
+            words = sc_read(sc_tool, link, base, 5, log_fh=log_fh)
+            mts.append({
+                "idx": idx,
+                "base": f"0x{base:05X}",
+                "status_control": f"0x{words[0]:08X}",
+                "discard_hits":   words[1],
+                "expected_latency": words[2],
+                "total_hits":     ((words[3] & 0xFFFF) << 32) | words[4],
+            })
+        except RuntimeError as exc:
+            mts.append({"idx": idx, "error": str(exc)})
+    return mts
+
+
+def snapshot_frame_asm(sc_tool: Path, link: int,
+                        log_fh: Any | None = None) -> dict[str, Any]:
+    frame_asm: dict[str, Any] = {}
+    for name, base in FRAME_ASM_BASE_WORDS.items():
+        try:
+            words = sc_read(sc_tool, link, base, 8, log_fh=log_fh)
+            frame_asm[name] = {
+                "base":         f"0x{base:05X}",
+                "declared_hits": read_u64_pair(words, 2, 3),
+                "actual_hits":   read_u64_pair(words, 4, 5),
+                "missing_hits":  read_u64_pair(words, 6, 7),
+            }
+        except RuntimeError as exc:
+            frame_asm[name] = {"error": str(exc)}
+    return frame_asm
+
+
+def full_snapshot(sc_tool: Path, link: int,
+                   log_fh: Any | None = None) -> dict[str, Any]:
+    return {
+        "timestamp":    dt.datetime.now().isoformat(timespec="seconds"),
+        "sc_hub_uid":   f"0x{sc_read(sc_tool, link, SC_HUB_UID_WORD, log_fh=log_fh)[0]:08X}",
+        "arb":          snapshot_arb(sc_tool, link, log_fh=log_fh),
+        "histogram":    snapshot_hist_csr(sc_tool, link, log_fh=log_fh),
+        "ring":         snapshot_ring(sc_tool, link, log_fh=log_fh),
+        "mts":          snapshot_mts(sc_tool, link, log_fh=log_fh),
+        "frame_asm":    snapshot_frame_asm(sc_tool, link, log_fh=log_fh),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Dry-run printer
+# ---------------------------------------------------------------------------
+
+def dry_run_row(row: dict[str, Any], sc_tool: Path, link: int) -> None:
+    rid      = row["row_id"]
+    lm       = row["lane_mask"]
+    cm       = row["channel_mask"]
+    rate     = row["rate_88fp"]
+    mode     = row["hit_mode"]
+    interval = row["interval_clocks"]
+    run_s    = interval / 125_000_000 + row.get("run_headroom_s", 1.0)
+
+    print(f"\n=== DRY-RUN: {rid} ===")
+    print(f"  Expected: {row.get('expected_behavior', 'N/A')}")
+    print(f"\n  [1] Verify SC hub UID")
+    print(f"  CMD: {sc_tool} {link} read 0x{SC_HUB_UID_WORD:05X} 1 --quiet")
+    print(f"\n  [2] Enable LVDS lanes")
+    print(f"  CMD: {sc_tool} {link} write 0x{LVDS_LANE_GO_WORD:05X} 0x000001FF --quiet")
+    print(f"\n  [3] Configure arb lane_mask={lm}")
+    for lane in range(8):
+        mode_addr = ARB_BASE_WORD + lane * ARB_STRIDE_WORD + 0x03
+        enabled   = bool((int(lm, 16) >> lane) & 1)
+        val       = 0x00000001 if enabled else 0x00000000
+        print(f"  CMD: {sc_tool} {link} write 0x{mode_addr:05X} 0x{val:08X} --quiet  "
+              f"  # lane{lane} {'ENABLE' if enabled else 'DISABLE'}")
+    print(f"\n  [4] Configure emulator channel_mask={cm} rate={rate} hit_mode={mode}")
+    print(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+0x05:05X} {cm} --quiet  # CHANNEL_MASK")
+    print(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+0x0B:05X} {rate} --quiet  # RATES")
+    print(f"  CMD: {sc_tool} {link} write 0x{EMU_BASE_WORD+0x0A:05X} 0x{0x20|(int(mode,2)&0x3):02X} --quiet  # MUTRIG_FORMAT")
+    print(f"\n  [5] Configure histogram (interval={interval} clocks = {interval/125e6:.3f} s)")
+    print(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+0x03:05X} 0x00000000 --quiet  # LEFT_BOUND")
+    print(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+0x04:05X} 0x000000FF --quiet  # RIGHT_BOUND")
+    print(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+0x05:05X} 0x00000001 --quiet  # BIN_WIDTH")
+    print(f"  CMD: {sc_tool} {link} write 0x{HIST_CSR_BASE_WORD+0x0A:05X} 0x{interval:08X} --quiet  # INTERVAL_CFG")
+    print(f"\n  [6] Select post-rbCAM histogram path")
+    print(f"  CMD: {sc_tool} {link} write 0x{HIST_INGRESS_BASE_WORD+0x02:05X} 0x00000001 --quiet")
+    print(f"\n  [7] Configure downstream (MTS + ring_buffer_cam)")
+    for base in MTS_BASE_WORDS:
+        print(f"  CMD: {sc_tool} {link} write 0x{base:05X} 0x20000011 --quiet  # MTS ctrl")
+    for base in RING_BASE_WORDS.values():
+        print(f"  CMD: {sc_tool} {link} write 0x{base+0x02:05X} 0x00000011 --quiet  # ring ctrl")
+    print(f"\n  [8] Pre-run snapshot (full CSR read)")
+    print(f"  CMD: {sc_tool} {link} read 0x{HIST_CSR_BASE_WORD:05X} 17 --quiet")
+    print(f"\n  [9] LOCAL_CMD sequence: 0x10 -> 0x11 -> 0x12  (NB: 0x30/0x31 are NEVER issued)")
+    print(f"  CMD: {sc_tool} {link} write 0x{LOCAL_CMD_WORD:05X} 0x<RUN_N>10 --quiet  # 0x10 LOAD")
+    print(f"  CMD: {sc_tool} {link} write 0x{LOCAL_CMD_WORD:05X} 0x00000011 --quiet  # 0x11 SYNC")
+    print(f"  CMD: {sc_tool} {link} write 0x{LOCAL_CMD_WORD:05X} 0x00000012 --quiet  # 0x12 GO")
+    print(f"\n  [10] Wait {run_s:.1f} s (interval {interval/125e6:.3f} s + {row.get('run_headroom_s',1.0):.1f} s headroom)")
+    print(f"\n  [11] Post-run snapshot (full CSR read)")
+    print(f"\n  [12] Read hist_bin[0..{HIST_NUM_BINS-1}] one word at a time ({HIST_NUM_BINS} reads)")
+    print(f"  CMD: {sc_tool} {link} read 0x{HIST_BIN_BASE_WORD:05X} 1 --quiet  # bin[0]")
+    print(f"  ... (x{HIST_NUM_BINS} total single-word reads -- NO burst)")
+    print(f"\n  [13] LOCAL_CMD 0x13 end-run")
+    print(f"  CMD: {sc_tool} {link} write 0x{LOCAL_CMD_WORD:05X} 0x00000013 --quiet  # 0x13 END")
+    print(f"\n  [14] Save evidence to sweep_evidence/{rid}/")
+    print(f"       counters.json, hist_bin.csv, tool_calls.log, plot.png")
+    print(f"\n  [15] Regenerate doc/PHASE4_5_SWEEP_TABLE.md")
+
+
+# ---------------------------------------------------------------------------
+# Verdict
+# ---------------------------------------------------------------------------
+
+def compute_verdict(row: dict[str, Any],
+                    counters_pre: dict[str, Any],
+                    counters_post: dict[str, Any],
+                    hist_bins: list[int],
+                    prev_total_hits: int | None) -> dict[str, Any]:
+    hist_post = counters_post.get("histogram", {})
+    total_hits = hist_post.get("TOTAL_HITS", 0)
+    underflow  = hist_post.get("UNDERFLOW_COUNT", 0)
+    overflow   = hist_post.get("OVERFLOW_COUNT", 0)
+    dropped    = hist_post.get("DROPPED_HITS", 0)
+
+    lane_mask = int(row["lane_mask"], 16)
+    expect_hits = lane_mask != 0
+
+    ratio_to_prev: float | None = None
+    if prev_total_hits is not None and prev_total_hits > 0:
+        ratio_to_prev = total_hits / prev_total_hits
+
+    arb_drops = sum(
+        lane.get("drops_emu", 0)
+        for lane in counters_post.get("arb", [])
+        if isinstance(lane, dict) and "drops_emu" in lane
+    )
+
+    passed = (
+        (total_hits > 0) == expect_hits
+        and underflow == 0
+        and overflow == 0
+        and dropped == 0
+        and arb_drops == 0
+    )
+
+    return {
+        "pass":          passed,
+        "total_hits":    total_hits,
+        "underflow":     underflow,
+        "overflow":      overflow,
+        "dropped_hits":  dropped,
+        "arb_drops_emu": arb_drops,
+        "ratio_to_prev": ratio_to_prev,
+        "hist_sum":      sum(hist_bins),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Row executor
+# ---------------------------------------------------------------------------
+
+def run_row(row: dict[str, Any], sc_tool: Path, link: int,
+            dry_run: bool = False) -> dict[str, Any]:
+    rid = row["row_id"]
+    ev_dir = EVIDENCE_ROOT / rid
+    ev_dir.mkdir(parents=True, exist_ok=True)
+
+    log_path = ev_dir / "tool_calls.log"
+
+    if dry_run:
+        dry_run_row(row, sc_tool, link)
+        return {"pass": None, "dry_run": True, "row_id": rid}
+
+    lane_mask    = int(row["lane_mask"], 16)
+    channel_mask = int(row["channel_mask"], 16)
+    rate_88fp    = int(row["rate_88fp"], 16)
+    hit_mode     = int(row["hit_mode"], 2)
+    interval_clocks = int(row["interval_clocks"])
+    run_s        = interval_clocks / 125_000_000 + row.get("run_headroom_s", 1.0)
+
+    with open(log_path, "w", encoding="ascii") as log_fh:
+        log_fh.write(f"# tool_calls.log  row={rid}  started={dt.datetime.now().isoformat()}\n\n")
+
+        # Verify SC hub
+        uid = sc_read(sc_tool, link, SC_HUB_UID_WORD, log_fh=log_fh)[0]
+        if uid != SC_HUB_UID:
+            raise RuntimeError(
+                f"SC hub UID mismatch: got 0x{uid:08X}, expected 0x{SC_HUB_UID:08X}"
+            )
+
+        # Enable LVDS lanes
+        sc_write_stable(sc_tool, link, LVDS_LANE_GO_WORD, [0x000001FF], log_fh=log_fh)
+
+        # Configure arb lane_mask
+        arb_cfg = configure_arb_lane_mask(sc_tool, link, lane_mask, log_fh=log_fh)
+
+        # Configure emulator
+        emu_cfg = configure_emulator(sc_tool, link, channel_mask, rate_88fp,
+                                      hit_mode, log_fh=log_fh)
+
+        # Configure histogram
+        hist_cfg = configure_histogram(
+            sc_tool, link, interval_clocks,
+            hist_left  = row.get("hist_left",  0),
+            hist_right = row.get("hist_right", 255),
+            hist_bin_width = row.get("hist_bin_width", 1),
+            log_fh=log_fh,
+        )
+
+        # Select post-rbCAM path
+        ingress_status = select_histogram_post(sc_tool, link, log_fh=log_fh)
+
+        # Configure downstream
+        ds_cfg = configure_downstream(sc_tool, link, log_fh=log_fh)
+
+        # Pre-run snapshot
+        snap_pre = full_snapshot(sc_tool, link, log_fh=log_fh)
+
+        # LOCAL_CMD: 0x10 -> 0x11 -> 0x12
+        run_number = int(time.time()) & 0xFFFFFF
+        cmd_trace = []
+        for cmd, delay in ((0x10, 0.05), (0x11, 0.05)):
+            payload = run_number if cmd == 0x10 else 0
+            cmd_trace.append(local_cmd(sc_tool, link, cmd, payload, delay, log_fh=log_fh))
+        ds_cfg_post_sync = configure_downstream(sc_tool, link, log_fh=log_fh)
+        go_trace = local_cmd(sc_tool, link, 0x12, 0, 0.0, log_fh=log_fh)
+        cmd_trace.append(go_trace)
+
+        # Wait for run
+        print(f"  [{rid}] running {run_s:.1f} s ...", flush=True)
+        time.sleep(run_s)
+
+        # Post-run snapshot
+        snap_post = full_snapshot(sc_tool, link, log_fh=log_fh)
+
+        # Read hist bins (single-word -- NO burst)
+        hist_bins = read_hist_bins(sc_tool, link, log_fh=log_fh)
+
+        # End run: 0x13
+        end_trace = local_cmd(sc_tool, link, 0x13, 0, 0.05, log_fh=log_fh)
+        cmd_trace.append(end_trace)
+
+        log_fh.write(f"\n# tool_calls.log  ended={dt.datetime.now().isoformat()}\n")
+
+    # Save counters.json
+    counters = {
+        "row":            row,
+        "created":        dt.datetime.now().isoformat(timespec="seconds"),
+        "sc_tool":        str(sc_tool),
+        "link":           link,
+        "arb_lane_cfg":   arb_cfg,
+        "emulator_cfg":   emu_cfg,
+        "histogram_cfg":  hist_cfg,
+        "ingress_status": f"0x{ingress_status:08X}",
+        "downstream_cfg": ds_cfg,
+        "cmd_trace":      cmd_trace,
+        "snapshot_pre":   snap_pre,
+        "snapshot_post":  snap_post,
+    }
+    (ev_dir / "counters.json").write_text(
+        json.dumps(counters, indent=2) + "\n", encoding="ascii"
+    )
+
+    # Save hist_bin.csv
+    with open(ev_dir / "hist_bin.csv", "w", newline="", encoding="ascii") as f:
+        writer = csv.writer(f)
+        writer.writerow(["bin_idx", "count"])
+        for i, cnt in enumerate(hist_bins):
+            writer.writerow([i, cnt])
+
+    # Compute verdict (prev_total_hits not tracked in single-row mode)
+    verdict = compute_verdict(row, snap_pre, snap_post, hist_bins, None)
+
+    # Save verdict into counters
+    counters["verdict"] = verdict
+    (ev_dir / "counters.json").write_text(
+        json.dumps(counters, indent=2) + "\n", encoding="ascii"
+    )
+
+    # Plot
+    try:
+        import subprocess as sp
+        plot_script = Path(__file__).parent / "phase4_5_hist_plot.py"
+        sp.run(
+            [sys.executable, str(plot_script),
+             "--counters", str(ev_dir / "counters.json"),
+             "--hist-bin", str(ev_dir / "hist_bin.csv"),
+             "--output",   str(ev_dir / "plot.png")],
+            check=False
+        )
+    except Exception as exc:
+        print(f"  WARNING: plot failed: {exc}", file=sys.stderr)
+
+    # Regenerate master table
+    try:
+        import subprocess as sp
+        sp.run([sys.executable, str(REGEN_SCRIPT)], check=False)
+    except Exception:
+        pass
+
+    status = "PASS" if verdict["pass"] else "FAIL"
+    print(f"  [{rid}] {status}  TOTAL_HITS={verdict['total_hits']}  "
+          f"drops={verdict['arb_drops_emu']}  sum_bins={verdict['hist_sum']}")
+    return verdict
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def load_plan() -> dict[str, Any]:
+    with open(PLAN_PATH, encoding="ascii") as f:
+        return json.load(f)
+
+
+def fill_defaults(row: dict[str, Any], defaults: dict[str, Any]) -> dict[str, Any]:
+    merged = dict(defaults)
+    merged.update(row)
+    return merged
+
+
+def have_swb_ring_lock() -> bool:
+    if os.environ.get("SWB_RING_LOCK_HELD") == "1":
+        return True
+    try:
+        return Path(os.readlink("/proc/self/fd/9")) == Path("/tmp/swb_ring.lock")
+    except OSError:
+        return False
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(
+        description="Phase 4.5 sweep runner -- TEST_PLAN.md §4.5"
+    )
+    ap.add_argument("--sc-tool", type=Path, default=DEFAULT_SC_TOOL)
+    ap.add_argument("--link",    type=int,  default=DEFAULT_LINK)
+    ap.add_argument("--dry-run", action="store_true",
+                    help="Print commands without executing any SC transactions")
+
+    grp = ap.add_mutually_exclusive_group(required=True)
+    grp.add_argument("--row",  metavar="ROW_ID",
+                     help="Run a single row by row_id")
+    grp.add_argument("--all",  action="store_true",
+                     help="Run all rows sequentially")
+
+    args = ap.parse_args()
+
+    if not args.dry_run and not have_swb_ring_lock():
+        print("ERROR: must be called under /home/yifeng/.local/bin/swb_ring_lock",
+              file=sys.stderr)
+        return 1
+
+    plan     = load_plan()
+    defaults = plan["default_template"]
+    rows     = [fill_defaults(r, defaults) for r in plan["rows"]]
+
+    if args.row:
+        matches = [r for r in rows if r["row_id"] == args.row]
+        if not matches:
+            print(f"ERROR: row_id '{args.row}' not found in plan", file=sys.stderr)
+            return 1
+        verdict = run_row(matches[0], args.sc_tool, args.link, dry_run=args.dry_run)
+        if args.dry_run:
+            return 0
+        return 0 if verdict.get("pass") else 2
+    else:
+        prev_total_hits: int | None = None
+        all_pass = True
+        for row in rows:
+            try:
+                v = run_row(row, args.sc_tool, args.link, dry_run=args.dry_run)
+                if not args.dry_run:
+                    if not v.get("pass"):
+                        all_pass = False
+                    prev_total_hits = v.get("total_hits")
+            except Exception as exc:
+                print(f"  ERROR [{row['row_id']}]: {exc}", file=sys.stderr)
+                all_pass = False
+        return 0 if (args.dry_run or all_pass) else 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())

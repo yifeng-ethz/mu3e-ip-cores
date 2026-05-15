@@ -3,7 +3,9 @@ set -eu
 export LC_ALL=C
 
 ROOT="${MU3E_IP_CORES_ROOT:-/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
-SYN_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn"
+SYSTEM_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512"
+export SYSTEM_DIR
+SYN_DIR="${SYSTEM_DIR}/syn"
 QSYS="${SYN_DIR}/feb_system_v3.qsys"
 QSYS_BASENAME="feb_system_v3"
 GENERATED_ROOT="${SYN_DIR}/${QSYS_BASENAME}"
@@ -12,8 +14,9 @@ QSYS_GENERATE_BIN="${QSYS_GENERATE_BIN:-/data1/intelFPGA/18.1/quartus/sopc_build
 STAMP="${QSYS_GENERATE_STAMP:-$(date +%Y%m%d_%H%M%S)}"
 LOG="${SYN_DIR}/${QSYS_BASENAME}_qsys_generate_${STAMP}_isolated.console.log"
 STATUS="${SYN_DIR}/${QSYS_BASENAME}_qsys_generate_${STAMP}_isolated.status"
+PARENT_REFRESH_SCRIPT="${SYSTEM_DIR}/script/refresh_feb_system_v3_datapath_instance.tcl"
 
-. "${ROOT}/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/script/qsys_search_path.sh"
+. "${SYSTEM_DIR}/script/qsys_search_path.sh"
 
 SEARCH_PATHS=""
 USER_COMPONENT_PATHS=""
@@ -30,6 +33,11 @@ if [ -n "${QSYS_EXTRA_SEARCH_PATHS:-}" ]; then
 fi
 
 qsys_create_isolated_user_catalog
+
+qsys-script \
+    --search-path="${SEARCH_PATHS},\$" \
+    --cmd="set ::env(SYSTEM_DIR) {${SYSTEM_DIR}}" \
+    --script="${PARENT_REFRESH_SCRIPT}" > "${SYN_DIR}/${QSYS_BASENAME}_parent_refresh_qsys_script_${STAMP}.log" 2>&1
 
 if [ -d "${GENERATED_ROOT}" ]; then
     chmod -R u+w "${GENERATED_ROOT}"

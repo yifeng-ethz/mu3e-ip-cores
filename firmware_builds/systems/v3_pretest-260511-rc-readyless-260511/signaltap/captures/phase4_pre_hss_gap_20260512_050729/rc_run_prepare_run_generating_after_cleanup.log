@@ -1,0 +1,5 @@
+info: cmd=0x10 (run-prepare) feb=7 -> RESET_LINK_CTL_REGISTER_W=0xE0000010
+info: before: CTL=0x00000000 STATUS=0x31000000
+info: writing RESET_LINK_RUN_NUMBER_REGISTER_W = 0x00010239
+info: after : CTL=0x00000000 STATUS=0x00010239
+info: ok: run-prepare FSM advanced (state encodes run number)

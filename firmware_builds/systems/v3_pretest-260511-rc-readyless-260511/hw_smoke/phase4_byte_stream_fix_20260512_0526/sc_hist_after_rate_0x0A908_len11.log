@@ -1,0 +1,54 @@
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A908
+  request length     : 11 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 15
+  expected reply words (declared) : 15
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A908
+  wmem[2] = 0x0000000B
+  wmem[3] = 0x0000009C
+  timing main ready   : 59 us
+  timing matched      : 81 us
+  timing total        : 81 us
+  secondary before    : 0x4360
+  secondary after     : 0x436F
+  secondary delta     : 15 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x4360
+  ring end            : 0x436F
+  type                : RD
+  link                : 2
+  addr                : 0x0A908
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 11
+  declared payload    : 11
+  actual payload      : 11
+  declared ring words : 15
+  actual ring words   : 15
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A908
+  raw len word        : 0x0001000B
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000
+  payload[1] = 0x00000000
+  payload[2] = 0x07735940
+  payload[3] = 0x00000001
+  payload[4] = 0x000200FF
+  payload[5] = 0x001C9282
+  payload[6] = 0x00000000
+  payload[7] = 0x00000100
+  payload[8] = 0x00000000
+  payload[9] = 0x007A0144
+  payload[10] = 0x00000000

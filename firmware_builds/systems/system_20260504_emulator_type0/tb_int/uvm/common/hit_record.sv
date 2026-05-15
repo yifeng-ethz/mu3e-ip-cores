@@ -47,6 +47,8 @@ package tb_int_record_pkg;
         observation_point_e observation_point;
         bit                 root_hit_id_valid;
         bit [63:0]          root_hit_id;
+        bit                 true_hit_ts_valid;
+        bit [47:0]          true_hit_ts;
         bit [14:0]          t_coarse;
         bit                 monitor_debug_valid;
         bit [63:0]          monitor_debug_id;
@@ -93,10 +95,11 @@ package tb_int_record_pkg;
                 id_desc = $sformatf("0x%016h", root_hit_id);
             else
                 id_desc = "?";
-            return $sformatf("{point=%s hit_id=0x%016h lane=%0d ch=%0d tfine=%0d seq=%0d t=%0t root=%s dbg_valid=%0b dbg_id=0x%016h dbg_level=%0d run_origin=%0b payload=0x%016h}",
+            return $sformatf("{point=%s hit_id=0x%016h lane=%0d ch=%0d tfine=%0d seq=%0d t=%0t root=%s true_ts_valid=%0b true_ts=0x%012h dbg_valid=%0b dbg_id=0x%016h dbg_level=%0d run_origin=%0b payload=0x%016h}",
                              observation_point_name(observation_point),
                              hit_id, lane_id, key.channel, key.t_fine,
                              seq_in_bucket, abs_ts, id_desc,
+                             true_hit_ts_valid, true_hit_ts,
                              monitor_debug_valid, monitor_debug_id,
                              monitor_debug_level,
                              run_origin, payload);
@@ -120,6 +123,8 @@ package tb_int_record_pkg;
             observation_point = rhs_record.observation_point;
             root_hit_id_valid = rhs_record.root_hit_id_valid;
             root_hit_id       = rhs_record.root_hit_id;
+            true_hit_ts_valid = rhs_record.true_hit_ts_valid;
+            true_hit_ts       = rhs_record.true_hit_ts;
             t_coarse          = rhs_record.t_coarse;
             monitor_debug_valid = rhs_record.monitor_debug_valid;
             monitor_debug_id    = rhs_record.monitor_debug_id;

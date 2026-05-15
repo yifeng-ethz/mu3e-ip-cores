@@ -160,10 +160,32 @@ package tb_int_scoreboard_pkg;
             if (dst == null || src == null)
                 return;
             dst.run_origin = src.run_origin;
+            if (!dst.true_hit_ts_valid && src.true_hit_ts_valid) begin
+                dst.true_hit_ts_valid = 1'b1;
+                dst.true_hit_ts       = src.true_hit_ts;
+            end
             if (!src.root_hit_id_valid)
                 return;
             dst.root_hit_id_valid = 1'b1;
             dst.root_hit_id       = src.root_hit_id;
+        endfunction
+
+        function automatic void compare_true_hit_ts(hit_record expected,
+                                                    hit_record observed,
+                                                    string transition_name);
+            if (expected == null || observed == null)
+                return;
+            if (!(expected.true_hit_ts_valid && observed.true_hit_ts_valid))
+                return;
+            if (expected.true_hit_ts !== observed.true_hit_ts) begin
+                `uvm_error("TB_INT_TS",
+                           $sformatf("%s true hit timestamp mismatch expected=0x%012h observed=0x%012h expected_rec=%s observed_rec=%s",
+                                     transition_name,
+                                     expected.true_hit_ts,
+                                     observed.true_hit_ts,
+                                     expected.describe(),
+                                     observed.describe()))
+            end
         endfunction
 
         function automatic hit_record clone_observation(hit_record item);
@@ -308,8 +330,12 @@ package tb_int_scoreboard_pkg;
                         ? stage_pre_rbcam_ledger[lane_idx][key_bits].size() : 0;
             if (!item.root_hit_id_valid &&
                 stage_a_ledger[lane_idx].exists(key_bits) &&
-                stage_a_ledger[lane_idx][key_bits].size() > match_seq)
+                stage_a_ledger[lane_idx][key_bits].size() > match_seq) begin
+                compare_true_hit_ts(stage_a_ledger[lane_idx][key_bits][match_seq],
+                                    item,
+                                    "stage_a_to_pre_rbcam");
                 copy_root_hit_id(item, stage_a_ledger[lane_idx][key_bits][match_seq]);
+            end
             push_obs(stage_pre_rbcam_ledger[lane_idx], item);
             push_debug_obs(stage_pre_rbcam_debug_ledger, item, "pre_rbcam");
             total_pre_rbcam++;
@@ -345,8 +371,12 @@ package tb_int_scoreboard_pkg;
                         ? stage_post_rbcam_ledger[lane_idx][key_bits].size() : 0;
             if (!item.root_hit_id_valid &&
                 stage_pre_rbcam_ledger[lane_idx].exists(key_bits) &&
-                stage_pre_rbcam_ledger[lane_idx][key_bits].size() > match_seq)
+                stage_pre_rbcam_ledger[lane_idx][key_bits].size() > match_seq) begin
+                compare_true_hit_ts(stage_pre_rbcam_ledger[lane_idx][key_bits][match_seq],
+                                    item,
+                                    "pre_rbcam_to_post_rbcam");
                 copy_root_hit_id(item, stage_pre_rbcam_ledger[lane_idx][key_bits][match_seq]);
+            end
             push_obs(stage_post_rbcam_ledger[lane_idx], item);
             push_debug_obs(stage_post_rbcam_debug_ledger, item, "post_rbcam");
             total_post_rbcam++;
@@ -371,8 +401,12 @@ package tb_int_scoreboard_pkg;
                         ? stage_feb_egress_ledger[lane_idx][key_bits].size() : 0;
             if (!item.root_hit_id_valid &&
                 stage_post_rbcam_ledger[lane_idx].exists(key_bits) &&
-                stage_post_rbcam_ledger[lane_idx][key_bits].size() > match_seq)
+                stage_post_rbcam_ledger[lane_idx][key_bits].size() > match_seq) begin
+                compare_true_hit_ts(stage_post_rbcam_ledger[lane_idx][key_bits][match_seq],
+                                    item,
+                                    "post_rbcam_to_feb_egress");
                 copy_root_hit_id(item, stage_post_rbcam_ledger[lane_idx][key_bits][match_seq]);
+            end
             push_obs(stage_feb_egress_ledger[lane_idx], item);
             push_debug_obs(stage_feb_egress_debug_ledger, item, "feb_egress");
             total_feb_egress++;

@@ -1,0 +1,4 @@
+Recovering PCIe device 0000:0b:00.0 (0x1172:0x0004)...
+unloaded 'mudaq'
+/usr/local/lib/mudaq-recover
+loaded 'mudaq'

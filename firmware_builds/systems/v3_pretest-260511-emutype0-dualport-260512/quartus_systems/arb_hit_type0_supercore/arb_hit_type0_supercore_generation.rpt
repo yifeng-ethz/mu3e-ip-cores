@@ -1,0 +1,127 @@
+Info: Starting: Create HDL design files for synthesis
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/arb_hit_type0_supercore/synthesis --family="Arria V" --part=5AGXBA7D4F31C5
+Progress: Loading quartus_systems/arb_hit_type0_supercore.qsys
+Progress: Reading input file
+Progress: Adding clk_bridge [altera_clock_bridge 18.1]
+Progress: Parameterizing module clk_bridge
+Progress: Adding csr_pipe_0 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_0
+Progress: Adding csr_pipe_1 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_1
+Progress: Adding csr_pipe_2 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_2
+Progress: Adding csr_pipe_3 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_3
+Progress: Adding csr_pipe_4 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_4
+Progress: Adding csr_pipe_5 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_5
+Progress: Adding csr_pipe_6 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_6
+Progress: Adding csr_pipe_7 [altera_avalon_mm_bridge 18.1]
+Progress: Parameterizing module csr_pipe_7
+Progress: Adding lane_0 [arb_hit_type0 26.5.0.511]
+Warning: lane_0: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_0
+Progress: Adding lane_1 [arb_hit_type0 26.5.0.511]
+Warning: lane_1: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_1
+Progress: Adding lane_2 [arb_hit_type0 26.5.0.511]
+Warning: lane_2: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_2
+Progress: Adding lane_3 [arb_hit_type0 26.5.0.511]
+Warning: lane_3: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_3
+Progress: Adding lane_4 [arb_hit_type0 26.5.0.511]
+Warning: lane_4: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_4
+Progress: Adding lane_5 [arb_hit_type0 26.5.0.511]
+Warning: lane_5: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_5
+Progress: Adding lane_6 [arb_hit_type0 26.5.0.511]
+Warning: lane_6: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_6
+Progress: Adding lane_7 [arb_hit_type0 26.5.0.511]
+Warning: lane_7: Used arb_hit_type0 26.6.0.512 (instead of 26.5.0.511)
+Progress: Parameterizing module lane_7
+Progress: Adding reset_bridge [altera_reset_bridge 18.1]
+Progress: Parameterizing module reset_bridge
+Progress: Adding run_ctrl_splitter [altera_avalon_st_splitter 18.1]
+Progress: Parameterizing module run_ctrl_splitter
+Progress: Building connections
+Progress: Parameterizing connections
+Progress: Validating
+Progress: Done reading input file
+Warning: arb_hit_type0_supercore.lane_0.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_0.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_0.selected_out: Signal aso_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_1.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_1.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_1.selected_out: Signal aso_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_2.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_2.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_2.selected_out: Signal aso_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_3.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_3.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_3.selected_out: Signal aso_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_4.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_4.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_4.selected_out: Signal aso_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_5.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_5.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_5.selected_out: Signal aso_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_6.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_6.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_6.selected_out: Signal aso_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_7.real_in: Signal asi_real_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_7.emu_in: Signal asi_emu_endofrun has unknown type endofrun
+Warning: arb_hit_type0_supercore.lane_7.selected_out: Signal aso_endofrun has unknown type endofrun
+Info: arb_hit_type0_supercore: Generating arb_hit_type0_supercore "arb_hit_type0_supercore" for QUARTUS_SYNTH
+Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_0.m0 and slave lane_0.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_1.m0 and slave lane_1.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_2.m0 and slave lane_2.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_3.m0 and slave lane_3.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_4.m0 and slave lane_4.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_5.m0 and slave lane_5.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_6.m0 and slave lane_6.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has readdatavalid signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has burstcount signal 1 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
+Info: Interconnect is inserted between master csr_pipe_7.m0 and slave lane_7.csr because the master has debugaccess signal 1 bit wide, but the slave is 0 bit wide.
+Info: csr_pipe_0: "arb_hit_type0_supercore" instantiated altera_avalon_mm_bridge "csr_pipe_0"
+Info: lane_0: "arb_hit_type0_supercore" instantiated arb_hit_type0 "lane_0"
+Info: run_ctrl_splitter: "arb_hit_type0_supercore" instantiated altera_avalon_st_splitter "run_ctrl_splitter"
+Info: mm_interconnect_0: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_0"
+Info: mm_interconnect_1: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_1"
+Info: mm_interconnect_2: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_2"
+Info: mm_interconnect_3: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_3"
+Info: mm_interconnect_4: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_4"
+Info: mm_interconnect_5: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_5"
+Info: mm_interconnect_6: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_6"
+Info: mm_interconnect_7: "arb_hit_type0_supercore" instantiated altera_mm_interconnect "mm_interconnect_7"
+Info: csr_pipe_0_m0_translator: "mm_interconnect_0" instantiated altera_merlin_master_translator "csr_pipe_0_m0_translator"
+Info: lane_0_csr_translator: "mm_interconnect_0" instantiated altera_merlin_slave_translator "lane_0_csr_translator"
+Info: arb_hit_type0_supercore: Done "arb_hit_type0_supercore" with 14 modules, 19 files
+Info: qsys-generate succeeded.
+Info: Finished: Create HDL design files for synthesis

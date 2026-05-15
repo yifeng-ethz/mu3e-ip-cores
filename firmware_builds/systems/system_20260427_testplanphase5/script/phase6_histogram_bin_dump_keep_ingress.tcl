@@ -509,7 +509,7 @@ proc configure_histogram {svc csr_base profile lane_filter} {
 if {[catch {
     lassign [::board_test::jtag::parse_args \
         $argv \
-        {profile out wait-ms lane-filter csr-base bin-base read-chunk-words read-delay-ms rate-ingress-base-list master-pattern fallback-pattern service-tag onclick-base onclick-repeat onclick-gap-ms} \
+        {profile out wait-ms lane-filter csr-base bin-base read-chunk-words read-delay-ms rate-ingress-base-list master-pattern fallback-pattern service-tag onclick-base onclick-repeat onclick-gap-ms left-bound right-bound bin-width key-loc key-value control interval-clocks} \
         {unsafe-bulk-read}] opt_kvs positional
     array set opts $opt_kvs
 

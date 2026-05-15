@@ -1,0 +1,33 @@
+[*]
+[timestart] 0
+[size] 1600 1200
+[treeopen] top.
+[treeopen] top.tb_spi.
+[treeopen] top.tb_spi.e_spi_master.
+[treeopen] top.tb_spi.e_spi_master.e_spi_slave.
+[sst_expanded] 1
+[sst_width] 300
+[signals_width] 150
+[sst_expanded] 1
+[sst_vpaned_height] 600
+top.tb_spi.reset_n
+top.tb_spi.clk
+top.tb_spi.cycle
+-SCLK
+top.tb_spi.e_spi_master.o_sclk
+top.tb_spi.e_spi_master.ss
+-SDO
+top.tb_spi.e_spi_master.e_spi_slave.sdo_update
+top.tb_spi.e_spi_master.e_spi_slave.sdo_sample
+top.tb_spi.e_spi_master.e_spi_slave.sdo_cnt
+#{top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[7:0]} top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[7] top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[6] top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[5] top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[4] top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[3] top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[2] top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[1] top.tb_spi.e_spi_master.e_spi_slave.sdo_reg[0]
+top.tb_spi.e_spi_master.e_spi_slave.o_sdo
+-SDI
+top.tb_spi.e_spi_master.e_spi_slave.sdi_sample
+top.tb_spi.e_spi_master.e_spi_slave.i_sdi
+top.tb_spi.e_spi_master.e_spi_slave.sdi_cnt
+#{top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[7:0]} top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[7] top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[6] top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[5] top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[4] top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[3] top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[2] top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[1] top.tb_spi.e_spi_master.e_spi_slave.sdi_reg[0]
+-ERR
+top.tb_spi.e_spi_master.e_spi_slave.error_wfifo_uf
+top.tb_spi.e_spi_master.e_spi_slave.error_sdi_uf
+top.tb_spi.e_spi_master.e_spi_slave.error_rfifo_of

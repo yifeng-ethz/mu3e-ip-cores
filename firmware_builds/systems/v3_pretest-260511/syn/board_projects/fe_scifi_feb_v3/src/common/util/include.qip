@@ -1,0 +1,18 @@
+#
+
+set_global_assignment -name QIP_FILE [ file join $::quartus(qip_path) "quartus/include.qip" ]
+
+# include sdc files
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain \
+    "*.sdc" \
+] ] {
+    set_global_assignment -name SDC_FILE $f
+}
+
+# include vhd files
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain \
+    "*.vhd" \
+] ] {
+    if { [ string match "*_tb.vhd" $f ] } { continue }
+    set_global_assignment -name VHDL_FILE "$f"
+}

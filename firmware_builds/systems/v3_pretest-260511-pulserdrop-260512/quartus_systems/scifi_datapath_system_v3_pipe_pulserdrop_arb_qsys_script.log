@@ -1,0 +1,397 @@
+2026.05.13.21:49:20 Info: Doing: <b>qsys-script --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/swb,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/CAM,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_frame_assembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy/max10_prog_avmm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firefly_xcvr_i2c_master,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-arbfix-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/high_performance_counter_array,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ip_8b10b_decoder,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/lvds_error_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core14,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core20,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_driver,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top/ex_design/qsys_interface_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/avst_snoop_splitter,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/conduit2rst,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_counter_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_issp_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/histogram_snoop_selector,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/hit_type0_readyless_mux4,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/inactive_reset_source,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/pulse_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_channel_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_reset_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_timestamp_processor,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/tb/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_rq_fetcher,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_subsystem,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference/feb_system_v2_snapshot_20260415,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p11,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/v26_0_0331,$ --cmd=set ::src_qsys {/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/scifi_datapath_system_v3_pipe.qsys}; set ::dst_qsys {/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys} --script=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/script/clone_refactor_v3_emulator_type0_qsys.tcl</b>
+2026.05.13.21:49:24 Info: load_system /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/scifi_datapath_system_v3_pipe.qsys
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_0.tx8b1k/decoded_lane_mux_0.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out0/emulator_mutrig_0.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out0/emulator_mutrig_0.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_0.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_0.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_0.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_0.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_0
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_1.tx8b1k/decoded_lane_mux_1.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out1/emulator_mutrig_1.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out1/emulator_mutrig_1.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_1.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_1.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_1.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_1.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_2.tx8b1k/decoded_lane_mux_2.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out2/emulator_mutrig_2.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out2/emulator_mutrig_2.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_2.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_2.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_2.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_2.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_2
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_3.tx8b1k/decoded_lane_mux_3.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out3/emulator_mutrig_3.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out3/emulator_mutrig_3.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_3.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_3.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_3.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_3.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_3
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_4.tx8b1k/decoded_lane_mux_4.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out4/emulator_mutrig_4.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out4/emulator_mutrig_4.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_4.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_4.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_4.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_4.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_4
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_5.tx8b1k/decoded_lane_mux_5.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out5/emulator_mutrig_5.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out5/emulator_mutrig_5.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_5.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_5.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_5.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_5.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_5
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_6.tx8b1k/decoded_lane_mux_6.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out6/emulator_mutrig_6.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out6/emulator_mutrig_6.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_6.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_6.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_6.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_6.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_6
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_mutrig_7.tx8b1k/decoded_lane_mux_7.in1
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_ctrl_splitter.out7/emulator_mutrig_7.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection emulator_inject_fanout.out7/emulator_mutrig_7.inject
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection lvds_rx_28nm_0.outclock/emulator_mutrig_7.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master_reset/emulator_mutrig_7.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_7.csr
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: remove_connection master_datapath.master/emulator_mutrig_7.csr
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_instance emulator_mutrig_7
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: remove_dangling_connections 
+2026.05.13.21:49:27 Info: set_instance_parameter_value run_control_splitter USE_READY 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value run_control_splitter READY_LATENCY 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value run_control_splitter QUALIFY_VALID_OUT 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_ctrl_splitter USE_READY 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_ctrl_splitter READY_LATENCY 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_ctrl_splitter QUALIFY_VALID_OUT 0
+2026.05.13.21:49:27 Info: add_instance emulator_mutrig_qsys_inst emulator_mutrig 26.3.1.0513
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst BYTE_STREAM_ENABLE false
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst CSR_ADDR_WIDTH 6
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst CLUSTER_LANE_COUNT_DEFAULT 8
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst CLUSTER_LANE_INDEX_DEFAULT 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst ASIC_ID_DEFAULT 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst INSTANCE_ID 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst FIFO_DEPTH 64
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst DEBUG_LEVEL 0
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_MAJOR 26
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_MINOR 3
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_PATCH 1
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst BUILD 513
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_DATE 20260513
+2026.05.13.21:49:27 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_GIT 0
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: add_connection lvds_rx_28nm_0.outclock emulator_mutrig_qsys_inst.data_clock
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: add_connection master_datapath.master_reset emulator_mutrig_qsys_inst.data_reset
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: add_connection emulator_ctrl_splitter.out0 emulator_mutrig_qsys_inst.ctrl
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: add_connection emulator_inject_fanout.out0 emulator_mutrig_qsys_inst.inject
+2026.05.13.21:49:27 Info: get_instances 
+2026.05.13.21:49:27 Info: get_connections 
+2026.05.13.21:49:27 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 emulator_mutrig_qsys_inst.csr
+2026.05.13.21:49:27 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_qsys_inst.csr baseAddress 0x0000
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_qsys_inst.csr arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/emulator_mutrig_qsys_inst.csr defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 emulator_mutrig_qsys_inst.csr
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_qsys_inst.csr baseAddress 0x2000
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_qsys_inst.csr arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/emulator_mutrig_qsys_inst.csr defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master emulator_mutrig_qsys_inst.csr
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/emulator_mutrig_qsys_inst.csr baseAddress 0x2000
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/emulator_mutrig_qsys_inst.csr arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/emulator_mutrig_qsys_inst.csr defaultConnection false
+2026.05.13.21:49:28 Info: add_instance emulator_hit_type0_fanout hit_type0_fanout8 26.0.0.0512
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection lvds_rx_28nm_0.outclock emulator_hit_type0_fanout.clk
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master_reset emulator_hit_type0_fanout.rst
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_mutrig_qsys_inst.hit_type0 emulator_hit_type0_fanout.in
+2026.05.13.21:49:28 Info: add_instance arb_hit_type0_supercore_0 arb_hit_type0_supercore 1.0
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection lvds_rx_28nm_0.outclock arb_hit_type0_supercore_0.clk
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master_reset arb_hit_type0_supercore_0.rst
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_ctrl_splitter.out1 arb_hit_type0_supercore_0.run_ctrl
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_0.hit_type0_out/mux_mutrig2processor.in0
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mutrig_datapath_subsystem_0.hit_type0_out arb_hit_type0_supercore_0.real_in_0
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_hit_type0_fanout.out0 arb_hit_type0_supercore_0.emu_in_0
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection arb_hit_type0_supercore_0.selected_out_0 mux_mutrig2processor.in0
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_0
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_0 baseAddress 0x0280
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_0 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_0 defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_0
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_0 baseAddress 0x2280
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_0 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_0 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_0
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_0 baseAddress 0x2280
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_0 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_0 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_1.hit_type0_out/mux_mutrig2processor.in1
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mutrig_datapath_subsystem_1.hit_type0_out arb_hit_type0_supercore_0.real_in_1
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_hit_type0_fanout.out1 arb_hit_type0_supercore_0.emu_in_1
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection arb_hit_type0_supercore_0.selected_out_1 mux_mutrig2processor.in1
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_1 baseAddress 0x0300
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_1 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_1 defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_1 baseAddress 0x2300
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_1 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_1 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_1 baseAddress 0x2300
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_1 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_1 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_2.hit_type0_out/mux_mutrig2processor.in2
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mutrig_datapath_subsystem_2.hit_type0_out arb_hit_type0_supercore_0.real_in_2
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_hit_type0_fanout.out2 arb_hit_type0_supercore_0.emu_in_2
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection arb_hit_type0_supercore_0.selected_out_2 mux_mutrig2processor.in2
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_2
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_2 baseAddress 0x0380
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_2 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_2 defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_2
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_2 baseAddress 0x2380
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_2 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_2 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_2
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_2 baseAddress 0x2380
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_2 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_2 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_3.hit_type0_out/mux_mutrig2processor.in3
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mutrig_datapath_subsystem_3.hit_type0_out arb_hit_type0_supercore_0.real_in_3
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_hit_type0_fanout.out3 arb_hit_type0_supercore_0.emu_in_3
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection arb_hit_type0_supercore_0.selected_out_3 mux_mutrig2processor.in3
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_3
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_3 baseAddress 0x0400
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_3 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_3 defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_3
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_3 baseAddress 0x2400
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_3 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_3 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_3
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_3 baseAddress 0x2400
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_3 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_3 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_4.hit_type0_out/mux_mutrig2processor_0.in0
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mutrig_datapath_subsystem_4.hit_type0_out arb_hit_type0_supercore_0.real_in_4
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_hit_type0_fanout.out4 arb_hit_type0_supercore_0.emu_in_4
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection arb_hit_type0_supercore_0.selected_out_4 mux_mutrig2processor_0.in0
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_4
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_4 baseAddress 0x0480
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_4 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_4 defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_4
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_4 baseAddress 0x2480
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_4 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_4 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_4
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_4 baseAddress 0x2480
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_4 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_4 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_5.hit_type0_out/mux_mutrig2processor_0.in1
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mutrig_datapath_subsystem_5.hit_type0_out arb_hit_type0_supercore_0.real_in_5
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_hit_type0_fanout.out5 arb_hit_type0_supercore_0.emu_in_5
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection arb_hit_type0_supercore_0.selected_out_5 mux_mutrig2processor_0.in1
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_5
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_5 baseAddress 0x0500
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_5 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_5 defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_5
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_5 baseAddress 0x2500
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_5 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_5 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_5
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_5 baseAddress 0x2500
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_5 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_5 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_6.hit_type0_out/mux_mutrig2processor_0.in2
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mutrig_datapath_subsystem_6.hit_type0_out arb_hit_type0_supercore_0.real_in_6
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection emulator_hit_type0_fanout.out6 arb_hit_type0_supercore_0.emu_in_6
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection arb_hit_type0_supercore_0.selected_out_6 mux_mutrig2processor_0.in2
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_6
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_6 baseAddress 0x0580
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_6 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_6 defaultConnection false
+2026.05.13.21:49:28 Info: get_instances 
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_6
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_6 baseAddress 0x2580
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_6 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_6 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_6
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_6 baseAddress 0x2580
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_6 arbitrationPriority 1
+2026.05.13.21:49:28 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_6 defaultConnection false
+2026.05.13.21:49:28 Info: get_connections 
+2026.05.13.21:49:28 Info: remove_connection mutrig_datapath_subsystem_7.hit_type0_out/mux_mutrig2processor_0.in3
+2026.05.13.21:49:29 Info: get_connections 
+2026.05.13.21:49:29 Info: add_connection mutrig_datapath_subsystem_7.hit_type0_out arb_hit_type0_supercore_0.real_in_7
+2026.05.13.21:49:29 Info: get_connections 
+2026.05.13.21:49:29 Info: add_connection emulator_hit_type0_fanout.out7 arb_hit_type0_supercore_0.emu_in_7
+2026.05.13.21:49:29 Info: get_connections 
+2026.05.13.21:49:29 Info: add_connection arb_hit_type0_supercore_0.selected_out_7 mux_mutrig2processor_0.in3
+2026.05.13.21:49:29 Info: get_instances 
+2026.05.13.21:49:29 Info: get_connections 
+2026.05.13.21:49:29 Info: add_connection mm_pipeline_lvds_csr_emu_dbg.m0 arb_hit_type0_supercore_0.csr_7
+2026.05.13.21:49:29 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_7 baseAddress 0x0600
+2026.05.13.21:49:29 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_7 arbitrationPriority 1
+2026.05.13.21:49:29 Info: set_connection_parameter_value mm_pipeline_lvds_csr_emu_dbg.m0/arb_hit_type0_supercore_0.csr_7 defaultConnection false
+2026.05.13.21:49:29 Info: get_instances 
+2026.05.13.21:49:29 Info: get_connections 
+2026.05.13.21:49:29 Info: add_connection mm_clock_crossing_bridge.m0 arb_hit_type0_supercore_0.csr_7
+2026.05.13.21:49:29 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_7 baseAddress 0x2600
+2026.05.13.21:49:29 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_7 arbitrationPriority 1
+2026.05.13.21:49:29 Info: set_connection_parameter_value mm_clock_crossing_bridge.m0/arb_hit_type0_supercore_0.csr_7 defaultConnection false
+2026.05.13.21:49:29 Info: get_connections 
+2026.05.13.21:49:29 Info: add_connection master_datapath.master arb_hit_type0_supercore_0.csr_7
+2026.05.13.21:49:29 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_7 baseAddress 0x2600
+2026.05.13.21:49:29 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_7 arbitrationPriority 1
+2026.05.13.21:49:29 Info: set_connection_parameter_value master_datapath.master/arb_hit_type0_supercore_0.csr_7 defaultConnection false
+2026.05.13.21:49:29 Info: save_system /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys
+INFO: saved arb-enabled pulserdrop datapath /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys from /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/scifi_datapath_system_v3_pipe.qsys

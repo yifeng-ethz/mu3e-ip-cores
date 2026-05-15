@@ -1,0 +1,6 @@
+command=/data1/intelFPGA/18.1/quartus/sopc_builder/bin/qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3 --clear-output-directory --family=Arria V --part=5AGXBA7D4F31C5 --search-path=<74 paths>,$
+exit_code=0
+error_count=0
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3_qsys_generate_20260514_hist_debug_stream_clean.console.log
+report=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3/scifi_datapath_system_v3_generation.rpt
+isolated_catalog=/tmp/qsys_user_catalog.NqM1Aw

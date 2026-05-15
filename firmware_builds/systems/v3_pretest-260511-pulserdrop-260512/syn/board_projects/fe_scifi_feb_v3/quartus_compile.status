@@ -1,0 +1,9 @@
+start=2026-05-12T20:07:23+02:00
+pwd=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3
+tmpdir=/data2/tmp/quartus_pulserdrop_260512
+Quartus Prime Shell
+Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+Copyright (C) 2018  Intel Corporation. All rights reserved.
+end=2026-05-12T20:45:18+02:00
+exit_code=0
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-pulserdrop-260512/syn/board_projects/fe_scifi_feb_v3/quartus_compile_console.log

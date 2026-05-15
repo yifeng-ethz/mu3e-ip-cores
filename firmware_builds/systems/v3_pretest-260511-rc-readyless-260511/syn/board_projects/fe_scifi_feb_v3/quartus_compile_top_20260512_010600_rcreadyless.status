@@ -1,0 +1,14 @@
+command=/data1/intelFPGA/18.1/quartus/bin/quartus_sh --flow compile top
+workdir=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3
+start=2026-05-12T01:06:00+02:00
+end=2026-05-12T01:46:45+02:00
+runtime_seconds=2445
+exit_code=0
+log=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_20260512_010600_rcreadyless.console.log
+sof=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof
+sof_bytes=12678639
+sof_sha256=2171cd90643967aef85993ac384707807ffcf418b1b23652443277bd3f8d3f2e
+artifact=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.sta.rpt
+artifact=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.fit.summary
+artifact=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.flow.rpt
+artifact=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files/top.map.summary

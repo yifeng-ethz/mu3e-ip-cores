@@ -51,6 +51,8 @@ package tb_int_feb_egress_monitor_pkg;
                                       OBS_STAGE_FEB_EGRESS);
                     rec.root_hit_id_valid = vif.root_hit_id_valid;
                     rec.root_hit_id       = vif.root_hit_id;
+                    rec.true_hit_ts_valid = vif.true_hit_ts_valid;
+                    rec.true_hit_ts       = vif.true_hit_ts;
                     rec.monitor_debug_valid = vif.root_hit_id_valid | vif.hit_id_valid;
                     rec.monitor_debug_id = vif.root_hit_id_valid ? vif.root_hit_id :
                                            (vif.hit_id_valid ? vif.hit_id : 64'd0);

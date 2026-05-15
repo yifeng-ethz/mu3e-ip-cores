@@ -1,0 +1,4 @@
+2026.05.12.11:06:39 Info: Doing: <b>qsys-script --cmd=set ::env(SYSTEM_DIR) {/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512} --script=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/script/update_emulator_type0_descriptions.tcl</b>
+INFO: qsys description already current: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/quartus_systems/scifi_datapath_system_v3.qsys
+INFO: qsys description already current: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys
+INFO: qsys description already current: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/syn/feb_system_v3.qsys

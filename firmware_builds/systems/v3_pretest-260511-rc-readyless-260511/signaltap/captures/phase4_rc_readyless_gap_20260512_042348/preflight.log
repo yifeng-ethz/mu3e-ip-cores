@@ -1,0 +1,468 @@
+2026-05-12T04:25:09+02:00
+7dd7f9303a7551d4b0074136a38f2b818ad37e1d20ec4a9decfd6dd21e7f03ad  firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_rc_readyless_gap_clkfix/top_stp_phase4_rc_readyless_gap.sof
+a21b5a3fb46d31fa26bf797cbf819f2313161fb1fb14a4ae120fc05d1b51a3b7  firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/signaltap/phase4_rc_readyless_gap.stp
+crw-rw-rw- 1 root users 10, 124 May 12 04:23 /dev/mudaq0
+crw-rw-rw- 1 root users 10, 123 May 12 04:23 /dev/mudaq0_dmabuf
+mudaq                  45056  0
+swb-register-source: /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/registers/a10_pcie_registers.vhd sha256=396115ef16a9cba562e44d4fdd0f09613d48f447f20123180aadbf0f5b33278d
+LINK_LOCKED_LOW_REGISTER_R @ 0x36, samples=1000
+  ones_count_per_bit (b31..b0):
+    b31..b24 = 0 0 0 0 0 0 0 0
+    b23..b16 = 0 0 0 0 0 0 0 0
+    b15..b08 = 46 67 55 13 1000 1000 1000 1000
+    b07..b00 = 0 0 0 0 0 0 0 0
+  bit-stability:
+    stable@1 bits: b11, b10, b9, b8
+    stable@0 bits: b31, b30, b29, b28, b27, b26, b25, b24, b23, b22, b21, b20, b19, b18, b17, b16, b15, b12, b7, b6, b5, b4, b3, b2, b1, b0
+    unstable bits: b14=0.067, b13=0.055
+  median (32 bits): 0x00000F00  (per-bit majority vote)
+  min: 0x00000F00
+  max: 0x0000EF00
+  entropy_bits: 2
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x00000
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00000000
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 0 us
+  timing total        : 1008698 us
+  secondary before    : 0x10E0
+  secondary after     : 0xD4CE
+  secondary delta     : 50158 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+err: timed out waiting for matching secondary reply
+warn: skipped non-preamble words while scanning secondary ring
+  skipped ring[0x10E0] = 0x0F081800
+  skipped ring[0x10E1] = 0xE01E6006
+  skipped ring[0x10E2] = 0x88070080
+  skipped ring[0x10E3] = 0x183CEBFC
+  skipped ring[0x10E4] = 0x00EE8000
+  skipped ring[0x10E5] = 0x60ECE7E0
+  skipped ring[0x10E6] = 0x00E41818
+  skipped ring[0x10E7] = 0xE7FCC060
+info: packets observed on secondary ring:
+  [0] invalid RD_NI link=0 addr=0x0FD58 rsp=RSP3 ack=0 declared=26440 actual=0 start=0x11A6
+  [1] invalid RD link=240 addr=0x01E80 rsp=RSP3 ack=0 declared=103 actual=0 start=0x11CF
+  [2] invalid WR link=24 addr=0x3E0E0 rsp=RSP3 ack=0 declared=153 actual=0 start=0x12C7
+  [3] invalid WR link=104 addr=0x0F6FE rsp=OK ack=0 declared=16544 actual=0 start=0x169C
+  [4] invalid WR_NI link=224 addr=0x0E01E rsp=SLVERR ack=1 declared=0 actual=0 start=0x16F0
+  [5] invalid RD_NI link=28 addr=0x06714 rsp=OK ack=0 declared=60480 actual=0 start=0x16F9
+  [6] invalid RD_NI link=28 addr=0x06714 rsp=OK ack=0 declared=60480 actual=0 start=0x1700
+  [7] invalid RD_NI link=40 addr=0x0EF60 rsp=OK ack=0 declared=57575 actual=0 start=0x1706
+  [8] invalid RD_NI link=40 addr=0x0EF60 rsp=OK ack=0 declared=57575 actual=0 start=0x170D
+  [9] invalid RD link=157 addr=0x29100 rsp=OK ack=0 declared=57086 actual=0 start=0x17DE
+  [10] invalid RD link=181 addr=0x0181F rsp=OK ack=0 declared=6336 actual=0 start=0x1AF4
+  [11] invalid WR_NI link=0 addr=0x01CE0 rsp=DECERR ack=0 declared=33308 actual=0 start=0x1B79
+  [12] invalid RD link=0 addr=0x360C0 rsp=OK ack=0 declared=32864 actual=0 start=0x1B84
+  [13] invalid RD link=0 addr=0x3F880 rsp=SLVERR ack=1 declared=30206 actual=0 start=0x1B8C
+  [14] invalid RD link=117 addr=0x0A060 rsp=OK ack=0 declared=227 actual=0 start=0x1B8E
+  [15] invalid RD link=0 addr=0x3F880 rsp=SLVERR ack=1 declared=30206 actual=0 start=0x1B94
+  [16] invalid RD link=117 addr=0x0A060 rsp=OK ack=0 declared=227 actual=0 start=0x1B96
+  [17] invalid RD link=96 addr=0x0007B rsp=SLVERR ack=1 declared=32768 actual=0 start=0x1BA9
+  [18] invalid RD link=96 addr=0x0007B rsp=SLVERR ack=1 declared=32768 actual=0 start=0x1BB0
+  [19] invalid WR link=96 addr=0x0E071 rsp=DECERR ack=0 declared=32128 actual=0 start=0x1BBF
+  [20] invalid RD_NI link=128 addr=0x06040 rsp=DECERR ack=1 declared=32827 actual=0 start=0x1F01
+  [21] invalid WR link=29 addr=0x0F062 rsp=OK ack=0 declared=37088 actual=0 start=0x1F17
+  [22] invalid RD_NI link=216 addr=0x0FD00 rsp=DECERR ack=1 declared=30963 actual=0 start=0x201D
+  [23] invalid WR link=224 addr=0x0A200 rsp=OK ack=0 declared=49184 actual=0 start=0x202E
+  [24] invalid RD link=40 addr=0x30FE0 rsp=OK ack=0 declared=31456 actual=0 start=0x20A0
+  [25] invalid RD link=40 addr=0x30FE0 rsp=RSP3 ack=0 declared=31456 actual=0 start=0x20A8
+  [26] invalid WR_NI link=253 addr=0x0C79C rsp=SLVERR ack=0 declared=62396 actual=0 start=0x21B8
+  [27] invalid WR_NI link=243 addr=0x0C0E8 rsp=OK ack=0 declared=8337 actual=0 start=0x21BA
+  [28] invalid WR_NI link=243 addr=0x0C0E8 rsp=DECERR ack=1 declared=0 actual=0 start=0x21C1
+  [29] invalid WR link=124 addr=0x00320 rsp=RSP3 ack=0 declared=8308 actual=0 start=0x21EB
+  [30] invalid WR_NI link=26 addr=0x2001E rsp=RSP3 ack=1 declared=0 actual=0 start=0x21F2
+  [31] invalid WR link=128 addr=0x01C14 rsp=RSP3 ack=0 declared=25056 actual=0 start=0x22A3
+  [32] invalid WR link=192 addr=0x09F96 rsp=OK ack=0 declared=38752 actual=0 start=0x24DB
+  [33] invalid WR link=192 addr=0x09F96 rsp=OK ack=0 declared=57440 actual=0 start=0x24E2
+  [34] invalid WR link=30 addr=0x3E0E9 rsp=SLVERR ack=1 declared=0 actual=0 start=0x2509
+  [35] invalid WR link=224 addr=0x3E0FF rsp=DECERR ack=1 declared=0 actual=0 start=0x2618
+  [36] invalid WR link=224 addr=0x320E0 rsp=OK ack=0 declared=30722 actual=0 start=0x2619
+  [37] invalid RD_NI link=224 addr=0x01F80 rsp=OK ack=0 declared=8222 actual=0 start=0x27ED
+  [38] invalid RD_NI link=2 addr=0x0E0E0 rsp=OK ack=0 declared=57488 actual=0 start=0x2B55
+  [39] invalid WR link=241 addr=0x0E0E0 rsp=DECERR ack=1 declared=0 actual=0 start=0x2C34
+  [40] invalid WR_NI link=15 addr=0x0E000 rsp=SLVERR ack=0 declared=7290 actual=0 start=0x2CB8
+  [41] invalid RD_NI link=192 addr=0x10A08 rsp=OK ack=0 declared=61735 actual=0 start=0x2D1D
+  [42] invalid WR link=0 addr=0x080E1 rsp=SLVERR ack=1 declared=0 actual=0 start=0x2D34
+  [43] invalid RD_NI link=26 addr=0x0F1E0 rsp=SLVERR ack=1 declared=49874 actual=0 start=0x2D3A
+  [44] invalid WR link=13 addr=0x080A0 rsp=DECERR ack=0 declared=159 actual=0 start=0x2D5C
+  [45] invalid WR link=13 addr=0x080A0 rsp=DECERR ack=0 declared=159 actual=0 start=0x2D63
+  [46] invalid WR link=6 addr=0x320E0 rsp=OK ack=0 declared=63712 actual=0 start=0x2DC7
+  [47] invalid RD link=103 addr=0x26041 rsp=DECERR ack=0 declared=32871 actual=0 start=0x2E70
+  [48] invalid RD_NI link=128 addr=0x2E006 rsp=OK ack=0 declared=62443 actual=0 start=0x2F5A
+  [49] invalid RD_NI link=128 addr=0x2E006 rsp=OK ack=0 declared=62443 actual=0 start=0x2F61
+  [50] invalid RD link=21 addr=0x01742 rsp=OK ack=0 declared=65038 actual=0 start=0x3000
+  [51] invalid RD link=21 addr=0x01742 rsp=OK ack=0 declared=65038 actual=0 start=0x3008
+  [52] invalid WR link=24 addr=0x00000 rsp=DECERR ack=0 declared=15596 actual=0 start=0x3A1A
+  [53] invalid WR link=24 addr=0x00000 rsp=DECERR ack=0 declared=15596 actual=0 start=0x3A21
+  [54] invalid RD_NI link=128 addr=0x39C60 rsp=OK ack=0 declared=57361 actual=0 start=0x3AB6
+  [55] invalid WR_NI link=206 addr=0x00000 rsp=OK ack=0 declared=65216 actual=0 start=0x3C03
+  [56] invalid WR link=224 addr=0x2006B rsp=DECERR ack=1 declared=0 actual=0 start=0x3C33
+  [57] invalid RD_NI link=228 addr=0x000F8 rsp=OK ack=0 declared=1 actual=0 start=0x3D09
+  [58] invalid RD_NI link=228 addr=0x000F8 rsp=OK ack=0 declared=1 actual=0 start=0x3D11
+  [59] invalid RD_NI link=251 addr=0x0ECE0 rsp=OK ack=0 declared=7060 actual=0 start=0x3D4F
+  [60] invalid RD link=116 addr=0x07BE6 rsp=OK ack=1 declared=4224 actual=0 start=0x3D8A
+  [61] invalid RD link=116 addr=0x07BE6 rsp=OK ack=1 declared=4224 actual=0 start=0x3D92
+  [62] invalid WR_NI link=224 addr=0x3E439 rsp=SLVERR ack=0 declared=3074 actual=0 start=0x5C44
+  [63] invalid RD_NI link=96 addr=0x1E0E0 rsp=OK ack=1 declared=32800 actual=0 start=0x5C48
+  [64] invalid WR link=249 addr=0x1E1B3 rsp=OK ack=0 declared=8316 actual=0 start=0x5C84
+  [65] invalid RD_NI link=1 addr=0x00760 rsp=OK ack=0 declared=6656 actual=0 start=0x5CC2
+  [66] invalid WR_NI link=32 addr=0x07864 rsp=RSP3 ack=0 declared=57352 actual=0 start=0x5CDC
+  [67] invalid RD_NI link=0 addr=0x0FB9C rsp=OK ack=1 declared=26279 actual=0 start=0x5D40
+  [68] invalid WR_NI link=110 addr=0x06012 rsp=RSP3 ack=1 declared=0 actual=0 start=0x5D8A
+  [69] invalid RD_NI link=3 addr=0x10027 rsp=OK ack=0 declared=576 actual=0 start=0x5DA6
+  [70] invalid RD link=110 addr=0x0E0E0 rsp=RSP3 ack=0 declared=3584 actual=0 start=0x5E11
+  [71] invalid RD link=79 addr=0x2E700 rsp=OK ack=0 declared=57568 actual=0 start=0x640A
+  [72] invalid WR_NI link=224 addr=0x0F6BD rsp=OK ack=0 declared=3212 actual=0 start=0x6471
+  [73] invalid RD link=126 addr=0x11FC0 rsp=DECERR ack=1 declared=52000 actual=0 start=0x658F
+  [74] invalid RD link=226 addr=0x000E0 rsp=OK ack=1 declared=224 actual=0 start=0x6672
+  [75] invalid RD link=224 addr=0x2603E rsp=OK ack=0 declared=49097 actual=0 start=0x66A8
+  [76] invalid RD link=224 addr=0x2603E rsp=OK ack=0 declared=49097 actual=0 start=0x66B0
+  [77] invalid WR link=224 addr=0x00EBD rsp=OK ack=1 declared=0 actual=0 start=0x66C3
+  [78] invalid WR link=224 addr=0x00EBD rsp=OK ack=1 declared=0 actual=0 start=0x66CB
+  [79] invalid WR link=96 addr=0x20E06 rsp=RSP3 ack=1 declared=0 actual=0 start=0x6778
+  [80] invalid RD link=0 addr=0x30BE0 rsp=RSP3 ack=1 declared=32832 actual=0 start=0x67AF
+  [81] invalid RD_NI link=23 addr=0x08BF8 rsp=OK ack=0 declared=0 actual=0 start=0x687B
+  [82] invalid WR link=228 addr=0x30B00 rsp=SLVERR ack=1 declared=0 actual=0 start=0x6B5F
+  [83] invalid WR link=228 addr=0x30B00 rsp=SLVERR ack=1 declared=0 actual=0 start=0x6B67
+  [84] invalid WR_NI link=28 addr=0x20000 rsp=SLVERR ack=0 declared=7709 actual=0 start=0x6BCA
+  [85] invalid WR link=160 addr=0x00099 rsp=OK ack=0 declared=61306 actual=0 start=0x6C24
+  [86] invalid RD link=104 addr=0x2C020 rsp=RSP3 ack=0 declared=18 actual=0 start=0x6D2A
+  [87] invalid RD_NI link=10 addr=0x240DE rsp=RSP3 ack=1 declared=0 actual=0 start=0x6DA2
+  [88] invalid WR_NI link=254 addr=0x2E708 rsp=DECERR ack=0 declared=5184 actual=0 start=0x6E0F
+  [89] invalid RD link=0 addr=0x30768 rsp=OK ack=0 declared=57346 actual=0 start=0x6E7A
+  [90] invalid WR link=211 addr=0x0809E rsp=OK ack=0 declared=39888 actual=0 start=0x6EA8
+  [91] invalid WR link=211 addr=0x0809E rsp=OK ack=0 declared=39888 actual=0 start=0x6EB0
+  [92] invalid RD link=224 addr=0x240E0 rsp=OK ack=0 declared=6382 actual=0 start=0x7060
+  [93] invalid RD_NI link=0 addr=0x1F062 rsp=DECERR ack=0 declared=1152 actual=0 start=0x707A
+  [94] invalid WR link=195 addr=0x00337 rsp=DECERR ack=0 declared=22765 actual=0 start=0x70F3
+  [95] invalid WR link=195 addr=0x00337 rsp=DECERR ack=0 declared=22765 actual=0 start=0x70FB
+  [96] invalid RD link=64 addr=0x01FE3 rsp=SLVERR ack=1 declared=31968 actual=0 start=0x71DC
+  [97] invalid RD_NI link=184 addr=0x3F1FB rsp=DECERR ack=0 declared=30208 actual=0 start=0x71F9
+  [98] invalid RD link=0 addr=0x00006 rsp=RSP3 ack=1 declared=57344 actual=0 start=0x723B
+  [99] invalid RD link=216 addr=0x0C013 rsp=OK ack=1 declared=57551 actual=0 start=0x7242
+  [100] invalid WR_NI link=0 addr=0x0C0A7 rsp=OK ack=0 declared=23662 actual=0 start=0x736B
+  [101] invalid RD_NI link=167 addr=0x01C17 rsp=OK ack=0 declared=254 actual=0 start=0x7957
+  [102] invalid RD_NI link=240 addr=0x3F6C0 rsp=OK ack=0 declared=32768 actual=0 start=0x7F26
+  [103] invalid RD_NI link=240 addr=0x3E0C0 rsp=DECERR ack=0 declared=160 actual=0 start=0x7F2D
+  [104] invalid WR_NI link=224 addr=0x02029 rsp=OK ack=0 declared=33011 actual=0 start=0x9D19
+  [105] invalid RD link=224 addr=0x0EEF9 rsp=OK ack=0 declared=65408 actual=0 start=0x9D61
+  [106] invalid RD link=224 addr=0x0EEF9 rsp=OK ack=0 declared=65408 actual=0 start=0x9D68
+  [107] invalid WR_NI link=27 addr=0x06760 rsp=RSP3 ack=1 declared=0 actual=0 start=0x9D94
+  [108] invalid WR_NI link=27 addr=0x06760 rsp=RSP3 ack=1 declared=0 actual=0 start=0x9D9C
+  [109] invalid RD_NI link=23 addr=0x01A60 rsp=OK ack=0 declared=14 actual=0 start=0x9EF1
+  [110] invalid RD link=192 addr=0x10509 rsp=RSP3 ack=0 declared=96 actual=0 start=0x9F53
+  [111] invalid RD link=192 addr=0x10509 rsp=RSP3 ack=0 declared=96 actual=0 start=0x9F5B
+  [112] invalid WR link=8 addr=0x000E0 rsp=OK ack=0 declared=63488 actual=0 start=0xA059
+  [113] invalid WR_NI link=224 addr=0x0FE00 rsp=DECERR ack=1 declared=0 actual=0 start=0xA13F
+  [114] invalid RD_NI link=28 addr=0x1E0A0 rsp=OK ack=0 declared=41056 actual=0 start=0xBF4F
+  [115] invalid WR link=0 addr=0x000FA rsp=OK ack=0 declared=2078 actual=0 start=0xC112
+  [116] invalid WR link=145 addr=0x02256 rsp=OK ack=0 declared=57351 actual=0 start=0xC164
+  [117] invalid RD link=232 addr=0x04027 rsp=OK ack=0 declared=41185 actual=0 start=0xC2F8
+  [118] invalid WR_NI link=242 addr=0x01C00 rsp=OK ack=0 declared=6371 actual=0 start=0xC3B1
+  [119] invalid WR_NI link=8 addr=0x060E8 rsp=SLVERR ack=1 declared=0 actual=0 start=0xC3FE
+  [120] invalid WR_NI link=8 addr=0x060E8 rsp=SLVERR ack=1 declared=0 actual=0 start=0xC406
+  [121] invalid WR_NI link=192 addr=0x3E062 rsp=RSP3 ack=0 declared=241 actual=0 start=0xC555
+  [122] invalid RD link=224 addr=0x00B60 rsp=DECERR ack=1 declared=6368 actual=0 start=0xC631
+  [123] invalid RD link=0 addr=0x300C0 rsp=DECERR ack=1 declared=41184 actual=0 start=0xC78F
+  [124] invalid WR_NI link=27 addr=0x1080F rsp=RSP3 ack=1 declared=0 actual=0 start=0xCBC9
+  [125] invalid RD_NI link=192 addr=0x3441D rsp=OK ack=1 declared=64220 actual=0 start=0xCBEB
+  [126] invalid RD link=64 addr=0x000C0 rsp=OK ack=0 declared=41208 actual=0 start=0xCEAA
+  [127] invalid RD link=224 addr=0x37B07 rsp=SLVERR ack=0 declared=7392 actual=0 start=0xCEB3
+  [128] invalid WR link=4 addr=0x08000 rsp=OK ack=0 declared=41099 actual=0 start=0xCF0A
+  [129] invalid WR_NI link=228 addr=0x12080 rsp=OK ack=0 declared=47232 actual=0 start=0xCF6C
+  [130] invalid RD_NI link=32 addr=0x0A0A0 rsp=OK ack=0 declared=59136 actual=0 start=0xCF80
+  [131] invalid WR_NI link=30 addr=0x01AF8 rsp=RSP3 ack=1 declared=0 actual=0 start=0xCF93
+  [132] invalid WR link=224 addr=0x11C00 rsp=OK ack=0 declared=2 actual=0 start=0xCFCD
+  [133] invalid RD_NI link=224 addr=0x25819 rsp=OK ack=0 declared=60256 actual=0 start=0xD19A
+  [134] invalid WR link=249 addr=0x0E0B0 rsp=OK ack=0 declared=57597 actual=0 start=0xD1A3
+  [135] invalid RD_NI link=72 addr=0x0107D rsp=OK ack=0 declared=57344 actual=0 start=0xD21D
+  [136] invalid RD_NI link=32 addr=0x0E309 rsp=SLVERR ack=1 declared=3370 actual=0 start=0xD286
+  [137] invalid RD_NI link=32 addr=0x0E309 rsp=SLVERR ack=1 declared=3370 actual=0 start=0xD28E
+  [138] invalid WR link=224 addr=0x2E0A0 rsp=OK ack=0 declared=32768 actual=0 start=0xD448
+  [139] invalid WR link=224 addr=0x2FCA0 rsp=OK ack=0 declared=12408 actual=0 start=0xD450
+warn: scan ended with an incomplete candidate packet
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x08800
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00008800
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 71 us
+  timing total        : 71 us
+  secondary before    : 0x1BAE
+  secondary after     : 0x1BB3
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x1BAE
+  ring end            : 0x1BB3
+  type                : RD
+  link                : 2
+  addr                : 0x08800
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00008800
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x454D5554
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A900
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A900
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 71 us
+  timing total        : 71 us
+  secondary before    : 0x00B7
+  secondary after     : 0x00BC
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x80000001
+info: observed packet:
+  ring start          : 0x00B7
+  ring end            : 0x00BC
+  type                : RD
+  link                : 2
+  addr                : 0x0A900
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A900
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x48495354
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0C003
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000C003
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 59 us
+  timing matched      : 69 us
+  timing total        : 69 us
+  secondary before    : 0x0406
+  secondary after     : 0x040B
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0406
+  ring end            : 0x040B
+  type                : RD
+  link                : 2
+  addr                : 0x0C003
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000C003
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x80000003
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0C004
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000C004
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 59 us
+  timing matched      : 69 us
+  timing total        : 69 us
+  secondary before    : 0x105D
+  secondary after     : 0x1062
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x105D
+  ring end            : 0x1062
+  type                : RD
+  link                : 2
+  addr                : 0x0C004
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000C004
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0C00F
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000C00F
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 59 us
+  timing matched      : 69 us
+  timing total        : 69 us
+  secondary before    : 0x0C88
+  secondary after     : 0x0C8D
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0C88
+  ring end            : 0x0C8D
+  type                : RD
+  link                : 2
+  addr                : 0x0C00F
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000C00F
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000042
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A90B
+  request length     : 7 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 11
+  expected reply words (declared) : 11
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A90B
+  wmem[2] = 0x00000007
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 78 us
+  timing total        : 78 us
+  secondary before    : 0x0448
+  secondary after     : 0x0453
+  secondary delta     : 11 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0448
+  ring end            : 0x0453
+  type                : RD
+  link                : 2
+  addr                : 0x0A90B
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 7
+  declared payload    : 7
+  actual payload      : 7
+  declared ring words : 11
+  actual ring words   : 11
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A90B
+  raw len word        : 0x00010007
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000001
+  payload[1] = 0x000000FF
+  payload[2] = 0x00000000
+  payload[3] = 0x00000000
+  payload[4] = 0x00000000
+  payload[5] = 0x00000000
+  payload[6] = 0x00000000

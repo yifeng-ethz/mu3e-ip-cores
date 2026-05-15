@@ -1,0 +1,1 @@
+../../../../system_20260504_emulator_type0/tb_int/uvm/common/tb_int_counter_if.sv

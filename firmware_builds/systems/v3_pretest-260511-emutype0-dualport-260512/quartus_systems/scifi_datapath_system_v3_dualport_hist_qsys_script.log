@@ -1,0 +1,125 @@
+2026.05.12.13:37:22 Info: Doing: <b>qsys-script --system-file=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3.qsys --search-path=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/quartus_systems/swb,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/CAM,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/alt_temp_sense_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/charge_injection/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/emulator_mutrig,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_frame_assembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/legacy/max10_prog_avmm,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firefly_xcvr_i2c_master,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/ip/hit_type0_fanout8/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/high_performance_counter_array,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ip_8b10b_decoder,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/lvds_error_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core14,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_core20,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/altera_lvds_driver,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/altera_lvds/top/ex_design/qsys_interface_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/arb_hit_type0/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/avst_snoop_splitter,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/conduit2rst,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_counter_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/dbg_issp_fab,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_hit_sidecar_bank_bridge/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/debug_sidecar_fanout/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/histogram_snoop_selector,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/hit_type0_readyless_mux4,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/inactive_reset_source,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/mutrig_lane_source_mux,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/misc/pulse_fanout8,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mu3e_lvds_controller/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_channel_counter_fabric,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_frame_deassembly/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_reset_controller,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/mutrig_timestamp_processor,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/onewire_temp_sense/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler/tb/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_rq_fetcher,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_run_manager/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/rdma_subsystem,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/ring-buffer_cam/script,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/run-control_mgmt/reference/feb_system_v2_snapshot_20260415,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p0,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/sc_hub_2p7p11,/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/slow-control_hub/legacy/v26_0_0331,$ --script=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/script/update_dualport_histogram_topology.tcl</b>
+2026.05.12.13:37:29 Info: get_instances 
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 DEFAULT_SELECT_POST 0
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 ENABLE_POST_FORWARD 0
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 FILTER_POST_HIT_WORDS 1
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 INSTANCE_ID 0
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MAJOR 26
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 VERSION_MINOR 0
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 VERSION_PATCH 5
+2026.05.12.13:37:29 Info: set_instance_parameter_value histogram_ingress_bridge_0 BUILD 512
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_0 VERSION_DATE 20260512
+2026.05.12.13:37:30 Info: get_instances 
+2026.05.12.13:37:30 Info: add_instance histogram_ingress_bridge_1 histogram_ingress_bridge 26.0.2.425
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 DEFAULT_SELECT_POST 0
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 ENABLE_POST_FORWARD 0
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 FILTER_POST_HIT_WORDS 1
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 INSTANCE_ID 1
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 VERSION_MAJOR 26
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 VERSION_MINOR 0
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 VERSION_PATCH 5
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 BUILD 512
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_ingress_bridge_1 VERSION_DATE 20260512
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_0 VERSION_MAJOR 26
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_0 VERSION_MINOR 3
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_0 VERSION_PATCH 0
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_0 BUILD 512
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_0 VERSION_DATE 20260512
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_1 VERSION_MAJOR 26
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_1 VERSION_MINOR 3
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_1 VERSION_PATCH 0
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_1 BUILD 512
+2026.05.12.13:37:30 Info: set_instance_parameter_value mts_preprocessor_1 VERSION_DATE 20260512
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection mux_mutrig2processor.out/mts_preprocessor_0.hit_type0_in
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection lvds_rx_28nm_0.outclock/mux_mutrig2processor.clk
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection master_datapath.master_reset/mux_mutrig2processor.reset
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_0/mux_mutrig2processor.in0
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_1/mux_mutrig2processor.in1
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_2/mux_mutrig2processor.in2
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_3/mux_mutrig2processor.in3
+2026.05.12.13:37:30 Info: get_instances 
+2026.05.12.13:37:30 Info: remove_instance mux_mutrig2processor
+2026.05.12.13:37:30 Info: add_instance mux_mutrig2processor hit_type0_readyless_mux4 26.0.0.0512
+2026.05.12.13:37:30 Info: set_instance_parameter_value mux_mutrig2processor FIFO_DEPTH 16
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection lvds_rx_28nm_0.outclock mux_mutrig2processor.clk
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection master_datapath.master_reset mux_mutrig2processor.rst
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_0 mux_mutrig2processor.in0
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_1 mux_mutrig2processor.in1
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_2 mux_mutrig2processor.in2
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_3 mux_mutrig2processor.in3
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection mux_mutrig2processor.out mts_preprocessor_0.hit_type0_in
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection mux_mutrig2processor_0.out/mts_preprocessor_1.hit_type0_in
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection lvds_rx_28nm_0.outclock/mux_mutrig2processor_0.clk
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection master_datapath.master_reset/mux_mutrig2processor_0.reset
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_4/mux_mutrig2processor_0.in0
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_5/mux_mutrig2processor_0.in1
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_6/mux_mutrig2processor_0.in2
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection arb_hit_type0_supercore_0.selected_out_7/mux_mutrig2processor_0.in3
+2026.05.12.13:37:30 Info: get_instances 
+2026.05.12.13:37:30 Info: remove_instance mux_mutrig2processor_0
+2026.05.12.13:37:30 Info: add_instance mux_mutrig2processor_0 hit_type0_readyless_mux4 26.0.0.0512
+2026.05.12.13:37:30 Info: set_instance_parameter_value mux_mutrig2processor_0 FIFO_DEPTH 16
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection lvds_rx_28nm_0.outclock mux_mutrig2processor_0.clk
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection master_datapath.master_reset mux_mutrig2processor_0.rst
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_4 mux_mutrig2processor_0.in0
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_5 mux_mutrig2processor_0.in1
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_6 mux_mutrig2processor_0.in2
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection arb_hit_type0_supercore_0.selected_out_7 mux_mutrig2processor_0.in3
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection mux_mutrig2processor_0.out mts_preprocessor_1.hit_type0_in
+2026.05.12.13:37:30 Info: set_instance_parameter_value histogram_statistics_0 N_PORTS 2
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection lvds_rx_28nm_0.outclock histogram_ingress_bridge_1.clock
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection master_datapath.master_reset histogram_ingress_bridge_1.reset
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection mm_pipeline_lvds_csr_hist.m0 histogram_ingress_bridge_1.csr
+2026.05.12.13:37:30 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_ingress_bridge_1.csr baseAddress 0x00000c10
+2026.05.12.13:37:30 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_ingress_bridge_1.csr arbitrationPriority 1
+2026.05.12.13:37:30 Info: set_connection_parameter_value mm_pipeline_lvds_csr_hist.m0/histogram_ingress_bridge_1.csr defaultConnection false
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection master_datapath.master histogram_ingress_bridge_1.csr
+2026.05.12.13:37:30 Info: set_connection_parameter_value master_datapath.master/histogram_ingress_bridge_1.csr baseAddress 0x00020c10
+2026.05.12.13:37:30 Info: set_connection_parameter_value master_datapath.master/histogram_ingress_bridge_1.csr arbitrationPriority 1
+2026.05.12.13:37:30 Info: set_connection_parameter_value master_datapath.master/histogram_ingress_bridge_1.csr defaultConnection false
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: remove_connection mts_preprocessor_1.hit_type1_out/hit_stack_subsystem_1.hit_type_1
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection mts_preprocessor_1.hit_type1_out histogram_ingress_bridge_1.pre_in
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection histogram_ingress_bridge_1.pre_out hit_stack_subsystem_1.hit_type_1
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: get_connections 
+2026.05.12.13:37:30 Info: add_connection histogram_ingress_bridge_1.hist_out histogram_statistics_0.fill_in_1
+2026.05.12.13:37:30 Info: save_system 

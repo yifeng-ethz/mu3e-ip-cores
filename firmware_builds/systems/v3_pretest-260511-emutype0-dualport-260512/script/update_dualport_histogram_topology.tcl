@@ -40,7 +40,7 @@ proc add_mm_connection {start end base} {
 
 proc configure_histogram_bridge {inst instance_id} {
     if {![has_instance $inst]} {
-        add_instance $inst histogram_ingress_bridge 26.0.2.425
+        add_instance $inst histogram_ingress_bridge 26.0.6.0514
     }
 
     set_optional_param $inst DEFAULT_SELECT_POST 0
@@ -49,9 +49,9 @@ proc configure_histogram_bridge {inst instance_id} {
     set_optional_param $inst INSTANCE_ID $instance_id
     set_optional_param $inst VERSION_MAJOR 26
     set_optional_param $inst VERSION_MINOR 0
-    set_optional_param $inst VERSION_PATCH 5
-    set_optional_param $inst BUILD 512
-    set_optional_param $inst VERSION_DATE 20260512
+    set_optional_param $inst VERSION_PATCH 6
+    set_optional_param $inst BUILD 514
+    set_optional_param $inst VERSION_DATE 20260514
 }
 
 proc configure_readyless_mts {inst} {

@@ -435,7 +435,7 @@ begin
 			SS_n          => spi_SS_n                                                --                 .export
 		);
 
-	sysid : component nios_altera_avalon_sysid_qsys_181.nios_pkg.nios_altera_avalon_sysid_qsys_181_xxvhhmy
+	sysid : component nios_altera_avalon_sysid_qsys_181.nios_pkg.nios_altera_avalon_sysid_qsys_181_vtqjcqa
 		port map (
 			clock    => clk_clk,                                          --           clk.clk
 			reset_n  => rst_controller_reset_out_reset_ports_inv,         --         reset.reset_n

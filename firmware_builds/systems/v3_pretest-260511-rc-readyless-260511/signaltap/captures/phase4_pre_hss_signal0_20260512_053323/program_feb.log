@@ -1,0 +1,35 @@
+program_feb.sh: programming firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_pre_hss_gap/top_stp_phase4_pre_hss_gap.sof on cable 'USB-BlasterII [7-2]'
+Info: *******************************************************************
+Info: Running Quartus Prime Programmer
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions 
+    Info: and other software and tools, and its AMPP partner logic 
+    Info: functions, and any output files from any of the foregoing 
+    Info: (including device programming or simulation files), and any 
+    Info: associated documentation or information are expressly subject 
+    Info: to the terms and conditions of the Intel Program License 
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Tue May 12 07:33:33 2026
+Info: Command: quartus_pgm -c "USB-BlasterII [7-2]" --mode=JTAG -o p;firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_pre_hss_gap/top_stp_phase4_pre_hss_gap.sof@1
+Info (213045): Using programming cable "USB-BlasterII [7-2]"
+Info (213011): Using programming file firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/syn/board_projects/fe_scifi_feb_v3/output_files_stp_phase4_pre_hss_gap/top_stp_phase4_pre_hss_gap.sof with checksum 0x147FE76A for device 5AGXBA7D4F31@1
+Info (209060): Started Programmer operation at Tue May 12 07:33:34 2026
+Info (209016): Configuring device index 1
+Info (209017): Device 1 contains JTAG ID code 0x02A020DD
+Info (209007): Configuration succeeded -- 1 device(s) configured
+Info (209011): Successfully performed operation(s)
+Info (209061): Ended Programmer operation at Tue May 12 07:33:38 2026
+Info: Quartus Prime Programmer was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 474 megabytes
+    Info: Processing ended: Tue May 12 07:33:38 2026
+    Info: Elapsed time: 00:00:05
+    Info: Total CPU time (on all processors): 00:00:01
+program_feb.sh: FEB programmed. Waiting 20 s for LVDS PLL + firefly transceiver settle.
+                (See ~/.claude/.../feedback_feb_post_program_settle.md or ~/AGENTS.md.)
+program_feb.sh: settle window elapsed; FEB is SC-ready.

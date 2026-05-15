@@ -1,0 +1,39 @@
+--------------------------------------------------------------------------------
+ Version 18.1 625
+ Copyright (C) 2018 Intel Corporation. All rights reserved.
+ Your use of Intel Corporation's design tools, logic functions
+ and other software and tools, and its AMPP partner logic
+ functions, and any output files from any of the foregoing
+ (including device programming or simulation files), and any
+ associated documentation or information is expressly subject
+ to the terms and conditions of the Intel Program License
+ Subscription Agreement, the Intel Quartus Prime License Agreement,
+ the Intel MegaCore Function License Agreement, or other
+ applicable license agreement, including, without limitation,
+ that your use is for the sole purpose of programming logic
+ devices manufactured by Intel and sold by Intel or its
+ authorized distributors.  Please refer to the applicable
+ agreement for further details.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+ Welcome to Intel's FPGA System Console
+
+ This Tcl console provides access to the hardware modules instantiated in your
+ FPGA. You can use System Console for all of the following purposes:
+
+    * To start, stop, or step a Nios II processor
+    * To read or write Avalon Memory-Mapped (Avalon-MM) slaves using special
+     masters
+    * To sample the SOPC system clock as well as system reset signal
+    * To run JTAG loopback tests to analyze board noise problems
+    * To shift arbitrary instruction register and data register values to
+     instantiated system level debug (SLD) nodes
+
+ In addition, the directory <QuartusII Dir>/sopc_builder/system_console/scripts
+ contains Tcl files that provide miscellaneous utilities and examples of how to
+ access the functionality provided. You can include those macros in your
+ scripts by issuing Tcl source commands.
+--------------------------------------------------------------------------------
+% JTAG_PROBE master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/alt_sld_fab_sldfabric.node_4/phy_1/data_path_subsystem_master_datapath.master} status=PROBED uid=0x48495354
+PHASE6_HIST_DUMP_WARN ingress_base=0x00020C10 status=UID_MISMATCH uid=0x00000000
+PHASE5_HIST_DUMP_RESULT status=OK profile=rate lane_filter={} out={firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/hw_smoke/phase4_byte_stream_fix_20260512_0526/hist_rate_bins.csv} master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/alt_sld_fab_sldfabric.node_4/phy_1/data_path_subsystem_master_datapath.master} csr_base=0x00020400 bin_base=0x00020000 read_chunk_words=1 read_delay_ms=0 onclick_base=0x00022000 onclick_repeat=0 onclick_gap_ms=0 ingress_status={{base 0x00020C00 present 1 uid 0x48495342 raw 0x00000003 live_select_post 1 requested_select_post 1 switch_pending 0 pre_packet_active 0 post_packet_active 0 post_hit_filter_enabled 0 post_hit_region 0} {base 0x00020C10 present 0 uid 0x00000000 error UID_MISMATCH}} wait_ms=1100 stats_before_wait={underflow_count 0 overflow_count 0 total_hits 9694 dropped_hits 0 coal_status 0x00000100 coal_occupancy 0 coal_occupancy_max 1 coal_queue_overflow_count 0 last_interval_total_hits 0 last_interval_dropped_hits 0} stats_after_wait={underflow_count 0 overflow_count 0 total_hits 836042 dropped_hits 0 coal_status 0x00000100 coal_occupancy 0 coal_occupancy_max 1 coal_queue_overflow_count 0 last_interval_total_hits 7995716 last_interval_dropped_hits 0} stats_after_read={underflow_count 0 overflow_count 0 total_hits 1414800 dropped_hits 0 coal_status 0x00000100 coal_occupancy 0 coal_occupancy_max 1 coal_queue_overflow_count 0 last_interval_total_hits 7995716 last_interval_dropped_hits 0} underflow_delta_read=0 overflow_delta_read=0 config={preset_id rate preset_label {8 MuTRiG Channel Rate} left 0 right 256 bin_width 1 key_loc 0x28242824 key_value 0x00000000 control 0x00000101 interval_clocks 125000000 sample_interval_ms 1000 sample_guard_ms 50}

@@ -1,0 +1,32 @@
+{
+  "row": {
+    "row_id": "p45_029_lane0only_0x00000001_default_dir",
+    "lane_mask": "0x01",
+    "channel_mask": "0x00000001",
+    "rate_88fp": "0x0800",
+    "hit_mode": "00",
+    "interval_seconds": 4.0,
+    "axis_section": "4.5.cross",
+    "expected_behavior": "most-restrictive: only lane 0 channel 0 populated",
+    "sanity_negative": false
+  },
+  "row_idx": 29,
+  "started": "2026-05-12T12:08:54",
+  "sc_tool": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/tools/run_script/build/sc_tool",
+  "link": 2,
+  "evidence_dir": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/sweep_evidence/p45_029_lane0only_0x00000001_default_dir",
+  "fatal": "SC hub unreachable: sc_read failed addr=0x0FE80 count=1 rc=4 retries=3 tail='5CE\\n  [47] invalid RD_NI link=224 addr=0x2C01F rsp=OK ack=0 declared=244 actual=0 start=0x5808\\nwarn: scan ended with an incomplete candidate packet\\nerr: timed out waiting for matching secondary reply\\n'",
+  "verdict": {
+    "pass": false,
+    "total_hits": 0,
+    "underflow": null,
+    "overflow": null,
+    "dropped_hits": null,
+    "arb_drops_emu": null,
+    "ratio_to_prev": null,
+    "hist_sum": 0,
+    "stage_durations": {},
+    "failure_mode": "FATAL: RuntimeError: sc_read failed addr=0x0FE80 count=1 rc=4 retries=3 tail='5CE\\n  [47] invalid RD_NI link=224 addr=0x2C01F rsp=OK ack=0 declared=244 actual=0 start=0x5808\\nwarn: scan ended with an incomplete candidate packet\\nerr: timed out waiting for matching secondary reply\\n'",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 1750, in run_row\n    uid = sc_read(sc_tool, link, SC_HUB_UID_WORD, 1, log_fh=log_fh)[0]\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 532, in sc_read\n    raise RuntimeError(\nRuntimeError: sc_read failed addr=0x0FE80 count=1 rc=4 retries=3 tail='5CE\\n  [47] invalid RD_NI link=224 addr=0x2C01F rsp=OK ack=0 declared=244 actual=0 start=0x5808\\nwarn: scan ended with an incomplete candidate packet\\nerr: timed out waiting for matching secondary reply\\n'\n"
+  }
+}

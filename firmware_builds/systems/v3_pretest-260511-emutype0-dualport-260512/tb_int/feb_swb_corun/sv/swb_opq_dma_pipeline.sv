@@ -64,6 +64,7 @@ module swb_opq_dma_pipeline #(
     logic        opq_egress_valid_q;
     logic        opq_egress_sop_q;
     logic        opq_egress_eop_q;
+    logic        opq_packer_ready;
 
     logic [35:0] lane_word_q [N_LANES][$];
     logic [35:0] merge_word_q[$];
@@ -239,10 +240,6 @@ module swb_opq_dma_pipeline #(
                 lane_overflow_count[lane] = 0;
             end
         end else begin
-            opq_egress_valid_q <= 1'b0;
-            opq_egress_sop_q   <= 1'b0;
-            opq_egress_eop_q   <= 1'b0;
-
             for (int lane = 0; lane < N_LANES; lane++) begin
                     if (i_feb_valid[lane] && i_lane_mask_n[lane]) begin
                         // synthesis translate_off
@@ -267,7 +264,12 @@ module swb_opq_dma_pipeline #(
                 build_merged_frame();
             end
 
-            if (i_dma_enable && (merge_word_q.size() != 0)) begin
+            if (!i_dma_enable) begin
+                opq_egress_valid_q <= 1'b0;
+                opq_egress_sop_q   <= 1'b0;
+                opq_egress_eop_q   <= 1'b0;
+            end else if ((!opq_egress_valid_q || opq_packer_ready) &&
+                         (merge_word_q.size() != 0)) begin
                 next_word = merge_word_q.pop_front();
                 // synthesis translate_off
                 if (word_is_idle_sop(next_word)) begin
@@ -279,6 +281,10 @@ module swb_opq_dma_pipeline #(
                 opq_egress_valid_q <= 1'b1;
                 opq_egress_sop_q   <= word_is_sop(next_word);
                 opq_egress_eop_q   <= word_is_eop(next_word);
+            end else if (opq_egress_valid_q && opq_packer_ready) begin
+                opq_egress_valid_q <= 1'b0;
+                opq_egress_sop_q   <= 1'b0;
+                opq_egress_eop_q   <= 1'b0;
             end
         end
     end
@@ -297,6 +303,7 @@ module swb_opq_dma_pipeline #(
         .i_opq_valid     (opq_egress_valid_q & i_dma_enable),
         .i_opq_sop       (opq_egress_sop_q),
         .i_opq_eop       (opq_egress_eop_q),
+        .o_opq_ready     (opq_packer_ready),
         .i_dma_halffull  (i_dma_halffull),
         .o_dma_data      (o_dma_data),
         .o_dma_datak     (o_dma_datak),

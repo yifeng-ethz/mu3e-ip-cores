@@ -129,6 +129,8 @@ module ordered_priority_queue_monolithic_sv #(
   logic [N_LANE-1:0] ingress_credit_drop_valid_dbg;
   logic [N_LANE-1:0] ingress_credit_drop_lane_dbg;
   logic [N_LANE-1:0] ingress_credit_drop_ticket_dbg;
+  logic [N_LANE-1:0][FRAME_SERIAL_SIZE-1:0] ingress_pkg_cnt_dbg;
+  logic [N_LANE-1:0][FRAME_SERIAL_SIZE-1:0] ingress_credit_drop_pkg_cnt_dbg;
   logic [N_LANE-1:0][47:0] ingress_credit_drop_ts_dbg;
   logic [N_LANE-1:0][15:0] ingress_credit_drop_shd_cnt_dbg;
   logic [N_LANE-1:0][15:0] ingress_credit_drop_hit_cnt_dbg;
@@ -160,6 +162,7 @@ module ordered_priority_queue_monolithic_sv #(
   logic [N_LANE-1:0][15:0] late_frame_drop_hdr_cnt_dbg;
   logic [N_LANE-1:0][15:0] late_frame_drop_shd_cnt_dbg;
   logic [N_LANE-1:0][15:0] late_frame_drop_hit_cnt_dbg;
+  logic [N_LANE-1:0][FRAME_SERIAL_SIZE-1:0] late_frame_drop_serial_dbg;
   logic [N_LANE-1:0][47:0] late_frame_drop_ts_dbg;
   logic [N_LANE-1:0] tk_future_dbg;
   logic fetch_ticket_active_dbg;
@@ -341,16 +344,18 @@ module ordered_priority_queue_monolithic_sv #(
       .lane_wptr(ingress_lane_wptr[g]),
       .lane_we(ingress_lane_we[g]),
       .running_ts_dbg(ingress_running_ts_dbg[g]),
-        .frame_ts_base_dbg(ingress_frame_ts_base_dbg[g]),
-        .dt_type_dbg(ingress_dt_type_dbg[g]),
-        .feb_id_dbg(ingress_feb_id_dbg[g]),
-        .parser_busy_o(ingress_parser_busy_dbg[g]),
-        .parser_idle_dbg_o(ingress_parser_idle_dbg_o[g]),
-        .lane_credit_dbg_o(ingress_lane_credit_dbg_o[g]),
-        .ticket_credit_dbg_o(ingress_ticket_credit_dbg_o[g]),
+      .pkg_cnt_dbg(ingress_pkg_cnt_dbg[g]),
+      .frame_ts_base_dbg(ingress_frame_ts_base_dbg[g]),
+      .dt_type_dbg(ingress_dt_type_dbg[g]),
+      .feb_id_dbg(ingress_feb_id_dbg[g]),
+      .parser_busy_o(ingress_parser_busy_dbg[g]),
+      .parser_idle_dbg_o(ingress_parser_idle_dbg_o[g]),
+      .lane_credit_dbg_o(ingress_lane_credit_dbg_o[g]),
+      .ticket_credit_dbg_o(ingress_ticket_credit_dbg_o[g]),
       .credit_drop_valid_o(ingress_credit_drop_valid_dbg[g]),
       .credit_drop_lane_o(ingress_credit_drop_lane_dbg[g]),
       .credit_drop_ticket_o(ingress_credit_drop_ticket_dbg[g]),
+      .credit_drop_pkg_cnt_o(ingress_credit_drop_pkg_cnt_dbg[g]),
       .credit_drop_ts_o(ingress_credit_drop_ts_dbg[g]),
       .credit_drop_shd_cnt_o(ingress_credit_drop_shd_cnt_dbg[g]),
       .credit_drop_hit_cnt_o(ingress_credit_drop_hit_cnt_dbg[g]),
@@ -400,11 +405,13 @@ module ordered_priority_queue_monolithic_sv #(
     .handle_waddr_o(handle_waddr_dbg),
     .handle_we_o(handle_we_dbg),
     .handle_wptr_o(handle_wptr_dbg),
+    .handle_credit_update_valid_i(block_path_lane_credit_update_valid),
     .eop_flush_ack_o(ingress_eop_flush_ack_dbg),
     .late_frame_drop_valid_o(late_frame_drop_valid_dbg),
     .late_frame_drop_hdr_cnt_o(late_frame_drop_hdr_cnt_dbg),
     .late_frame_drop_shd_cnt_o(late_frame_drop_shd_cnt_dbg),
     .late_frame_drop_hit_cnt_o(late_frame_drop_hit_cnt_dbg),
+    .late_frame_drop_serial_o(late_frame_drop_serial_dbg),
     .late_frame_drop_ts_o(late_frame_drop_ts_dbg),
     .late_frame_lane_credit_update_o(late_drop_lane_credit_update),
     .late_frame_lane_credit_update_valid_o(late_drop_lane_credit_update_valid),

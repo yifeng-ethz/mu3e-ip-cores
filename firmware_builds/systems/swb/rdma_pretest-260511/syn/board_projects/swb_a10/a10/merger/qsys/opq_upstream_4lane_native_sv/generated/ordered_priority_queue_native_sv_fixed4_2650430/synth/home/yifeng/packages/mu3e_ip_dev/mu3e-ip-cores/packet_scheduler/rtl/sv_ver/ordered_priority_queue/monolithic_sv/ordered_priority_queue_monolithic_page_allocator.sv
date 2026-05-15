@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------
 // ordered_priority_queue_monolithic_page_allocator
 // Author  : Yifeng Wang (original OPQ) / native SV staging by Codex
-// Version : 26.4.13
-// Date    : 20260428
-// Change  : Permit forward-serial rebase at the same frame timestamp after
-//           masked/drop-only frames so mixed no-restart 4-lane soaks reopen.
+// Version : 26.4.15
+// Date    : 20260514
+// Change  : Preserve legal zero-hit subheaders in the allocated page stream
+//           while keeping zero-length body blocks out of handle FIFOs.
 //------------------------------------------------------------------------------
 
 module ordered_priority_queue_monolithic_page_allocator #(
@@ -154,7 +154,7 @@ module ordered_priority_queue_monolithic_page_allocator #(
 `ifdef OPQ_DEBUG_BYPASS_SUBFRAME_HIT_LIMIT
   localparam frame_hit_cnt_t FRAME_HIT_ROOM_RESET = {MAX_HIT_CNT_BITS{1'b1}};
 `else
-  localparam frame_hit_cnt_t FRAME_HIT_ROOM_RESET = frame_hit_cnt_t'(N_HIT);
+  localparam frame_hit_cnt_t FRAME_HIT_ROOM_RESET = frame_hit_cnt_t'(FRAME_HIT_ROOM_LIMIT);
 `endif
   typedef logic [PAGE_LENGTH_WIDTH-1:0] page_length_t;
 
@@ -778,10 +778,10 @@ module ordered_priority_queue_monolithic_page_allocator #(
     idle_tail_flush_base = 1'b0;
     lanes_with_sop_ticket = '0;
     lanes_with_curr_sop_ticket = '0;
-    header_dt_type = ingress_dt_type_i[0];
-    header_feb_id = ingress_feb_id_i[0];
-    header_frame_ts = ingress_frame_ts_i[0];
-    header_running_ts = ingress_frame_ts_i[0];
+    header_dt_type = fetch_header_dt_type_q;
+    header_feb_id = fetch_header_feb_id_q;
+    header_frame_ts = fetch_header_frame_ts_q;
+    header_running_ts = fetch_header_running_ts_q;
     header_lane_selected_v = 1'b0;
     page_allocator_if_read_ticket_ticket_sop = '0;
     page_allocator_if_write_page_shr_data = '0;
@@ -2250,7 +2250,6 @@ module ordered_priority_queue_monolithic_page_allocator #(
               lane_active_v &&
               !lane_skipped_v &&
               !lane_masked_v &&
-              (lane_ticket_v.block_length != '0) &&
               (frame_hit_cnt_t'(lane_ticket_v.block_length) <= page_allocator.frame_hit_room);
             lane_skip_v =
               lane_active_v &&

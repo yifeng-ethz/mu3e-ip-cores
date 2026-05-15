@@ -15,8 +15,10 @@ REPO_ROOT ?= $(abspath $(COSIM_ROOT)/../../../..)
 COSIM_BUILD_DIR ?= $(COSIM_ROOT)/build
 COSIM_WORK ?= cosim_work
 FEB_CORUN_DIR ?= $(COSIM_ROOT)/../tb_int/feb_swb_corun
+HIST_BRIDGE_SWITCH_DIR ?= $(COSIM_ROOT)/../tb_int/hist_bridge_switch
 REPORT_DIR ?= $(COSIM_ROOT)/REPORT/sanity_1ms
 REPORT_ROOT ?= $(COSIM_ROOT)/REPORT
+HIST_BRIDGE_REPORT_DIR ?= $(REPORT_ROOT)/hist_bridge_switch_$(shell date +%Y%m%d_%H%M%S)
 WORK_ROOT ?=
 EXPECTED_HITS ?= 6400
 
@@ -80,7 +82,7 @@ ifneq ($(strip $(RUN_ID)),)
 AUTO_REPORT_ARGS += --run-id $(RUN_ID)
 endif
 
-.PHONY: compile_cosim run_COSIM_SANITY summarize_COSIM_SANITY run_BASIC auto_report
+.PHONY: compile_cosim run_COSIM_SANITY summarize_COSIM_SANITY run_HIST_BRIDGE_SWITCH_REPRO run_BASIC auto_report
 
 compile_cosim:
 	mkdir -p $(COSIM_BUILD_DIR)
@@ -111,6 +113,11 @@ summarize_COSIM_SANITY:
 		--hit-period-8ns $(HIT_PERIOD_8NS) \
 		--run-window-8ns $(RUN_WINDOW_8NS) \
 		--asic-count $(ASIC_COUNT)
+
+run_HIST_BRIDGE_SWITCH_REPRO:
+	REPORT_DIR=$(HIST_BRIDGE_REPORT_DIR) \
+	QUESTA_HOME=$(QUESTA_HOME) \
+	$(HIST_BRIDGE_SWITCH_DIR)/run_hist_bridge_switch_repro.sh
 
 run_BASIC:
 	BUILD_ROOT=$(RN_BASIC_BUILD_ROOT) \

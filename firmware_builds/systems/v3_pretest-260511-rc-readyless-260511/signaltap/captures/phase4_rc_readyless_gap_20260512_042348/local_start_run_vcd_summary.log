@@ -1,0 +1,26 @@
+Phase 4 rc-readyless local_start_run VCD summary
+VCD: firmware_builds/systems/v3_pretest-260511-rc-readyless-260511/signaltap/captures/phase4_rc_readyless_gap_20260512_042348/local_start_run.vcd
+signals=100 samples=2051
+
+First-high times (ps):
+- host_valid: 127500
+- mux_valid: 128500
+- split15_valid: 128500
+- emu_ctrl_out0_valid: 128500
+- emu0_asi_ctrl_valid: 128500
+- run_generating: 129500
+- aso_tx8b1k_valid: None
+
+Values at split15_valid first high (128500 ps):
+- run_control_mux.out_data: 0x008
+- run_control_splitter.out15_data: 0x008
+- emulator_ctrl_splitter.out0_data: 0x008
+- emulator_mutrig_0.asi_ctrl_data: 0x008
+- ctrl_state_q: 0x004
+- aso_tx8b1k_data: 0x1bc
+
+Final scalar values:
+- run_generating: 1
+- frame_rst: 0
+- aso_tx8b1k_valid: 0
+- aso_tx8b1k_data: 0x1bc

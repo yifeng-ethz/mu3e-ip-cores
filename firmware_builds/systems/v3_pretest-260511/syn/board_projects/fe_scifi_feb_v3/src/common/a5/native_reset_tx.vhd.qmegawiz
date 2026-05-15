@@ -1,0 +1,28 @@
+-- megafunction wizard: %Transceiver PHY Reset Controller v18.0%
+-- GENERATION: XML
+-- Retrieval info: <?xml version="1.0"?>
+-- Retrieval info: <instance entity-name="altera_xcvr_reset_control" version="18.0" >
+-- Retrieval info: 	<generic name="device_family" value="Arria V" />
+-- Retrieval info: 	<generic name="CHANNELS" value="4" />
+-- Retrieval info: 	<generic name="PLLS" value="4" />
+-- Retrieval info: 	<generic name="SYS_CLK_IN_MHZ" value="156.25" />
+-- Retrieval info: 	<generic name="SYNCHRONIZE_RESET" value="1" />
+-- Retrieval info: 	<generic name="REDUCED_SIM_TIME" value="1" />
+-- Retrieval info: 	<generic name="gui_split_interfaces" value="0" />
+-- Retrieval info: 	<generic name="TX_PLL_ENABLE" value="1" />
+-- Retrieval info: 	<generic name="T_PLL_POWERDOWN" value="1000" />
+-- Retrieval info: 	<generic name="SYNCHRONIZE_PLL_RESET" value="0" />
+-- Retrieval info: 	<generic name="TX_ENABLE" value="1" />
+-- Retrieval info: 	<generic name="TX_PER_CHANNEL" value="1" />
+-- Retrieval info: 	<generic name="gui_tx_auto_reset" value="0" />
+-- Retrieval info: 	<generic name="T_TX_ANALOGRESET" value="0" />
+-- Retrieval info: 	<generic name="T_TX_DIGITALRESET" value="20" />
+-- Retrieval info: 	<generic name="T_PLL_LOCK_HYST" value="0" />
+-- Retrieval info: 	<generic name="gui_pll_cal_busy" value="0" />
+-- Retrieval info: 	<generic name="RX_ENABLE" value="0" />
+-- Retrieval info: 	<generic name="RX_PER_CHANNEL" value="0" />
+-- Retrieval info: 	<generic name="gui_rx_auto_reset" value="0" />
+-- Retrieval info: 	<generic name="T_RX_ANALOGRESET" value="40" />
+-- Retrieval info: 	<generic name="T_RX_DIGITALRESET" value="4000" />
+-- Retrieval info: </instance>
+-- IPFS_FILES : native_reset_tx.vho

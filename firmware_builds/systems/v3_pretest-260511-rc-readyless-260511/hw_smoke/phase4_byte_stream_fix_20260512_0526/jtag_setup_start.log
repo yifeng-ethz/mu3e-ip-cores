@@ -1,0 +1,39 @@
+--------------------------------------------------------------------------------
+ Version 18.1 625
+ Copyright (C) 2018 Intel Corporation. All rights reserved.
+ Your use of Intel Corporation's design tools, logic functions
+ and other software and tools, and its AMPP partner logic
+ functions, and any output files from any of the foregoing
+ (including device programming or simulation files), and any
+ associated documentation or information is expressly subject
+ to the terms and conditions of the Intel Program License
+ Subscription Agreement, the Intel Quartus Prime License Agreement,
+ the Intel MegaCore Function License Agreement, or other
+ applicable license agreement, including, without limitation,
+ that your use is for the sole purpose of programming logic
+ devices manufactured by Intel and sold by Intel or its
+ authorized distributors.  Please refer to the applicable
+ agreement for further details.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+ Welcome to Intel's FPGA System Console
+
+ This Tcl console provides access to the hardware modules instantiated in your
+ FPGA. You can use System Console for all of the following purposes:
+
+    * To start, stop, or step a Nios II processor
+    * To read or write Avalon Memory-Mapped (Avalon-MM) slaves using special
+     masters
+    * To sample the SOPC system clock as well as system reset signal
+    * To run JTAG loopback tests to analyze board noise problems
+    * To shift arbitrary instruction register and data register values to
+     instantiated system level debug (SLD) nodes
+
+ In addition, the directory <QuartusII Dir>/sopc_builder/system_console/scripts
+ contains Tcl files that provide miscellaneous utilities and examples of how to
+ access the functionality provided. You can include those macros in your
+ scripts by issuing Tcl source commands.
+--------------------------------------------------------------------------------
+% JTAG_PROBE master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/alt_sld_fab_sldfabric.node_4/phy_1/data_path_subsystem_master_datapath.master} status=PROBED uid=0x48495354
+JTAG_PROBE master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/alt_sld_fab_sldfabric.node_5/phy_2/upload_subsystem_upload_system_jtag_master.master} status=PROBED uid=0x52434d48
+PHASE6_JTAG_CASE_RESULT status=OK op=setup run_number=66101 active_lane=0 source_mode=emulator hist_snoop_source=post lvds_lane_go_mask=0x000001FF skip_lvds_config=0 skip_runctl_reset=0 skip_runctl_start=0 skip_source_mux=0 address_payload=0x00000002 case_mode=1 multiplicity=1 pulse_interval=12500 emu_hit_rate=0x00000800 emu_control=0x00000001 emu_signal=0x00000001 emu_cluster_width=1 data_master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/alt_sld_fab_sldfabric.node_4/phy_1/data_path_subsystem_master_datapath.master} upload_master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/alt_sld_fab_sldfabric.node_5/phy_2/upload_subsystem_upload_system_jtag_master.master} runctl_words={0x00FFFF30 0x00000240 0x00FFFF31 0x01023510 0x00000011 0x00000012} runctl_status=0x00000003 runctl_last_cmd=0x00020012 lvds={base 0x00000000 soft_reset 0x00000000 lane_go 0x000001FF} selector={source post uid 0x48495342 meta 0x1A0001A5 control 0x00000001 status 0x00000003 hp_seen 0x00000000 rb_seen 0x00000000 hist_emit 0x00000000 hist_drop 0x00000000} injector={layout headered mode_offset 0x00000008 mode 0x00000001 header_delay 0x000001F4 multiplicity 0x00000001 pulse_interval 0x000030D4 pulse_high 0x00000005 readback 0x4D494E4A,0x1A0101FF,0x00000001,0x000001F4,0x00000001,0x00000001,0x00000000,0x000030D4,0x00000005,0x000003E7,0x00000001,0x0000ACE1,0x00000004} source_mux={{lane 0 base 0x00002240 control 0x00000000 status 0x00000000} {lane 1 base 0x00002280 control 0x00000000 status 0x00000000} {lane 2 base 0x000022C0 control 0x00000000 status 0x00000000} {lane 3 base 0x00002300 control 0x00000000 status 0x00000000} {lane 4 base 0x00002340 control 0x00000000 status 0x00000000} {lane 5 base 0x00002380 control 0x00000000 status 0x00000000} {lane 6 base 0x000023C0 control 0x00000000 status 0x00000000} {lane 7 base 0x00002400 control 0x00000000 status 0x00000000}} emulators={{lane 0 base 0x00002000 central 0x00000001 signal 0x00000001 format 0x00000020 cluster_fix 0x00004000} {lane 1 base 0x00002040 central 0x00000000 signal 0x00000000 format 0x00000022 cluster_fix 0x01804180} {lane 2 base 0x00002080 central 0x00000000 signal 0x00000000 format 0x00000022 cluster_fix 0x01804180} {lane 3 base 0x000020C0 central 0x00000000 signal 0x00000000 format 0x00000022 cluster_fix 0x01804180} {lane 4 base 0x00002100 central 0x00000000 signal 0x00000000 format 0x00000022 cluster_fix 0x01804180} {lane 5 base 0x00002140 central 0x00000000 signal 0x00000000 format 0x00000022 cluster_fix 0x01804180} {lane 6 base 0x00002180 central 0x00000000 signal 0x00000000 format 0x00000022 cluster_fix 0x01804180} {lane 7 base 0x000021C0 central 0x00000000 signal 0x00000000 format 0x00000022 cluster_fix 0x01804180}}

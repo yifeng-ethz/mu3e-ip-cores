@@ -1,0 +1,32 @@
+# Quartus/generated build products
+db/
+incremental_db/
+output_files*/
+sta_debug_*/
+timing_debug/
+*.qws
+*.sof
+*.pof
+*.jic
+*.rpt
+*.summary
+
+# Compile/programming logs and transient run markers
+*.log
+*.console.log
+*.asm.log
+*.cdb.log
+*.fit.log
+*.map.log
+*.pgm.log
+*.sta.log
+*.stp_import.log
+*.sta_paths*.log
+.*.pid
+.*.pidlog
+.*.exit
+.*.log
+
+# Local machine/tool scratch files
+a5_pin_model_dump.txt
+cr_ie_info.json

@@ -1,0 +1,4 @@
+2026.05.12.10:01:44 Info: Doing: <b>qsys-script --system-file=firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/quartus_systems/scifi_datapath_system_v3_pipe.qsys --cmd=package require -exact qsys 18.1; if {[lsearch -exact [get_instances] emulator_mutrig_qsys_inst] >= 0} {set_instance_property emulator_mutrig_qsys_inst NAME emulator_mutrig_qsys_lane}; save_system</b>
+2026.05.12.10:01:52 Info: get_instances 
+2026.05.12.10:01:52 Info: set_instance_property emulator_mutrig_qsys_inst NAME emulator_mutrig_qsys_lane
+2026.05.12.10:01:53 Info: save_system 

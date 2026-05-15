@@ -479,10 +479,16 @@ static void write_register(const RawDevice& dev, uint32_t idx, uint32_t value)
 static uint32_t dma_write_word(const RawDevice& dev, const DmaMap& dma)
 {
 	uint32_t word = 0;
-	if (dev.has_dma_ctrl && dev.dma_ctrl)
-		word = dev.dma_ctrl[3] >> 2;
-	else
+	if (dev.has_dma_ctrl && dev.dma_ctrl) {
+		const uint32_t ctrl3_word = dev.dma_ctrl[3] >> 2;
+		const uint32_t ctrl0_lines_256b = dev.dma_ctrl[0];
+		if (ctrl3_word != 0)
+			word = ctrl3_word;
+		else
+			word = ctrl0_lines_256b * 8u;
+	} else {
 		word = read_register_rw(dev, GET_N_DMA_WORDS_REGISTER_W);
+	}
 	return dma.n_words ? (word % dma.n_words) : 0;
 }
 

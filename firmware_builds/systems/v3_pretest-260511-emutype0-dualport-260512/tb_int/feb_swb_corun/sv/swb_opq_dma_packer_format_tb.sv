@@ -20,6 +20,7 @@ module swb_opq_dma_packer_format_tb;
     localparam int unsigned N_SHD_CONST       = 128;
     localparam int unsigned N_FRAMES_CONST    = 3;
     localparam int unsigned SLOTS_PER_DMA     = 8;
+    localparam int unsigned PACKER_FIFO_DEPTH = 16;
     localparam logic [7:0]  K285_CONST        = 8'hbc;
     localparam logic [7:0]  K284_CONST        = 8'h9c;
     localparam logic [7:0]  K237_CONST        = 8'hf7;
@@ -36,6 +37,7 @@ module swb_opq_dma_packer_format_tb;
     logic         opq_valid = 1'b0;
     logic         opq_sop   = 1'b0;
     logic         opq_eop   = 1'b0;
+    logic         opq_ready;
     logic         halffull  = 1'b0;
 
     logic [255:0] dma_data;
@@ -49,13 +51,17 @@ module swb_opq_dma_packer_format_tb;
 
     bit           enable_backpressure;
     int unsigned  offered_word_idx;
+    int unsigned  drive_cycle;
     int unsigned  observed_eoe_count;
     int unsigned  fail_count;
+    bit           ready_low_seen;
     bit           dma_monitor_in_frame;
     wire_word_t   expected_words[$];
     wire_word_t   observed_words[$];
 
-    swb_opq_dma_packer u_dut (
+    swb_opq_dma_packer #(
+        .BACKPRESSURE_FIFO_DEPTH(PACKER_FIFO_DEPTH)
+    ) u_dut (
         .i_clk            (clk),
         .i_reset_n        (reset_n),
         .i_opq_data       (opq_data),
@@ -63,6 +69,7 @@ module swb_opq_dma_packer_format_tb;
         .i_opq_valid      (opq_valid),
         .i_opq_sop        (opq_sop),
         .i_opq_eop        (opq_eop),
+        .o_opq_ready      (opq_ready),
         .i_dma_halffull   (halffull),
         .o_dma_data       (dma_data),
         .o_dma_datak      (dma_datak),
@@ -143,15 +150,13 @@ module swb_opq_dma_packer_format_tb;
         return (word.datak == 4'h1) && (word.data[7:0] == K284_CONST);
     endfunction
 
-    function automatic bit backpressure_for_word(input int unsigned word_idx);
+    function automatic bit backpressure_for_cycle(input int unsigned cycle_idx);
         if (!enable_backpressure) begin
             return 1'b0;
         end
-        return (word_idx == 3) ||    // declared 128-subheader count word
-               (word_idx == 19) ||   // zero/nonzero subheader region
-               (word_idx == 80) ||
-               (word_idx == 145) ||
-               (word_idx == 260);
+        return ((cycle_idx >= 20)  && (cycle_idx < 90)) ||
+               ((cycle_idx >= 180) && (cycle_idx < 255)) ||
+               ((cycle_idx >= 360) && (cycle_idx < 430));
     endfunction
 
     task automatic push_expected(input logic [31:0] data, input logic [3:0] datak);
@@ -169,14 +174,21 @@ module swb_opq_dma_packer_format_tb;
         input bit          sop,
         input bit          eop
     );
+        bit accepted;
         begin
-            @(negedge clk);
-            opq_data  = data;
-            opq_datak = datak;
-            opq_valid = 1'b1;
-            opq_sop   = sop;
-            opq_eop   = eop;
-            halffull  = backpressure_for_word(offered_word_idx);
+            accepted = 1'b0;
+            while (!accepted) begin
+                @(negedge clk);
+                opq_data  = data;
+                opq_datak = datak;
+                opq_valid = 1'b1;
+                opq_sop   = sop;
+                opq_eop   = eop;
+                halffull  = backpressure_for_cycle(drive_cycle);
+                drive_cycle++;
+                @(posedge clk);
+                accepted = opq_ready;
+            end
             push_expected(data, datak);
             offered_word_idx++;
         end
@@ -274,6 +286,12 @@ module swb_opq_dma_packer_format_tb;
     always_ff @(posedge clk) begin
         bit monitor_in_frame_v;
 
+        if (!reset_n) begin
+            ready_low_seen <= 1'b0;
+        end else if (opq_valid && !opq_ready) begin
+            ready_low_seen <= 1'b1;
+        end
+
         monitor_in_frame_v = dma_monitor_in_frame;
         if (dma_wen) begin
             for (int slot = 0; slot < SLOTS_PER_DMA; slot++) begin
@@ -335,6 +353,7 @@ module swb_opq_dma_packer_format_tb;
         $display("  event_cnt          : %0d", event_cnt);
         $display("  observed EOE count : %0d", observed_eoe_count);
         $display("  halt_cnt           : %0d", halt_cnt);
+        $display("  ready_low_seen     : %0d", ready_low_seen);
 
         if (input_word_cnt != expected_words.size()) begin
             record_failure($sformatf("input_word_cnt expected %0d got %0d",
@@ -351,6 +370,12 @@ module swb_opq_dma_packer_format_tb;
         if (observed_words.size() != expected_words.size()) begin
             record_failure($sformatf("observed non-pad word count expected %0d got %0d",
                                      expected_words.size(), observed_words.size()));
+        end
+        if (enable_backpressure && !ready_low_seen) begin
+            record_failure("expected OPQ ready to deassert under directed RDMA backpressure");
+        end
+        if (enable_backpressure && (halt_cnt == 0)) begin
+            record_failure("expected nonzero halt_cnt under directed RDMA backpressure");
         end
         for (int i = 0; (i < expected_words.size()) && (i < observed_words.size()); i++) begin
             if ((observed_words[i].data !== expected_words[i].data) ||

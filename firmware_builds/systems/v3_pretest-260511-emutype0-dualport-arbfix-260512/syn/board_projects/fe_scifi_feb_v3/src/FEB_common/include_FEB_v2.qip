@@ -1,0 +1,15 @@
+#
+
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "FEB_common.sdc"]
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) \
+    "*.vhd" \
+] ] {
+    set_global_assignment -name VHDL_FILE $f
+}
+
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "firefly/include.qip"]
+
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "max10_interface/include.qip"]
+
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "sorter_common/include.qip"]

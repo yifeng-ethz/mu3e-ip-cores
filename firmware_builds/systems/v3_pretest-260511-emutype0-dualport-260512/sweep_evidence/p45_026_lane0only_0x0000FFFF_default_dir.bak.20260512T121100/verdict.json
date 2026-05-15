@@ -1,0 +1,13 @@
+{
+  "pass": false,
+  "total_hits": 0,
+  "underflow": null,
+  "overflow": null,
+  "dropped_hits": null,
+  "arb_drops_emu": null,
+  "ratio_to_prev": null,
+  "hist_sum": 0,
+  "stage_durations": {},
+  "failure_mode": "FATAL: RuntimeError: sc_read failed addr=0x0FE80 count=1 rc=4 retries=3 tail='041\\n  [140] invalid RD link=237 addr=0x3E000 rsp=OK ack=0 declared=62992 actual=0 start=0x834D\\nwarn: scan ended with an incomplete candidate packet\\nerr: timed out waiting for matching secondary reply\\n'",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 1750, in run_row\n    uid = sc_read(sc_tool, link, SC_HUB_UID_WORD, 1, log_fh=log_fh)[0]\n  File \"/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/scripts/cotest/phase4_5_sweep.py\", line 532, in sc_read\n    raise RuntimeError(\nRuntimeError: sc_read failed addr=0x0FE80 count=1 rc=4 retries=3 tail='041\\n  [140] invalid RD link=237 addr=0x3E000 rsp=OK ack=0 declared=62992 actual=0 start=0x834D\\nwarn: scan ended with an incomplete candidate packet\\nerr: timed out waiting for matching secondary reply\\n'\n"
+}

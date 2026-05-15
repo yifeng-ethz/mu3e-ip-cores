@@ -1,0 +1,877 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags="INTERNAL_COMPONENT=false"
+   categories="" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element clk_bridge
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element csr_pipe_0
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element csr_pipe_1
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element csr_pipe_2
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+   }
+   element csr_pipe_3
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element csr_pipe_4
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+   }
+   element csr_pipe_5
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+   }
+   element csr_pipe_6
+   {
+      datum _sortIndex
+      {
+         value = "16";
+         type = "int";
+      }
+   }
+   element csr_pipe_7
+   {
+      datum _sortIndex
+      {
+         value = "18";
+         type = "int";
+      }
+   }
+   element lane_0
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element lane_1
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+   }
+   element lane_2
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element lane_3
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element lane_4
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+   }
+   element lane_5
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+   }
+   element lane_6
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+   }
+   element lane_7
+   {
+      datum _sortIndex
+      {
+         value = "17";
+         type = "int";
+      }
+   }
+   element reset_bridge
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element run_ctrl_splitter
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="AUTO" />
+ <parameter name="device" value="5AGXBA7D4F31C5" />
+ <parameter name="deviceFamily" value="Arria V" />
+ <parameter name="deviceSpeedGrade" value="5_H4" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="4" />
+ <parameter name="projectName" value="" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript></instanceScript>
+ <interface name="clk" internal="clk_bridge.in_clk" type="clock" dir="end" />
+ <interface name="csr_0" internal="csr_pipe_0.s0" type="avalon" dir="end" />
+ <interface name="csr_1" internal="csr_pipe_1.s0" type="avalon" dir="end" />
+ <interface name="csr_2" internal="csr_pipe_2.s0" type="avalon" dir="end" />
+ <interface name="csr_3" internal="csr_pipe_3.s0" type="avalon" dir="end" />
+ <interface name="csr_4" internal="csr_pipe_4.s0" type="avalon" dir="end" />
+ <interface name="csr_5" internal="csr_pipe_5.s0" type="avalon" dir="end" />
+ <interface name="csr_6" internal="csr_pipe_6.s0" type="avalon" dir="end" />
+ <interface name="csr_7" internal="csr_pipe_7.s0" type="avalon" dir="end" />
+ <interface
+   name="emu_in_0"
+   internal="lane_0.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="emu_in_1"
+   internal="lane_1.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="emu_in_2"
+   internal="lane_2.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="emu_in_3"
+   internal="lane_3.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="emu_in_4"
+   internal="lane_4.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="emu_in_5"
+   internal="lane_5.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="emu_in_6"
+   internal="lane_6.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="emu_in_7"
+   internal="lane_7.emu_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_0"
+   internal="lane_0.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_1"
+   internal="lane_1.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_2"
+   internal="lane_2.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_3"
+   internal="lane_3.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_4"
+   internal="lane_4.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_5"
+   internal="lane_5.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_6"
+   internal="lane_6.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="real_in_7"
+   internal="lane_7.real_in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface name="rst" internal="reset_bridge.in_reset" type="reset" dir="end" />
+ <interface
+   name="run_ctrl"
+   internal="run_ctrl_splitter.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="selected_out_0"
+   internal="lane_0.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="selected_out_1"
+   internal="lane_1.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="selected_out_2"
+   internal="lane_2.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="selected_out_3"
+   internal="lane_3.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="selected_out_4"
+   internal="lane_4.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="selected_out_5"
+   internal="lane_5.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="selected_out_6"
+   internal="lane_6.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="selected_out_7"
+   internal="lane_7.selected_out"
+   type="avalon_streaming"
+   dir="start" />
+ <module
+   name="clk_bridge"
+   kind="altera_clock_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="0" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="csr_pipe_0"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_1"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_2"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_3"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_4"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_5"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_6"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module
+   name="csr_pipe_7"
+   kind="altera_avalon_mm_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ADDRESS_UNITS" value="WORDS" />
+  <parameter name="ADDRESS_WIDTH" value="5" />
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="PIPELINE_COMMAND" value="1" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
+  <parameter name="USE_RESPONSE" value="0" />
+ </module>
+ <module name="lane_0" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module name="lane_1" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="1" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module name="lane_2" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="2" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module name="lane_3" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="3" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module name="lane_4" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="4" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module name="lane_5" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="5" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module name="lane_6" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="6" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module name="lane_7" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
+  <parameter name="DEBUG_LEVEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="INSTANCE_ID" value="7" />
+  <parameter name="IP_UID" value="1095263280" />
+  <parameter name="MODE_DEFAULT" value="1" />
+  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_GIT" value="0" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="6" />
+  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="WATCHDOG_DEFAULT" value="500" />
+ </module>
+ <module
+   name="reset_bridge"
+   kind="altera_reset_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ACTIVE_LOW_RESET" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="0" />
+  <parameter name="NUM_RESET_OUTPUTS" value="1" />
+  <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
+  <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <module
+   name="run_ctrl_splitter"
+   kind="altera_avalon_st_splitter"
+   version="18.1"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="9" />
+  <parameter name="CHANNEL_WIDTH" value="1" />
+  <parameter name="DATA_WIDTH" value="9" />
+  <parameter name="ERROR_DESCRIPTOR" value="" />
+  <parameter name="ERROR_WIDTH" value="1" />
+  <parameter name="MAX_CHANNELS" value="1" />
+  <parameter name="NUMBER_OF_OUTPUTS" value="8" />
+  <parameter name="QUALIFY_VALID_OUT" value="0" />
+  <parameter name="READY_LATENCY" value="0" />
+  <parameter name="USE_CHANNEL" value="0" />
+  <parameter name="USE_DATA" value="1" />
+  <parameter name="USE_ERROR" value="0" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_READY" value="0" />
+  <parameter name="USE_VALID" value="1" />
+ </module>
+ <connection kind="avalon" version="18.1" start="csr_pipe_0.m0" end="lane_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_1.m0" end="lane_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_2.m0" end="lane_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_3.m0" end="lane_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_4.m0" end="lane_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_5.m0" end="lane_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_6.m0" end="lane_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="18.1" start="csr_pipe_7.m0" end="lane_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out0"
+   end="lane_0.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out1"
+   end="lane_1.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out2"
+   end="lane_2.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out3"
+   end="lane_3.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out4"
+   end="lane_4.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out5"
+   end="lane_5.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out6"
+   end="lane_6.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_ctrl_splitter.out7"
+   end="lane_7.run_ctrl" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="reset_bridge.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="run_ctrl_splitter.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_0.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_1.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_1.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_2.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_2.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_3.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_3.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_4.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_4.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_5.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_5.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_6.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_6.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="lane_7.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_pipe_7.clk" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="run_ctrl_splitter.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_2.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_4.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_pipe_7.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_0.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_1.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_2.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_3.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_4.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_5.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_6.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="lane_7.rst" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="AUTO" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableInstrumentation" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="4" />
+</system>

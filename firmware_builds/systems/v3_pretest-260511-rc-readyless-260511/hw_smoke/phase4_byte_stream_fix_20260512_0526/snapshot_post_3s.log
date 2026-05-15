@@ -1,0 +1,39 @@
+--------------------------------------------------------------------------------
+ Version 18.1 625
+ Copyright (C) 2018 Intel Corporation. All rights reserved.
+ Your use of Intel Corporation's design tools, logic functions
+ and other software and tools, and its AMPP partner logic
+ functions, and any output files from any of the foregoing
+ (including device programming or simulation files), and any
+ associated documentation or information is expressly subject
+ to the terms and conditions of the Intel Program License
+ Subscription Agreement, the Intel Quartus Prime License Agreement,
+ the Intel MegaCore Function License Agreement, or other
+ applicable license agreement, including, without limitation,
+ that your use is for the sole purpose of programming logic
+ devices manufactured by Intel and sold by Intel or its
+ authorized distributors.  Please refer to the applicable
+ agreement for further details.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+ Welcome to Intel's FPGA System Console
+
+ This Tcl console provides access to the hardware modules instantiated in your
+ FPGA. You can use System Console for all of the following purposes:
+
+    * To start, stop, or step a Nios II processor
+    * To read or write Avalon Memory-Mapped (Avalon-MM) slaves using special
+     masters
+    * To sample the SOPC system clock as well as system reset signal
+    * To run JTAG loopback tests to analyze board noise problems
+    * To shift arbitrary instruction register and data register values to
+     instantiated system level debug (SLD) nodes
+
+ In addition, the directory <QuartusII Dir>/sopc_builder/system_console/scripts
+ contains Tcl files that provide miscellaneous utilities and examples of how to
+ access the functionality provided. You can include those macros in your
+ scripts by issuing Tcl source commands.
+--------------------------------------------------------------------------------
+% JTAG_PROBE master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/alt_sld_fab_sldfabric.node_4/phy_1/data_path_subsystem_master_datapath.master} status=PROBED uid=0x48495354
+PHASE6_POST_RBCAM_SNAPSHOT_JSON {"active_lane":0,"source_mux":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"rbcam":[1380074317,436384255,17,2000,0,0,0,0,0,0],"lvds":[16384009,511,0,0,511,2,4294967295,2,4294967295,2,2,4294967295,4294967295,0],"frame_rcv":[1,0,0],"mts0":[536870929,0,2000,0,0],"mts1":[536870929,0,2000,0,0],"hist":[1366466,0,125000000,0,131327,2746546,0,512,0,7995716,0],"selector":[1212764994,436208037,1,3,0,0,0,0]}
+PHASE6_POST_RBCAM_SNAPSHOT_RESULT status=OK active_lane=0

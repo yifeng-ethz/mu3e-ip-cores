@@ -1,0 +1,10 @@
+modelsim.ini
+questa.ini
+work*/
+lpm/
+sim/
+transcript
+*.wlf
+uvm/common/feb_egress_monitor_rdma/
+uvm/common/rdma_cqe_monitor/
+uvm/v3_pretest-260511/rdma_sqe_ingress_if.sv

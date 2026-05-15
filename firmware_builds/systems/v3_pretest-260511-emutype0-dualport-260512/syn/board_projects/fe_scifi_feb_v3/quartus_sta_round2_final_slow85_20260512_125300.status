@@ -1,0 +1,3 @@
+command=quartus_sta --model=slow --temperature=85 top --report_script=../../../script/report_round2_lvds_timing.tcl
+end=2026-05-12T12:52:08+02:00
+exit_code=3

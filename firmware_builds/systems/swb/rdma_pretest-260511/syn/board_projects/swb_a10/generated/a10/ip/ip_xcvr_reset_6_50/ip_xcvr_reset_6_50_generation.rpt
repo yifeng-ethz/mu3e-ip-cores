@@ -14,15 +14,22 @@ Info: ip_xcvr_reset_6_50: Running transform generation_view_transform took 0.000
 Info: xcvr_reset_control_0: Running transform generation_view_transform
 Info: xcvr_reset_control_0: Running transform generation_view_transform took 0.000s
 Info: ip_xcvr_reset_6_50: Running transform merlin_avalon_transform
-Info: ip_xcvr_reset_6_50: Running transform merlin_avalon_transform took 0.026s
+Info: ip_xcvr_reset_6_50: Running transform merlin_avalon_transform took 0.023s
 Info: ip_xcvr_reset_6_50: "Naming system components in system: ip_xcvr_reset_6_50"
 Info: ip_xcvr_reset_6_50: "Processing generation queue"
 Info: ip_xcvr_reset_6_50: "Generating: ip_xcvr_reset_6_50"
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_reset_6_50/synth/ip_xcvr_reset_6_50.vhd could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_reset_6_50/altera_xcvr_reset_control_181/synth/ip_xcvr_reset_6_50_pkg.vhd could not be written to."
 Info: ip_xcvr_reset_6_50: "Generating: altera_xcvr_reset_control"
 Info: xcvr_reset_control_0: add_fileset_file ./altera_xcvr_functions.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_generic/altera_xcvr_functions.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_reset_6_50/altera_xcvr_reset_control_181/synth/altera_xcvr_functions.sv could not be written to."
 Info: xcvr_reset_control_0: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_reset_6_50/altera_xcvr_reset_control_181/synth/alt_xcvr_resync.sv could not be written to."
 Info: xcvr_reset_control_0: add_fileset_file ./altera_xcvr_reset_control.sv SYSTEM_VERILOG PATH ..//altera_xcvr_reset_control.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_reset_6_50/altera_xcvr_reset_control_181/synth/altera_xcvr_reset_control.sv could not be written to."
 Info: xcvr_reset_control_0: add_fileset_file ./alt_xcvr_reset_counter.sv SYSTEM_VERILOG PATH ..//alt_xcvr_reset_counter.sv
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_reset_6_50/altera_xcvr_reset_control_181/synth/alt_xcvr_reset_counter.sv could not be written to."
+Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_reset_6_50/altera_xcvr_reset_control_181/synth/plain_files.txt could not be written to."
 Info: ip_xcvr_reset_6_50: Done "ip_xcvr_reset_6_50" with 2 modules, 7 files
-Info: qsys-generate succeeded.
+Error: qsys-generate failed with exit code 1: 7 Errors, 0 Warnings
 Info: Finished: Create HDL design files for synthesis

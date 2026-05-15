@@ -24,6 +24,7 @@ module swb_opq_dma_packer_tb;
     logic         opq_valid  = 1'b0;
     logic         opq_sop    = 1'b0;
     logic         opq_eop    = 1'b0;
+    logic         opq_ready;
     logic         halffull   = 1'b0;
 
     logic [255:0] dma_data;
@@ -40,6 +41,7 @@ module swb_opq_dma_packer_tb;
         .i_opq_valid     (opq_valid),
         .i_opq_sop       (opq_sop),
         .i_opq_eop       (opq_eop),
+        .o_opq_ready     (opq_ready),
         .i_dma_halffull  (halffull),
         .o_dma_data      (dma_data),
         .o_dma_datak     (dma_datak),

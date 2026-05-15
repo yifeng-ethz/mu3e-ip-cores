@@ -1,0 +1,15 @@
+2026.05.13.22:00:34 Info: Doing: <b>qsys-script --system-file=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/quartus_systems/scifi_datapath_system_v3.qsys --script=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/script/set_readyless_ctrl_splitters.tcl</b>
+2026.05.13.22:00:44 Info: set_instance_parameter_value run_control_splitter USE_READY 0
+2026.05.13.22:00:44 Info: set_instance_parameter_value run_control_splitter READY_LATENCY 0
+2026.05.13.22:00:44 Info: set_instance_parameter_value run_control_splitter QUALIFY_VALID_OUT 0
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_ctrl_splitter USE_READY 0
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_ctrl_splitter READY_LATENCY 0
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_ctrl_splitter QUALIFY_VALID_OUT 0
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_mutrig_qsys_inst CSR_ADDR_WIDTH 6
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_mutrig_qsys_inst BUILD 513
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_DATE 20260513
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_MAJOR 26
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_MINOR 3
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_PATCH 1
+2026.05.13.22:00:44 Info: set_instance_parameter_value emulator_mutrig_qsys_inst VERSION_GIT 0
+2026.05.13.22:00:44 Info: save_system 
