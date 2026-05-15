@@ -167,6 +167,10 @@ package tb_int_run_emulator_directed_pkg;
                                       1'b1);
         endfunction
 
+        function automatic bit [47:0] true_ts_for_payload(bit [44:0] payload);
+            return {33'd0, extract_t_coarse_hit0(payload)};
+        endfunction
+
         task automatic drive_opcode(bit [8:0] symbol, string mnemonic);
             `uvm_info("RC_EMU_SEQ",
                       $sformatf("drive opcode mnemonic=%s symbol=0x%03h",
@@ -218,10 +222,12 @@ package tb_int_run_emulator_directed_pkg;
                                           int unsigned hit_count);
             bit [44:0] payload;
             bit [63:0] hit_id;
+            bit [47:0] true_hit_ts;
             bit [15:0] hit_idx16;
             bit [15:0] hit_count16;
 
             payload     = payload_for_hit(hit_idx);
+            true_hit_ts = true_ts_for_payload(payload);
             hit_idx16   = hit_idx;
             hit_count16 = hit_count;
             hit_id      = {32'hEEEE_0000, hit_count16, hit_idx16};
@@ -229,16 +235,20 @@ package tb_int_run_emulator_directed_pkg;
             stage_a_vif.drive_commit(4'd0, payload);
             debug_l2_vif.drive_commit(4'd0, payload, hit_id, 1'b1, hit_id, 1'b1, 2'd2);
 
-            pre_rbcam_vif.drive_hit(4'd0, payload, 64'd0, 1'b0, 64'd0, 1'b0, 1'b1, 2'd0);
-            debug_pre_rbcam_vif.drive_hit(4'd0, payload, hit_id, 1'b1, hit_id, 1'b1, 1'b1, 2'd2);
+            pre_rbcam_vif.drive_hit(4'd0, payload, 64'd0, 1'b0, 64'd0, 1'b0, 1'b1, 2'd0,
+                                     true_hit_ts, 1'b1);
+            debug_pre_rbcam_vif.drive_hit(4'd0, payload, hit_id, 1'b1, hit_id, 1'b1, 1'b1, 2'd2,
+                                           true_hit_ts, 1'b1);
 
-            post_rbcam_vif.drive_hit(4'd0, payload, 64'd0, 1'b0, 64'd0, 1'b0, 1'b1, 2'd0);
-            debug_post_rbcam_vif.drive_hit(4'd0, payload, hit_id, 1'b1, hit_id, 1'b1, 1'b1, 2'd2);
+            post_rbcam_vif.drive_hit(4'd0, payload, 64'd0, 1'b0, 64'd0, 1'b0, 1'b1, 2'd0,
+                                      true_hit_ts, 1'b1);
+            debug_post_rbcam_vif.drive_hit(4'd0, payload, hit_id, 1'b1, hit_id, 1'b1, 1'b1, 2'd2,
+                                            true_hit_ts, 1'b1);
 
             feb_egress_vif.drive_hit(4'd0, payload, 64'd0, 1'b0, 64'd0, 1'b0,
-                                     1'b1, 2'd0);
+                                     1'b1, 2'd0, true_hit_ts, 1'b1);
             debug_feb_egress_vif.drive_hit(4'd0, payload, hit_id, 1'b1, hit_id, 1'b1,
-                                           1'b1, 2'd2);
+                                           1'b1, 2'd2, true_hit_ts, 1'b1);
 
             repeat (HIT_GAP_CYCLES) @(posedge stage_a_vif.clk);
         endtask
