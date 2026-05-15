@@ -186,9 +186,8 @@ module tb_int_top;
         end
     end
 
-    // mock_total_hits_cnt: counts stage_a_vif.valid edges seen while the
-    // splitter delivered RUNNING. Mirrors the on-board
-    // histogram_statistics.TOTAL_HITS register.
+    // mock_total_hits_cnt remains as a cheap cross-check, but the default
+    // tb_int shell now exposes a real histogram_statistics_v2 CSR responder.
     logic [31:0] mock_total_hits_cnt;
     always_ff @(posedge clk_125) begin
         if (rst) begin
@@ -198,11 +197,188 @@ module tb_int_top;
         end
     end
 
-    // SC AVMM responder. Default returns 32'h4849_5354 ("HIST"). When the
-    // master reads CSR_HISTO_TOTAL_HITS (byte addr 0x0000_2000), return the
-    // mock_total_hits_cnt so the run_emulator_directed sequence can
-    // distinguish the pre-fix (0) vs post-fix (16) cases.
-    localparam bit [31:0] FEB_CSR_HISTO_TOTAL_HITS = 32'h0000_2000;
+    localparam bit [31:0] FEB_HIST_CSR_BASE         = 32'h0000_A400;
+    localparam bit [31:0] FEB_CSR_HISTO_BANK_STATUS = FEB_HIST_CSR_BASE + (32'd11 << 2);
+    localparam bit [31:0] FEB_CSR_HISTO_PORT_STATUS = FEB_HIST_CSR_BASE + (32'd12 << 2);
+    localparam bit [31:0] FEB_CSR_HISTO_TOTAL_HITS  = FEB_HIST_CSR_BASE + (32'd13 << 2);
+    localparam bit [31:0] FEB_CSR_HISTO_DROPPED     = FEB_HIST_CSR_BASE + (32'd14 << 2);
+
+    function automatic bit is_hist_csr_addr(input logic [31:0] addr);
+        return (addr >= FEB_HIST_CSR_BASE) && (addr < (FEB_HIST_CSR_BASE + 32'h80));
+    endfunction
+
+`ifndef TB_INT_BIND_REAL_DUT
+    logic [31:0] hist_csr_readdata;
+    logic        hist_csr_read;
+    logic [4:0]  hist_csr_address;
+    logic        hist_csr_waitrequest;
+    logic        hist_csr_write;
+    logic [31:0] hist_csr_writedata;
+    logic [31:0] hist_bin_readdata;
+    logic        hist_bin_waitrequest;
+    logic        hist_bin_readdatavalid;
+    logic        hist_bin_writeresponsevalid;
+    logic [1:0]  hist_bin_response;
+    logic        hist_fill_ready;
+    logic        hist_fill_valid;
+    logic [38:0] hist_fill_data;
+
+    assign hist_fill_valid = mock_emulator_running && pre_rbcam_vif.valid;
+    assign hist_fill_data  = pre_rbcam_vif.payload[38:0];
+    assign hist_csr_read   = sc_phy_vif.read && is_hist_csr_addr(sc_phy_vif.address);
+    assign hist_csr_write  = sc_phy_vif.write && is_hist_csr_addr(sc_phy_vif.address);
+    assign hist_csr_address = sc_phy_vif.address[6:2];
+    assign hist_csr_writedata = sc_phy_vif.writedata;
+
+    histogram_statistics_v2 #(
+        .DEF_LEFT_BOUND(0),
+        .DEF_BIN_WIDTH(16),
+        .AVS_ADDR_WIDTH(8),
+        .N_PORTS(1),
+        .FIFO_ADDR_WIDTH(8),
+        .ENABLE_PINGPONG(1'b1),
+        .DEF_INTERVAL_CLOCKS(125000000),
+        .AVST_DATA_WIDTH(39),
+        .AVST_CHANNEL_WIDTH(4),
+        .N_DEBUG_INTERFACE(0),
+        .SNOOP_EN(1'b0),
+        .ENABLE_PACKET(1'b0),
+        .DEBUG(0)
+    ) u_hist (
+        .avs_hist_bin_readdata(hist_bin_readdata),
+        .avs_hist_bin_read(1'b0),
+        .avs_hist_bin_address(8'd0),
+        .avs_hist_bin_waitrequest(hist_bin_waitrequest),
+        .avs_hist_bin_write(1'b0),
+        .avs_hist_bin_writedata(32'd0),
+        .avs_hist_bin_burstcount(9'd1),
+        .avs_hist_bin_readdatavalid(hist_bin_readdatavalid),
+        .avs_hist_bin_writeresponsevalid(hist_bin_writeresponsevalid),
+        .avs_hist_bin_response(hist_bin_response),
+
+        .avs_csr_readdata(hist_csr_readdata),
+        .avs_csr_read(hist_csr_read),
+        .avs_csr_address(hist_csr_address),
+        .avs_csr_waitrequest(hist_csr_waitrequest),
+        .avs_csr_write(hist_csr_write),
+        .avs_csr_writedata(hist_csr_writedata),
+
+        .asi_hist_fill_in_ready(hist_fill_ready),
+        .asi_hist_fill_in_valid(hist_fill_valid),
+        .asi_hist_fill_in_data(hist_fill_data),
+        .asi_hist_fill_in_startofpacket(1'b0),
+        .asi_hist_fill_in_endofpacket(1'b0),
+        .asi_hist_fill_in_channel(pre_rbcam_vif.lane_id),
+
+        .asi_fill_in_1_ready(),
+        .asi_fill_in_1_valid(1'b0),
+        .asi_fill_in_1_data(39'd0),
+        .asi_fill_in_1_startofpacket(1'b0),
+        .asi_fill_in_1_endofpacket(1'b0),
+        .asi_fill_in_1_channel(4'd0),
+        .asi_fill_in_2_ready(),
+        .asi_fill_in_2_valid(1'b0),
+        .asi_fill_in_2_data(39'd0),
+        .asi_fill_in_2_startofpacket(1'b0),
+        .asi_fill_in_2_endofpacket(1'b0),
+        .asi_fill_in_2_channel(4'd0),
+        .asi_fill_in_3_ready(),
+        .asi_fill_in_3_valid(1'b0),
+        .asi_fill_in_3_data(39'd0),
+        .asi_fill_in_3_startofpacket(1'b0),
+        .asi_fill_in_3_endofpacket(1'b0),
+        .asi_fill_in_3_channel(4'd0),
+        .asi_fill_in_4_ready(),
+        .asi_fill_in_4_valid(1'b0),
+        .asi_fill_in_4_data(39'd0),
+        .asi_fill_in_4_startofpacket(1'b0),
+        .asi_fill_in_4_endofpacket(1'b0),
+        .asi_fill_in_4_channel(4'd0),
+        .asi_fill_in_5_ready(),
+        .asi_fill_in_5_valid(1'b0),
+        .asi_fill_in_5_data(39'd0),
+        .asi_fill_in_5_startofpacket(1'b0),
+        .asi_fill_in_5_endofpacket(1'b0),
+        .asi_fill_in_5_channel(4'd0),
+        .asi_fill_in_6_ready(),
+        .asi_fill_in_6_valid(1'b0),
+        .asi_fill_in_6_data(39'd0),
+        .asi_fill_in_6_startofpacket(1'b0),
+        .asi_fill_in_6_endofpacket(1'b0),
+        .asi_fill_in_6_channel(4'd0),
+        .asi_fill_in_7_ready(),
+        .asi_fill_in_7_valid(1'b0),
+        .asi_fill_in_7_data(39'd0),
+        .asi_fill_in_7_startofpacket(1'b0),
+        .asi_fill_in_7_endofpacket(1'b0),
+        .asi_fill_in_7_channel(4'd0),
+
+        .asi_hit_type1_extended_0_valid(1'b0),
+        .asi_hit_type1_extended_0_data(87'd0),
+        .asi_hit_type1_extended_1_valid(1'b0),
+        .asi_hit_type1_extended_1_data(87'd0),
+
+        .aso_hist_fill_out_ready(1'b1),
+        .aso_hist_fill_out_valid(),
+        .aso_hist_fill_out_data(),
+        .aso_hist_fill_out_startofpacket(),
+        .aso_hist_fill_out_endofpacket(),
+        .aso_hist_fill_out_channel(),
+
+        .asi_ctrl_data(9'd0),
+        .asi_ctrl_valid(1'b0),
+
+        .asi_debug_1_valid(1'b0),
+        .asi_debug_1_data(16'd0),
+        .asi_debug_2_valid(1'b0),
+        .asi_debug_2_data(16'd0),
+        .asi_debug_3_valid(1'b0),
+        .asi_debug_3_data(16'd0),
+        .asi_debug_4_valid(1'b0),
+        .asi_debug_4_data(16'd0),
+        .asi_debug_5_valid(1'b0),
+        .asi_debug_5_data(16'd0),
+        .asi_debug_6_valid(1'b0),
+        .asi_debug_6_data(16'd0),
+
+        .i_interval_reset(1'b0),
+        .i_rst(rst),
+        .i_clk(clk_125)
+    );
+
+    logic        sc_read_q;
+    logic        sc_hist_read_q;
+    logic [31:0] sc_addr_q;
+    logic        sc_resp_pending_q;
+
+    // SC AVMM responder backed by the real histogram CSR aperture from the
+    // generated Qsys map. Data is staged before readdatavalid so the direct
+    // tb_int polling sequences sample the VHDL CSR output after it has settled.
+    always_ff @(posedge clk_125) begin
+        if (rst) begin
+            sc_read_q <= 1'b0;
+            sc_hist_read_q <= 1'b0;
+            sc_addr_q <= 32'h0;
+            sc_resp_pending_q <= 1'b0;
+            sc_phy_vif.readdatavalid <= 1'b0;
+            sc_phy_vif.readdata <= 32'h0000_0000;
+        end else begin
+            sc_read_q <= sc_phy_vif.read;
+            sc_hist_read_q <= sc_phy_vif.read && is_hist_csr_addr(sc_phy_vif.address);
+            sc_addr_q <= sc_phy_vif.address;
+            sc_resp_pending_q <= sc_read_q;
+            sc_phy_vif.readdatavalid <= sc_resp_pending_q;
+            if (sc_read_q) begin
+                if (sc_hist_read_q)
+                    sc_phy_vif.readdata <= hist_csr_readdata;
+                else if (sc_addr_q == FEB_CSR_HISTO_TOTAL_HITS)
+                    sc_phy_vif.readdata <= mock_total_hits_cnt;
+                else
+                    sc_phy_vif.readdata <= 32'h4849_5354;
+            end
+        end
+    end
+`else
     always_ff @(posedge clk_125) begin
         if (rst) begin
             sc_phy_vif.readdatavalid <= 1'b0;
@@ -215,6 +391,7 @@ module tb_int_top;
                 sc_phy_vif.readdata <= 32'h4849_5354;
         end
     end
+`endif
 
     initial begin
         uvm_config_db#(virtual lvds_phy_if)::set(null,

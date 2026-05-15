@@ -37,15 +37,23 @@ This page is the coverage summary only. Per-case evidence lives under [`REPORT/`
 | [PASS] | `B068_histogram_cross_check` | isolated | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | 0.5 | 1024 |
 | [PASS] | `B069_upload_pkt_mux_one_hit` | isolated | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | 0.5 | 1 |
 | [PASS] | `RC_EMUL` | directed | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 16 |
+| [PASS] | `RC_EMUL_BLOCKED` | directed | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 16 |
+| [PASS] | `RC_EMUL_FIXED` | directed | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 16 |
 | [PASS] | `SOURCE_MUX_FRAME` | cosim | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 5056 |
+| [PASS] | `SOURCE_MUX_FRAME_nominal_5m` | cosim | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 126944 |
+| [PASS] | `SOURCE_MUX_FRAME_sparse_5m` | cosim | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 9760 |
+| [PASS] | `SOURCE_MUX_FRAME_high_q256_longdrain` | cosim | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 124992 |
+| [PASS] | `SOURCE_MUX_FRAME_high_q384_longdrain` | cosim | bridgefree_phase_a | BASIC | 1 | n/a | n/a | n/a | n/a | 187488 |
 | [PASS] | `B067_bind_real_dut` | bind-smoke | generated_synthesis | BASIC | 1 | n/a | n/a | n/a | n/a | 100 |
 | [PEND] | `all_buckets_frame` | all_buckets_frame | generated_dut | - | 768 | n/a | n/a | n/a | 0.0 | 0 |
 
 ## Non-Claims
 
-No UCDB coverage is claimed in this phase. B065 through B069 and `RC_EMUL`
+No UCDB coverage is claimed in this phase. B065 through B069 and `RC_EMUL*`
 close functional DEBUG_LEVEL=2 per-hit scoreboard evidence in the old dual UVM
-environment; `SOURCE_MUX_FRAME` closes the source-mux/frame-parser cosim; and
-`B067_bind_real_dut` proves the generated `synthesis/` tree compiles and can be
-instantiated as the dormant DUT in the harness. RDMA SQE/CQE cosim is outside
-this harness.
+environment; `SOURCE_MUX_FRAME*` closes the source-mux/frame-parser/MTS/histogram
+cosim with exact parser/MTS/hist totals; and `B067_bind_real_dut` proves the
+generated `synthesis/` tree compiles and can be instantiated as the dormant DUT
+in the harness. The clean-STP FEB firmware compile is tracked as integration
+evidence only and does not add UCDB coverage; slow-corner setup timing remains
+open. RDMA SQE/CQE cosim is outside this harness.

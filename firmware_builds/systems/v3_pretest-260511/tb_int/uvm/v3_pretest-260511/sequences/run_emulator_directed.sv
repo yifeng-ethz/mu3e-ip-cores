@@ -24,11 +24,10 @@
 //      the splitter outN_ready dangling-input wire never exists. The bug
 //      is therefore silicon-only or requires TB_INT_BIND_REAL_DUT with the
 //      generated feb_system_v3 synthesis tree compiled in.
-//   3) AVMM polling reads against the histogram_statistics_0 / mts_preprocessor_0
-//      register windows so the test demonstrates the on-board SC-side query
-//      pattern (TOTAL_HITS, BANK_STATUS, PORT_STATUS) even though the FEB
-//      tb_int currently uses a fixed-payload stub responder
-//      (tb_int_top.sv:98..106 returns 32'h4849_5354 for every read).
+//   3) AVMM polling reads against the bridge-free histogram_statistics_0
+//      CSR window so the test demonstrates the on-board SC-side query
+//      pattern (TOTAL_HITS, BANK_STATUS, PORT_STATUS) while the FEB tb_int
+//      shell keeps unrelated legacy apertures as fixed-payload placeholders.
 //
 // Splitter-blockage repro flag:
 //   The sequence emits a uvm_info marker after the start-run step
@@ -50,14 +49,12 @@ package tb_int_run_emulator_directed_pkg;
     localparam bit [8:0] OP_RUN_SYNC    = 9'h111;  // CMD_RUN_SYNC    0x11
     localparam bit [8:0] OP_START_RUN   = 9'h112;  // CMD_START_RUN   0x12
 
-    // CSR byte offsets used by the on-board sc_tool pattern. Exact byte
-    // addresses depend on the FEB Qsys map; the stub responder ignores the
-    // address and returns the fixed pattern, so for this directed sequence
-    // any offset within the SC window exercises the bus path. Keep the
-    // addresses 4-byte aligned so the stub responder + (future) Qsys-bound
-    // responder both accept the burst.
-    localparam bit [31:0] CSR_HISTO_TOTAL_HITS   = 32'h0000_2000;
-    localparam bit [31:0] CSR_HISTO_BANK_STATUS  = 32'h0000_2004;
+    // CSR byte addresses from the bridge-free FEB v3 Qsys map:
+    // histogram_statistics_0.csr is based at 0xA400 and uses word offsets.
+    localparam bit [31:0] CSR_HISTO_BASE         = 32'h0000_A400;
+    localparam bit [31:0] CSR_HISTO_BANK_STATUS  = CSR_HISTO_BASE + (32'd11 << 2);
+    localparam bit [31:0] CSR_HISTO_PORT_STATUS  = CSR_HISTO_BASE + (32'd12 << 2);
+    localparam bit [31:0] CSR_HISTO_TOTAL_HITS   = CSR_HISTO_BASE + (32'd13 << 2);
     localparam bit [31:0] CSR_PREPROC_PORT_STAT  = 32'h0000_3000;
     localparam bit [31:0] CSR_FRAME_ACTUAL_HITS  = 32'h0000_4000;
 
@@ -279,12 +276,12 @@ package tb_int_run_emulator_directed_pkg;
                 drive_emulator_hit(hit_idx, hit_count);
             end
 
-            // Phase 3: SC CSR poll. The fixed-payload stub returns
-            // STUB_READDATA for every address; that's still valuable for
-            // demonstrating the bus path is live.
+            // Phase 3: SC CSR poll. Histogram reads use the real bridge-free
+            // CSR aperture. Unrelated preprocessor/frame addresses remain
+            // fixed-payload placeholders in the behavioural shell.
             sc_read32(CSR_HISTO_TOTAL_HITS,   obs_total_hits);
             sc_read32(CSR_HISTO_BANK_STATUS,  obs_bank_status);
-            sc_read32(CSR_PREPROC_PORT_STAT,  obs_port_status);
+            sc_read32(CSR_HISTO_PORT_STATUS,  obs_port_status);
             sc_read32(CSR_FRAME_ACTUAL_HITS,  obs_actual_hits);
 
             `uvm_info("RC_EMU_SEQ",

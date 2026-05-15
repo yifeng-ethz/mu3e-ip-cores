@@ -7,6 +7,7 @@ module tb_source_mux_frame_parser_cosim;
     localparam logic [8:0] CTRL_RUN_PREPARE = 9'b000000010;
     localparam logic [8:0] CTRL_SYNC        = 9'b000000100;
     localparam logic [8:0] CTRL_RUNNING     = 9'b000001000;
+    localparam logic [8:0] CTRL_TERMINATING = 9'b000010000;
 
     localparam logic [5:0] EMU_REG_CENTRAL       = 6'h07;
     localparam logic [5:0] EMU_REG_SIGNAL        = 6'h08;
@@ -22,6 +23,15 @@ module tb_source_mux_frame_parser_cosim;
     localparam logic [3:0] MLSM_REG_EMU_BEATS     = 4'h5;
     localparam logic [3:0] MLSM_REG_SELECTED_BEATS= 4'h6;
     localparam logic [3:0] MLSM_REG_EMU_SELECTED  = 4'hD;
+
+    localparam int unsigned HIST_CSR_CONTROL      = 2;
+    localparam int unsigned HIST_CSR_LEFT_BOUND   = 3;
+    localparam int unsigned HIST_CSR_BIN_WIDTH    = 5;
+    localparam int unsigned HIST_CSR_INTERVAL     = 10;
+    localparam int unsigned HIST_CSR_BANK_STATUS  = 11;
+    localparam int unsigned HIST_CSR_PORT_STATUS  = 12;
+    localparam int unsigned HIST_CSR_TOTAL_HITS   = 13;
+    localparam int unsigned HIST_CSR_DROPPED_HITS = 14;
 
     logic clk = 1'b0;
     logic rst = 1'b1;
@@ -128,8 +138,61 @@ module tb_source_mux_frame_parser_cosim;
     logic        parser_dbg_n_crc_error;
     logic [31:0] parser_dbg_p_crc_err_count;
 
+    logic [31:0] mts_csr_readdata;
+    logic        mts_csr_read;
+    logic [2:0]  mts_csr_address;
+    logic        mts_csr_waitrequest;
+    logic        mts_csr_write;
+    logic [31:0] mts_csr_writedata;
+    logic        mts_hit0_ready;
+    logic [3:0]  mts_type1_channel;
+    logic        mts_type1_sop;
+    logic        mts_type1_eop;
+    logic [38:0] mts_type1_data;
+    logic        mts_type1_valid;
+    logic        mts_type1_empty;
+    logic        mts_type1_error;
+    logic [86:0] mts_ext0_data;
+    logic        mts_ext0_valid;
+    logic [86:0] mts_ext1_data;
+    logic        mts_ext1_valid;
+    logic        mts_debug_ts_valid;
+    logic [15:0] mts_debug_ts_data;
+    logic        mts_debug_burst_valid;
+    logic [15:0] mts_debug_burst_data;
+    logic        mts_ts_delta_valid;
+    logic [15:0] mts_ts_delta_data;
+    logic [31:0] mts_debug_status_data;
+    logic [63:0] mts_type1_sidecar_data;
+    logic        mts_type1_sidecar_valid;
+
+    logic [31:0] hist_bin_readdata;
+    logic        hist_bin_read;
+    logic [7:0]  hist_bin_address;
+    logic        hist_bin_waitrequest;
+    logic        hist_bin_write;
+    logic [31:0] hist_bin_writedata;
+    logic [8:0]  hist_bin_burstcount;
+    logic        hist_bin_readdatavalid;
+    logic        hist_bin_writeresponsevalid;
+    logic [1:0]  hist_bin_response;
+    logic [31:0] hist_csr_readdata;
+    logic        hist_csr_read;
+    logic [4:0]  hist_csr_address;
+    logic        hist_csr_waitrequest;
+    logic        hist_csr_write;
+    logic [31:0] hist_csr_writedata;
+    logic        hist_fill_ready;
+    logic        hist_fill_out_valid;
+    logic [38:0] hist_fill_out_data;
+    logic        hist_fill_out_sop;
+    logic        hist_fill_out_eop;
+    logic [3:0]  hist_fill_out_channel;
+
     int unsigned run_cycles;
     int unsigned q16_rate;
+    int unsigned drain_cycles;
+    int unsigned hist_interval_cycles;
     longint unsigned cycle_count;
     int unsigned emu_tx_count;
     int unsigned emu_header_count;
@@ -139,11 +202,17 @@ module tb_source_mux_frame_parser_cosim;
     int unsigned parser_hit_count;
     int unsigned parser_new_frame_count;
     int unsigned parser_new_word_count;
+    int unsigned mts_type1_count;
+    int unsigned hist_ext0_count;
     logic [41:0] last_headerinfo;
     logic [44:0] last_hit_data;
     logic [31:0] mux_emu_beats_csr;
     logic [31:0] mux_selected_beats_csr;
     logic [31:0] mux_emu_selected_csr;
+    logic [31:0] hist_total_hits_csr;
+    logic [31:0] hist_bank_status_csr;
+    logic [31:0] hist_port_status_csr;
+    logic [31:0] hist_dropped_hits_csr;
 
     always #(CLK_PERIOD_NS / 2.0) clk = ~clk;
 
@@ -350,6 +419,177 @@ module tb_source_mux_frame_parser_cosim;
         .dbg_p_crc_err_count(parser_dbg_p_crc_err_count)
     );
 
+    mts_processor #(
+        .BANK("UP"),
+        .ENABLED_CHANNEL_HI(3),
+        .ENABLED_CHANNEL_LO(0),
+        .DEBUG(0)
+    ) u_mts (
+        .avs_csr_readdata(mts_csr_readdata),
+        .avs_csr_read(mts_csr_read),
+        .avs_csr_address(mts_csr_address),
+        .avs_csr_waitrequest(mts_csr_waitrequest),
+        .avs_csr_write(mts_csr_write),
+        .avs_csr_writedata(mts_csr_writedata),
+
+        .asi_hit_type0_channel({2'b00, parser_hit_channel}),
+        .asi_hit_type0_startofpacket(parser_hit_sop),
+        .asi_hit_type0_endofpacket(parser_hit_eop),
+        .asi_hit_type0_endofrun(parser_hit_eor),
+        .asi_hit_type0_error(parser_hit_error),
+        .asi_hit_type0_data(parser_hit_data),
+        .asi_hit_type0_valid(parser_hit_valid),
+        .asi_hit_type0_ready(mts_hit0_ready),
+        .coe_hit_type0_sidecar_data({32'hC051_0000, cycle_count[31:0]}),
+        .coe_hit_type0_sidecar_valid(parser_hit_valid),
+
+        .aso_hit_type1_channel(mts_type1_channel),
+        .aso_hit_type1_startofpacket(mts_type1_sop),
+        .aso_hit_type1_endofpacket(mts_type1_eop),
+        .aso_hit_type1_data(mts_type1_data),
+        .aso_hit_type1_valid(mts_type1_valid),
+        .aso_hit_type1_ready(1'b1),
+        .aso_hit_type1_empty(mts_type1_empty),
+        .aso_hit_type1_error(mts_type1_error),
+
+        .aso_hit_type1_extended_0_data(mts_ext0_data),
+        .aso_hit_type1_extended_0_valid(mts_ext0_valid),
+        .aso_hit_type1_extended_1_data(mts_ext1_data),
+        .aso_hit_type1_extended_1_valid(mts_ext1_valid),
+
+        .asi_ctrl_data(parser_ctrl_data),
+        .asi_ctrl_valid(parser_ctrl_valid),
+
+        .aso_debug_ts_valid(mts_debug_ts_valid),
+        .aso_debug_ts_data(mts_debug_ts_data),
+        .aso_debug_burst_valid(mts_debug_burst_valid),
+        .aso_debug_burst_data(mts_debug_burst_data),
+        .aso_ts_delta_valid(mts_ts_delta_valid),
+        .aso_ts_delta_data(mts_ts_delta_data),
+        .coe_debug_status_data(mts_debug_status_data),
+        .coe_hit_type1_sidecar_data(mts_type1_sidecar_data),
+        .coe_hit_type1_sidecar_valid(mts_type1_sidecar_valid),
+
+        .i_rst(rst),
+        .i_clk(clk)
+    );
+
+    histogram_statistics_v2 #(
+        .DEF_LEFT_BOUND(0),
+        .DEF_BIN_WIDTH(16),
+        .AVS_ADDR_WIDTH(8),
+        .N_PORTS(1),
+        .FIFO_ADDR_WIDTH(8),
+        .ENABLE_PINGPONG(1'b1),
+        .DEF_INTERVAL_CLOCKS(125000000),
+        .AVST_DATA_WIDTH(39),
+        .AVST_CHANNEL_WIDTH(4),
+        .N_DEBUG_INTERFACE(0),
+        .SNOOP_EN(1'b0),
+        .ENABLE_PACKET(1'b0),
+        .DEBUG(0)
+    ) u_hist (
+        .avs_hist_bin_readdata(hist_bin_readdata),
+        .avs_hist_bin_read(hist_bin_read),
+        .avs_hist_bin_address(hist_bin_address),
+        .avs_hist_bin_waitrequest(hist_bin_waitrequest),
+        .avs_hist_bin_write(hist_bin_write),
+        .avs_hist_bin_writedata(hist_bin_writedata),
+        .avs_hist_bin_burstcount(hist_bin_burstcount),
+        .avs_hist_bin_readdatavalid(hist_bin_readdatavalid),
+        .avs_hist_bin_writeresponsevalid(hist_bin_writeresponsevalid),
+        .avs_hist_bin_response(hist_bin_response),
+
+        .avs_csr_readdata(hist_csr_readdata),
+        .avs_csr_read(hist_csr_read),
+        .avs_csr_address(hist_csr_address),
+        .avs_csr_waitrequest(hist_csr_waitrequest),
+        .avs_csr_write(hist_csr_write),
+        .avs_csr_writedata(hist_csr_writedata),
+
+        .asi_hist_fill_in_ready(hist_fill_ready),
+        .asi_hist_fill_in_valid(1'b0),
+        .asi_hist_fill_in_data(39'd0),
+        .asi_hist_fill_in_startofpacket(1'b0),
+        .asi_hist_fill_in_endofpacket(1'b0),
+        .asi_hist_fill_in_channel(4'd0),
+
+        .asi_fill_in_1_ready(),
+        .asi_fill_in_1_valid(1'b0),
+        .asi_fill_in_1_data(39'd0),
+        .asi_fill_in_1_startofpacket(1'b0),
+        .asi_fill_in_1_endofpacket(1'b0),
+        .asi_fill_in_1_channel(4'd0),
+        .asi_fill_in_2_ready(),
+        .asi_fill_in_2_valid(1'b0),
+        .asi_fill_in_2_data(39'd0),
+        .asi_fill_in_2_startofpacket(1'b0),
+        .asi_fill_in_2_endofpacket(1'b0),
+        .asi_fill_in_2_channel(4'd0),
+        .asi_fill_in_3_ready(),
+        .asi_fill_in_3_valid(1'b0),
+        .asi_fill_in_3_data(39'd0),
+        .asi_fill_in_3_startofpacket(1'b0),
+        .asi_fill_in_3_endofpacket(1'b0),
+        .asi_fill_in_3_channel(4'd0),
+        .asi_fill_in_4_ready(),
+        .asi_fill_in_4_valid(1'b0),
+        .asi_fill_in_4_data(39'd0),
+        .asi_fill_in_4_startofpacket(1'b0),
+        .asi_fill_in_4_endofpacket(1'b0),
+        .asi_fill_in_4_channel(4'd0),
+        .asi_fill_in_5_ready(),
+        .asi_fill_in_5_valid(1'b0),
+        .asi_fill_in_5_data(39'd0),
+        .asi_fill_in_5_startofpacket(1'b0),
+        .asi_fill_in_5_endofpacket(1'b0),
+        .asi_fill_in_5_channel(4'd0),
+        .asi_fill_in_6_ready(),
+        .asi_fill_in_6_valid(1'b0),
+        .asi_fill_in_6_data(39'd0),
+        .asi_fill_in_6_startofpacket(1'b0),
+        .asi_fill_in_6_endofpacket(1'b0),
+        .asi_fill_in_6_channel(4'd0),
+        .asi_fill_in_7_ready(),
+        .asi_fill_in_7_valid(1'b0),
+        .asi_fill_in_7_data(39'd0),
+        .asi_fill_in_7_startofpacket(1'b0),
+        .asi_fill_in_7_endofpacket(1'b0),
+        .asi_fill_in_7_channel(4'd0),
+
+        .asi_hit_type1_extended_0_valid(mts_ext0_valid),
+        .asi_hit_type1_extended_0_data(mts_ext0_data),
+        .asi_hit_type1_extended_1_valid(mts_ext1_valid),
+        .asi_hit_type1_extended_1_data(mts_ext1_data),
+
+        .aso_hist_fill_out_ready(1'b1),
+        .aso_hist_fill_out_valid(hist_fill_out_valid),
+        .aso_hist_fill_out_data(hist_fill_out_data),
+        .aso_hist_fill_out_startofpacket(hist_fill_out_sop),
+        .aso_hist_fill_out_endofpacket(hist_fill_out_eop),
+        .aso_hist_fill_out_channel(hist_fill_out_channel),
+
+        .asi_ctrl_data(parser_ctrl_data),
+        .asi_ctrl_valid(parser_ctrl_valid),
+
+        .asi_debug_1_valid(1'b0),
+        .asi_debug_1_data(16'd0),
+        .asi_debug_2_valid(1'b0),
+        .asi_debug_2_data(16'd0),
+        .asi_debug_3_valid(1'b0),
+        .asi_debug_3_data(16'd0),
+        .asi_debug_4_valid(1'b0),
+        .asi_debug_4_data(16'd0),
+        .asi_debug_5_valid(1'b0),
+        .asi_debug_5_data(16'd0),
+        .asi_debug_6_valid(1'b0),
+        .asi_debug_6_data(16'd0),
+
+        .i_interval_reset(1'b0),
+        .i_rst(rst),
+        .i_clk(clk)
+    );
+
     task automatic emu_write(input logic [5:0] addr, input logic [31:0] data);
         @(posedge clk);
         emu_csr_address   <= addr;
@@ -380,6 +620,27 @@ module tb_source_mux_frame_parser_cosim;
         mux_csr_read <= 1'b0;
     endtask
 
+    task automatic hist_csr_bus_write(input int unsigned addr, input logic [31:0] data);
+        @(posedge clk);
+        hist_csr_address   <= addr[4:0];
+        hist_csr_writedata <= data;
+        hist_csr_write     <= 1'b1;
+        hist_csr_read      <= 1'b0;
+        @(posedge clk);
+        hist_csr_write     <= 1'b0;
+    endtask
+
+    task automatic hist_csr_bus_read(input int unsigned addr, output logic [31:0] data);
+        @(posedge clk);
+        hist_csr_address <= addr[4:0];
+        hist_csr_read    <= 1'b1;
+        hist_csr_write   <= 1'b0;
+        @(posedge clk);
+        #1ps;
+        data = hist_csr_readdata;
+        hist_csr_read <= 1'b0;
+    endtask
+
     task automatic parser_write(input logic [1:0] addr, input logic [31:0] data);
         @(posedge clk);
         parser_csr_address   <= addr;
@@ -403,6 +664,15 @@ module tb_source_mux_frame_parser_cosim;
         parser_ctrl_data    <= CTRL_IDLE;
     endtask
 
+    task automatic send_emu_run_state(input logic [8:0] state);
+        @(posedge clk);
+        emu_ctrl_data  <= state;
+        emu_ctrl_valid <= 1'b1;
+        @(posedge clk);
+        emu_ctrl_valid <= 1'b0;
+        emu_ctrl_data  <= CTRL_IDLE;
+    endtask
+
     always_ff @(posedge clk) begin
         if (rst) begin
             cycle_count <= 0;
@@ -414,6 +684,8 @@ module tb_source_mux_frame_parser_cosim;
             parser_hit_count <= 0;
             parser_new_frame_count <= 0;
             parser_new_word_count <= 0;
+            mts_type1_count <= 0;
+            hist_ext0_count <= 0;
             last_headerinfo <= '0;
             last_hit_data <= '0;
         end else begin
@@ -474,6 +746,14 @@ module tb_source_mux_frame_parser_cosim;
                              parser_hit_error);
                 end
             end
+
+            if (mts_type1_valid) begin
+                mts_type1_count <= mts_type1_count + 1;
+            end
+
+            if (mts_ext0_valid) begin
+                hist_ext0_count <= hist_ext0_count + 1;
+            end
         end
     end
 
@@ -484,6 +764,10 @@ module tb_source_mux_frame_parser_cosim;
         if (!$value$plusargs("Q16_RATE=%d", q16_rate)) begin
             q16_rate = 52;
         end
+        if (!$value$plusargs("DRAIN_CYCLES=%d", drain_cycles)) begin
+            drain_cycles = 4096;
+        end
+        hist_interval_cycles = run_cycles + drain_cycles + 10000;
 
         emu_ctrl_data = CTRL_IDLE;
         emu_ctrl_valid = 1'b0;
@@ -495,6 +779,19 @@ module tb_source_mux_frame_parser_cosim;
         mux_csr_read = 1'b0;
         mux_csr_write = 1'b0;
         mux_csr_writedata = '0;
+        mts_csr_address = '0;
+        mts_csr_read = 1'b0;
+        mts_csr_write = 1'b0;
+        mts_csr_writedata = '0;
+        hist_bin_address = '0;
+        hist_bin_read = 1'b0;
+        hist_bin_write = 1'b0;
+        hist_bin_writedata = '0;
+        hist_bin_burstcount = 9'd1;
+        hist_csr_address = '0;
+        hist_csr_read = 1'b0;
+        hist_csr_write = 1'b0;
+        hist_csr_writedata = '0;
         parser_csr_address = '0;
         parser_csr_read = 1'b0;
         parser_csr_write = 1'b0;
@@ -504,6 +801,12 @@ module tb_source_mux_frame_parser_cosim;
 
         wait (rst == 1'b0);
         repeat (8) @(posedge clk);
+
+        hist_csr_bus_write(HIST_CSR_LEFT_BOUND, 32'h0000_0000);
+        hist_csr_bus_write(HIST_CSR_BIN_WIDTH, 32'h0000_0010);
+        hist_csr_bus_write(HIST_CSR_INTERVAL, hist_interval_cycles);
+        hist_csr_bus_write(HIST_CSR_CONTROL, 32'h0000_0015); // apply, in_port=1, delay mode
+        repeat (16) @(posedge clk);
 
         emu_write(EMU_REG_CENTRAL, 32'h0000_0000);
         emu_write(EMU_REG_BACKGROUND, 32'h0000_0000);
@@ -526,14 +829,24 @@ module tb_source_mux_frame_parser_cosim;
         send_run_state(CTRL_RUNNING);
 
         repeat (run_cycles) @(posedge clk);
+        send_emu_run_state(CTRL_TERMINATING);
+        repeat (drain_cycles) @(posedge clk);
+        send_emu_run_state(CTRL_IDLE);
+        repeat (512) @(posedge clk);
 
         mux_read(MLSM_REG_EMU_BEATS, mux_emu_beats_csr);
         mux_read(MLSM_REG_SELECTED_BEATS, mux_selected_beats_csr);
         mux_read(MLSM_REG_EMU_SELECTED, mux_emu_selected_csr);
+        hist_csr_bus_read(HIST_CSR_TOTAL_HITS, hist_total_hits_csr);
+        hist_csr_bus_read(HIST_CSR_BANK_STATUS, hist_bank_status_csr);
+        hist_csr_bus_read(HIST_CSR_PORT_STATUS, hist_port_status_csr);
+        hist_csr_bus_read(HIST_CSR_DROPPED_HITS, hist_dropped_hits_csr);
 
-        $display("SUMMARY run_cycles=%0d q16_rate=%0d emu_tx_count=%0d emu_header_count=%0d mux_selected_count=%0d parser_rx_count=%0d parser_new_frame_count=%0d parser_header_count=%0d parser_new_word_count=%0d parser_hit_count=%0d parser_enable=%0b receiver_go=%0b parser_csr_control=0x%02h parser_csr_status=0x%02h crc_err=%0d frame_head=%0d frame_tail=%0d mux_csr_emu=%0d mux_csr_selected=%0d mux_csr_emu_selected=%0d last_header=0x%011h last_hit=0x%012h",
+        $display("SUMMARY run_cycles=%0d q16_rate=%0d drain_cycles=%0d hist_interval_cycles=%0d emu_tx_count=%0d emu_header_count=%0d mux_selected_count=%0d parser_rx_count=%0d parser_new_frame_count=%0d parser_header_count=%0d parser_new_word_count=%0d parser_hit_count=%0d mts_type1_count=%0d hist_ext0_count=%0d hist_total_hits=%0d hist_bank_status=0x%08h hist_port_status=0x%08h hist_dropped_hits=%0d parser_enable=%0b receiver_go=%0b parser_csr_control=0x%02h parser_csr_status=0x%02h crc_err=%0d frame_head=%0d frame_tail=%0d mux_csr_emu=%0d mux_csr_selected=%0d mux_csr_emu_selected=%0d last_header=0x%011h last_hit=0x%012h",
                  run_cycles,
                  q16_rate,
+                 drain_cycles,
+                 hist_interval_cycles,
                  emu_tx_count,
                  emu_header_count,
                  mux_selected_count,
@@ -542,6 +855,12 @@ module tb_source_mux_frame_parser_cosim;
                  parser_header_count,
                  parser_new_word_count,
                  parser_hit_count,
+                 mts_type1_count,
+                 hist_ext0_count,
+                 hist_total_hits_csr,
+                 hist_bank_status_csr,
+                 hist_port_status_csr,
+                 hist_dropped_hits_csr,
                  parser_dbg_enable,
                  parser_dbg_receiver_go,
                  parser_dbg_csr_control,
@@ -569,6 +888,21 @@ module tb_source_mux_frame_parser_cosim;
         end
         if (parser_hit_count == 0) begin
             $fatal(1, "frame parser saw headers but emitted no hits");
+        end
+        if (mts_type1_count == 0) begin
+            $fatal(1, "MTS processor emitted no Type-1 hits");
+        end
+        if (hist_ext0_count == 0) begin
+            $fatal(1, "MTS extended debug plane emitted no histogram-source hits");
+        end
+        if (hist_total_hits_csr == 0) begin
+            $fatal(1, "histogram_statistics_v2 TOTAL_HITS stayed zero");
+        end
+        if (hist_total_hits_csr != hist_ext0_count) begin
+            $fatal(1,
+                   "histogram_statistics_v2 TOTAL_HITS (%0d) did not match drained extended-plane hit count (%0d)",
+                   hist_total_hits_csr,
+                   hist_ext0_count);
         end
 
         $display("*** TEST PASSED ***");

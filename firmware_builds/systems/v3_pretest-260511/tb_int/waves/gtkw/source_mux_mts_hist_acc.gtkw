@@ -1,0 +1,91 @@
+[*] GTKWave Analyzer save file
+[dumpfile] /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_stream_debug_plane_snapshot_20260515/firmware_builds/systems/v3_pretest-260511/tb_int/sim_hist_ip_cosim_wave_acc_20260515/SOURCE_MUX_FRAME/source_mux_mts_hist_acc.fst
+[dumpfile_mtime] 0
+[savefile] /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_stream_debug_plane_snapshot_20260515/firmware_builds/systems/v3_pretest-260511/tb_int/waves/gtkw/source_mux_mts_hist_acc.gtkw
+[timestart] 0
+[size] 1600 900
+[pos] -1 -1
+*-1 0
+[treeopen] tb_source_mux_frame_parser_cosim.
+@200
+- 00 clock reset cycle
+@28
+tb_source_mux_frame_parser_cosim.clk
+[color] 0
+@28
+tb_source_mux_frame_parser_cosim.rst
+[color] 1
+@24
+tb_source_mux_frame_parser_cosim.cycle_count[63:0]
+[color] 4
+@200
+- 01 source mux byte stream
+@28
+tb_source_mux_frame_parser_cosim.emu_tx_valid
+[color] 3
+@24
+tb_source_mux_frame_parser_cosim.emu_tx_data[8:0]
+[color] 0
+@28
+tb_source_mux_frame_parser_cosim.mux_valid
+[color] 3
+@24
+tb_source_mux_frame_parser_cosim.mux_data[8:0]
+[color] 0
+@28
+tb_source_mux_frame_parser_cosim.lane_fifo_valid
+[color] 3
+@28
+tb_source_mux_frame_parser_cosim.parser_rx_valid
+[color] 3
+@200
+- 02 frame parser hit plane
+@28
+tb_source_mux_frame_parser_cosim.parser_headerinfo_valid
+[color] 2
+@28
+tb_source_mux_frame_parser_cosim.parser_hit_valid
+[color] 3
+@22
+tb_source_mux_frame_parser_cosim.parser_hit_data[44:0]
+[color] 0
+@200
+- 03 MTS type1 and extended plane
+@28
+tb_source_mux_frame_parser_cosim.mts_type1_valid
+[color] 3
+@22
+tb_source_mux_frame_parser_cosim.mts_type1_data[38:0]
+[color] 0
+@28
+tb_source_mux_frame_parser_cosim.mts_ext0_valid
+[color] 3
+@22
+tb_source_mux_frame_parser_cosim.mts_ext0_data[86:0]
+[color] 0
+@200
+- 04 histogram fill and CSR evidence
+@24
+tb_source_mux_frame_parser_cosim.hist_ext0_count
+[color] 4
+@28
+tb_source_mux_frame_parser_cosim.hist_csr_read
+[color] 3
+@24
+tb_source_mux_frame_parser_cosim.hist_csr_address[4:0]
+[color] 0
+@22
+tb_source_mux_frame_parser_cosim.hist_csr_readdata[31:0]
+[color] 5
+@22
+tb_source_mux_frame_parser_cosim.hist_total_hits_csr[31:0]
+[color] 5
+@22
+tb_source_mux_frame_parser_cosim.hist_bank_status_csr[31:0]
+[color] 5
+@22
+tb_source_mux_frame_parser_cosim.hist_port_status_csr[31:0]
+[color] 5
+@22
+tb_source_mux_frame_parser_cosim.hist_dropped_hits_csr[31:0]
+[color] 1

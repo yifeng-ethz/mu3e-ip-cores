@@ -5,6 +5,7 @@ lpm/
 intel_verilog/
 sim/
 transcript
+dual_port_rom_init.txt
 *.wlf
 uvm/common/feb_egress_monitor_rdma/
 uvm/common/rdma_cqe_monitor/

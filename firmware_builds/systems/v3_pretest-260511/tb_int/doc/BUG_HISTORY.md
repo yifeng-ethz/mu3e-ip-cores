@@ -41,6 +41,7 @@ Historical formal note:
 | [BUG-005-R](#bug-005-r-emulator-csr-address-width-wraps-high-status-and-control-offsets) | R | hard stuck error | `common (routine emulator CSR program / readback)` | fixed / board retest pending | live source-mux capture + manual SC readback | `pending` | emulator CSR instances kept a 4-bit address generic while the parent map exposed larger windows, so high offsets wrapped to low config/UID registers. |
 | [BUG-006-R](#bug-006-r-readyless-mts-run_prepare-rearm-loss-keeps-fresh-live-captures-empty) | R | hard stuck error | `common (fresh histogram readback / CSR counter runs)` | fixed in sim / board retest still failing | live hist zero capture after source-mux and emulator CSR fixes | `pending` | MTS rearm fix is present in the programmed tree, but live source-mux-to-frame-parser closure is still blocked by zero downstream counters and a timing-violating FEB build. |
 | [BUG-007-R](#bug-007-r-qsys-catalog-shadowing-and-optional-streams-block-feb-v3-gui-open) | R | non-datapath-refactor | `common (FEB v3 Platform Designer open/generate)` | fixed / qsys-generate green | FEB v3 Qsys GUI reported 121 errors on 2026-05-15 | this commit | Qsys search-path shadowing selected the wrong MuTRiG frame-deassembly package surface and optional streams stayed enabled in production-disabled configurations. |
+| [BUG-008-H](#bug-008-h-source-mux-frame-cosim-interval-rollover-clears-total_hits-during-long-drain) | H | non-datapath-refactor | `corner-only (long-drain cosim profiles with drain > 10000 cycles)` | fixed / long-drain cosim green | `high_3m_q256` exploratory cosim | `pending` | The cosim programmed histogram interval as `run_cycles + 10000`, so longer drains could roll the interval and clear `TOTAL_HITS` before CSR readback. |
 
 ## 2026-05-11
 
@@ -218,6 +219,31 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
     - `qsys-generate quartus_systems/feb_system_v3.qsys --synthesis=VERILOG` exited with status 0, no `Error:` lines, and 82 remaining warnings in `/tmp/qsys_generate_feb_v3_top_20260515_122310.log`.
   - potential_hazard:
     - medium. The GUI/generation blocker is closed, but the live hardware bottleneck remains the source-mux output into frame parser / MuTRiG frame-deassembly boundary once a timing-clean SOF is available.
+
+### BUG-008-H: source mux frame cosim interval rollover clears TOTAL_HITS during long drain
+- First seen in:
+  - exploratory long cosim `sim_hist_ip_cosim_exploratory_fail_20260515/high_3m_q256/transcript`
+- Symptom:
+  - `parser_hit_count=374976`, `mts_type1_count=374976`, and `hist_ext0_count=374976`, but histogram CSR `TOTAL_HITS=0`
+  - `hist_bank_status=0x00000001`, showing the histogram interval rolled while the bench was draining in-flight hits before CSR readback
+- Root cause:
+  - the cosim programmed `HIST_CSR_INTERVAL` as `run_cycles + 10000`
+  - high-rate long-drain profiles used `DRAIN_CYCLES=16384`, so the programmed interval expired during the drain phase and cleared the live `TOTAL_HITS` register before the final CSR check
+- Fix status:
+  - state:
+    - fixed in the cosim harness
+  - mechanism:
+    - program `HIST_CSR_INTERVAL` as `run_cycles + drain_cycles + 10000`
+    - print `hist_interval_cycles` in the summary so future long-drain evidence proves the interval covers the final CSR readback
+  - before_fix_outcome:
+    - `high_3m_q256` failed with `hist_total_hits=0` even though the MTS extended stream delivered 374976 hits into the histogram IP
+  - after_fix_outcome:
+    - `sim_hist_ip_cosim_long_sweep_20260515/high_1m_q256_longdrain/transcript` passed with `hist_interval_cycles=1026384`, `parser_hit_count=124992`, `mts_type1_count=124992`, `hist_ext0_count=124992`, `hist_total_hits=124992`, `hist_dropped_hits=0`
+    - `sim_hist_ip_cosim_long_sweep_20260515/high_1m_q384_longdrain/transcript` passed with `hist_interval_cycles=1026384`, `parser_hit_count=187488`, `mts_type1_count=187488`, `hist_ext0_count=187488`, `hist_total_hits=187488`, `hist_dropped_hits=0`
+  - potential_hazard:
+    - low for the cosim harness; the interval guard now scales with any requested drain length
+  - review decision:
+    - pending / no code-review commit yet
   - review decision:
     - pending / not run
 

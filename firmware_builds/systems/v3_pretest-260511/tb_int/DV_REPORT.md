@@ -24,7 +24,7 @@ This page is the chief-architect dashboard. All per-case evidence lives under [`
 |---|---|
 | DUT_IMPL | `generated_synthesis` |
 | BUILD | `v3_pretest-260511` |
-| TB_MODE | `firefly_nominal_feb_only` |
+| TB_MODE | `histogram-backed behavioral shell + source_mux_frame cosim` |
 | BASIC_IMPLEMENTED | `B065-B069` |
 | TOOLCHAIN | `QuestaOne 2026.1` |
 | FEB_EGRESS_BIND | `legacy upload_pkt_mux` |
@@ -33,10 +33,11 @@ This page is the chief-architect dashboard. All per-case evidence lives under [`
 
 ## Non-Claims
 
-- B065 through B069 and `RC_EMUL` are old dual UVM environment results with DEBUG_LEVEL=2 per-hit scoreboard closure.
-- `SOURCE_MUX_FRAME` is source-mux/frame-parser cosim evidence, not a full FEB board or all-buckets signoff run.
+- B065 through B069 and `RC_EMUL*` are old dual UVM environment results with DEBUG_LEVEL=2 per-hit scoreboard closure.
+- `SOURCE_MUX_FRAME*` is source-mux/frame-parser/MTS/histogram cosim evidence, not a full FEB board or all-buckets signoff run.
 - `BIND_REAL_DUT=1` B067 compiles and instantiates the generated `synthesis/` tree as `u_dut`; the existing behavioral shell taps remain the scoreboard-observed path.
 - Vendor/generated assertions under `u_dut` are disabled in bind mode to keep dormant generated fabric from polluting the UVM scoreboard result.
+- The clean-STP FEB bitstream compile is firmware evidence, not an added UVM coverage claim; slow-corner setup timing remains open.
 - CSR-toggle RC and JTAG-master SC are debug fallback paths only for their dedicated case IDs.
 - RDMA SQE/CQE cosim is not claimed in this FEB-only harness; it belongs to the separate FEB+SWB task.
 - UCDB/code-coverage closure is not claimed in this phase.
@@ -77,11 +78,22 @@ This page is the chief-architect dashboard. All per-case evidence lives under [`
 | [PASS] | `B068_histogram_cross_check` | isolated | bridgefree_phase_a | run_B068 | 1024 | 0.5 |
 | [PASS] | `B069_upload_pkt_mux_one_hit` | isolated | bridgefree_phase_a | run_B069 | 1 | 0.5 |
 | [PASS] | `RC_EMUL` | directed | bridgefree_phase_a | run_RC_EMUL | 16 | n/a |
+| [PASS] | `RC_EMUL_BLOCKED` | directed | bridgefree_phase_a | run_RC_EMUL_BLOCKED | 16 | n/a |
+| [PASS] | `RC_EMUL_FIXED` | directed | bridgefree_phase_a | run_RC_EMUL_FIXED | 16 | n/a |
 | [PASS] | `SOURCE_MUX_FRAME` | cosim | bridgefree_phase_a | run_source_mux_frame_parser_cosim | 5056 | n/a |
+| [PASS] | `SOURCE_MUX_FRAME_nominal_5m` | cosim | bridgefree_phase_a | direct vsim long sweep | 126944 | n/a |
+| [PASS] | `SOURCE_MUX_FRAME_sparse_5m` | cosim | bridgefree_phase_a | direct vsim long sweep | 9760 | n/a |
+| [PASS] | `SOURCE_MUX_FRAME_high_q256_longdrain` | cosim | bridgefree_phase_a | direct vsim long sweep | 124992 | n/a |
+| [PASS] | `SOURCE_MUX_FRAME_high_q384_longdrain` | cosim | bridgefree_phase_a | direct vsim long sweep | 187488 | n/a |
 | [PASS] | `B067_bind_real_dut` | bind-smoke | generated_synthesis | run_B067 BIND_REAL_DUT=1 | 100 | n/a |
 
 ## Index
 
-- `sim_stream_debug_20260515_rerun/*/transcript` - local run transcripts for B065-B069, RC_EMUL, and SOURCE_MUX_FRAME
+- `sim_hist_ip_tbint_regress_20260515/*/transcript` - local run transcripts for B065-B069, RC_EMUL, RC_EMUL_BLOCKED, and RC_EMUL_FIXED
+- `sim_hist_ip_cosim_long_sweep_20260515/*/transcript` - source-mux/frame/MTS/histogram long-sweep transcripts
+- `sim_hist_ip_cosim_exploratory_fail_20260515/*/transcript` - non-signoff exploratory failures used for BUG-008-H root cause
+- `sim_hist_ip_cosim_wave_acc_20260515/SOURCE_MUX_FRAME/source_mux_mts_hist_acc.fst` and `waves/gtkw/source_mux_mts_hist_acc.gtkw` - waveform/GTKWave evidence for hits filling the histogram IP
+- `../signaltap/stream_debug_hist_path.stp` and `../signaltap/stream_debug_hist_path_nodes_top_stp_stream_debug_hist.md` - clean histogram-path SignalTap probe set and node report
+- `../syn/board_projects/fe_scifi_feb_v3/quartus_compile_top_stp_stream_debug_hist_20260515_cleanstp.console.log` - clean-STP FEB firmware compile transcript
 - `sim_stream_debug_bind/B067/transcript` - generated-DUT bind smoke transcript
 - [`DV_COV.md`](DV_COV.md) - coverage summary and non-claims

@@ -27,22 +27,25 @@ BOARD_MUDAQ_PKG    := $(firstword $(wildcard $(SYSTEM_ROOT)/syn/board_projects/*
 EMU_RTL_DIR        := $(REPO_ROOT)/emulator_mutrig/rtl
 FRCV_RTL_DIR       := $(REPO_ROOT)/mutrig_frame_deassembly/rtl
 SOURCE_MUX_RTL     := $(REPO_ROOT)/misc/mutrig_lane_source_mux/rtl/mutrig_lane_source_mux.sv
+MTS_RTL_DIR        := $(REPO_ROOT)/mutrig_timestamp_processor
+HIST_RTL_DIR       := $(REPO_ROOT)/histogram_statistics/rtl
 INTEL_18_SIM_LIB   ?= /data1/intelFPGA/18.1/quartus/eda/sim_lib
 INTEL_VERILOG_LIB  ?= intel_verilog
+INTEL_ALTERA_MF_LIB ?= altera_mf
 UVM_HOME           := $(QUESTA_HOME)/verilog_src/uvm-1.2/src
 QUESTA_UVM_HOME    := $(QUESTA_HOME)/verilog_src/questa_uvm_pkg-1.2/src
 UVM_SRC            := $(UVM_HOME)/uvm_pkg.sv
 UVM_INCDIR         := +incdir+$(UVM_HOME) +incdir+$(QUESTA_UVM_HOME)
 VLOG_OPTS          := -sv -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
 BIND_REAL_DUT      ?= 0
-VSIM_LIB_OPTS      :=
+VSIM_LIB_OPTS      := -L lpm -L $(INTEL_ALTERA_MF_LIB)
 VSIM_DO            := run -all; quit -f
-COMP_UVM_DEPS      := lib
+COMP_UVM_DEPS      := lib comp_tb_int_hist_ip
 ifeq ($(BIND_REAL_DUT),1)
 VLOG_OPTS          += +define+TB_INT_BIND_REAL_DUT
-VSIM_LIB_OPTS      += -L lpm -L $(INTEL_VERILOG_LIB)
+VSIM_LIB_OPTS      += -L $(INTEL_VERILOG_LIB)
 VSIM_DO            := assertion enable -off -r /$(TB_TOP)/u_dut/*; run -all; quit -f
-COMP_UVM_DEPS      += comp_dut
+COMP_UVM_DEPS      := lib comp_dut
 endif
 VSIM_OPTS          := -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK) $(VSIM_LIB_OPTS)
 SOURCE_MUX_FRAME_WORK ?= work_source_mux_frame
@@ -58,6 +61,17 @@ QSYS_LANE_CHAIN_SV_SRC = \
 	$(QSYS_SYNTH_DIR)/submodules/feb_system_v3_data_path_subsystem_avalon_st_adapter_009_channel_adapter_0.sv \
 	$(QSYS_SYNTH_DIR)/submodules/feb_system_v3_data_path_subsystem_avalon_st_adapter_009_timing_adapter_0.sv \
 	$(QSYS_SYNTH_DIR)/submodules/feb_system_v3_data_path_subsystem_avalon_st_adapter_009.v
+
+HIST_VHDL_SRC = \
+	$(HIST_RTL_DIR)/histogram_statistics_v2_pkg.vhd \
+	$(HIST_RTL_DIR)/true_dual_port_ram_single_clock.vhd \
+	$(HIST_RTL_DIR)/alt_dpram/alt_dpram_true.vhd \
+	$(HIST_RTL_DIR)/hit_fifo.vhd \
+	$(HIST_RTL_DIR)/rr_arbiter.vhd \
+	$(HIST_RTL_DIR)/bin_divider.vhd \
+	$(HIST_RTL_DIR)/coalescing_queue.vhd \
+	$(HIST_RTL_DIR)/pingpong_sram.vhd \
+	$(HIST_RTL_DIR)/histogram_statistics_v2.vhd
 
 EMU_COSIM_SV_SRC = \
 	$(EMU_RTL_DIR)/common/frontend_ticket_bus_pkg.sv \
@@ -80,7 +94,7 @@ EMU_COSIM_SV_SRC = \
 	$(QSYS_LANE_CHAIN_SV_SRC) \
 	uvm/v3_pretest-260511/tb_source_mux_frame_parser_cosim.sv
 
-.PHONY: lib intel_lpm intel_verilog_libs comp_board_deps comp_uvm comp_uvm_emul_fixed qsys_filelists comp_dut check_dut_contract comp_source_mux_frame_parser_cosim run_source_mux_frame_parser_cosim smoke run_B065 run_B066 run_B067 run_B068 run_B069 run_b065 run_b066 run_b067 run_b068 run_b069 run_RC_EMUL run_RC_EMUL_BLOCKED run_RC_EMUL_FIXED regress_basic all_buckets_frame static_screen clean
+.PHONY: lib intel_lpm altera_mf_vhdl intel_verilog_libs comp_board_deps comp_tb_int_hist_ip comp_uvm comp_uvm_emul_fixed qsys_filelists comp_dut check_dut_contract comp_source_mux_frame_parser_cosim run_source_mux_frame_parser_cosim smoke run_B065 run_B066 run_B067 run_B068 run_B069 run_b065 run_b066 run_b067 run_b068 run_b069 run_RC_EMUL run_RC_EMUL_BLOCKED run_RC_EMUL_FIXED regress_basic all_buckets_frame static_screen clean
 
 modelsim.ini:
 	cp $(QUESTA_HOME)/modelsim.ini modelsim.ini
@@ -95,6 +109,12 @@ intel_lpm: modelsim.ini
 	$(VMAP) -modelsimini modelsim.ini lpm lpm
 	$(VCOM) -modelsimini modelsim.ini -2008 -work lpm $(INTEL_18_SIM_LIB)/220pack.vhd
 	$(VCOM) -modelsimini modelsim.ini -2008 -work lpm $(INTEL_18_SIM_LIB)/220model.vhd
+
+altera_mf_vhdl: modelsim.ini
+	$(VLIB) $(INTEL_ALTERA_MF_LIB)
+	$(VMAP) -modelsimini modelsim.ini $(INTEL_ALTERA_MF_LIB) $(INTEL_ALTERA_MF_LIB)
+	$(VCOM) -modelsimini modelsim.ini -2008 -work $(INTEL_ALTERA_MF_LIB) $(INTEL_18_SIM_LIB)/altera_mf_components.vhd
+	$(VCOM) -modelsimini modelsim.ini -2008 -work $(INTEL_ALTERA_MF_LIB) $(INTEL_18_SIM_LIB)/altera_mf.vhd
 
 intel_verilog_libs: modelsim.ini
 	$(VLIB) $(INTEL_VERILOG_LIB)
@@ -121,24 +141,31 @@ comp_uvm: $(COMP_UVM_DEPS)
 	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) $(UVM_SRC)
 	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) -f script/tb_int.f
 
+comp_tb_int_hist_ip: lib intel_lpm altera_mf_vhdl
+	$(VCOM) -modelsimini modelsim.ini -2008 -work $(WORK) $(HIST_VHDL_SRC)
+
 qsys_filelists:
 	python3 script/qip_to_filelists.py $(QSYS_QIP) $(QSYS_FILELIST_DIR)
 
-comp_dut: qsys_filelists lib intel_lpm intel_verilog_libs comp_board_deps
+comp_dut: qsys_filelists lib intel_lpm altera_mf_vhdl intel_verilog_libs comp_board_deps
 	$(VCOM) -modelsimini modelsim.ini -2008 -work $(WORK) -f $(QSYS_FILELIST_DIR)/qsys_vhdl.f
 	@if [ -s "$(QSYS_FILELIST_DIR)/qsys_verilog.f" ]; then $(VLOG) -modelsimini modelsim.ini -work $(WORK) -f $(QSYS_FILELIST_DIR)/qsys_verilog.f; fi
 	@if [ -s "$(QSYS_FILELIST_DIR)/qsys_sv.f" ]; then $(VLOG) -modelsimini modelsim.ini -sv -work $(WORK) -f $(QSYS_FILELIST_DIR)/qsys_sv.f; fi
 
-comp_source_mux_frame_parser_cosim: lib
+comp_source_mux_frame_parser_cosim: lib intel_lpm altera_mf_vhdl
 	test -d $(SOURCE_MUX_FRAME_WORK) || $(VLIB) $(SOURCE_MUX_FRAME_WORK)
 	$(VMAP) -modelsimini modelsim.ini $(SOURCE_MUX_FRAME_WORK) $(SOURCE_MUX_FRAME_WORK)
 	$(VCOM) -modelsimini modelsim.ini -2008 -work $(SOURCE_MUX_FRAME_WORK) $(FRCV_RTL_DIR)/crc16_calc.vhd
 	$(VCOM) -modelsimini modelsim.ini -2008 -work $(SOURCE_MUX_FRAME_WORK) $(FRCV_RTL_DIR)/frame_rcv_ip.vhd
+	cp $(MTS_RTL_DIR)/dual_port_rom_init.txt .
+	$(VLOG) -modelsimini modelsim.ini -work $(SOURCE_MUX_FRAME_WORK) $(MTS_RTL_DIR)/dual_port_rom.v
+	$(VCOM) -modelsimini modelsim.ini -2008 -work $(SOURCE_MUX_FRAME_WORK) $(MTS_RTL_DIR)/mts_processor.vhd
+	$(VCOM) -modelsimini modelsim.ini -2008 -work $(SOURCE_MUX_FRAME_WORK) $(HIST_VHDL_SRC)
 	$(VLOG) -modelsimini modelsim.ini -sv -work $(SOURCE_MUX_FRAME_WORK) -timescale 1ps/1ps -mfcu +define+TB_INT_SIM $(EMU_COSIM_SV_SRC)
 
 run_source_mux_frame_parser_cosim: comp_source_mux_frame_parser_cosim
 	mkdir -p $(SIM_ROOT)/SOURCE_MUX_FRAME
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(SOURCE_MUX_FRAME_WORK) $(SOURCE_MUX_FRAME_TOP) +RUN_CYCLES=$(SOURCE_MUX_FRAME_RUN_CYCLES) +Q16_RATE=$(SOURCE_MUX_FRAME_Q16_RATE) -l $(SIM_ROOT)/SOURCE_MUX_FRAME/transcript -do "run -all; quit -f"
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(SOURCE_MUX_FRAME_WORK) -L lpm -L $(INTEL_ALTERA_MF_LIB) $(SOURCE_MUX_FRAME_TOP) +RUN_CYCLES=$(SOURCE_MUX_FRAME_RUN_CYCLES) +Q16_RATE=$(SOURCE_MUX_FRAME_Q16_RATE) -l $(SIM_ROOT)/SOURCE_MUX_FRAME/transcript -do "run -all; quit -f"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/SOURCE_MUX_FRAME/transcript
 
 check_dut_contract:
@@ -203,15 +230,16 @@ run_RC_EMUL_BLOCKED: comp_uvm
 # separate WORK dir (work_tb_int_emul_fixed) with
 # +define+BUG_RC_RUN_EMUL_FIXED so the splitter ignores out_ready and the
 # broadcast propagates. Expects TOTAL_HITS=16 after 16 emulator hits.
-comp_uvm_emul_fixed: lib
+comp_uvm_emul_fixed: lib intel_lpm altera_mf_vhdl
 	test -d work_tb_int_emul_fixed || $(VLIB) work_tb_int_emul_fixed
 	$(VMAP) -modelsimini modelsim.ini work_emul_fixed work_tb_int_emul_fixed
+	$(VCOM) -modelsimini modelsim.ini -2008 -work work_tb_int_emul_fixed $(HIST_VHDL_SRC)
 	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+BUG_RC_RUN_EMUL_FIXED $(UVM_INCDIR) $(UVM_SRC)
 	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+BUG_RC_RUN_EMUL_FIXED $(UVM_INCDIR) -f script/tb_int.f
 
 run_RC_EMUL_FIXED: comp_uvm_emul_fixed
 	mkdir -p $(SIM_ROOT)/RC_EMUL_FIXED
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work work_tb_int_emul_fixed $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_fixed_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_FIXED -l $(SIM_ROOT)/RC_EMUL_FIXED/transcript -do "run -all; quit -f"
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work work_tb_int_emul_fixed -L lpm -L $(INTEL_ALTERA_MF_LIB) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_fixed_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_FIXED -l $(SIM_ROOT)/RC_EMUL_FIXED/transcript -do "run -all; quit -f"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/RC_EMUL_FIXED/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_EMUL_FIXED/transcript; then exit 1; fi
 

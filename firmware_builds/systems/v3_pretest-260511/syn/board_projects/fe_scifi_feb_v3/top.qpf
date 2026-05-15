@@ -1,2 +1,4 @@
 QUARTUS_VERSION = "18.1"
+
+PROJECT_REVISION = "top_stp_stream_debug_hist"
 PROJECT_REVISION = "top"
