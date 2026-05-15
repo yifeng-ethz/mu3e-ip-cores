@@ -40,6 +40,7 @@ Historical formal note:
 | [BUG-004-R](#bug-004-r-decoded-lane-multiplexer-keeps-real-lvds-idle-on-the-emulator-histogram-path) | R | hard stuck error | `common (routine emulator-driven histogram bring-up)` | fixed / board retest pending | live hist zero capture after readyless run-control fix | `pending` | decoded-lane fan-in allowed always-valid real LVDS idle traffic to dominate the emulator source path, hiding directed emulator hits from rbCAM and hist. |
 | [BUG-005-R](#bug-005-r-emulator-csr-address-width-wraps-high-status-and-control-offsets) | R | hard stuck error | `common (routine emulator CSR program / readback)` | fixed / board retest pending | live source-mux capture + manual SC readback | `pending` | emulator CSR instances kept a 4-bit address generic while the parent map exposed larger windows, so high offsets wrapped to low config/UID registers. |
 | [BUG-006-R](#bug-006-r-readyless-mts-run_prepare-rearm-loss-keeps-fresh-live-captures-empty) | R | hard stuck error | `common (fresh histogram readback / CSR counter runs)` | fixed in sim / board retest still failing | live hist zero capture after source-mux and emulator CSR fixes | `pending` | MTS rearm fix is present in the programmed tree, but live source-mux-to-frame-parser closure is still blocked by zero downstream counters and a timing-violating FEB build. |
+| [BUG-007-R](#bug-007-r-qsys-catalog-shadowing-and-optional-streams-block-feb-v3-gui-open) | R | non-datapath-refactor | `common (FEB v3 Platform Designer open/generate)` | fixed / qsys-generate green | FEB v3 Qsys GUI reported 121 errors on 2026-05-15 | this commit | Qsys search-path shadowing selected the wrong MuTRiG frame-deassembly package surface and optional streams stayed enabled in production-disabled configurations. |
 
 ## 2026-05-11
 
@@ -191,6 +192,34 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
     - high until a timing-clean FEB SOF is produced and the source-mux-to-frame-parser live boundary is closed; the loaded 2026-05-15 06:27 FEB build reports setup slack violations (`-1.502 ns` slow 85 C, `-1.385 ns` slow 0 C) on the LVDS datapath clock
   - review decision:
     - pending / board retest run but still failing on hardware
+
+### BUG-007-R: Qsys catalog shadowing and optional streams block FEB v3 GUI open
+- First seen in:
+  - `quartus_systems/feb_system_v3.qsys` Platform Designer GUI open on 2026-05-15, where the GUI still reported 121 errors after the earlier histogram/sideband Qsys Tcl update.
+  - The current top-level target for this task is `quartus_systems/feb_system_v3.qsys`, not the generated copy under `firmware_builds/systems/v3_pretest-260511/syn`.
+- Symptom:
+  - Platform Designer could open the top-level only with a large error/warning cluster around MuTRiG frame-deassembly and unused optional streams.
+  - The generated FEB v3 Qsys path was still sensitive to stale catalog search order and local user-catalog state.
+- Root cause:
+  - The active Qsys search path could include `mutrig_frame_deassembly/script` even though the IP root also has the real component surface, allowing the script directory to shadow the intended package during catalog resolution.
+  - Optional package interfaces stayed enabled when FEB v3 deliberately disabled histogram post forwarding, histogram snooping, MTS debug streams, emulator direct-hit output in byte-stream mode, and the internal frame-deassembly FIFO `almost_empty` status.
+- Fix status:
+  - state:
+    - fixed for GUI open and top-level Qsys generation; remaining warnings are legacy/optional-interface warnings rather than hard errors
+  - mechanism:
+    - update `qsys_search_path.sh` so script helper directories are skipped when the IP root already provides a component surface
+    - make `apply_v3_histogram_stats_contract.sh` reuse the shared active search path, isolated catalog, and a new `update_mutrig_datapath_v3_frame_fifo.tcl` hook
+    - refresh the v3 histogram/MTS/emulator package versions and VERSION_GIT instance parameters to the committed submodule tips
+    - regenerate `quartus_systems/feb_system_v3.qsys`, `mutrig_datapath_system_v3.qsys`, and the three SciFi datapath variants
+  - before_fix_outcome:
+    - GUI open still reported 121 errors in the FEB v3 top-level Qsys session.
+  - after_fix_outcome:
+    - `_JAVA_OPTIONS=-Dsun.java2d.xrender=false -Dsun.java2d.opengl=true qsys-edit quartus_systems/feb_system_v3.qsys` opened on the remote display; `/tmp/qsys_edit_feb_system_v3_top_20260515_114734.log` had no `Error:`, `Warning:`, or exception lines.
+    - `qsys-generate quartus_systems/feb_system_v3.qsys --synthesis=VERILOG` exited with status 0, no `Error:` lines, and 82 remaining warnings in `/tmp/qsys_generate_feb_v3_top_20260515_122310.log`.
+  - potential_hazard:
+    - medium. The GUI/generation blocker is closed, but the live hardware bottleneck remains the source-mux output into frame parser / MuTRiG frame-deassembly boundary once a timing-clean SOF is available.
+  - review decision:
+    - pending / not run
 
 ## Resolved / Redesignated
 

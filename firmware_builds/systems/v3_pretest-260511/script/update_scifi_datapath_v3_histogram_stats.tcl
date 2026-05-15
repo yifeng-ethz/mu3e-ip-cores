@@ -13,6 +13,13 @@ set source_mux_base {0x2880}
 set source_mux_span {0x40}
 set frame_deassembly_csr_base {0x2A80}
 set frame_deassembly_csr_span {0x10}
+set hist_post_ts_sideband_version {26.0.0.0514}
+set hist_pre_ts_trim_version {26.0.0.0514}
+set mutrig_lane_source_mux_version {26.2.1.0503}
+set hist_version_git {968989915}
+set hist_bridge_version_git {968989915}
+set mts_version_git {933047952}
+set emulator_version_git {1131313671}
 array set mutrig_datapath_runctrl_out {
     0 2
     1 3
@@ -28,9 +35,13 @@ proc list_has {items needle} {
     return [expr {[lsearch -exact $items $needle] >= 0}]
 }
 
-proc add_instance_if_missing {name kind} {
+proc add_instance_if_missing {name kind {version ""}} {
     if {![list_has [get_instances] $name]} {
-        add_instance $name $kind
+        if {$version eq ""} {
+            add_instance $name $kind
+        } else {
+            add_instance $name $kind $version
+        }
     }
 }
 
@@ -58,6 +69,71 @@ proc set_connection_base_if_present {path base} {
         set_connection_parameter_value $path baseAddress [format "0x%04x" $base]
         set_connection_parameter_value $path arbitrationPriority 1
         set_connection_parameter_value $path defaultConnection false
+    }
+}
+
+proc set_instance_parameter_if_present {inst param value} {
+    if {![list_has [get_instances] $inst]} {
+        return
+    }
+
+    if {[list_has [get_instance_parameters $inst] $param]} {
+        set_instance_parameter_value $inst $param $value
+    }
+}
+
+proc set_histogram_ip_identity {} {
+    set_instance_parameter_value $::post_ts_inst {VERSION_MAJOR} {26}
+    set_instance_parameter_value $::post_ts_inst {VERSION_MINOR} {0}
+    set_instance_parameter_value $::post_ts_inst {VERSION_PATCH} {0}
+    set_instance_parameter_value $::post_ts_inst {BUILD} {514}
+    set_instance_parameter_value $::post_ts_inst {VERSION_DATE} {20260514}
+
+    set_instance_parameter_value $::pre_trim_inst {VERSION_MAJOR} {26}
+    set_instance_parameter_value $::pre_trim_inst {VERSION_MINOR} {0}
+    set_instance_parameter_value $::pre_trim_inst {VERSION_PATCH} {0}
+    set_instance_parameter_value $::pre_trim_inst {BUILD} {514}
+    set_instance_parameter_value $::pre_trim_inst {VERSION_DATE} {20260514}
+
+    set_instance_parameter_value $::hist_inst {VERSION_MAJOR} {26}
+    set_instance_parameter_value $::hist_inst {VERSION_MINOR} {2}
+    set_instance_parameter_value $::hist_inst {VERSION_PATCH} {4}
+    set_instance_parameter_value $::hist_inst {BUILD} {515}
+    set_instance_parameter_value $::hist_inst {VERSION_DATE} {20260515}
+    set_instance_parameter_if_present $::hist_inst {VERSION_GIT} $::hist_version_git
+
+    set_instance_parameter_value $::bridge_inst {VERSION_MAJOR} {26}
+    set_instance_parameter_value $::bridge_inst {VERSION_MINOR} {0}
+    set_instance_parameter_value $::bridge_inst {VERSION_PATCH} {10}
+    set_instance_parameter_value $::bridge_inst {BUILD} {515}
+    set_instance_parameter_value $::bridge_inst {VERSION_DATE} {20260515}
+    set_instance_parameter_if_present $::bridge_inst {VERSION_GIT} $::hist_bridge_version_git
+}
+
+proc set_mts_ip_identity {} {
+    foreach mts_inst $::mts_insts {
+        if {[list_has [get_instances] $mts_inst]} {
+            set_instance_parameter_value $mts_inst {VERSION_MAJOR} {26}
+            set_instance_parameter_value $mts_inst {VERSION_MINOR} {3}
+            set_instance_parameter_value $mts_inst {VERSION_PATCH} {3}
+            set_instance_parameter_value $mts_inst {BUILD} {515}
+            set_instance_parameter_value $mts_inst {VERSION_DATE} {20260515}
+            set_instance_parameter_if_present $mts_inst {VERSION_GIT} $::mts_version_git
+        }
+    }
+}
+
+proc set_emulator_ip_identity {} {
+    for {set idx 0} {$idx < 8} {incr idx} {
+        set inst "emulator_mutrig_${idx}"
+        if {[list_has [get_instances] $inst]} {
+            set_instance_parameter_value $inst {VERSION_MAJOR} {26}
+            set_instance_parameter_value $inst {VERSION_MINOR} {3}
+            set_instance_parameter_value $inst {VERSION_PATCH} {2}
+            set_instance_parameter_value $inst {BUILD} {515}
+            set_instance_parameter_value $inst {VERSION_DATE} {20260515}
+            set_instance_parameter_if_present $inst {VERSION_GIT} $::emulator_version_git
+        }
     }
 }
 
@@ -92,7 +168,7 @@ proc replace_decoded_lane_muxes_with_source_selectors {} {
         remove_connection_if_present "master_datapath.master_reset/${old_mux}.reset"
         remove_instance_if_present $old_mux
 
-        add_instance_if_missing $new_mux {mutrig_lane_source_mux}
+        add_instance_if_missing $new_mux {mutrig_lane_source_mux} $::mutrig_lane_source_mux_version
         set_instance_parameter_value $new_mux {SELECT_EMULATOR} {1}
         set_instance_parameter_value $new_mux {REAL_ALWAYS_VALID} {1}
         set_instance_parameter_value $new_mux {FIFO_DEPTH} {4}
@@ -141,20 +217,9 @@ proc expose_frame_deassembly_csrs {} {
     }
 }
 
-add_instance_if_missing $post_ts_inst {histogram_post_ts_sideband}
-add_instance_if_missing $pre_trim_inst {histogram_pre_ts_trim}
-
-set_instance_parameter_value $post_ts_inst {VERSION_MAJOR} {26}
-set_instance_parameter_value $post_ts_inst {VERSION_MINOR} {0}
-set_instance_parameter_value $post_ts_inst {VERSION_PATCH} {0}
-set_instance_parameter_value $post_ts_inst {BUILD} {514}
-set_instance_parameter_value $post_ts_inst {VERSION_DATE} {20260514}
-
-set_instance_parameter_value $pre_trim_inst {VERSION_MAJOR} {26}
-set_instance_parameter_value $pre_trim_inst {VERSION_MINOR} {0}
-set_instance_parameter_value $pre_trim_inst {VERSION_PATCH} {0}
-set_instance_parameter_value $pre_trim_inst {BUILD} {514}
-set_instance_parameter_value $pre_trim_inst {VERSION_DATE} {20260514}
+add_instance_if_missing $post_ts_inst {histogram_post_ts_sideband} $hist_post_ts_sideband_version
+add_instance_if_missing $pre_trim_inst {histogram_pre_ts_trim} $hist_pre_ts_trim_version
+set_histogram_ip_identity
 
 remove_connection_if_present {hist_post_cdc_0.out/histogram_ingress_bridge_0.post_in}
 add_connection_if_missing {lvds_rx_28nm_0.outclock} "${post_ts_inst}.clock"
@@ -171,6 +236,7 @@ add_connection_if_missing "${pre_trim_inst}.out" {hit_stack_subsystem_1.hit_type
 set_instance_parameter_value $hist_inst {ENABLE_PACKET} {false}
 set_instance_parameter_value $hist_inst {ENABLE_PINGPONG} {true}
 set_instance_parameter_value $hist_inst {SNOOP_EN} {false}
+set_instance_parameter_if_present $hist_inst {N_DEBUG_INTERFACE} {0}
 
 # The ingress bridge now drives {ts[47:0], payload[38:0]} into the
 # histogram. Positive stream-delay mode (CONTROL.mode=1) subtracts the
@@ -184,33 +250,15 @@ set_instance_parameter_value $hist_inst {LOCK_KEY_RANGES} {true}
 set_instance_parameter_value $hist_inst {SAR_KEY_WIDTH} {32}
 set_instance_parameter_value $hist_inst {SAR_TICK_WIDTH} {32}
 
-set_instance_parameter_value $hist_inst {VERSION_MAJOR} {26}
-set_instance_parameter_value $hist_inst {VERSION_MINOR} {2}
-set_instance_parameter_value $hist_inst {VERSION_PATCH} {3}
-set_instance_parameter_value $hist_inst {BUILD} {514}
-set_instance_parameter_value $hist_inst {VERSION_DATE} {20260514}
-
-set_instance_parameter_value $bridge_inst {VERSION_MAJOR} {26}
-set_instance_parameter_value $bridge_inst {VERSION_MINOR} {0}
-set_instance_parameter_value $bridge_inst {VERSION_PATCH} {9}
-set_instance_parameter_value $bridge_inst {BUILD} {515}
-set_instance_parameter_value $bridge_inst {VERSION_DATE} {20260515}
 set_instance_parameter_value $bridge_inst {ENABLE_POST_FORWARD} {0}
 set_instance_parameter_value $bridge_inst {FILTER_POST_HIT_WORDS} {1}
 
-foreach mts_inst $mts_insts {
-    if {[list_has [get_instances] $mts_inst]} {
-        set_instance_parameter_value $mts_inst {VERSION_MAJOR} {26}
-        set_instance_parameter_value $mts_inst {VERSION_MINOR} {3}
-        set_instance_parameter_value $mts_inst {VERSION_PATCH} {2}
-        set_instance_parameter_value $mts_inst {BUILD} {515}
-        set_instance_parameter_value $mts_inst {VERSION_DATE} {20260515}
-    }
-}
+set_mts_ip_identity
 
 # The current emulator_mutrig CSR span is 0x100 bytes. Older V3 Qsys XML
 # placed the eight emulator CSR windows every 0x40 bytes, which lets Qsys
 # validate older catalogs but fails with the current component metadata.
+set_emulator_ip_identity
 widen_emulator_csr_apertures
 refresh_emulator_csr_address_map
 replace_decoded_lane_muxes_with_source_selectors

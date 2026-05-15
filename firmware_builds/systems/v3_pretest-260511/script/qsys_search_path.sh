@@ -58,11 +58,21 @@ qsys_append_search_path() {
     QSYS_SEARCH_PATH_COUNT=$((QSYS_SEARCH_PATH_COUNT + 1))
 }
 
+qsys_ip_root_has_component() {
+    local ip_dir="$1"
+
+    [ -d "${ip_dir}" ] || return 1
+    [ -e "${ip_dir}/components.ipx" ] && return 0
+    find "${ip_dir}" -maxdepth 1 \( -name '*_hw.tcl' -o -name '*.qsys' \) | grep -q .
+}
+
 qsys_append_ip_helpers() {
     local ip_dir="$1"
 
     qsys_append_search_path "${ip_dir}"
-    qsys_append_search_path "${ip_dir}/script"
+    if ! qsys_ip_root_has_component "${ip_dir}"; then
+        qsys_append_search_path "${ip_dir}/script"
+    fi
     qsys_append_search_path "${ip_dir}/legacy"
     qsys_append_search_path "${ip_dir}/reference"
 
@@ -108,7 +118,9 @@ qsys_collect_active_search_paths() {
         esac
 
         qsys_append_ip_helpers "${ip_dir}"
-        qsys_append_search_path "${hw_dir}"
+        if [ "${hw_dir}" != "${ip_dir}/script" ] || ! qsys_ip_root_has_component "${ip_dir}"; then
+            qsys_append_search_path "${hw_dir}"
+        fi
     done < <(
         find "${root}" \
             -path "${root}/.git" -prune -o \
