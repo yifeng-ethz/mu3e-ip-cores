@@ -89,6 +89,19 @@ package tb_int_mu3e_frame_format_pkg;
         };
     endfunction
 
+    function automatic bit [47:0] mu3e_frame_start_ts(
+        input bit [31:0] header_ts_high_word,
+        input bit [31:0] header_ts_low_word,
+        input bit [7:0]  first_subheader_ts
+    );
+        return {
+            header_ts_high_word,
+            header_ts_low_word[31:28],
+            first_subheader_ts,
+            4'h0
+        };
+    endfunction
+
     class mu3e_frame_checker extends uvm_object;
         `uvm_object_utils(mu3e_frame_checker)
 
@@ -125,7 +138,9 @@ package tb_int_mu3e_frame_format_pkg;
         bit [31:0]   header_ts_low_word;
         bit [7:0]    current_subheader_ts;
         bit [47:0]   last_packet_ts;
+        bit [47:0]   last_frame_start_ts;
         bit          last_packet_ts_valid;
+        bit          last_frame_start_ts_valid;
 
         function new(string name = "mu3e_frame_checker");
             super.new(name);
@@ -178,6 +193,8 @@ package tb_int_mu3e_frame_format_pkg;
             last_frame_valid = 1'b0;
             last_frame_page_base = '0;
             last_frame_packet_count = '0;
+            last_frame_start_ts = '0;
+            last_frame_start_ts_valid = 1'b0;
         endfunction
 
         function void init_sample(output mu3e_frame_sample_t sample);
@@ -266,12 +283,16 @@ package tb_int_mu3e_frame_format_pkg;
             bit [15:0] expected_packet_count;
             bit [7:0] expected_page_base;
             bit [7:0] current_page_base;
+            bit [47:0] current_frame_start_ts;
 
             check_open_subheader(sample);
             expected_frame_words = 5 + declared_subheaders + declared_hits + 1;
             expected_packet_count = last_frame_packet_count + 16'd1;
             expected_page_base = last_frame_page_base + (expected_subheaders & 8'hff);
             current_page_base = header_page_base[7:0];
+            current_frame_start_ts = mu3e_frame_start_ts(header_ts_high_word,
+                                                         header_ts_low_word,
+                                                         current_page_base);
             if (frame_accepted_words != expected_frame_words) begin
                 flag_error($sformatf("broken packet length accepted_words=%0d expected_words=%0d header_words=5 declared_subheaders=%0d declared_hits=%0d trailer_words=1",
                                      frame_accepted_words,
@@ -322,6 +343,13 @@ package tb_int_mu3e_frame_format_pkg;
                                      last_frame_page_base),
                            sample);
             end
+            if (strict_cross_frame && last_frame_start_ts_valid
+                && (current_frame_start_ts < last_frame_start_ts)) begin
+                flag_error($sformatf("frame header timestamp decreased got=0x%012h prev=0x%012h",
+                                     current_frame_start_ts,
+                                     last_frame_start_ts),
+                           sample);
+            end
             sample.frame_accepted_words = frame_accepted_words;
             sample.expected_frame_words = expected_frame_words;
             sample.subheader_declared_hit_sum = subheader_declared_hit_sum;
@@ -334,6 +362,8 @@ package tb_int_mu3e_frame_format_pkg;
             last_frame_valid = 1'b1;
             last_frame_packet_count = current_packet_count;
             last_frame_page_base = current_page_base;
+            last_frame_start_ts = current_frame_start_ts;
+            last_frame_start_ts_valid = 1'b1;
         endfunction
 
         function void sample_beat(

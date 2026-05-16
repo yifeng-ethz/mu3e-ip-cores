@@ -99,6 +99,32 @@ packet_ts = {
 
 Within one frame, reconstructed hit timestamps must not decrease.
 
+For SciFi/Tile hit words the offline rate-study decoder also interprets the
+spec fields used by the 256-channel histogram namespace:
+
+```text
+data[27:22] = ASIC / chip id
+data[21:16] = local channel id
+global_channel = ASIC * 32 + local_channel
+```
+
+The FEB rate debug closure uses one randomly selected local channel per ASIC.
+For exact periodic offline injection at the 125 MHz timestamp clock, the
+required inter-event intervals are:
+
+| Per-channel rate | Expected timestamp interval |
+| --- | ---: |
+| 10 kHz | 12,500 ticks |
+| 100 kHz | 1,250 ticks |
+| 500 kHz | 250 ticks |
+| 1 MHz | 125 ticks |
+
+The offline checker decodes each hit timestamp from the raw Mu3e frame words
+and fails if any active channel has a decoded inter-event interval different
+from the injected interval. A longer interval is treated as evidence for a lost
+or nonconsecutive frame unless a higher-level drop policy explicitly explains
+the gap.
+
 ### Enforced Checker Gates
 
 The SystemVerilog `mu3e_frame_checker` and the offline STP decoder enforce the
@@ -118,6 +144,12 @@ same packet vocabulary:
   16 bits.
 - Consecutive frames on the same stream must advance the first-subheader page
   base by 128 modulo 256.
+- Consecutive frames on the same stream must not move the header-derived
+  frame-start timestamp backward. The checked value is reconstructed as
+  `{header_timestamp_high_word, header_timestamp_low_word[31:28],
+  first_subheader_timestamp, 4'b0}`. Exact 2048-tick frame-window cadence is
+  enforced by the subheader page-base rule above; exact per-channel injection
+  interval is enforced by the offline timestamp-rate study.
 
 The FEB integration monitor can additionally require a minimum number of
 completed upload frames and hits with:

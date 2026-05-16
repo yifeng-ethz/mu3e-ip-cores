@@ -99,6 +99,9 @@ RC_EMUL_REALISTIC_LONG_FRAME_PERIOD_CYCLES ?= 2048
 RC_EMUL_REALISTIC_LONG_WAVE_VCD ?= $(SIM_ROOT)/RC_EMUL_REALISTIC_LONG_WAVE/feb_rc_emul_realistic_long_packet_contract.vcd
 RC_EMUL_REALISTIC_LONG_WAVE_FST ?= $(SIM_ROOT)/RC_EMUL_REALISTIC_LONG_WAVE/feb_rc_emul_realistic_long_packet_contract.fst
 RC_EMUL_REALISTIC_LONG_GTKW ?= waves/gtkw/feb_rc_emul_realistic_long_packet_contract.gtkw
+OFFLINE_RATE_STUDY_OUT ?= $(SYSTEM_ROOT)/reports/offline_channel_rate_timestamp_latest
+OFFLINE_RATE_STUDY_RATES ?= 10kHz 100kHz 500kHz 1MHz
+OFFLINE_RATE_STUDY_SEED ?= 20260516
 UPLOAD_MUX_CONTRACT_WORK ?= work_upload_mux_contract
 UPLOAD_MUX_CONTRACT_TOP ?= tb_upload_pkt_mux_contract
 UPLOAD_MUX_CONTRACT_TB ?= uvm/common/upload_pkt_mux_contract/tb_upload_pkt_mux_contract.sv
@@ -389,6 +392,9 @@ run_RC_EMUL_REALISTIC_LONG_WAVE: comp_uvm
 	} > $(RC_EMUL_REALISTIC_LONG_GTKW)
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/RC_EMUL_REALISTIC_LONG_WAVE/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_EMUL_REALISTIC_LONG_WAVE/transcript; then exit 1; fi
+
+run_OFFLINE_CHANNEL_RATE_STUDY:
+	python3 $(SYSTEM_ROOT)/script/offline_channel_rate_timestamp_study.py --rates $(OFFLINE_RATE_STUDY_RATES) --seed $(OFFLINE_RATE_STUDY_SEED) --output-dir $(OFFLINE_RATE_STUDY_OUT)
 
 run_UPLOAD_MUX_CONTRACT: modelsim.ini
 	mkdir -p $(dir $(UPLOAD_MUX_CONTRACT_TRANSCRIPT))

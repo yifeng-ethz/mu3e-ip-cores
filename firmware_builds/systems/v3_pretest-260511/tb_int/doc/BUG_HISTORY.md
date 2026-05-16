@@ -407,6 +407,8 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
     - the live STP decode now exits nonzero by design and writes `firmware_builds/systems/v3_pretest-260511/reports/feb_stp_frame_after_assembly_20260516_1930/feb_frame_after_assembly_topvalid.length_contract.decode_summary.json`
     - that negative STP artifact reports both early format errors (`subheader_sequence`, `subframe_declared_hit_count`) and final packet-length errors (`broken_packet_length`, `frame_declared_hit_count`, `subheader_declared_hit_sum`) on the captured frame
     - `make run_RC_EMUL_REALISTIC_LONG_WAVE SIM_ROOT=sim_feb_long_cross_20260516 QSYS_DUT_VARIANT=synthesis` passes a 1.346804 ms run with four frames per upload bank, `packet_count=0..3`, page base `0x00,0x80,0x00,0x80`, `accepted_words=150 expected_words=150` on every frame, and `UVM_ERROR=0`
+    - follow-up closure adds a header-derived frame-start timestamp monotonicity gate: `{header_ts_hi, header_ts_lo[31:28], first_subheader_ts, 4'b0}` must not move backward across accepted frames
+    - `make run_OFFLINE_CHANNEL_RATE_STUDY` generates 10 kHz, 100 kHz, 500 kHz, and 1 MHz one-random-channel-per-ASIC frame streams, decodes 48-bit hit timestamps from raw words, and fails on nonexact per-channel inter-event intervals or long gaps
   - potential_hazard:
     - low for checker coverage; the remaining hardware root cause is still open under BUG-011-H and needs an upstream frame-assembly input capture
   - review decision:
