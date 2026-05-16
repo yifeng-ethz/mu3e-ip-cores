@@ -11,6 +11,11 @@ create_clock -period "100.003 MHz" [get_ports PCIE_REFCLK_p]
 derive_pll_clocks -create_base_clocks
 derive_clock_uncertainty
 
-# SignalTap acquisition registers are debug-only observation sinks and are not
-# part of functional datapath requirements.
-set_false_path -to [get_registers -nowarn {*sld_signaltap:*|acq_*_reg[*] *auto_signaltap*|acq_*_reg[*]}]
+# SignalTap acquisition registers are debug-only observation fabric and are not
+# part of functional datapath requirements. Cut both directions so wider frame
+# probes do not pull the SWB closure into the SLD capture network.
+set signaltap_regs [get_registers -nowarn {*sld_signaltap* *auto_signaltap* *|acq_*_reg[*]}]
+if { [get_collection_size $signaltap_regs] > 0 } {
+    set_false_path -to $signaltap_regs
+    set_false_path -from $signaltap_regs
+}

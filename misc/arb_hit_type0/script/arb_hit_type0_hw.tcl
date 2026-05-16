@@ -2,9 +2,9 @@ package require -exact qsys 16.1
 
 set VERSION_MAJOR_DEFAULT_CONST 26
 set VERSION_MINOR_DEFAULT_CONST 6
-set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         512
-set VERSION_DATE_DEFAULT_CONST  20260512
+set VERSION_PATCH_DEFAULT_CONST 5
+set BUILD_DEFAULT_CONST         518
+set VERSION_DATE_DEFAULT_CONST  20260516
 set VERSION_GIT_DEFAULT_CONST   0x00000000
 set IP_UID_DEFAULT_CONST        0x41485430 ;# ASCII "AHT0"
 set INSTANCE_ID_DEFAULT_CONST   0
@@ -18,7 +18,7 @@ set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
 set_module_property NAME                         arb_hit_type0
 set_module_property DISPLAY_NAME                 "Arbiter hit_type0 (real / emu / mix RR)"
 set_module_property VERSION                      $VERSION_STRING_DEFAULT_CONST
-set_module_property DESCRIPTION                  "Per-lane arbiter on the post-deassembly hit_type0 boundary with 16-deep ingress FIFOs per source. Modes: REAL (real-only), EMU (emulator-only), MIX_RR (beat-level round-robin, multi-channel packetized egress). MIX_RR requires multi-channel packet support in every downstream consumer (hit processor / rbCAM); see Identity tab warning."
+set_module_property DESCRIPTION                  "Per-lane arbiter on the post-deassembly hit_type0 boundary with configurable 2- or 16-deep ingress FIFOs per source. Modes: REAL (real-only), EMU (emulator-only), MIX_RR (beat-level round-robin, multi-channel packetized egress). MIX_RR requires multi-channel packet support in every downstream consumer (hit processor / rbCAM); see Identity tab warning."
 set_module_property GROUP                        "Mu3e Emulators/Modules"
 
 # Elaboration callback emits a Platform Designer warning when MIX_RR is the
@@ -30,11 +30,19 @@ set_module_property VALIDATION_CALLBACK          validate
 proc validate {} {
     set mode [get_parameter_value MODE_DEFAULT]
     set debug_level [get_parameter_value DEBUG_LEVEL]
+    set fifo_depth [get_parameter_value FIFO_DEPTH]
+    set counter_profile [get_parameter_value COUNTER_PROFILE]
     if {$mode == 2} {
         send_message warning "MODE_DEFAULT = MIX_RR. Merge-packet FSM collapses two source frames into one merged Avalon-ST packet (single-packet boundary, channel varies per beat). Per-beat channel demux at the downstream consumer is the audit gate before MIX_RR is promoted into a production datapath. See misc/arb_hit_type0/doc/RTL_PLAN.md sections 1 and 2.2."
     }
     if {$debug_level < 0 || $debug_level > 2} {
         send_message error "DEBUG_LEVEL must be 0 (off), 1 (FIFO levels), or 2 (FIFO levels plus per-hit metadata)."
+    }
+    if {$fifo_depth != 2 && $fifo_depth != 16} {
+        send_message error "FIFO_DEPTH must be 2 or 16."
+    }
+    if {$counter_profile != 0 && $counter_profile != 1} {
+        send_message error "COUNTER_PROFILE must be 0 (full) or 1 (trim3)."
     }
 }
 
@@ -67,6 +75,8 @@ add_fileset_file arb_hit_type0_arbiter.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_typ
 add_fileset_file arb_hit_type0_watchdog.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_watchdog.sv
 add_fileset_file arb_hit_type0_runctl.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_runctl.sv
 add_fileset_file arb_hit_type0_csr.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr.sv
+add_fileset_file arb_hit_type0_csr_trim3.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr_trim3.sv
+add_fileset_file arb_hit_type0_csr_profiled.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr_profiled.sv
 add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0.sv TOP_LEVEL_FILE
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
@@ -78,6 +88,8 @@ add_fileset_file arb_hit_type0_arbiter.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_typ
 add_fileset_file arb_hit_type0_watchdog.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_watchdog.sv
 add_fileset_file arb_hit_type0_runctl.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_runctl.sv
 add_fileset_file arb_hit_type0_csr.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr.sv
+add_fileset_file arb_hit_type0_csr_trim3.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr_trim3.sv
+add_fileset_file arb_hit_type0_csr_profiled.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0_csr_profiled.sv
 add_fileset_file arb_hit_type0.sv SYSTEM_VERILOG PATH ../rtl/arb_hit_type0.sv TOP_LEVEL_FILE
 
 # ---------- Parameters ----------
@@ -124,9 +136,17 @@ add_display_item $TAB_IDENTITY INSTANCE_ID parameter
 
 add_parameter FIFO_DEPTH NATURAL 16
 set_parameter_property FIFO_DEPTH DISPLAY_NAME "Per-source ingress FIFO depth"
-set_parameter_property FIFO_DEPTH ALLOWED_RANGES {16}
+set_parameter_property FIFO_DEPTH ALLOWED_RANGES {2 16}
 set_parameter_property FIFO_DEPTH HDL_PARAMETER true
+set_parameter_property FIFO_DEPTH DESCRIPTION "Per-source ingress FIFO depth. 16 preserves the full standalone DV/debug contract. 2 trims ALM/register usage for FEB integration where only small run-start skew absorption is needed."
 add_display_item "Datapath" FIFO_DEPTH parameter
+
+add_parameter COUNTER_PROFILE NATURAL 0
+set_parameter_property COUNTER_PROFILE DISPLAY_NAME "Counter profile"
+set_parameter_property COUNTER_PROFILE ALLOWED_RANGES 0:1
+set_parameter_property COUNTER_PROFILE HDL_PARAMETER true
+set_parameter_property COUNTER_PROFILE DESCRIPTION "0 = full diagnostic CSR bank with source-specific counters, drops, frame counters, error counters, and syndromes. 1 = trim3 bank with only INGRESS_REAL_HITS, INGRESS_EMU_HITS, and total EGRESS_HITS as 64-bit counters; syndrome and error-counter CSRs read zero."
+add_display_item "Datapath" COUNTER_PROFILE parameter
 
 add_parameter IP_UID STD_LOGIC_VECTOR $IP_UID_DEFAULT_CONST
 set_parameter_property IP_UID DISPLAY_NAME "UID"

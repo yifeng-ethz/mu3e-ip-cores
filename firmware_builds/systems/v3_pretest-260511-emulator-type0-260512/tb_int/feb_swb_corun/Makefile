@@ -95,7 +95,7 @@ CORUN_SV_SOURCES := \
 
 CORUN_COMPILE_STAMP := $(CORUN_BUILD_DIR)/.compile-stamp.$(OPQ_SOURCE_MODE).$(OPQ_N_SHD).$(OPQ_N_HIT).$(OPQ_LANE_FIFO_DEPTH).$(OPQ_TICKET_FIFO_DEPTH).$(OPQ_HANDLE_FIFO_DEPTH).$(OPQ_PAGE_RAM_DEPTH).$(OPQ_DEBUG_LEVEL).$(OPQ_DEBUG_BYPASS_SUBFRAME_HIT_LIMIT)
 
-.PHONY: compile compile_musip_driver smoke compile_swb_corun run_swb_corun run_swb_corun_scan_point run_swb_corun_poisson run_swb_corun_header_sync clean
+.PHONY: compile compile_musip_driver smoke compile_swb_corun run_swb_corun run_swb_corun_scan_point run_swb_corun_link2 run_swb_corun_poisson run_swb_corun_header_sync clean
 
 compile: clean
 	$(VLIB) $(WORK)
@@ -180,6 +180,13 @@ run_swb_corun_scan_point: compile_swb_corun
 	    echo "FEB_SWB_CORUN_SCAN_TRACE_FAIL see $(RUN_LOG)"; \
 	    false; \
 	fi
+
+run_swb_corun_link2: compile_swb_corun
+	mkdir -p $(CURDIR)/report_link2
+	-cd $(CORUN_BUILD_DIR) && set -o pipefail; \
+	QSIM_INI=$(QUESTA_INI) $(QUESTA_RUNNER) $(VSIM) $(VSIM_FLAGS) $(OPQ_VSIM_LIB_FLAGS) feb_swb_corun_plain_tb -do "$(RUN_DO)" +FEB_SWB_TRACE_DIR=$(CURDIR)/report_link2 +FEB_SWB_RUN_WINDOW_8NS=4096 +FEB_SWB_HIT_PERIOD_8NS=512 +FEB_SWB_ASIC_COUNT=1 +FEB_SWB_SOURCE_MODE=periodic +FEB_SWB_POISSON_SEED=$(POISSON_SEED) +FEB_SWB_ALLOW_DROPS=1 +FEB_SWB_SCAN_ONLY=0 +FEB_SWB_DRAIN_SWB_CYCLES=100000 +FEB_SWB_FLUSH_FRAMES=$(FLUSH_FRAMES) +FEB_SWB_HEADER_SYNC_PHASE_8NS=$(HEADER_SYNC_PHASE_8NS) +FEB_SWB_HEADER_SYNC_BURST_COUNT=$(HEADER_SYNC_BURST_COUNT) +FEB_SWB_HEADER_SYNC_BURST_SPACING_8NS=$(HEADER_SYNC_BURST_SPACING_8NS) +FEB_SWB_HEADER_SYNC_ASIC_STAGGER_8NS=$(HEADER_SYNC_ASIC_STAGGER_8NS) +FEB_SWB_ACTIVE_MASK=4 +FEB_SWB_FORCE_SOURCE_LANE=2 | tee "$(CURDIR)/report_link2/run_swb_corun.log"
+	@$(PYTHON) $(TRACE_ANALYZER) --trace-dir "$(CURDIR)/report_link2" --expected-hit-period-8ns 512 --expected-asic-count 1 --source-mode periodic --opq-log "$(CURDIR)/report_link2/run_swb_corun.log" --assume-opq-lossless > "$(CURDIR)/report_link2/trace_analyzer.log" 2>&1 || echo "FEB_SWB_LINK2_TRACE_ANALYZER_EXPECTED_MISMATCH see $(CURDIR)/report_link2/trace_analyzer.log"
+	@$(PYTHON) $(CURDIR)/scripts/check_feb_swb_link2_steering.py --run-log "$(CURDIR)/report_link2/run_swb_corun.log" --summary "$(CURDIR)/report_link2/feb_swb_trace_debug_summary.txt" --lane 2 > "$(CURDIR)/report_link2/link2_steering_check.log"; rc=$$?; cat "$(CURDIR)/report_link2/link2_steering_check.log"; exit $$rc
 
 run_swb_corun_poisson:
 	$(MAKE) run_swb_corun REPORT_DIR=$(CURDIR)/report_poisson RUN_LOG=$(CURDIR)/report_poisson/run_swb_corun.log SOURCE_MODE=poisson

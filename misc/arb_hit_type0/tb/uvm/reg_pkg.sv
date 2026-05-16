@@ -33,9 +33,9 @@ package arb_hit_type0_reg_pkg;
   localparam bit [31:0] ARB_UID_CONST                         = 32'h4148_5430;
   // VERSION_WORD layout (per arb_hit_type0_csr.sv VERSION_WORD_CONST):
   //   [31:24] MAJOR, [23:16] MINOR, [15:12] PATCH, [11:0] BUILD.
-  // 26.6.0.512 -> 0x1A06_0200 (Phase 4.5 lane-admit asymmetry fix).
-  localparam bit [31:0] ARB_VERSION_WORD_CONST                = 32'h1A06_0200;
-  localparam bit [31:0] ARB_DATE_WORD_CONST                   = 32'd20260512;
+  // 26.6.5.518 -> 0x1A06_5206 (COUNTER_PROFILE trim3 option).
+  localparam bit [31:0] ARB_VERSION_WORD_CONST                = 32'h1A06_5206;
+  localparam bit [31:0] ARB_DATE_WORD_CONST                   = 32'd20260516;
   localparam bit [31:0] ARB_GIT_WORD_CONST                    = 32'h0000_0000;
   localparam bit [31:0] ARB_INSTANCE_ID_WORD_CONST            = 32'h0000_0000;
 

@@ -548,7 +548,7 @@
    kind="feb_frame_assembly"
    version="26.0.328"
    enabled="1">
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="INTERLEAVING_FACTOR" value="4" />
   <parameter name="N_SHD" value="128" />
  </module>
@@ -557,7 +557,7 @@
    kind="ring_buffer_cam"
    version="26.0.330"
    enabled="1">
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="ENCODER_LEAF_WIDTH" value="16" />
   <parameter name="ENCODER_PIPE_STAGES" value="4" />
   <parameter name="INTERLEAVING_FACTOR" value="4" />
@@ -572,7 +572,7 @@
    kind="ring_buffer_cam"
    version="26.0.330"
    enabled="1">
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="ENCODER_LEAF_WIDTH" value="16" />
   <parameter name="ENCODER_PIPE_STAGES" value="4" />
   <parameter name="INTERLEAVING_FACTOR" value="4" />
@@ -587,7 +587,7 @@
    kind="ring_buffer_cam"
    version="26.0.330"
    enabled="1">
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="ENCODER_LEAF_WIDTH" value="16" />
   <parameter name="ENCODER_PIPE_STAGES" value="4" />
   <parameter name="INTERLEAVING_FACTOR" value="4" />
@@ -602,7 +602,7 @@
    kind="ring_buffer_cam"
    version="26.0.330"
    enabled="1">
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="ENCODER_LEAF_WIDTH" value="16" />
   <parameter name="ENCODER_PIPE_STAGES" value="4" />
   <parameter name="INTERLEAVING_FACTOR" value="4" />

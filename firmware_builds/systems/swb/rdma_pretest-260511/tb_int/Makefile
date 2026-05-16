@@ -16,6 +16,9 @@ WORK ?= work_tb_int
 TB_TOP := tb_int_top
 SEED ?= 1
 SIM_ROOT ?= sim
+STP_REPLAY_MEM ?=
+STP_REPLAY_LANE ?= 0
+STP_REPLAY_SIDE ?= ingress
 UVM_HOME := $(QUESTA_HOME)/verilog_src/uvm-1.2/src
 QUESTA_UVM_HOME := $(QUESTA_HOME)/verilog_src/questa_uvm_pkg-1.2/src
 UVM_SRC := $(UVM_HOME)/uvm_pkg.sv
@@ -29,7 +32,7 @@ ERROR_CASES := X001 X002 X003 X004 X005 X033 X065 X069
 PROF_CASES := P001 P002 P003 P065 P066 P068
 SELECTED_CASES := $(BASIC_CASES) $(EDGE_CASES) $(ERROR_CASES) $(PROF_CASES)
 
-.PHONY: docs check modelsim_ini lib comp_uvm comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE
+.PHONY: docs check modelsim_ini lib comp_uvm comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE run_OPQ_FRAME_STP_REPLAY
 
 docs:
 	python3 script/generate_swb_tb_int_assets.py
@@ -156,6 +159,13 @@ run_OPQ_FRAME_TS_SMOKE: comp_uvm
 	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_opq_frame_ts_smoke_test +ARB_SEED=$(SEED) +TB_INT_SIM_DIR=$(SIM_ROOT)/OPQ_FRAME_TS_SMOKE -l $(SIM_ROOT)/OPQ_FRAME_TS_SMOKE/transcript -do "run -all; quit -f"
 	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/OPQ_FRAME_TS_SMOKE/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/OPQ_FRAME_TS_SMOKE/transcript; then exit 1; fi
+
+run_OPQ_FRAME_STP_REPLAY: comp_uvm
+	@test -n "$(STP_REPLAY_MEM)" || { echo "STP_REPLAY_MEM=<decoded.mem> is required"; exit 2; }
+	mkdir -p $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_opq_frame_replay_test +ARB_SEED=$(SEED) +TB_INT_STP_REPLAY_MEM=$(STP_REPLAY_MEM) +TB_INT_STP_REPLAY_LANE=$(STP_REPLAY_LANE) +TB_INT_STP_REPLAY_SIDE=$(STP_REPLAY_SIDE) +TB_INT_REPLAY_EXPECT_INGRESS_HITS +TB_INT_SIM_DIR=$(SIM_ROOT)/OPQ_FRAME_STP_REPLAY -l $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript
+	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript; then exit 1; fi
 
 structural_preflight: docs
 	python3 script/run_basic_bucket_sweep.py

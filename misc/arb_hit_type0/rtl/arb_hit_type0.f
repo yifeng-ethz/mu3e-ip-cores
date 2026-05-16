@@ -3,4 +3,6 @@ arb_hit_type0_arbiter.sv
 arb_hit_type0_watchdog.sv
 arb_hit_type0_runctl.sv
 arb_hit_type0_csr.sv
+arb_hit_type0_csr_trim3.sv
+arb_hit_type0_csr_profiled.sv
 arb_hit_type0.sv

@@ -1,0 +1,23 @@
+set_global_assignment -name FAMILY "Arria V"
+set_global_assignment -name DEVICE 5AGXBA7D4F31C5
+set_global_assignment -name TOP_LEVEL_ENTITY arb_hit_type0_standalone_trim3_fifo2_top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files_trim3_fifo2
+set_global_assignment -name SDC_FILE arb_hit_type0_standalone.sdc
+set_global_assignment -name SAFE_STATE_MACHINE ON
+set_global_assignment -name OPTIMIZATION_MODE Balanced
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name ALLOW_REGISTER_DUPLICATION ON
+set_global_assignment -name ROUTER_LCELL_INSERTION_AND_LOGIC_DUPLICATION Auto
+set_global_assignment -name ROUTER_REGISTER_DUPLICATION Auto
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0_fifo.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0_arbiter.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0_watchdog.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0_runctl.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0_csr.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0_csr_trim3.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0_csr_profiled.sv
+set_global_assignment -name SYSTEMVERILOG_FILE ../../rtl/arb_hit_type0.sv
+set_global_assignment -name SYSTEMVERILOG_FILE arb_hit_type0_standalone_top.sv
+
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"

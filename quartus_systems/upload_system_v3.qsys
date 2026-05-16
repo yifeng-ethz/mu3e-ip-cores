@@ -228,7 +228,7 @@
    kind="runctl_mgmt_host"
    version="26.2.6.425"
    enabled="1">
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="EXT_HARD_RESET_PULSE_CYCLES" value="16384" />
   <parameter name="RUN_END_ACK_SYMBOL" value="11111101" />
   <parameter name="RUN_START_ACK_SYMBOL" value="11111110" />

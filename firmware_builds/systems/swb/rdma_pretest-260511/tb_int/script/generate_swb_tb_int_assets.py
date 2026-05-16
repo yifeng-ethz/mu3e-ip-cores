@@ -508,6 +508,8 @@ def emit_selected_tests_pkg() -> str:
     lines.append("    import tb_int_run_sequence_directed_wedge_fixed_test_pkg::*;")
     lines.append("    // OPQ frame timestamp monitor smoke")
     lines.append("    import tb_int_opq_frame_ts_smoke_test_pkg::*;")
+    lines.append("    // OPQ frame replay from SignalTap-decoded memory")
+    lines.append("    import tb_int_opq_frame_replay_test_pkg::*;")
     lines.extend([
         "",
         "endpackage",
@@ -527,6 +529,7 @@ def emit_filelist() -> str:
         "+incdir+uvm/common/rdma_cqe_egress_monitor",
         "+incdir+uvm/common/opq_lane_fill_monitor",
         "+incdir+uvm/common/opq_frame_ts_monitor",
+        "+incdir+uvm/common/mu3e_frame_format",
         "+incdir+uvm/common/pcie_dma_egress_monitor",
         "+incdir+uvm/common/host_memory_model",
         "+incdir+uvm/swb_rdma_pretest",
@@ -539,6 +542,7 @@ def emit_filelist() -> str:
         "uvm/swb_rdma_pretest/rdma_cqe_egress_if.sv",
         "uvm/swb_rdma_pretest/opq_lane_if.sv",
         "uvm/swb_rdma_pretest/pcie_dma_egress_if.sv",
+        "uvm/common/mu3e_frame_format/mu3e_frame_format_pkg.sv",
         "uvm/common/swb_stage_record.sv",
         "uvm/common/host_memory_model/host_memory_pkg.sv",
         "uvm/common/host_memory_model/host_axi_responder.sv",
@@ -573,6 +577,8 @@ def emit_filelist() -> str:
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_fixed_test.sv")
     # OPQ frame timestamp monitor smoke test.
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_opq_frame_ts_smoke_test.sv")
+    # SignalTap decoded OPQ replay test.
+    lines.append("uvm/swb_rdma_pretest/tests/tb_int_opq_frame_replay_test.sv")
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv")
     lines.extend([
         "uvm/swb_rdma_pretest/tb_int_smoke_test.sv",

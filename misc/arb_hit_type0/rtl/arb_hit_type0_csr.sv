@@ -1,19 +1,20 @@
 // arb_hit_type0_csr.sv
 // Avalon-MM CSR slave, counters, sticky status, and syndrome capture.
 //
-// Version : 26.2.0
-// Date    : 20260504
-// Change  : Add per-source native frame counters to the CSR map.
+// Version : 26.6.3
+// Date    : 20260516
+// Change  : Register W1P clear pulses before they fan out to the wide
+//           counter/sticky banks, and keep address decode off those banks.
 
 module arb_hit_type0_csr #(
     parameter integer MODE_DEFAULT     = 0,
     parameter integer WATCHDOG_DEFAULT = 500,
     parameter integer IP_UID           = 32'h41485430,
     parameter integer VERSION_MAJOR    = 26,
-    parameter integer VERSION_MINOR    = 2,
-    parameter integer VERSION_PATCH    = 0,
-    parameter integer BUILD            = 504,
-    parameter integer VERSION_DATE     = 20260504,
+    parameter integer VERSION_MINOR    = 6,
+    parameter integer VERSION_PATCH    = 3,
+    parameter integer BUILD            = 518,
+    parameter integer VERSION_DATE     = 20260516,
     parameter integer VERSION_GIT      = 32'h0000_0000,
     parameter integer INSTANCE_ID      = 0
 ) (
@@ -140,6 +141,13 @@ module arb_hit_type0_csr #(
     logic [31:0] meta_readdata;
     logic [31:0] status_readdata;
     logic [31:0] csr_read_data;
+    logic        csr_write_valid_q;
+    logic [4:0]  csr_write_address_q;
+    logic [31:0] csr_write_data_q;
+    logic        csr_clear_counters_q;
+    logic        csr_clear_sticky_q;
+    logic        csr_clear_error_counters_q;
+    logic        csr_clear_syndromes_q;
 
     function automatic logic [1:0] mode_default_value();
         if (MODE_DEFAULT == 1) begin
@@ -329,11 +337,11 @@ module arb_hit_type0_csr #(
         logic emu_drop_mid_event;
         logic [1:0] drop_mid_event_count;
 
-        control_write        = avs_csr_write & (avs_csr_address == 5'h02);
-        clear_counters       = control_write & avs_csr_writedata[2];
-        clear_sticky         = control_write & avs_csr_writedata[3];
-        clear_error_counters = control_write & avs_csr_writedata[4];
-        clear_syndromes      = control_write & avs_csr_writedata[5];
+        control_write        = csr_write_valid_q & (csr_write_address_q == 5'h02);
+        clear_counters       = csr_clear_counters_q;
+        clear_sticky         = csr_clear_sticky_q;
+        clear_error_counters = csr_clear_error_counters_q;
+        clear_syndromes      = csr_clear_syndromes_q;
         // R007: drop-mid-packet event must fire when the FIFO is mid-packet
         // on the ingress side, regardless of whether the arbiter has started
         // draining that source on egress. Use *_ingress_open, which tracks
@@ -386,62 +394,65 @@ module arb_hit_type0_csr #(
                 csr_next.egress_emu_frames_h_snap     = 32'd0;
             end
 
-            if (avs_csr_write) begin
-                case (avs_csr_address)
+            if (clear_counters) begin
+                csr_next.ingress_real_hits        = 64'd0;
+                csr_next.ingress_emu_hits         = 64'd0;
+                csr_next.ingress_real_frames      = 64'd0;
+                csr_next.ingress_emu_frames       = 64'd0;
+                csr_next.drops_real               = 64'd0;
+                csr_next.drops_emu                = 64'd0;
+                csr_next.egress_real_hits         = 64'd0;
+                csr_next.egress_emu_hits          = 64'd0;
+                csr_next.egress_real_frames       = 64'd0;
+                csr_next.egress_emu_frames        = 64'd0;
+                csr_next.ingress_real_hits_h_snap = 32'd0;
+                csr_next.ingress_emu_hits_h_snap  = 32'd0;
+                csr_next.ingress_real_frames_h_snap = 32'd0;
+                csr_next.ingress_emu_frames_h_snap  = 32'd0;
+                csr_next.drops_real_h_snap        = 32'd0;
+                csr_next.drops_emu_h_snap         = 32'd0;
+                csr_next.egress_real_hits_h_snap  = 32'd0;
+                csr_next.egress_emu_hits_h_snap   = 32'd0;
+                csr_next.egress_real_frames_h_snap = 32'd0;
+                csr_next.egress_emu_frames_h_snap  = 32'd0;
+            end
+
+            if (clear_sticky) begin
+                csr_next.partial_packet_drop_sticky = 1'b0;
+                csr_next.mode_reserved_seen         = 1'b0;
+                csr_next.protocol_violation_sticky  = 1'b0;
+                csr_next.drop_mid_packet_sticky     = 1'b0;
+                csr_next.watchdog_synthesized_real  = 1'b0;
+                csr_next.watchdog_synthesized_emu   = 1'b0;
+            end
+
+            if (clear_error_counters) begin
+                csr_next.error_count_protocol        = 32'd0;
+                csr_next.error_count_drop_mid_packet = 32'd0;
+            end
+
+            if (clear_syndromes) begin
+                csr_next.syndrome_protocol        = 32'd0;
+                csr_next.syndrome_drop_mid_packet = 32'd0;
+            end
+
+            if (control_write) begin
+                csr_next.mode_pending = sanitize_mode(csr_write_data_q[1:0]);
+
+                if (csr_write_data_q[1:0] == MODE_RESERVED_CONST) begin
+                    csr_next.mode_reserved_seen = 1'b1;
+                end
+            end
+
+            if (csr_write_valid_q) begin
+                case (csr_write_address_q)
                     5'h01: begin
-                        csr_next.meta_select = avs_csr_writedata[1:0];
+                        csr_next.meta_select = csr_write_data_q[1:0];
                     end
                     5'h02: begin
-                        if (clear_counters) begin
-                            csr_next.ingress_real_hits        = 64'd0;
-                            csr_next.ingress_emu_hits         = 64'd0;
-                            csr_next.ingress_real_frames      = 64'd0;
-                            csr_next.ingress_emu_frames       = 64'd0;
-                            csr_next.drops_real               = 64'd0;
-                            csr_next.drops_emu                = 64'd0;
-                            csr_next.egress_real_hits         = 64'd0;
-                            csr_next.egress_emu_hits          = 64'd0;
-                            csr_next.egress_real_frames       = 64'd0;
-                            csr_next.egress_emu_frames        = 64'd0;
-                            csr_next.ingress_real_hits_h_snap = 32'd0;
-                            csr_next.ingress_emu_hits_h_snap  = 32'd0;
-                            csr_next.ingress_real_frames_h_snap = 32'd0;
-                            csr_next.ingress_emu_frames_h_snap  = 32'd0;
-                            csr_next.drops_real_h_snap        = 32'd0;
-                            csr_next.drops_emu_h_snap         = 32'd0;
-                            csr_next.egress_real_hits_h_snap  = 32'd0;
-                            csr_next.egress_emu_hits_h_snap   = 32'd0;
-                            csr_next.egress_real_frames_h_snap = 32'd0;
-                            csr_next.egress_emu_frames_h_snap  = 32'd0;
-                        end
-
-                        if (clear_sticky) begin
-                            csr_next.partial_packet_drop_sticky = 1'b0;
-                            csr_next.mode_reserved_seen         = 1'b0;
-                            csr_next.protocol_violation_sticky  = 1'b0;
-                            csr_next.drop_mid_packet_sticky     = 1'b0;
-                            csr_next.watchdog_synthesized_real  = 1'b0;
-                            csr_next.watchdog_synthesized_emu   = 1'b0;
-                        end
-
-                        if (clear_error_counters) begin
-                            csr_next.error_count_protocol        = 32'd0;
-                            csr_next.error_count_drop_mid_packet = 32'd0;
-                        end
-
-                        if (clear_syndromes) begin
-                            csr_next.syndrome_protocol        = 32'd0;
-                            csr_next.syndrome_drop_mid_packet = 32'd0;
-                        end
-
-                        csr_next.mode_pending = sanitize_mode(avs_csr_writedata[1:0]);
-
-                        if (avs_csr_writedata[1:0] == MODE_RESERVED_CONST) begin
-                            csr_next.mode_reserved_seen = 1'b1;
-                        end
                     end
                     5'h04: begin
-                        csr_next.watchdog_cycles = avs_csr_writedata[15:0];
+                        csr_next.watchdog_cycles = csr_write_data_q[15:0];
                     end
                     default: begin
                     end
@@ -591,9 +602,27 @@ module arb_hit_type0_csr #(
 
     always_ff @(posedge clk or posedge rst) begin : csr_state
         if (rst) begin
-            csr <= hard_reset_state();
+            csr                         <= hard_reset_state();
+            csr_write_valid_q           <= 1'b0;
+            csr_write_address_q         <= 5'd0;
+            csr_write_data_q            <= 32'd0;
+            csr_clear_counters_q        <= 1'b0;
+            csr_clear_sticky_q          <= 1'b0;
+            csr_clear_error_counters_q  <= 1'b0;
+            csr_clear_syndromes_q       <= 1'b0;
         end else begin
-            csr <= csr_next;
+            csr                         <= csr_next;
+            csr_write_valid_q           <= avs_csr_write & ~stream_clear;
+            csr_write_address_q         <= avs_csr_address;
+            csr_write_data_q            <= avs_csr_writedata;
+            csr_clear_counters_q        <= avs_csr_write & ~stream_clear &
+                                           (avs_csr_address == 5'h02) & avs_csr_writedata[2];
+            csr_clear_sticky_q          <= avs_csr_write & ~stream_clear &
+                                           (avs_csr_address == 5'h02) & avs_csr_writedata[3];
+            csr_clear_error_counters_q  <= avs_csr_write & ~stream_clear &
+                                           (avs_csr_address == 5'h02) & avs_csr_writedata[4];
+            csr_clear_syndromes_q       <= avs_csr_write & ~stream_clear &
+                                           (avs_csr_address == 5'h02) & avs_csr_writedata[5];
         end
     end
 

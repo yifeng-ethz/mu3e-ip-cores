@@ -41,14 +41,6 @@
          type = "int";
       }
    }
-   element lvdserr_count_subsystem
-   {
-      datum _sortIndex
-      {
-         value = "1";
-         type = "int";
-      }
-   }
    element mch_count_subsystem
    {
       datum _sortIndex
@@ -292,20 +284,6 @@ proc compose {} {
   <parameter name="source_width" value="2" />
  </module>
  <module
-   name="lvdserr_count_subsystem"
-   kind="avst_errcnt_system"
-   version="1.0"
-   enabled="0">
-  <parameter name="AUTO_COUNTER_CLK_CLOCK_DOMAIN" value="1" />
-  <parameter name="AUTO_COUNTER_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_COUNTER_CLK_RESET_DOMAIN" value="1" />
-  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
-  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
-  <parameter name="AUTO_GENERATION_ID" value="0" />
-  <parameter name="AUTO_UNIQUE_ID">mutrig_datapath_system_lvdserr_count_subsystem</parameter>
- </module>
- <module
    name="mutrig_frame_deassembly_0"
    kind="mutrig_frame_deassembly"
    version="26.2.0.511"
@@ -352,11 +330,6 @@ proc compose {} {
  <connection
    kind="clock"
    version="18.1"
-   start="system_clock_reset_interface.clk"
-   end="lvdserr_count_subsystem.counter_clk" />
- <connection
-   kind="clock"
-   version="18.1"
    start="debug_clock.out_clk"
    end="dbg_counter_fab_sclr.clock_sink" />
  <connection
@@ -380,11 +353,6 @@ proc compose {} {
    version="18.1"
    start="system_clock_reset_interface.clk_reset"
    end="backpressure_fifo.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="system_clock_reset_interface.clk_reset"
-   end="lvdserr_count_subsystem.counter_rst" />
  <connection
    kind="reset"
    version="18.1"

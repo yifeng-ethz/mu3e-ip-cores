@@ -1,10 +1,10 @@
 package require -exact qsys 16.1
 
 set VERSION_MAJOR_DEFAULT_CONST 26
-set VERSION_MINOR_DEFAULT_CONST 0
+set VERSION_MINOR_DEFAULT_CONST 1
 set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         512
-set VERSION_DATE_DEFAULT_CONST  20260512
+set BUILD_DEFAULT_CONST         516
+set VERSION_DATE_DEFAULT_CONST  20260515
 
 set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
     $VERSION_MAJOR_DEFAULT_CONST \
@@ -15,7 +15,7 @@ set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
 set_module_property NAME                         hit_type0_readyless_mux4
 set_module_property DISPLAY_NAME                 "Hit Type0 Readyless Mux4"
 set_module_property VERSION                      $VERSION_STRING_DEFAULT_CONST
-set_module_property DESCRIPTION                  "Readyless four-input hit_type0 Avalon-ST mux with per-input FIFOs"
+set_module_property DESCRIPTION                  "Readyless four-input hit_type0 Avalon-ST mux with per-input FIFOs and optional DEBUG_LEVEL=2 metadata sidecars"
 set_module_property GROUP                        "Mu3e Data Plane/Modules"
 set_module_property AUTHOR                       "OpenAI Codex"
 set_module_property INTERNAL                     false
@@ -26,12 +26,26 @@ set_module_property REPORT_TO_TALKBACK           false
 set_module_property ALLOW_GREYBOX_GENERATION     false
 set_module_property REPORT_HIERARCHY             false
 set_module_property VALIDATION_CALLBACK          validate
+set_module_property ELABORATION_CALLBACK         elaborate
 
 proc validate {} {
     set depth [get_parameter_value FIFO_DEPTH]
     if {$depth < 2} {
         send_message error "FIFO_DEPTH must be at least 2"
     }
+    set debug_level [get_parameter_value DEBUG_LEVEL]
+    if {$debug_level < 0 || $debug_level > 2} {
+        send_message error "DEBUG_LEVEL must be 0, 1, or 2"
+    }
+}
+
+proc elaborate {} {
+    set debug_level [get_parameter_value DEBUG_LEVEL]
+    set metadata_enabled [expr {$debug_level >= 2}]
+    for {set i 0} {$i < 4} {incr i} {
+        set_interface_property in${i}_metadata ENABLED $metadata_enabled
+    }
+    set_interface_property selected_metadata ENABLED $metadata_enabled
 }
 
 proc add_html_text {group_name item_name html_text} {
@@ -57,6 +71,11 @@ set_parameter_property FIFO_DEPTH DISPLAY_NAME "Input FIFO Depth"
 set_parameter_property FIFO_DEPTH HDL_PARAMETER true
 set_parameter_property FIFO_DEPTH ALLOWED_RANGES {2 4 8 16 32 64}
 
+add_parameter DEBUG_LEVEL NATURAL 0
+set_parameter_property DEBUG_LEVEL DISPLAY_NAME "Debug Level"
+set_parameter_property DEBUG_LEVEL HDL_PARAMETER true
+set_parameter_property DEBUG_LEVEL ALLOWED_RANGES {0 1 2}
+
 set TAB_CONFIGURATION "Configuration"
 set TAB_IDENTITY      "Identity"
 set TAB_INTERFACES    "Interfaces"
@@ -64,8 +83,10 @@ set TAB_INTERFACES    "Interfaces"
 add_display_item "" $TAB_CONFIGURATION GROUP tab
 add_display_item $TAB_CONFIGURATION "Overview" GROUP
 add_display_item $TAB_CONFIGURATION "Sizing" GROUP
+add_display_item $TAB_CONFIGURATION "Debug" GROUP
 add_html_text "Overview" overview_html {<html><b>Function</b><br/>Combines four readyless 45-bit hit_type0 streams into one readyless 45-bit hit_type0 stream. Each input has a small FIFO. The output channel preserves the input channel in bits [3:0] and places the selected local lane index in bits [5:4], matching the prior Platform Designer multiplexer contract.</html>}
 add_display_item "Sizing" FIFO_DEPTH parameter
+add_display_item "Debug" DEBUG_LEVEL parameter
 
 add_display_item "" $TAB_IDENTITY GROUP tab
 add_display_item $TAB_IDENTITY "Delivered Profile" GROUP
@@ -73,7 +94,7 @@ add_html_text "Delivered Profile" profile_html [format {<html><b>Catalog revisio
 
 add_display_item "" $TAB_INTERFACES GROUP tab
 add_display_item $TAB_INTERFACES "Streams" GROUP
-add_html_text "Streams" streams_html {<html><b>in0..in3</b><br/>Readyless Avalon-ST hit_type0 sinks: data, valid, error, channel, SOP/EOP, and endofrun sideband. No input ready is exported.<br/><br/><b>out</b><br/>Readyless Avalon-ST hit_type0 source. No output ready is consumed.</html>}
+add_html_text "Streams" streams_html {<html><b>in0..in3</b><br/>Readyless Avalon-ST hit_type0 sinks: data, valid, error, channel, SOP/EOP, and endofrun sideband. No input ready is exported.<br/><br/><b>in0_metadata..in3_metadata</b><br/>DEBUG_LEVEL=2 only: 64-bit per-hit sidecar conduits. Metadata valid must be aligned with the matching hit valid on the same input.<br/><br/><b>out</b><br/>Readyless Avalon-ST hit_type0 source. No output ready is consumed.<br/><br/><b>selected_metadata</b><br/>DEBUG_LEVEL=2 only: 64-bit sidecar source aligned with the selected output hit.</html>}
 
 add_interface clk clock end
 set_interface_property clk ENABLED true
@@ -107,6 +128,13 @@ proc add_hit_sink {name index} {
 
 for {set i 0} {$i < 4} {incr i} {
     add_hit_sink in${i} $i
+
+    add_interface in${i}_metadata conduit end
+    set_interface_property in${i}_metadata associatedClock clk
+    set_interface_property in${i}_metadata associatedReset rst
+    set_interface_property in${i}_metadata ENABLED false
+    add_interface_port in${i}_metadata "asi_in${i}_metadata"       metadata Input 64
+    add_interface_port in${i}_metadata "asi_in${i}_metadata_valid" valid    Input 1
 }
 
 add_interface out avalon_streaming start
@@ -126,3 +154,10 @@ add_interface_port out aso_out_channel       channel       Output 6
 add_interface_port out aso_out_startofpacket startofpacket Output 1
 add_interface_port out aso_out_endofpacket   endofpacket   Output 1
 add_interface_port out aso_out_endofrun      endofrun      Output 1
+
+add_interface selected_metadata conduit start
+set_interface_property selected_metadata associatedClock clk
+set_interface_property selected_metadata associatedReset rst
+set_interface_property selected_metadata ENABLED false
+add_interface_port selected_metadata coe_selected_metadata       metadata Output 64
+add_interface_port selected_metadata coe_selected_metadata_valid valid    Output 1

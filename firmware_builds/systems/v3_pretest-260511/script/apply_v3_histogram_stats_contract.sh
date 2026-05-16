@@ -2,9 +2,12 @@
 set -eu
 export LC_ALL=C
 
-ROOT="${MU3E_IP_CORES_ROOT:-/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+ROOT="${MU3E_IP_CORES_ROOT:-${DEFAULT_ROOT}}"
 TCL="${ROOT}/firmware_builds/systems/v3_pretest-260511/script/update_scifi_datapath_v3_histogram_stats.tcl"
 MUTRIG_TCL="${ROOT}/firmware_builds/systems/v3_pretest-260511/script/update_mutrig_datapath_v3_frame_fifo.tcl"
+HIT_STACK_TCL="${ROOT}/firmware_builds/systems/v3_pretest-260511/script/update_hit_stack_synthesis_debug0.tcl"
 PARENT_TCL="${ROOT}/firmware_builds/systems/v3_pretest-260511/script/refresh_v3_histogram_parent_binding.tcl"
 export MU3E_IP_CORES_ROOT="${ROOT}"
 
@@ -27,6 +30,11 @@ qsys-script \
     --system-file="${ROOT}/quartus_systems/mutrig_datapath_system_v3.qsys" \
     --search-path="${SEARCH_PATHS},\$" \
     --script="${MUTRIG_TCL}"
+
+qsys-script \
+    --system-file="${ROOT}/quartus_systems/hit_stack_system.qsys" \
+    --search-path="${SEARCH_PATHS},\$" \
+    --script="${HIT_STACK_TCL}"
 
 for qsys in \
     "${ROOT}/quartus_systems/scifi_datapath_system_v3.qsys" \

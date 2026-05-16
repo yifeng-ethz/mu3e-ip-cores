@@ -3,7 +3,7 @@
 module feb_swb_corun_plain_tb;
   import feb_swb_corun_pkg::*;
 
-  localparam int ACTIVE_LANES = 2;
+  localparam int ACTIVE_LANES = 4;
   localparam int CHANNELS_PER_ASIC = 32;
   localparam int DEFAULT_ASIC_COUNT = 8;
   localparam int MAX_ASIC_COUNT = 8;
@@ -63,6 +63,7 @@ module feb_swb_corun_plain_tb;
   logic [3:0]   swb_endofpacket;
   logic [3:0]   swb_debug_valid;
   logic [255:0] swb_debug_meta;
+  logic [3:0]   adapter_enable_mask;
   logic [3:0]   swb_enable_mask;
   logic [ACTIVE_LANES-1:0] fifo_overflow;
   logic [ACTIVE_LANES-1:0] fifo_underflow;
@@ -103,6 +104,7 @@ module feb_swb_corun_plain_tb;
   int unsigned active_asic_count;
   int unsigned source_mode;
   int unsigned poisson_seed;
+  int unsigned forced_source_lane;
   int unsigned header_sync_phase_8ns;
   int unsigned header_sync_burst_count;
   int unsigned header_sync_burst_spacing_8ns;
@@ -160,7 +162,7 @@ module feb_swb_corun_plain_tb;
     .swb_endofpacket(swb_endofpacket),
     .swb_debug_valid(swb_debug_valid),
     .swb_debug_meta(swb_debug_meta),
-    .swb_enable_mask(swb_enable_mask),
+    .swb_enable_mask(adapter_enable_mask),
     .fifo_overflow(fifo_overflow),
     .fifo_underflow(fifo_underflow)
   );
@@ -275,6 +277,9 @@ module feb_swb_corun_plain_tb;
 
   function automatic int unsigned source_lane_for_asic(input int unsigned asic);
     begin
+      if (forced_source_lane < ACTIVE_LANES) begin
+        return forced_source_lane;
+      end
       if (ACTIVE_LANES < 2 || active_asic_count != MAX_ASIC_COUNT) begin
         return 0;
       end
@@ -873,6 +878,7 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "drain_swb_cycles=%0d", drain_swb_cycles);
       $fdisplay(summary_fd, "flush_frames=%0d", flush_frames);
       $fdisplay(summary_fd, "source_mode=%s", source_mode_name(source_mode));
+      $fdisplay(summary_fd, "forced_source_lane=%0d", forced_source_lane);
       $fdisplay(summary_fd, "poisson_seed=%0d", poisson_seed);
       $fdisplay(summary_fd, "header_sync_phase_8ns=%0d", header_sync_phase_8ns);
       $fdisplay(summary_fd, "header_sync_burst_count=%0d", header_sync_burst_count);
@@ -904,7 +910,12 @@ module feb_swb_corun_plain_tb;
       $fdisplay(summary_fd, "fifo_overflow=0x%0h", fifo_overflow);
       $fdisplay(summary_fd, "fifo_underflow=0x%0h", fifo_underflow);
 
-      assert(swb_enable_mask == 4'h3) else $fatal(1, "SWB lane mask mismatch");
+      assert((swb_enable_mask & 4'hf) != 4'h0) else $fatal(1, "SWB lane mask is zero");
+      if (forced_source_lane < ACTIVE_LANES) begin
+        assert(swb_enable_mask[forced_source_lane])
+          else $fatal(1, "forced source lane %0d is not enabled by SWB lane mask 0x%0h",
+                      forced_source_lane, swb_enable_mask);
+      end
       assert(fifo_overflow == '0) else $fatal(1, "adapter FIFO overflow");
       assert(fifo_underflow == '0) else $fatal(1, "adapter FIFO underflow");
       assert(expected_hits.size() == expected_hits_runtime)
@@ -959,6 +970,8 @@ module feb_swb_corun_plain_tb;
     active_asic_count = DEFAULT_ASIC_COUNT;
     source_mode = SOURCE_MODE_PERIODIC;
     poisson_seed = DEFAULT_POISSON_SEED;
+    forced_source_lane = ACTIVE_LANES;
+    swb_enable_mask = 4'h3;
     header_sync_phase_8ns = DEFAULT_HEADER_SYNC_PHASE_8NS;
     header_sync_burst_count = DEFAULT_HEADER_SYNC_BURST_COUNT;
     header_sync_burst_spacing_8ns = DEFAULT_HEADER_SYNC_BURST_SPACING_8NS;
@@ -1006,6 +1019,16 @@ module feb_swb_corun_plain_tb;
     if (!$value$plusargs("FEB_SWB_POISSON_SEED=%d", poisson_seed)) begin
       poisson_seed = DEFAULT_POISSON_SEED;
     end
+    begin
+      int unsigned active_mask_arg;
+      active_mask_arg = swb_enable_mask;
+      if ($value$plusargs("FEB_SWB_ACTIVE_MASK=%h", active_mask_arg)) begin
+        swb_enable_mask = active_mask_arg[3:0];
+      end
+    end
+    if (!$value$plusargs("FEB_SWB_FORCE_SOURCE_LANE=%d", forced_source_lane)) begin
+      forced_source_lane = ACTIVE_LANES;
+    end
     if (!$value$plusargs("FEB_SWB_HEADER_SYNC_PHASE_8NS=%d", header_sync_phase_8ns)) begin
       header_sync_phase_8ns = DEFAULT_HEADER_SYNC_PHASE_8NS;
     end
@@ -1025,6 +1048,10 @@ module feb_swb_corun_plain_tb;
       $fatal(1,
              "invalid FEB_SWB runtime config run_window_8ns=%0d hit_period_8ns=%0d asic_count=%0d",
              run_window_8ns, hit_period_8ns, active_asic_count);
+    end
+    if (forced_source_lane > ACTIVE_LANES) begin
+      $fatal(1, "invalid FEB_SWB_FORCE_SOURCE_LANE=%0d ACTIVE_LANES=%0d",
+             forced_source_lane, ACTIVE_LANES);
     end
     if (source_mode == SOURCE_MODE_HEADER_SYNC &&
         (header_sync_phase_8ns >= VIRTUAL_MUTRIG_SHORT_FRAME_8NS ||
@@ -1052,6 +1079,8 @@ module feb_swb_corun_plain_tb;
     fork
       drive_lane(0);
       drive_lane(1);
+      drive_lane(2);
+      drive_lane(3);
     join
 
     for (int cyc = 0; cyc < drain_swb_cycles; cyc++) begin

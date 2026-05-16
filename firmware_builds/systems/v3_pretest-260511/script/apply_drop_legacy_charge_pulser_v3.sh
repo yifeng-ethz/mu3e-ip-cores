@@ -2,7 +2,9 @@
 set -eu
 export LC_ALL=C
 
-ROOT="${MU3E_IP_CORES_ROOT:-/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+ROOT="${MU3E_IP_CORES_ROOT:-${DEFAULT_ROOT}}"
 SYSTEM_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511"
 TCL="${SYSTEM_DIR}/script/drop_legacy_charge_pulser_v3.tcl"
 STAMP="${QSYS_DROP_STAMP:-$(date +%Y%m%d_%H%M%S)}"

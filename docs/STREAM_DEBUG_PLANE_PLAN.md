@@ -1,39 +1,93 @@
-# Streaming Debug Plane - Datapath Re-architecture Plan
+# Streaming Debug Plane - FEB v3 Type-0 Contract
 
-Status: Phase A implemented in the 2026-05-15 snapshot worktree; tb_int/cosim refreshed; clean-STP FEB compile completed; Phase B deferred
+Status: Qsys/cosim Type-0 arbitration implemented on the 2026-05-15 snapshot worktree; corrected FEB host-run waveform generated with split emulator commit/egress/rbCAM checkpoints; STP compile emits a SOF but STA setup timing is not closed; on-board capture still pending
 Owner: yifeng wang
 Target repo: `mu3e-ip-cores`
-Scope: `feb_system_v3`, `mutrig_timestamp_processor`, `histogram_statistics_v2`
+Scope: `feb_system_v3`, `emulator_mutrig`, `arb_hit_type0`, `mutrig_timestamp_processor`, `histogram_statistics_v2`
 
 ---
 
 ## 1. Motivation
 
-The pre-change FEB v3 image carried the 48-bit true-hit timestamp inside the
-main Type-1 stream and also routed timestamp observability through the
-`histogram_ingress_bridge`. That made the main MTS to splitter to rbCAM path
-87 bits wide even though the functional Type-1 contract is 39 bits, and it
-made histogram delay-mode source selection depend on a separate bridge IP.
+FEB v3 needs one debug/control contract for real MuTRiG hits and emulator
+hits before they enter MTS and the histogram path. The previous decoded-lane
+source-mux/byte-stream approach selected too early in the pipeline and could
+mask the real issue: the emulator must feed the same Type-0 hit atom boundary
+as the real frame-deassembly output.
 
-The new contract moves observability to a readyless streaming-debug plane:
+The active contract is therefore:
 
-- the main MTS Type-1 output is restored to the original 39-bit payload;
-- `mts_processor` exposes two readyless 87-bit debug sources,
-  `hit_type1_extended_0` and `hit_type1_extended_1`;
-- `histogram_statistics_v2` owns source selection internally through
-  `CONTROL.in_port[3:2]`;
-- `histogram_ingress_bridge` is removed from the FEB v3 topology and from the
-  `histogram_statistics` IP repository.
-
-The normal histogram fill inputs remain available on `histogram_statistics_v2`.
-For FEB v3 streaming-debug capture, the selected source is now the histogram
-IP itself, not an external bridge.
+- `emulator_mutrig` is Type-0 only in Qsys. `BYTE_STREAM_ENABLE` is permanently
+  disabled by package validation and by the FEB v3 Tcl generators.
+- Real MuTRiG traffic stays on the LVDS decoded-lane path until
+  `mutrig_frame_deassembly_<n>.hit_type0_out`.
+- `arb_hit_type0_<n>` arbitrates between real post-deassembly Type-0 atoms and
+  emulator Type-0 atoms per lane.
+- `hit_type0_readyless_mux4` combines the selected lane outputs into the two
+  MTS banks.
+- DEBUG_LEVEL=2 sidecar metadata is enabled only in simulation so the old
+  dual-UVM scoreboard can track per-hit lineage through the mux and MTS.
+- Generated synthesis Qsys is forced to DEBUG_LEVEL=0 and checked top-down;
+  STP probes the functional Type-0/MTS/histogram datapath and counters.
+- `histogram_statistics_v2` owns histogram source selection internally through
+  `CONTROL.in_port[3:2]`; the external histogram ingress bridge is retired.
 
 ---
 
-## 2. Implemented Topology
+## 2. Active Topology
 
-### 2.1 Main Datapath
+### 2.1 Type-0 Arbitration Point
+
+```text
+LVDS decoded lane N
+  -> mutrig_datapath_subsystem_N
+  -> mutrig_frame_deassembly_N.hit_type0_out
+  -> arb_hit_type0_N.real_in
+
+emulator_mutrig_N.hit_type0
+  -> arb_hit_type0_N.emu_in
+
+arb_hit_type0_N.selected_out
+  -> hit_type0_readyless_mux4 bank input
+  -> mts_preprocessor_<bank>.hit_type0_in
+
+arb_hit_type0_N.selected_hit_debug      (simulation DEBUG_LEVEL=2 only)
+  -> hit_type0_readyless_mux4 metadata input
+  -> mts_preprocessor_<bank>.hit_type0_sidecar
+```
+
+Lanes 0-3 feed `mts_preprocessor_0`; lanes 4-7 feed
+`mts_preprocessor_1`. The old `mutrig_lane_source_mux_<n>` instances are not
+part of the active topology.
+
+The generated FEB synthesis graph omits the debug sidecar connections above
+and must pass `check_feb_synthesis_debug_levels.py` with `allowed_debug=[0]`.
+
+### 2.2 Emulator Contract
+
+`emulator_mutrig` still carries legacy `tx8b1k` HDL ports, but the Platform
+Designer package now rejects active byte-stream use:
+
+- `_hw.tcl` validation reports an error if `BYTE_STREAM_ENABLE=true`;
+- elaboration forces `BYTE_STREAM_ENABLE=false`;
+- generated FEB v3 Qsys wrappers leave `tx8b1k` unconnected;
+- the cosim scoreboard checks `emu_tx_count=0` while Type-0 hits continue to
+  fill the histogram path.
+
+### 2.3 Run-Control And Reset Contract
+
+`arb_hit_type0` mode selection is runtime-programmable:
+
+- default reset mode in FEB v3 is `EMU`;
+- `RUN_PREP` must not reset the selected mode;
+- mode can switch during `RUNNING`;
+- only RESET/hard reset returns mode and sticky configuration to defaults.
+
+The FEB v3 Tcl adds `run_control_type0_arb_splitter` so the arbs receive the
+same run-control stream without stealing the existing MTS, frame-deassembly,
+histogram, or hit-stack fanout paths.
+
+### 2.4 MTS And Histogram Debug Plane
 
 ```text
 mts_processor
@@ -46,205 +100,126 @@ aso_hit_type1
   -> rbCAM
   -> feb_frame_assembly
 
-aso_hit_type1_extended_0
-  -> histogram_statistics_v2.asi_hit_type1_extended_0
-
-aso_hit_type1_extended_1
-  -> histogram_statistics_v2.asi_hit_type1_extended_1
+aso_hit_type1_extended_0/1
+  -> histogram_statistics_v2.asi_hit_type1_extended_0/1
 ```
 
-The generated `feb_system_v3` synthesis tree confirms the production main
-datapath uses 39-bit Type-1 payloads and that the two 87-bit extended streams
-connect directly from the two MTS instances into `histogram_statistics_v2`.
-
-### 2.2 Retired Bridge
-
-`histogram_ingress_bridge` is no longer part of the active contract:
-
-- no bridge RTL, `_hw.tcl`, SVD, CMSIS generator, or standalone bridge TB
-  remains in `histogram_statistics`;
-- the FEB v3 Qsys updater removes stale bridge, post-sideband, and pre-trim
-  instances if they exist in older `.qsys` files;
-- no bridge CSR aperture is published in the regenerated parent map.
-
-This intentionally discards the old bridge source-switch path. Source
-selection is absorbed into `histogram_statistics_v2`.
+The main MTS Type-1 output stays at the original 39-bit payload width. The
+87-bit extended streams are readyless observability/fill sources for the
+histogram IP.
 
 ---
 
-## 3. Interface Contracts
+## 3. Retired IP And Removed Paths
 
-### 3.1 `mts_processor.hit_type1`
+`histogram_ingress_bridge` is no longer part of FEB v3 and should not be used
+as a selectable source. The histogram IP now owns source selection:
 
-| signal | width | notes |
-|---|---:|---|
-| `aso_hit_type1_data` | 39 | functional Type-1 payload only |
-| `aso_hit_type1_valid` | 1 | unchanged real-hit payload gate |
-| `aso_hit_type1_sop/eop/channel/empty/error` | unchanged | normal packet sidebands |
-
-The internal non-wrapping timestamp reconstruction remains in the MTS
-processor and is reused only for the debug-plane payload.
-
-### 3.2 `mts_processor.hit_type1_extended_<bank>`
-
-| signal | width | notes |
-|---|---:|---|
-| `aso_hit_type1_extended_<bank>_data` | 87 | `{true_ts[47:0], type1[38:0]}` |
-| `aso_hit_type1_extended_<bank>_valid` | 1 | asserted only for real Type-1 hit beats |
-
-Rules:
-
-- no ready, no packets, no channel, no empty, no error;
-- `_0` is the upper-bank source and `_1` is the lower-bank source in FEB v3;
-- DEBUG_LEVEL=2 UVM observes per-hit lineage, but production Qsys keeps the
-  generated MTS `DEBUG` generic at the synthesizable default.
-
-### 3.3 `histogram_statistics_v2`
-
-New readyless sinks:
-
-| interface | payload |
-|---|---|
-| `asi_hit_type1_extended_0` | 87-bit upper-bank `{true_ts, type1}` stream |
-| `asi_hit_type1_extended_1` | 87-bit lower-bank `{true_ts, type1}` stream |
-
-`CONTROL.in_port[3:2]` selects the source when an apply strobe is written:
-
-| value | source |
+| `CONTROL.in_port[3:2]` | source |
 |---:|---|
 | `0` | normal `hist_fill_in` / `fill_in_1..7` path |
 | `1` | `asi_hit_type1_extended_0` |
 | `2` | `asi_hit_type1_extended_1` |
-| `3` | rejected; `csr_error_info = 0x2` |
+| `3` | rejected, `csr_error_info = 0x2` |
 
-For extended ports, the lower 39 bits feed the normal payload extraction path.
-In delay mode, `data[86:39]` supplies the 48-bit true timestamp used by the
-existing GTS subtraction/binning logic.
-
----
-
-## 4. Phase A Work Completed
-
-### `mutrig_timestamp_processor`
-
-- restored `aso_hit_type1_data` to 39 bits;
-- added readyless `hit_type1_extended_0/1` 87-bit sources;
-- routed `_0` for the upper bank and `_1` for the lower bank;
-- updated wrapper/testbench files and package metadata to version
-  `26.3.4.0515`.
-
-### `histogram_statistics`
-
-- deleted `histogram_ingress_bridge` RTL, package metadata, SVD, CMSIS
-  generator, and standalone bridge testbench;
-- added `asi_hit_type1_extended_0/1` sinks to `histogram_statistics_v2`;
-- added `CONTROL.in_port[3:2]` source selection to the histogram IP;
-- updated SVD/CMSIS metadata and package version to `26.3.0.0515`;
-- updated the standalone board wrapper so the direct pre path drives the
-  histogram extended sink without the bridge.
-
-### `feb_system_v3`
-
-- updated `update_scifi_datapath_v3_histogram_stats.tcl` to remove stale
-  bridge/sideband/pre-trim instances and connections;
-- wired MTS extended streams directly into `histogram_statistics_0`;
-- regenerated `quartus_systems/feb_system_v3.qsys` and the v3 datapath Qsys
-  variants;
-- updated the live capture script so `upper`/`lower` map to histogram
-  `in_port = 1/2` without bridge CSR access.
+The FEB v3 Tcl also removes stale `mutrig_lane_source_mux_*`, `tx8b1k`, and
+bridge/snoop selector connections from older `.qsys` files before rebuilding
+the Type-0 graph.
 
 ---
 
-## 5. Verification Evidence
+## 4. SC Address Contract
 
-All evidence below is from the 2026-05-15 bridge-free Phase A worktree.
+Data-path offsets below are inside `data_path_subsystem.avmm_port`. For SC
+tool word addresses, add the SC bridge byte base `0x20000` and divide by 4.
 
-| area | command / artifact | result |
+| block | datapath byte offset | top/SC byte | `sc_tool` word |
+|---|---:|---:|---:|
+| `emulator_mutrig_<k>.csr` | `0x2000 + k*0x100` | `0x22000 + k*0x100` | `0x08800 + k*0x40` |
+| `dbg_mm2runctrl_0.csr` | `0x2800` | `0x22800` | `0x08A00` |
+| `mutrig_datapath_subsystem_<k>.csr` | `0x2A80 + k*0x10` | `0x22A80 + k*0x10` | `0x08AA0 + k*0x4` |
+| `arb_hit_type0_<k>.csr` | `0x3000 + k*0x80` | `0x23000 + k*0x80` | `0x08C00 + k*0x20` |
+| `mts_preprocessor_0.csr` | `0x4000` | `0x24000` | `0x09000` |
+| `mts_preprocessor_1.csr` | `0x8000` | `0x28000` | `0x0A000` |
+| `histogram_statistics_0.hist_bin` | `0xA000` | `0x2A000` | `0x0A800` |
+| `histogram_statistics_0.csr` | `0xA400` | `0x2A400` | `0x0A900` |
+
+The removed source-mux CSR range is not a valid FEB v3 control surface.
+
+---
+
+## 5. Implemented Files
+
+| area | implemented change |
+|---|---|
+| `emulator_mutrig` | package validation permanently disables `BYTE_STREAM_ENABLE`; Qsys exposes Type-0 output only |
+| `scifi_datapath_system_v3` Tcl | inserts 8 `arb_hit_type0` instances after frame deassembly; removes stale source mux and byte-stream paths |
+| `hit_type0_readyless_mux4` | carries selected-hit DEBUG_LEVEL=2 metadata sidecars in simulation; synthesis Qsys is forced to DEBUG_LEVEL=0 |
+| `mts_processor` | accepts Type-0 sidecar metadata and limits DEBUG report spam to explicit debug builds |
+| `histogram_statistics_v2` | owns source selection through `CONTROL.in_port`; no external histogram bridge |
+| `live_hist_sideband_capture.py` | programs `arb_hit_type0` mode/watchdog counters and histogram source selection directly |
+| `stream_debug_hist_path.stp` | probes emulator output, real post-deassembly Type-0, arb selection, mux metadata, MTS sidecar, and histogram fill/counters |
+
+---
+
+## 6. Verification Evidence
+
+All evidence below is from the 2026-05-15 Type-0 arbitration worktree.
+The earlier `sim_feb_checkpoint_wave_realistic_20260515` waveform is retired:
+it drove a shortcut one-hot run-state model instead of the real
+`runctl_mgmt_host` synclink input. Current FEB checkpoint evidence is the
+`sim_feb_host_runctl_split_egress_20260516` run below.
+
+| area | artifact | result |
 |---|---|---|
-| MTS standalone TB | `make -C mutrig_timestamp_processor/tb run_all` | PASS, `mts_processor_tb PASSED`, `mts_processor_terminating_tb PASSED`, 0 errors |
-| histogram standalone TB | `make -C histogram_statistics/tb run_all` | PASS, `47 PASS, 0 FAIL` |
-| FEB v3 Qsys generation | `generate_feb_system_v3.sh` with stamp `20260515_stream_debug_bridgefree_retry1` | PASS, status `exit_code=0`, `error_count=0` |
-| tb_int BASIC | `make regress_basic SIM_ROOT=sim_hist_ip_tbint_regress_20260515 SEED=1` | PASS, B065-B069, UVM_ERROR/FATAL 0 |
-| tb_int RC/emulator | `make run_RC_EMUL && make run_RC_EMUL_BLOCKED && make run_RC_EMUL_FIXED SIM_ROOT=sim_hist_ip_tbint_regress_20260515 SEED=1` | PASS; fixed mode reads histogram `TOTAL_HITS=0x10`, `BANK_STATUS=0x0000e202`, `PORT_STATUS=0x000100ff` |
-| source-mux/frame/MTS/hist cosim | `sim_hist_ip_cosim_long_sweep_20260515/*/transcript` | PASS, 5M nominal, 5M sparse, and high-rate long-drain cases |
-| source-mux/MTS/hist waveform | `tb_int/sim_hist_ip_cosim_wave_acc_20260515/SOURCE_MUX_FRAME/source_mux_mts_hist_acc.fst` and `tb_int/waves/gtkw/source_mux_mts_hist_acc.gtkw` | PASS, GTKWave view covers parser, MTS extended stream, and histogram fill/counter probes |
-| generated DUT bind smoke | `make run_B067 BIND_REAL_DUT=1 SIM_ROOT=sim_stream_debug_bind SEED=1` | PASS, generated `synthesis/` tree compiled and instantiated as `u_dut` |
-| SignalTap probe insertion | `signaltap/stream_debug_hist_path.stp` and `quartus_compile_top_stp_stream_debug_hist_20260515_cleanstp.console.log` | PASS, Quartus connected `stream_debug_hist_path_lvds` to all 401 required debug inputs |
-| FEB STP firmware compile | `output_files_stp_stream_debug_hist/top_stp_stream_debug_hist.{sof,rbf,jdi}` | PASS, full Quartus compile successful, 0 errors, 1622 warnings |
-| FEB STP timing | `output_files_stp_stream_debug_hist/top_stp_stream_debug_hist.sta.summary` | OPEN, slow-corner setup WNS `-1.381 ns` on LVDS `pll_sclk`; `lvds_firefly_clk` WNS `-0.462 ns` |
+| Qsys apply | `syn/qsys_type0_sidecar_apply_20260515.log` | PASS, no errors; all emulator instances force `BYTE_STREAM_ENABLE=false` |
+| Qsys generate | `syn/feb_system_v3_qsys_generate_20260515_type0_sidecar_isolated.status` | PASS, `exit_code=0`, `error_count=0` |
+| synthesis debug-level checker | `script/check_feb_synthesis_debug_levels.py` | PASS, checked 5 generated Qsys/VHDL artifacts with `allowed_debug=[0]` |
+| directed Type-0 switch cosim | `tb_int/sim_type0_arb_switch2_20260515/TYPE0_ARB_HIST/transcript` | PASS, runtime EMU->REAL->EMU switching, `emu_tx_count=0`, `hist_total_hits=5392`, `hist_dropped_hits=0` |
+| 32x8 rate-mode model | `tb_int/sim_type0_arb_32x8_rate_20260515/TYPE0_ARB_HIST_RATE/transcript` | PASS, `lane_scale=8`, `q16_rate=52`, `hist_total_hits=3168`, zero arb/hist drops |
+| 32x8 latency-mode model | `tb_int/sim_type0_arb_32x8_latency_20260515/TYPE0_ARB_HIST_LATENCY/transcript` | PASS, `lane_scale=8`, `q16_rate=52`, `hist_total_hits=3168`, zero arb/hist drops |
+| waveform cosim | `tb_int/sim_type0_arb_wave_20260515/TYPE0_ARB_HIST_WAVE/type0_arb_mts_hist.{vcd,fst}` and `tb_int/waves/gtkw/type0_arb_mts_hist.gtkw` | PASS transcript; waveform captures emulator Type-0, real Type-0, arb metadata, MTS sidecar, and histogram counters |
+| realistic FEB checkpoint waveform | `tb_int/sim_feb_host_runctl_split_egress_20260516/RC_EMUL_REALISTIC/feb_host_runctl_realistic.{vcd,fst}` and `tb_int/waves/gtkw/feb_host_runctl_emulator_rbcam_realistic.gtkw` | PASS, real `runctl_mgmt_host` input protocol through generated Qsys run-control splitters; explicit reset/configure/long `RUN_PREP`/`RUN_SYNC`/`RUNNING`/`END_RUN`/collection phases; one channel at 100 kHz; split checkpoints for emulator commit, emulator egress, rbCAM ingress, rbCAM egress, and FEB egress |
+| rbCAM lifetime report | `tb_int/sim_feb_host_runctl_split_egress_20260516/RC_EMUL_REALISTIC/rbcam_lifetime_report.{md,csv}` | PASS, 16/16 hits at rbCAM ingress = 835 cycles within `[0,2000]`; 16/16 hits at rbCAM egress = 2070 cycles within `[2000,2300]`; emulator commit->egress = 600 cycles, egress->ingress = 235 cycles |
+| old dual UVM BASIC | `make regress_basic SIM_ROOT=sim_feb_host_runctl_split_egress_regress_basic_20260516 SEED=1` | PASS B065-B069, UVM_ERROR/FATAL 0 |
+| old dual UVM RC/emulator | `make run_RC_EMUL run_RC_EMUL_FIXED SIM_ROOT=sim_uvm_type0_rcemul_20260515` | PASS; fixed case reads `TOTAL_HITS=0x10` |
+| SignalTap import | `syn/quartus_stp_stream_debug_hist_20260515_type0_remap.log` | PASS, `quartus_stp` accepted the current STP with 0 errors and 0 warnings |
+| SignalTap pre-synthesis nodes | `signaltap/stream_debug_hist_path_nodes_top_stp_stream_debug_hist.md` | PASS, 282 probes found, 0 missing |
+| STP firmware compile | `syn/board_projects/fe_scifi_feb_v3/output_files_stp_stream_debug_hist/top_stp_stream_debug_hist.sof` | SOF generated; fitter/assembler successful; not timing-closed because STA reports setup WNS = -2.391 ns on the LVDS `pll_sclk` domain and -0.462 ns on `lvds_firefly_clk` |
 
-Per-hit DEBUG_LEVEL=2 scoreboard evidence from the old dual UVM environment:
+Per-hit scoreboard evidence:
 
-| sequence | closed hits | evidence |
+| run | closed hits | key evidence |
 |---|---:|---|
 | `B065` | 16 | `debug_obs SRC/PRE/POST/FEB=16/16/16/16`, duplicate IDs 0 |
 | `B066` | 16 | `debug_obs SRC/PRE/POST/FEB=16/16/16/16`, duplicate IDs 0 |
 | `B067` | 100 | `debug_obs SRC/PRE/POST/FEB=100/100/100/100`, duplicate IDs 0 |
 | `B068` | 1024 | `debug_obs SRC/PRE/POST/FEB=1024/1024/1024/1024`, duplicate IDs 0 |
 | `B069` | 1 | `debug_obs SRC/PRE/POST/FEB=1/1/1/1`, duplicate IDs 0 |
-| `RC_EMUL` | 16 | `debug_obs SRC/PRE/POST/FEB=16/16/16/16`, duplicate IDs 0 |
-| `SOURCE_MUX_FRAME` | 5056 parser hits | source-mux/frame-parser cosim PASS, CRC errors 0 |
-| `SOURCE_MUX_FRAME nominal_5m` | 126944 parser hits | parser/MTS/hist totals all 126944, dropped 0 |
-| `SOURCE_MUX_FRAME sparse_5m` | 9760 parser hits | parser/MTS/hist totals all 9760, dropped 0 |
-| `SOURCE_MUX_FRAME high_1m_q256_longdrain` | 124992 parser hits | parser/MTS/hist totals all 124992, dropped 0 |
-| `SOURCE_MUX_FRAME high_1m_q384_longdrain` | 187488 parser hits | parser/MTS/hist totals all 187488, dropped 0 |
+| `RC_EMUL` | 16 | real host command path; no shortcut one-hot drive; scoreboard closes 16 hits |
+| `RC_EMUL_FIXED` | 16 | real host command path reads `TOTAL_HITS=0x00000010`, `LAST_CMD=0x12`, `RUN_NUMBER=0x20260515`, `RX_CMD_COUNT=3`; scoreboard closes 16 hits |
+| `RC_EMUL_REALISTIC` | 16 | one channel, 100 kHz periodic; 5000-cycle/40 us `RUN_PREP` flush; collection reads `TOTAL_HITS=0x00000010`, `LAST_CMD=0x13`, `RUN_NUMBER=0x20260515`, `RX_CMD_COUNT=4`; `debug_obs SRC/PRE/POST/FEB=16/16/16/16`; rbCAM ingress/egress lifetimes are 835/2070 cycles for every hit |
+| `TYPE0_ARB_HIST` | 5392 | metadata count equals selected count; `metadata_alignment_errors=0`; MTS sidecar and histogram totals match selected hits |
 
-The `BIND_REAL_DUT=1` mode instantiates the generated `feb_system_v3`
-synthesis tree in the old dual UVM harness. The generated system is held in a
-benign dormant configuration while the existing per-hit scoreboard continues
-to validate the behavioral shell taps. Vendor/generated assertions under
-`u_dut` are disabled in this bind mode so dormant unconnected fabric does not
-pollute the UVM scoreboard result.
-
-Clean-STP FEB firmware artifact hashes:
-
-| artifact | SHA-256 |
-|---|---|
-| `top_stp_stream_debug_hist.sof` | `996344ab071f72b345e7b44ae5303ff7747a847a523f3d404ef36a7de3a3ae11` |
-| `top_stp_stream_debug_hist.rbf` | `48f11eecad3a6fc71ac2f177c622f8f9ee4eeeba150f5b6a0c61981ebe5fea54` |
-| `top_stp_stream_debug_hist.jdi` | `1e4dfbfa50b68db50ed369667409bb9e50f06b159555fa101d74714b9791106f` |
-
-Clean-STP FEB resource summary:
-
-| resource | usage |
-|---|---|
-| ALMs | `72,260 / 91,680 (79%)` |
-| registers | `111,741` |
-| block memory bits | `4,497,610 / 13,987,840 (32%)` |
-| RAM blocks | `592 / 1,366 (43%)` |
-| DSP blocks | `0 / 800 (0%)` |
+The rate/latency cosims use a single-lane RTL slice with `LANE_SCALE=8` to
+check the 32x8 100 kHz model. They are not a full eight-instantiated-lane
+firmware simulation.
 
 ---
 
-## 6. Non-Claims And Remaining Work
+## 7. Non-Claims And Remaining Work
 
-- Full standalone Quartus timing signoff for the new bridge-free
-  `histogram_statistics_v2` standalone harness was not rerun in this turn.
-  The old bridge-plus-hist timing result is archived only and is not current
-  26.3.0 signoff evidence.
-- Full FEB Quartus compile with the histogram-path STP is claimed as a
-  generated bitstream only. Slow-corner setup timing is still open, so this is
-  not timing signoff.
-- On-board SC/histogram capture is not claimed here.
-- UCDB/code coverage closure is not claimed by the tb_int run; the evidence
-  is functional DEBUG_LEVEL=2 per-hit scoreboard closure.
-- The exploratory overdrive case `Q16_RATE=1024` emitted no payload hits and is
-  archived outside the passing evidence set; it is not used as signoff.
-- Phase B, which would source the same histogram extended sinks from
-  `feb_frame_assembly` Type-2 boundaries, remains deferred.
-
----
-
-## 7. What This Plan Does Not Change
-
-- rbCAM and `feb_frame_assembly` main hit widths remain at their original
-  Type-1/Type-2 contracts.
-- The MTS internal timestamp reconstruction remains available for debug-plane
-  payload construction.
-- The existing simulation-only per-hit sidecar monitors remain the
-  DEBUG_LEVEL=2 UVM evidence path.
-- The normal histogram fill inputs remain part of `histogram_statistics_v2`,
-  but FEB v3 no longer feeds or selects them through `histogram_ingress_bridge`.
+- Post-map STP connectivity is not closed yet. Pre-synthesis node finder
+  resolves 282/282 probes, but the current `top_stp_stream_debug_hist` image
+  still needs post-fit probe review before board use.
+- The fresh full FEB compile produced `top_stp_stream_debug_hist.sof`, but STA
+  is red: setup WNS is -2.391 ns in the LVDS `pll_sclk` domain and -0.462 ns
+  on `lvds_firefly_clk`. Treat the SOF as debug-only until timing is closed or
+  explicitly waived.
+- On-board SC/histogram capture is not claimed yet.
+- UCDB/code coverage closure is not claimed by these tb_int runs.
+- The old bridge-free STP bitstream evidence remains historical and must not
+  be used as signoff for the current Type-0 arbitration/STP graph.
 
 ---
 
@@ -252,7 +227,9 @@ Clean-STP FEB resource summary:
 
 | risk | mitigation |
 |---|---|
-| Qsys inserts an adapter on the readyless extended streams | both MTS sources and histogram sinks declare no ready; regenerated VHDL shows direct 87-bit connections |
-| stale bridge instances remain in older `.qsys` files | the v3 updater removes retired bridge, post-sideband, and pre-trim instances before rewiring |
-| host scripts still read bridge CSR words | `live_hist_sideband_capture.py` now programs `histogram_statistics_0.csr` `CONTROL.in_port` directly |
-| users confuse old bridge timing evidence with current signoff | `histogram_statistics/syn/SYN_REPORT.md` marks the bridge-plus-hist result as archived and not current |
+| byte-stream mode reappears through an old script | emulator `_hw.tcl` validation rejects `BYTE_STREAM_ENABLE=true`; FEB Tcl writes `false`; generated Qsys is grepped for stale `tx8b1k` connections |
+| source selection happens before frame deassembly | Qsys connects emulator and real traffic only at `arb_hit_type0.real_in/emu_in` after `mutrig_frame_deassembly.hit_type0_out` |
+| `RUN_PREP` resets runtime source mode | cosim checks RUN_PREP preservation and RESET/hard reset default restoration |
+| per-hit lineage is lost through muxing | arb `selected_hit_debug` is carried through mux metadata and MTS sidecar; cosim requires metadata count and source counts to match |
+| host scripts read removed source-mux CSRs | `live_hist_sideband_capture.py` now programs `arb_hit_type0` CSRs at `0x08C00 + k*0x20` |
+| histogram bridge references survive in docs/builds | active docs mark `histogram_ingress_bridge` retired; Qsys updater removes stale instances and source-selector paths |

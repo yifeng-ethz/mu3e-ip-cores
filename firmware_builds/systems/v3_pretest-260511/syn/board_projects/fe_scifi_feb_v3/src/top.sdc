@@ -1,9 +1,11 @@
 #
 
-# false path for signaltap
-set signaltap_cells [get_cells -hierarchical -nowarn *sld_signaltap*]
-if { [get_collection_size $signaltap_cells] > 0 } {
-    set_false_path -to $signaltap_cells
+# SignalTap is debug-only observation fabric. Cut timing into and out of the
+# SLD capture registers so wide probe fan-in does not affect functional closure.
+set signaltap_regs [get_registers -nowarn {*sld_signaltap* *auto_signaltap* *|acq_*_reg[*]}]
+if { [get_collection_size $signaltap_regs] > 0 } {
+    set_false_path -to $signaltap_regs
+    set_false_path -from $signaltap_regs
 }
 
 # false path for lvds controller, TODO: remove it by adding CDC

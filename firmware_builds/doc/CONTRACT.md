@@ -1,6 +1,6 @@
-# CONTRACT.md - Phase-5 AVST and error-sideband contract
+# CONTRACT.md - Phase-5 AVST, Mu3e data-frame, and error-sideband contract
 
-Date: 2026-04-27
+Date: 2026-05-16
 
 This document records the live FEB SciFi Phase-5 stream contract. The key rule
 is: upstream IP asserts error sidebands when it detects bad data; downstream IP
@@ -17,6 +17,110 @@ or an explicit trim point decides whether to drop the marked beat.
   cleared to make rate counters look good.
 - A stream tap may count or histogram error-marked data, but any loss of the
   error sideband at that tap must be documented.
+
+## Mu3e Data Frame on 36-bit Upload Streams
+
+Streams: FEB `hit_type3`, `upload_data`, `upload_data0_sc_rc`,
+`upload_data1`, SWB FEB RX data path, and OPQ ingress after data/SC/RC
+demultiplexing.
+
+Each accepted beat carries `data[31:0]` and `datak[3:0]`. A K-symbol in byte 0
+uses `datak[0]=1`; normal hit words use `datak=0`.
+
+### Frame Layout
+
+The checked Mu3e data frame is:
+
+| Beat | Name | Required contents | Checker status |
+| --- | --- | --- | --- |
+| 0 | SOP / preamble | `sop=1`, `datak[0]=1`, `data[7:0]=K28.5=0xbc`; `data[31:26]` carries FEB type and `data[23:8]` carries FEB ID | enforced for SOP and K28.5 |
+| 1 | Header timestamp high | `datak=0`, `data[31:0]=frame_ts[47:16]` | captured for timestamp reconstruction |
+| 2 | Header timestamp low and packet count | `datak=0`, `data[31:16]=frame_ts[15:0]` with the subheader-window bits masked to zero; `data[15:0]=packet_count` | packet count is enforced across frames |
+| 3 | Declared counts | `datak=0`, `data[31]=0`, `data[30:16]=declared_subheaders`, `data[15:0]=declared_hits` | enforced |
+| 4 | Debug time / TTL | `datak=0`, generation timestamp / frame lifetime reference | captured as debug context |
+| 5..N | Subheaders and hit payloads | exactly `declared_subheaders` subheaders, each followed by its declared number of hit beats | enforced |
+| Last | Trailer | `eop=1`, `datak[0]=1`, `data[7:0]=K28.4=0x9c` | enforced |
+
+The v3 FEB data-frame contract uses 128 subheaders per frame. A legal frame
+therefore accepts exactly:
+
+```text
+5 header words + 128 subheaders + 1 trailer + declared_hit_beats
+```
+
+Equivalently, the checker uses:
+
+```text
+expected_accepted_words = 5 + declared_subheaders + declared_hits + 1
+```
+
+### Subheader Contract
+
+Each subheader is a K23.7 word:
+
+```text
+datak[0] = 1
+data[7:0] = K23.7 = 0xf7
+data[15:8] = declared hit beats for this subheader
+data[23:16] = reserved / TBD
+data[31:24] = subheader timestamp, frame-local ts[11:4]
+```
+
+The first subheader defines the frame page base. With 128-subheader frames the
+legal page bases are `0x00` and `0x80`; the next frame must advance by 128
+modulo 256. Inside a frame, subheader timestamps must be monotonic and
+consecutive. Duplicate, backward, and gap sequences are broken-packet errors.
+
+Every subheader must transmit exactly the number of accepted hit beats declared
+in `data[15:8]` before the next subheader or trailer. A missing hit beat,
+extra hit beat, or mismatch between the sum of subheader hit counts and the
+frame header `declared_hits` is a broken-packet error.
+
+### Hit Contract
+
+A hit beat has `datak=0` and carries the 32-bit MuTRiG hit payload. The checker
+uses `data[31:28]` as the hit timestamp nibble and reconstructs the full packet
+timestamp as:
+
+```text
+packet_ts = {
+  header_timestamp_high_word[31:0],
+  header_timestamp_low_word[31:28],
+  subheader_timestamp[7:0],
+  hit_word[31:28]
+}
+```
+
+Within one frame, reconstructed hit timestamps must not decrease.
+
+### Enforced Checker Gates
+
+The SystemVerilog `mu3e_frame_checker` and the offline STP decoder enforce the
+same packet vocabulary:
+
+- `sop` must coincide with K28.5 and `eop` must coincide with K28.4.
+- Data outside a frame is an error unless it is an accepted idle comma.
+- The declared subheader count must be 128 for v3 FEB data frames.
+- The number of seen subheaders must equal the frame header declaration.
+- Subheaders must be consecutive within the frame page.
+- Per-subheader accepted hit beats must equal the subheader declaration.
+- Total accepted hit beats must equal the frame header declaration.
+- The sum of subheader-declared hits must equal the frame header declaration.
+- Total accepted frame words must equal `5 + declared_subheaders +
+  declared_hits + 1`.
+- Consecutive frames on the same stream must increment `packet_count` modulo
+  16 bits.
+- Consecutive frames on the same stream must advance the first-subheader page
+  base by 128 modulo 256.
+
+The FEB integration monitor can additionally require a minimum number of
+completed upload frames and hits with:
+
+```text
++TB_INT_REQUIRE_FEB_UPLOAD_FRAMES
++TB_INT_MIN_FEB_UPLOAD_FRAMES=<n>
++TB_INT_MIN_FEB_UPLOAD_HITS=<n>
+```
 
 ## `mutrig_frame_deassembly_N` to `mts_preprocessor_{0,1}`
 

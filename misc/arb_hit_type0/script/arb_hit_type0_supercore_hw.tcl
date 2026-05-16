@@ -2,9 +2,9 @@ package require -exact qsys 16.1
 
 set VERSION_MAJOR_DEFAULT_CONST 26
 set VERSION_MINOR_DEFAULT_CONST 6
-set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         512
-set VERSION_DATE_DEFAULT_CONST  20260512
+set VERSION_PATCH_DEFAULT_CONST 5
+set BUILD_DEFAULT_CONST         518
+set VERSION_DATE_DEFAULT_CONST  20260516
 set VERSION_GIT_DEFAULT_CONST   0x00000000
 set IP_UID_DEFAULT_CONST        0x41485430 ;# ASCII "AHT0"
 
@@ -58,9 +58,15 @@ set_parameter_property WATCHDOG_DEFAULT DESCRIPTION "Reset value propagated to e
 
 add_parameter FIFO_DEPTH NATURAL 16
 set_parameter_property FIFO_DEPTH DISPLAY_NAME "Per-source ingress FIFO depth"
-set_parameter_property FIFO_DEPTH ALLOWED_RANGES {16}
+set_parameter_property FIFO_DEPTH ALLOWED_RANGES {2 16}
 set_parameter_property FIFO_DEPTH HDL_PARAMETER false
-set_parameter_property FIFO_DEPTH DESCRIPTION "Per-source ingress FIFO depth propagated to each lane."
+set_parameter_property FIFO_DEPTH DESCRIPTION "Per-source ingress FIFO depth propagated to each lane. 16 preserves the full standalone DV/debug contract. 2 trims ALM/register usage for FEB integration."
+
+add_parameter COUNTER_PROFILE NATURAL 0
+set_parameter_property COUNTER_PROFILE DISPLAY_NAME "Counter profile"
+set_parameter_property COUNTER_PROFILE ALLOWED_RANGES 0:1
+set_parameter_property COUNTER_PROFILE HDL_PARAMETER false
+set_parameter_property COUNTER_PROFILE DESCRIPTION "Counter profile propagated to every lane. 0 keeps the full diagnostic CSR bank. 1 builds the trim3 bank with only ingress-real, ingress-emu, and total-egress 64-bit counters."
 
 add_parameter DEBUG_LEVEL NATURAL 0
 set_parameter_property DEBUG_LEVEL DISPLAY_NAME "Debug Level"
@@ -74,6 +80,7 @@ add_display_item "Configuration" LANE_COUNT parameter
 add_display_item "Configuration" MODE_DEFAULT parameter
 add_display_item "Configuration" WATCHDOG_DEFAULT parameter
 add_display_item "Configuration" FIFO_DEPTH parameter
+add_display_item "Configuration" COUNTER_PROFILE parameter
 add_display_item "Configuration" DEBUG_LEVEL parameter
 
 add_display_item "" "Interfaces" GROUP tab
@@ -204,6 +211,7 @@ proc validate {} {
     set mode_default [get_parameter_value MODE_DEFAULT]
     set watchdog_default [get_parameter_value WATCHDOG_DEFAULT]
     set fifo_depth [get_parameter_value FIFO_DEPTH]
+    set counter_profile [get_parameter_value COUNTER_PROFILE]
     set debug_level [get_parameter_value DEBUG_LEVEL]
 
     if {$lane_count < 1 || $lane_count > 32} {
@@ -215,8 +223,11 @@ proc validate {} {
     if {$watchdog_default < 0 || $watchdog_default > 65535} {
         send_message error "WATCHDOG_DEFAULT must be in the range 0..65535."
     }
-    if {$fifo_depth != 16} {
-        send_message error "FIFO_DEPTH is fixed at 16 for arb_hit_type0."
+    if {$fifo_depth != 2 && $fifo_depth != 16} {
+        send_message error "FIFO_DEPTH must be 2 or 16 for arb_hit_type0."
+    }
+    if {$counter_profile != 0 && $counter_profile != 1} {
+        send_message error "COUNTER_PROFILE must be 0 (full) or 1 (trim3)."
     }
     if {$debug_level < 0 || $debug_level > 2} {
         send_message error "DEBUG_LEVEL must be 0 (off), 1 (FIFO levels), or 2 (FIFO levels plus per-hit metadata)."
@@ -243,6 +254,7 @@ proc compose {} {
     set mode_default [get_parameter_value MODE_DEFAULT]
     set watchdog_default [get_parameter_value WATCHDOG_DEFAULT]
     set fifo_depth [get_parameter_value FIFO_DEPTH]
+    set counter_profile [get_parameter_value COUNTER_PROFILE]
     set debug_level [get_parameter_value DEBUG_LEVEL]
 
     add_instance clk_bridge altera_clock_bridge 18.1
@@ -278,10 +290,11 @@ proc compose {} {
 
     for {set lane 0} {$lane < $lane_count} {incr lane} {
         set inst lane_$lane
-        add_instance $inst arb_hit_type0 26.5.0.0511
+        add_instance $inst arb_hit_type0 $VERSION_STRING_DEFAULT_CONST
         set_instance_parameter_value $inst MODE_DEFAULT $mode_default
         set_instance_parameter_value $inst WATCHDOG_DEFAULT $watchdog_default
         set_instance_parameter_value $inst FIFO_DEPTH $fifo_depth
+        set_child_param_if_present $inst COUNTER_PROFILE $counter_profile
         set_child_param_if_present $inst DEBUG_LEVEL $debug_level
         set_instance_parameter_value $inst IP_UID $IP_UID_DEFAULT_CONST
         set_instance_parameter_value $inst INSTANCE_ID $lane

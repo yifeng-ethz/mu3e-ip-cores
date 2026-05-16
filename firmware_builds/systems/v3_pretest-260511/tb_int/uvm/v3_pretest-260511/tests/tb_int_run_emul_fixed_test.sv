@@ -1,17 +1,11 @@
 // tb_int_run_emul_fixed_test.sv
-// FEB BUG-RC-RUN-EMUL behavioural topology repro test (POST-FIX).
+// FEB BUG-RC-RUN-EMUL host-driven run-control regression test.
 //
 // Author : Claude Opus
 // Date   : 20260511
-// Scope  : Phase 3 BUG-RC-RUN-EMUL fix verification. Drives start-run
-//          (0x12) + 16 emulator hits against the behavioural topology
-//          model in tb_int_top.sv. With BUG_RC_RUN_EMUL_FIXED DEFINED
-//          (passed via vlog +define+ at build time) the
-//          mock_run_control_splitter ignores out_ready and ties the
-//          internal AND to 1'b1. The RUNNING broadcast propagates,
-//          mock_emulator_running latches high, and mock_total_hits_cnt
-//          reaches hit_count (16). The test PASSes when TOTAL_HITS == 16
-//          is observed.
+// Scope  : Drives real host command bytes through runctl_mgmt_host and the
+//          generated Qsys splitter wrappers, then checks end-to-end hit
+//          evidence and histogram extended ingress.
 
 package tb_int_run_emul_fixed_test_pkg;
 
@@ -27,6 +21,14 @@ package tb_int_run_emul_fixed_test_pkg;
         virtual sc_avmm_if    sc_vif;
 
         int unsigned hit_count = 16;
+        bit realistic_latency_model = 1'b0;
+        int unsigned periodic_channel = 0;
+        bit periodic_channel_forced = 1'b0;
+        bit periodic_channel_seed_valid = 1'b0;
+        int unsigned periodic_channel_seed = 0;
+        int unsigned periodic_hit_period_cycles = 1250;
+        int unsigned run_prep_flush_cycles = 5000;
+        int unsigned upload_frames_per_lane = 2;
 
         function new(string name = "tb_int_run_emul_fixed_test",
                      uvm_component parent = null);
@@ -43,6 +45,16 @@ package tb_int_run_emul_fixed_test_pkg;
                 `uvm_fatal("RC_EMUL_FIX", "sc_phy_vif not configured")
             if ($value$plusargs("TB_INT_RC_EMUL_HIT_COUNT=%d", plusarg_hits))
                 hit_count = plusarg_hits;
+            realistic_latency_model = $test$plusargs("TB_INT_REALISTIC_LATENCY");
+            periodic_channel_forced = $value$plusargs("TB_INT_PERIODIC_CHANNEL=%d", periodic_channel);
+            periodic_channel &= 32'h1F;
+            periodic_channel_seed_valid = $value$plusargs("ARB_SEED=%d", periodic_channel_seed);
+            void'($value$plusargs("TB_INT_PERIODIC_HIT_PERIOD_CYCLES=%d",
+                                  periodic_hit_period_cycles));
+            void'($value$plusargs("TB_INT_RUN_PREP_FLUSH_CYCLES=%d",
+                                  run_prep_flush_cycles));
+            void'($value$plusargs("TB_INT_FEB_UPLOAD_FRAMES_PER_LANE=%d",
+                                  upload_frames_per_lane));
         endfunction
 
         virtual task run_phase(uvm_phase phase);
@@ -56,13 +68,27 @@ package tb_int_run_emul_fixed_test_pkg;
                           sc_vif,
                           stage_a_vif,
                           debug_l2_vif,
+                          emulator_egress_vif,
+                          debug_emulator_egress_vif,
                           pre_rbcam_vif,
                           post_rbcam_vif,
                           debug_pre_rbcam_vif,
                           debug_post_rbcam_vif,
                           debug_feb_egress_vif,
-                          feb_egress_vif);
+                          feb_egress_vif,
+                          upload_data0_frame_vif,
+                          upload_data1_frame_vif);
             seq.emul_check_mode = EMUL_MODE_EXPECT_FIXED;
+            seq.realistic_latency_model = realistic_latency_model;
+            seq.periodic_channel = periodic_channel;
+            seq.periodic_channel_forced = periodic_channel_forced;
+            seq.periodic_channel_seed_valid = periodic_channel_seed_valid;
+            seq.periodic_channel_seed = periodic_channel_seed;
+            seq.periodic_hit_period_cycles = periodic_hit_period_cycles;
+            seq.run_prep_flush_cycles = run_prep_flush_cycles;
+            seq.upload_frames_per_lane = upload_frames_per_lane;
+            if ($test$plusargs("TB_INT_RC_EMUL_SNAPSHOT_ONLY"))
+                seq.emul_check_mode = EMUL_MODE_NONE;
             seq.body(hit_count);
             $display("*** TEST PASSED ***");
             phase.drop_objection(this);

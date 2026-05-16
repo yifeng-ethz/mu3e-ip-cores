@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """run_tool - run-control + capture orchestrator for the Mu3e SWB/FEB pipeline.
 
-Targets the FEB<->SWB lifetime-histogram debug flow. Performs:
+Targets the FEB<->SWB live hit-flow debug path. Performs:
   1. (optional) Program both SOFs.
   2. Wait for FEB SC ring (sc_tool 0x0FE80 -> 0x53434842).
   3. Configure SWB datapath: SWB_LINK_MASK_SCIFI, optional USE_BIT_MERGER.
-  4. Configure FEB emulators (existing run_rbcam_feb_hist_latency.py path or
-     direct sc writes).
+  4. Reset/stop-reset FEB run control, then configure current-map FEB emulators,
+     Type0 arbiters, MTS, rbCAM, and frame assembly path.
   5. Launch dma_tool in background, wait for it to come up.
   6. Issue rc_tool reset -> stop-reset -> run-prepare -> sync -> start-run.
   7. Wait --duration-s.
   8. Issue rc_tool end-run, stop dma_tool.
-  9. Read FEB histogram CSRs + SWB OPQ counters, write conservation summary.
+  9. Read FEB hit-flow CSRs + SWB OPQ counters, write conservation summary.
 
 Designed to be a drop-in companion to the existing sc_tool / rc_tool / dma_tool
 binaries - same CLI conventions, same defaults, same exit-code semantics.
@@ -38,6 +38,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_BIN_DIR = SCRIPT_DIR / "build"
 DEFAULT_INSTALL_DIR = SCRIPT_DIR / "install" / "bin"
 SWB_RING_LOCK_FILE = Path("/tmp/swb_ring.lock")
+MUDAQ_DEVICE = "/dev/mudaq0"
 
 # SWB BAR registers are addressed through sc_tool --swb by firmware-true names.
 USE_BIT_GEN_LINK = 0x1
@@ -62,20 +63,55 @@ RDMA_CSR_CTRL = 0x08
 
 # FEB SciFi word-addressed CSR windows reachable through the SWB sc_hub.
 EMU_BASE_WORD = 0x08800
-EMU_STRIDE_WORD = 0x10
-MUX_BASE_WORD = 0x08890
-MUX_STRIDE_WORD = 0x10
+EMU_STRIDE_WORD = 0x40
+ARB_BASE_WORD = 0x08C00
+ARB_STRIDE_WORD = 0x20
+MTS_BASE_WORDS = (0x09000, 0x0A000)
+RBCAM_BASE_WORD = 0x0AC00
+RBCAM_BANK_STRIDE_WORD = 0x100
+RBCAM_STRIDE_WORD = 0x20
+FRAME_ASM_BASE_WORDS = (0x0B400, 0x0B410)
 LVDS_CSR_BASE_WORD = 0x08000
 LVDS_LANE_GO_WORD = LVDS_CSR_BASE_WORD + 0x04
 LVDS_LANE_GO_MASK = 0x000001FF
 HIST_CSR_BASE_WORD = 0x0A900
 HIST_TOTAL_HITS_WORD = HIST_CSR_BASE_WORD + 0x0D
 HIST_DROPPED_HITS_WORD = HIST_CSR_BASE_WORD + 0x0E
-LEGACY_EMU_TX_SHORT_IDLE = 0x0000000C
 EMU_UID = 0x454D5554
-MUX_UID = 0x4D4C534D
+ARB_UID = 0x41485430
+RBCAM_UID = 0x5242434D
 SC_HUB_UID_WORD = 0x0FE80
 SC_HUB_UID = 0x53434842
+
+EMU_REG_UID = 0x00
+EMU_REG_CENTRAL = 0x07
+EMU_REG_SIGNAL = 0x08
+EMU_REG_BACKGROUND = 0x09
+EMU_REG_FORMAT = 0x0A
+EMU_REG_RATES = 0x0B
+EMU_REG_CLUSTER_FIX = 0x0C
+EMU_REG_PRNG_SEED = 0x0E
+EMU_REG_TIMEBASE_SEED = 0x0F
+
+ARB_REG_UID = 0x00
+ARB_REG_CONTROL = 0x02
+ARB_REG_STATUS = 0x03
+ARB_REG_WATCHDOG = 0x04
+ARB_REG_INGRESS_REAL_LO = 0x0A
+ARB_REG_INGRESS_REAL_HI = 0x0B
+ARB_REG_INGRESS_EMU_LO = 0x0C
+ARB_REG_INGRESS_EMU_HI = 0x0D
+ARB_REG_EGRESS_REAL_LO = 0x12
+ARB_REG_EGRESS_EMU_LO = 0x14
+ARB_MODE_EMU = 0x1
+ARB_CLEAR_ALL = (1 << 2) | (1 << 3) | (1 << 4) | (1 << 5)
+
+EMU_REG_LANE_ENABLE = 0x12
+EMU_REG_LANE_STATUS_BASE = 0x18
+EMU_FORMAT_TYPE0_SHORT_IDLE = 0x00000033
+EMU_CLUSTER_FIX_ALL_CHANNELS = 0x00004F80
+MTS_CTRL_DEFAULT = (1 << 0) | (1 << 4) | (1 << 29)
+RBCAM_CTRL_DEFAULT = 0x00000011
 
 
 @dataclass
@@ -163,9 +199,24 @@ def sc_write(tools: Tools, link: int, addr: int, words: list[int]) -> None:
         "write",
         f"0x{addr:05X}",
         *[f"0x{w & 0xFFFFFFFF:08X}" for w in words],
+        "--device",
+        MUDAQ_DEVICE,
+        "--main-timeout-ms",
+        "3000",
+        "--reply-timeout-ms",
+        "3000",
         "--quiet",
     ]
-    run(args)
+    last: subprocess.CompletedProcess[str] | None = None
+    for attempt in range(6):
+        last = run(args, check=False)
+        if last.returncode == 0:
+            return
+        time.sleep(0.05 * (attempt + 1))
+    assert last is not None
+    sys.stderr.write(f"run_tool: SC write failed after retries at 0x{addr:05X}\n")
+    sys.stderr.write(last.stdout + last.stderr)
+    sys.exit(last.returncode)
 
 
 def sc_read(tools: Tools, link: int, addr: int, count: int = 1) -> list[int]:
@@ -175,13 +226,25 @@ def sc_read(tools: Tools, link: int, addr: int, count: int = 1) -> list[int]:
         "read",
         f"0x{addr:05X}",
         str(count),
+        "--device",
+        MUDAQ_DEVICE,
+        "--main-timeout-ms",
+        "3000",
+        "--reply-timeout-ms",
+        "3000",
         "--quiet",
     ]
-    res = run(args)
-    payloads = re.findall(r"payload\[(\d+)\]\s*=\s*(0x[0-9A-Fa-f]+)", res.stdout + res.stderr)
-    if len(payloads) != count:
-        sys.exit(f"run_tool: SC read 0x{addr:05X} expected {count} words, got {len(payloads)}")
-    return [int(v, 16) for _, v in payloads]
+    last: subprocess.CompletedProcess[str] | None = None
+    for attempt in range(6):
+        last = run(args, check=False)
+        payloads = re.findall(r"payload\[(\d+)\]\s*=\s*(0x[0-9A-Fa-f]+)", last.stdout + last.stderr)
+        if last.returncode == 0 and len(payloads) == count:
+            return [int(v, 16) for _, v in payloads]
+        time.sleep(0.05 * (attempt + 1))
+    assert last is not None
+    sys.stderr.write(f"run_tool: SC read 0x{addr:05X} expected {count} words, got no stable reply\n")
+    sys.stderr.write(last.stdout + last.stderr)
+    sys.exit(last.returncode or 1)
 
 
 def swb_write(tools: Tools, name: str, val: int) -> None:
@@ -207,7 +270,7 @@ def swb_dump_all(tools: Tools) -> str:
 
 
 def rc_send(tools: Tools, cmd: str, *, run_no: int | None = None, feb: int = 7) -> None:
-    args = [str(tools.rc_tool), "send", cmd, "--device", "/dev/mudaq0", "--feb", str(feb)]
+    args = [str(tools.rc_tool), "send", cmd, "--device", MUDAQ_DEVICE, "--feb", str(feb)]
     if run_no is not None:
         args.extend(["--run", str(run_no)])
     run(args, capture=False, check=False)  # rc_tool prints to stderr
@@ -294,9 +357,26 @@ def configure_swb(tools: Tools, *, link_mask_scifi: int, use_opq: bool, gen_link
     }
 
 
-def configure_empty_frame_sources(tools: Tools, link: int) -> dict:
-    """Select FEB emulator sources but configure them for zero generated hits."""
-    record: dict = {"lvds_lane_go": {}, "mux": [], "emulators": []}
+def _read_counter64(tools: Tools, link: int, base: int, low_reg: int) -> int:
+    low, high = sc_read(tools, link, base + low_reg, 2)
+    return (high << 32) | low
+
+
+def _u48(high_word: int, low_word: int, *, high_bits: int = 18) -> int:
+    return ((high_word & ((1 << high_bits) - 1)) << 32) | (low_word & 0xFFFFFFFF)
+
+
+def configure_current_feb_sources(tools: Tools, link: int, *, q16_rate: int, lane_mask: int = 0xFF) -> dict:
+    """Configure the current FEB v3 SC word map for Type0 emulator hit delivery."""
+    record: dict = {
+        "lvds_lane_go": {},
+        "emulators": [],
+        "type0_arbs": [],
+        "mts": [],
+        "rbcam": [],
+        "lane_mask": f"0x{lane_mask & 0xFF:02X}",
+        "q16_rate": q16_rate & 0xFFFF,
+    }
 
     sc_write_stable(tools, link, LVDS_LANE_GO_WORD, [LVDS_LANE_GO_MASK])
     lane_go = sc_read(tools, link, LVDS_LANE_GO_WORD)[0]
@@ -307,79 +387,168 @@ def configure_empty_frame_sources(tools: Tools, link: int) -> dict:
     }
 
     for lane in range(8):
-        base = MUX_BASE_WORD + lane * MUX_STRIDE_WORD
-        words, err = try_sc_read(tools, link, base, 1)
-        if err is not None or not words or words[0] != MUX_UID:
-            record["mux"].append({
-                "lane": lane,
-                "base": f"0x{base:05X}",
-                "status": "skipped",
-                "uid": None if not words else f"0x{words[0]:08X}",
-                "error": err,
-            })
-            continue
-        sc_write_stable(tools, link, base + 0x02, [0x00000003])
-        sc_write_stable(tools, link, base + 0x02, [0x00000001])
-        status = sc_read(tools, link, base + 0x03)[0]
-        record["mux"].append({
+        base = EMU_BASE_WORD + lane * EMU_STRIDE_WORD
+        uid = sc_read(tools, link, base + EMU_REG_UID, 1)[0]
+        if uid != EMU_UID:
+            sys.exit(f"run_tool: emulator_mutrig_{lane} UID mismatch at 0x{base:05X}: 0x{uid:08X}")
+        enabled = 1 if ((lane_mask >> lane) & 0x1) else 0
+        sc_write_stable(tools, link, base + EMU_REG_CENTRAL, [0x00000000])
+        sc_write_stable(tools, link, base + EMU_REG_BACKGROUND, [0x00000000])
+        sc_write_stable(tools, link, base + EMU_REG_SIGNAL, [0x00000002])
+        sc_write_stable(tools, link, base + EMU_REG_FORMAT, [EMU_FORMAT_TYPE0_SHORT_IDLE])
+        sc_write_stable(tools, link, base + EMU_REG_RATES, [q16_rate & 0xFFFF])
+        sc_write_stable(tools, link, base + EMU_REG_CLUSTER_FIX, [EMU_CLUSTER_FIX_ALL_CHANNELS])
+        sc_write_stable(tools, link, base + EMU_REG_PRNG_SEED, [0xDEADBEEF ^ lane])
+        sc_write_stable(tools, link, base + EMU_REG_TIMEBASE_SEED, [0x00010001])
+        sc_write_stable(tools, link, base + EMU_REG_LANE_ENABLE, [((lane & 0xF) << 8) | enabled])
+        if enabled:
+            sc_write_stable(tools, link, base + EMU_REG_CENTRAL, [0x00000001])
+        record["emulators"].append({
             "lane": lane,
             "base": f"0x{base:05X}",
-            "status": "selected_emulator",
-            "uid": f"0x{words[0]:08X}",
-            "mux_status": f"0x{status:08X}",
+            "uid": f"0x{uid:08X}",
+            "enabled": bool(enabled),
+            "central": f"0x{sc_read(tools, link, base + EMU_REG_CENTRAL)[0]:08X}",
+            "signal": f"0x{sc_read(tools, link, base + EMU_REG_SIGNAL)[0]:08X}",
+            "format": f"0x{sc_read(tools, link, base + EMU_REG_FORMAT)[0]:08X}",
+            "rates": f"0x{sc_read(tools, link, base + EMU_REG_RATES)[0]:08X}",
+            "lane_enable": f"0x{sc_read(tools, link, base + EMU_REG_LANE_ENABLE)[0]:08X}",
         })
-
-    first = sc_read(tools, link, EMU_BASE_WORD, 1)[0]
-    second, _ = try_sc_read(tools, link, EMU_BASE_WORD + EMU_STRIDE_WORD, 1)
-    bank_map = first == EMU_UID and (not second or second[0] != EMU_UID)
-
-    if bank_map:
-        sc_write_stable(tools, link, EMU_BASE_WORD + 0x07, [0x00000001])
-        sc_write_stable(tools, link, EMU_BASE_WORD + 0x08, [0x00000000])
-        sc_write_stable(tools, link, EMU_BASE_WORD + 0x09, [0x00000000])
-        sc_write_stable(tools, link, EMU_BASE_WORD + 0x0A, [0x00000023])
-        sc_write_stable(tools, link, EMU_BASE_WORD + 0x0B, [0x00000000])
-        sc_write_stable(tools, link, EMU_BASE_WORD + 0x12, [0x000000FF])
-        record["emulators"].append({
-            "layout": "bank",
-            "base": f"0x{EMU_BASE_WORD:05X}",
-            "uid": f"0x{first:08X}",
-            "central": f"0x{sc_read(tools, link, EMU_BASE_WORD + 0x07)[0]:08X}",
-            "rates": f"0x{sc_read(tools, link, EMU_BASE_WORD + 0x0B)[0]:08X}",
-            "lane_enable": f"0x{sc_read(tools, link, EMU_BASE_WORD + 0x12)[0]:08X}",
-        })
-        return record
 
     for lane in range(8):
-        base = EMU_BASE_WORD + lane * EMU_STRIDE_WORD
-        uid_or_control = sc_read(tools, link, base, 1)[0]
-        if uid_or_control == EMU_UID:
-            sc_write_stable(tools, link, base + 0x07, [0x00000001])
-            sc_write_stable(tools, link, base + 0x08, [0x00000000])
-            sc_write_stable(tools, link, base + 0x09, [0x00000000])
-            sc_write_stable(tools, link, base + 0x0A, [0x00000023])
-            sc_write_stable(tools, link, base + 0x0B, [0x00000000])
-            record["emulators"].append({
-                "layout": "per_lane_uid",
+        base = ARB_BASE_WORD + lane * ARB_STRIDE_WORD
+        uid = sc_read(tools, link, base + ARB_REG_UID, 1)[0]
+        if uid != ARB_UID:
+            sys.exit(f"run_tool: arb_hit_type0_{lane} UID mismatch at 0x{base:05X}: 0x{uid:08X}")
+        sc_write_stable(tools, link, base + ARB_REG_WATCHDOG, [0x000001F4])
+        sc_write_stable(tools, link, base + ARB_REG_CONTROL, [ARB_MODE_EMU | ARB_CLEAR_ALL])
+        record["type0_arbs"].append({
+            "lane": lane,
+            "base": f"0x{base:05X}",
+            "uid": f"0x{uid:08X}",
+            "control": f"0x{sc_read(tools, link, base + ARB_REG_CONTROL)[0]:08X}",
+            "status": f"0x{sc_read(tools, link, base + ARB_REG_STATUS)[0]:08X}",
+            "watchdog": f"0x{sc_read(tools, link, base + ARB_REG_WATCHDOG)[0]:08X}",
+        })
+
+    for idx, base in enumerate(MTS_BASE_WORDS):
+        sc_write_stable(tools, link, base, [MTS_CTRL_DEFAULT])
+        record["mts"].append({
+            "idx": idx,
+            "base": f"0x{base:05X}",
+            "control": f"0x{sc_read(tools, link, base)[0]:08X}",
+        })
+
+    for stack_name, base0 in (("lower", RBCAM_BASE_WORD), ("upper", RBCAM_BASE_WORD + RBCAM_BANK_STRIDE_WORD)):
+        for lane in range(4):
+            base = base0 + lane * RBCAM_STRIDE_WORD
+            uid = sc_read(tools, link, base, 1)[0]
+            if uid != RBCAM_UID:
+                sys.exit(f"run_tool: ring_buffer_cam {stack_name}{lane} UID mismatch at 0x{base:05X}: 0x{uid:08X}")
+            sc_write_stable(tools, link, base + 2, [RBCAM_CTRL_DEFAULT])
+            record["rbcam"].append({
+                "stack": stack_name,
                 "lane": lane,
                 "base": f"0x{base:05X}",
-                "uid": f"0x{uid_or_control:08X}",
-                "central": f"0x{sc_read(tools, link, base + 0x07)[0]:08X}",
-                "rates": f"0x{sc_read(tools, link, base + 0x0B)[0]:08X}",
-            })
-        else:
-            sc_write_stable(tools, link, base + 0x00, [0x00000009])
-            sc_write_stable(tools, link, base + 0x01, [0x00000000])
-            sc_write_stable(tools, link, base + 0x04, [LEGACY_EMU_TX_SHORT_IDLE | (lane << 4)])
-            record["emulators"].append({
-                "layout": "legacy",
-                "lane": lane,
-                "base": f"0x{base:05X}",
-                "control": f"0x{sc_read(tools, link, base + 0x00)[0]:08X}",
-                "rates": f"0x{sc_read(tools, link, base + 0x01)[0]:08X}",
-                "tx_mode": f"0x{sc_read(tools, link, base + 0x04)[0]:08X}",
+                "uid": f"0x{uid:08X}",
+                "control": f"0x{sc_read(tools, link, base + 2)[0]:08X}",
             })
     return record
+
+
+def configure_empty_frame_sources(tools: Tools, link: int) -> dict:
+    """Configure the current FEB source path for empty frames / zero generated hits."""
+    return configure_current_feb_sources(tools, link, q16_rate=0, lane_mask=0xFF)
+
+
+def read_feb_flow_counters(tools: Tools, link: int) -> dict:
+    arbs = []
+    for lane in range(8):
+        base = ARB_BASE_WORD + lane * ARB_STRIDE_WORD
+        ingress_real = _read_counter64(tools, link, base, ARB_REG_INGRESS_REAL_LO)
+        ingress_emu = _read_counter64(tools, link, base, ARB_REG_INGRESS_EMU_LO)
+        egress_real = _read_counter64(tools, link, base, ARB_REG_EGRESS_REAL_LO)
+        egress_emu = _read_counter64(tools, link, base, ARB_REG_EGRESS_EMU_LO)
+        arbs.append({
+            "lane": lane,
+            "base": f"0x{base:05X}",
+            "status": f"0x{sc_read(tools, link, base + ARB_REG_STATUS)[0]:08X}",
+            "ingress_real_hits": ingress_real,
+            "ingress_emu_hits": ingress_emu,
+            "egress_real_hits": egress_real,
+            "egress_emu_hits": egress_emu,
+            "egress_hits": egress_real + egress_emu,
+        })
+
+    mts = []
+    for idx, base in enumerate(MTS_BASE_WORDS):
+        words = sc_read(tools, link, base, 5)
+        mts.append({
+            "idx": idx,
+            "base": f"0x{base:05X}",
+            "control_status": f"0x{words[0]:08X}",
+            "discard_hits": words[1],
+            "expected_latency": words[2],
+            "total_hits": ((words[3] & 0xFFFF) << 32) | words[4],
+        })
+
+    rbcam = []
+    for stack_name, base0 in (("lower", RBCAM_BASE_WORD), ("upper", RBCAM_BASE_WORD + RBCAM_BANK_STRIDE_WORD)):
+        for lane in range(4):
+            base = base0 + lane * RBCAM_STRIDE_WORD
+            words = sc_read(tools, link, base, 10)
+            rbcam.append({
+                "stack": stack_name,
+                "lane": lane,
+                "base": f"0x{base:05X}",
+                "uid": f"0x{words[0]:08X}",
+                "control": f"0x{words[2]:08X}",
+                "fill_level": words[4],
+                "inerr_count": words[5],
+                "push_count": words[6],
+                "pop_count": words[7],
+                "overwrite_count": words[8],
+                "cache_miss_count": words[9],
+            })
+
+    frame_asm = []
+    for idx, base in enumerate(FRAME_ASM_BASE_WORDS):
+        words = sc_read(tools, link, base, 8)
+        frame_asm.append({
+            "idx": idx,
+            "base": f"0x{base:05X}",
+            "feb_type": words[0],
+            "feb_id": words[1],
+            "declared_hits": _u48(words[2], words[3]),
+            "actual_hits": _u48(words[4], words[5]),
+            "missing_hits": _u48(words[6], words[7]),
+        })
+
+    return {
+        "type0_arb": arbs,
+        "type0_arb_sums": {
+            "ingress_real_hits": sum(row["ingress_real_hits"] for row in arbs),
+            "ingress_emu_hits": sum(row["ingress_emu_hits"] for row in arbs),
+            "egress_hits": sum(row["egress_hits"] for row in arbs),
+        },
+        "mts": mts,
+        "mts_sums": {
+            "discard_hits": sum(row["discard_hits"] for row in mts),
+            "total_hits": sum(row["total_hits"] for row in mts),
+        },
+        "rbcam": rbcam,
+        "rbcam_sums": {
+            "push_count": sum(row["push_count"] for row in rbcam),
+            "pop_count": sum(row["pop_count"] for row in rbcam),
+            "cache_miss_count": sum(row["cache_miss_count"] for row in rbcam),
+        },
+        "frame_asm": frame_asm,
+        "frame_asm_sums": {
+            "declared_hits": sum(row["declared_hits"] for row in frame_asm),
+            "actual_hits": sum(row["actual_hits"] for row in frame_asm),
+            "missing_hits": sum(row["missing_hits"] for row in frame_asm),
+        },
+    }
 
 
 def _fmt_words(words: list[int]) -> str:
@@ -393,6 +562,11 @@ def dump_csrs(tools: Tools, link: int, out_dir: Path) -> Path:
     swb_dump = swb_dump_all(tools)
     feb_ranges = [
         *[(f"emulator_mutrig_{idx}.csr", EMU_BASE_WORD + idx * EMU_STRIDE_WORD, 16) for idx in range(8)],
+        *[(f"arb_hit_type0_{idx}.csr", ARB_BASE_WORD + idx * ARB_STRIDE_WORD, 32) for idx in range(8)],
+        *[(f"mutrig_timestamp_processor_{idx}.csr", base, 8) for idx, base in enumerate(MTS_BASE_WORDS)],
+        *[(f"ring_buffer_cam_lower_{idx}.csr", RBCAM_BASE_WORD + idx * RBCAM_STRIDE_WORD, 10) for idx in range(4)],
+        *[(f"ring_buffer_cam_upper_{idx}.csr", RBCAM_BASE_WORD + RBCAM_BANK_STRIDE_WORD + idx * RBCAM_STRIDE_WORD, 10) for idx in range(4)],
+        *[(f"feb_frame_assembly_{idx}.csr", base, 8) for idx, base in enumerate(FRAME_ASM_BASE_WORDS)],
         ("histogram_statistics_0.csr", HIST_CSR_BASE_WORD, 17),
     ]
 
@@ -460,7 +634,7 @@ def main() -> int:
     run_group.add_argument("--swb-sof", type=Path, default=None, help="program SWB before run (optional)")
     run_group.add_argument("--skip-program", "--no-program", dest="skip_program", action="store_true",
                            help="skip SOF programming and assume hardware is already configured")
-    run_group.add_argument("--skip-feb-config", action="store_true", help="don't run rbcam latency-style FEB config")
+    run_group.add_argument("--skip-feb-config", action="store_true", help="don't configure the FEB emulator/Type0/MTS/rbCAM source path")
     run_group.add_argument("--use-opq", action="store_true", help="enable USE_BIT_MERGER (OPQ datapath); default off")
     run_group.add_argument("--swb-link-mask-scifi", type=lambda s: int(s, 0), default=0x4)
     run_group.add_argument("--staging-mb", type=int, default=64)
@@ -474,7 +648,7 @@ def main() -> int:
     debug_group.add_argument("--no-data-ingress", action="store_true",
                              help="force SWB_LINK_MASK_SCIFI=0 and run SWB generated generic data through OPQ/RDMA")
     debug_group.add_argument("--dump-csrs", action="store_true",
-                             help="write run_tool_csr_dump_<timestamp>.md with 9 SWB BAR0 registers and 9 FEB CSR ranges")
+                             help="write run_tool_csr_dump_<timestamp>.md with SWB BAR0 registers and FEB hit-flow CSR ranges")
 
     tool_group = ap.add_argument_group("Tool discovery")
     tool_group.add_argument("--tool-bin-dir", type=Path, default=None,
@@ -542,27 +716,25 @@ def main() -> int:
     print(f"run_tool: SWB state {swb_state}")
     summary["swb_state"] = swb_state
 
-    # 4. FEB config (delegate to existing rbcam latency script for compatibility)
+    run_no = int(time.time()) & 0xFFFFFF
+    summary["run_number"] = run_no
+    print(f"run_tool: rc_tool preamble reset/stop-reset run={run_no}")
+    rc_send(tools, "reset", feb=args.feb_target)
+    rc_send(tools, "stop-reset", feb=args.feb_target)
+
+    # 4. FEB config on the current v3 SC word map.  The stale 20260427 helper
+    # used a different emulator stride and is intentionally not called here.
     if args.empty_frame:
         print("run_tool: configuring empty-frame FEB source mode (no MuTRiG config, no emulator hits)")
         summary["empty_frame_config"] = configure_empty_frame_sources(tools, args.feb_link)
     elif not args.skip_feb_config:
-        rbcam = Path("/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_hit_type0_mux_20260504/firmware_builds/systems/system_20260427_testplanphase5/script/run_rbcam_feb_hist_latency.py")
-        if rbcam.exists():
-            cfg_dir = args.output_dir / "feb_config_warmup"
-            cfg_dir.mkdir(exist_ok=True, parents=True)
-            print(f"run_tool: FEB config via {rbcam}")
-            run([
-                "python3", str(rbcam),
-                "--link", str(args.feb_link),
-                "--sc-tool", str(tools.sc_tool),
-                "--rc-tool", str(tools.rc_tool),
-                "--device", "/dev/mudaq0",
-                "--rates", "100k",
-                "--wait-ms", "200",
-                "--skip-egress",
-                "--output-dir", str(cfg_dir),
-            ], capture=False, check=False)
+        print("run_tool: configuring current FEB Type0 emulator source path")
+        summary["feb_config"] = configure_current_feb_sources(
+            tools,
+            args.feb_link,
+            q16_rate=args.rate_q16,
+            lane_mask=0xFF,
+        )
 
     # 5. Launch dma_tool
     dma_log = args.output_dir / "dma_tool.log"
@@ -586,10 +758,7 @@ def main() -> int:
 
     try:
         # 6. Run-control sequence
-        run_no = int(time.time()) & 0xFFFFFF
         print(f"run_tool: rc_tool sequence run={run_no}")
-        rc_send(tools, "reset", feb=args.feb_target)
-        rc_send(tools, "stop-reset", feb=args.feb_target)
         rc_send(tools, "run-prepare", run_no=run_no, feb=args.feb_target)
         rc_send(tools, "sync", feb=args.feb_target)
         rc_send(tools, "start-run", feb=args.feb_target)
@@ -622,6 +791,10 @@ def main() -> int:
         "DMA_REGISTER": swb_read(tools, "DMA_REGISTER"),
     }
     summary["final_swb_state"] = final_state
+    try:
+        summary["final_feb_flow"] = read_feb_flow_counters(tools, args.feb_link)
+    except SystemExit as exc:
+        summary["final_feb_flow"] = {"error": f"read failed rc={exc.code}"}
     summary["dma_capture_bytes"] = dma_out.stat().st_size if dma_out.exists() else 0
     summary["dma_log"] = str(dma_log)
     if dma_log.exists():

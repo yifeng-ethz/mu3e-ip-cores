@@ -97,8 +97,11 @@ arbiter, and FEB frame assembly, but the canonical mapping for `ps`, `ts`, and
 - `sv/feb_swb_parallel_cdc_adapter.sv` is the active parallel fallback.
 - `sv/feb_swb_corun_plain_tb.sv` is the direct mixed FEB/MuSiP RTL
   continuation bench. It instantiates the parallel adapter and the MuSiP
-  `swb_block_uvm_wrapper`, drives lanes 0 and 1 with FEB-style hit_type3
-  frames, masks lanes 2 and 3, and checks OPQ/DMA hit identity.
+  `swb_block_uvm_wrapper`, drives FEB-style hit_type3 frames through the
+  SWB demerger/OPQ steering path, and checks OPQ/DMA hit identity. The
+  default run keeps the historical lane-0/lane-1 setup with mask `0x3`.
+  `make run_swb_corun_link2` forces all hits onto logical SWB lane 2 with
+  mask `0x4`, matching the board bring-up link-2 check.
 - `sv/feb_swb_musip_uvm_driver.sv` drives MuSiP `feb_ingress_if`
   instances from the packed adapter outputs.
 - `sv/feb_swb_async_fifo.sv` is a simulation FIFO for the 125 MHz FEB to
@@ -142,6 +145,12 @@ make run_swb_corun \
   RUN_WINDOW_8NS=125000 \
   HIT_PERIOD_8NS=1250 \
   SOURCE_MODE=periodic
+```
+
+For the link-2 steering regression:
+
+```sh
+make run_swb_corun_link2 QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim
 ```
 
 The stochastic comparison uses independent Poisson streams per ASIC/channel:

@@ -8,6 +8,8 @@
 +incdir+uvm/common/lvds_decoded_monitor
 +incdir+uvm/common/rbcam_egress_monitor
 +incdir+uvm/common/feb_egress_monitor
++incdir+uvm/common/mu3e_frame_format
++incdir+uvm/common/feb_frame_monitor
 +incdir+uvm/common/histogram_csr_monitor
 +incdir+uvm/common/debug_l2_sidecar_monitor
 +incdir+uvm/common/debug_pre_rbcam_sidecar_monitor
@@ -26,9 +28,11 @@ uvm/common/tb_int_counter_if.sv
 uvm/common/lvds_phy_if.sv
 uvm/common/runctl_phy_if.sv
 uvm/common/sc_avmm_if.sv
+uvm/common/mu3e_frame_if.sv
 uvm/v3_pretest-260511/mutrig_l2_commit_if.sv
 uvm/v3_pretest-260511/mutrig_frame_deassembly_decoded_if.sv
 uvm/common/debug_fill_monitor/debug_fill_if.sv
+../../../../run-control_mgmt/rtl/runctl_mgmt_host.sv
 uvm/common/mutrig_phy_agent/mutrig_phy_agent.sv
 uvm/common/runctl_phy_agent/runctl_phy_agent.sv
 uvm/common/sc_phy_agent/sc_phy_agent.sv
@@ -36,6 +40,8 @@ uvm/common/l2_fifo_commit_monitor/l2_fifo_commit_monitor.sv
 uvm/common/lvds_decoded_monitor/lvds_decoded_monitor.sv
 uvm/common/rbcam_egress_monitor/rbcam_egress_monitor.sv
 uvm/common/feb_egress_monitor/feb_egress_monitor.sv
+uvm/common/mu3e_frame_format/mu3e_frame_format_pkg.sv
+uvm/common/feb_frame_monitor/feb_frame_monitor.sv
 uvm/common/histogram_csr_monitor/histogram_csr_monitor.sv
 uvm/common/debug_l2_sidecar_monitor/debug_l2_sidecar_monitor.sv
 uvm/common/debug_pre_rbcam_sidecar_monitor/debug_pre_rbcam_sidecar_monitor.sv

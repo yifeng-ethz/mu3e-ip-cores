@@ -50,5 +50,7 @@ package tb_int_swb_selected_tests_pkg;
     import tb_int_run_sequence_directed_wedge_fixed_test_pkg::*;
     // OPQ frame timestamp monitor smoke
     import tb_int_opq_frame_ts_smoke_test_pkg::*;
+    // OPQ frame replay from SignalTap-decoded memory
+    import tb_int_opq_frame_replay_test_pkg::*;
 
 endpackage

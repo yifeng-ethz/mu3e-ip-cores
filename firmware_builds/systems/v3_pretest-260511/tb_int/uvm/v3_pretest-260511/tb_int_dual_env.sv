@@ -11,6 +11,7 @@ package tb_int_dual_env_pkg;
     import tb_int_lvds_decoded_monitor_pkg::*;
     import tb_int_rbcam_egress_monitor_pkg::*;
     import tb_int_feb_egress_monitor_pkg::*;
+    import tb_int_feb_frame_monitor_pkg::*;
     import tb_int_histogram_csr_monitor_pkg::*;
     import tb_int_debug_l2_sidecar_monitor_pkg::*;
     import tb_int_debug_pre_rbcam_sidecar_monitor_pkg::*;
@@ -23,6 +24,7 @@ package tb_int_dual_env_pkg;
     localparam int TB_INT_STAGE_A_TAPS = 8;
     localparam int TB_INT_RBCAM_TAPS = 8;
     localparam int TB_INT_FEB_EGRESS_TAPS = 2;
+    localparam int TB_INT_FEB_FRAME_TAPS = 2;
     localparam int TB_INT_FILL_TAPS = 8;
 
     class tb_int_nominal_env extends uvm_env;
@@ -35,6 +37,7 @@ package tb_int_dual_env_pkg;
         lvds_decoded_monitor   pre_rbcam_mon[TB_INT_RBCAM_TAPS];
         rbcam_egress_monitor   post_rbcam_mon[TB_INT_RBCAM_TAPS];
         feb_egress_monitor      feb_egress_mon[TB_INT_FEB_EGRESS_TAPS];
+        feb_frame_monitor       feb_frame_mon[TB_INT_FEB_FRAME_TAPS];
         histogram_csr_monitor  histogram_mon;
 
         function new(string name, uvm_component parent);
@@ -58,6 +61,18 @@ package tb_int_dual_env_pkg;
             foreach (feb_egress_mon[tap_idx])
                 feb_egress_mon[tap_idx] = feb_egress_monitor::type_id::create(
                     $sformatf("feb_egress_mon%0d", tap_idx), this);
+            foreach (feb_frame_mon[tap_idx]) begin
+                feb_frame_mon[tap_idx] = feb_frame_monitor::type_id::create(
+                    $sformatf("feb_frame_mon%0d", tap_idx), this);
+                uvm_config_db#(int unsigned)::set(this,
+                                                  $sformatf("feb_frame_mon%0d", tap_idx),
+                                                  "lane_id",
+                                                  tap_idx);
+                uvm_config_db#(string)::set(this,
+                                            $sformatf("feb_frame_mon%0d", tap_idx),
+                                            "stream_name",
+                                            (tap_idx == 0) ? "feb_upload_data0_sc_rc" : "feb_upload_data1");
+            end
             histogram_mon = histogram_csr_monitor::type_id::create("histogram_mon", this);
         endfunction
     endclass

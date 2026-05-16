@@ -1,9 +1,9 @@
 set root [expr {[info exists env(MU3E_IP_CORES_ROOT)] ? $env(MU3E_IP_CORES_ROOT) : "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores"}]
 set system_dir [file join $root firmware_builds systems v3_pretest-260511]
 
-set datapath_version {3.0.6.515}
-set top_description {FEB V3 top with streaming histogram debug plane: scifi_datapath_system_v3 keeps the main MTS-to-rbCAM Type-1 path at 39 bits, carries 48-bit hit timestamp sidebands on readyless MTS extended sources into histogram_statistics_v2, uses 0x100-wide emulator CSR windows, keeps run-control fanout readyless, selects emulator byte streams with static per-lane source muxes, and exports per-lane frame-deassembly parser CSRs.}
-set datapath_description {scifi_datapath_system_v3 streaming histogram debug-plane contract: MTS Type-1 payloads remain on the legacy 39-bit main path while readyless hit_type1_extended_0/1 streams carry true hit_ts[47:0] above the payload directly into histogram_statistics_v2; histogram source selection is owned by the histogram CONTROL.in_port CSR; run-control fanout is readyless; decoded lane traffic uses explicit real/emulator source muxes rather than round-robin streaming multiplexers; parser CSRs are exported for live frame debug.}
+set datapath_version {3.0.7.515}
+set top_description {FEB V3 top with streaming histogram debug plane: scifi_datapath_system_v3 keeps the main MTS-to-rbCAM Type-1 path at 39 bits, carries 48-bit hit timestamp sidebands on readyless MTS extended sources into histogram_statistics_v2, uses 0x100-wide emulator CSR windows, keeps run-control fanout readyless, routes real decoded lanes through MuTRiG frame deassembly, and selects real versus emulator traffic at the post-deassembly hit_type0 atom boundary with per-lane arb_hit_type0 instances.}
+set datapath_description {scifi_datapath_system_v3 streaming histogram debug-plane contract: MTS Type-1 payloads remain on the legacy 39-bit main path while readyless hit_type1_extended_0/1 streams carry true hit_ts[47:0] above the payload directly into histogram_statistics_v2; histogram source selection is owned by the histogram CONTROL.in_port CSR; run-control fanout is readyless; emulator BYTE_STREAM_ENABLE is permanently false and emulator hit_type0 streams arbitrate against real frame-deassembly hit_type0 outputs before the MTS bank muxes; parser CSRs remain exported for live frame debug; the control-plane SC hub reaches datapath CSR windows through the clock-crossing bridge and banked command-pipelined CSR decode bridges while the local datapath JTAG master is kept off the SC-exported slave windows.}
 
 set avmm_slaves [list \
     {data_path_subsystem_lvds_rx_controller_pro_0.csr 0x0 0x40} \
@@ -20,14 +20,6 @@ set avmm_slaves [list \
     {data_path_subsystem_emulator_mutrig_7.csr 0x2700 0x2800} \
     {data_path_subsystem_dbg_mm2runctrl_0.csr 0x2800 0x2840} \
     {data_path_subsystem_mutrig_datapath_subsystem_2_backpressure_fifo.csr 0x2860 0x2870} \
-    {data_path_subsystem_mutrig_lane_source_mux_0.csr 0x2880 0x28C0} \
-    {data_path_subsystem_mutrig_lane_source_mux_1.csr 0x28C0 0x2900} \
-    {data_path_subsystem_mutrig_lane_source_mux_2.csr 0x2900 0x2940} \
-    {data_path_subsystem_mutrig_lane_source_mux_3.csr 0x2940 0x2980} \
-    {data_path_subsystem_mutrig_lane_source_mux_4.csr 0x2980 0x29C0} \
-    {data_path_subsystem_mutrig_lane_source_mux_5.csr 0x29C0 0x2A00} \
-    {data_path_subsystem_mutrig_lane_source_mux_6.csr 0x2A00 0x2A40} \
-    {data_path_subsystem_mutrig_lane_source_mux_7.csr 0x2A40 0x2A80} \
     {data_path_subsystem_mutrig_datapath_subsystem_0.csr 0x2A80 0x2A90} \
     {data_path_subsystem_mutrig_datapath_subsystem_1.csr 0x2A90 0x2AA0} \
     {data_path_subsystem_mutrig_datapath_subsystem_2.csr 0x2AA0 0x2AB0} \
@@ -36,6 +28,14 @@ set avmm_slaves [list \
     {data_path_subsystem_mutrig_datapath_subsystem_5.csr 0x2AD0 0x2AE0} \
     {data_path_subsystem_mutrig_datapath_subsystem_6.csr 0x2AE0 0x2AF0} \
     {data_path_subsystem_mutrig_datapath_subsystem_7.csr 0x2AF0 0x2B00} \
+    {data_path_subsystem_arb_hit_type0_0.csr 0x3000 0x3080} \
+    {data_path_subsystem_arb_hit_type0_1.csr 0x3080 0x3100} \
+    {data_path_subsystem_arb_hit_type0_2.csr 0x3100 0x3180} \
+    {data_path_subsystem_arb_hit_type0_3.csr 0x3180 0x3200} \
+    {data_path_subsystem_arb_hit_type0_4.csr 0x3200 0x3280} \
+    {data_path_subsystem_arb_hit_type0_5.csr 0x3280 0x3300} \
+    {data_path_subsystem_arb_hit_type0_6.csr 0x3300 0x3380} \
+    {data_path_subsystem_arb_hit_type0_7.csr 0x3380 0x3400} \
     {data_path_subsystem_mutrig_datapath_subsystem_3_backpressure_fifo.csr 0x3860 0x3870} \
     {data_path_subsystem_mts_preprocessor_0.csr 0x4000 0x4020} \
     {data_path_subsystem_mutrig_datapath_subsystem_4_backpressure_fifo.csr 0x4860 0x4870} \

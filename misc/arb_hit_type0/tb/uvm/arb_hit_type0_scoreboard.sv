@@ -62,6 +62,19 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
   int unsigned       coverage_mode_transition_bins[3][3];
   int unsigned       suppressed_csr_read_checks;
 
+  typedef struct {
+    bit  clear_counters;
+    bit  clear_sticky;
+    bit  clear_error_counters;
+    bit  clear_syndromes;
+    time due_time;
+  } csr_clear_effect_t;
+
+  // The CSR monitor samples the Avalon write request before the DUT samples it;
+  // registered W1P clear pulses therefore affect readable counters two clocks later.
+  localparam time CSR_WRITE_EFFECT_LATENCY = 16000ps;
+  csr_clear_effect_t pending_clear_effect_q[$];
+
   function new(string name = "arb_hit_type0_scoreboard", uvm_component parent = null);
     super.new(name, parent);
     real_imp   = new("real_imp", this);
@@ -138,6 +151,7 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
     egress_emu_frames_h_snap      = 32'd0;
     run_state                     = 3'd0;
     suppressed_csr_read_checks    = 0;
+    pending_clear_effect_q.delete();
   endfunction
 
   function hit_type0_seq_item clone_hit(hit_type0_seq_item item, string name);
@@ -166,9 +180,61 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
     endcase
   endfunction
 
+  function void apply_due_csr_clear_effects();
+    csr_clear_effect_t effect_v;
+
+    while ((pending_clear_effect_q.size() != 0) &&
+           (pending_clear_effect_q[0].due_time <= $time)) begin
+      effect_v = pending_clear_effect_q.pop_front();
+
+      if (effect_v.clear_counters) begin
+        ingress_real_hits        = 64'd0;
+        ingress_emu_hits         = 64'd0;
+        ingress_real_frames      = 64'd0;
+        ingress_emu_frames       = 64'd0;
+        drops_real               = 64'd0;
+        drops_emu                = 64'd0;
+        egress_real_hits         = 64'd0;
+        egress_emu_hits          = 64'd0;
+        egress_real_frames       = 64'd0;
+        egress_emu_frames        = 64'd0;
+        ingress_real_hits_h_snap = 32'd0;
+        ingress_emu_hits_h_snap  = 32'd0;
+        ingress_real_frames_h_snap = 32'd0;
+        ingress_emu_frames_h_snap  = 32'd0;
+        drops_real_h_snap        = 32'd0;
+        drops_emu_h_snap         = 32'd0;
+        egress_real_hits_h_snap  = 32'd0;
+        egress_emu_hits_h_snap   = 32'd0;
+        egress_real_frames_h_snap = 32'd0;
+        egress_emu_frames_h_snap  = 32'd0;
+      end
+
+      if (effect_v.clear_sticky) begin
+        partial_packet_drop_sticky = 1'b0;
+        mode_reserved_seen         = 1'b0;
+        protocol_violation_sticky  = 1'b0;
+        drop_mid_packet_sticky     = 1'b0;
+        watchdog_synthesized_real  = 1'b0;
+        watchdog_synthesized_emu   = 1'b0;
+      end
+
+      if (effect_v.clear_error_counters) begin
+        error_count_protocol        = 32'd0;
+        error_count_drop_mid_packet = 32'd0;
+      end
+
+      if (effect_v.clear_syndromes) begin
+        syndrome_protocol         = 32'd0;
+        syndrome_drop_mid_packet  = 32'd0;
+      end
+    end
+  endfunction
+
   function void write_real(hit_type0_seq_item txn);
     hit_type0_seq_item copy_v;
 
+    apply_due_csr_clear_effects();
     copy_v = clone_hit(txn, "real_fifo_item");
     copy_v.source_emu = 1'b0;
     if (txn.eop) begin
@@ -204,6 +270,7 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
   function void write_emu(hit_type0_seq_item txn);
     hit_type0_seq_item copy_v;
 
+    apply_due_csr_clear_effects();
     copy_v = clone_hit(txn, "emu_fifo_item");
     copy_v.source_emu = 1'b1;
     if (txn.eop) begin
@@ -237,6 +304,7 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
   function void write_egress(hit_type0_seq_item txn);
     hit_type0_seq_item exp;
 
+    apply_due_csr_clear_effects();
     ensure_expected_available();
     if (expected_egress_q.size() == 0) begin
       `uvm_error(get_type_name(), $sformatf("Unexpected egress beat: %s", txn.convert2string()))
@@ -260,6 +328,7 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
   function void write_csr(csr_seq_item txn);
     bit [31:0] expected_v;
 
+    apply_due_csr_clear_effects();
     if (txn.is_write) begin
       note_csr_write(txn);
     end else begin
@@ -366,6 +435,7 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
 
   function void note_csr_write(csr_seq_item txn);
     bit [1:0] old_mode_v;
+    csr_clear_effect_t clear_effect_v;
 
     case (txn.address)
       ARB_REG_META_ADDR: begin
@@ -373,43 +443,16 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
       end
       ARB_REG_CONTROL_ADDR: begin
         old_mode_v = mode_pending;
-        if (txn.writedata[2]) begin
-          ingress_real_hits        = 64'd0;
-          ingress_emu_hits         = 64'd0;
-          ingress_real_frames      = 64'd0;
-          ingress_emu_frames       = 64'd0;
-          drops_real               = 64'd0;
-          drops_emu                = 64'd0;
-          egress_real_hits         = 64'd0;
-          egress_emu_hits          = 64'd0;
-          egress_real_frames       = 64'd0;
-          egress_emu_frames        = 64'd0;
-          ingress_real_hits_h_snap = 32'd0;
-          ingress_emu_hits_h_snap  = 32'd0;
-          ingress_real_frames_h_snap = 32'd0;
-          ingress_emu_frames_h_snap  = 32'd0;
-          drops_real_h_snap        = 32'd0;
-          drops_emu_h_snap         = 32'd0;
-          egress_real_hits_h_snap  = 32'd0;
-          egress_emu_hits_h_snap   = 32'd0;
-          egress_real_frames_h_snap = 32'd0;
-          egress_emu_frames_h_snap  = 32'd0;
-        end
-        if (txn.writedata[3]) begin
-          partial_packet_drop_sticky = 1'b0;
-          mode_reserved_seen         = 1'b0;
-          protocol_violation_sticky  = 1'b0;
-          drop_mid_packet_sticky     = 1'b0;
-          watchdog_synthesized_real  = 1'b0;
-          watchdog_synthesized_emu   = 1'b0;
-        end
-        if (txn.writedata[4]) begin
-          error_count_protocol        = 32'd0;
-          error_count_drop_mid_packet = 32'd0;
-        end
-        if (txn.writedata[5]) begin
-          syndrome_protocol      = 32'd0;
-          syndrome_drop_mid_packet = 32'd0;
+        clear_effect_v.clear_counters       = txn.writedata[2];
+        clear_effect_v.clear_sticky         = txn.writedata[3];
+        clear_effect_v.clear_error_counters = txn.writedata[4];
+        clear_effect_v.clear_syndromes      = txn.writedata[5];
+        clear_effect_v.due_time             = $time + CSR_WRITE_EFFECT_LATENCY;
+        if (clear_effect_v.clear_counters ||
+            clear_effect_v.clear_sticky ||
+            clear_effect_v.clear_error_counters ||
+            clear_effect_v.clear_syndromes) begin
+          pending_clear_effect_q.push_back(clear_effect_v);
         end
         mode_pending = arb_sanitize_mode(txn.writedata[1:0]);
         if (txn.writedata[1:0] == ARB_MODE_RESERVED_CONST) begin
@@ -431,6 +474,7 @@ class arb_hit_type0_scoreboard extends uvm_scoreboard;
   function bit [31:0] expected_csr_read(input bit [4:0] addr);
     bit [31:0] value_v;
 
+    apply_due_csr_clear_effects();
     case (addr)
       ARB_REG_UID_ADDR: value_v = ARB_UID_CONST;
       ARB_REG_META_ADDR: begin

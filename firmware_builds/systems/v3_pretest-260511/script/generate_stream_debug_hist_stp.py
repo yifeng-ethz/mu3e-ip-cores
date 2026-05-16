@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
 """Generate the stream-debug histogram-path SignalTap file for feb_system_v3.
 
-This tap follows the bridge-free path:
+This tap follows the bridge-free post-deassembly Type-0 path and the FE
+delivery boundary:
 
-    source mux -> frame parser -> MTS type1/extended -> histogram_statistics_0
+    frame parser hit_type0 + emulator hit_type0 -> arb_hit_type0
+        -> readyless bank mux -> MTS type1/extended
+        -> rbCAM -> feb_frame_assembly -> upload
 
-The probe list deliberately excludes the retired histogram ingress bridge. The
-histogram IP owns extended-port selection internally through its CONTROL/port
-CSR state.
+The probe list deliberately excludes the retired histogram ingress bridge and
+the removed decoded-lane source mux. The histogram IP owns extended-port
+selection internally through its CONTROL/port CSR state.
+
+This is the synthesis/STP view. It also excludes DEBUG_LEVEL=2 metadata
+sidecars; those are simulator-only scoreboard evidence and are forced off in
+normal FEB firmware builds.
 """
 
 from __future__ import annotations
@@ -22,8 +29,9 @@ from pathlib import Path
 QSYS = "feb_system:u_feb_system|feb_system_v3:u_qsys|"
 DP_PREFIX = f"{QSYS}feb_system_v3_data_path_subsystem:data_path_subsystem|"
 HIST_PREFIX = f"{DP_PREFIX}histogram_statistics_v2:histogram_statistics_0|"
+FIREFLY_PREFIX = "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|"
 DEFAULT_CLOCK = f"{DP_PREFIX}lvds_outclock_clk"
-DEFAULT_TRIGGER = f"{HIST_PREFIX}asi_hit_type1_extended_0_valid"
+DEFAULT_TRIGGER = f"{DP_PREFIX}dbg_mm2runctrl:dbg_mm2runctrl_0|aso_ctrl_valid"
 
 
 @dataclass(frozen=True)
@@ -44,58 +52,297 @@ def add_bit_range(group: str, probes: list[Probe], base: str, start: int, stop: 
     probes.extend(Probe(group, f"{base}[{idx}]") for idx in range(start, stop))
 
 
+def add_avst_stream36(
+    group: str,
+    probes: list[Probe],
+    base: str,
+    *,
+    include_ready: bool = True,
+    include_packet_flags: bool = True,
+) -> None:
+    add(group, probes, f"{base}_valid")
+    if include_ready:
+        add(group, probes, f"{base}_ready")
+    if include_packet_flags:
+        add(group, probes, f"{base}_startofpacket", f"{base}_endofpacket")
+    add_bit_range(group, probes, f"{base}_data", 0, 32)
+    add_bit_range(f"{group} datak", probes, f"{base}_data", 32, 36)
+
+
 def default_probes() -> list[Probe]:
+    qsys = QSYS
     dp = DP_PREFIX
+    firefly = FIREFLY_PREFIX
     parser0 = (
         f"{dp}"
         "feb_system_v3_data_path_subsystem_mutrig_datapath_subsystem_0:"
         "mutrig_datapath_subsystem_0|"
     )
+    parser4 = (
+        f"{dp}"
+        "feb_system_v3_data_path_subsystem_mutrig_datapath_subsystem_4:"
+        "mutrig_datapath_subsystem_4|"
+    )
     frcv0 = f"{parser0}frame_rcv_ip:mutrig_frame_deassembly_0|"
+    frcv4 = f"{parser4}frame_rcv_ip:mutrig_frame_deassembly_0|"
+    emus = [f"{dp}emulator_mutrig_qsys_lane:emulator_mutrig_{idx}|" for idx in range(8)]
+    arbs = [f"{dp}arb_hit_type0:arb_hit_type0_{idx}|" for idx in range(8)]
+    run_splitter = f"{dp}feb_system_v3_data_path_subsystem_run_control_splitter:run_control_splitter|"
+    type0_splitter = (
+        f"{dp}"
+        "feb_system_v3_data_path_subsystem_run_control_type0_arb_splitter:"
+        "run_control_type0_arb_splitter|"
+    )
+    mux0 = f"{dp}hit_type0_readyless_mux4:mux_mutrig2processor|"
+    mux1 = f"{dp}hit_type0_readyless_mux4:mux_mutrig2processor_0|"
+    mts0 = f"{dp}mts_processor:mts_preprocessor_0|"
+    mts1 = f"{dp}mts_processor:mts_preprocessor_1|"
     hist = HIST_PREFIX
+    hit_stacks = [
+        (
+            "hs0",
+            f"{dp}"
+            "feb_system_v3_data_path_subsystem_hit_stack_subsystem_0:"
+            "hit_stack_subsystem_0|",
+        ),
+        (
+            "hs1",
+            f"{dp}"
+            "feb_system_v3_data_path_subsystem_hit_stack_subsystem_1:"
+            "hit_stack_subsystem_1|",
+        ),
+    ]
 
     probes: list[Probe] = []
 
     add(
-        "00 parser_lane0_type0",
+        "00 run_control_debug_source",
+        probes,
+        f"{dp}dbg_mm2runctrl:dbg_mm2runctrl_0|aso_ctrl_valid",
+        f"{dp}dbg_mm2runctrl:dbg_mm2runctrl_0|aso_ctrl_ready",
+        f"{dp}run_control_mux_out_data",
+        f"{dp}run_control_mux_out_valid",
+        f"{dp}run_control_mux_out_ready",
+        f"{dp}run_control_channel_dropper_out_data",
+        f"{dp}run_control_channel_dropper_out_valid",
+        f"{dp}run_control_splitter_out0_data",
+        f"{dp}run_control_splitter_out1_data",
+        f"{dp}run_control_splitter_out2_data",
+        f"{dp}run_control_splitter_out12_data",
+        f"{dp}run_control_splitter_out14_data",
+        f"{dp}run_control_splitter_out14_valid",
+        f"{run_splitter}out15_valid",
+        f"{dp}run_control_splitter_out15_data",
+        f"{dp}run_control_splitter_out15_valid",
+        f"{type0_splitter}out0_valid",
+        f"{type0_splitter}out1_valid",
+        f"{type0_splitter}out5_valid",
+        f"{type0_splitter}out1_data",
+        f"{frcv0}receiver_go",
+    )
+    add_bits("00 run_control_debug_source", probes, f"{dp}dbg_mm2runctrl:dbg_mm2runctrl_0|aso_ctrl_data", 9)
+
+    for idx in range(8):
+        add(
+            "00b generated_run_control_fanout",
+            probes,
+            f"{dp}emulator_ctrl_splitter_out{idx}_valid",
+            f"{dp}emulator_ctrl_splitter_out{idx}_ready",
+            f"{dp}emulator_ctrl_splitter_out{idx}_data",
+            f"{dp}run_control_type0_arb_splitter_out{idx + 1}_valid",
+            f"{dp}run_control_type0_arb_splitter_out{idx + 1}_data",
+        )
+
+    add(
+        "00c emulator_inject_fanout",
+        probes,
+        f"{dp}mutrig_injector_0_inject_pulse",
+    )
+    for idx in range(8):
+        add(
+            "00c emulator_inject_fanout",
+            probes,
+            f"{dp}emulator_inject_fanout_out{idx}_pulse",
+            f"{dp}emulator_inject_fanout_out{idx}_masked_pulse",
+        )
+
+    add(
+        "01 post_deassembly_type0",
         probes,
         f"{parser0}decoded_din_valid",
         f"{frcv0}aso_headerinfo_valid",
         f"{frcv0}aso_hit_type0_valid",
+        f"{frcv0}aso_hit_type0_endofpacket",
         f"{frcv0}p_new_word",
         f"{frcv0}n_new_word",
+        f"{parser0}hit_type0_out_valid",
+        f"{parser0}hit_type0_out_startofpacket",
+        f"{parser0}hit_type0_out_endofpacket",
+        f"{parser0}hit_type0_out_channel",
+        f"{parser0}hit_type0_out_data",
+        f"{frcv4}receiver_go",
+        f"{frcv4}aso_hit_type0_valid",
+        f"{parser4}hit_type0_out_valid",
+        f"{parser4}hit_type0_out_startofpacket",
+        f"{parser4}hit_type0_out_endofpacket",
+        f"{parser4}hit_type0_out_channel",
+        f"{parser4}hit_type0_out_data",
     )
-    add_bits("00 parser_lane0_type0", probes, f"{parser0}decoded_din_data", 9)
+    add_bits("01 post_deassembly_type0", probes, f"{parser0}decoded_din_data", 9)
+
+    for idx, emu in enumerate(emus):
+        add(
+            "02 emulator_type0_each",
+            probes,
+            f"{dp}emulator_mutrig_{idx}_hit_type0_valid",
+            f"{dp}emulator_mutrig_{idx}_hit_type0_startofpacket",
+            f"{dp}emulator_mutrig_{idx}_hit_type0_endofpacket",
+            f"{dp}emulator_mutrig_{idx}_hit_type0_endofrun",
+            f"{dp}emulator_mutrig_{idx}_hit_type0_channel",
+            f"{dp}emulator_mutrig_{idx}_hit_type0_error",
+            f"{dp}emulator_mutrig_{idx}_hit_type0_data",
+            f"{emu}aso_tx8b1k_valid",
+        )
+
+    for arb in arbs:
+        add(
+            "03 type0_arb_output_all",
+            probes,
+            f"{arb}arbiter_egress_valid",
+            f"{arb}arbiter_egress_startofpacket",
+            f"{arb}arbiter_egress_endofpacket",
+            f"{arb}arbiter_egress_endofrun",
+            f"{arb}arbiter_egress_channel",
+            f"{arb}arbiter_egress_error",
+            f"{arb}arbiter_egress_data",
+            f"{arb}arbiter_egress_source_emu",
+            f"{arb}arbiter_egress_synthesized",
+            f"{arb}arbiter_egress_real_frame_pulse",
+            f"{arb}arbiter_egress_emu_frame_pulse",
+        )
 
     add(
-        "01 mts_to_histogram_ingress",
+        "04 mux_mts_type0_boundary",
         probes,
+        f"{mux0}aso_out_valid",
+        f"{mux0}aso_out_channel",
+        f"{mux0}aso_out_data",
+        f"{mux0}aso_out_startofpacket",
+        f"{mux0}aso_out_endofpacket",
+        f"{mux1}aso_out_valid",
+        f"{mux1}aso_out_channel",
+        f"{mux1}aso_out_data",
+        f"{mux1}aso_out_startofpacket",
+        f"{mux1}aso_out_endofpacket",
+        f"{mts0}asi_hit_type0_accept",
+        f"{mts1}asi_hit_type0_accept",
+    )
+
+    add(
+        "04b mts_type1_to_hitstack",
+        probes,
+        f"{dp}mts_preprocessor_0_hit_type1_out_valid",
+        f"{dp}mts_preprocessor_0_hit_type1_out_ready",
+        f"{dp}mts_preprocessor_0_hit_type1_out_startofpacket",
+        f"{dp}mts_preprocessor_0_hit_type1_out_endofpacket",
+        f"{dp}mts_preprocessor_0_hit_type1_out_empty",
+        f"{dp}mts_preprocessor_0_hit_type1_out_channel",
+        f"{dp}mts_preprocessor_0_hit_type1_out_error",
+        f"{dp}mts_preprocessor_0_hit_type1_out_data",
+        f"{dp}mts_preprocessor_1_hit_type1_out_valid",
+        f"{dp}mts_preprocessor_1_hit_type1_out_ready",
+        f"{dp}mts_preprocessor_1_hit_type1_out_startofpacket",
+        f"{dp}mts_preprocessor_1_hit_type1_out_endofpacket",
+        f"{dp}mts_preprocessor_1_hit_type1_out_empty",
+        f"{dp}mts_preprocessor_1_hit_type1_out_channel",
+        f"{dp}mts_preprocessor_1_hit_type1_out_error",
+        f"{dp}mts_preprocessor_1_hit_type1_out_data",
+    )
+
+    for _stack_name, stack in hit_stacks:
+        for cam_idx in range(4):
+            pre = f"{stack}data_splitter_0_out{cam_idx}"
+            add(
+                "05 prerbcam_hit_type1_each",
+                probes,
+                f"{pre}_valid",
+                f"{pre}_ready",
+                f"{pre}_startofpacket",
+                f"{pre}_endofpacket",
+                f"{pre}_empty[0]",
+                f"{pre}_channel",
+                f"{pre}_error[0]",
+                f"{pre}_data",
+            )
+
+            post = f"{stack}ring_buffer_cam_{cam_idx}_hit_type2"
+            add(
+                "06 postrbcam_hit_type2_each",
+                probes,
+                f"{post}_valid",
+                f"{post}_ready",
+                f"{post}_startofpacket",
+                f"{post}_endofpacket",
+                f"{post}_channel",
+                f"{post}_error",
+                f"{post}_data",
+            )
+
+    add_avst_stream36("07a frame_assembly_upper_bank", probes, f"{dp}hit_type3_upper")
+    add_avst_stream36("07b frame_assembly_lower_bank", probes, f"{dp}hit_type3_lower")
+    add_avst_stream36("07c qsys_upper_export", probes, f"{qsys}data_path_subsystem_hit_type3_upper")
+    add_avst_stream36("07d qsys_upload_data1_lower_bank", probes, f"{qsys}upload_data1")
+    add_avst_stream36("07e qsys_upload_data0_upper_sc_rc_bank", probes, f"{qsys}upload_data0_sc_rc")
+    add_avst_stream36(
+        "07f firefly_upload_data1_lower_bank",
+        probes,
+        f"{firefly}i_upload_data1",
+        include_ready=False,
+        include_packet_flags=False,
+    )
+    add_avst_stream36(
+        "07g firefly_upload_data0_upper_sc_rc_bank",
+        probes,
+        f"{firefly}i_upload_data0_sc_rc",
+        include_ready=False,
+        include_packet_flags=False,
+    )
+
+    add(
+        "08 mts_to_histogram_ingress",
+        probes,
+        f"{mts0}aso_hit_type1_extended_0_valid",
+        f"{mts1}aso_hit_type1_extended_1_valid",
         f"{hist}asi_hit_type1_extended_0_valid",
         f"{hist}asi_hit_type1_extended_1_valid",
         f"{hist}port_valid[0]",
         f"{hist}port_ready[0]",
         f"{hist}ingress_stage_valid[0]",
         f"{hist}ingress_stage_write_req[0]",
+        f"{hist}ingress_stage_valid[1]",
+        f"{hist}ingress_stage_write_req[1]",
     )
-    add_bits("01 mts_to_histogram_ingress", probes, f"{hist}cfg_in_port", 2)
-    add_bit_range("01 mts_to_histogram_ingress", probes, f"{hist}asi_hit_type1_extended_0_data", 17, 39)
+    add_bits("08 mts_to_histogram_ingress", probes, f"{hist}cfg_in_port", 2)
+    add_bit_range("08 mts_to_histogram_ingress", probes, f"{hist}asi_hit_type1_extended_0_data", 17, 39)
+    add_bit_range("08 mts_to_histogram_ingress", probes, f"{hist}asi_hit_type1_extended_1_data", 17, 39)
 
     add(
-        "02 histogram_fill_pipeline",
+        "09 histogram_fill_pipeline",
         probes,
         f"{hist}fifo_write[0]",
+        f"{hist}fifo_write[1]",
         f"{hist}key_pipe_valid",
         f"{hist}divider_in_valid",
         f"{hist}queue_hit_valid",
     )
-    add_bits("02 histogram_fill_pipeline", probes, f"{hist}key_pipe", 32)
-    add_bit_range("02 histogram_fill_pipeline", probes, f"{hist}queue_hit_bin", 0, 8)
+    add_bits("09 histogram_fill_pipeline", probes, f"{hist}key_pipe", 32)
+    add_bit_range("09 histogram_fill_pipeline", probes, f"{hist}queue_hit_bin", 0, 8)
 
-    add_bits("03 histogram_csr_counters", probes, f"{hist}csr_total_hits", 32)
-    add_bit_range("03 histogram_csr_counters", probes, f"{hist}csr_dropped_hits", 0, 16)
-    add_bit_range("03 histogram_csr_counters", probes, f"{hist}csr_bank_status", 0, 8)
-    add_bit_range("03 histogram_csr_counters", probes, f"{hist}csr_port_status", 0, 24)
-    add_bit_range("03 histogram_csr_counters", probes, f"{hist}csr_coal_status", 0, 16)
+    add_bits("10 histogram_csr_counters", probes, f"{hist}csr_total_hits", 32)
+    add_bit_range("10 histogram_csr_counters", probes, f"{hist}csr_dropped_hits", 0, 16)
+    add_bit_range("10 histogram_csr_counters", probes, f"{hist}csr_bank_status", 0, 8)
+    add_bit_range("10 histogram_csr_counters", probes, f"{hist}csr_port_status", 0, 24)
+    add_bit_range("10 histogram_csr_counters", probes, f"{hist}csr_coal_status", 0, 16)
 
     return probes
 
@@ -111,7 +358,7 @@ def add_multi(parent: ET.Element, attribute: str, size: str, value: str) -> None
 def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str) -> ET.ElementTree:
     stamp = dt.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")
     signal_set_name = "stream_debug_hist_path"
-    trigger_name = "hist_ext0_valid_rise" if trigger_mode == "rising_edge" else "hist_ext0_valid_high"
+    trigger_name = "run_control_dbg_valid_rise" if trigger_mode == "rising_edge" else "run_control_dbg_valid_high"
     probes = default_probes()
     signals = [probe.name for probe in probes]
 
@@ -158,7 +405,17 @@ def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str) -> ET.E
 
     signal_set = ET.SubElement(instance, "signal_set", {"name": signal_set_name})
     signal_set.append(ET.Comment(f"Generated {stamp} UTC"))
-    signal_set.append(ET.Comment("Bridge-free FEB histogram path: MTS extended outputs feed histogram_statistics_0 directly."))
+    signal_set.append(
+        ET.Comment(
+            "Bridge-free FEB histogram path with run-control debug-source probes through mux/dropper/splitter."
+        )
+    )
+    signal_set.append(
+        ET.Comment(
+            "Frame buses are probed bitwise. For 36-bit streams, data[31:0]=word and data[35:32]=datak; "
+            "offline decode classifies K28.5 headers, K23.7 subheaders, hits, and K28.4 trailers."
+        )
+    )
     ET.SubElement(signal_set, "clock", {"name": DEFAULT_CLOCK, "polarity": "posedge", "tap_mode": "classic"})
     ET.SubElement(
         signal_set,

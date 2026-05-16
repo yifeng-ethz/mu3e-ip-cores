@@ -288,8 +288,8 @@ offsets. For `sc_tool`, add the SC bridge byte base `0x20000` and divide by 4.
 | `mutrig_datapath_subsystem_<k>.backpressure_fifo.csr` (k=0..7) | `0x0860 + k*0x1000` | `0x20860 + k*0x1000` | `0x08218 + k*0x400` |
 | `emulator_mutrig_<k>.csr` (k=0..7) | `0x2000 + k*0x100` | `0x22000 + k*0x100` | `0x08800 + k*0x40` |
 | `dbg_mm2runctrl_0.csr` | `0x2800` | `0x22800` | `0x08A00` |
-| `mutrig_lane_source_mux_<k>.csr` (k=0..7) | `0x2880 + k*0x40` | `0x22880 + k*0x40` | `0x08A20 + k*0x10` |
 | `mutrig_datapath_subsystem_<k>.csr` frame parser export (k=0..7) | `0x2A80 + k*0x10` | `0x22A80 + k*0x10` | `0x08AA0 + k*0x4` |
+| `arb_hit_type0_<k>.csr` (k=0..7) | `0x3000 + k*0x80` | `0x23000 + k*0x80` | `0x08C00 + k*0x20` |
 | `mts_preprocessor_0.csr` | `0x4000`-`0x401F` | `0x24000`-`0x2401F` | `0x09000`-`0x09007` |
 | `mts_preprocessor_1.csr` | `0x8000`-`0x801F` | `0x28000`-`0x2801F` | `0x0A000`-`0x0A007` |
 | `histogram_statistics_0.hist_bin` | `0xA000`-`0xA3FF` | `0x2A000`-`0x2A3FF` | `0x0A800`-`0x0A8FF` |
@@ -318,6 +318,10 @@ selects normal fill input (`0`), upper MTS extended stream (`1`), or lower MTS
 extended stream (`2`). The live capture script programs this field directly
 and clears histogram counters through the histogram CSR during each fresh case
 configuration before starting the run.
+Emulator source selection is not done by a decoded-lane byte-stream mux. The
+emulator package permanently disables `BYTE_STREAM_ENABLE`, and real/emulated
+traffic is selected per lane by `arb_hit_type0_<k>` at the post-frame-
+deassembly Type-0 hit atom boundary.
 
 #### `upload_mm_bridge` (window `0x30000`-`0x3007F`) — upload AVMM map
 
@@ -339,10 +343,11 @@ chain and is **not** an SC slave; listed here for completeness.
 
 ### Things to flag
 
-- The source-mux CSRs occupy the old frame-parser region in the current v3
-  map. The exported per-lane frame-parser CSRs now start at `sc_tool` word
-  `0x08AA0 + k*0x4`; using the old `0x08240/0x08640/0x08A40/...` probes will
-  collide with other live datapath slaves.
+- The old source-mux CSR region is retired in the current Type-0 arbitration
+  map. Per-lane frame-parser CSRs start at `sc_tool` word
+  `0x08AA0 + k*0x4`; Type-0 arb CSRs start at `0x08C00 + k*0x20`.
+  Using old `0x08240/0x08640/0x08A40/...` probes will collide with other live
+  datapath slaves.
 - `bringup_subsystem` is fully isolated — there is no path for SC, the
   data plane, or the SWB to touch the bring-up Nios. If the user expects
   to drive the bring-up Nios from the host, an explicit AVMM or

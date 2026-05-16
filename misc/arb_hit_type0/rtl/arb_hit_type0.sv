@@ -1,10 +1,10 @@
 // arb_hit_type0.sv
 // Per-lane arbiter on the post-deassembly hit_type0 boundary. Selects
 // between the real MuTRiG hit_type0 stream and the emulator hit_type0
-// stream with 16-deep ingress FIFOs per source.
+// stream with configurable 2- or 16-deep ingress FIFOs per source.
 //
-// Version : 26.6.0
-// Date    : 20260512
+// Version : 26.6.5
+// Date    : 20260516
 // Change  : 26.4.1 (20260506) Preserve per-hit metadata valid through the
 //                              selected DEBUG sideband.
 //           26.5.0 (20260511) Drop run_ctrl ready output to match rc-network
@@ -16,18 +16,31 @@
 //                              clear only on RUN_RESETTING. Fixes lane-admit
 //                              asymmetry seen in on-board Phase 4.5 sweep
 //                              (Qsys CSR/RC ordering race during run start).
+//           26.6.1 (20260516) Register CSR write side effects in the CSR
+//                              block so local Qsys address decode does not
+//                              feed the wide counter clear bank in one cycle.
+//           26.6.2 (20260516) Register W1P clear pulses before the wide
+//                              counter/sticky fanout to remove the remaining
+//                              local clear-decode critical path.
+//           26.6.3 (20260516) Keep W1P clear address decode off the wide
+//                              counter/sticky fanout.
+//           26.6.4 (20260516) Allow FIFO_DEPTH=2 for FEB resource-trim builds
+//                              while preserving the full CSR/counter surface.
+//           26.6.5 (20260516) Add COUNTER_PROFILE=1 trim3 CSR profile:
+//                              ingress real, ingress emu, total egress only.
 
 module arb_hit_type0 #(
     parameter integer MODE_DEFAULT      = 0,            // 0=REAL, 1=EMU, 2=MIX_RR
-    parameter integer FIFO_DEPTH        = 16,
+    parameter integer FIFO_DEPTH        = 16,           // supported values: 2 or 16
+    parameter integer COUNTER_PROFILE   = 0,            // 0=full CSR counters, 1=trim3
     parameter integer DEBUG_LEVEL       = 0,            // 0=off, 1=FIFO levels, 2=hit metadata
     parameter integer WATCHDOG_DEFAULT  = 500,          // FAW threshold cycles, 0 disables
     parameter integer IP_UID            = 32'h41485430, // ASCII "AHT0"
     parameter integer VERSION_MAJOR     = 26,
     parameter integer VERSION_MINOR     = 6,
-    parameter integer VERSION_PATCH     = 0,
-    parameter integer BUILD             = 512,
-    parameter integer VERSION_DATE      = 20260512,
+    parameter integer VERSION_PATCH     = 5,
+    parameter integer BUILD             = 518,
+    parameter integer VERSION_DATE      = 20260516,
     parameter integer VERSION_GIT       = 32'h0000_0000,
     parameter integer INSTANCE_ID       = 0
 ) (
@@ -347,7 +360,8 @@ module arb_hit_type0 #(
         .selected_endofpacket      (arbiter_selected_endofpacket)
     );
 
-    arb_hit_type0_csr #(
+    arb_hit_type0_csr_profiled #(
+        .COUNTER_PROFILE       (COUNTER_PROFILE),
         .MODE_DEFAULT          (MODE_DEFAULT),
         .WATCHDOG_DEFAULT      (WATCHDOG_DEFAULT),
         .IP_UID                (IP_UID),
@@ -464,6 +478,12 @@ module arb_hit_type0 #(
     initial begin : debug_parameter_guard
         if ((DEBUG_LEVEL < 0) || (DEBUG_LEVEL > 2)) begin
             $error("arb_hit_type0 supports DEBUG_LEVEL in the range 0..2");
+        end
+        if (!((FIFO_DEPTH == 2) || (FIFO_DEPTH == 16))) begin
+            $error("arb_hit_type0 supports FIFO_DEPTH=2 or FIFO_DEPTH=16 only");
+        end
+        if (!((COUNTER_PROFILE == 0) || (COUNTER_PROFILE == 1))) begin
+            $error("arb_hit_type0 supports COUNTER_PROFILE=0 or COUNTER_PROFILE=1 only");
         end
     end
     // synthesis translate_on

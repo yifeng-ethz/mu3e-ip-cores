@@ -23,12 +23,16 @@ package tb_int_base_test_pkg;
 
         virtual mutrig_l2_commit_if stage_a_vif;
         virtual mutrig_l2_commit_if debug_l2_vif;
+        virtual hit_tap_if emulator_egress_vif;
+        virtual hit_tap_if debug_emulator_egress_vif;
         virtual hit_tap_if pre_rbcam_vif;
         virtual hit_tap_if post_rbcam_vif;
         virtual hit_tap_if debug_pre_rbcam_vif;
         virtual hit_tap_if debug_post_rbcam_vif;
         virtual hit_tap_if debug_feb_egress_vif;
         virtual hit_tap_if feb_egress_vif;
+        virtual mu3e_frame_if upload_data0_frame_vif;
+        virtual mu3e_frame_if upload_data1_frame_vif;
 
         function new(string name, uvm_component parent);
             super.new(name, parent);
@@ -56,6 +60,10 @@ package tb_int_base_test_pkg;
                 `uvm_fatal("TB_INT_BASE", "stage_a_vif not configured")
             if (!uvm_config_db#(virtual mutrig_l2_commit_if)::get(this, "", "debug_l2_vif", debug_l2_vif))
                 `uvm_fatal("TB_INT_BASE", "debug_l2_vif not configured")
+            if (!uvm_config_db#(virtual hit_tap_if)::get(this, "", "emulator_egress_vif", emulator_egress_vif))
+                `uvm_fatal("TB_INT_BASE", "emulator_egress_vif not configured")
+            if (!uvm_config_db#(virtual hit_tap_if)::get(this, "", "debug_emulator_egress_vif", debug_emulator_egress_vif))
+                `uvm_fatal("TB_INT_BASE", "debug_emulator_egress_vif not configured")
             if (!uvm_config_db#(virtual hit_tap_if)::get(this, "", "pre_rbcam_vif", pre_rbcam_vif))
                 `uvm_fatal("TB_INT_BASE", "pre_rbcam_vif not configured")
             if (!uvm_config_db#(virtual hit_tap_if)::get(this, "", "post_rbcam_vif", post_rbcam_vif))
@@ -68,6 +76,10 @@ package tb_int_base_test_pkg;
                 `uvm_fatal("TB_INT_BASE", "debug_feb_egress_vif not configured")
             if (!uvm_config_db#(virtual hit_tap_if)::get(this, "", "feb_egress_vif", feb_egress_vif))
                 `uvm_fatal("TB_INT_BASE", "feb_egress_vif not configured")
+            if (!uvm_config_db#(virtual mu3e_frame_if)::get(this, "", "upload_data0_frame_vif", upload_data0_frame_vif))
+                `uvm_fatal("TB_INT_BASE", "upload_data0_frame_vif not configured")
+            if (!uvm_config_db#(virtual mu3e_frame_if)::get(this, "", "upload_data1_frame_vif", upload_data1_frame_vif))
+                `uvm_fatal("TB_INT_BASE", "upload_data1_frame_vif not configured")
         endfunction
 
         virtual task reset_per_test_delay();

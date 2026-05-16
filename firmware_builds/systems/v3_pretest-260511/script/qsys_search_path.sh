@@ -22,6 +22,8 @@ qsys_is_forbidden_path() {
         "${resolved_root}/firmware_builds/systems/"*/syn/*|\
         "${resolved_root}/firmware_builds/systems/system_20260427_testplanphase5"|\
         "${resolved_root}/firmware_builds/systems/system_20260427_testplanphase5/"*|\
+        "${resolved_root}/run-control_mgmt/reference/feb_system_v2_snapshot_20260415"|\
+        "${resolved_root}/run-control_mgmt/reference/feb_system_v2_snapshot_20260415/"*|\
         "${resolved_root}/.git"|\
         "${resolved_root}/.git/"*|\
         "${resolved_root}/.worktrees"|\
@@ -94,6 +96,7 @@ qsys_collect_active_search_paths() {
     local hw_tcl hw_dir ip_dir qsys_dir
 
     root="$(realpath -- "${root}")"
+    MU3E_IP_CORES_ROOT="${root}"
 
     if [ -d "${root}/quartus_systems" ]; then
         while IFS= read -r qsys_dir; do

@@ -1,17 +1,15 @@
 // tb_int_run_emul_blocked_test.sv
-// FEB BUG-RC-RUN-EMUL behavioural topology repro test (PRE-FIX).
+// FEB run-control/emulator path regression. The legacy PRE-FIX test name is
+// retained for Makefile compatibility; the active tb_int shell no longer uses
+// the old behavioural splitter shortcut and therefore expects the generated
+// run-control path to pass hits.
 //
 // Author : Claude Opus
 // Date   : 20260511
-// Scope  : Phase 3 BUG-RC-RUN-EMUL repro. Drives start-run (0x12) + 16
-//          emulator hits against the behavioural topology model in
-//          tb_int_top.sv. With BUG_RC_RUN_EMUL_FIXED UNDEFINED the
-//          mock_run_control_splitter's outN_ready inputs are dangling
-//          (resolve as logic 0 by AND default), so the RUNNING broadcast
-//          to emulator_mutrig is blocked. mock_total_hits_cnt stays 0 and
-//          the SC AVMM read at CSR_HISTO_TOTAL_HITS returns 0. The test
-//          PASSes when the blocked signature (TOTAL_HITS == 0) is
-//          observed (the bug is "verified live" in behavioural sim).
+// Scope  : Drives real runctl_mgmt_host synclink commands plus emulator hits
+//          against the generated FEB run-control splitter path. The stale
+//          pre-fix blocked expectation was removed because it hid a shortcut
+//          model rather than verifying the current FEB topology.
 
 package tb_int_run_emul_blocked_test_pkg;
 
@@ -56,13 +54,17 @@ package tb_int_run_emul_blocked_test_pkg;
                           sc_vif,
                           stage_a_vif,
                           debug_l2_vif,
+                          emulator_egress_vif,
+                          debug_emulator_egress_vif,
                           pre_rbcam_vif,
                           post_rbcam_vif,
                           debug_pre_rbcam_vif,
                           debug_post_rbcam_vif,
                           debug_feb_egress_vif,
-                          feb_egress_vif);
-            seq.emul_check_mode = EMUL_MODE_EXPECT_BLOCKED;
+                          feb_egress_vif,
+                          upload_data0_frame_vif,
+                          upload_data1_frame_vif);
+            seq.emul_check_mode = EMUL_MODE_EXPECT_FIXED;
             seq.body(hit_count);
             $display("*** TEST PASSED ***");
             phase.drop_objection(this);

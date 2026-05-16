@@ -44,9 +44,9 @@ RO status reads consistent with quiescent board.
 | BU011 | B | runctl_mgmt_host CSR sweep | 1 | read CSR_UID..CSR_LOG_STATUS | LAST_CMD = 0; RX_CMD_COUNT = 0 | `check_sc_bridges.py` |
 | BU012 | B | histogram_statistics_v2 UID | 1 | read hist CSR | matches `histogram_statistics_0` row in Section 2.5 | `check_ip_metadata.py` |
 | BU013 | B | mts_preprocessor_0 / _1 UID | 2 | read both mts CSR bases | matches `mts_preprocessor_0` and `_1` rows in Section 2.5 | `check_ip_metadata.py` |
-| BU014 | B | arb_hit_type0_supercore META | 1 | read supercore META + per-lane MODE | matches `arb_hit_type0_supercore_0`; LANE_COUNT = 8 | `check_ip_metadata.py` |
+| BU014 | B | arb_hit_type0 per-lane UID + META | 8 | read `0x08C00 + k*0x20` UID/META + MODE | matches `arb_hit_type0_<k>` rows; `MODE_DEFAULT = EMU`, `DEBUG_LEVEL = 2` | `check_ip_metadata.py` |
 | BU015 | B | emulator_mutrig_qsys_lane UID | 1 | read emulator CSR base | matches `emulator_mutrig_0`..`_7` rows; `BYTE_STREAM_ENABLE = 0` | `check_ip_metadata.py` |
-| BU016 | B | hit_type0_fanout8 instance | 1 | inspect synthesis tree | 1 instance, 8 outputs | grep submodules |
+| BU016 | B | hit_type0_readyless_mux4 banks | 1 | inspect synthesis tree | 2 instances; selected metadata sidecars reach both MTS banks | grep submodules |
 | BU017 | B | mutrig_frame_deassembly UID | 1 | read CSR base | `mutrig_frame_deassembly_0` row documents current map status | `check_ip_metadata.py` |
 | BU018 | B | ring_buffer_cam debug counters | 1 | read rbCAM debug_msg2 | rbCAM rows in Section 2.5; push_cnt = pop_cnt = 0 at cold-boot | `check_sc_bridges.py` |
 | BU019 | B | feb_frame_assembly_HSS0 / 1 UID | 2 | read both frame-asm CSRs | matches `feb_frame_assembly_0` and `_1` rows; actual_hits = 0 | `check_ip_metadata.py` |
@@ -87,21 +87,25 @@ drop commit appears in the most recent 20 commits.
 | runctl_mgmt_host_0 | runctl_mgmt_host | 0x52434D48 | 26.3.0.0505 | Yifeng Wang | 2026-05-05 | 0x30000 / 0x0C000 | 0x00000000 |  |
 | lvds_rx_controller_pro_0 | lvds_rx_controller_pro | TBD | 25.1.0631 | Yifeng Wang | 2025-01-24 | 0x20000 / 0x08000 | 0x00000000 |  |
 | mutrig_reset_controller_0 | mutrig_reset_controller | TBD | 1.1.0 | Yifeng Wang | 2024-07-25 | 0x20200 / 0x08080 | 0x00000200 |  |
-| emulator_mutrig_0 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x22000 / 0x08800 | 0x00002000 |  |
-| emulator_mutrig_1 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x22040 / 0x08810 | 0x00002040 |  |
-| emulator_mutrig_2 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x22080 / 0x08820 | 0x00002080 |  |
-| emulator_mutrig_3 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x220C0 / 0x08830 | 0x000020C0 |  |
-| emulator_mutrig_4 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x22100 / 0x08840 | 0x00002100 |  |
-| emulator_mutrig_5 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x22140 / 0x08850 | 0x00002140 |  |
-| emulator_mutrig_6 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x22180 / 0x08860 | 0x00002180 |  |
-| emulator_mutrig_7 | emulator_mutrig | 0x454D5554 | 26.3.0.0506 | Yifeng Wang | 2026-05-06 | 0x221C0 / 0x08870 | 0x000021C0 |  |
-| arb_hit_type0_supercore_0 | arb_hit_type0_supercore | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x22280 / 0x088A0 | 0x000022A0 | rc-readyless supercore; lane CSR contents are arb_hit_type0 |
-| arb_hit_type0_0 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x22280 / 0x088A0 | 0x000022A0 | per-lane CSR behind supercore |
-| arb_hit_type0_runctl_0 | TBD | TBD | TBD | TBD | TBD | inside arb_hit_type0_supercore_0 | no separate aperture | TBD: no standalone _hw.tcl found; RTL block under misc/arb_hit_type0/rtl |
-| mts_preprocessor_0 | mts_preprocessor | 0x4D546350 | 26.3.0.0512 | Yifeng Wang | 2026-05-12 | 0x24000 / 0x09000 | 0x00004000 |  |
-| mts_preprocessor_1 | mts_preprocessor | 0x4D546350 | 26.3.0.0512 | Yifeng Wang | 2026-05-12 | 0x28000 / 0x0A000 | 0x00008000 |  |
-| histogram_statistics_0 | histogram_statistics_v2 | 0x48495354 | 26.2.0.0511 | Yifeng Wang | 2026-05-11 | 0x2A400 / 0x0A900 | 0x0000A400 |  |
-| histogram_ingress_bridge_0 | histogram_ingress_bridge | 0x48495342 | 26.0.2.0425 | OpenAI Codex | 2026-04-25 | 0x2AC00 / 0x0AB00 | 0x0000AC00 |  |
+| emulator_mutrig_0 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22000 / 0x08800 | 0x00002000 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| emulator_mutrig_1 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22100 / 0x08840 | 0x00002100 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| emulator_mutrig_2 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22200 / 0x08880 | 0x00002200 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| emulator_mutrig_3 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22300 / 0x088C0 | 0x00002300 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| emulator_mutrig_4 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22400 / 0x08900 | 0x00002400 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| emulator_mutrig_5 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22500 / 0x08940 | 0x00002500 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| emulator_mutrig_6 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22600 / 0x08980 | 0x00002600 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| emulator_mutrig_7 | emulator_mutrig | 0x454D5554 | 26.3.3.0515 | Yifeng Wang | 2026-05-15 | 0x22700 / 0x089C0 | 0x00002700 | `BYTE_STREAM_ENABLE=false`; Type-0 output only |
+| arb_hit_type0_0 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23000 / 0x08C00 | 0x00003000 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| arb_hit_type0_1 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23080 / 0x08C20 | 0x00003080 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| arb_hit_type0_2 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23100 / 0x08C40 | 0x00003100 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| arb_hit_type0_3 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23180 / 0x08C60 | 0x00003180 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| arb_hit_type0_4 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23200 / 0x08C80 | 0x00003200 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| arb_hit_type0_5 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23280 / 0x08CA0 | 0x00003280 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| arb_hit_type0_6 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23300 / 0x08CC0 | 0x00003300 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| arb_hit_type0_7 | arb_hit_type0 | 0x41485430 | 26.6.0.0512 | Mu3e IP team | 2026-05-12 | 0x23380 / 0x08CE0 | 0x00003380 | post-deassembly real/emu Type-0 arb; DEBUG_LEVEL=2 |
+| mts_preprocessor_0 | mts_preprocessor | 0x4D545350 | 26.3.4.0515 | Yifeng Wang | 2026-05-15 | 0x24000 / 0x09000 | 0x00004000 | Type-0 sidecar input enabled |
+| mts_preprocessor_1 | mts_preprocessor | 0x4D545350 | 26.3.4.0515 | Yifeng Wang | 2026-05-15 | 0x28000 / 0x0A000 | 0x00008000 | Type-0 sidecar input enabled |
+| histogram_statistics_0 | histogram_statistics_v2 | 0x48495354 | 26.3.0.0515 | Yifeng Wang | 2026-05-15 | 0x2A400 / 0x0A900 | 0x0000A400 | owns source selection; no external ingress bridge |
 | ring_buffer_cam_0 | ring_buffer_cam | 0x5242434D | 26.2.11.0511 | Yifeng Wang | 2026-05-11 | 0x2B000 / 0x0AC00 | 0x0000B000 |  |
 | ring_buffer_cam_1 | ring_buffer_cam | 0x5242434D | 26.2.11.0511 | Yifeng Wang | 2026-05-11 | 0x2B080 / 0x0AC20 | 0x0000B080 |  |
 | ring_buffer_cam_2 | ring_buffer_cam | 0x5242434D | 26.2.11.0511 | Yifeng Wang | 2026-05-11 | 0x2B100 / 0x0AC40 | 0x0000B100 |  |

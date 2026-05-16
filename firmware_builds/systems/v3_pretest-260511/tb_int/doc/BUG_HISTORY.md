@@ -42,6 +42,10 @@ Historical formal note:
 | [BUG-006-R](#bug-006-r-readyless-mts-run_prepare-rearm-loss-keeps-fresh-live-captures-empty) | R | hard stuck error | `common (fresh histogram readback / CSR counter runs)` | fixed in sim / board retest still failing | live hist zero capture after source-mux and emulator CSR fixes | `pending` | MTS rearm fix is present in the programmed tree, but live source-mux-to-frame-parser closure is still blocked by zero downstream counters and a timing-violating FEB build. |
 | [BUG-007-R](#bug-007-r-qsys-catalog-shadowing-and-optional-streams-block-feb-v3-gui-open) | R | non-datapath-refactor | `common (FEB v3 Platform Designer open/generate)` | fixed / qsys-generate green | FEB v3 Qsys GUI reported 121 errors on 2026-05-15 | this commit | Qsys search-path shadowing selected the wrong MuTRiG frame-deassembly package surface and optional streams stayed enabled in production-disabled configurations. |
 | [BUG-008-H](#bug-008-h-source-mux-frame-cosim-interval-rollover-clears-total_hits-during-long-drain) | H | non-datapath-refactor | `corner-only (long-drain cosim profiles with drain > 10000 cycles)` | fixed / long-drain cosim green | `high_3m_q256` exploratory cosim | `pending` | The cosim programmed histogram interval as `run_cycles + 10000`, so longer drains could roll the interval and clear `TOTAL_HITS` before CSR readback. |
+| [BUG-009-H](#bug-009-h-synthesis_debug-dut-manifest-has-debug2-sources-but-generated-rtl-still-debug0) | H | non-datapath-refactor | `common (real-DUT debug tb_int with synthesis_debug)` | open / manifest guard blocks sim | `check_qsys_dut_manifest QSYS_DUT_VARIANT=synthesis_debug` | `pending` | The copied debug Qsys source tree carries DEBUG=2, but generated `synthesis_debug/` RTL still has DEBUG/DEBUG_LEVEL/DEBUG_LV generics at 0, so the real-DUT waveform run is intentionally blocked. |
+| [BUG-010-H](#bug-010-h-focused-stp-frame-capture-has-sop-eop-shape-but-not-decodable-data-datak-contract) | H | non-datapath-refactor | `directed-only (old focused SignalTap export without data/datak contract probes)` | open / recapture required | focused STP contract decode + OPQ replay on 2026-05-16 | `pending` | The old focused STP capture shows 517 valid frame-shaped samples but exports data as zero and lacks datak, so the strict Mu3e checker and replay fail instead of proving delivered hits. |
+| [BUG-011-H](#bug-011-h-live-feb-frame-counters-advance-but-swb-opq-ingress-remains-idle) | H | hard stuck error | `common (live FEB-to-SWB hit-flow bring-up)` | open / receiver boundary not fixed | live programmed STP firmware on 2026-05-16 | `pending` | FEB ARB/MTS/rbCAM/frame assembly counters advance and match, but SWB OPQ/DMA remain zero; SWB debug now needs the raw XCVR output data/datak capture ahead of OPQ ingress. |
+| [BUG-012-H](#bug-012-h-mu3e-frame-checker-missed-broken-packet-length-and-subframe-beat-counts) | H | non-datapath-refactor | `directed-only (malformed STP/replay contract validation)` | fixed / sim and STP negative gates pass | FEB frame-after-assembly STP decode on 2026-05-16 | `pending` | The Mu3e checker now rejects nonconsecutive subheaders, per-subheader hit-count mismatch, frame length mismatch, and cross-frame packet/page discontinuity. |
 
 ## 2026-05-11
 
@@ -246,6 +250,128 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
     - pending / no code-review commit yet
   - review decision:
     - pending / not run
+
+## 2026-05-16
+
+### BUG-009-H: synthesis_debug DUT manifest has DEBUG=2 sources but generated RTL still DEBUG=0
+- First seen in:
+  - `QSYS_GENERATE_STAMP=20260516_dual_dut_manifest_dbg02 firmware_builds/systems/v3_pretest-260511/script/generate_feb_system_v3.sh`
+  - `make check_qsys_dut_manifest QSYS_DUT_VARIANT=synthesis_debug` from `firmware_builds/systems/v3_pretest-260511/tb_int`
+- Symptom:
+  - `synthesis/` passes the generated-DUT manifest check, but `synthesis_debug/` fails before the realistic real-DUT run can compile.
+  - The guard reports `debug DUT has no generated DEBUG/DEBUG_LEVEL/DEBUG_LV generic set to 2`.
+  - Direct RTL inspection shows generated debug VHDL still uses `DEBUG => 0` and `DEBUG_LEVEL => 0` in the control, upload, datapath, and hit-stack submodules.
+- Root cause:
+  - the copied `qsys_debug_sources/` tree contains the intended DEBUG=2 Qsys parameter edits, but the `qsys-generate` invocation still resolves hierarchical composed systems from the original component/catalog definitions rather than the copied debug Qsys sources.
+  - Copying raw `.qsys` files into a debug source directory is therefore not sufficient to force generated debug RTL for composed child systems.
+- Fix status:
+  - state:
+    - open; no bypass is allowed because this is the DUT identity guard that prevents simulation/synthesis drift
+  - mechanism:
+    - the manifest checker remains a hard pre-sim gate for `QSYS_DUT_VARIANT=synthesis_debug`
+    - `run_RC_EMUL_REALISTIC_WAVE BIND_REAL_DUT=1 QSYS_DUT_VARIANT=synthesis_debug` is blocked until Qsys component resolution is corrected
+  - before_fix_outcome:
+    - normal manifest pass: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/.qsys_dut_manifest.json`, tree SHA256 `76926ea07c99abaa6d0e3287d342a5e4ba1d4aa15718a130180c6e26fa9bc683`
+    - debug manifest fail: `firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis_debug/.qsys_dut_manifest.json`, generated RTL still has no DEBUG=2 generic
+  - after_fix_outcome:
+    - pending; the next valid evidence must be a passing debug manifest followed by the realistic real-DUT waveform run
+  - potential_hazard:
+    - high for debug observability only; a green sim using the wrong generated tree would hide the exact custom RC/data-path bug class under investigation
+  - review decision:
+    - pending / generator-source resolution not fixed
+
+### BUG-010-H: focused STP frame capture has SOP/EOP shape but not decodable data/datak contract
+- First seen in:
+  - `tools/run_script/decode_mu3e_stp_vcd.py --profile feb-focused firmware_builds/systems/v3_pretest-260511/reports/stp_swb_frame_structure_20260516_153044/stream_debug_swb_frame.vcd --fail-on-contract-error`
+  - `make run_OPQ_FRAME_STP_REPLAY STP_REPLAY_MEM=.../top_upper_replay.mem` from `firmware_builds/systems/swb/rdma_pretest-260511/tb_int`
+- Symptom:
+  - the old focused STP capture records 517 valid samples with SOP/EOP shape, but the exported `*_data_observed` buses stay `0x00000000` and no datak sideband is present.
+  - the offline checker reports contract failure on all decoded focused streams: `inner_upper`, `inner_lower`, and `top_upper` each have 519 Mu3e frame-format errors and 0 decoded hits.
+  - the SWB OPQ replay converts `top_upper_replay.mem` into the same monitor contract and fails with `UVM_ERROR : 520`, including `SOP asserted without K28.5` and `ingress replay hits=0 expected at least 1`.
+- Root cause:
+  - the capture is a frame-structure snapshot, not a packet-contract snapshot: it is useful for valid/ready/SOP/EOP lifetime review, but it does not preserve the 32-bit frame word value or the 4-bit datak/K-symbol provenance required by the Mu3e header/subheader/hit checker.
+- Fix status:
+  - state:
+    - open; recapture required with data and datak taps at the same boundaries before using STP as packet-contract evidence
+  - mechanism:
+    - `tools/run_script/decode_mu3e_stp_vcd.py` now performs strict Mu3e frame checking, emits all decoded words, writes replay memory for `tb_int`, and can fail on contract errors or zero-downstream boundary drops
+    - SWB `tb_int` now includes `tb_int_opq_frame_replay_test` and `make run_OPQ_FRAME_STP_REPLAY` to replay decoded STP words into the same OPQ monitor checker
+  - before_fix_outcome:
+    - old focused capture could be reviewed visually in GTKWave, but it could not prove header/subheader/hit legality or declared-versus-observed hit counts
+  - after_fix_outcome:
+    - negative validation artifact: `firmware_builds/systems/v3_pretest-260511/reports/stp_contract_validation_20260516_focused_swb_frame/focused_frame_contract.json`
+    - negative replay transcript: `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/sim_stp_replay_negative2/OPQ_FRAME_STP_REPLAY/transcript`
+    - positive smoke for the replay-enabled SWB monitor harness: `make run_OPQ_FRAME_TS_SMOKE WORK=work_tb_int_stp_replay_check SIM_ROOT=sim_stp_replay_check` passed
+  - potential_hazard:
+    - medium; visual STP frame-shape evidence can look healthy while the packet contract is unprovable unless data and datak are captured
+  - review decision:
+    - pending / full data+datak STP recapture not run
+
+### BUG-011-H: live FEB frame counters advance but SWB OPQ ingress remains idle
+- First seen in:
+  - `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_182610/run_tool_opq_90s_retry_link2/debug_daq_summary.json`
+  - `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_182610/swb_stp_active_run_183535/swb_active_run_manual.focused.vcd`
+  - `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_182610/swb_stp_active_run_183535/swb_active_run_manual.decode_summary_active33.json`
+- Symptom:
+  - the timing-accepted FEB/SWB images program successfully and the FEB SC hub is reachable on link 2 after PCIe recovery.
+  - the 90 s OPQ run leaves the host capture at 0 bytes and all SWB RDMA/OPQ counters at 0.
+  - FEB counters advance through the custom data path: Type0 ARB ingress/egress, MTS total, rbCAM push/pop, and frame assembly declared/actual hits all match, with frame assembly missing hits at 0.
+  - SWB SignalTap with real data/datak sidebands records physical and logical FEB receive lanes as K28.5/idle-like or invalid outside-frame words, with no decoded frames and no masked OPQ input words.
+- Root cause:
+  - open; the last confirmed good point is FEB frame assembly counters, while the first confirmed bad point is the SWB receiver to OPQ boundary.
+  - current evidence points at the FEB-to-SWB link/frame contract or SWB receiver mapping/decoder path, not at the FEB ARB/rbCAM/histogram counter path.
+- Fix status:
+  - state:
+    - open / hardware boundary failure reproduced with programmed STP firmware
+  - mechanism:
+    - keep the strict packet-contract decoder and STP-to-`tb_int` replay path as the debug gate
+    - next capture should use the broad SWB raw-XCVR STP probes and a matching FEB upper/lower-bank SignalTap trigger to prove whether real K28.5/K23.7/K28.4 frames leave the FEB Firefly boundary and enter the SWB receiver
+  - before_fix_outcome:
+    - `SWB_LINK_MASK_SCIFI=0x4`, `0x100`, `0x200`, `0x300`, and `0xF00` all produced 0 DMA bytes and 0 OPQ input words while FEB frame assembly counters advanced
+  - after_fix_outcome:
+    - live hardware remains open; no SWB OPQ/DMA data observed yet
+    - post-XCVR SWB corun link-2 steering gate passes: `make run_swb_corun_link2 QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim OPQ_SOURCE_MODE=native_sv_signoff OPQ_LANE_FIFO_DEPTH=65536 OPQ_TICKET_FIFO_DEPTH=65536 OPQ_HANDLE_FIFO_DEPTH=65536 OPQ_PAGE_RAM_DEPTH=65536`
+    - link-2 corun evidence: `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/tb_int/feb_swb_corun/report_link2/link2_steering_check.log` reports `FEB_SWB_LINK2_STEERING_PASS lane=2 expected_hits=256 opq_ingress_hits=256 wr_hit=256 rd_hit=256`, with `opq_drop_counter_total=0`
+    - implication: if a valid Mu3e data frame reaches SWB logical lane 2, the SWB demux/OPQ ingress path accepts it; the hardware zero-ingress boundary is still upstream of OPQ ingress or in the live receiver/lane-mapping/capture contract
+    - regenerated SWB `rn001_opq_ingress_egress.stp` now captures all 16 raw physical XCVR0 RX output data/datak lanes, then carries the logical FEB RX lanes, masked OPQ inputs, and OPQ egress in the same capture for receiver-to-OPQ correlation
+  - potential_hazard:
+    - high; FEB internal counters alone can look healthy while the SWB-facing packet contract remains empty or invalid
+  - review decision:
+    - pending / receiver boundary not fixed
+
+### BUG-012-H: Mu3e frame checker missed broken-packet length and subframe beat counts
+- First seen in:
+  - `firmware_builds/systems/v3_pretest-260511/reports/feb_stp_frame_after_assembly_20260516_1930/feb_frame_after_assembly_topvalid.vcd`
+  - `tools/run_script/decode_mu3e_stp_vcd.py --profile feb .../feb_frame_after_assembly_topvalid.vcd --fail-on-contract-error`
+  - `make run_RC_EMUL_REALISTIC_WAVE SIM_ROOT=sim_feb_subheader_checker_20260516_len QSYS_DUT_VARIANT=synthesis`
+- Symptom:
+  - the live FEB SignalTap capture has one full 517-word SOP/EOP frame after frame assembly, but the subheaders are not monotonic and consecutive.
+  - examples from the upper-bank stream include gaps, backward steps, and duplicates in the early subheader sequence: `00,01,02,07,05,06,07,09,0a,0b,0c,0f,0f`.
+  - the same frame also violates the declared-length contract at EOP: the upper-bank decode accepted 517 words but the header/subheader declarations imply 2694 words, with 203 seen subheaders versus 256 declared and 307 seen hits versus 2432 declared.
+  - before this update, the checker could report packet-format errors but did not make the missing declared hit beats and total packet length an explicit broken-packet failure.
+- Root cause:
+  - the Mu3e frame-format checker tracked marker order and decoded hit counts, but it did not close each frame with a strict accepted-word count.
+  - it also did not require each subheader-declared hit count to be matched by exactly that many accepted hit beats before the next subheader or trailer.
+- Fix status:
+  - state:
+    - fixed in the SystemVerilog checker and mirrored in the offline STP decoder
+  - mechanism:
+    - add strict subheader monotonic/consecutive checks, including duplicate, backward, and gap diagnostics
+    - add per-subheader declared-hit accounting and fail on underflow or overrun
+    - add end-of-frame length accounting: expected accepted words are `5 + declared_subheaders + declared_hits + 1`, and the v3 FEB data frame must carry 128 declared subheaders
+    - mirror the same checks in `tools/run_script/decode_mu3e_stp_vcd.py` so STP evidence and `tb_int` monitor evidence use the same failure vocabulary
+  - before_fix_outcome:
+    - malformed STP frames could fail on local marker/sequence symptoms without explicitly proving that the declared subframe and whole-frame beat counts were broken
+  - after_fix_outcome:
+    - `make run_RC_EMUL_REALISTIC_WAVE SIM_ROOT=sim_feb_subheader_checker_20260516_len QSYS_DUT_VARIANT=synthesis` passes with both upload banks reporting `accepted_words=142 expected_words=142 frame_errors=0`
+    - `make run_UPLOAD_MUX_CONTRACT SIM_ROOT=sim_feb_subheader_checker_20260516_len QSYS_DUT_VARIANT=synthesis` passes with `UPLOAD_MUX_CONTRACT_PASS accepted=142 checked=142`, proving the generated upload mux preserves the one-cycle input0 data contract when SC/RC are idle
+    - the live STP decode now exits nonzero by design and writes `firmware_builds/systems/v3_pretest-260511/reports/feb_stp_frame_after_assembly_20260516_1930/feb_frame_after_assembly_topvalid.length_contract.decode_summary.json`
+    - that negative STP artifact reports both early format errors (`subheader_sequence`, `subframe_declared_hit_count`) and final packet-length errors (`broken_packet_length`, `frame_declared_hit_count`, `subheader_declared_hit_sum`) on the captured frame
+    - `make run_RC_EMUL_REALISTIC_LONG_WAVE SIM_ROOT=sim_feb_long_cross_20260516 QSYS_DUT_VARIANT=synthesis` passes a 1.346804 ms run with four frames per upload bank, `packet_count=0..3`, page base `0x00,0x80,0x00,0x80`, `accepted_words=150 expected_words=150` on every frame, and `UVM_ERROR=0`
+  - potential_hazard:
+    - low for checker coverage; the remaining hardware root cause is still open under BUG-011-H and needs an upstream frame-assembly input capture
+  - review decision:
+    - pending / code review not run
 
 ## Resolved / Redesignated
 

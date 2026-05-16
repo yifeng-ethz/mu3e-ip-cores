@@ -11,10 +11,21 @@ from pathlib import Path
 
 
 SWB = "swb_block:e_swb_block|"
+A10 = "a10_block:e_a10_block|"
 ADAPT = f"{SWB}ingress_egress_adaptor:e_ingress_egress_adaptor|"
 PIPE = f"{SWB}swb_opq_dma_pipeline:e_opq_dma_pipeline|"
 DEFAULT_CLOCK = f"{SWB}i_clk"
 DEFAULT_TRIGGER = f"{SWB}opq_dma_input_valid"
+PHYSICAL_TO_LOGICAL = {
+    0: 0,
+    4: 1,
+    8: 2,
+    12: 3,
+    1: 4,
+    5: 5,
+    9: 6,
+    13: 7,
+}
 
 
 @dataclass(frozen=True)
@@ -31,6 +42,26 @@ def add_bits(group: str, probes: list[Probe], base: str, width: int) -> None:
     probes.extend(Probe(group, f"{base}[{idx}]") for idx in range(width))
 
 
+def add_link32(group: str, probes: list[Probe], base: str) -> None:
+    add_bits(group, probes, f"{base}.data", 32)
+    add_bits(f"{group} datak", probes, f"{base}.datak", 4)
+    add(
+        group,
+        probes,
+        f"{base}.sop",
+        f"{base}.eop",
+        f"{base}.idle",
+        f"{base}.err",
+        f"{base}.dthdr",
+        f"{base}.sbhdr",
+    )
+
+
+def add_xcvr_lane(group: str, probes: list[Probe], physical_lane: int) -> None:
+    add_bits(group, probes, f"{A10}o_xcvr0_rx_data[{physical_lane}]", 32)
+    add_bits(f"{group} datak", probes, f"{A10}o_xcvr0_rx_datak[{physical_lane}]", 4)
+
+
 def default_probes() -> list[Probe]:
     probes: list[Probe] = []
 
@@ -41,7 +72,26 @@ def default_probes() -> list[Probe]:
         f"{SWB}opq_reset_n",
         f"{SWB}dma_reset_n",
         f"{SWB}i_dmamemhalffull",
+        f"{SWB}mask_n[0]",
+        f"{SWB}mask_n[1]",
+        f"{SWB}mask_n[2]",
+        f"{SWB}mask_n[3]",
     )
+
+    # Raw XCVR lane coverage is deliberately wider than the selected FEB link.
+    # Link 2 maps through physical lane 8 into logical feb_rx(2); earlier
+    # captures only tapped 0/1/4/5 and could not answer whether link 2 carried
+    # data.
+    for physical_lane in range(16):
+        logical = PHYSICAL_TO_LOGICAL.get(physical_lane)
+        suffix = f"_to_logical{logical}" if logical is not None else "_unmapped"
+        add_xcvr_lane(f"01 xcvr_raw_physical_lane{physical_lane}{suffix}", probes, physical_lane)
+
+    for logical_lane in range(8):
+        add_link32(f"02 swb_logical_feb_rx{logical_lane}", probes, f"{SWB}i_feb_rx[{logical_lane}]")
+
+    for lane in range(4):
+        add_link32(f"09 masked_opq_input_link_lane{lane}", probes, f"{SWB}rx_data_sim_opq[{lane}]")
 
     for lane in range(4):
         group = f"1{lane} opq_ingress_lane{lane}"
@@ -68,8 +118,6 @@ def default_probes() -> list[Probe]:
         "21 opq_egress_to_packer",
         probes,
         f"{SWB}opq_dma_input_valid",
-        f"{SWB}opq_dma_input_sop",
-        f"{SWB}opq_dma_input_eop",
     )
     add_bits("21 opq_egress_to_packer", probes, f"{SWB}opq_dma_input_data", 32)
     add_bits("21 opq_egress_to_packer", probes, f"{SWB}opq_dma_input_datak", 4)
@@ -138,9 +186,11 @@ def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str) -> ET.E
     signal_set.append(ET.Comment(f"Generated {stamp} UTC"))
     signal_set.append(
         ET.Comment(
-            "RN.BASIC.001 OPQ ingress and registered OPQ-to-packer egress. "
-            "Decode K28.5/K28.4 offline from datak+LSB; DMA-side probes "
-            "capture the active SWB interface replacing the legacy RDMA bridge."
+            "RN.BASIC.001 SWB frame path: raw XCVR output lanes, logical FEB link records, "
+            "masked 4-lane OPQ input, OPQ egress, and registered OPQ-to-packer egress. "
+            "Physical lanes 0/4/8/12 map to logical OPQ-eligible lanes 0/1/2/3; "
+            "physical lanes 1/5/9/13 map to secondary logical lanes 4/5/6/7. "
+            "Decode K28.5/K23.7/K28.4 offline from datak+LSB; do not decode Idle SOPs as frames."
         )
     )
     ET.SubElement(signal_set, "clock", {"name": DEFAULT_CLOCK, "polarity": "posedge", "tap_mode": "classic"})

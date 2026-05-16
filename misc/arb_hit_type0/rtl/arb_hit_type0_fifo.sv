@@ -1,9 +1,10 @@
 // arb_hit_type0_fifo.sv
-// Per-source 16-deep ingress FIFO and ingress-side packet/drop tracking.
+// Per-source configurable-depth ingress FIFO and ingress-side packet/drop tracking.
 //
-// Version : 26.4.1
-// Date    : 20260506
+// Version : 26.6.4
+// Date    : 20260516
 // Change  : Preserve DEBUG_LEVEL=2 metadata valid beside the sidecar payload.
+//           Support FIFO_DEPTH=2 for FEB resource-trim builds.
 
 module arb_hit_type0_fifo #(
     parameter integer FIFO_DEPTH  = 16,
@@ -46,8 +47,10 @@ module arb_hit_type0_fifo #(
     output logic [3:0]  last_channel
 );
 
-    localparam integer FIFO_DEPTH_CONST           = 16;
-    localparam logic [4:0] FIFO_DEPTH_COUNT_CONST = 5'd16;
+    localparam integer FIFO_DEPTH_CONST           = FIFO_DEPTH;
+    localparam integer FIFO_PTR_WIDTH_CONST       = (FIFO_DEPTH_CONST <= 2) ? 1 : 4;
+    localparam logic [4:0] FIFO_DEPTH_COUNT_CONST =
+        (FIFO_DEPTH_CONST == 2) ? 5'd2 : 5'd16;
 
     typedef struct packed {
         logic [44:0] data;
@@ -62,8 +65,8 @@ module arb_hit_type0_fifo #(
 
     fifo_beat_t head_beat;
     fifo_beat_t input_beat;
-    logic [3:0] read_ptr;
-    logic [3:0] write_ptr;
+    logic [FIFO_PTR_WIDTH_CONST-1:0] read_ptr;
+    logic [FIFO_PTR_WIDTH_CONST-1:0] write_ptr;
     logic [4:0] count;
 
     generate
@@ -112,15 +115,15 @@ module arb_hit_type0_fifo #(
 
     always_ff @(posedge clk or posedge rst) begin : fifo_state
         if (rst) begin
-            read_ptr        <= 4'd0;
-            write_ptr       <= 4'd0;
+            read_ptr        <= '0;
+            write_ptr       <= '0;
             count           <= 5'd0;
             ingress_open    <= 1'b0;
             idle_cycles     <= 16'd0;
             last_channel    <= 4'd0;
         end else if (stream_clear) begin
-            read_ptr        <= 4'd0;
-            write_ptr       <= 4'd0;
+            read_ptr        <= '0;
+            write_ptr       <= '0;
             count           <= 5'd0;
             ingress_open    <= 1'b0;
             idle_cycles     <= 16'd0;
@@ -134,7 +137,7 @@ module arb_hit_type0_fifo #(
             end
 
             if (push_accept) begin
-                write_ptr <= write_ptr + 4'd1;
+                write_ptr <= write_ptr + 1'b1;
 
                 if (asi_startofpacket & ~(asi_endofpacket | asi_endofrun)) begin
                     ingress_open <= 1'b1;
@@ -144,7 +147,7 @@ module arb_hit_type0_fifo #(
             end
 
             if (pop) begin
-                read_ptr <= read_ptr + 4'd1;
+                read_ptr <= read_ptr + 1'b1;
             end
 
             case ({push_accept, pop})
@@ -163,8 +166,8 @@ module arb_hit_type0_fifo #(
 
     // synthesis translate_off
     initial begin : parameter_guard
-        if (FIFO_DEPTH != FIFO_DEPTH_CONST) begin
-            $error("arb_hit_type0_fifo supports FIFO_DEPTH=16 only");
+        if (!((FIFO_DEPTH == 2) || (FIFO_DEPTH == 16))) begin
+            $error("arb_hit_type0_fifo supports FIFO_DEPTH=2 or FIFO_DEPTH=16 only");
         end
         if ((DEBUG_LEVEL < 0) || (DEBUG_LEVEL > 2)) begin
             $error("arb_hit_type0_fifo supports DEBUG_LEVEL in the range 0..2");

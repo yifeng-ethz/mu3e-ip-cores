@@ -11,6 +11,7 @@ fi
 cat << EOF
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 package cmp is
 
@@ -21,6 +22,33 @@ while read -r fname ; do
     echo "-- $fname"
     cat -- "$fname"
 done < <(find -L . -name '*.cmp' | sort)
+)
+
+$(
+while read -r fname ; do
+    entity="$(basename -- "$fname" .vhd)"
+    parent="$(basename -- "$(dirname -- "$(dirname -- "$fname")")")"
+    [ "$entity" = "$parent" ] || continue
+    [ -f "./$parent/$entity.cmp" ] && continue
+
+    echo "-- $fname"
+    awk -v entity="$entity" '
+        BEGIN { in_entity = 0 }
+        $1 == "entity" && $2 == entity && $3 == "is" {
+            in_entity = 1
+            print "    component " entity " is"
+            next
+        }
+        in_entity {
+            if ($1 == "end" && $2 == "entity") {
+                print "    end component;"
+                print ""
+                exit
+            }
+            print
+        }
+    ' "$fname"
+done < <(find -L . -path '*/synth/*.vhd' | sort)
 )
 
 end package;

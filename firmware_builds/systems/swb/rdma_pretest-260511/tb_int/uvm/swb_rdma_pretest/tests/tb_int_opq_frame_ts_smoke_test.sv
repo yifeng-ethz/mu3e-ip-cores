@@ -13,6 +13,7 @@ package tb_int_opq_frame_ts_smoke_test_pkg;
         localparam bit [7:0] K285 = 8'hbc;
         localparam bit [7:0] K284 = 8'h9c;
         localparam bit [7:0] K237 = 8'hf7;
+        localparam bit [5:0] SCIFI_HEADER_ID = 6'b111000;
         localparam int unsigned EXPECTED_SUBHEADERS = 128;
 
         function new(string name = "tb_int_opq_frame_ts_smoke_test",
@@ -68,7 +69,7 @@ package tb_int_opq_frame_ts_smoke_test_pkg;
         );
             int unsigned shd;
 
-            drive_opq_beat(vif, egress, {8'ha5, 2'b00, 14'd0, K285},
+            drive_opq_beat(vif, egress, {SCIFI_HEADER_ID, 2'b00, 16'h0001, K285},
                            4'b0001, 1'b1, 1'b0);
             drive_opq_beat(vif, egress, 32'h00000000,
                            4'b0000, 1'b0, 1'b0);
@@ -99,18 +100,20 @@ package tb_int_opq_frame_ts_smoke_test_pkg;
             repeat (4) @(posedge opq_lane0_vif.clk);
 
             env.scoreboard.start_case("OPQ_FRAME_TS_SMOKE");
-            drive_opq_frame(opq_lane0_vif, 1'b0, 16'h3456, 32'h00010001);
-            drive_opq_frame(opq_lane0_vif, 1'b1, 16'h3456, 32'h00010001);
+            // Two full frames exercise both legal subheader pages:
+            // frame 0 covers 0..127, frame 1 covers 128..255.
+            opq_lane0_vif.drive_packet(32'h00010001);
+            opq_lane0_vif.drive_packet(32'h00010002);
             repeat (4) @(posedge opq_lane0_vif.clk);
 
-            if (env.scoreboard.opq_frame_ingress_hits != 1) begin
+            if (env.scoreboard.opq_frame_ingress_hits != 2) begin
                 `uvm_error("OPQ_FRAME_TS_SMOKE",
-                           $sformatf("ingress frame hits=%0d expected=1",
+                           $sformatf("ingress frame hits=%0d expected=2",
                                      env.scoreboard.opq_frame_ingress_hits))
             end
-            if (env.scoreboard.opq_frame_egress_hits != 1) begin
+            if (env.scoreboard.opq_frame_egress_hits != 2) begin
                 `uvm_error("OPQ_FRAME_TS_SMOKE",
-                           $sformatf("egress frame hits=%0d expected=1",
+                           $sformatf("egress frame hits=%0d expected=2",
                                      env.scoreboard.opq_frame_egress_hits))
             end
             if (env.scoreboard.opq_frame_ts_invalid != 0) begin

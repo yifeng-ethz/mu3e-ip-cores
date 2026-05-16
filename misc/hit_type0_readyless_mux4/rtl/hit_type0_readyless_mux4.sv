@@ -8,7 +8,8 @@
 // exposes no ready signal.
 
 module hit_type0_readyless_mux4 #(
-    parameter int FIFO_DEPTH = 16
+    parameter int FIFO_DEPTH = 16,
+    parameter int DEBUG_LEVEL = 0
 ) (
     input  logic        clk,
     input  logic        rst,
@@ -20,6 +21,8 @@ module hit_type0_readyless_mux4 #(
     input  logic        asi_in0_startofpacket,
     input  logic        asi_in0_endofpacket,
     input  logic        asi_in0_endofrun,
+    input  logic [63:0] asi_in0_metadata,
+    input  logic        asi_in0_metadata_valid,
 
     input  logic [44:0] asi_in1_data,
     input  logic        asi_in1_valid,
@@ -28,6 +31,8 @@ module hit_type0_readyless_mux4 #(
     input  logic        asi_in1_startofpacket,
     input  logic        asi_in1_endofpacket,
     input  logic        asi_in1_endofrun,
+    input  logic [63:0] asi_in1_metadata,
+    input  logic        asi_in1_metadata_valid,
 
     input  logic [44:0] asi_in2_data,
     input  logic        asi_in2_valid,
@@ -36,6 +41,8 @@ module hit_type0_readyless_mux4 #(
     input  logic        asi_in2_startofpacket,
     input  logic        asi_in2_endofpacket,
     input  logic        asi_in2_endofrun,
+    input  logic [63:0] asi_in2_metadata,
+    input  logic        asi_in2_metadata_valid,
 
     input  logic [44:0] asi_in3_data,
     input  logic        asi_in3_valid,
@@ -44,6 +51,8 @@ module hit_type0_readyless_mux4 #(
     input  logic        asi_in3_startofpacket,
     input  logic        asi_in3_endofpacket,
     input  logic        asi_in3_endofrun,
+    input  logic [63:0] asi_in3_metadata,
+    input  logic        asi_in3_metadata_valid,
 
     output logic [44:0] aso_out_data,
     output logic        aso_out_valid,
@@ -51,14 +60,17 @@ module hit_type0_readyless_mux4 #(
     output logic [5:0]  aso_out_channel,
     output logic        aso_out_startofpacket,
     output logic        aso_out_endofpacket,
-    output logic        aso_out_endofrun
+    output logic        aso_out_endofrun,
+    output logic [63:0] coe_selected_metadata,
+    output logic        coe_selected_metadata_valid
 );
 
     localparam int N_INPUTS = 4;
-    localparam int PAYLOAD_WIDTH = 45 + 1 + 1 + 1 + 3 + 4;
+    localparam int PAYLOAD_WIDTH = 45 + 1 + 1 + 1 + 3 + 4 + 64 + 1;
     localparam int PTR_WIDTH = (FIFO_DEPTH <= 2) ? 1 : $clog2(FIFO_DEPTH);
     localparam int COUNT_WIDTH = $clog2(FIFO_DEPTH + 1);
     localparam logic [COUNT_WIDTH-1:0] FIFO_DEPTH_COUNT = FIFO_DEPTH;
+    localparam bit DEBUG_METADATA_ENABLE = (DEBUG_LEVEL >= 2);
 
     logic [PAYLOAD_WIDTH-1:0] fifo_mem [N_INPUTS][FIFO_DEPTH];
     logic [PTR_WIDTH-1:0]     wr_ptr   [N_INPUTS];
@@ -72,6 +84,8 @@ module hit_type0_readyless_mux4 #(
     logic        in_startofpacket [N_INPUTS];
     logic        in_endofpacket   [N_INPUTS];
     logic        in_endofrun      [N_INPUTS];
+    logic [63:0] in_metadata      [N_INPUTS];
+    logic        in_metadata_valid [N_INPUTS];
 
     logic [N_INPUTS-1:0] push_accept;
     logic [N_INPUTS-1:0] pop_lane;
@@ -88,6 +102,8 @@ module hit_type0_readyless_mux4 #(
     assign in_startofpacket[0] = asi_in0_startofpacket;
     assign in_endofpacket[0]   = asi_in0_endofpacket;
     assign in_endofrun[0]      = asi_in0_endofrun;
+    assign in_metadata[0]      = asi_in0_metadata;
+    assign in_metadata_valid[0]= asi_in0_metadata_valid;
 
     assign in_data[1]          = asi_in1_data;
     assign in_error[1]         = asi_in1_error;
@@ -96,6 +112,8 @@ module hit_type0_readyless_mux4 #(
     assign in_startofpacket[1] = asi_in1_startofpacket;
     assign in_endofpacket[1]   = asi_in1_endofpacket;
     assign in_endofrun[1]      = asi_in1_endofrun;
+    assign in_metadata[1]      = asi_in1_metadata;
+    assign in_metadata_valid[1]= asi_in1_metadata_valid;
 
     assign in_data[2]          = asi_in2_data;
     assign in_error[2]         = asi_in2_error;
@@ -104,6 +122,8 @@ module hit_type0_readyless_mux4 #(
     assign in_startofpacket[2] = asi_in2_startofpacket;
     assign in_endofpacket[2]   = asi_in2_endofpacket;
     assign in_endofrun[2]      = asi_in2_endofrun;
+    assign in_metadata[2]      = asi_in2_metadata;
+    assign in_metadata_valid[2]= asi_in2_metadata_valid;
 
     assign in_data[3]          = asi_in3_data;
     assign in_error[3]         = asi_in3_error;
@@ -112,6 +132,8 @@ module hit_type0_readyless_mux4 #(
     assign in_startofpacket[3] = asi_in3_startofpacket;
     assign in_endofpacket[3]   = asi_in3_endofpacket;
     assign in_endofrun[3]      = asi_in3_endofrun;
+    assign in_metadata[3]      = asi_in3_metadata;
+    assign in_metadata_valid[3]= asi_in3_metadata_valid;
 
     function automatic logic [PTR_WIDTH-1:0] ptr_next(input logic [PTR_WIDTH-1:0] ptr);
         if (ptr == FIFO_DEPTH - 1) begin
@@ -190,6 +212,8 @@ module hit_type0_readyless_mux4 #(
             aso_out_startofpacket  <= 1'b0;
             aso_out_endofpacket    <= 1'b0;
             aso_out_endofrun       <= 1'b0;
+            coe_selected_metadata  <= 64'd0;
+            coe_selected_metadata_valid <= 1'b0;
         end else begin
             for (int lane = 0; lane < N_INPUTS; lane = lane + 1) begin
                 if (push_accept[lane]) begin
@@ -199,7 +223,9 @@ module hit_type0_readyless_mux4 #(
                         in_endofpacket[lane],
                         in_endofrun[lane],
                         in_error[lane],
-                        in_channel[lane]
+                        in_channel[lane],
+                        (DEBUG_METADATA_ENABLE ? in_metadata[lane] : 64'd0),
+                        (DEBUG_METADATA_ENABLE ? in_metadata_valid[lane] : 1'b0)
                     };
                     wr_ptr[lane] <= ptr_next(wr_ptr[lane]);
                 end
@@ -224,7 +250,9 @@ module hit_type0_readyless_mux4 #(
                     aso_out_endofpacket,
                     aso_out_endofrun,
                     aso_out_error,
-                    aso_out_channel[3:0]
+                    aso_out_channel[3:0],
+                    coe_selected_metadata,
+                    coe_selected_metadata_valid
                 } <= grant_payload;
                 aso_out_channel[5:4] <= grant_idx;
             end else begin
@@ -235,6 +263,8 @@ module hit_type0_readyless_mux4 #(
                 aso_out_startofpacket <= 1'b0;
                 aso_out_endofpacket   <= 1'b0;
                 aso_out_endofrun      <= 1'b0;
+                coe_selected_metadata <= 64'd0;
+                coe_selected_metadata_valid <= 1'b0;
             end
         end
     end

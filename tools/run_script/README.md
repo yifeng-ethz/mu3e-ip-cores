@@ -23,6 +23,7 @@ build location going forward), reaching the FEB SciFi at SWB link 2 over
 | `sc_scratchpad_sweep.py` | Scratchpad sweep harness (python). |
 | `sc_speed_sweep.py` | SC bridge speed sweep (python). |
 | `stp_datalog_extract.py` | SignalTap datalog post-processing (python). |
+| `decode_mu3e_stp_vcd.py` | Strict Mu3e frame decode for FEB/SWB SignalTap VCD exports; checks header/subheader/hit contracts and can emit `tb_int` replay memory. |
 | `gen_swb_pcie_registers.py` | Build-time parser for the SWB firmware `a10_pcie_registers.vhd`; emits the generated C++ register table into the CMake build directory. |
 | `feb_scifi_sc_quickref.md` | One-page SC address quickref (FEB SciFi slave map). |
 | `feb_scifi_datapath_test_report.md` | Historical bring-up report (Apr 16 2026); kept for context. |
@@ -62,6 +63,24 @@ This is documented in the auto-memory under
 is launched directly. Wrapping it explicitly is still the preferred board
 smoke pattern because the full SC/RC/DMA run then holds one serialized
 hardware-access lease.
+
+## SignalTap Packet Contract Decode
+
+Use `decode_mu3e_stp_vcd.py` after exporting a SignalTap capture to VCD.
+Final packet-contract captures must include data and datak at the tapped
+boundary; SOP/EOP-only captures are valid for visual lifetime review but are
+not sufficient for Mu3e header/subheader/hit signoff.
+
+```
+tools/run_script/decode_mu3e_stp_vcd.py --profile feb <capture.vcd> \
+  --json-out feb_contract.json --words-csv-out feb_words.csv \
+  --fail-on-contract-error
+
+tools/run_script/decode_mu3e_stp_vcd.py --profile swb --active-lane-mask 0x3 <capture.vcd> \
+  --json-out swb_contract.json --words-csv-out swb_words.csv \
+  --replay-stream opq_ingress_lane0 --replay-mem-out opq_ingress_lane0.mem \
+  --fail-on-contract-error --fail-on-boundary-drop
+```
 
 ## run_tool debug flags
 

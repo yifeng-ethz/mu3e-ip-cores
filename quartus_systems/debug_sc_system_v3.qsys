@@ -241,7 +241,7 @@
    version="26.2.423"
    enabled="1">
   <parameter name="AVS_FIREFLY_ADDR_W" value="5" />
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="I2C_BAUD_RATE" value="400000" />
   <parameter name="SYSTEM_CLK_FREQ" value="125000000" />
  </module>
@@ -330,7 +330,7 @@
   <parameter name="COUNTER_MM_ADDR_OFFSET_WORD" value="32768" />
   <parameter name="CPHA" value="0" />
   <parameter name="CPOL" value="0" />
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="INTENDED_MUTRIG_VERSION" value="MuTRiG 3" />
   <parameter name="N_MUTRIG" value="4" />
   <parameter name="SEL_SUBROUTINES" value="2" />
@@ -629,7 +629,7 @@
   <parameter name="BUILD" value="414" />
   <parameter name="BUS_TYPE" value="AVALON" />
   <parameter name="DATA_WIDTH" value="32" />
-  <parameter name="DEBUG" value="1" />
+  <parameter name="DEBUG" value="0" />
   <parameter name="EXT_DOWN_PLD_DEPTH" value="512" />
   <parameter name="EXT_UP_PLD_DEPTH" value="512" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />

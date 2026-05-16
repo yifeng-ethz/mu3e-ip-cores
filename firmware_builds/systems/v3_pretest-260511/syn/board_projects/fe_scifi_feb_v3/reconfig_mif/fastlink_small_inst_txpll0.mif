@@ -1,5 +1,5 @@
 
--- File Name = /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/reconfig_mif/fastlink_small_inst_txpll0.mif.mif
+-- File Name = /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_stream_debug_plane_snapshot_20260515/firmware_builds/systems/v3_pretest-260511/syn/board_projects/fe_scifi_feb_v3/reconfig_mif/fastlink_small_inst_txpll0.mif.mif
 WIDTH=16;
 DEPTH=12;
 
