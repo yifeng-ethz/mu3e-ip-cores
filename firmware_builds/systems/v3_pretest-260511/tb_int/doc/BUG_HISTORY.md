@@ -44,8 +44,9 @@ Historical formal note:
 | [BUG-008-H](#bug-008-h-source-mux-frame-cosim-interval-rollover-clears-total_hits-during-long-drain) | H | non-datapath-refactor | `corner-only (long-drain cosim profiles with drain > 10000 cycles)` | fixed / long-drain cosim green | `high_3m_q256` exploratory cosim | `pending` | The cosim programmed histogram interval as `run_cycles + 10000`, so longer drains could roll the interval and clear `TOTAL_HITS` before CSR readback. |
 | [BUG-009-H](#bug-009-h-synthesis_debug-dut-manifest-has-debug2-sources-but-generated-rtl-still-debug0) | H | non-datapath-refactor | `common (real-DUT debug tb_int with synthesis_debug)` | open / manifest guard blocks sim | `check_qsys_dut_manifest QSYS_DUT_VARIANT=synthesis_debug` | `pending` | The copied debug Qsys source tree carries DEBUG=2, but generated `synthesis_debug/` RTL still has DEBUG/DEBUG_LEVEL/DEBUG_LV generics at 0, so the real-DUT waveform run is intentionally blocked. |
 | [BUG-010-H](#bug-010-h-focused-stp-frame-capture-has-sop-eop-shape-but-not-decodable-data-datak-contract) | H | non-datapath-refactor | `directed-only (old focused SignalTap export without data/datak contract probes)` | open / recapture required | focused STP contract decode + OPQ replay on 2026-05-16 | `pending` | The old focused STP capture shows 517 valid frame-shaped samples but exports data as zero and lacks datak, so the strict Mu3e checker and replay fail instead of proving delivered hits. |
-| [BUG-011-H](#bug-011-h-live-feb-frame-counters-advance-but-swb-opq-ingress-remains-idle) | H | hard stuck error | `common (live FEB-to-SWB hit-flow bring-up)` | fixed / OPQ ingress restored; host capture follow-up open | live programmed STP firmware on 2026-05-16 | `pending` | SciFi OPQ mode wrote `SWB_LINK_MASK_SCIFI=0x4`, but `swb_block` gated OPQ with the generic mask, leaving `mask_n=0`; the selected-mask fix restores logical lane-2 OPQ ingress. |
+| [BUG-011-H](#bug-011-h-live-feb-frame-counters-advance-but-swb-opq-ingress-remains-idle) | H | hard stuck error | `common (live FEB-to-SWB hit-flow bring-up)` | fixed / OPQ ingress restored; host capture fixed by BUG-013-H | live programmed STP firmware on 2026-05-16 | `pending` | SciFi OPQ mode wrote `SWB_LINK_MASK_SCIFI=0x4`, but `swb_block` gated OPQ with the generic mask, leaving `mask_n=0`; the selected-mask fix restores logical lane-2 OPQ ingress. |
 | [BUG-012-H](#bug-012-h-mu3e-frame-checker-missed-broken-packet-length-and-subframe-beat-counts) | H | non-datapath-refactor | `directed-only (malformed STP/replay contract validation)` | fixed / sim and STP negative gates pass | FEB frame-after-assembly STP decode on 2026-05-16 | `pending` | The Mu3e checker now rejects nonconsecutive subheaders, per-subheader hit-count mismatch, frame length mismatch, and cross-frame packet/page discontinuity. |
+| [BUG-013-H](#bug-013-h-short-lived-board-helpers-clear-swb-dma-enable-during-capture) | H | hard stuck error | `common (host DMA capture with rc_tool/sc_tool traffic)` | fixed / 5 s board capture nonzero | post-BUG-011 host capture retest on 2026-05-16 | `pending` | Short-lived board helpers can clear `DMA_REGISTER_W[0]` while `dma_tool` is alive, so the capture process must own and reassert the DMA enable bit. |
 
 ## 2026-05-11
 
@@ -323,7 +324,7 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
   - The link-2 physical/logical mapping itself is correct for the tested path: top-level `feb_rx(2)` is sourced from raw XCVR physical lane 8 and is gated by `mask_n[2]`.
 - Fix status:
   - state:
-    - fixed for the receiver-to-OPQ boundary; a separate host DMA/readout follow-up remains because `capture.bin` is still 0 bytes despite nonzero OPQ/RDMA counters
+    - fixed for the receiver-to-OPQ boundary; the separate host DMA/readout follow-up is tracked and fixed as BUG-013-H
   - mechanism:
     - select the live OPQ link mask from `SWB_LINK_MASK_SCIFI_REGISTER_W` whenever `USE_BIT_SCIFI` is set, otherwise keep the legacy generic-mask behavior
     - add preserved `debug_mask_*` signals for generic, SciFi, selected mask, readout state, and selector bits
@@ -341,7 +342,39 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
     - the compiled SWB image programs cleanly and a 5 s link-2 OPQ run writes nonzero SWB counters in `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_220404_swb_maskfix_xcvr_stp/run_tool_opq_5s_link2_maskfix/debug_daq_summary.json`: `CNT_OPQ_INPUT_W=27488685`, `CNT_BYTES_WRITTEN=3460931`, `CNT_RQE_CONSUMED=58408`, `DMA_ENDEVENT_REGISTER_R=58408`
     - the active SWB SignalTap decode at `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_220404_swb_maskfix_xcvr_stp/swb_stp_maskfix_active_run_2206/swb_maskfix_active_run.mask_xcvr_opq.summary.json` confirms `debug_mask_generic_w=0x00000000`, `debug_mask_scifi_w=0x00000004`, `debug_selected_link_mask_w=0x00000004`, `mask_n_low=0x4`, live data only on logical FEB lane 2, and OPQ ingress valid only on lane 2
   - potential_hazard:
-    - medium; the pre-OPQ zero-ingress bug is closed, but the host readout still needs a separate DMA/capture investigation because the same run leaves `capture.bin` at 0 bytes
+    - low for the receiver-to-OPQ boundary; host DMA enable ownership is tracked separately under BUG-013-H
+  - review decision:
+    - pending / code review not run
+
+### BUG-013-H: short-lived board helpers clear SWB DMA enable during capture
+- First seen in:
+  - `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_220404_swb_maskfix_xcvr_stp/run_tool_opq_5s_link2_maskfix/debug_daq_summary.json`
+  - manual live CSR checks of `DMA_REGISTER_W`, `DMA_STATUS_REGISTER_R`, and `DMA_CNT_WORDS_REGISTER_R` on 2026-05-16.
+- Symptom:
+  - after BUG-011 restored OPQ ingress, the SWB OPQ/RDMA counters advanced but `capture.bin` remained 0 bytes.
+  - `DMA_STATUS_REGISTER_R=0x00000001` matched the DMA engine disabled state, while `DMA_CNT_WORDS_REGISTER_R` and OPQ/RDMA counters showed that the packer side had produced data.
+  - `sc_tool --swb write DMA_REGISTER_W 0x1` read back as 1 within the same process, but a later process observed `DMA_REGISTER_W=0`.
+  - a raw `/dev/mudaq0` mmap holder reproduced the lifetime bug: it wrote `DMA_REGISTER_W=1`, a separate `sc_tool` could see 1, and the holder later observed the bit cleared.
+- Root cause:
+  - short-lived board helpers can deactivate the DMA enable while the capture process is still alive.
+  - `run_tool` launches `dma_tool` before the run-control sequence, so later `rc_tool` / `sc_tool` invocations can clear `DMA_REGISTER_W[0]` after the initial enable.
+  - a one-shot `DMA_REGISTER_W=1` write from `run_tool` is therefore not a stable ownership model for host DMA capture.
+- Fix status:
+  - state:
+    - fixed in `tools/run_script/dma_tool.cpp`; no RTL change or firmware recompile required
+  - mechanism:
+    - make `dma_tool` assert `DMA_REGISTER_W[0]` when the capture starts
+    - keep reasserting the enable bit during the capture lifetime so run-control and slow-control helper exits cannot leave the DMA engine disabled
+    - keep the existing shutdown behavior that writes `DMA_REGISTER_W=0` when `dma_tool` exits
+  - before_fix_outcome:
+    - post-BUG-011 5 s link-2 OPQ run had `CNT_OPQ_INPUT_W=27488685`, `CNT_BYTES_WRITTEN=3460931`, and `DMA_ENDEVENT_REGISTER_R=58408`, but `capture.bin=0`
+  - after_fix_outcome:
+    - `cmake --build tools/run_script/build --target dma_tool` passes
+    - patched `dma_tool` logs repeated `DMA enable asserted: DMA_REGISTER_W 0x0 -> 0x1` during board-helper interference
+    - `tools/run_script/run_tool --skip-program --use-opq --swb-link-mask-scifi 4 --feb-link 2 --duration-s 5 --skip-mutrig-config --dump-csrs --output-dir firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_2300_dma_enable_fix/run_tool_opq_5s_link2_dma_enable_fix` writes `capture.bin=106954752` bytes
+    - the same run reports `read_words=26738688`, `written_words=26738688`, `bytes_written=106954752`, `CNT_OPQ_INPUT_W=27341414`, `CNT_BYTES_WRITTEN=3442578`, and FEB frame assembly declared/actual hits both `127382784` with `missing_hits=0`
+  - potential_hazard:
+    - medium for production readout policy: the debug capture process now owns the DMA enable bit while alive, but the broader helper lifetime contract should be cleaned up before relying on mixed helper processes in production DAQ
   - review decision:
     - pending / code review not run
 

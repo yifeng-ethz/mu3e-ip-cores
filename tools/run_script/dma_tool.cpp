@@ -476,6 +476,18 @@ static void write_register(const RawDevice& dev, uint32_t idx, uint32_t value)
 	std::atomic_thread_fence(std::memory_order_seq_cst);
 }
 
+static void ensure_dma_enabled(const Options& opt, const RawDevice& dev)
+{
+	const uint32_t dma_reg = read_register_rw(dev, DMA_REGISTER_W);
+	/* Other short-lived board helpers can deactivate DMA on close.  The
+	 * capture process therefore owns this bit for as long as it is alive. */
+	write_register(dev, DMA_REGISTER_W, dma_reg | 0x1u);
+	if ((dma_reg & 0x1u) == 0) {
+		log_msg(opt, "DMA enable asserted: DMA_REGISTER_W " + hex_u32(dma_reg) +
+			     " -> " + hex_u32(read_register_rw(dev, DMA_REGISTER_W)));
+	}
+}
+
 static uint32_t dma_write_word(const RawDevice& dev, const DmaMap& dma)
 {
 	uint32_t word = 0;
@@ -749,6 +761,7 @@ int main(int argc, char **argv)
 	configure_thresholds(opt, &sh);
 	log_sg_detection(opt, dev);
 	log_drop_counter(opt, dev);
+	ensure_dma_enabled(opt, dev);
 	log_msg(opt, "starting reader/writer threads");
 
 	std::thread reader(reader_thread, &sh);
@@ -762,6 +775,7 @@ int main(int argc, char **argv)
 			if (elapsed.count() >= opt.duration_s)
 				break;
 		}
+		ensure_dma_enabled(opt, dev);
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 	}
 
