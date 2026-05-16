@@ -36,11 +36,83 @@ Historical formal note:
 |---|---|---|---|---|---|---|---|
 | [BUG-001-H](#bug-001-h-swb-tb-int-had-no-local-synthesis-tree-for-basic-smoke) | H | non-datapath-refactor | `directed-only (harness preflight)` | fixed | `B065` structural preflight | `pending` | SWB tb_int could not run its first BASIC smoke until a local staged board project and Qsys synthesis outputs existed. |
 | [BUG-002-H](#bug-002-h-phase-1-link-2-legacy-lvds-smoke-bypassed-the-physical-link-boundary) | H | non-datapath-refactor | `directed-only (hardware debug repro)` | open | `B067` Phase 1 legacy-link preflight | `pending` | Existing SWB tb_int cases pass through abstract RDMA/OPQ/DMA interfaces and do not exercise firefly lock, LVDS word alignment, or LINK_LOCKED[2]. |
-| [BUG-003-H](#bug-003-h-legacy-swb-dma-path-stripped-mu3e-wire-frame-structure) | H | datapath-contract | `always-on (every SWB DMA capture)` | partial | `RN.BASIC.050` cosim / `#109` host rxbuffer trace | `pending` | The legacy SWB DMA path emitted flat 64-bit hit records instead of full Mu3e wire-frame words. |
-| [BUG-004-R](#bug-004-r-swb-firmware-left-dirty-k284-trailer-metadata-and-no-idle-sop-guard) | R | datapath-contract | `always-on (OPQ egress marker contract)` | partial | `RN.BASIC.001` RDMA popup / K-symbol audit | `pending` | SWB firmware could forward a true K28.4 trailer with nonzero metadata bits and had no simulation guard for illegal Idle-frame SOPs at the OPQ-to-DMA boundary. |
+| [BUG-003-H](#bug-003-h-legacy-swb-dma-path-stripped-mu3e-wire-frame-structure) | H | datapath-contract | `common (every SWB DMA capture)` | partial | `RN.BASIC.050` cosim / `#109` host rxbuffer trace | `pending` | The legacy SWB DMA path emitted flat 64-bit hit records instead of full Mu3e wire-frame words. |
+| [BUG-004-R](#bug-004-r-swb-firmware-left-dirty-k284-trailer-metadata-and-no-idle-sop-guard) | R | datapath-contract | `common (OPQ egress marker contract)` | partial | `RN.BASIC.001` RDMA popup / K-symbol audit | `pending` | SWB firmware could forward a true K28.4 trailer with nonzero metadata bits and had no simulation guard for illegal Idle-frame SOPs at the OPQ-to-DMA boundary. |
 | [BUG-005-H](#bug-005-h-swb-opq-signaltap-used-optimized-wrapper-aliases) | H | non-datapath-refactor | `directed-only (SignalTap compile gate)` | fixed-debug-loadable | RN.BASIC.001 SWB OPQ STP Node Finder | `d0b58930` / `bc192229` | The OPQ STP targeted wrapper-local aliases that Quartus optimized or exposed only as aggregate nodes, so the debug image could not prove the OPQ-to-DMA boundary. |
-| [BUG-006-H](#bug-006-h-board-rate-hist-readout-sampled-the-empty-post-run-1-ms-bank) | H | non-datapath-refactor | `common (1 ms board histogram readback after END_RUN)` | fixed-harness / board-rerun-pending | RN.BASIC.001 pre/post rbCAM board pair, 2026-05-14 | `pending` | The board runner compared post-END `hist_bin` data even though the 1 ms ping-pong histogram had already advanced into empty post-run intervals. |
+| [BUG-006-H](#bug-006-h-board-rate-hist-readout-sampled-the-empty-post-run-1-ms-bank) | H | non-datapath-refactor | `common (board histogram readback after END_RUN)` | fixed-harness / board-rerun-pending | RN.BASIC.001 pre/post rbCAM board pair, 2026-05-14 | `pending` | The board runner compared post-END `hist_bin` data even though the 1 ms ping-pong histogram had already advanced into empty post-run intervals. |
 | [BUG-007-R](#bug-007-r-histogram-ingress-bridge-can-remain-pending-on-a-stale-packet-state) | R | non-datapath-refactor | `common (pre/post histogram source switching after partial traffic)` | open | RN.BASIC.001 live RUNNING hist samples, 2026-05-14 | `pending` | The histogram ingress bridge can report a pending pre/post switch while a stale packet-active bit prevents the requested source from becoming live. |
+| [BUG-008-R](#bug-008-r-swb-demerger-dropped-feb-v3-data-frames-before-opq) | R | datapath-contract | `common (FEB v3 data frames with 0xA5 preamble)` | fixed-sim / firmware-compiled / board-STP-pending | SWB active-run STP + `SWB_FEB_XCVR_DEMERGER_REPLAY` | `pending` | The SWB data/SC/RC demerger did not classify the FEB v3 `0xA50000BC` SOP as data, so legal frames stayed before OPQ ingress. |
+
+## 2026-05-16
+
+### BUG-008-R: SWB demerger dropped FEB v3 data frames before OPQ
+- First seen in:
+  - hardware handoff: 90 s OPQ run produced `capture.bin = 0` while FEB
+    frame assembly counters advanced with matching declared/actual hits and
+    `missing_hits=0`
+  - focused SWB STP:
+    `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_182610/swb_stp_active_run_183535/swb_active_run_manual.focused.vcd`
+  - sim repro:
+    `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/sim_swb_xcvr_replay_20260516_prefix/SWB_FEB_XCVR_DEMERGER_REPLAY/transcript`
+- Symptom:
+  - SWB OPQ/RDMA counters stayed zero and STP showed no legal OPQ ingress
+    frames even though the upstream FEB frame assembly stage completed legal
+    Mu3e data frames.
+  - The exact FEB v3 replay at the SWB XCVR-side split boundary reported
+    `data_words=0`, `opq_ingress_words=0`, `sc_words=0`, and
+    `rc_words=8192` before the fix.
+- Root cause:
+  - `swb_data_demerger.STATE_IDLE` treated K28.5 data preambles as detector
+    data only when `data[31:29]` was `111` or `110`.
+  - The current FEB v3 upload frame SOP is `0xA50000BC`
+    (`data[31:26]=101001`), so the demux never entered `STATE_DATA`; later
+    K23.7 subheaders were then misclassified as RC words while the frame was
+    withheld from OPQ.
+- Fix status:
+  - state:
+    - fixed in simulation; SWB firmware compiles with the broad XCVR-to-OPQ
+      STP image; board STP confirmation is pending
+  - mechanism:
+    - `swb_data_demerger` now uses one `is_data_preamble()` predicate that
+      accepts legacy Mupix/MuTrig data preambles plus the FEB v3
+      `data[31:26]=101001` preamble.
+    - `tb_swb_data_demerger_feb_v3` compiles the real VHDL splitter and
+      replays 64 FEB v3 frames at 2048 cycles per frame.
+    - `tb_int_swb_feb_steering_sweep_test` replays the exact FEB v3 SOP
+      through the SWB logical-link steering model and requires link 2 /
+      physical lane 8 to reach OPQ ingress.
+  - before_fix_outcome:
+    - `sim_swb_xcvr_replay_20260516_prefix/SWB_FEB_XCVR_DEMERGER_REPLAY/transcript`
+      fails with `data_words=0`, `opq_ingress_words=0`, `rc_words=8192`
+  - after_fix_outcome:
+    - `sim_swb_xcvr_replay_20260516_postfix/SWB_FEB_XCVR_DEMERGER_REPLAY/transcript`
+      passes with `data_words=8640`, `opq_ingress_words=8640`, and
+      `sc_words=0 rc_words=0`
+    - `sim_swb_xcvr_replay_20260516_uvm/SWB_FEB_XCVR_STEERING_REPLAY/transcript`
+      passes with `sop=0xa50000bc`, `frames=64`,
+      `frame_period_cycles=2048`, and `observed_hits=64`
+    - `sim_swb_xcvr_replay_20260516_smoke/OPQ_FRAME_TS_SMOKE/transcript`
+      passes with no UVM errors or fatals after synchronizing the stricter
+      Mu3e frame checker
+    - `quartus_compile_top_20260516_204436_febv3_demux_opq_retry.console.log`
+      completes `make flow SIGNALTAP_FILE=rn001_opq_ingress_egress.stp`
+      with `STATUS=0`
+    - `rn001_opq_ingress_egress_nodecheck_20260516_febv3_demux.md` reports
+      1617 probes found and 0 missing
+  - potential_hazard:
+    - low for the identified contract mismatch; the remaining risk is board
+      lane mapping or timing, to be checked by the compiled STP image
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run
+- Runtime / coverage context:
+  - exact FEB stimulus source:
+    `firmware_builds/systems/v3_pretest-260511/tb_int/sim_feb_long_cross_20260516/RC_EMUL_REALISTIC_LONG_WAVE/transcript`
+  - frame cadence:
+    - RUNNING-stage replay drives 64 frames per upload lane
+    - frame start period is 2048 clk125 cycles
+    - each one-hit frame has 135 accepted Mu3e data words
+- Commit:
+  - pending
 
 ## 2026-05-14
 

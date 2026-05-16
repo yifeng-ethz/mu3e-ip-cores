@@ -84,10 +84,11 @@ interface opq_lane_if (input logic clk, input logic reset_n);
         end
     endtask
 
-    task automatic drive_mu3e_frame(input logic [31:0] payload,
-                                    input bit drive_ingress = 1'b1,
-                                    input bit drive_egress = 1'b1,
-                                    input int unsigned total_hits = 1);
+    task automatic drive_mu3e_frame_with_sop(input logic [31:0] sop_word,
+                                             input logic [31:0] payload,
+                                             input bit drive_ingress = 1'b1,
+                                             input bit drive_egress = 1'b1,
+                                             input int unsigned total_hits = 1);
         int unsigned shd;
         int unsigned hit;
         int unsigned hit_subheader_offset;
@@ -104,7 +105,7 @@ interface opq_lane_if (input logic clk, input logic reset_n);
         frame_count = frame_seq[15:0];
 
         drive_mu3e_beat(drive_ingress, drive_egress,
-                        {MU3E_IF_SCIFI_HEADER_ID, 2'b00, 16'h0001, MU3E_IF_K285},
+                        sop_word,
                         4'b0001, 1'b1, 1'b0);
         drive_mu3e_beat(drive_ingress, drive_egress,
                         {16'h2026, frame_seq[15:0]},
@@ -141,6 +142,17 @@ interface opq_lane_if (input logic clk, input logic reset_n);
                         {24'h0, MU3E_IF_K284},
                         4'b0001, 1'b0, 1'b1);
         frame_seq++;
+    endtask
+
+    task automatic drive_mu3e_frame(input logic [31:0] payload,
+                                    input bit drive_ingress = 1'b1,
+                                    input bit drive_egress = 1'b1,
+                                    input int unsigned total_hits = 1);
+        drive_mu3e_frame_with_sop({MU3E_IF_SCIFI_HEADER_ID, 2'b00, 16'h0001, MU3E_IF_K285},
+                                  payload,
+                                  drive_ingress,
+                                  drive_egress,
+                                  total_hits);
     endtask
 
     task automatic drive_packet(input logic [31:0] payload);

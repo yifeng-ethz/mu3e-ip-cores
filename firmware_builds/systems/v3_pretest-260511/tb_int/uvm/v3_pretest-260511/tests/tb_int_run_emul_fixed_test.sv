@@ -29,6 +29,7 @@ package tb_int_run_emul_fixed_test_pkg;
         int unsigned periodic_hit_period_cycles = 1250;
         int unsigned run_prep_flush_cycles = 5000;
         int unsigned upload_frames_per_lane = 2;
+        int unsigned upload_frame_period_cycles = 0;
 
         function new(string name = "tb_int_run_emul_fixed_test",
                      uvm_component parent = null);
@@ -55,6 +56,8 @@ package tb_int_run_emul_fixed_test_pkg;
                                   run_prep_flush_cycles));
             void'($value$plusargs("TB_INT_FEB_UPLOAD_FRAMES_PER_LANE=%d",
                                   upload_frames_per_lane));
+            void'($value$plusargs("TB_INT_FEB_UPLOAD_FRAME_PERIOD_CYCLES=%d",
+                                  upload_frame_period_cycles));
         endfunction
 
         virtual task run_phase(uvm_phase phase);
@@ -87,6 +90,7 @@ package tb_int_run_emul_fixed_test_pkg;
             seq.periodic_hit_period_cycles = periodic_hit_period_cycles;
             seq.run_prep_flush_cycles = run_prep_flush_cycles;
             seq.upload_frames_per_lane = upload_frames_per_lane;
+            seq.upload_frame_period_cycles = upload_frame_period_cycles;
             if ($test$plusargs("TB_INT_RC_EMUL_SNAPSHOT_ONLY"))
                 seq.emul_check_mode = EMUL_MODE_NONE;
             seq.body(hit_count);

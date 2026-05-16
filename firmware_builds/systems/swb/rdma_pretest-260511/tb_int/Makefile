@@ -13,6 +13,7 @@ VLIB := $(QUESTA_HOME)/linux_x86_64/vlib
 VMAP := $(QUESTA_HOME)/linux_x86_64/vmap
 
 WORK ?= work_tb_int
+SWB_VHDL_WORK ?= work_swb_demux
 TB_TOP := tb_int_top
 SEED ?= 1
 SIM_ROOT ?= sim
@@ -32,7 +33,7 @@ ERROR_CASES := X001 X002 X003 X004 X005 X033 X065 X069
 PROF_CASES := P001 P002 P003 P065 P066 P068
 SELECTED_CASES := $(BASIC_CASES) $(EDGE_CASES) $(ERROR_CASES) $(PROF_CASES)
 
-.PHONY: docs check modelsim_ini lib comp_uvm comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE run_OPQ_FRAME_STP_REPLAY
+.PHONY: docs check modelsim_ini lib comp_uvm comp_swb_demux_replay comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE run_OPQ_FRAME_STP_REPLAY run_SWB_FEB_XCVR_DEMERGER_REPLAY run_SWB_FEB_XCVR_STEERING_REPLAY
 
 docs:
 	python3 script/generate_swb_tb_int_assets.py
@@ -53,6 +54,18 @@ lib: modelsim.ini
 comp_uvm: docs lib
 	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) $(UVM_SRC)
 	$(VLOG) -modelsimini modelsim.ini $(VLOG_OPTS) $(UVM_INCDIR) -f script/tb_int.f
+
+comp_swb_demux_replay: modelsim.ini
+	mkdir -p $(SIM_ROOT)
+	test -d $(SWB_VHDL_WORK) || $(VLIB) $(SWB_VHDL_WORK)
+	$(VMAP) -modelsimini modelsim.ini work $(SWB_VHDL_WORK)
+	$(VCOM) -modelsimini modelsim.ini -2008 -work $(SWB_VHDL_WORK) \
+		../syn/board_projects/swb_a10/util/util_slv.vhd \
+		../syn/board_projects/swb_a10/util/util_pkg.vhd \
+		../syn/board_projects/swb_a10/registers/mudaq.vhd \
+		../syn/board_projects/swb_a10/a10/link/mu3e_pkg.vhd \
+		../syn/board_projects/swb_a10/a10/swb/swb_data_demerger.vhd \
+		hdl/tb_swb_data_demerger_feb_v3.vhd
 
 define RUN_CASE_template
 run_$(1): comp_uvm
@@ -166,6 +179,17 @@ run_OPQ_FRAME_STP_REPLAY: comp_uvm
 	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_opq_frame_replay_test +ARB_SEED=$(SEED) +TB_INT_STP_REPLAY_MEM=$(STP_REPLAY_MEM) +TB_INT_STP_REPLAY_LANE=$(STP_REPLAY_LANE) +TB_INT_STP_REPLAY_SIDE=$(STP_REPLAY_SIDE) +TB_INT_REPLAY_EXPECT_INGRESS_HITS +TB_INT_SIM_DIR=$(SIM_ROOT)/OPQ_FRAME_STP_REPLAY -l $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript -do "run -all; quit -f"
 	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript; then exit 1; fi
+
+run_SWB_FEB_XCVR_DEMERGER_REPLAY: comp_swb_demux_replay
+	mkdir -p $(SIM_ROOT)/SWB_FEB_XCVR_DEMERGER_REPLAY
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -work $(SWB_VHDL_WORK) tb_swb_data_demerger_feb_v3 -l $(SIM_ROOT)/SWB_FEB_XCVR_DEMERGER_REPLAY/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/SWB_FEB_XCVR_DEMERGER_REPLAY/transcript
+
+run_SWB_FEB_XCVR_STEERING_REPLAY: comp_uvm
+	mkdir -p $(SIM_ROOT)/SWB_FEB_XCVR_STEERING_REPLAY
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_swb_feb_steering_sweep_test +ARB_SEED=$(SEED) +TB_INT_SIM_DIR=$(SIM_ROOT)/SWB_FEB_XCVR_STEERING_REPLAY -l $(SIM_ROOT)/SWB_FEB_XCVR_STEERING_REPLAY/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/SWB_FEB_XCVR_STEERING_REPLAY/transcript
+	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/SWB_FEB_XCVR_STEERING_REPLAY/transcript; then exit 1; fi
 
 structural_preflight: docs
 	python3 script/run_basic_bucket_sweep.py

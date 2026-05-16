@@ -27,9 +27,10 @@ done < <(find -L . -name '*.cmp' | sort)
 $(
 while read -r fname ; do
     entity="$(basename -- "$fname" .vhd)"
-    parent="$(basename -- "$(dirname -- "$(dirname -- "$fname")")")"
+    entity_dir="$(dirname -- "$(dirname -- "$fname")")"
+    parent="$(basename -- "$entity_dir")"
     [ "$entity" = "$parent" ] || continue
-    [ -f "./$parent/$entity.cmp" ] && continue
+    [ -f "$entity_dir/$entity.cmp" ] && continue
 
     echo "-- $fname"
     awk -v entity="$entity" '

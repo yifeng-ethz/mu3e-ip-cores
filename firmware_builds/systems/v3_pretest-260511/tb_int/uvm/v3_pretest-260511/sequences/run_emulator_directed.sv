@@ -94,6 +94,7 @@ package tb_int_run_emulator_directed_pkg;
         int unsigned periodic_channel_seed = 0;
         int unsigned run_prep_flush_cycles = RUN_PREP_FLUSH_CYCLES_DEFAULT;
         int unsigned upload_frames_per_lane = 2;
+        int unsigned upload_frame_period_cycles = 0;
         bit [31:0] run_number = DEFAULT_RUN_NUMBER;
 
         // PHY drivers
@@ -456,6 +457,7 @@ package tb_int_run_emulator_directed_pkg;
                                                                 hits_this_frame,
                                                                 2'd0);
                         hits_remaining -= hits_this_frame;
+                        wait_upload_frame_period(hits_this_frame, frame_idx, frames_per_lane);
                     end
                 end
                 begin
@@ -473,10 +475,28 @@ package tb_int_run_emulator_directed_pkg;
                                                                 hits_this_frame,
                                                                 2'd1);
                         hits_remaining -= hits_this_frame;
+                        wait_upload_frame_period(hits_this_frame, frame_idx, frames_per_lane);
                     end
                 end
             join_none
 `endif
+        endtask
+
+        function automatic int unsigned upload_frame_drive_cycles(int unsigned hits_this_frame);
+            // drive_mu3e_frame emits header(5) + subheaders(128) + hits + trailer(1),
+            // with one valid cycle and one idle cycle per beat.
+            return (5 + 128 + hits_this_frame + 1) * 2;
+        endfunction
+
+        task automatic wait_upload_frame_period(input int unsigned hits_this_frame,
+                                                input int unsigned frame_idx,
+                                                input int unsigned frames_per_lane);
+            int unsigned drive_cycles;
+            if ((upload_frame_period_cycles == 0) || (frame_idx + 1 >= frames_per_lane))
+                return;
+            drive_cycles = upload_frame_drive_cycles(hits_this_frame);
+            if (upload_frame_period_cycles > drive_cycles)
+                repeat (upload_frame_period_cycles - drive_cycles) @(posedge stage_a_vif.clk);
         endtask
 
         task automatic configure_histogram_phase();

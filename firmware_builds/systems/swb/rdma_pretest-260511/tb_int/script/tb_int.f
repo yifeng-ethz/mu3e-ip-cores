@@ -124,6 +124,7 @@ uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_run_sequence_directed_wedge_fixed_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_opq_frame_ts_smoke_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_opq_frame_replay_test.sv
+uvm/swb_rdma_pretest/tests/tb_int_swb_feb_steering_sweep_test.sv
 uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv
 uvm/swb_rdma_pretest/tb_int_smoke_test.sv
 uvm/swb_rdma_pretest/tb_int_top.sv

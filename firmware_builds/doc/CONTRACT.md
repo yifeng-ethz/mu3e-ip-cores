@@ -54,6 +54,12 @@ Equivalently, the checker uses:
 expected_accepted_words = 5 + declared_subheaders + declared_hits + 1
 ```
 
+The current FEB v3 upload SOP observed in integration simulation is
+`0xA50000BC` (`data[31:26]=6'b101001`). The SWB data/SC/RC demerger must route
+this preamble to the detector-data path, not to SC or RC. Legacy SWB data
+preambles with `data[31:29]` equal to `111` or `110` remain valid detector-data
+preambles.
+
 ### Subheader Contract
 
 Each subheader is a K23.7 word:

@@ -10,7 +10,7 @@
   <instance enabled="true" entity_name="sld_signaltap" is_auto_node="yes" name="rn001_opq_ingress_egress" source_file="sld_signaltap.vhd">
     <node_ip_info instance_id="0" mfg_id="110" node_id="0" version="6" />
     <signal_set name="rn001_opq_ingress_egress">
-      <!--Generated 2026/05/16 18:04:33 UTC-->
+      <!--Generated 2026/05/16 18:35:07 UTC-->
       <!--RN.BASIC.001 SWB frame path: raw XCVR output lanes, logical FEB link records, masked 4-lane OPQ input, OPQ egress, and registered OPQ-to-packer egress. Physical lanes 0/4/8/12 map to logical OPQ-eligible lanes 0/1/2/3; physical lanes 1/5/9/13 map to secondary logical lanes 4/5/6/7. Decode K28.5/K23.7/K28.4 offline from datak+LSB; do not decode Idle SOPs as frames.-->
       <clock name="swb_block:e_swb_block|i_clk" polarity="posedge" tap_mode="classic" />
       <config pipeline_level="0" ram_type="AUTO" reserved_data_nodes="0" reserved_storage_qualifier_nodes="0" reserved_trigger_nodes="0" sample_depth="4096" trigger_in_enable="no" trigger_out_enable="no" />

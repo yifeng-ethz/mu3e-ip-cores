@@ -510,6 +510,8 @@ def emit_selected_tests_pkg() -> str:
     lines.append("    import tb_int_opq_frame_ts_smoke_test_pkg::*;")
     lines.append("    // OPQ frame replay from SignalTap-decoded memory")
     lines.append("    import tb_int_opq_frame_replay_test_pkg::*;")
+    lines.append("    // FEB v3 XCVR-to-OPQ steering replay")
+    lines.append("    import tb_int_swb_feb_steering_sweep_test_pkg::*;")
     lines.extend([
         "",
         "endpackage",
@@ -579,6 +581,8 @@ def emit_filelist() -> str:
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_opq_frame_ts_smoke_test.sv")
     # SignalTap decoded OPQ replay test.
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_opq_frame_replay_test.sv")
+    # FEB v3 exact-frame XCVR-to-OPQ steering replay.
+    lines.append("uvm/swb_rdma_pretest/tests/tb_int_swb_feb_steering_sweep_test.sv")
     lines.append("uvm/swb_rdma_pretest/tests/tb_int_selected_tests_pkg.sv")
     lines.extend([
         "uvm/swb_rdma_pretest/tb_int_smoke_test.sv",

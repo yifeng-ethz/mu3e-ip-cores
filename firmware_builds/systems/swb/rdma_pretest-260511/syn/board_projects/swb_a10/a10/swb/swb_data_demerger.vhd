@@ -28,6 +28,17 @@ architecture arch of swb_data_demerger is
     );
     signal state : state_t;
 
+    function is_data_preamble(i_data : work.mu3e.link32_t) return boolean is
+    begin
+        return i_data.datak(3 downto 0) = "0001"
+            and i_data.data(7 downto 0) = work.util.K28_5
+            and (
+                i_data.data(31 downto 29) = "111" or
+                i_data.data(31 downto 29) = "110" or
+                i_data.data(31 downto 26) = "101001"
+            );
+    end function;
+
 begin
 
     process(i_clk, i_reset_n, i_aligned)
@@ -47,7 +58,7 @@ begin
         when STATE_IDLE =>
             if ( i_data.datak = "0001" and i_data.data(7 downto 0) /= work.util.K28_5 and i_data.data(7 downto 0) /= work.util.K28_4 ) then
                 o_rc <= i_data;
-            elsif ( i_data.datak(3 downto 0) = "0001" and i_data.data(7 downto 0) = work.util.K28_5 and (i_data.data(31 downto 29) = "111" or i_data.data(31 downto 29) = "110" ) ) then -- Mupix or MuTrig preamble
+            elsif ( is_data_preamble(i_data) ) then -- Mupix/MuTrig/FEB-v3 data preamble
                 o_fpga_id <= i_data.data(23 downto 8);
                 state <= STATE_DATA;
                 o_data <= i_data;

@@ -52,5 +52,7 @@ package tb_int_swb_selected_tests_pkg;
     import tb_int_opq_frame_ts_smoke_test_pkg::*;
     // OPQ frame replay from SignalTap-decoded memory
     import tb_int_opq_frame_replay_test_pkg::*;
+    // FEB v3 XCVR-to-OPQ steering replay
+    import tb_int_swb_feb_steering_sweep_test_pkg::*;
 
 endpackage
