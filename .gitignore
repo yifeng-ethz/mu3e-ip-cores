@@ -144,6 +144,22 @@ firmware_builds/systems/*/script/feb_system_v3_qsys_generate_*.log
 firmware_builds/systems/*/script/qsys_*_isolated*/
 firmware_builds/systems/*/script/qdb/
 
+# --- Local bring-up logs, status sidecars, and generated debug scratch ---
+/apply_v3_histogram_stats_contract_*.log
+firmware_builds/systems/*/apply_v3_histogram_stats_contract_*.log
+firmware_builds/systems/*/generate_feb_system_v3_*.log
+firmware_builds/systems/*/gui_logs/
+firmware_builds/systems/*/syn/feb_system_v3/
+firmware_builds/**/syn/board_projects/*/quartus_compile_top_*.status
+firmware_builds/**/syn/board_projects/*/script/report_top_stp_timing_paths.tcl
+firmware_builds/**/syn/board_projects/*/rn001_opq_ingress_egress_nodecheck_*_after_compile.md
+firmware_builds/**/syn/board_projects/*/rn001_opq_ingress_egress_nodecheck_*_frame_decode_bus.md
+firmware_builds/**/syn/board_projects/*/rn001_opq_ingress_egress_nodecheck_*_xcvr_bound.md
+firmware_builds/**/tb_int/*.log
+firmware_builds/**/tb_int/*.make.log
+firmware_builds/**/tb_int/waves/gtkw/feb_*.gtkw
+firmware_builds/**/tb_int/waves/gtkw/type0_*.gtkw
+
 # --- Codex-authored evidence / scratch markdown under board_projects ---
 firmware_builds/systems/*/syn/board_projects/*/rn001_*_current.md
 firmware_builds/systems/*/syn/board_projects/*/codex_*.md
@@ -247,4 +263,3 @@ tools/run_script/BASELINE_*/
 tools/run_script/EMPTY_FRAME_SMOKE_*.md
 tools/run_script/BASELINE_*.md
 tools/run_script/PLAN_*.md
-
