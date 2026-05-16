@@ -72,11 +72,17 @@ def default_probes() -> list[Probe]:
         f"{SWB}opq_reset_n",
         f"{SWB}dma_reset_n",
         f"{SWB}i_dmamemhalffull",
+        f"{SWB}debug_mask_select_generic",
+        f"{SWB}debug_mask_select_scifi",
         f"{SWB}mask_n[0]",
         f"{SWB}mask_n[1]",
         f"{SWB}mask_n[2]",
         f"{SWB}mask_n[3]",
     )
+    add_bits("00 mask generic register", probes, f"{SWB}debug_mask_generic_w", 32)
+    add_bits("00 mask scifi register", probes, f"{SWB}debug_mask_scifi_w", 32)
+    add_bits("00 selected link mask", probes, f"{SWB}debug_selected_link_mask_w", 32)
+    add_bits("00 readout state register", probes, f"{SWB}debug_readout_state_w", 32)
 
     # Raw XCVR lane coverage is deliberately wider than the selected FEB link.
     # Link 2 maps through physical lane 8 into logical feb_rx(2); earlier
@@ -187,7 +193,8 @@ def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str) -> ET.E
     signal_set.append(
         ET.Comment(
             "RN.BASIC.001 SWB frame path: raw XCVR output lanes, logical FEB link records, "
-            "masked 4-lane OPQ input, OPQ egress, and registered OPQ-to-packer egress. "
+            "raw/generic/scifi/selected link-mask control, masked 4-lane OPQ input, "
+            "OPQ egress, and registered OPQ-to-packer egress. "
             "Physical lanes 0/4/8/12 map to logical OPQ-eligible lanes 0/1/2/3; "
             "physical lanes 1/5/9/13 map to secondary logical lanes 4/5/6/7. "
             "Decode K28.5/K23.7/K28.4 offline from datak+LSB; do not decode Idle SOPs as frames."

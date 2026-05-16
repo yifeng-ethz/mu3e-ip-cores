@@ -44,7 +44,7 @@ Historical formal note:
 | [BUG-008-H](#bug-008-h-source-mux-frame-cosim-interval-rollover-clears-total_hits-during-long-drain) | H | non-datapath-refactor | `corner-only (long-drain cosim profiles with drain > 10000 cycles)` | fixed / long-drain cosim green | `high_3m_q256` exploratory cosim | `pending` | The cosim programmed histogram interval as `run_cycles + 10000`, so longer drains could roll the interval and clear `TOTAL_HITS` before CSR readback. |
 | [BUG-009-H](#bug-009-h-synthesis_debug-dut-manifest-has-debug2-sources-but-generated-rtl-still-debug0) | H | non-datapath-refactor | `common (real-DUT debug tb_int with synthesis_debug)` | open / manifest guard blocks sim | `check_qsys_dut_manifest QSYS_DUT_VARIANT=synthesis_debug` | `pending` | The copied debug Qsys source tree carries DEBUG=2, but generated `synthesis_debug/` RTL still has DEBUG/DEBUG_LEVEL/DEBUG_LV generics at 0, so the real-DUT waveform run is intentionally blocked. |
 | [BUG-010-H](#bug-010-h-focused-stp-frame-capture-has-sop-eop-shape-but-not-decodable-data-datak-contract) | H | non-datapath-refactor | `directed-only (old focused SignalTap export without data/datak contract probes)` | open / recapture required | focused STP contract decode + OPQ replay on 2026-05-16 | `pending` | The old focused STP capture shows 517 valid frame-shaped samples but exports data as zero and lacks datak, so the strict Mu3e checker and replay fail instead of proving delivered hits. |
-| [BUG-011-H](#bug-011-h-live-feb-frame-counters-advance-but-swb-opq-ingress-remains-idle) | H | hard stuck error | `common (live FEB-to-SWB hit-flow bring-up)` | open / receiver boundary not fixed | live programmed STP firmware on 2026-05-16 | `pending` | FEB ARB/MTS/rbCAM/frame assembly counters advance and match, but SWB OPQ/DMA remain zero; SWB debug now needs the raw XCVR output data/datak capture ahead of OPQ ingress. |
+| [BUG-011-H](#bug-011-h-live-feb-frame-counters-advance-but-swb-opq-ingress-remains-idle) | H | hard stuck error | `common (live FEB-to-SWB hit-flow bring-up)` | fixed / OPQ ingress restored; host capture follow-up open | live programmed STP firmware on 2026-05-16 | `pending` | SciFi OPQ mode wrote `SWB_LINK_MASK_SCIFI=0x4`, but `swb_block` gated OPQ with the generic mask, leaving `mask_n=0`; the selected-mask fix restores logical lane-2 OPQ ingress. |
 | [BUG-012-H](#bug-012-h-mu3e-frame-checker-missed-broken-packet-length-and-subframe-beat-counts) | H | non-datapath-refactor | `directed-only (malformed STP/replay contract validation)` | fixed / sim and STP negative gates pass | FEB frame-after-assembly STP decode on 2026-05-16 | `pending` | The Mu3e checker now rejects nonconsecutive subheaders, per-subheader hit-count mismatch, frame length mismatch, and cross-frame packet/page discontinuity. |
 
 ## 2026-05-11
@@ -318,26 +318,32 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
   - FEB counters advance through the custom data path: Type0 ARB ingress/egress, MTS total, rbCAM push/pop, and frame assembly declared/actual hits all match, with frame assembly missing hits at 0.
   - SWB SignalTap with real data/datak sidebands records physical and logical FEB receive lanes as K28.5/idle-like or invalid outside-frame words, with no decoded frames and no masked OPQ input words.
 - Root cause:
-  - open; the last confirmed good point is FEB frame assembly counters, while the first confirmed bad point is the SWB receiver to OPQ boundary.
-  - current evidence points at the FEB-to-SWB link/frame contract or SWB receiver mapping/decoder path, not at the FEB ARB/rbCAM/histogram counter path.
+  - `run_tool --use-opq` in SciFi mode programs `SWB_LINK_MASK_SCIFI`, while leaving `SWB_GENERIC_MASK` at 0.
+  - `swb_block` previously drove `mask_n` only from `SWB_GENERIC_MASK_REGISTER_W`, so the OPQ-eligible link was forced to idle even when valid FEB frames reached the SWB logical receiver.
+  - The link-2 physical/logical mapping itself is correct for the tested path: top-level `feb_rx(2)` is sourced from raw XCVR physical lane 8 and is gated by `mask_n[2]`.
 - Fix status:
   - state:
-    - open / hardware boundary failure reproduced with programmed STP firmware
+    - fixed for the receiver-to-OPQ boundary; a separate host DMA/readout follow-up remains because `capture.bin` is still 0 bytes despite nonzero OPQ/RDMA counters
   - mechanism:
-    - keep the strict packet-contract decoder and STP-to-`tb_int` replay path as the debug gate
-    - next capture should use the broad SWB raw-XCVR STP probes and a matching FEB upper/lower-bank SignalTap trigger to prove whether real K28.5/K23.7/K28.4 frames leave the FEB Firefly boundary and enter the SWB receiver
+    - select the live OPQ link mask from `SWB_LINK_MASK_SCIFI_REGISTER_W` whenever `USE_BIT_SCIFI` is set, otherwise keep the legacy generic-mask behavior
+    - add preserved `debug_mask_*` signals for generic, SciFi, selected mask, readout state, and selector bits
+    - extend the RN.BASIC.001 SWB SignalTap generator to capture all 16 raw XCVR0 RX lanes plus the selected mask signals, logical FEB RX lanes, masked OPQ inputs, and OPQ egress/packer handoff
+    - add `SWB_FEB_SCIFI_MASK_REPLAY`, which instantiates the real `swb_block` around the steering/demux path and proves SciFi mask `0x4` passes link 2 while generic-only mask `0x4` does not pass in SciFi mode
   - before_fix_outcome:
     - `SWB_LINK_MASK_SCIFI=0x4`, `0x100`, `0x200`, `0x300`, and `0xF00` all produced 0 DMA bytes and 0 OPQ input words while FEB frame assembly counters advanced
   - after_fix_outcome:
-    - live hardware remains open; no SWB OPQ/DMA data observed yet
     - post-XCVR SWB corun link-2 steering gate passes: `make run_swb_corun_link2 QUESTA_HOME=/data1/questaone_sim-2026.1_1/questasim OPQ_SOURCE_MODE=native_sv_signoff OPQ_LANE_FIFO_DEPTH=65536 OPQ_TICKET_FIFO_DEPTH=65536 OPQ_HANDLE_FIFO_DEPTH=65536 OPQ_PAGE_RAM_DEPTH=65536`
     - link-2 corun evidence: `firmware_builds/systems/v3_pretest-260511-emulator-type0-260512/tb_int/feb_swb_corun/report_link2/link2_steering_check.log` reports `FEB_SWB_LINK2_STEERING_PASS lane=2 expected_hits=256 opq_ingress_hits=256 wr_hit=256 rd_hit=256`, with `opq_drop_counter_total=0`
-    - implication: if a valid Mu3e data frame reaches SWB logical lane 2, the SWB demux/OPQ ingress path accepts it; the hardware zero-ingress boundary is still upstream of OPQ ingress or in the live receiver/lane-mapping/capture contract
     - regenerated SWB `rn001_opq_ingress_egress.stp` now captures all 16 raw physical XCVR0 RX output data/datak lanes, then carries the logical FEB RX lanes, masked OPQ inputs, and OPQ egress in the same capture for receiver-to-OPQ correlation
+    - `make run_SWB_FEB_SCIFI_MASK_REPLAY SIM_ROOT=sim_swb_scifi_mask_20260516` passes with `scifi_mask=0x4 generic_mask=0x0 before=0 after=135`, `scifi_mask=0x0 generic_mask=0x4 before=135 after=135`, and `generic_mode generic_mask=0x4 before=135 after=270`
+    - `make run_SWB_FEB_XCVR_DEMERGER_REPLAY SIM_ROOT=sim_swb_xcvr_replay_20260516_maskfix_demux`, `make run_SWB_FEB_XCVR_STEERING_REPLAY SIM_ROOT=sim_swb_xcvr_replay_20260516_maskfix_uvm`, and SWB `make check` all pass after the mask fix
+    - SignalTap node check reports `probes total=1747 found=1747 missing=0 errors=0` in `firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/rn001_opq_ingress_egress_nodecheck_20260516_mask_xcvr.md`
+    - the compiled SWB image programs cleanly and a 5 s link-2 OPQ run writes nonzero SWB counters in `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_220404_swb_maskfix_xcvr_stp/run_tool_opq_5s_link2_maskfix/debug_daq_summary.json`: `CNT_OPQ_INPUT_W=27488685`, `CNT_BYTES_WRITTEN=3460931`, `CNT_RQE_CONSUMED=58408`, `DMA_ENDEVENT_REGISTER_R=58408`
+    - the active SWB SignalTap decode at `firmware_builds/systems/v3_pretest-260511/reports/hw_program_and_hitflow_20260516_220404_swb_maskfix_xcvr_stp/swb_stp_maskfix_active_run_2206/swb_maskfix_active_run.mask_xcvr_opq.summary.json` confirms `debug_mask_generic_w=0x00000000`, `debug_mask_scifi_w=0x00000004`, `debug_selected_link_mask_w=0x00000004`, `mask_n_low=0x4`, live data only on logical FEB lane 2, and OPQ ingress valid only on lane 2
   - potential_hazard:
-    - high; FEB internal counters alone can look healthy while the SWB-facing packet contract remains empty or invalid
+    - medium; the pre-OPQ zero-ingress bug is closed, but the host readout still needs a separate DMA/capture investigation because the same run leaves `capture.bin` at 0 bytes
   - review decision:
-    - pending / receiver boundary not fixed
+    - pending / code review not run
 
 ### BUG-012-H: Mu3e frame checker missed broken-packet length and subframe beat counts
 - First seen in:

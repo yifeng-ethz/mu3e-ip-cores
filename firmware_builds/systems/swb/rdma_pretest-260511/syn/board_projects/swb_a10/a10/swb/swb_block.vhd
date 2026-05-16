@@ -78,6 +78,12 @@ architecture arch of swb_block is
 
     --! data path control signals
     signal mask_n : std_logic_vector(63 downto 0) := (others => '0');
+    signal debug_mask_generic_w : std_logic_vector(31 downto 0) := (others => '0');
+    signal debug_mask_scifi_w : std_logic_vector(31 downto 0) := (others => '0');
+    signal debug_selected_link_mask_w : std_logic_vector(31 downto 0) := (others => '0');
+    signal debug_readout_state_w : std_logic_vector(31 downto 0) := (others => '0');
+    signal debug_mask_select_generic : std_logic := '0';
+    signal debug_mask_select_scifi : std_logic := '0';
 
     --! feb links
     signal feb_rx : work.mu3e.link32_array_t(g_NLINKS_FEB_TOTL-1 downto 0) := (others => work.mu3e.LINK32_IDLE);
@@ -107,7 +113,21 @@ architecture arch of swb_block is
     signal data_path_reset_n : std_logic;
     signal opq_reset_n : std_logic;
     signal dma_reset_n : std_logic;
+    attribute keep : boolean;
+    attribute noprune : boolean;
     attribute altera_attribute : string;
+    attribute keep of debug_mask_generic_w : signal is true;
+    attribute keep of debug_mask_scifi_w : signal is true;
+    attribute keep of debug_selected_link_mask_w : signal is true;
+    attribute keep of debug_readout_state_w : signal is true;
+    attribute keep of debug_mask_select_generic : signal is true;
+    attribute keep of debug_mask_select_scifi : signal is true;
+    attribute noprune of debug_mask_generic_w : signal is true;
+    attribute noprune of debug_mask_scifi_w : signal is true;
+    attribute noprune of debug_selected_link_mask_w : signal is true;
+    attribute noprune of debug_readout_state_w : signal is true;
+    attribute noprune of debug_mask_select_generic : signal is true;
+    attribute noprune of debug_mask_select_scifi : signal is true;
     attribute altera_attribute of opq_reset_n : signal is "-name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON; -name GLOBAL_SIGNAL OFF";
     attribute altera_attribute of dma_reset_n : signal is "-name DONT_MERGE_REGISTER ON; -name PRESERVE_REGISTER ON; -name GLOBAL_SIGNAL OFF";
 
@@ -310,18 +330,36 @@ begin
     --! ------------------------------------------------------------------------
     --! ------------------------------------------------------------------------
     process(i_clk, i_reset_n)
+        variable selected_mask : std_logic_vector(31 downto 0);
     begin
     if ( i_reset_n /= '1' ) then
         data_path_reset_n <= '0';
         opq_reset_n <= '0';
         dma_reset_n <= '0';
         mask_n <= (others => '0');
+        debug_mask_generic_w <= (others => '0');
+        debug_mask_scifi_w <= (others => '0');
+        debug_selected_link_mask_w <= (others => '0');
+        debug_readout_state_w <= (others => '0');
+        debug_mask_select_generic <= '0';
+        debug_mask_select_scifi <= '0';
         use_opq_merge <= '0';
     elsif rising_edge(i_clk) then
+        selected_mask := i_writeregs(SWB_GENERIC_MASK_REGISTER_W);
+        if ( i_writeregs(SWB_READOUT_STATE_REGISTER_W)(USE_BIT_SCIFI) = '1' ) then
+            selected_mask := i_writeregs(SWB_LINK_MASK_SCIFI_REGISTER_W);
+        end if;
         data_path_reset_n <= i_resets_n(RESET_BIT_DATA_PATH);
         opq_reset_n <= data_path_reset_n;
         dma_reset_n <= data_path_reset_n;
-        mask_n <= x"00000000" & i_writeregs(SWB_GENERIC_MASK_REGISTER_W);
+        mask_n <= x"00000000" & selected_mask;
+        debug_mask_generic_w <= i_writeregs(SWB_GENERIC_MASK_REGISTER_W);
+        debug_mask_scifi_w <= i_writeregs(SWB_LINK_MASK_SCIFI_REGISTER_W);
+        debug_selected_link_mask_w <= selected_mask;
+        debug_readout_state_w <= i_writeregs(SWB_READOUT_STATE_REGISTER_W);
+        debug_mask_select_generic <= i_writeregs(SWB_READOUT_STATE_REGISTER_W)(USE_BIT_GENERIC) or
+                                     i_writeregs(SWB_READOUT_STATE_REGISTER_W)(USE_BIT_GEN_LINK);
+        debug_mask_select_scifi <= i_writeregs(SWB_READOUT_STATE_REGISTER_W)(USE_BIT_SCIFI);
         use_opq_merge <= i_writeregs(SWB_READOUT_STATE_REGISTER_W)(USE_BIT_MERGER);
     end if;
     end process;
