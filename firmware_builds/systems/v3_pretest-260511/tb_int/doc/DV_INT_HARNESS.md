@@ -1,5 +1,6 @@
-# DV_INT_HARNESS.md - v3_pretest-260511 tb_int harness notes
+# DV_INT_HARNESS.md: v3_pretest-260511 tb_int harness notes
 
+**DUT:** `feb_system_v3` &nbsp; **Date:** 2026-05-16
 **Companion docs:** [DV_INT_PLAN.md](DV_INT_PLAN.md), [DV_BASIC.md](DV_BASIC.md), [BUG_HISTORY.md](BUG_HISTORY.md), [../README.md](../README.md)
 
 ## 1. Common Reuse

@@ -1,0 +1,7 @@
+{
+  "dut": "feb_system_v3",
+  "date": "2026-05-16",
+  "rtl_variant": "generated_synthesis + type0_sidecar",
+  "status": "warn",
+  "summary": "tb_int report files moved into doc/ layout; detailed evidence remains in DV_REPORT.md and DV_COV.md."
+}

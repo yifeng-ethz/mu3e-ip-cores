@@ -1,22 +1,22 @@
-# [WARN] DV Report - v3_pretest-260511 tb_int
+# ⚠️ DV Report — v3_pretest-260511 tb_int
 
 **DUT:** `feb_system_v3` &nbsp; **Date:** `2026-05-15` &nbsp; **RTL variant:** `generated_synthesis + old dual UVM shell` &nbsp; **Seed:** `1`
 
-This page is the chief-architect dashboard. All per-case evidence lives under [`REPORT/`](REPORT/README.md).
+This page is the chief-architect dashboard. All per-case evidence lives under [`REPORT/`](../REPORT/README.md).
 
 ## Legend
 
-[PASS] pass / closed &middot; [WARN] partial / below target / known limitation &middot; [FAIL] failed / missing evidence &middot; [PEND] pending &middot; [INFO] informational
+✅ pass / closed &middot; ⚠️ partial / below target / known limitation &middot; ❌ failed / missing evidence &middot; ❓ pending &middot; ℹ️ informational
 
 ## Health
 
 | status | field | value |
 |:---:|---|---|
-| [PASS] | failed_cases | `0` |
-| [PASS] | signoff_runs_with_failures | `0` |
-| [WARN] | catalog_backlog_cases | `763` |
-| [WARN] | unimplemented_cases | `763` |
-| [PASS] | stale_artifacts | `0` |
+| ✅ | failed_cases | `0` |
+| ✅ | signoff_runs_with_failures | `0` |
+| ⚠️ | catalog_backlog_cases | `763` |
+| ⚠️ | unimplemented_cases | `763` |
+| ✅ | stale_artifacts | `0` |
 
 ## Signoff Scope
 
@@ -52,22 +52,22 @@ This page is the chief-architect dashboard. All per-case evidence lives under [`
 
 | status | bucket | catalog_planned | promoted | evidenced | backlog | merged | promoted functional |
 |:---:|---|---:|---:|---:|---:|---|---|
-| [WARN] | [`BASIC`](doc/DV_BASIC.md) | 192 | 5 | 5 | 187 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 2.6% (5/192) |
-| [PEND] | [`EDGE`](doc/DV_EDGE.md) | 192 | 0 | 0 | 192 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 0.0% (0/192) |
-| [PEND] | [`PROF`](doc/DV_PROF.md) | 192 | 0 | 0 | 192 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 0.0% (0/192) |
-| [PEND] | [`ERROR`](doc/DV_ERROR.md) | 192 | 0 | 0 | 192 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 0.0% (0/192) |
+| ⚠️ | [`BASIC`](DV_BASIC.md) | 192 | 5 | 5 | 187 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 2.6% (5/192) |
+| ❓ | [`EDGE`](DV_EDGE.md) | 192 | 0 | 0 | 192 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 0.0% (0/192) |
+| ❓ | [`PROF`](DV_PROF.md) | 192 | 0 | 0 | 192 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 0.0% (0/192) |
+| ❓ | [`ERROR`](DV_ERROR.md) | 192 | 0 | 0 | 192 | stmt=n/a, branch=n/a, cond=n/a, expr=n/a, fsm_state=n/a, fsm_trans=n/a, toggle=n/a | 0.0% (0/192) |
 
 ## Totals
 
 | status | metric | pct | target |
 |:---:|---|---|---|
-| [WARN] | stmt | n/a | 95.0 |
-| [WARN] | branch | n/a | 90.0 |
-| [INFO] | cond | n/a | - |
-| [INFO] | expr | n/a | - |
-| [WARN] | fsm_state | n/a | 95.0 |
-| [WARN] | fsm_trans | n/a | 90.0 |
-| [WARN] | toggle | n/a | 80.0 |
+| ⚠️ | stmt | n/a | 95.0 |
+| ⚠️ | branch | n/a | 90.0 |
+| ℹ️ | cond | n/a | - |
+| ℹ️ | expr | n/a | - |
+| ⚠️ | fsm_state | n/a | 95.0 |
+| ⚠️ | fsm_trans | n/a | 90.0 |
+| ⚠️ | toggle | n/a | 80.0 |
 
 - catalog_planned_cases: `768`
 - promoted_signoff_cases: `5`
@@ -78,18 +78,18 @@ This page is the chief-architect dashboard. All per-case evidence lives under [`
 
 | status | run_id | kind | build | seq | txns | cross_pct |
 |:---:|---|---|---|---|---:|---:|
-| [PASS] | `B065_firefly_nominal_smoke` | isolated | type0_sidecar | run_B065 | 16 | 0.5 |
-| [PASS] | `B066_emulator_direct_smoke` | isolated | type0_sidecar | run_B066 | 16 | 0.5 |
-| [PASS] | `B067_sidecar_lineage` | isolated | type0_sidecar | run_B067 | 100 | 0.5 |
-| [PASS] | `B068_histogram_cross_check` | isolated | type0_sidecar | run_B068 | 1024 | 0.5 |
-| [PASS] | `B069_upload_pkt_mux_one_hit` | isolated | type0_sidecar | run_B069 | 1 | 0.5 |
-| [PASS] | `RC_EMUL` | directed | type0_sidecar | run_RC_EMUL | 16 | n/a |
-| [PASS] | `RC_EMUL_FIXED` | directed | type0_sidecar | run_RC_EMUL_FIXED | 16 | n/a |
-| [PASS] | `RC_EMUL_REALISTIC` | directed | type0_sidecar | run_RC_EMUL_FIXED + TB_INT_REALISTIC_LATENCY + split emulator-egress checkpoint + 5000-cycle RUN_PREP flush | 16 | n/a |
-| [PASS] | `TYPE0_ARB_HIST_switch` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim | 5392 | n/a |
-| [PASS] | `TYPE0_ARB_HIST_rate_32x8_model` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim_rate | 3168 | n/a |
-| [PASS] | `TYPE0_ARB_HIST_latency_32x8_model` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim_latency | 3168 | n/a |
-| [PASS] | `TYPE0_ARB_HIST_wave` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim_wave | 5392 | n/a |
+| ✅ | `B065_firefly_nominal_smoke` | isolated | type0_sidecar | run_B065 | 16 | 0.5 |
+| ✅ | `B066_emulator_direct_smoke` | isolated | type0_sidecar | run_B066 | 16 | 0.5 |
+| ✅ | `B067_sidecar_lineage` | isolated | type0_sidecar | run_B067 | 100 | 0.5 |
+| ✅ | `B068_histogram_cross_check` | isolated | type0_sidecar | run_B068 | 1024 | 0.5 |
+| ✅ | `B069_upload_pkt_mux_one_hit` | isolated | type0_sidecar | run_B069 | 1 | 0.5 |
+| ✅ | `RC_EMUL` | directed | type0_sidecar | run_RC_EMUL | 16 | n/a |
+| ✅ | `RC_EMUL_FIXED` | directed | type0_sidecar | run_RC_EMUL_FIXED | 16 | n/a |
+| ✅ | `RC_EMUL_REALISTIC` | directed | type0_sidecar | run_RC_EMUL_FIXED + TB_INT_REALISTIC_LATENCY + split emulator-egress checkpoint + 5000-cycle RUN_PREP flush | 16 | n/a |
+| ✅ | `TYPE0_ARB_HIST_switch` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim | 5392 | n/a |
+| ✅ | `TYPE0_ARB_HIST_rate_32x8_model` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim_rate | 3168 | n/a |
+| ✅ | `TYPE0_ARB_HIST_latency_32x8_model` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim_latency | 3168 | n/a |
+| ✅ | `TYPE0_ARB_HIST_wave` | cosim | type0_sidecar | run_type0_arb_mts_hist_cosim_wave | 5392 | n/a |
 
 ## Index
 
@@ -109,3 +109,5 @@ This page is the chief-architect dashboard. All per-case evidence lives under [`
 - `../syn/board_projects/fe_scifi_feb_v3/output_files_stp_stream_debug_hist/top_stp_stream_debug_hist.sof` - generated debug SOF; not timing signoff because STA has setup violations
 - `../script/check_feb_synthesis_debug_levels.py` - synthesis debug-level checker, PASS with `allowed_debug=[0]`
 - [`DV_COV.md`](DV_COV.md) - coverage summary and non-claims
+
+_Regenerate with `make run_RC_EMUL_REALISTIC_LONG_WAVE` and then refresh `DV_REPORT.json`, `DV_REPORT.md`, and `DV_COV.md` from the resulting tb_int evidence._

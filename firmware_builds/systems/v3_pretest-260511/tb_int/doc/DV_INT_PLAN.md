@@ -1,18 +1,17 @@
 # Integration Testbench: `v3_pretest-260511/tb_int/`
 
-**DUT:** `feb_system_v3` (v3_pretest-260511 FEB-only pretest build).
-The Qsys-generated synthesis tree at
-`firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/` is the
-canonical DUT. The standalone behavioral spec models are NOT the DUT; this is
-an integration TB and must compile the actual generated wrappers / adapters /
-clock-bridges to catch the bugs that integration exists to catch.
+**DUT:** `feb_system_v3` &nbsp; **Date:** 2026-05-16 &nbsp; **Status:** Draft / active debug.
 **Companion docs:** [DV_BASIC.md](DV_BASIC.md), [DV_EDGE.md](DV_EDGE.md),
 [DV_ERROR.md](DV_ERROR.md), [DV_PROF.md](DV_PROF.md), [BUG_HISTORY.md](BUG_HISTORY.md),
 [TEST_PLAN.md](../../doc/TEST_PLAN.md), `DV_INT_HARNESS.md` (codex1).
 **Reference:** `firmware_builds/systems/system_20260504_emulator_type0/tb_int/doc/DV_PLAN.md` (Apr 27 / May 4 emulator_type0 plan; structural parent).
 **Author:** Mu3e IP team.
-**Date:** 2026-05-11.
-**Status:** Draft. Awaits codex1 harness construction.
+
+The Qsys-generated synthesis tree at
+`firmware_builds/systems/v3_pretest-260511/syn/feb_system_v3/synthesis/` is the
+canonical DUT. The standalone behavioral spec models are NOT the DUT; this is
+an integration TB and must compile the actual generated wrappers / adapters /
+clock-bridges to catch the bugs that integration exists to catch.
 
 ---
 
