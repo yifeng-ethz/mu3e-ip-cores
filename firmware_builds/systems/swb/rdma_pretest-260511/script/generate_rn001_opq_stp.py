@@ -124,6 +124,8 @@ def default_probes() -> list[Probe]:
         "21 opq_egress_to_packer",
         probes,
         f"{SWB}opq_dma_input_valid",
+        f"{PIPE}i_opq_sop",
+        f"{PIPE}i_opq_eop",
     )
     add_bits("21 opq_egress_to_packer", probes, f"{SWB}opq_dma_input_data", 32)
     add_bits("21 opq_egress_to_packer", probes, f"{SWB}opq_dma_input_datak", 4)
@@ -143,6 +145,15 @@ def default_probes() -> list[Probe]:
     )
     add_bits("30 opq_dma_pipeline_opq_word", probes, f"{PIPE}opq_dma_data", 32)
     add_bits("31 opq_dma_output_256b", probes, f"{PIPE}o_dma_data", 256)
+    add_bits("32 opq_dma_output_datak", probes, f"{PIPE}o_dma_datak", 32)
+
+    add(
+        "33 a10_dma0_handoff",
+        probes,
+        f"{A10}i_pcie0_dma0_we",
+        f"{A10}i_pcie0_dma0_eoe",
+    )
+    add_bits("33 a10_dma0_handoff", probes, f"{A10}i_pcie0_dma0_wdata", 256)
 
     return probes
 
@@ -194,7 +205,8 @@ def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str) -> ET.E
         ET.Comment(
             "RN.BASIC.001 SWB frame path: raw XCVR output lanes, logical FEB link records, "
             "raw/generic/scifi/selected link-mask control, masked 4-lane OPQ input, "
-            "OPQ egress, and registered OPQ-to-packer egress. "
+            "OPQ egress, registered OPQ-to-packer egress, packed DMA output data+datak, "
+            "and the A10 PCIe DMA0 handoff checkpoint. "
             "Physical lanes 0/4/8/12 map to logical OPQ-eligible lanes 0/1/2/3; "
             "physical lanes 1/5/9/13 map to secondary logical lanes 4/5/6/7. "
             "Decode K28.5/K23.7/K28.4 offline from datak+LSB; do not decode Idle SOPs as frames."

@@ -38,6 +38,7 @@ class StreamSpec:
     lane: int | None = None
     infer_datak: bool = False
     expected_subheaders: int = 128
+    wide_slots: int = 1
 
 
 FEB_QSYS = "feb_system:u_feb_system|feb_system_v3:u_qsys|"
@@ -46,6 +47,7 @@ FEB_FIREFLY = "feb_system:u_feb_system|firefly_xcvr_subsystem:u_firefly_xcvr|"
 SWB = "swb_block:e_swb_block|"
 SWB_A10 = "a10_block:e_a10_block|"
 ADAPT = f"{SWB}ingress_egress_adaptor:e_ingress_egress_adaptor|"
+PIPE = f"{SWB}swb_opq_dma_pipeline:e_opq_dma_pipeline|"
 
 
 def feb_profile() -> list[StreamSpec]:
@@ -160,8 +162,16 @@ def swb_profile() -> list[StreamSpec]:
                 f"{SWB}opq_dma_input_data",
                 datak_suffix=f"{SWB}opq_dma_input_datak",
                 valid_suffix=f"{SWB}opq_dma_input_valid",
-                sop_suffix=f"{SWB}opq_dma_input_sop",
-                eop_suffix=f"{SWB}opq_dma_input_eop",
+                sop_suffix=f"{PIPE}i_opq_sop",
+                eop_suffix=f"{PIPE}i_opq_eop",
+            ),
+            StreamSpec(
+                "opq_dma_output_256b",
+                f"{PIPE}o_dma_data",
+                datak_suffix=f"{PIPE}o_dma_datak",
+                valid_suffix=f"{PIPE}o_dma_wen",
+                eop_suffix=f"{PIPE}o_end_of_event",
+                wide_slots=8,
             ),
         ]
     )
@@ -673,11 +683,11 @@ def decode_stream(
     widths_by_id: dict[str, int],
     spec: StreamSpec,
 ) -> dict[str, Any]:
-    width = 36 if spec.packed36 else 32
+    width = 36 if spec.packed36 else 32 * spec.wide_slots
     data_bus = find_bus(names_by_id, widths_by_id, spec.data_suffix, width)
     datak_bus = None
     if not spec.packed36 and not spec.infer_datak:
-        datak_bus = find_bus(names_by_id, widths_by_id, spec.datak_suffix or "", 4)
+        datak_bus = find_bus(names_by_id, widths_by_id, spec.datak_suffix or "", 4 * spec.wide_slots)
     valid_id = find_optional_signal(names_by_id, spec.valid_suffix)
     ready_id = find_optional_signal(names_by_id, spec.ready_suffix)
     idle_id = find_optional_signal(names_by_id, spec.idle_suffix)
@@ -700,6 +710,31 @@ def decode_stream(
 
         raw = bus_value(values, data_bus, width)
         if raw is None:
+            continue
+        if spec.wide_slots > 1:
+            datak_raw = bus_value(values, datak_bus or {}, 4 * spec.wide_slots)
+            if datak_raw is None:
+                continue
+            eop_side = scalar_value(values, eop_id)
+            for slot in range(spec.wide_slots):
+                data = (raw >> (slot * 32)) & 0xFFFFFFFF
+                datak = (datak_raw >> (slot * 4)) & 0xF
+                is_eop_symbol = bool(datak & 0x1) and (data & 0xFF) == K284
+                words.append(
+                    {
+                        "time_ps": sample["time_ps"],
+                        "data": data,
+                        "datak": datak,
+                        "low_byte": data & 0xFF,
+                        "sop": 1 if slot == 0 and bool(datak & 0x1) and (data & 0xFF) == K285 else None,
+                        "eop": 1 if eop_side == 1 and (is_eop_symbol or slot == spec.wide_slots - 1) else None,
+                        "ready": ready,
+                        "datak_source": "wide_datak",
+                        "wide_slot": slot,
+                    }
+                )
+                if is_eop_symbol:
+                    break
             continue
         if spec.packed36:
             data = raw & 0xFFFFFFFF
@@ -863,6 +898,7 @@ def compact_words(words: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "role": classify_word(word),
             "contract_kind": word.get("contract_kind"),
             "datak_source": word.get("datak_source"),
+            "wide_slot": word.get("wide_slot"),
         }
         for word in words
     ]
@@ -883,6 +919,7 @@ def write_words_csv(path: Path, streams: list[dict[str, Any]]) -> None:
             "role",
             "contract_kind",
             "datak_source",
+            "wide_slot",
         ]
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
         writer.writeheader()

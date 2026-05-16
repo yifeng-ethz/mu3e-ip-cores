@@ -15,18 +15,43 @@ VMAP := $(QUESTA_HOME)/linux_x86_64/vmap
 WORK ?= work_tb_int
 SWB_VHDL_WORK ?= work_swb_demux
 SWB_BLOCK_WORK ?= work_swb_block_mask
+OPQ_NATIVE_WORK ?= work_opq_native_replay
+OPQ_NATIVE_PLUSARGS ?=
 TB_TOP := tb_int_top
 SEED ?= 1
 SIM_ROOT ?= sim
 STP_REPLAY_MEM ?=
 STP_REPLAY_LANE ?= 0
 STP_REPLAY_SIDE ?= ingress
+OPQ_NATIVE_SRC_ROOT ?= /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler
 UVM_HOME := $(QUESTA_HOME)/verilog_src/uvm-1.2/src
 QUESTA_UVM_HOME := $(QUESTA_HOME)/verilog_src/questa_uvm_pkg-1.2/src
 UVM_SRC := $(UVM_HOME)/uvm_pkg.sv
 UVM_INCDIR := +incdir+$(UVM_HOME) +incdir+$(QUESTA_UVM_HOME)
 VLOG_OPTS := -sv -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM
 VSIM_OPTS := -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK)
+OPQ_NATIVE_VLOG_OPTS := -sv -work $(OPQ_NATIVE_WORK) -timescale 1ns/1ps \
+	+define+OPQ_USE_NATIVE_SV +define+OPQ_N_LANE=4 +define+OPQ_N_SHD=128 \
+	+define+OPQ_N_HIT=255 +define+OPQ_TICKET_FIFO_DEPTH=1024 \
+	+define+OPQ_PAGE_RAM_DEPTH=65536 +define+OPQ_DEBUG_LEVEL=1
+
+OPQ_NATIVE_RAM_SRCS := \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/vendor/alt_ram/frame_table.v \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/vendor/alt_ram/handle_fifo.v \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/vendor/alt_ram/lane_fifo.v \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/vendor/alt_ram/page_ram.v \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/vendor/alt_ram/ticket_fifo.v \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/vendor/alt_ram/tile_fifo.v
+
+OPQ_NATIVE_SV_SRCS := \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_ingress_parser.sv \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_page_allocator.sv \
+	$(OPQ_NATIVE_SRC_ROOT)/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_block_path.sv \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_frame_table_tracker.sv \
+	$(OPQ_NATIVE_SRC_ROOT)/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_frame_table_presenter.sv \
+	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_basic_presenter.sv \
+	$(OPQ_NATIVE_SRC_ROOT)/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic.sv \
+	$(OPQ_NATIVE_SRC_ROOT)/syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_dut_sv.sv
 
 BASIC_CASES := B001 B002 B003 B004 B005 B006 B007 B008 B033 B034 B040 B043 B065 B066 B067 B068 B069
 EDGE_CASES := E001 E002 E003 E033 E043 E065 E066 E067 E068
@@ -34,7 +59,7 @@ ERROR_CASES := X001 X002 X003 X004 X005 X033 X065 X069
 PROF_CASES := P001 P002 P003 P065 P066 P068
 SELECTED_CASES := $(BASIC_CASES) $(EDGE_CASES) $(ERROR_CASES) $(PROF_CASES)
 
-.PHONY: docs check modelsim_ini lib comp_uvm comp_swb_demux_replay comp_swb_block_mask_replay comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE run_OPQ_FRAME_STP_REPLAY run_SWB_FEB_XCVR_DEMERGER_REPLAY run_SWB_FEB_XCVR_STEERING_REPLAY run_SWB_FEB_SCIFI_MASK_REPLAY
+.PHONY: docs check modelsim_ini lib comp_uvm comp_swb_demux_replay comp_swb_block_mask_replay comp_opq_native_replay comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE run_OPQ_FRAME_STP_REPLAY run_OPQ_NATIVE_LANE2_REPLAY run_SWB_FEB_XCVR_DEMERGER_REPLAY run_SWB_FEB_XCVR_STEERING_REPLAY run_SWB_FEB_SCIFI_MASK_REPLAY
 
 docs:
 	python3 script/generate_swb_tb_int_assets.py
@@ -83,6 +108,15 @@ comp_swb_block_mask_replay: modelsim.ini
 		hdl/swb_block_mask_stubs.vhd \
 		../syn/board_projects/swb_a10/a10/swb/swb_block.vhd \
 		hdl/tb_swb_block_feb_v3_scifi_mask.vhd
+
+comp_opq_native_replay: modelsim.ini
+	mkdir -p $(SIM_ROOT)
+	test -d $(OPQ_NATIVE_WORK) || $(VLIB) $(OPQ_NATIVE_WORK)
+	$(VMAP) -modelsimini modelsim.ini work $(OPQ_NATIVE_WORK)
+	$(VLOG) -modelsimini modelsim.ini $(OPQ_NATIVE_VLOG_OPTS) \
+		$(OPQ_NATIVE_RAM_SRCS) \
+		$(OPQ_NATIVE_SV_SRCS) \
+		hdl/tb_opq_native_lane2_replay.sv
 
 define RUN_CASE_template
 run_$(1): comp_uvm
@@ -196,6 +230,11 @@ run_OPQ_FRAME_STP_REPLAY: comp_uvm
 	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_opq_frame_replay_test +ARB_SEED=$(SEED) +TB_INT_STP_REPLAY_MEM=$(STP_REPLAY_MEM) +TB_INT_STP_REPLAY_LANE=$(STP_REPLAY_LANE) +TB_INT_STP_REPLAY_SIDE=$(STP_REPLAY_SIDE) +TB_INT_REPLAY_EXPECT_INGRESS_HITS +TB_INT_SIM_DIR=$(SIM_ROOT)/OPQ_FRAME_STP_REPLAY -l $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript -do "run -all; quit -f"
 	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/OPQ_FRAME_STP_REPLAY/transcript; then exit 1; fi
+
+run_OPQ_NATIVE_LANE2_REPLAY: comp_opq_native_replay
+	mkdir -p $(SIM_ROOT)/OPQ_NATIVE_LANE2_REPLAY
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -work $(OPQ_NATIVE_WORK) tb_opq_native_lane2_replay $(OPQ_NATIVE_PLUSARGS) -l $(SIM_ROOT)/OPQ_NATIVE_LANE2_REPLAY/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/OPQ_NATIVE_LANE2_REPLAY/transcript
 
 run_SWB_FEB_XCVR_DEMERGER_REPLAY: comp_swb_demux_replay
 	mkdir -p $(SIM_ROOT)/SWB_FEB_XCVR_DEMERGER_REPLAY

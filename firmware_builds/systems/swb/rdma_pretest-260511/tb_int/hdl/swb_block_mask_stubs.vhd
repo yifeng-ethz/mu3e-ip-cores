@@ -227,6 +227,7 @@ port (
     o_opq_egress_sop       : out std_logic;
     o_opq_egress_eop       : out std_logic;
     o_dma_data             : out std_logic_vector(255 downto 0);
+    o_dma_datak            : out std_logic_vector(31 downto 0);
     o_dma_wen              : out std_logic;
     o_end_of_event         : out std_logic;
     o_input_word_cnt       : out std_logic_vector(31 downto 0);
@@ -259,6 +260,7 @@ begin
                 o_opq_egress_sop <= '0';
                 o_opq_egress_eop <= '0';
                 o_dma_data <= (others => '0');
+                o_dma_datak <= (others => '0');
                 o_dma_wen <= '0';
                 o_end_of_event <= '0';
             else
@@ -268,6 +270,8 @@ begin
                 o_opq_egress_eop <= accept_valid and i_opq_eop;
                 o_dma_data <= (others => '0');
                 o_dma_data(31 downto 0) <= i_opq_data;
+                o_dma_datak <= (others => '0');
+                o_dma_datak(3 downto 0) <= i_opq_datak;
                 o_dma_wen <= accept_valid;
                 o_end_of_event <= accept_valid and i_opq_eop;
                 if accept_valid = '1' then

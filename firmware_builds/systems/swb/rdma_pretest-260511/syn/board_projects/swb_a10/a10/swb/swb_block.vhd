@@ -114,6 +114,7 @@ architecture arch of swb_block is
     signal opq_reset_n : std_logic;
     signal dma_reset_n : std_logic;
     attribute keep : boolean;
+    attribute preserve : boolean;
     attribute noprune : boolean;
     attribute altera_attribute : string;
     attribute keep of debug_mask_generic_w : signal is true;
@@ -167,6 +168,7 @@ architecture arch of swb_block is
         o_opq_egress_sop       : out std_logic;
         o_opq_egress_eop       : out std_logic;
         o_dma_data             : out std_logic_vector(255 downto 0);
+        o_dma_datak            : out std_logic_vector(31 downto 0);
         o_dma_wen              : out std_logic;
         o_end_of_event         : out std_logic;
         o_input_word_cnt       : out std_logic_vector(31 downto 0);
@@ -177,8 +179,15 @@ architecture arch of swb_block is
     end component;
 
     signal opq_dma_data       : std_logic_vector(255 downto 0) := (others => '0');
+    signal opq_dma_datak      : std_logic_vector(31 downto 0) := (others => '0');
     signal opq_dma_wren       : std_logic := '0';
     signal opq_dma_endofevent : std_logic := '0';
+    attribute keep of opq_dma_input_sop : signal is true;
+    attribute keep of opq_dma_input_eop : signal is true;
+    attribute keep of opq_dma_datak : signal is true;
+    attribute preserve of opq_dma_input_sop : signal is true;
+    attribute preserve of opq_dma_input_eop : signal is true;
+    attribute preserve of opq_dma_datak : signal is true;
 
 begin
 
@@ -471,6 +480,7 @@ begin
         o_opq_egress_sop       => open,
         o_opq_egress_eop       => open,
         o_dma_data             => opq_dma_data,
+        o_dma_datak            => opq_dma_datak,
         o_dma_wen              => opq_dma_wren,
         o_end_of_event         => opq_dma_endofevent,
         o_input_word_cnt       => opq_dma_input_words,

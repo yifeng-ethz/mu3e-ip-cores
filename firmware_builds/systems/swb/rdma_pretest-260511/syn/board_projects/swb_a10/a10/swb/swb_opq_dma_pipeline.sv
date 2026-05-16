@@ -1,10 +1,10 @@
 // -----------------------------------------------------------------------------
 // File      : swb_opq_dma_pipeline.sv
 // Author    : Yifeng Wang (yifenwan@phys.ethz.ch)
-// Version   : 26.3.10
-// Date      : 20260514
-// Change    : Hardware SWB wrapper from raw OPQ egress to the lossless
-//             swb_opq_dma_packer RDMA-FIFO interface with upstream ready.
+// Version   : 26.3.12
+// Date      : 20260516
+// Change    : Export the packed DMA datak bitmap to the VHDL wrapper for
+//             OPQ/RDMA output frame-format SignalTap checks.
 // -----------------------------------------------------------------------------
 //
 // LEGACY_DMA_DEAD:
@@ -36,6 +36,7 @@ module swb_opq_dma_pipeline (
     output logic        o_opq_egress_eop,
 
     output wire [255:0] o_dma_data,
+    output wire [31:0]  o_dma_datak,
     output wire         o_dma_wen,
     output wire         o_end_of_event,
 
@@ -111,6 +112,7 @@ module swb_opq_dma_pipeline (
         .o_opq_ready      (opq_packer_ready),
         .i_dma_halffull   (i_dma_halffull),
         .o_dma_data       (o_dma_data),
+        .o_dma_datak      (o_dma_datak),
         .o_dma_wen        (o_dma_wen),
         .o_end_of_event   (o_end_of_event),
         .o_input_word_cnt (o_input_word_cnt),

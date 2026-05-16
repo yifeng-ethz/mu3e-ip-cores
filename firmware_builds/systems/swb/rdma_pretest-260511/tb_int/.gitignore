@@ -1,5 +1,6 @@
 modelsim.ini
 work_tb_int/
+work_opq_native_replay/
 sim/
 script/__pycache__/
 uvm/**/*.bak

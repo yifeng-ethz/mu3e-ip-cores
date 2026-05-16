@@ -155,6 +155,7 @@ firmware_builds/**/syn/board_projects/*/script/report_top_stp_timing_paths.tcl
 firmware_builds/**/syn/board_projects/*/rn001_opq_ingress_egress_nodecheck_*_after_compile.md
 firmware_builds/**/syn/board_projects/*/rn001_opq_ingress_egress_nodecheck_*_frame_decode_bus.md
 firmware_builds/**/syn/board_projects/*/rn001_opq_ingress_egress_nodecheck_*_xcvr_bound.md
+firmware_builds/**/syn/board_projects/*/rn001_opq_ingress_egress_nodecheck_*.md
 firmware_builds/**/tb_int/*.log
 firmware_builds/**/tb_int/*.make.log
 firmware_builds/**/tb_int/waves/gtkw/feb_*.gtkw
