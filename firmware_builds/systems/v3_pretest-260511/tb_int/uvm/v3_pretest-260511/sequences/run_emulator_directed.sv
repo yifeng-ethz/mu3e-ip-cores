@@ -24,11 +24,10 @@
 //      the splitter outN_ready dangling-input wire never exists. The bug
 //      is therefore silicon-only or requires TB_INT_BIND_REAL_DUT with the
 //      generated feb_system_v3 synthesis tree compiled in.
-//   3) AVMM polling reads against the histogram_statistics_0 / mts_preprocessor_0
-//      register windows so the test demonstrates the on-board SC-side query
-//      pattern (TOTAL_HITS, BANK_STATUS, PORT_STATUS) even though the FEB
-//      tb_int currently uses a fixed-payload stub responder
-//      (tb_int_top.sv:98..106 returns 32'h4849_5354 for every read).
+//   3) AVMM writes configure histogram_statistics_0 and the histogram ingress
+//      bridge before RUNNING; post-run AVMM reads check CONTROL, INTERVAL_CFG,
+//      TOTAL_HITS, LAST_INTERVAL_TOTAL_HITS, BANK_STATUS, PORT_STATUS, and
+//      bridge-local counters.
 //
 // Splitter-blockage repro flag:
 //   The sequence emits a uvm_info marker after the start-run step
@@ -56,13 +55,23 @@ package tb_int_run_emulator_directed_pkg;
     // any offset within the SC window exercises the bus path. Keep the
     // addresses 4-byte aligned so the stub responder + (future) Qsys-bound
     // responder both accept the burst.
-    localparam bit [31:0] CSR_HISTO_TOTAL_HITS   = 32'h0000_2000;
-    localparam bit [31:0] CSR_HISTO_BANK_STATUS  = 32'h0000_2004;
-    localparam bit [31:0] CSR_PREPROC_PORT_STAT  = 32'h0000_3000;
+    localparam bit [31:0] CSR_HISTO_BASE                     = 32'h0000_A400;
+    localparam bit [31:0] CSR_HISTO_CONTROL                  = CSR_HISTO_BASE + 32'h008;
+    localparam bit [31:0] CSR_HISTO_INTERVAL_CFG             = CSR_HISTO_BASE + 32'h028;
+    localparam bit [31:0] CSR_HISTO_BANK_STATUS              = CSR_HISTO_BASE + 32'h02C;
+    localparam bit [31:0] CSR_HISTO_PORT_STATUS              = CSR_HISTO_BASE + 32'h030;
+    localparam bit [31:0] CSR_HISTO_TOTAL_HITS               = CSR_HISTO_BASE + 32'h034;
+    localparam bit [31:0] CSR_HISTO_DROPPED_HITS             = CSR_HISTO_BASE + 32'h038;
+    localparam bit [31:0] CSR_HISTO_LAST_INTERVAL_TOTAL_HITS = CSR_HISTO_BASE + 32'h044;
+    localparam bit [31:0] CSR_HISTO_LAST_INTERVAL_DROP_HITS  = CSR_HISTO_BASE + 32'h048;
+    localparam bit [31:0] CSR_HIST_BRIDGE_BASE               = 32'h0000_AC00;
+    localparam bit [31:0] CSR_HIST_BRIDGE_CONTROL            = CSR_HIST_BRIDGE_BASE + 32'h008;
+    localparam bit [31:0] CSR_HIST_BRIDGE_STATUS             = CSR_HIST_BRIDGE_BASE + 32'h00C;
+    localparam bit [31:0] CSR_HIST_BRIDGE_PRE_COUNT          = CSR_HIST_BRIDGE_BASE + 32'h010;
+    localparam bit [31:0] CSR_HIST_BRIDGE_POST_COUNT         = CSR_HIST_BRIDGE_BASE + 32'h014;
+    localparam bit [31:0] CSR_HIST_BRIDGE_HIST_COUNT         = CSR_HIST_BRIDGE_BASE + 32'h018;
+    localparam bit [31:0] CSR_HIST_BRIDGE_DROP_COUNT         = CSR_HIST_BRIDGE_BASE + 32'h01C;
     localparam bit [31:0] CSR_FRAME_ACTUAL_HITS  = 32'h0000_4000;
-
-    // Behavioural stub pattern (tb_int_top.sv:98..106).
-    localparam bit [31:0] STUB_READDATA = 32'h4849_5354;
 
     // On-board observed signatures from Phase 3 (silicon-side, what the
     // sequence should observe once TB_INT_BIND_REAL_DUT promotes the real
@@ -111,12 +120,26 @@ package tb_int_run_emulator_directed_pkg;
         virtual hit_tap_if feb_egress_vif;
 
         // Snapshot of the four SC reads after start-run.
+        bit [31:0] obs_control;
+        bit [31:0] obs_interval_cfg;
         bit [31:0] obs_total_hits;
+        bit [31:0] obs_dropped_hits;
+        bit [31:0] obs_last_interval_total_hits;
+        bit [31:0] obs_last_interval_drop_hits;
         bit [31:0] obs_bank_status;
         bit [31:0] obs_port_status;
         bit [31:0] obs_actual_hits;
+        bit [31:0] obs_bridge_status;
+        bit [31:0] obs_bridge_pre_count;
+        bit [31:0] obs_bridge_post_count;
+        bit [31:0] obs_bridge_hist_count;
+        bit [31:0] obs_bridge_drop_count;
 
         int unsigned avmm_timeout = 10000;
+        int unsigned hist_interval_cycles = 128;
+        int unsigned hist_min_intervals = 4;
+        int unsigned hist_select_post = 0;
+        int unsigned hist_mode = 1;
 
         function new(string name = "run_emulator_directed");
             super.new(name);
@@ -215,6 +238,78 @@ package tb_int_run_emulator_directed_pkg;
             data = sc_vif.readdata;
         endtask
 
+        task automatic sc_write32(bit [31:0] addr, bit [31:0] data);
+            int unsigned waited;
+
+            @(negedge sc_vif.clk);
+            sc_vif.address    <= addr;
+            sc_vif.writedata  <= data;
+            sc_vif.byteenable <= 4'hF;
+            sc_vif.burstcount <= 8'd1;
+            sc_vif.read       <= 1'b0;
+            sc_vif.write      <= 1'b1;
+            waited = 0;
+            do begin
+                @(posedge sc_vif.clk);
+                waited++;
+                if (waited >= avmm_timeout)
+                    `uvm_fatal("RC_EMU_SEQ", "AVMM write waitrequest timeout")
+            end while (sc_vif.waitrequest === 1'b1);
+            @(negedge sc_vif.clk);
+            sc_vif.write <= 1'b0;
+        endtask
+
+        task automatic configure_histogram_before_running();
+            bit [31:0] hist_control_word;
+            bit [31:0] bridge_control_word;
+
+            void'($value$plusargs("TB_INT_HIST_INTERVAL_CYCLES=%d", hist_interval_cycles));
+            void'($value$plusargs("TB_INT_HIST_MIN_INTERVALS=%d", hist_min_intervals));
+            void'($value$plusargs("TB_INT_HIST_SELECT_POST=%d", hist_select_post));
+            void'($value$plusargs("TB_INT_HIST_MODE=%d", hist_mode));
+
+            hist_control_word = 32'h0;
+            hist_control_word[0] = 1'b1; // apply
+            hist_control_word[7:4] = hist_mode[3:0];
+            hist_control_word[8] = 1'b1; // unsigned timestamp/key
+
+            bridge_control_word = 32'h0000_0100 | (hist_select_post[0] ? 32'h1 : 32'h0);
+
+            sc_write32(CSR_HISTO_INTERVAL_CFG, hist_interval_cycles[31:0]);
+            sc_write32(CSR_HIST_BRIDGE_CONTROL, bridge_control_word);
+            sc_write32(CSR_HISTO_CONTROL, hist_control_word);
+
+            sc_read32(CSR_HISTO_INTERVAL_CFG, obs_interval_cfg);
+            sc_read32(CSR_HISTO_CONTROL, obs_control);
+            sc_read32(CSR_HIST_BRIDGE_STATUS, obs_bridge_status);
+
+            `uvm_info("RC_EMU_SEQ",
+                      $sformatf("CONFIG histogram before RUNNING: interval=%0d readback=0x%08h mode=%0d control=0x%08h bridge_select_post=%0d bridge_status=0x%08h",
+                                hist_interval_cycles,
+                                obs_interval_cfg,
+                                hist_mode,
+                                obs_control,
+                                hist_select_post[0],
+                                obs_bridge_status),
+                      UVM_LOW)
+
+            if (obs_interval_cfg !== hist_interval_cycles[31:0]) begin
+                `uvm_error("RC_EMU_SEQ",
+                           $sformatf("HIST CFG MISS: INTERVAL_CFG readback=0x%08h expected=0x%08h",
+                                     obs_interval_cfg, hist_interval_cycles[31:0]))
+            end
+            if (obs_control[7:4] !== hist_mode[3:0]) begin
+                `uvm_error("RC_EMU_SEQ",
+                           $sformatf("HIST CFG MISS: CONTROL.mode readback=%0d expected=%0d",
+                                     obs_control[7:4], hist_mode[3:0]))
+            end
+            if (obs_bridge_status[0] !== hist_select_post[0]) begin
+                `uvm_error("RC_EMU_SEQ",
+                           $sformatf("HIST CFG MISS: bridge live_select_post=%0b expected=%0b",
+                                     obs_bridge_status[0], hist_select_post[0]))
+            end
+        endtask
+
         // Drive one hit through every observation tap. Matches the
         // tb_int_basic_sequences.sv per-hit pattern (lane 0, debug level 2
         // on sidecars).
@@ -253,13 +348,37 @@ package tb_int_run_emulator_directed_pkg;
             repeat (HIT_GAP_CYCLES) @(posedge stage_a_vif.clk);
         endtask
 
-        // Body: run-prepare -> sync -> start-run -> hit burst -> SC poll.
+        // Body: histogram CSR configure -> run-prepare -> sync -> start-run
+        // -> hit burst longer than ping-pong -> SC poll.
         task automatic body(int unsigned hit_count = 16);
+            longint unsigned driven_cycles;
+            longint unsigned required_cycles;
+            bit hist_has_live_or_latched_hit;
+
             `uvm_info("RC_EMU_SEQ",
                       "starting run-control + emulator hit-flow directed sweep",
                       UVM_LOW)
 
-            // Phase 1: synclink run-prepare -> sync -> start-run.
+            // Phase 1: configure histogram and source bridge before RUNNING.
+            // Default mode=1 uses the 48-bit true timestamp sideband carried
+            // by Type-1/pre or post-rbCAM data; mode=0 can still be selected
+            // by plusarg for rate-only experiments.
+            configure_histogram_before_running();
+
+            driven_cycles = longint'(hit_count) * longint'(HIT_GAP_CYCLES);
+            required_cycles = longint'(hist_interval_cycles) * longint'(hist_min_intervals);
+            if (driven_cycles < required_cycles) begin
+                `uvm_error("RC_EMU_SEQ",
+                           $sformatf("run length too short for ping-pong: hit_count=%0d gap=%0d gives %0d cycles, need at least %0d cycles (%0d intervals x %0d)",
+                                     hit_count,
+                                     HIT_GAP_CYCLES,
+                                     driven_cycles,
+                                     required_cycles,
+                                     hist_min_intervals,
+                                     hist_interval_cycles))
+            end
+
+            // Phase 2: synclink run-prepare -> sync -> start-run.
             drive_opcode(OP_RUN_PREPARE, "run-prepare 0x10");
             drive_opcode(OP_RUN_SYNC,    "sync 0x11");
             drive_opcode(OP_START_RUN,   "start-run 0x12");
@@ -271,7 +390,7 @@ package tb_int_run_emulator_directed_pkg;
             tb_int_run_window_db::note_run_start($time);
             tb_int_run_window_db::note_stable_start($time);
 
-            // Phase 2: emulator-style hit burst.
+            // Phase 3: emulator-style hit burst.
             `uvm_info("RC_EMU_SEQ",
                       $sformatf("driving %0d emulator hits (lane 0)", hit_count),
                       UVM_LOW)
@@ -279,54 +398,92 @@ package tb_int_run_emulator_directed_pkg;
                 drive_emulator_hit(hit_idx, hit_count);
             end
 
-            // Phase 3: SC CSR poll. The fixed-payload stub returns
-            // STUB_READDATA for every address; that's still valuable for
-            // demonstrating the bus path is live.
+            // Phase 4: SC CSR poll. The histogram model resets TOTAL_HITS at
+            // ping-pong interval boundaries, so fixed verification checks the
+            // live counter, the last-interval counter, and the bridge's
+            // non-interval hist emit counter.
+            sc_read32(CSR_HISTO_CONTROL,      obs_control);
+            sc_read32(CSR_HISTO_INTERVAL_CFG, obs_interval_cfg);
             sc_read32(CSR_HISTO_TOTAL_HITS,   obs_total_hits);
+            sc_read32(CSR_HISTO_DROPPED_HITS, obs_dropped_hits);
+            sc_read32(CSR_HISTO_LAST_INTERVAL_TOTAL_HITS, obs_last_interval_total_hits);
+            sc_read32(CSR_HISTO_LAST_INTERVAL_DROP_HITS,  obs_last_interval_drop_hits);
             sc_read32(CSR_HISTO_BANK_STATUS,  obs_bank_status);
-            sc_read32(CSR_PREPROC_PORT_STAT,  obs_port_status);
+            sc_read32(CSR_HISTO_PORT_STATUS,  obs_port_status);
             sc_read32(CSR_FRAME_ACTUAL_HITS,  obs_actual_hits);
+            sc_read32(CSR_HIST_BRIDGE_STATUS,     obs_bridge_status);
+            sc_read32(CSR_HIST_BRIDGE_PRE_COUNT,  obs_bridge_pre_count);
+            sc_read32(CSR_HIST_BRIDGE_POST_COUNT, obs_bridge_post_count);
+            sc_read32(CSR_HIST_BRIDGE_HIST_COUNT, obs_bridge_hist_count);
+            sc_read32(CSR_HIST_BRIDGE_DROP_COUNT, obs_bridge_drop_count);
 
             `uvm_info("RC_EMU_SEQ",
-                      $sformatf("CSR snapshot TOTAL_HITS=0x%08h BANK_STATUS=0x%08h PORT_STATUS=0x%08h ACTUAL_HITS=0x%08h",
+                      $sformatf("CSR snapshot CONTROL=0x%08h INTERVAL_CFG=0x%08h TOTAL_HITS=0x%08h LAST_INTERVAL_TOTAL_HITS=0x%08h DROPPED=0x%08h LAST_DROPPED=0x%08h BANK_STATUS=0x%08h PORT_STATUS=0x%08h BRIDGE_STATUS=0x%08h BRIDGE_PRE=0x%08h BRIDGE_POST=0x%08h BRIDGE_HIST=0x%08h BRIDGE_DROP=0x%08h ACTUAL_HITS=0x%08h",
+                                obs_control,
+                                obs_interval_cfg,
                                 obs_total_hits,
+                                obs_last_interval_total_hits,
+                                obs_dropped_hits,
+                                obs_last_interval_drop_hits,
                                 obs_bank_status,
                                 obs_port_status,
+                                obs_bridge_status,
+                                obs_bridge_pre_count,
+                                obs_bridge_post_count,
+                                obs_bridge_hist_count,
+                                obs_bridge_drop_count,
                                 obs_actual_hits),
                       UVM_LOW)
 
             // Splitter-blockage check. With the behavioural topology model
             // in tb_int_top.sv, the SC AVMM responder is address-aware:
-            // address CSR_HISTO_TOTAL_HITS returns the mock_total_hits_cnt
-            // counter which increments only when (stage_a_vif.valid &&
-            // mock_emulator_running). Without BUG_RC_RUN_EMUL_FIXED the
-            // splitter outN_ready dangling-input collapse keeps
-            // mock_emulator_running=0 and TOTAL_HITS stays 0. With the
-            // guard defined the splitter ignores out_ready and the
-            // broadcast propagates so TOTAL_HITS reaches hit_count.
+            // histogram CSR model increments only when the selected Type-1
+            // timestamp-bearing hist tap is valid and mock_emulator_running is
+            // high. With TB_INT_REPRO_DANGLING_READY defined, the splitter
+            // dangling-ready collapse keeps mock_emulator_running=0 and all
+            // hist counters stay zero. In the default fixed build the
+            // broadcast propagates, ping-pong may reset TOTAL_HITS, and the
+            // bridge emit counter reaches hit_count.
+            hist_has_live_or_latched_hit = (obs_total_hits != 32'h0)
+                || (obs_last_interval_total_hits != 32'h0)
+                || (obs_bridge_hist_count != 32'h0);
             case (emul_check_mode)
                 EMUL_MODE_EXPECT_BLOCKED: begin
-                    if (obs_total_hits === 32'h0) begin
+                    if (obs_total_hits === 32'h0
+                            && obs_last_interval_total_hits === 32'h0
+                            && obs_bridge_hist_count === 32'h0) begin
                         `uvm_info("RC_EMU_SEQ",
-                                  $sformatf("BLOCKED OK: TOTAL_HITS=0x%08h (expected 0). BUG-RC-RUN-EMUL splitter dangling-ready collapse is LIVE.",
-                                            obs_total_hits),
+                                  $sformatf("BLOCKED OK: TOTAL_HITS=0x%08h LAST_INTERVAL_TOTAL_HITS=0x%08h BRIDGE_HIST=0x%08h (expected all zero). BUG-RC-RUN-EMUL splitter dangling-ready collapse is LIVE.",
+                                            obs_total_hits,
+                                            obs_last_interval_total_hits,
+                                            obs_bridge_hist_count),
                                   UVM_LOW)
                     end else begin
                         `uvm_error("RC_EMU_SEQ",
-                                   $sformatf("BLOCKED MISS: TOTAL_HITS=0x%08h, expected 0 (splitter should have blocked the RUNNING broadcast).",
-                                             obs_total_hits))
+                                   $sformatf("BLOCKED MISS: TOTAL_HITS=0x%08h LAST_INTERVAL_TOTAL_HITS=0x%08h BRIDGE_HIST=0x%08h, expected all zero.",
+                                             obs_total_hits,
+                                             obs_last_interval_total_hits,
+                                             obs_bridge_hist_count))
                     end
                 end
                 EMUL_MODE_EXPECT_FIXED: begin
-                    if (obs_total_hits === hit_count) begin
+                    if (hist_has_live_or_latched_hit
+                            && obs_bridge_hist_count === hit_count) begin
                         `uvm_info("RC_EMU_SEQ",
-                                  $sformatf("FIXED OK: TOTAL_HITS=0x%08h (expected 0x%08h). Qsys fix tied outN_ready to 1'b1 and the splitter broadcast propagated.",
-                                            obs_total_hits, hit_count),
+                                  $sformatf("FIXED OK: TOTAL_HITS=0x%08h LAST_INTERVAL_TOTAL_HITS=0x%08h BRIDGE_HIST=0x%08h expected_bridge=0x%08h after >=%0d ping-pong intervals.",
+                                            obs_total_hits,
+                                            obs_last_interval_total_hits,
+                                            obs_bridge_hist_count,
+                                            hit_count,
+                                            hist_min_intervals),
                                   UVM_LOW)
                     end else begin
                         `uvm_error("RC_EMU_SEQ",
-                                   $sformatf("FIXED MISS: TOTAL_HITS=0x%08h, expected 0x%08h.",
-                                             obs_total_hits, hit_count))
+                                   $sformatf("FIXED MISS: TOTAL_HITS=0x%08h LAST_INTERVAL_TOTAL_HITS=0x%08h BRIDGE_HIST=0x%08h expected_bridge=0x%08h.",
+                                             obs_total_hits,
+                                             obs_last_interval_total_hits,
+                                             obs_bridge_hist_count,
+                                             hit_count))
                     end
                 end
                 default: begin

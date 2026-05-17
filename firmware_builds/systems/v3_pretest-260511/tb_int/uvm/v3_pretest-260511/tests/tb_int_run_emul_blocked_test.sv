@@ -3,15 +3,15 @@
 //
 // Author : Claude Opus
 // Date   : 20260511
-// Scope  : Phase 3 BUG-RC-RUN-EMUL repro. Drives start-run (0x12) + 16
+// Scope  : Phase 3 BUG-RC-RUN-EMUL repro. Configures histogram CSR
+//          mode/interval before RUNNING, then drives start-run (0x12) +
 //          emulator hits against the behavioural topology model in
-//          tb_int_top.sv. With BUG_RC_RUN_EMUL_FIXED UNDEFINED the
+//          tb_int_top.sv. With TB_INT_REPRO_DANGLING_READY DEFINED the
 //          mock_run_control_splitter's outN_ready inputs are dangling
 //          (resolve as logic 0 by AND default), so the RUNNING broadcast
-//          to emulator_mutrig is blocked. mock_total_hits_cnt stays 0 and
-//          the SC AVMM read at CSR_HISTO_TOTAL_HITS returns 0. The test
-//          PASSes when the blocked signature (TOTAL_HITS == 0) is
-//          observed (the bug is "verified live" in behavioural sim).
+//          to emulator_mutrig is blocked. Histogram CSR and bridge counters
+//          stay zero across multiple ping-pong intervals. The test PASSes
+//          when the blocked signature is observed.
 
 package tb_int_run_emul_blocked_test_pkg;
 
@@ -26,7 +26,7 @@ package tb_int_run_emul_blocked_test_pkg;
         virtual runctl_phy_if rc_vif;
         virtual sc_avmm_if    sc_vif;
 
-        int unsigned hit_count = 16;
+        int unsigned hit_count = 64;
 
         function new(string name = "tb_int_run_emul_blocked_test",
                      uvm_component parent = null);

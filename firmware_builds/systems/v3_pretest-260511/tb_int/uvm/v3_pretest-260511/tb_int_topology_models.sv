@@ -29,11 +29,10 @@
 // as logic 0 (AND default), gating the broadcast to 0 on silicon. In
 // behavioural sim the dangling logic 0 default reproduces the bug.
 //
-// BUG_RC_RUN_EMUL_FIXED guard:
-//   When defined, outN_ready inputs are tied to 1'b1 explicitly, mirroring
-//   the Qsys-level fix (forcing outN_ready connections to a constant
-//   driver). The broadcast then passes through and stage_a_vif.valid is
-//   gated true so the post-rbCAM hits actually flow.
+// Default fixed model:
+//   Readyless fanout explicitly ignores outN_ready by tying internal ready
+//   terms high, matching the Qsys-level fix. Define
+//   TB_INT_REPRO_DANGLING_READY only for the historical zero-hit repro.
 
 `ifndef TB_INT_FEB_TOPOLOGY_MODELS_SV
 `define TB_INT_FEB_TOPOLOGY_MODELS_SV
@@ -69,30 +68,31 @@ module mock_run_control_splitter (
     // 9 outN_ready inputs. In Qsys these would be drawn as Avalon-ST ready
     // backpressure, but with USE_READY=0 the splitter ignores them on
     // paper. On silicon, the AND default still consumes them; an undriven
-    // outN_ready collapses out_valid to 0. We model both the dangling
-    // (no driver) and the explicit-1 case via the BUG_RC_RUN_EMUL_FIXED
-    // guard.
+    // outN_ready collapses out_valid to 0. The default model now ties the
+    // internal ready terms high; TB_INT_REPRO_DANGLING_READY restores the
+    // dangling-input behavior for the historical repro.
     input  logic                                       out_ready [TB_INT_SPLITTER_FANOUT_PORTS]
 );
-    // Internal ready gate. Each lane's ready_int is the OR of the explicit
-    // input and the BUG_RC_RUN_EMUL_FIXED tie. The B002 silicon symptom
-    // models the case where the input is dangling (logic 0 by AND default).
+    // Internal ready gate. In the fixed readyless model, every internal
+    // ready term is high. The historical repro target defines
+    // TB_INT_REPRO_DANGLING_READY to model the pre-fix dangling-ready
+    // collapse observed on silicon.
     logic [TB_INT_SPLITTER_FANOUT_PORTS-1:0] ready_int;
     logic                                    ready_and;
 
     always_comb begin
         ready_and = 1'b1;
         for (int i = 0; i < TB_INT_SPLITTER_FANOUT_PORTS; i++) begin
-`ifdef BUG_RC_RUN_EMUL_FIXED
-            // FIX: explicit tie-to-1 mirrors the Qsys connection-list
-            // change "set <splitter>.out<N>_ready <- one_const.out".
-            ready_int[i] = 1'b1;
-`else
+`ifdef TB_INT_REPRO_DANGLING_READY
             // PRE-FIX: the input is honored as-is. In a real testbench the
             // out_ready ports get no driver, so SV resolves the value to
             // X. In Qsys synthesis the resolution is "logic 0 by AND default"
             // -- match that by treating X as 0 here.
             ready_int[i] = (out_ready[i] === 1'b1) ? 1'b1 : 1'b0;
+`else
+            // FIX: explicit tie-to-1 mirrors the Qsys connection-list
+            // change "set <splitter>.out<N>_ready <- one_const.out".
+            ready_int[i] = 1'b1;
 `endif
             ready_and = ready_and & ready_int[i];
         end

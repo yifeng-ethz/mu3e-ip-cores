@@ -41,6 +41,7 @@ Historical formal note:
 | [BUG-005-R](#bug-005-r-emulator-csr-address-width-wraps-high-status-and-control-offsets) | R | hard stuck error | `common (routine emulator CSR program / readback)` | fixed / board retest pending | live source-mux capture + manual SC readback | `pending` | emulator CSR instances kept a 4-bit address generic while the parent map exposed larger windows, so high offsets wrapped to low config/UID registers. |
 | [BUG-006-R](#bug-006-r-readyless-mts-run_prepare-rearm-loss-keeps-fresh-live-captures-empty) | R | hard stuck error | `common (fresh histogram readback / CSR counter runs)` | fixed in sim / board retest still failing | live hist zero capture after source-mux and emulator CSR fixes | `pending` | MTS rearm fix is present in the programmed tree, but live source-mux-to-frame-parser closure is still blocked by zero downstream counters and a timing-violating FEB build. |
 | [BUG-007-R](#bug-007-r-qsys-catalog-shadowing-and-optional-streams-block-feb-v3-gui-open) | R | non-datapath-refactor | `common (FEB v3 Platform Designer open/generate)` | fixed / qsys-generate green | FEB v3 Qsys GUI reported 121 errors on 2026-05-15 | this commit | Qsys search-path shadowing selected the wrong MuTRiG frame-deassembly package surface and optional streams stayed enabled in production-disabled configurations. |
+| [BUG-008-H](#bug-008-h-run-emulator-tb_int-did-not-model-direct-histogram-ping-pong-csr-readback) | H | non-datapath-refactor | `common (FEB v3 direct histogram tb_int evidence)` | fixed / focused tb_int checks pass | direct histogram evidence handoff on 2026-05-17 | this commit | `run_RC_EMUL_FIXED` and `run_RC_EMUL_BLOCKED` did not yet model the direct histogram CSR/control sequence, ping-pong live/last counters, or bridge hist-count evidence needed to compare simulation with board readback. |
 
 ## 2026-05-11
 
@@ -220,6 +221,36 @@ No active DUT bug remains from the original BUG-001-R observation; it is redesig
     - medium. The GUI/generation blocker is closed, but the live hardware bottleneck remains the source-mux output into frame parser / MuTRiG frame-deassembly boundary once a timing-clean SOF is available.
   - review decision:
     - pending / not run
+
+## 2026-05-17
+
+### BUG-008-H: run-emulator tb_int did not model direct histogram ping-pong CSR readback
+- First seen in:
+  - direct histogram evidence handoff on 2026-05-17, where the FEB V3 generated-Qsys and board flow needed the same SC readout sequence for Type0/Type1 histogram counters.
+- Symptom:
+  - `run_RC_EMUL_FIXED` could prove the readyless RUNNING broadcast reached the behavioural hit path, but the test still lacked the board-like histogram setup and ping-pong CSR readback.
+  - The blocked/fixed pair did not expose the direct histogram control, interval, bank status, live total, last-interval total, dropped-hit, and bridge-local count registers used by the board scripts.
+- Root cause:
+  - The tb_int SC responder was still mostly a fixed-payload stub and did not mirror the current V3 direct histogram CSR window.
+  - The run-emulator sequence read only the older total-hit style checks, so it could miss a mismatch between simulation and the board's middle-of-run ping-pong readout.
+- Fix status:
+  - state:
+    - fixed in the tb_int harness and focused run-emulator tests; board helper scripts are checked in for the matching direct histogram path.
+  - mechanism:
+    - add a histogram/bridge CSR model in `tb_int_top.sv` with interval configuration, live/last counters, source select, and bridge pre/post/hist counters.
+    - extend `run_emulator_directed.sv` to configure the histogram before RUNNING, require enough hit cycles for multiple ping-pong intervals, and check live, last-interval, and bridge counters.
+    - split the blocked build into an explicit `TB_INT_REPRO_DANGLING_READY` compile and leave the default fixed model readyless.
+    - add direct histogram SignalTap and board-matrix helper scripts under the emulator-type0 dual-port system.
+  - before_fix_outcome:
+    - the focused fixed test could only distinguish zero versus nonzero total-hit behaviour and did not verify the direct histogram CSR read sequence.
+  - after_fix_outcome:
+    - `make -C firmware_builds/systems/v3_pretest-260511/tb_int run_RC_EMUL_FIXED` passed with `BRIDGE_HIST=0x00000040`, `TOTAL_HITS=0x00000002`, `LAST_INTERVAL_TOTAL_HITS=0x00000006`, `UVM_ERROR=0`, and `UVM_FATAL=0`.
+    - `make -C firmware_builds/systems/v3_pretest-260511/tb_int run_RC_EMUL_BLOCKED` passed with `TOTAL_HITS=0`, `LAST_INTERVAL_TOTAL_HITS=0`, `BRIDGE_HIST=0`, `UVM_ERROR=0`, and `UVM_FATAL=0`.
+    - `git diff --cached --check` passed before committing the harness update.
+  - potential_hazard:
+    - medium until the same direct histogram matrix is replayed on the timing-clean online-sc FEB firmware image.
+  - review decision:
+    - pending / board replay not run in this commit
 
 ## Resolved / Redesignated
 

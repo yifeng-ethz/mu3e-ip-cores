@@ -3,15 +3,16 @@
 //
 // Author : Claude Opus
 // Date   : 20260511
-// Scope  : Phase 3 BUG-RC-RUN-EMUL fix verification. Drives start-run
-//          (0x12) + 16 emulator hits against the behavioural topology
-//          model in tb_int_top.sv. With BUG_RC_RUN_EMUL_FIXED DEFINED
-//          (passed via vlog +define+ at build time) the
-//          mock_run_control_splitter ignores out_ready and ties the
-//          internal AND to 1'b1. The RUNNING broadcast propagates,
-//          mock_emulator_running latches high, and mock_total_hits_cnt
-//          reaches hit_count (16). The test PASSes when TOTAL_HITS == 16
-//          is observed.
+// Scope  : Phase 3 BUG-RC-RUN-EMUL fix verification. Configures histogram
+//          CSR mode/interval before RUNNING, then drives start-run (0x12)
+//          + emulator hits against the behavioural topology model in
+//          tb_int_top.sv. In the default fixed build the
+//          mock_run_control_splitter ignores out_ready for readyless fanout
+//          and ties the internal AND to 1'b1. The RUNNING broadcast propagates,
+//          mock_emulator_running latches high, and the selected Type-1
+//          timestamp-bearing histogram tap increments through multiple
+//          ping-pong intervals. The test PASSes when CSR readback shows
+//          live/latched hits and the bridge hist counter reaches hit_count.
 
 package tb_int_run_emul_fixed_test_pkg;
 
@@ -26,7 +27,7 @@ package tb_int_run_emul_fixed_test_pkg;
         virtual runctl_phy_if rc_vif;
         virtual sc_avmm_if    sc_vif;
 
-        int unsigned hit_count = 16;
+        int unsigned hit_count = 64;
 
         function new(string name = "tb_int_run_emul_fixed_test",
                      uvm_component parent = null);

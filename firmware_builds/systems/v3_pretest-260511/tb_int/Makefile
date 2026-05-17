@@ -38,6 +38,13 @@ SOURCE_MUX_FRAME_WORK ?= work_source_mux_frame
 SOURCE_MUX_FRAME_TOP  := tb_source_mux_frame_parser_cosim
 SOURCE_MUX_FRAME_RUN_CYCLES ?= 200000
 SOURCE_MUX_FRAME_Q16_RATE   ?= 52
+SOURCE_MUX_CONTROL ?= 3
+TB_INT_RC_EMUL_HIT_COUNT ?= 64
+TB_INT_HIST_INTERVAL_CYCLES ?= 128
+TB_INT_HIST_MIN_INTERVALS ?= 4
+TB_INT_HIST_SELECT_POST ?= 0
+TB_INT_HIST_MODE ?= 1
+TB_INT_HIST_PLUSARGS := +TB_INT_RC_EMUL_HIT_COUNT=$(TB_INT_RC_EMUL_HIT_COUNT) +TB_INT_HIST_INTERVAL_CYCLES=$(TB_INT_HIST_INTERVAL_CYCLES) +TB_INT_HIST_MIN_INTERVALS=$(TB_INT_HIST_MIN_INTERVALS) +TB_INT_HIST_SELECT_POST=$(TB_INT_HIST_SELECT_POST) +TB_INT_HIST_MODE=$(TB_INT_HIST_MODE)
 
 QSYS_LANE_CHAIN_SV_SRC = \
 	$(QSYS_SYNTH_DIR)/submodules/feb_system_v3_data_path_subsystem_avalon_st_adapter_024_channel_adapter_0.sv \
@@ -69,7 +76,7 @@ EMU_COSIM_SV_SRC = \
 	$(QSYS_LANE_CHAIN_SV_SRC) \
 	uvm/v3_pretest-260511/tb_source_mux_frame_parser_cosim.sv
 
-.PHONY: lib intel_lpm comp_board_deps comp_uvm comp_uvm_emul_fixed qsys_filelists comp_dut check_dut_contract comp_source_mux_frame_parser_cosim run_source_mux_frame_parser_cosim smoke run_B065 run_B066 run_B067 run_B068 run_B069 run_b065 run_b066 run_b067 run_b068 run_b069 run_RC_EMUL run_RC_EMUL_BLOCKED run_RC_EMUL_FIXED regress_basic all_buckets_frame static_screen clean
+.PHONY: lib intel_lpm comp_board_deps comp_uvm comp_uvm_emul_blocked comp_uvm_emul_fixed qsys_filelists comp_dut check_dut_contract comp_source_mux_frame_parser_cosim run_source_mux_frame_parser_cosim smoke run_B065 run_B066 run_B067 run_B068 run_B069 run_b065 run_b066 run_b067 run_b068 run_b069 run_RC_EMUL run_RC_EMUL_BLOCKED run_RC_EMUL_FIXED regress_basic all_buckets_frame static_screen clean
 
 modelsim.ini:
 	cp $(QUESTA_HOME)/modelsim.ini modelsim.ini
@@ -118,7 +125,7 @@ comp_source_mux_frame_parser_cosim: lib
 
 run_source_mux_frame_parser_cosim: comp_source_mux_frame_parser_cosim
 	mkdir -p $(SIM_ROOT)/SOURCE_MUX_FRAME
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(SOURCE_MUX_FRAME_WORK) $(SOURCE_MUX_FRAME_TOP) +RUN_CYCLES=$(SOURCE_MUX_FRAME_RUN_CYCLES) +Q16_RATE=$(SOURCE_MUX_FRAME_Q16_RATE) -l $(SIM_ROOT)/SOURCE_MUX_FRAME/transcript -do "run -all; quit -f"
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(SOURCE_MUX_FRAME_WORK) $(SOURCE_MUX_FRAME_TOP) +RUN_CYCLES=$(SOURCE_MUX_FRAME_RUN_CYCLES) +Q16_RATE=$(SOURCE_MUX_FRAME_Q16_RATE) +MUX_CONTROL=$(SOURCE_MUX_CONTROL) -l $(SIM_ROOT)/SOURCE_MUX_FRAME/transcript -do "run -all; quit -f"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/SOURCE_MUX_FRAME/transcript
 
 check_dut_contract:
@@ -169,35 +176,41 @@ run_b067: run_B067
 run_b068: run_B068
 run_b069: run_B069
 
-# BUG-RC-RUN-EMUL behavioural topology repro (PRE-FIX). Uses the default
-# WORK dir (no BUG_RC_RUN_EMUL_FIXED define), so the splitter's
-# dangling-ready collapse blocks the RUNNING broadcast. Expects
-# TOTAL_HITS=0 after 16 emulator hits.
-run_RC_EMUL_BLOCKED: comp_uvm
+# BUG-RC-RUN-EMUL behavioural topology repro (PRE-FIX). Uses an explicit
+# TB_INT_REPRO_DANGLING_READY build so the splitter's dangling-ready collapse
+# blocks the RUNNING broadcast. Expects the histogram CSR/bridge counters to
+# stay zero after the requested emulator hits.
+comp_uvm_emul_blocked: lib
+	test -d work_tb_int_emul_blocked || $(VLIB) work_tb_int_emul_blocked
+	$(VMAP) -modelsimini modelsim.ini work_emul_blocked work_tb_int_emul_blocked
+	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_blocked -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+TB_INT_REPRO_DANGLING_READY $(UVM_INCDIR) $(UVM_SRC)
+	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_blocked -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+TB_INT_REPRO_DANGLING_READY $(UVM_INCDIR) -f script/tb_int.f
+
+run_RC_EMUL_BLOCKED: comp_uvm_emul_blocked
 	mkdir -p $(SIM_ROOT)/RC_EMUL_BLOCKED
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_blocked_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_BLOCKED -l $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript -do "run -all; quit -f"
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work work_tb_int_emul_blocked $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_blocked_test +ARB_SEED=$(SEED) $(TB_INT_HIST_PLUSARGS) +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_BLOCKED -l $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript -do "run -all; quit -f"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_EMUL_BLOCKED/transcript; then exit 1; fi
 
 # BUG-RC-RUN-EMUL behavioural topology repro (POST-FIX). Compiles into a
-# separate WORK dir (work_tb_int_emul_fixed) with
-# +define+BUG_RC_RUN_EMUL_FIXED so the splitter ignores out_ready and the
-# broadcast propagates. Expects TOTAL_HITS=16 after 16 emulator hits.
+# separate WORK dir (work_tb_int_emul_fixed) with the default fixed readyless
+# splitter model. Expects nonzero histogram CSR readback and bridge hist count
+# equal to the requested emulator hits after multiple ping-pong intervals.
 comp_uvm_emul_fixed: lib
 	test -d work_tb_int_emul_fixed || $(VLIB) work_tb_int_emul_fixed
 	$(VMAP) -modelsimini modelsim.ini work_emul_fixed work_tb_int_emul_fixed
-	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+BUG_RC_RUN_EMUL_FIXED $(UVM_INCDIR) $(UVM_SRC)
-	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM +define+BUG_RC_RUN_EMUL_FIXED $(UVM_INCDIR) -f script/tb_int.f
+	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM $(UVM_INCDIR) $(UVM_SRC)
+	$(VLOG) -modelsimini modelsim.ini -sv -work work_tb_int_emul_fixed -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_INT_SIM $(UVM_INCDIR) -f script/tb_int.f
 
 run_RC_EMUL_FIXED: comp_uvm_emul_fixed
 	mkdir -p $(SIM_ROOT)/RC_EMUL_FIXED
-	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work work_tb_int_emul_fixed $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_fixed_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_FIXED -l $(SIM_ROOT)/RC_EMUL_FIXED/transcript -do "run -all; quit -f"
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work work_tb_int_emul_fixed $(TB_TOP) +UVM_TESTNAME=tb_int_run_emul_fixed_test +ARB_SEED=$(SEED) $(TB_INT_HIST_PLUSARGS) +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL_FIXED -l $(SIM_ROOT)/RC_EMUL_FIXED/transcript -do "run -all; quit -f"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/RC_EMUL_FIXED/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_EMUL_FIXED/transcript; then exit 1; fi
 
 run_RC_EMUL: comp_uvm
 	mkdir -p $(SIM_ROOT)/RC_EMUL
-	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emulator_directed_test +ARB_SEED=$(SEED) +TB_INT_RC_EMUL_HIT_COUNT=16 +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL -l $(SIM_ROOT)/RC_EMUL/transcript -do "run -all; quit -f"
+	$(VSIM) $(VSIM_OPTS) $(TB_TOP) +UVM_TESTNAME=tb_int_run_emulator_directed_test +ARB_SEED=$(SEED) $(TB_INT_HIST_PLUSARGS) +TB_INT_SIM_DIR=$(SIM_ROOT)/RC_EMUL -l $(SIM_ROOT)/RC_EMUL/transcript -do "run -all; quit -f"
 	rg "\\*\\*\\* TEST PASSED \\*\\*\\*" $(SIM_ROOT)/RC_EMUL/transcript
 	@if rg "UVM_(ERROR|FATAL)[[:space:]]*:[[:space:]]*[1-9]" $(SIM_ROOT)/RC_EMUL/transcript; then exit 1; fi
 

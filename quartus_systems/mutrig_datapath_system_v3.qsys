@@ -352,11 +352,6 @@ proc compose {} {
  <connection
    kind="clock"
    version="18.1"
-   start="system_clock_reset_interface.clk"
-   end="lvdserr_count_subsystem.counter_clk" />
- <connection
-   kind="clock"
-   version="18.1"
    start="debug_clock.out_clk"
    end="dbg_counter_fab_sclr.clock_sink" />
  <connection
@@ -380,11 +375,6 @@ proc compose {} {
    version="18.1"
    start="system_clock_reset_interface.clk_reset"
    end="backpressure_fifo.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="system_clock_reset_interface.clk_reset"
-   end="lvdserr_count_subsystem.counter_rst" />
  <connection
    kind="reset"
    version="18.1"

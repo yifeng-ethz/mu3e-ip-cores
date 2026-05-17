@@ -114,33 +114,30 @@ module tb_int_top;
     //     RUNNING one-hot that the splitter then broadcasts.
     //   - mock_run_control_splitter is USE_READY=0 on paper but its silicon
     //     implementation still has internal outN_ready inputs. Dangling
-    //     outN_ready (no driver) collapses out_valid to 0 by AND default.
+    //     outN_ready (no driver) used to collapse out_valid to 0 by AND
+    //     default. The fixed model ties the internal ready terms high.
     //   - mock_emulator_running latches the splitter output corresponding
     //     to the emulator_mutrig RUNNING enable. Without the fix the
-    //     dangling-ready collapse keeps mock_emulator_running=0; with the
-    //     BUG_RC_RUN_EMUL_FIXED guard, the outN_ready inputs are tied to
-    //     1'b1 and the broadcast propagates.
-    //   - mock_total_hits_cnt counts stage_a_vif.valid edges that occur
-    //     while mock_emulator_running is high. The SC AVMM responder
-    //     below returns this counter when address 0x0000_2000
-    //     (CSR_HISTO_TOTAL_HITS) is read, mirroring the on-board
-    //     histogram_statistics.TOTAL_HITS register.
+    //     historical TB_INT_REPRO_DANGLING_READY repro keeps
+    //     mock_emulator_running=0; the default fixed model ties the internal
+    //     outN_ready terms to 1'b1 and the broadcast propagates.
+    //   - the histogram CSR model counts the selected Type-1 timestamp tap
+    //     while mock_emulator_running is high. The SC AVMM responder below
+    //     exposes the V3 histogram and ingress-bridge CSR windows, including
+    //     ping-pong live/last counters.
     logic [7:0] mock_run_state_onehot;
     logic       mock_run_state_valid;
 
     logic                                  splitter_out_valid [TB_INT_SPLITTER_FANOUT_PORTS];
     logic [7:0]                            splitter_out_data  [TB_INT_SPLITTER_FANOUT_PORTS];
-    // outN_ready inputs to the splitter. PRE-FIX: keep these as unassigned
-    // `logic` (no driver) -- the splitter treats X as 0 and the broadcast
-    // collapses, modelling the B002 silicon symptom. POST-FIX (define
-    // BUG_RC_RUN_EMUL_FIXED): the splitter ignores out_ready and ties
-    // internal readies to 1'b1, so the broadcast passes through.
+    // outN_ready inputs to the splitter. The fixed readyless model ignores
+    // these and ties internal readies to 1'b1. The explicit
+    // TB_INT_REPRO_DANGLING_READY build keeps them unassigned so the old
+    // zero-hit signature can still be reproduced.
     logic                                  splitter_out_ready [TB_INT_SPLITTER_FANOUT_PORTS];
 
-    // PRE-FIX: explicitly leave splitter_out_ready dangling (no continuous
-    // assignment). SV defaults Z; mock_run_control_splitter resolves Z as
-    // 0 internally (see ready_int comb in tb_int_topology_models.sv).
-    // POST-FIX: don't touch -- the model ignores out_ready entirely.
+    // Deliberately no continuous assignment here: fixed builds ignore the
+    // port, while the explicit repro build resolves the dangling value as 0.
 
     mock_run_state_latch u_mock_run_state_latch (
         .clk             (clk_125),
@@ -173,33 +170,189 @@ module tb_int_top;
         end
     end
 
-    // mock_total_hits_cnt: counts stage_a_vif.valid edges seen while the
-    // splitter delivered RUNNING. Mirrors the on-board
-    // histogram_statistics.TOTAL_HITS register.
-    logic [31:0] mock_total_hits_cnt;
-    always_ff @(posedge clk_125) begin
-        if (rst) begin
-            mock_total_hits_cnt <= 32'h0;
-        end else if (mock_emulator_running && stage_a_vif.valid) begin
-            mock_total_hits_cnt <= mock_total_hits_cnt + 1'b1;
-        end
-    end
+    // Histogram/bridge CSR model. This mirrors the V3 parent map used by
+    // refresh_v3_histogram_parent_binding.tcl closely enough for tb_int to
+    // configure the histogram before RUNNING, let the ping-pong interval
+    // roll, and read back the rate counters through SC AVMM.
+    localparam bit [31:0] FEB_HIST_CSR_BASE                 = 32'h0000_A400;
+    localparam bit [31:0] FEB_HIST_CSR_CONTROL              = FEB_HIST_CSR_BASE + 32'h008;
+    localparam bit [31:0] FEB_HIST_CSR_INTERVAL_CFG         = FEB_HIST_CSR_BASE + 32'h028;
+    localparam bit [31:0] FEB_HIST_CSR_BANK_STATUS          = FEB_HIST_CSR_BASE + 32'h02C;
+    localparam bit [31:0] FEB_HIST_CSR_PORT_STATUS          = FEB_HIST_CSR_BASE + 32'h030;
+    localparam bit [31:0] FEB_HIST_CSR_TOTAL_HITS           = FEB_HIST_CSR_BASE + 32'h034;
+    localparam bit [31:0] FEB_HIST_CSR_DROPPED_HITS         = FEB_HIST_CSR_BASE + 32'h038;
+    localparam bit [31:0] FEB_HIST_CSR_LAST_TOTAL_HITS      = FEB_HIST_CSR_BASE + 32'h044;
+    localparam bit [31:0] FEB_HIST_CSR_LAST_DROPPED_HITS    = FEB_HIST_CSR_BASE + 32'h048;
+    localparam bit [31:0] FEB_HIST_BRIDGE_CSR_BASE          = 32'h0000_AC00;
+    localparam bit [31:0] FEB_HIST_BRIDGE_CSR_CONTROL       = FEB_HIST_BRIDGE_CSR_BASE + 32'h008;
+    localparam bit [31:0] FEB_HIST_BRIDGE_CSR_STATUS        = FEB_HIST_BRIDGE_CSR_BASE + 32'h00C;
+    localparam bit [31:0] FEB_HIST_BRIDGE_CSR_PRE_COUNT     = FEB_HIST_BRIDGE_CSR_BASE + 32'h010;
+    localparam bit [31:0] FEB_HIST_BRIDGE_CSR_POST_COUNT    = FEB_HIST_BRIDGE_CSR_BASE + 32'h014;
+    localparam bit [31:0] FEB_HIST_BRIDGE_CSR_HIST_COUNT    = FEB_HIST_BRIDGE_CSR_BASE + 32'h018;
+    localparam bit [31:0] FEB_HIST_BRIDGE_CSR_DROP_COUNT    = FEB_HIST_BRIDGE_CSR_BASE + 32'h01C;
+    localparam bit [31:0] FEB_LEGACY_CSR_HISTO_TOTAL_HITS   = 32'h0000_2000;
 
-    // SC AVMM responder. Default returns 32'h4849_5354 ("HIST"). When the
-    // master reads CSR_HISTO_TOTAL_HITS (byte addr 0x0000_2000), return the
-    // mock_total_hits_cnt so the run_emulator_directed sequence can
-    // distinguish the pre-fix (0) vs post-fix (16) cases.
-    localparam bit [31:0] FEB_CSR_HISTO_TOTAL_HITS = 32'h0000_2000;
+    logic [31:0] mock_hist_interval_cfg;
+    logic [31:0] mock_hist_interval_counter;
+    logic [31:0] mock_hist_current_total_cnt;
+    logic [31:0] mock_hist_last_interval_total_cnt;
+    logic [31:0] mock_hist_current_drop_cnt;
+    logic [31:0] mock_hist_last_interval_drop_cnt;
+    logic        mock_hist_active_bank;
+    logic [3:0]  mock_hist_mode;
+    logic        mock_hist_key_unsigned;
+    logic        mock_hist_filter_enable;
+    logic        mock_hist_filter_reject;
+    logic        mock_bridge_select_post_req;
+    logic        mock_bridge_select_post_live;
+    logic [31:0] mock_bridge_pre_seen_cnt;
+    logic [31:0] mock_bridge_post_seen_cnt;
+    logic [31:0] mock_bridge_hist_emit_cnt;
+    logic [31:0] mock_bridge_hist_drop_cnt;
+
+    wire mock_pre_type1_valid  = pre_rbcam_vif.valid  && pre_rbcam_vif.true_hit_ts_valid;
+    wire mock_post_type1_valid = post_rbcam_vif.valid && post_rbcam_vif.true_hit_ts_valid;
+    wire mock_selected_hist_valid = mock_bridge_select_post_live ? mock_post_type1_valid : mock_pre_type1_valid;
+    wire mock_hist_count_valid = mock_emulator_running && mock_selected_hist_valid;
+    wire mock_hist_interval_fire = (mock_hist_interval_cfg != 32'h0)
+        && (mock_hist_interval_counter >= (mock_hist_interval_cfg - 32'd1));
+
+    function automatic bit [31:0] hist_control_readback();
+        hist_control_readback = 32'h0;
+        hist_control_readback[7:4] = mock_hist_mode;
+        hist_control_readback[8] = mock_hist_key_unsigned;
+        hist_control_readback[12] = mock_hist_filter_enable;
+        hist_control_readback[13] = mock_hist_filter_reject;
+    endfunction
+
+    function automatic bit [31:0] hist_bank_status_readback();
+        hist_bank_status_readback = 32'h0;
+        hist_bank_status_readback[0] = mock_hist_active_bank;
+    endfunction
+
+    function automatic bit [31:0] hist_port_status_readback();
+        hist_port_status_readback = 32'h0;
+        hist_port_status_readback[7:0] = mock_selected_hist_valid ? 8'hFE : 8'hFF;
+        hist_port_status_readback[15:8] = (mock_bridge_hist_emit_cnt != 32'h0) ? 8'h01 : 8'h00;
+    endfunction
+
+    function automatic bit [31:0] bridge_status_readback();
+        bridge_status_readback = 32'h0;
+        bridge_status_readback[0] = mock_bridge_select_post_live;
+        bridge_status_readback[1] = mock_bridge_select_post_req;
+    endfunction
+
     always_ff @(posedge clk_125) begin
         if (rst) begin
+            mock_hist_interval_cfg <= 32'd125000000;
+            mock_hist_interval_counter <= 32'h0;
+            mock_hist_current_total_cnt <= 32'h0;
+            mock_hist_last_interval_total_cnt <= 32'h0;
+            mock_hist_current_drop_cnt <= 32'h0;
+            mock_hist_last_interval_drop_cnt <= 32'h0;
+            mock_hist_active_bank <= 1'b0;
+            mock_hist_mode <= 4'h0;
+            mock_hist_key_unsigned <= 1'b1;
+            mock_hist_filter_enable <= 1'b0;
+            mock_hist_filter_reject <= 1'b0;
+            mock_bridge_select_post_req <= 1'b0;
+            mock_bridge_select_post_live <= 1'b0;
+            mock_bridge_pre_seen_cnt <= 32'h0;
+            mock_bridge_post_seen_cnt <= 32'h0;
+            mock_bridge_hist_emit_cnt <= 32'h0;
+            mock_bridge_hist_drop_cnt <= 32'h0;
             sc_phy_vif.readdatavalid <= 1'b0;
             sc_phy_vif.readdata <= 32'h0000_0000;
         end else begin
             sc_phy_vif.readdatavalid <= sc_phy_vif.read;
-            if (sc_phy_vif.address == FEB_CSR_HISTO_TOTAL_HITS)
-                sc_phy_vif.readdata <= mock_total_hits_cnt;
-            else
-                sc_phy_vif.readdata <= 32'h4849_5354;
+
+            if (sc_phy_vif.write) begin
+                case (sc_phy_vif.address)
+                    FEB_HIST_CSR_CONTROL: begin
+                        mock_hist_mode <= sc_phy_vif.writedata[7:4];
+                        mock_hist_key_unsigned <= sc_phy_vif.writedata[8];
+                        mock_hist_filter_enable <= sc_phy_vif.writedata[12];
+                        mock_hist_filter_reject <= sc_phy_vif.writedata[13];
+                    end
+                    FEB_HIST_CSR_INTERVAL_CFG: begin
+                        mock_hist_interval_cfg <= sc_phy_vif.writedata;
+                        mock_hist_interval_counter <= 32'h0;
+                        mock_hist_current_total_cnt <= 32'h0;
+                        mock_hist_current_drop_cnt <= 32'h0;
+                    end
+                    FEB_HIST_BRIDGE_CSR_CONTROL: begin
+                        mock_bridge_select_post_req <= sc_phy_vif.writedata[0];
+                        mock_bridge_select_post_live <= sc_phy_vif.writedata[0];
+                        if (sc_phy_vif.writedata[8]) begin
+                            mock_bridge_pre_seen_cnt <= 32'h0;
+                            mock_bridge_post_seen_cnt <= 32'h0;
+                            mock_bridge_hist_emit_cnt <= 32'h0;
+                            mock_bridge_hist_drop_cnt <= 32'h0;
+                        end
+                    end
+                    default: begin
+                    end
+                endcase
+            end
+
+            if (mock_hist_interval_fire) begin
+                mock_hist_last_interval_total_cnt <= mock_hist_current_total_cnt;
+                mock_hist_last_interval_drop_cnt <= mock_hist_current_drop_cnt;
+                mock_hist_current_total_cnt <= 32'h0;
+                mock_hist_current_drop_cnt <= 32'h0;
+                mock_hist_interval_counter <= 32'h0;
+                mock_hist_active_bank <= ~mock_hist_active_bank;
+            end else if (mock_hist_interval_cfg != 32'h0) begin
+                mock_hist_interval_counter <= mock_hist_interval_counter + 32'd1;
+            end
+
+            if (mock_emulator_running && mock_pre_type1_valid && mock_bridge_pre_seen_cnt != 32'hFFFF_FFFF)
+                mock_bridge_pre_seen_cnt <= mock_bridge_pre_seen_cnt + 32'd1;
+            if (mock_emulator_running && mock_post_type1_valid && mock_bridge_post_seen_cnt != 32'hFFFF_FFFF)
+                mock_bridge_post_seen_cnt <= mock_bridge_post_seen_cnt + 32'd1;
+            if (mock_hist_count_valid) begin
+                if (mock_hist_interval_fire)
+                    mock_hist_current_total_cnt <= 32'd1;
+                else if (mock_hist_current_total_cnt != 32'hFFFF_FFFF)
+                    mock_hist_current_total_cnt <= mock_hist_current_total_cnt + 32'd1;
+
+                if (mock_bridge_hist_emit_cnt != 32'hFFFF_FFFF)
+                    mock_bridge_hist_emit_cnt <= mock_bridge_hist_emit_cnt + 32'd1;
+            end
+
+            case (sc_phy_vif.address)
+                FEB_HIST_CSR_CONTROL:
+                    sc_phy_vif.readdata <= hist_control_readback();
+                FEB_HIST_CSR_INTERVAL_CFG:
+                    sc_phy_vif.readdata <= mock_hist_interval_cfg;
+                FEB_HIST_CSR_BANK_STATUS:
+                    sc_phy_vif.readdata <= hist_bank_status_readback();
+                FEB_HIST_CSR_PORT_STATUS:
+                    sc_phy_vif.readdata <= hist_port_status_readback();
+                FEB_HIST_CSR_TOTAL_HITS,
+                FEB_LEGACY_CSR_HISTO_TOTAL_HITS:
+                    sc_phy_vif.readdata <= mock_hist_current_total_cnt;
+                FEB_HIST_CSR_DROPPED_HITS:
+                    sc_phy_vif.readdata <= mock_hist_current_drop_cnt;
+                FEB_HIST_CSR_LAST_TOTAL_HITS:
+                    sc_phy_vif.readdata <= mock_hist_last_interval_total_cnt;
+                FEB_HIST_CSR_LAST_DROPPED_HITS:
+                    sc_phy_vif.readdata <= mock_hist_last_interval_drop_cnt;
+                FEB_HIST_BRIDGE_CSR_CONTROL:
+                    sc_phy_vif.readdata <= {31'h0, mock_bridge_select_post_req};
+                FEB_HIST_BRIDGE_CSR_STATUS:
+                    sc_phy_vif.readdata <= bridge_status_readback();
+                FEB_HIST_BRIDGE_CSR_PRE_COUNT:
+                    sc_phy_vif.readdata <= mock_bridge_pre_seen_cnt;
+                FEB_HIST_BRIDGE_CSR_POST_COUNT:
+                    sc_phy_vif.readdata <= mock_bridge_post_seen_cnt;
+                FEB_HIST_BRIDGE_CSR_HIST_COUNT:
+                    sc_phy_vif.readdata <= mock_bridge_hist_emit_cnt;
+                FEB_HIST_BRIDGE_CSR_DROP_COUNT:
+                    sc_phy_vif.readdata <= mock_bridge_hist_drop_cnt;
+                default:
+                    sc_phy_vif.readdata <= 32'h4849_5354;
+            endcase
         end
     end
 

@@ -130,6 +130,7 @@ module tb_source_mux_frame_parser_cosim;
 
     int unsigned run_cycles;
     int unsigned q16_rate;
+    int unsigned mux_control_word;
     longint unsigned cycle_count;
     int unsigned emu_tx_count;
     int unsigned emu_header_count;
@@ -484,6 +485,9 @@ module tb_source_mux_frame_parser_cosim;
         if (!$value$plusargs("Q16_RATE=%d", q16_rate)) begin
             q16_rate = 52;
         end
+        if (!$value$plusargs("MUX_CONTROL=%d", mux_control_word)) begin
+            mux_control_word = 3;
+        end
 
         emu_ctrl_data = CTRL_IDLE;
         emu_ctrl_valid = 1'b0;
@@ -516,7 +520,7 @@ module tb_source_mux_frame_parser_cosim;
         emu_write(EMU_REG_LANE_ENABLE, 32'h0000_0001);
         emu_write(EMU_REG_CENTRAL, 32'h0000_0001);
 
-        mux_write(MLSM_REG_CONTROL, 32'h0000_0003);
+        mux_write(MLSM_REG_CONTROL, mux_control_word[31:0]);
         parser_write(2'd0, 32'h0000_0001);
 
         send_run_state(CTRL_RUN_PREPARE);
@@ -531,9 +535,10 @@ module tb_source_mux_frame_parser_cosim;
         mux_read(MLSM_REG_SELECTED_BEATS, mux_selected_beats_csr);
         mux_read(MLSM_REG_EMU_SELECTED, mux_emu_selected_csr);
 
-        $display("SUMMARY run_cycles=%0d q16_rate=%0d emu_tx_count=%0d emu_header_count=%0d mux_selected_count=%0d parser_rx_count=%0d parser_new_frame_count=%0d parser_header_count=%0d parser_new_word_count=%0d parser_hit_count=%0d parser_enable=%0b receiver_go=%0b parser_csr_control=0x%02h parser_csr_status=0x%02h crc_err=%0d frame_head=%0d frame_tail=%0d mux_csr_emu=%0d mux_csr_selected=%0d mux_csr_emu_selected=%0d last_header=0x%011h last_hit=0x%012h",
+        $display("SUMMARY run_cycles=%0d q16_rate=%0d mux_control=0x%08h emu_tx_count=%0d emu_header_count=%0d mux_selected_count=%0d parser_rx_count=%0d parser_new_frame_count=%0d parser_header_count=%0d parser_new_word_count=%0d parser_hit_count=%0d parser_enable=%0b receiver_go=%0b parser_csr_control=0x%02h parser_csr_status=0x%02h crc_err=%0d frame_head=%0d frame_tail=%0d mux_csr_emu=%0d mux_csr_selected=%0d mux_csr_emu_selected=%0d last_header=0x%011h last_hit=0x%012h",
                  run_cycles,
                  q16_rate,
+                 mux_control_word[31:0],
                  emu_tx_count,
                  emu_header_count,
                  mux_selected_count,
