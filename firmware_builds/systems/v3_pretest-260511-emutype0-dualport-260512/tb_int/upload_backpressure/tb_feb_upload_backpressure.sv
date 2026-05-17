@@ -5,6 +5,8 @@ module tb_feb_upload_backpressure;
     localparam int unsigned PACKET_BEATS = 8;
     localparam int unsigned STALL_CYCLES = 16;
     localparam int unsigned RUN_CYCLES = 12000;
+    localparam int unsigned SC_START_CYCLE = 512;
+    localparam int unsigned SC_PACKET_BEATS = 4;
     localparam logic [35:0] RUNCTL_IDLE_WORD = {27'd0, 9'h1bc};
 
     logic clk = 1'b0;
@@ -47,10 +49,17 @@ module tb_feb_upload_backpressure;
     int unsigned source_period;
     int unsigned stall_count;
     bit          stall_armed_for_packet;
+    bit          sc_active;
+    bit          sc_done;
+    int unsigned sc_beat;
 
     int unsigned in0_valid_held_cycles;
     int unsigned in0_ready_pulses;
+    int unsigned in1_valid_held_cycles;
+    int unsigned in1_ready_pulses;
     int unsigned in2_ready_pulses;
+    int unsigned sc_words_seen;
+    int unsigned sc_eop_accepted;
     int unsigned idle_words_seen;
     int unsigned in0_eop_offered;
     int unsigned in0_eop_accepted;
@@ -126,10 +135,10 @@ module tb_feb_upload_backpressure;
         .reset_n           (reset_n)
     );
 
-    assign in1_valid = 1'b0;
-    assign in1_data = 36'h0;
-    assign in1_sop = 1'b0;
-    assign in1_eop = 1'b0;
+    assign in1_valid = sc_active;
+    assign in1_data = {8'h5c, 20'h5c001, sc_beat[7:0]};
+    assign in1_sop = sc_active && (sc_beat == 0);
+    assign in1_eop = sc_active && (sc_beat == SC_PACKET_BEATS - 1);
 
     assign in2_valid = reset_n;
     assign in2_data = RUNCTL_IDLE_WORD;
@@ -152,9 +161,16 @@ module tb_feb_upload_backpressure;
             src_data <= 36'h0;
             stall_count <= 0;
             stall_armed_for_packet <= 1'b0;
+            sc_active <= 1'b0;
+            sc_done <= 1'b0;
+            sc_beat <= 0;
             in0_valid_held_cycles <= 0;
             in0_ready_pulses <= 0;
+            in1_valid_held_cycles <= 0;
+            in1_ready_pulses <= 0;
             in2_ready_pulses <= 0;
+            sc_words_seen <= 0;
+            sc_eop_accepted <= 0;
             idle_words_seen <= 0;
             in0_eop_offered <= 0;
             in0_eop_accepted <= 0;
@@ -206,12 +222,33 @@ module tb_feb_upload_backpressure;
             end
 `endif
 
+            if (!sc_active && !sc_done && cycle_count >= SC_START_CYCLE) begin
+                sc_active <= 1'b1;
+                sc_beat <= 0;
+            end else if (sc_active && in1_ready) begin
+                if (sc_beat == SC_PACKET_BEATS - 1) begin
+                    sc_active <= 1'b0;
+                    sc_done <= 1'b1;
+                    sc_beat <= 0;
+                end else begin
+                    sc_beat <= sc_beat + 1'b1;
+                end
+            end
+
             if (upload_valid)
                 in0_valid_held_cycles <= in0_valid_held_cycles + 1'b1;
             if (upload_valid && upload_ready)
                 in0_ready_pulses <= in0_ready_pulses + 1'b1;
+            if (in1_valid)
+                in1_valid_held_cycles <= in1_valid_held_cycles + 1'b1;
+            if (in1_valid && in1_ready)
+                in1_ready_pulses <= in1_ready_pulses + 1'b1;
             if (in2_valid && in2_ready)
                 in2_ready_pulses <= in2_ready_pulses + 1'b1;
+            if (out_valid && out_ready && out_channel == 2'd1 && out_data[35:28] == 8'h5c)
+                sc_words_seen <= sc_words_seen + 1'b1;
+            if (in1_valid && in1_ready && in1_eop)
+                sc_eop_accepted <= sc_eop_accepted + 1'b1;
             if (out_valid && out_ready && out_channel == 2'd2 && out_data[8:0] == 9'h1bc)
                 idle_words_seen <= idle_words_seen + 1'b1;
             if (upload_valid && upload_eop)
@@ -220,7 +257,7 @@ module tb_feb_upload_backpressure;
                 in0_eop_accepted <= in0_eop_accepted + 1'b1;
 
             if (cycle_count == RUN_CYCLES) begin
-                $display("UPLOAD_BACKPRESSURE_SUMMARY mode=%s rate_q16=52 cluster_fix=18448 period_cycles=%0d packet_beats=%0d stall_cycles=%0d in0_valid_held=%0d in0_ready_pulses=%0d in0_eop_offered=%0d in0_eop_accepted=%0d in2_valid=1 in2_ready_pulses=%0d idle_words=%0d stall_windows=%0d",
+                $display("UPLOAD_BACKPRESSURE_SUMMARY mode=%s rate_q16=52 cluster_fix=18448 period_cycles=%0d packet_beats=%0d stall_cycles=%0d in0_valid_held=%0d in0_ready_pulses=%0d in0_eop_offered=%0d in0_eop_accepted=%0d in1_sc_valid_held=%0d in1_sc_ready_pulses=%0d sc_words=%0d sc_eop_accepted=%0d in2_valid=1 in2_ready_pulses=%0d idle_words=%0d stall_windows=%0d",
 `ifdef FEB_UPLOAD_BROKEN_ADAPTER
                          "broken_adapter",
 `else
@@ -233,20 +270,30 @@ module tb_feb_upload_backpressure;
                          in0_ready_pulses,
                          in0_eop_offered,
                          in0_eop_accepted,
+                         in1_valid_held_cycles,
+                         in1_ready_pulses,
+                         sc_words_seen,
+                         sc_eop_accepted,
                          in2_ready_pulses,
                          idle_words_seen,
                          stall_windows);
 
                 if (expect_broken) begin
-                    if (in2_ready_pulses <= 1 && idle_words_seen <= 1 && in0_eop_offered > in0_eop_accepted) begin
-                        $display("UPLOAD_BACKPRESSURE_BROKEN_REPRO in0_valid_held=%0d in0_ready_pulses=%0d in2_ready_pulses=%0d idle_words=%0d missed_eop=%0d",
+                    if (in1_valid_held_cycles > 1000 && in1_ready_pulses == 0 && sc_words_seen == 0 &&
+                        in2_ready_pulses <= 1 && idle_words_seen <= 1 && in0_eop_offered > in0_eop_accepted) begin
+                        $display("UPLOAD_BACKPRESSURE_BROKEN_REPRO in0_valid_held=%0d in0_ready_pulses=%0d in1_sc_valid_held=%0d in1_sc_ready_pulses=%0d sc_words=%0d in2_ready_pulses=%0d idle_words=%0d missed_eop=%0d",
                                  in0_valid_held_cycles,
                                  in0_ready_pulses,
+                                 in1_valid_held_cycles,
+                                 in1_ready_pulses,
+                                 sc_words_seen,
                                  in2_ready_pulses,
                                  idle_words_seen,
                                  in0_eop_offered - in0_eop_accepted);
                     end else begin
-                        $fatal(1, "Expected broken adapter starvation, got in2_ready=%0d idle_words=%0d eop_offered=%0d eop_accepted=%0d",
+                        $fatal(1, "Expected broken adapter starvation, got in1_ready=%0d sc_words=%0d in2_ready=%0d idle_words=%0d eop_offered=%0d eop_accepted=%0d",
+                               in1_ready_pulses,
+                               sc_words_seen,
                                in2_ready_pulses,
                                idle_words_seen,
                                in0_eop_offered,
@@ -255,15 +302,21 @@ module tb_feb_upload_backpressure;
                 end
 
                 if (expect_fixed) begin
-                    if (in2_ready_pulses > 16 && idle_words_seen > 16 && in0_eop_accepted >= stall_windows) begin
-                        $display("UPLOAD_BACKPRESSURE_FIXED_PASS in0_valid_held=%0d in0_ready_pulses=%0d in2_ready_pulses=%0d idle_words=%0d eop_accepted=%0d",
+                    if (in1_ready_pulses >= SC_PACKET_BEATS && sc_words_seen >= SC_PACKET_BEATS &&
+                        in2_ready_pulses > 16 && idle_words_seen > 16 && in0_eop_accepted >= stall_windows) begin
+                        $display("UPLOAD_BACKPRESSURE_FIXED_PASS in0_valid_held=%0d in0_ready_pulses=%0d in1_sc_ready_pulses=%0d sc_words=%0d sc_eop_accepted=%0d in2_ready_pulses=%0d idle_words=%0d eop_accepted=%0d",
                                  in0_valid_held_cycles,
                                  in0_ready_pulses,
+                                 in1_ready_pulses,
+                                 sc_words_seen,
+                                 sc_eop_accepted,
                                  in2_ready_pulses,
                                  idle_words_seen,
                                  in0_eop_accepted);
                     end else begin
-                        $fatal(1, "Expected direct-ready recovery, got in2_ready=%0d idle_words=%0d eop_accepted=%0d stall_windows=%0d",
+                        $fatal(1, "Expected direct-ready recovery, got in1_ready=%0d sc_words=%0d in2_ready=%0d idle_words=%0d eop_accepted=%0d stall_windows=%0d",
+                               in1_ready_pulses,
+                               sc_words_seen,
                                in2_ready_pulses,
                                idle_words_seen,
                                in0_eop_accepted,
