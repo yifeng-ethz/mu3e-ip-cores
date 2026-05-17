@@ -24,9 +24,12 @@ GEN_DIR := $(SYSTEM_ROOT)/syn/feb_system_v3/synthesis/submodules
 COMMON_GEN_SRC := \
 	$(GEN_DIR)/feb_system_v3_upload_subsystem_upload_pkt_mux.sv
 
+BROKEN_ADAPTER_HELPERS := \
+	$(wildcard $(GEN_DIR)/feb_system_v3_avalon_st_adapter_timing_adapter_0.sv) \
+	$(wildcard $(GEN_DIR)/feb_system_v3_avalon_st_adapter_data_format_adapter_0.sv)
+
 BROKEN_GEN_SRC := \
-	$(GEN_DIR)/feb_system_v3_avalon_st_adapter_timing_adapter_0.sv \
-	$(GEN_DIR)/feb_system_v3_avalon_st_adapter_data_format_adapter_0.sv \
+	$(BROKEN_ADAPTER_HELPERS) \
 	$(GEN_DIR)/feb_system_v3_avalon_st_adapter.v
 
 TB_SRC := $(TB_DIR)/tb_feb_upload_backpressure.sv
