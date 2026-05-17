@@ -24,18 +24,25 @@ proc configure_run_ctrl_splitter {name outputs} {
 }
 
 proc configure_arb_child {name lane} {
-    add_instance $name arb_hit_type0 26.5.0.0511
+    set debug_level 0
+    if {[info exists ::debug_level]} {
+        set debug_level $::debug_level
+    } elseif {[info exists ::env(DEBUG_LEVEL)]} {
+        set debug_level $::env(DEBUG_LEVEL)
+    }
+
+    add_instance $name arb_hit_type0 26.6.0.0512
     set_required_param $name MODE_DEFAULT 1
     set_required_param $name WATCHDOG_DEFAULT 500
     set_required_param $name FIFO_DEPTH 16
-    set_required_param $name DEBUG_LEVEL 0
+    set_required_param $name DEBUG_LEVEL $debug_level
     set_required_param $name IP_UID 1095263280
     set_required_param $name INSTANCE_ID $lane
     set_required_param $name VERSION_MAJOR 26
-    set_required_param $name VERSION_MINOR 5
+    set_required_param $name VERSION_MINOR 6
     set_required_param $name VERSION_PATCH 0
-    set_required_param $name BUILD 511
-    set_required_param $name VERSION_DATE 20260511
+    set_required_param $name BUILD 512
+    set_required_param $name VERSION_DATE 20260512
     set_required_param $name VERSION_GIT 0
 }
 
@@ -59,7 +66,13 @@ proc export_existing_interface {name type dir target} {
     set_interface_property $name EXPORT_OF $target
 }
 
-set system_dir {/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512}
+if {[info exists ::system_dir]} {
+    set system_dir $::system_dir
+} elseif {[info exists env(SYSTEM_DIR)]} {
+    set system_dir $env(SYSTEM_DIR)
+} else {
+    error "SYSTEM_DIR must be set by the Qsys generation wrapper"
+}
 set qsys_path [file join $system_dir quartus_systems arb_hit_type0_supercore.qsys]
 file mkdir [file dirname $qsys_path]
 if {[file exists $qsys_path]} {

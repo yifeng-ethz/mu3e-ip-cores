@@ -25,6 +25,33 @@ Severity legend:
 | [BUG-008-I](#bug-008-i-feb-top-qsys-exported-a-stale-pulse_out_conduit-interface) | I | non-datapath-refactor | `common (every top-level Qsys regenerate after the runctrl refactor)` | fixed-debug-loadable | FEB top Qsys regenerate, 2026-05-14 | this checkpoint | `syn/feb_system_v3.qsys` still exported `pulse_out_conduit` even though the regenerated datapath/runctrl interface no longer drives that conduit, leaving stale wrapper ports and blocking a clean FEB top compile. |
 | [BUG-009-H](#bug-009-h-feb-stp-generator-used-whole-vector-probes-that-synthesized-into-partial-signaltap-connections) | H | non-datapath-refactor | `directed-only (SignalTap observability build)` | fixed-debug-loadable | FEB STP map gate, 2026-05-14 | this checkpoint | The first FEB rbCAM-gap STP used whole-vector probes that Node Finder accepted but Quartus map only partially connected; the fixed generator emits bit-expanded instance-port probes and map reports all 631 SignalTap inputs/clocks/pins connected. |
 | [BUG-010-H](#bug-010-h-febswb-corun-smoke-did-not-model-the-declared-128-subheader-frame) | H | non-datapath-refactor | `directed-only (FEB/SWB corun smoke and monitor harness)` | fixed | FEB/SWB corun UVM smoke, 2026-05-14 | this checkpoint | The corun smoke declared 128 subheaders but drove only the active subheader, and the monitors reconstructed true timestamps without rejecting a declared-versus-seen subheader mismatch. |
+| [BUG-011-I](#bug-011-i-make-side-qsys-generation-did-not-produce-the-debug2-synthesis-dut-tree-for-tb_int) | I | non-datapath-refactor | `common (realistic tb_int setup and Qsys regeneration)` | fixed | FEB v3 debug Qsys generation, 2026-05-17 | this working tree | The Make-side Qsys generate hook produced only the normal `synthesis/` tree, leaving no parallel DEBUG_LEVEL=2 synthesis HDL tree for realistic `tb_int`; the arb supercore build Tcl also referenced stale `arb_hit_type0` version `26.5.0.0511`. |
+
+## 2026-05-17
+
+### BUG-011-I: Make-side Qsys generation did not produce the DEBUG2 synthesis DUT tree for tb_int
+
+- First seen:
+  - FEB v3 realistic `tb_int` setup work on 2026-05-17 while preparing to use generated Qsys synthesis HDL as the DUT.
+- Symptom:
+  - The Make-side Qsys flow generated the production `synthesis/` tree only, so `tb_int` could not consume a generated DEBUG_LEVEL=2 synthesis HDL tree from a sibling `simulation/` directory.
+  - Early dual-generation attempts also exposed a stale `arb_hit_type0` package binding: `build_arb_hit_type0_supercore_qsys.tcl` requested version `26.5.0.0511`, while the active raw IP package is `26.6.0.0512`.
+- Root cause:
+  - The board-project Make object delegated to a single-target `qsys-generate.sh`; DEBUG_LEVEL was not part of that generation contract.
+  - The arb supercore Tcl hardcoded both the child IP version and DEBUG_LEVEL, preventing the same raw Qsys source from being regenerated deterministically for DEBUG0 synthesis and DEBUG2 simulation-DUT HDL.
+- Fix:
+  - The Make-side `qsys-generate.sh` now routes this system through `script/generate_qsys_debug_pair.sh`.
+  - The wrapper validates and generates the same Qsys twice: `synthesis/` with DEBUG_LEVEL=0 and `simulation/` with DEBUG_LEVEL=2, where `simulation/` is populated from a second `--synthesis=VHDL` generation rather than Platform Designer simulation models.
+  - The wrapper launches `qsys-edit` in the background before generation and records an explicit warning/status if the GUI exits early.
+  - `build_arb_hit_type0_supercore_qsys.tcl` now accepts `::debug_level` or `DEBUG_LEVEL`, uses system-relative paths, and binds `arb_hit_type0` version `26.6.0.0512`.
+- Evidence:
+  - Make-facing invocation on `quartus_systems/arb_hit_type0_supercore.qsys`, stamp `20260517_make_object_dual_probe`: DEBUG0 and DEBUG2 `validate_system` both reported `exit_code=0`, `error_count=0`; both `qsys-generate` runs reported `exit_code=0`, `error_count=0`.
+  - Generated arb evidence: `quartus_systems/arb_hit_type0_supercore/synthesis/arb_hit_type0_supercore.vhd` contains eight `DEBUG_LEVEL => 0` lane generics, while `quartus_systems/arb_hit_type0_supercore/simulation/arb_hit_type0_supercore.vhd` contains eight `DEBUG_LEVEL => 2` lane generics.
+  - Make-facing invocation on `quartus_systems/scifi_datapath_system_v3.qsys`, stamp `20260517_make_object_scifi_dual`: DEBUG0 and DEBUG2 `validate_system` both reported `exit_code=0`, `error_count=0`; both `qsys-generate` runs reported `exit_code=0`, `error_count=0`.
+  - Generated datapath evidence: `quartus_systems/scifi_datapath_system_v3/synthesis/scifi_datapath_system_v3.vhd` contains `DEBUG_LEVEL => 0`, and `quartus_systems/scifi_datapath_system_v3/simulation/scifi_datapath_system_v3.vhd` contains `DEBUG_LEVEL => 2`; the generated arb submodule under `simulation/submodules/` also contains eight `DEBUG_LEVEL => 2` lane generics.
+- Residuals:
+  - In this shell the requested background `qsys-edit` GUI exits early with an X11/GUI error; the wrapper records this as a warning instead of hiding it. CLI validation and generation are still zero-error.
+  - Realistic `tb_int` still needs to be pointed at `quartus_systems/scifi_datapath_system_v3/simulation/` and run for the type0/type1 hit evidence.
 
 ## 2026-05-14
 
