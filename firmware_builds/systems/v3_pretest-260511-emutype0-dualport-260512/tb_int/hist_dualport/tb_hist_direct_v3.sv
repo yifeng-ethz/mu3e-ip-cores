@@ -24,6 +24,12 @@ module tb_hist_direct_v3;
   localparam int unsigned AVMM_TIMEOUT        = 4096;
   localparam int unsigned DELAY_TARGET_CYCLES = 4096;
   localparam int unsigned DELAY_BIN_WIDTH     = 32;
+  localparam int unsigned TYPE1_RBCAM_WINDOW_LOW_CYCLES  = 0;
+  localparam int unsigned TYPE1_RBCAM_WINDOW_HIGH_CYCLES = 2000;
+  localparam int unsigned VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES = 810;
+  localparam int unsigned VIRTUAL_MUTRIG_PRE_RBCAM_FIXED_CYCLES = 18;
+  localparam int unsigned HEADER_SYNC_FRAME_CYCLES = 910;
+  localparam int unsigned HEADER_SYNC_LATENCY_CYCLES = 27;
 
   localparam bit [1:0] SOURCE_TYPE0      = 2'd0;
   localparam bit [1:0] SOURCE_TYPE1_UP   = 2'd1;
@@ -52,6 +58,8 @@ module tb_hist_direct_v3;
   int unsigned pass_count;
   int summary_fd;
   int interval_fd;
+  int delay_bins_fd;
+  int type1_meta_fd;
 
   logic i_clk = 1'b0;
   logic i_rst = 1'b1;
@@ -103,6 +111,8 @@ module tb_hist_direct_v3;
   longint unsigned case_interval_dropped;
   longint unsigned case_interval_bin_sum;
   longint unsigned case_coal_overflow_max;
+  longint unsigned case_delay_bin_accum[N_BINS];
+  longint unsigned case_meta_bin_accum[N_BINS];
   int unsigned     case_delay_min_bin;
   int unsigned     case_delay_max_bin;
   int unsigned     case_interval_seen;
@@ -273,6 +283,34 @@ module tb_hist_direct_v3;
     return prng_state;
   endfunction
 
+  function automatic int unsigned virtual_mutrig_short_frame_marker(
+    input int unsigned abs_ts_8ns
+  );
+    int unsigned phase_v;
+    phase_v = abs_ts_8ns % VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES;
+    if (phase_v == 0) begin
+      return abs_ts_8ns;
+    end
+    return abs_ts_8ns + (VIRTUAL_MUTRIG_SHORT_FRAME_CYCLES - phase_v);
+  endfunction
+
+  function automatic int unsigned virtual_mutrig_slot_offset(
+    input int unsigned slot
+  );
+    return 9 + (7 * (slot / 2)) + (3 * (slot % 2));
+  endfunction
+
+  function automatic int unsigned virtual_mutrig_pre_rbcam_latency(
+    input int unsigned abs_ts_8ns,
+    input int unsigned slot
+  );
+    int unsigned marker_v;
+    marker_v = virtual_mutrig_short_frame_marker(abs_ts_8ns);
+    return (marker_v - abs_ts_8ns)
+           + virtual_mutrig_slot_offset(slot)
+           + VIRTUAL_MUTRIG_PRE_RBCAM_FIXED_CYCLES;
+  endfunction
+
   function automatic logic [TYPE0_DATA_WIDTH-1:0] make_type0_word(
     input int unsigned asic_id,
     input int unsigned channel_id,
@@ -426,7 +464,8 @@ module tb_hist_direct_v3;
   task automatic read_all_bins(
     output longint unsigned bin_sum,
     output int unsigned nonzero_min_bin,
-    output int unsigned nonzero_max_bin
+    output int unsigned nonzero_max_bin,
+    output longint unsigned bins_out[N_BINS]
   );
     logic [31:0] data_v;
     bin_sum = 0;
@@ -434,6 +473,7 @@ module tb_hist_direct_v3;
     nonzero_max_bin = 0;
     for (int bin = 0; bin < N_BINS; bin++) begin
       bin_read32(bin, data_v);
+      bins_out[bin] = data_v;
       bin_sum += data_v;
       if (data_v != 0) begin
         if (bin < nonzero_min_bin) nonzero_min_bin = bin;
@@ -570,31 +610,47 @@ module tb_hist_direct_v3;
   endtask
 
 	  task automatic drive_type1_case(
+	    input string       case_name,
+	    input string       source_name,
 	    input bit [1:0]    source_select,
 	    input int unsigned rate_hz,
 	    input bit          all_channels,
-	    input bit          delay_mode
+	    input bit          delay_mode,
+	    input int unsigned delay_target_cycles,
+	    input bit          use_virtual_latency,
+	    input bit          use_header_sync_latency,
+	    input string       delay_model_label
   );
     int unsigned period;
     int unsigned next_due[N_TYPE1_BANK_ASICS];
     int unsigned fixed_ch[N_TYPE1_BANK_ASICS];
     int unsigned hit_index[N_TYPE1_BANK_ASICS];
+    int unsigned marker_current[N_TYPE1_BANK_ASICS];
+    int unsigned marker_slot_count[N_TYPE1_BANK_ASICS];
     int unsigned bank_base_asic;
     bit          has_hit;
     int unsigned hit_asic;
     int unsigned hit_ch;
     int unsigned hit_tcc;
+    int unsigned hit_local_asic;
+    int unsigned hit_latency;
+    int unsigned hit_marker;
+    int unsigned hit_slot;
+    longint unsigned hit_seq;
     logic [47:0] gts_sample;
     logic [47:0] hit_ts;
     logic [47:0] delay_target_v;
 
     period = CLK_HZ / rate_hz;
-    delay_target_v = DELAY_TARGET_CYCLES;
+    delay_target_v = delay_target_cycles;
+    hit_seq = 0;
     bank_base_asic = (source_select == SOURCE_TYPE1_DOWN) ? N_TYPE1_BANK_ASICS : 0;
     for (int asic = 0; asic < N_TYPE1_BANK_ASICS; asic++) begin
       fixed_ch[asic]  = (prng_next() >> 8) % CHANNELS_PER_ASIC;
       hit_index[asic] = 0;
       next_due[asic]  = (asic * (period / N_TYPE1_BANK_ASICS + 1)) % period;
+      marker_current[asic] = 32'hffff_ffff;
+      marker_slot_count[asic] = 0;
     end
 
     for (int cyc = 0; cyc < run_cycles; cyc++) begin
@@ -615,6 +671,7 @@ module tb_hist_direct_v3;
             next_due[asic] = cyc + 1;
           end else begin
             has_hit = 1'b1;
+            hit_local_asic = asic;
             hit_asic = bank_base_asic + asic;
             hit_ch = all_channels ? ((prng_next() >> 12) % CHANNELS_PER_ASIC) : fixed_ch[asic];
             hit_tcc = (cyc + hit_asic * 17 + hit_index[asic]) & 13'h1fff;
@@ -626,7 +683,33 @@ module tb_hist_direct_v3;
 
       if (has_hit) begin
         gts_sample = dut.gts_8n;
-        hit_ts = delay_mode ? (gts_sample - delay_target_v) : 48'h0;
+        if (delay_mode) begin
+          if (use_header_sync_latency) begin
+            hit_marker = (gts_sample[31:0] / HEADER_SYNC_FRAME_CYCLES) * HEADER_SYNC_FRAME_CYCLES;
+            hit_slot = 0;
+            hit_latency = HEADER_SYNC_LATENCY_CYCLES;
+          end else if (use_virtual_latency) begin
+            hit_marker = virtual_mutrig_short_frame_marker(gts_sample[31:0]);
+            if (marker_current[hit_local_asic] != hit_marker) begin
+              marker_current[hit_local_asic] = hit_marker;
+              marker_slot_count[hit_local_asic] = 0;
+            end
+            hit_slot = marker_slot_count[hit_local_asic];
+            marker_slot_count[hit_local_asic]++;
+            hit_latency = virtual_mutrig_pre_rbcam_latency(gts_sample[31:0], hit_slot);
+          end else begin
+            hit_marker = 0;
+            hit_slot = 0;
+            hit_latency = delay_target_cycles;
+          end
+          delay_target_v = hit_latency;
+          hit_ts = gts_sample - delay_target_v;
+        end else begin
+          hit_marker = 0;
+          hit_slot = 0;
+          hit_latency = 0;
+          hit_ts = 48'h0;
+        end
         if (source_select == SOURCE_TYPE1_UP) begin
           type1_up_data  <= make_type1_word(hit_asic, hit_ch, hit_tcc);
           type1_up_ts    <= hit_ts;
@@ -646,11 +729,35 @@ module tb_hist_direct_v3;
         if (type1_up_valid) begin
           if (type1_up_ready) case_accepted++;
           else case_ready_miss++;
+          $fwrite(type1_meta_fd,
+                  "%s,%s,%0d,%s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%012h,0x%012h,%0d\n",
+                  case_name, source_name, rate_hz,
+                  use_header_sync_latency ? "header_sync_one_ch_per_asic" :
+                  (all_channels ? "all_ch_all_asic" : "one_random_ch_per_asic"),
+                  delay_mode, use_virtual_latency, cyc, hit_asic, hit_ch,
+                  hit_index[hit_local_asic] - 1, hit_seq, hit_latency,
+                  hit_slot, hit_ts, gts_sample, type1_up_ready);
+          if (type1_up_ready && delay_mode && ((hit_latency / DELAY_BIN_WIDTH) < N_BINS)) begin
+            case_meta_bin_accum[hit_latency / DELAY_BIN_WIDTH]++;
+          end
+          hit_seq++;
         end
       end else begin
         if (type1_down_valid) begin
           if (type1_down_ready) case_accepted++;
           else case_ready_miss++;
+          $fwrite(type1_meta_fd,
+                  "%s,%s,%0d,%s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,0x%012h,0x%012h,%0d\n",
+                  case_name, source_name, rate_hz,
+                  use_header_sync_latency ? "header_sync_one_ch_per_asic" :
+                  (all_channels ? "all_ch_all_asic" : "one_random_ch_per_asic"),
+                  delay_mode, use_virtual_latency, cyc, hit_asic, hit_ch,
+                  hit_index[hit_local_asic] - 1, hit_seq, hit_latency,
+                  hit_slot, hit_ts, gts_sample, type1_down_ready);
+          if (type1_down_ready && delay_mode && ((hit_latency / DELAY_BIN_WIDTH) < N_BINS)) begin
+            case_meta_bin_accum[hit_latency / DELAY_BIN_WIDTH]++;
+          end
+          hit_seq++;
         end
       end
     end
@@ -660,17 +767,25 @@ module tb_hist_direct_v3;
 
   task automatic interval_readback_monitor(
     input string       case_name,
+    input string       source_name,
     input bit          delay_mode,
     input int unsigned rate_hz,
-    input string       pattern
+    input string       pattern,
+    input int unsigned delay_target_cycles,
+    input bit          use_virtual_latency,
+    input string       delay_model_label,
+    input int unsigned active_asics
   );
     logic [31:0] last_total_v;
     logic [31:0] last_dropped_v;
     logic [31:0] coal_v;
     logic [31:0] bank_v;
     longint unsigned bin_sum_v;
+    longint unsigned bins_v[N_BINS];
     int unsigned min_bin_v;
     int unsigned max_bin_v;
+    int unsigned bin_center_v;
+    real percent_v;
 
     for (int interval_idx = 0; interval_idx < (run_cycles / interval_cycles); interval_idx++) begin
       while (dut.interval_pulse !== 1'b1) begin
@@ -685,7 +800,7 @@ module tb_hist_direct_v3;
       csr_read32(CSR_LAST_DROPPED, last_dropped_v);
       csr_read32(CSR_COAL_STATUS, coal_v);
       csr_read32(CSR_BANK_STATUS, bank_v);
-      read_all_bins(bin_sum_v, min_bin_v, max_bin_v);
+      read_all_bins(bin_sum_v, min_bin_v, max_bin_v, bins_v);
 
       case_interval_seen++;
       case_interval_total += last_total_v;
@@ -697,6 +812,22 @@ module tb_hist_direct_v3;
       if (delay_mode && (bin_sum_v != 0)) begin
         if (min_bin_v < case_delay_min_bin) case_delay_min_bin = min_bin_v;
         if (max_bin_v > case_delay_max_bin) case_delay_max_bin = max_bin_v;
+      end
+
+      if (delay_mode) begin
+        for (int bin = 0; bin < N_BINS; bin++) begin
+          bin_center_v = bin * DELAY_BIN_WIDTH;
+          percent_v = (bin_sum_v == 0) ? 0.0 : (100.0 * real'(bins_v[bin]) / real'(bin_sum_v));
+          case_delay_bin_accum[bin] += bins_v[bin];
+          $fwrite(delay_bins_fd,
+                  "%s,%0d,%s,%s,%0d,%s,%s,%0d,%0d,%0d,%0d,%0d,%0d,%0.9f,%0d\n",
+                  case_name, interval_idx, source_name, mode_name, rate_hz, pattern,
+                  delay_model_label,
+                  delay_target_cycles, active_asics, bin, bin_center_v, bins_v[bin],
+                  bin_sum_v, percent_v,
+                  (bin_center_v >= TYPE1_RBCAM_WINDOW_LOW_CYCLES) &&
+                  (bin_center_v <= TYPE1_RBCAM_WINDOW_HIGH_CYCLES));
+        end
       end
 
       $fwrite(interval_fd,
@@ -719,6 +850,10 @@ module tb_hist_direct_v3;
     case_delay_min_bin    = N_BINS;
     case_delay_max_bin    = 0;
     case_interval_seen    = 0;
+    for (int bin = 0; bin < N_BINS; bin++) begin
+      case_delay_bin_accum[bin] = 0;
+      case_meta_bin_accum[bin] = 0;
+    end
   endtask
 
   function automatic int unsigned active_asic_count_for_source(
@@ -752,7 +887,11 @@ module tb_hist_direct_v3;
 	    input bit [1:0]    source_select,
 	    input bit          delay_mode,
 	    input int unsigned rate_hz,
-    input bit          all_channels
+    input bit          all_channels,
+    input int unsigned delay_target_cycles,
+    input bit          enforce_delay_window,
+    input bit          use_virtual_latency,
+    input bit          use_header_sync_latency
   );
     string case_name;
     string pattern;
@@ -763,21 +902,37 @@ module tb_hist_direct_v3;
     int unsigned expected_delay_bin;
     int unsigned active_asics;
     longint unsigned expected_hits;
+    longint unsigned meta_total;
+    longint unsigned hist_total;
+    longint unsigned expected_shift_count;
+    int unsigned meta_min_bin;
+    int unsigned meta_max_bin;
+    int unsigned hist_min_bin;
+    int unsigned hist_max_bin;
+    int signed meta_to_hist_offset;
+    int signed src_bin;
+    bit meta_exact_match;
+    bit meta_constant_offset_match;
+    string delay_model_label;
 
-    pattern = all_channels ? "all_ch_all_asic" : "one_random_ch_per_asic";
+    pattern = use_header_sync_latency ? "header_sync_one_ch_per_asic" :
+              (all_channels ? "all_ch_all_asic" : "one_random_ch_per_asic");
     mode_name = delay_mode ? "latency" : "rate";
+    delay_model_label = use_header_sync_latency ? "header_sync_910cyc_delta" :
+                        (use_virtual_latency ? "virtual_mutrig_pre_rbcam" : "fixed_delay");
     case_name = $sformatf("%s_%s_%0dk_%s",
                           source_name,
                           mode_name,
                           rate_hz / 1000,
                           all_channels ? "allch" : "onech");
     expected_intervals = run_cycles / interval_cycles;
-    expected_delay_bin = DELAY_TARGET_CYCLES / DELAY_BIN_WIDTH;
+    expected_delay_bin = delay_target_cycles / DELAY_BIN_WIDTH;
     active_asics = active_asic_count_for_source(source_select);
     expected_hits = expected_hits_for_case(source_select, rate_hz);
 
-    $display("CASE_START %s source=%0d delay=%0d rate_hz=%0d pattern=%s expected_hits=%0d",
-             case_name, source_select, delay_mode, rate_hz, pattern, expected_hits);
+    $display("CASE_START %s source=%0d delay=%0d rate_hz=%0d pattern=%s expected_hits=%0d delay_model=%s delay_target=%0d enforce_window=%0d",
+             case_name, source_select, delay_mode, rate_hz, pattern, expected_hits,
+             delay_model_label, delay_target_cycles, enforce_delay_window);
 
     do_reset();
     reset_case_counters();
@@ -787,7 +942,13 @@ module tb_hist_direct_v3;
     repeat (8) @(posedge i_clk);
     send_ctrl(9'h008); // RUNNING.
     if (delay_mode) begin
-      repeat (DELAY_TARGET_CYCLES + 64) @(posedge i_clk);
+      if (use_header_sync_latency) begin
+        repeat (HEADER_SYNC_FRAME_CYCLES + 64) @(posedge i_clk);
+      end else if (use_virtual_latency) begin
+        repeat (TYPE1_RBCAM_WINDOW_HIGH_CYCLES + 64) @(posedge i_clk);
+      end else begin
+        repeat (delay_target_cycles + 64) @(posedge i_clk);
+      end
     end else begin
       repeat (64) @(posedge i_clk);
     end
@@ -798,10 +959,14 @@ module tb_hist_direct_v3;
         if (source_select == SOURCE_TYPE0) begin
           drive_type0_case(rate_hz, all_channels);
         end else begin
-          drive_type1_case(source_select, rate_hz, all_channels, delay_mode);
+          drive_type1_case(case_name, source_name, source_select, rate_hz, all_channels,
+                           delay_mode, delay_target_cycles, use_virtual_latency,
+                           use_header_sync_latency, delay_model_label);
         end
       end
-      interval_readback_monitor(case_name, delay_mode, rate_hz, pattern);
+      interval_readback_monitor(case_name, source_name, delay_mode, rate_hz, pattern,
+                                delay_target_cycles, use_virtual_latency, delay_model_label,
+                                active_asics);
     join
 
     wait_pipeline_drain(2048);
@@ -846,25 +1011,107 @@ module tb_hist_direct_v3;
       if (case_delay_min_bin == N_BINS) begin
         $display("FAIL %s no delay bins observed", case_name);
         case_pass = 1'b0;
-      end else if ((case_delay_min_bin + 1 < expected_delay_bin) ||
-                   (case_delay_max_bin > expected_delay_bin + 1)) begin
+      end else if (!use_virtual_latency &&
+                   ((case_delay_min_bin + 1 < expected_delay_bin) ||
+                    (case_delay_max_bin > expected_delay_bin + 1))) begin
         $display("FAIL %s delay bins [%0d,%0d] expected around %0d",
                  case_name, case_delay_min_bin, case_delay_max_bin, expected_delay_bin);
         case_pass = 1'b0;
+      end else if (enforce_delay_window &&
+                   (((case_delay_min_bin * DELAY_BIN_WIDTH) < TYPE1_RBCAM_WINDOW_LOW_CYCLES) ||
+                    ((case_delay_max_bin * DELAY_BIN_WIDTH) > TYPE1_RBCAM_WINDOW_HIGH_CYCLES))) begin
+        $display("FAIL %s delay bin centers [%0d,%0d] cycles outside rbCAM window [%0d,%0d]",
+                 case_name,
+                 case_delay_min_bin * DELAY_BIN_WIDTH,
+                 case_delay_max_bin * DELAY_BIN_WIDTH,
+                 TYPE1_RBCAM_WINDOW_LOW_CYCLES,
+                 TYPE1_RBCAM_WINDOW_HIGH_CYCLES);
+        case_pass = 1'b0;
       end
+
+      meta_total = 0;
+      hist_total = 0;
+      meta_min_bin = N_BINS;
+      meta_max_bin = 0;
+      hist_min_bin = N_BINS;
+      hist_max_bin = 0;
+      meta_exact_match = 1'b1;
+      for (int bin = 0; bin < N_BINS; bin++) begin
+        meta_total += case_meta_bin_accum[bin];
+        hist_total += case_delay_bin_accum[bin];
+        if (case_meta_bin_accum[bin] != 0) begin
+          if (bin < meta_min_bin) meta_min_bin = bin;
+          if (bin > meta_max_bin) meta_max_bin = bin;
+        end
+        if (case_delay_bin_accum[bin] != 0) begin
+          if (bin < hist_min_bin) hist_min_bin = bin;
+          if (bin > hist_max_bin) hist_max_bin = bin;
+        end
+        if (case_meta_bin_accum[bin] != case_delay_bin_accum[bin]) begin
+          meta_exact_match = 1'b0;
+        end
+      end
+
+      if (meta_total != case_accepted) begin
+        $display("FAIL %s meta_total=%0d accepted=%0d", case_name, meta_total, case_accepted);
+        case_pass = 1'b0;
+      end
+      if (hist_total != case_interval_bin_sum) begin
+        $display("FAIL %s hist_accum_total=%0d interval_bin_sum=%0d",
+                 case_name, hist_total, case_interval_bin_sum);
+        case_pass = 1'b0;
+      end
+      if (meta_total != hist_total) begin
+        $display("FAIL %s meta_total=%0d hist_total=%0d", case_name, meta_total, hist_total);
+        case_pass = 1'b0;
+      end
+
+      meta_to_hist_offset = 0;
+      meta_constant_offset_match = meta_exact_match;
+      if (!meta_exact_match && meta_min_bin != N_BINS && hist_min_bin != N_BINS) begin
+        meta_to_hist_offset = int'(hist_min_bin) - int'(meta_min_bin);
+        meta_constant_offset_match = 1'b1;
+        for (int bin = 0; bin < N_BINS; bin++) begin
+          src_bin = int'(bin) - meta_to_hist_offset;
+          expected_shift_count = ((src_bin >= 0) && (src_bin < N_BINS)) ?
+                                 case_meta_bin_accum[src_bin] : 0;
+          if (case_delay_bin_accum[bin] != expected_shift_count) begin
+            meta_constant_offset_match = 1'b0;
+          end
+        end
+      end
+
+      if (!meta_constant_offset_match) begin
+        $display("FAIL %s meta bins do not match CSR bins exactly or by constant offset", case_name);
+        case_pass = 1'b0;
+      end
+      if (use_header_sync_latency &&
+          ((meta_min_bin != meta_max_bin) || (hist_min_bin != hist_max_bin))) begin
+        $display("FAIL %s header-sync delay is not a delta: meta_bins=[%0d,%0d] csr_bins=[%0d,%0d]",
+                 case_name, meta_min_bin, meta_max_bin, hist_min_bin, hist_max_bin);
+        case_pass = 1'b0;
+      end
+      $display("META_CHECK %s meta_total=%0d csr_total=%0d meta_bins=[%0d,%0d] csr_bins=[%0d,%0d] exact=%0d offset_bins=%0d constant_offset=%0d",
+               case_name, meta_total, hist_total, meta_min_bin, meta_max_bin,
+               hist_min_bin, hist_max_bin, meta_exact_match,
+               meta_to_hist_offset, meta_constant_offset_match);
     end
 
     seconds_v = real'(run_cycles) / real'(CLK_HZ);
     per_asic_rate_v = (real'(case_interval_total) / seconds_v) / real'(active_asics);
     $fwrite(summary_fd,
-            "%s,%s,%s,%0d,%s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0.3f,%s\n",
+            "%s,%s,%s,%0d,%s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0.3f,%s,%s,%0d,%0d,%0d\n",
             case_name, source_name, mode_name,
             rate_hz, pattern, run_cycles, interval_cycles,
             expected_hits, case_offered, case_accepted, case_ready_miss,
             case_interval_seen, case_interval_total,
             case_interval_dropped, case_interval_bin_sum,
             case_coal_overflow_max, case_delay_min_bin, case_delay_max_bin,
-            active_asics, per_asic_rate_v, case_pass ? "PASS" : "FAIL");
+            active_asics, per_asic_rate_v, case_pass ? "PASS" : "FAIL",
+            delay_model_label,
+            delay_target_cycles,
+            TYPE1_RBCAM_WINDOW_LOW_CYCLES,
+            TYPE1_RBCAM_WINDOW_HIGH_CYCLES);
 
     if (case_pass) begin
       pass_count++;
@@ -886,30 +1133,59 @@ module tb_hist_direct_v3;
     rates[2] = 1_000_000;
 
     for (int r = 0; r < 3; r++) begin
-      run_hist_case("type0", SOURCE_TYPE0, 1'b0, rates[r], 1'b0);
-      run_hist_case("type0", SOURCE_TYPE0, 1'b0, rates[r], 1'b1);
+      run_hist_case("type0", SOURCE_TYPE0, 1'b0, rates[r], 1'b0,
+                    DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+      run_hist_case("type0", SOURCE_TYPE0, 1'b0, rates[r], 1'b1,
+                    DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
     end
 
     for (int r = 0; r < 3; r++) begin
       for (int pat = 0; pat < 2; pat++) begin
-        run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b0, rates[r], pat[0]);
-        run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b1, rates[r], pat[0]);
-        run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b0, rates[r], pat[0]);
-        run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b1, rates[r], pat[0]);
+        run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b0, rates[r], pat[0],
+                      DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+        run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b1, rates[r], pat[0],
+                      DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+        run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b0, rates[r], pat[0],
+                      DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+        run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b1, rates[r], pat[0],
+                      DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
       end
     end
   endtask
 
   task automatic run_smoke();
-    run_hist_case("type0", SOURCE_TYPE0, 1'b0, 100_000, 1'b0);
-    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b0, 100_000, 1'b0);
-    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b1, 100_000, 1'b0);
-    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b0, 100_000, 1'b0);
-    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b1, 100_000, 1'b0);
+    run_hist_case("type0", SOURCE_TYPE0, 1'b0, 100_000, 1'b0,
+                  DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b0, 100_000, 1'b0,
+                  DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b1, 100_000, 1'b0,
+                  DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b0, 100_000, 1'b0,
+                  DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b1, 100_000, 1'b0,
+                  DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
   endtask
 
   task automatic run_type0_rate_max();
-    run_hist_case("type0", SOURCE_TYPE0, 1'b0, 1_000_000, 1'b1);
+    run_hist_case("type0", SOURCE_TYPE0, 1'b0, 1_000_000, 1'b1,
+                  DELAY_TARGET_CYCLES, 1'b0, 1'b0, 1'b0);
+  endtask
+
+  task automatic run_type1_delay_sweep(input bit all_channels);
+    int unsigned rates[4];
+    rates[0] = 10_000;
+    rates[1] = 100_000;
+    rates[2] = 500_000;
+    rates[3] = 1_000_000;
+
+    for (int r = 0; r < 4; r++) begin
+      run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b1, rates[r], all_channels,
+                    all_channels ? 0 : HEADER_SYNC_LATENCY_CYCLES,
+                    1'b1, all_channels, !all_channels);
+      run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b1, rates[r], all_channels,
+                    all_channels ? 0 : HEADER_SYNC_LATENCY_CYCLES,
+                    1'b1, all_channels, !all_channels);
+    end
   endtask
 
   initial begin
@@ -935,13 +1211,19 @@ module tb_hist_direct_v3;
 
     summary_fd = $fopen({report_prefix, "_summary.csv"}, "w");
     interval_fd = $fopen({report_prefix, "_intervals.csv"}, "w");
-    if (summary_fd == 0 || interval_fd == 0) begin
+    delay_bins_fd = $fopen({report_prefix, "_delay_bins.csv"}, "w");
+    type1_meta_fd = $fopen({report_prefix, "_type1_meta.csv"}, "w");
+    if (summary_fd == 0 || interval_fd == 0 || delay_bins_fd == 0 || type1_meta_fd == 0) begin
       $fatal(1, "failed to open report files for prefix %s", report_prefix);
     end
     $fwrite(summary_fd,
-            "case,source,mode,rate_hz,pattern,run_cycles,interval_cycles,expected,offered,accepted,ready_miss,intervals,total,dropped,bin_sum,coal_overflow_max,delay_min_bin,delay_max_bin,active_asics,per_asic_rate_hz,result\n");
+            "case,source,mode,rate_hz,pattern,run_cycles,interval_cycles,expected,offered,accepted,ready_miss,intervals,total,dropped,bin_sum,coal_overflow_max,delay_min_bin,delay_max_bin,active_asics,per_asic_rate_hz,result,delay_model,delay_target_cycles,rbcam_window_low_cycles,rbcam_window_high_cycles\n");
     $fwrite(interval_fd,
             "case,interval_idx,rate_hz,pattern,delay_mode,last_total,last_dropped,bin_sum,min_bin,max_bin,total_accum,dropped_accum,bin_sum_accum,coal_status,bank_status\n");
+    $fwrite(delay_bins_fd,
+            "case,interval_idx,source,mode,rate_hz,pattern,delay_model,delay_target_cycles,active_asics,bin_idx,bin_center_cycles,count,interval_total,percent,in_rbcam_window\n");
+    $fwrite(type1_meta_fd,
+            "case,source,rate_hz,pattern,delay_mode,use_virtual_latency,cycle,asic,channel,hit_index,hit_seq,latency_cycles,slot,hit_ts,gts_sample,ready\n");
 
     $display("TB_INT_DIRECT_V3_START case=%s run_cycles=%0d interval_cycles=%0d seed=%0d report_prefix=%s",
              case_select, run_cycles, interval_cycles, prng_state, report_prefix);
@@ -949,12 +1231,18 @@ module tb_hist_direct_v3;
       run_smoke();
     end else if (case_select == "type0_rate_max") begin
       run_type0_rate_max();
+    end else if (case_select == "type1_delay_sweep") begin
+      run_type1_delay_sweep(1'b0);
+    end else if (case_select == "type1_delay_sweep_allch") begin
+      run_type1_delay_sweep(1'b1);
     end else begin
       run_matrix();
     end
 
     $fclose(summary_fd);
     $fclose(interval_fd);
+    $fclose(delay_bins_fd);
+    $fclose(type1_meta_fd);
     $display("TB_INT_DIRECT_V3_DONE pass_count=%0d fail_count=%0d", pass_count, fail_count);
     if (fail_count != 0) begin
       $fatal(1, "tb_hist_direct_v3 saw %0d failing cases", fail_count);

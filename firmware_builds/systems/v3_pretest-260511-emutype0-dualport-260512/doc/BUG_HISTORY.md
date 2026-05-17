@@ -29,8 +29,42 @@ Severity legend:
 | [BUG-012-H](#bug-012-h-feb-generated-histogram-smoke-did-not-require-declared-hit-counts-for-all-type0type1-modes) | H | non-datapath-refactor | `common (generated-FEB histogram direct simulation)` | fixed | FEB generated histogram simulation, 2026-05-17 | this working tree | The direct histogram smoke could pass without proving the declared 10 ms, 100 kHz one-random-channel-per-ASIC hit count for Type0 rate plus Type1 rate and latency modes on both MTS banks; it also compiled raw repo RTL instead of the regenerated FEB `simulation/submodules` tree. |
 | [BUG-013-H](#bug-013-h-direct-histogram-harness-modeled-16-active-asics-instead-of-the-febs-8-asic-topology) | H | non-datapath-refactor | `common (generated-FEB histogram direct simulation and Type0 plot evidence)` | fixed | FEB generated histogram simulation review, 2026-05-17 | this commit | The direct histogram harness modeled 16 active ASIC sources, but this FEB has 8 ASICs total: 4 upper bank and 4 lower bank. |
 | [BUG-014-I](#bug-014-i-feb-ip-packaging-could-drift-back-to-256-subheaders) | I | non-datapath-refactor | `common (Qsys/IP regeneration if an N_SHD override is missed or changed)` | fixed | FEB/SWB N_SHD audit, 2026-05-17 | this commit | `feb_frame_assembly` still defaulted to 256 subheaders and FEB rbCAM packaging still allowed non-128 `N_SHD`, so a missed override could regenerate a FEB source shape that SWB reports as 256 subheaders. |
+| [BUG-015-H](#bug-015-h-type1-delay-plot-evidence-did-not-lock-the-one-channel-header-sync-delta-contract) | H | non-datapath-refactor | `directed-only (Type1 latency plot evidence)` | fixed | FEB generated Type1 delay plot review, 2026-05-17 | this commit | The generated-RTL delay evidence had no four-rate Type1 latency plot for the header-synced one-channel-per-ASIC mode, no per-hit ingress metadata checkpoint, and no hard metadata-vs-CSR bin check. |
 
 ## 2026-05-17
+
+### BUG-015-H: Type1 delay plot evidence did not lock the one-channel header-sync delta contract
+
+- First seen:
+  - FEB generated Type1 latency evidence review on 2026-05-17 after the initial four-rate Type1 plot used a virtual short-frame latency spread.
+- Symptom:
+  - There was no DISLIN Type1 latency figure matching the requested header-sync mode where the one-channel-per-ASIC delay should collapse to a delta function.
+  - The previous Type1 latency plot checked that the plotted range stayed inside rbCAM `[0,2000]` cycles, but it did not prove that the CSR delay bin matched an ingress per-hit metadata checkpoint.
+  - A plotted delta could be hidden by the CSR peak marker, making the checkpoint overlay hard to inspect visually.
+- Root cause:
+  - The direct histogram sweep emitted CSR bins and per-hit metadata, but the delay-sweep mode was still shaped for a virtual MuTRiG short-frame spread instead of the header-synced timestamp mode requested for the one-channel-per-ASIC check.
+  - The renderer drew the black peak marker over a single-bin CSR/meta delta.
+- Fix:
+  - `tb_hist_direct_v3.sv` now runs `type1_delay_sweep` as the one-channel-per-ASIC header-sync timestamp mode for Type1-up and Type1-down at `10 kHz`, `100 kHz`, `500 kHz`, and `1 MHz` over 10 ms RUNNING.
+  - The header-sync mode drives the Type1 timestamp sideband with a declared fixed ingress latency of 27 8 ns cycles against a 910-cycle header-sync frame model; it does not rescale or rewrite readback bins after the CSR read.
+  - The sweep accumulates the 1 ms in-RUNNING CSR delay-bin readbacks and the accepted-hit metadata bins, then hard-fails unless metadata and CSR totals match exactly and the bin distribution matches exactly or by a constant bin offset.
+  - For header-sync mode the sweep additionally hard-fails unless both metadata and CSR are single-bin deltas.
+  - `type1_delay_dislin.c` overlays the ingress metadata checkpoint as a red marker beside the blue CSR bin, keeps the green rbCAM window markers at 0 and 2000 cycles, and renders PNG/PDF with fixed x-axis range `[-1000,3096]` cycles.
+- Evidence:
+  - `tb_int/hist_dualport/run_hist_dualport.sh type1_delay_sweep`, stamp `hist_direct_v3_type1_delay_sweep_20260517_135600`, passed with `pass_count=8`, `fail_count=0`, `Errors=0`, `Warnings=2`.
+  - The eight plotted one-channel-per-ASIC cases passed with declared/offered/accepted/total counts:
+    - 10 kHz Type1-up/down: 400 hits per bank.
+    - 100 kHz Type1-up/down: 4000 hits per bank.
+    - 500 kHz Type1-up/down: 20000 hits per bank.
+    - 1 MHz Type1-up/down: 40000 hits per bank.
+  - Every `META_CHECK` line reported metadata and CSR totals equal, `meta_bins=[0,0]`, `csr_bins=[0,0]`, `exact=1`, and `offset_bins=0`.
+  - The summary CSV reports `active_asics=4` for each Type1 bank, so Type1-up covers ASICs 0..3 and Type1-down covers ASICs 4..7; the FEB still has 8 ASICs total.
+  - DISLIN rendered Type1-up and Type1-down PNG/PDF with `Warnings: 0`:
+    - `hist_direct_v3_type1_delay_sweep_20260517_135600_type1_up_header_sync_delay_dislin.png`
+    - `hist_direct_v3_type1_delay_sweep_20260517_135600_type1_down_header_sync_delay_dislin.png`
+  - Generated CSV, log, PNG, PDF, and Questa work evidence remains ignored by the `hist_direct_v3_*` and `dislin_work/` gitignore rules.
+- Residuals:
+  - This is a generated-RTL evidence/harness fix. No raw RTL datapath defect was exposed because both Type1 banks conserve the declared hit counts, the metadata checkpoint and CSR bin match exactly, and the header-sync latency collapses to a delta inside the rbCAM window.
 
 ### BUG-014-I: FEB IP packaging could drift back to 256 subheaders
 

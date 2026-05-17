@@ -44,8 +44,22 @@ case "${CASE}" in
         INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
         STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_type0_rate_max_summary.csv"
         ;;
+    type1_delay_sweep)
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_summary.csv"
+        STABLE_DELAY_BINS="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_delay_bins.csv"
+        STABLE_TYPE1_META="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_type1_meta.csv"
+        ;;
+    type1_delay_sweep_allch)
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_allch_summary.csv"
+        STABLE_DELAY_BINS="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_allch_delay_bins.csv"
+        STABLE_TYPE1_META="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_allch_type1_meta.csv"
+        ;;
     *)
-        echo "unknown case: ${CASE} (expected smoke, matrix, or type0_rate_max)" >&2
+        echo "unknown case: ${CASE} (expected smoke, matrix, type0_rate_max, type1_delay_sweep, or type1_delay_sweep_allch)" >&2
         exit 2
         ;;
 esac
@@ -119,8 +133,28 @@ if [[ -e "${STABLE_SUMMARY}" ]]; then
     mv "${STABLE_SUMMARY}" "${STABLE_SUMMARY}.${STAMP}.bak"
 fi
 cp "${PREFIX}_summary.csv" "${STABLE_SUMMARY}"
+if [[ -n "${STABLE_DELAY_BINS:-}" ]]; then
+    if [[ -e "${STABLE_DELAY_BINS}" ]]; then
+        mv "${STABLE_DELAY_BINS}" "${STABLE_DELAY_BINS}.${STAMP}.bak"
+    fi
+    cp "${PREFIX}_delay_bins.csv" "${STABLE_DELAY_BINS}"
+fi
+if [[ -n "${STABLE_TYPE1_META:-}" ]]; then
+    if [[ -e "${STABLE_TYPE1_META}" ]]; then
+        mv "${STABLE_TYPE1_META}" "${STABLE_TYPE1_META}.${STAMP}.bak"
+    fi
+    cp "${PREFIX}_type1_meta.csv" "${STABLE_TYPE1_META}"
+fi
 
 echo "summary=${PREFIX}_summary.csv"
 echo "intervals=${PREFIX}_intervals.csv"
+echo "delay_bins=${PREFIX}_delay_bins.csv"
+echo "type1_meta=${PREFIX}_type1_meta.csv"
 echo "transcript=${PREFIX}_transcript.log"
 echo "stable_summary=${STABLE_SUMMARY}"
+if [[ -n "${STABLE_DELAY_BINS:-}" ]]; then
+    echo "stable_delay_bins=${STABLE_DELAY_BINS}"
+fi
+if [[ -n "${STABLE_TYPE1_META:-}" ]]; then
+    echo "stable_type1_meta=${STABLE_TYPE1_META}"
+fi
