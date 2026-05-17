@@ -35,6 +35,36 @@ Severity legend:
 | [BUG-018-I](#bug-018-i-clean-feb-qsys-generation-could-drift-through-hidden-adapters-and-caller-relative-ip-roots) | I | non-datapath-refactor | `common (clean FEB Qsys regeneration and firmware compile)` | fixed | FEB Qsys clean generation, 2026-05-17 | `4a293ca1d0e8`, `9fa5856d58c4`, this commit | Clean `qsys-generate --clear-output-directory` exposed stale generated-state assumptions: direct histogram taps advertised ready/data metadata that could create a broken Avalon-ST adapter, and `mutrig_frame_deassembly` could resolve its RTL files from the caller root. |
 | [BUG-019-R](#bug-019-r-emulator-systemverilog-module-header-imports-blocked-quartus-181-firmware-compile) | R | non-datapath-refactor | `common (generated FEB firmware compile with emulator Type0 enabled)` | fixed | FEB top Quartus compile, 2026-05-17 | `a9e2dbad9d52` | Quartus 18.1 rejected emulator SystemVerilog module-header `import` syntax even though the generated simulation path accepted it. |
 | [BUG-020-R](#bug-020-r-mutrig-injector-running-cdc-was-timed-as-a-spare_clk_osc-setup-path) | R | non-datapath-refactor | `common (mode-3 injector support in fitted FEB firmware)` | fixed-with-residuals | FEB top TimeQuest closure, 2026-05-17 | `695b68441fc3`, this commit | The mode-3 injector already synchronized RUNNING into the oscillator clock domain, but the first synchronizer flop was not marked and the source-to-meta CDC crossing was not constrained, producing a false `spare_clk_osc` setup failure. |
+| [BUG-021-I](#bug-021-i-hit_type3_upper-lost-ready-and-starved-run-control-idles) | I | hard stuck error | `common (generated FEB upload path with realistic downstream backpressure)` | open / sim-reproduced | FEB generated upload backpressure repro, 2026-05-18 | pending fix | Qsys auto-inserted an Avalon-ST adapter between `data_path_subsystem.hit_type3_upper` and `upload_subsystem.upload_data` with `inUseReady=0` and `outUseReady=1`; a missed Type3 EOP parks `upload_pkt_mux` on in0 and starves the run-control/K28.5 idle input. |
+
+## 2026-05-18
+
+### BUG-021-I: hit_type3_upper lost ready and starved run-control idles
+
+- First seen:
+  - On-board FEB/SWB bring-up on 2026-05-17 after commit `c85daa06 [FIX] Close FEB generated Qsys firmware timing`.
+  - SWB `LINK_LOCKED_LOW` did not set bits 2 or 6 for the new FEB SOF, while the golden FEB image restored SC immediately on the same hardware.
+- Symptom:
+  - SC scan on all 16 links timed out.
+  - The broken generated top inserted `feb_system_v3_avalon_st_adapter` between `data_path_subsystem.hit_type3_upper` and `upload_subsystem.upload_data`.
+  - The generated adapter had `inUseEmptyPort => 1`, `inUseReady => 0`, and `outUseReady => 1`, while the golden top wired `upload_data_ready` directly back to `data_path_subsystem_hit_type3_upper_ready`.
+- Root cause:
+  - The Qsys component export for `data_path_subsystem.hit_type3_upper` became a readyless, empty-bearing Avalon-ST source.
+  - Platform Designer auto-inserted an Avalon-ST adapter that cannot backpressure the Type3 producer when `upload_pkt_mux` stalls or services other inputs.
+  - When an in0 packet EOP is offered during downstream backpressure, `upload_pkt_mux` misses the EOP, remains in an in0 packet, and starves input 2, which carries the run-control/K28.5 idle stream needed for SWB PMA lock.
+- Reproduction:
+  - `make -C firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/tb_int/upload_backpressure run MODE=broken`
+  - The repro compiles the actual generated `feb_system_v3_avalon_st_adapter*.{v,sv}` and `feb_system_v3_upload_subsystem_upload_pkt_mux.sv` files from `syn/feb_system_v3/synthesis/submodules`.
+  - Transcript: `firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/tb_int/upload_backpressure/sim_upload_backpressure/broken/transcript`.
+  - Marker: `UPLOAD_BACKPRESSURE_BROKEN_REPRO in0_valid_held=80 in0_ready_pulses=69 in2_ready_pulses=1 idle_words=1 missed_eop=10`.
+  - The generated adapter also emits Intel's warning: `The downstream component is backpressuring by deasserting ready, but the upstream component can't be backpressured.`
+- Fix:
+  - Pending. The required Qsys fix is to restore the `_ready` contract on `data_path_subsystem.hit_type3_upper` and remove the unnecessary `_empty` sideband so the auto-inserted adapter disappears.
+- Evidence:
+  - Broken generated wrapper evidence: `syn/feb_system_v3/synthesis/feb_system_v3.vhd` maps `upload_data_ready` to `avalon_st_adapter_out_0_ready` and the adapter has no input ready.
+  - Golden wrapper evidence: `/data2/firmware_backup_20260517_2350/feb_golden/feb_system_v3_synthesis/feb_system_v3.vhd` wires `upload_data_ready` directly to `data_path_subsystem_hit_type3_upper_ready`.
+- Residuals:
+  - No fix has been applied yet. Board retest is intentionally blocked until the sim repro is committed, the Qsys source is fixed, regenerated, and the same upload-backpressure test passes in direct-ready mode.
 
 ## 2026-05-17
 
