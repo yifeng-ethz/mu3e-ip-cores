@@ -99,6 +99,22 @@ module tb_feb_upload_backpressure;
         .out_0_startofpacket (upload_sop),
         .out_0_endofpacket   (upload_eop)
     );
+`elsif FEB_UPLOAD_READY_ADAPTER
+    feb_system_v3_avalon_st_adapter u_generated_adapter (
+        .in_clk_0_clk        (clk),
+        .in_rst_0_reset      (~reset_n),
+        .in_0_data           (src_data),
+        .in_0_valid          (src_valid),
+        .in_0_ready          (src_ready),
+        .in_0_startofpacket  (src_sop),
+        .in_0_endofpacket    (src_eop),
+        .in_0_empty          (src_empty),
+        .out_0_data          (upload_data),
+        .out_0_valid         (upload_valid),
+        .out_0_ready         (upload_ready),
+        .out_0_startofpacket (upload_sop),
+        .out_0_endofpacket   (upload_eop)
+    );
 `elsif FEB_UPLOAD_DIRECT_READY
     assign src_ready = upload_ready;
     assign upload_data = src_data;
@@ -106,7 +122,7 @@ module tb_feb_upload_backpressure;
     assign upload_sop = src_sop;
     assign upload_eop = src_eop;
 `else
-    initial $fatal(1, "Compile with FEB_UPLOAD_BROKEN_ADAPTER or FEB_UPLOAD_DIRECT_READY");
+    initial $fatal(1, "Compile with FEB_UPLOAD_BROKEN_ADAPTER, FEB_UPLOAD_READY_ADAPTER, or FEB_UPLOAD_DIRECT_READY");
 `endif
 
     feb_system_v3_upload_subsystem_upload_pkt_mux u_generated_upload_pkt_mux (
@@ -260,6 +276,8 @@ module tb_feb_upload_backpressure;
                 $display("UPLOAD_BACKPRESSURE_SUMMARY mode=%s rate_q16=52 cluster_fix=18448 period_cycles=%0d packet_beats=%0d stall_cycles=%0d in0_valid_held=%0d in0_ready_pulses=%0d in0_eop_offered=%0d in0_eop_accepted=%0d in1_sc_valid_held=%0d in1_sc_ready_pulses=%0d sc_words=%0d sc_eop_accepted=%0d in2_valid=1 in2_ready_pulses=%0d idle_words=%0d stall_windows=%0d",
 `ifdef FEB_UPLOAD_BROKEN_ADAPTER
                          "broken_adapter",
+`elsif FEB_UPLOAD_READY_ADAPTER
+                         "ready_adapter",
 `else
                          "direct_ready",
 `endif
