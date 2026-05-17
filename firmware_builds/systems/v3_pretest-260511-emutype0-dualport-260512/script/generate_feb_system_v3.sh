@@ -2,8 +2,15 @@
 set -eu
 export LC_ALL=C
 
-ROOT="${MU3E_IP_CORES_ROOT:-/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
-SYSTEM_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "${MU3E_IP_CORES_ROOT:-}" ]; then
+    ROOT="${MU3E_IP_CORES_ROOT}"
+    SYSTEM_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
+else
+    SYSTEM_DIR="$(realpath -m -- "${SCRIPT_DIR}/..")"
+    ROOT="$(realpath -m -- "${SYSTEM_DIR}/../../..")"
+fi
+export MU3E_IP_CORES_ROOT="${ROOT}"
 export SYSTEM_DIR
 SYN_DIR="${SYSTEM_DIR}/syn"
 QSYS="${SYN_DIR}/feb_system_v3.qsys"
@@ -52,6 +59,7 @@ set +e
 "${QSYS_GENERATE_BIN}" \
     "${QSYS}" \
     --synthesis=VHDL \
+    --clear-output-directory \
     --output-directory="${GENERATED_ROOT}" \
     --family="Arria V" \
     --part=5AGXBA7D4F31C5 \
@@ -62,13 +70,37 @@ set -e
 error_count="$(grep -c ' Error:' "${LOG}" || true)"
 
 {
-    printf 'command=%s %s --synthesis=VHDL --output-directory=%s --family=Arria V --part=5AGXBA7D4F31C5 --search-path=<%s paths>,$\n' "${QSYS_GENERATE_BIN}" "${QSYS}" "${GENERATED_ROOT}" "${QSYS_SEARCH_PATH_COUNT}"
+    printf 'command=%s %s --synthesis=VHDL --clear-output-directory --output-directory=%s --family=Arria V --part=5AGXBA7D4F31C5 --search-path=<%s paths>,$\n' "${QSYS_GENERATE_BIN}" "${QSYS}" "${GENERATED_ROOT}" "${QSYS_SEARCH_PATH_COUNT}"
     printf 'exit_code=%s\n' "${exit_code}"
     printf 'error_count=%s\n' "${error_count}"
     printf 'log=%s\n' "${LOG}"
     printf 'report=%s\n' "${GENERATED_ROOT}/${QSYS_BASENAME}_generation.rpt"
     printf 'isolated_catalog=%s\n' "${QSYS_USER_CATALOG_ROOT}"
 } > "${STATUS}"
+
+if [ "${exit_code}" -eq 0 ]; then
+    FANOUT_RTL="${OUT_DIR}/submodules/hit_type0_fanout8.sv"
+    if [ ! -f "${FANOUT_RTL}" ] ||
+       ! grep -q 'Version : 26\.0\.1' "${FANOUT_RTL}" ||
+       ! grep -q 'lane_qualified_data' "${FANOUT_RTL}"; then
+        {
+            printf 'fanout_guard=failed\n'
+            printf 'fanout_rtl=%s\n' "${FANOUT_RTL}"
+            printf 'expected=hit_type0_fanout8 26.0.1 lane-qualified timestamp RTL\n'
+        } >> "${STATUS}"
+        echo "ERROR: generated FEB Qsys used stale hit_type0_fanout8; expected 26.0.1 lane-qualified RTL." >&2
+        exit 1
+    fi
+
+    if grep -R -n 'N_SHD.*256' "${OUT_DIR}/submodules" "${GENERATED_ROOT}"/*.sopcinfo 2>/dev/null; then
+        printf 'nshd_guard=failed\n' >> "${STATUS}"
+        echo "ERROR: generated FEB Qsys contains N_SHD=256; expected N_SHD=128 only." >&2
+        exit 1
+    fi
+
+    printf 'fanout_guard=passed\n' >> "${STATUS}"
+    printf 'nshd_guard=passed\n' >> "${STATUS}"
+fi
 
 if [ "${exit_code}" -eq 0 ]; then
     if [ -d "${OUT_DIR}" ]; then

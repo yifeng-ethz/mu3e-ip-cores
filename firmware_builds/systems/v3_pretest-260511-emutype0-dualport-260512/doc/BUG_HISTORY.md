@@ -32,8 +32,87 @@ Severity legend:
 | [BUG-015-H](#bug-015-h-type1-delay-plot-evidence-did-not-lock-the-one-channel-header-sync-delta-contract) | H | non-datapath-refactor | `directed-only (Type1 latency plot evidence)` | fixed | FEB generated Type1 delay plot review, 2026-05-17 | this commit | The generated-RTL delay evidence had no four-rate Type1 latency plot for the header-synced one-channel-per-ASIC mode, no per-hit ingress metadata checkpoint, and no hard metadata-vs-CSR bin check. |
 | [BUG-016-R](#bug-016-r-hit_type0_fanout8-did-not-lane-phase-the-encoded-mutrig-timestamp) | R | soft error | `directed-only (generated-Qsys header-sync Type1 delay mode)` | fixed | FEB generated-Qsys Type1 header-sync gate, 2026-05-17 | `73d882cc456a5c459c3d27bc77ff7430c800cbcd` | The build-local `hit_type0_fanout8` changed ASIC/channel metadata per lane but copied the same encoded MuTRiG TCC/ECC timestamp to every lane, so serialized lanes produced a multi-cycle latency spread instead of the expected header-sync delta. |
 | [BUG-017-H](#bug-017-h-dislin-plot-renderers-could-report-passing-artifacts-that-were-not-the-requested-files) | H | non-datapath-refactor | `directed-only (DISLIN plot evidence)` | fixed | FEB generated-Qsys plot evidence review, 2026-05-17 | `73d882cc456a5c459c3d27bc77ff7430c800cbcd` | The Type1 DISLIN metadata overlay read the wrong CSV column, and long DISLIN output paths could be silently truncated while the wrapper still printed the requested `.png/.pdf` path as passing. |
+| [BUG-018-I](#bug-018-i-clean-feb-qsys-generation-could-drift-through-hidden-adapters-and-caller-relative-ip-roots) | I | non-datapath-refactor | `common (clean FEB Qsys regeneration and firmware compile)` | fixed | FEB Qsys clean generation, 2026-05-17 | `4a293ca1d0e8`, `9fa5856d58c4`, this commit | Clean `qsys-generate --clear-output-directory` exposed stale generated-state assumptions: direct histogram taps advertised ready/data metadata that could create a broken Avalon-ST adapter, and `mutrig_frame_deassembly` could resolve its RTL files from the caller root. |
+| [BUG-019-R](#bug-019-r-emulator-systemverilog-module-header-imports-blocked-quartus-181-firmware-compile) | R | non-datapath-refactor | `common (generated FEB firmware compile with emulator Type0 enabled)` | fixed | FEB top Quartus compile, 2026-05-17 | `a9e2dbad9d52` | Quartus 18.1 rejected emulator SystemVerilog module-header `import` syntax even though the generated simulation path accepted it. |
+| [BUG-020-R](#bug-020-r-mutrig-injector-running-cdc-was-timed-as-a-spare_clk_osc-setup-path) | R | non-datapath-refactor | `common (mode-3 injector support in fitted FEB firmware)` | fixed-with-residuals | FEB top TimeQuest closure, 2026-05-17 | `695b68441fc3`, this commit | The mode-3 injector already synchronized RUNNING into the oscillator clock domain, but the first synchronizer flop was not marked and the source-to-meta CDC crossing was not constrained, producing a false `spare_clk_osc` setup failure. |
 
 ## 2026-05-17
+
+### BUG-020-R: mutrig injector RUNNING CDC was timed as a spare_clk_osc setup path
+
+- First seen:
+  - FEB top full compile `quartus_compile_top_20260517_2041_sv_import_top_closure` on 2026-05-17 after generated Qsys and emulator parser issues were cleared.
+- Symptom:
+  - TimeQuest setup failed only on `spare_clk_osc` with `Slack=-1.028 ns`, `TNS=-1.028 ns`.
+  - The violating path launched from `mutrig_injector_multiheader:mutrig_injector_0|runctl_state[3]~DUPLICATE` on the LVDS-derived `pll_sclk~PLL_OUTPUT_COUNTER|divclk` clock and latched at `run_active_osc_meta` on `spare_clk_osc`.
+- Root cause:
+  - `run_active_osc_meta` and `run_active_osc` were already a two-flop CDC synchronizer for the mode-3 oscillator injector, but this RUNNING crossing was not marked like the other mode-3 configuration synchronizers.
+  - The SDC constrained the mode, interval, high-cycle, and async-reset CDC paths but missed the RUNNING source-to-first-flop crossing.
+- Fix:
+  - `mutrig_injector_multiheader.vhd` is now version `26.1.2` and applies synchronizer, preserve, no-merge, no-shift-register, and no-global-clock attributes to `run_active_osc_meta` and `run_active_osc`.
+  - `mutrig_injector_multiheader.sdc` now constrains only `runctl_state[*]` to `run_active_osc_meta`.
+  - `mutrig_injector_multiheader_hw.tcl` now packages version patch `2` with history entry `26.1.2.0517`.
+- Evidence:
+  - Raw IP commit: `charge_injection` `695b68441fc3`.
+  - Qsys regeneration stamp `20260517_closure_cdc1` passed with `exit_code=0`, `error_count=0`, `fanout_guard=passed`, and `nshd_guard=passed`.
+  - Generated HDL evidence contains `mutrig_injector_multiheader.vhd` `Version: 26.1.2`, `VERSION_PATCH := 2`, and the `run_active_osc_meta` synchronizer attributes.
+  - Generated SDC evidence contains the `run_active_src` to `run_active_meta` false-path pair.
+  - Full non-STP FEB top compile `quartus_compile_top_20260517_2136_cdc_top_closure` passed with `exit_code=0`, `error_count=0`, and generated `output_files/top.sof` plus `output_files/top.rbf`.
+  - `output_files/top.sta.summary` has no negative slack or TNS. Worst setup is `lvds_firefly_clk` at `+0.264 ns`, and `spare_clk_osc` setup is now `+6.106 ns`.
+  - `output_files/top.map.rpt` records `run_active_osc_meta` with `SYNCHRONIZER_IDENTIFICATION=FORCED_IF_ASYNCHRONOUS`, `DONT_MERGE_REGISTER=ON`, `PRESERVE_REGISTER=ON`, `AUTO_SHIFT_REGISTER_RECOGNITION=OFF`, and `GLOBAL_SIGNAL=OFF`.
+- Residuals:
+  - TimeQuest still reports the pre-existing board-project warning `Design is not fully constrained for setup/hold requirements`, caused by `47` unconstrained output ports and `65` unconstrained output-port paths.
+  - The same unconstrained warning was present in the earlier failing compile log, so this fix closes the negative timing path without hiding that separate board-level output-delay cleanup item.
+
+### BUG-019-R: emulator SystemVerilog module-header imports blocked Quartus 18.1 firmware compile
+
+- First seen:
+  - FEB top full compile on 2026-05-17 after clean generated Qsys was available for the direct histogram topology.
+- Symptom:
+  - Quartus Analysis & Synthesis failed on emulator RTL with a syntax error near `import`, expecting `;`.
+  - The failure occurred before fitting, so the generated FEB firmware could not reach the timing-closure gate.
+- Root cause:
+  - The emulator sources used SystemVerilog module-header package imports accepted by the simulation flow, but Quartus Prime 18.1 Standard rejected that parser form.
+  - The generated Qsys firmware path therefore exposed a tool-version compatibility issue that the previous generated simulation path did not catch.
+- Fix:
+  - The package imports were moved to compilation-unit scope in:
+    - `rtl/frontend/frontend_trigger_engine.sv`
+    - `rtl/frontend/frontend_ticket_distributor.sv`
+    - `rtl/frontend/frontend_bkg_generator.sv`
+    - `rtl/backend_mutrig/be_mutrig_lane_type0_emit.sv`
+    - `rtl/backend_mutrig/be_mutrig_frame_assembler.sv`
+- Evidence:
+  - Raw IP commit: `emulator_mutrig` `a9e2dbad9d52`.
+  - Generated FEB Qsys submodules contain the import-compatible emulator RTL.
+  - Full non-STP FEB top compile `quartus_compile_top_20260517_2136_cdc_top_closure` passed Analysis & Synthesis, Fitter, Assembler, and TimeQuest with `exit_code=0`, `error_count=0`.
+  - The prior Quartus `import` syntax error is absent from the passing compile log.
+- Residuals:
+  - This is a syntax/tool-compatibility RTL fix. It does not change the emulator packet, timestamp, or injection behavior verified by the generated-Qsys histogram simulations.
+
+### BUG-018-I: clean FEB Qsys generation could drift through hidden adapters and caller-relative IP roots
+
+- First seen:
+  - FEB clean Qsys regeneration on 2026-05-17 while preparing the fitted firmware build from a cleared generated-output directory.
+- Symptom:
+  - `qsys-generate --clear-output-directory` exposed hidden generated-state assumptions instead of reliably producing a fresh FEB system.
+  - Platform Designer could infer a broken Avalon-ST adapter on direct histogram observation paths, and `mutrig_frame_deassembly` could report missing RTL files when sourced through an isolated catalog/caller directory.
+- Root cause:
+  - The direct histogram Type0/Type1 observation sinks are passive taps, but the package still advertised ready ports and symbolic data-width metadata that could cause a ready/data adapter to be inserted.
+  - `mutrig_frame_deassembly_hw.tcl` still depended on `info script` or caller-relative resolution in cases where Platform Designer sourced the package without a stable script path.
+- Fix:
+  - `histogram_statistics_v2_hw.tcl` now publishes numeric Avalon-ST widths and removes ready ports from the direct Type0 lane and Type1 up/down observation sinks.
+  - `mutrig_frame_deassembly_hw.tcl` now searches the script directory, `MU3E_IP_CORES_ROOT/mutrig_frame_deassembly`, `[pwd]`, and `[pwd]/mutrig_frame_deassembly`, and only accepts a candidate containing `rtl/frame_rcv_ip.vhd`.
+  - `script/generate_feb_system_v3.sh` now resolves the active worktree root, exports `MU3E_IP_CORES_ROOT`, runs Qsys generation with `--clear-output-directory`, and hard-fails if the generated fanout or `N_SHD=128` guards drift.
+  - Generated evidence is ignored: the root `.gitignore` now also ignores top-level `quartus_systems/*.sopcinfo`.
+- Evidence:
+  - Raw IP commits: `histogram_statistics` `4a293ca1d0e8` and `mutrig_frame_deassembly` `9fa5856d58c4`.
+  - Qsys regeneration stamp `20260517_closure_cdc1` passed with `exit_code=0`, `error_count=0`, `fanout_guard=passed`, and `nshd_guard=passed`.
+  - Generated `feb_system_v3/synthesis/submodules/hit_type0_fanout8.sv` contains `Version : 26.0.1` and lane-qualified timestamp logic.
+  - Generated `feb_system_v3/synthesis/submodules/feb_system_v3_data_path_subsystem.vhd` keeps `BYTE_STREAM_ENABLE => false` on the emulator and `DEBUG_LEVEL => 0` for production synthesis.
+  - Current direct X11 Qsys GUI open check `feb_system_v3_qsys_edit_20260517_gui_x11_fixedenv_current.status` used `DISPLAY=127.0.0.1:10.0`, `XAUTHORITY=/home/yifeng/.Xauthority`, stayed alive after 10 seconds, and recorded `error_count=0`.
+  - Full non-STP FEB top compile `quartus_compile_top_20260517_2136_cdc_top_closure` passed with `exit_code=0`, `error_count=0`, `output_files/top.sof`, and `output_files/top.rbf`.
+- Residuals:
+  - The generated Qsys and Quartus logs/status/bitstreams are intentionally ignored evidence artifacts. Source Qsys/Tcl and raw IP commits carry the reproducible state.
 
 ### BUG-017-H: DISLIN plot renderers could report passing artifacts that were not the requested files
 

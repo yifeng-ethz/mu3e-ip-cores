@@ -64,6 +64,7 @@ firmware_builds/systems/*/syn/board_projects/*/qdb/
 firmware_builds/systems/*/syn/reports/
 
 # --- Generated Qsys evidence for system-local quartus_systems/ trees ---
+quartus_systems/*.sopcinfo
 firmware_builds/systems/*/quartus_systems/*.sopcinfo
 firmware_builds/systems/*/quartus_systems/*.log
 firmware_builds/systems/*/quartus_systems/*.pid
